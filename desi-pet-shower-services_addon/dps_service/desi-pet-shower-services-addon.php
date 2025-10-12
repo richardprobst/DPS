@@ -37,7 +37,43 @@ class DPS_Services_Addon {
         // Enfileira scripts
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
         // Popula serviços padrões na ativação
-        register_activation_hook( __FILE__, [ $this, 'activate' ] );
+        if ( defined( 'DPS_SERVICES_PLUGIN_FILE' ) ) {
+            register_activation_hook( DPS_SERVICES_PLUGIN_FILE, [ $this, 'activate' ] );
+        }
+    }
+
+    /**
+     * Verifica se o usuário atual pode gerenciar serviços.
+     *
+     * @return bool
+     */
+    private function can_manage() {
+        return current_user_can( 'manage_options' );
+    }
+
+    /**
+     * Calcula a URL de redirecionamento após uma ação de serviço.
+     *
+     * @param string $tab Aba que deve permanecer ativa.
+     *
+     * @return string
+     */
+    private function get_redirect_url( $tab = 'servicos' ) {
+        $base = wp_get_referer();
+        if ( ! $base ) {
+            $base = home_url();
+        }
+
+        $base = remove_query_arg(
+            [ 'dps_service_delete', 'dps_service_action', 'service_id', 'dps_service_nonce' ],
+            $base
+        );
+
+        if ( $tab ) {
+            $base = add_query_arg( 'tab', $tab, $base );
+        }
+
+        return $base;
     }
 
     /**
@@ -369,28 +405,31 @@ class DPS_Services_Addon {
      * Processa solicitações de salvamento ou exclusão de serviços
      */
     public function maybe_handle_service_request() {
+        if ( ! $this->can_manage() ) {
+            return;
+        }
         // Salvamento
         if ( isset( $_POST['dps_service_action'] ) && 'save_service' === $_POST['dps_service_action'] ) {
             // Verifica nonce
-            if ( ! isset( $_POST['dps_service_nonce'] ) || ! wp_verify_nonce( $_POST['dps_service_nonce'], 'dps_service_action' ) ) {
+            if ( ! isset( $_POST['dps_service_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_service_nonce'] ) ), 'dps_service_action' ) ) {
                 return;
             }
-            $name     = sanitize_text_field( $_POST['service_name'] ?? '' );
-            $type     = sanitize_text_field( $_POST['service_type'] ?? '' );
-            $category = sanitize_text_field( $_POST['service_category'] ?? '' );
-            $price    = floatval( $_POST['service_price'] ?? 0 );
-            $price_small  = isset( $_POST['service_price_small'] ) ? floatval( $_POST['service_price_small'] ) : '';
-            $price_medium = isset( $_POST['service_price_medium'] ) ? floatval( $_POST['service_price_medium'] ) : '';
-            $price_large  = isset( $_POST['service_price_large'] ) ? floatval( $_POST['service_price_large'] ) : '';
-            $duration = isset( $_POST['service_duration'] ) ? intval( $_POST['service_duration'] ) : 0;
-            $dur_small  = isset( $_POST['service_duration_small'] ) ? intval( $_POST['service_duration_small'] ) : '';
-            $dur_medium = isset( $_POST['service_duration_medium'] ) ? intval( $_POST['service_duration_medium'] ) : '';
-            $dur_large  = isset( $_POST['service_duration_large'] ) ? intval( $_POST['service_duration_large'] ) : '';
-            $active   = isset( $_POST['service_active'] ) && '1' === $_POST['service_active'] ? '1' : '0';
+            $name     = isset( $_POST['service_name'] ) ? sanitize_text_field( wp_unslash( $_POST['service_name'] ) ) : '';
+            $type     = isset( $_POST['service_type'] ) ? sanitize_text_field( wp_unslash( $_POST['service_type'] ) ) : '';
+            $category = isset( $_POST['service_category'] ) ? sanitize_text_field( wp_unslash( $_POST['service_category'] ) ) : '';
+            $price    = isset( $_POST['service_price'] ) ? floatval( wp_unslash( $_POST['service_price'] ) ) : 0;
+            $price_small  = isset( $_POST['service_price_small'] ) ? floatval( wp_unslash( $_POST['service_price_small'] ) ) : '';
+            $price_medium = isset( $_POST['service_price_medium'] ) ? floatval( wp_unslash( $_POST['service_price_medium'] ) ) : '';
+            $price_large  = isset( $_POST['service_price_large'] ) ? floatval( wp_unslash( $_POST['service_price_large'] ) ) : '';
+            $duration = isset( $_POST['service_duration'] ) ? intval( wp_unslash( $_POST['service_duration'] ) ) : 0;
+            $dur_small  = isset( $_POST['service_duration_small'] ) ? intval( wp_unslash( $_POST['service_duration_small'] ) ) : '';
+            $dur_medium = isset( $_POST['service_duration_medium'] ) ? intval( wp_unslash( $_POST['service_duration_medium'] ) ) : '';
+            $dur_large  = isset( $_POST['service_duration_large'] ) ? intval( wp_unslash( $_POST['service_duration_large'] ) ) : '';
+            $active   = ( isset( $_POST['service_active'] ) && '1' === wp_unslash( $_POST['service_active'] ) ) ? '1' : '0';
             if ( empty( $name ) || empty( $type ) ) {
                 return;
             }
-            $srv_id = isset( $_POST['service_id'] ) ? intval( $_POST['service_id'] ) : 0;
+            $srv_id = isset( $_POST['service_id'] ) ? intval( wp_unslash( $_POST['service_id'] ) ) : 0;
             if ( $srv_id ) {
                 wp_update_post( [ 'ID' => $srv_id, 'post_title' => $name ] );
             } else {
@@ -435,38 +474,38 @@ class DPS_Services_Addon {
                 }
                 // Salva serviços incluídos no pacote, se for um pacote
                 if ( 'package' === $type && isset( $_POST['service_package_items'] ) && is_array( $_POST['service_package_items'] ) ) {
-                    $items = array_map( 'intval', (array) $_POST['service_package_items'] );
+                    $items = array_map( 'intval', (array) wp_unslash( $_POST['service_package_items'] ) );
                     update_post_meta( $srv_id, 'service_package_items', $items );
                 } else {
                     delete_post_meta( $srv_id, 'service_package_items' );
                 }
             }
             // Redireciona para aba serviços
-            $redirect = add_query_arg( [ 'tab' => 'servicos' ], get_permalink() );
-            wp_redirect( $redirect );
+            $redirect = $this->get_redirect_url();
+            wp_safe_redirect( $redirect );
             exit;
         }
         // Exclusão via GET
         if ( isset( $_GET['dps_service_delete'] ) ) {
-            $id = intval( $_GET['dps_service_delete'] );
+            $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
             if ( $id ) {
                 wp_delete_post( $id, true );
             }
-            $redirect = add_query_arg( [ 'tab' => 'servicos' ], get_permalink() );
-            wp_redirect( $redirect );
+            $redirect = $this->get_redirect_url();
+            wp_safe_redirect( $redirect );
             exit;
         }
 
         // Alterna status ativo/inativo via GET
         if ( isset( $_GET['dps_toggle_service'] ) ) {
-            $id = intval( $_GET['dps_toggle_service'] );
+            $id = intval( wp_unslash( $_GET['dps_toggle_service'] ) );
             if ( $id ) {
                 $curr = get_post_meta( $id, 'service_active', true );
                 $new  = ( '0' === $curr ) ? '1' : '0';
                 update_post_meta( $id, 'service_active', $new );
             }
-            $redirect = add_query_arg( [ 'tab' => 'servicos' ], get_permalink() );
-            wp_redirect( $redirect );
+            $redirect = $this->get_redirect_url();
+            wp_safe_redirect( $redirect );
             exit;
         }
     }

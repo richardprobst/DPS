@@ -1,10 +1,14 @@
 <?php
 /**
- * Plugin Name: Desi Pet Shower – Client Portal
- * Description: Portal do Cliente para o sistema Desi Pet Shower. Permite que clientes consultem histórico de atendimentos, galeria de fotos, pendências financeiras, atualizem seus dados e efetuem pagamentos de forma prática.
- * Version: 1.0.0
- * Author: PRObst
- * Text Domain: dps-client-portal
+ * Plugin Name:       Desi Pet Shower – Client Portal Add-on
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Portal do Cliente para o sistema Desi Pet Shower. Permite que clientes consultem histórico de atendimentos, galeria de fotos, pendências financeiras, atualizem seus dados e efetuem pagamentos de forma prática.
+ * Version:           1.0.0
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-client-portal
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
  *
  * Este add-on cria um portal de autoatendimento para clientes.  Ele registra
  * automaticamente um usuário WordPress para cada cliente cadastrado (quando

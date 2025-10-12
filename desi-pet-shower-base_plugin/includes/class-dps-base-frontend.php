@@ -10,14 +10,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Base_Frontend {
 
     /**
+     * Verifica se o usuário atual possui permissão para gerenciar o painel.
+     *
+     * @return bool
+     */
+    private static function can_manage() {
+        return current_user_can( 'manage_options' );
+    }
+
+    /**
+     * Obtém a URL base para redirecionamentos após ações do formulário.
+     *
+     * @return string
+     */
+    private static function get_redirect_base_url() {
+        $referer = wp_get_referer();
+        if ( $referer ) {
+            return esc_url_raw( $referer );
+        }
+
+        $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+        if ( $queried_id ) {
+            return get_permalink( $queried_id );
+        }
+
+        global $post;
+        if ( isset( $post->ID ) ) {
+            return get_permalink( $post->ID );
+        }
+
+        return home_url();
+    }
+
+    /**
+     * Monta a URL final de redirecionamento com base na aba desejada.
+     *
+     * @param string $tab Aba que deve ficar ativa após o redirecionamento.
+     *
+     * @return string
+     */
+    private static function get_redirect_url( $tab = '' ) {
+        $base = self::get_redirect_base_url();
+        $base = remove_query_arg(
+            [ 'dps_delete', 'id', 'dps_edit', 'dps_view', 'tab', 'dps_action', 'dps_nonce' ],
+            $base
+        );
+
+        if ( $tab ) {
+            $base = add_query_arg( 'tab', $tab, $base );
+        }
+
+        return $base;
+    }
+
+    /**
      * Processa submissões de formulários
      */
     public static function handle_request() {
         // Verifica nonce
-        if ( ! isset( $_POST['dps_nonce'] ) || ! wp_verify_nonce( $_POST['dps_nonce'], 'dps_action' ) ) {
+        if ( ! isset( $_POST['dps_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce'] ) ), 'dps_action' ) ) {
             return;
         }
-        $action = sanitize_key( $_POST['dps_action'] );
+        if ( ! self::can_manage() ) {
+            return;
+        }
+        $action = isset( $_POST['dps_action'] ) ? sanitize_key( wp_unslash( $_POST['dps_action'] ) ) : '';
         switch ( $action ) {
             case 'save_client':
                 self::save_client();
@@ -37,8 +94,12 @@ class DPS_Base_Frontend {
      * Processa exclusões de registros via query string
      */
     public static function handle_delete() {
-        $type = sanitize_key( $_GET['dps_delete'] );
-        $id   = intval( $_GET['id'] );
+        if ( ! self::can_manage() ) {
+            return;
+        }
+
+        $type = isset( $_GET['dps_delete'] ) ? sanitize_key( wp_unslash( $_GET['dps_delete'] ) ) : '';
+        $id   = isset( $_GET['id'] ) ? intval( wp_unslash( $_GET['id'] ) ) : 0;
         if ( ! $id ) {
             return;
         }
@@ -66,11 +127,9 @@ class DPS_Base_Frontend {
         }
         // Redireciona para a aba apropriada após exclusão.
         // Remove parâmetros de exclusão da URL para evitar loops de redirecionamento.
-        $base_url = get_permalink();
-        $tab      = ( $type === 'appointment' ) ? 'agendas' : ( $type === 'pet' ? 'pets' : 'clientes' );
-        $redirect_url = add_query_arg( [ 'tab' => $tab ], $base_url );
-        $redirect_url = remove_query_arg( [ 'dps_delete', 'id' ], $redirect_url );
-        wp_redirect( $redirect_url );
+        $tab           = ( $type === 'appointment' ) ? 'agendas' : ( $type === 'pet' ? 'pets' : 'clientes' );
+        $redirect_url  = self::get_redirect_url( $tab );
+        wp_safe_redirect( $redirect_url );
         exit;
     }
 
@@ -578,7 +637,7 @@ class DPS_Base_Frontend {
             echo '<label style="margin-left:20px;"><input type="radio" name="appointment_type" value="subscription" ' . ( $appt_type === 'subscription' ? 'checked' : '' ) . '> ' . esc_html__( 'Agendamento de assinatura', 'dps-base' ) . '</label>';
             echo '</label></p>';
             // Campo: frequência para assinaturas (semanal ou quinzenal)
-            $freq_val = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( $_POST['appointment_frequency'] ) : '';
+            $freq_val = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_frequency'] ) ) : '';
             if ( $edit_id ) {
                 // Se estiver editando, tenta obter frequência via subscription_id
                 $sub_id_edit = get_post_meta( $edit_id, 'subscription_id', true );
@@ -1016,23 +1075,23 @@ EOT;
      * Salva cliente (inserção ou atualização)
      */
     private static function save_client() {
-        $name      = sanitize_text_field( $_POST['client_name'] ?? '' );
-        $cpf       = sanitize_text_field( $_POST['client_cpf'] ?? '' );
-        $phone     = sanitize_text_field( $_POST['client_phone'] ?? '' );
-        $email     = sanitize_email( $_POST['client_email'] ?? '' );
-        $birth     = sanitize_text_field( $_POST['client_birth'] ?? '' );
-        $insta     = sanitize_text_field( $_POST['client_instagram'] ?? '' );
-        $facebook  = sanitize_text_field( $_POST['client_facebook'] ?? '' );
+        $name      = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
+        $cpf       = isset( $_POST['client_cpf'] ) ? sanitize_text_field( wp_unslash( $_POST['client_cpf'] ) ) : '';
+        $phone     = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
+        $email     = isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '';
+        $birth     = isset( $_POST['client_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['client_birth'] ) ) : '';
+        $insta     = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
+        $facebook  = isset( $_POST['client_facebook'] ) ? sanitize_text_field( wp_unslash( $_POST['client_facebook'] ) ) : '';
         $photo_auth= isset( $_POST['client_photo_auth'] ) ? 1 : 0;
-        $address   = sanitize_textarea_field( $_POST['client_address'] ?? '' );
-        $referral  = sanitize_text_field( $_POST['client_referral'] ?? '' );
+        $address   = isset( $_POST['client_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['client_address'] ) ) : '';
+        $referral  = isset( $_POST['client_referral'] ) ? sanitize_text_field( wp_unslash( $_POST['client_referral'] ) ) : '';
         // Coordenadas (podem estar vazias se não selecionadas)
-        $lat       = sanitize_text_field( $_POST['client_lat'] ?? '' );
-        $lng       = sanitize_text_field( $_POST['client_lng'] ?? '' );
+        $lat       = isset( $_POST['client_lat'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lat'] ) ) : '';
+        $lng       = isset( $_POST['client_lng'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lng'] ) ) : '';
         if ( empty( $name ) ) {
             return;
         }
-        $client_id = isset( $_POST['client_id'] ) ? intval( $_POST['client_id'] ) : 0;
+        $client_id = isset( $_POST['client_id'] ) ? intval( wp_unslash( $_POST['client_id'] ) ) : 0;
         if ( $client_id ) {
             // Atualiza
             wp_update_post( [
@@ -1063,8 +1122,7 @@ EOT;
             }
         }
         // Redireciona para a aba de clientes
-        $base_url = get_permalink();
-        wp_redirect( add_query_arg( [ 'tab' => 'clientes' ], $base_url ) );
+        wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
         exit;
     }
 
@@ -1072,26 +1130,26 @@ EOT;
      * Salva pet (inserção ou atualização)
      */
     private static function save_pet() {
-        $owner_id  = intval( $_POST['owner_id'] ?? 0 );
-        $name      = sanitize_text_field( $_POST['pet_name'] ?? '' );
-        $species   = sanitize_text_field( $_POST['pet_species'] ?? '' );
-        $breed     = sanitize_text_field( $_POST['pet_breed'] ?? '' );
-        $size      = sanitize_text_field( $_POST['pet_size'] ?? '' );
-        $weight    = sanitize_text_field( $_POST['pet_weight'] ?? '' );
-        $coat      = sanitize_text_field( $_POST['pet_coat'] ?? '' );
-        $color     = sanitize_text_field( $_POST['pet_color'] ?? '' );
-        $birth     = sanitize_text_field( $_POST['pet_birth'] ?? '' );
-        $sex       = sanitize_text_field( $_POST['pet_sex'] ?? '' );
-        $care      = sanitize_textarea_field( $_POST['pet_care'] ?? '' );
+        $owner_id  = isset( $_POST['owner_id'] ) ? intval( wp_unslash( $_POST['owner_id'] ) ) : 0;
+        $name      = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
+        $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
+        $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
+        $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
+        $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
+        $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
+        $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
+        $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
+        $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
+        $care      = isset( $_POST['pet_care'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_care'] ) ) : '';
         $aggressive= isset( $_POST['pet_aggressive'] ) ? 1 : 0;
         // Campos adicionais para pets
-        $vaccinations = sanitize_textarea_field( $_POST['pet_vaccinations'] ?? '' );
-        $allergies    = sanitize_textarea_field( $_POST['pet_allergies'] ?? '' );
-        $behavior     = sanitize_textarea_field( $_POST['pet_behavior'] ?? '' );
+        $vaccinations = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
+        $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
+        $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
         if ( empty( $owner_id ) || empty( $name ) ) {
             return;
         }
-        $pet_id = isset( $_POST['pet_id'] ) ? intval( $_POST['pet_id'] ) : 0;
+        $pet_id = isset( $_POST['pet_id'] ) ? intval( wp_unslash( $_POST['pet_id'] ) ) : 0;
         if ( $pet_id ) {
             // Update
             wp_update_post( [
@@ -1151,8 +1209,7 @@ EOT;
             }
         }
         // Redireciona para aba pets
-        $base_url = get_permalink();
-        wp_redirect( add_query_arg( [ 'tab' => 'pets' ], $base_url ) );
+        wp_safe_redirect( self::get_redirect_url( 'pets' ) );
         exit;
     }
 
@@ -1160,9 +1217,9 @@ EOT;
      * Salva agendamento (inserção ou atualização)
      */
     private static function save_appointment() {
-        $client_id = intval( $_POST['appointment_client_id'] ?? 0 );
+        $client_id = isset( $_POST['appointment_client_id'] ) ? intval( wp_unslash( $_POST['appointment_client_id'] ) ) : 0;
         // Recebe lista de pets (multi‑seleção). Pode ser array ou valor único.
-        $raw_pets = isset( $_POST['appointment_pet_ids'] ) ? (array) $_POST['appointment_pet_ids'] : [];
+        $raw_pets = isset( $_POST['appointment_pet_ids'] ) ? (array) wp_unslash( $_POST['appointment_pet_ids'] ) : [];
         $pet_ids  = [];
         foreach ( $raw_pets as $pid_raw ) {
             $pid = intval( $pid_raw );
@@ -1175,28 +1232,28 @@ EOT;
 
         // Define pet_id como o primeiro ID da lista para compatibilidade com lógica existente
         $pet_id = ! empty( $pet_ids ) ? $pet_ids[0] : 0;
-        $date      = sanitize_text_field( $_POST['appointment_date'] ?? '' );
-        $time      = sanitize_text_field( $_POST['appointment_time'] ?? '' );
-        $notes     = sanitize_textarea_field( $_POST['appointment_notes'] ?? '' );
+        $date      = isset( $_POST['appointment_date'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_date'] ) ) : '';
+        $time      = isset( $_POST['appointment_time'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_time'] ) ) : '';
+        $notes     = isset( $_POST['appointment_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['appointment_notes'] ) ) : '';
         // Novo: tipo de agendamento (simple ou subscription)
-        $appt_type = sanitize_text_field( $_POST['appointment_type'] ?? 'simple' );
+        $appt_type = isset( $_POST['appointment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_type'] ) ) : 'simple';
         // Frequência (apenas para assinaturas)
-        $appt_freq = sanitize_text_field( $_POST['appointment_frequency'] ?? '' );
+        $appt_freq = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_frequency'] ) ) : '';
         $tosa      = isset( $_POST['appointment_tosa'] ) ? '1' : '0';
         // Preço e ocorrência da tosa: somente relevantes para assinaturas, mas definimos aqui para ter valores padrão
         $tosa_price      = 0;
         if ( isset( $_POST['appointment_tosa_price'] ) ) {
-            $tosa_price = floatval( str_replace( ',', '.', $_POST['appointment_tosa_price'] ) );
+            $tosa_price = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_tosa_price'] ) ) );
             if ( $tosa_price < 0 ) {
                 $tosa_price = 0;
             }
         }
-        $tosa_occurrence = isset( $_POST['appointment_tosa_occurrence'] ) ? intval( $_POST['appointment_tosa_occurrence'] ) : 1;
+        $tosa_occurrence = isset( $_POST['appointment_tosa_occurrence'] ) ? intval( wp_unslash( $_POST['appointment_tosa_occurrence'] ) ) : 1;
         $taxidog   = isset( $_POST['appointment_taxidog'] ) ? '1' : '0';
         // Valor do TaxiDog somente para agendamento simples; se vazio ou não numérico, trata como 0
         $taxi_price = 0;
         if ( 'simple' === $appt_type && $taxidog && isset( $_POST['appointment_taxidog_price'] ) ) {
-            $taxi_price = floatval( str_replace( ',', '.', $_POST['appointment_taxidog_price'] ) );
+            $taxi_price = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_taxidog_price'] ) ) );
             if ( $taxi_price < 0 ) {
                 $taxi_price = 0;
             }
@@ -1204,7 +1261,7 @@ EOT;
         if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
             return;
         }
-        $appt_id = isset( $_POST['appointment_id'] ) ? intval( $_POST['appointment_id'] ) : 0;
+        $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
 
         /*
          * Caso seja uma nova assinatura e não esteja editando, cria uma assinatura para um ou mais pets.
@@ -1332,8 +1389,7 @@ EOT;
                 }
             }
             // Redireciona após salvar assinatura
-            $base_url = get_permalink();
-            wp_redirect( add_query_arg( [ 'tab' => 'agendas' ], $base_url ) );
+            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
             exit;
         }
         // Para agendamentos simples de múltiplos pets (novo), cria um agendamento para cada pet
@@ -1357,7 +1413,7 @@ EOT;
                     update_post_meta( $new_appt, 'appointment_taxidog', $taxidog );
                     update_post_meta( $new_appt, 'appointment_taxidog_price', $taxi_price );
                     // Serviços e total são definidos pelo add‑on de serviços; recuperamos total postado
-                    $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', $_POST['appointment_total'] ) ) : 0;
+                    $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
                     $final_total  = $posted_total + $taxi_price;
                     update_post_meta( $new_appt, 'appointment_total_value', $final_total );
                     // Status inicial
@@ -1367,8 +1423,7 @@ EOT;
                 }
             }
             // Após criar todos os agendamentos, redireciona
-            $base_url = get_permalink();
-            wp_redirect( add_query_arg( [ 'tab' => 'agendas' ], $base_url ) );
+            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
             exit;
         }
 
@@ -1460,14 +1515,13 @@ EOT;
             } else {
                 // Agendamento simples: soma valor total dos serviços selecionados mais valor do TaxiDog
                 // dps_service add-on salva appointment_total via POST; recupera
-                $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', $_POST['appointment_total'] ) ) : 0;
+                $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
                 $final_total  = $posted_total + $taxi_price;
                 update_post_meta( $appt_id, 'appointment_total_value', $final_total );
             }
         }
         // Redireciona para aba agendas
-        $base_url = get_permalink();
-        wp_redirect( add_query_arg( [ 'tab' => 'agendas' ], $base_url ) );
+        wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
         exit;
     }
 
@@ -1481,8 +1535,8 @@ EOT;
      */
     private static function save_passwords() {
         // Recebe dados
-        $base_pass   = sanitize_text_field( $_POST['base_password'] ?? '' );
-        $agenda_pass = sanitize_text_field( $_POST['agenda_password'] ?? '' );
+        $base_pass   = isset( $_POST['base_password'] ) ? sanitize_text_field( wp_unslash( $_POST['base_password'] ) ) : '';
+        $agenda_pass = isset( $_POST['agenda_password'] ) ? sanitize_text_field( wp_unslash( $_POST['agenda_password'] ) ) : '';
         // Atualiza opções apenas se valores não vazios
         if ( $base_pass ) {
             update_option( 'dps_base_password', $base_pass );
@@ -1491,10 +1545,9 @@ EOT;
             update_option( 'dps_agenda_password', $agenda_pass );
         }
         // Gancho para outras senhas de add‑ons (a função pode ser estendida)
-        do_action( 'dps_base_save_passwords', $_POST );
+        do_action( 'dps_base_save_passwords', wp_unslash( $_POST ) );
         // Redireciona para aba de senhas
-        $base_url = get_permalink();
-        wp_redirect( add_query_arg( [ 'tab' => 'senhas' ], $base_url ) );
+        wp_safe_redirect( self::get_redirect_url( 'senhas' ) );
         exit;
     }
 

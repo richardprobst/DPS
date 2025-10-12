@@ -1,11 +1,15 @@
 <?php
-/*
- * Plugin Name: Desi Pet Shower Payment Add-on
- * Description: Gera links de pagamento via Mercado Pago para atender clientes de forma prática e envia por WhatsApp. Cria a URL de checkout e adiciona ao link de cobrança para atendimentos finalizados.
- * Version:     1.0.0
- * Author:      PRObst
- * License:     GPL-2.0+
- * Text Domain: dps-payment-addon
+/**
+ * Plugin Name:       Desi Pet Shower – Pagamentos Add-on
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Gera links de pagamento via Mercado Pago para atender clientes de forma prática e envia por WhatsApp. Cria a URL de checkout e adiciona ao link de cobrança para atendimentos finalizados.
+ * Version:           1.0.0
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-payment-addon
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ * License:           GPL-2.0+
  */
 
 // Impede acesso direto
