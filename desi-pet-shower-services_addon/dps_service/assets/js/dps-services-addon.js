@@ -4,12 +4,21 @@ jQuery(document).ready(function ($) {
    * Calcula o valor total somando o valor de cada serviço selecionado.
    * Habilita ou desabilita o campo de valor conforme o checkbox.
    */
-  function updateTotal() {
+  function getAppointmentType() {
+    return $('input[name="appointment_type"]:checked').val() || 'simple';
+  }
+
+  function parseCurrency(value) {
+    var num = parseFloat(value);
+    return isNaN(num) ? 0 : num;
+  }
+
+  function updateSimpleTotal() {
     var total = 0;
     $('.dps-service-checkbox').each(function () {
       var checkbox = $(this);
       var priceInput = checkbox.closest('label').find('.dps-service-price');
-      var price = parseFloat(priceInput.val()) || 0;
+      var price = parseCurrency(priceInput.val());
       if (checkbox.is(':checked')) {
         total += price;
         priceInput.prop('disabled', false);
@@ -17,7 +26,32 @@ jQuery(document).ready(function ($) {
         priceInput.prop('disabled', true);
       }
     });
+    if ($('#dps-simple-extra-fields').is(':visible')) {
+      total += parseCurrency($('#dps-simple-extra-value').val());
+    }
+    if ($('#dps-taxidog-toggle').is(':checked')) {
+      total += parseCurrency($('#dps-taxidog-price').val());
+    }
     $('#dps-appointment-total').val(total.toFixed(2));
+  }
+
+  function updateSubscriptionTotal() {
+    var total = parseCurrency($('#dps-subscription-base').val());
+    if ($('#dps-tosa-toggle').is(':checked')) {
+      total += parseCurrency($('#dps-tosa-price').val());
+    }
+    if ($('#dps-subscription-extra-fields').is(':visible')) {
+      total += parseCurrency($('#dps-subscription-extra-value').val());
+    }
+    $('#dps-subscription-total').val(total.toFixed(2));
+  }
+
+  function updateTotal() {
+    if (getAppointmentType() === 'subscription') {
+      updateSubscriptionTotal();
+    } else {
+      updateSimpleTotal();
+    }
   }
 
   /**
@@ -27,16 +61,16 @@ jQuery(document).ready(function ($) {
    * os valores, recalcula o total.
    */
   function applyPricesByPetSize() {
-    var $petSelect = $('#dps-appointment-pet');
-    if ($petSelect.length === 0) {
+    var $petInputs = $('input[name="appointment_pet_ids[]"]');
+    if ($petInputs.length === 0) {
       updateTotal();
       return;
     }
     // Obtém o tamanho do primeiro pet selecionado
     var selectedSize = null;
-    var $selectedOptions = $petSelect.find('option:selected');
-    if ($selectedOptions.length > 0) {
-      var sizeAttr = $($selectedOptions[0]).data('size');
+    var $checked = $petInputs.filter(':checked');
+    if ($checked.length > 0) {
+      var sizeAttr = $checked.first().data('size');
       // Mapas para traduzir o valor armazenado no meta (pequeno, medio, grande) em chaves
       if (typeof sizeAttr === 'string') {
         sizeAttr = sizeAttr.toLowerCase();
@@ -85,12 +119,32 @@ jQuery(document).ready(function ($) {
   $(document).on('change', '.dps-service-checkbox, .dps-service-price', function () {
     updateTotal();
   });
+  $(document).on('click', '.dps-extra-toggle', function (event) {
+    event.preventDefault();
+    var target = $(this).data('target');
+    if (target) {
+      var $target = $(target);
+      if ($target.length) {
+        $target.toggle();
+        updateTotal();
+      }
+    }
+  });
+  $(document).on('change', '#dps-taxidog-toggle, input[name="appointment_type"]', function () {
+    updateTotal();
+  });
+  $(document).on('input', '#dps-taxidog-price, #dps-simple-extra-value, #dps-subscription-base, #dps-subscription-extra-value, #dps-tosa-price', function () {
+    updateTotal();
+  });
+  $(document).on('change', '#dps-tosa-toggle', function () {
+    updateTotal();
+  });
   // Aplica preços por porte quando o select de pets é modificado
-  $(document).on('change', '#dps-appointment-pet', function () {
+  $(document).on('change', 'input[name="appointment_pet_ids[]"]', function () {
     applyPricesByPetSize();
   });
   // Impede valores negativos e formata campos
-  $(document).on('input', '.dps-service-price, #dps-appointment-total', function () {
+  $(document).on('input', '.dps-service-price, #dps-appointment-total, #dps-taxidog-price, #dps-simple-extra-value, #dps-subscription-base, #dps-subscription-total, #dps-subscription-extra-value, #dps-tosa-price', function () {
     var val = parseFloat($(this).val());
     if (isNaN(val) || val < 0) {
       $(this).val('0.00');
@@ -98,4 +152,5 @@ jQuery(document).ready(function ($) {
   });
   // Ao carregar a página, aplica preços e atualiza total
   applyPricesByPetSize();
+  updateTotal();
 });
