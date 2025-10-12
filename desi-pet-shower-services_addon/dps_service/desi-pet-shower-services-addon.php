@@ -270,24 +270,45 @@ class DPS_Services_Addon {
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></p>';
-        // Preço base e variações por porte (se existir).  
+        // Preços por porte.
         $price_val      = $meta['price'] ?? '';
         $price_small    = $meta['price_small'] ?? '';
         $price_medium   = $meta['price_medium'] ?? '';
         $price_large    = $meta['price_large'] ?? '';
-        echo '<p><label>' . esc_html__( 'Valor base (R$)', 'dps-services-addon' ) . '<br><input type="number" name="service_price" step="0.01" value="' . esc_attr( $price_val ) . '" required></label></p>';
+        if ( '' !== $price_val ) {
+            if ( '' === $price_small ) {
+                $price_small = $price_val;
+            }
+            if ( '' === $price_medium ) {
+                $price_medium = $price_val;
+            }
+            if ( '' === $price_large ) {
+                $price_large = $price_val;
+            }
+        }
         echo '<div class="dps-price-by-size">';
         echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Valores por porte (opcional)', 'dps-services-addon' ) . '</strong></p>';
+        echo '<p class="description">' . esc_html__( 'Informe pelo menos um valor. O menor será usado como referência padrão.', 'dps-services-addon' ) . '</p>';
         echo '<p><label>' . esc_html__( 'Pequeno', 'dps-services-addon' ) . ' <input type="number" name="service_price_small" step="0.01" value="' . esc_attr( $price_small ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
         echo '<p><label>' . esc_html__( 'Médio', 'dps-services-addon' ) . ' <input type="number" name="service_price_medium" step="0.01" value="' . esc_attr( $price_medium ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
         echo '<p><label>' . esc_html__( 'Grande', 'dps-services-addon' ) . ' <input type="number" name="service_price_large" step="0.01" value="' . esc_attr( $price_large ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
         echo '</div>';
-        // Duração média (minutos) e variações por porte
+        // Duração média (minutos) por porte
         $duration_val    = $meta['duration'] ?? '';
         $dur_small       = $meta['duration_small'] ?? '';
         $dur_medium      = $meta['duration_medium'] ?? '';
         $dur_large       = $meta['duration_large'] ?? '';
-        echo '<p><label>' . esc_html__( 'Duração média (minutos)', 'dps-services-addon' ) . '<br><input type="number" name="service_duration" step="5" min="0" value="' . esc_attr( $duration_val ) . '" placeholder="0"></label></p>';
+        if ( '' !== $duration_val ) {
+            if ( '' === $dur_small ) {
+                $dur_small = $duration_val;
+            }
+            if ( '' === $dur_medium ) {
+                $dur_medium = $duration_val;
+            }
+            if ( '' === $dur_large ) {
+                $dur_large = $duration_val;
+            }
+        }
         echo '<div class="dps-duration-by-size">';
         echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Durações por porte (minutos)', 'dps-services-addon' ) . '</strong></p>';
         echo '<p><label>' . esc_html__( 'Pequeno', 'dps-services-addon' ) . ' <input type="number" name="service_duration_small" step="5" min="0" value="' . esc_attr( $dur_small ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
@@ -367,7 +388,25 @@ class DPS_Services_Addon {
             foreach ( $services as $service ) {
                 $type  = get_post_meta( $service->ID, 'service_type', true );
                 $cat   = get_post_meta( $service->ID, 'service_category', true );
-                $price = get_post_meta( $service->ID, 'service_price', true );
+                $prices_for_range = [];
+                foreach ( [ 'service_price_small', 'service_price_medium', 'service_price_large', 'service_price' ] as $meta_key ) {
+                    $meta_val = get_post_meta( $service->ID, $meta_key, true );
+                    if ( '' !== $meta_val && null !== $meta_val ) {
+                        $prices_for_range[] = (float) $meta_val;
+                    }
+                }
+                $price_display = '-';
+                if ( ! empty( $prices_for_range ) ) {
+                    $min_val = min( $prices_for_range );
+                    $max_val = max( $prices_for_range );
+                    $min_fmt = number_format_i18n( $min_val, 2 );
+                    if ( abs( $max_val - $min_val ) < 0.01 ) {
+                        $price_display = 'R$ ' . $min_fmt;
+                    } else {
+                        $max_fmt = number_format_i18n( $max_val, 2 );
+                        $price_display = 'R$ ' . $min_fmt . ' - R$ ' . $max_fmt;
+                    }
+                }
                 $type_label = isset( $types[ $type ] ) ? $types[ $type ] : $type;
                 $cat_label  = isset( $categories[ $cat ] ) ? $categories[ $cat ] : $cat;
                 $edit_url   = add_query_arg( [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $service->ID ], $base_url );
@@ -376,7 +415,7 @@ class DPS_Services_Addon {
                 echo '<td>' . esc_html( $service->post_title ) . '</td>';
                 echo '<td>' . esc_html( $type_label ) . '</td>';
                 echo '<td>' . esc_html( $cat_label ) . '</td>';
-                echo '<td>' . esc_html( number_format_i18n( (float) $price, 2 ) ) . '</td>';
+                echo '<td>' . esc_html( $price_display ) . '</td>';
                 $active = get_post_meta( $service->ID, 'service_active', true );
                 $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
                 echo '<td>' . esc_html( $status_label ) . '</td>';
@@ -417,14 +456,32 @@ class DPS_Services_Addon {
             $name     = isset( $_POST['service_name'] ) ? sanitize_text_field( wp_unslash( $_POST['service_name'] ) ) : '';
             $type     = isset( $_POST['service_type'] ) ? sanitize_text_field( wp_unslash( $_POST['service_type'] ) ) : '';
             $category = isset( $_POST['service_category'] ) ? sanitize_text_field( wp_unslash( $_POST['service_category'] ) ) : '';
-            $price    = isset( $_POST['service_price'] ) ? floatval( wp_unslash( $_POST['service_price'] ) ) : 0;
-            $price_small  = isset( $_POST['service_price_small'] ) ? floatval( wp_unslash( $_POST['service_price_small'] ) ) : '';
-            $price_medium = isset( $_POST['service_price_medium'] ) ? floatval( wp_unslash( $_POST['service_price_medium'] ) ) : '';
-            $price_large  = isset( $_POST['service_price_large'] ) ? floatval( wp_unslash( $_POST['service_price_large'] ) ) : '';
-            $duration = isset( $_POST['service_duration'] ) ? intval( wp_unslash( $_POST['service_duration'] ) ) : 0;
-            $dur_small  = isset( $_POST['service_duration_small'] ) ? intval( wp_unslash( $_POST['service_duration_small'] ) ) : '';
-            $dur_medium = isset( $_POST['service_duration_medium'] ) ? intval( wp_unslash( $_POST['service_duration_medium'] ) ) : '';
-            $dur_large  = isset( $_POST['service_duration_large'] ) ? intval( wp_unslash( $_POST['service_duration_large'] ) ) : '';
+            $price_small_raw  = isset( $_POST['service_price_small'] ) ? wp_unslash( $_POST['service_price_small'] ) : '';
+            $price_medium_raw = isset( $_POST['service_price_medium'] ) ? wp_unslash( $_POST['service_price_medium'] ) : '';
+            $price_large_raw  = isset( $_POST['service_price_large'] ) ? wp_unslash( $_POST['service_price_large'] ) : '';
+            $price_small  = ( '' !== $price_small_raw ) ? floatval( $price_small_raw ) : '';
+            $price_medium = ( '' !== $price_medium_raw ) ? floatval( $price_medium_raw ) : '';
+            $price_large  = ( '' !== $price_large_raw ) ? floatval( $price_large_raw ) : '';
+            $duration_small_raw  = isset( $_POST['service_duration_small'] ) ? wp_unslash( $_POST['service_duration_small'] ) : '';
+            $duration_medium_raw = isset( $_POST['service_duration_medium'] ) ? wp_unslash( $_POST['service_duration_medium'] ) : '';
+            $duration_large_raw  = isset( $_POST['service_duration_large'] ) ? wp_unslash( $_POST['service_duration_large'] ) : '';
+            $dur_small  = ( '' !== $duration_small_raw ) ? intval( $duration_small_raw ) : '';
+            $dur_medium = ( '' !== $duration_medium_raw ) ? intval( $duration_medium_raw ) : '';
+            $dur_large  = ( '' !== $duration_large_raw ) ? intval( $duration_large_raw ) : '';
+            $price_candidates = [];
+            foreach ( [ $price_small, $price_medium, $price_large ] as $candidate ) {
+                if ( '' !== $candidate ) {
+                    $price_candidates[] = (float) $candidate;
+                }
+            }
+            $price = ! empty( $price_candidates ) ? min( $price_candidates ) : 0;
+            $duration_candidates = [];
+            foreach ( [ $dur_small, $dur_medium, $dur_large ] as $candidate ) {
+                if ( '' !== $candidate ) {
+                    $duration_candidates[] = (int) $candidate;
+                }
+            }
+            $duration = ! empty( $duration_candidates ) ? max( $duration_candidates ) : 0;
             $active   = ( isset( $_POST['service_active'] ) && '1' === wp_unslash( $_POST['service_active'] ) ) ? '1' : '0';
             if ( empty( $name ) || empty( $type ) ) {
                 return;
@@ -542,6 +599,13 @@ class DPS_Services_Addon {
             $price_small  = get_post_meta( $srv->ID, 'service_price_small', true );
             $price_medium = get_post_meta( $srv->ID, 'service_price_medium', true );
             $price_large  = get_post_meta( $srv->ID, 'service_price_large', true );
+            $price_candidates = [];
+            foreach ( [ $price_small, $price_medium, $price_large, $price ] as $candidate ) {
+                if ( '' !== $candidate && null !== $candidate ) {
+                    $price_candidates[] = (float) $candidate;
+                }
+            }
+            $default_price = ! empty( $price_candidates ) ? min( $price_candidates ) : 0;
             // Se tipo desconhecido, coloca como extra
             if ( ! isset( $grouped[ $type ] ) ) {
                 $type = 'extra';
@@ -550,7 +614,7 @@ class DPS_Services_Addon {
                 'id'          => $srv->ID,
                 'name'        => $srv->post_title,
                 'category'    => $cat,
-                'price'       => floatval( $price ),
+                'price'       => (float) $default_price,
                 'price_small'  => ( '' !== $price_small ? floatval( $price_small ) : null ),
                 'price_medium' => ( '' !== $price_medium ? floatval( $price_medium ) : null ),
                 'price_large'  => ( '' !== $price_large ? floatval( $price_large ) : null ),
@@ -565,12 +629,17 @@ class DPS_Services_Addon {
             }
         }
         echo '<fieldset class="dps-services-fields"><legend>' . esc_html__( 'Serviços', 'dps-services-addon' ) . '</legend>';
-        // Serviços padrão
+        $appt_type = isset( $meta['appointment_type'] ) && $meta['appointment_type'] ? $meta['appointment_type'] : ( isset( $_POST['appointment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_type'] ) ) : 'simple' );
+        $simple_display       = ( 'subscription' === $appt_type ) ? 'none' : 'block';
+        $subscription_display = ( 'subscription' === $appt_type ) ? 'block' : 'none';
+        $extra_desc    = $meta['extra_description'] ?? '';
+        $extra_value   = $meta['extra_value'] ?? '';
+        $show_extra    = ( '' !== $extra_desc || '' !== $extra_value );
+        echo '<div class="dps-simple-fields" style="display:' . esc_attr( $simple_display ) . ';">';
         if ( ! empty( $grouped['padrao'] ) ) {
             echo '<p><strong>' . esc_html__( 'Serviços padrão', 'dps-services-addon' ) . '</strong></p>';
             foreach ( $grouped['padrao'] as $srv ) {
                 $checked  = in_array( $srv['id'], $selected, false ) ? 'checked' : '';
-                // Recupera preço personalizado se houver (para edição)
                 $custom_prices = [];
                 if ( $edit_id ) {
                     $custom_prices = get_post_meta( $edit_id, 'appointment_service_prices', true );
@@ -579,10 +648,8 @@ class DPS_Services_Addon {
                     }
                 }
                 $current_price = isset( $custom_prices[ $srv['id'] ] ) ? (float) $custom_prices[ $srv['id'] ] : (float) $srv['price'];
-                // Input field for custom price
                 echo '<p><label>';
                 echo '<input type="checkbox" class="dps-service-checkbox" name="appointment_services[]" value="' . esc_attr( $srv['id'] ) . '" '
-                    // Atributos de preço por porte. Usa string vazia se não houver valor definido
                     . 'data-price-default="' . esc_attr( $srv['price'] ) . '" '
                     . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
@@ -593,14 +660,11 @@ class DPS_Services_Addon {
                 echo '</label></p>';
             }
         }
-        // Serviços extras
         if ( ! empty( $grouped['extra'] ) ) {
-            // Agrupa extras por categoria
             $cats = [];
             foreach ( $grouped['extra'] as $srv ) {
                 $cats[ $srv['category'] ][] = $srv;
             }
-            // Category labels
             $labels = [
                 'preparacao_pelagem' => __( 'Preparação da pelagem', 'dps-services-addon' ),
                 'opcoes_tosa'        => __( 'Opções de tosa', 'dps-services-addon' ),
@@ -608,7 +672,6 @@ class DPS_Services_Addon {
                 'cuidados'           => __( 'Cuidados adicionais', 'dps-services-addon' ),
                 'pelagem'            => __( 'Tratamento da pelagem e pele', 'dps-services-addon' ),
             ];
-            // Recupera preços personalizados
             $custom_prices = [];
             if ( $edit_id ) {
                 $custom_prices = get_post_meta( $edit_id, 'appointment_service_prices', true );
@@ -635,10 +698,8 @@ class DPS_Services_Addon {
                 }
             }
         }
-        // Pacotes de serviços
         if ( ! empty( $grouped['package'] ) ) {
             echo '<p><strong>' . esc_html__( 'Pacotes de serviços', 'dps-services-addon' ) . '</strong></p>';
-            // Recupera preços personalizados
             $custom_prices = [];
             if ( $edit_id ) {
                 $custom_prices = get_post_meta( $edit_id, 'appointment_service_prices', true );
@@ -661,7 +722,6 @@ class DPS_Services_Addon {
                 echo '</label></p>';
             }
         }
-        // Exibe notas do pet para auxiliar na escolha de serviços
         if ( $edit_id ) {
             $pet_id = get_post_meta( $edit_id, 'appointment_pet_id', true );
             if ( $pet_id ) {
@@ -682,12 +742,31 @@ class DPS_Services_Addon {
                 echo '</div>';
             }
         }
-        // Campo de total
         $total_val = '';
         if ( $edit_id ) {
             $total_val = get_post_meta( $edit_id, 'appointment_total_value', true );
         }
+        echo '<p><button type="button" class="button dps-extra-toggle" data-target="#dps-simple-extra-fields">' . esc_html__( 'Extra', 'dps-services-addon' ) . '</button></p>';
+        echo '<div id="dps-simple-extra-fields" class="dps-extra-fields" style="display:' . ( $show_extra ? 'block' : 'none' ) . ';">';
+        echo '<p><label>' . esc_html__( 'Descrição do extra', 'dps-services-addon' ) . '<br><input type="text" name="appointment_extra_description" value="' . esc_attr( $extra_desc ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Valor extra (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-simple-extra-value" name="appointment_extra_value" value="' . esc_attr( $extra_value ) . '"></label></p>';
+        echo '</div>';
         echo '<p><label>' . esc_html__( 'Valor total do serviço (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" id="dps-appointment-total" name="appointment_total" value="' . esc_attr( $total_val ) . '" min="0"></label></p>';
+        echo '</div>';
+        $subscription_base_value  = $meta['subscription_base_value'] ?? '';
+        $subscription_total_value = $meta['subscription_total_value'] ?? '';
+        $subscription_extra_desc  = $meta['subscription_extra_description'] ?? '';
+        $subscription_extra_value = $meta['subscription_extra_value'] ?? '';
+        $subscription_show_extra  = ( '' !== $subscription_extra_desc || '' !== $subscription_extra_value );
+        echo '<div id="dps-subscription-fields" class="dps-subscription-fields" style="display:' . esc_attr( $subscription_display ) . ';">';
+        echo '<p><label>' . esc_html__( 'Valor da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-base" name="subscription_base_value" value="' . esc_attr( $subscription_base_value ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Valor total da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-total" name="subscription_total_value" value="' . esc_attr( $subscription_total_value ) . '"></label></p>';
+        echo '<p><button type="button" class="button dps-extra-toggle" data-target="#dps-subscription-extra-fields">' . esc_html__( 'Extra', 'dps-services-addon' ) . '</button></p>';
+        echo '<div id="dps-subscription-extra-fields" class="dps-extra-fields" style="display:' . ( $subscription_show_extra ? 'block' : 'none' ) . ';">';
+        echo '<p><label>' . esc_html__( 'Descrição do extra', 'dps-services-addon' ) . '<br><input type="text" name="subscription_extra_description" value="' . esc_attr( $subscription_extra_desc ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Valor extra (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-extra-value" name="subscription_extra_value" value="' . esc_attr( $subscription_extra_value ) . '"></label></p>';
+        echo '</div>';
+        echo '</div>';
         echo '</fieldset>';
     }
 
@@ -868,6 +947,45 @@ class DPS_Services_Addon {
         if ( isset( $_POST['appointment_total'] ) ) {
             $total = floatval( $_POST['appointment_total'] );
             update_post_meta( $post_id, 'appointment_total_value', $total );
+        }
+        $extra_desc = isset( $_POST['appointment_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_extra_description'] ) ) : '';
+        $extra_value = 0;
+        if ( isset( $_POST['appointment_extra_value'] ) ) {
+            $extra_value = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_extra_value'] ) ) );
+            if ( $extra_value < 0 ) {
+                $extra_value = 0;
+            }
+        }
+        if ( '' !== $extra_desc || $extra_value > 0 ) {
+            update_post_meta( $post_id, 'appointment_extra_description', $extra_desc );
+            update_post_meta( $post_id, 'appointment_extra_value', $extra_value );
+        } else {
+            delete_post_meta( $post_id, 'appointment_extra_description' );
+            delete_post_meta( $post_id, 'appointment_extra_value' );
+        }
+        $sub_base = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
+        $sub_total = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
+        $sub_extra_desc = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
+        $sub_extra_value = isset( $_POST['subscription_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_extra_value'] ) ) ) : 0;
+        if ( $sub_base > 0 ) {
+            update_post_meta( $post_id, 'subscription_base_value', max( 0, $sub_base ) );
+        } else {
+            delete_post_meta( $post_id, 'subscription_base_value' );
+        }
+        if ( $sub_total > 0 ) {
+            update_post_meta( $post_id, 'subscription_total_value', max( 0, $sub_total ) );
+        } else {
+            delete_post_meta( $post_id, 'subscription_total_value' );
+        }
+        if ( '' !== $sub_extra_desc || $sub_extra_value > 0 ) {
+            if ( $sub_extra_value < 0 ) {
+                $sub_extra_value = 0;
+            }
+            update_post_meta( $post_id, 'subscription_extra_description', $sub_extra_desc );
+            update_post_meta( $post_id, 'subscription_extra_value', $sub_extra_value );
+        } else {
+            delete_post_meta( $post_id, 'subscription_extra_description' );
+            delete_post_meta( $post_id, 'subscription_extra_value' );
         }
     }
 
