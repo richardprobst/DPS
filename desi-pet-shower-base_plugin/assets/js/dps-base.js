@@ -56,47 +56,52 @@
       });
     });
     // Filtra pets no agendamento de acordo com o cliente selecionado
+    var $petContainer = $('#dps-appointment-pet-container');
+    var $petGrid = $('#dps-appointment-pet-grid');
+    var $petSearch = $('#dps-appointment-pet-search');
     $('#dps-appointment-cliente').on('change', function(){
       var ownerId = $(this).val();
-      var $petSelect = $('#dps-appointment-pet');
-      $petSelect.find('option').each(function(){
-        var $opt = $(this);
-        var optOwner = $opt.data('owner');
-        // Sempre mostra opção vazia
-        if ($opt.val() === '') {
-          $opt.show();
-          return;
-        }
-        if (!ownerId) {
-          $opt.show();
+      var $cards = $petGrid.find('.dps-pet-card');
+      $cards.each(function(){
+        var $card = $(this);
+        var cardOwner = $card.data('owner');
+        var matchesOwner = !ownerId || String(cardOwner) === String(ownerId);
+        if (matchesOwner) {
+          $card.show();
         } else {
-          if (String(optOwner) === String(ownerId)) {
-            $opt.show();
-          } else {
-            $opt.hide();
-          }
+          $card.hide();
+          $card.find('input[type="checkbox"]').prop('checked', false).trigger('change');
         }
       });
-      // Reseta seleção
-      $petSelect.val('');
-      // Oculta campo se nenhum tutor
-      var $petField = $petSelect.closest('p');
       if (!ownerId) {
-        $petField.hide();
+        $petContainer.hide();
       } else {
-        $petField.show();
+        $petContainer.show();
       }
+      $petSearch.val('');
+    });
+    $petSearch.on('input', function(){
+      var term = $(this).val().toLowerCase();
+      var ownerId = $('#dps-appointment-cliente').val();
+      $petGrid.find('.dps-pet-card').each(function(){
+        var $card = $(this);
+        var cardOwner = $card.data('owner');
+        var matchesOwner = !ownerId || String(cardOwner) === String(ownerId);
+        if (!matchesOwner) {
+          $card.hide();
+          return;
+        }
+        var text = $card.text().toLowerCase();
+        $card.toggle(text.indexOf(term) > -1);
+      });
     });
     // Esconde campo de pet inicialmente se nenhum cliente estiver selecionado e filtra pets se houver pré‑seleção
     (function(){
-      var $petSelect = $('#dps-appointment-pet');
-      var $petField  = $petSelect.closest('p');
       var $clientSel = $('#dps-appointment-cliente');
       var clientVal  = $clientSel.val();
       if (!clientVal) {
-        $petField.hide();
+        $petContainer.hide();
       } else {
-        // Gatilho de mudança para filtrar pets
         $clientSel.trigger('change');
       }
     })();
@@ -114,7 +119,7 @@
       // A ordem foi ajustada para melhorar a usabilidade conforme solicitação: Agendamentos, Clientes, Pets, Serviços,
       // Assinaturas, Financeiro, Estatísticas, Notificações. Se algumas abas não existirem (por exemplo, senhas
       // foram removidas e notificações podem não estar presentes), elas serão ignoradas.
-      var desiredOrder = ['agendas','clientes','pets','servicos','assinaturas','financeiro','estatisticas','notificacoes'];
+      var desiredOrder = ['agendas','historico','clientes','pets','servicos','assinaturas','financeiro','estatisticas','backup','notificacoes'];
       var $nav = $('.dps-nav');
       if ($nav.length) {
         var $items = {};
