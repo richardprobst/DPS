@@ -1,10 +1,15 @@
 <?php
-/*
-Plugin Name: Desi Pet Shower Base
-Description: Plugin básico para cadastro de clientes, pets e agendamentos de banho e tosa. Este é o núcleo que pode ser expandido por add‑ons.
-Version: 1.0.0
-Author: PRObst
-*/
+/**
+ * Plugin Name:       Desi Pet Shower – Base
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Plugin básico para cadastro de clientes, pets e agendamentos de banho e tosa. Este é o núcleo que pode ser expandido por add-ons.
+ * Version:           1.0.1
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-base
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ */
 
 // Impede acesso direto
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_BASE_VERSION', '1.0.0' );
+define( 'DPS_BASE_VERSION', '1.0.1' );
 define( 'DPS_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 

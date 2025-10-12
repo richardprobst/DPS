@@ -1,11 +1,15 @@
 <?php
-/*
- * Plugin Name: Desi Pet Shower – Cadastro Add-on
- * Description: Permite criar uma página pública para cadastro de clientes e seus pets. Ideal para enviar ao cliente e deixar que ele mesmo preencha seus dados antes do primeiro atendimento.
- * Version:     1.0.0
- * Author:      PRObst
- * License:     GPL-2.0+
- * Text Domain: dps-registration-addon
+/**
+ * Plugin Name:       Desi Pet Shower – Cadastro Add-on
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Permite criar uma página pública para cadastro de clientes e seus pets. Ideal para enviar ao cliente e deixar que ele mesmo preencha seus dados antes do primeiro atendimento.
+ * Version:           1.0.0
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-registration-addon
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ * License:           GPL-2.0+
  */
 
 // Impede acesso direto

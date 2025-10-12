@@ -1,11 +1,15 @@
 <?php
-/*
- * Plugin Name: Desi Pet Shower – Push Notifications Add-on
- * Description: Envia notificações diárias às 08:00 com o resumo dos agendamentos do dia. Pode ser adaptado para serviços de push externos.
- * Version:     1.0.0
- * Author:      PRObst
- * License:     GPL-2.0+
- * Text Domain: dps-push-addon
+/**
+ * Plugin Name:       Desi Pet Shower – Push Notifications Add-on
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Envia notificações diárias às 08:00 com o resumo dos agendamentos do dia. Pode ser adaptado para serviços de push externos.
+ * Version:           1.0.0
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-push-addon
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ * License:           GPL-2.0+
  */
 
 // Impede acesso direto
