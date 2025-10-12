@@ -583,6 +583,12 @@ class DPS_Base_Frontend {
                     'tosa_occurrence' => get_post_meta( $edit_id, 'appointment_tosa_occurrence', true ),
                     'taxidog'   => get_post_meta( $edit_id, 'appointment_taxidog', true ),
                     'taxidog_price' => get_post_meta( $edit_id, 'appointment_taxidog_price', true ),
+                    'extra_description' => get_post_meta( $edit_id, 'appointment_extra_description', true ),
+                    'extra_value'       => get_post_meta( $edit_id, 'appointment_extra_value', true ),
+                    'subscription_base_value'  => get_post_meta( $edit_id, 'subscription_base_value', true ),
+                    'subscription_total_value' => get_post_meta( $edit_id, 'subscription_total_value', true ),
+                    'subscription_extra_description' => get_post_meta( $edit_id, 'subscription_extra_description', true ),
+                    'subscription_extra_value'       => get_post_meta( $edit_id, 'subscription_extra_value', true ),
                 ];
             }
         }
@@ -677,12 +683,13 @@ class DPS_Base_Frontend {
                 $sel_pets = array_map( 'strval', $multi_meta );
             }
             echo '<p><label>' . esc_html__( 'Pet(s)', 'dps-base' ) . '<br><select name="appointment_pet_ids[]" id="dps-appointment-pet" multiple required>';
-            echo '<option value="">' . esc_html__( 'Selecione...', 'dps-base' ) . '</option>';
             foreach ( $pets as $pet ) {
                 $owner_id  = get_post_meta( $pet->ID, 'owner_id', true );
                 $owner_attr = $owner_id ? ' data-owner="' . esc_attr( $owner_id ) . '"' : '';
+                $size       = get_post_meta( $pet->ID, 'pet_size', true );
+                $size_attr  = $size ? ' data-size="' . esc_attr( $size ) . '"' : '';
                 $sel       = in_array( (string) $pet->ID, $sel_pets, true ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $pet->ID ) . '"' . $owner_attr . ' ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
+                echo '<option value="' . esc_attr( $pet->ID ) . '"' . $owner_attr . $size_attr . ' ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
             }
             echo '</select></label></p>';
             // Data
@@ -696,24 +703,26 @@ class DPS_Base_Frontend {
             $tosa       = $meta['tosa'] ?? '';
             $tosa_price = $meta['tosa_price'] ?? '';
             $tosa_occ   = $meta['tosa_occurrence'] ?? '1';
+            $tosa_display = ( '1' === $tosa ) ? 'block' : 'none';
             echo '<div id="dps-tosa-wrapper" style="display:none; margin-bottom:10px;">';
-            echo '<p><label><input type="checkbox" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '> ' . esc_html__( 'Precisa de tosa?', 'dps-base' ) . '</label> ';
+            echo '<p><label><input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '> ' . esc_html__( 'Precisa de tosa?', 'dps-base' ) . '</label> ';
             echo '<small>' . esc_html__( 'Adicione um serviço de tosa à assinatura', 'dps-base' ) . '</small></p>';
+            echo '<div id="dps-tosa-fields" style="display:' . esc_attr( $tosa_display ) . ';">';
             // Preço da tosa com valor padrão 30 se não definido
             $tosa_price_val = $tosa_price !== '' ? $tosa_price : '30';
-            echo '<p><label>' . esc_html__( 'Preço da tosa (R$)', 'dps-base' ) . '<br><input type="number" step="0.01" min="0" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:80px;"></label></p>';
+            echo '<p><label>' . esc_html__( 'Preço da tosa (R$)', 'dps-base' ) . '<br><input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:80px;"></label></p>';
             // Ocorrência da tosa (selecionada via JS conforme frequência)
             echo '<p><label>' . esc_html__( 'Ocorrência da tosa', 'dps-base' ) . '<br>';
             echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select></label></p>';
+            echo '</div>';
             echo '</div>';
 
             // Campo: escolha de TaxiDog
             $taxidog = $meta['taxidog'] ?? '';
             echo '<p><label><input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '> ' . esc_html__( 'Solicitar TaxiDog?', 'dps-base' ) . '</label>';
             echo '<span id="dps-taxidog-extra" style="margin-left:10px; display:' . ( $taxidog ? 'inline-block' : 'none' ) . ';">';
-            echo esc_html__( 'Valor (R$)', 'dps-base' ) . ': <input type="number" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:80px;">';
-            echo '</span>';
-            echo ' <small>(' . esc_html__( 'Para assinaturas, TaxiDog é cortesia', 'dps-base' ) . ')</small></p>';
+            echo esc_html__( 'Valor (R$)', 'dps-base' ) . ': <input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:80px;">';
+            echo '</span></p>';
 
             // Observações
             $notes_val = $meta['notes'] ?? '';
@@ -733,26 +742,30 @@ class DPS_Base_Frontend {
             $dps_script = <<<EOT
 <script>
 jQuery(function($){
+    function toggleTaxiDog(){
+        var type = $('input[name="appointment_type"]:checked').val();
+        var hasTaxi = $('#dps-taxidog-toggle').is(':checked');
+        if(type === 'subscription'){
+            $('#dps-taxidog-extra').hide();
+        } else {
+            $('#dps-taxidog-extra').toggle(hasTaxi);
+        }
+    }
+
     function updateTypeFields(){
         var type = $('input[name="appointment_type"]:checked').val();
         // Exibe ou oculta o seletor de frequência
         $('#dps-appointment-frequency-wrapper').toggle(type === 'subscription');
         // Exibe ou oculta campos de tosa somente nas assinaturas
         $('#dps-tosa-wrapper').toggle(type === 'subscription');
-        if(type === 'subscription'){
-            // Oculta seleção de serviços e total quando assinatura
-            $('.dps-services-fields').hide();
-            $('#dps-appointment-total').closest('p').hide();
-            if($('#dps-taxidog-toggle').is(':checked')){
-                $('#dps-taxidog-extra').hide();
-            }
-        } else {
-            $('.dps-services-fields').show();
-            $('#dps-appointment-total').closest('p').show();
-            if($('#dps-taxidog-toggle').is(':checked')){
-                $('#dps-taxidog-extra').show();
-            }
-        }
+        $('.dps-simple-fields').toggle(type !== 'subscription');
+        $('.dps-subscription-fields').toggle(type === 'subscription');
+        toggleTaxiDog();
+    }
+
+    function updateTosaFields(){
+        var show = $('#dps-tosa-toggle').is(':checked');
+        $('#dps-tosa-fields').toggle(show);
     }
 
     // Atualiza opções de ocorrência da tosa conforme a frequência selecionada
@@ -772,26 +785,21 @@ jQuery(function($){
     // Inicializa campos de tipo e tosa
     updateTypeFields();
     updateTosaOptions();
+    updateTosaFields();
     $(document).on('change','input[name="appointment_type"]', function(){
         updateTypeFields();
-        // Recalcula opções de tosa ao mudar entre simples e assinatura
         updateTosaOptions();
+        updateTosaFields();
     });
     // Atualiza opções de tosa ao alterar a frequência
     $('select[name="appointment_frequency"]').on('change', function(){
         updateTosaOptions();
     });
     $('#dps-taxidog-toggle').on('change', function(){
-        var type = $('input[name="appointment_type"]:checked').val();
-        if($(this).is(':checked')){
-            if(type === 'subscription'){
-                $('#dps-taxidog-extra').hide();
-            } else {
-                $('#dps-taxidog-extra').show();
-            }
-        } else {
-            $('#dps-taxidog-extra').hide();
-        }
+        toggleTaxiDog();
+    });
+    $('#dps-tosa-toggle').on('change', function(){
+        updateTosaFields();
     });
 });
 </script>
@@ -1258,6 +1266,18 @@ EOT;
                 $taxi_price = 0;
             }
         }
+        $extra_description = isset( $_POST['appointment_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_extra_description'] ) ) : '';
+        $extra_value       = isset( $_POST['appointment_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_extra_value'] ) ) ) : 0;
+        if ( $extra_value < 0 ) {
+            $extra_value = 0;
+        }
+        $subscription_base_value  = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
+        $subscription_total_value = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
+        $subscription_extra_description = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
+        $subscription_extra_value       = isset( $_POST['subscription_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_extra_value'] ) ) ) : 0;
+        if ( $subscription_extra_value < 0 ) {
+            $subscription_extra_value = 0;
+        }
         if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
             return;
         }
@@ -1292,10 +1312,17 @@ EOT;
             }
             // Define número de ocorrências no ciclo com base na frequência
             $count_events  = ( $appt_freq === 'quinzenal' ) ? 2 : 4;
-            // Calcula valor do pacote por pet: soma todos os eventos + preço de tosa (uma vez no ciclo, se marcada)
-            $package_per_pet = ( $base_event_price * $count_events ) + ( ( '1' === $tosa ) ? $tosa_price : 0 );
-            // Valor total considerando todos os pets
-            $total_package = $package_per_pet * count( $pet_ids );
+            // Calcula valor do pacote por pet permitindo valores personalizados
+            $base_cycle_value   = ( $subscription_base_value > 0 ) ? $subscription_base_value : ( $base_event_price * $count_events );
+            $extra_cycle_value  = ( $subscription_extra_value > 0 ) ? $subscription_extra_value : 0;
+            $package_per_pet    = $base_cycle_value + ( ( '1' === $tosa ) ? $tosa_price : 0 ) + $extra_cycle_value;
+            $total_package      = $package_per_pet * count( $pet_ids );
+            if ( $subscription_total_value > 0 ) {
+                $total_package = $subscription_total_value;
+                if ( count( $pet_ids ) > 0 ) {
+                    $package_per_pet = $total_package / count( $pet_ids );
+                }
+            }
             // Cria post da assinatura
             $sub_id = wp_insert_post( [
                 'post_type'   => 'dps_subscription',
@@ -1311,6 +1338,19 @@ EOT;
                 update_post_meta( $sub_id, 'subscription_service', 'Assinatura' );
                 update_post_meta( $sub_id, 'subscription_frequency', $appt_freq ?: 'semanal' );
                 update_post_meta( $sub_id, 'subscription_price', $total_package );
+                if ( $subscription_base_value > 0 ) {
+                    update_post_meta( $sub_id, 'subscription_base_value', $subscription_base_value );
+                }
+                if ( $subscription_total_value > 0 ) {
+                    update_post_meta( $sub_id, 'subscription_total_value', $subscription_total_value );
+                }
+                if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+                    update_post_meta( $sub_id, 'subscription_extra_description', $subscription_extra_description );
+                    update_post_meta( $sub_id, 'subscription_extra_value', $subscription_extra_value );
+                } else {
+                    delete_post_meta( $sub_id, 'subscription_extra_description' );
+                    delete_post_meta( $sub_id, 'subscription_extra_value' );
+                }
                 // Salva informações de tosa na assinatura
                 update_post_meta( $sub_id, 'subscription_tosa', $tosa );
                 update_post_meta( $sub_id, 'subscription_tosa_price', $tosa_price );
@@ -1414,8 +1454,11 @@ EOT;
                     update_post_meta( $new_appt, 'appointment_taxidog_price', $taxi_price );
                     // Serviços e total são definidos pelo add‑on de serviços; recuperamos total postado
                     $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                    $final_total  = $posted_total + $taxi_price;
-                    update_post_meta( $new_appt, 'appointment_total_value', $final_total );
+                    update_post_meta( $new_appt, 'appointment_total_value', $posted_total );
+                    if ( '' !== $extra_description || $extra_value > 0 ) {
+                        update_post_meta( $new_appt, 'appointment_extra_description', $extra_description );
+                        update_post_meta( $new_appt, 'appointment_extra_value', $extra_value );
+                    }
                     // Status inicial
                     update_post_meta( $new_appt, 'appointment_status', 'pendente' );
                     // Dispara gancho pós‑salvamento
@@ -1487,9 +1530,9 @@ EOT;
                 foreach ( $prices as $p ) {
                     $base_total += (float) $p;
                 }
-                $total = $base_total;
+                $calculated_total = $base_total;
                 if ( '1' === $tosa ) {
-                    $total += $tosa_price;
+                    $calculated_total += $tosa_price;
                     // Registra preço da tosa para esta ocorrência
                     update_post_meta( $appt_id, 'appointment_tosa_price', $tosa_price );
                     update_post_meta( $appt_id, 'appointment_tosa_occurrence', 1 );
@@ -1497,8 +1540,28 @@ EOT;
                     update_post_meta( $appt_id, 'appointment_tosa_price', 0 );
                     update_post_meta( $appt_id, 'appointment_tosa_occurrence', 0 );
                 }
-                // TaxiDog não altera preço em assinatura (cortesia)
-                update_post_meta( $appt_id, 'appointment_total_value', $total );
+                if ( $subscription_extra_value > 0 ) {
+                    $calculated_total += $subscription_extra_value;
+                }
+                $final_subscription_total = $subscription_total_value > 0 ? $subscription_total_value : $calculated_total;
+                update_post_meta( $appt_id, 'appointment_total_value', $final_subscription_total );
+                if ( $subscription_base_value > 0 ) {
+                    update_post_meta( $appt_id, 'subscription_base_value', $subscription_base_value );
+                } elseif ( $base_total > 0 ) {
+                    update_post_meta( $appt_id, 'subscription_base_value', $base_total );
+                }
+                if ( $subscription_total_value > 0 ) {
+                    update_post_meta( $appt_id, 'subscription_total_value', $subscription_total_value );
+                } else {
+                    update_post_meta( $appt_id, 'subscription_total_value', $final_subscription_total );
+                }
+                if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+                    update_post_meta( $appt_id, 'subscription_extra_description', $subscription_extra_description );
+                    update_post_meta( $appt_id, 'subscription_extra_value', $subscription_extra_value );
+                } else {
+                    delete_post_meta( $appt_id, 'subscription_extra_description' );
+                    delete_post_meta( $appt_id, 'subscription_extra_value' );
+                }
                 // Vincula a assinatura se existir para este cliente/pet
                 $subs = get_posts( [
                     'post_type'      => 'dps_subscription',
@@ -1516,8 +1579,14 @@ EOT;
                 // Agendamento simples: soma valor total dos serviços selecionados mais valor do TaxiDog
                 // dps_service add-on salva appointment_total via POST; recupera
                 $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                $final_total  = $posted_total + $taxi_price;
-                update_post_meta( $appt_id, 'appointment_total_value', $final_total );
+                update_post_meta( $appt_id, 'appointment_total_value', $posted_total );
+                if ( '' !== $extra_description || $extra_value > 0 ) {
+                    update_post_meta( $appt_id, 'appointment_extra_description', $extra_description );
+                    update_post_meta( $appt_id, 'appointment_extra_value', $extra_value );
+                } else {
+                    delete_post_meta( $appt_id, 'appointment_extra_description' );
+                    delete_post_meta( $appt_id, 'appointment_extra_value' );
+                }
             }
         }
         // Redireciona para aba agendas

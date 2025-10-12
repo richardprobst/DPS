@@ -62,23 +62,24 @@
       $petSelect.find('option').each(function(){
         var $opt = $(this);
         var optOwner = $opt.data('owner');
-        // Sempre mostra opção vazia
-        if ($opt.val() === '') {
-          $opt.show();
-          return;
-        }
-        if (!ownerId) {
+        if (!ownerId || String(optOwner) === String(ownerId)) {
           $opt.show();
         } else {
-          if (String(optOwner) === String(ownerId)) {
-            $opt.show();
-          } else {
-            $opt.hide();
-          }
+          $opt.hide();
+          $opt.prop('selected', false);
         }
       });
-      // Reseta seleção
-      $petSelect.val('');
+      // Mantém seleção apenas dos pets visíveis
+      var visibleSelected = $petSelect.find('option:selected').filter(function(){
+        return $(this).is(':visible');
+      }).map(function(){
+        return $(this).val();
+      }).get();
+      if (!ownerId) {
+        $petSelect.val([]);
+      } else {
+        $petSelect.val(visibleSelected);
+      }
       // Oculta campo se nenhum tutor
       var $petField = $petSelect.closest('p');
       if (!ownerId) {
