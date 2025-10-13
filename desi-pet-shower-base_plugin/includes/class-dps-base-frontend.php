@@ -19,6 +19,205 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Normaliza números de telefone para uso no WhatsApp.
+     *
+     * @param string $raw_phone Telefone original.
+     *
+     * @return string
+     */
+    private static function format_whatsapp_number( $raw_phone ) {
+        $digits = preg_replace( '/\D+/', '', (string) $raw_phone );
+        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
+            $digits = '55' . $digits;
+        }
+        return $digits;
+    }
+
+    /**
+     * Retorna dados agregados de agendamentos multi-pet para cobrança consolidada.
+     *
+     * @param int $appt_id ID do agendamento.
+     *
+     * @return array|null
+     */
+    public static function get_multi_pet_charge_data( $appt_id ) {
+        $pet_ids = get_post_meta( $appt_id, 'appointment_pet_ids', true );
+        if ( ! is_array( $pet_ids ) || count( $pet_ids ) < 2 ) {
+            return null;
+        }
+
+        $client_id = (int) get_post_meta( $appt_id, 'appointment_client_id', true );
+        $date      = get_post_meta( $appt_id, 'appointment_date', true );
+        $time      = get_post_meta( $appt_id, 'appointment_time', true );
+
+        $normalized = array_map( 'intval', $pet_ids );
+        sort( $normalized );
+        $signature = implode( '-', $normalized );
+
+        $related = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [
+                [ 'key' => 'appointment_client_id', 'value' => $client_id ],
+                [ 'key' => 'appointment_date', 'value' => $date ],
+                [ 'key' => 'appointment_time', 'value' => $time ],
+            ],
+        ] );
+
+        if ( empty( $related ) ) {
+            return null;
+        }
+
+        $ids       = [];
+        $pet_names = [];
+        $total     = 0;
+
+        foreach ( $related as $item ) {
+            $group_meta = get_post_meta( $item->ID, 'appointment_pet_ids', true );
+            if ( ! is_array( $group_meta ) ) {
+                continue;
+            }
+            $candidate = array_map( 'intval', $group_meta );
+            sort( $candidate );
+            if ( implode( '-', $candidate ) !== $signature ) {
+                continue;
+            }
+            $ids[] = $item->ID;
+            $single_pet_id = (int) get_post_meta( $item->ID, 'appointment_pet_id', true );
+            if ( $single_pet_id ) {
+                $pet_post = get_post( $single_pet_id );
+                if ( $pet_post ) {
+                    $pet_names[] = $pet_post->post_title;
+                }
+            }
+            $total += (float) get_post_meta( $item->ID, 'appointment_total_value', true );
+        }
+
+        $ids = array_map( 'intval', $ids );
+        if ( count( $ids ) < 2 ) {
+            return null;
+        }
+
+        sort( $ids );
+
+        return [
+            'ids'       => $ids,
+            'pet_names' => array_values( array_unique( $pet_names ) ),
+            'total'     => $total,
+            'client_id' => $client_id,
+            'date'      => $date,
+            'time'      => $time,
+            'signature' => $signature,
+        ];
+    }
+
+    /**
+     * Retorna o rótulo amigável para um status de agendamento.
+     *
+     * @param string $status Status bruto.
+     *
+     * @return string
+     */
+    private static function get_status_label( $status ) {
+        switch ( $status ) {
+            case 'finalizado_pago':
+            case 'finalizado e pago':
+                return __( 'Finalizado e pago', 'dps-base' );
+            case 'cancelado':
+                return __( 'Cancelado', 'dps-base' );
+            case 'finalizado':
+                return __( 'Finalizado', 'dps-base' );
+            default:
+                return $status;
+        }
+    }
+
+    /**
+     * Monta os botões de cobrança via WhatsApp, incluindo opção agregada quando aplicável.
+     *
+     * @param int    $appt_id  ID do agendamento.
+     * @param string $context  Contexto de uso (base, agenda, historico).
+     * @param bool   $allow_group Incluir ou não cobrança agregada.
+     *
+     * @return string
+     */
+    private static function build_charge_html( $appt_id, $context = 'base', $allow_group = true ) {
+        $client_id  = (int) get_post_meta( $appt_id, 'appointment_client_id', true );
+        $status     = get_post_meta( $appt_id, 'appointment_status', true );
+        $appt_type  = get_post_meta( $appt_id, 'appointment_type', true );
+        if ( ! $client_id || 'finalizado' !== $status || 'subscription' === $appt_type ) {
+            return '-';
+        }
+
+        $client_post  = get_post( $client_id );
+        $client_phone = $client_post ? get_post_meta( $client_id, 'client_phone', true ) : '';
+        $total_value  = (float) get_post_meta( $appt_id, 'appointment_total_value', true );
+        if ( empty( $client_phone ) || $total_value <= 0 ) {
+            return '-';
+        }
+
+        $number = self::format_whatsapp_number( $client_phone );
+        if ( empty( $number ) ) {
+            return '-';
+        }
+
+        $pet_names = [];
+        $pet_id    = (int) get_post_meta( $appt_id, 'appointment_pet_id', true );
+        if ( $pet_id ) {
+            $pet_post = get_post( $pet_id );
+            if ( $pet_post ) {
+                $pet_names[] = $pet_post->post_title;
+            }
+        }
+
+        $client_name = $client_post ? $client_post->post_title : '';
+        $pets_label  = implode( ', ', $pet_names );
+        $valor_formatado = number_format_i18n( $total_value, 2 );
+        $payment_link = get_post_meta( $appt_id, 'dps_payment_link', true );
+        $default_link = 'https://link.mercadopago.com.br/desipetshower';
+        $link_to_use  = $payment_link ? $payment_link : $default_link;
+
+        $message = sprintf(
+            'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!',
+            $client_name,
+            $pets_label,
+            $valor_formatado,
+            $link_to_use
+        );
+        $message = apply_filters( 'dps_base_whatsapp_charge_message', $message, $appt_id, $context );
+        $base_link = 'https://wa.me/' . $number . '?text=' . rawurlencode( $message );
+        $html      = '<a href="' . esc_url( $base_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-base' ) . '</a>';
+
+        if ( $allow_group ) {
+            $group_data = self::get_multi_pet_charge_data( $appt_id );
+            if ( $group_data ) {
+                $anchor_id = min( $group_data['ids'] );
+                if ( (int) $appt_id === (int) $anchor_id ) {
+                    $group_names = implode( ', ', $group_data['pet_names'] );
+                    $valor_total = number_format_i18n( $group_data['total'], 2 );
+                    $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
+                    $time_fmt    = $group_data['time'];
+                    $group_message = sprintf(
+                        'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!',
+                        $client_name,
+                        $group_names,
+                        $date_fmt,
+                        $time_fmt,
+                        $valor_total,
+                        $link_to_use
+                    );
+                    $group_message = apply_filters( 'dps_base_whatsapp_group_charge_message', $group_message, $appt_id, $context, $group_data );
+                    $group_link = 'https://wa.me/' . $number . '?text=' . rawurlencode( $group_message );
+                    $html      .= '<br><a href="' . esc_url( $group_link ) . '" target="_blank" class="dps-whatsapp-group">' . esc_html__( 'Cobrança conjunta', 'dps-base' ) . '</a>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    /**
      * Obtém a URL base para redirecionamentos após ações do formulário.
      *
      * @return string
@@ -167,6 +366,7 @@ class DPS_Base_Frontend {
         echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'dps-base' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="pets">' . esc_html__( 'Pets', 'dps-base' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'dps-base' ) . '</a></li>';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'dps-base' ) . '</a></li>';
         // Não renderiza mais a aba de senhas
         // Permite que add-ons adicionem novas abas
         do_action( 'dps_base_nav_tabs', false );
@@ -175,6 +375,7 @@ class DPS_Base_Frontend {
         echo self::section_clients();
         echo self::section_pets();
         echo self::section_agendas( false );
+        echo self::section_history();
         // Omitimos a seção de senhas
         // Permite que add-ons adicionem novas seções
         do_action( 'dps_base_sections', false );
@@ -682,16 +883,44 @@ class DPS_Base_Frontend {
             if ( $multi_meta && is_array( $multi_meta ) ) {
                 $sel_pets = array_map( 'strval', $multi_meta );
             }
-            echo '<p><label>' . esc_html__( 'Pet(s)', 'dps-base' ) . '<br><select name="appointment_pet_ids[]" id="dps-appointment-pet" multiple required>';
+            echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker">';
+            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'dps-base' ) . '</strong></p>';
+            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. Use os filtros para facilitar a busca.', 'dps-base' ) . '</p>';
+            echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'dps-base' ) . '</p>';
+            echo '<div class="dps-pet-picker-actions">';
+            echo '<input type="search" id="dps-pet-filter" placeholder="' . esc_attr__( 'Filtrar por nome ou raça...', 'dps-base' ) . '"> ';
+            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'dps-base' ) . '</button> ';
+            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-base' ) . '</button>';
+            echo '</div>';
+            echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
             foreach ( $pets as $pet ) {
-                $owner_id  = get_post_meta( $pet->ID, 'owner_id', true );
-                $owner_attr = $owner_id ? ' data-owner="' . esc_attr( $owner_id ) . '"' : '';
+                $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
+                $owner_post = $owner_id ? get_post( $owner_id ) : null;
+                $owner_name = $owner_post ? $owner_post->post_title : '';
                 $size       = get_post_meta( $pet->ID, 'pet_size', true );
-                $size_attr  = $size ? ' data-size="' . esc_attr( $size ) . '"' : '';
-                $sel       = in_array( (string) $pet->ID, $sel_pets, true ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $pet->ID ) . '"' . $owner_attr . $size_attr . ' ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
+                $breed      = get_post_meta( $pet->ID, 'pet_breed', true );
+                $sel        = in_array( (string) $pet->ID, $sel_pets, true ) ? 'checked' : '';
+                $size_attr  = $size ? ' data-size="' . esc_attr( strtolower( $size ) ) . '"' : '';
+                $owner_attr = $owner_id ? ' data-owner="' . esc_attr( $owner_id ) . '"' : '';
+                $search_blob = strtolower( $pet->post_title . ' ' . $breed . ' ' . $owner_name );
+                echo '<label class="dps-pet-option"' . $owner_attr . $size_attr . ' data-search="' . esc_attr( $search_blob ) . '">';
+                echo '<input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="' . esc_attr( $pet->ID ) . '" ' . $sel . '>';
+                echo '<span class="dps-pet-name">' . esc_html( $pet->post_title ) . '</span>';
+                if ( $breed ) {
+                    echo '<span class="dps-pet-breed"> – ' . esc_html( $breed ) . '</span>';
+                }
+                if ( $owner_name ) {
+                    echo '<span class="dps-pet-owner"> (' . esc_html( $owner_name ) . ')</span>';
+                }
+                if ( $size ) {
+                    echo '<span class="dps-pet-size"> · ' . esc_html( ucfirst( $size ) ) . '</span>';
+                }
+                echo '</label>';
             }
-            echo '</select></label></p>';
+            echo '</div>';
+            echo '<p id="dps-pet-summary" class="description" style="display:none;"></p>';
+            echo '<p id="dps-no-pets-message" style="display:none;" class="description">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'dps-base' ) . '</p>';
+            echo '</div>';
             // Data
             $date_val = $meta['date'] ?? '';
             echo '<p><label>' . esc_html__( 'Data', 'dps-base' ) . '<br><input type="date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required></label></p>';
@@ -819,6 +1048,9 @@ EOT;
             'order'          => 'ASC',
         ];
         $appointments = get_posts( $args );
+        if ( $appointments ) {
+            usort( $appointments, [ self::class, 'compare_appointments_desc' ] );
+        }
         // Obtém a URL base para links de edição e exclusão antes de qualquer saída
         $base_url = get_permalink();
         // Classifica os agendamentos em pendentes de dias anteriores e próximos
@@ -928,31 +1160,7 @@ EOT;
                 echo '<td>' . esc_html( $pet_name ) . '</td>';
                 if ( ! $visitor_only ) {
                     // Coluna de cobrança
-                    $charge_html = '-';
-                    $appointment_status = get_post_meta( $appt->ID, 'appointment_status', true );
-                    $appt_type = get_post_meta( $appt->ID, 'appointment_type', true );
-                    // Ignora assinaturas
-                    if ( 'finalizado' === $appointment_status && 'subscription' !== $appt_type ) {
-                        $client_phone = $client_id ? get_post_meta( $client_id, 'client_phone', true ) : '';
-                        $total_value   = get_post_meta( $appt->ID, 'appointment_total_value', true );
-                        if ( ! empty( $client_phone ) && ! empty( $total_value ) ) {
-                            // Sanitiza número: remove qualquer caractere não numérico
-                            $num = preg_replace( '/[^0-9]/', '', $client_phone );
-                            // Se não começar com 55 e tiver 10 ou 11 dígitos, adiciona código do Brasil
-                            if ( strlen( $num ) >= 10 && substr( $num, 0, 2 ) !== '55' ) {
-                                $num = '55' . $num;
-                            }
-                            $client_name = $client ? $client->post_title : '';
-                            $pet_name    = $pet ? $pet->post_title : '';
-                            // Formata valor com duas casas decimais
-                            $valor_formatado = number_format( (float) $total_value, 2, ',', '.' );
-                            $msg = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Seguem opções de pagamento: PIX 15 99160‑6299 ou via link https://link.mercadopago.com.br/desipetshower. Agradecemos sua preferência!', $client_name, $pet_name, $valor_formatado );
-                            $encoded = rawurlencode( $msg );
-                            $charge_url = 'https://wa.me/' . $num . '?text=' . $encoded;
-                            $charge_html = '<a href="' . esc_url( $charge_url ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-base' ) . '</a>';
-                        }
-                    }
-                    echo '<td>' . $charge_html . '</td>';
+                    echo '<td>' . self::build_charge_html( $appt->ID, 'agendas' ) . '</td>';
                     // Coluna de ações
                     echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
                 }
@@ -963,92 +1171,195 @@ EOT;
             echo '<p>' . esc_html__( 'Nenhum agendamento encontrado.', 'dps-base' ) . '</p>';
         }
 
-        // ==== Seção de atendimentos já realizados (finalizados, pagos ou cancelados) ====
-        // Exibe uma lista com todos os agendamentos cujo status seja finalizado, finalizado e pago ou cancelado.
-        // Útil para consultas e administração de históricos.
-        $past_appts = [];
+        echo '</div>';
+        return ob_get_clean();
+    }
+
+    /**
+     * Seção dedicada ao histórico de atendimentos já realizados.
+     */
+    private static function section_history() {
+        if ( ! self::can_manage() ) {
+            return '';
+        }
+
+        $args = [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_status',
+                    'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ],
+                    'compare' => 'IN',
+                ],
+            ],
+        ];
+        $appointments = get_posts( $args );
         if ( $appointments ) {
-            foreach ( $appointments as $past ) {
-                $past_status = get_post_meta( $past->ID, 'appointment_status', true );
-                if ( in_array( $past_status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                    $past_appts[] = $past;
-                }
+            usort( $appointments, [ self::class, 'compare_appointments_desc' ] );
+        } else {
+            $appointments = [];
+        }
+
+        $clients = self::get_clients();
+        $client_options = [];
+        foreach ( $clients as $client ) {
+            $client_options[ $client->ID ] = $client->post_title;
+        }
+
+        $status_filters = [
+            'finalizado'      => __( 'Finalizado', 'dps-base' ),
+            'finalizado_pago' => __( 'Finalizado e pago', 'dps-base' ),
+            'cancelado'       => __( 'Cancelado', 'dps-base' ),
+        ];
+
+        $total_count = count( $appointments );
+        $total_amount = 0;
+        foreach ( $appointments as $appt ) {
+            $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+            if ( 'cancelado' !== $status_meta ) {
+                $total_amount += (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
             }
         }
-        if ( ! empty( $past_appts ) ) {
-            echo '<h4>' . esc_html__( 'Atendimentos Realizados', 'dps-base' ) . '</h4>';
-            echo '<table class="dps-table"><thead><tr>';
+
+        ob_start();
+        echo '<div class="dps-section" id="dps-section-historico">';
+        echo '<h3>' . esc_html__( 'Histórico de Atendimentos', 'dps-base' ) . '</h3>';
+        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'dps-base' ) . '</p>';
+
+        echo '<div class="dps-history-toolbar">';
+        echo '<div class="dps-history-filters">';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Buscar', 'dps-base' ) . '<br><input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'dps-base' ) . '"></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'dps-base' ) . '</option>';
+        foreach ( $client_options as $id => $name ) {
+            echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
+        }
+        echo '</select></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Status', 'dps-base' ) . '<br><select id="dps-history-status"><option value="">' . esc_html__( 'Todos', 'dps-base' ) . '</option>';
+        foreach ( $status_filters as $key => $label ) {
+            echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $label ) . '</option>';
+        }
+        echo '</select></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data inicial', 'dps-base' ) . '<br><input type="date" id="dps-history-start"></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data final', 'dps-base' ) . '<br><input type="date" id="dps-history-end"></label></div>';
+        echo '<div class="dps-history-filter"><label><input type="checkbox" id="dps-history-pending"> ' . esc_html__( 'Somente pendentes de pagamento', 'dps-base' ) . '</label></div>';
+        echo '</div>';
+        echo '<div class="dps-history-actions">';
+        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar filtros', 'dps-base' ) . '</button> ';
+        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'dps-base' ) . '</button>';
+        echo '</div>';
+        echo '</div>';
+
+        $summary_value = number_format_i18n( $total_amount, 2 );
+        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
+        if ( $total_count ) {
+            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'dps-base' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
+        } else {
+            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'dps-base' ) . '</strong>';
+        }
+        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'dps-base' ) . '</p>';
+        echo '</div>';
+
+        if ( $appointments ) {
+            echo '<table class="dps-table" id="dps-history-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Horário', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pets', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Serviços', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Valor', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'dps-base' ) . '</th>';
-            // Verifica permissão para exibir colunas adicionais (cobrança e ações)
-            $show_actions = is_user_logged_in() && current_user_can( 'manage_options' );
-            if ( $show_actions ) {
-                echo '<th>' . esc_html__( 'Cobrança', 'dps-base' ) . '</th>';
-                echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
-            }
+            echo '<th>' . esc_html__( 'Cobrança', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
             echo '</tr></thead><tbody>';
-            foreach ( $past_appts as $past ) {
-                $p_date   = get_post_meta( $past->ID, 'appointment_date', true );
-                $p_time   = get_post_meta( $past->ID, 'appointment_time', true );
-                $p_client_id = get_post_meta( $past->ID, 'appointment_client_id', true );
-                $p_pet_id    = get_post_meta( $past->ID, 'appointment_pet_id', true );
-                $p_client = $p_client_id ? get_post( $p_client_id ) : null;
-                $p_pet    = $p_pet_id ? get_post( $p_pet_id ) : null;
-                $p_status = get_post_meta( $past->ID, 'appointment_status', true );
-                // Monta informações
-                $p_pet_name = $p_pet ? $p_pet->post_title : '-';
-                $p_client_name = $p_client ? $p_client->post_title : '-';
-                // Altera rotulo de status para exibição
-                $status_label = $p_status;
-                if ( 'finalizado' === $p_status ) {
-                    $status_label = __( 'Finalizado', 'dps-base' );
-                } elseif ( 'finalizado_pago' === $p_status || 'finalizado e pago' === $p_status ) {
-                    $status_label = __( 'Finalizado e pago', 'dps-base' );
-                } elseif ( 'cancelado' === $p_status ) {
-                    $status_label = __( 'Cancelado', 'dps-base' );
+            $base_url = get_permalink();
+            foreach ( $appointments as $appt ) {
+                $date    = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time    = get_post_meta( $appt->ID, 'appointment_time', true );
+                $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $client_post = $client_id ? get_post( $client_id ) : null;
+                $client_name = $client_post ? $client_post->post_title : '-';
+                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+                $status_key  = strtolower( str_replace( ' ', '_', $status_meta ) );
+                if ( 'finalizado_e_pago' === $status_key ) {
+                    $status_key = 'finalizado_pago';
                 }
-                // Links de edição/exclusão
-                $p_edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $past->ID ], $base_url );
-                $p_delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $past->ID ], $base_url );
-                echo '<tr>';
-                $p_date_fmt = $p_date ? date_i18n( 'd-m-Y', strtotime( $p_date ) ) : '';
-                echo '<td>' . esc_html( $p_date_fmt ) . '</td>';
-                echo '<td>' . esc_html( $p_time ) . '</td>';
-                echo '<td>' . esc_html( $p_client_name ) . '</td>';
-                echo '<td>' . esc_html( $p_pet_name ) . '</td>';
-                echo '<td>' . esc_html( $status_label ) . '</td>';
-                if ( $show_actions ) {
-                    // Coluna de cobrança: somente se status for finalizado mas ainda não pago
-                    $p_charge_html = '-';
-                    if ( 'finalizado' === $p_status ) {
-                        $client_phone_p = $p_client_id ? get_post_meta( $p_client_id, 'client_phone', true ) : '';
-                        $total_value_p = get_post_meta( $past->ID, 'appointment_total_value', true );
-                        if ( ! empty( $client_phone_p ) && ! empty( $total_value_p ) ) {
-                            $num_p = preg_replace( '/[^0-9]/', '', $client_phone_p );
-                            if ( strlen( $num_p ) >= 10 && substr( $num_p, 0, 2 ) !== '55' ) {
-                                $num_p = '55' . $num_p;
-                            }
-                            // Formata valor
-                            $valor_formatado_p = number_format( (float) $total_value_p, 2, ',', '.' );
-                            $msg_p = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Seguem opções de pagamento: PIX 15 99160‑6299 ou via link https://link.mercadopago.com.br/desipetshower. Agradecemos sua preferência!', $p_client_name, $p_pet_name, $valor_formatado_p );
-                            $encoded_p = rawurlencode( $msg_p );
-                            $p_charge_url = 'https://wa.me/' . $num_p . '?text=' . $encoded_p;
-                            $p_charge_html = '<a href="' . esc_url( $p_charge_url ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-base' ) . '</a>';
+                $status_label = self::get_status_label( $status_meta );
+                $pet_display  = '-';
+                $group_data   = self::get_multi_pet_charge_data( $appt->ID );
+                if ( $group_data ) {
+                    $pet_display = implode( ', ', $group_data['pet_names'] );
+                } else {
+                    $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                    if ( $pet_id ) {
+                        $pet_post = get_post( $pet_id );
+                        if ( $pet_post ) {
+                            $pet_display = $pet_post->post_title;
                         }
                     }
-                    echo '<td>' . $p_charge_html . '</td>';
-                    // Ações
-                    echo '<td><a href="' . esc_url( $p_edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $p_delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
                 }
+                $services = get_post_meta( $appt->ID, 'appointment_services', true );
+                $services_text = '-';
+                if ( is_array( $services ) && ! empty( $services ) ) {
+                    $names = [];
+                    foreach ( $services as $srv_id ) {
+                        $srv_post = get_post( $srv_id );
+                        if ( $srv_post ) {
+                            $names[] = $srv_post->post_title;
+                        }
+                    }
+                    if ( $names ) {
+                        $services_text = implode( ', ', $names );
+                    }
+                }
+                $total_val = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+                $total_display = $total_val > 0 ? 'R$ ' . number_format_i18n( $total_val, 2 ) : '—';
+                $paid_flag = ( 'finalizado' === $status_key ) ? '0' : '1';
+                $date_attr = $date ? $date : '';
+                echo '<tr data-date="' . esc_attr( $date_attr ) . '" data-status="' . esc_attr( $status_key ) . '" data-client="' . esc_attr( $client_id ) . '" data-total="' . esc_attr( $total_val ) . '" data-paid="' . esc_attr( $paid_flag ) . '">';
+                $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
+                echo '<td>' . esc_html( $date_fmt ) . '</td>';
+                echo '<td>' . esc_html( $time ) . '</td>';
+                echo '<td>' . esc_html( $client_name ) . '</td>';
+                echo '<td>' . esc_html( $pet_display ) . '</td>';
+                echo '<td>' . esc_html( $services_text ) . '</td>';
+                echo '<td>' . esc_html( $total_display ) . '</td>';
+                echo '<td>' . esc_html( $status_label ) . '</td>';
+                echo '<td>' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
+                $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
+                $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
+                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
+        } else {
+            echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'dps-base' ) . '</p>';
         }
+
         echo '</div>';
         return ob_get_clean();
+    }
+
+    /**
+     * Compara agendamentos pela data e hora em ordem decrescente.
+     *
+     * @param WP_Post $a Primeiro agendamento.
+     * @param WP_Post $b Segundo agendamento.
+     *
+     * @return int
+     */
+    private static function compare_appointments_desc( $a, $b ) {
+        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+        if ( $dt_a === $dt_b ) {
+            return $b->ID <=> $a->ID;
+        }
+        return $dt_b <=> $dt_a;
     }
 
     /**

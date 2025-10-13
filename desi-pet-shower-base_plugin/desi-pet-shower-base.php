@@ -148,6 +148,15 @@ class DPS_Base_Plugin {
         wp_localize_script( 'dps-base-script', 'DPSBase', [
             'pets' => $pets_data,
         ] );
+        wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
+            'summarySingle'     => __( 'Pet selecionado: %s', 'dps-base' ),
+            'summaryMultiple'   => __( '%d pets selecionados: %s', 'dps-base' ),
+            'selectPetWarning'  => __( 'Selecione pelo menos um pet para o agendamento.', 'dps-base' ),
+            'historySummary'    => __( '%1$s atendimentos filtrados. Total estimado: R$ %2$s.', 'dps-base' ),
+            'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'dps-base' ),
+            'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'dps-base' ),
+            'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'dps-base' ),
+        ] );
     }
 
     /**
