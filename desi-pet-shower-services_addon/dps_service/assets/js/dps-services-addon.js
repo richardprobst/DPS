@@ -61,17 +61,15 @@ jQuery(document).ready(function ($) {
    * os valores, recalcula o total.
    */
   function applyPricesByPetSize() {
-    var $petSelect = $('#dps-appointment-pet');
-    if ($petSelect.length === 0) {
+    var $petChoices = $('.dps-pet-checkbox');
+    if ($petChoices.length === 0) {
       updateTotal();
       return;
     }
-    // Obtém o tamanho do primeiro pet selecionado
+    var $selectedPet = $petChoices.filter(':checked').first();
     var selectedSize = null;
-    var $selectedOptions = $petSelect.find('option:selected');
-    if ($selectedOptions.length > 0) {
-      var sizeAttr = $($selectedOptions[0]).data('size');
-      // Mapas para traduzir o valor armazenado no meta (pequeno, medio, grande) em chaves
+    if ($selectedPet.length) {
+      var sizeAttr = $selectedPet.closest('.dps-pet-option').data('size');
       if (typeof sizeAttr === 'string') {
         sizeAttr = sizeAttr.toLowerCase();
         if (sizeAttr === 'pequeno') {
@@ -140,7 +138,10 @@ jQuery(document).ready(function ($) {
     updateTotal();
   });
   // Aplica preços por porte quando o select de pets é modificado
-  $(document).on('change', '#dps-appointment-pet', function () {
+  $(document).on('change', '.dps-pet-checkbox', function () {
+    applyPricesByPetSize();
+  });
+  $(document).on('dps-pet-selection-updated', function () {
     applyPricesByPetSize();
   });
   // Impede valores negativos e formata campos

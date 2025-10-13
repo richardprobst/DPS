@@ -441,6 +441,21 @@ class DPS_Agenda_Addon {
                 if ( empty( $apts ) ) {
                     return;
                 }
+                usort(
+                    $apts,
+                    function( $a, $b ) {
+                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                        if ( $dt_a === $dt_b ) {
+                            return $b->ID <=> $a->ID;
+                        }
+                        return $dt_b <=> $dt_a;
+                    }
+                );
                 echo '<h5>' . esc_html( $heading ) . '</h5>';
                 // Adiciona coluna para cobrança via WhatsApp (somente se usuário logado ou administrador)
                 echo '<table class="dps-table"><thead><tr>';
@@ -450,6 +465,7 @@ class DPS_Agenda_Addon {
                 echo '<th>' . __( 'Serviço', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . __( 'Status', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . __( 'Mapa', 'dps-agenda-addon' ) . '</th>';
+                echo '<th>' . __( 'Confirmação', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . __( 'Cobrança', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
@@ -557,32 +573,89 @@ class DPS_Agenda_Addon {
                         echo '-';
                     }
                     echo '</td>';
+                    // Confirmação via WhatsApp
+                    echo '<td>';
+                    $confirmation_html = '-';
+                    if ( $status === 'pendente' && $client_post ) {
+                        $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
+                        $whatsapp  = self::format_whatsapp_number( $raw_phone );
+                        if ( $whatsapp ) {
+                            $client_name = $client_post->post_title;
+                            $pet_names   = [];
+                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
+                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
+                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
+                                    $pet_names = $group_data['pet_names'];
+                                }
+                            }
+                            if ( empty( $pet_names ) ) {
+                                $pet_names[] = $pet_name ? $pet_name : __( 'Pet', 'dps-agenda-addon' );
+                            }
+                            $services_ids = get_post_meta( $appt->ID, 'appointment_services', true );
+                            $services_txt = '';
+                            if ( is_array( $services_ids ) && ! empty( $services_ids ) ) {
+                                $service_names = [];
+                                foreach ( $services_ids as $srv_id ) {
+                                    $srv_post = get_post( $srv_id );
+                                    if ( $srv_post ) {
+                                        $service_names[] = $srv_post->post_title;
+                                    }
+                                }
+                                if ( $service_names ) {
+                                    $services_txt = ' (' . implode( ', ', $service_names ) . ')';
+                                }
+                            }
+                            $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
+                            $message = sprintf(
+                                'Olá %s, tudo bem? Poderia confirmar o atendimento do(s) pet(s) %s agendado para %s às %s%s? Caso precise reagendar é só responder esta mensagem. Obrigado!',
+                                $client_name,
+                                implode( ', ', $pet_names ),
+                                $date_fmt,
+                                $time,
+                                $services_txt
+                            );
+                            $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
+                            $confirmation_html = '<a href="' . esc_url( 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message ) ) . '" target="_blank">' . esc_html__( 'Confirmar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                        }
+                    }
+                    echo $confirmation_html;
+                    echo '</td>';
                     // Cobrança via WhatsApp
                     echo '<td>';
                     // Mostra link de cobrança apenas para atendimentos finalizados (não assinaturas)
                     $sub_meta = get_post_meta( $appt->ID, 'subscription_id', true );
                     if ( $status === 'finalizado' && empty( $sub_meta ) ) {
                         $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
-                        $total_val    = get_post_meta( $appt->ID, 'appointment_total_value', true );
-                        if ( $client_phone && $total_val ) {
-                            $digits = preg_replace( '/\D+/', '', $client_phone );
-                            if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
-                                $digits = '55' . $digits;
+                        $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+                        $digits       = self::format_whatsapp_number( $client_phone );
+                        if ( $digits && $total_val > 0 ) {
+                            $client_name = $client_post ? $client_post->post_title : '';
+                            $pet_names   = [];
+                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
+                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
+                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
+                                    $pet_names = $group_data['pet_names'];
+                                }
                             }
-                            $cn = $client_name;
-                            $pn = $pet_post ? $pet_post->post_title : '';
-                            $valor_fmt = number_format( (float) $total_val, 2, ',', '.' );
-                            // Recupera link de pagamento gerado via add-on de pagamentos, se existir
+                            if ( empty( $pet_names ) ) {
+                                $pet_names[] = $pet_post ? $pet_post->post_title : '';
+                            }
+                            $valor_fmt    = number_format_i18n( $total_val, 2 );
                             $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
-                            // Link de fallback definido pelo usuário caso o plugin de pagamento não esteja ativo
                             $default_link = 'https://link.mercadopago.com.br/desipetshower';
                             $link_to_use  = $payment_link ? $payment_link : $default_link;
-                            // Monta mensagem padrão de cobrança incluindo PIX e link de pagamento
-                            $msg = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $cn, $pn, $valor_fmt, $link_to_use );
-                            // Permite que outros plugins filtrem a mensagem de WhatsApp
-                            $msg = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
-                            $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
-                            echo '<a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
+                            $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
+                            $links        = [];
+                            $links[]      = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg ) ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
+                                $group_total = number_format_i18n( $group_data['total'], 2 );
+                                $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
+                                $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
+                                $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
+                                $links[]     = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg ) ) . '" target="_blank">' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                            }
+                            echo implode( '<br>', $links );
                         } else {
                             echo '-';
                         }
@@ -880,6 +953,14 @@ class DPS_Agenda_Addon {
                 wp_mail( $recipient, $subject, $message );
             }
         }
+    }
+
+    private static function format_whatsapp_number( $phone ) {
+        $digits = preg_replace( '/\D+/', '', (string) $phone );
+        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
+            $digits = '55' . $digits;
+        }
+        return $digits;
     }
 }
 
