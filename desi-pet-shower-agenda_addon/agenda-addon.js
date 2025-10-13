@@ -1,27 +1,66 @@
 (function($){
   $(document).ready(function(){
+    var reloadDelay = parseInt(DPS_AG_Addon.reloadDelay, 10) || 600;
+
+    // Garante que o status atual esteja salvo em data attributes
+    $('.dps-status-select').each(function(){
+      var select = $(this);
+      if ( ! select.data('current-status') ) {
+        select.data('current-status', select.val());
+      }
+    });
+
     // Evento de alteração de status
     $(document).on('change', '.dps-status-select', function(){
-      var select = $(this);
-      var apptId = select.data('appt-id');
-      var status = select.val();
-      // Envia solicitação AJAX
-      $.post(DPS_AG_Addon.ajax, {
+      var select   = $(this);
+      var apptId   = select.data('appt-id');
+      var status   = select.val();
+      var previous = select.data('current-status');
+      var feedback = select.siblings('.dps-status-feedback');
+
+      if ( ! feedback.length ) {
+        feedback = $('<span class="dps-status-feedback" aria-live="polite"></span>');
+        select.after(feedback);
+      }
+
+      var updatingMessage = getMessage('updating', 'Atualizando status...');
+      feedback.removeClass('dps-status-feedback--error').text(updatingMessage);
+
+      select.addClass('is-loading').prop('disabled', true);
+
+      var request = $.post(DPS_AG_Addon.ajax, {
         action: 'dps_update_status',
         id: apptId,
         status: status,
         nonce: DPS_AG_Addon.nonce_status
-      }, function(resp){
-        if ( resp && resp.success ) {
-          // Atualiza a classe CSS da linha correspondente para refletir o novo status
-          updateRowStatus(apptId, status);
-          console.log('Status atualizado para ' + status);
-          // Recarrega a página após atualização para refletir todas as mudanças (como alterações em valores ou ações)
-          location.reload();
-        } else {
-          alert(resp.data ? resp.data.message : 'Erro ao atualizar status.');
-        }
       });
+
+      request.done(function(resp){
+        if ( resp && resp.success ) {
+          updateRowStatus(apptId, status);
+          select.data('current-status', status);
+          var successMessage = getMessage('updated', 'Status atualizado!');
+          feedback.text(successMessage);
+          setTimeout(function(){
+            location.reload();
+          }, reloadDelay);
+        } else {
+          handleError(resp);
+        }
+      }).fail(function(){
+        handleError();
+      }).always(function(){
+        select.removeClass('is-loading').prop('disabled', false);
+      });
+
+      function handleError(response){
+        var fallback = 'Erro ao atualizar status.';
+        var message  = (response && response.data && response.data.message) ? response.data.message : getMessage('error', fallback);
+        feedback.addClass('dps-status-feedback--error').text(message);
+        if ( previous ) {
+          select.val(previous);
+        }
+      }
     });
     // Evento para visualizar serviços de um agendamento
     $(document).on('click', '.dps-services-link', function(e){
@@ -65,5 +104,12 @@
       row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
          .addClass('status-' + status);
     }
+  }
+
+  function getMessage(key, fallback){
+    if ( typeof DPS_AG_Addon !== 'undefined' && DPS_AG_Addon.messages && DPS_AG_Addon.messages[key] ) {
+      return DPS_AG_Addon.messages[key];
+    }
+    return fallback;
   }
 })(jQuery);
