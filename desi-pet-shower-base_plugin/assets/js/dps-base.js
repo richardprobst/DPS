@@ -62,6 +62,7 @@
       if (!$petWrapper.length) {
         return;
       }
+      var $petList      = $('#dps-appointment-pet-list');
       var $petOptions   = $petWrapper.find('.dps-pet-option');
       var $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
       var $filterInput  = $('#dps-pet-filter');
@@ -91,8 +92,8 @@
         var visible = 0;
         $petOptions.each(function(){
           var $option = $(this);
-          var optionOwner = $option.data('owner');
-          var matchesOwner = !ownerId || String(optionOwner) === String(ownerId);
+          var optionOwner = $option.attr('data-owner');
+          var matchesOwner = ownerId && String(optionOwner) === String(ownerId);
           if (!matchesOwner) {
             $option.find('.dps-pet-checkbox').prop('checked', false);
           }
@@ -104,6 +105,7 @@
             visible++;
           }
         });
+        $petList.toggle(!!ownerId);
         $noPetsMsg.toggle(visible === 0 && !!ownerId);
         $selectHint.toggle(!ownerId);
         $petWrapper.toggleClass('dps-pet-picker--disabled', !ownerId);

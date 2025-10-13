@@ -263,6 +263,75 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Redireciona para a aba desejada exibindo aviso de pendências, se existirem.
+     *
+     * @param int    $client_id ID do cliente relacionado ao agendamento.
+     * @param string $tab       Aba para a qual o usuário deve ser redirecionado.
+     */
+    private static function redirect_with_pending_notice( $client_id, $tab = 'agendas' ) {
+        $redirect = self::get_redirect_url( $tab );
+        $client_id = (int) $client_id;
+        if ( $client_id ) {
+            $pending = self::get_client_pending_transactions( $client_id );
+            if ( ! empty( $pending ) ) {
+                $notice_key  = 'dps_pending_notice_' . get_current_user_id();
+                $client_post = get_post( $client_id );
+                set_transient(
+                    $notice_key,
+                    [
+                        'client_name'  => $client_post ? $client_post->post_title : '',
+                        'transactions' => $pending,
+                    ],
+                    MINUTE_IN_SECONDS * 10
+                );
+                $redirect = add_query_arg( 'dps_notice', 'pending_payments', $redirect );
+            }
+        }
+        wp_safe_redirect( $redirect );
+        exit;
+    }
+
+    /**
+     * Recupera transações em aberto para um cliente.
+     *
+     * @param int $client_id ID do cliente.
+     *
+     * @return array Lista de transações em aberto.
+     */
+    private static function get_client_pending_transactions( $client_id ) {
+        global $wpdb;
+        $client_id = (int) $client_id;
+        if ( ! $client_id ) {
+            return [];
+        }
+        $table = $wpdb->prefix . 'dps_transacoes';
+        $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( $exists !== $table ) {
+            return [];
+        }
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT data, descricao, valor, status FROM {$table} WHERE cliente_id = %d AND status = %s",
+                $client_id,
+                'em_aberto'
+            )
+        );
+        if ( empty( $rows ) ) {
+            return [];
+        }
+        $mapped = [];
+        foreach ( $rows as $row ) {
+            $mapped[] = [
+                'data'      => $row->data,
+                'descricao' => $row->descricao,
+                'valor'     => isset( $row->valor ) ? (float) $row->valor : 0,
+                'status'    => $row->status,
+            ];
+        }
+        return $mapped;
+    }
+
+    /**
      * Processa submissões de formulários
      */
     public static function handle_request() {
@@ -283,6 +352,9 @@ class DPS_Base_Frontend {
                 break;
             case 'save_appointment':
                 self::save_appointment();
+                break;
+            case 'update_appointment_status':
+                self::update_appointment_status();
                 break;
             default:
                 break;
@@ -799,6 +871,26 @@ class DPS_Base_Frontend {
         ob_start();
         echo '<div class="dps-section" id="dps-section-agendas">';
         echo '<h3>' . esc_html__( 'Agendamento de Serviços', 'dps-base' ) . '</h3>';
+        if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] && ! $visitor_only ) {
+            $notice_key  = 'dps_pending_notice_' . get_current_user_id();
+            $notice_data = get_transient( $notice_key );
+            if ( $notice_data && ! empty( $notice_data['transactions'] ) ) {
+                echo '<div class="dps-alert dps-alert--danger">';
+                $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'dps-base' );
+                echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_label ) ) . '</strong>';
+                echo '<ul>';
+                foreach ( $notice_data['transactions'] as $row ) {
+                    $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd-m-Y', strtotime( $row['data'] ) ) : '';
+                    $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
+                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
+                    $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
+                    echo '<li>' . esc_html( $message ) . '</li>';
+                }
+                echo '</ul>';
+                echo '</div>';
+            }
+            delete_transient( $notice_key );
+        }
         // Alerta de pagamentos pendentes
         if ( ! $visitor_only ) {
             $sel_client = $meta['client_id'] ?? '';
@@ -807,22 +899,23 @@ class DPS_Base_Frontend {
                 $sel_client = intval( $_GET['pref_client'] );
             }
             if ( $sel_client ) {
-                global $wpdb;
-                $table_trans = $wpdb->prefix . 'dps_transacoes';
-                // Busca transações em aberto para este cliente (status diferente de 'pago')
-                $pendings = [];
-                if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_trans ) ) === $table_trans ) {
-                    $pendings = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_trans} WHERE cliente_id = %d AND status != %s", $sel_client, 'pago' ) );
-                }
-                if ( $pendings ) {
-                    echo '<div class="notice notice-error" style="border-left:4px solid #dc3232;padding:10px;margin:10px 0;background:#f8d7da;color:#721c24;">';
-                    echo '<strong>' . esc_html__( 'Atenção:', 'dps-base' ) . '</strong> ' . esc_html__( 'Este cliente possui pagamentos pendentes:', 'dps-base' );
-                    echo '<ul style="margin-top:5px;">';
-                    foreach ( $pendings as $p ) {
-                        $date_fmt = $p->data ? date_i18n( 'd-m-Y', strtotime( $p->data ) ) : '';
-                        $valor_fmt = number_format( (float) $p->valor, 2, ',', '.' );
-                        $desc = $p->descricao ?: '';
-                        echo '<li>' . esc_html( $date_fmt . ': R$ ' . $valor_fmt . ' – ' . $desc ) . '</li>';
+                $pending_rows = self::get_client_pending_transactions( $sel_client );
+                if ( $pending_rows ) {
+                    $client_post = get_post( $sel_client );
+                    $client_name = $client_post ? $client_post->post_title : '';
+                    echo '<div class="dps-alert dps-alert--danger">';
+                    if ( $client_name ) {
+                        echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_name ) ) . '</strong>';
+                    } else {
+                        echo '<strong>' . esc_html__( 'Este cliente possui pagamentos pendentes.', 'dps-base' ) . '</strong>';
+                    }
+                    echo '<ul>';
+                    foreach ( $pending_rows as $row ) {
+                        $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd-m-Y', strtotime( $row['data'] ) ) : '';
+                        $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
+                        $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
+                        $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
+                        echo '<li>' . esc_html( $message ) . '</li>';
                     }
                     echo '</ul>';
                     echo '</div>';
@@ -1036,7 +1129,7 @@ EOT;
             echo $dps_script;
             echo '</form>';
         }
-        // Listagem de agendamentos futuros (ordenados por data e hora)
+        // Listagem de agendamentos organizados por status
         echo '<h3>' . esc_html__( 'Próximos Agendamentos', 'dps-base' ) . '</h3>';
         echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-base' ) . '"></p>';
         $args = [
@@ -1047,127 +1140,142 @@ EOT;
             'meta_key'       => 'appointment_date',
             'order'          => 'ASC',
         ];
-        $appointments = get_posts( $args );
+        $appointments   = get_posts( $args );
+        $base_url       = get_permalink();
+        $status_labels  = [
+            'pendente'        => __( 'Pendente', 'dps-base' ),
+            'finalizado'      => __( 'Finalizado', 'dps-base' ),
+            'finalizado_pago' => __( 'Finalizado e pago', 'dps-base' ),
+            'cancelado'       => __( 'Cancelado', 'dps-base' ),
+        ];
+        $overdue        = [];
+        $finalized_today = [];
+        $upcoming       = [];
+        $now_ts         = current_time( 'timestamp' );
+        $today_date     = wp_date( 'Y-m-d', $now_ts );
+
         if ( $appointments ) {
-            usort( $appointments, [ self::class, 'compare_appointments_desc' ] );
-        }
-        // Obtém a URL base para links de edição e exclusão antes de qualquer saída
-        $base_url = get_permalink();
-        // Classifica os agendamentos em pendentes de dias anteriores e próximos
-        $overdue_ids = [];
-        $today_date  = current_time( 'Y-m-d' );
-        if ( $appointments ) {
-            foreach ( $appointments as $tmp_appt ) {
-                $tmp_status = get_post_meta( $tmp_appt->ID, 'appointment_status', true );
-                // Ignora finalizados, pagos e cancelados na listagem principal
-                if ( in_array( $tmp_status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+            foreach ( $appointments as $appt ) {
+                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+                if ( ! $status_meta ) {
+                    $status_meta = 'pendente';
+                }
+                if ( 'finalizado e pago' === $status_meta ) {
+                    $status_meta = 'finalizado_pago';
+                }
+                $date_value = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time_value = get_post_meta( $appt->ID, 'appointment_time', true );
+                $datetime   = trim( $date_value . ' ' . ( $time_value ? $time_value : '00:00' ) );
+                $appt_ts    = $date_value ? strtotime( $datetime ) : 0;
+
+                if ( in_array( $status_meta, [ 'finalizado_pago', 'cancelado' ], true ) ) {
                     continue;
                 }
-                $tmp_date = get_post_meta( $tmp_appt->ID, 'appointment_date', true );
-                if ( $tmp_date && $tmp_date < $today_date ) {
-                    $overdue_ids[] = $tmp_appt->ID;
+
+                if ( 'pendente' === $status_meta ) {
+                    if ( $appt_ts && $appt_ts < $now_ts ) {
+                        $overdue[] = $appt;
+                        continue;
+                    }
+                    if ( ! $appt_ts && $date_value && $date_value < $today_date ) {
+                        $overdue[] = $appt;
+                        continue;
+                    }
+                }
+
+                if ( 'finalizado' === $status_meta ) {
+                    if ( $date_value === $today_date ) {
+                        $finalized_today[] = $appt;
+                    }
+                    continue;
+                }
+
+                if ( $appt_ts && $appt_ts >= $now_ts ) {
+                    $upcoming[] = $appt;
+                    continue;
+                }
+
+                if ( 'pendente' === $status_meta && $date_value && $date_value >= $today_date ) {
+                    $upcoming[] = $appt;
                 }
             }
         }
-        // Renderiza tabela de pendentes anteriores se houver
-        if ( ! empty( $overdue_ids ) ) {
-            echo '<h4>' . esc_html__( 'Agendamentos Pendentes (dias anteriores)', 'dps-base' ) . '</h4>';
+
+        $render_table = function( $items, $title, $group_class ) use ( $visitor_only, $base_url, $status_labels ) {
+            if ( empty( $items ) ) {
+                return;
+            }
+            usort(
+                $items,
+                function( $a, $b ) {
+                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                    $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                    $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                    if ( $dt_a === $dt_b ) {
+                        return $a->ID <=> $b->ID;
+                    }
+                    return $dt_a <=> $dt_b;
+                }
+            );
+            echo '<div class="dps-appointments-group ' . esc_attr( $group_class ) . '">';
+            echo '<h4>' . esc_html( $title ) . '</h4>';
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Horário', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status', 'dps-base' ) . '</th>';
             if ( ! $visitor_only ) {
-                echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
-            }
-            echo '</tr></thead><tbody>';
-            foreach ( $appointments as $ov_appt ) {
-                if ( ! in_array( $ov_appt->ID, $overdue_ids, true ) ) {
-                    continue;
-                }
-                $date_o      = get_post_meta( $ov_appt->ID, 'appointment_date', true );
-                $time_o      = get_post_meta( $ov_appt->ID, 'appointment_time', true );
-                $client_id_o = get_post_meta( $ov_appt->ID, 'appointment_client_id', true );
-                $pet_id_o    = get_post_meta( $ov_appt->ID, 'appointment_pet_id', true );
-                $client_o    = $client_id_o ? get_post( $client_id_o ) : null;
-                $pet_o       = $pet_id_o ? get_post( $pet_id_o ) : null;
-                $edit_url_o   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $ov_appt->ID ], $base_url );
-                $delete_url_o = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $ov_appt->ID ], $base_url );
-                echo '<tr>';
-                $date_o_fmt = $date_o ? date_i18n( 'd-m-Y', strtotime( $date_o ) ) : '';
-                echo '<td>' . esc_html( $date_o_fmt ) . '</td>';
-                echo '<td>' . esc_html( $time_o ) . '</td>';
-                echo '<td>' . esc_html( $client_o ? $client_o->post_title : '-' ) . '</td>';
-                $sub_meta_o = get_post_meta( $ov_appt->ID, 'subscription_id', true );
-                $pet_name_o = $pet_o ? $pet_o->post_title : '-';
-                if ( $sub_meta_o ) {
-                    $pet_name_o .= ' ' . esc_html__( '(Assinatura)', 'dps-base' );
-                }
-                echo '<td>' . esc_html( $pet_name_o ) . '</td>';
-                if ( ! $visitor_only ) {
-                    echo '<td><a href="' . esc_url( $edit_url_o ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url_o ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
-                }
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-        }
-        if ( $appointments ) {
-            // Recalcula base_url localmente para uso no restante da listagem
-            $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Data', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-base' ) . '</th>';
-            if ( ! $visitor_only ) {
-                // Adiciona coluna de cobrança via WhatsApp para serviços finalizados
                 echo '<th>' . esc_html__( 'Cobrança', 'dps-base' ) . '</th>';
                 echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
             }
             echo '</tr></thead><tbody>';
-            foreach ( $appointments as $appt ) {
-                // Pula agendamentos finalizados, pagos ou cancelados. Estes serão listados em seção separada.
-                $status_for_skip = get_post_meta( $appt->ID, 'appointment_status', true );
-                if ( in_array( $status_for_skip, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                    continue;
+            foreach ( $items as $appt ) {
+                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+                if ( ! $status_meta ) {
+                    $status_meta = 'pendente';
                 }
-                // Pula agendamentos de datas anteriores (pendentes) que já foram listados na seção "Pendentes (dias anteriores)"
-                $date_check = get_post_meta( $appt->ID, 'appointment_date', true );
-                // Obtém data atual em formato Y-m-d para comparação
-                $today_check = current_time( 'Y-m-d' );
-                if ( $date_check && $date_check < $today_check ) {
-                    continue;
+                if ( 'finalizado e pago' === $status_meta ) {
+                    $status_meta = 'finalizado_pago';
                 }
-                $date = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time = get_post_meta( $appt->ID, 'appointment_time', true );
-                $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $client = $client_id ? get_post( $client_id ) : null;
-                $pet    = $pet_id ? get_post( $pet_id ) : null;
+                $date       = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time       = get_post_meta( $appt->ID, 'appointment_time', true );
+                $client_id  = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pet_id     = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                $client     = $client_id ? get_post( $client_id ) : null;
+                $pet        = $pet_id ? get_post( $pet_id ) : null;
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
-                echo '<tr>';
+                $row_class  = 'status-' . sanitize_html_class( $status_meta );
+                echo '<tr class="' . esc_attr( $row_class ) . '">';
                 $date_fmt = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
                 echo '<td>' . esc_html( $time ) . '</td>';
                 echo '<td>' . esc_html( $client ? $client->post_title : '-' ) . '</td>';
-                // Indica se o agendamento é de uma assinatura
-                $sub_id_meta = get_post_meta( $appt->ID, 'subscription_id', true );
                 $pet_name = $pet ? $pet->post_title : '-';
-                if ( $sub_id_meta ) {
+                if ( get_post_meta( $appt->ID, 'subscription_id', true ) ) {
                     $pet_name .= ' ' . esc_html__( '(Assinatura)', 'dps-base' );
                 }
                 echo '<td>' . esc_html( $pet_name ) . '</td>';
+                echo '<td>' . self::render_status_selector( $appt->ID, $status_meta, $status_labels, $visitor_only ) . '</td>';
                 if ( ! $visitor_only ) {
-                    // Coluna de cobrança
                     echo '<td>' . self::build_charge_html( $appt->ID, 'agendas' ) . '</td>';
-                    // Coluna de ações
                     echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
                 }
                 echo '</tr>';
             }
             echo '</tbody></table>';
-        } else {
+            echo '</div>';
+        };
+
+        $render_table( $overdue, __( 'Agendamentos pendentes (dias anteriores)', 'dps-base' ), 'dps-appointments-group--overdue' );
+        $render_table( $finalized_today, __( 'Atendimentos finalizados hoje', 'dps-base' ), 'dps-appointments-group--finalized' );
+        $render_table( $upcoming, __( 'Próximos atendimentos', 'dps-base' ), 'dps-appointments-group--upcoming' );
+
+        if ( empty( $overdue ) && empty( $finalized_today ) && empty( $upcoming ) ) {
             echo '<p>' . esc_html__( 'Nenhum agendamento encontrado.', 'dps-base' ) . '</p>';
         }
 
@@ -1363,6 +1471,40 @@ EOT;
     }
 
     /**
+     * Renderiza o seletor de status em linha para os agendamentos.
+     *
+     * @param int   $appt_id        ID do agendamento.
+     * @param string $current_status Status atual salvo na meta.
+     * @param array  $status_labels  Rótulos disponíveis para exibição.
+     * @param bool   $visitor_only   Indica se o usuário atual não pode gerenciar registros.
+     *
+     * @return string HTML do seletor ou do texto de status.
+     */
+    private static function render_status_selector( $appt_id, $current_status, $status_labels, $visitor_only ) {
+        $status = $current_status ? $current_status : 'pendente';
+        if ( 'finalizado e pago' === $status ) {
+            $status = 'finalizado_pago';
+        }
+        if ( $visitor_only ) {
+            $label = $status_labels[ $status ] ?? ucwords( str_replace( '_', ' ', $status ) );
+            return esc_html( $label );
+        }
+        $nonce_field = wp_nonce_field( 'dps_action', 'dps_nonce', true, false );
+        $html  = '<form method="post" class="dps-inline-status-form">';
+        $html .= '<input type="hidden" name="dps_action" value="update_appointment_status">';
+        $html .= $nonce_field;
+        $html .= '<input type="hidden" name="appointment_id" value="' . esc_attr( $appt_id ) . '">';
+        $html .= '<select name="appointment_status">';
+        foreach ( $status_labels as $key => $label ) {
+            $html .= '<option value="' . esc_attr( $key ) . '"' . selected( $status, $key, false ) . '>' . esc_html( $label ) . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '<button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'dps-base' ) . '</button>';
+        $html .= '</form>';
+        return $html;
+    }
+
+    /**
      * Seção de senhas: permite que o administrador altere as senhas de acesso do
      * plugin base e dos add‑ons (como agenda). As senhas são armazenadas em
      * opções do WordPress. Esta seção é exibida apenas para usuários
@@ -1535,6 +1677,28 @@ EOT;
     /**
      * Salva agendamento (inserção ou atualização)
      */
+    private static function update_appointment_status() {
+        if ( ! self::can_manage() ) {
+            return;
+        }
+        $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
+        $status  = isset( $_POST['appointment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_status'] ) ) : '';
+        $valid   = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
+        if ( ! $appt_id || ! in_array( $status, $valid, true ) ) {
+            return;
+        }
+        update_post_meta( $appt_id, 'appointment_status', $status );
+        $appt_type = get_post_meta( $appt_id, 'appointment_type', true );
+        if ( ! $appt_type ) {
+            $appt_type = 'simple';
+        }
+        if ( in_array( $status, [ 'finalizado', 'finalizado_pago' ], true ) ) {
+            do_action( 'dps_base_after_save_appointment', $appt_id, $appt_type );
+        }
+        $client_id = (int) get_post_meta( $appt_id, 'appointment_client_id', true );
+        self::redirect_with_pending_notice( $client_id );
+    }
+
     private static function save_appointment() {
         $client_id = isset( $_POST['appointment_client_id'] ) ? intval( wp_unslash( $_POST['appointment_client_id'] ) ) : 0;
         // Recebe lista de pets (multi‑seleção). Pode ser array ou valor único.
@@ -1740,8 +1904,7 @@ EOT;
                 }
             }
             // Redireciona após salvar assinatura
-            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
-            exit;
+            self::redirect_with_pending_notice( $client_id );
         }
         // Para agendamentos simples de múltiplos pets (novo), cria um agendamento para cada pet
         if ( ! $appt_id && 'simple' === $appt_type && count( $pet_ids ) > 1 ) {
@@ -1777,8 +1940,7 @@ EOT;
                 }
             }
             // Após criar todos os agendamentos, redireciona
-            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
-            exit;
+            self::redirect_with_pending_notice( $client_id );
         }
 
         // Para agendamentos simples ou edição de qualquer tipo (único pet) continua com a lógica padrão
@@ -1901,8 +2063,7 @@ EOT;
             }
         }
         // Redireciona para aba agendas
-        wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
-        exit;
+        self::redirect_with_pending_notice( $client_id );
     }
 
     /**
