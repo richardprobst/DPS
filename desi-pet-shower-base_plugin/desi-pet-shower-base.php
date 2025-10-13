@@ -156,6 +156,10 @@ class DPS_Base_Plugin {
             'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'dps-base' ),
             'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'dps-base' ),
             'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'dps-base' ),
+            'pendingTitle'          => __( 'Pagamentos em aberto para %s.', 'dps-base' ),
+            'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'dps-base' ),
+            'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'dps-base' ),
+            'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'dps-base' ),
         ] );
     }
 
