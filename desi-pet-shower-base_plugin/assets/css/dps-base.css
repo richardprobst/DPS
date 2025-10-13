@@ -177,3 +177,75 @@
 .dps-pet-option .dps-pet-size::before {
     content: '';
 }
+.dps-appointments-group {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 6px solid #0d6efd;
+    background: #f4f9ff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+.dps-appointments-group h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+.dps-appointments-group--overdue {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+.dps-appointments-group--finalized {
+    border-left-color: #198754;
+    background: #f3fdf7;
+}
+.dps-appointments-group--upcoming {
+    border-left-color: #0d6efd;
+    background: #f4f9ff;
+}
+.dps-table tr.status-pendente {
+    background: #fff9e6;
+}
+.dps-table tr.status-finalizado {
+    background: #e8f7fb;
+}
+.dps-table tr.status-finalizado_pago,
+.dps-table tr.status-finalizado\ e\ pago {
+    background: #e6f4ea;
+}
+.dps-table tr.status-cancelado {
+    background: #fdecea;
+}
+.dps-inline-status-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.dps-inline-status-form select {
+    min-width: 140px;
+}
+.dps-inline-status-form .button {
+    padding: 2px 8px;
+    line-height: 1.4;
+}
+.dps-alert {
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 6px solid #ffc107;
+    background: #fff8e1;
+    color: #4b3d0a;
+}
+.dps-alert--danger {
+    border-left-color: #dc3545;
+    background: #fdecea;
+    color: #58151c;
+}
+.dps-alert--info {
+    border-left-color: #0d6efd;
+    background: #eef5ff;
+    color: #0a1f44;
+}
+.dps-alert strong {
+    display: inline-block;
+    margin-bottom: 6px;
+}
