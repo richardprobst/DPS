@@ -96,8 +96,9 @@
           hasPending = $selected.attr('data-has-pending');
         }
         if (!hasPending || String(hasPending) === '0') {
-          $pendingAlert.hide().empty();
+          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
           $petWrapper.removeClass('dps-pet-picker--warning');
+          $clientSelect.removeClass('dps-client-select--warning');
           return;
         }
         var pendingInfo = $selected.data('pendingInfo');
@@ -109,8 +110,9 @@
           }
         }
         if (!Array.isArray(pendingInfo) || !pendingInfo.length) {
-          $pendingAlert.hide().empty();
+          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
           $petWrapper.removeClass('dps-pet-picker--warning');
+          $clientSelect.removeClass('dps-client-select--warning');
           return;
         }
         var clientName = $.trim($selected.text());
@@ -129,8 +131,9 @@
           }
           $('<li/>').text(line).appendTo($list);
         });
-        $pendingAlert.show();
+        $pendingAlert.attr('aria-hidden', 'false').show();
         $petWrapper.addClass('dps-pet-picker--warning');
+        $clientSelect.addClass('dps-client-select--warning');
       }
 
       function applyPetFilters(){

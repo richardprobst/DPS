@@ -247,15 +247,28 @@ class DPS_Base_Frontend {
         if ( isset( $_POST['dps_redirect_url'] ) ) {
             $raw_redirect = wp_unslash( $_POST['dps_redirect_url'] );
             if ( is_string( $raw_redirect ) ) {
-                $validated = wp_validate_redirect( $raw_redirect, false );
-                if ( $validated ) {
-                    return esc_url_raw( $validated );
+                $raw_redirect = trim( $raw_redirect );
+                if ( '' !== $raw_redirect ) {
+                    $validated = wp_validate_redirect( $raw_redirect, false );
+                    if ( $validated ) {
+                        return esc_url_raw( $validated );
+                    }
+                    if ( 0 === strpos( $raw_redirect, '/' ) || 0 === strpos( $raw_redirect, '?' ) ) {
+                        $candidate = home_url( $raw_redirect );
+                        $candidate_validated = wp_validate_redirect( $candidate, false );
+                        if ( $candidate_validated ) {
+                            return esc_url_raw( $candidate_validated );
+                        }
+                    }
                 }
             }
         }
         $referer = wp_get_referer();
         if ( $referer ) {
-            return esc_url_raw( $referer );
+            $referer_validated = wp_validate_redirect( $referer, false );
+            if ( $referer_validated ) {
+                return esc_url_raw( $referer_validated );
+            }
         }
 
         $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
@@ -926,7 +939,7 @@ class DPS_Base_Frontend {
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
             wp_nonce_field( 'dps_action', 'dps_nonce' );
-            echo '<input type="hidden" name="dps_redirect_url" value="' . esc_url( self::get_current_page_url() ) . '">';
+            echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
             }
@@ -954,7 +967,7 @@ class DPS_Base_Frontend {
                 $meta['client_id'] = $pref_client;
             }
             $sel_client = $meta['client_id'] ?? '';
-            echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" required>';
+            echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
             echo '<option value="">' . esc_html__( 'Selecione...', 'dps-base' ) . '</option>';
             $pending_cache = [];
             foreach ( $clients as $client ) {
@@ -1009,8 +1022,13 @@ class DPS_Base_Frontend {
                 }
                 $initial_alert_html .= '</ul>';
             }
-            $alert_style = $initial_alert_html ? '' : ' style="display:none;"';
-            echo '<div id="dps-client-pending-alert" class="dps-alert dps-alert--danger"' . $alert_style . '>' . $initial_alert_html . '</div>';
+            $alert_attrs = ' id="dps-client-pending-alert" class="dps-alert dps-alert--danger dps-alert--pending" role="status" aria-live="polite"';
+            if ( $initial_alert_html ) {
+                $alert_attrs .= ' aria-hidden="false"';
+            } else {
+                $alert_attrs .= ' aria-hidden="true" style="display:none;"';
+            }
+            echo '<div' . $alert_attrs . '>' . $initial_alert_html . '</div>';
             // Pets (permite múltiplos)
             // Se não editando, utiliza pref_pet como pré‑seleção única
             if ( ! $edit_id && $pref_pet ) {
@@ -1545,7 +1563,7 @@ EOT;
         $html .= '<input type="hidden" name="dps_action" value="update_appointment_status">';
         $html .= $nonce_field;
         $html .= '<input type="hidden" name="appointment_id" value="' . esc_attr( $appt_id ) . '">';
-        $html .= '<input type="hidden" name="dps_redirect_url" value="' . esc_url( self::get_current_page_url() ) . '">';
+        $html .= '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
         $html .= '<select name="appointment_status">';
         foreach ( $status_labels as $key => $label ) {
             $html .= '<option value="' . esc_attr( $key ) . '"' . selected( $status, $key, false ) . '>' . esc_html( $label ) . '</option>';
