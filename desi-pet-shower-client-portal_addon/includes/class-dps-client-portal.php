@@ -57,6 +57,14 @@ final class DPS_Client_Portal {
         // Processa ações de atualização do portal e login/logout
         add_action( 'init', [ $this, 'handle_portal_actions' ] );
 
+        // Registra tipos de dados e recursos do portal
+        add_action( 'init', [ $this, 'register_message_post_type' ] );
+        add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
+
+        // Metaboxes e salvamento das mensagens no admin
+        add_action( 'add_meta_boxes_dps_portal_message', [ $this, 'add_message_meta_boxes' ] );
+        add_action( 'save_post_dps_portal_message', [ $this, 'save_message_meta' ], 10, 3 );
+
         // --- MUDANÇAS AQUI ---
         // Remove o menu do admin e adiciona abas no front-end
         // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
@@ -137,51 +145,65 @@ final class DPS_Client_Portal {
         if ( ! $client_id ) {
             return;
         }
-        // Processa atualizações de dados do cliente
+
+        $referer      = wp_get_referer();
+        $redirect_url = $referer ? remove_query_arg( 'portal_msg', $referer ) : remove_query_arg( 'portal_msg' );
+
+        // Processa geração de link de pagamento para pendência
+        if ( 'pay_transaction' === $action && isset( $_POST['trans_id'] ) ) {
+            $trans_id = intval( $_POST['trans_id'] );
+            $redirect = add_query_arg( 'portal_msg', 'error', $redirect_url );
+            $link     = $this->generate_payment_link_for_transaction( $trans_id );
+            if ( $link ) {
+                // Redireciona para o link de pagamento
+                wp_redirect( $link );
+                exit;
+            }
+            wp_redirect( $redirect );
+            exit;
+        }
+
         if ( 'update_client_info' === $action ) {
-            // Telefone
             $phone = sanitize_text_field( $_POST['client_phone'] ?? '' );
             update_post_meta( $client_id, 'client_phone', $phone );
-            // Endereço completo
+
             $address = sanitize_textarea_field( $_POST['client_address'] ?? '' );
             update_post_meta( $client_id, 'client_address', $address );
-            // Instagram
+
             $insta = sanitize_text_field( $_POST['client_instagram'] ?? '' );
             update_post_meta( $client_id, 'client_instagram', $insta );
-            // Facebook
+
             $fb = sanitize_text_field( $_POST['client_facebook'] ?? '' );
             update_post_meta( $client_id, 'client_facebook', $fb );
-            // Email (só atualiza se diferente e válido)
+
             $email = sanitize_email( $_POST['client_email'] ?? '' );
             if ( $email && is_email( $email ) ) {
-                // Atualiza o email no meta do cliente; não há usuário WordPress associado
                 update_post_meta( $client_id, 'client_email', $email );
             }
-        }
-        // Processa atualizações de pet (um por vez)
-        if ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
+
+            $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
+        } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
             $pet_id = intval( $_POST['pet_id'] );
-            // Verifica se o pet pertence ao cliente
             $owner_id = intval( get_post_meta( $pet_id, 'owner_id', true ) );
+
             if ( $owner_id === $client_id ) {
-                // Atualiza dados básicos do pet
-                $pet_name   = sanitize_text_field( $_POST['pet_name'] ?? '' );
-                $species    = sanitize_text_field( $_POST['pet_species'] ?? '' );
-                $breed      = sanitize_text_field( $_POST['pet_breed'] ?? '' );
-                $size       = sanitize_text_field( $_POST['pet_size'] ?? '' );
-                $weight     = sanitize_text_field( $_POST['pet_weight'] ?? '' );
-                $coat       = sanitize_text_field( $_POST['pet_coat'] ?? '' );
-                $color      = sanitize_text_field( $_POST['pet_color'] ?? '' );
-                $birth      = sanitize_text_field( $_POST['pet_birth'] ?? '' );
-                $sex        = sanitize_text_field( $_POST['pet_sex'] ?? '' );
-                $vacc       = sanitize_textarea_field( $_POST['pet_vaccinations'] ?? '' );
-                $allergies  = sanitize_textarea_field( $_POST['pet_allergies'] ?? '' );
-                $behavior   = sanitize_textarea_field( $_POST['pet_behavior'] ?? '' );
-                // Atualiza título do post (nome do pet)
+                $pet_name  = sanitize_text_field( $_POST['pet_name'] ?? '' );
+                $species   = sanitize_text_field( $_POST['pet_species'] ?? '' );
+                $breed     = sanitize_text_field( $_POST['pet_breed'] ?? '' );
+                $size      = sanitize_text_field( $_POST['pet_size'] ?? '' );
+                $weight    = sanitize_text_field( $_POST['pet_weight'] ?? '' );
+                $coat      = sanitize_text_field( $_POST['pet_coat'] ?? '' );
+                $color     = sanitize_text_field( $_POST['pet_color'] ?? '' );
+                $birth     = sanitize_text_field( $_POST['pet_birth'] ?? '' );
+                $sex       = sanitize_text_field( $_POST['pet_sex'] ?? '' );
+                $vacc      = sanitize_textarea_field( $_POST['pet_vaccinations'] ?? '' );
+                $allergies = sanitize_textarea_field( $_POST['pet_allergies'] ?? '' );
+                $behavior  = sanitize_textarea_field( $_POST['pet_behavior'] ?? '' );
+
                 if ( $pet_name ) {
                     wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
                 }
-                // Atualiza metas
+
                 update_post_meta( $pet_id, 'pet_species', $species );
                 update_post_meta( $pet_id, 'pet_breed', $breed );
                 update_post_meta( $pet_id, 'pet_size', $size );
@@ -193,15 +215,14 @@ final class DPS_Client_Portal {
                 update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
                 update_post_meta( $pet_id, 'pet_allergies', $allergies );
                 update_post_meta( $pet_id, 'pet_behavior', $behavior );
-                // Lida com upload de foto
+
                 if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                     $file = $_FILES['pet_photo'];
                     require_once ABSPATH . 'wp-admin/includes/file.php';
                     require_once ABSPATH . 'wp-admin/includes/image.php';
-                    // Verifica e faz upload
+
                     $upload = wp_handle_upload( $file, [ 'test_form' => false ] );
                     if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                        // Insere como anexo
                         $file_path  = $upload['file'];
                         $file_name  = basename( $file_path );
                         $file_type  = wp_check_filetype( $file_name, null );
@@ -211,31 +232,231 @@ final class DPS_Client_Portal {
                             'post_status'    => 'inherit',
                         ];
                         $attach_id = wp_insert_attachment( $attachment, $file_path );
-                        // Gera metadados de imagem
                         $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
                         wp_update_attachment_metadata( $attach_id, $attach_data );
                         update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
                     }
                 }
             }
-        }
-        // Processa geração de link de pagamento para pendência
-        if ( 'pay_transaction' === $action && isset( $_POST['trans_id'] ) ) {
-            $trans_id = intval( $_POST['trans_id'] );
-            $redirect = add_query_arg( 'portal_msg', 'error', home_url() );
-            $link     = $this->generate_payment_link_for_transaction( $trans_id );
-            if ( $link ) {
-                // Redireciona para o link de pagamento
-                wp_redirect( $link );
-                exit;
+
+            $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
+        } elseif ( 'send_message' === $action ) {
+            $subject = isset( $_POST['message_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['message_subject'] ) ) : '';
+            $content = isset( $_POST['message_body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message_body'] ) ) : '';
+
+            if ( $content ) {
+                $client_name = get_the_title( $client_id );
+                $title       = $subject ? $subject : sprintf( __( 'Mensagem do cliente %s', 'dps-client-portal' ), $client_name );
+
+                $message_id = wp_insert_post( [
+                    'post_type'    => 'dps_portal_message',
+                    'post_status'  => 'publish',
+                    'post_title'   => wp_strip_all_tags( $title ),
+                    'post_content' => $content,
+                ] );
+
+                if ( ! is_wp_error( $message_id ) ) {
+                    update_post_meta( $message_id, 'message_client_id', $client_id );
+                    update_post_meta( $message_id, 'message_sender', 'client' );
+                    update_post_meta( $message_id, 'message_status', 'open' );
+
+                    $admin_email = get_option( 'admin_email' );
+                    if ( $admin_email ) {
+                        $phone   = get_post_meta( $client_id, 'client_phone', true );
+                        $email   = get_post_meta( $client_id, 'client_email', true );
+                        $subject_line = sprintf( __( 'Nova mensagem do cliente %s', 'dps-client-portal' ), $client_name );
+                        $body_lines   = [
+                            sprintf( __( 'Cliente: %s (ID #%d)', 'dps-client-portal' ), $client_name, $client_id ),
+                            $phone ? sprintf( __( 'Telefone: %s', 'dps-client-portal' ), $phone ) : '',
+                            $email ? sprintf( __( 'Email: %s', 'dps-client-portal' ), $email ) : '',
+                            $subject ? sprintf( __( 'Assunto: %s', 'dps-client-portal' ), $subject ) : '',
+                            '',
+                            __( 'Mensagem:', 'dps-client-portal' ),
+                            $content,
+                        ];
+                        $body_lines = array_filter( $body_lines, 'strlen' );
+                        wp_mail( $admin_email, $subject_line, implode( "\n", $body_lines ) );
+                    }
+
+                    $redirect_url = add_query_arg( 'portal_msg', 'message_sent', $redirect_url );
+                } else {
+                    $redirect_url = add_query_arg( 'portal_msg', 'message_error', $redirect_url );
+                }
+            } else {
+                $redirect_url = add_query_arg( 'portal_msg', 'message_error', $redirect_url );
             }
-            wp_redirect( $redirect );
-            exit;
         }
-        // Após processar, redireciona para o portal para evitar repost
-        $url = remove_query_arg( [ 'portal_msg' ] );
-        wp_redirect( $url );
+
+        wp_redirect( $redirect_url );
         exit;
+    }
+
+    /**
+     * Registra estilos do portal no frontend.
+     */
+    public function register_assets() {
+        if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
+            return;
+        }
+
+        $style_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/css/client-portal.css';
+        $style_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/css/client-portal.css';
+        $version    = file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0';
+
+        wp_register_style( 'dps-client-portal', $style_url, [], $version );
+    }
+
+    /**
+     * Registra o tipo de post utilizado para armazenar mensagens do portal.
+     */
+    public function register_message_post_type() {
+        $labels = [
+            'name'               => __( 'Mensagens do Portal', 'dps-client-portal' ),
+            'singular_name'      => __( 'Mensagem do Portal', 'dps-client-portal' ),
+            'add_new'            => __( 'Adicionar nova', 'dps-client-portal' ),
+            'add_new_item'       => __( 'Adicionar nova mensagem', 'dps-client-portal' ),
+            'edit_item'          => __( 'Editar mensagem', 'dps-client-portal' ),
+            'new_item'           => __( 'Nova mensagem', 'dps-client-portal' ),
+            'view_item'          => __( 'Ver mensagem', 'dps-client-portal' ),
+            'search_items'       => __( 'Buscar mensagens', 'dps-client-portal' ),
+            'not_found'          => __( 'Nenhuma mensagem encontrada', 'dps-client-portal' ),
+            'not_found_in_trash' => __( 'Nenhuma mensagem na lixeira', 'dps-client-portal' ),
+            'all_items'          => __( 'Mensagens do Portal', 'dps-client-portal' ),
+            'menu_name'          => __( 'Mensagens Portal', 'dps-client-portal' ),
+        ];
+
+        $args = [
+            'labels'             => $labels,
+            'public'             => false,
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'menu_position'      => 26,
+            'menu_icon'          => 'dashicons-email-alt2',
+            'supports'           => [ 'title', 'editor' ],
+            'has_archive'        => false,
+            'rewrite'            => false,
+            'capability_type'    => 'post',
+            'map_meta_cap'       => true,
+            'show_in_rest'       => false,
+        ];
+
+        register_post_type( 'dps_portal_message', $args );
+    }
+
+    /**
+     * Adiciona metabox com os detalhes da mensagem no admin.
+     */
+    public function add_message_meta_boxes() {
+        add_meta_box(
+            'dps_portal_message_details',
+            __( 'Detalhes da Mensagem', 'dps-client-portal' ),
+            [ $this, 'render_message_meta_box' ],
+            'dps_portal_message',
+            'normal',
+            'high'
+        );
+    }
+
+    /**
+     * Renderiza campos extras da mensagem no painel administrativo.
+     *
+     * @param WP_Post $post Post atual.
+     */
+    public function render_message_meta_box( $post ) {
+        wp_nonce_field( 'dps_portal_message_meta', 'dps_portal_message_meta_nonce' );
+
+        $client_id = (int) get_post_meta( $post->ID, 'message_client_id', true );
+        $sender    = get_post_meta( $post->ID, 'message_sender', true );
+        $status    = get_post_meta( $post->ID, 'message_status', true );
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+
+        echo '<p><label for="dps_portal_message_client">' . esc_html__( 'Cliente vinculado', 'dps-client-portal' ) . '</label><br />';
+        echo '<select name="dps_portal_message_client" id="dps_portal_message_client" style="max-width:100%;">';
+        echo '<option value="">' . esc_html__( 'Selecione um cliente', 'dps-client-portal' ) . '</option>';
+        if ( $clients ) {
+            foreach ( $clients as $client ) {
+                $selected = selected( $client_id, $client->ID, false );
+                echo '<option value="' . esc_attr( $client->ID ) . '" ' . $selected . '>' . esc_html( $client->post_title ) . '</option>';
+            }
+        }
+        echo '</select></p>';
+
+        $sender_options = [
+            'admin'  => __( 'Equipe / Administração', 'dps-client-portal' ),
+            'client' => __( 'Cliente', 'dps-client-portal' ),
+        ];
+        echo '<p><label for="dps_portal_message_sender">' . esc_html__( 'Origem da mensagem', 'dps-client-portal' ) . '</label><br />';
+        echo '<select name="dps_portal_message_sender" id="dps_portal_message_sender">';
+        foreach ( $sender_options as $value => $label ) {
+            $selected = selected( $sender ? $sender : 'admin', $value, false );
+            echo '<option value="' . esc_attr( $value ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select></p>';
+
+        $status_options = [
+            'open'     => __( 'Em aberto', 'dps-client-portal' ),
+            'answered' => __( 'Respondida', 'dps-client-portal' ),
+            'closed'   => __( 'Concluída', 'dps-client-portal' ),
+        ];
+        echo '<p><label for="dps_portal_message_status">' . esc_html__( 'Status da conversa', 'dps-client-portal' ) . '</label><br />';
+        echo '<select name="dps_portal_message_status" id="dps_portal_message_status">';
+        foreach ( $status_options as $value => $label ) {
+            $selected = selected( $status ? $status : 'open', $value, false );
+            echo '<option value="' . esc_attr( $value ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select></p>';
+
+        $read_at = get_post_meta( $post->ID, 'client_read_at', true );
+        if ( $read_at ) {
+            echo '<p><em>' . esc_html( sprintf( __( 'Visualizada pelo cliente em %s', 'dps-client-portal' ), mysql2date( 'd/m/Y H:i', $read_at ) ) ) . '</em></p>';
+        }
+    }
+
+    /**
+     * Salva metadados da mensagem no admin.
+     *
+     * @param int     $post_id ID da mensagem.
+     * @param WP_Post $post    Objeto do post.
+     * @param bool    $update  Indica se é atualização.
+     */
+    public function save_message_meta( $post_id, $post, $update ) {
+        if ( ! isset( $_POST['dps_portal_message_meta_nonce'] ) || ! wp_verify_nonce( $_POST['dps_portal_message_meta_nonce'], 'dps_portal_message_meta' ) ) {
+            return;
+        }
+
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            return;
+        }
+
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
+
+        $client_id = isset( $_POST['dps_portal_message_client'] ) ? intval( $_POST['dps_portal_message_client'] ) : 0;
+        if ( $client_id ) {
+            update_post_meta( $post_id, 'message_client_id', $client_id );
+        } else {
+            delete_post_meta( $post_id, 'message_client_id' );
+        }
+
+        $sender = isset( $_POST['dps_portal_message_sender'] ) ? sanitize_key( $_POST['dps_portal_message_sender'] ) : 'admin';
+        if ( ! in_array( $sender, [ 'admin', 'client' ], true ) ) {
+            $sender = 'admin';
+        }
+        update_post_meta( $post_id, 'message_sender', $sender );
+
+        $status = isset( $_POST['dps_portal_message_status'] ) ? sanitize_key( $_POST['dps_portal_message_status'] ) : 'open';
+        if ( ! in_array( $status, [ 'open', 'answered', 'closed' ], true ) ) {
+            $status = 'open';
+        }
+        update_post_meta( $post_id, 'message_status', $status );
     }
 
     /**
@@ -245,6 +466,7 @@ final class DPS_Client_Portal {
      */
     public function render_portal_shortcode() {
         ob_start();
+        wp_enqueue_style( 'dps-client-portal' );
         // Se não houver sessão de cliente, exibe o formulário de login personalizado
         if ( ! isset( $_SESSION['dps_client_id'] ) || ! $_SESSION['dps_client_id'] ) {
             echo '<div class="dps-client-portal-login">';
@@ -265,6 +487,10 @@ final class DPS_Client_Portal {
                 echo '<div class="notice notice-success">' . esc_html__( 'Dados atualizados com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'error' === $msg ) {
                 echo '<div class="notice notice-error">' . esc_html__( 'Ocorreu um erro ao processar sua solicitação.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'message_sent' === $msg ) {
+                echo '<div class="notice notice-success">' . esc_html__( 'Mensagem enviada para a equipe. Responderemos em breve!', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'message_error' === $msg ) {
+                echo '<div class="notice notice-error">' . esc_html__( 'Não foi possível enviar sua mensagem. Verifique o conteúdo e tente novamente.', 'dps-client-portal' ) . '</div>';
             }
         }
         echo '<div class="dps-client-portal">';
@@ -274,6 +500,7 @@ final class DPS_Client_Portal {
         $this->render_financial_pending( $client_id );
         $this->render_appointment_history( $client_id );
         $this->render_pet_gallery( $client_id );
+        $this->render_message_center( $client_id );
         $this->render_update_forms( $client_id );
         echo '</div>';
         return ob_get_clean();
@@ -491,6 +718,91 @@ final class DPS_Client_Portal {
             echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'dps-client-portal' ) . '</p>';
         }
         echo '</section>';
+    }
+
+    /**
+     * Renderiza o centro de mensagens entre cliente e administração.
+     *
+     * @param int $client_id ID do cliente.
+     */
+    private function render_message_center( $client_id ) {
+        echo '<section class="dps-portal-section dps-portal-messages">';
+        echo '<h3>' . esc_html__( 'Mensagens com a equipe', 'dps-client-portal' ) . '</h3>';
+
+        $messages = get_posts( [
+            'post_type'      => 'dps_portal_message',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'ASC',
+            'meta_key'       => 'message_client_id',
+            'meta_value'     => $client_id,
+        ] );
+
+        if ( $messages ) {
+            echo '<div class="dps-portal-messages__list">';
+            foreach ( $messages as $message ) {
+                $sender  = get_post_meta( $message->ID, 'message_sender', true );
+                $status  = get_post_meta( $message->ID, 'message_status', true );
+                $classes = [ 'dps-portal-message' ];
+                $classes[] = ( 'client' === $sender ) ? 'dps-portal-message--client' : 'dps-portal-message--admin';
+                echo '<article class="' . esc_attr( implode( ' ', $classes ) ) . '">';
+
+                $author_label = ( 'client' === $sender )
+                    ? esc_html__( 'Você', 'dps-client-portal' )
+                    : esc_html__( 'Equipe Desi Pet Shower', 'dps-client-portal' );
+                $date_display = get_post_time( 'd/m/Y H:i', false, $message, true );
+
+                echo '<div class="dps-portal-message__meta">';
+                echo '<span class="dps-portal-message__author">' . esc_html( $author_label ) . '</span>';
+                echo '<span class="dps-portal-message__date">' . esc_html( $date_display ) . '</span>';
+                echo '</div>';
+
+                if ( $status ) {
+                    echo '<div class="dps-portal-message__status">' . esc_html( $this->get_message_status_label( $status ) ) . '</div>';
+                }
+
+                $content = $message->post_content ? wpautop( esc_html( $message->post_content ) ) : '';
+                echo '<div class="dps-portal-message__content">' . $content . '</div>';
+                echo '</article>';
+
+                if ( 'admin' === $sender && ! get_post_meta( $message->ID, 'client_read_at', true ) ) {
+                    update_post_meta( $message->ID, 'client_read_at', current_time( 'mysql' ) );
+                }
+            }
+            echo '</div>';
+        } else {
+            echo '<p>' . esc_html__( 'Ainda não há mensagens no seu histórico.', 'dps-client-portal' ) . '</p>';
+        }
+
+        echo '<div class="dps-portal-messages__form">';
+        echo '<h4>' . esc_html__( 'Enviar nova mensagem', 'dps-client-portal' ) . '</h4>';
+        echo '<form method="post">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="send_message">';
+        echo '<p><label>' . esc_html__( 'Assunto (opcional)', 'dps-client-portal' ) . '<br><input type="text" name="message_subject"></label></p>';
+        echo '<p><label>' . esc_html__( 'Mensagem', 'dps-client-portal' ) . '<br><textarea name="message_body" required></textarea></label></p>';
+        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Enviar para a equipe', 'dps-client-portal' ) . '</button></p>';
+        echo '</form>';
+        echo '</div>';
+
+        echo '</section>';
+    }
+
+    /**
+     * Recupera o rótulo legível para o status da mensagem.
+     *
+     * @param string $status Status salvo na mensagem.
+     * @return string
+     */
+    private function get_message_status_label( $status ) {
+        $labels = [
+            'open'     => __( 'Em aberto', 'dps-client-portal' ),
+            'answered' => __( 'Respondida', 'dps-client-portal' ),
+            'closed'   => __( 'Concluída', 'dps-client-portal' ),
+        ];
+
+        return $labels[ $status ] ?? '';
     }
 
     /**
