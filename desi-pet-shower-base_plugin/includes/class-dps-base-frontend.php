@@ -1764,6 +1764,31 @@ EOT;
         if ( $extra_value < 0 ) {
             $extra_value = 0;
         }
+        $services_selected = [];
+        if ( isset( $_POST['appointment_services'] ) ) {
+            $services_raw = wp_unslash( $_POST['appointment_services'] );
+            if ( ! is_array( $services_raw ) ) {
+                $services_raw = [ $services_raw ];
+            }
+            foreach ( $services_raw as $service_id_raw ) {
+                $service_id = intval( $service_id_raw );
+                if ( $service_id ) {
+                    $services_selected[] = $service_id;
+                }
+            }
+        }
+        $service_price_map = [];
+        if ( isset( $_POST['service_price'] ) ) {
+            $raw_price_map = wp_unslash( $_POST['service_price'] );
+            if ( is_array( $raw_price_map ) ) {
+                foreach ( $raw_price_map as $key => $value ) {
+                    if ( is_scalar( $value ) ) {
+                        $normalized_key                      = is_int( $key ) ? $key : (string) $key;
+                        $service_price_map[ $normalized_key ] = floatval( str_replace( ',', '.', (string) $value ) );
+                    }
+                }
+            }
+        }
         $subscription_base_value  = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
         $subscription_total_value = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
         $subscription_extra_description = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
@@ -1947,7 +1972,11 @@ EOT;
                     update_post_meta( $new_appt, 'appointment_taxidog_price', $taxi_price );
                     // Serviços e total são definidos pelo add‑on de serviços; recuperamos total postado
                     $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                    update_post_meta( $new_appt, 'appointment_total_value', $posted_total );
+                    if ( $posted_total < 0 ) {
+                        $posted_total = 0;
+                    }
+                    $final_total  = self::normalize_simple_total( $posted_total, $taxidog, $taxi_price, $extra_value, $services_selected, $service_price_map );
+                    update_post_meta( $new_appt, 'appointment_total_value', $final_total );
                     if ( '' !== $extra_description || $extra_value > 0 ) {
                         update_post_meta( $new_appt, 'appointment_extra_description', $extra_description );
                         update_post_meta( $new_appt, 'appointment_extra_value', $extra_value );
@@ -2072,7 +2101,11 @@ EOT;
                 // Agendamento simples: soma valor total dos serviços selecionados mais valor do TaxiDog
                 // dps_service add-on salva appointment_total via POST; recupera
                 $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                update_post_meta( $appt_id, 'appointment_total_value', $posted_total );
+                if ( $posted_total < 0 ) {
+                    $posted_total = 0;
+                }
+                $final_total  = self::normalize_simple_total( $posted_total, $taxidog, $taxi_price, $extra_value, $services_selected, $service_price_map );
+                update_post_meta( $appt_id, 'appointment_total_value', $final_total );
                 if ( '' !== $extra_description || $extra_value > 0 ) {
                     update_post_meta( $appt_id, 'appointment_extra_description', $extra_description );
                     update_post_meta( $appt_id, 'appointment_extra_value', $extra_value );
@@ -2631,5 +2664,105 @@ EOT;
                 }
             }
         }
+    }
+
+    /**
+     * Garantia para que agendamentos simples sempre incluam o valor do TaxiDog no total armazenado.
+     *
+     * @param float       $posted_total      Total recebido do formulário.
+     * @param string      $taxidog_flag      Flag indicando se TaxiDog foi selecionado.
+     * @param float       $taxi_price        Valor informado para o TaxiDog.
+     * @param float       $extra_value       Valor extra informado para o agendamento simples.
+     * @param array|null  $services_selected Lista de serviços selecionados já sanitizados (opcional).
+     * @param array|null  $service_price_map Mapa de preços enviados pelo formulário (opcional).
+     *
+     * @return float Total ajustado garantindo que o TaxiDog esteja embutido quando necessário.
+     */
+    private static function normalize_simple_total( $posted_total, $taxidog_flag, $taxi_price, $extra_value, $services_selected = null, $service_price_map = null ) {
+        $total      = max( 0, (float) $posted_total );
+        $taxi_price = max( 0, (float) $taxi_price );
+        if ( '1' !== $taxidog_flag || $taxi_price <= 0 ) {
+            return $total;
+        }
+
+        $base_total = self::estimate_simple_base_total_from_post( $services_selected, $service_price_map, $extra_value );
+        $tolerance  = 0.01;
+
+        if ( null !== $base_total ) {
+            $expected_with_taxi = $base_total + $taxi_price;
+            if ( $total + $tolerance < $expected_with_taxi ) {
+                return $expected_with_taxi;
+            }
+
+            return $total;
+        }
+
+        // Sem referência dos serviços selecionados, assumimos que o POST não somou o TaxiDog.
+        return $total + $taxi_price;
+    }
+
+    /**
+     * Estima o valor base de um agendamento simples a partir dos serviços postados.
+     *
+     * Retorna null caso não seja possível determinar (por exemplo, integrações customizadas).
+     *
+     * @param array      $services_selected Lista de serviços considerados.
+     * @param array|null $service_price_map Mapa com os preços dos serviços vindos do POST.
+     * @param float      $extra_value       Valor extra informado para o agendamento.
+     *
+     * @return float|null
+     */
+    private static function estimate_simple_base_total_from_post( $services_selected, $service_price_map, $extra_value ) {
+        if ( null === $services_selected ) {
+            if ( empty( $_POST['appointment_services'] ) ) {
+                return null;
+            }
+
+            $services_raw = wp_unslash( $_POST['appointment_services'] );
+            if ( ! is_array( $services_raw ) ) {
+                $services_raw = [ $services_raw ];
+            }
+
+            $services_selected = [];
+            foreach ( $services_raw as $service_id_raw ) {
+                $service_id = intval( $service_id_raw );
+                if ( $service_id ) {
+                    $services_selected[] = $service_id;
+                }
+            }
+        }
+
+        if ( empty( $services_selected ) ) {
+            return null;
+        }
+
+        if ( null === $service_price_map ) {
+            $service_price_map = isset( $_POST['service_price'] ) ? wp_unslash( $_POST['service_price'] ) : [];
+        }
+
+        if ( ! is_array( $service_price_map ) ) {
+            $service_price_map = [];
+        }
+
+        $total = 0;
+        foreach ( $services_selected as $service_id ) {
+            $price_value = 0;
+            if ( isset( $service_price_map[ $service_id ] ) ) {
+                $price_value = floatval( str_replace( ',', '.', (string) $service_price_map[ $service_id ] ) );
+            } elseif ( isset( $service_price_map[ (string) $service_id ] ) ) {
+                $price_value = floatval( str_replace( ',', '.', (string) $service_price_map[ (string) $service_id ] ) );
+            } else {
+                $price_value = (float) get_post_meta( $service_id, 'service_price', true );
+            }
+            if ( $price_value < 0 ) {
+                $price_value = 0;
+            }
+            $total += $price_value;
+        }
+
+        $extra_value = max( 0, (float) $extra_value );
+        $total      += $extra_value;
+
+        return $total;
     }
 }
