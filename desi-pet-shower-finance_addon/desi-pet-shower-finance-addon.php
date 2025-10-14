@@ -579,7 +579,8 @@ class DPS_Finance_Addon {
                         }
                     }
                     // Define URL base atual removendo parâmetros de ação
-                    $current_url = home_url( add_query_arg( null, null ) );
+                    $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
+                    $current_url = home_url( $request_uri );
                     $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file' ], $current_url );
                     // Link para envio por email
                     $send_link = add_query_arg( [ 'dps_send_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean );
@@ -669,10 +670,6 @@ class DPS_Finance_Addon {
                 echo '<form method="post" class="dps-form">';
                 echo '<input type="hidden" name="dps_finance_action" value="save_partial">';
                 wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
-                echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
-                echo '<form method="post" class="dps-form">';
-                echo '<input type="hidden" name="dps_finance_action" value="save_partial">';
-                wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $partial_id ) . '">';
                 $today = date( 'Y-m-d' );
                 echo '<p><label>' . esc_html__( 'Data', 'dps-finance-addon' ) . '<br><input type="date" name="partial_date" value="' . esc_attr( $today ) . '" required></label></p>';
@@ -738,7 +735,6 @@ class DPS_Finance_Addon {
         echo '</select></label> ';
         echo '<div class="dps-finance-quick-links">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button>';
-        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button>';
         // Links rápidos: preserva categoria
         $quick_params = $_GET;
         unset( $quick_params['fin_start'], $quick_params['fin_end'], $quick_params['fin_range'] );
@@ -750,15 +746,11 @@ class DPS_Finance_Addon {
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
         echo '<a href="' . esc_url( $link7 ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a>';
         echo '<a href="' . esc_url( $link30 ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a>';
-        echo '<div class="dps-history-actions">';
-        echo '<a href="' . esc_url( $link7 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a>';
-        echo '<a href="' . esc_url( $link30 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a>';
         // Link de limpar filtros: remove todos os filtros inclusive categoria
         $clear_params = $quick_params;
         unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'] );
         $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
-        echo '<a href="' . esc_url( $clear_link ) . '" class="button button-secondary">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
