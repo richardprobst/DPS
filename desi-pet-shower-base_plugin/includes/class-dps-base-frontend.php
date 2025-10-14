@@ -309,11 +309,13 @@ class DPS_Base_Frontend {
         if ( $exists !== $table ) {
             return [];
         }
+        $pending_statuses = [ 'em_aberto', 'pendente' ];
+        $placeholders     = implode( ', ', array_fill( 0, count( $pending_statuses ), '%s' ) );
+
         $rows = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT data, descricao, valor, status FROM {$table} WHERE cliente_id = %d AND status = %s",
-                $client_id,
-                'em_aberto'
+                "SELECT data, descricao, valor, status FROM {$table} WHERE cliente_id = %d AND status IN ({$placeholders})",
+                array_merge( [ $client_id ], $pending_statuses )
             )
         );
         if ( empty( $rows ) ) {
