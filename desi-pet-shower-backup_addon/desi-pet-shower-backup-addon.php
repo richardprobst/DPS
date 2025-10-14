@@ -92,6 +92,12 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 <?php endif; ?>
         <div class="dps-backup-actions">
             <div class="dps-backup-box">
+                    <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?>">
+                        <p><strong><?php echo ( 'success' === $status ) ? esc_html__( 'Sucesso:', 'dps-backup-addon' ) : esc_html__( 'Erro:', 'dps-backup-addon' ); ?></strong> <?php echo esc_html( $message ); ?></p>
+                    </div>
+                <?php endif; ?>
+                <div class="dps-backup-actions">
+                    <div class="dps-backup-box">
                         <h4><?php esc_html_e( 'Gerar backup', 'dps-backup-addon' ); ?></h4>
                         <p><?php esc_html_e( 'Clique no botão abaixo para baixar um arquivo JSON com todos os dados do sistema.', 'dps-backup-addon' ); ?></p>
                         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -99,11 +105,13 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_EXPORT, 'dps_backup_nonce' ); ?>
                         <button type="submit" class="button button-primary dps-backup-submit">
+                            <button type="submit" class="button button-primary">
                                 <?php esc_html_e( 'Baixar backup completo', 'dps-backup-addon' ); ?>
                             </button>
                         </form>
                     </div>
             <div class="dps-backup-box">
+                    <div class="dps-backup-box">
                         <h4><?php esc_html_e( 'Restaurar backup', 'dps-backup-addon' ); ?></h4>
                         <p><?php esc_html_e( 'Selecione um arquivo JSON gerado anteriormente para restaurar todos os dados.', 'dps-backup-addon' ); ?></p>
                         <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -112,6 +120,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                             <?php wp_nonce_field( self::ACTION_IMPORT, 'dps_backup_nonce' ); ?>
                             <input type="file" name="dps_backup_file" accept="application/json" required class="dps-backup-file" />
                             <p class="dps-backup-hint">
+                            <input type="file" name="dps_backup_file" accept="application/json" required />
+                            <p class="dps-field-help">
                                 <?php esc_html_e( 'O processo substituirá os dados atuais do Desi Pet Shower. Todos os registros existentes serão removidos antes da restauração.', 'dps-backup-addon' ); ?>
                             </p>
                             <button type="submit" class="button button-secondary">

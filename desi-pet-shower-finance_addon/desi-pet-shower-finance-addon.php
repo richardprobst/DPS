@@ -669,13 +669,17 @@ class DPS_Finance_Addon {
                 echo '<form method="post" class="dps-form">';
                 echo '<input type="hidden" name="dps_finance_action" value="save_partial">';
                 wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
+                echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
+                echo '<form method="post" class="dps-form">';
+                echo '<input type="hidden" name="dps_finance_action" value="save_partial">';
+                wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $partial_id ) . '">';
                 $today = date( 'Y-m-d' );
                 echo '<p><label>' . esc_html__( 'Data', 'dps-finance-addon' ) . '<br><input type="date" name="partial_date" value="' . esc_attr( $today ) . '" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="partial_value" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Método', 'dps-finance-addon' ) . '<br><select name="partial_method"><option value="pix">PIX</option><option value="cartao">' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option><option value="dinheiro">' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option><option value="outro">' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option></select></label></p>';
                 $cancel_link = esc_url( remove_query_arg( 'register_partial' ) . '#financeiro' );
-                echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button> <a href="' . $cancel_link . '" class="button">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
+                echo '<p class="dps-field-actions"><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button><a href="' . $cancel_link . '" class="button button-secondary">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
                 echo '</form>';
                 echo '</div>';
             }
@@ -734,6 +738,7 @@ class DPS_Finance_Addon {
         echo '</select></label> ';
         echo '<div class="dps-finance-quick-links">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button>';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button>';
         // Links rápidos: preserva categoria
         $quick_params = $_GET;
         unset( $quick_params['fin_start'], $quick_params['fin_end'], $quick_params['fin_range'] );
@@ -745,11 +750,15 @@ class DPS_Finance_Addon {
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
         echo '<a href="' . esc_url( $link7 ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a>';
         echo '<a href="' . esc_url( $link30 ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a>';
+        echo '<div class="dps-history-actions">';
+        echo '<a href="' . esc_url( $link7 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $link30 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a>';
         // Link de limpar filtros: remove todos os filtros inclusive categoria
         $clear_params = $quick_params;
         unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'] );
         $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button dps-finance-quick-link">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $clear_link ) . '" class="button button-secondary">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
@@ -764,6 +773,12 @@ class DPS_Finance_Addon {
             table.dps-table tr.fin-status-em_aberto { background-color:#fff8e1; }
             table.dps-table tr.fin-status-pago { background-color:#e6ffed; }
             </style>';
+            // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
+            echo '<table class="dps-table"><thead><tr>';
+        echo '<a href="' . esc_url( $export_link ) . '" class="button button-secondary">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '</div>';
+        echo '</form>';
+        if ( $trans ) {
             // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-finance-addon' ) . '</th>';
@@ -915,6 +930,8 @@ class DPS_Finance_Addon {
             echo '<div class="dps-finance-summary">';
             // Removido: gráficos financeiros não são exibidos
             echo '</div>';
+            // Script inline para mostrar detalhes dos serviços vinculados às transações
+            // Utiliza a mesma chamada AJAX do add‑on da agenda para buscar serviços do agendamento.
             // Script inline para mostrar detalhes dos serviços vinculados às transações
             // Utiliza a mesma chamada AJAX do add‑on da agenda para buscar serviços do agendamento.
             echo '<script type="text/javascript">(function($){$(document).on("click",".dps-trans-services",function(e){e.preventDefault();var apptId=$(this).data("appt-id");$.post("' . esc_js( admin_url( 'admin-ajax.php' ) ) . '",{action:"dps_get_services_details",appt_id:apptId,nonce:"' . wp_create_nonce( 'dps_get_services_details' ) . '"},function(resp){if(resp && resp.success){var services=resp.data.services||[];if(services.length>0){var msg="";for(var i=0;i<services.length;i++){var srv=services[i];msg+=srv.name+" - R$ "+parseFloat(srv.price).toFixed(2);if(i<services.length-1) msg+="\n";}alert(msg);}else{alert("Nenhum serviço encontrado.");}}else{alert(resp.data?resp.data.message:"Erro ao buscar serviços.");}});});})(jQuery);</script>';
