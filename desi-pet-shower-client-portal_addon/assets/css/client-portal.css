@@ -1,88 +1,126 @@
 .dps-client-portal {
     display: grid;
-    gap: 1.5rem;
+    gap: 24px;
+}
+
+@media (min-width: 1024px) {
+    .dps-client-portal {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
 }
 
 .dps-portal-section {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    padding: 24px;
 }
 
 .dps-portal-section h3 {
-    margin-top: 0;
+    margin: 0;
     font-size: 1.2rem;
-    color: #1e293b;
+    color: var(--dps-color-text);
 }
 
-.dps-table {
+.dps-portal-section p {
+    margin: 0;
+    color: var(--dps-color-subtle);
+}
+
+.dps-portal-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 12px 16px;
+    box-shadow: var(--dps-shadow-sm);
+    font-weight: 600;
+}
+
+.dps-portal-summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-portal-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    overflow: hidden;
 }
 
-.dps-table th,
-.dps-table td {
-    border-bottom: 1px solid #e2e8f0;
-    padding: 0.5rem 0.75rem;
-    text-align: left;
+.dps-portal-table th,
+.dps-portal-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dps-color-border);
 }
 
-.dps-table thead {
-    background: #f8fafc;
+.dps-portal-table thead {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.78rem;
 }
 
 .dps-portal-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    gap: 18px;
 }
 
 .dps-portal-photo-item {
-    background: #f8fafc;
-    border-radius: 6px;
-    padding: 0.75rem;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
     text-align: center;
+    box-shadow: var(--dps-shadow-sm);
 }
 
-.dps-share-whatsapp {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.4rem 0.75rem;
-    background: #16a34a;
-    color: #fff;
-    border-radius: 4px;
-    text-decoration: none;
+.dps-portal-photo {
+    width: 100%;
+    height: auto;
+    border-radius: var(--dps-radius-md);
+    box-shadow: var(--dps-shadow-sm);
 }
 
 .dps-portal-messages {
     display: grid;
-    gap: 1rem;
+    gap: 16px;
 }
 
 .dps-portal-messages__list {
     display: grid;
-    gap: 0.75rem;
+    gap: 12px;
     max-height: 380px;
     overflow-y: auto;
-    padding-right: 0.5rem;
+    padding-right: 8px;
 }
 
 .dps-portal-message {
     border-left: 4px solid transparent;
-    background: #f8fafc;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    box-shadow: inset 0 0 0 1px #e2e8f0;
+    background: var(--dps-color-soft-surface);
+    border-radius: var(--dps-radius-md);
+    padding: 14px 16px;
+    box-shadow: inset 0 0 0 1px var(--dps-color-border);
 }
 
 .dps-portal-message--admin {
-    border-left-color: #2563eb;
+    border-left-color: var(--dps-color-primary);
 }
 
 .dps-portal-message--client {
-    border-left-color: #16a34a;
+    border-left-color: var(--dps-color-success);
 }
 
 .dps-portal-message__meta {
@@ -90,259 +128,112 @@
     justify-content: space-between;
     align-items: baseline;
     font-size: 0.85rem;
-    color: #475569;
-    margin-bottom: 0.35rem;
+    color: var(--dps-color-muted);
+    margin-bottom: 6px;
 }
 
 .dps-portal-message__status {
     font-weight: 600;
+    color: var(--dps-color-subtle);
 }
 
 .dps-portal-messages__form textarea {
-    width: 100%;
     min-height: 120px;
 }
 
-.dps-portal-messages__form button.button {
-    margin-top: 0.75rem;
+.dps-portal-messages__form .button {
+    align-self: flex-end;
 }
 
-@media (min-width: 768px) {
-    .dps-client-portal {
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    }
-
-    .dps-portal-section {
-        grid-column: span 2;
-    }
-
-    .dps-portal-section.dps-portal-next,
-    .dps-portal-section.dps-portal-finances {
-        grid-column: span 1;
-    }
+.dps-portal-messages__empty {
+    text-align: center;
+    color: var(--dps-color-muted);
 }
 
 .dps-client-logins {
     display: grid;
-    gap: 1.25rem;
+    gap: 24px;
 }
 
 .dps-client-logins__title {
     margin: 0;
     font-size: 1.6rem;
-    color: #1e293b;
+    color: var(--dps-color-text);
 }
 
 .dps-client-logins__feedback {
     display: grid;
-    gap: 0.75rem;
+    gap: 12px;
 }
 
 .dps-client-logins__notice {
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
+    border-radius: var(--dps-radius-md);
+    padding: 12px 16px;
     font-weight: 600;
 }
 
 .dps-client-logins__notice--success {
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #34d399;
+    background: rgba(31, 157, 85, 0.12);
+    color: var(--dps-color-success);
+    border: 1px solid rgba(31, 157, 85, 0.4);
 }
 
 .dps-client-logins__notice--error {
-    background: #fef2f2;
-    color: #b91c1c;
-    border: 1px solid #fca5a5;
-}
-
-.dps-client-logins__summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem 1.5rem;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    font-size: 0.95rem;
-    color: #475569;
-}
-
-.dps-client-logins__summary-item strong {
-    color: #111827;
+    background: rgba(220, 53, 69, 0.12);
+    color: var(--dps-color-danger);
+    border: 1px solid rgba(220, 53, 69, 0.4);
 }
 
 .dps-client-logins__filters {
     display: grid;
-    gap: 0.75rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    gap: 16px;
 }
 
 .dps-client-logins__field {
     display: grid;
-    gap: 0.25rem;
+    gap: 6px;
 }
 
 .dps-client-logins__label {
     font-weight: 600;
-    color: #334155;
-}
-
-.dps-client-logins__filters input[type="search"] {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #cbd5f5;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.dps-client-logins__field--checkbox {
-    align-items: center;
-    grid-template-columns: auto 1fr;
-    gap: 0.5rem;
-}
-
-.dps-client-logins__field--checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-}
-
-.dps-client-logins__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    color: var(--dps-color-subtle);
 }
 
 .dps-client-logins__table-wrapper {
     overflow-x: auto;
+    border-radius: var(--dps-radius-lg);
+    border: 1px solid var(--dps-color-border);
+    box-shadow: var(--dps-shadow-lg);
 }
 
-.dps-client-logins__table {
+.dps-client-logins__table-wrapper table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-.dps-client-logins__table th,
-.dps-client-logins__table td {
-    padding: 0.75rem;
-    text-align: left;
-    vertical-align: top;
-}
-
-.dps-client-logins__table thead {
-    background: #f1f5f9;
-}
-
-.dps-client-logins__cell-id {
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.dps-client-logins__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.dps-client-logins__badge--active {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.dps-client-logins__badge--inactive {
-    background: #f1f5f9;
-    color: #475569;
-}
-
-.dps-client-logins__code {
-    display: inline-block;
-    margin: 0.4rem 0 0;
-    padding: 0.2rem 0.5rem;
-    background: #0f172a;
-    color: #f8fafc;
-    border-radius: 4px;
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 0.95rem;
-}
-
-.dps-client-logins__hint {
-    display: block;
-    margin-top: 0.35rem;
-    color: #64748b;
-    font-size: 0.8rem;
+.dps-client-logins__table-wrapper th,
+.dps-client-logins__table-wrapper td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dps-color-border);
 }
 
 .dps-client-logins__actions-cell {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-}
-
-.dps-client-logins__action {
-    white-space: nowrap;
+    gap: 10px;
 }
 
 .dps-client-logins__empty {
-    margin: 0;
-    padding: 1.25rem;
-    background: #f8fafc;
-    border: 1px dashed #cbd5f5;
-    border-radius: 8px;
-    color: #475569;
     text-align: center;
-    font-weight: 500;
+    color: var(--dps-color-muted);
+    padding: 16px;
 }
 
-.dps-client-logins--restricted {
-    padding: 1.5rem;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    color: #475569;
-    text-align: center;
-}
-
-@media (max-width: 782px) {
-    .dps-client-logins__table thead {
-        display: none;
-    }
-
-    .dps-client-logins__table tr {
-        display: block;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-        background: #fff;
-    }
-
-    .dps-client-logins__table td {
-        display: grid;
-        grid-template-columns: 140px 1fr;
-        gap: 0.35rem;
-        border: none;
-        padding: 0.35rem 0;
-    }
-
-    .dps-client-logins__table td::before {
-        content: attr(data-title);
-        font-weight: 600;
-        color: #1f2937;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-    }
-
-    .dps-client-logins__actions-cell {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 0.5rem;
-    }
+.dps-client-portal-login {
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    padding: 24px;
+    box-shadow: var(--dps-shadow-lg);
 }

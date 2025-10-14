@@ -388,7 +388,7 @@ final class DPS_Client_Portal {
         ] );
 
         echo '<p><label for="dps_portal_message_client">' . esc_html__( 'Cliente vinculado', 'dps-client-portal' ) . '</label><br />';
-        echo '<select name="dps_portal_message_client" id="dps_portal_message_client" style="max-width:100%;">';
+        echo '<select name="dps_portal_message_client" id="dps_portal_message_client">';
         echo '<option value="">' . esc_html__( 'Selecione um cliente', 'dps-client-portal' ) . '</option>';
         if ( $clients ) {
             foreach ( $clients as $client ) {
@@ -522,7 +522,7 @@ final class DPS_Client_Portal {
      * @param int $client_id ID do cliente.
      */
     private function render_next_appointment( $client_id ) {
-        echo '<section class="dps-portal-section dps-portal-next">';
+        echo '<section class="dps-portal-section dps-portal-next dps-card">';
         echo '<h3>' . esc_html__( 'Próximo Agendamento', 'dps-client-portal' ) . '</h3>';
         $today     = current_time( 'Y-m-d' );
         $args      = [
@@ -590,7 +590,7 @@ final class DPS_Client_Portal {
         $table = $wpdb->prefix . 'dps_transacoes';
         // Busca transações com status em aberto
         $pendings = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')", $client_id ) );
-        echo '<section class="dps-portal-section dps-portal-finances">';
+        echo '<section class="dps-portal-section dps-portal-finances dps-card">';
         echo '<h3>' . esc_html__( 'Pendências Financeiras', 'dps-client-portal' ) . '</h3>';
         if ( $pendings ) {
             echo '<table class="dps-table"><thead><tr>';
@@ -609,7 +609,7 @@ final class DPS_Client_Portal {
                 echo '<td>R$ ' . esc_html( $valor ) . '</td>';
                 // Gera link de pagamento via formulário
                 echo '<td>';
-                echo '<form method="post" style="display:inline;">';
+                echo '<form method="post" class="dps-inline-form">';
                 wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
                 echo '<input type="hidden" name="dps_client_portal_action" value="pay_transaction">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $trans->id ) . '">';
@@ -647,7 +647,7 @@ final class DPS_Client_Portal {
             'order'          => 'DESC',
         ];
         $appointments = get_posts( $args );
-        echo '<section class="dps-portal-section dps-portal-history">';
+        echo '<section class="dps-portal-section dps-portal-history dps-card">';
         echo '<h3>' . esc_html__( 'Histórico de Atendimentos', 'dps-client-portal' ) . '</h3>';
         if ( $appointments ) {
             echo '<table class="dps-table"><thead><tr>';
@@ -698,7 +698,7 @@ final class DPS_Client_Portal {
             'meta_key'       => 'owner_id',
             'meta_value'     => $client_id,
         ] );
-        echo '<section class="dps-portal-section dps-portal-gallery">';
+        echo '<section class="dps-portal-section dps-portal-gallery dps-card">';
         echo '<h3>' . esc_html__( 'Galeria de Fotos', 'dps-client-portal' ) . '</h3>';
         if ( $pets ) {
             echo '<div class="dps-portal-gallery-grid">';
@@ -713,7 +713,7 @@ final class DPS_Client_Portal {
                         // Link para compartilhar via WhatsApp
                         $wa_text = urlencode( sprintf( __( 'Olha que fofo estou após o banho/tosa no Desi Pet Shower! %s', 'dps-client-portal' ), $img_url ) );
                         $wa_link = 'https://wa.me/?text=' . $wa_text;
-                        echo '<a href="' . esc_url( $img_url ) . '" target="_blank"><img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet_name ) . '" style="max-width:100%;height:auto;" /></a><br>';
+                        echo '<a href="' . esc_url( $img_url ) . '" target="_blank"><img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-portal-photo" /></a><br>';
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" class="dps-share-whatsapp">' . esc_html__( 'Compartilhar via WhatsApp', 'dps-client-portal' ) . '</a>';
                     } else {
                         echo '<p>' . esc_html__( 'Sem foto disponível.', 'dps-client-portal' ) . '</p>';
@@ -736,7 +736,7 @@ final class DPS_Client_Portal {
      * @param int $client_id ID do cliente.
      */
     private function render_message_center( $client_id ) {
-        echo '<section class="dps-portal-section dps-portal-messages">';
+        echo '<section class="dps-portal-section dps-portal-messages dps-card">';
         echo '<h3>' . esc_html__( 'Mensagens com a equipe', 'dps-client-portal' ) . '</h3>';
 
         $messages = get_posts( [
@@ -829,7 +829,7 @@ final class DPS_Client_Portal {
             'instagram' => get_post_meta( $client_id, 'client_instagram', true ),
             'facebook'  => get_post_meta( $client_id, 'client_facebook', true ),
         ];
-        echo '<section class="dps-portal-section dps-portal-update">';
+        echo '<section class="dps-portal-section dps-portal-update dps-card">';
         echo '<h3>' . esc_html__( 'Atualizar Dados Pessoais', 'dps-client-portal' ) . '</h3>';
         echo '<form method="post">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );

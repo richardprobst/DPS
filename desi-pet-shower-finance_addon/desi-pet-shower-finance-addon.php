@@ -676,7 +676,7 @@ class DPS_Finance_Addon {
                 echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="partial_value" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Método', 'dps-finance-addon' ) . '<br><select name="partial_method"><option value="pix">PIX</option><option value="cartao">' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option><option value="dinheiro">' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option><option value="outro">' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option></select></label></p>';
                 $cancel_link = esc_url( remove_query_arg( 'register_partial' ) . '#financeiro' );
-                echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button> <a href="' . $cancel_link . '" class="button">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
+                echo '<p class="dps-field-actions"><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button><a href="' . $cancel_link . '" class="button button-secondary">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
                 echo '</form>';
                 echo '</div>';
             }
@@ -765,6 +765,12 @@ class DPS_Finance_Addon {
             table.dps-table tr.fin-status-em_aberto { background-color:#fff8e1; }
             table.dps-table tr.fin-status-pago { background-color:#e6ffed; }
             </style>';
+            // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
+            echo '<table class="dps-table"><thead><tr>';
+        echo '<a href="' . esc_url( $export_link ) . '" class="button button-secondary">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '</div>';
+        echo '</form>';
+        if ( $trans ) {
             // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-finance-addon' ) . '</th>';
@@ -916,6 +922,8 @@ class DPS_Finance_Addon {
             echo '<div class="dps-finance-summary">';
             // Removido: gráficos financeiros não são exibidos
             echo '</div>';
+            // Script inline para mostrar detalhes dos serviços vinculados às transações
+            // Utiliza a mesma chamada AJAX do add‑on da agenda para buscar serviços do agendamento.
             // Script inline para mostrar detalhes dos serviços vinculados às transações
             // Utiliza a mesma chamada AJAX do add‑on da agenda para buscar serviços do agendamento.
             echo '<script type="text/javascript">(function($){$(document).on("click",".dps-trans-services",function(e){e.preventDefault();var apptId=$(this).data("appt-id");$.post("' . esc_js( admin_url( 'admin-ajax.php' ) ) . '",{action:"dps_get_services_details",appt_id:apptId,nonce:"' . wp_create_nonce( 'dps_get_services_details' ) . '"},function(resp){if(resp && resp.success){var services=resp.data.services||[];if(services.length>0){var msg="";for(var i=0;i<services.length;i++){var srv=services[i];msg+=srv.name+" - R$ "+parseFloat(srv.price).toFixed(2);if(i<services.length-1) msg+="\n";}alert(msg);}else{alert("Nenhum serviço encontrado.");}}else{alert(resp.data?resp.data.message:"Erro ao buscar serviços.");}});});})(jQuery);</script>';
