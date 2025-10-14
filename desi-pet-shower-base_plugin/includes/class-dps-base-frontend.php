@@ -1947,29 +1947,39 @@ EOT;
                             'post_status' => 'publish',
                         ] );
                         if ( $appt_new ) {
-                            update_post_meta( $appt_new, 'appointment_client_id', $client_id );
-                            update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
-                            update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
-                            update_post_meta( $appt_new, 'appointment_date', $date_i );
-                            update_post_meta( $appt_new, 'appointment_time', $time );
-                            update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'dps-base' ) );
-                            update_post_meta( $appt_new, 'appointment_type', 'subscription' );
-                            // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
-                            $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
-                            update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
-                            update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
-                            update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
-                            update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
-                            update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
-                            update_post_meta( $appt_new, 'appointment_services', $service_ids );
-                            update_post_meta( $appt_new, 'appointment_service_prices', $prices );
-                            // Define valor total individual: preço de serviços base + preço da tosa apenas na ocorrência definida
-                            $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
-                            update_post_meta( $appt_new, 'appointment_total_value', $total_single );
-                            update_post_meta( $appt_new, 'appointment_status', 'pendente' );
-                            update_post_meta( $appt_new, 'subscription_id', $sub_id );
-                            // Dispara gancho pós‑salvamento para cada agendamento
-                            do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
+                    update_post_meta( $appt_new, 'appointment_client_id', $client_id );
+                    update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
+                    update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
+                    update_post_meta( $appt_new, 'appointment_date', $date_i );
+                    update_post_meta( $appt_new, 'appointment_time', $time );
+                    update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'dps-base' ) );
+                    update_post_meta( $appt_new, 'appointment_type', 'subscription' );
+                    // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
+                    $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
+                    update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
+                    update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
+                    update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
+                    update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
+                    update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
+                    update_post_meta( $appt_new, 'appointment_services', $service_ids );
+                    update_post_meta( $appt_new, 'appointment_service_prices', $prices );
+                    // Define valor total individual: soma serviços base, extras e tosa (apenas na ocorrência definida)
+                    $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
+                    if ( $subscription_extra_value > 0 ) {
+                        $total_single += $subscription_extra_value;
+                    }
+                    update_post_meta( $appt_new, 'appointment_total_value', $total_single );
+                    if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+                        update_post_meta( $appt_new, 'subscription_extra_description', $subscription_extra_description );
+                        update_post_meta( $appt_new, 'subscription_extra_value', $subscription_extra_value );
+                    } else {
+                        delete_post_meta( $appt_new, 'subscription_extra_description' );
+                        delete_post_meta( $appt_new, 'subscription_extra_value' );
+                    }
+                    update_post_meta( $appt_new, 'appointment_status', 'pendente' );
+                    update_post_meta( $appt_new, 'subscription_id', $sub_id );
+                    // Dispara gancho pós‑salvamento para cada agendamento
+                    do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
                         }
                         $current_dt->modify( '+' . $interval_days . ' days' );
                     }
