@@ -1019,57 +1019,77 @@ class DPS_Finance_Addon {
             // Para cancelamentos, também marca em aberto (não pago)
             $new_status = 'em_aberto';
         }
-        if ( $new_status ) {
-            // Recupera informações do agendamento para atualizar ou criar transação
-            $client_id  = get_post_meta( $appt_id, 'appointment_client_id', true );
-            $valor_meta = get_post_meta( $appt_id, 'appointment_total_value', true );
-            $valor      = $valor_meta ? (float) $valor_meta : 0;
-            // Monta descrição a partir de serviços e pet
-            $desc_parts = [];
-            $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
-            if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                foreach ( $service_ids as $sid ) {
-                    $srv = get_post( $sid );
-                    if ( $srv ) {
-                        $desc_parts[] = $srv->post_title;
-                    }
+        if ( ! $new_status ) {
+            return;
+        }
+
+        // Recupera informações do agendamento para atualizar ou criar transação
+        $client_id  = get_post_meta( $appt_id, 'appointment_client_id', true );
+        $valor_meta = get_post_meta( $appt_id, 'appointment_total_value', true );
+        $valor      = $valor_meta ? (float) $valor_meta : 0;
+
+        // Monta descrição a partir de serviços e pet
+        $desc_parts  = [];
+        $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
+        if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
+            foreach ( $service_ids as $sid ) {
+                $srv = get_post( $sid );
+                if ( $srv ) {
+                    $desc_parts[] = $srv->post_title;
                 }
             }
-            $pet_id    = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            $pet_post  = $pet_id ? get_post( $pet_id ) : null;
-            if ( $pet_post ) {
-                $desc_parts[] = $pet_post->post_title;
-            }
-            $desc = implode( ' - ', $desc_parts );
-            // Verifica se já existe transação para este agendamento
-            $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE agendamento_id = %d", $appt_id ) );
-            // Determina a data da transação. Para atualizações de status, usamos a data do agendamento ou a data atual caso não exista.
-            $appt_date = get_post_meta( $appt_id, 'appointment_date', true );
-            $trans_date = $appt_date ? $appt_date : current_time( 'Y-m-d' );
-            $trans_data = [
-                'cliente_id'     => $client_id ?: null,
-                'agendamento_id' => $appt_id,
-                'plano_id'       => null,
-                'data'           => $trans_date,
-                'valor'          => $valor,
-                'categoria'      => __( 'Serviço', 'dps-finance-addon' ),
-                'tipo'           => 'receita',
-                'status'         => ( $new_status === 'pago' ? 'pago' : 'em_aberto' ),
-                'descricao'      => $desc,
-            ];
-            if ( $existing_id ) {
-                // Atualiza a transação existente com novo status, valor e descrição
-                $wpdb->update( $table, [
+        }
+
+        $pet_id   = get_post_meta( $appt_id, 'appointment_pet_id', true );
+        $pet_post = $pet_id ? get_post( $pet_id ) : null;
+        if ( $pet_post ) {
+            $desc_parts[] = $pet_post->post_title;
+        }
+
+        $desc = implode( ' - ', $desc_parts );
+
+        // Verifica se já existe transação para este agendamento
+        $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE agendamento_id = %d", $appt_id ) );
+
+        // Determina a data da transação. Para atualizações de status, usamos a data do agendamento
+        // ou a data atual caso não exista.
+        $appt_date  = get_post_meta( $appt_id, 'appointment_date', true );
+        $trans_date = $appt_date ? $appt_date : current_time( 'Y-m-d' );
+
+        $trans_data = [
+            'cliente_id'     => $client_id ?: null,
+            'agendamento_id' => $appt_id,
+            'plano_id'       => null,
+            'data'           => $trans_date,
+            'valor'          => $valor,
+            'categoria'      => __( 'Serviço', 'dps-finance-addon' ),
+            'tipo'           => 'receita',
+            'status'         => ( 'pago' === $new_status ? 'pago' : 'em_aberto' ),
+            'descricao'      => $desc,
+        ];
+
+        if ( $existing_id ) {
+            // Atualiza a transação existente com novo status, valor e descrição
+            $wpdb->update(
+                $table,
+                [
                     'status'    => $trans_data['status'],
                     'valor'     => $trans_data['valor'],
                     'descricao' => $trans_data['descricao'],
-                ], [ 'id' => $existing_id ], [ '%s','%f','%s' ], [ '%d' ] );
-            } else {
-                // Cria uma nova transação se ainda não existir
-                $wpdb->insert( $table, $trans_data, [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
-            }
+                ],
+                [ 'id' => $existing_id ],
+                [ '%s', '%f', '%s' ],
+                [ '%d' ]
+            );
+            return;
         }
-        // fecha o método sync_status_to_finance
+
+        // Cria uma nova transação se ainda não existir
+        $wpdb->insert(
+            $table,
+            $trans_data,
+            [ '%d', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s' ]
+        );
     }
 
     /**
@@ -1162,9 +1182,9 @@ class DPS_Finance_Addon {
     }
 } // end class DPS_Finance_Addon
 
+} // end if class exists guard
+
 // Instancia a classe somente se ainda não houver uma instância global
 if ( class_exists( 'DPS_Finance_Addon' ) && ! isset( $GLOBALS['dps_finance_addon'] ) ) {
     $GLOBALS['dps_finance_addon'] = new DPS_Finance_Addon();
 }
-
-} // end if class exists guard

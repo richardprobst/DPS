@@ -39,12 +39,7 @@ final class DPS_Client_Portal {
      */
     private function __construct() {
         // Inicia sessão para autenticar clientes sem utilizar o sistema de usuários do WordPress
-        add_action( 'init', function() {
-            if ( ! session_id() ) {
-                // Start PHP session so we can track logged‑in clients independent of WP users.
-                session_start();
-            }
-        }, 1 );
+        add_action( 'init', [ $this, 'ensure_session_started' ], 0 );
 
         // Cria login para novo cliente ao salvar post do tipo dps_cliente
         add_action( 'save_post_dps_cliente', [ $this, 'maybe_create_login_for_client' ], 10, 3 );
@@ -70,6 +65,21 @@ final class DPS_Client_Portal {
         // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+    }
+
+    /**
+     * Garante que a sessão PHP esteja ativa antes de manipular os dados do portal.
+     * Evita avisos de cabeçalhos já enviados verificando se os cabeçalhos ainda não foram
+     * enviados e se uma sessão já não foi iniciada.
+     */
+    public function ensure_session_started() {
+        if ( session_status() === PHP_SESSION_ACTIVE ) {
+            return;
+        }
+        if ( headers_sent() ) {
+            return;
+        }
+        session_start();
     }
 
     /**
