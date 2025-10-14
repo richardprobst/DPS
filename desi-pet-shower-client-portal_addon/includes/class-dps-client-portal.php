@@ -54,11 +54,12 @@ final class DPS_Client_Portal {
         // Adiciona shortcode para o formulário de login
         add_shortcode( 'dps_client_login', [ $this, 'render_login_shortcode' ] );
 
+        // Registra tipos de dados e recursos do portal. Prioridade baixa garante que o tipo exista
+        // antes de qualquer processamento que dependa dele na mesma execução da ação "init".
+        add_action( 'init', [ $this, 'register_message_post_type' ], 0 );
+
         // Processa ações de atualização do portal e login/logout
         add_action( 'init', [ $this, 'handle_portal_actions' ] );
-
-        // Registra tipos de dados e recursos do portal
-        add_action( 'init', [ $this, 'register_message_post_type' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
 
         // Metaboxes e salvamento das mensagens no admin
