@@ -1,0 +1,239 @@
+.dps-client-portal {
+    display: grid;
+    gap: 24px;
+}
+
+@media (min-width: 1024px) {
+    .dps-client-portal {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+}
+
+.dps-portal-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    padding: 24px;
+}
+
+.dps-portal-section h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--dps-color-text);
+}
+
+.dps-portal-section p {
+    margin: 0;
+    color: var(--dps-color-subtle);
+}
+
+.dps-portal-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 12px 16px;
+    box-shadow: var(--dps-shadow-sm);
+    font-weight: 600;
+}
+
+.dps-portal-summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-portal-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    overflow: hidden;
+}
+
+.dps-portal-table th,
+.dps-portal-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dps-color-border);
+}
+
+.dps-portal-table thead {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.78rem;
+}
+
+.dps-portal-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+}
+
+.dps-portal-photo-item {
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-portal-photo {
+    width: 100%;
+    height: auto;
+    border-radius: var(--dps-radius-md);
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-portal-messages {
+    display: grid;
+    gap: 16px;
+}
+
+.dps-portal-messages__list {
+    display: grid;
+    gap: 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.dps-portal-message {
+    border-left: 4px solid transparent;
+    background: var(--dps-color-soft-surface);
+    border-radius: var(--dps-radius-md);
+    padding: 14px 16px;
+    box-shadow: inset 0 0 0 1px var(--dps-color-border);
+}
+
+.dps-portal-message--admin {
+    border-left-color: var(--dps-color-primary);
+}
+
+.dps-portal-message--client {
+    border-left-color: var(--dps-color-success);
+}
+
+.dps-portal-message__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.85rem;
+    color: var(--dps-color-muted);
+    margin-bottom: 6px;
+}
+
+.dps-portal-message__status {
+    font-weight: 600;
+    color: var(--dps-color-subtle);
+}
+
+.dps-portal-messages__form textarea {
+    min-height: 120px;
+}
+
+.dps-portal-messages__form .button {
+    align-self: flex-end;
+}
+
+.dps-portal-messages__empty {
+    text-align: center;
+    color: var(--dps-color-muted);
+}
+
+.dps-client-logins {
+    display: grid;
+    gap: 24px;
+}
+
+.dps-client-logins__title {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--dps-color-text);
+}
+
+.dps-client-logins__feedback {
+    display: grid;
+    gap: 12px;
+}
+
+.dps-client-logins__notice {
+    border-radius: var(--dps-radius-md);
+    padding: 12px 16px;
+    font-weight: 600;
+}
+
+.dps-client-logins__notice--success {
+    background: rgba(31, 157, 85, 0.12);
+    color: var(--dps-color-success);
+    border: 1px solid rgba(31, 157, 85, 0.4);
+}
+
+.dps-client-logins__notice--error {
+    background: rgba(220, 53, 69, 0.12);
+    color: var(--dps-color-danger);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.dps-client-logins__filters {
+    display: grid;
+    gap: 16px;
+}
+
+.dps-client-logins__field {
+    display: grid;
+    gap: 6px;
+}
+
+.dps-client-logins__label {
+    font-weight: 600;
+    color: var(--dps-color-subtle);
+}
+
+.dps-client-logins__table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--dps-radius-lg);
+    border: 1px solid var(--dps-color-border);
+    box-shadow: var(--dps-shadow-lg);
+}
+
+.dps-client-logins__table-wrapper table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.dps-client-logins__table-wrapper th,
+.dps-client-logins__table-wrapper td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dps-color-border);
+}
+
+.dps-client-logins__actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-client-logins__empty {
+    text-align: center;
+    color: var(--dps-color-muted);
+    padding: 16px;
+}
+
+.dps-client-portal-login {
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    padding: 24px;
+    box-shadow: var(--dps-shadow-lg);
+}

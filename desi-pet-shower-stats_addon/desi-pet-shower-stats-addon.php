@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Stats_Addon {
     public function __construct() {
         // Registrar abas e seções no plugin base
-        add_action( 'dps_base_nav_tabs', [ $this, 'add_stats_tab' ], 10, 1 );
-        add_action( 'dps_base_sections', [ $this, 'add_stats_section' ], 10, 1 );
+        add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_stats_tab' ], 20, 1 );
+        add_action( 'dps_base_sections_after_history', [ $this, 'add_stats_section' ], 20, 1 );
     }
 
     /**

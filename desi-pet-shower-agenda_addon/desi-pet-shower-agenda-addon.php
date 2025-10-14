@@ -104,8 +104,8 @@ class DPS_Agenda_Addon {
         // Agenda page: carrega FullCalendar e script de agenda
         if ( $agenda_page_id && is_page( $agenda_page_id ) ) {
             // Somente o script de atualização de status será necessário; não carregamos o calendário
-        // Carrega o script da agenda. Alteramos a versão para forçar atualização do cache quando o arquivo for modificado.
-        wp_enqueue_script( 'dps-agenda-addon', plugin_dir_url( __FILE__ ) . 'agenda-addon.js', [ 'jquery' ], '1.0.1', true );
+            // Carrega o script da agenda. Alteramos a versão para forçar atualização do cache quando o arquivo for modificado.
+            wp_enqueue_script( 'dps-agenda-addon', plugin_dir_url( __FILE__ ) . 'agenda-addon.js', [ 'jquery' ], '1.1.0', true );
             wp_localize_script( 'dps-agenda-addon', 'DPS_AG_Addon', [
                 'ajax'          => admin_url( 'admin-ajax.php' ),
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
@@ -116,6 +116,12 @@ class DPS_Agenda_Addon {
                     'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
                     'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
                 ],
+                'messages'      => [
+                    'updating' => __( 'Atualizando status...', 'dps-agenda-addon' ),
+                    'updated'  => __( 'Status atualizado!', 'dps-agenda-addon' ),
+                    'error'    => __( 'Não foi possível atualizar o status.', 'dps-agenda-addon' ),
+                ],
+                'reloadDelay'  => 700,
             ] );
             // Enfileira CSS opcional para tabela (reutilizamos estilos padrão do plugin principal se disponível)
         }
@@ -145,13 +151,82 @@ class DPS_Agenda_Addon {
         // Adiciona estilos inline para destacar linhas da agenda conforme o status. Essas classes serão
         // aplicadas nas linhas de cada agendamento e permitem uma rápida identificação visual da situação
         // (pendente, finalizado, finalizado e pago ou cancelado).
+        echo '<div class="dps-agenda-wrapper">';
         echo '<style>
-        table.dps-table tr.status-pendente { background-color:#fff3cd; }
-        table.dps-table tr.status-finalizado { background-color:#d1ecf1; }
-        table.dps-table tr.status-finalizado_pago { background-color:#d4edda; }
-        table.dps-table tr.status-cancelado { background-color:#f8d7da; }
-        /* Espaçamento consistente no menu de navegação */
-        .dps-agenda-nav .button { margin-right:5px; margin-bottom:5px; }
+        .dps-agenda-wrapper { max-width:100%; }
+        .dps-agenda-wrapper h3,
+        .dps-agenda-wrapper h4,
+        .dps-agenda-wrapper h5 { margin-top:0; }
+        .dps-agenda-wrapper table.dps-table tr.status-pendente { background-color:#fff8e1; border-left:4px solid #f0ad4e; }
+        .dps-agenda-wrapper table.dps-table tr.status-finalizado { background-color:#e8f7fb; border-left:4px solid #17a2b8; }
+        .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago { background-color:#e6f4ea; border-left:4px solid #28a745; }
+        .dps-agenda-wrapper table.dps-table tr.status-cancelado { background-color:#fdecea; border-left:4px solid #dc3545; }
+        .dps-agenda-nav,
+        .dps-agenda-date-form,
+        .dps-agenda-filters { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:18px; background:#f8f9fc; padding:14px 18px; border-radius:14px; border:1px solid #e2e8f0; box-shadow:0 16px 40px rgba(15,23,42,0.08); }
+        .dps-agenda-nav { justify-content:space-between; }
+        .dps-agenda-nav-group { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+        .dps-agenda-date-form label,
+        .dps-agenda-filters label { display:flex; flex-direction:column; gap:6px; font-weight:600; color:#1f2933; min-width:180px; flex:1 1 220px; }
+        .dps-agenda-date-form input[type="date"],
+        .dps-agenda-filters input,
+        .dps-agenda-filters select { width:100%; padding:10px 12px; border:1px solid #d8dde6; border-radius:12px; background:#fff; transition:border-color .2s ease, box-shadow .2s ease; }
+        .dps-agenda-date-form input[type="date"]:focus,
+        .dps-agenda-filters input:focus,
+        .dps-agenda-filters select:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,0.15); }
+        .dps-agenda-date-actions,
+        .dps-agenda-filter-actions { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex:1 1 auto; }
+        .dps-agenda-date-form .dps-agenda-date-actions { margin-left:auto; }
+        .dps-agenda-filters .dps-agenda-filter-actions { margin-left:auto; }
+        .dps-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0.55rem 1.2rem; border-radius:999px; font-weight:600; font-size:0.95rem; line-height:1.1; border:1px solid transparent; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, background .2s ease, color .2s ease, border-color .2s ease; text-decoration:none; box-shadow:0 12px 28px rgba(79,70,229,0.18); }
+        .dps-btn:focus { outline:none; box-shadow:0 0 0 4px rgba(99,102,241,0.2); }
+        .dps-btn--primary { background:linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color:#fff; }
+        .dps-btn--primary:hover { transform:translateY(-1px); box-shadow:0 16px 32px rgba(79,70,229,0.25); }
+        .dps-btn--ghost { background:rgba(99,102,241,0.08); border-color:rgba(99,102,241,0.2); color:#4338ca; box-shadow:none; }
+        .dps-btn--ghost:hover { background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.4); transform:translateY(-1px); }
+        .dps-btn--soft { background:#fff; border-color:#e2e8f0; color:#1f2933; box-shadow:0 8px 20px rgba(15,23,42,0.08); }
+        .dps-btn--soft:hover { border-color:#cbd5f5; color:#3730a3; transform:translateY(-1px); }
+        .dps-btn svg { width:16px; height:16px; }
+        .dps-agenda-summary { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:10px 0 20px; padding:12px 16px; background:#f1f5f9; border-left:4px solid #4f46e5; border-radius:10px; font-weight:600; color:#1f2933; }
+        .dps-agenda-summary span { display:flex; align-items:center; gap:6px; }
+        .dps-status-feedback { display:block; margin-top:4px; font-size:0.85rem; color:#1f2933; }
+        .dps-status-feedback--error { color:#dc3545; }
+        .dps-status-select.is-loading { opacity:0.6; pointer-events:none; }
+        .dps-agenda-table-container { overflow-x:auto; margin-bottom:20px; border-radius:8px; box-shadow:0 1px 2px rgba(15,23,42,0.08); }
+        .dps-agenda-table-container table { margin:0; min-width:760px; }
+        @media (max-width:900px) {
+            .dps-agenda-table-container table { min-width:680px; }
+        }
+        @media (max-width:1024px) {
+            .dps-agenda-nav { justify-content:flex-start; }
+            .dps-agenda-nav-group { flex:1 1 100%; }
+        }
+        @media (max-width:768px) {
+            .dps-agenda-nav,
+            .dps-agenda-date-form,
+            .dps-agenda-filters { padding:12px; }
+            .dps-agenda-nav-group { justify-content:stretch; }
+            .dps-agenda-nav .dps-btn { flex:1 1 calc(50% - 10px); text-align:center; }
+            .dps-agenda-date-form { gap:12px; }
+            .dps-agenda-date-form label { min-width:100%; }
+            .dps-agenda-date-actions,
+            .dps-agenda-filter-actions { width:100%; justify-content:stretch; }
+            .dps-agenda-date-actions .dps-btn,
+            .dps-agenda-filter-actions .dps-btn { flex:1; }
+            .dps-agenda-table-container { box-shadow:none; border-radius:0; overflow:visible; }
+            .dps-agenda-wrapper table.dps-table { border:0; min-width:0; }
+            .dps-agenda-wrapper table.dps-table thead { display:none; }
+            .dps-agenda-wrapper table.dps-table tbody { display:flex; flex-direction:column; gap:16px; }
+            .dps-agenda-wrapper table.dps-table tr { display:flex; flex-direction:column; padding:14px 16px; border-radius:10px; border:1px solid #d8dde6; background:#fff; box-shadow:0 6px 18px rgba(15,23,42,0.08); }
+            .dps-agenda-wrapper table.dps-table td { display:flex; justify-content:space-between; align-items:flex-start; border:0; padding:6px 0; font-size:0.95rem; gap:12px; }
+            .dps-agenda-wrapper table.dps-table td::before { content: attr(data-label); font-weight:600; color:#4b5563; }
+            .dps-agenda-summary { width:100%; }
+        }
+        @media (max-width:480px) {
+            .dps-agenda-nav .dps-btn { flex:1 1 100%; }
+            .dps-agenda-wrapper table.dps-table td { flex-direction:column; }
+            .dps-agenda-wrapper table.dps-table td::before { margin-bottom:4px; }
+        }
         </style>';
         // Acesso permitido: mostrar agenda
         // Filtro de data e visualização
@@ -189,29 +264,34 @@ class DPS_Agenda_Addon {
         // Não propagamos show_all em links de navegação padrão
         $nav_args = $current_args;
         unset( $nav_args['show_all'] );
-        echo '<div class="dps-agenda-nav" style="margin-bottom:10px;">';
+        echo '<div class="dps-agenda-nav">';
+        echo '<div class="dps-agenda-nav-group">';
         // Botões anterior e seguinte com filtros
         // Ao gerar links, não propague show_all (nav_args não contém show_all)
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
         $next_args = array_merge( $nav_args, [ 'dps_date' => $next_date, 'view' => $view ] );
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button" style="margin-right:5px;">' . ( $is_week_view ? esc_html__( 'Semana anterior', 'dps-agenda-addon' ) : esc_html__( 'Dia anterior', 'dps-agenda-addon' ) ) . '</a>';
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button" style="margin-right:5px;">' . ( $is_week_view ? esc_html__( 'Próxima semana', 'dps-agenda-addon' ) : esc_html__( 'Dia seguinte', 'dps-agenda-addon' ) ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Semana anterior', 'dps-agenda-addon' ) : esc_html__( 'Dia anterior', 'dps-agenda-addon' ) ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Próxima semana', 'dps-agenda-addon' ) : esc_html__( 'Dia seguinte', 'dps-agenda-addon' ) ) . '</a>';
+        echo '</div>';
+        echo '<div class="dps-agenda-nav-group">';
         // Toggle entre visualizações e botão de calendário alternativo
         $toggle_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
         if ( $is_week_view ) {
             // Em visualização semanal ou de calendário, exibe botão para voltar à lista diária
             $toggle_args['view'] = 'day';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Lista', 'dps-agenda-addon' ) . '</a>';
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Lista', 'dps-agenda-addon' ) . '</a>';
             // Se estiver no calendário, também exibe botão para a visualização semanal de lista
             if ( $view === 'calendar' ) {
                 $week_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'week' ] );
-                echo ' <a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
+                echo '<a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
             }
         } else {
             // Em visualização diária, exibe botão para a lista semanal
             $toggle_args['view'] = 'week';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
         }
+        echo '</div>';
+        echo '<div class="dps-agenda-nav-group">';
         // Botão "Ver Calendário" removido conforme solicitação do cliente. A visualização de calendário
         // será implementada em uma futura atualização. Por enquanto, não exibe o botão para evitar confusão.
         // Botão Ver Hoje: redefine a data selecionada para a data de hoje, preservando outros filtros
@@ -219,16 +299,17 @@ class DPS_Agenda_Addon {
         $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
         // Se show_all estiver definido, removemos para voltar à visualização normal
         unset( $today_args['show_all'] );
-        echo ' <a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Ver Hoje', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver Hoje', 'dps-agenda-addon' ) . '</a>';
         // Botão Todos os Atendimentos: remove data/view e define show_all=1
         $all_args = $current_args;
         unset( $all_args['dps_date'] );
         unset( $all_args['view'] );
         $all_args['show_all'] = '1';
-        echo ' <a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button">' . esc_html__( 'Todos os Atendimentos', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Todos os Atendimentos', 'dps-agenda-addon' ) . '</a>';
+        echo '</div>';
         echo '</div>';
         // Formulário de seleção de data
-        echo '<form method="get" class="dps-agenda-date-form" style="margin-bottom:15px;">';
+        echo '<form method="get" class="dps-agenda-date-form">';
         // Preserve outros parâmetros, exceto dps_date, view e show_all
         foreach ( $_GET as $k => $v ) {
             if ( $k === 'dps_date' || $k === 'view' || $k === 'show_all' ) {
@@ -239,8 +320,10 @@ class DPS_Agenda_Addon {
         }
         // Preserve view explicitamente, caso exista
         echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
-        echo '<label>' . esc_html__( 'Selecione a data:', 'dps-agenda-addon' ) . ' <input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '"></label> ';
-        echo '<button type="submit" class="button">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
+        echo '<label>' . esc_html__( 'Selecione a data', 'dps-agenda-addon' ) . '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '"></label>';
+        echo '<div class="dps-agenda-date-actions">';
+        echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
+        echo '</div>';
         echo '</form>';
 
         // ========== Filtros por cliente, status e serviço ==========
@@ -272,12 +355,12 @@ class DPS_Agenda_Addon {
             'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
         ];
         // Formulário de filtros
-        echo '<form method="get" class="dps-agenda-filters" style="margin-bottom:15px;">';
+        echo '<form method="get" class="dps-agenda-filters">';
         // Preserve data e view
         echo '<input type="hidden" name="dps_date" value="' . esc_attr( $selected_date ) . '">';
         echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
         // Cliente select
-        echo '<label style="margin-right:10px;">' . esc_html__( 'Cliente:', 'dps-agenda-addon' ) . ' ';
+        echo '<label>' . esc_html__( 'Cliente', 'dps-agenda-addon' );
         echo '<select name="filter_client">';
         echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
         foreach ( $clients as $cl ) {
@@ -286,7 +369,7 @@ class DPS_Agenda_Addon {
         }
         echo '</select></label>';
         // Status select
-        echo '<label style="margin-right:10px;">' . esc_html__( 'Status:', 'dps-agenda-addon' ) . ' ';
+        echo '<label>' . esc_html__( 'Status', 'dps-agenda-addon' );
         echo '<select name="filter_status">';
         foreach ( $status_options as $val => $label ) {
             $selected = ( $filter_status === $val ) ? 'selected' : '';
@@ -294,7 +377,7 @@ class DPS_Agenda_Addon {
         }
         echo '</select></label>';
         // Serviço select
-        echo '<label style="margin-right:10px;">' . esc_html__( 'Serviço:', 'dps-agenda-addon' ) . ' ';
+        echo '<label>' . esc_html__( 'Serviço', 'dps-agenda-addon' );
         echo '<select name="filter_service">';
         echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
         foreach ( $services as $srv ) {
@@ -303,10 +386,12 @@ class DPS_Agenda_Addon {
         }
         echo '</select></label>';
         // Botões
-        echo '<button type="submit" class="button" style="margin-right:5px;">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
+        echo '<div class="dps-agenda-filter-actions">';
+        echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
         // Link para limpar filtros
         $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
-        echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
+        echo '</div>';
         echo '</form>';
         // Carrega agendamentos conforme visualização ou modo "todos"
         $appointments = [];
@@ -374,6 +459,16 @@ class DPS_Agenda_Addon {
         }
         // Renderiza tabela para cada dia, aplicando filtros se necessário
         $has_any = false;
+        $column_labels = [
+            'date'          => __( 'Data', 'dps-agenda-addon' ),
+            'time'          => __( 'Hora', 'dps-agenda-addon' ),
+            'pet'           => __( 'Pet (Cliente)', 'dps-agenda-addon' ),
+            'service'       => __( 'Serviço', 'dps-agenda-addon' ),
+            'status'        => __( 'Status', 'dps-agenda-addon' ),
+            'map'           => __( 'Mapa', 'dps-agenda-addon' ),
+            'confirmation'  => __( 'Confirmação', 'dps-agenda-addon' ),
+            'charge'        => __( 'Cobrança', 'dps-agenda-addon' ),
+        ];
         foreach ( $appointments as $day => $appts ) {
             $has_any = $has_any || ! empty( $appts );
             // Define título do bloco
@@ -437,20 +532,37 @@ class DPS_Agenda_Addon {
                     $completed[] = $appt;
                 }
             }
-            $render_table = function( $apts, $heading ) {
+            $render_table = function( $apts, $heading ) use ( $column_labels ) {
                 if ( empty( $apts ) ) {
                     return;
                 }
+                usort(
+                    $apts,
+                    function( $a, $b ) {
+                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                        if ( $dt_a === $dt_b ) {
+                            return $b->ID <=> $a->ID;
+                        }
+                        return $dt_b <=> $dt_a;
+                    }
+                );
                 echo '<h5>' . esc_html( $heading ) . '</h5>';
                 // Adiciona coluna para cobrança via WhatsApp (somente se usuário logado ou administrador)
+                echo '<div class="dps-agenda-table-container">';
                 echo '<table class="dps-table"><thead><tr>';
-                echo '<th>' . __( 'Data', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Hora', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Pet (Cliente)', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Serviço', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Status', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Mapa', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . __( 'Cobrança', 'dps-agenda-addon' ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['date'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['time'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['pet'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['service'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['status'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['map'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['confirmation'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['charge'] ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
                     $date  = get_post_meta( $appt->ID, 'appointment_date', true );
@@ -464,8 +576,8 @@ class DPS_Agenda_Addon {
                     // Cada linha recebe classes de status e um data attribute para permitir manipulação via JS.
                     echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="status-' . esc_attr( $status ) . '">';
                     // Mostra a data no formato dia-mês-ano
-                    echo '<td>' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
-                    echo '<td>' . esc_html( $time ) . '</td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['date'] ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['time'] ) . '">' . esc_html( $time ) . '</td>';
                     // Nome do pet e cliente com agressivo
                     $pet_name    = $pet_post ? $pet_post->post_title : '';
                     $client_name = $client_post ? $client_post->post_title : '';
@@ -476,9 +588,9 @@ class DPS_Agenda_Addon {
                             $aggr_flag = ' <span class="dps-aggressive-flag" style="color:red; font-weight:bold;">! </span>';
                         }
                     }
-                    echo '<td>' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['pet'] ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
                     // Serviços e assinatura
-                    echo '<td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['service'] ) . '">';
                     $sub_id_meta = get_post_meta( $appt->ID, 'subscription_id', true );
                     if ( $sub_id_meta ) {
                         echo '<span class="dps-subscription-flag" style="font-weight:bold; color:#0073aa;">' . esc_html__( 'Assinatura', 'dps-agenda-addon' ) . '</span> ';
@@ -491,7 +603,7 @@ class DPS_Agenda_Addon {
                     }
                     echo '</td>';
                     // Status (editable if admin)
-                    echo '<td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['status'] ) . '">';
                     $plugin_role = '';
                     if ( isset( $_COOKIE['dps_base_role'] ) ) {
                         $plugin_role = sanitize_text_field( $_COOKIE['dps_base_role'] );
@@ -517,7 +629,7 @@ class DPS_Agenda_Addon {
                         }
                     }
                     if ( $can_edit ) {
-                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '">';
+                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '">';
                         foreach ( $statuses as $value => $label ) {
                             echo '<option value="' . esc_attr( $value ) . '"' . selected( $status, $value, false ) . '>' . esc_html( $label ) . '</option>';
                         }
@@ -527,7 +639,7 @@ class DPS_Agenda_Addon {
                     }
                     echo '</td>';
                     // Mapa
-                    echo '<td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['map'] ) . '">';
                     $map_link = '';
                     if ( $client_post ) {
                         // Tenta usar o endereço em texto (rua/número) para o link do mapa, se existir.
@@ -557,32 +669,89 @@ class DPS_Agenda_Addon {
                         echo '-';
                     }
                     echo '</td>';
+                    // Confirmação via WhatsApp
+                    echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ) . '">';
+                    $confirmation_html = '-';
+                    if ( $status === 'pendente' && $client_post ) {
+                        $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
+                        $whatsapp  = self::format_whatsapp_number( $raw_phone );
+                        if ( $whatsapp ) {
+                            $client_name = $client_post->post_title;
+                            $pet_names   = [];
+                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
+                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
+                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
+                                    $pet_names = $group_data['pet_names'];
+                                }
+                            }
+                            if ( empty( $pet_names ) ) {
+                                $pet_names[] = $pet_name ? $pet_name : __( 'Pet', 'dps-agenda-addon' );
+                            }
+                            $services_ids = get_post_meta( $appt->ID, 'appointment_services', true );
+                            $services_txt = '';
+                            if ( is_array( $services_ids ) && ! empty( $services_ids ) ) {
+                                $service_names = [];
+                                foreach ( $services_ids as $srv_id ) {
+                                    $srv_post = get_post( $srv_id );
+                                    if ( $srv_post ) {
+                                        $service_names[] = $srv_post->post_title;
+                                    }
+                                }
+                                if ( $service_names ) {
+                                    $services_txt = ' (' . implode( ', ', $service_names ) . ')';
+                                }
+                            }
+                            $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
+                            $message = sprintf(
+                                'Olá %s, tudo bem? Poderia confirmar o atendimento do(s) pet(s) %s agendado para %s às %s%s? Caso precise reagendar é só responder esta mensagem. Obrigado!',
+                                $client_name,
+                                implode( ', ', $pet_names ),
+                                $date_fmt,
+                                $time,
+                                $services_txt
+                            );
+                            $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
+                            $confirmation_html = '<a href="' . esc_url( 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message ) ) . '" target="_blank">' . esc_html__( 'Confirmar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                        }
+                    }
+                    echo $confirmation_html;
+                    echo '</td>';
                     // Cobrança via WhatsApp
-                    echo '<td>';
+                    echo '<td data-label="' . esc_attr( $column_labels['charge'] ) . '">';
                     // Mostra link de cobrança apenas para atendimentos finalizados (não assinaturas)
                     $sub_meta = get_post_meta( $appt->ID, 'subscription_id', true );
                     if ( $status === 'finalizado' && empty( $sub_meta ) ) {
                         $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
-                        $total_val    = get_post_meta( $appt->ID, 'appointment_total_value', true );
-                        if ( $client_phone && $total_val ) {
-                            $digits = preg_replace( '/\D+/', '', $client_phone );
-                            if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
-                                $digits = '55' . $digits;
+                        $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+                        $digits       = self::format_whatsapp_number( $client_phone );
+                        if ( $digits && $total_val > 0 ) {
+                            $client_name = $client_post ? $client_post->post_title : '';
+                            $pet_names   = [];
+                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
+                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
+                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
+                                    $pet_names = $group_data['pet_names'];
+                                }
                             }
-                            $cn = $client_name;
-                            $pn = $pet_post ? $pet_post->post_title : '';
-                            $valor_fmt = number_format( (float) $total_val, 2, ',', '.' );
-                            // Recupera link de pagamento gerado via add-on de pagamentos, se existir
+                            if ( empty( $pet_names ) ) {
+                                $pet_names[] = $pet_post ? $pet_post->post_title : '';
+                            }
+                            $valor_fmt    = number_format_i18n( $total_val, 2 );
                             $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
-                            // Link de fallback definido pelo usuário caso o plugin de pagamento não esteja ativo
                             $default_link = 'https://link.mercadopago.com.br/desipetshower';
                             $link_to_use  = $payment_link ? $payment_link : $default_link;
-                            // Monta mensagem padrão de cobrança incluindo PIX e link de pagamento
-                            $msg = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $cn, $pn, $valor_fmt, $link_to_use );
-                            // Permite que outros plugins filtrem a mensagem de WhatsApp
-                            $msg = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
-                            $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
-                            echo '<a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
+                            $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
+                            $links        = [];
+                            $links[]      = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg ) ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
+                                $group_total = number_format_i18n( $group_data['total'], 2 );
+                                $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
+                                $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
+                                $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
+                                $links[]     = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg ) ) . '" target="_blank">' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                            }
+                            echo implode( '<br>', $links );
                         } else {
                             echo '-';
                         }
@@ -593,7 +762,17 @@ class DPS_Agenda_Addon {
                     echo '</tr>';
                 }
                 echo '</tbody></table>';
+                echo '</div>';
             };
+            if ( ! empty( $filtered ) ) {
+                $total_upcoming  = count( $upcoming );
+                $total_completed = count( $completed );
+                echo '<div class="dps-agenda-summary" role="status">';
+                echo '<span><strong>' . esc_html( $total_upcoming ) . '</strong> ' . esc_html( _n( 'atendimento pendente', 'atendimentos pendentes', $total_upcoming, 'dps-agenda-addon' ) ) . '</span>';
+                echo '<span><strong>' . esc_html( $total_completed ) . '</strong> ' . esc_html( _n( 'atendimento finalizado', 'atendimentos finalizados', $total_completed, 'dps-agenda-addon' ) ) . '</span>';
+                echo '<span><strong>' . esc_html( count( $filtered ) ) . '</strong> ' . esc_html__( 'agendamentos no total', 'dps-agenda-addon' ) . '</span>';
+                echo '</div>';
+            }
             // Renderiza tabelas
             $render_table( $upcoming, __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
             $render_table( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
@@ -601,6 +780,7 @@ class DPS_Agenda_Addon {
         if ( ! $has_any ) {
             echo '<p>' . __( 'Nenhum agendamento encontrado para o período selecionado.', 'dps-agenda-addon' ) . '</p>';
         }
+        echo '</div>';
         return ob_get_clean();
     }
 
@@ -880,6 +1060,14 @@ class DPS_Agenda_Addon {
                 wp_mail( $recipient, $subject, $message );
             }
         }
+    }
+
+    private static function format_whatsapp_number( $phone ) {
+        $digits = preg_replace( '/\D+/', '', (string) $phone );
+        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
+            $digits = '55' . $digits;
+        }
+        return $digits;
     }
 }
 

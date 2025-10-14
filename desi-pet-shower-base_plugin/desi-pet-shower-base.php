@@ -36,8 +36,9 @@ class DPS_Base_Plugin {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // Manipula ações de formulário (salvar e excluir)
         add_action( 'init', [ $this, 'maybe_handle_request' ] );
-        // Shortcode para exibir a aplicação no frontend
+        // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
+        add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
     }
 
     /**
@@ -147,6 +148,19 @@ class DPS_Base_Plugin {
         }
         wp_localize_script( 'dps-base-script', 'DPSBase', [
             'pets' => $pets_data,
+        ] );
+        wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
+            'summarySingle'     => __( 'Pet selecionado: %s', 'dps-base' ),
+            'summaryMultiple'   => __( '%d pets selecionados: %s', 'dps-base' ),
+            'selectPetWarning'  => __( 'Selecione pelo menos um pet para o agendamento.', 'dps-base' ),
+            'historySummary'    => __( '%1$s atendimentos filtrados. Total estimado: R$ %2$s.', 'dps-base' ),
+            'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'dps-base' ),
+            'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'dps-base' ),
+            'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'dps-base' ),
+            'pendingTitle'          => __( 'Pagamentos em aberto para %s.', 'dps-base' ),
+            'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'dps-base' ),
+            'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'dps-base' ),
+            'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'dps-base' ),
         ] );
     }
 

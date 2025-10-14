@@ -18,8 +18,8 @@ class DPS_Subscription_Addon {
         // Registrar CPT para assinaturas
         add_action( 'init', [ $this, 'register_subscription_cpt' ] );
         // Registrar abas e seções no plugin base
-        add_action( 'dps_base_nav_tabs', [ $this, 'add_subscriptions_tab' ], 10, 1 );
-        add_action( 'dps_base_sections', [ $this, 'add_subscriptions_section' ], 10, 1 );
+        add_action( 'dps_base_nav_tabs_after_pets', [ $this, 'add_subscriptions_tab' ], 20, 1 );
+        add_action( 'dps_base_sections_after_pets', [ $this, 'add_subscriptions_section' ], 20, 1 );
         // Manipular salvamento, exclusão e renovação
         add_action( 'init', [ $this, 'maybe_handle_subscription_request' ] );
 
