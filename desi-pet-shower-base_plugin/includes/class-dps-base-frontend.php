@@ -83,6 +83,10 @@ class DPS_Base_Frontend {
             if ( implode( '-', $candidate ) !== $signature ) {
                 continue;
             }
+            $status = get_post_meta( $item->ID, 'appointment_status', true );
+            if ( 'finalizado' !== $status && 'finalizado_pago' !== $status && 'finalizado e pago' !== $status ) {
+                continue;
+            }
             $ids[] = $item->ID;
             $single_pet_id = (int) get_post_meta( $item->ID, 'appointment_pet_id', true );
             if ( $single_pet_id ) {
