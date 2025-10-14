@@ -1764,9 +1764,10 @@ EOT;
         if ( $extra_value < 0 ) {
             $extra_value = 0;
         }
-        $services_selected = [];
+        $services_selected = null;
         if ( isset( $_POST['appointment_services'] ) ) {
-            $services_raw = wp_unslash( $_POST['appointment_services'] );
+            $services_selected = [];
+            $services_raw      = wp_unslash( $_POST['appointment_services'] );
             if ( ! is_array( $services_raw ) ) {
                 $services_raw = [ $services_raw ];
             }
@@ -1777,10 +1778,11 @@ EOT;
                 }
             }
         }
-        $service_price_map = [];
+        $service_price_map = null;
         if ( isset( $_POST['service_price'] ) ) {
             $raw_price_map = wp_unslash( $_POST['service_price'] );
             if ( is_array( $raw_price_map ) ) {
+                $service_price_map = [];
                 foreach ( $raw_price_map as $key => $value ) {
                     if ( is_scalar( $value ) ) {
                         $normalized_key                      = is_int( $key ) ? $key : (string) $key;
