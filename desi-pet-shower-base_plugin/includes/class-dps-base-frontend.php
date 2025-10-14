@@ -1388,9 +1388,19 @@ EOT;
                     update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
                     update_post_meta( $appt_new, 'appointment_services', $service_ids );
                     update_post_meta( $appt_new, 'appointment_service_prices', $prices );
-                    // Define valor total individual: preço de serviços base + preço da tosa apenas na ocorrência definida
+                    // Define valor total individual: soma serviços base, extras e tosa (apenas na ocorrência definida)
                     $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
+                    if ( $subscription_extra_value > 0 ) {
+                        $total_single += $subscription_extra_value;
+                    }
                     update_post_meta( $appt_new, 'appointment_total_value', $total_single );
+                    if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+                        update_post_meta( $appt_new, 'subscription_extra_description', $subscription_extra_description );
+                        update_post_meta( $appt_new, 'subscription_extra_value', $subscription_extra_value );
+                    } else {
+                        delete_post_meta( $appt_new, 'subscription_extra_description' );
+                        delete_post_meta( $appt_new, 'subscription_extra_value' );
+                    }
                     update_post_meta( $appt_new, 'appointment_status', 'pendente' );
                     update_post_meta( $appt_new, 'subscription_id', $sub_id );
                     // Dispara gancho pós‑salvamento para cada agendamento
