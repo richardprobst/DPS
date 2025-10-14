@@ -1,202 +1,1091 @@
 /*
- * Estilos básicos para o plugin Desi Pet Shower Base.
+ * Tema visual unificado para o ecossistema Desi Pet Shower.
+ * As regras abaixo modernizam a interface do plugin base e de todos os add-ons,
+ * reutilizando a mesma paleta, espaçamentos e componentes inspirados na agenda.
  */
-.dps-base-wrapper {
-    margin: 20px 0;
-    font-family: Arial, sans-serif;
+
+:root {
+    --dps-color-primary: #6366f1;
+    --dps-color-primary-dark: #4f46e5;
+    --dps-color-primary-soft: rgba(99, 102, 241, 0.12);
+    --dps-color-primary-ghost: rgba(99, 102, 241, 0.08);
+    --dps-color-danger: #dc3545;
+    --dps-color-warning: #f0ad4e;
+    --dps-color-success: #1f9d55;
+    --dps-color-info: #0ea5e9;
+    --dps-color-text: #1f2933;
+    --dps-color-subtle: #475569;
+    --dps-color-muted: #64748b;
+    --dps-color-border: #e2e8f0;
+    --dps-color-surface: #ffffff;
+    --dps-color-soft-surface: #f8f9fc;
+    --dps-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.08);
+    --dps-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+    --dps-shadow-sm: 0 4px 10px rgba(15, 23, 42, 0.06);
+    --dps-radius-lg: 18px;
+    --dps-radius-md: 12px;
+    --dps-radius-sm: 8px;
+    --dps-transition: 0.2s ease;
 }
-.dps-nav {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    border-bottom: 2px solid #ccc;
+
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-push-wrapper,
+    .dps-subscription-wrapper,
+    .dps-services-admin,
+    .dps-stats-wrapper
+) {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--dps-color-text);
+    line-height: 1.6;
+    margin: 0 auto 24px;
 }
-.dps-nav li {
-    margin-right: 10px;
-}
-.dps-nav .dps-tab-link {
-    display: inline-block;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-bottom: none;
-    background: #f7f7f7;
+
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs
+) a {
+    color: var(--dps-color-primary-dark);
     text-decoration: none;
-    color: #333;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
+    transition: color var(--dps-transition);
 }
-.dps-nav .dps-tab-link.active,
-.dps-nav .dps-tab-link:hover {
-    background: #fff;
-    border-color: #aaa;
-    color: #000;
+
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs
+) a:hover {
+    color: var(--dps-color-primary);
 }
+
+:where(
+    .dps-base-wrapper h2,
+    .dps-base-wrapper h3,
+    .dps-base-wrapper h4,
+    .dps-base-wrapper h5,
+    .dps-agenda-wrapper h2,
+    .dps-agenda-wrapper h3,
+    .dps-agenda-wrapper h4,
+    .dps-agenda-wrapper h5,
+    .dps-registration-form h2,
+    .dps-registration-form h3,
+    .dps-registration-form h4,
+    .dps-client-portal h2,
+    .dps-client-portal h3,
+    .dps-client-portal h4,
+    .dps-client-logins h2,
+    .dps-client-logins h3,
+    .dps-client-logins h4,
+    .dps-fin-docs h2,
+    .dps-fin-docs h3,
+    .dps-fin-docs h4
+) {
+    color: var(--dps-color-text);
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+/* Componentes principais -------------------------------------------------- */
+
+.dps-card,
+.dps-section {
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    padding: 24px;
+}
+
 .dps-section {
     display: none;
-    border: 1px solid #ccc;
-    border-top: none;
-    padding: 15px;
-    background: #fff;
 }
+
 .dps-section.active {
     display: block;
 }
-.dps-form p {
-    margin-bottom: 10px;
+
+.dps-card--muted {
+    background: var(--dps-color-soft-surface);
 }
+
+.dps-base-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dps-nav {
+    list-style: none;
+    margin: 0;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+}
+
+.dps-nav li {
+    margin: 0;
+}
+
+.dps-nav .dps-tab-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-weight: 600;
+    color: var(--dps-color-subtle);
+    transition: transform 0.18s ease, box-shadow var(--dps-transition), background var(--dps-transition), color var(--dps-transition);
+}
+
+.dps-nav .dps-tab-link:hover,
+.dps-nav .dps-tab-link:focus {
+    color: var(--dps-color-primary-dark);
+    background: var(--dps-color-primary-ghost);
+    outline: none;
+}
+
+.dps-nav .dps-tab-link.active {
+    background: linear-gradient(135deg, var(--dps-color-primary) 0%, var(--dps-color-primary-dark) 100%);
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.22);
+}
+
+.dps-toolbar,
+.dps-history-toolbar,
+.dps-agenda-nav,
+.dps-agenda-date-form,
+.dps-agenda-filters,
+.dps-client-logins__filters,
+.dps-client-portal .dps-portal-toolbar,
+.dps-finance-date-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px 18px;
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-history-toolbar,
+.dps-agenda-nav,
+.dps-client-logins__filters {
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.dps-history-filters,
+.dps-agenda-nav-group,
+.dps-agenda-filter-actions,
+.dps-agenda-date-actions,
+.dps-history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.dps-summary,
+.dps-history-summary,
+.dps-agenda-summary,
+.dps-client-logins__summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: #f1f5f9;
+    border-radius: var(--dps-radius-md);
+    border-left: 4px solid var(--dps-color-primary);
+    padding: 12px 18px;
+    font-weight: 600;
+    color: var(--dps-color-subtle);
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-summary span,
+.dps-history-summary span,
+.dps-agenda-summary span,
+.dps-client-logins__summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Formulários -------------------------------------------------------------- */
+
+.dps-form,
+.dps-agenda-date-form,
+.dps-agenda-filters,
+.dps-registration-form form,
+.dps-client-portal form,
+.dps-client-logins__filters,
+.dps-finance-date-filter,
+.dps-backup-actions,
+.dps-push-form,
+.dps-subscription-form,
+.dps-services-form,
+.dps-stats-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.dps-finance-date-filter {
+    margin-bottom: 18px;
+}
+
+.dps-inline-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-client-fields,
+.dps-pet-fieldset,
+.dps-registration-form .dps-pet-fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.dps-form p,
+.dps-registration-form form p,
+.dps-client-portal form p,
+.dps-subscription-form p,
+.dps-services-form p,
+.dps-stats-filters p,
+.dps-finance-date-filter label,
+.dps-agenda-date-form label,
+.dps-agenda-filters label,
+.dps-client-logins__filters label {
+    flex: 1 1 220px;
+    margin: 0;
+}
+
+.dps-field-full {
+    flex: 1 1 100% !important;
+}
+
+.dps-field-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex: 1 1 100%;
+}
+
+.dps-field-help {
+    font-size: 0.82rem;
+    color: var(--dps-color-muted);
+    margin-top: -6px;
+}
+
+.dps-form label,
+.dps-registration-form label,
+.dps-client-portal label,
+.dps-client-logins__filters label,
+.dps-services-form label,
+.dps-subscription-form label,
+.dps-stats-filters label,
+.dps-agenda-date-form label,
+.dps-agenda-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--dps-color-subtle);
+}
+
 .dps-form input[type="text"],
 .dps-form input[type="email"],
 .dps-form input[type="date"],
 .dps-form input[type="time"],
 .dps-form input[type="number"],
+.dps-form input[type="search"],
+.dps-form input[type="password"],
+.dps-form input[type="tel"],
 .dps-form select,
-.dps-form textarea {
+.dps-form textarea,
+.dps-registration-form input,
+.dps-registration-form select,
+.dps-registration-form textarea,
+.dps-client-portal input,
+.dps-client-portal select,
+.dps-client-portal textarea,
+.dps-client-logins__filters input,
+.dps-finance-date-filter input,
+.dps-finance-date-filter select,
+.dps-agenda-date-form input[type="date"],
+.dps-agenda-filters input,
+.dps-agenda-filters select,
+.dps-services-form input,
+.dps-services-form select,
+.dps-services-form textarea,
+.dps-subscription-form input,
+.dps-subscription-form select,
+.dps-subscription-form textarea {
     width: 100%;
-    padding: 6px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    background: #fff;
+    color: var(--dps-color-text);
+    transition: border-color var(--dps-transition), box-shadow var(--dps-transition);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
 }
-.dps-form textarea {
+
+.dps-form textarea,
+.dps-registration-form textarea,
+.dps-client-portal textarea,
+.dps-services-form textarea,
+.dps-subscription-form textarea {
     resize: vertical;
+    min-height: 90px;
 }
-.dps-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+
+.dps-form input:focus,
+.dps-form select:focus,
+.dps-form textarea:focus,
+.dps-registration-form input:focus,
+.dps-registration-form select:focus,
+.dps-registration-form textarea:focus,
+.dps-client-portal input:focus,
+.dps-client-portal select:focus,
+.dps-client-portal textarea:focus,
+.dps-client-logins__filters input:focus,
+.dps-finance-date-filter input:focus,
+.dps-finance-date-filter select:focus,
+.dps-agenda-date-form input:focus,
+.dps-agenda-filters input:focus,
+.dps-agenda-filters select:focus {
+    outline: none;
+    border-color: var(--dps-color-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
-.dps-table th,
-.dps-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-.dps-table th {
-    background: #f0f0f0;
-    font-weight: bold;
-}
+
 .dps-search {
     width: 100%;
-    padding: 6px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: var(--dps-radius-md);
+    border: 1px solid var(--dps-color-border);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
 }
-.dps-history-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-.dps-history-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-.dps-history-filter label {
-    display: flex;
-    flex-direction: column;
-    font-size: 13px;
+
+/* Botões ------------------------------------------------------------------ */
+
+.dps-btn,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.55rem 1.3rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
     font-weight: 600;
-    color: #1d2327;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow var(--dps-transition), background var(--dps-transition), color var(--dps-transition);
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.18);
+    background: linear-gradient(135deg, var(--dps-color-primary) 0%, var(--dps-color-primary-dark) 100%);
+    color: #fff;
 }
-.dps-history-filter input,
-.dps-history-filter select {
-    min-width: 170px;
+
+.dps-btn:hover,
+.dps-btn:focus,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button:hover,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) button:hover,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button:focus,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) button:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(79, 70, 229, 0.25);
+    outline: none;
 }
-.dps-history-actions {
+
+.dps-btn--ghost,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button.button-secondary,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) button.button-secondary {
+    background: var(--dps-color-primary-ghost);
+    color: var(--dps-color-primary-dark);
+    box-shadow: none;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.dps-btn--ghost:hover,
+.dps-btn--ghost:focus,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button.button-secondary:hover,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) button.button-secondary:hover {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.dps-btn--soft,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs,
+    .dps-backup-wrapper,
+    .dps-services-admin
+) .button.button-small,
+.dps-btn--muted {
+    background: #fff;
+    color: var(--dps-color-subtle);
+    border: 1px solid var(--dps-color-border);
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-btn--muted:hover,
+.dps-btn--soft:hover,
+.dps-btn--muted:focus,
+.dps-btn--soft:focus {
+    color: var(--dps-color-primary-dark);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.dps-btn svg,
+:where(
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs
+) .button svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Tabelas ------------------------------------------------------------------ */
+
+.dps-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 16px;
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    overflow: hidden;
+}
+
+.dps-table thead {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    color: var(--dps-color-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.78rem;
+}
+
+.dps-table th,
+.dps-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--dps-color-border);
+}
+
+.dps-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-table tbody tr:nth-child(odd) {
+    background: rgba(99, 102, 241, 0.02);
+}
+
+.dps-table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.dps-table a.button {
+    margin-right: 8px;
+}
+
+.dps-table .dps-actions {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
+    gap: 10px;
 }
-.dps-history-summary {
-    background: #f8f9fa;
-    border: 1px solid #e2e6ea;
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-bottom: 12px;
+
+.dps-table .dps-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--dps-color-soft-surface);
+    color: var(--dps-color-subtle);
 }
+
+.dps-table .dps-status-pill--success {
+    background: rgba(31, 157, 85, 0.12);
+    color: var(--dps-color-success);
+}
+
+.dps-table .dps-status-pill--warning {
+    background: rgba(240, 173, 78, 0.18);
+    color: var(--dps-color-warning);
+}
+
+.dps-table .dps-status-pill--danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--dps-color-danger);
+}
+
+.dps-table .dps-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    font-size: 0.8rem;
+}
+
+/* Listas auxiliares ------------------------------------------------------- */
+
 .dps-pet-picker {
-    border: 1px solid #e2e2e2;
-    background: #fafafa;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 15px;
+    border: 1px solid var(--dps-color-border);
+    background: var(--dps-color-soft-surface);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
+    margin-bottom: 18px;
+    box-shadow: var(--dps-shadow-sm);
 }
+
 .dps-pet-picker--disabled {
-    opacity: 0.6;
+    opacity: 0.55;
+    pointer-events: none;
 }
+
 .dps-pet-picker--warning {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+    border-color: var(--dps-color-danger);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
 }
+
 .dps-pet-picker-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
+
 .dps-pet-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
+    gap: 10px;
 }
+
 .dps-pet-option {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px;
-    border: 1px solid #d8d8d8;
-    border-radius: 6px;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
     background: #fff;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--dps-transition), box-shadow var(--dps-transition);
+    box-shadow: var(--dps-shadow-sm);
 }
+
 .dps-pet-option:hover {
-    border-color: #0073aa;
-    box-shadow: 0 0 0 1px rgba(0, 115, 170, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
-.dps-pet-option input[type="checkbox"] {
-    margin-right: 6px;
-}
+
 .dps-pet-option .dps-pet-name {
     font-weight: 600;
-    color: #1d2327;
+    color: var(--dps-color-text);
 }
+
 .dps-pet-option .dps-pet-owner,
 .dps-pet-option .dps-pet-breed,
 .dps-pet-option .dps-pet-size {
-    font-size: 12px;
-    color: #555d66;
+    font-size: 0.8rem;
+    color: var(--dps-color-muted);
 }
-.dps-pet-option .dps-pet-breed::before,
-.dps-pet-option .dps-pet-owner::before,
-.dps-pet-option .dps-pet-size::before {
-    content: '';
+
+.dps-pet-fieldset {
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 18px;
+    margin: 0 0 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: #fff;
+    box-shadow: var(--dps-shadow-sm);
 }
+
+.dps-pet-fieldset legend {
+    font-weight: 700;
+    padding: 0 6px;
+    color: var(--dps-color-subtle);
+}
+
+.dps-pet-fieldset p {
+    flex: 1 1 calc(50% - 16px);
+    margin: 0;
+}
+
+.dps-pet-fieldset textarea {
+    min-height: 80px;
+}
+
+/* Agrupamentos de agendamentos */
+
 .dps-appointments-group {
     margin-top: 20px;
-    padding: 16px;
-    border-radius: 10px;
-    border-left: 6px solid #0d6efd;
-    background: #f4f9ff;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    padding: 20px;
+    border-radius: var(--dps-radius-lg);
+    border-left: 6px solid var(--dps-color-info);
+    background: #f1f5f9;
+    box-shadow: var(--dps-shadow-md);
 }
+
 .dps-appointments-group h4 {
+    margin-top: 0;
+    margin-bottom: 14px;
+}
+
+.dps-appointments-group--overdue {
+    border-left-color: var(--dps-color-danger);
+    background: #fdecea;
+}
+
+.dps-appointments-group--finalized {
+    border-left-color: var(--dps-color-success);
+    background: #e6f4ea;
+}
+
+/* Estados e alertas ------------------------------------------------------- */
+
+.status-pendente {
+    background: #fff8e1;
+    border-left: 4px solid var(--dps-color-warning);
+}
+
+.status-finalizado {
+    background: #e8f7fb;
+    border-left: 4px solid var(--dps-color-info);
+}
+
+.status-finalizado_pago {
+    background: #e6f4ea;
+    border-left: 4px solid var(--dps-color-success);
+}
+
+.status-cancelado {
+    background: #fdecea;
+    border-left: 4px solid var(--dps-color-danger);
+}
+
+.dps-table tr.fin-status-em_aberto {
+    background: #fff8e1;
+    border-left: 4px solid var(--dps-color-warning);
+}
+
+.dps-table tr.fin-status-pago {
+    background: #e6f4ea;
+    border-left: 4px solid var(--dps-color-success);
+}
+
+.dps-status-feedback {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--dps-color-subtle);
+}
+
+.dps-status-feedback--error {
+    color: var(--dps-color-danger);
+}
+
+.dps-status-select.is-loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.notice {
+    border-radius: var(--dps-radius-md);
+    padding: 16px 18px;
+    margin: 18px 0;
+    border-left-width: 5px;
+}
+
+.notice-success {
+    border-left-color: var(--dps-color-success);
+    background: rgba(31, 157, 85, 0.1);
+}
+
+.notice-error {
+    border-left-color: var(--dps-color-danger);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+/* Componentes específicos ------------------------------------------------- */
+
+.dps-backup-actions {
+    gap: 24px;
+}
+
+.dps-backup-box {
+    flex: 1 1 280px;
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    padding: 20px;
+    box-shadow: var(--dps-shadow-md);
+}
+
+.dps-partial-form {
+    margin: 18px 0;
+    padding: 20px;
+    border-radius: var(--dps-radius-md);
+    border: 1px solid var(--dps-color-border);
+    background: var(--dps-color-soft-surface);
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-backup-box h4 {
     margin-top: 0;
     margin-bottom: 12px;
 }
-.dps-appointments-group--overdue {
-    border-left-color: #dc3545;
-    background: #fff5f5;
+
+.dps-client-portal table,
+.dps-client-logins table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
 }
-.dps-appointments-group--finalized {
-    border-left-color: #198754;
-    background: #f3fdf7;
+
+.dps-client-portal table thead,
+.dps-client-logins table thead {
+    background: #eef2ff;
+}
+
+.dps-client-portal table th,
+.dps-client-portal table td,
+.dps-client-logins table th,
+.dps-client-logins table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dps-color-border);
+}
+
+.dps-client-portal table tr:last-child td,
+.dps-client-logins table tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-fin-docs-list {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.dps-fin-docs-list li {
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-fin-docs-list strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.dps-client-logins__table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    border: 1px solid var(--dps-color-border);
+}
+
+.dps-client-logins__actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-client-logins__action {
+    margin-right: 0;
+}
+
+.dps-client-logins__empty {
+    background: var(--dps-color-soft-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
+    text-align: center;
+    color: var(--dps-color-muted);
+}
+
+.dps-share-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(37, 211, 102, 0.14);
+    color: #1f8727;
+    font-weight: 600;
+}
+
+.dps-share-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.22);
+}
+
+/* Agenda responsiva ------------------------------------------------------- */
+
+.dps-agenda-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dps-agenda-table-container,
+.dps-table-container {
+    overflow-x: auto;
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-lg);
+    border: 1px solid var(--dps-color-border);
+}
+
+.dps-agenda-wrapper table {
+    margin: 0;
+    min-width: 760px;
+}
+
+@media (max-width: 1024px) {
+    .dps-nav,
+    .dps-toolbar,
+    .dps-history-toolbar,
+    .dps-agenda-nav,
+    .dps-agenda-date-form,
+    .dps-agenda-filters,
+    .dps-client-logins__filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-history-actions,
+    .dps-agenda-date-actions,
+    .dps-agenda-filter-actions {
+        justify-content: stretch;
+    }
+
+    .dps-nav .dps-tab-link {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 900px) {
+    .dps-agenda-wrapper table {
+        min-width: 680px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dps-base-wrapper,
+    .dps-agenda-wrapper,
+    .dps-registration-form,
+    .dps-client-portal,
+    .dps-client-logins,
+    .dps-fin-docs {
+        margin-bottom: 18px;
+    }
+
+    .dps-form p,
+    .dps-registration-form form p,
+    .dps-client-portal form p,
+    .dps-services-form p,
+    .dps-subscription-form p,
+    .dps-stats-filters p {
+        flex: 1 1 100%;
+    }
+
+    .dps-pet-fieldset {
+        flex-direction: column;
+    }
+
+    .dps-pet-fieldset p {
+        flex: 1 1 100%;
+    }
+
+    .dps-agenda-wrapper table.dps-table {
+        border: none;
+        min-width: 0;
+    }
+
+    .dps-agenda-wrapper table.dps-table thead {
+        display: none;
+    }
+
+    .dps-agenda-wrapper table.dps-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .dps-agenda-wrapper table.dps-table tr {
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        border-radius: var(--dps-radius-lg);
+        border: 1px solid var(--dps-color-border);
+        background: #fff;
+        box-shadow: var(--dps-shadow-md);
+    }
+
+    .dps-agenda-wrapper table.dps-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border: 0;
+        padding: 6px 0;
+        font-size: 0.95rem;
+    }
+
+    .dps-agenda-wrapper table.dps-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--dps-color-muted);
+    }
+}
+
+@media (max-width: 520px) {
+    .dps-agenda-wrapper table.dps-table td {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dps-agenda-wrapper table.dps-table td::before {
+        margin-bottom: 4px;
+    }
 }
 .dps-appointments-group--upcoming {
     border-left-color: #0d6efd;
