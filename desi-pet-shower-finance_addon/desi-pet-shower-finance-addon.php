@@ -19,8 +19,8 @@ if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
 class DPS_Finance_Addon {
     public function __construct() {
         // Registra abas e seções no plugin base
-        add_action( 'dps_base_nav_tabs', [ $this, 'add_finance_tab' ], 10, 1 );
-        add_action( 'dps_base_sections', [ $this, 'add_finance_section' ], 10, 1 );
+        add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_finance_tab' ], 10, 1 );
+        add_action( 'dps_base_sections_after_history', [ $this, 'add_finance_section' ], 10, 1 );
         // Trata salvamento e exclusão de transações
         add_action( 'init', [ $this, 'maybe_handle_finance_actions' ] );
         // Cria tabela de parcelas de pagamentos (pagamentos parciais) se ainda não existir

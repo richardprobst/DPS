@@ -20,8 +20,8 @@ class DPS_Services_Addon {
         // Registra CPT
         add_action( 'init', [ $this, 'register_service_cpt' ] );
         // Adiciona abas e seções ao plugin base
-        add_action( 'dps_base_nav_tabs', [ $this, 'add_services_tab' ], 10, 1 );
-        add_action( 'dps_base_sections', [ $this, 'add_services_section' ], 10, 1 );
+        add_action( 'dps_base_nav_tabs_after_pets', [ $this, 'add_services_tab' ], 10, 1 );
+        add_action( 'dps_base_sections_after_pets', [ $this, 'add_services_section' ], 10, 1 );
         // Manipula salvamento e exclusão de serviços
         add_action( 'init', [ $this, 'maybe_handle_service_request' ] );
         // Adiciona campos de serviços ao formulário de agendamento
