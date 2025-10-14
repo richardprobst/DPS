@@ -486,6 +486,14 @@ class DPS_Base_Frontend {
         echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'dps-base' ) . '</a></li>';
         // Espaço para add-ons exibirem abas após o histórico
         do_action( 'dps_base_nav_tabs_after_history', false );
+        // Alias de compatibilidade: mantém as abas de configurações no shortcode original
+        if ( has_action( 'dps_settings_nav_tabs' ) ) {
+            /**
+             * Permite que instalações existentes continuem exibindo abas administrativas no
+             * shortcode [dps_base] até que a nova página dedicada seja provisionada.
+             */
+            do_action( 'dps_settings_nav_tabs', false );
+        }
         echo '</ul>';
         // Seções principais na nova ordem
         echo self::section_agendas( false );
@@ -496,6 +504,13 @@ class DPS_Base_Frontend {
         echo self::section_history();
         // Seções adicionadas após o histórico
         do_action( 'dps_base_sections_after_history', false );
+        if ( has_action( 'dps_settings_sections' ) ) {
+            /**
+             * As mesmas seções administrativas também são renderizadas aqui como fallback
+             * para instalações que ainda dependem do shortcode [dps_base].
+             */
+            do_action( 'dps_settings_sections', false );
+        }
         echo '</div>';
         return ob_get_clean();
     }
