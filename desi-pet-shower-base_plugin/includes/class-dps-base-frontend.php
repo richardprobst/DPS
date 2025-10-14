@@ -222,10 +222,53 @@ class DPS_Base_Frontend {
      *
      * @return string
      */
+    private static function get_current_page_url() {
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+            $request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+            if ( is_string( $request_uri ) && '' !== $request_uri ) {
+                return esc_url_raw( home_url( $request_uri ) );
+            }
+        }
+
+        $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+        if ( $queried_id ) {
+            return get_permalink( $queried_id );
+        }
+
+        global $post;
+        if ( isset( $post->ID ) ) {
+            return get_permalink( $post->ID );
+        }
+
+        return home_url();
+    }
+
     private static function get_redirect_base_url() {
+        if ( isset( $_POST['dps_redirect_url'] ) ) {
+            $raw_redirect = wp_unslash( $_POST['dps_redirect_url'] );
+            if ( is_string( $raw_redirect ) ) {
+                $raw_redirect = trim( $raw_redirect );
+                if ( '' !== $raw_redirect ) {
+                    $validated = wp_validate_redirect( $raw_redirect, false );
+                    if ( $validated ) {
+                        return esc_url_raw( $validated );
+                    }
+                    if ( 0 === strpos( $raw_redirect, '/' ) || 0 === strpos( $raw_redirect, '?' ) ) {
+                        $candidate = home_url( $raw_redirect );
+                        $candidate_validated = wp_validate_redirect( $candidate, false );
+                        if ( $candidate_validated ) {
+                            return esc_url_raw( $candidate_validated );
+                        }
+                    }
+                }
+            }
+        }
         $referer = wp_get_referer();
         if ( $referer ) {
-            return esc_url_raw( $referer );
+            $referer_validated = wp_validate_redirect( $referer, false );
+            if ( $referer_validated ) {
+                return esc_url_raw( $referer_validated );
+            }
         }
 
         $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
@@ -880,7 +923,7 @@ class DPS_Base_Frontend {
                 echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_label ) ) . '</strong>';
                 echo '<ul>';
                 foreach ( $notice_data['transactions'] as $row ) {
-                    $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd-m-Y', strtotime( $row['data'] ) ) : '';
+                    $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
                     $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
                     $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
                     $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
@@ -891,42 +934,12 @@ class DPS_Base_Frontend {
             }
             delete_transient( $notice_key );
         }
-        // Alerta de pagamentos pendentes
-        if ( ! $visitor_only ) {
-            $sel_client = $meta['client_id'] ?? '';
-            // Se não estiver editando e houver pré-seleção, usa pref_client ou meta já definido
-            if ( ! $edit_id && isset( $_GET['pref_client'] ) && ! $sel_client ) {
-                $sel_client = intval( $_GET['pref_client'] );
-            }
-            if ( $sel_client ) {
-                $pending_rows = self::get_client_pending_transactions( $sel_client );
-                if ( $pending_rows ) {
-                    $client_post = get_post( $sel_client );
-                    $client_name = $client_post ? $client_post->post_title : '';
-                    echo '<div class="dps-alert dps-alert--danger">';
-                    if ( $client_name ) {
-                        echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_name ) ) . '</strong>';
-                    } else {
-                        echo '<strong>' . esc_html__( 'Este cliente possui pagamentos pendentes.', 'dps-base' ) . '</strong>';
-                    }
-                    echo '<ul>';
-                    foreach ( $pending_rows as $row ) {
-                        $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd-m-Y', strtotime( $row['data'] ) ) : '';
-                        $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
-                        $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
-                        $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
-                        echo '<li>' . esc_html( $message ) . '</li>';
-                    }
-                    echo '</ul>';
-                    echo '</div>';
-                }
-            }
-        }
         // Formulário de agendamento
         if ( ! $visitor_only ) {
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
             wp_nonce_field( 'dps_action', 'dps_nonce' );
+            echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
             }
@@ -954,13 +967,68 @@ class DPS_Base_Frontend {
                 $meta['client_id'] = $pref_client;
             }
             $sel_client = $meta['client_id'] ?? '';
-            echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" required>';
+            echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
             echo '<option value="">' . esc_html__( 'Selecione...', 'dps-base' ) . '</option>';
+            $pending_cache = [];
             foreach ( $clients as $client ) {
-                $sel = (string) $client->ID === (string) $sel_client ? 'selected' : '';
-                echo '<option value="' . esc_attr( $client->ID ) . '" ' . $sel . '>' . esc_html( $client->post_title ) . '</option>';
+                if ( ! array_key_exists( $client->ID, $pending_cache ) ) {
+                    $pending_cache[ $client->ID ] = self::get_client_pending_transactions( $client->ID );
+                }
+                $pending_rows = $pending_cache[ $client->ID ];
+                $pending_attr = ' data-has-pending="' . ( $pending_rows ? '1' : '0' ) . '"';
+                if ( $pending_rows ) {
+                    $payload = [];
+                    foreach ( $pending_rows as $row ) {
+                        $payload[] = [
+                            'date'        => ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '',
+                            'value'       => number_format_i18n( (float) $row['valor'], 2 ),
+                            'description' => ! empty( $row['descricao'] ) ? wp_strip_all_tags( $row['descricao'] ) : __( 'Serviço', 'dps-base' ),
+                        ];
+                    }
+                    $pending_attr .= ' data-pending-info=\'' . esc_attr( wp_json_encode( $payload ) ) . '\'';
+                }
+                $option_attrs  = ' value="' . esc_attr( $client->ID ) . '"';
+                if ( (string) $client->ID === (string) $sel_client ) {
+                    $option_attrs .= ' selected';
+                }
+                $option_attrs .= $pending_attr;
+                echo '<option' . $option_attrs . '>' . esc_html( $client->post_title ) . '</option>';
             }
             echo '</select></label></p>';
+            $initial_pending_rows = [];
+            if ( $sel_client && isset( $pending_cache[ $sel_client ] ) ) {
+                $initial_pending_rows = $pending_cache[ $sel_client ];
+            }
+            $initial_alert_html = '';
+            if ( $initial_pending_rows ) {
+                $client_post = get_post( (int) $sel_client );
+                $client_name = $client_post ? $client_post->post_title : '';
+                if ( $client_name ) {
+                    $initial_alert_html .= '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_name ) ) . '</strong>';
+                } else {
+                    $initial_alert_html .= '<strong>' . esc_html__( 'Este cliente possui pagamentos pendentes.', 'dps-base' ) . '</strong>';
+                }
+                $initial_alert_html .= '<ul>';
+                foreach ( $initial_pending_rows as $row ) {
+                    $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
+                    $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
+                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
+                    if ( $date_fmt ) {
+                        $message = sprintf( __( '%1$s: R$ %2$s – %3$s', 'dps-base' ), $date_fmt, $value_fmt, $desc );
+                    } else {
+                        $message = sprintf( __( 'R$ %1$s – %2$s', 'dps-base' ), $value_fmt, $desc );
+                    }
+                    $initial_alert_html .= '<li>' . esc_html( $message ) . '</li>';
+                }
+                $initial_alert_html .= '</ul>';
+            }
+            $alert_attrs = ' id="dps-client-pending-alert" class="dps-alert dps-alert--danger dps-alert--pending" role="status" aria-live="polite"';
+            if ( $initial_alert_html ) {
+                $alert_attrs .= ' aria-hidden="false"';
+            } else {
+                $alert_attrs .= ' aria-hidden="true" style="display:none;"';
+            }
+            echo '<div' . $alert_attrs . '>' . $initial_alert_html . '</div>';
             // Pets (permite múltiplos)
             // Se não editando, utiliza pref_pet como pré‑seleção única
             if ( ! $edit_id && $pref_pet ) {
@@ -978,10 +1046,9 @@ class DPS_Base_Frontend {
             }
             echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker">';
             echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'dps-base' ) . '</strong></p>';
-            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. Use os filtros para facilitar a busca.', 'dps-base' ) . '</p>';
+            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'dps-base' ) . '</p>';
             echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'dps-base' ) . '</p>';
             echo '<div class="dps-pet-picker-actions">';
-            echo '<input type="search" id="dps-pet-filter" placeholder="' . esc_attr__( 'Filtrar por nome ou raça...', 'dps-base' ) . '"> ';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'dps-base' ) . '</button> ';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-base' ) . '</button>';
             echo '</div>';
@@ -1212,12 +1279,14 @@ EOT;
                     $time_a = get_post_meta( $a->ID, 'appointment_time', true );
                     $date_b = get_post_meta( $b->ID, 'appointment_date', true );
                     $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-                    $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
-                    $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                    $dt_a   = $date_a ? strtotime( trim( $date_a . ' ' . ( $time_a ? $time_a : '00:00' ) ) ) : 0;
+                    $dt_b   = $date_b ? strtotime( trim( $date_b . ' ' . ( $time_b ? $time_b : '00:00' ) ) ) : 0;
+                    $dt_a   = $dt_a ? $dt_a : 0;
+                    $dt_b   = $dt_b ? $dt_b : 0;
                     if ( $dt_a === $dt_b ) {
-                        return $a->ID <=> $b->ID;
+                        return $b->ID <=> $a->ID;
                     }
-                    return $dt_a <=> $dt_b;
+                    return $dt_b <=> $dt_a;
                 }
             );
             echo '<div class="dps-appointments-group ' . esc_attr( $group_class ) . '">';
@@ -1494,12 +1563,13 @@ EOT;
         $html .= '<input type="hidden" name="dps_action" value="update_appointment_status">';
         $html .= $nonce_field;
         $html .= '<input type="hidden" name="appointment_id" value="' . esc_attr( $appt_id ) . '">';
+        $html .= '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
         $html .= '<select name="appointment_status">';
         foreach ( $status_labels as $key => $label ) {
             $html .= '<option value="' . esc_attr( $key ) . '"' . selected( $status, $key, false ) . '>' . esc_html( $label ) . '</option>';
         }
         $html .= '</select>';
-        $html .= '<button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'dps-base' ) . '</button>';
+        $html .= '<noscript><button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'dps-base' ) . '</button></noscript>';
         $html .= '</form>';
         return $html;
     }
@@ -1839,6 +1909,12 @@ EOT;
                 // Para cada pet e para cada ocorrência, cria agendamento
                 foreach ( $pet_ids as $p_id_each ) {
                     $current_dt = DateTime::createFromFormat( 'Y-m-d', $date );
+                    if ( ! $current_dt ) {
+                        $current_dt = date_create( $date );
+                    }
+                    if ( ! $current_dt ) {
+                        continue;
+                    }
                     for ( $i = 0; $i < $count_events; $i++ ) {
                         $date_i   = $current_dt->format( 'Y-m-d' );
                         $appt_new = wp_insert_post( [
@@ -1847,29 +1923,29 @@ EOT;
                             'post_status' => 'publish',
                         ] );
                         if ( $appt_new ) {
-                    update_post_meta( $appt_new, 'appointment_client_id', $client_id );
-                    update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
-                    update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
-                    update_post_meta( $appt_new, 'appointment_date', $date_i );
-                    update_post_meta( $appt_new, 'appointment_time', $time );
-                    update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'dps-base' ) );
-                    update_post_meta( $appt_new, 'appointment_type', 'subscription' );
-                    // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
-                    $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
-                    update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
-                    update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
-                    update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
-                    update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
-                    update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
-                    update_post_meta( $appt_new, 'appointment_services', $service_ids );
-                    update_post_meta( $appt_new, 'appointment_service_prices', $prices );
-                    // Define valor total individual: preço de serviços base + preço da tosa apenas na ocorrência definida
-                    $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
-                    update_post_meta( $appt_new, 'appointment_total_value', $total_single );
-                    update_post_meta( $appt_new, 'appointment_status', 'pendente' );
-                    update_post_meta( $appt_new, 'subscription_id', $sub_id );
-                    // Dispara gancho pós‑salvamento para cada agendamento
-                    do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
+                            update_post_meta( $appt_new, 'appointment_client_id', $client_id );
+                            update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
+                            update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
+                            update_post_meta( $appt_new, 'appointment_date', $date_i );
+                            update_post_meta( $appt_new, 'appointment_time', $time );
+                            update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'dps-base' ) );
+                            update_post_meta( $appt_new, 'appointment_type', 'subscription' );
+                            // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
+                            $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
+                            update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
+                            update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
+                            update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
+                            update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
+                            update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
+                            update_post_meta( $appt_new, 'appointment_services', $service_ids );
+                            update_post_meta( $appt_new, 'appointment_service_prices', $prices );
+                            // Define valor total individual: preço de serviços base + preço da tosa apenas na ocorrência definida
+                            $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
+                            update_post_meta( $appt_new, 'appointment_total_value', $total_single );
+                            update_post_meta( $appt_new, 'appointment_status', 'pendente' );
+                            update_post_meta( $appt_new, 'subscription_id', $sub_id );
+                            // Dispara gancho pós‑salvamento para cada agendamento
+                            do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
                         }
                         $current_dt->modify( '+' . $interval_days . ' days' );
                     }

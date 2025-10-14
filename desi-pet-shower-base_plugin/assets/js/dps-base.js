@@ -65,10 +65,10 @@
       var $petList      = $('#dps-appointment-pet-list');
       var $petOptions   = $petWrapper.find('.dps-pet-option');
       var $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
-      var $filterInput  = $('#dps-pet-filter');
       var $noPetsMsg    = $('#dps-no-pets-message');
       var $summary      = $('#dps-pet-summary');
       var $selectHint   = $('#dps-pet-select-client');
+      var $pendingAlert = $('#dps-client-pending-alert');
 
       function updateSummary(){
         var selected = $petCheckboxes.filter(':checked');
@@ -86,9 +86,58 @@
         }
       }
 
+      function updatePendingAlert(){
+        if (!$pendingAlert.length) {
+          return;
+        }
+        var $selected = $clientSelect.find('option:selected');
+        var hasPending = $selected.data('hasPending');
+        if (hasPending === undefined) {
+          hasPending = $selected.attr('data-has-pending');
+        }
+        if (!hasPending || String(hasPending) === '0') {
+          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
+          $petWrapper.removeClass('dps-pet-picker--warning');
+          $clientSelect.removeClass('dps-client-select--warning');
+          return;
+        }
+        var pendingInfo = $selected.data('pendingInfo');
+        if (typeof pendingInfo === 'string') {
+          try {
+            pendingInfo = JSON.parse(pendingInfo);
+          } catch (err) {
+            pendingInfo = [];
+          }
+        }
+        if (!Array.isArray(pendingInfo) || !pendingInfo.length) {
+          $pendingAlert.attr('aria-hidden', 'true').hide().empty();
+          $petWrapper.removeClass('dps-pet-picker--warning');
+          $clientSelect.removeClass('dps-client-select--warning');
+          return;
+        }
+        var clientName = $.trim($selected.text());
+        var titleText = clientName ?
+          dpsBaseL10n.pendingTitle.replace('%s', clientName) :
+          dpsBaseL10n.pendingGenericTitle;
+        $pendingAlert.empty();
+        $('<strong/>').text(titleText).appendTo($pendingAlert);
+        var $list = $('<ul/>').appendTo($pendingAlert);
+        pendingInfo.forEach(function(item){
+          var line = '';
+          if (item.date) {
+            line = dpsBaseL10n.pendingItem.replace('%1$s', item.date).replace('%2$s', item.value).replace('%3$s', item.description);
+          } else {
+            line = dpsBaseL10n.pendingItemNoDate.replace('%1$s', item.value).replace('%2$s', item.description);
+          }
+          $('<li/>').text(line).appendTo($list);
+        });
+        $pendingAlert.attr('aria-hidden', 'false').show();
+        $petWrapper.addClass('dps-pet-picker--warning');
+        $clientSelect.addClass('dps-client-select--warning');
+      }
+
       function applyPetFilters(){
         var ownerId = $clientSelect.val();
-        var query   = ($filterInput.val() || '').toLowerCase();
         var visible = 0;
         $petOptions.each(function(){
           var $option = $(this);
@@ -97,11 +146,8 @@
           if (!matchesOwner) {
             $option.find('.dps-pet-checkbox').prop('checked', false);
           }
-          var searchable = ($option.data('search') || '').toLowerCase();
-          var matchesQuery = !query || searchable.indexOf(query) !== -1;
-          var show = matchesOwner && matchesQuery;
-          $option.toggle(show);
-          if (show) {
+          $option.toggle(matchesOwner);
+          if (matchesOwner) {
             visible++;
           }
         });
@@ -109,17 +155,13 @@
         $noPetsMsg.toggle(visible === 0 && !!ownerId);
         $selectHint.toggle(!ownerId);
         $petWrapper.toggleClass('dps-pet-picker--disabled', !ownerId);
-        $filterInput.prop('disabled', !ownerId);
         $petWrapper.find('.dps-pet-toggle').prop('disabled', !ownerId || visible === 0);
         updateSummary();
+        updatePendingAlert();
         $(document).trigger('dps-pet-selection-updated');
       }
 
       $clientSelect.on('change', function(){
-        applyPetFilters();
-      });
-
-      $filterInput.on('input', function(){
         applyPetFilters();
       });
 
@@ -132,12 +174,10 @@
         e.preventDefault();
         var action = $(this).data('action');
         var ownerId = $clientSelect.val();
-        var query   = ($filterInput.val() || '').toLowerCase();
         $petOptions.each(function(){
           var $option = $(this);
           var optionOwner = $option.data('owner');
-          var searchable = ($option.data('search') || '').toLowerCase();
-          var matches = (!ownerId || String(optionOwner) === String(ownerId)) && (!query || searchable.indexOf(query) !== -1);
+          var matches = ownerId && String(optionOwner) === String(ownerId);
           if (matches) {
             $option.find('.dps-pet-checkbox').prop('checked', action === 'select');
           }
@@ -158,6 +198,18 @@
       // Aplica filtros iniciais considerando pré-seleções
       applyPetFilters();
     })();
+
+    $(document).on('change', '.dps-inline-status-form select[name="appointment_status"]', function(){
+      var $select = $(this);
+      var $form = $select.closest('form');
+      if ($form.data('submitting')) {
+        return;
+      }
+      $form.data('submitting', true);
+      $form.addClass('is-updating');
+      $select.prop('disabled', true);
+      $form.trigger('submit');
+    });
 
     (function(){
       var $historyTable = $('#dps-history-table');

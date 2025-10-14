@@ -128,15 +128,16 @@
 .dps-pet-picker--disabled {
     opacity: 0.6;
 }
+.dps-pet-picker--warning {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
 .dps-pet-picker-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
     margin-bottom: 10px;
-}
-#dps-pet-filter {
-    max-width: 260px;
 }
 .dps-pet-list {
     display: grid;
@@ -215,17 +216,16 @@
     background: #fdecea;
 }
 .dps-inline-status-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    position: relative;
+    display: inline-flex;
     align-items: center;
 }
 .dps-inline-status-form select {
     min-width: 140px;
 }
-.dps-inline-status-form .button {
-    padding: 2px 8px;
-    line-height: 1.4;
+.dps-inline-status-form.is-updating select {
+    opacity: 0.6;
+    pointer-events: none;
 }
 .dps-alert {
     padding: 14px 16px;
@@ -240,6 +240,30 @@
     background: #fdecea;
     color: #58151c;
 }
+.dps-alert--pending {
+    position: relative;
+    padding-left: 46px;
+    border-left-color: #b54708;
+    background: #fff4d6;
+    color: #4b2c07;
+    box-shadow: 0 6px 16px rgba(181, 71, 8, 0.12);
+}
+.dps-alert--pending::before {
+    content: "!";
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #b54708;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    line-height: 20px;
+    box-shadow: 0 0 0 3px rgba(255, 244, 214, 0.9);
+}
 .dps-alert--info {
     border-left-color: #0d6efd;
     background: #eef5ff;
@@ -248,4 +272,10 @@
 .dps-alert strong {
     display: inline-block;
     margin-bottom: 6px;
+}
+.dps-client-select--warning {
+    border-color: #b54708 !important;
+    box-shadow: 0 0 0 2px rgba(181, 71, 8, 0.18);
+    background: #fff8ea;
+    color: #2c1601;
 }
