@@ -800,9 +800,23 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function get_redirect_url() {
             $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
-            $current     = home_url( $request_uri );
+            $home_parts  = wp_parse_url( home_url() );
+
+            if ( '' === $request_uri ) {
+                $request_uri = '/';
+            } elseif ( '/' !== $request_uri[0] && '?' !== $request_uri[0] ) {
+                $request_uri = '/' . ltrim( $request_uri, '/' );
+            }
+
+            $scheme = isset( $home_parts['scheme'] ) ? $home_parts['scheme'] : ( is_ssl() ? 'https' : 'http' );
+            $host   = isset( $home_parts['host'] ) ? $home_parts['host'] : '';
+            $port   = isset( $home_parts['port'] ) ? ':' . $home_parts['port'] : '';
+
+            $current = $host ? sprintf( '%s://%s%s%s', $scheme, $host, $port, $request_uri ) : $request_uri;
+
             $current = remove_query_arg( [ 'dps_backup_status', 'dps_backup_message' ], $current );
             $current = add_query_arg( 'tab', 'backup', $current );
+
             return $current;
         }
 
