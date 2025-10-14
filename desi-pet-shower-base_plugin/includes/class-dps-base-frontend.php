@@ -1745,6 +1745,103 @@ EOT;
     }
 
     /**
+     * Sincroniza o status financeiro de um agendamento na tabela dps_transacoes.
+     *
+     * @param int    $appt_id ID do agendamento.
+     * @param string $status  Status do agendamento (slug).
+     */
+    private static function sync_transaction_status( $appt_id, $status ) {
+        if ( ! in_array( $status, [ 'finalizado', 'finalizado_pago' ], true ) ) {
+            return;
+        }
+
+        $client_id = (int) get_post_meta( $appt_id, 'appointment_client_id', true );
+        $date      = get_post_meta( $appt_id, 'appointment_date', true );
+        $pet_id    = (int) get_post_meta( $appt_id, 'appointment_pet_id', true );
+        $total     = get_post_meta( $appt_id, 'appointment_total_value', true );
+        $total     = $total ? (float) $total : 0;
+
+        $desc_parts   = [];
+        $service_ids  = get_post_meta( $appt_id, 'appointment_services', true );
+        if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
+            foreach ( $service_ids as $service_id ) {
+                $service = get_post( $service_id );
+                if ( $service ) {
+                    $desc_parts[] = $service->post_title;
+                }
+            }
+        }
+
+        $pet_post = $pet_id ? get_post( $pet_id ) : null;
+        if ( $pet_post ) {
+            $desc_parts[] = $pet_post->post_title;
+        }
+
+        $description = implode( ' - ', $desc_parts );
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+        if ( $table_exists !== $table_name ) {
+            return;
+        }
+
+        $existing = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt_id ) );
+        $trans_data = [
+            'cliente_id'     => $client_id,
+            'agendamento_id' => $appt_id,
+            'plano_id'       => null,
+            'data'           => $date ? $date : current_time( 'Y-m-d' ),
+            'valor'          => $total,
+            'categoria'      => __( 'Serviço', 'dps-base' ),
+            'tipo'           => 'receita',
+            'status'         => ( 'finalizado' === $status ? 'em_aberto' : 'pago' ),
+            'descricao'      => $description,
+        ];
+
+        if ( $existing ) {
+            $wpdb->update(
+                $table_name,
+                [
+                    'status'    => $trans_data['status'],
+                    'valor'     => $trans_data['valor'],
+                    'descricao' => $trans_data['descricao'],
+                ],
+                [ 'id' => $existing ],
+                [ '%s', '%f', '%s' ],
+                [ '%d' ]
+            );
+        } else {
+            $wpdb->insert(
+                $table_name,
+                $trans_data,
+                [ '%d', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s' ]
+            );
+        }
+
+        if ( class_exists( 'DPS_WhatsApp' ) && $client_id ) {
+            $client_post = get_post( $client_id );
+            $client_name = $client_post ? $client_post->post_title : '';
+            $pet_name    = $pet_post ? $pet_post->post_title : '';
+            $date_fmt    = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
+            $phone       = get_post_meta( $client_id, 'client_phone', true );
+            $phone_digits = $phone ? preg_replace( '/\D+/', '', $phone ) : '';
+            $total_fmt   = number_format( (float) $total, 2, ',', '.' );
+            $message_template = ( 'finalizado_pago' === $status )
+                ? 'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!'
+                : 'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
+            $message_args = [ $client_name, $pet_name, $date_fmt ];
+            if ( 'finalizado_pago' !== $status ) {
+                $message_args[] = $total_fmt;
+            }
+            $message = vsprintf( $message_template, $message_args );
+            if ( $phone_digits ) {
+                DPS_WhatsApp::send_text( $phone_digits, $message );
+            }
+        }
+    }
+
+    /**
      * Salva agendamento (inserção ou atualização)
      */
     private static function update_appointment_status() {
@@ -1753,11 +1850,15 @@ EOT;
         }
         $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
         $status  = isset( $_POST['appointment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_status'] ) ) : '';
+        if ( 'finalizado e pago' === $status ) {
+            $status = 'finalizado_pago';
+        }
         $valid   = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
         if ( ! $appt_id || ! in_array( $status, $valid, true ) ) {
             return;
         }
         update_post_meta( $appt_id, 'appointment_status', $status );
+        self::sync_transaction_status( $appt_id, $status );
         $appt_type = get_post_meta( $appt_id, 'appointment_type', true );
         if ( ! $appt_type ) {
             $appt_type = 'simple';
