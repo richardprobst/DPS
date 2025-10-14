@@ -229,7 +229,7 @@ class DPS_Registration_Addon {
         ob_start();
         echo '<div class="dps-registration-form">';
         if ( $success ) {
-            echo '<p style="color:green; font-weight:bold;">' . esc_html__( 'Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</p>';
+            echo '<div class="notice notice-success dps-registration-notice"><p>' . esc_html__( 'Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</p></div>';
         }
         echo '<form method="post" id="dps-reg-form">';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
@@ -246,8 +246,8 @@ class DPS_Registration_Addon {
         echo '<p><label>Facebook<br><input type="text" name="client_facebook"></label></p>';
         echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
-        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
-        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
+        echo '<p class="dps-field-full"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
+        echo '<p class="dps-field-full"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
         echo '</div>';
         echo '<h4>' . esc_html__( 'Dados dos Pets', 'dps-registration-addon' ) . '</h4>';
         echo '<div id="dps-pets-wrapper">';
@@ -375,9 +375,11 @@ class DPS_Registration_Addon {
         // Script para adicionar pets dinamicamente e preencher campo Cliente automaticamente
         // CSS para melhorar a distribuição dos campos do formulário
         echo '<style>';
-        echo '.dps-registration-form .dps-pet-fieldset, .dps-registration-form .dps-client-fields { display:flex; flex-wrap:wrap; gap:15px; }';
-        echo '.dps-registration-form .dps-pet-fieldset p, .dps-registration-form .dps-client-fields p { flex:1 1 calc(50% - 15px); margin:0; }';
-        echo '.dps-registration-form .dps-client-fields p[style*="100%"], .dps-registration-form .dps-client-fields textarea, .dps-registration-form .dps-pet-fieldset textarea { flex:1 1 100%; width:100%; }';
+        echo '.dps-registration-form .dps-pet-fieldset, .dps-registration-form .dps-client-fields {';
+        echo ' display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin:0; }';
+        echo '.dps-registration-form .dps-pet-fieldset p, .dps-registration-form .dps-client-fields p { margin:0; }';
+        echo '.dps-registration-form .dps-client-fields textarea, .dps-registration-form .dps-pet-fieldset textarea { min-height:120px; }';
+        echo '@media (max-width: 680px) { .dps-registration-form .dps-pet-fieldset, .dps-registration-form .dps-client-fields { grid-template-columns:1fr; } }';
         echo '</style>';
         // Script principal para clonar pets e atualizar campos de cliente
         echo '<script type="text/javascript">(function(){';
@@ -432,7 +434,7 @@ class DPS_Registration_Addon {
     public function get_pet_fieldset_html( $index ) {
         $i = intval( $index );
         ob_start();
-        echo '<fieldset class="dps-pet-fieldset" style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">';
+        echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . sprintf( __( 'Pet %d', 'dps-registration-addon' ), $i ) . '</legend>';
         // Nome do pet
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
@@ -485,7 +487,7 @@ class DPS_Registration_Addon {
      */
     public function get_pet_fieldset_html_placeholder() {
         ob_start();
-        echo '<fieldset class="dps-pet-fieldset" style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">';
+        echo '<fieldset class="dps-pet-fieldset">';
         echo '<legend>' . __( 'Pet __INDEX__', 'dps-registration-addon' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
         echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
