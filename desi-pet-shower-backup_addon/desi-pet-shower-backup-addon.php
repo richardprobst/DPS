@@ -86,32 +86,32 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 <p><?php esc_html_e( 'O backup inclui clientes, pets, agendamentos, serviços, assinaturas, opções do plugin, tabelas personalizadas e arquivos enviados (como fotos dos pets e documentos financeiros).', 'dps-backup-addon' ); ?></p>
                 <p><?php esc_html_e( 'A restauração substitui completamente os dados existentes do Desi Pet Shower. Recomenda-se executar em um ambiente vazio ou após realizar um backup completo do site.', 'dps-backup-addon' ); ?></p>
                 <?php if ( $status && $message ) : ?>
-                    <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?>" style="margin:20px 0; padding:15px; border-left:4px solid <?php echo ( 'success' === $status ) ? '#46b450' : '#dc3232'; ?>; background:#fff;">
+            <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?> dps-backup-notice">
                         <p><strong><?php echo ( 'success' === $status ) ? esc_html__( 'Sucesso:', 'dps-backup-addon' ) : esc_html__( 'Erro:', 'dps-backup-addon' ); ?></strong> <?php echo esc_html( $message ); ?></p>
                     </div>
                 <?php endif; ?>
-                <div class="dps-backup-actions" style="display:flex; gap:40px; flex-wrap:wrap;">
-                    <div class="dps-backup-box" style="flex:1 1 280px; background:#f7f7f7; padding:20px; border-radius:8px;">
+        <div class="dps-backup-actions">
+            <div class="dps-backup-box">
                         <h4><?php esc_html_e( 'Gerar backup', 'dps-backup-addon' ); ?></h4>
                         <p><?php esc_html_e( 'Clique no botão abaixo para baixar um arquivo JSON com todos os dados do sistema.', 'dps-backup-addon' ); ?></p>
                         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_EXPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_EXPORT, 'dps_backup_nonce' ); ?>
-                            <button type="submit" class="button button-primary" style="margin-top:10px;">
+                        <button type="submit" class="button button-primary dps-backup-submit">
                                 <?php esc_html_e( 'Baixar backup completo', 'dps-backup-addon' ); ?>
                             </button>
                         </form>
                     </div>
-                    <div class="dps-backup-box" style="flex:1 1 280px; background:#f7f7f7; padding:20px; border-radius:8px;">
+            <div class="dps-backup-box">
                         <h4><?php esc_html_e( 'Restaurar backup', 'dps-backup-addon' ); ?></h4>
                         <p><?php esc_html_e( 'Selecione um arquivo JSON gerado anteriormente para restaurar todos os dados.', 'dps-backup-addon' ); ?></p>
                         <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_IMPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_IMPORT, 'dps_backup_nonce' ); ?>
-                            <input type="file" name="dps_backup_file" accept="application/json" required style="margin:10px 0;" />
-                            <p style="font-size:12px; color:#555;">
+                            <input type="file" name="dps_backup_file" accept="application/json" required class="dps-backup-file" />
+                            <p class="dps-backup-hint">
                                 <?php esc_html_e( 'O processo substituirá os dados atuais do Desi Pet Shower. Todos os registros existentes serão removidos antes da restauração.', 'dps-backup-addon' ); ?>
                             </p>
                             <button type="submit" class="button button-secondary">

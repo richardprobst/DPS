@@ -1,50 +1,137 @@
 /*
  * Estilos básicos para o plugin Desi Pet Shower Base.
+ * Os ajustes foram redesenhados para organizar cada aba individualmente,
+ * tomando a agenda como referência sem interferir na marcação padrão do WordPress.
  */
-.dps-base-wrapper {
-    margin: 20px 0;
-    font-family: Arial, sans-serif;
+:root {
+    --dps-color-primary: #6366f1;
+    --dps-color-primary-dark: #4f46e5;
+    --dps-color-surface: #ffffff;
+    --dps-color-border: #d9dde3;
+    --dps-color-muted: #52606d;
+    --dps-color-background: #f4f6fb;
+    --dps-shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.08);
+    --dps-radius-md: 12px;
+    --dps-radius-lg: 18px;
 }
+
+.dps-base-wrapper {
+    margin: 24px auto;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    max-width: 1080px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
 .dps-nav {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 16px;
     display: flex;
-    border-bottom: 2px solid #ccc;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-lg);
+    box-shadow: var(--dps-shadow-sm);
 }
+
 .dps-nav li {
-    margin-right: 10px;
+    margin: 0;
 }
+
 .dps-nav .dps-tab-link {
-    display: inline-block;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-bottom: none;
-    background: #f7f7f7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: var(--dps-color-surface);
+    color: var(--dps-color-muted);
     text-decoration: none;
-    color: #333;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
+
 .dps-nav .dps-tab-link.active,
 .dps-nav .dps-tab-link:hover {
-    background: #fff;
-    border-color: #aaa;
-    color: #000;
+    background: var(--dps-color-primary);
+    border-color: var(--dps-color-primary);
+    color: #fff;
 }
+
 .dps-section {
     display: none;
-    border: 1px solid #ccc;
-    border-top: none;
-    padding: 15px;
-    background: #fff;
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    box-shadow: var(--dps-shadow-sm);
+    padding: 24px;
 }
+
 .dps-section.active {
     display: block;
 }
-.dps-form p {
-    margin-bottom: 10px;
+
+.dps-fin-docs,
+.dps-registration-form,
+.dps-backup-wrapper {
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    box-shadow: var(--dps-shadow-sm);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
+
+.dps-client-portal,
+.dps-client-logins {
+    background: var(--dps-color-surface);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    box-shadow: var(--dps-shadow-sm);
+    padding: 24px;
+}
+
+.dps-section h2,
+.dps-section h3,
+.dps-section h4,
+.dps-fin-docs h2,
+.dps-registration-form h2,
+.dps-backup-wrapper h2,
+.dps-client-portal h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #1d2430;
+}
+
+.dps-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.dps-form p {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-field-full {
+    grid-column: 1 / -1;
+}
+
+.dps-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dps-color-muted);
+}
+
 .dps-form input[type="text"],
 .dps-form input[type="email"],
 .dps-form input[type="date"],
@@ -53,111 +140,338 @@
 .dps-form select,
 .dps-form textarea {
     width: 100%;
-    padding: 6px;
+    padding: 10px 12px;
     box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid var(--dps-color-border);
+    border-radius: 8px;
+    background: var(--dps-color-background);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .dps-form textarea {
     resize: vertical;
+    min-height: 110px;
 }
+
+.dps-form input:focus,
+.dps-form select:focus,
+.dps-form textarea:focus {
+    border-color: var(--dps-color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+    outline: none;
+}
+
+.dps-form .dps-form-actions,
+.dps-history-actions,
+.dps-pet-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.dps-form .button,
+.dps-form button,
+.dps-history-actions .button,
+.dps-history-actions button,
+.dps-pet-picker-actions .button,
+.dps-pet-picker-actions button {
+    background: var(--dps-color-primary);
+    border: 1px solid var(--dps-color-primary);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.dps-form .button:hover,
+.dps-history-actions .button:hover,
+.dps-pet-picker-actions .button:hover,
+.dps-form button:hover,
+.dps-history-actions button:hover,
+.dps-pet-picker-actions button:hover {
+    background: var(--dps-color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.dps-form .button:disabled,
+.dps-history-actions .button:disabled,
+.dps-pet-picker-actions .button:disabled,
+.dps-form button:disabled,
+.dps-history-actions button:disabled,
+.dps-pet-picker-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dps-fin-docs-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.dps-fin-docs-list li {
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-fin-docs-list a {
+    color: var(--dps-color-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dps-fin-docs-list a:hover {
+    color: var(--dps-color-primary-dark);
+}
+
+.dps-registration-notice {
+    margin: 0 0 16px;
+}
+
+.dps-pet-fieldset {
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    background: var(--dps-color-background);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-pet-fieldset legend {
+    font-weight: 700;
+    color: #1d2430;
+    margin-bottom: 12px;
+}
+
+.dps-backup-notice {
+    margin: 0;
+    padding: 16px 20px;
+    border-left: 4px solid var(--dps-color-primary);
+    background: var(--dps-color-surface);
+    box-shadow: var(--dps-shadow-sm);
+    border-radius: 10px;
+}
+
+.dps-backup-notice.notice-error {
+    border-left-color: #dc3232;
+}
+
+.dps-backup-notice.notice-success {
+    border-left-color: #46b450;
+}
+
+.dps-backup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.dps-backup-box {
+    flex: 1 1 280px;
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dps-backup-submit {
+    margin-top: 6px;
+}
+
+.dps-backup-file {
+    margin: 10px 0;
+}
+
+.dps-backup-hint {
+    font-size: 12px;
+    color: var(--dps-color-muted);
+}
+
+.dps-partial-form {
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 20px;
+}
+
 .dps-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 16px;
+    border: 1px solid var(--dps-color-border);
+    border-radius: 8px;
+    overflow: hidden;
 }
+
 .dps-table th,
 .dps-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px;
     text-align: left;
+    border-bottom: 1px solid var(--dps-color-border);
 }
+
 .dps-table th {
-    background: #f0f0f0;
-    font-weight: bold;
+    background: var(--dps-color-background);
+    font-weight: 700;
+    color: #1f2933;
 }
+
+.dps-table tbody tr:nth-child(even) {
+    background: rgba(99, 102, 241, 0.04);
+}
+
 .dps-search {
     width: 100%;
-    padding: 6px;
-    margin-bottom: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
     box-sizing: border-box;
+    border: 1px solid var(--dps-color-border);
+    border-radius: 8px;
+    background: var(--dps-color-background);
 }
+
 .dps-history-toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 16px;
+    margin-bottom: 20px;
 }
+
 .dps-history-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
 }
+
 .dps-history-filter label {
     display: flex;
     flex-direction: column;
+    gap: 6px;
     font-size: 13px;
     font-weight: 600;
-    color: #1d2327;
+    color: var(--dps-color-muted);
 }
+
 .dps-history-filter input,
 .dps-history-filter select {
     min-width: 170px;
 }
-.dps-history-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
+
 .dps-history-summary {
-    background: #f8f9fa;
-    border: 1px solid #e2e6ea;
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    color: #1d2430;
 }
+
+.dps-finance-date-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 0 !important;
+}
+
+.dps-finance-date-filter label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--dps-color-muted);
+}
+
+.dps-finance-date-filter input,
+.dps-finance-date-filter select {
+    min-width: 180px;
+}
+
+.dps-finance-quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.dps-finance-quick-link {
+    margin-left: 0 !important;
+}
+
+.dps-inline-form {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.dps-finance-summary {
+    margin-top: 20px;
+    background: var(--dps-color-background);
+    border: 1px solid var(--dps-color-border);
+    border-radius: var(--dps-radius-md);
+    padding: 16px;
+}
+
 .dps-pet-picker {
-    border: 1px solid #e2e2e2;
-    background: #fafafa;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 15px;
+    border: 1px solid var(--dps-color-border);
+    background: var(--dps-color-background);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
 }
+
 .dps-pet-picker--disabled {
     opacity: 0.6;
 }
+
 .dps-pet-picker--warning {
     border-color: #dc3545;
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
 }
-.dps-pet-picker-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 10px;
-}
+
 .dps-pet-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
+    gap: 10px;
 }
+
 .dps-pet-option {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px;
-    border: 1px solid #d8d8d8;
-    border-radius: 6px;
-    background: #fff;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--dps-color-border);
+    border-radius: 10px;
+    background: var(--dps-color-surface);
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .dps-pet-option:hover {
-    border-color: #0073aa;
+    border-color: var(--dps-color-primary);
     box-shadow: 0 0 0 1px rgba(0, 115, 170, 0.15);
 }
 .dps-pet-option input[type="checkbox"] {
@@ -278,4 +592,28 @@
     box-shadow: 0 0 0 2px rgba(181, 71, 8, 0.18);
     background: #fff8ea;
     color: #2c1601;
+}
+
+@media (max-width: 768px) {
+    .dps-base-wrapper {
+        padding: 0 16px;
+    }
+
+    .dps-nav {
+        justify-content: center;
+    }
+
+    .dps-form {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-history-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-history-actions,
+    .dps-form .dps-form-actions {
+        justify-content: flex-start;
+    }
 }
