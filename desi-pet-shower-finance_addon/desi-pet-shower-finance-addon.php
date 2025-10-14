@@ -664,7 +664,7 @@ class DPS_Finance_Addon {
                 $already_paid = $this->get_partial_sum( $partial_id );
                 $desc_value   = number_format( (float) $trans_pp->valor, 2, ',', '.' );
                 $paid_value   = number_format( (float) $already_paid, 2, ',', '.' );
-                echo '<div class="dps-partial-form" style="margin:15px 0;padding:10px;border:1px solid #ddd;background:#f9f9f9;">';
+                echo '<div class="dps-partial-form">';
                 echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
                 echo '<form method="post" class="dps-form">';
                 echo '<input type="hidden" name="dps_finance_action" value="save_partial">';
@@ -675,7 +675,7 @@ class DPS_Finance_Addon {
                 echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="partial_value" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Método', 'dps-finance-addon' ) . '<br><select name="partial_method"><option value="pix">PIX</option><option value="cartao">' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option><option value="dinheiro">' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option><option value="outro">' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option></select></label></p>';
                 $cancel_link = esc_url( remove_query_arg( 'register_partial' ) . '#financeiro' );
-                echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button> <a href="' . $cancel_link . '" class="button">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
+                echo '<p class="dps-field-actions"><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button><a href="' . $cancel_link . '" class="button button-secondary">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
                 echo '</form>';
                 echo '</div>';
             }
@@ -709,7 +709,7 @@ class DPS_Finance_Addon {
         // Lista de transações
         echo '<h4>' . esc_html__( 'Transações Registradas', 'dps-finance-addon' ) . '</h4>';
         // Formulário de filtro por data e categoria
-        echo '<form method="get" class="dps-finance-date-filter" style="margin-bottom:10px;">';
+        echo '<form method="get" class="dps-finance-date-filter">';
         // Mantém parâmetros existentes (exceto filtros de data, intervalo e categoria)
         foreach ( $_GET as $k => $v ) {
             if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat' ], true ) ) {
@@ -732,7 +732,7 @@ class DPS_Finance_Addon {
             }
         }
         echo '</select></label> ';
-        echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button> ';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button>';
         // Links rápidos: preserva categoria
         $quick_params = $_GET;
         unset( $quick_params['fin_start'], $quick_params['fin_end'], $quick_params['fin_range'] );
@@ -742,26 +742,22 @@ class DPS_Finance_Addon {
         }
         $link7  = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '7' ] ), get_permalink() ) . '#financeiro';
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $link7 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
-        echo '<a href="' . esc_url( $link30 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
+        echo '<div class="dps-history-actions">';
+        echo '<a href="' . esc_url( $link7 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $link30 ) . '" class="button button-secondary">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a>';
         // Link de limpar filtros: remove todos os filtros inclusive categoria
         $clear_params = $quick_params;
         unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'] );
         $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $clear_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $clear_link ) . '" class="button button-secondary">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
         $export_link = add_query_arg( $export_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $export_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $export_link ) . '" class="button button-secondary">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '</div>';
         echo '</form>';
         if ( $trans ) {
-            // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas
-            // e linhas com status pago ficam esverdeadas, facilitando a identificação rápida.
-            echo '<style>
-            table.dps-table tr.fin-status-em_aberto { background-color:#fff8e1; }
-            table.dps-table tr.fin-status-pago { background-color:#e6ffed; }
-            </style>';
             // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-finance-addon' ) . '</th>';
@@ -806,7 +802,7 @@ class DPS_Finance_Addon {
                 echo '<td>' . esc_html( $tr->categoria ) . '</td>';
                 echo '<td>' . esc_html( $tr->tipo ) . '</td>';
                 echo '<td>';
-                echo '<form method="post" style="display:inline-block;">';
+                echo '<form method="post" class="dps-inline-form">';
                 echo '<input type="hidden" name="dps_update_trans_status" value="1">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $tr->id ) . '">';
                 echo '<select name="trans_status" onchange="this.form.submit()">';
@@ -910,9 +906,6 @@ class DPS_Finance_Addon {
             foreach ( $cat_labels as $clab ) {
                 $cat_colors[] = 'rgba(' . mt_rand( 0, 255 ) . ', ' . mt_rand( 0, 255 ) . ', ' . mt_rand( 0, 255 ) . ', 0.6)';
             }
-            echo '<div style="margin-top:20px;">';
-            // Removido: gráficos financeiros não são exibidos
-            echo '</div>';
             // Script inline para mostrar detalhes dos serviços vinculados às transações
             // Utiliza a mesma chamada AJAX do add‑on da agenda para buscar serviços do agendamento.
             echo '<script type="text/javascript">(function($){$(document).on("click",".dps-trans-services",function(e){e.preventDefault();var apptId=$(this).data("appt-id");$.post("' . esc_js( admin_url( 'admin-ajax.php' ) ) . '",{action:"dps_get_services_details",appt_id:apptId,nonce:"' . wp_create_nonce( 'dps_get_services_details' ) . '"},function(resp){if(resp && resp.success){var services=resp.data.services||[];if(services.length>0){var msg="";for(var i=0;i<services.length;i++){var srv=services[i];msg+=srv.name+" - R$ "+parseFloat(srv.price).toFixed(2);if(i<services.length-1) msg+="\n";}alert(msg);}else{alert("Nenhum serviço encontrado.");}}else{alert(resp.data?resp.data.message:"Erro ao buscar serviços.");}});});})(jQuery);</script>';
