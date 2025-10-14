@@ -547,10 +547,15 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @param string $content_base64 Conteúdo codificado em base64.
          */
         private function write_upload_file( $relative_path, $content_base64 ) {
-            $uploads = wp_upload_dir();
-            $path    = ltrim( str_replace( '\\', '/', $relative_path ), '/' );
-            $target  = trailingslashit( $uploads['basedir'] ) . $path;
-            $dir     = dirname( $target );
+            $uploads  = wp_upload_dir();
+            $base_dir = trailingslashit( wp_normalize_path( $uploads['basedir'] ) );
+            $path     = $this->sanitize_upload_relative_path( $relative_path );
+            $target   = $base_dir . $path;
+            $dir      = dirname( $target );
+
+            if ( 0 !== strpos( wp_normalize_path( $target ), $base_dir ) ) {
+                throw new Exception( __( 'O caminho do arquivo do backup é inválido.', 'dps-backup-addon' ) );
+            }
 
             if ( ! wp_mkdir_p( $dir ) ) {
                 throw new Exception( sprintf( __( 'Não foi possível criar o diretório %s para armazenar arquivos do backup.', 'dps-backup-addon' ), $dir ) );
@@ -564,6 +569,49 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             if ( false === file_put_contents( $target, $data ) ) {
                 throw new Exception( sprintf( __( 'Não foi possível gravar o arquivo %s durante a restauração.', 'dps-backup-addon' ), $target ) );
             }
+        }
+
+        /**
+         * Sanitiza o caminho relativo informado no backup e impede traversal.
+         *
+         * @param string $relative_path Caminho informado no backup.
+         *
+         * @return string Caminho sanitizado.
+         */
+        private function sanitize_upload_relative_path( $relative_path ) {
+            $path = trim( str_replace( '\\', '/', (string) $relative_path ) );
+            $path = preg_replace( '#^[A-Za-z]:#', '', $path );
+            $path = ltrim( $path, '/' );
+
+            if ( '' === $path ) {
+                throw new Exception( __( 'O caminho do arquivo do backup é inválido.', 'dps-backup-addon' ) );
+            }
+
+            $segments      = explode( '/', $path );
+            $safe_segments = [];
+
+            foreach ( $segments as $segment ) {
+                if ( '' === $segment || '.' === $segment ) {
+                    continue;
+                }
+
+                if ( '..' === $segment ) {
+                    if ( empty( $safe_segments ) ) {
+                        throw new Exception( __( 'O caminho do arquivo do backup é inválido.', 'dps-backup-addon' ) );
+                    }
+
+                    array_pop( $safe_segments );
+                    continue;
+                }
+
+                $safe_segments[] = $segment;
+            }
+
+            if ( empty( $safe_segments ) ) {
+                throw new Exception( __( 'O caminho do arquivo do backup é inválido.', 'dps-backup-addon' ) );
+            }
+
+            return implode( '/', $safe_segments );
         }
 
         /**
