@@ -68,8 +68,8 @@ final class DPS_Client_Portal {
         // --- MUDANÇAS AQUI ---
         // Remove o menu do admin e adiciona abas no front-end
         // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
-        add_action( 'dps_base_nav_tabs', [ $this, 'render_logins_tab' ] );
-        add_action( 'dps_base_sections', [ $this, 'render_logins_section' ] );
+        add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
+        add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
     }
 
     /**
@@ -1341,14 +1341,20 @@ final class DPS_Client_Portal {
     /**
      * Renderiza a aba "Logins" na navegação do front-end.
      */
-    public function render_logins_tab() {
+    public function render_logins_tab( $visitor_only = false ) {
+        if ( $visitor_only ) {
+            return;
+        }
         echo '<li><a href="#" class="dps-tab-link" data-tab="logins">' . esc_html__( 'Logins de Clientes', 'dps-client-portal' ) . '</a></li>';
     }
 
     /**
      * Renderiza o conteúdo da seção "Logins" no front-end.
      */
-    public function render_logins_section() {
+    public function render_logins_section( $visitor_only = false ) {
+        if ( $visitor_only ) {
+            return;
+        }
         echo '<div class="dps-section" id="dps-section-logins">';
         $page_id   = get_queried_object_id();
         $page_link = $page_id ? get_permalink( $page_id ) : home_url();

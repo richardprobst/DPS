@@ -36,8 +36,9 @@ class DPS_Base_Plugin {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // Manipula ações de formulário (salvar e excluir)
         add_action( 'init', [ $this, 'maybe_handle_request' ] );
-        // Shortcode para exibir a aplicação no frontend
+        // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
+        add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
     }
 
     /**

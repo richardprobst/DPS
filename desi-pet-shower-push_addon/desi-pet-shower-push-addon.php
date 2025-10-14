@@ -33,8 +33,8 @@ class DPS_Push_Notifications_Addon {
         add_action( 'dps_send_daily_report', [ $this, 'send_daily_report' ] );
 
         // Se o base plugin estiver ativo, adiciona uma aba de configurações
-        add_action( 'dps_base_nav_tabs', [ $this, 'add_nav_tab' ] );
-        add_action( 'dps_base_sections', [ $this, 'add_settings_section' ] );
+        add_action( 'dps_settings_nav_tabs', [ $this, 'add_nav_tab' ], 30, 1 );
+        add_action( 'dps_settings_sections', [ $this, 'add_settings_section' ], 30, 1 );
 
         // Lida com salvamento do formulário de configurações
         add_action( 'init', [ $this, 'maybe_handle_save' ] );

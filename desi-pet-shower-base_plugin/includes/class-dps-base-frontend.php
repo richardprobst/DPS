@@ -478,23 +478,47 @@ class DPS_Base_Frontend {
         ob_start();
         echo '<div class="dps-base-wrapper">';
         echo '<ul class="dps-nav">';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'dps-base' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'dps-base' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="pets">' . esc_html__( 'Pets', 'dps-base' ) . '</a></li>';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'dps-base' ) . '</a></li>';
+        // Permite que add-ons adicionem abas após os módulos principais
+        do_action( 'dps_base_nav_tabs_after_pets', false );
         echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'dps-base' ) . '</a></li>';
-        // Não renderiza mais a aba de senhas
-        // Permite que add-ons adicionem novas abas
-        do_action( 'dps_base_nav_tabs', false );
+        // Espaço para add-ons exibirem abas após o histórico
+        do_action( 'dps_base_nav_tabs_after_history', false );
         echo '</ul>';
-        // Seções principais
+        // Seções principais na nova ordem
+        echo self::section_agendas( false );
         echo self::section_clients();
         echo self::section_pets();
-        echo self::section_agendas( false );
+        // Seções adicionais posicionadas entre os módulos principais e o histórico
+        do_action( 'dps_base_sections_after_pets', false );
         echo self::section_history();
-        // Omitimos a seção de senhas
-        // Permite que add-ons adicionem novas seções
-        do_action( 'dps_base_sections', false );
+        // Seções adicionadas após o histórico
+        do_action( 'dps_base_sections_after_history', false );
         echo '</div>';
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza a página de configurações avançadas (shortcode dps_configuracoes).
+     *
+     * @return string
+     */
+    public static function render_settings() {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            $login_url = wp_login_url( get_permalink() );
+            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar esta área.', 'dps-base' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-base' ) . '</a></p>';
+        }
+
+        ob_start();
+        echo '<div class="dps-base-wrapper dps-settings-wrapper">';
+        echo '<ul class="dps-nav">';
+        do_action( 'dps_settings_nav_tabs', false );
+        echo '</ul>';
+        do_action( 'dps_settings_sections', false );
+        echo '</div>';
+
         return ob_get_clean();
     }
 

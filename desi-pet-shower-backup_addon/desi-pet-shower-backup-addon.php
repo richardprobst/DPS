@@ -26,8 +26,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * Registra os hooks do add-on.
          */
         public function __construct() {
-            add_action( 'dps_base_nav_tabs', [ $this, 'add_backup_tab' ], 10, 1 );
-            add_action( 'dps_base_sections', [ $this, 'add_backup_section' ], 10, 1 );
+            add_action( 'dps_settings_nav_tabs', [ $this, 'add_backup_tab' ], 10, 1 );
+            add_action( 'dps_settings_sections', [ $this, 'add_backup_section' ], 10, 1 );
 
             add_action( 'admin_post_' . self::ACTION_EXPORT, [ $this, 'handle_export' ] );
             add_action( 'admin_post_nopriv_' . self::ACTION_EXPORT, [ $this, 'deny_anonymous' ] );
