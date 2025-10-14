@@ -163,16 +163,31 @@ class DPS_Agenda_Addon {
         .dps-agenda-wrapper table.dps-table tr.status-cancelado { background-color:#fdecea; border-left:4px solid #dc3545; }
         .dps-agenda-nav,
         .dps-agenda-date-form,
-        .dps-agenda-filters { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:15px; background:#f8f9fc; padding:12px 15px; border-radius:8px; }
-        .dps-agenda-nav .button { margin:0; }
+        .dps-agenda-filters { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:18px; background:#f8f9fc; padding:14px 18px; border-radius:14px; border:1px solid #e2e8f0; box-shadow:0 16px 40px rgba(15,23,42,0.08); }
+        .dps-agenda-nav { justify-content:space-between; }
+        .dps-agenda-nav-group { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
         .dps-agenda-date-form label,
-        .dps-agenda-filters label { display:flex; flex-direction:column; font-weight:600; color:#1f2933; min-width:160px; }
+        .dps-agenda-filters label { display:flex; flex-direction:column; gap:6px; font-weight:600; color:#1f2933; min-width:180px; flex:1 1 220px; }
         .dps-agenda-date-form input[type="date"],
         .dps-agenda-filters input,
-        .dps-agenda-filters select { width:100%; padding:6px 8px; border:1px solid #d8dde6; border-radius:6px; }
-        .dps-agenda-date-form .button,
-        .dps-agenda-filters .button { height:auto; }
-        .dps-agenda-summary { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:10px 0 20px; padding:12px 16px; background:#f1f5f9; border-left:4px solid #0073aa; border-radius:6px; font-weight:600; color:#1f2933; }
+        .dps-agenda-filters select { width:100%; padding:10px 12px; border:1px solid #d8dde6; border-radius:12px; background:#fff; transition:border-color .2s ease, box-shadow .2s ease; }
+        .dps-agenda-date-form input[type="date"]:focus,
+        .dps-agenda-filters input:focus,
+        .dps-agenda-filters select:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,0.15); }
+        .dps-agenda-date-actions,
+        .dps-agenda-filter-actions { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex:1 1 auto; }
+        .dps-agenda-date-form .dps-agenda-date-actions { margin-left:auto; }
+        .dps-agenda-filters .dps-agenda-filter-actions { margin-left:auto; }
+        .dps-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0.55rem 1.2rem; border-radius:999px; font-weight:600; font-size:0.95rem; line-height:1.1; border:1px solid transparent; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, background .2s ease, color .2s ease, border-color .2s ease; text-decoration:none; box-shadow:0 12px 28px rgba(79,70,229,0.18); }
+        .dps-btn:focus { outline:none; box-shadow:0 0 0 4px rgba(99,102,241,0.2); }
+        .dps-btn--primary { background:linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color:#fff; }
+        .dps-btn--primary:hover { transform:translateY(-1px); box-shadow:0 16px 32px rgba(79,70,229,0.25); }
+        .dps-btn--ghost { background:rgba(99,102,241,0.08); border-color:rgba(99,102,241,0.2); color:#4338ca; box-shadow:none; }
+        .dps-btn--ghost:hover { background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.4); transform:translateY(-1px); }
+        .dps-btn--soft { background:#fff; border-color:#e2e8f0; color:#1f2933; box-shadow:0 8px 20px rgba(15,23,42,0.08); }
+        .dps-btn--soft:hover { border-color:#cbd5f5; color:#3730a3; transform:translateY(-1px); }
+        .dps-btn svg { width:16px; height:16px; }
+        .dps-agenda-summary { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:10px 0 20px; padding:12px 16px; background:#f1f5f9; border-left:4px solid #4f46e5; border-radius:10px; font-weight:600; color:#1f2933; }
         .dps-agenda-summary span { display:flex; align-items:center; gap:6px; }
         .dps-status-feedback { display:block; margin-top:4px; font-size:0.85rem; color:#1f2933; }
         .dps-status-feedback--error { color:#dc3545; }
@@ -182,11 +197,22 @@ class DPS_Agenda_Addon {
         @media (max-width:900px) {
             .dps-agenda-table-container table { min-width:680px; }
         }
+        @media (max-width:1024px) {
+            .dps-agenda-nav { justify-content:flex-start; }
+            .dps-agenda-nav-group { flex:1 1 100%; }
+        }
         @media (max-width:768px) {
             .dps-agenda-nav,
             .dps-agenda-date-form,
             .dps-agenda-filters { padding:12px; }
-            .dps-agenda-nav .button { flex:1 1 calc(50% - 10px); text-align:center; }
+            .dps-agenda-nav-group { justify-content:stretch; }
+            .dps-agenda-nav .dps-btn { flex:1 1 calc(50% - 10px); text-align:center; }
+            .dps-agenda-date-form { gap:12px; }
+            .dps-agenda-date-form label { min-width:100%; }
+            .dps-agenda-date-actions,
+            .dps-agenda-filter-actions { width:100%; justify-content:stretch; }
+            .dps-agenda-date-actions .dps-btn,
+            .dps-agenda-filter-actions .dps-btn { flex:1; }
             .dps-agenda-table-container { box-shadow:none; border-radius:0; overflow:visible; }
             .dps-agenda-wrapper table.dps-table { border:0; min-width:0; }
             .dps-agenda-wrapper table.dps-table thead { display:none; }
@@ -197,7 +223,7 @@ class DPS_Agenda_Addon {
             .dps-agenda-summary { width:100%; }
         }
         @media (max-width:480px) {
-            .dps-agenda-nav .button { flex:1 1 100%; }
+            .dps-agenda-nav .dps-btn { flex:1 1 100%; }
             .dps-agenda-wrapper table.dps-table td { flex-direction:column; }
             .dps-agenda-wrapper table.dps-table td::before { margin-bottom:4px; }
         }
@@ -239,28 +265,33 @@ class DPS_Agenda_Addon {
         $nav_args = $current_args;
         unset( $nav_args['show_all'] );
         echo '<div class="dps-agenda-nav">';
+        echo '<div class="dps-agenda-nav-group">';
         // Botões anterior e seguinte com filtros
         // Ao gerar links, não propague show_all (nav_args não contém show_all)
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
         $next_args = array_merge( $nav_args, [ 'dps_date' => $next_date, 'view' => $view ] );
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button">' . ( $is_week_view ? esc_html__( 'Semana anterior', 'dps-agenda-addon' ) : esc_html__( 'Dia anterior', 'dps-agenda-addon' ) ) . '</a>';
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button">' . ( $is_week_view ? esc_html__( 'Próxima semana', 'dps-agenda-addon' ) : esc_html__( 'Dia seguinte', 'dps-agenda-addon' ) ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Semana anterior', 'dps-agenda-addon' ) : esc_html__( 'Dia anterior', 'dps-agenda-addon' ) ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Próxima semana', 'dps-agenda-addon' ) : esc_html__( 'Dia seguinte', 'dps-agenda-addon' ) ) . '</a>';
+        echo '</div>';
+        echo '<div class="dps-agenda-nav-group">';
         // Toggle entre visualizações e botão de calendário alternativo
         $toggle_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
         if ( $is_week_view ) {
             // Em visualização semanal ou de calendário, exibe botão para voltar à lista diária
             $toggle_args['view'] = 'day';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Lista', 'dps-agenda-addon' ) . '</a>';
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Lista', 'dps-agenda-addon' ) . '</a>';
             // Se estiver no calendário, também exibe botão para a visualização semanal de lista
             if ( $view === 'calendar' ) {
                 $week_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'week' ] );
-                echo ' <a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
+                echo '<a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
             }
         } else {
             // Em visualização diária, exibe botão para a lista semanal
             $toggle_args['view'] = 'week';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
         }
+        echo '</div>';
+        echo '<div class="dps-agenda-nav-group">';
         // Botão "Ver Calendário" removido conforme solicitação do cliente. A visualização de calendário
         // será implementada em uma futura atualização. Por enquanto, não exibe o botão para evitar confusão.
         // Botão Ver Hoje: redefine a data selecionada para a data de hoje, preservando outros filtros
@@ -268,13 +299,14 @@ class DPS_Agenda_Addon {
         $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
         // Se show_all estiver definido, removemos para voltar à visualização normal
         unset( $today_args['show_all'] );
-        echo ' <a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button">' . esc_html__( 'Ver Hoje', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver Hoje', 'dps-agenda-addon' ) . '</a>';
         // Botão Todos os Atendimentos: remove data/view e define show_all=1
         $all_args = $current_args;
         unset( $all_args['dps_date'] );
         unset( $all_args['view'] );
         $all_args['show_all'] = '1';
-        echo ' <a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button">' . esc_html__( 'Todos os Atendimentos', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Todos os Atendimentos', 'dps-agenda-addon' ) . '</a>';
+        echo '</div>';
         echo '</div>';
         // Formulário de seleção de data
         echo '<form method="get" class="dps-agenda-date-form">';
@@ -289,7 +321,9 @@ class DPS_Agenda_Addon {
         // Preserve view explicitamente, caso exista
         echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
         echo '<label>' . esc_html__( 'Selecione a data', 'dps-agenda-addon' ) . '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '"></label>';
-        echo '<button type="submit" class="button">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
+        echo '<div class="dps-agenda-date-actions">';
+        echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
+        echo '</div>';
         echo '</form>';
 
         // ========== Filtros por cliente, status e serviço ==========
@@ -352,10 +386,12 @@ class DPS_Agenda_Addon {
         }
         echo '</select></label>';
         // Botões
-        echo '<button type="submit" class="button">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
+        echo '<div class="dps-agenda-filter-actions">';
+        echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
         // Link para limpar filtros
         $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
-        echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
+        echo '</div>';
         echo '</form>';
         // Carrega agendamentos conforme visualização ou modo "todos"
         $appointments = [];
