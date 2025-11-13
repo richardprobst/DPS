@@ -1015,7 +1015,7 @@ class DPS_Agenda_Addon {
             $render_table( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
         }
         if ( ! $has_any ) {
-            echo '<p class="dps-agenda-empty" role="status">' . __( 'Nenhum agendamento encontrado para o período selecionado.', 'dps-agenda-addon' ) . '</p>';
+            echo '<p class="dps-agenda-empty" role="status">' . __( 'Nenhum agendamento.', 'dps-agenda-addon' ) . '</p>';
         }
         echo '</div>';
         return ob_get_clean();
