@@ -27,3 +27,8 @@ Estas instruções se aplicam a todo o repositório. Diretórios que exigirem re
 ## Comunicação adicional
 - Se encontrar instruções conflitantes entre diretórios, adote as mais específicas e sinalize o conflito na PR.
 - Registre quaisquer requisitos extras (variáveis de ambiente, passos manuais) diretamente nos `AGENTS.md` relevantes.
+
+## Documentação específica do plugin WordPress
+- A arquitetura do plugin base e dos add-ons WordPress está descrita em `ANALYSIS.md`. Consulte o documento antes de alterar fluxos para manter a compatibilidade entre módulos.
+- Os add-ons estendem o plugin base por meio dos *hooks* `dps_base_*` (abas/seções) e `dps_settings_*`. Preserve esses pontos de integração ao adicionar novos recursos.
+- As integrações financeiras reutilizam a tabela `dps_transacoes`; mantenha o esquema e sincronizações consistentes ao introduzir novas interações com agendamentos, assinaturas ou cobranças.
