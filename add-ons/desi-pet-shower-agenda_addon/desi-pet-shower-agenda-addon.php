@@ -235,6 +235,19 @@ class DPS_Agenda_Addon {
         }
         .dps-agenda-date-actions .dps-btn,
         .dps-agenda-filter-actions .dps-btn { min-width:8.5rem; }
+        .dps-agenda-empty {
+            margin:2rem auto 0;
+            padding:1.5rem;
+            max-width:min(100%, 32rem);
+            text-align:center;
+            line-height:1.6;
+            color:var(--dps-muted);
+            background:var(--dps-background);
+            border:1px dashed var(--dps-border);
+            border-radius:0.85rem;
+            box-shadow:0 6px 20px rgba(15,23,42,0.06);
+            word-break:break-word;
+        }
         .dps-btn {
             display:inline-flex;
             align-items:center;
@@ -413,6 +426,10 @@ class DPS_Agenda_Addon {
                 background:var(--dps-surface);
                 padding:1rem;
             }
+            .dps-agenda-empty {
+                margin-top:1.5rem;
+                padding:1.25rem;
+            }
             .dps-agenda-wrapper table.dps-table tbody td {
                 border:0;
                 padding:0.5rem 0;
@@ -433,6 +450,10 @@ class DPS_Agenda_Addon {
             .dps-agenda-nav .dps-btn { flex:1 1 100%; }
             .dps-agenda-date-actions,
             .dps-agenda-filter-actions { gap:0.5rem; }
+            .dps-agenda-empty {
+                padding:1.1rem;
+                border-radius:0.75rem;
+            }
         }
         </style>';
         // Acesso permitido: mostrar agenda
@@ -527,6 +548,9 @@ class DPS_Agenda_Addon {
         }
         // Preserve view explicitamente, caso exista
         echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
+        if ( $show_all ) {
+            echo '<input type="hidden" name="show_all" value="1">';
+        }
         echo '<label>' . esc_html__( 'Selecione a data', 'dps-agenda-addon' ) . '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '"></label>';
         echo '<div class="dps-agenda-date-actions">';
         echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
@@ -566,6 +590,9 @@ class DPS_Agenda_Addon {
         // Preserve data e view
         echo '<input type="hidden" name="dps_date" value="' . esc_attr( $selected_date ) . '">';
         echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
+        if ( $show_all ) {
+            echo '<input type="hidden" name="show_all" value="1">';
+        }
         // Cliente select
         echo '<label>' . esc_html__( 'Cliente', 'dps-agenda-addon' );
         echo '<select name="filter_client">';
@@ -597,6 +624,9 @@ class DPS_Agenda_Addon {
         echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
         // Link para limpar filtros
         $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
+        if ( $show_all ) {
+            $clear_args['show_all'] = '1';
+        }
         echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
         echo '</div>';
         echo '</form>';
@@ -985,7 +1015,7 @@ class DPS_Agenda_Addon {
             $render_table( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
         }
         if ( ! $has_any ) {
-            echo '<p>' . __( 'Nenhum agendamento encontrado para o período selecionado.', 'dps-agenda-addon' ) . '</p>';
+            echo '<p class="dps-agenda-empty" role="status">' . __( 'Nenhum agendamento encontrado para o período selecionado.', 'dps-agenda-addon' ) . '</p>';
         }
         echo '</div>';
         return ob_get_clean();
