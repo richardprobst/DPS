@@ -1,7 +1,7 @@
 # Instruções para agentes do monorepo DPS
 
 ## Escopo
-Estas instruções se aplicam a todo o repositório. Diretórios que exigirem regras adicionais devem conter seus próprios `AGENTS.md`, que terão precedência dentro do respectivo escopo.
+Estas instruções se aplicam a todo o repositório. Diretórios que exigirem regras adicionais devem conter seus próprios `AGENTS.md`, que terão precedência dentro do respectivo escopo. Já existem orientações específicas em `plugin/AGENTS.md` para o plugin base e em `add-ons/AGENTS.md` para os complementos.
 
 ## Convenções gerais
 - Utilize mensagens de commit descritivas no imperativo, em português.
