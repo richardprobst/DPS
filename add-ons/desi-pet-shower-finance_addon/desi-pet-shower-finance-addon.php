@@ -16,6 +16,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Evita redeclaração caso outro plugin já tenha definido esta classe
 if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
 
+if ( ! function_exists( 'dps_parse_money_br' ) ) {
+    /**
+     * Converte uma string de valor em formato brasileiro para inteiro em centavos.
+     * Aceita entradas com vírgula ou ponto como separador decimal e remove milhares.
+     *
+     * @param string $str Valor monetário (ex.: "129,90" ou "129.90").
+     * @return int Valor em centavos (ex.: 12990)
+     */
+    function dps_parse_money_br( $str ) {
+        $raw = trim( (string) $str );
+        if ( $raw === '' ) {
+            return 0;
+        }
+        // Mantém apenas dígitos, vírgula, ponto e sinal de menos
+        $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
+        $normalized = str_replace( ' ', '', $normalized );
+        // Se houver vírgula, assume separador decimal brasileiro e remove pontos de milhar
+        if ( strpos( $normalized, ',' ) !== false ) {
+            $normalized = str_replace( '.', '', $normalized );
+            $normalized = str_replace( ',', '.', $normalized );
+        }
+        $value = floatval( $normalized );
+        return (int) round( $value * 100 );
+    }
+}
+
+if ( ! function_exists( 'dps_format_money_br' ) ) {
+    /**
+     * Formata um valor em centavos para string no padrão brasileiro.
+     *
+     * @param int $int Valor em centavos (ex.: 12990).
+     * @return string Valor formatado (ex.: "129,90").
+     */
+    function dps_format_money_br( $int ) {
+        $float = (int) $int / 100;
+        return number_format( $float, 2, ',', '.' );
+    }
+}
+
 class DPS_Finance_Addon {
     public function __construct() {
         // Registra abas e seções no plugin base
@@ -105,9 +144,10 @@ class DPS_Finance_Addon {
             if ( ! $date ) {
                 $date = current_time( 'Y-m-d' );
             }
-            // Converte vírgula em ponto para valores no formato brasileiro
-            $raw_value = $_POST['partial_value'] ?? '0';
-            $value     = floatval( str_replace( ',', '.', $raw_value ) );
+            // Converte valor informado em centavos para evitar imprecisão de ponto flutuante
+            $raw_value   = sanitize_text_field( wp_unslash( $_POST['partial_value'] ?? '0' ) );
+            $value_cents = dps_parse_money_br( $raw_value );
+            $value       = $value_cents / 100;
             $method    = sanitize_text_field( $_POST['partial_method'] ?? '' );
             if ( $trans_id && $value > 0 ) {
                 $parc_table = $wpdb->prefix . 'dps_parcelas';
@@ -119,10 +159,12 @@ class DPS_Finance_Addon {
                     'metodo'   => $method,
                 ], [ '%d','%s','%f','%s' ] );
                 // Calcula a soma de parcelas pagas
-                $paid_sum  = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
+                $paid_sum       = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
+                $paid_sum_cents = $paid_sum ? (int) round( (float) $paid_sum * 100 ) : 0;
                 // Valor total da transação
-                $total_val = $wpdb->get_var( $wpdb->prepare( "SELECT valor FROM {$table} WHERE id = %d", $trans_id ) );
-                if ( $paid_sum && $total_val && floatval( $paid_sum ) >= floatval( $total_val ) ) {
+                $total_val       = $wpdb->get_var( $wpdb->prepare( "SELECT valor FROM {$table} WHERE id = %d", $trans_id ) );
+                $total_val_cents = $total_val ? (int) round( (float) $total_val * 100 ) : 0;
+                if ( $paid_sum_cents && $total_val_cents && $paid_sum_cents >= $total_val_cents ) {
                     // Marca a transação como paga quando quitada
                     $wpdb->update( $table, [ 'status' => 'pago' ], [ 'id' => $trans_id ], [ '%s' ], [ '%d' ] );
                 } else {
@@ -148,7 +190,9 @@ class DPS_Finance_Addon {
         // Salvar nova transação
         if ( isset( $_POST['dps_finance_action'] ) && $_POST['dps_finance_action'] === 'save_trans' && check_admin_referer( 'dps_finance_action', 'dps_finance_nonce' ) ) {
             $date       = sanitize_text_field( $_POST['finance_date'] ?? '' );
-            $value      = floatval( str_replace( ',', '.', $_POST['finance_value'] ?? '0' ) );
+            $value_raw  = sanitize_text_field( wp_unslash( $_POST['finance_value'] ?? '0' ) );
+            $value_cent = dps_parse_money_br( $value_raw );
+            $value      = $value_cent / 100;
             $category   = sanitize_text_field( $_POST['finance_category'] ?? '' );
             $type       = sanitize_text_field( $_POST['finance_type'] ?? 'receita' );
             $status     = sanitize_text_field( $_POST['finance_status'] ?? 'em_aberto' );
@@ -215,7 +259,13 @@ class DPS_Finance_Addon {
             $appt_id = $wpdb->get_var( $wpdb->prepare( "SELECT agendamento_id FROM $table WHERE id = %d", $id ) );
             $appt_id = intval( $appt_id );
             if ( $appt_id ) {
-                $appt_status = ( $status === 'pago' ) ? 'finalizado_pago' : 'finalizado';
+                if ( $status === 'pago' ) {
+                    $appt_status = 'finalizado_pago';
+                } elseif ( $status === 'cancelado' ) {
+                    $appt_status = 'cancelado';
+                } else {
+                    $appt_status = 'finalizado';
+                }
                 delete_post_meta( $appt_id, 'appointment_status' );
                 add_post_meta( $appt_id, 'appointment_status', $appt_status, true );
             }
@@ -314,7 +364,7 @@ class DPS_Finance_Addon {
         // Datas no formato dia-mês-ano
         $date     = $trans->data ? date_i18n( 'd-m-Y', strtotime( $trans->data ) ) : current_time( 'd-m-Y' );
         $date_key = $trans->data ? date( 'Y-m-d', strtotime( $trans->data ) ) : date( 'Y-m-d' );
-        $valor_fmt = number_format( (float) $trans->valor, 2, ',', '.' );
+        $valor_fmt = dps_format_money_br( (int) round( (float) $trans->valor * 100 ) );
         // Cliente e pet
         $client_name = '';
         $client_email = '';
@@ -384,7 +434,7 @@ class DPS_Finance_Addon {
                         } else {
                             $price = (float) get_post_meta( $sid, 'service_price', true );
                         }
-                        $service_lines[] = esc_html( $srv->post_title ) . ' - R$ ' . number_format( $price, 2, ',', '.' );
+                        $service_lines[] = esc_html( $srv->post_title ) . ' - R$ ' . dps_format_money_br( (int) round( $price * 100 ) );
                     }
                 }
             }
@@ -662,8 +712,8 @@ class DPS_Finance_Addon {
             $trans_pp  = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $partial_id ) );
             if ( $trans_pp ) {
                 $already_paid = $this->get_partial_sum( $partial_id );
-                $desc_value   = number_format( (float) $trans_pp->valor, 2, ',', '.' );
-                $paid_value   = number_format( (float) $already_paid, 2, ',', '.' );
+                $desc_value   = dps_format_money_br( (int) round( (float) $trans_pp->valor * 100 ) );
+                $paid_value   = dps_format_money_br( (int) round( (float) $already_paid * 100 ) );
                 echo '<div class="dps-partial-form" style="margin:15px 0;padding:10px;border:1px solid #ddd;background:#f9f9f9;">';
                 echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
                 echo '<form method="post" class="dps-form">';
@@ -798,11 +848,16 @@ class DPS_Finance_Addon {
                     }
                 }
                 // Status editável
-                $status_options = [ 'em_aberto' => __( 'Em aberto', 'dps-finance-addon' ), 'pago' => __( 'Pago', 'dps-finance-addon' ) ];
+                $status_options = [
+                    'em_aberto' => __( 'Em aberto', 'dps-finance-addon' ),
+                    'pago'      => __( 'Pago', 'dps-finance-addon' ),
+                    'cancelado' => __( 'Cancelado', 'dps-finance-addon' ),
+                ];
                 // Adiciona classe para o status da transação
                 echo '<tr class="fin-status-' . esc_attr( $tr->status ) . '">';
                 echo '<td>' . esc_html( date_i18n( 'd-m-Y', strtotime( $tr->data ) ) ) . '</td>';
-                echo '<td>R$ ' . esc_html( number_format( $tr->valor, 2, ',', '.' ) ) . '</td>';
+                $tr_valor_cents = (int) round( (float) $tr->valor * 100 );
+                echo '<td>R$ ' . esc_html( dps_format_money_br( $tr_valor_cents ) ) . '</td>';
                 echo '<td>' . esc_html( $tr->categoria ) . '</td>';
                 echo '<td>' . esc_html( $tr->tipo ) . '</td>';
                 echo '<td>';
@@ -819,7 +874,8 @@ class DPS_Finance_Addon {
                 // Coluna de pagamentos parciais
                 $partial_paid = $this->get_partial_sum( $tr->id );
                 echo '<td>';
-                echo 'R$ ' . esc_html( number_format( $partial_paid, 2, ',', '.' ) ) . ' / R$ ' . esc_html( number_format( $tr->valor, 2, ',', '.' ) );
+                $partial_paid_cents = (int) round( (float) $partial_paid * 100 );
+                echo 'R$ ' . esc_html( dps_format_money_br( $partial_paid_cents ) ) . ' / R$ ' . esc_html( dps_format_money_br( $tr_valor_cents ) );
                 if ( $tr->status !== 'pago' ) {
                     // Mantém parâmetros de filtro existentes ao gerar o link de registro
                     $link_params = $_GET;
@@ -857,7 +913,7 @@ class DPS_Finance_Addon {
                         $client_name = $client_name ? $client_name : '';
                         $pet_title   = $pet_name !== '-' ? $pet_name : '';
                         $date_str    = date_i18n( 'd-m-Y', strtotime( $tr->data ) );
-                        $valor_str   = number_format( $tr->valor, 2, ',', '.' );
+                        $valor_str   = dps_format_money_br( $tr_valor_cents );
                         $msg = sprintf( 'Olá %s, tudo bem? O atendimento do pet %s em %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: https://link.mercadopago.com.br/desipetshower. Obrigado pela confiança!', $client_name, $pet_title, $date_str, $valor_str );
                         $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-finance-addon' ) . '</a>';
@@ -949,13 +1005,14 @@ class DPS_Finance_Addon {
                                 if ( strlen( $digits ) == 10 || strlen( $digits ) == 11 ) {
                                     $digits = '55' . $digits;
                                 }
-                                $valor_str = number_format( $pdata['due'], 2, ',', '.' );
+                                $valor_str = dps_format_money_br( (int) round( (float) $pdata['due'] * 100 ) );
                                 $msg = sprintf( 'Olá %s, tudo bem? Há pagamentos pendentes no total de R$ %s relacionados aos seus atendimentos na Desi Pet Shower. Para regularizar, você pode pagar via PIX ou utilizar nosso link: https://link.mercadopago.com.br/desipetshower. Muito obrigado!', $cname, $valor_str );
                                 $phone_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                             }
                         }
                     }
-                    echo '<tr><td>' . esc_html( $cname ?: '-' ) . '</td><td>R$ ' . esc_html( number_format( $pdata['due'], 2, ',', '.' ) ) . '</td><td>';
+                    $due_cents = (int) round( (float) $pdata['due'] * 100 );
+                    echo '<tr><td>' . esc_html( $cname ?: '-' ) . '</td><td>R$ ' . esc_html( dps_format_money_br( $due_cents ) ) . '</td><td>';
                     if ( $phone_link ) {
                         echo '<a href="' . esc_url( $phone_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-finance-addon' ) . '</a>';
                     } else {
@@ -998,65 +1055,76 @@ class DPS_Finance_Addon {
             return;
         }
         // Determina novo status financeiro com base no status do agendamento
-        $new_status = null;
-        if ( $meta_value === 'finalizado_pago' || $meta_value === 'finalizado e pago' ) {
-            $new_status = 'pago';
-        } elseif ( $meta_value === 'finalizado' ) {
-            // Se o agendamento foi finalizado mas não pago, marca transação como em aberto
-            $new_status = 'em_aberto';
-        } elseif ( $meta_value === 'cancelado' ) {
-            // Para cancelamentos, também marca em aberto (não pago)
-            $new_status = 'em_aberto';
+        $status_map = [
+            'finalizado_pago'   => 'pago',
+            'finalizado e pago' => 'pago',
+            'finalizado'        => 'em_aberto',
+            'cancelado'         => 'cancelado',
+        ];
+        $status_slug = is_string( $meta_value ) ? $meta_value : '';
+        $new_status  = isset( $status_map[ $status_slug ] ) ? $status_map[ $status_slug ] : null;
+        if ( ! $new_status ) {
+            return;
         }
-        if ( $new_status ) {
-            // Recupera informações do agendamento para atualizar ou criar transação
-            $client_id  = get_post_meta( $appt_id, 'appointment_client_id', true );
-            $valor_meta = get_post_meta( $appt_id, 'appointment_total_value', true );
-            $valor      = $valor_meta ? (float) $valor_meta : 0;
-            // Monta descrição a partir de serviços e pet
-            $desc_parts = [];
-            $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
-            if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                foreach ( $service_ids as $sid ) {
-                    $srv = get_post( $sid );
-                    if ( $srv ) {
-                        $desc_parts[] = $srv->post_title;
-                    }
+
+        // Verifica se já existe transação para este agendamento
+        $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE agendamento_id = %d", $appt_id ) );
+
+        // Cancelamento apenas altera o status das transações existentes
+        if ( $new_status === 'cancelado' ) {
+            if ( $existing_id ) {
+                $wpdb->update( $table, [ 'status' => 'cancelado' ], [ 'agendamento_id' => $appt_id ], [ '%s' ], [ '%d' ] );
+            }
+            return;
+        }
+
+        // Recupera informações do agendamento para atualizar ou criar transação
+        $client_id   = get_post_meta( $appt_id, 'appointment_client_id', true );
+        $valor_meta  = get_post_meta( $appt_id, 'appointment_total_value', true );
+        $valor_cents = dps_parse_money_br( $valor_meta );
+        $valor       = $valor_cents / 100;
+        // Monta descrição a partir de serviços e pet
+        $desc_parts  = [];
+        $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
+        if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
+            foreach ( $service_ids as $sid ) {
+                $srv = get_post( $sid );
+                if ( $srv ) {
+                    $desc_parts[] = $srv->post_title;
                 }
             }
-            $pet_id    = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            $pet_post  = $pet_id ? get_post( $pet_id ) : null;
-            if ( $pet_post ) {
-                $desc_parts[] = $pet_post->post_title;
-            }
-            $desc = implode( ' - ', $desc_parts );
-            // Verifica se já existe transação para este agendamento
-            $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE agendamento_id = %d", $appt_id ) );
-            // Determina a data da transação. Para atualizações de status, usamos a data do agendamento ou a data atual caso não exista.
-            $appt_date = get_post_meta( $appt_id, 'appointment_date', true );
-            $trans_date = $appt_date ? $appt_date : current_time( 'Y-m-d' );
-            $trans_data = [
-                'cliente_id'     => $client_id ?: null,
-                'agendamento_id' => $appt_id,
-                'plano_id'       => null,
-                'data'           => $trans_date,
-                'valor'          => $valor,
-                'categoria'      => __( 'Serviço', 'dps-finance-addon' ),
-                'tipo'           => 'receita',
-                'status'         => ( $new_status === 'pago' ? 'pago' : 'em_aberto' ),
-                'descricao'      => $desc,
-            ];
-            if ( $existing_id ) {
-                // Atualiza a transação existente com novo status, valor e descrição
-                $wpdb->update( $table, [
-                    'status'    => $trans_data['status'],
-                    'valor'     => $trans_data['valor'],
-                    'descricao' => $trans_data['descricao'],
-                ], [ 'id' => $existing_id ], [ '%s','%f','%s' ], [ '%d' ] );
-            } else {
-                // Cria uma nova transação se ainda não existir
-                $wpdb->insert( $table, $trans_data, [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
-            }
+        }
+        $pet_id   = get_post_meta( $appt_id, 'appointment_pet_id', true );
+        $pet_post = $pet_id ? get_post( $pet_id ) : null;
+        if ( $pet_post ) {
+            $desc_parts[] = $pet_post->post_title;
+        }
+        $desc = implode( ' - ', $desc_parts );
+        // Determina a data da transação. Para atualizações de status, usamos a data do agendamento ou a data atual caso não exista.
+        $appt_date  = get_post_meta( $appt_id, 'appointment_date', true );
+        $trans_date = $appt_date ? $appt_date : current_time( 'Y-m-d' );
+        $trans_data = [
+            'cliente_id'     => $client_id ?: null,
+            'agendamento_id' => $appt_id,
+            'plano_id'       => null,
+            'data'           => $trans_date,
+            'valor'          => $valor,
+            'categoria'      => __( 'Serviço', 'dps-finance-addon' ),
+            'tipo'           => 'receita',
+            'status'         => ( $new_status === 'pago' ? 'pago' : 'em_aberto' ),
+            'descricao'      => $desc,
+        ];
+        if ( $existing_id ) {
+            // Atualiza a transação existente com novo status, valor, descrição e data
+            $wpdb->update( $table, [
+                'status'    => $trans_data['status'],
+                'valor'     => $trans_data['valor'],
+                'descricao' => $trans_data['descricao'],
+                'data'      => $trans_data['data'],
+            ], [ 'id' => $existing_id ], [ '%s','%f','%s','%s' ], [ '%d' ] );
+        } else {
+            // Cria uma nova transação se ainda não existir
+            $wpdb->insert( $table, $trans_data, [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
         }
         // fecha o método sync_status_to_finance
     }
