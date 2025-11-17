@@ -1011,15 +1011,24 @@ class DPS_Services_Addon {
         }
 
         // Extras e TaxiDog também compõem o valor histórico do atendimento
-        $extra_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_extra_value', true ) );
-        $taxi_cents  = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_taxidog_price', true ) );
-        $sub_extra   = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_extra_value', true ) );
+        $subscription_base_cents  = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_base_value', true ) );
+        $subscription_total_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_total_value', true ) );
+        $extra_cents              = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_extra_value', true ) );
+        $taxi_cents               = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_taxidog_price', true ) );
+        $sub_extra                = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_extra_value', true ) );
+        $appointment_total_cents  = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_total_value', true ) );
+
+        if ( $subscription_total_cents > 0 ) {
+            $total_cents += $subscription_total_cents;
+        } elseif ( $subscription_base_cents > 0 ) {
+            $total_cents += $subscription_base_cents;
+        }
 
         $total_cents += $extra_cents + $taxi_cents + $sub_extra;
 
-        // Fallback: se não houver serviços mas existir total calculado anteriormente
-        if ( $total_cents <= 0 ) {
-            $total_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_total_value', true ) );
+        // Garante que o total registrado não ignore o valor consolidado do agendamento
+        if ( $appointment_total_cents > 0 ) {
+            $total_cents = max( $total_cents, $appointment_total_cents );
         }
 
         update_post_meta( $appointment_id, '_dps_total_at_booking', $total_cents );
