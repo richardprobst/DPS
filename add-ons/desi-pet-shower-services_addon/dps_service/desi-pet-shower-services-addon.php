@@ -216,6 +216,7 @@ class DPS_Services_Addon {
                 'duration_small'  => get_post_meta( $edit_id, 'service_duration_small', true ),
                 'duration_medium' => get_post_meta( $edit_id, 'service_duration_medium', true ),
                 'duration_large'  => get_post_meta( $edit_id, 'service_duration_large', true ),
+                'stock'           => get_post_meta( $edit_id, 'dps_service_stock_consumption', true ),
             ];
             }
         }
@@ -292,6 +293,57 @@ class DPS_Services_Addon {
         echo '<p><label>' . esc_html__( 'Pequeno', 'dps-services-addon' ) . ' <input type="number" name="service_duration_small" step="5" min="0" value="' . esc_attr( $dur_small ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
         echo '<p><label>' . esc_html__( 'Médio', 'dps-services-addon' ) . ' <input type="number" name="service_duration_medium" step="5" min="0" value="' . esc_attr( $dur_medium ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
         echo '<p><label>' . esc_html__( 'Grande', 'dps-services-addon' ) . ' <input type="number" name="service_duration_large" step="5" min="0" value="' . esc_attr( $dur_large ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
+        echo '</div>';
+        // Consumo de estoque
+        $consumption = isset( $meta['stock'] ) && is_array( $meta['stock'] ) ? $meta['stock'] : [];
+        $stock_items = [];
+        if ( post_type_exists( 'dps_stock_item' ) ) {
+            $stock_items = get_posts( [
+                'post_type'      => 'dps_stock_item',
+                'post_status'    => 'publish',
+                'posts_per_page' => -1,
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+            ] );
+        }
+        echo '<div class="dps-stock-consumption">';
+        echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Consumo de estoque', 'desi-pet-shower' ) . '</strong><br><span class="description">' . esc_html__( 'Relacione insumos utilizados por atendimento deste serviço. A baixa acontecerá automaticamente ao concluir um agendamento.', 'desi-pet-shower' ) . '</span></p>';
+        if ( empty( $stock_items ) ) {
+            echo '<p class="description">' . esc_html__( 'Cadastre itens em Estoque DPS para selecionar insumos.', 'desi-pet-shower' ) . '</p>';
+        }
+        echo '<table class="widefat striped" id="dps-stock-consumption-table">';
+        echo '<thead><tr><th>' . esc_html__( 'Item de estoque', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Quantidade consumida', 'desi-pet-shower' ) . '</th><th></th></tr></thead><tbody id="dps-stock-consumption-rows">';
+
+        if ( ! empty( $consumption ) ) {
+            foreach ( $consumption as $row ) {
+                $selected_item = isset( $row['item_id'] ) ? intval( $row['item_id'] ) : 0;
+                $qty_value     = isset( $row['quantity'] ) ? $row['quantity'] : '';
+                echo '<tr>';
+                echo '<td><select name="dps_stock_item[]">';
+                echo '<option value="">' . esc_html__( 'Selecione um item', 'desi-pet-shower' ) . '</option>';
+                foreach ( $stock_items as $stock ) {
+                    $selected = selected( $selected_item, $stock->ID, false );
+                    echo '<option value="' . esc_attr( $stock->ID ) . '" ' . $selected . '>' . esc_html( $stock->post_title ) . '</option>';
+                }
+                echo '</select></td>';
+                echo '<td><input type="number" name="dps_stock_quantity[]" step="0.01" min="0" value="' . esc_attr( $qty_value ) . '" placeholder="0"></td>';
+                echo '<td><button type="button" class="button dps-remove-stock-row">' . esc_html__( 'Remover', 'desi-pet-shower' ) . '</button></td>';
+                echo '</tr>';
+            }
+        }
+
+        echo '</tbody></table>';
+        echo '<p><button type="button" class="button" id="dps-add-stock-row">' . esc_html__( 'Adicionar insumo', 'desi-pet-shower' ) . '</button></p>';
+        $options = '<option value="">' . esc_html__( 'Selecione um item', 'desi-pet-shower' ) . '</option>';
+        foreach ( $stock_items as $stock ) {
+            $options .= '<option value="' . esc_attr( $stock->ID ) . '">' . esc_html( $stock->post_title ) . '</option>';
+        }
+        $template = '<tr><td><select name="dps_stock_item[]">' . $options . '</select></td><td><input type="number" name="dps_stock_quantity[]" step="0.01" min="0" value="" placeholder="0"></td><td><button type="button" class="button dps-remove-stock-row">' . esc_html__( 'Remover', 'desi-pet-shower' ) . '</button></td></tr>';
+        echo '<script>(function($){$(document).ready(function(){var rowTemplate = ' . wp_json_encode( $template ) . ';';
+        echo 'if($("#dps-stock-consumption-rows tr").length === 0){$("#dps-stock-consumption-rows").append(rowTemplate);}';
+        echo '$("#dps-add-stock-row").on("click", function(e){e.preventDefault();$("#dps-stock-consumption-rows").append(rowTemplate);});';
+        echo '$(document).on("click", ".dps-remove-stock-row", function(e){e.preventDefault();$(this).closest("tr").remove();});';
+        echo '});})(jQuery);</script>';
         echo '</div>';
         // Campos específicos para pacotes: seleção de serviços incluídos
         $package_items = [];
@@ -509,6 +561,29 @@ class DPS_Services_Addon {
                     update_post_meta( $srv_id, 'service_duration_large', $dur_large );
                 } else {
                     delete_post_meta( $srv_id, 'service_duration_large' );
+                }
+                // Salva insumos vinculados ao serviço
+                $consumption = [];
+                $posted_items = isset( $_POST['dps_stock_item'] ) ? (array) wp_unslash( $_POST['dps_stock_item'] ) : [];
+                $posted_qty   = isset( $_POST['dps_stock_quantity'] ) ? (array) wp_unslash( $_POST['dps_stock_quantity'] ) : [];
+
+                foreach ( $posted_items as $idx => $item_raw ) {
+                    $item_id = intval( $item_raw );
+                    $qty_raw = isset( $posted_qty[ $idx ] ) ? $posted_qty[ $idx ] : '';
+                    $qty     = '' === $qty_raw ? 0 : floatval( str_replace( ',', '.', $qty_raw ) );
+
+                    if ( $item_id && $qty > 0 ) {
+                        $consumption[] = [
+                            'item_id'  => $item_id,
+                            'quantity' => $qty,
+                        ];
+                    }
+                }
+
+                if ( ! empty( $consumption ) ) {
+                    update_post_meta( $srv_id, 'dps_service_stock_consumption', $consumption );
+                } else {
+                    delete_post_meta( $srv_id, 'dps_service_stock_consumption' );
                 }
                 // Salva serviços incluídos no pacote, se for um pacote
                 if ( 'package' === $type && isset( $_POST['service_package_items'] ) && is_array( $_POST['service_package_items'] ) ) {
