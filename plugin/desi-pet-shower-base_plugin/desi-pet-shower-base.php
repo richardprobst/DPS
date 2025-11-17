@@ -42,6 +42,38 @@ class DPS_Base_Plugin {
     }
 
     /**
+     * Executa rotinas de ativação: criação de capabilities e do papel de recepção.
+     */
+    public static function activate() {
+        $capabilities = [
+            'dps_manage_appointments',
+            'dps_manage_clients',
+            'dps_manage_pets',
+        ];
+
+        $admin_role = get_role( 'administrator' );
+        if ( $admin_role ) {
+            foreach ( $capabilities as $capability ) {
+                $admin_role->add_cap( $capability );
+            }
+        }
+
+        $reception_caps = array_fill_keys( $capabilities, true );
+        $existing_reception = get_role( 'dps_reception' );
+        if ( $existing_reception ) {
+            foreach ( $capabilities as $capability ) {
+                $existing_reception->add_cap( $capability );
+            }
+        } else {
+            add_role(
+                'dps_reception',
+                __( 'Recepção DPS', 'desi-pet-shower' ),
+                $reception_caps
+            );
+        }
+    }
+
+    /**
      * Registra tipos de post personalizados: clientes, pets e agendamentos
      */
     public function register_post_types() {
@@ -178,6 +210,9 @@ class DPS_Base_Plugin {
         }
     }
 }
+
+// Registra hook de ativação para criação de capabilities e papéis padrão
+register_activation_hook( __FILE__, [ 'DPS_Base_Plugin', 'activate' ] );
 
 // Instancia o plugin
 new DPS_Base_Plugin();
