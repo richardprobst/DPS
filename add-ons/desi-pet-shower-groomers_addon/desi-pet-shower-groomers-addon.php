@@ -235,7 +235,11 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        $groomers = isset( $_POST['dps_groomers'] ) ? (array) wp_unslash( $_POST['dps_groomers'] ) : [];
+        if ( ! array_key_exists( 'dps_groomers', $_POST ) ) {
+            return;
+        }
+
+        $groomers = (array) wp_unslash( $_POST['dps_groomers'] );
         $groomers = array_filter( array_map( 'absint', $groomers ) );
 
         if ( ! empty( $groomers ) ) {
@@ -292,7 +296,7 @@ class DPS_Groomers_Addon {
                         ],
                         [
                             'key'     => '_dps_groomers',
-                            'value'   => '"' . $selected . '"',
+                            'value'   => 'i:' . $selected . ';',
                             'compare' => 'LIKE',
                         ],
                     ],
