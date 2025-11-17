@@ -345,18 +345,9 @@ class DPS_Payment_Addon {
         if ( is_admin() ) {
             return;
         }
-        $raw_body = file_get_contents( 'php://input' );
-        $this->log_notification( 'Notificação do Mercado Pago recebida', [ 'raw' => $raw_body, 'get' => $_GET ] );
-        if ( ! $this->validate_mp_webhook_request() ) {
-            $this->log_notification( 'Falha na validação do webhook do Mercado Pago', [] );
-            if ( ! headers_sent() ) {
-                status_header( 401 );
-            }
-            echo 'Unauthorized';
-            exit;
-        }
-        $payment_id = '';
-        $topic      = '';
+        $raw_body        = file_get_contents( 'php://input' );
+        $payment_id      = '';
+        $topic           = '';
         $notification_id = '';
         $payload         = [];
         // 1. IPN padrão: ?topic=payment&id=123
@@ -393,6 +384,15 @@ class DPS_Payment_Addon {
         // Se não for pagamento ou não tiver id, ignora
         if ( 'payment' !== strtolower( $topic ) || ! $payment_id ) {
             return;
+        }
+        $this->log_notification( 'Notificação do Mercado Pago recebida', [ 'raw' => $raw_body, 'get' => $_GET ] );
+        if ( ! $this->validate_mp_webhook_request() ) {
+            $this->log_notification( 'Falha na validação do webhook do Mercado Pago', [] );
+            if ( ! headers_sent() ) {
+                status_header( 401 );
+            }
+            echo 'Unauthorized';
+            exit;
         }
         $notification_id = $this->extract_notification_identifier( $payload, $topic, $payment_id );
         if ( $notification_id && $this->is_notification_processed( $notification_id ) ) {
