@@ -73,6 +73,53 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Retorna o ID do cliente associado ao usuário logado.
+     *
+     * @return int
+     */
+    private function get_client_id_for_current_user() {
+        $user_id = get_current_user_id();
+
+        if ( ! $user_id ) {
+            return 0;
+        }
+
+        $client_id = absint( get_user_meta( $user_id, 'dps_client_id', true ) );
+
+        if ( $client_id && 'dps_cliente' === get_post_type( $client_id ) ) {
+            update_post_meta( $client_id, 'client_user_id', $user_id );
+            return $client_id;
+        }
+
+        $user = get_userdata( $user_id );
+
+        if ( $user && $user->user_email ) {
+            $client_query = new WP_Query( [
+                'post_type'      => 'dps_cliente',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'meta_query'     => [
+                    [
+                        'key'     => 'client_email',
+                        'value'   => $user->user_email,
+                        'compare' => '=',
+                    ],
+                ],
+            ] );
+
+            if ( $client_query->have_posts() ) {
+                $client_id = absint( $client_query->posts[0]->ID );
+                update_user_meta( $user_id, 'dps_client_id', $client_id );
+                update_post_meta( $client_id, 'client_user_id', $user_id );
+            }
+
+            wp_reset_postdata();
+        }
+
+        return $client_id ? $client_id : 0;
+    }
+
+    /**
      * Cria um usuário WordPress para um cliente recém-cadastrado, se ainda não existir.
      * Este usuário é do tipo "assinante" e recebe login e senha enviados por email.
      *
@@ -92,36 +139,53 @@ final class DPS_Client_Portal {
      * @param bool    $update  Indica se é atualização (true) ou criação (false).
      */
     public function maybe_create_login_for_client( $post_id, $post, $update ) {
-        // Apenas na criação do cliente
         if ( $update ) {
             return;
         }
-        // Evita auto‑saves ou revisões
+
         if ( wp_is_post_revision( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) {
             return;
         }
-        // Verifica se já existe senha criada
-        $existing_hash = get_post_meta( $post_id, 'client_password_hash', true );
-        if ( ! empty( $existing_hash ) ) {
+
+        $existing_user = absint( get_post_meta( $post_id, 'client_user_id', true ) );
+        if ( $existing_user && get_userdata( $existing_user ) ) {
             return;
         }
-        // Recupera telefone do cliente
+
         $phone = sanitize_text_field( get_post_meta( $post_id, 'client_phone', true ) );
-        if ( ! $phone ) {
+        $email = sanitize_email( get_post_meta( $post_id, 'client_email', true ) );
+
+        if ( ! $phone && ! $email ) {
             return;
         }
-        // Gera uma senha aleatória de 8 caracteres (sem símbolos para facilitar digitação)
-        $plain  = wp_generate_password( 8, false, false );
-        // Gera hash usando as funções do WordPress
-        $hash   = wp_hash_password( $plain );
-        // Armazena hash no meta
-        update_post_meta( $post_id, 'client_password_hash', $hash );
-        // Opcional: armazenar o telefone em um meta separado para login (já existe client_phone)
-        // Marca data de criação do login
+
+        $username = $phone ? 'dps_cliente_' . preg_replace( '/\D+/', '', $phone ) : 'dps_cliente_' . $post_id;
+        if ( username_exists( $username ) ) {
+            $username .= '_' . $post_id;
+        }
+
+        $safe_email = $email && is_email( $email ) ? $email : $username . '@example.com';
+        $password   = wp_generate_password( 12, true );
+
+        $user_data = [
+            'user_login'   => sanitize_user( $username, true ),
+            'user_email'   => $safe_email,
+            'user_pass'    => $password,
+            'display_name' => get_the_title( $post_id ),
+            'role'         => 'subscriber',
+        ];
+
+        $user_id = wp_insert_user( $user_data );
+
+        if ( is_wp_error( $user_id ) ) {
+            return;
+        }
+
+        update_user_meta( $user_id, 'dps_client_id', $post_id );
+        update_post_meta( $post_id, 'client_user_id', $user_id );
         update_post_meta( $post_id, 'client_login_created_at', current_time( 'mysql' ) );
-        // Salva a senha temporariamente em meta transiente para visualização imediata pela administração
-        // Transiente expira em 30 minutos
-        set_transient( 'dps_client_pass_' . $post_id, $plain, 30 * MINUTE_IN_SECONDS );
+
+        set_transient( 'dps_client_pass_' . $post_id, $password, 30 * MINUTE_IN_SECONDS );
     }
 
     /**
@@ -129,10 +193,16 @@ final class DPS_Client_Portal {
      * Utiliza nonce para proteção CSRF e atualiza metas conforme necessário.
      */
     public function handle_portal_actions() {
-        // Para processar ações do portal, o cliente deve estar logado via sessão customizada
-        if ( ! isset( $_SESSION['dps_client_id'] ) || ! $_SESSION['dps_client_id'] ) {
+        if ( ! is_user_logged_in() ) {
             return;
         }
+
+        $client_id = $this->get_client_id_for_current_user();
+
+        if ( ! $client_id ) {
+            return;
+        }
+
         if ( empty( $_POST['dps_client_portal_action'] ) ) {
             return;
         }
@@ -141,10 +211,6 @@ final class DPS_Client_Portal {
             return;
         }
         $action    = sanitize_key( $_POST['dps_client_portal_action'] );
-        $client_id = intval( $_SESSION['dps_client_id'] );
-        if ( ! $client_id ) {
-            return;
-        }
 
         $referer      = wp_get_referer();
         $redirect_url = $referer ? remove_query_arg( 'portal_msg', $referer ) : remove_query_arg( 'portal_msg' );
@@ -153,13 +219,18 @@ final class DPS_Client_Portal {
         if ( 'pay_transaction' === $action && isset( $_POST['trans_id'] ) ) {
             $trans_id = intval( $_POST['trans_id'] );
             $redirect = add_query_arg( 'portal_msg', 'error', $redirect_url );
-            $link     = $this->generate_payment_link_for_transaction( $trans_id );
-            if ( $link ) {
-                // Redireciona para o link de pagamento
-                wp_redirect( $link );
+            if ( ! $this->transaction_belongs_to_client( $trans_id, $client_id ) ) {
+                wp_safe_redirect( $redirect );
                 exit;
             }
-            wp_redirect( $redirect );
+
+            $link = $this->generate_payment_link_for_transaction( $trans_id );
+            if ( $link ) {
+                // Redireciona para o link de pagamento
+                wp_safe_redirect( $link );
+                exit;
+            }
+            wp_safe_redirect( $redirect );
             exit;
         }
 
@@ -467,15 +538,17 @@ final class DPS_Client_Portal {
     public function render_portal_shortcode() {
         ob_start();
         wp_enqueue_style( 'dps-client-portal' );
-        // Se não houver sessão de cliente, exibe o formulário de login personalizado
-        if ( ! isset( $_SESSION['dps_client_id'] ) || ! $_SESSION['dps_client_id'] ) {
+        // Se o usuário não estiver autenticado, exibe o formulário de login do WordPress
+        if ( ! is_user_logged_in() ) {
             echo '<div class="dps-client-portal-login">';
             echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
             echo do_shortcode( '[dps_client_login]' );
             echo '</div>';
             return ob_get_clean();
         }
-        $client_id = intval( $_SESSION['dps_client_id'] );
+
+        $client_id = $this->get_client_id_for_current_user();
+
         if ( ! $client_id ) {
             echo '<p>' . esc_html__( 'Nenhum cadastro de cliente foi encontrado para sua conta.', 'dps-client-portal' ) . '</p>';
             return ob_get_clean();
@@ -894,6 +967,22 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Garante que a transação pertence ao cliente logado.
+     *
+     * @param int $trans_id  ID da transação.
+     * @param int $client_id ID do cliente.
+     * @return bool
+     */
+    private function transaction_belongs_to_client( $trans_id, $client_id ) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'dps_transacoes';
+        $found = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(1) FROM {$table} WHERE id = %d AND cliente_id = %d", $trans_id, $client_id ) );
+
+        return (bool) $found;
+    }
+
+    /**
      * Gera um link de pagamento do Mercado Pago para uma transação específica.  Se
      * ocorrer algum erro, retorna false.
      *
@@ -1275,66 +1364,92 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Exibe formulário de login e processa autenticação via telefone e senha.
+     * Exibe formulário de login e processa autenticação usando o fluxo padrão do WordPress.
      * Quando autenticado, redireciona para a página contendo o portal.
      *
      * @return string HTML do formulário de login
      */
     public function render_login_shortcode() {
-        // Se já logado, redireciona
-        if ( isset( $_SESSION['dps_client_id'] ) && $_SESSION['dps_client_id'] ) {
+        if ( is_user_logged_in() ) {
             $portal_page = get_page_by_title( 'Portal do Cliente' );
+
             if ( $portal_page ) {
                 wp_safe_redirect( get_permalink( $portal_page->ID ) );
+                exit;
             }
+
             return '';
         }
-        // Processa submissão do login
-        if ( isset( $_POST['dps_client_login_action'] ) ) {
+
+        $feedback    = '';
+        $ip_address  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+        $attempt_key = $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
+        $attempts    = $attempt_key ? (int) get_transient( $attempt_key ) : 0;
+        $max_attempt = 5;
+        $lock_time   = 15 * MINUTE_IN_SECONDS;
+
+        if ( $attempts >= $max_attempt ) {
+            $feedback = esc_html__( 'Muitas tentativas de login. Tente novamente em alguns minutos.', 'dps-client-portal' );
+        }
+
+        if ( isset( $_POST['dps_client_login_action'] ) && ! $feedback ) {
             if ( ! isset( $_POST['_dps_client_login_nonce'] ) || ! wp_verify_nonce( $_POST['_dps_client_login_nonce'], 'dps_client_login_action' ) ) {
-                echo '<div class="notice notice-error"><p>' . esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' ) . '</p></div>';
+                $feedback = esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' );
             } else {
-                $phone    = sanitize_text_field( $_POST['dps_client_phone'] ?? '' );
+                $login    = sanitize_text_field( $_POST['dps_client_login'] ?? '' );
                 $password = sanitize_text_field( $_POST['dps_client_password'] ?? '' );
-                $client_q = new WP_Query( [
-                    'post_type'      => 'dps_cliente',
-                    'posts_per_page' => 1,
-                    'post_status'    => 'publish',
-                    'meta_query'     => [
-                        [
-                            'key'     => 'client_phone',
-                            'value'   => $phone,
-                            'compare' => '=',
-                        ],
-                    ],
-                ] );
-                if ( $client_q->have_posts() ) {
-                    $client_post = $client_q->posts[0];
-                    $hash = get_post_meta( $client_post->ID, 'client_password_hash', true );
-                    if ( $hash && wp_check_password( $password, $hash ) ) {
-                        $_SESSION['dps_client_id'] = $client_post->ID;
-                        $portal_page = get_page_by_title( 'Portal do Cliente' );
-                        if ( $portal_page ) {
-                            wp_safe_redirect( get_permalink( $portal_page->ID ) );
-                        }
-                        return '';
-                    } else {
-                        echo '<div class="notice notice-error"><p>' . esc_html__( 'Telefone ou senha incorretos.', 'dps-client-portal' ) . '</p></div>';
+
+                $creds = [
+                    'user_login'    => $login,
+                    'user_password' => $password,
+                    'remember'      => true,
+                ];
+
+                $user = wp_signon( $creds, false );
+
+                if ( is_wp_error( $user ) ) {
+                    $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
+
+                    if ( $attempt_key ) {
+                        $attempts++;
+                        set_transient( $attempt_key, $attempts, $lock_time );
                     }
                 } else {
-                    echo '<div class="notice notice-error"><p>' . esc_html__( 'Telefone ou senha incorretos.', 'dps-client-portal' ) . '</p></div>';
+                    if ( $attempt_key ) {
+                        delete_transient( $attempt_key );
+                    }
+
+                    wp_set_current_user( $user->ID );
+                    wp_set_auth_cookie( $user->ID, true );
+
+                    $portal_page = get_page_by_title( 'Portal do Cliente' );
+
+                    if ( $portal_page ) {
+                        wp_safe_redirect( get_permalink( $portal_page->ID ) );
+                    } else {
+                        wp_safe_redirect( home_url() );
+                    }
+
+                    exit;
                 }
             }
         }
+
         ob_start();
+
+        if ( $feedback ) {
+            echo '<div class="notice notice-error"><p>' . esc_html( $feedback ) . '</p></div>';
+        }
+
         echo '<form method="post" class="dps-client-login-form">';
         wp_nonce_field( 'dps_client_login_action', '_dps_client_login_nonce' );
-        echo '<p><label>' . esc_html__( 'Telefone', 'dps-client-portal' ) . '<br />';
-        echo '<input type="text" name="dps_client_phone" value="" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Usuário ou e-mail', 'dps-client-portal' ) . '<br />';
+        echo '<input type="text" name="dps_client_login" value="" autocomplete="username" required></label></p>';
         echo '<p><label>' . esc_html__( 'Senha', 'dps-client-portal' ) . '<br />';
-        echo '<input type="password" name="dps_client_password" value="" required></label></p>';
+        echo '<input type="password" name="dps_client_password" value="" autocomplete="current-password" required></label></p>';
         echo '<p><button type="submit" name="dps_client_login_action" class="button button-primary">' . esc_html__( 'Entrar', 'dps-client-portal' ) . '</button></p>';
         echo '</form>';
+
         return ob_get_clean();
     }
     
