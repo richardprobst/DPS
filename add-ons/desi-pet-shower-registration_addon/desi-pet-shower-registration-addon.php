@@ -22,6 +22,8 @@ class DPS_Registration_Addon {
     public function __construct() {
         // Processa o envio do formulário
         add_action( 'init', [ $this, 'maybe_handle_registration' ] );
+        // Confirmação de email
+        add_action( 'init', [ $this, 'maybe_handle_email_confirmation' ] );
         // Shortcode para exibir o formulário
         add_shortcode( 'dps_registration_form', [ $this, 'render_registration_form' ] );
         // Cria a página automaticamente ao ativar
@@ -107,15 +109,26 @@ class DPS_Registration_Addon {
      */
     public function maybe_handle_registration() {
         if ( isset( $_POST['dps_reg_action'] ) && 'save_registration' === $_POST['dps_reg_action'] ) {
-            // Verifica nonce
-            if ( ! isset( $_POST['dps_reg_nonce'] ) || ! wp_verify_nonce( $_POST['dps_reg_nonce'], 'dps_reg_action' ) ) {
+            // Verifica nonce e honeypot
+            if ( ! isset( $_POST['dps_reg_nonce'] ) || ! check_admin_referer( 'dps_reg_action', 'dps_reg_nonce' ) ) {
+                return;
+            }
+
+            // Honeypot para bots
+            if ( ! empty( $_POST['dps_hp_field'] ) ) {
+                return;
+            }
+
+            // Hook para validações adicionais (ex.: reCAPTCHA)
+            $spam_check = apply_filters( 'dps_registration_spam_check', true, $_POST );
+            if ( true !== $spam_check ) {
                 return;
             }
             // Sanitiza dados do cliente
             $client_name     = sanitize_text_field( $_POST['client_name'] ?? '' );
             $client_cpf      = sanitize_text_field( $_POST['client_cpf'] ?? '' );
             $client_phone    = sanitize_text_field( $_POST['client_phone'] ?? '' );
-            $client_email    = sanitize_text_field( $_POST['client_email'] ?? '' );
+            $client_email    = sanitize_email( $_POST['client_email'] ?? '' );
             $client_birth    = sanitize_text_field( $_POST['client_birth'] ?? '' );
             $client_instagram = sanitize_text_field( $_POST['client_instagram'] ?? '' );
             $client_facebook = sanitize_text_field( $_POST['client_facebook'] ?? '' );
@@ -145,10 +158,16 @@ class DPS_Registration_Addon {
                 update_post_meta( $client_id, 'client_photo_auth', $client_photo_auth );
                 update_post_meta( $client_id, 'client_address', $client_address );
                 update_post_meta( $client_id, 'client_referral', $client_referral );
+                update_post_meta( $client_id, 'dps_email_confirmed', 0 );
+                update_post_meta( $client_id, 'dps_is_active', 0 );
                 // Salva coordenadas se fornecidas
                 if ( $client_lat !== '' && $client_lng !== '' ) {
                     update_post_meta( $client_id, 'client_lat', $client_lat );
                     update_post_meta( $client_id, 'client_lng', $client_lng );
+                }
+
+                if ( $client_email ) {
+                    $this->send_confirmation_email( $client_id, $client_email );
                 }
             }
             // Lê pets submetidos (campos em arrays)
@@ -202,9 +221,44 @@ class DPS_Registration_Addon {
                 }
             }
             // Redireciona e indica sucesso
-            wp_redirect( add_query_arg( 'registered', '1', get_permalink() ) );
+            wp_redirect( add_query_arg( 'registered', '1', $this->get_registration_page_url() ) );
             exit;
         }
+    }
+
+    /**
+     * Processa a confirmação de email via token presente na URL.
+     */
+    public function maybe_handle_email_confirmation() {
+        if ( empty( $_GET['dps_confirm_email'] ) ) {
+            return;
+        }
+
+        $token = sanitize_text_field( wp_unslash( $_GET['dps_confirm_email'] ) );
+        $client = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => 'dps_email_confirm_token',
+                    'value' => $token,
+                ],
+            ],
+        ] );
+
+        if ( empty( $client ) ) {
+            return;
+        }
+
+        $client_id = absint( $client[0] );
+        update_post_meta( $client_id, 'dps_email_confirmed', 1 );
+        update_post_meta( $client_id, 'dps_is_active', 1 );
+        delete_post_meta( $client_id, 'dps_email_confirm_token' );
+
+        $redirect = add_query_arg( 'dps_email_confirmed', '1', $this->get_registration_page_url() );
+        wp_safe_redirect( $redirect );
+        exit;
     }
 
     /**
@@ -231,9 +285,16 @@ class DPS_Registration_Addon {
         if ( $success ) {
             echo '<p style="color:green; font-weight:bold;">' . esc_html__( 'Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</p>';
         }
+        if ( isset( $_GET['dps_email_confirmed'] ) && '1' === $_GET['dps_email_confirmed'] ) {
+            echo '<p style="color:green; font-weight:bold;">' . esc_html__( 'Email confirmado com sucesso! Seu cadastro está ativo.', 'desi-pet-shower' ) . '</p>';
+        }
         echo '<form method="post" id="dps-reg-form">';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
+        echo '<div class="dps-hp-field" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">';
+        echo '<label for="dps_hp_field">' . esc_html__( 'Deixe este campo vazio', 'desi-pet-shower' ) . '</label>';
+        echo '<input type="text" name="dps_hp_field" id="dps_hp_field" tabindex="-1" autocomplete="off">';
+        echo '</div>';
         echo '<h4>' . esc_html__( 'Dados do Cliente', 'dps-registration-addon' ) . '</h4>';
         // Campos do cliente agrupados para melhor distribuição
         echo '<div class="dps-client-fields">';
@@ -260,6 +321,7 @@ class DPS_Registration_Addon {
         // Campos ocultos para coordenadas, preenchidos via script de autocomplete
         echo '<input type="hidden" name="client_lat" id="dps-client-lat" value="">';
         echo '<input type="hidden" name="client_lng" id="dps-client-lng" value="">';
+        do_action( 'dps_registration_after_fields' );
         echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button></p>';
         echo '</form>';
         // Lista de raças
@@ -421,6 +483,46 @@ class DPS_Registration_Addon {
         }
         echo '</div>';
         return ob_get_clean();
+    }
+
+    /**
+     * Envia email com token de confirmação para o cliente.
+     *
+     * @param int    $client_id    ID do post do cliente.
+     * @param string $client_email Email do cliente.
+     */
+    protected function send_confirmation_email( $client_id, $client_email ) {
+        $token = wp_generate_uuid4();
+        update_post_meta( $client_id, 'dps_email_confirm_token', $token );
+
+        $confirmation_link = add_query_arg( 'dps_confirm_email', $token, $this->get_registration_page_url() );
+
+        $subject = __( 'Confirme seu email - Desi Pet Shower', 'desi-pet-shower' );
+        $message = sprintf(
+            "%s\n\n%s\n\n%s",
+            __( 'Olá! Recebemos seu cadastro no Desi Pet Shower. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ),
+            esc_url_raw( $confirmation_link ),
+            __( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' )
+        );
+
+        wp_mail( $client_email, $subject, $message );
+    }
+
+    /**
+     * Retorna a URL da página de cadastro configurada.
+     *
+     * @return string
+     */
+    protected function get_registration_page_url() {
+        $page_id = (int) get_option( 'dps_registration_page_id' );
+        if ( $page_id ) {
+            $url = get_permalink( $page_id );
+            if ( $url ) {
+                return $url;
+            }
+        }
+
+        return home_url( '/' );
     }
 
     /**
