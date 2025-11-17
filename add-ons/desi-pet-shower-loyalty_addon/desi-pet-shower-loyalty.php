@@ -268,6 +268,10 @@ class DPS_Loyalty_Addon {
         ] );
 
         foreach ( $campaigns as $campaign ) {
+            if ( ! $this->is_campaign_within_date_window( $campaign->ID ) ) {
+                continue;
+            }
+
             $eligible_clients = $this->find_eligible_clients_for_campaign( $campaign->ID );
             update_post_meta( $campaign->ID, 'dps_campaign_pending_offers', $eligible_clients );
             update_post_meta( $campaign->ID, 'dps_campaign_last_audit', current_time( 'mysql' ) );
@@ -303,6 +307,28 @@ class DPS_Loyalty_Addon {
         }
 
         return $eligible_clients;
+    }
+
+    private function is_campaign_within_date_window( $campaign_id ) {
+        $start_date = get_post_meta( $campaign_id, 'dps_campaign_start_date', true );
+        $end_date   = get_post_meta( $campaign_id, 'dps_campaign_end_date', true );
+        $now        = current_time( 'timestamp' );
+
+        if ( ! empty( $start_date ) ) {
+            $start_timestamp = strtotime( $start_date . ' 00:00:00' );
+            if ( $start_timestamp && $start_timestamp > $now ) {
+                return false;
+            }
+        }
+
+        if ( ! empty( $end_date ) ) {
+            $end_timestamp = strtotime( $end_date . ' 23:59:59' );
+            if ( $end_timestamp && $end_timestamp < $now ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function is_client_inactive_for_days( $client_id, $days ) {
