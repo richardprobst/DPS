@@ -209,6 +209,23 @@ final class DPS_Client_Portal {
             $existing_user = get_user_by( 'email', $email );
 
             if ( $existing_user ) {
+                $linked_client_id       = absint( get_user_meta( $existing_user->ID, 'dps_client_id', true ) );
+                $existing_client_userid = absint( get_post_meta( $client_id, 'client_user_id', true ) );
+
+                if ( $linked_client_id && $linked_client_id !== $client_id ) {
+                    return 0;
+                }
+
+                if ( $existing_client_userid && $existing_client_userid !== $existing_user->ID ) {
+                    return 0;
+                }
+
+                $is_same_client = ( $linked_client_id === $client_id ) || ( $existing_client_userid === $existing_user->ID );
+
+                if ( ! $is_same_client ) {
+                    return 0;
+                }
+
                 if ( $password ) {
                     wp_set_password( $password, $existing_user->ID );
                 }
