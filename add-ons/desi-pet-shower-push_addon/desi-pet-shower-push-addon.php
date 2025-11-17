@@ -54,21 +54,22 @@ class DPS_Push_Notifications_Addon {
      */
     public function activate() {
         // Agenda a notificação diária de agenda no horário configurado
-        $agenda_hour = intval( get_option( 'dps_push_agenda_hour', 8 ) );
+        $agenda_time  = $this->normalize_time_option( get_option( 'dps_push_agenda_time', '' ), get_option( 'dps_push_agenda_hour', 8 ) );
         if ( ! wp_next_scheduled( 'dps_send_agenda_notification' ) ) {
-            $timestamp = $this->get_next_run_timestamp( $agenda_hour );
+            $timestamp = $this->get_next_daily_timestamp( $agenda_time );
             wp_schedule_event( $timestamp, 'daily', 'dps_send_agenda_notification' );
         }
         // Agenda o envio do relatório diário no horário configurado
-        $report_hour = intval( get_option( 'dps_push_report_hour', 19 ) );
+        $report_time_option = $this->normalize_time_option( get_option( 'dps_push_report_time', '' ), get_option( 'dps_push_report_hour', 19 ) );
         if ( ! wp_next_scheduled( 'dps_send_daily_report' ) ) {
-            $report_time = $this->get_next_run_timestamp( $report_hour );
+            $report_time = $this->get_next_daily_timestamp( $report_time_option );
             wp_schedule_event( $report_time, 'daily', 'dps_send_daily_report' );
         }
-        // Agenda o relatório semanal de pets inativos para segunda-feira às 08h (ou horário da agenda)
-        $week_hour = intval( get_option( 'dps_push_agenda_hour', 8 ) );
+        // Agenda o relatório semanal de pets inativos com dia e horário configuráveis
+        $week_day  = $this->sanitize_weekday( get_option( 'dps_push_weekly_day', 'monday' ) );
+        $week_time = $this->normalize_time_option( get_option( 'dps_push_weekly_time', '' ), get_option( 'dps_push_agenda_hour', 8 ) );
         if ( ! wp_next_scheduled( 'dps_send_weekly_inactive_report' ) ) {
-            $weekly_time = $this->get_next_weekly_run_timestamp( 'Monday', $week_hour );
+            $weekly_time = $this->get_next_weekly_timestamp( $week_day, $week_time );
             wp_schedule_event( $weekly_time, 'weekly', 'dps_send_weekly_inactive_report' );
         }
     }
@@ -77,18 +78,9 @@ class DPS_Push_Notifications_Addon {
      * Cancela o evento agendado ao desativar
      */
     public function deactivate() {
-        $timestamp = wp_next_scheduled( 'dps_send_agenda_notification' );
-        if ( $timestamp ) {
-            wp_unschedule_event( $timestamp, 'dps_send_agenda_notification' );
-        }
-        $report_timestamp = wp_next_scheduled( 'dps_send_daily_report' );
-        if ( $report_timestamp ) {
-            wp_unschedule_event( $report_timestamp, 'dps_send_daily_report' );
-        }
-        $inactive_timestamp = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
-        if ( $inactive_timestamp ) {
-            wp_unschedule_event( $inactive_timestamp, 'dps_send_weekly_inactive_report' );
-        }
+        wp_clear_scheduled_hook( 'dps_send_agenda_notification' );
+        wp_clear_scheduled_hook( 'dps_send_daily_report' );
+        wp_clear_scheduled_hook( 'dps_send_weekly_inactive_report' );
     }
 
     /**
@@ -96,35 +88,107 @@ class DPS_Push_Notifications_Addon {
      *
      * @return int Timestamp
      */
-    private function get_next_run_timestamp( $hour = 8 ) {
-        // Calcula o próximo horário desejado (default 8h) no timezone do WordPress
-        $now = current_time( 'timestamp' );
-        $next_run = mktime( $hour, 0, 0, date( 'n', $now ), date( 'j', $now ), date( 'Y', $now ) );
-        if ( $next_run <= $now ) {
-            $next_run = strtotime( '+1 day', $next_run );
+    private function get_next_daily_timestamp( $time_string = '08:00' ) {
+        $time_string = $this->normalize_time_option( $time_string, 8 );
+        $timezone    = $this->get_wp_timezone();
+        $now         = new DateTimeImmutable( 'now', $timezone );
+
+        $target = DateTimeImmutable::createFromFormat( 'Y-m-d H:i', $now->format( 'Y-m-d' ) . ' ' . $time_string, $timezone );
+        if ( ! $target ) {
+            $target = $now->setTime( 8, 0 );
         }
-        return $next_run;
+
+        if ( $target <= $now ) {
+            $target = $target->modify( '+1 day' );
+        }
+
+        return $target->getTimestamp();
     }
 
     /**
      * Calcula o próximo horário para um dia específico da semana.
      *
      * @param string $day Dia da semana em inglês (Monday, Tuesday, etc.)
-     * @param int    $hour Horário (0-23)
+     * @param string $time_string Horário no formato H:i
      * @return int Timestamp da próxima ocorrência
      */
-    private function get_next_weekly_run_timestamp( $day = 'Monday', $hour = 8 ) {
-        $now = current_time( 'timestamp' );
-        // Encontra a próxima ocorrência do dia específico
-        // Usa strtotime com 'next Monday' etc.
-        $next = strtotime( 'next ' . $day, $now );
-        // Define hora
-        $next_run = mktime( $hour, 0, 0, date( 'n', $next ), date( 'j', $next ), date( 'Y', $next ) );
-        // Se ainda estiver no passado (mesmo dia e hora), acrescenta uma semana
-        if ( $next_run <= $now ) {
-            $next_run = strtotime( '+1 week', $next_run );
+    private function get_next_weekly_timestamp( $day = 'monday', $time_string = '08:00' ) {
+        $day         = $this->sanitize_weekday( $day );
+        $time_string = $this->normalize_time_option( $time_string, 8 );
+        $timezone    = $this->get_wp_timezone();
+        $now         = new DateTimeImmutable( 'now', $timezone );
+
+        $candidate = new DateTimeImmutable( 'this ' . $day, $timezone );
+        $target    = DateTimeImmutable::createFromFormat( 'Y-m-d H:i', $candidate->format( 'Y-m-d' ) . ' ' . $time_string, $timezone );
+
+        if ( ! $target || $target <= $now ) {
+            $candidate = $candidate->modify( '+1 week' );
+            $target    = DateTimeImmutable::createFromFormat( 'Y-m-d H:i', $candidate->format( 'Y-m-d' ) . ' ' . $time_string, $timezone );
         }
-        return $next_run;
+
+        if ( ! $target ) {
+            $target = $now->modify( '+1 week' )->setTime( 8, 0 );
+        }
+
+        return $target->getTimestamp();
+    }
+
+    /**
+     * Retorna a timezone configurada no WordPress.
+     *
+     * @return DateTimeZone
+     */
+    private function get_wp_timezone() {
+        $timezone_string = get_option( 'timezone_string' );
+        if ( $timezone_string ) {
+            return new DateTimeZone( $timezone_string );
+        }
+
+        $offset   = (float) get_option( 'gmt_offset', 0 );
+        $hours    = (int) $offset;
+        $minutes  = (int) round( abs( $offset - $hours ) * 60 );
+        $sign     = ( $offset >= 0 ) ? '+' : '-';
+        $timezone = sprintf( '%s%02d:%02d', $sign, abs( $hours ), $minutes );
+
+        return new DateTimeZone( $timezone );
+    }
+
+    /**
+     * Normaliza horário no formato HH:MM, com fallback para hora inteira.
+     *
+     * @param string $time_string Horário recebido do formulário/option.
+     * @param int    $fallback_hour Hora padrão caso formato seja inválido.
+     * @return string Horário normalizado.
+     */
+    private function normalize_time_option( $time_string, $fallback_hour = 8 ) {
+        $time_string = is_string( $time_string ) ? trim( $time_string ) : '';
+        if ( preg_match( '/^(2[0-3]|[01]?\d):([0-5]\d)$/', $time_string, $matches ) ) {
+            return sprintf( '%02d:%02d', intval( $matches[1] ), intval( $matches[2] ) );
+        }
+
+        $hour = is_numeric( $fallback_hour ) ? (int) $fallback_hour : 8;
+        if ( $hour < 0 || $hour > 23 ) {
+            $hour = 8;
+        }
+
+        return sprintf( '%02d:00', $hour );
+    }
+
+    /**
+     * Sanitiza o dia da semana garantindo valores válidos em inglês.
+     *
+     * @param string $day Dia recebido das opções ou formulário.
+     * @return string Dia validado (em minúsculas).
+     */
+    private function sanitize_weekday( $day ) {
+        $valid_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
+        $day        = is_string( $day ) ? strtolower( $day ) : 'monday';
+
+        if ( in_array( $day, $valid_days, true ) ) {
+            return $day;
+        }
+
+        return 'monday';
     }
 
     /**
@@ -346,8 +410,10 @@ class DPS_Push_Notifications_Addon {
         $report_emails = get_option( 'dps_push_emails_report', [] );
         $agenda_str = is_array( $agenda_emails ) ? implode( ', ', $agenda_emails ) : '';
         $report_str = is_array( $report_emails ) ? implode( ', ', $report_emails ) : '';
-        $agenda_hour = intval( get_option( 'dps_push_agenda_hour', 8 ) );
-        $report_hour = intval( get_option( 'dps_push_report_hour', 19 ) );
+        $agenda_time = $this->normalize_time_option( get_option( 'dps_push_agenda_time', '' ), get_option( 'dps_push_agenda_hour', 8 ) );
+        $report_time = $this->normalize_time_option( get_option( 'dps_push_report_time', '' ), get_option( 'dps_push_report_hour', 19 ) );
+        $weekly_day  = $this->sanitize_weekday( get_option( 'dps_push_weekly_day', 'monday' ) );
+        $weekly_time = $this->normalize_time_option( get_option( 'dps_push_weekly_time', '' ), get_option( 'dps_push_agenda_hour', 8 ) );
         $telegram_token = get_option( 'dps_push_telegram_token', '' );
         $telegram_chat  = get_option( 'dps_push_telegram_chat', '' );
         echo '<div class="dps-section" id="dps-section-notificacoes">';
@@ -359,14 +425,24 @@ class DPS_Push_Notifications_Addon {
         echo '<form method="post">';
         echo '<input type="hidden" name="dps_push_action" value="save_notifications">';
         wp_nonce_field( 'dps_push_save', 'dps_push_nonce' );
-        echo '<p><label>' . esc_html__( 'Emails para resumo de agendamentos', 'dps-push-addon' ) . '<br>'; 
+        echo '<p><label>' . esc_html__( 'Emails para resumo de agendamentos', 'dps-push-addon' ) . '<br>';
         echo '<input type="text" name="agenda_emails" value="' . esc_attr( $agenda_str ) . '" style="width:100%;"></label></p>';
-        echo '<p><label>' . esc_html__( 'Horário do resumo de agendamentos (0-23)', 'dps-push-addon' ) . '<br>';
-        echo '<input type="number" name="agenda_hour" min="0" max="23" value="' . esc_attr( $agenda_hour ) . '" style="width:60px;"></label></p>';
-        echo '<p><label>' . esc_html__( 'Emails para relatório financeiro e atendimentos', 'dps-push-addon' ) . '<br>'; 
+        echo '<p><label>' . esc_html__( 'Horário do resumo de agendamentos (HH:MM)', 'dps-push-addon' ) . '<br>';
+        echo '<input type="time" name="agenda_time" value="' . esc_attr( $agenda_time ) . '" pattern="[0-2][0-9]:[0-5][0-9]" step="60" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Emails para relatório financeiro e atendimentos', 'dps-push-addon' ) . '<br>';
         echo '<input type="text" name="report_emails" value="' . esc_attr( $report_str ) . '" style="width:100%;"></label></p>';
-        echo '<p><label>' . esc_html__( 'Horário do relatório diário (0-23)', 'dps-push-addon' ) . '<br>';
-        echo '<input type="number" name="report_hour" min="0" max="23" value="' . esc_attr( $report_hour ) . '" style="width:60px;"></label></p>';
+        echo '<p><label>' . esc_html__( 'Horário do relatório diário (HH:MM)', 'dps-push-addon' ) . '<br>';
+        echo '<input type="time" name="report_time" value="' . esc_attr( $report_time ) . '" pattern="[0-2][0-9]:[0-5][0-9]" step="60" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Dia do relatório semanal de inativos', 'dps-push-addon' ) . '<br>';
+        echo '<select name="weekly_day">';
+        $weekdays = [ 'monday' => __( 'Segunda-feira', 'dps-push-addon' ), 'tuesday' => __( 'Terça-feira', 'dps-push-addon' ), 'wednesday' => __( 'Quarta-feira', 'dps-push-addon' ), 'thursday' => __( 'Quinta-feira', 'dps-push-addon' ), 'friday' => __( 'Sexta-feira', 'dps-push-addon' ), 'saturday' => __( 'Sábado', 'dps-push-addon' ), 'sunday' => __( 'Domingo', 'dps-push-addon' ) ];
+        foreach ( $weekdays as $day_key => $label ) {
+            $selected = selected( $weekly_day, $day_key, false );
+            echo '<option value="' . esc_attr( $day_key ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select></label></p>';
+        echo '<p><label>' . esc_html__( 'Horário do relatório semanal (HH:MM)', 'dps-push-addon' ) . '<br>';
+        echo '<input type="time" name="weekly_time" value="' . esc_attr( $weekly_time ) . '" pattern="[0-2][0-9]:[0-5][0-9]" step="60" required></label></p>';
         // Campos para integração com Telegram
         echo '<h4>' . esc_html__( 'Integração com Telegram (opcional)', 'dps-push-addon' ) . '</h4>';
         echo '<p><label>' . esc_html__( 'Token do bot', 'dps-push-addon' ) . '<br>';
@@ -398,36 +474,34 @@ class DPS_Push_Notifications_Addon {
             update_option( 'dps_push_emails_agenda', $agenda_list );
             update_option( 'dps_push_emails_report', $report_list );
             // Salva horários
-            $agenda_hour = isset( $_POST['agenda_hour'] ) ? intval( $_POST['agenda_hour'] ) : 8;
-            $report_hour = isset( $_POST['report_hour'] ) ? intval( $_POST['report_hour'] ) : 19;
-            update_option( 'dps_push_agenda_hour', $agenda_hour );
-            update_option( 'dps_push_report_hour', $report_hour );
+            $agenda_time = isset( $_POST['agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['agenda_time'] ) ) : '08:00';
+            $report_time = isset( $_POST['report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['report_time'] ) ) : '19:00';
+            $weekly_day  = isset( $_POST['weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['weekly_day'] ) ) : 'monday';
+            $weekly_time = isset( $_POST['weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['weekly_time'] ) ) : '08:00';
+            $agenda_time = $this->normalize_time_option( $agenda_time, 8 );
+            $report_time = $this->normalize_time_option( $report_time, 19 );
+            $weekly_day  = $this->sanitize_weekday( $weekly_day );
+            $weekly_time = $this->normalize_time_option( $weekly_time, 8 );
+            update_option( 'dps_push_agenda_time', $agenda_time );
+            update_option( 'dps_push_report_time', $report_time );
+            update_option( 'dps_push_weekly_day', $weekly_day );
+            update_option( 'dps_push_weekly_time', $weekly_time );
             // Salva integração Telegram
             $telegram_token = isset( $_POST['telegram_token'] ) ? sanitize_text_field( $_POST['telegram_token'] ) : '';
             $telegram_chat  = isset( $_POST['telegram_chat'] ) ? sanitize_text_field( $_POST['telegram_chat'] ) : '';
             update_option( 'dps_push_telegram_token', $telegram_token );
             update_option( 'dps_push_telegram_chat', $telegram_chat );
             // Reagendar eventos com novos horários
-            $timestamp = wp_next_scheduled( 'dps_send_agenda_notification' );
-            if ( $timestamp ) {
-                wp_unschedule_event( $timestamp, 'dps_send_agenda_notification' );
-            }
-            $report_timestamp = wp_next_scheduled( 'dps_send_daily_report' );
-            if ( $report_timestamp ) {
-                wp_unschedule_event( $report_timestamp, 'dps_send_daily_report' );
-            }
-            $inactive_timestamp = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
-            if ( $inactive_timestamp ) {
-                wp_unschedule_event( $inactive_timestamp, 'dps_send_weekly_inactive_report' );
-            }
+            wp_clear_scheduled_hook( 'dps_send_agenda_notification' );
+            wp_clear_scheduled_hook( 'dps_send_daily_report' );
+            wp_clear_scheduled_hook( 'dps_send_weekly_inactive_report' );
             // Agenda novamente com novos horários
-            $timestamp = $this->get_next_run_timestamp( $agenda_hour );
+            $timestamp = $this->get_next_daily_timestamp( $agenda_time );
             wp_schedule_event( $timestamp, 'daily', 'dps_send_agenda_notification' );
-            $report_time = $this->get_next_run_timestamp( $report_hour );
-            wp_schedule_event( $report_time, 'daily', 'dps_send_daily_report' );
-            // agenda semanal (segunda)
-            $weekly_time = $this->get_next_weekly_run_timestamp( 'Monday', $agenda_hour );
-            wp_schedule_event( $weekly_time, 'weekly', 'dps_send_weekly_inactive_report' );
+            $report_timestamp = $this->get_next_daily_timestamp( $report_time );
+            wp_schedule_event( $report_timestamp, 'daily', 'dps_send_daily_report' );
+            $weekly_timestamp = $this->get_next_weekly_timestamp( $weekly_day, $weekly_time );
+            wp_schedule_event( $weekly_timestamp, 'weekly', 'dps_send_weekly_inactive_report' );
             // Redireciona com flag de sucesso
             wp_redirect( add_query_arg( [ 'tab' => 'notificacoes', 'updated' => '1' ], get_permalink() ) );
             exit;
