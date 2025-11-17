@@ -1162,6 +1162,11 @@ class DPS_Finance_Addon {
             // Cria uma nova transação se ainda não existir
             $wpdb->insert( $table, $trans_data, [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
         }
+
+        if ( $trans_data['status'] === 'pago' ) {
+            $amount_in_cents = (int) round( $valor * 100 );
+            do_action( 'dps_finance_booking_paid', $appt_id, (int) $client_id, $amount_in_cents );
+        }
         // fecha o método sync_status_to_finance
     }
 

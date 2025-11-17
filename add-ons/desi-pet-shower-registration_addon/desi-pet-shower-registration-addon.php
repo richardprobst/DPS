@@ -135,6 +135,7 @@ class DPS_Registration_Addon {
             $client_photo_auth = isset( $_POST['client_photo_auth'] ) ? 1 : 0;
             $client_address  = sanitize_textarea_field( $_POST['client_address'] ?? '' );
             $client_referral = sanitize_text_field( $_POST['client_referral'] ?? '' );
+            $referral_code   = sanitize_text_field( $_POST['dps_referral_code'] ?? '' );
 
             // Coordenadas de latitude e longitude (podem estar vazias)
             $client_lat  = sanitize_text_field( $_POST['client_lat'] ?? '' );
@@ -169,6 +170,8 @@ class DPS_Registration_Addon {
                 if ( $client_email ) {
                     $this->send_confirmation_email( $client_id, $client_email );
                 }
+
+                do_action( 'dps_registration_after_client_created', $referral_code, $client_id, $client_email, $client_phone );
             }
             // Lê pets submetidos (campos em arrays)
             $pet_names      = $_POST['pet_name'] ?? [];
