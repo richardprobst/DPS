@@ -17,6 +17,91 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Monta uma chave de cache única para transients das estatísticas.
+ *
+ * @param string $prefix     Prefixo do transient.
+ * @param string $start_date Data inicial (Y-m-d).
+ * @param string $end_date   Data final (Y-m-d).
+ *
+ * @return string
+ */
+function dps_stats_build_cache_key( $prefix, $start_date, $end_date = '' ) {
+    $start_key = preg_replace( '/[^0-9]/', '', $start_date );
+    $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
+
+    if ( $end_key ) {
+        return sprintf( '%s_%s_%s', $prefix, $start_key, $end_key );
+    }
+
+    return sprintf( '%s_%s', $prefix, $start_key );
+}
+
+/**
+ * Calcula o total de receitas pagas no intervalo informado com cache via transient.
+ *
+ * @param string $start_date Data inicial (Y-m-d).
+ * @param string $end_date   Data final (Y-m-d).
+ *
+ * @return float
+ */
+function dps_get_total_revenue( $start_date, $end_date ) {
+    global $wpdb;
+
+    $start_date = sanitize_text_field( $start_date );
+    $end_date   = sanitize_text_field( $end_date );
+
+    $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
+    $cached    = get_transient( $cache_key );
+
+    if ( false !== $cached ) {
+        return (float) $cached;
+    }
+
+    $table          = $wpdb->prefix . 'dps_transacoes';
+    $total_revenue  = (float) $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
+            $start_date,
+            $end_date
+        )
+    );
+
+    set_transient( $cache_key, $total_revenue, HOUR_IN_SECONDS );
+
+    return $total_revenue;
+}
+
+/**
+ * Remove os transients relacionados às estatísticas do add-on.
+ */
+function dps_stats_clear_cache() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'Você não tem permissão para limpar o cache.', 'dps-stats-addon' ) );
+    }
+
+    check_admin_referer( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' );
+
+    global $wpdb;
+
+    $transient_prefix      = $wpdb->esc_like( '_transient_dps_stats_' ) . '%';
+    $transient_timeout_pre = $wpdb->esc_like( '_transient_timeout_dps_stats_' ) . '%';
+
+    // Remove transients específicos do add-on de estatísticas.
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+            $transient_prefix,
+            $transient_timeout_pre
+        )
+    );
+
+    wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
+    exit;
+}
+
+add_action( 'admin_post_dps_clear_stats_cache', 'dps_stats_clear_cache' );
+
 class DPS_Stats_Addon {
     public function __construct() {
         // Registrar abas e seções no plugin base
@@ -69,128 +154,22 @@ class DPS_Stats_Addon {
         $end_ts     = strtotime( $end_date . ' 23:59:59' );
         $cutoff_str = $start_date;
         $end_str    = $end_date;
-        // Obter todos os clientes
-        $clients = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-        ] );
-        $inactive_clients = [];
-        $inactive_pets    = [];
-        foreach ( $clients as $client ) {
-            // Encontra último agendamento do cliente
-            $last_appt = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'posts_per_page' => 1,
-                'post_status'    => 'publish',
-                'meta_key'       => 'appointment_date',
-                'orderby'        => 'meta_value',
-                'order'          => 'DESC',
-                'meta_query'     => [
-                    [ 'key' => 'appointment_client_id', 'value' => $client->ID, 'compare' => '=' ],
-                ],
-            ] );
-            $last_date = '';
-            if ( $last_appt ) {
-                $last_date = get_post_meta( $last_appt[0]->ID, 'appointment_date', true );
-            }
-            if ( ! $last_date || strtotime( $last_date ) < $cutoff_ts ) {
-                $inactive_clients[] = [ 'client' => $client, 'last_date' => $last_date ];
-            }
-            // Verifica pets para cada cliente
-            $pets = get_posts( [
-                'post_type'      => 'dps_pet',
-                'posts_per_page' => -1,
-                'post_status'    => 'publish',
-                'meta_key'       => 'owner_id',
-                'meta_value'     => $client->ID,
-            ] );
-            foreach ( $pets as $pet ) {
-                $last_pet = get_posts( [
-                    'post_type'      => 'dps_agendamento',
-                    'posts_per_page' => 1,
-                    'post_status'    => 'publish',
-                    'meta_key'       => 'appointment_date',
-                    'orderby'        => 'meta_value',
-                    'order'          => 'DESC',
-                    'meta_query'     => [
-                        [ 'key' => 'appointment_pet_id', 'value' => $pet->ID, 'compare' => '=' ],
-                    ],
-                ] );
-                $last_pet_date = '';
-                if ( $last_pet ) {
-                    $last_pet_date = get_post_meta( $last_pet[0]->ID, 'appointment_date', true );
-                }
-                if ( ! $last_pet_date || strtotime( $last_pet_date ) < $cutoff_ts ) {
-                    $inactive_pets[] = [ 'pet' => $pet, 'client' => $client, 'last_date' => $last_pet_date ];
-                }
-            }
-        }
-        // Outras estatísticas: total de atendimentos no último mês, serviços mais pedidos, receita do último mês
-        // Total de agendamentos no intervalo
-        $recent_appts = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $cutoff_str, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_str,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-        ] );
-        $total_recent_appts = count( $recent_appts );
-        // Serviços mais requisitados
-        $service_counts = [];
-        foreach ( $recent_appts as $appt ) {
-            $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-            if ( is_array( $service_ids ) ) {
-                foreach ( $service_ids as $sid ) {
-                    $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
-                }
-            }
-        }
-        // Ordena por número de atendimentos
+        $inactive_data     = $this->get_inactive_entities( $cutoff_ts );
+        $inactive_clients  = $inactive_data['inactive_clients'];
+        $inactive_pets     = $inactive_data['inactive_pets'];
+        $appointments_data = $this->get_recent_appointments_stats( $cutoff_str, $end_str );
+        $total_recent_appts = $appointments_data['total'];
+        $service_counts     = $appointments_data['service_counts'];
         arsort( $service_counts );
-        $top_services = array_slice( $service_counts, 0, 5, true );
-        // Soma total de atendimentos de todos os serviços para calcular porcentagens
-        $total_service_uses = array_sum( $service_counts );
-
-        // ====== Estatísticas de espécies, raças e frequência de banho ======
-        $species_counts = [];
-        $breed_counts   = [];
-        $client_counts  = [];
-        foreach ( $recent_appts as $appt ) {
-            $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-            $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-            if ( $client_id ) {
-                if ( ! isset( $client_counts[ $client_id ] ) ) {
-                    $client_counts[ $client_id ] = 0;
-                }
-                $client_counts[ $client_id ]++;
-            }
-            if ( $pet_id ) {
-                $species = get_post_meta( $pet_id, 'pet_species', true );
-                $breed   = get_post_meta( $pet_id, 'pet_breed', true );
-                // Traduz espécie
-                if ( $species === 'cao' ) {
-                    $species_label = __( 'Cachorro', 'dps-stats-addon' );
-                } elseif ( $species === 'gato' ) {
-                    $species_label = __( 'Gato', 'dps-stats-addon' );
-                } else {
-                    $species_label = __( 'Outro', 'dps-stats-addon' );
-                }
-                $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
-                if ( $breed ) {
-                    $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
-                }
-            }
-        }
+        $top_services        = array_slice( $service_counts, 0, 5, true );
+        $total_service_uses  = array_sum( $service_counts );
+        $species_counts      = $appointments_data['species_counts'];
         arsort( $species_counts );
+        $breed_counts        = $appointments_data['breed_counts'];
         arsort( $breed_counts );
-        // Top breeds
-        $top_breeds = array_slice( $breed_counts, 0, 5, true );
-        // Calcula frequência média por cliente
-        $avg_baths = 0;
+        $top_breeds          = array_slice( $breed_counts, 0, 5, true );
+        $client_counts       = $appointments_data['client_counts'];
+        $avg_baths           = 0;
         if ( ! empty( $client_counts ) ) {
             $avg_baths = array_sum( $client_counts ) / count( $client_counts );
         }
@@ -198,18 +177,9 @@ class DPS_Stats_Addon {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
         // Busca transações no intervalo e soma apenas receitas pagas
-        $recent_trans = $wpdb->get_results( $wpdb->prepare( "SELECT valor, status, tipo FROM $table WHERE data >= %s AND data <= %s", $cutoff_str, $end_str ) );
-        $total_revenue  = 0;
-        $total_expenses = 0;
-        foreach ( $recent_trans as $tr ) {
-            if ( isset( $tr->tipo ) && isset( $tr->status ) && $tr->status === 'pago' ) {
-                if ( $tr->tipo === 'receita' ) {
-                    $total_revenue += (float) $tr->valor;
-                } elseif ( $tr->tipo === 'despesa' ) {
-                    $total_expenses += (float) $tr->valor;
-                }
-            }
-        }
+        $financial_totals = $this->get_financial_totals( $cutoff_str, $end_str );
+        $total_revenue    = $financial_totals['revenue'];
+        $total_expenses   = $financial_totals['expenses'];
         $net_profit = $total_revenue - $total_expenses;
 
         // Estatísticas de assinaturas
@@ -255,6 +225,12 @@ class DPS_Stats_Addon {
         echo '<label>' . esc_html__( 'De', 'dps-stats-addon' ) . ' <input type="date" name="stats_start" value="' . esc_attr( $start_date ) . '"></label> ';
         echo '<label>' . esc_html__( 'Até', 'dps-stats-addon' ) . ' <input type="date" name="stats_end" value="' . esc_attr( $end_date ) . '"></label> ';
         echo '<button type="submit" class="button">' . esc_html__( 'Aplicar intervalo', 'dps-stats-addon' ) . '</button>';
+        echo '</form>';
+        // Botão para limpar cache das estatísticas
+        echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-bottom:15px;">';
+        wp_nonce_field( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' );
+        echo '<input type="hidden" name="action" value="dps_clear_stats_cache">';
+        echo '<button type="submit" class="button button-secondary">' . esc_html__( 'Limpar cache de estatísticas', 'dps-stats-addon' ) . '</button>';
         echo '</form>';
         // Total
         echo '<p><strong>' . sprintf( esc_html__( 'Total de atendimentos entre %s e %s:', 'dps-stats-addon' ), date_i18n( 'd-m-Y', strtotime( $start_date ) ), date_i18n( 'd-m-Y', strtotime( $end_date ) ) ) . '</strong> ' . esc_html( $total_recent_appts ) . '</p>';
@@ -338,6 +314,218 @@ class DPS_Stats_Addon {
         }
         echo '</div>';
         return ob_get_clean();
+    }
+
+    /**
+     * Retorna clientes e pets inativos, com cache.
+     *
+     * @param int $cutoff_ts Timestamp do limite de inatividade.
+     *
+     * @return array
+     */
+    private function get_inactive_entities( $cutoff_ts ) {
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_inactive', date( 'Y-m-d', $cutoff_ts ) );
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return $cached;
+        }
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+        ] );
+
+        $inactive_clients = [];
+        $inactive_pets    = [];
+
+        foreach ( $clients as $client ) {
+            $last_appt = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => 1,
+                'post_status'    => 'publish',
+                'meta_key'       => 'appointment_date',
+                'orderby'        => 'meta_value',
+                'order'          => 'DESC',
+                'meta_query'     => [
+                    [ 'key' => 'appointment_client_id', 'value' => $client->ID, 'compare' => '=' ],
+                ],
+            ] );
+
+            $last_date = '';
+            if ( $last_appt ) {
+                $last_date = get_post_meta( $last_appt[0]->ID, 'appointment_date', true );
+            }
+
+            if ( ! $last_date || strtotime( $last_date ) < $cutoff_ts ) {
+                $inactive_clients[] = [ 'client' => $client, 'last_date' => $last_date ];
+            }
+
+            $pets = get_posts( [
+                'post_type'      => 'dps_pet',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'meta_key'       => 'owner_id',
+                'meta_value'     => $client->ID,
+            ] );
+
+            foreach ( $pets as $pet ) {
+                $last_pet = get_posts( [
+                    'post_type'      => 'dps_agendamento',
+                    'posts_per_page' => 1,
+                    'post_status'    => 'publish',
+                    'meta_key'       => 'appointment_date',
+                    'orderby'        => 'meta_value',
+                    'order'          => 'DESC',
+                    'meta_query'     => [
+                        [ 'key' => 'appointment_pet_id', 'value' => $pet->ID, 'compare' => '=' ],
+                    ],
+                ] );
+
+                $last_pet_date = '';
+                if ( $last_pet ) {
+                    $last_pet_date = get_post_meta( $last_pet[0]->ID, 'appointment_date', true );
+                }
+
+                if ( ! $last_pet_date || strtotime( $last_pet_date ) < $cutoff_ts ) {
+                    $inactive_pets[] = [ 'pet' => $pet, 'client' => $client, 'last_date' => $last_pet_date ];
+                }
+            }
+        }
+
+        $result = [
+            'inactive_clients' => $inactive_clients,
+            'inactive_pets'    => $inactive_pets,
+        ];
+
+        set_transient( $cache_key, $result, DAY_IN_SECONDS );
+
+        return $result;
+    }
+
+    /**
+     * Retorna estatísticas agregadas de atendimentos do período com cache.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array
+     */
+    private function get_recent_appointments_stats( $start_date, $end_date ) {
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_appointments', $start_date, $end_date );
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return $cached;
+        }
+
+        $recent_appts = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                'relation' => 'AND',
+                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
+                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
+            ],
+        ] );
+
+        $service_counts = [];
+        $species_counts = [];
+        $breed_counts   = [];
+        $client_counts  = [];
+
+        foreach ( $recent_appts as $appt ) {
+            $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
+            if ( is_array( $service_ids ) ) {
+                foreach ( $service_ids as $sid ) {
+                    $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
+                }
+            }
+
+            $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
+
+            if ( $client_id ) {
+                if ( ! isset( $client_counts[ $client_id ] ) ) {
+                    $client_counts[ $client_id ] = 0;
+                }
+                $client_counts[ $client_id ]++;
+            }
+
+            if ( $pet_id ) {
+                $species = get_post_meta( $pet_id, 'pet_species', true );
+                $breed   = get_post_meta( $pet_id, 'pet_breed', true );
+
+                if ( $species === 'cao' ) {
+                    $species_label = __( 'Cachorro', 'dps-stats-addon' );
+                } elseif ( $species === 'gato' ) {
+                    $species_label = __( 'Gato', 'dps-stats-addon' );
+                } else {
+                    $species_label = __( 'Outro', 'dps-stats-addon' );
+                }
+
+                $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
+
+                if ( $breed ) {
+                    $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
+                }
+            }
+        }
+
+        $result = [
+            'total'           => count( $recent_appts ),
+            'service_counts'  => $service_counts,
+            'species_counts'  => $species_counts,
+            'breed_counts'    => $breed_counts,
+            'client_counts'   => $client_counts,
+        ];
+
+        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+
+        return $result;
+    }
+
+    /**
+     * Retorna receitas e despesas pagas do período com cache.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array
+     */
+    private function get_financial_totals( $start_date, $end_date ) {
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_financial', $start_date, $end_date );
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return $cached;
+        }
+
+        global $wpdb;
+        $table   = $wpdb->prefix . 'dps_transacoes';
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT tipo, SUM(valor) AS total FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' GROUP BY tipo",
+                $start_date,
+                $end_date
+            ),
+            OBJECT_K
+        );
+
+        $totals = [
+            'revenue'  => isset( $results['receita'] ) ? (float) $results['receita']->total : 0,
+            'expenses' => isset( $results['despesa'] ) ? (float) $results['despesa']->total : 0,
+        ];
+
+        // Armazena cache compartilhado para receitas totais.
+        $revenue_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
+        set_transient( $revenue_key, $totals['revenue'], HOUR_IN_SECONDS );
+
+        set_transient( $cache_key, $totals, HOUR_IN_SECONDS );
+
+        return $totals;
     }
 }
 
