@@ -120,6 +120,163 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Localiza um cliente pelo identificador informado no login (telefone ou e-mail).
+     *
+     * @param string $identifier Telefone, e-mail ou usuário informado no formulário.
+     * @return WP_Post|null
+     */
+    private function find_client_by_identifier( $identifier ) {
+        $email = is_email( $identifier ) ? sanitize_email( $identifier ) : '';
+
+        if ( $email ) {
+            $query = new WP_Query(
+                [
+                    'post_type'      => 'dps_cliente',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => 1,
+                    'meta_query'     => [
+                        [
+                            'key'     => 'client_email',
+                            'value'   => $email,
+                            'compare' => '=',
+                        ],
+                    ],
+                ]
+            );
+
+            if ( $query->have_posts() ) {
+                $client = $query->posts[0];
+                wp_reset_postdata();
+                return $client;
+            }
+            wp_reset_postdata();
+        }
+
+        $digits = preg_replace( '/\D+/', '', (string) $identifier );
+
+        if ( $digits ) {
+            $query = new WP_Query(
+                [
+                    'post_type'      => 'dps_cliente',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => 1,
+                    'meta_query'     => [
+                        [
+                            'key'     => 'client_phone',
+                            'value'   => $digits,
+                            'compare' => 'LIKE',
+                        ],
+                    ],
+                ]
+            );
+
+            if ( $query->have_posts() ) {
+                $client = $query->posts[0];
+                wp_reset_postdata();
+                return $client;
+            }
+            wp_reset_postdata();
+        }
+
+        return null;
+    }
+
+    /**
+     * Garante que o cliente possui uma conta WordPress vinculada e opcionalmente atualiza a senha.
+     *
+     * @param int         $client_id ID do cliente.
+     * @param string|null $password  Senha em texto plano a ser aplicada.
+     *
+     * @return int ID do usuário WordPress ou 0 se falhar.
+     */
+    private function ensure_client_user_account( $client_id, $password = null ) {
+        $user_id = absint( get_post_meta( $client_id, 'client_user_id', true ) );
+        $email   = sanitize_email( get_post_meta( $client_id, 'client_email', true ) );
+        $phone   = sanitize_text_field( get_post_meta( $client_id, 'client_phone', true ) );
+
+        if ( $user_id && get_userdata( $user_id ) ) {
+            if ( $password ) {
+                wp_set_password( $password, $user_id );
+            }
+
+            update_user_meta( $user_id, 'dps_client_id', $client_id );
+            update_post_meta( $client_id, 'client_user_id', $user_id );
+
+            return $user_id;
+        }
+
+        if ( $email && is_email( $email ) ) {
+            $existing_user = get_user_by( 'email', $email );
+
+            if ( $existing_user ) {
+                if ( $password ) {
+                    wp_set_password( $password, $existing_user->ID );
+                }
+
+                update_user_meta( $existing_user->ID, 'dps_client_id', $client_id );
+                update_post_meta( $client_id, 'client_user_id', $existing_user->ID );
+
+                return (int) $existing_user->ID;
+            }
+        }
+
+        $base_username = $phone ? 'dps_cliente_' . preg_replace( '/\D+/', '', $phone ) : 'dps_cliente_' . $client_id;
+        $username      = sanitize_user( $base_username, true );
+        $suffix        = 1;
+
+        while ( username_exists( $username ) ) {
+            $username = sanitize_user( $base_username . '_' . $suffix, true );
+            $suffix++;
+        }
+
+        $safe_email = $email && is_email( $email ) ? $email : $username . '@example.com';
+        $user_pass  = $password ? $password : wp_generate_password( 12, true );
+
+        $user_data = [
+            'user_login'   => $username,
+            'user_email'   => $safe_email,
+            'user_pass'    => $user_pass,
+            'display_name' => get_the_title( $client_id ),
+            'role'         => 'subscriber',
+        ];
+
+        $user_id = wp_insert_user( $user_data );
+
+        if ( is_wp_error( $user_id ) ) {
+            return 0;
+        }
+
+        update_user_meta( $user_id, 'dps_client_id', $client_id );
+        update_post_meta( $client_id, 'client_user_id', $user_id );
+
+        return (int) $user_id;
+    }
+
+    /**
+     * Verifica se a senha informada corresponde ao hash ou senha temporária do cliente.
+     *
+     * @param int    $client_id ID do cliente.
+     * @param string $password  Senha informada.
+     *
+     * @return bool
+     */
+    private function check_client_password( $client_id, $password ) {
+        $stored_hash = get_post_meta( $client_id, 'client_password_hash', true );
+
+        if ( $stored_hash && wp_check_password( $password, $stored_hash ) ) {
+            return true;
+        }
+
+        $temp_password = get_transient( 'dps_client_pass_' . $client_id );
+
+        if ( $temp_password && hash_equals( (string) $temp_password, (string) $password ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Cria um usuário WordPress para um cliente recém-cadastrado, se ainda não existir.
      * Este usuário é do tipo "assinante" e recebe login e senha enviados por email.
      *
@@ -159,30 +316,13 @@ final class DPS_Client_Portal {
             return;
         }
 
-        $username = $phone ? 'dps_cliente_' . preg_replace( '/\D+/', '', $phone ) : 'dps_cliente_' . $post_id;
-        if ( username_exists( $username ) ) {
-            $username .= '_' . $post_id;
-        }
+        $password = wp_generate_password( 12, true );
+        $user_id  = $this->ensure_client_user_account( $post_id, $password );
 
-        $safe_email = $email && is_email( $email ) ? $email : $username . '@example.com';
-        $password   = wp_generate_password( 12, true );
-
-        $user_data = [
-            'user_login'   => sanitize_user( $username, true ),
-            'user_email'   => $safe_email,
-            'user_pass'    => $password,
-            'display_name' => get_the_title( $post_id ),
-            'role'         => 'subscriber',
-        ];
-
-        $user_id = wp_insert_user( $user_data );
-
-        if ( is_wp_error( $user_id ) ) {
+        if ( ! $user_id ) {
             return;
         }
 
-        update_user_meta( $user_id, 'dps_client_id', $post_id );
-        update_post_meta( $post_id, 'client_user_id', $user_id );
         update_post_meta( $post_id, 'client_login_created_at', current_time( 'mysql' ) );
 
         set_transient( 'dps_client_pass_' . $post_id, $password, 30 * MINUTE_IN_SECONDS );
@@ -1080,6 +1220,7 @@ final class DPS_Client_Portal {
                 $plain = wp_generate_password( 8, false, false );
                 $hash  = wp_hash_password( $plain );
                 update_post_meta( $cid, 'client_password_hash', $hash );
+                $this->ensure_client_user_account( $cid, $plain );
                 set_transient( 'dps_client_pass_' . $cid, $plain, 30 * MINUTE_IN_SECONDS );
                 $feedback_messages[] = [
                     'type' => 'success',
@@ -1098,6 +1239,7 @@ final class DPS_Client_Portal {
                 $plain = wp_generate_password( 8, false, false );
                 $hash  = wp_hash_password( $plain );
                 update_post_meta( $cid, 'client_password_hash', $hash );
+                $this->ensure_client_user_account( $cid, $plain );
                 set_transient( 'dps_client_pass_' . $cid, $plain, 30 * MINUTE_IN_SECONDS );
                 $phone       = get_post_meta( $cid, 'client_phone', true );
                 $clean_phone = preg_replace( '/[^0-9]/', '', (string) $phone );
@@ -1408,6 +1550,32 @@ final class DPS_Client_Portal {
                 $user = wp_signon( $creds, false );
 
                 if ( is_wp_error( $user ) ) {
+                    $client = $this->find_client_by_identifier( $login );
+
+                    if ( $client && $this->check_client_password( $client->ID, $password ) ) {
+                        $user_id = $this->ensure_client_user_account( $client->ID, $password );
+
+                        if ( $user_id ) {
+                            update_post_meta( $client->ID, 'client_password_hash', wp_hash_password( $password ) );
+                            if ( $attempt_key ) {
+                                delete_transient( $attempt_key );
+                            }
+
+                            wp_set_current_user( $user_id );
+                            wp_set_auth_cookie( $user_id, true );
+
+                            $portal_page = get_page_by_title( 'Portal do Cliente' );
+
+                            if ( $portal_page ) {
+                                wp_safe_redirect( get_permalink( $portal_page->ID ) );
+                            } else {
+                                wp_safe_redirect( home_url() );
+                            }
+
+                            exit;
+                        }
+                    }
+
                     $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
 
                     if ( $attempt_key ) {
