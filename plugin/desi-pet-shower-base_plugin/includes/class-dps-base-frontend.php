@@ -126,11 +126,11 @@ class DPS_Base_Frontend {
         switch ( $status ) {
             case 'finalizado_pago':
             case 'finalizado e pago':
-                return __( 'Finalizado e pago', 'dps-base' );
+                return __( 'Finalizado e pago', 'desi-pet-shower' );
             case 'cancelado':
-                return __( 'Cancelado', 'dps-base' );
+                return __( 'Cancelado', 'desi-pet-shower' );
             case 'finalizado':
-                return __( 'Finalizado', 'dps-base' );
+                return __( 'Finalizado', 'desi-pet-shower' );
             default:
                 return $status;
         }
@@ -190,7 +190,7 @@ class DPS_Base_Frontend {
         );
         $message = apply_filters( 'dps_base_whatsapp_charge_message', $message, $appt_id, $context );
         $base_link = 'https://wa.me/' . $number . '?text=' . rawurlencode( $message );
-        $html      = '<a href="' . esc_url( $base_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-base' ) . '</a>';
+        $html      = '<a href="' . esc_url( $base_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'desi-pet-shower' ) . '</a>';
 
         if ( $allow_group ) {
             $group_data = self::get_multi_pet_charge_data( $appt_id );
@@ -212,7 +212,7 @@ class DPS_Base_Frontend {
                     );
                     $group_message = apply_filters( 'dps_base_whatsapp_group_charge_message', $group_message, $appt_id, $context, $group_data );
                     $group_link = 'https://wa.me/' . $number . '?text=' . rawurlencode( $group_message );
-                    $html      .= '<br><a href="' . esc_url( $group_link ) . '" target="_blank" class="dps-whatsapp-group">' . esc_html__( 'Cobrança conjunta', 'dps-base' ) . '</a>';
+                    $html      .= '<br><a href="' . esc_url( $group_link ) . '" target="_blank" class="dps-whatsapp-group">' . esc_html__( 'Cobrança conjunta', 'desi-pet-shower' ) . '</a>';
                 }
             }
         }
@@ -493,18 +493,18 @@ class DPS_Base_Frontend {
         // Verifica se o usuário atual está logado e possui permissão de administrador
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             $login_url = wp_login_url( get_permalink() );
-            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar este painel.', 'dps-base' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-base' ) . '</a></p>';
+            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
         // Sempre mostrar interface completa para usuários administradores
         ob_start();
         echo '<div class="dps-base-wrapper">';
         echo '<ul class="dps-nav">';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'dps-base' ) . '</a></li>';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'dps-base' ) . '</a></li>';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="pets">' . esc_html__( 'Pets', 'dps-base' ) . '</a></li>';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'desi-pet-shower' ) . '</a></li>';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'desi-pet-shower' ) . '</a></li>';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="pets">' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</a></li>';
         // Permite que add-ons adicionem abas após os módulos principais
         do_action( 'dps_base_nav_tabs_after_pets', false );
-        echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'dps-base' ) . '</a></li>';
+        echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'desi-pet-shower' ) . '</a></li>';
         // Espaço para add-ons exibirem abas após o histórico
         do_action( 'dps_base_nav_tabs_after_history', false );
         echo '</ul>';
@@ -529,7 +529,7 @@ class DPS_Base_Frontend {
     public static function render_settings() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             $login_url = wp_login_url( get_permalink() );
-            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar esta área.', 'dps-base' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-base' ) . '</a></p>';
+            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar esta área.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
 
         ob_start();
@@ -602,7 +602,7 @@ class DPS_Base_Frontend {
         }
         ob_start();
         echo '<div class="dps-section" id="dps-section-clientes">';
-        echo '<h3>' . esc_html__( 'Cadastro de Clientes', 'dps-base' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ) . '</h3>';
         echo '<form method="post" class="dps-form">';
         // Hidden fields
         echo '<input type="hidden" name="dps_action" value="save_client">';
@@ -612,19 +612,19 @@ class DPS_Base_Frontend {
         }
         // Name
         $name_value = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome', 'dps-base' ) . '<br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '<br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
         // CPF
         $cpf_val = $meta['cpf'] ?? '';
-        echo '<p><label>' . esc_html__( 'CPF', 'dps-base' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'CPF', 'desi-pet-shower' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '"></label></p>';
         // Phone / WhatsApp
         $phone_val = $meta['phone'] ?? '';
-        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'dps-base' ) . '<br><input type="text" name="client_phone" value="' . esc_attr( $phone_val ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . '<br><input type="text" name="client_phone" value="' . esc_attr( $phone_val ) . '" required></label></p>';
         // Email
         $email_val = $meta['email'] ?? '';
         echo '<p><label>Email<br><input type="email" name="client_email" value="' . esc_attr( $email_val ) . '"></label></p>';
         // Birth date
         $birth_val = $meta['birth'] ?? '';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-base' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
         // Instagram
         $insta_val = $meta['instagram'] ?? '';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $insta_val ) . '" placeholder="@usuario"></label></p>';
@@ -634,28 +634,28 @@ class DPS_Base_Frontend {
         // Photo authorization
         $auth = $meta['photo_auth'] ?? '';
         $checked = $auth ? 'checked' : '';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'dps-base' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</label></p>';
         // Address
         $addr_val = $meta['address'] ?? '';
-        echo '<p><label>' . esc_html__( 'Endereço completo', 'dps-base' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Endereço completo', 'desi-pet-shower' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
         // Referral (Como nos conheceu?)
         $ref_val = $meta['referral'] ?? '';
-        echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'dps-base' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '"></label></p>';
         // Campos ocultos para latitude e longitude (admin) - valores predefinidos se estiver editando
         $lat_admin = isset( $meta['lat'] ) ? $meta['lat'] : '';
         $lng_admin = isset( $meta['lng'] ) ? $meta['lng'] : '';
         echo '<input type="hidden" name="client_lat" id="dps-client-lat-admin" value="' . esc_attr( $lat_admin ) . '">';
         echo '<input type="hidden" name="client_lng" id="dps-client-lng-admin" value="' . esc_attr( $lng_admin ) . '">';
         // Submit button
-        $btn_text = $edit_id ? esc_html__( 'Atualizar Cliente', 'dps-base' ) : esc_html__( 'Salvar Cliente', 'dps-base' );
+        $btn_text = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : esc_html__( 'Salvar Cliente', 'desi-pet-shower' );
         echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de clientes
-        echo '<h3>' . esc_html__( 'Clientes Cadastrados', 'dps-base' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-base' ) . '"></p>';
+        echo '<h3>' . esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ) . '</h3>';
+        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
         if ( ! empty( $clients ) ) {
             $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'dps-base' ) . '</th><th>' . esc_html__( 'Telefone', 'dps-base' ) . '</th><th>' . esc_html__( 'Ações', 'dps-base' ) . '</th></tr></thead><tbody>';
+            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Telefone', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
             foreach ( $clients as $client ) {
                 $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
                 // Gera link do WhatsApp se houver telefone
@@ -677,12 +677,12 @@ class DPS_Base_Frontend {
                 echo '<tr>';
                 echo '<td><a href="' . esc_url( $view_url ) . '">' . esc_html( $client->post_title ) . '</a></td>';
                 echo '<td>' . $phone_display . '</td>';
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'dps-base' ) . '</a></td>';
+                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum cliente cadastrado.', 'dps-base' ) . '</p>';
+            echo '<p>' . esc_html__( 'Nenhum cliente cadastrado.', 'desi-pet-shower' ) . '</p>';
         }
         // Se houver chave da API do Google Maps, injeta script de autocomplete de endereço
         $api_key = get_option( 'dps_google_api_key', '' );
@@ -764,7 +764,7 @@ class DPS_Base_Frontend {
         ];
         ob_start();
         echo '<div class="dps-section" id="dps-section-pets">';
-        echo '<h3>' . esc_html__( 'Cadastro de Pets', 'dps-base' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h3>';
         // Define enctype multipart/form-data para permitir upload de foto
         echo '<form method="post" enctype="multipart/form-data" class="dps-form">';
         echo '<input type="hidden" name="dps_action" value="save_pet">';
@@ -774,11 +774,11 @@ class DPS_Base_Frontend {
         }
         // Nome do pet
         $pet_name = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-base' ) . '<br><input type="text" name="pet_name" value="' . esc_attr( $pet_name ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Nome do Pet', 'desi-pet-shower' ) . '<br><input type="text" name="pet_name" value="' . esc_attr( $pet_name ) . '" required></label></p>';
         // Cliente (tutor)
         $owner_selected = $meta['owner_id'] ?? '';
-        echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="owner_id" id="dps-pet-owner" required>';
-        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-base' ) . '</option>';
+        echo '<p><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select name="owner_id" id="dps-pet-owner" required>';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
         foreach ( $clients as $client ) {
             $sel = (string) $client->ID === (string) $owner_selected ? 'selected' : '';
             echo '<option value="' . esc_attr( $client->ID ) . '" ' . $sel . '>' . esc_html( $client->post_title ) . '</option>';
@@ -786,12 +786,12 @@ class DPS_Base_Frontend {
         echo '</select></label></p>';
         // Espécie
         $species_val = $meta['species'] ?? '';
-        echo '<p><label>' . esc_html__( 'Espécie', 'dps-base' ) . '<br><select name="pet_species" required>';
+        echo '<p><label>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '<br><select name="pet_species" required>';
         $species_options = [
-            ''      => __( 'Selecione...', 'dps-base' ),
-            'cao'   => __( 'Cachorro', 'dps-base' ),
-            'gato'  => __( 'Gato', 'dps-base' ),
-            'outro' => __( 'Outro', 'dps-base' ),
+            ''      => __( 'Selecione...', 'desi-pet-shower' ),
+            'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
+            'gato'  => __( 'Gato', 'desi-pet-shower' ),
+            'outro' => __( 'Outro', 'desi-pet-shower' ),
         ];
         foreach ( $species_options as $val => $label ) {
             $sel = ( $species_val === $val ) ? 'selected' : '';
@@ -800,7 +800,7 @@ class DPS_Base_Frontend {
         echo '</select></label></p>';
         // Raça (com datalist)
         $breed_val = $meta['breed'] ?? '';
-        echo '<p><label>' . esc_html__( 'Raça', 'dps-base' ) . '<br>';
+        echo '<p><label>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '<br>';
         echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '">' ;
         echo '</label></p>';
         // Datalist definition (outside of label)
@@ -811,8 +811,8 @@ class DPS_Base_Frontend {
         echo '</datalist>';
         // Porte
         $size_val = $meta['size'] ?? '';
-        echo '<p><label>' . esc_html__( 'Porte', 'dps-base' ) . '<br><select name="pet_size" required>';
-        $sizes = [ '' => __( 'Selecione...', 'dps-base' ), 'pequeno' => __( 'Pequeno', 'dps-base' ), 'medio' => __( 'Médio', 'dps-base' ), 'grande' => __( 'Grande', 'dps-base' ) ];
+        echo '<p><label>' . esc_html__( 'Porte', 'desi-pet-shower' ) . '<br><select name="pet_size" required>';
+        $sizes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'pequeno' => __( 'Pequeno', 'desi-pet-shower' ), 'medio' => __( 'Médio', 'desi-pet-shower' ), 'grande' => __( 'Grande', 'desi-pet-shower' ) ];
         foreach ( $sizes as $val => $lab ) {
             $sel = ( $size_val === $val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
@@ -820,20 +820,20 @@ class DPS_Base_Frontend {
         echo '</select></label></p>';
         // Peso
         $weight_val = $meta['weight'] ?? '';
-        echo '<p><label>' . esc_html__( 'Peso (kg)', 'dps-base' ) . '<br><input type="number" step="0.01" name="pet_weight" value="' . esc_attr( $weight_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Peso (kg)', 'desi-pet-shower' ) . '<br><input type="number" step="0.01" name="pet_weight" value="' . esc_attr( $weight_val ) . '"></label></p>';
         // Pelagem
         $coat_val = $meta['coat'] ?? '';
-        echo '<p><label>' . esc_html__( 'Pelagem', 'dps-base' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $coat_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Pelagem', 'desi-pet-shower' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $coat_val ) . '"></label></p>';
         // Cor
         $color_val = $meta['color'] ?? '';
-        echo '<p><label>' . esc_html__( 'Cor', 'dps-base' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $color_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Cor', 'desi-pet-shower' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $color_val ) . '"></label></p>';
         // Data de nascimento
         $birth_val = $meta['birth'] ?? '';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-base' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
         // Sexo
         $sex_val = $meta['sex'] ?? '';
-        echo '<p><label>' . esc_html__( 'Sexo', 'dps-base' ) . '<br><select name="pet_sex" required>';
-        $sexes = [ '' => __( 'Selecione...', 'dps-base' ), 'macho' => __( 'Macho', 'dps-base' ), 'femea' => __( 'Fêmea', 'dps-base' ) ];
+        echo '<p><label>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . '<br><select name="pet_sex" required>';
+        $sexes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'macho' => __( 'Macho', 'desi-pet-shower' ), 'femea' => __( 'Fêmea', 'desi-pet-shower' ) ];
         foreach ( $sexes as $val => $lab ) {
             $sel = ( $sex_val === $val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
@@ -841,40 +841,40 @@ class DPS_Base_Frontend {
         echo '</select></label></p>';
         // Cuidados especiais/restrições
         $care_val = $meta['care'] ?? '';
-        echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'dps-base' ) . '<br><textarea name="pet_care" rows="2">' . esc_textarea( $care_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'desi-pet-shower' ) . '<br><textarea name="pet_care" rows="2">' . esc_textarea( $care_val ) . '</textarea></label></p>';
         // Agressivo
         $aggressive = $meta['aggressive'] ?? '';
         $checked_ag = $aggressive ? 'checked' : '';
-        echo '<p><label><input type="checkbox" name="pet_aggressive" value="1" ' . $checked_ag . '> ' . esc_html__( 'Cão agressivo', 'dps-base' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="pet_aggressive" value="1" ' . $checked_ag . '> ' . esc_html__( 'Cão agressivo', 'desi-pet-shower' ) . '</label></p>';
 
         // Campos adicionais de saúde, alergias e comportamento, além de foto do pet
         $vaccinations_val = $meta['vaccinations'] ?? '';
-        echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'dps-base' ) . '<br><textarea name="pet_vaccinations" rows="2">' . esc_textarea( $vaccinations_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'desi-pet-shower' ) . '<br><textarea name="pet_vaccinations" rows="2">' . esc_textarea( $vaccinations_val ) . '</textarea></label></p>';
         $allergies_val = $meta['allergies'] ?? '';
-        echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'dps-base' ) . '<br><textarea name="pet_allergies" rows="2">' . esc_textarea( $allergies_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'desi-pet-shower' ) . '<br><textarea name="pet_allergies" rows="2">' . esc_textarea( $allergies_val ) . '</textarea></label></p>';
         $behavior_val = $meta['behavior'] ?? '';
-        echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'dps-base' ) . '<br><textarea name="pet_behavior" rows="2">' . esc_textarea( $behavior_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'desi-pet-shower' ) . '<br><textarea name="pet_behavior" rows="2">' . esc_textarea( $behavior_val ) . '</textarea></label></p>';
         // Upload de foto do pet
         $photo_id  = $meta['photo_id'] ?? '';
         $photo_url = '';
         if ( $photo_id ) {
             $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
         }
-        echo '<p><label>' . esc_html__( 'Foto do Pet', 'dps-base' ) . '<br><input type="file" name="pet_photo" accept="image/*"></label></p>';
+        echo '<p><label>' . esc_html__( 'Foto do Pet', 'desi-pet-shower' ) . '<br><input type="file" name="pet_photo" accept="image/*"></label></p>';
         if ( $photo_url ) {
             // Exibe a foto atual
             echo '<p><img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" style="max-width:100px;height:auto;"></p>';
         }
         // Botão
-        $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'dps-base' ) : esc_html__( 'Salvar Pet', 'dps-base' );
+        $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
         echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de pets
-        echo '<h3>' . esc_html__( 'Pets Cadastrados', 'dps-base' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-base' ) . '"></p>';
+        echo '<h3>' . esc_html__( 'Pets Cadastrados', 'desi-pet-shower' ) . '</h3>';
+        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
         if ( ! empty( $pets ) ) {
             $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'dps-base' ) . '</th><th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th><th>' . esc_html__( 'Espécie', 'dps-base' ) . '</th><th>' . esc_html__( 'Raça', 'dps-base' ) . '</th><th>' . esc_html__( 'Ações', 'dps-base' ) . '</th></tr></thead><tbody>';
+            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
             foreach ( $pets as $pet ) {
                 $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
                 $owner    = $owner_id ? get_post( $owner_id ) : null;
@@ -886,13 +886,13 @@ class DPS_Base_Frontend {
                 $species_label = '';
                 switch ( $species ) {
                     case 'cao':
-                        $species_label = __( 'Cachorro', 'dps-base' );
+                        $species_label = __( 'Cachorro', 'desi-pet-shower' );
                         break;
                     case 'gato':
-                        $species_label = __( 'Gato', 'dps-base' );
+                        $species_label = __( 'Gato', 'desi-pet-shower' );
                         break;
                     case 'outro':
-                        $species_label = __( 'Outro', 'dps-base' );
+                        $species_label = __( 'Outro', 'desi-pet-shower' );
                         break;
                     default:
                         $species_label = $species;
@@ -907,12 +907,12 @@ class DPS_Base_Frontend {
                 echo '<td>' . $owner_display . '</td>';
                 echo '<td>' . esc_html( $species_label ) . '</td>';
                 echo '<td>' . esc_html( $breed ) . '</td>';
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'dps-base' ) . '</a></td>';
+                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'dps-base' ) . '</p>';
+            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'desi-pet-shower' ) . '</p>';
         }
         echo '</div>';
         return ob_get_clean();
@@ -958,19 +958,19 @@ class DPS_Base_Frontend {
         $pref_pet    = isset( $_GET['pref_pet'] ) ? intval( $_GET['pref_pet'] ) : 0;
         ob_start();
         echo '<div class="dps-section" id="dps-section-agendas">';
-        echo '<h3>' . esc_html__( 'Agendamento de Serviços', 'dps-base' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h3>';
         if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] && ! $visitor_only ) {
             $notice_key  = 'dps_pending_notice_' . get_current_user_id();
             $notice_data = get_transient( $notice_key );
             if ( $notice_data && ! empty( $notice_data['transactions'] ) ) {
                 echo '<div class="dps-alert dps-alert--danger">';
-                $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'dps-base' );
-                echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_label ) ) . '</strong>';
+                $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'desi-pet-shower' );
+                echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'desi-pet-shower' ), esc_html( $client_label ) ) . '</strong>';
                 echo '<ul>';
                 foreach ( $notice_data['transactions'] as $row ) {
                     $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
                     $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
-                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
+                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'desi-pet-shower' );
                     $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
                     echo '<li>' . esc_html( $message ) . '</li>';
                 }
@@ -990,9 +990,9 @@ class DPS_Base_Frontend {
             }
             // Campo: tipo de agendamento (simples ou assinatura)
             $appt_type = isset( $meta['appointment_type'] ) ? $meta['appointment_type'] : 'simple';
-            echo '<p><label>' . esc_html__( 'Tipo de agendamento', 'dps-base' ) . '<br>';
-            echo '<label><input type="radio" name="appointment_type" value="simple" ' . ( $appt_type === 'subscription' ? '' : 'checked' ) . '> ' . esc_html__( 'Agendamento simples', 'dps-base' ) . '</label> ';
-            echo '<label style="margin-left:20px;"><input type="radio" name="appointment_type" value="subscription" ' . ( $appt_type === 'subscription' ? 'checked' : '' ) . '> ' . esc_html__( 'Agendamento de assinatura', 'dps-base' ) . '</label>';
+            echo '<p><label>' . esc_html__( 'Tipo de agendamento', 'desi-pet-shower' ) . '<br>';
+            echo '<label><input type="radio" name="appointment_type" value="simple" ' . ( $appt_type === 'subscription' ? '' : 'checked' ) . '> ' . esc_html__( 'Agendamento simples', 'desi-pet-shower' ) . '</label> ';
+            echo '<label style="margin-left:20px;"><input type="radio" name="appointment_type" value="subscription" ' . ( $appt_type === 'subscription' ? 'checked' : '' ) . '> ' . esc_html__( 'Agendamento de assinatura', 'desi-pet-shower' ) . '</label>';
             echo '</label></p>';
             // Campo: frequência para assinaturas (semanal ou quinzenal)
             $freq_val = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_frequency'] ) ) : '';
@@ -1004,7 +1004,7 @@ class DPS_Base_Frontend {
                 }
             }
             $freq_display = ( $appt_type === 'subscription' ) ? 'block' : 'none';
-            echo '<p id="dps-appointment-frequency-wrapper" style="display:' . esc_attr( $freq_display ) . '"><label>' . esc_html__( 'Frequência', 'dps-base' ) . '<br><select name="appointment_frequency" id="dps-appointment-frequency"><option value="semanal" ' . selected( $freq_val, 'semanal', false ) . '>' . esc_html__( 'Semanal', 'dps-base' ) . '</option><option value="quinzenal" ' . selected( $freq_val, 'quinzenal', false ) . '>' . esc_html__( 'Quinzenal', 'dps-base' ) . '</option></select></label></p>';
+            echo '<p id="dps-appointment-frequency-wrapper" style="display:' . esc_attr( $freq_display ) . '"><label>' . esc_html__( 'Frequência', 'desi-pet-shower' ) . '<br><select name="appointment_frequency" id="dps-appointment-frequency"><option value="semanal" ' . selected( $freq_val, 'semanal', false ) . '>' . esc_html__( 'Semanal', 'desi-pet-shower' ) . '</option><option value="quinzenal" ' . selected( $freq_val, 'quinzenal', false ) . '>' . esc_html__( 'Quinzenal', 'desi-pet-shower' ) . '</option></select></label></p>';
 
             // Cliente
             // Preenchimento: se não editando, usa pref_client se disponível
@@ -1012,8 +1012,8 @@ class DPS_Base_Frontend {
                 $meta['client_id'] = $pref_client;
             }
             $sel_client = $meta['client_id'] ?? '';
-            echo '<p><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
-            echo '<option value="">' . esc_html__( 'Selecione...', 'dps-base' ) . '</option>';
+            echo '<p><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
+            echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
             $pending_cache = [];
             foreach ( $clients as $client ) {
                 if ( ! array_key_exists( $client->ID, $pending_cache ) ) {
@@ -1027,7 +1027,7 @@ class DPS_Base_Frontend {
                         $payload[] = [
                             'date'        => ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '',
                             'value'       => number_format_i18n( (float) $row['valor'], 2 ),
-                            'description' => ! empty( $row['descricao'] ) ? wp_strip_all_tags( $row['descricao'] ) : __( 'Serviço', 'dps-base' ),
+                            'description' => ! empty( $row['descricao'] ) ? wp_strip_all_tags( $row['descricao'] ) : __( 'Serviço', 'desi-pet-shower' ),
                         ];
                     }
                     $pending_attr .= ' data-pending-info=\'' . esc_attr( wp_json_encode( $payload ) ) . '\'';
@@ -1049,19 +1049,19 @@ class DPS_Base_Frontend {
                 $client_post = get_post( (int) $sel_client );
                 $client_name = $client_post ? $client_post->post_title : '';
                 if ( $client_name ) {
-                    $initial_alert_html .= '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'dps-base' ), esc_html( $client_name ) ) . '</strong>';
+                    $initial_alert_html .= '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'desi-pet-shower' ), esc_html( $client_name ) ) . '</strong>';
                 } else {
-                    $initial_alert_html .= '<strong>' . esc_html__( 'Este cliente possui pagamentos pendentes.', 'dps-base' ) . '</strong>';
+                    $initial_alert_html .= '<strong>' . esc_html__( 'Este cliente possui pagamentos pendentes.', 'desi-pet-shower' ) . '</strong>';
                 }
                 $initial_alert_html .= '<ul>';
                 foreach ( $initial_pending_rows as $row ) {
                     $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
                     $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
-                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'dps-base' );
+                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'desi-pet-shower' );
                     if ( $date_fmt ) {
-                        $message = sprintf( __( '%1$s: R$ %2$s – %3$s', 'dps-base' ), $date_fmt, $value_fmt, $desc );
+                        $message = sprintf( __( '%1$s: R$ %2$s – %3$s', 'desi-pet-shower' ), $date_fmt, $value_fmt, $desc );
                     } else {
-                        $message = sprintf( __( 'R$ %1$s – %2$s', 'dps-base' ), $value_fmt, $desc );
+                        $message = sprintf( __( 'R$ %1$s – %2$s', 'desi-pet-shower' ), $value_fmt, $desc );
                     }
                     $initial_alert_html .= '<li>' . esc_html( $message ) . '</li>';
                 }
@@ -1090,12 +1090,12 @@ class DPS_Base_Frontend {
                 $sel_pets = array_map( 'strval', $multi_meta );
             }
             echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker">';
-            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'dps-base' ) . '</strong></p>';
-            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'dps-base' ) . '</p>';
-            echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'dps-base' ) . '</p>';
+            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . '</strong></p>';
+            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
+            echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
             echo '<div class="dps-pet-picker-actions">';
-            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'dps-base' ) . '</button> ';
-            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-base' ) . '</button>';
+            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'desi-pet-shower' ) . '</button> ';
+            echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'desi-pet-shower' ) . '</button>';
             echo '</div>';
             echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
             foreach ( $pets as $pet ) {
@@ -1124,14 +1124,14 @@ class DPS_Base_Frontend {
             }
             echo '</div>';
             echo '<p id="dps-pet-summary" class="description" style="display:none;"></p>';
-            echo '<p id="dps-no-pets-message" style="display:none;" class="description">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'dps-base' ) . '</p>';
+            echo '<p id="dps-no-pets-message" style="display:none;" class="description">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
             // Data
             $date_val = $meta['date'] ?? '';
-            echo '<p><label>' . esc_html__( 'Data', 'dps-base' ) . '<br><input type="date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required></label></p>';
+            echo '<p><label>' . esc_html__( 'Data', 'desi-pet-shower' ) . '<br><input type="date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required></label></p>';
             // Hora
             $time_val = $meta['time'] ?? '';
-            echo '<p><label>' . esc_html__( 'Horário', 'dps-base' ) . '<br><input type="time" name="appointment_time" value="' . esc_attr( $time_val ) . '" required></label></p>';
+            echo '<p><label>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '<br><input type="time" name="appointment_time" value="' . esc_attr( $time_val ) . '" required></label></p>';
             // Campo: indicativo de necessidade de tosa.
             // Campos relativos à tosa: exibidos apenas quando o tipo de agendamento for assinatura. Agrupamos em div para controle via JS.
             $tosa       = $meta['tosa'] ?? '';
@@ -1139,28 +1139,28 @@ class DPS_Base_Frontend {
             $tosa_occ   = $meta['tosa_occurrence'] ?? '1';
             $tosa_display = ( '1' === $tosa ) ? 'block' : 'none';
             echo '<div id="dps-tosa-wrapper" style="display:none; margin-bottom:10px;">';
-            echo '<p><label><input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '> ' . esc_html__( 'Precisa de tosa?', 'dps-base' ) . '</label> ';
-            echo '<small>' . esc_html__( 'Adicione um serviço de tosa à assinatura', 'dps-base' ) . '</small></p>';
+            echo '<p><label><input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '> ' . esc_html__( 'Precisa de tosa?', 'desi-pet-shower' ) . '</label> ';
+            echo '<small>' . esc_html__( 'Adicione um serviço de tosa à assinatura', 'desi-pet-shower' ) . '</small></p>';
             echo '<div id="dps-tosa-fields" style="display:' . esc_attr( $tosa_display ) . ';">';
             // Preço da tosa com valor padrão 30 se não definido
             $tosa_price_val = $tosa_price !== '' ? $tosa_price : '30';
-            echo '<p><label>' . esc_html__( 'Preço da tosa (R$)', 'dps-base' ) . '<br><input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:80px;"></label></p>';
+            echo '<p><label>' . esc_html__( 'Preço da tosa (R$)', 'desi-pet-shower' ) . '<br><input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:80px;"></label></p>';
             // Ocorrência da tosa (selecionada via JS conforme frequência)
-            echo '<p><label>' . esc_html__( 'Ocorrência da tosa', 'dps-base' ) . '<br>';
+            echo '<p><label>' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '<br>';
             echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select></label></p>';
             echo '</div>';
             echo '</div>';
 
             // Campo: escolha de TaxiDog
             $taxidog = $meta['taxidog'] ?? '';
-            echo '<p><label><input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '> ' . esc_html__( 'Solicitar TaxiDog?', 'dps-base' ) . '</label>';
+            echo '<p><label><input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '> ' . esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' ) . '</label>';
             echo '<span id="dps-taxidog-extra" style="margin-left:10px; display:' . ( $taxidog ? 'inline-block' : 'none' ) . ';">';
-            echo esc_html__( 'Valor (R$)', 'dps-base' ) . ': <input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:80px;">';
+            echo esc_html__( 'Valor (R$)', 'desi-pet-shower' ) . ': <input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:80px;">';
             echo '</span></p>';
 
             // Observações
             $notes_val = $meta['notes'] ?? '';
-            echo '<p><label>' . esc_html__( 'Observações', 'dps-base' ) . '<br><textarea name="appointment_notes" rows="2">' . esc_textarea( $notes_val ) . '</textarea></label></p>';
+            echo '<p><label>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '<br><textarea name="appointment_notes" rows="2">' . esc_textarea( $notes_val ) . '</textarea></label></p>';
             /**
              * Permite que add‑ons adicionem campos extras ao formulário de agendamento (ex.: serviços).
              *
@@ -1169,7 +1169,7 @@ class DPS_Base_Frontend {
              */
             do_action( 'dps_base_appointment_fields', $edit_id, $meta );
             // Botão
-            $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'dps-base' ) : esc_html__( 'Salvar Agendamento', 'dps-base' );
+            $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'desi-pet-shower' ) : esc_html__( 'Salvar Agendamento', 'desi-pet-shower' );
             echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
             // Script para alternar campos de acordo com o tipo de agendamento e uso de TaxiDog.  
             // Utilizamos heredoc para evitar problemas de escape de aspas simples/dobras.
@@ -1253,10 +1253,10 @@ EOT;
         $appointments   = get_posts( $args );
         $base_url       = get_permalink();
         $status_labels  = [
-            'pendente'        => __( 'Pendente', 'dps-base' ),
-            'finalizado'      => __( 'Finalizado', 'dps-base' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'dps-base' ),
-            'cancelado'       => __( 'Cancelado', 'dps-base' ),
+            'pendente'        => __( 'Pendente', 'desi-pet-shower' ),
+            'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
+            'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
+            'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
         ];
         $overdue        = [];
         $finalized_today = [];
@@ -1411,9 +1411,9 @@ EOT;
         }
 
         $status_filters = [
-            'finalizado'      => __( 'Finalizado', 'dps-base' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'dps-base' ),
-            'cancelado'       => __( 'Cancelado', 'dps-base' ),
+            'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
+            'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
+            'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
         ];
 
         $total_count = count( $appointments );
@@ -1427,53 +1427,53 @@ EOT;
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
-        echo '<h3>' . esc_html__( 'Histórico de Atendimentos', 'dps-base' ) . '</h3>';
-        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'dps-base' ) . '</p>';
+        echo '<h3>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h3>';
+        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'desi-pet-shower' ) . '</p>';
 
         echo '<div class="dps-history-toolbar">';
         echo '<div class="dps-history-filters">';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Buscar', 'dps-base' ) . '<br><input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'dps-base' ) . '"></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Cliente', 'dps-base' ) . '<br><select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'dps-base' ) . '</option>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Buscar', 'desi-pet-shower' ) . '<br><input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'desi-pet-shower' ) . '"></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $client_options as $id => $name ) {
             echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
         }
         echo '</select></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Status', 'dps-base' ) . '<br><select id="dps-history-status"><option value="">' . esc_html__( 'Todos', 'dps-base' ) . '</option>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Status', 'desi-pet-shower' ) . '<br><select id="dps-history-status"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $status_filters as $key => $label ) {
             echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data inicial', 'dps-base' ) . '<br><input type="date" id="dps-history-start"></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data final', 'dps-base' ) . '<br><input type="date" id="dps-history-end"></label></div>';
-        echo '<div class="dps-history-filter"><label><input type="checkbox" id="dps-history-pending"> ' . esc_html__( 'Somente pendentes de pagamento', 'dps-base' ) . '</label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data inicial', 'desi-pet-shower' ) . '<br><input type="date" id="dps-history-start"></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data final', 'desi-pet-shower' ) . '<br><input type="date" id="dps-history-end"></label></div>';
+        echo '<div class="dps-history-filter"><label><input type="checkbox" id="dps-history-pending"> ' . esc_html__( 'Somente pendentes de pagamento', 'desi-pet-shower' ) . '</label></div>';
         echo '</div>';
         echo '<div class="dps-history-actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar filtros', 'dps-base' ) . '</button> ';
-        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'dps-base' ) . '</button>';
+        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar filtros', 'desi-pet-shower' ) . '</button> ';
+        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
         echo '</div>';
         echo '</div>';
 
         $summary_value = number_format_i18n( $total_amount, 2 );
         echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
         if ( $total_count ) {
-            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'dps-base' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
+            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
         } else {
-            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'dps-base' ) . '</strong>';
+            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'desi-pet-shower' ) . '</strong>';
         }
-        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'dps-base' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'desi-pet-shower' ) . '</p>';
         echo '</div>';
 
         if ( $appointments ) {
             echo '<table class="dps-table" id="dps-history-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Data', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pets', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Serviços', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Valor', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Status', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cobrança', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
             $base_url = get_permalink();
             foreach ( $appointments as $appt ) {
@@ -1531,12 +1531,12 @@ EOT;
                 echo '<td>' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
+                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'dps-base' ) . '</p>';
+            echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'desi-pet-shower' ) . '</p>';
         }
 
         echo '</div>';
@@ -1594,7 +1594,7 @@ EOT;
             $html .= '<option value="' . esc_attr( $key ) . '"' . selected( $status, $key, false ) . '>' . esc_html( $label ) . '</option>';
         }
         $html .= '</select>';
-        $html .= '<noscript><button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'dps-base' ) . '</button></noscript>';
+        $html .= '<noscript><button type="submit" class="button button-secondary button-small">' . esc_html__( 'Atualizar', 'desi-pet-shower' ) . '</button></noscript>';
         $html .= '</form>';
         return $html;
     }
@@ -1611,17 +1611,17 @@ EOT;
         $agenda_pass = get_option( 'dps_agenda_password', 'agendaDPS' );
         ob_start();
         echo '<div class="dps-section" id="dps-section-senhas">';
-        echo '<h3>' . esc_html__( 'Configuração de Senhas', 'dps-base' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Configuração de Senhas', 'desi-pet-shower' ) . '</h3>';
         echo '<form method="post" class="dps-form">';
         echo '<input type="hidden" name="dps_action" value="save_passwords">';
         wp_nonce_field( 'dps_action', 'dps_nonce' );
         // Senha do plugin base (admin)
-        echo '<p><label>' . esc_html__( 'Senha do painel principal', 'dps-base' ) . '<br><input type="password" name="base_password" value="' . esc_attr( $base_pass ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Senha do painel principal', 'desi-pet-shower' ) . '<br><input type="password" name="base_password" value="' . esc_attr( $base_pass ) . '" required></label></p>';
         // Senha da agenda
-        echo '<p><label>' . esc_html__( 'Senha da agenda pública', 'dps-base' ) . '<br><input type="password" name="agenda_password" value="' . esc_attr( $agenda_pass ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Senha da agenda pública', 'desi-pet-shower' ) . '<br><input type="password" name="agenda_password" value="' . esc_attr( $agenda_pass ) . '" required></label></p>';
         // Permite add‑ons adicionarem seus próprios campos de senha
         do_action( 'dps_base_password_fields' );
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Senhas', 'dps-base' ) . '</button></p>';
+        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Senhas', 'desi-pet-shower' ) . '</button></p>';
         echo '</form>';
         echo '</div>';
         return ob_get_clean();
@@ -1905,7 +1905,7 @@ EOT;
             // Cria post da assinatura
             $sub_id = wp_insert_post( [
                 'post_type'   => 'dps_subscription',
-                'post_title'  => $date . ' ' . $time . ' - ' . __( 'Assinatura', 'dps-base' ),
+                'post_title'  => $date . ' ' . $time . ' - ' . __( 'Assinatura', 'desi-pet-shower' ),
                 'post_status' => 'publish',
             ] );
             if ( $sub_id ) {
@@ -1962,7 +1962,7 @@ EOT;
                             update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
                             update_post_meta( $appt_new, 'appointment_date', $date_i );
                             update_post_meta( $appt_new, 'appointment_time', $time );
-                            update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'dps-base' ) );
+                            update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'desi-pet-shower' ) );
                             update_post_meta( $appt_new, 'appointment_type', 'subscription' );
                             // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
                             $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
@@ -1988,14 +1988,14 @@ EOT;
                 global $wpdb;
                 $table     = $wpdb->prefix . 'dps_transacoes';
                 $status_fin = 'em_aberto';
-                $desc_fin  = sprintf( __( 'Assinatura: %s (%s)', 'dps-base' ), 'Assinatura', ( $appt_freq ?: 'semanal' ) );
+                $desc_fin  = sprintf( __( 'Assinatura: %s (%s)', 'desi-pet-shower' ), 'Assinatura', ( $appt_freq ?: 'semanal' ) );
                 $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE plano_id = %d AND data = %s", $sub_id, $date ) );
                 if ( $existing_id ) {
                     $wpdb->update( $table, [
                         'cliente_id' => $client_id ?: null,
                         'valor'      => (float) $total_package,
                         'status'     => $status_fin,
-                        'categoria'  => __( 'Assinatura', 'dps-base' ),
+                        'categoria'  => __( 'Assinatura', 'desi-pet-shower' ),
                         'tipo'       => 'receita',
                         'descricao'  => $desc_fin,
                     ], [ 'id' => $existing_id ] );
@@ -2006,7 +2006,7 @@ EOT;
                         'plano_id'       => $sub_id,
                         'data'           => $date,
                         'valor'          => (float) $total_package,
-                        'categoria'      => __( 'Assinatura', 'dps-base' ),
+                        'categoria'      => __( 'Assinatura', 'desi-pet-shower' ),
                         'tipo'           => 'receita',
                         'status'         => $status_fin,
                         'descricao'      => $desc_fin,
@@ -2215,13 +2215,13 @@ EOT;
     private static function render_login_form( $error = '' ) {
         ob_start();
         echo '<div class="dps-login-wrapper">';
-        echo '<h3>' . esc_html__( 'Acesso ao Desi Pet Shower', 'dps-base' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Acesso ao Desi Pet Shower', 'desi-pet-shower' ) . '</h3>';
         if ( $error ) {
             echo '<p class="dps-error" style="color:red;">' . esc_html( $error ) . '</p>';
         }
         echo '<form method="post" class="dps-login-form">';
-        echo '<p><label>' . esc_html__( 'Senha', 'dps-base' ) . '<br><input type="password" name="dps_admin_pass" required></label></p>';
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Entrar', 'dps-base' ) . '</button></p>';
+        echo '<p><label>' . esc_html__( 'Senha', 'desi-pet-shower' ) . '<br><input type="password" name="dps_admin_pass" required></label></p>';
+        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Entrar', 'desi-pet-shower' ) . '</button></p>';
         echo '</form>';
         echo '</div>';
         return ob_get_clean();
@@ -2235,7 +2235,7 @@ EOT;
     private static function render_client_page( $client_id ) {
         $client = get_post( $client_id );
         if ( ! $client || $client->post_type !== 'dps_cliente' ) {
-            return '<p>' . esc_html__( 'Cliente não encontrado.', 'dps-base' ) . '</p>';
+            return '<p>' . esc_html__( 'Cliente não encontrado.', 'desi-pet-shower' ) . '</p>';
         }
 
         // Mostra aviso se um histórico foi gerado e disponível para download
@@ -2243,7 +2243,7 @@ EOT;
             $file = sanitize_file_name( wp_unslash( $_GET['history_file'] ) );
             $uploads = wp_upload_dir();
             $url  = trailingslashit( $uploads['baseurl'] ) . 'dps_docs/' . $file;
-            echo '<div class="notice notice-success" style="padding:10px;margin-bottom:15px;border:1px solid #d4edda;background:#d4edda;color:#155724;">' . sprintf( esc_html__( 'Histórico gerado com sucesso. %sClique aqui para abrir%s.', 'dps-base' ), '<a href="' . esc_url( $url ) . '" target="_blank" style="font-weight:bold;">', '</a>' ) . '</div>';
+            echo '<div class="notice notice-success" style="padding:10px;margin-bottom:15px;border:1px solid #d4edda;background:#d4edda;color:#155724;">' . sprintf( esc_html__( 'Histórico gerado com sucesso. %sClique aqui para abrir%s.', 'desi-pet-shower' ), '<a href="' . esc_url( $url ) . '" target="_blank" style="font-weight:bold;">', '</a>' ) . '</div>';
         }
 
         // Antes de montar a página, trata requisições de geração, envio e exclusão de documentos.
@@ -2316,27 +2316,27 @@ EOT;
             echo '<div class="dps-notice" style="padding:10px;background:#dff0d8;border:1px solid #d6e9c6;margin-bottom:10px;">Histórico enviado por email com sucesso.</div>';
         }
         echo '<div class="dps-client-detail">';
-        echo '<p><a href="' . esc_url( remove_query_arg( [ 'dps_view', 'id', 'tab' ] ) ) . '">' . esc_html__( '← Voltar', 'dps-base' ) . '</a></p>';
+        echo '<p><a href="' . esc_url( remove_query_arg( [ 'dps_view', 'id', 'tab' ] ) ) . '">' . esc_html__( '← Voltar', 'desi-pet-shower' ) . '</a></p>';
         echo '<h3>' . esc_html( $client->post_title ) . '</h3>';
         echo '<ul class="dps-client-info">';
         // CPF
-        echo '<li><strong>' . esc_html__( 'CPF:', 'dps-base' ) . '</strong> ' . ( $meta['cpf'] ? esc_html( $meta['cpf'] ) : '-' ) . '</li>';
+        echo '<li><strong>' . esc_html__( 'CPF:', 'desi-pet-shower' ) . '</strong> ' . ( $meta['cpf'] ? esc_html( $meta['cpf'] ) : '-' ) . '</li>';
         // Telefone/WhatsApp
         if ( $meta['phone'] ) {
             $phone_digits = preg_replace( '/\D+/', '', $meta['phone'] );
             $wa_url       = 'https://wa.me/' . $phone_digits;
-            echo '<li><strong>' . esc_html__( 'Telefone:', 'dps-base' ) . '</strong> <a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $meta['phone'] ) . '</a></li>';
+            echo '<li><strong>' . esc_html__( 'Telefone:', 'desi-pet-shower' ) . '</strong> <a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $meta['phone'] ) . '</a></li>';
         } else {
-            echo '<li><strong>' . esc_html__( 'Telefone:', 'dps-base' ) . '</strong> -</li>';
+            echo '<li><strong>' . esc_html__( 'Telefone:', 'desi-pet-shower' ) . '</strong> -</li>';
         }
         // Email
         echo '<li><strong>Email:</strong> ' . ( $meta['email'] ? esc_html( $meta['email'] ) : '-' ) . '</li>';
         // Data de nascimento
         if ( $meta['birth'] ) {
             $birth_fmt = date_i18n( 'd-m-Y', strtotime( $meta['birth'] ) );
-            echo '<li><strong>' . esc_html__( 'Nascimento:', 'dps-base' ) . '</strong> ' . esc_html( $birth_fmt ) . '</li>';
+            echo '<li><strong>' . esc_html__( 'Nascimento:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $birth_fmt ) . '</li>';
         } else {
-            echo '<li><strong>' . esc_html__( 'Nascimento:', 'dps-base' ) . '</strong> -</li>';
+            echo '<li><strong>' . esc_html__( 'Nascimento:', 'desi-pet-shower' ) . '</strong> -</li>';
         }
         // Instagram
         echo '<li><strong>Instagram:</strong> ' . ( $meta['instagram'] ? esc_html( $meta['instagram'] ) : '-' ) . '</li>';
@@ -2346,31 +2346,31 @@ EOT;
         $photo_auth_val = $meta['photo_auth'];
         $photo_label    = '';
         if ( '' !== $photo_auth_val && null !== $photo_auth_val ) {
-            $photo_label = $photo_auth_val ? __( 'Sim', 'dps-base' ) : __( 'Não', 'dps-base' );
+            $photo_label = $photo_auth_val ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' );
         }
-        echo '<li><strong>' . esc_html__( 'Autorização de publicação nas redes sociais:', 'dps-base' ) . '</strong> ' . esc_html( $photo_label !== '' ? $photo_label : '-' ) . '</li>';
+        echo '<li><strong>' . esc_html__( 'Autorização de publicação nas redes sociais:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $photo_label !== '' ? $photo_label : '-' ) . '</li>';
         // Endereço completo
-        echo '<li><strong>' . esc_html__( 'Endereço:', 'dps-base' ) . '</strong> ' . esc_html( $meta['address'] ? $meta['address'] : '-' ) . '</li>';
+        echo '<li><strong>' . esc_html__( 'Endereço:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $meta['address'] ? $meta['address'] : '-' ) . '</li>';
         // Como nos conheceu
-        echo '<li><strong>' . esc_html__( 'Como nos conheceu:', 'dps-base' ) . '</strong> ' . esc_html( $meta['referral'] ? $meta['referral'] : '-' ) . '</li>';
+        echo '<li><strong>' . esc_html__( 'Como nos conheceu:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $meta['referral'] ? $meta['referral'] : '-' ) . '</li>';
         echo '</ul>';
         // Pets do cliente
-        echo '<h4>' . esc_html__( 'Pets', 'dps-base' ) . '</h4>';
+        echo '<h4>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</h4>';
         if ( $pets ) {
             // Tabela de pets com detalhes
             echo '<table class="dps-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Foto', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Nome', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Espécie', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Raça', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Porte', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Peso', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pelagem', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cor', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Nascimento', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Sexo', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cuidados', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Agressivo', 'dps-base' ) . '</th>';
+            echo '<th>' . esc_html__( 'Foto', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Porte', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Peso', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pelagem', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Cor', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Nascimento', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Cuidados', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Agressivo', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $pets as $pet ) {
                 // Foto do pet
@@ -2396,13 +2396,13 @@ EOT;
                 // Translate codes
                 switch ( $species ) {
                     case 'cao':
-                        $species_label = __( 'Cachorro', 'dps-base' );
+                        $species_label = __( 'Cachorro', 'desi-pet-shower' );
                         break;
                     case 'gato':
-                        $species_label = __( 'Gato', 'dps-base' );
+                        $species_label = __( 'Gato', 'desi-pet-shower' );
                         break;
                     case 'outro':
-                        $species_label = __( 'Outro', 'dps-base' );
+                        $species_label = __( 'Outro', 'desi-pet-shower' );
                         break;
                     default:
                         $species_label = $species;
@@ -2410,13 +2410,13 @@ EOT;
                 }
                 switch ( $size ) {
                     case 'pequeno':
-                        $size_label = __( 'Pequeno', 'dps-base' );
+                        $size_label = __( 'Pequeno', 'desi-pet-shower' );
                         break;
                     case 'medio':
-                        $size_label = __( 'Médio', 'dps-base' );
+                        $size_label = __( 'Médio', 'desi-pet-shower' );
                         break;
                     case 'grande':
-                        $size_label = __( 'Grande', 'dps-base' );
+                        $size_label = __( 'Grande', 'desi-pet-shower' );
                         break;
                     default:
                         $size_label = $size;
@@ -2424,17 +2424,17 @@ EOT;
                 }
                 switch ( $sex ) {
                     case 'macho':
-                        $sex_label = __( 'Macho', 'dps-base' );
+                        $sex_label = __( 'Macho', 'desi-pet-shower' );
                         break;
                     case 'femea':
-                        $sex_label = __( 'Fêmea', 'dps-base' );
+                        $sex_label = __( 'Fêmea', 'desi-pet-shower' );
                         break;
                     default:
                         $sex_label = $sex;
                         break;
                 }
                 $birth_formatted = $birth ? date_i18n( 'd-m-Y', strtotime( $birth ) ) : '';
-                $aggr_label = $aggr ? __( 'Sim', 'dps-base' ) : __( 'Não', 'dps-base' );
+                $aggr_label = $aggr ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' );
                 echo '<tr>';
                 // Exibe foto ou marcador vazio
                 echo '<td>' . ( $photo_html ? $photo_html : '-' ) . '</td>';
@@ -2453,20 +2453,20 @@ EOT;
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'dps-base' ) . '</p>';
+            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'desi-pet-shower' ) . '</p>';
         }
         // Link para gerar PDF/relatório do histórico
         $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
         $email_base   = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', 'send_email' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
-        echo '<p style="margin-top:15px;"><a href="' . esc_url( $history_link ) . '" class="button">' . esc_html__( 'Gerar histórico', 'dps-base' ) . '</a> ';
+        echo '<p style="margin-top:15px;"><a href="' . esc_url( $history_link ) . '" class="button">' . esc_html__( 'Gerar histórico', 'desi-pet-shower' ) . '</a> ';
         // Botão de envio com prompt para email personalizado
-        echo '<a href="#" class="button dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar histórico por email', 'dps-base' ) . '</a></p>';
+        echo '<a href="#" class="button dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar histórico por email', 'desi-pet-shower' ) . '</a></p>';
         // Script para solicitar email e redirecionar
         echo '<script>(function($){$(document).on("click", ".dps-send-history-email", function(e){e.preventDefault();var base=$(this).data("base");var email=prompt("Para qual email deseja enviar? Deixe em branco para usar o email cadastrado.");if(email===null){return;}email=email.trim();var url=base; if(email){url += "&to_email=" + encodeURIComponent(email);} window.location.href=url;});})(jQuery);</script>';
         // Histórico de agendamentos
-        echo '<h4>' . esc_html__( 'Histórico de Atendimentos', 'dps-base' ) . '</h4>';
+        echo '<h4>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h4>';
         if ( $appointments ) {
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Data', 'dps-base' ) . '</th><th>' . esc_html__( 'Horário', 'dps-base' ) . '</th><th>' . esc_html__( 'Pet', 'dps-base' ) . '</th><th>' . esc_html__( 'Pagamento', 'dps-base' ) . '</th><th>' . esc_html__( 'Observações', 'dps-base' ) . '</th></tr></thead><tbody>';
+            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Pagamento', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
             foreach ( $appointments as $appt ) {
                 $date  = get_post_meta( $appt->ID, 'appointment_date', true );
                 $time  = get_post_meta( $appt->ID, 'appointment_time', true );
@@ -2477,14 +2477,14 @@ EOT;
                 // Determina status: pago ou pendente
                 $status_label = '';
                 if ( $status_meta === 'finalizado_pago' || $status_meta === 'finalizado e pago' ) {
-                    $status_label = __( 'Pago', 'dps-base' );
+                    $status_label = __( 'Pago', 'desi-pet-shower' );
                 } elseif ( $status_meta === 'finalizado' ) {
-                    $status_label = __( 'Pendente', 'dps-base' );
+                    $status_label = __( 'Pendente', 'desi-pet-shower' );
                 } elseif ( $status_meta === 'cancelado' ) {
-                    $status_label = __( 'Cancelado', 'dps-base' );
+                    $status_label = __( 'Cancelado', 'desi-pet-shower' );
                 } else {
                     // default
-                    $status_label = __( 'Pendente', 'dps-base' );
+                    $status_label = __( 'Pendente', 'desi-pet-shower' );
                 }
                 $date_fmt = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
                 echo '<tr>';
@@ -2497,7 +2497,7 @@ EOT;
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum atendimento encontrado.', 'dps-base' ) . '</p>';
+            echo '<p>' . esc_html__( 'Nenhum atendimento encontrado.', 'desi-pet-shower' ) . '</p>';
         }
         echo '</div>';
         return ob_get_clean();

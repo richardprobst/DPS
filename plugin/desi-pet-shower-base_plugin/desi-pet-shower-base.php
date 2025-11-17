@@ -6,7 +6,7 @@
  * Version:           1.0.1
  * Author:            PRObst
  * Author URI:        https://probst.pro
- * Text Domain:       dps-base
+ * Text Domain:       desi-pet-shower
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -23,9 +23,20 @@ define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 
 // Funções auxiliares de template
 require_once DPS_BASE_DIR . 'includes/template-functions.php';
+// Logger e UI de logs
+require_once DPS_BASE_DIR . 'includes/class-dps-logger.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-logs-admin-page.php';
 
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
+
+/**
+ * Carrega o text domain do plugin base.
+ */
+function dps_load_textdomain() {
+    load_plugin_textdomain( 'desi-pet-shower', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'dps_load_textdomain' );
 
 /**
  * Classe principal do plugin
@@ -78,6 +89,9 @@ class DPS_Base_Plugin {
                 $reception_caps
             );
         }
+
+        add_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
+        DPS_Logger::create_table();
     }
 
     /**
@@ -86,17 +100,17 @@ class DPS_Base_Plugin {
     public function register_post_types() {
         // Clientes (tutores)
         $labels = [
-            'name'               => __( 'Clientes', 'dps-base' ),
-            'singular_name'      => __( 'Cliente', 'dps-base' ),
-            'add_new'            => __( 'Adicionar Novo', 'dps-base' ),
-            'add_new_item'       => __( 'Adicionar Novo Cliente', 'dps-base' ),
-            'edit_item'          => __( 'Editar Cliente', 'dps-base' ),
-            'new_item'           => __( 'Novo Cliente', 'dps-base' ),
-            'all_items'          => __( 'Todos os Clientes', 'dps-base' ),
-            'view_item'          => __( 'Ver Cliente', 'dps-base' ),
-            'search_items'       => __( 'Buscar Clientes', 'dps-base' ),
-            'not_found'          => __( 'Nenhum cliente encontrado', 'dps-base' ),
-            'menu_name'          => __( 'Clientes', 'dps-base' ),
+            'name'               => __( 'Clientes', 'desi-pet-shower' ),
+            'singular_name'      => __( 'Cliente', 'desi-pet-shower' ),
+            'add_new'            => __( 'Adicionar Novo', 'desi-pet-shower' ),
+            'add_new_item'       => __( 'Adicionar Novo Cliente', 'desi-pet-shower' ),
+            'edit_item'          => __( 'Editar Cliente', 'desi-pet-shower' ),
+            'new_item'           => __( 'Novo Cliente', 'desi-pet-shower' ),
+            'all_items'          => __( 'Todos os Clientes', 'desi-pet-shower' ),
+            'view_item'          => __( 'Ver Cliente', 'desi-pet-shower' ),
+            'search_items'       => __( 'Buscar Clientes', 'desi-pet-shower' ),
+            'not_found'          => __( 'Nenhum cliente encontrado', 'desi-pet-shower' ),
+            'menu_name'          => __( 'Clientes', 'desi-pet-shower' ),
         ];
         $args = [
             'labels'             => $labels,
@@ -111,17 +125,17 @@ class DPS_Base_Plugin {
 
         // Pets
         $labels = [
-            'name'               => __( 'Pets', 'dps-base' ),
-            'singular_name'      => __( 'Pet', 'dps-base' ),
-            'add_new'            => __( 'Adicionar Novo', 'dps-base' ),
-            'add_new_item'       => __( 'Adicionar Novo Pet', 'dps-base' ),
-            'edit_item'          => __( 'Editar Pet', 'dps-base' ),
-            'new_item'           => __( 'Novo Pet', 'dps-base' ),
-            'all_items'          => __( 'Todos os Pets', 'dps-base' ),
-            'view_item'          => __( 'Ver Pet', 'dps-base' ),
-            'search_items'       => __( 'Buscar Pets', 'dps-base' ),
-            'not_found'          => __( 'Nenhum pet encontrado', 'dps-base' ),
-            'menu_name'          => __( 'Pets', 'dps-base' ),
+            'name'               => __( 'Pets', 'desi-pet-shower' ),
+            'singular_name'      => __( 'Pet', 'desi-pet-shower' ),
+            'add_new'            => __( 'Adicionar Novo', 'desi-pet-shower' ),
+            'add_new_item'       => __( 'Adicionar Novo Pet', 'desi-pet-shower' ),
+            'edit_item'          => __( 'Editar Pet', 'desi-pet-shower' ),
+            'new_item'           => __( 'Novo Pet', 'desi-pet-shower' ),
+            'all_items'          => __( 'Todos os Pets', 'desi-pet-shower' ),
+            'view_item'          => __( 'Ver Pet', 'desi-pet-shower' ),
+            'search_items'       => __( 'Buscar Pets', 'desi-pet-shower' ),
+            'not_found'          => __( 'Nenhum pet encontrado', 'desi-pet-shower' ),
+            'menu_name'          => __( 'Pets', 'desi-pet-shower' ),
         ];
         $args = [
             'labels'             => $labels,
@@ -136,16 +150,16 @@ class DPS_Base_Plugin {
 
         // Agendamentos
         $labels = [
-            'name'               => __( 'Agendamentos', 'dps-base' ),
-            'singular_name'      => __( 'Agendamento', 'dps-base' ),
-            'add_new_item'       => __( 'Adicionar Novo Agendamento', 'dps-base' ),
-            'edit_item'          => __( 'Editar Agendamento', 'dps-base' ),
-            'new_item'           => __( 'Novo Agendamento', 'dps-base' ),
-            'all_items'          => __( 'Todos os Agendamentos', 'dps-base' ),
-            'view_item'          => __( 'Ver Agendamento', 'dps-base' ),
-            'search_items'       => __( 'Buscar Agendamentos', 'dps-base' ),
-            'not_found'          => __( 'Nenhum agendamento encontrado', 'dps-base' ),
-            'menu_name'          => __( 'Agendamentos', 'dps-base' ),
+            'name'               => __( 'Agendamentos', 'desi-pet-shower' ),
+            'singular_name'      => __( 'Agendamento', 'desi-pet-shower' ),
+            'add_new_item'       => __( 'Adicionar Novo Agendamento', 'desi-pet-shower' ),
+            'edit_item'          => __( 'Editar Agendamento', 'desi-pet-shower' ),
+            'new_item'           => __( 'Novo Agendamento', 'desi-pet-shower' ),
+            'all_items'          => __( 'Todos os Agendamentos', 'desi-pet-shower' ),
+            'view_item'          => __( 'Ver Agendamento', 'desi-pet-shower' ),
+            'search_items'       => __( 'Buscar Agendamentos', 'desi-pet-shower' ),
+            'not_found'          => __( 'Nenhum agendamento encontrado', 'desi-pet-shower' ),
+            'menu_name'          => __( 'Agendamentos', 'desi-pet-shower' ),
         ];
         $args = [
             'labels'             => $labels,
@@ -189,17 +203,17 @@ class DPS_Base_Plugin {
             'pets' => $pets_data,
         ] );
         wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
-            'summarySingle'     => __( 'Pet selecionado: %s', 'dps-base' ),
-            'summaryMultiple'   => __( '%d pets selecionados: %s', 'dps-base' ),
-            'selectPetWarning'  => __( 'Selecione pelo menos um pet para o agendamento.', 'dps-base' ),
-            'historySummary'    => __( '%1$s atendimentos filtrados. Total estimado: R$ %2$s.', 'dps-base' ),
-            'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'dps-base' ),
-            'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'dps-base' ),
-            'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'dps-base' ),
-            'pendingTitle'          => __( 'Pagamentos em aberto para %s.', 'dps-base' ),
-            'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'dps-base' ),
-            'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'dps-base' ),
-            'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'dps-base' ),
+            'summarySingle'     => __( 'Pet selecionado: %s', 'desi-pet-shower' ),
+            'summaryMultiple'   => __( '%d pets selecionados: %s', 'desi-pet-shower' ),
+            'selectPetWarning'  => __( 'Selecione pelo menos um pet para o agendamento.', 'desi-pet-shower' ),
+            'historySummary'    => __( '%1$s atendimentos filtrados. Total estimado: R$ %2$s.', 'desi-pet-shower' ),
+            'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'desi-pet-shower' ),
+            'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'desi-pet-shower' ),
+            'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'desi-pet-shower' ),
+            'pendingTitle'          => __( 'Pagamentos em aberto para %s.', 'desi-pet-shower' ),
+            'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'desi-pet-shower' ),
+            'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'desi-pet-shower' ),
+            'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'desi-pet-shower' ),
         ] );
     }
 
