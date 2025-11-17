@@ -59,6 +59,8 @@ class DPS_Payment_Addon {
         register_setting( 'dps_payment_options', 'dps_mercadopago_access_token' );
         // Também armazena a chave PIX utilizada nas mensagens de cobrança
         register_setting( 'dps_payment_options', 'dps_pix_key' );
+        // Segredo utilizado para validar notificações do Mercado Pago
+        register_setting( 'dps_payment_options', 'dps_mercadopago_webhook_secret' );
     }
 
     /**
@@ -100,9 +102,18 @@ class DPS_Payment_Addon {
             'dps-payment-settings',
             'dps_payment_section'
         );
+        // Campo para secret de webhook do Mercado Pago
+        add_settings_field(
+            'dps_mercadopago_webhook_secret',
+            __( 'Webhook secret', 'dps-payment-addon' ),
+            [ $this, 'render_webhook_secret_field' ],
+            'dps-payment-settings',
+            'dps_payment_section'
+        );
         // Registra as opções para que possam ser salvas
         register_setting( 'dps_payment_options', 'dps_mercadopago_access_token' );
         register_setting( 'dps_payment_options', 'dps_pix_key' );
+        register_setting( 'dps_payment_options', 'dps_mercadopago_webhook_secret' );
 
         // Não registramos o manipulador do webhook aqui. Ele é registrado
         // globalmente no construtor para garantir que as notificações sejam
@@ -129,6 +140,15 @@ class DPS_Payment_Addon {
         $pix = esc_attr( get_option( 'dps_pix_key', '' ) );
         echo '<input type="text" name="dps_pix_key" value="' . $pix . '" style="width: 400px;" />';
         echo '<p class="description">' . esc_html__( 'Informe sua chave PIX (telefone, CPF ou chave aleatória) para incluir nas mensagens de pagamento.', 'dps-payment-addon' ) . '</p>';
+    }
+
+    /**
+     * Renderiza o campo de secret do webhook para validar notificações.
+     */
+    public function render_webhook_secret_field() {
+        $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
+        echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
+        echo '<p class="description">' . esc_html__( 'Defina um secret para validar a origem das notificações do Mercado Pago. Configure o mesmo valor na URL ou header do webhook.', 'dps-payment-addon' ) . '</p>';
     }
 
     /**
@@ -325,8 +345,20 @@ class DPS_Payment_Addon {
         if ( is_admin() ) {
             return;
         }
+        $raw_body = file_get_contents( 'php://input' );
+        $this->log_notification( 'Notificação do Mercado Pago recebida', [ 'raw' => $raw_body, 'get' => $_GET ] );
+        if ( ! $this->validate_mp_webhook_request() ) {
+            $this->log_notification( 'Falha na validação do webhook do Mercado Pago', [] );
+            if ( ! headers_sent() ) {
+                status_header( 401 );
+            }
+            echo 'Unauthorized';
+            exit;
+        }
         $payment_id = '';
         $topic      = '';
+        $notification_id = '';
+        $payload         = [];
         // 1. IPN padrão: ?topic=payment&id=123
         if ( isset( $_GET['topic'] ) && isset( $_GET['id'] ) ) {
             $topic      = sanitize_text_field( wp_unslash( $_GET['topic'] ) );
@@ -339,22 +371,21 @@ class DPS_Payment_Addon {
         }
         // 3. Webhook via POST JSON
         if ( ! $payment_id && 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
-            $raw_body = file_get_contents( 'php://input' );
-            $json     = json_decode( $raw_body, true );
-            if ( is_array( $json ) ) {
+            $payload = json_decode( $raw_body, true );
+            if ( is_array( $payload ) ) {
                 // Alguns webhooks enviam { "topic": "payment", "id": "123" }
-                if ( isset( $json['topic'] ) && isset( $json['id'] ) ) {
-                    $topic      = sanitize_text_field( $json['topic'] );
-                    $payment_id = sanitize_text_field( (string) $json['id'] );
+                if ( isset( $payload['topic'] ) && isset( $payload['id'] ) ) {
+                    $topic      = sanitize_text_field( $payload['topic'] );
+                    $payment_id = sanitize_text_field( (string) $payload['id'] );
                 }
                 // Outros webhooks enviam { "data": { "id": "123" }, "type": "payment" }
-                if ( ! $payment_id && isset( $json['data'] ) && isset( $json['data']['id'] ) ) {
-                    $payment_id = sanitize_text_field( (string) $json['data']['id'] );
+                if ( ! $payment_id && isset( $payload['data'] ) && isset( $payload['data']['id'] ) ) {
+                    $payment_id = sanitize_text_field( (string) $payload['data']['id'] );
                     // MP pode usar "action" ou "type" para o tópico
-                    if ( isset( $json['type'] ) ) {
-                        $topic = sanitize_text_field( $json['type'] );
-                    } elseif ( isset( $json['action'] ) ) {
-                        $topic = sanitize_text_field( $json['action'] );
+                    if ( isset( $payload['type'] ) ) {
+                        $topic = sanitize_text_field( $payload['type'] );
+                    } elseif ( isset( $payload['action'] ) ) {
+                        $topic = sanitize_text_field( $payload['action'] );
                     }
                 }
             }
@@ -363,8 +394,20 @@ class DPS_Payment_Addon {
         if ( 'payment' !== strtolower( $topic ) || ! $payment_id ) {
             return;
         }
+        $notification_id = $this->extract_notification_identifier( $payload, $topic, $payment_id );
+        if ( $notification_id && $this->is_notification_processed( $notification_id ) ) {
+            $this->log_notification( 'Notificação ignorada por idempotência', [ 'notification_id' => $notification_id ] );
+            if ( ! headers_sent() ) {
+                status_header( 200 );
+            }
+            echo 'OK';
+            exit;
+        }
         // Processa e responde
-        $this->process_payment_notification( $payment_id );
+        $processed = $this->process_payment_notification( $payment_id, $notification_id );
+        if ( $processed && $notification_id ) {
+            $this->mark_notification_as_processed( $notification_id, $processed );
+        }
         // Responde imediatamente
         if ( ! headers_sent() ) {
             status_header( 200 );
@@ -379,48 +422,68 @@ class DPS_Payment_Addon {
      * atualiza o status. Também envia um email de notificação para o administrador.
      *
      * @param string $payment_id ID do pagamento retornado pelo webhook.
-     * @return void
+     * @param string $notification_id ID único da notificação para idempotência.
+     * @return array|false Dados do processamento ou falso em caso de falha.
      */
-    private function process_payment_notification( $payment_id ) {
+    private function process_payment_notification( $payment_id, $notification_id = '' ) {
         $token = trim( get_option( 'dps_mercadopago_access_token' ) );
         if ( ! $token ) {
-            return;
+            $this->log_notification( 'Token do Mercado Pago ausente; não é possível processar notificação.', [] );
+            return false;
         }
         // Consulta a API de pagamentos do Mercado Pago
         $url      = 'https://api.mercadopago.com/v1/payments/' . rawurlencode( $payment_id ) . '?access_token=' . rawurlencode( $token );
         $response = wp_remote_get( $url );
         if ( is_wp_error( $response ) ) {
-            return;
+            $this->log_notification( 'Erro ao consultar pagamento no Mercado Pago', [ 'error' => $response->get_error_message() ] );
+            return false;
         }
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
         if ( ! is_array( $data ) ) {
-            return;
+            $this->log_notification( 'Resposta inválida do Mercado Pago', [ 'body' => wp_remote_retrieve_body( $response ) ] );
+            return false;
         }
-        // Apenas pagamentos aprovados ou sucesso devem alterar o status
-        $status = $data['status'] ?? '';
-        if ( 'approved' !== $status && 'success' !== $status ) {
-            return;
-        }
+        $status = isset( $data['status'] ) ? strtolower( $data['status'] ) : '';
         // O campo external_reference deve estar presente para identificar o registro
         $external_reference = $data['external_reference'] ?? '';
         if ( ! $external_reference ) {
-            return;
+            $this->log_notification( 'Notificação sem external_reference; não é possível mapear agendamento/assinatura.', [ 'payment_id' => $payment_id ] );
+            return false;
         }
+        $result = [
+            'success'      => false,
+            'transacao_id' => 0,
+        ];
         // Determina o tipo (agendamento ou assinatura)
         if ( 0 === strpos( $external_reference, 'dps_appointment_' ) ) {
             $parts   = explode( '_', $external_reference );
             // Espera formato dps_appointment_{ID}
             $appt_id = isset( $parts[2] ) ? intval( $parts[2] ) : 0;
             if ( $appt_id ) {
-                $this->mark_appointment_paid( $appt_id, $data );
+                $trans_id          = $this->mark_appointment_paid( $appt_id, $data, $status );
+                $result['success'] = true;
+                $result['transacao_id'] = $trans_id;
             }
         } elseif ( 0 === strpos( $external_reference, 'dps_subscription_' ) ) {
             $parts  = explode( '_', $external_reference );
             $sub_id = isset( $parts[2] ) ? intval( $parts[2] ) : 0;
             if ( $sub_id ) {
-                $this->mark_subscription_paid( $sub_id, $data );
+                $this->mark_subscription_paid( $sub_id, $data, $status );
+                $result['success'] = true;
             }
         }
+        if ( $result['success'] ) {
+            $this->log_notification(
+                'Atualização de pagamento do Mercado Pago aplicada',
+                [
+                    'status'           => $status,
+                    'notification_id'  => $notification_id,
+                    'external_reference' => $external_reference,
+                ]
+            );
+            return $result;
+        }
+        return false;
     }
 
     /**
@@ -430,27 +493,24 @@ class DPS_Payment_Addon {
      * @param int   $appt_id      ID do agendamento.
      * @param array $payment_data Dados completos do pagamento retornado pela API.
      */
-    private function mark_appointment_paid( $appt_id, $payment_data ) {
-        $current_status = get_post_meta( $appt_id, 'appointment_status', true );
-        // Se já estiver pago ou não finalizado, não altera
-        // Alguns usuários podem utilizar diferentes rótulos para o status pago ("finalizado e pago", "finalizado_pago").
-        // Só interrompe se o status já indica que o agendamento está pago. Caso contrário, prossegue com a marcação.
-        if ( in_array( $current_status, [ 'finalizado e pago', 'finalizado_pago' ], true ) ) {
-            // Já está marcado como pago; ainda assim podemos garantir que a transação fique com status pago.
-        } else {
-            // Atualiza o status para a forma padronizada "finalizado_pago".
-            update_post_meta( $appt_id, 'appointment_status', 'finalizado_pago' );
+    private function mark_appointment_paid( $appt_id, $payment_data, $mp_status ) {
+        $transaction_status = $this->map_mp_status_to_transaction_status( $mp_status );
+        $appointment_status = $this->map_mp_status_to_appointment_status( $mp_status );
+        if ( $appointment_status ) {
+            update_post_meta( $appt_id, 'appointment_status', $appointment_status );
         }
         // Registra o status do pagamento no meta para referência futura
         update_post_meta( $appt_id, 'dps_payment_status', $payment_data['status'] ?? '' );
-        // Atualiza ou cria a transação associada a este agendamento na tabela customizada para status pago
+        // Atualiza ou cria a transação associada a este agendamento na tabela customizada
         global $wpdb;
         $table_name = $wpdb->prefix . 'dps_transacoes';
         // Verifica se já existe transação para este agendamento
         $existing_trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt_id ) );
+        $trans_id          = 0;
         if ( $existing_trans_id ) {
-            // Atualiza status para pago
-            $wpdb->update( $table_name, [ 'status' => 'pago' ], [ 'id' => $existing_trans_id ], [ '%s' ], [ '%d' ] );
+            // Atualiza status de acordo com o retorno do Mercado Pago
+            $wpdb->update( $table_name, [ 'status' => $transaction_status ], [ 'id' => $existing_trans_id ], [ '%s' ], [ '%d' ] );
+            $trans_id = (int) $existing_trans_id;
         } else {
             // Não há transação criada (talvez o status não tenha sido alterado manualmente). Cria agora com os detalhes do agendamento.
             $client_id  = get_post_meta( $appt_id, 'appointment_client_id', true );
@@ -484,12 +544,17 @@ class DPS_Payment_Addon {
                 'valor'          => $valor,
                 'categoria'      => __( 'Serviço', 'dps-agenda-addon' ),
                 'tipo'           => 'receita',
-                'status'         => 'pago',
+                'status'         => $transaction_status,
                 'descricao'      => $desc,
             ], [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
+            $trans_id = (int) $wpdb->insert_id;
         }
-        // Envia notificação por email ao administrador
-        $this->send_payment_notification_email( $appt_id, $payment_data );
+        if ( in_array( $mp_status, [ 'approved', 'success', 'authorized' ], true ) ) {
+            // Envia notificação por email ao administrador somente para status aprovados
+            $this->send_payment_notification_email( $appt_id, $payment_data );
+        }
+        $this->log_notification( 'Status do agendamento atualizado a partir do Mercado Pago', [ 'appointment_id' => $appt_id, 'status' => $mp_status, 'transaction_status' => $transaction_status ] );
+        return $trans_id;
     }
 
     /**
@@ -501,9 +566,11 @@ class DPS_Payment_Addon {
      * @param int   $sub_id       ID da assinatura.
      * @param array $payment_data Dados do pagamento.
      */
-    private function mark_subscription_paid( $sub_id, $payment_data ) {
+    private function mark_subscription_paid( $sub_id, $payment_data, $mp_status ) {
+        $transaction_status = $this->map_mp_status_to_transaction_status( $mp_status );
+        $appointment_status = $this->map_mp_status_to_appointment_status( $mp_status );
         // Atualiza meta de status de pagamento da assinatura
-        update_post_meta( $sub_id, 'subscription_payment_status', 'pago' );
+        update_post_meta( $sub_id, 'subscription_payment_status', $transaction_status );
         // Recupera agendamentos da assinatura e atualiza status
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -515,18 +582,16 @@ class DPS_Payment_Addon {
         ] );
         if ( $appointments ) {
             foreach ( $appointments as $appt ) {
-                $st = get_post_meta( $appt->ID, 'appointment_status', true );
-                // Atualiza status para a forma padronizada se ainda não estiver pago
-                if ( ! in_array( $st, [ 'finalizado e pago', 'finalizado_pago' ], true ) ) {
-                    update_post_meta( $appt->ID, 'appointment_status', 'finalizado_pago' );
+                if ( $appointment_status ) {
+                    update_post_meta( $appt->ID, 'appointment_status', $appointment_status );
                 }
-                // Atualiza ou cria a transação correspondente para pago
+                // Atualiza ou cria a transação correspondente para refletir o status recebido
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'dps_transacoes';
-                $trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt->ID ) );
+                $trans_id   = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt->ID ) );
                 if ( $trans_id ) {
-                    // Atualiza status para pago e define data como data de pagamento
-                    $wpdb->update( $table_name, [ 'status' => 'pago', 'data' => current_time( 'Y-m-d' ) ], [ 'id' => $trans_id ], [ '%s','%s' ], [ '%d' ] );
+                    // Atualiza status e data de atualização
+                    $wpdb->update( $table_name, [ 'status' => $transaction_status, 'data' => current_time( 'Y-m-d' ) ], [ 'id' => $trans_id ], [ '%s','%s' ], [ '%d' ] );
                 } else {
                     // Cria transação se não existir (para garantir que receita apareça nas estatísticas). Usa dados do agendamento.
                     $client_id  = get_post_meta( $appt->ID, 'appointment_client_id', true );
@@ -556,18 +621,20 @@ class DPS_Payment_Addon {
                         'valor'          => $valor,
                         'categoria'      => __( 'Serviço', 'dps-agenda-addon' ),
                         'tipo'           => 'receita',
-                        'status'         => 'pago',
+                        'status'         => $transaction_status,
                         'descricao'      => $desc,
                     ], [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
                 }
+                // Atualiza meta de status de pagamento
+                update_post_meta( $appt->ID, 'dps_payment_status', $payment_data['status'] ?? '' );
             }
         }
-        // Atualiza ou cria a transação principal da assinatura (plano) para pago
+        // Atualiza ou cria a transação principal da assinatura (plano) para refletir o status
         global $wpdb;
         $table_name = $wpdb->prefix . 'dps_transacoes';
         $plan_trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE plano_id = %d", $sub_id ) );
         if ( $plan_trans_id ) {
-            $wpdb->update( $table_name, [ 'status' => 'pago', 'data' => current_time( 'Y-m-d' ) ], [ 'id' => $plan_trans_id ], [ '%s','%s' ], [ '%d' ] );
+            $wpdb->update( $table_name, [ 'status' => $transaction_status, 'data' => current_time( 'Y-m-d' ) ], [ 'id' => $plan_trans_id ], [ '%s','%s' ], [ '%d' ] );
         } else {
             // Caso não exista transação do plano (pode ocorrer em integrações antigas), cria uma nova.
             $client_id = get_post_meta( $sub_id, 'subscription_client_id', true );
@@ -580,12 +647,15 @@ class DPS_Payment_Addon {
                 'valor'          => $price ? (float) $price : 0,
                 'categoria'      => __( 'Assinatura', 'dps-agenda-addon' ),
                 'tipo'           => 'receita',
-                'status'         => 'pago',
+                'status'         => $transaction_status,
                 'descricao'      => __( 'Pagamento de assinatura', 'dps-agenda-addon' ),
             ], [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
         }
-        // Envia email de notificação
-        $this->send_subscription_payment_notification_email( $sub_id, $payment_data );
+        if ( in_array( $mp_status, [ 'approved', 'success', 'authorized' ], true ) ) {
+            // Envia email de notificação
+            $this->send_subscription_payment_notification_email( $sub_id, $payment_data );
+        }
+        $this->log_notification( 'Status da assinatura atualizado a partir do Mercado Pago', [ 'subscription_id' => $sub_id, 'status' => $mp_status, 'transaction_status' => $transaction_status ] );
     }
 
     /**
@@ -656,6 +726,230 @@ class DPS_Payment_Addon {
         $message    .= sprintf( "Status do pagamento: %s\n", $payment_data['status'] ?? '' );
         $message    .= sprintf( "ID do pagamento no Mercado Pago: %s\n", $payment_data['id'] ?? '' );
         wp_mail( $notify_email, $subject, $message );
+    }
+
+    /**
+     * Valida a requisição do webhook utilizando um secret configurado.
+     *
+     * @return bool
+     */
+    private function validate_mp_webhook_request() {
+        $expected = $this->get_webhook_secret();
+        if ( ! $expected ) {
+            return false;
+        }
+        $provided = '';
+        if ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) && stripos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ), 'bearer ' ) === 0 ) {
+            $provided = trim( substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ), 7 ) );
+        }
+        if ( isset( $_SERVER['HTTP_X_WEBHOOK_SECRET'] ) ) {
+            $provided = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WEBHOOK_SECRET'] ) );
+        }
+        if ( isset( $_GET['token'] ) ) {
+            $provided = sanitize_text_field( wp_unslash( $_GET['token'] ) );
+        }
+        if ( isset( $_GET['secret'] ) ) {
+            $provided = sanitize_text_field( wp_unslash( $_GET['secret'] ) );
+        }
+        return $provided && hash_equals( $expected, $provided );
+    }
+
+    /**
+     * Recupera o secret configurado para validação do webhook.
+     *
+     * @return string
+     */
+    private function get_webhook_secret() {
+        $secret = trim( (string) get_option( 'dps_mercadopago_webhook_secret', '' ) );
+        if ( $secret ) {
+            return $secret;
+        }
+        $token = trim( (string) get_option( 'dps_mercadopago_access_token', '' ) );
+        return $token;
+    }
+
+    /**
+     * Extrai um identificador único da notificação para garantir idempotência.
+     *
+     * @param array  $payload      Corpo JSON da notificação (se houver).
+     * @param string $topic        Tópico recebido.
+     * @param string $payment_id   ID do pagamento.
+     * @return string
+     */
+    private function extract_notification_identifier( $payload, $topic, $payment_id ) {
+        if ( isset( $_GET['notification_id'] ) ) {
+            return sanitize_text_field( wp_unslash( $_GET['notification_id'] ) );
+        }
+        if ( isset( $_SERVER['HTTP_X_IDEMPOTENCY_KEY'] ) ) {
+            return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_IDEMPOTENCY_KEY'] ) );
+        }
+        if ( isset( $_SERVER['HTTP_X_NOTIFICATION_ID'] ) ) {
+            return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_NOTIFICATION_ID'] ) );
+        }
+        if ( is_array( $payload ) ) {
+            if ( isset( $payload['notification_id'] ) ) {
+                return sanitize_text_field( (string) $payload['notification_id'] );
+            }
+            if ( isset( $payload['event_id'] ) ) {
+                return sanitize_text_field( (string) $payload['event_id'] );
+            }
+            if ( isset( $payload['id'] ) && ! empty( $payload['id'] ) && is_scalar( $payload['id'] ) ) {
+                return sanitize_text_field( (string) $payload['id'] );
+            }
+        }
+        if ( $payment_id ) {
+            return sanitize_text_field( $topic . ':' . $payment_id );
+        }
+        return '';
+    }
+
+    /**
+     * Converte o status do Mercado Pago para o status da transação.
+     *
+     * @param string $mp_status Status enviado pelo Mercado Pago.
+     * @return string
+     */
+    private function map_mp_status_to_transaction_status( $mp_status ) {
+        switch ( strtolower( (string) $mp_status ) ) {
+            case 'approved':
+            case 'success':
+            case 'authorized':
+                return 'pago';
+            case 'pending':
+            case 'in_process':
+                return 'pendente';
+            case 'cancelled':
+            case 'rejected':
+                return 'cancelado';
+            case 'refunded':
+            case 'charged_back':
+                return 'reembolsado';
+            default:
+                return 'pendente';
+        }
+    }
+
+    /**
+     * Converte o status do Mercado Pago para o status do agendamento.
+     *
+     * @param string $mp_status Status enviado pelo Mercado Pago.
+     * @return string
+     */
+    private function map_mp_status_to_appointment_status( $mp_status ) {
+        switch ( strtolower( (string) $mp_status ) ) {
+            case 'approved':
+            case 'success':
+            case 'authorized':
+                return 'finalizado_pago';
+            case 'pending':
+            case 'in_process':
+                return 'pagamento_pendente';
+            case 'cancelled':
+            case 'rejected':
+                return 'cancelado';
+            case 'refunded':
+            case 'charged_back':
+                return 'reembolsado';
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Retorna o nome da tabela de meta de transações.
+     *
+     * @return string
+     */
+    private function get_transactions_meta_table() {
+        global $wpdb;
+        return $wpdb->prefix . 'dps_transacoes_meta';
+    }
+
+    /**
+     * Garante a criação da tabela de meta de transações para registrar notificações.
+     */
+    private function ensure_transactions_meta_table() {
+        global $wpdb;
+        $table = $this->get_transactions_meta_table();
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( $table_exists === $table ) {
+            return;
+        }
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        $charset_collate = $wpdb->get_charset_collate();
+        $sql             = "CREATE TABLE {$table} (\n" .
+            "meta_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+            "transacao_id bigint(20) unsigned NOT NULL DEFAULT 0,\n" .
+            "meta_key varchar(191) NOT NULL,\n" .
+            "meta_value longtext NULL,\n" .
+            "PRIMARY KEY  (meta_id),\n" .
+            "KEY transacao_id (transacao_id),\n" .
+            "KEY meta_key (meta_key)\n" .
+            ") {$charset_collate};";
+        maybe_create_table( $table, $sql );
+    }
+
+    /**
+     * Verifica se uma notificação já foi processada.
+     *
+     * @param string $notification_id Identificador único da notificação.
+     * @return bool
+     */
+    private function is_notification_processed( $notification_id ) {
+        if ( ! $notification_id ) {
+            return false;
+        }
+        $this->ensure_transactions_meta_table();
+        global $wpdb;
+        $table   = $this->get_transactions_meta_table();
+        $meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM {$table} WHERE meta_key = %s AND meta_value = %s LIMIT 1", 'mp_notification_id', $notification_id ) );
+        return (bool) $meta_id;
+    }
+
+    /**
+     * Registra uma notificação como processada para garantir idempotência.
+     *
+     * @param string $notification_id Identificador único.
+     * @param array  $processed       Dados retornados do processamento.
+     */
+    private function mark_notification_as_processed( $notification_id, $processed ) {
+        if ( ! $notification_id ) {
+            return;
+        }
+        $this->ensure_transactions_meta_table();
+        global $wpdb;
+        $table    = $this->get_transactions_meta_table();
+        $existing = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM {$table} WHERE meta_key = %s AND meta_value = %s LIMIT 1", 'mp_notification_id', $notification_id ) );
+        if ( $existing ) {
+            return;
+        }
+        $transacao_id = 0;
+        if ( is_array( $processed ) && isset( $processed['transacao_id'] ) ) {
+            $transacao_id = (int) $processed['transacao_id'];
+        }
+        $wpdb->insert(
+            $table,
+            [
+                'transacao_id' => $transacao_id,
+                'meta_key'     => 'mp_notification_id',
+                'meta_value'   => $notification_id,
+            ],
+            [ '%d', '%s', '%s' ]
+        );
+    }
+
+    /**
+     * Registra logs simples para acompanhamento do fluxo de notificações.
+     *
+     * @param string $message Mensagem principal.
+     * @param array  $context Dados adicionais para depuração.
+     */
+    private function log_notification( $message, $context ) {
+        $prefix = '[DPS Pagamentos] ';
+        if ( ! empty( $context ) ) {
+            $message .= ' | ' . wp_json_encode( $context );
+        }
+        error_log( $prefix . $message );
     }
 }
 
