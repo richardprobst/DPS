@@ -1,34 +1,66 @@
-# Instruções para agentes do monorepo DPS
+# Diretrizes para agentes do Desi Pet Shower (DPS)
 
 ## Escopo
-Estas instruções se aplicam a todo o repositório. Diretórios que exigirem regras adicionais devem conter seus próprios `AGENTS.md`, que terão precedência dentro do respectivo escopo. Já existem orientações específicas em `plugin/AGENTS.md` para o plugin base e em `add-ons/AGENTS.md` para os complementos.
+Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `plugin/` e os complementos em `add-ons/`. Caso exista um `AGENTS.md` mais específico em subdiretórios, ele prevalece para arquivos dentro de seu escopo.
 
-## Convenções gerais
-- Utilize mensagens de commit descritivas no imperativo, em português.
-- Prefira manter a documentação em português, alinhada ao restante do repositório.
-- Antes de editar arquivos existentes, verifique se há um `AGENTS.md` mais específico no diretório-alvo.
+## Estrutura do repositório
+- **plugin/**: plugin WordPress principal (`desi-pet-shower-base_plugin`) com ponto de entrada, includes e assets compartilhados.
+- **add-ons/**: add-ons opcionais, cada um com arquivo principal próprio e subpastas por funcionalidade.
+- **ANALYSIS.md**: visão arquitetural, fluxos de integração e contratos entre núcleo e extensões.
+- **CHANGELOG.md**: histórico de versões e lançamentos. Deve ser atualizado em cada release.
+- Pastas adicionais podem surgir para ferramentas de build, exemplos ou documentação; mantenha-as descritas nesta seção quando adicionadas.
 
-## Fluxo de trabalho recomendado
-1. Crie uma branch temática antes de começar a trabalhar.
-2. Execute `git status` com frequência para revisar o que foi modificado.
-3. Organize os commits para que contem histórias pequenas e coerentes.
-4. Abra a _pull request_ descrevendo claramente o contexto, a mudança e os testes executados.
+## Versionamento e git-flow
+- Utilize SemVer (MAJOR.MINOR.PATCH) para o plugin base e para cada add-on.
+- Branches:
+  - `main`: sempre estável; somente merges revisados.
+  - `develop`: integra funcionalidades antes de promover para release.
+  - `feature/<slug-descritivo>`: novas funcionalidades ou ajustes relevantes.
+  - `hotfix/<slug-descritivo>`: correções urgentes sobre `main`.
+- Releases:
+  - Crie tags anotadas (`git tag -a vX.Y.Z`) apenas após atualizar `CHANGELOG.md` e conferir versões em arquivos do plugin.
+  - Documente migrações ou passos manuais em `CHANGELOG.md` e, se necessário, em `ANALYSIS.md`.
+- Commits devem ser curtos, em português, no imperativo, descrevendo a ação (ex.: "Atualizar checklist de segurança").
 
-## Testes
-- Quando alterar código Python, execute os testes com `pytest` a partir do diretório do módulo impactado.
-- Para módulos Odoo, confirme que o servidor inicia sem erros (`odoo-bin -d <banco_de_teste>`).
-- Documente explicitamente os testes executados (ou justifique se não foi necessário rodá-los).
+## Regras de documentação
+- Mantenha a documentação em português, clara e orientada a passos.
+- Sempre que alterar fluxos de integração, atualize `ANALYSIS.md` e descreva impactos em add-ons.
+- `CHANGELOG.md` deve refletir o que chega ao usuário ou integrador; siga a estrutura padrão de categorias.
+- Inclua exemplos de uso ou contratos de hooks ao criar novas extensões.
+- Use tabelas ou listas para requisitos de ambiente, permissões e dependências externas.
 
-## Estilo de código
-- Siga o padrão `black` para Python (linha máxima de 88 caracteres).
-- Organize importações com `isort`.
-- Evite blocos `try/except` envolvendo imports.
+## Convenções de código
+- WordPress: indentação de 4 espaços; funções globais em `snake_case`; métodos e propriedades de classe em `camelCase`.
+- Escape e sanitização são obrigatórios (`esc_html__`, `esc_attr`, `wp_nonce_*`, `sanitize_text_field`, etc.).
+- Não envolva imports em blocos `try/catch` e mantenha require/require_once organizados.
+- Scripts e estilos: prefira `wp_register_*` + `wp_enqueue_*` em pontos específicos; evite carregar assets no site inteiro.
+- Nomes de hooks, options e handles prefixados com `dps_`.
 
-## Comunicação adicional
-- Se encontrar instruções conflitantes entre diretórios, adote as mais específicas e sinalize o conflito na PR.
-- Registre quaisquer requisitos extras (variáveis de ambiente, passos manuais) diretamente nos `AGENTS.md` relevantes.
+## Diretrizes para add-ons
+- Cada add-on deve manter um arquivo principal `desi-pet-shower-<feature>-addon.php` e, se preciso, subpastas `includes/` ou específicas por domínio.
+- Use os hooks de extensão documentados no núcleo (`dps_base_nav_tabs_*`, `dps_base_sections_*`, `dps_settings_*`) sem alterar assinaturas existentes.
+- Reutilize a tabela `dps_transacoes` e contratos de metadados para fluxos financeiros ou de assinatura.
+- Documente dependências entre add-ons (ex.: Financeiro + Assinaturas) e valide o comportamento conjunto em ambiente de testes.
+- Registre assets apenas nas páginas relevantes e considere colisões com temas/plugins instalados.
 
-## Documentação específica do plugin WordPress
-- A arquitetura do plugin base e dos add-ons WordPress está descrita em `ANALYSIS.md`. Consulte o documento antes de alterar fluxos para manter a compatibilidade entre módulos.
-- Os add-ons estendem o plugin base por meio dos *hooks* `dps_base_*` (abas/seções) e `dps_settings_*`. Preserve esses pontos de integração ao adicionar novos recursos.
-- As integrações financeiras reutilizam a tabela `dps_transacoes`; mantenha o esquema e sincronizações consistentes ao introduzir novas interações com agendamentos, assinaturas ou cobranças.
+## Integração núcleo ⇄ extensões
+- Novos pontos de extensão no núcleo devem vir acompanhados de documentação mínima (assinatura, propósito, exemplos) no `ANALYSIS.md`.
+- Mantenha compatibilidade retroativa: introduza novos hooks sem quebrar os existentes; marque depreciações no `CHANGELOG.md` com versão alvo.
+- Para fluxos compartilhados (agendamento, pagamentos, notificações), centralize lógica em classes utilitárias no núcleo e reutilize-as nos add-ons.
+- Ao alterar esquemas de dados compartilhados, inclua migrações reversíveis e valide a sincronização entre plugins.
+
+## Políticas de segurança obrigatórias
+- Nonces obrigatórios em formulários e ações autenticadas; rejeite requisições sem verificação.
+- Escape de saída em HTML, atributos e JS inline; sanitize toda entrada do usuário, inclusive parâmetros de webhooks.
+- Princípio do menor privilégio para capabilities (`manage_options`, `edit_posts`, etc.).
+- Armazene segredos apenas via constantes ou variáveis de ambiente; não commitar chaves ou tokens.
+- Sempre registrar correções de segurança na categoria "Security (Segurança)" do changelog.
+
+## Boas práticas de revisão e testes
+- Execute `php -l <arquivo>` nos arquivos alterados e valide fluxos críticos em ambiente WordPress local.
+- Para mudanças de dados ou cron jobs, inclua passos de rollback no PR.
+- Revise diffs garantindo consistência com `ANALYSIS.md` e `CHANGELOG.md` antes do merge.
+
+## Contato e conflitos de instruções
+- Em caso de conflito entre este documento e um `AGENTS.md` mais específico, siga o de escopo menor e registre a decisão na PR.
+- Adicione novos requisitos ou políticas diretamente neste arquivo sempre que expandir o repositório ou os processos.
