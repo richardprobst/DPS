@@ -15,6 +15,7 @@
       var select   = $(this);
       var apptId   = select.data('appt-id');
       var status   = select.val();
+      var apptVersion = parseInt(select.data('appt-version'), 10) || 0;
       var previous = select.data('current-status');
       var feedback = select.siblings('.dps-status-feedback');
 
@@ -32,6 +33,7 @@
         action: 'dps_update_status',
         id: apptId,
         status: status,
+        version: apptVersion,
         nonce: DPS_AG_Addon.nonce_status
       });
 
@@ -39,6 +41,9 @@
         if ( resp && resp.success ) {
           updateRowStatus(apptId, status);
           select.data('current-status', status);
+          if ( resp.data && resp.data.version ) {
+            select.data('appt-version', resp.data.version);
+          }
           var successMessage = getMessage('updated', 'Status atualizado!');
           feedback.text(successMessage);
           setTimeout(function(){
@@ -55,6 +60,12 @@
 
       function handleError(response){
         var fallback = 'Erro ao atualizar status.';
+        if ( response && response.data && response.data.error_code === 'version_conflict' ) {
+          var conflictMessage = getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.');
+          feedback.addClass('dps-status-feedback--error').text(conflictMessage);
+          select.val(previous);
+          return;
+        }
         var message  = (response && response.data && response.data.message) ? response.data.message : getMessage('error', fallback);
         feedback.addClass('dps-status-feedback--error').text(message);
         if ( previous ) {

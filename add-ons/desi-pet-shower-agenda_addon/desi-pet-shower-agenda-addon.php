@@ -30,6 +30,9 @@ class DPS_Agenda_Addon {
         add_action( 'wp_ajax_dps_update_status', [ $this, 'update_status_ajax' ] );
         add_action( 'wp_ajax_nopriv_dps_update_status', [ $this, 'update_status_ajax' ] );
 
+        // Versionamento de agendamentos para evitar conflitos de escrita
+        add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
+
         // AJAX para obter detalhes de serviços de um agendamento
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
         add_action( 'wp_ajax_nopriv_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
@@ -96,6 +99,29 @@ class DPS_Agenda_Addon {
     }
 
     /**
+     * Garante que o meta de versão do agendamento seja inicializado.
+     *
+     * @param int     $post_id ID do post.
+     * @param WP_Post $post    Objeto do post sendo salvo.
+     * @param bool    $update  Indica se é uma atualização.
+     */
+    public function ensure_appointment_version_meta( $post_id, $post, $update ) {
+        if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+            return;
+        }
+
+        if ( ! $post || 'dps_agendamento' !== $post->post_type ) {
+            return;
+        }
+
+        $current_version = intval( get_post_meta( $post_id, '_dps_appointment_version', true ) );
+
+        if ( $current_version < 1 ) {
+            update_post_meta( $post_id, '_dps_appointment_version', 1 );
+        }
+    }
+
+    /**
      * Enfileira os scripts e estilos necessários apenas quando a página de agenda for carregada.
      */
     public function enqueue_assets() {
@@ -105,7 +131,7 @@ class DPS_Agenda_Addon {
         if ( $agenda_page_id && is_page( $agenda_page_id ) ) {
             // Somente o script de atualização de status será necessário; não carregamos o calendário
             // Carrega o script da agenda. Alteramos a versão para forçar atualização do cache quando o arquivo for modificado.
-            wp_enqueue_script( 'dps-agenda-addon', plugin_dir_url( __FILE__ ) . 'agenda-addon.js', [ 'jquery' ], '1.1.0', true );
+            wp_enqueue_script( 'dps-agenda-addon', plugin_dir_url( __FILE__ ) . 'agenda-addon.js', [ 'jquery' ], '1.2.0', true );
             wp_localize_script( 'dps-agenda-addon', 'DPS_AG_Addon', [
                 'ajax'          => admin_url( 'admin-ajax.php' ),
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
@@ -120,6 +146,7 @@ class DPS_Agenda_Addon {
                     'updating' => __( 'Atualizando status...', 'dps-agenda-addon' ),
                     'updated'  => __( 'Status atualizado!', 'dps-agenda-addon' ),
                     'error'    => __( 'Não foi possível atualizar o status.', 'dps-agenda-addon' ),
+                    'versionConflict' => __( 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.', 'dps-agenda-addon' ),
                 ],
                 'reloadDelay'  => 700,
             ] );
@@ -810,6 +837,11 @@ class DPS_Agenda_Addon {
                     $pet_post    = $pet_id ? get_post( $pet_id ) : null;
                     $status = get_post_meta( $appt->ID, 'appointment_status', true );
                     if ( ! $status ) { $status = 'pendente'; }
+                    $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
+                    if ( $appt_version < 1 ) {
+                        $appt_version = 1;
+                        update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
+                    }
                     // Cada linha recebe classes de status e um data attribute para permitir manipulação via JS.
                     echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="status-' . esc_attr( $status ) . '">';
                     // Mostra a data no formato dia-mês-ano
@@ -866,7 +898,7 @@ class DPS_Agenda_Addon {
                         }
                     }
                     if ( $can_edit ) {
-                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '">';
+                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '">';
                         foreach ( $statuses as $value => $label ) {
                             echo '<option value="' . esc_attr( $value ) . '"' . selected( $status, $value, false ) . '>' . esc_html( $label ) . '</option>';
                         }
@@ -1067,17 +1099,35 @@ class DPS_Agenda_Addon {
         }
         $id     = intval( $_POST['id'] ?? 0 );
         $status = sanitize_text_field( $_POST['status'] ?? '' );
+        $version = isset( $_POST['version'] ) ? intval( $_POST['version'] ) : 0;
         // Aceita variações do texto "finalizado e pago" além do slug sem espaços
         if ( $status === 'finalizado e pago' ) {
             $status = 'finalizado_pago';
         }
         $valid_statuses = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
-        if ( ! $id || ! in_array( $status, $valid_statuses, true ) ) {
+        if ( ! $id || ! in_array( $status, $valid_statuses, true ) || $version < 1 ) {
             wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        $current_version = intval( get_post_meta( $id, '_dps_appointment_version', true ) );
+
+        if ( $current_version < 1 ) {
+            $current_version = 1;
+            update_post_meta( $id, '_dps_appointment_version', $current_version );
+        }
+
+        if ( $version !== $current_version ) {
+            wp_send_json_error(
+                [
+                    'message'    => __( 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.', 'dps-agenda-addon' ),
+                    'error_code' => 'version_conflict',
+                ]
+            );
         }
         // Atualiza meta de status. Remove entradas anteriores para garantir que não haja valores duplicados.
         delete_post_meta( $id, 'appointment_status' );
         add_post_meta( $id, 'appointment_status', $status, true );
+        $new_version = $current_version + 1;
+        update_post_meta( $id, '_dps_appointment_version', $new_version );
         // Criar ou atualizar transação se necessário (finalizado ou pago)
         if ( $status === 'finalizado' || $status === 'finalizado_pago' ) {
             // Dados do agendamento
@@ -1153,7 +1203,13 @@ class DPS_Agenda_Addon {
                 }
             }
         }
-        wp_send_json_success( [ 'message' => __( 'Status atualizado.', 'dps-agenda-addon' ), 'status' => $status ] );
+        wp_send_json_success(
+            [
+                'message' => __( 'Status atualizado.', 'dps-agenda-addon' ),
+                'status'  => $status,
+                'version' => $new_version,
+            ]
+        );
     }
 
     /**
