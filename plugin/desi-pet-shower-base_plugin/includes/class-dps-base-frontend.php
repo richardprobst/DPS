@@ -15,7 +15,10 @@ class DPS_Base_Frontend {
      * @return bool
      */
     private static function can_manage() {
-        return current_user_can( 'manage_options' );
+        return current_user_can( 'manage_options' )
+            || current_user_can( 'dps_manage_clients' )
+            || current_user_can( 'dps_manage_pets' )
+            || current_user_can( 'dps_manage_appointments' );
     }
 
     /**
@@ -382,21 +385,30 @@ class DPS_Base_Frontend {
         if ( ! isset( $_POST['dps_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce'] ) ), 'dps_action' ) ) {
             return;
         }
-        if ( ! self::can_manage() ) {
-            return;
-        }
         $action = isset( $_POST['dps_action'] ) ? sanitize_key( wp_unslash( $_POST['dps_action'] ) ) : '';
         switch ( $action ) {
             case 'save_client':
+                if ( ! current_user_can( 'dps_manage_clients' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 self::save_client();
                 break;
             case 'save_pet':
+                if ( ! current_user_can( 'dps_manage_pets' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 self::save_pet();
                 break;
             case 'save_appointment':
+                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 self::save_appointment();
                 break;
             case 'update_appointment_status':
+                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 self::update_appointment_status();
                 break;
             default:
@@ -420,12 +432,21 @@ class DPS_Base_Frontend {
         // Verifica tipo e exclui
         switch ( $type ) {
             case 'client':
+                if ( ! current_user_can( 'dps_manage_clients' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 wp_delete_post( $id, true );
                 break;
             case 'pet':
+                if ( ! current_user_can( 'dps_manage_pets' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 wp_delete_post( $id, true );
                 break;
             case 'appointment':
+                if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+                    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+                }
                 // Exclui o agendamento
                 wp_delete_post( $id, true );
                 // Remove transações financeiras associadas a este agendamento, se existirem
@@ -1630,6 +1651,9 @@ EOT;
      * Salva cliente (inserção ou atualização)
      */
     private static function save_client() {
+        if ( ! current_user_can( 'dps_manage_clients' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+        }
         $name      = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
         $cpf       = isset( $_POST['client_cpf'] ) ? sanitize_text_field( wp_unslash( $_POST['client_cpf'] ) ) : '';
         $phone     = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
@@ -1685,6 +1709,9 @@ EOT;
      * Salva pet (inserção ou atualização)
      */
     private static function save_pet() {
+        if ( ! current_user_can( 'dps_manage_pets' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+        }
         $owner_id  = isset( $_POST['owner_id'] ) ? intval( wp_unslash( $_POST['owner_id'] ) ) : 0;
         $name      = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
         $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
@@ -1772,8 +1799,8 @@ EOT;
      * Salva agendamento (inserção ou atualização)
      */
     private static function update_appointment_status() {
-        if ( ! self::can_manage() ) {
-            return;
+        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
         $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
         $status  = isset( $_POST['appointment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_status'] ) ) : '';
@@ -1794,6 +1821,9 @@ EOT;
     }
 
     private static function save_appointment() {
+        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+        }
         $client_id = isset( $_POST['appointment_client_id'] ) ? intval( wp_unslash( $_POST['appointment_client_id'] ) ) : 0;
         // Recebe lista de pets (multi‑seleção). Pode ser array ou valor único.
         $raw_pets = isset( $_POST['appointment_pet_ids'] ) ? (array) wp_unslash( $_POST['appointment_pet_ids'] ) : [];
