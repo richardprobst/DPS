@@ -29,6 +29,14 @@ class DPS_Subscription_Addon {
         // transação financeira for criada ou atualizada.
         add_action( 'init', [ $this, 'maybe_sync_finance_on_save' ], 20 );
 
+        // Exemplo de integração com gateway de pagamento: qualquer add-on de
+        // pagamentos pode disparar esta ação para atualizar o status do ciclo
+        // da assinatura. O terceiro parâmetro aceita valores como "paid" ou
+        // "failed". O segundo parâmetro deve conter a string do ciclo no
+        // formato Y-m (ex.: 2025-11). Quando omitido, o ciclo atual é
+        // inferido pela data de início da assinatura.
+        add_action( 'dps_subscription_payment_status', [ $this, 'handle_subscription_payment_status' ], 10, 3 );
+
         // Integrações com Financeiro: quando uma assinatura for salva ou atualizada,
         // cria ou atualiza a transação correspondente na tabela dps_transacoes. Se
         // o status de pagamento mudar ou a assinatura for renovada, o registro
@@ -127,6 +135,66 @@ class DPS_Subscription_Addon {
         );
         // Permite customização via filtro
         return apply_filters( 'dps_subscription_whatsapp_message', $msg, $sub, $payment_link );
+    }
+
+    /**
+     * Retorna a chave de ciclo (Y-m) com base em uma data informada ou na data atual.
+     *
+     * @param string $date_start Data inicial do ciclo (Y-m-d).
+     * @return string Chave do ciclo no formato Y-m.
+     */
+    private function get_cycle_key( $date_start = '' ) {
+        try {
+            $timezone = function_exists( 'wp_timezone' ) ? wp_timezone() : new DateTimeZone( 'UTC' );
+            $dt       = $date_start ? new DateTime( $date_start, $timezone ) : new DateTime( 'now', $timezone );
+        } catch ( Exception $e ) {
+            return '';
+        }
+        return $dt->format( 'Y-m' );
+    }
+
+    /**
+     * Verifica se o ciclo já foi processado para a assinatura.
+     *
+     * @param int    $sub_id    ID da assinatura.
+     * @param string $cycle_key Ciclo no formato Y-m.
+     * @return bool
+     */
+    private function has_generated_cycle( $sub_id, $cycle_key ) {
+        if ( ! $cycle_key ) {
+            return false;
+        }
+        $meta_key = 'dps_generated_cycle_' . $cycle_key;
+        return (bool) get_post_meta( $sub_id, $meta_key, true );
+    }
+
+    /**
+     * Marca o ciclo como gerado, evitando recriação futura.
+     *
+     * @param int    $sub_id    ID da assinatura.
+     * @param string $cycle_key Ciclo no formato Y-m.
+     */
+    private function mark_cycle_generated( $sub_id, $cycle_key ) {
+        if ( ! $cycle_key ) {
+            return;
+        }
+        $meta_key = 'dps_generated_cycle_' . $cycle_key;
+        update_post_meta( $sub_id, $meta_key, 1 );
+    }
+
+    /**
+     * Atualiza o status de pagamento de um ciclo.
+     *
+     * @param int    $sub_id    ID da assinatura.
+     * @param string $cycle_key Ciclo no formato Y-m.
+     * @param string $status    Status a registrar (pago|em_atraso|pendente).
+     */
+    private function mark_cycle_status( $sub_id, $cycle_key, $status ) {
+        if ( ! $cycle_key ) {
+            return;
+        }
+        $meta_key = 'dps_cycle_status_' . $cycle_key;
+        update_post_meta( $sub_id, $meta_key, sanitize_text_field( $status ) );
     }
 
     /**
@@ -245,7 +313,9 @@ class DPS_Subscription_Addon {
             // Se há primeira consulta deste ciclo, atualiza status do primeiro agendamento correspondente
             $this->update_first_appointment_status( $sub_id, $status );
             // Atualiza o status da transação financeira relacionada
-            $this->create_or_update_finance_record( $sub_id );
+            $cycle_key = $this->get_cycle_key( get_post_meta( $sub_id, 'subscription_start_date', true ) );
+            $this->mark_cycle_status( $sub_id, $cycle_key, $status );
+            $this->create_or_update_finance_record( $sub_id, $cycle_key );
             // Redireciona sem parametros
             $base_url = get_permalink();
             wp_redirect( add_query_arg( [ 'tab' => 'assinaturas' ], $base_url ) );
@@ -296,24 +366,31 @@ class DPS_Subscription_Addon {
         if ( ! $pay_status ) {
             update_post_meta( $sub_id, 'subscription_payment_status', 'pendente' );
         }
-        // Gera agendamentos para o mês atual ou do start_date, se novo ou se start_date mudou
-        $this->generate_monthly_appointments( $sub_id, $start_date );
+        // Define o ciclo corrente a partir da data de início
+        $cycle_key = $this->get_cycle_key( $start_date );
+
+        // Gera agendamentos apenas quando o ciclo ainda não foi criado
+        $this->generate_monthly_appointments( $sub_id, $start_date, $cycle_key );
 
         // Sincroniza com o financeiro: cria ou atualiza o registro de transação
         // da assinatura no módulo financeiro. Isso garante que cada assinatura
         // possua uma entrada na tabela dps_transacoes correspondente ao ciclo
         // vigente (data de início) e ao valor do pacote. O status da transação
         // refletirá o campo subscription_payment_status.
-        $this->create_or_update_finance_record( $sub_id );
+        $this->create_or_update_finance_record( $sub_id, $cycle_key );
     }
 
     /**
      * Gera os agendamentos para uma assinatura para o mês da data inicial
      * @param int    $sub_id     ID da assinatura
      * @param string $date_start Data inicial (Y-m-d)
+     * @param string $cycle_key  Ciclo (Y-m) calculado previamente
      */
-    private function generate_monthly_appointments( $sub_id, $date_start ) {
-        // Remove agendamentos existentes associados a esta assinatura na mesma data atual
+    private function generate_monthly_appointments( $sub_id, $date_start, $cycle_key = '' ) {
+        $cycle_key = $cycle_key ? $cycle_key : $this->get_cycle_key( $date_start );
+        if ( ! $cycle_key || $this->has_generated_cycle( $sub_id, $cycle_key ) ) {
+            return;
+        }
         $pet_id    = get_post_meta( $sub_id, 'subscription_pet_id', true );
         $client_id = get_post_meta( $sub_id, 'subscription_client_id', true );
         $frequency = get_post_meta( $sub_id, 'subscription_frequency', true );
@@ -345,13 +422,14 @@ class DPS_Subscription_Addon {
             $dates[]   = $current_dt->format( 'Y-m-d' );
             $current_dt->modify( '+' . $interval_days . ' days' );
         }
-        // Apaga todos os agendamentos existentes associados a esta assinatura (não apenas no mês)
+        // Remove agendamentos já criados para o mesmo ciclo para evitar duplicidade
         $existing = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'meta_query'     => [
                 [ 'key' => 'subscription_id', 'value' => $sub_id, 'compare' => '=' ],
+                [ 'key' => 'subscription_cycle', 'value' => $cycle_key, 'compare' => '=' ],
             ],
         ] );
         foreach ( $existing as $appt ) {
@@ -374,10 +452,13 @@ class DPS_Subscription_Addon {
                 update_post_meta( $appt_id, 'appointment_total_value', 0 );
                 update_post_meta( $appt_id, 'appointment_status', 'pendente' );
                 update_post_meta( $appt_id, 'subscription_id', $sub_id );
+                update_post_meta( $appt_id, 'subscription_cycle', $cycle_key );
                 // Indica que o agendamento pertence a um pacote de assinatura
                 update_post_meta( $appt_id, 'appointment_notes', __( 'Serviço de assinatura', 'dps-subscription-addon' ) );
             }
         }
+        $this->mark_cycle_generated( $sub_id, $cycle_key );
+        $this->mark_cycle_status( $sub_id, $cycle_key, 'pendente' );
     }
 
     /**
@@ -421,11 +502,13 @@ class DPS_Subscription_Addon {
      * já existir para o mesmo plano e data, ela será atualizada; caso
      * contrário, um novo registro será inserido. O status financeiro será
      * "pago" quando o campo subscription_payment_status estiver definido
-     * como "pago"; caso contrário, permanecerá "em_aberto".
+     * como "pago"; "em_atraso" quando o pagamento falhar e "em_aberto" para
+     * estados pendentes.
      *
-     * @param int $sub_id ID da assinatura
+     * @param int    $sub_id    ID da assinatura
+     * @param string $cycle_key Ciclo (Y-m) relacionado à transação
      */
-    private function create_or_update_finance_record( $sub_id ) {
+    private function create_or_update_finance_record( $sub_id, $cycle_key = '' ) {
         if ( ! $sub_id ) {
             return;
         }
@@ -442,8 +525,13 @@ class DPS_Subscription_Addon {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
         // Prepara valores
-        $date_db   = $start_date; // armazenamos somente a data (YYYY-mm-dd)
-        $status    = ( 'pago' === $pay_status ) ? 'pago' : 'em_aberto';
+        $date_db   = $cycle_key ? $cycle_key . '-01' : $start_date; // armazenamos somente a data (YYYY-mm-dd)
+        $status_map = [
+            'pago'      => 'pago',
+            'em_atraso' => 'em_atraso',
+            'pendente'  => 'em_aberto',
+        ];
+        $status    = $status_map[ $pay_status ] ?? 'em_aberto';
         $category  = __( 'Assinatura', 'dps-subscription-addon' );
         $type      = 'receita';
         $desc      = sprintf( __( 'Assinatura: %s (%s)', 'dps-subscription-addon' ), $service, $freq );
@@ -473,6 +561,42 @@ class DPS_Subscription_Addon {
                 'descricao'      => $desc,
             ] );
         }
+    }
+
+    /**
+     * Integração fictícia de status de pagamento proveniente de um gateway externo.
+     * Use a ação dps_subscription_payment_status para informar o resultado do pagamento
+     * do ciclo atual. Exemplo de uso: do_action( 'dps_subscription_payment_status', $sub_id, '2025-11', 'paid' );
+     *
+     * @param int    $sub_id         ID da assinatura.
+     * @param string $cycle_key      Ciclo (Y-m). Se vazio, usa o ciclo da data de início.
+     * @param string $payment_status Status recebido do gateway (paid|failed|pending).
+     */
+    public function handle_subscription_payment_status( $sub_id, $cycle_key = '', $payment_status = '' ) {
+        $sub_id = intval( $sub_id );
+        if ( ! $sub_id ) {
+            return;
+        }
+        $start_date = get_post_meta( $sub_id, 'subscription_start_date', true );
+        $cycle_key  = $cycle_key ? $cycle_key : $this->get_cycle_key( $start_date );
+        if ( ! $cycle_key ) {
+            return;
+        }
+
+        $normalized = strtolower( sanitize_text_field( $payment_status ) );
+        if ( in_array( $normalized, [ 'paid', 'approved', 'success' ], true ) ) {
+            update_post_meta( $sub_id, 'subscription_payment_status', 'pago' );
+            $this->mark_cycle_status( $sub_id, $cycle_key, 'pago' );
+            $this->update_first_appointment_status( $sub_id, 'pago' );
+        } elseif ( in_array( $normalized, [ 'failed', 'rejected', 'refused' ], true ) ) {
+            update_post_meta( $sub_id, 'subscription_payment_status', 'em_atraso' );
+            $this->mark_cycle_status( $sub_id, $cycle_key, 'em_atraso' );
+        } else {
+            update_post_meta( $sub_id, 'subscription_payment_status', 'pendente' );
+            $this->mark_cycle_status( $sub_id, $cycle_key, 'pendente' );
+        }
+
+        $this->create_or_update_finance_record( $sub_id, $cycle_key );
     }
 
     /**
@@ -580,12 +704,13 @@ class DPS_Subscription_Addon {
         // Reinicia status de pagamento para pendente
         update_post_meta( $sub_id, 'subscription_payment_status', 'pendente' );
         // Gera os novos agendamentos para o novo mês
-        $this->generate_monthly_appointments( $sub_id, $new_date_start );
+        $cycle_key = $this->get_cycle_key( $new_date_start );
+        $this->generate_monthly_appointments( $sub_id, $new_date_start, $cycle_key );
 
         // Cria novo registro financeiro para o novo ciclo. Como o
         // subscription_start_date foi atualizado, este método inserirá uma
         // nova transação para a data atualizada.
-        $this->create_or_update_finance_record( $sub_id );
+        $this->create_or_update_finance_record( $sub_id, $cycle_key );
     }
 
     /**
