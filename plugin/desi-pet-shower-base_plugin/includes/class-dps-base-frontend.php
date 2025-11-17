@@ -1242,8 +1242,6 @@ EOT;
             echo '</form>';
         }
         // Listagem de agendamentos organizados por status
-        echo '<h3>' . esc_html__( 'Próximos Agendamentos', 'dps-base' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-base' ) . '"></p>';
         $args = [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
@@ -1313,9 +1311,9 @@ EOT;
             }
         }
 
-        $render_table = function( $items, $title, $group_class ) use ( $visitor_only, $base_url, $status_labels ) {
+        $sort_appointments = function( $items ) {
             if ( empty( $items ) ) {
-                return;
+                return [];
             }
             usort(
                 $items,
@@ -1334,64 +1332,46 @@ EOT;
                     return $dt_b <=> $dt_a;
                 }
             );
-            echo '<div class="dps-appointments-group ' . esc_attr( $group_class ) . '">';
-            echo '<h4>' . esc_html( $title ) . '</h4>';
-            echo '<table class="dps-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Data', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Horário', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cliente', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pet', 'dps-base' ) . '</th>';
-            echo '<th>' . esc_html__( 'Status', 'dps-base' ) . '</th>';
-            if ( ! $visitor_only ) {
-                echo '<th>' . esc_html__( 'Cobrança', 'dps-base' ) . '</th>';
-                echo '<th>' . esc_html__( 'Ações', 'dps-base' ) . '</th>';
-            }
-            echo '</tr></thead><tbody>';
-            foreach ( $items as $appt ) {
-                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-                if ( ! $status_meta ) {
-                    $status_meta = 'pendente';
-                }
-                if ( 'finalizado e pago' === $status_meta ) {
-                    $status_meta = 'finalizado_pago';
-                }
-                $date       = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time       = get_post_meta( $appt->ID, 'appointment_time', true );
-                $client_id  = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                $pet_id     = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $client     = $client_id ? get_post( $client_id ) : null;
-                $pet        = $pet_id ? get_post( $pet_id ) : null;
-                $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
-                $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
-                $row_class  = 'status-' . sanitize_html_class( $status_meta );
-                echo '<tr class="' . esc_attr( $row_class ) . '">';
-                $date_fmt = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
-                echo '<td>' . esc_html( $date_fmt ) . '</td>';
-                echo '<td>' . esc_html( $time ) . '</td>';
-                echo '<td>' . esc_html( $client ? $client->post_title : '-' ) . '</td>';
-                $pet_name = $pet ? $pet->post_title : '-';
-                if ( get_post_meta( $appt->ID, 'subscription_id', true ) ) {
-                    $pet_name .= ' ' . esc_html__( '(Assinatura)', 'dps-base' );
-                }
-                echo '<td>' . esc_html( $pet_name ) . '</td>';
-                echo '<td>' . self::render_status_selector( $appt->ID, $status_meta, $status_labels, $visitor_only ) . '</td>';
-                if ( ! $visitor_only ) {
-                    echo '<td>' . self::build_charge_html( $appt->ID, 'agendas' ) . '</td>';
-                    echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-base' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-base' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-base' ) . '</a></td>';
-                }
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-            echo '</div>';
+            return $items;
         };
 
-        $render_table( $overdue, __( 'Agendamentos pendentes (dias anteriores)', 'dps-base' ), 'dps-appointments-group--overdue' );
-        $render_table( $finalized_today, __( 'Atendimentos finalizados hoje', 'dps-base' ), 'dps-appointments-group--finalized' );
-        $render_table( $upcoming, __( 'Próximos atendimentos', 'dps-base' ), 'dps-appointments-group--upcoming' );
+        $appointments_groups = [
+            [
+                'items' => $sort_appointments( $overdue ),
+                'title' => __( 'Agendamentos pendentes (dias anteriores)', 'desi-pet-shower' ),
+                'class' => 'dps-appointments-group--overdue',
+            ],
+            [
+                'items' => $sort_appointments( $finalized_today ),
+                'title' => __( 'Atendimentos finalizados hoje', 'desi-pet-shower' ),
+                'class' => 'dps-appointments-group--finalized',
+            ],
+            [
+                'items' => $sort_appointments( $upcoming ),
+                'title' => __( 'Próximos atendimentos', 'desi-pet-shower' ),
+                'class' => 'dps-appointments-group--upcoming',
+            ],
+        ];
 
-        if ( empty( $overdue ) && empty( $finalized_today ) && empty( $upcoming ) ) {
-            echo '<p>' . esc_html__( 'Nenhum agendamento encontrado.', 'dps-base' ) . '</p>';
-        }
+        $status_selector = function( $appt_id, $status ) use ( $status_labels, $visitor_only ) {
+            return self::render_status_selector( $appt_id, $status, $status_labels, $visitor_only );
+        };
+
+        $charge_renderer = function( $appt_id ) {
+            return self::build_charge_html( $appt_id, 'agendas' );
+        };
+
+        dps_get_template(
+            'appointments-list.php',
+            [
+                'groups'           => $appointments_groups,
+                'base_url'         => $base_url,
+                'visitor_only'     => $visitor_only,
+                'status_labels'    => $status_labels,
+                'status_selector'  => $status_selector,
+                'charge_renderer'  => $charge_renderer,
+            ]
+        );
 
         echo '</div>';
         return ob_get_clean();

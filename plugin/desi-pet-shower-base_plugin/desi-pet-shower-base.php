@@ -21,6 +21,9 @@ define( 'DPS_BASE_VERSION', '1.0.1' );
 define( 'DPS_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 
+// Funções auxiliares de template
+require_once DPS_BASE_DIR . 'includes/template-functions.php';
+
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
