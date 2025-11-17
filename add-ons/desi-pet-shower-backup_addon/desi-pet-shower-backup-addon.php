@@ -184,11 +184,12 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'O arquivo informado não é um JSON válido.', 'dps-backup-addon' ) );
             }
 
-            if ( empty( $data['plugin'] ) || 'desi-pet-shower' !== $data['plugin'] ) {
-                $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'O arquivo não parece ser um backup do Desi Pet Shower.', 'dps-backup-addon' ) );
+            $validated = $this->validate_import_payload( $data );
+            if ( is_wp_error( $validated ) ) {
+                $this->redirect_with_message( $this->get_post_redirect(), 'error', $validated->get_error_message() );
             }
 
-            $result = $this->restore_backup_payload( $data );
+            $result = $this->restore_backup_payload( $validated );
             if ( is_wp_error( $result ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', $result->get_error_message() );
             }
@@ -237,9 +238,14 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             return [
                 'plugin'        => 'desi-pet-shower',
                 'version'       => self::VERSION,
+                'schema_version' => 1,
                 'generated_at'  => gmdate( 'c' ),
                 'site_url'      => home_url(),
                 'db_prefix'     => $wpdb->prefix,
+                'clients'       => $this->export_entities_by_type( 'dps_cliente' ),
+                'pets'          => $this->export_entities_by_type( 'dps_pet' ),
+                'appointments'  => $this->export_entities_by_type( 'dps_agendamento' ),
+                'transactions'  => $this->export_transactions(),
                 'posts'         => $posts,
                 'postmeta'      => $meta,
                 'attachments'   => $attachments,
@@ -247,6 +253,270 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 'tables'        => $tables,
                 'files'         => $files,
             ];
+        }
+
+        /**
+         * Valida o payload recebido antes da restauração.
+         *
+         * Estrutura esperada para schema_version 1:
+         * {
+         *   "plugin": "desi-pet-shower",
+         *   "schema_version": 1,
+         *   "clients": [ { "id": 1, "post": {"post_title": "Maria"}, "meta": {"client_phone": "..."} } ],
+         *   "pets": [ { "id": 2, "post": {"post_title": "Rex"}, "meta": {"owner_id": 1} } ],
+         *   "appointments": [ { "id": 3, "post": {"post_title": "Banho"}, "meta": {"appointment_client_id": 1, "appointment_pet_ids": [2]} } ],
+         *   "transactions": [ { "id": 10, "cliente_id": 1, "agendamento_id": 3, "valor": 120, "status": "pago" } ]
+         * }
+         *
+         * @param array $data Dados decodificados do JSON.
+         *
+         * @return array|WP_Error
+         */
+        private function validate_import_payload( $data ) {
+            if ( empty( $data['plugin'] ) || 'desi-pet-shower' !== $data['plugin'] ) {
+                return new WP_Error( 'dps_backup_plugin', __( 'O arquivo não parece ser um backup do Desi Pet Shower.', 'dps-backup-addon' ) );
+            }
+
+            $schema_version = isset( $data['schema_version'] ) ? absint( $data['schema_version'] ) : 0;
+            if ( 1 !== $schema_version ) {
+                return new WP_Error( 'dps_backup_schema', __( 'Versão de esquema do backup ausente ou não suportada.', 'dps-backup-addon' ) );
+            }
+
+            $required_blocks = [ 'clients', 'pets', 'appointments', 'transactions' ];
+            foreach ( $required_blocks as $block ) {
+                if ( ! isset( $data[ $block ] ) || ! is_array( $data[ $block ] ) ) {
+                    return new WP_Error( 'dps_backup_block', sprintf( __( 'O backup está incompleto: bloco %s ausente ou inválido.', 'dps-backup-addon' ), $block ) );
+                }
+            }
+
+            return $data;
+        }
+
+        /**
+         * Exporta entidades (posts) agrupadas por tipo com seus metadados.
+         *
+         * @param string $post_type Tipo de post a ser exportado.
+         *
+         * @return array
+         */
+        private function export_entities_by_type( $post_type ) {
+            $items = get_posts(
+                [
+                    'post_type'      => $post_type,
+                    'post_status'    => 'any',
+                    'posts_per_page' => -1,
+                    'orderby'        => 'ID',
+                    'order'          => 'ASC',
+                ]
+            );
+
+            $exported = [];
+            foreach ( $items as $item ) {
+                $exported[] = [
+                    'id'   => $item->ID,
+                    'post' => [
+                        'post_title'        => $item->post_title,
+                        'post_status'       => $item->post_status,
+                        'post_content'      => $item->post_content,
+                        'post_excerpt'      => $item->post_excerpt,
+                        'post_date'         => $item->post_date,
+                        'post_date_gmt'     => $item->post_date_gmt,
+                        'post_name'         => $item->post_name,
+                        'post_author'       => $item->post_author,
+                        'post_type'         => $post_type,
+                    ],
+                    'meta' => $this->collect_post_meta( $item->ID ),
+                ];
+            }
+
+            return $exported;
+        }
+
+        /**
+         * Exporta as transações financeiras mantendo os identificadores originais.
+         *
+         * @return array
+         */
+        private function export_transactions() {
+            global $wpdb;
+
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+            if ( $exists !== $table ) {
+                return [];
+            }
+
+            $rows = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC", ARRAY_A );
+            return is_array( $rows ) ? $rows : [];
+        }
+
+        /**
+         * Obtém e normaliza metadados de um post.
+         *
+         * @param int $post_id ID do post.
+         *
+         * @return array
+         */
+        private function collect_post_meta( $post_id ) {
+            $raw  = get_post_meta( $post_id );
+            $meta = [];
+
+            foreach ( $raw as $key => $values ) {
+                if ( empty( $values ) || ! is_array( $values ) ) {
+                    continue;
+                }
+                $meta[ $key ] = maybe_unserialize( $values[0] );
+            }
+
+            return $meta;
+        }
+
+        /**
+         * Restaura entidades estruturadas e constrói mapas de IDs antigos x novos.
+         *
+         * @param array $payload Dados validados do backup.
+         */
+        private function restore_structured_entities( $payload ) {
+            $client_map      = [];
+            $pet_map         = [];
+            $appointment_map = [];
+
+            if ( ! empty( $payload['clients'] ) ) {
+                foreach ( $payload['clients'] as $client ) {
+                    $old_id = isset( $client['id'] ) ? (int) $client['id'] : 0;
+                    $new_id = $this->create_entity_post( $client, 'dps_cliente' );
+                    $client_map[ $old_id ] = $new_id;
+                }
+            }
+
+            if ( ! empty( $payload['pets'] ) ) {
+                foreach ( $payload['pets'] as $pet ) {
+                    $old_id = isset( $pet['id'] ) ? (int) $pet['id'] : 0;
+                    $meta   = $pet['meta'] ?? [];
+                    if ( isset( $meta['owner_id'] ) && isset( $client_map[ (int) $meta['owner_id'] ] ) ) {
+                        $meta['owner_id'] = $client_map[ (int) $meta['owner_id'] ];
+                        $pet['meta']      = $meta;
+                    }
+                    $new_id = $this->create_entity_post( $pet, 'dps_pet' );
+                    $pet_map[ $old_id ] = $new_id;
+                }
+            }
+
+            if ( ! empty( $payload['appointments'] ) ) {
+                foreach ( $payload['appointments'] as $appointment ) {
+                    $old_id = isset( $appointment['id'] ) ? (int) $appointment['id'] : 0;
+                    $meta   = $appointment['meta'] ?? [];
+
+                    if ( isset( $meta['appointment_client_id'] ) && isset( $client_map[ (int) $meta['appointment_client_id'] ] ) ) {
+                        $meta['appointment_client_id'] = $client_map[ (int) $meta['appointment_client_id'] ];
+                    }
+
+                    if ( isset( $meta['appointment_pet_id'] ) && isset( $pet_map[ (int) $meta['appointment_pet_id'] ] ) ) {
+                        $meta['appointment_pet_id'] = $pet_map[ (int) $meta['appointment_pet_id'] ];
+                    }
+
+                    if ( isset( $meta['appointment_pet_ids'] ) && is_array( $meta['appointment_pet_ids'] ) ) {
+                        $mapped_pets = [];
+                        foreach ( $meta['appointment_pet_ids'] as $pet_id ) {
+                            $pet_id = (int) $pet_id;
+                            if ( isset( $pet_map[ $pet_id ] ) ) {
+                                $mapped_pets[] = $pet_map[ $pet_id ];
+                            }
+                        }
+                        if ( $mapped_pets ) {
+                            $meta['appointment_pet_ids'] = $mapped_pets;
+                        }
+                    }
+
+                    $appointment['meta'] = $meta;
+                    $new_id               = $this->create_entity_post( $appointment, 'dps_agendamento' );
+                    $appointment_map[ $old_id ] = $new_id;
+                }
+            }
+
+            if ( ! empty( $payload['transactions'] ) ) {
+                $this->restore_transactions_with_mapping( $payload['transactions'], $client_map, $appointment_map );
+            }
+        }
+
+        /**
+         * Cria um post do tipo informado e aplica metadados.
+         *
+         * @param array  $entity    Dados do post (post + meta).
+         * @param string $post_type Tipo de post.
+         *
+         * @return int Novo ID do post.
+         */
+        private function create_entity_post( $entity, $post_type ) {
+            $post_data = $entity['post'] ?? [];
+
+            $prepared = [
+                'post_title'    => isset( $post_data['post_title'] ) ? wp_strip_all_tags( $post_data['post_title'] ) : '',
+                'post_status'   => isset( $post_data['post_status'] ) ? $post_data['post_status'] : 'publish',
+                'post_content'  => $post_data['post_content'] ?? '',
+                'post_excerpt'  => $post_data['post_excerpt'] ?? '',
+                'post_date'     => $post_data['post_date'] ?? '',
+                'post_date_gmt' => $post_data['post_date_gmt'] ?? '',
+                'post_name'     => $post_data['post_name'] ?? '',
+                'post_type'     => $post_type,
+            ];
+
+            $prepared = array_filter( $prepared, static function( $value ) {
+                return '' !== $value && null !== $value;
+            } );
+
+            $new_id = wp_insert_post( $prepared, true );
+            if ( is_wp_error( $new_id ) || ! $new_id ) {
+                throw new Exception( __( 'Falha ao criar registro durante a restauração.', 'dps-backup-addon' ) );
+            }
+
+            if ( ! empty( $entity['meta'] ) && is_array( $entity['meta'] ) ) {
+                foreach ( $entity['meta'] as $key => $value ) {
+                    update_post_meta( $new_id, $key, $value );
+                }
+            }
+
+            return (int) $new_id;
+        }
+
+        /**
+         * Restaura transações financeiras aplicando os novos IDs mapeados.
+         *
+         * @param array $transactions     Linhas exportadas da tabela.
+         * @param array $client_map       Mapa de clientes antigos => novos.
+         * @param array $appointment_map  Mapa de agendamentos antigos => novos.
+         */
+        private function restore_transactions_with_mapping( $transactions, $client_map, $appointment_map ) {
+            global $wpdb;
+
+            if ( empty( $transactions ) ) {
+                return;
+            }
+
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+            if ( $exists !== $table ) {
+                throw new Exception( __( 'Tabela de transações não encontrada para restauração.', 'dps-backup-addon' ) );
+            }
+
+            $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+
+            foreach ( $transactions as $row ) {
+                unset( $row['id'] );
+
+                if ( isset( $row['cliente_id'] ) && isset( $client_map[ (int) $row['cliente_id'] ] ) ) {
+                    $row['cliente_id'] = $client_map[ (int) $row['cliente_id'] ];
+                }
+
+                if ( isset( $row['agendamento_id'] ) && isset( $appointment_map[ (int) $row['agendamento_id'] ] ) ) {
+                    $row['agendamento_id'] = $appointment_map[ (int) $row['agendamento_id'] ];
+                }
+
+                $result = $wpdb->insert( $table, $row );
+                if ( false === $result ) {
+                    throw new Exception( __( 'Falha ao restaurar transações financeiras.', 'dps-backup-addon' ) );
+                }
+            }
         }
 
         /**
@@ -265,8 +535,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             try {
                 $this->wipe_existing_data();
 
-                $this->restore_posts( $payload['posts'] ?? [] );
-                $this->restore_postmeta( $payload['postmeta'] ?? [] );
+                $this->restore_structured_entities( $payload );
+
                 $this->restore_options( $payload['options'] ?? [] );
                 $this->restore_tables( $payload['tables'] ?? [] );
                 $this->restore_attachments( $payload['attachments'] ?? [] );
