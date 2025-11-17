@@ -50,6 +50,30 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 
 ---
 
+### [2025-11-17] v0.2.0 — Campanhas e fidelidade
+
+#### Added (Adicionado)
+- Criado add-on `desi-pet-shower-loyalty` com programa de pontos configurável e funções globais para crédito e resgate.
+- Registrado CPT `dps_campaign` com metabox de elegibilidade e rotina administrativa para identificar clientes alvo.
+- Incluída tela "Campanhas & Fidelidade" no menu principal do DPS com resumo de pontos por cliente e gatilho manual de campanhas.
+
+#### Changed (Alterado)
+- Nenhuma mudança aplicável.
+
+#### Fixed (Corrigido)
+- Nenhuma correção nesta versão.
+
+#### Removed (Removido)
+- Nada removido nesta versão.
+
+#### Deprecated (Depreciado)
+- Nenhuma funcionalidade depreciada.
+
+#### Security (Segurança)
+- Sem alterações específicas de segurança nesta entrega.
+
+---
+
 ### [YYYY-MM-DD] v0.1.0 — Primeira versão pública
 
 #### Added (Adicionado)
