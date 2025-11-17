@@ -36,6 +36,10 @@ class DPS_Base_Plugin {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // Manipula ações de formulário (salvar e excluir)
         add_action( 'init', [ $this, 'maybe_handle_request' ] );
+        // Impede exclusão de clientes/pets com agendamentos vinculados
+        add_action( 'before_delete_post', [ $this, 'prevent_orphaned_appointments' ] );
+        // Oculta registros marcados como exclusão lógica
+        add_action( 'pre_get_posts', [ $this, 'filter_soft_deleted_posts' ] );
         // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
         add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
@@ -194,6 +198,129 @@ class DPS_Base_Plugin {
             'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'dps-base' ),
             'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'dps-base' ),
         ] );
+    }
+
+    /**
+     * Impede exclusão física de clientes ou pets que possuem agendamentos.
+     * Permite exclusão lógica caso o filtro dps_enable_soft_delete seja verdadeiro.
+     *
+     * @param int $post_id ID do post prestes a ser removido.
+     */
+    public function prevent_orphaned_appointments( $post_id ) {
+        $post_type = get_post_type( $post_id );
+        if ( 'dps_cliente' !== $post_type && 'dps_pet' !== $post_type ) {
+            return;
+        }
+
+        if ( ! $this->has_related_appointments( $post_id, $post_type ) ) {
+            return;
+        }
+
+        if ( apply_filters( 'dps_enable_soft_delete', false, $post_id, $post_type ) ) {
+            update_post_meta( $post_id, 'dps_mark_as_deleted', current_time( 'mysql' ) );
+
+            wp_die(
+                esc_html__( 'Este registro foi marcado como removido e não aparecerá mais na listagem padrão.', 'desi-pet-shower' ),
+                '',
+                [ 'back_link' => true ]
+            );
+        }
+
+        $message = ( 'dps_cliente' === $post_type )
+            ? __( 'Este cliente possui agendamentos vinculados e não pode ser excluído.', 'desi-pet-shower' )
+            : __( 'Este pet possui agendamentos vinculados e não pode ser excluído.', 'desi-pet-shower' );
+
+        wp_die( esc_html( $message ), '', [ 'back_link' => true ] );
+    }
+
+    /**
+     * Verifica se há agendamentos associados ao cliente ou pet informado.
+     *
+     * @param int    $post_id   ID do post a verificar.
+     * @param string $post_type Tipo de post (dps_cliente ou dps_pet).
+     *
+     * @return bool
+     */
+    private function has_related_appointments( $post_id, $post_type ) {
+        if ( 'dps_cliente' === $post_type ) {
+            $meta_query = [
+                [
+                    'key'     => 'appointment_client_id',
+                    'value'   => (int) $post_id,
+                    'compare' => '=',
+                ],
+            ];
+        } else {
+            $meta_query = [
+                'relation' => 'OR',
+                [
+                    'key'     => 'appointment_pet_id',
+                    'value'   => (int) $post_id,
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => 'appointment_pet_ids',
+                    'value'   => '"' . (int) $post_id . '"',
+                    'compare' => 'LIKE',
+                ],
+            ];
+        }
+
+        $appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => $meta_query,
+        ] );
+
+        return ! empty( $appointments );
+    }
+
+    /**
+     * Remove da listagem clientes/pets marcados como exclusão lógica.
+     * Para incluir registros marcados, defina a query var dps_include_deleted como verdadeira.
+     *
+     * @param WP_Query $query Consulta sendo construída.
+     */
+    public function filter_soft_deleted_posts( $query ) {
+        if ( ! $query instanceof WP_Query || $query->get( 'dps_include_deleted' ) ) {
+            return;
+        }
+
+        $post_type     = $query->get( 'post_type' );
+        $target_types  = [ 'dps_cliente', 'dps_pet' ];
+        $should_filter = false;
+
+        if ( is_array( $post_type ) ) {
+            $should_filter = ! empty( array_intersect( $target_types, $post_type ) );
+        } elseif ( in_array( $post_type, $target_types, true ) ) {
+            $should_filter = true;
+        }
+
+        if ( ! $should_filter ) {
+            return;
+        }
+
+        $meta_query = $query->get( 'meta_query' );
+        if ( ! is_array( $meta_query ) ) {
+            $meta_query = [];
+        }
+
+        $meta_query[] = [
+            'relation' => 'OR',
+            [
+                'key'     => 'dps_mark_as_deleted',
+                'compare' => 'NOT EXISTS',
+            ],
+            [
+                'key'     => 'dps_mark_as_deleted',
+                'value'   => '',
+                'compare' => '=',
+            ],
+        ];
+
+        $query->set( 'meta_query', $meta_query );
     }
 
     /**
