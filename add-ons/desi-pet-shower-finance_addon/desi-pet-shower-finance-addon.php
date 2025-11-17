@@ -654,6 +654,39 @@ class DPS_Finance_Addon {
     }
 
     /**
+     * Exemplo de consulta utilizando metas históricas para somar faturamento.
+     * Retorna o total em centavos do valor salvo em `_dps_total_at_booking`
+     * para agendamentos dentro do intervalo informado.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     * @return int Total em centavos.
+     */
+    public function sum_revenue_by_period( $start_date, $end_date ) {
+        $query = new WP_Query( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                'relation' => 'AND',
+                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
+                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
+            ],
+        ] );
+
+        $total = 0;
+        if ( $query->have_posts() ) {
+            foreach ( $query->posts as $appt_id ) {
+                $total += (int) get_post_meta( $appt_id, '_dps_total_at_booking', true );
+            }
+        }
+        wp_reset_postdata();
+
+        return $total;
+    }
+
+    /**
      * Renderiza a seção do controle financeiro: formulário para nova transação e listagem.
      */
     private function section_financeiro() {
@@ -1080,9 +1113,12 @@ class DPS_Finance_Addon {
 
         // Recupera informações do agendamento para atualizar ou criar transação
         $client_id   = get_post_meta( $appt_id, 'appointment_client_id', true );
-        $valor_meta  = get_post_meta( $appt_id, 'appointment_total_value', true );
-        $valor_cents = dps_parse_money_br( $valor_meta );
-        $valor       = $valor_cents / 100;
+        $valor_cents = (int) get_post_meta( $appt_id, '_dps_total_at_booking', true );
+        if ( $valor_cents <= 0 ) {
+            $valor_meta  = get_post_meta( $appt_id, 'appointment_total_value', true );
+            $valor_cents = dps_parse_money_br( $valor_meta );
+        }
+        $valor = $valor_cents / 100;
         // Monta descrição a partir de serviços e pet
         $desc_parts  = [];
         $service_ids = get_post_meta( $appt_id, 'appointment_services', true );

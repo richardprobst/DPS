@@ -29,6 +29,9 @@ class DPS_Services_Addon {
         // Salva dados de serviços no agendamento
         add_action( 'save_post_dps_agendamento', [ $this, 'save_appointment_services_meta' ], 10, 3 );
 
+        // Salva instantâneo de preços históricos após criar/atualizar um agendamento
+        add_action( 'dps_base_after_save_appointment', [ $this, 'store_booking_totals_snapshot' ], 10, 2 );
+
         // Quando um agendamento for editado e estiver finalizado, exibe
         // um checklist dos serviços selecionados e campos para extras.
         add_action( 'dps_base_appointment_fields', [ $this, 'appointment_finalization_fields' ], 20, 2 );
@@ -957,6 +960,74 @@ class DPS_Services_Addon {
         } else {
             delete_post_meta( $post_id, 'subscription_extra_description' );
             delete_post_meta( $post_id, 'subscription_extra_value' );
+        }
+
+        // Calcula e armazena preço histórico deste agendamento em centavos
+        $this->store_booking_totals_snapshot( $post_id );
+    }
+
+    /**
+     * Converte um valor monetário (string ou float) em inteiro de centavos.
+     *
+     * @param mixed $value Valor informado.
+     * @return int Valor em centavos.
+     */
+    private function parse_to_cents( $value ) {
+        if ( function_exists( 'dps_parse_money_br' ) ) {
+            return max( 0, (int) dps_parse_money_br( $value ) );
+        }
+
+        $raw = is_string( $value ) ? str_replace( ',', '.', $value ) : $value;
+        $float = floatval( $raw );
+
+        return max( 0, (int) round( $float * 100 ) );
+    }
+
+    /**
+     * Calcula o total histórico dos serviços selecionados e salva nos metas
+     * `_dps_total_at_booking` (centavos) e `_dps_services_at_booking` (array de pares).
+     *
+     * @param int         $appointment_id ID do agendamento.
+     * @param string|null $context        Contexto opcional do salvamento.
+     */
+    public function store_booking_totals_snapshot( $appointment_id, $context = null ) {
+        $appointment = get_post( $appointment_id );
+        if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
+            return;
+        }
+
+        $service_ids          = get_post_meta( $appointment_id, 'appointment_services', true );
+        $service_ids          = is_array( $service_ids ) ? array_map( 'intval', $service_ids ) : [];
+        $service_prices_meta  = get_post_meta( $appointment_id, 'appointment_service_prices', true );
+        $service_prices_meta  = is_array( $service_prices_meta ) ? $service_prices_meta : [];
+        $services_at_booking  = [];
+        $total_cents          = 0;
+
+        foreach ( $service_ids as $sid ) {
+            $price_raw = isset( $service_prices_meta[ $sid ] ) ? $service_prices_meta[ $sid ] : get_post_meta( $sid, 'service_price', true );
+            $price_cents = $this->parse_to_cents( $price_raw );
+            $services_at_booking[] = [ (int) $sid, $price_cents ];
+            $total_cents          += $price_cents;
+        }
+
+        // Extras e TaxiDog também compõem o valor histórico do atendimento
+        $extra_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_extra_value', true ) );
+        $taxi_cents  = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_taxidog_price', true ) );
+        $sub_extra   = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_extra_value', true ) );
+
+        $total_cents += $extra_cents + $taxi_cents + $sub_extra;
+
+        // Fallback: se não houver serviços mas existir total calculado anteriormente
+        if ( $total_cents <= 0 ) {
+            $total_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_total_value', true ) );
+        }
+
+        update_post_meta( $appointment_id, '_dps_total_at_booking', $total_cents );
+
+        if ( ! empty( $services_at_booking ) ) {
+            update_post_meta( $appointment_id, '_dps_services_at_booking', $services_at_booking );
+        } else {
+            delete_post_meta( $appointment_id, '_dps_services_at_booking' );
         }
     }
 
