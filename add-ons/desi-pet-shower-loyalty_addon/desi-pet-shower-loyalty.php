@@ -343,15 +343,156 @@ class DPS_Loyalty_Addon {
 
     public function register_settings() {
         register_setting( 'dps_loyalty_settings_group', self::OPTION_KEY, [ $this, 'sanitize_settings' ] );
+
+        add_settings_section(
+            'dps_loyalty_referrals_section',
+            __( 'Indique e Ganhe', 'desi-pet-shower' ),
+            [ $this, 'render_referrals_section_intro' ],
+            'dps_loyalty_settings_page'
+        );
+
+        add_settings_field(
+            'dps_loyalty_referrals_enabled',
+            __( 'Ativar programa', 'desi-pet-shower' ),
+            [ $this, 'render_referrals_enabled_field' ],
+            'dps_loyalty_settings_page',
+            'dps_loyalty_referrals_section'
+        );
+
+        add_settings_field(
+            'dps_loyalty_referrer_reward',
+            __( 'Recompensa do indicador', 'desi-pet-shower' ),
+            [ $this, 'render_referrer_reward_field' ],
+            'dps_loyalty_settings_page',
+            'dps_loyalty_referrals_section'
+        );
+
+        add_settings_field(
+            'dps_loyalty_referee_reward',
+            __( 'Recompensa do indicado', 'desi-pet-shower' ),
+            [ $this, 'render_referee_reward_field' ],
+            'dps_loyalty_settings_page',
+            'dps_loyalty_referrals_section'
+        );
+
+        add_settings_field(
+            'dps_loyalty_referrals_rules',
+            __( 'Regras gerais', 'desi-pet-shower' ),
+            [ $this, 'render_referrals_rules_field' ],
+            'dps_loyalty_settings_page',
+            'dps_loyalty_referrals_section'
+        );
     }
 
     public function sanitize_settings( $input ) {
-        $output                  = [];
-        $output['brl_per_point'] = isset( $input['brl_per_point'] ) ? (float) $input['brl_per_point'] : 10.0;
+        $output                               = [];
+        $output['brl_per_point']              = isset( $input['brl_per_point'] ) ? (float) $input['brl_per_point'] : 10.0;
+        $output['referrals_enabled']          = ! empty( $input['referrals_enabled'] ) ? 1 : 0;
+        $output['referrer_reward_type']       = isset( $input['referrer_reward_type'] ) ? sanitize_text_field( $input['referrer_reward_type'] ) : 'none';
+        $output['referrer_reward_value']      = isset( $input['referrer_reward_value'] ) ? $this->sanitize_reward_value( $input['referrer_reward_value'], $output['referrer_reward_type'] ) : 0;
+        $output['referee_reward_type']        = isset( $input['referee_reward_type'] ) ? sanitize_text_field( $input['referee_reward_type'] ) : 'none';
+        $output['referee_reward_value']       = isset( $input['referee_reward_value'] ) ? $this->sanitize_reward_value( $input['referee_reward_value'], $output['referee_reward_type'] ) : 0;
+        $output['referrals_minimum_amount']   = isset( $input['referrals_minimum_amount'] ) ? dps_loyalty_parse_money_br( $input['referrals_minimum_amount'] ) : 0;
+        $output['referrals_max_per_referrer'] = isset( $input['referrals_max_per_referrer'] ) ? absint( $input['referrals_max_per_referrer'] ) : 0;
+        $output['referrals_first_purchase']   = ! empty( $input['referrals_first_purchase'] ) ? 1 : 0;
+
         if ( $output['brl_per_point'] <= 0 ) {
             $output['brl_per_point'] = 10.0;
         }
         return $output;
+    }
+
+    public function render_referrals_section_intro() {
+        echo '<p>' . esc_html__( 'Configure as regras do programa de indicações, incluindo recompensas e limites.', 'desi-pet-shower' ) . '</p>';
+    }
+
+    public function render_referrals_enabled_field() {
+        $settings = get_option( self::OPTION_KEY, [] );
+        $enabled  = ! empty( $settings['referrals_enabled'] );
+        echo '<label><input type="checkbox" name="' . esc_attr( self::OPTION_KEY ) . '[referrals_enabled]" value="1" ' . checked( $enabled, true, false ) . ' /> ' . esc_html__( 'Ativar programa Indique e Ganhe', 'desi-pet-shower' ) . '</label>';
+    }
+
+    public function render_referrer_reward_field() {
+        $settings = get_option( self::OPTION_KEY, [] );
+        $type     = isset( $settings['referrer_reward_type'] ) ? $settings['referrer_reward_type'] : 'none';
+        $value    = isset( $settings['referrer_reward_value'] ) ? $settings['referrer_reward_value'] : 0;
+        $this->render_reward_selector( 'referrer', $type, $value );
+    }
+
+    public function render_referee_reward_field() {
+        $settings = get_option( self::OPTION_KEY, [] );
+        $type     = isset( $settings['referee_reward_type'] ) ? $settings['referee_reward_type'] : 'none';
+        $value    = isset( $settings['referee_reward_value'] ) ? $settings['referee_reward_value'] : 0;
+        $this->render_reward_selector( 'referee', $type, $value );
+    }
+
+    public function render_referrals_rules_field() {
+        $settings       = get_option( self::OPTION_KEY, [] );
+        $minimum_amount = isset( $settings['referrals_minimum_amount'] ) ? (int) $settings['referrals_minimum_amount'] : 0;
+        $max_referrals  = isset( $settings['referrals_max_per_referrer'] ) ? absint( $settings['referrals_max_per_referrer'] ) : 0;
+        $first_purchase = ! empty( $settings['referrals_first_purchase'] );
+        ?>
+        <p>
+            <label>
+                <?php esc_html_e( 'Valor mínimo do primeiro atendimento para liberar recompensa (R$)', 'desi-pet-shower' ); ?><br />
+                <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_minimum_amount]" value="<?php echo esc_attr( dps_format_money_br( $minimum_amount ) ); ?>" />
+            </label>
+        </p>
+        <p>
+            <label>
+                <?php esc_html_e( 'Máximo de indicações recompensadas por cliente (0 para ilimitado)', 'desi-pet-shower' ); ?><br />
+                <input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_max_per_referrer]" value="<?php echo esc_attr( $max_referrals ); ?>" />
+            </label>
+        </p>
+        <p>
+            <label>
+                <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_first_purchase]" value="1" <?php checked( $first_purchase ); ?> />
+                <?php esc_html_e( 'Somente a primeira compra conta', 'desi-pet-shower' ); ?>
+            </label>
+        </p>
+        <?php
+    }
+
+    private function render_reward_selector( $role, $type, $value ) {
+        $type_key  = self::OPTION_KEY . '[' . $role . '_reward_type]';
+        $value_key = self::OPTION_KEY . '[' . $role . '_reward_value]';
+        ?>
+        <fieldset>
+            <label for="<?php echo esc_attr( $type_key ); ?>">
+                <select id="<?php echo esc_attr( $type_key ); ?>" name="<?php echo esc_attr( $type_key ); ?>">
+                    <option value="none" <?php selected( $type, 'none' ); ?>><?php esc_html_e( 'Sem recompensa', 'desi-pet-shower' ); ?></option>
+                    <option value="points" <?php selected( $type, 'points' ); ?>><?php esc_html_e( 'Pontos de fidelidade', 'desi-pet-shower' ); ?></option>
+                    <option value="fixed" <?php selected( $type, 'fixed' ); ?>><?php esc_html_e( 'Crédito fixo (R$)', 'desi-pet-shower' ); ?></option>
+                    <option value="percent" <?php selected( $type, 'percent' ); ?>><?php esc_html_e( 'Crédito percentual', 'desi-pet-shower' ); ?></option>
+                </select>
+            </label>
+            <input type="text" name="<?php echo esc_attr( $value_key ); ?>" value="<?php echo esc_attr( $this->format_reward_value( $value, $type ) ); ?>" placeholder="<?php esc_attr_e( 'Valor', 'desi-pet-shower' ); ?>" />
+        </fieldset>
+        <?php
+    }
+
+    private function sanitize_reward_value( $value, $type ) {
+        if ( 'points' === $type ) {
+            return absint( $value );
+        }
+
+        if ( 'fixed' === $type ) {
+            return dps_loyalty_parse_money_br( $value );
+        }
+
+        if ( 'percent' === $type ) {
+            return (float) $value;
+        }
+
+        return 0;
+    }
+
+    private function format_reward_value( $value, $type ) {
+        if ( 'fixed' === $type ) {
+            return dps_format_money_br( (int) $value );
+        }
+
+        return $value;
     }
 
     public function maybe_award_points_on_status_change( $meta_id, $object_id, $meta_key, $meta_value ) {
@@ -399,7 +540,280 @@ class DPS_Loyalty_Addon {
     }
 }
 
+class DPS_Loyalty_Referrals {
+
+    const DB_VERSION = '1.0.0';
+
+    private static $instance = null;
+
+    private $table_name;
+
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    private function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'dps_referrals';
+
+        add_action( 'init', [ $this, 'maybe_create_table' ] );
+        add_action( 'save_post_dps_cliente', [ $this, 'ensure_referral_code' ], 10, 3 );
+        add_action( 'dps_registration_after_fields', [ $this, 'render_registration_field' ] );
+        add_action( 'dps_registration_after_client_created', [ $this, 'maybe_register_referral' ], 10, 4 );
+        add_action( 'dps_finance_booking_paid', [ $this, 'handle_booking_paid' ], 10, 3 );
+    }
+
+    public static function install() {
+        self::get_instance()->create_table();
+    }
+
+    public function maybe_create_table() {
+        $installed = get_option( 'dps_referrals_db_version', '' );
+        if ( self::DB_VERSION !== $installed ) {
+            $this->create_table();
+        }
+    }
+
+    private function create_table() {
+        global $wpdb;
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+        $charset_collate = $wpdb->get_charset_collate();
+        $sql             = "CREATE TABLE {$this->table_name} (
+            id BIGINT(20) unsigned NOT NULL AUTO_INCREMENT,
+            referrer_client_id BIGINT(20) unsigned NOT NULL,
+            referee_client_id BIGINT(20) unsigned NULL,
+            referral_code VARCHAR(50) NOT NULL,
+            first_booking_id BIGINT(20) unsigned NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            created_at DATETIME NOT NULL,
+            reward_type_referrer VARCHAR(20) NULL,
+            reward_value_referrer DECIMAL(12,2) NULL,
+            reward_type_referee VARCHAR(20) NULL,
+            reward_value_referee DECIMAL(12,2) NULL,
+            meta LONGTEXT NULL,
+            PRIMARY KEY  (id),
+            KEY referrer_idx (referrer_client_id),
+            KEY referee_idx (referee_client_id),
+            KEY code_idx (referral_code)
+        ) {$charset_collate};";
+
+        dbDelta( $sql );
+        update_option( 'dps_referrals_db_version', self::DB_VERSION );
+    }
+
+    public function ensure_referral_code( $post_id, $post, $update ) {
+        if ( $update ) {
+            return;
+        }
+
+        dps_loyalty_get_referral_code( $post_id );
+    }
+
+    public function render_registration_field() {
+        $referral_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
+        ?>
+        <p class="dps-referral-field">
+            <label><?php esc_html_e( 'Código de indicação (opcional)', 'desi-pet-shower' ); ?><br />
+                <input type="text" name="dps_referral_code" value="<?php echo esc_attr( $referral_param ); ?>" maxlength="20" />
+            </label>
+        </p>
+        <?php
+    }
+
+    public function maybe_register_referral( $referral_code, $new_client_id, $client_email, $client_phone ) {
+        if ( ! $referral_code || ! $new_client_id ) {
+            return;
+        }
+
+        $settings = dps_referrals_get_settings();
+        if ( empty( $settings['referrals_enabled'] ) ) {
+            return;
+        }
+
+        $referrer_id = $this->get_client_id_by_referral_code( $referral_code );
+
+        if ( ! $referrer_id || $referrer_id === $new_client_id ) {
+            return;
+        }
+
+        if ( $this->is_existing_client_contact( $client_email, $client_phone ) ) {
+            return;
+        }
+
+        dps_referrals_create( [
+            'referrer_client_id' => $referrer_id,
+            'referee_client_id'  => $new_client_id,
+            'referral_code'      => $referral_code,
+            'status'             => 'pending',
+            'created_at'         => current_time( 'mysql' ),
+        ] );
+    }
+
+    public function handle_booking_paid( $appointment_id, $client_id, $amount_in_cents ) {
+        $settings = dps_referrals_get_settings();
+        if ( empty( $settings['referrals_enabled'] ) ) {
+            return;
+        }
+
+        $pending = dps_referrals_find_pending_by_referee( $client_id );
+        if ( ! $pending ) {
+            return;
+        }
+
+        if ( (int) $pending->referrer_client_id === (int) $client_id ) {
+            error_log( 'DPS Referrals: tentativa de autopromoção ignorada para cliente ' . $client_id );
+            return;
+        }
+
+        if ( $settings['referrals_minimum_amount'] > 0 && $amount_in_cents < (int) $settings['referrals_minimum_amount'] ) {
+            return;
+        }
+
+        if ( ! empty( $settings['referrals_first_purchase'] ) && $this->client_has_previous_paid_booking( $client_id, $appointment_id ) ) {
+            return;
+        }
+
+        if ( $this->has_referrer_reached_limit( $pending->referrer_client_id, $settings['referrals_max_per_referrer'] ) ) {
+            return;
+        }
+
+        $rewards_applied = $this->apply_rewards( $pending, $amount_in_cents );
+
+        dps_referrals_mark_rewarded(
+            $pending->id,
+            $appointment_id,
+            [
+                'reward_type_referrer' => $rewards_applied['referrer_type'],
+                'reward_value_referrer' => $rewards_applied['referrer_value'],
+                'reward_type_referee' => $rewards_applied['referee_type'],
+                'reward_value_referee' => $rewards_applied['referee_value'],
+            ]
+        );
+    }
+
+    private function apply_rewards( $referral, $amount_in_cents ) {
+        $settings       = dps_referrals_get_settings();
+        $rewards_applied = [
+            'referrer_type' => 'none',
+            'referrer_value' => 0,
+            'referee_type' => 'none',
+            'referee_value' => 0,
+        ];
+
+        if ( ! empty( $settings['referrer_reward_type'] ) && 'none' !== $settings['referrer_reward_type'] ) {
+            $rewards_applied['referrer_type']  = $settings['referrer_reward_type'];
+            $rewards_applied['referrer_value'] = $this->apply_single_reward( $referral->referrer_client_id, $settings['referrer_reward_type'], $settings['referrer_reward_value'], $amount_in_cents );
+        }
+
+        if ( ! empty( $settings['referee_reward_type'] ) && 'none' !== $settings['referee_reward_type'] ) {
+            $rewards_applied['referee_type']  = $settings['referee_reward_type'];
+            $rewards_applied['referee_value'] = $this->apply_single_reward( $referral->referee_client_id, $settings['referee_reward_type'], $settings['referee_reward_value'], $amount_in_cents );
+        }
+
+        return $rewards_applied;
+    }
+
+    private function apply_single_reward( $client_id, $type, $value, $amount_in_cents ) {
+        if ( 'points' === $type ) {
+            dps_loyalty_add_points( $client_id, (int) $value, 'referral_reward' );
+            return (int) $value;
+        }
+
+        if ( 'fixed' === $type ) {
+            dps_loyalty_add_credit( $client_id, (int) $value, 'referral_reward' );
+            return (int) $value;
+        }
+
+        if ( 'percent' === $type ) {
+            $calculated = (int) floor( (float) $value * $amount_in_cents / 100 );
+            if ( $calculated > 0 ) {
+                dps_loyalty_add_credit( $client_id, $calculated, 'referral_reward' );
+            }
+            return $calculated;
+        }
+
+        return 0;
+    }
+
+    private function client_has_previous_paid_booking( $client_id, $appointment_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE cliente_id = %d AND status = %s AND agendamento_id <> %d", $client_id, 'pago', $appointment_id ) );
+        return $count > 0;
+    }
+
+    private function has_referrer_reached_limit( $referrer_id, $limit ) {
+        if ( ! $limit ) {
+            return false;
+        }
+
+        global $wpdb;
+        $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table_name} WHERE referrer_client_id = %d AND status = %s", $referrer_id, 'rewarded' ) );
+        return $count >= $limit;
+    }
+
+    private function get_client_id_by_referral_code( $code ) {
+        $client = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => '_dps_referral_code',
+                    'value' => $code,
+                ],
+            ],
+        ] );
+
+        if ( empty( $client ) ) {
+            return 0;
+        }
+
+        return (int) $client[0];
+    }
+
+    private function is_existing_client_contact( $email, $phone ) {
+        $meta_query = [ 'relation' => 'OR' ];
+
+        if ( $email ) {
+            $meta_query[] = [
+                'key'     => 'client_email',
+                'value'   => $email,
+                'compare' => '=',
+            ];
+        }
+
+        if ( $phone ) {
+            $meta_query[] = [
+                'key'     => 'client_phone',
+                'value'   => $phone,
+                'compare' => '=',
+            ];
+        }
+
+        if ( count( $meta_query ) === 1 ) {
+            return false;
+        }
+
+        $existing = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => $meta_query,
+        ] );
+
+        return ! empty( $existing );
+    }
+}
+
 dps_loyalty_init();
+
+register_activation_hook( __FILE__, [ 'DPS_Loyalty_Referrals', 'install' ] );
 
 function dps_loyalty_init() {
     static $instance = null;
@@ -407,6 +821,7 @@ function dps_loyalty_init() {
     if ( null === $instance ) {
         $instance = new DPS_Loyalty_Addon();
         add_action( 'admin_init', [ $instance, 'register_settings' ] );
+        DPS_Loyalty_Referrals::get_instance();
     }
 
     return $instance;
@@ -489,4 +904,189 @@ function dps_loyalty_get_logs( $client_id, $limit = 10 ) {
 
     $logs = array_reverse( $logs );
     return array_slice( $logs, 0, $limit );
+}
+
+function dps_loyalty_parse_money_br( $value ) {
+    $raw = trim( (string) $value );
+    if ( '' === $raw ) {
+        return 0;
+    }
+
+    $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
+    $normalized = str_replace( ' ', '', $normalized );
+    if ( strpos( $normalized, ',' ) !== false ) {
+        $normalized = str_replace( '.', '', $normalized );
+        $normalized = str_replace( ',', '.', $normalized );
+    }
+
+    $float = (float) $normalized;
+    return (int) round( $float * 100 );
+}
+
+function dps_format_money_br( $int ) {
+    $float = (int) $int / 100;
+    return number_format( $float, 2, ',', '.' );
+}
+
+function dps_loyalty_generate_referral_code( $client_id ) {
+    $client_id = (int) $client_id;
+    if ( $client_id <= 0 ) {
+        return '';
+    }
+
+    $existing = get_post_meta( $client_id, '_dps_referral_code', true );
+    if ( $existing ) {
+        return $existing;
+    }
+
+    $attempts = 0;
+    $code     = '';
+    do {
+        $attempts++;
+        $code = strtoupper( wp_generate_password( 8, false, false ) );
+    } while ( $attempts < 5 && dps_referral_code_exists( $code ) );
+
+    update_post_meta( $client_id, '_dps_referral_code', $code );
+    return $code;
+}
+
+function dps_loyalty_get_referral_code( $client_id ) {
+    $client_id = (int) $client_id;
+    if ( $client_id <= 0 ) {
+        return '';
+    }
+
+    $code = get_post_meta( $client_id, '_dps_referral_code', true );
+    if ( ! $code ) {
+        $code = dps_loyalty_generate_referral_code( $client_id );
+    }
+
+    return $code;
+}
+
+function dps_referral_code_exists( $code ) {
+    $clients = get_posts( [
+        'post_type'      => 'dps_cliente',
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'   => '_dps_referral_code',
+                'value' => $code,
+            ],
+        ],
+    ] );
+
+    return ! empty( $clients );
+}
+
+function dps_referrals_create( $data ) {
+    global $wpdb;
+
+    $defaults = [
+        'referrer_client_id' => 0,
+        'referee_client_id'  => null,
+        'referral_code'      => '',
+        'first_booking_id'   => null,
+        'status'             => 'pending',
+        'created_at'         => current_time( 'mysql' ),
+        'reward_type_referrer' => null,
+        'reward_value_referrer' => null,
+        'reward_type_referee' => null,
+        'reward_value_referee' => null,
+        'meta'               => null,
+    ];
+
+    $data = wp_parse_args( $data, $defaults );
+
+    $wpdb->insert(
+        $wpdb->prefix . 'dps_referrals',
+        $data,
+        [ '%d', '%d', '%s', '%d', '%s', '%s', '%s', '%f', '%s', '%f', '%s' ]
+    );
+
+    return $wpdb->insert_id;
+}
+
+function dps_referrals_find_pending_by_referee( $referee_client_id ) {
+    global $wpdb;
+    $table = $wpdb->prefix . 'dps_referrals';
+    return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE referee_client_id = %d AND status = %s ORDER BY created_at ASC LIMIT 1", $referee_client_id, 'pending' ) );
+}
+
+function dps_referrals_mark_rewarded( $referral_id, $first_booking_id, $reward_data ) {
+    global $wpdb;
+    $table = $wpdb->prefix . 'dps_referrals';
+    $data  = [
+        'status'             => 'rewarded',
+        'first_booking_id'   => $first_booking_id,
+        'reward_type_referrer' => isset( $reward_data['reward_type_referrer'] ) ? sanitize_text_field( $reward_data['reward_type_referrer'] ) : null,
+        'reward_value_referrer' => isset( $reward_data['reward_value_referrer'] ) ? $reward_data['reward_value_referrer'] : null,
+        'reward_type_referee' => isset( $reward_data['reward_type_referee'] ) ? sanitize_text_field( $reward_data['reward_type_referee'] ) : null,
+        'reward_value_referee' => isset( $reward_data['reward_value_referee'] ) ? $reward_data['reward_value_referee'] : null,
+    ];
+
+    $wpdb->update( $table, $data, [ 'id' => $referral_id ], [ '%s', '%d', '%s', '%f', '%s', '%f' ], [ '%d' ] );
+}
+
+function dps_referrals_get_settings() {
+    $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
+    $defaults = [
+        'referrals_enabled'          => 0,
+        'referrer_reward_type'       => 'none',
+        'referrer_reward_value'      => 0,
+        'referee_reward_type'        => 'none',
+        'referee_reward_value'       => 0,
+        'referrals_minimum_amount'   => 0,
+        'referrals_max_per_referrer' => 0,
+        'referrals_first_purchase'   => 0,
+    ];
+
+    return wp_parse_args( $settings, $defaults );
+}
+
+function dps_referrals_register_signup( $referral_code, $new_client_id, $client_email = '', $client_phone = '' ) {
+    $instance = DPS_Loyalty_Referrals::get_instance();
+    $instance->maybe_register_referral( $referral_code, $new_client_id, $client_email, $client_phone );
+}
+
+function dps_loyalty_add_credit( $client_id, $amount_in_cents, $context = '' ) {
+    $client_id        = (int) $client_id;
+    $amount_in_cents  = (int) $amount_in_cents;
+
+    if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
+        return 0;
+    }
+
+    $current = dps_loyalty_get_credit( $client_id );
+    $new     = $current + $amount_in_cents;
+    update_post_meta( $client_id, '_dps_credit_balance', $new );
+    dps_loyalty_log_event( $client_id, 'credit_add', $amount_in_cents, $context );
+    return $new;
+}
+
+function dps_loyalty_get_credit( $client_id ) {
+    $client_id = (int) $client_id;
+    if ( $client_id <= 0 ) {
+        return 0;
+    }
+
+    $balance = get_post_meta( $client_id, '_dps_credit_balance', true );
+    return $balance ? (int) $balance : 0;
+}
+
+function dps_loyalty_use_credit( $client_id, $amount_in_cents, $context = '' ) {
+    $client_id       = (int) $client_id;
+    $amount_in_cents = (int) $amount_in_cents;
+
+    if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
+        return 0;
+    }
+
+    $current = dps_loyalty_get_credit( $client_id );
+    $amount  = min( $current, $amount_in_cents );
+    $new     = $current - $amount;
+    update_post_meta( $client_id, '_dps_credit_balance', $new );
+    dps_loyalty_log_event( $client_id, 'credit_use', $amount, $context );
+    return $amount;
 }

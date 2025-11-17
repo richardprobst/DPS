@@ -50,6 +50,30 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 
 ---
 
+### [2025-11-17] v0.3.0 — Indique e Ganhe
+
+#### Added (Adicionado)
+- Criado módulo “Indique e Ganhe” no add-on de fidelidade com códigos únicos, tabela `dps_referrals`, cadastro de indicações e recompensas configuráveis por pontos ou créditos para indicador e indicado.
+- Incluída seção administrativa para ativar o programa, definir limites e tipos de bonificação, além de exibir código/link de convite e status de indicações no Portal do Cliente.
+- Adicionado hook `dps_finance_booking_paid` no fluxo financeiro e campo de código de indicação no cadastro público para registrar relações entre clientes.
+
+#### Changed (Alterado)
+- Nenhuma mudança aplicável.
+
+#### Fixed (Corrigido)
+- Nenhuma correção nesta versão.
+
+#### Removed (Removido)
+- Nada removido nesta versão.
+
+#### Deprecated (Depreciado)
+- Nenhuma funcionalidade depreciada.
+
+#### Security (Segurança)
+- Sem alterações específicas de segurança nesta entrega.
+
+---
+
 ### [2025-11-17] v0.2.0 — Campanhas e fidelidade
 
 #### Added (Adicionado)

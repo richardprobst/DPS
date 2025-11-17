@@ -574,6 +574,9 @@ final class DPS_Client_Portal {
         $this->render_appointment_history( $client_id );
         $this->render_pet_gallery( $client_id );
         $this->render_message_center( $client_id );
+        if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
+            $this->render_referrals_summary( $client_id );
+        }
         $this->render_update_forms( $client_id );
         echo '</div>';
         return ob_get_clean();
@@ -876,6 +879,44 @@ final class DPS_Client_Portal {
         ];
 
         return $labels[ $status ] ?? '';
+    }
+
+    /**
+     * Renderiza um resumo do programa Indique e Ganhe no portal do cliente.
+     *
+     * @param int $client_id ID do cliente.
+     */
+    private function render_referrals_summary( $client_id ) {
+        $code = dps_loyalty_get_referral_code( $client_id );
+        if ( ! $code ) {
+            return;
+        }
+
+        $base_url  = '';
+        $page_id   = (int) get_option( 'dps_registration_page_id', 0 );
+        $base_url  = $page_id ? get_permalink( $page_id ) : site_url( '/cadastro/' );
+        $share_url = add_query_arg( 'ref', rawurlencode( $code ), $base_url );
+
+        global $wpdb;
+        $table        = $wpdb->prefix . 'dps_referrals';
+        $rewarded_cnt = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE referrer_client_id = %d AND status = %s", $client_id, 'rewarded' ) );
+        $points       = function_exists( 'dps_loyalty_get_points' ) ? dps_loyalty_get_points( $client_id ) : 0;
+        $credit       = function_exists( 'dps_loyalty_get_credit' ) ? dps_loyalty_get_credit( $client_id ) : 0;
+
+        echo '<section class="dps-portal-section dps-portal-referrals">';
+        echo '<h3>' . esc_html__( 'Indique e Ganhe', 'desi-pet-shower' ) . '</h3>';
+        echo '<p>' . esc_html__( 'Compartilhe seu código e acompanhe as recompensas.', 'desi-pet-shower' ) . '</p>';
+        echo '<p class="dps-referral-code"><strong>' . esc_html__( 'Seu código:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $code ) . '</p>';
+        echo '<p class="dps-referral-link"><strong>' . esc_html__( 'Seu link:', 'desi-pet-shower' ) . '</strong> <a href="' . esc_url( $share_url ) . '" target="_blank" rel="noopener">' . esc_html( $share_url ) . '</a></p>';
+        echo '<ul class="dps-referral-stats">';
+        echo '<li><strong>' . esc_html__( 'Indicações com recompensa:', 'desi-pet-shower' ) . '</strong> ' . esc_html( (int) $rewarded_cnt ) . '</li>';
+        echo '<li><strong>' . esc_html__( 'Pontos acumulados:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $points ) . '</li>';
+        if ( $credit ) {
+            $formatted_credit = function_exists( 'dps_format_money_br' ) ? dps_format_money_br( $credit ) : $credit;
+            echo '<li><strong>' . esc_html__( 'Créditos disponíveis:', 'desi-pet-shower' ) . '</strong> R$ ' . esc_html( $formatted_credit ) . '</li>';
+        }
+        echo '</ul>';
+        echo '</section>';
     }
 
     /**
