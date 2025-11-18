@@ -346,6 +346,14 @@ class DPS_Payment_Addon {
             return;
         }
         $raw_body = file_get_contents( 'php://input' );
+        $payload  = json_decode( $raw_body, true );
+
+        // Ignora requisições comuns do site que não contenham pistas de notificação
+        // do Mercado Pago para evitar respostas 401 em acessos legítimos.
+        if ( ! $this->is_mp_notification_request( $payload ) ) {
+            return;
+        }
+
         $this->log_notification( 'Notificação do Mercado Pago recebida', [ 'raw' => $raw_body, 'get' => $_GET ] );
         if ( ! $this->validate_mp_webhook_request() ) {
             $this->log_notification( 'Falha na validação do webhook do Mercado Pago', [] );
@@ -358,7 +366,8 @@ class DPS_Payment_Addon {
         $payment_id = '';
         $topic      = '';
         $notification_id = '';
-        $payload         = [];
+        $payload         = is_array( $payload ) ? $payload : [];
+
         // 1. IPN padrão: ?topic=payment&id=123
         if ( isset( $_GET['topic'] ) && isset( $_GET['id'] ) ) {
             $topic      = sanitize_text_field( wp_unslash( $_GET['topic'] ) );
@@ -371,7 +380,6 @@ class DPS_Payment_Addon {
         }
         // 3. Webhook via POST JSON
         if ( ! $payment_id && 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
-            $payload = json_decode( $raw_body, true );
             if ( is_array( $payload ) ) {
                 // Alguns webhooks enviam { "topic": "payment", "id": "123" }
                 if ( isset( $payload['topic'] ) && isset( $payload['id'] ) ) {
@@ -726,6 +734,31 @@ class DPS_Payment_Addon {
         $message    .= sprintf( "Status do pagamento: %s\n", $payment_data['status'] ?? '' );
         $message    .= sprintf( "ID do pagamento no Mercado Pago: %s\n", $payment_data['id'] ?? '' );
         wp_mail( $notify_email, $subject, $message );
+    }
+
+    /**
+     * Verifica se a requisição atual contém dados característicos de notificações
+     * do Mercado Pago, evitando interferir em acessos normais do site.
+     *
+     * @param array|null $payload Corpo JSON já decodificado, quando houver.
+     * @return bool
+     */
+    private function is_mp_notification_request( $payload ) {
+        $has_query_params = ( isset( $_GET['topic'] ) && isset( $_GET['id'] ) )
+            || ( isset( $_GET['data.topic'] ) && isset( $_GET['data.id'] ) );
+
+        $has_auth_markers = isset( $_GET['token'] ) || isset( $_GET['secret'] )
+            || isset( $_SERVER['HTTP_X_WEBHOOK_SECRET'] )
+            || ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) && stripos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ), 'bearer ' ) === 0 );
+
+        $has_payload_data = is_array( $payload ) && (
+            ( isset( $payload['topic'] ) && isset( $payload['id'] ) ) ||
+            ( isset( $payload['data'] ) && isset( $payload['data']['id'] ) ) ||
+            ( isset( $payload['type'] ) && isset( $payload['data'] ) ) ||
+            ( isset( $payload['action'] ) && isset( $payload['data'] ) )
+        );
+
+        return $has_query_params || $has_auth_markers || $has_payload_data;
     }
 
     /**
