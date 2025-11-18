@@ -32,7 +32,8 @@ class DPS_Stock_Addon {
         add_action( 'init', [ $this, 'register_stock_cpt' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_meta_boxes' ] );
         add_action( 'save_post_' . self::CPT, [ $this, 'save_stock_meta' ], 10, 3 );
-        add_action( 'admin_menu', [ $this, 'register_menu' ] );
+        // Registra menus após o núcleo para aproveitar o menu principal existente.
+        add_action( 'admin_menu', [ $this, 'register_menu' ], 99 );
 
         // Integração com agendamentos: baixa estoque quando o atendimento é concluído.
         add_action( 'dps_base_after_save_appointment', [ $this, 'maybe_handle_appointment_completion' ], 10, 2 );
@@ -168,24 +169,28 @@ class DPS_Stock_Addon {
      * Adiciona submenu na área administrativa para visualizar o estoque.
      */
     public function register_menu() {
-        if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
-            add_menu_page(
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                self::CAPABILITY,
+        // O núcleo cria o menu principal "desi-pet-shower"; aqui apenas anexamos o submenu de estoque.
+        if ( isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
+            add_submenu_page(
                 'desi-pet-shower',
-                '__return_null',
-                'dashicons-pets'
+                __( 'Estoque DPS', 'desi-pet-shower' ),
+                __( 'Estoque DPS', 'desi-pet-shower' ),
+                self::CAPABILITY,
+                'dps-stock',
+                [ $this, 'render_stock_page' ]
             );
+
+            return;
         }
 
-        add_submenu_page(
-            'desi-pet-shower',
+        // Fallback: quando o núcleo não está ativo, criamos menu próprio com slug distinto.
+        add_menu_page(
             __( 'Estoque DPS', 'desi-pet-shower' ),
             __( 'Estoque DPS', 'desi-pet-shower' ),
             self::CAPABILITY,
-            'dps-stock',
-            [ $this, 'render_stock_page' ]
+            'dps-stock-root',
+            [ $this, 'render_stock_page' ],
+            'dashicons-products'
         );
     }
 
