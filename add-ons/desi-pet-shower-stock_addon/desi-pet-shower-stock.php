@@ -22,15 +22,18 @@ class DPS_Stock_Addon {
 
     const CPT = 'dps_stock_item';
     const ALERT_OPTION = 'dps_stock_alerts';
+    const CAPABILITY = 'dps_manage_stock';
 
     /**
      * Inicializa hooks do add-on.
      */
     public function __construct() {
+        add_action( 'init', [ self::class, 'ensure_roles_have_capability' ] );
         add_action( 'init', [ $this, 'register_stock_cpt' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_meta_boxes' ] );
         add_action( 'save_post_' . self::CPT, [ $this, 'save_stock_meta' ], 10, 3 );
-        add_action( 'admin_menu', [ $this, 'register_menu' ] );
+        // Registra menus após o núcleo para aproveitar o menu principal existente.
+        add_action( 'admin_menu', [ $this, 'register_menu' ], 99 );
 
         // Integração com agendamentos: baixa estoque quando o atendimento é concluído.
         add_action( 'dps_base_after_save_appointment', [ $this, 'maybe_handle_appointment_completion' ], 10, 2 );
@@ -40,9 +43,25 @@ class DPS_Stock_Addon {
      * Rotinas de ativação: registra o CPT e flush das regras.
      */
     public static function activate() {
+        self::ensure_roles_have_capability();
         $self = new self();
         $self->register_stock_cpt();
         flush_rewrite_rules();
+    }
+
+    /**
+     * Garante que administradores e recepção possam gerenciar estoque.
+     */
+    public static function ensure_roles_have_capability() {
+        $roles = [ 'administrator', 'dps_reception' ];
+
+        foreach ( $roles as $role_slug ) {
+            $role = get_role( $role_slug );
+
+            if ( $role && ! $role->has_cap( self::CAPABILITY ) ) {
+                $role->add_cap( self::CAPABILITY );
+            }
+        }
     }
 
     /**
@@ -55,16 +74,16 @@ class DPS_Stock_Addon {
         ];
 
         $capabilities = [
-            'publish_posts'       => 'manage_options',
-            'edit_posts'          => 'manage_options',
-            'edit_others_posts'   => 'manage_options',
-            'delete_posts'        => 'manage_options',
-            'delete_others_posts' => 'manage_options',
-            'read_private_posts'  => 'manage_options',
-            'edit_post'           => 'manage_options',
-            'delete_post'         => 'manage_options',
-            'read_post'           => 'manage_options',
-            'create_posts'        => 'manage_options',
+            'publish_posts'       => self::CAPABILITY,
+            'edit_posts'          => self::CAPABILITY,
+            'edit_others_posts'   => self::CAPABILITY,
+            'delete_posts'        => self::CAPABILITY,
+            'delete_others_posts' => self::CAPABILITY,
+            'read_private_posts'  => self::CAPABILITY,
+            'edit_post'           => self::CAPABILITY,
+            'delete_post'         => self::CAPABILITY,
+            'read_post'           => self::CAPABILITY,
+            'create_posts'        => self::CAPABILITY,
         ];
 
         $args = [
@@ -101,7 +120,7 @@ class DPS_Stock_Addon {
      * @param WP_Post $post Objeto do post atual.
      */
     public function render_stock_metabox( $post ) {
-        if ( ! current_user_can( 'manage_options' ) ) {
+        if ( ! current_user_can( self::CAPABILITY ) ) {
             return;
         }
 
@@ -133,7 +152,7 @@ class DPS_Stock_Addon {
             return;
         }
 
-        if ( ! current_user_can( 'manage_options' ) ) {
+        if ( ! current_user_can( self::CAPABILITY ) ) {
             return;
         }
 
@@ -150,24 +169,28 @@ class DPS_Stock_Addon {
      * Adiciona submenu na área administrativa para visualizar o estoque.
      */
     public function register_menu() {
-        if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
-            add_menu_page(
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                'manage_options',
+        // O núcleo cria o menu principal "desi-pet-shower"; aqui apenas anexamos o submenu de estoque.
+        if ( isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
+            add_submenu_page(
                 'desi-pet-shower',
-                '__return_null',
-                'dashicons-pets'
+                __( 'Estoque DPS', 'desi-pet-shower' ),
+                __( 'Estoque DPS', 'desi-pet-shower' ),
+                self::CAPABILITY,
+                'dps-stock',
+                [ $this, 'render_stock_page' ]
             );
+
+            return;
         }
 
-        add_submenu_page(
-            'desi-pet-shower',
+        // Fallback: quando o núcleo não está ativo, criamos menu próprio com slug distinto.
+        add_menu_page(
             __( 'Estoque DPS', 'desi-pet-shower' ),
             __( 'Estoque DPS', 'desi-pet-shower' ),
-            'manage_options',
-            'dps-stock',
-            [ $this, 'render_stock_page' ]
+            self::CAPABILITY,
+            'dps-stock-root',
+            [ $this, 'render_stock_page' ],
+            'dashicons-products'
         );
     }
 
@@ -175,7 +198,7 @@ class DPS_Stock_Addon {
      * Renderiza a página de listagem e alertas do estoque.
      */
     public function render_stock_page() {
-        if ( ! current_user_can( 'manage_options' ) ) {
+        if ( ! current_user_can( self::CAPABILITY ) ) {
             wp_die( esc_html__( 'Você não possui permissão para acessar esta página.', 'desi-pet-shower' ) );
         }
 
