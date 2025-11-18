@@ -15,10 +15,7 @@ class DPS_Base_Frontend {
      * @return bool
      */
     private static function can_manage() {
-        return current_user_can( 'manage_options' )
-            || current_user_can( 'dps_manage_clients' )
-            || current_user_can( 'dps_manage_pets' )
-            || current_user_can( 'dps_manage_appointments' );
+        return current_user_can( 'manage_options' );
     }
 
     /**
@@ -384,6 +381,10 @@ class DPS_Base_Frontend {
         // Verifica nonce
         if ( ! isset( $_POST['dps_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce'] ) ), 'dps_action' ) ) {
             return;
+        }
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
         $action = isset( $_POST['dps_action'] ) ? sanitize_key( wp_unslash( $_POST['dps_action'] ) ) : '';
         switch ( $action ) {
