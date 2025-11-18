@@ -906,26 +906,30 @@ function dps_loyalty_get_logs( $client_id, $limit = 10 ) {
     return array_slice( $logs, 0, $limit );
 }
 
-function dps_loyalty_parse_money_br( $value ) {
-    $raw = trim( (string) $value );
-    if ( '' === $raw ) {
-        return 0;
-    }
+if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
+    function dps_loyalty_parse_money_br( $value ) {
+        $raw = trim( (string) $value );
+        if ( '' === $raw ) {
+            return 0;
+        }
 
-    $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
-    $normalized = str_replace( ' ', '', $normalized );
-    if ( strpos( $normalized, ',' ) !== false ) {
-        $normalized = str_replace( '.', '', $normalized );
-        $normalized = str_replace( ',', '.', $normalized );
-    }
+        $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
+        $normalized = str_replace( ' ', '', $normalized );
+        if ( strpos( $normalized, ',' ) !== false ) {
+            $normalized = str_replace( '.', '', $normalized );
+            $normalized = str_replace( ',', '.', $normalized );
+        }
 
-    $float = (float) $normalized;
-    return (int) round( $float * 100 );
+        $float = (float) $normalized;
+        return (int) round( $float * 100 );
+    }
 }
 
-function dps_format_money_br( $int ) {
-    $float = (int) $int / 100;
-    return number_format( $float, 2, ',', '.' );
+if ( ! function_exists( 'dps_format_money_br' ) ) {
+    function dps_format_money_br( $int ) {
+        $float = (int) $int / 100;
+        return number_format( $float, 2, ',', '.' );
+    }
 }
 
 function dps_loyalty_generate_referral_code( $client_id ) {
