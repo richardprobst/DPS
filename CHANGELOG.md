@@ -50,6 +50,11 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 
 ---
 
+### [Unreleased]
+
+#### Fixed (Corrigido)
+- Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
+
 ### [2025-11-17] v0.3.0 — Indique e Ganhe
 
 #### Added (Adicionado)
