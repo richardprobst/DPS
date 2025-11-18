@@ -490,8 +490,10 @@ class DPS_Base_Frontend {
             $client_id = intval( $_GET['id'] );
             return self::render_client_page( $client_id );
         }
-        // Verifica se o usuário atual está logado e possui permissão de administrador
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+        $can_manage = self::can_manage();
+
+        // Verifica se o usuário atual está logado e possui permissão para gerenciar o painel
+        if ( ! is_user_logged_in() || ! $can_manage ) {
             $login_url = wp_login_url( get_permalink() );
             return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
@@ -527,7 +529,9 @@ class DPS_Base_Frontend {
      * @return string
      */
     public static function render_settings() {
-        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+        $can_manage = self::can_manage();
+
+        if ( ! is_user_logged_in() || ! $can_manage ) {
             $login_url = wp_login_url( get_permalink() );
             return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar esta área.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }

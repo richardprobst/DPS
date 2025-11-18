@@ -40,6 +40,11 @@ final class DPS_Client_Portal {
     private function __construct() {
         // Inicia sessão para autenticar clientes sem utilizar o sistema de usuários do WordPress
         add_action( 'init', function() {
+            // Evita avisos de cabeçalho já enviado e não interfere em requisições AJAX/REST.
+            if ( headers_sent() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+                return;
+            }
+
             if ( ! session_id() ) {
                 // Start PHP session so we can track logged‑in clients independent of WP users.
                 session_start();
