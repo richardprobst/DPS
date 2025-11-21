@@ -678,37 +678,66 @@ class DPS_Base_Frontend {
         if ( $edit_id ) {
             echo '<input type="hidden" name="client_id" value="' . esc_attr( $edit_id ) . '">';
         }
+        
+        // Grupo: Dados Pessoais
+        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</legend>';
+        
         // Name
         $name_value = $editing ? $editing->post_title : '';
         echo '<p><label>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '<br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
         // CPF
         $cpf_val = $meta['cpf'] ?? '';
         echo '<p><label>' . esc_html__( 'CPF', 'desi-pet-shower' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '"></label></p>';
+        // Birth date
+        $birth_val = $meta['birth'] ?? '';
+        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        
+        echo '</fieldset>';
+        
+        // Grupo: Contato
+        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Contato', 'desi-pet-shower' ) . '</legend>';
+        
         // Phone / WhatsApp
         $phone_val = $meta['phone'] ?? '';
         echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . '<br><input type="text" name="client_phone" value="' . esc_attr( $phone_val ) . '" required></label></p>';
         // Email
         $email_val = $meta['email'] ?? '';
         echo '<p><label>Email<br><input type="email" name="client_email" value="' . esc_attr( $email_val ) . '"></label></p>';
-        // Birth date
-        $birth_val = $meta['birth'] ?? '';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        
+        echo '</fieldset>';
+        
+        // Grupo: Redes Sociais
+        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Redes Sociais', 'desi-pet-shower' ) . '</legend>';
+        
         // Instagram
         $insta_val = $meta['instagram'] ?? '';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $insta_val ) . '" placeholder="@usuario"></label></p>';
         // Facebook
         $fb_val = $meta['facebook'] ?? '';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $fb_val ) . '"></label></p>';
-        // Photo authorization
-        $auth = $meta['photo_auth'] ?? '';
-        $checked = $auth ? 'checked' : '';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</label></p>';
+        
+        echo '</fieldset>';
+        
+        // Grupo: Endereço e Preferências
+        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
+        echo '<legend class="dps-legend">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
+        
         // Address
         $addr_val = $meta['address'] ?? '';
         echo '<p><label>' . esc_html__( 'Endereço completo', 'desi-pet-shower' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
         // Referral (Como nos conheceu?)
         $ref_val = $meta['referral'] ?? '';
         echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '"></label></p>';
+        // Photo authorization
+        $auth = $meta['photo_auth'] ?? '';
+        $checked = $auth ? 'checked' : '';
+        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</label></p>';
+        
+        echo '</fieldset>';
+        
         // Campos ocultos para latitude e longitude (admin) - valores predefinidos se estiver editando
         $lat_admin = isset( $meta['lat'] ) ? $meta['lat'] : '';
         $lng_admin = isset( $meta['lng'] ) ? $meta['lng'] : '';
@@ -1774,6 +1803,10 @@ EOT;
                 update_post_meta( $client_id, 'client_lng', $lng );
             }
         }
+        // Adiciona mensagem de sucesso
+        if ( $client_id ) {
+            DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
+        }
         // Redireciona para a aba de clientes
         wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
         exit;
@@ -1863,6 +1896,10 @@ EOT;
                 wp_update_attachment_metadata( $attach_id, $attach_data );
                 update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
             }
+        }
+        // Adiciona mensagem de sucesso
+        if ( $pet_id ) {
+            DPS_Message_Helper::add_success( __( 'Pet salvo com sucesso!', 'desi-pet-shower' ) );
         }
         // Redireciona para aba pets
         wp_safe_redirect( self::get_redirect_url( 'pets' ) );
@@ -2107,6 +2144,8 @@ EOT;
                     ] );
                 }
             }
+            // Adiciona mensagem de sucesso
+            DPS_Message_Helper::add_success( __( 'Agendamento de assinatura salvo com sucesso!', 'desi-pet-shower' ) );
             // Redireciona após salvar assinatura
             self::redirect_with_pending_notice( $client_id );
         }
@@ -2143,6 +2182,8 @@ EOT;
                     do_action( 'dps_base_after_save_appointment', $new_appt, 'simple' );
                 }
             }
+            // Adiciona mensagem de sucesso
+            DPS_Message_Helper::add_success( __( 'Agendamentos salvos com sucesso!', 'desi-pet-shower' ) );
             // Após criar todos os agendamentos, redireciona
             self::redirect_with_pending_notice( $client_id );
         }
@@ -2266,6 +2307,8 @@ EOT;
                 }
             }
         }
+        // Adiciona mensagem de sucesso
+        DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
         // Redireciona para aba agendas
         self::redirect_with_pending_notice( $client_id );
     }
