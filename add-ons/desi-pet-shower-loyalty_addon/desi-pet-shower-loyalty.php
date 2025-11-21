@@ -19,7 +19,48 @@ class DPS_Loyalty_Addon {
 
     const OPTION_KEY = 'dps_loyalty_settings';
 
+    /**
+     * Helper para registrar o CPT de campanhas.
+     *
+     * @var DPS_CPT_Helper|null
+     */
+    private $cpt_helper;
+
     public function __construct() {
+        if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
+            require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
+        }
+
+        if ( class_exists( 'DPS_CPT_Helper' ) ) {
+            $this->cpt_helper = new DPS_CPT_Helper(
+                'dps_campaign',
+                [
+                    'name'               => _x( 'Campanhas', 'post type general name', 'desi-pet-shower' ),
+                    'singular_name'      => _x( 'Campanha', 'post type singular name', 'desi-pet-shower' ),
+                    'menu_name'          => _x( 'Campanhas', 'admin menu', 'desi-pet-shower' ),
+                    'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'desi-pet-shower' ),
+                    'add_new'            => _x( 'Adicionar nova', 'campaign', 'desi-pet-shower' ),
+                    'add_new_item'       => __( 'Adicionar nova campanha', 'desi-pet-shower' ),
+                    'new_item'           => __( 'Nova campanha', 'desi-pet-shower' ),
+                    'edit_item'          => __( 'Editar campanha', 'desi-pet-shower' ),
+                    'view_item'          => __( 'Ver campanha', 'desi-pet-shower' ),
+                    'all_items'          => __( 'Todas as campanhas', 'desi-pet-shower' ),
+                    'search_items'       => __( 'Buscar campanhas', 'desi-pet-shower' ),
+                    'not_found'          => __( 'Nenhuma campanha encontrada.', 'desi-pet-shower' ),
+                    'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'desi-pet-shower' ),
+                ],
+                [
+                    'public'          => false,
+                    'show_ui'         => true,
+                    'show_in_menu'    => false,
+                    'supports'        => [ 'title', 'editor' ],
+                    'capability_type' => 'post',
+                    'map_meta_cap'    => true,
+                    'has_archive'     => false,
+                ]
+            );
+        }
+
         add_action( 'init', [ $this, 'register_post_type' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_campaign_metaboxes' ] );
         add_action( 'save_post_dps_campaign', [ $this, 'save_campaign_meta' ] );
@@ -30,34 +71,11 @@ class DPS_Loyalty_Addon {
     }
 
     public function register_post_type() {
-        $labels = [
-            'name'               => _x( 'Campanhas', 'post type general name', 'desi-pet-shower' ),
-            'singular_name'      => _x( 'Campanha', 'post type singular name', 'desi-pet-shower' ),
-            'menu_name'          => _x( 'Campanhas', 'admin menu', 'desi-pet-shower' ),
-            'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'desi-pet-shower' ),
-            'add_new'            => _x( 'Adicionar nova', 'campaign', 'desi-pet-shower' ),
-            'add_new_item'       => __( 'Adicionar nova campanha', 'desi-pet-shower' ),
-            'new_item'           => __( 'Nova campanha', 'desi-pet-shower' ),
-            'edit_item'          => __( 'Editar campanha', 'desi-pet-shower' ),
-            'view_item'          => __( 'Ver campanha', 'desi-pet-shower' ),
-            'all_items'          => __( 'Todas as campanhas', 'desi-pet-shower' ),
-            'search_items'       => __( 'Buscar campanhas', 'desi-pet-shower' ),
-            'not_found'          => __( 'Nenhuma campanha encontrada.', 'desi-pet-shower' ),
-            'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'desi-pet-shower' ),
-        ];
+        if ( ! $this->cpt_helper ) {
+            return;
+        }
 
-        $args = [
-            'labels'             => $labels,
-            'public'             => false,
-            'show_ui'            => true,
-            'show_in_menu'       => false,
-            'supports'           => [ 'title', 'editor' ],
-            'capability_type'    => 'post',
-            'map_meta_cap'       => true,
-            'has_archive'        => false,
-        ];
-
-        register_post_type( 'dps_campaign', $args );
+        $this->cpt_helper->register();
     }
 
     public function register_campaign_metaboxes() {

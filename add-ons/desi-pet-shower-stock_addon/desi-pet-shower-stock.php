@@ -25,9 +25,52 @@ class DPS_Stock_Addon {
     const CAPABILITY = 'dps_manage_stock';
 
     /**
+     * Helper para registrar o CPT de estoque.
+     *
+     * @var DPS_CPT_Helper|null
+     */
+    private $cpt_helper;
+
+    /**
      * Inicializa hooks do add-on.
      */
     public function __construct() {
+        if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
+            require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
+        }
+
+        if ( class_exists( 'DPS_CPT_Helper' ) ) {
+            $stock_capabilities = [
+                'publish_posts'       => self::CAPABILITY,
+                'edit_posts'          => self::CAPABILITY,
+                'edit_others_posts'   => self::CAPABILITY,
+                'delete_posts'        => self::CAPABILITY,
+                'delete_others_posts' => self::CAPABILITY,
+                'read_private_posts'  => self::CAPABILITY,
+                'edit_post'           => self::CAPABILITY,
+                'delete_post'         => self::CAPABILITY,
+                'read_post'           => self::CAPABILITY,
+                'create_posts'        => self::CAPABILITY,
+            ];
+
+            $this->cpt_helper = new DPS_CPT_Helper(
+                self::CPT,
+                [
+                    'name'          => __( 'Estoque', 'desi-pet-shower' ),
+                    'singular_name' => __( 'Item de estoque', 'desi-pet-shower' ),
+                ],
+                [
+                    'public'          => false,
+                    'show_ui'         => true,
+                    'show_in_menu'    => false,
+                    'supports'        => [ 'title' ],
+                    'capability_type' => 'post',
+                    'map_meta_cap'    => true,
+                    'capabilities'    => $stock_capabilities,
+                ]
+            );
+        }
+
         add_action( 'init', [ self::class, 'ensure_roles_have_capability' ] );
         add_action( 'init', [ $this, 'register_stock_cpt' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_meta_boxes' ] );
@@ -68,36 +111,11 @@ class DPS_Stock_Addon {
      * Registra o tipo de post para itens de estoque.
      */
     public function register_stock_cpt() {
-        $labels = [
-            'name'          => __( 'Estoque', 'desi-pet-shower' ),
-            'singular_name' => __( 'Item de estoque', 'desi-pet-shower' ),
-        ];
+        if ( ! $this->cpt_helper ) {
+            return;
+        }
 
-        $capabilities = [
-            'publish_posts'       => self::CAPABILITY,
-            'edit_posts'          => self::CAPABILITY,
-            'edit_others_posts'   => self::CAPABILITY,
-            'delete_posts'        => self::CAPABILITY,
-            'delete_others_posts' => self::CAPABILITY,
-            'read_private_posts'  => self::CAPABILITY,
-            'edit_post'           => self::CAPABILITY,
-            'delete_post'         => self::CAPABILITY,
-            'read_post'           => self::CAPABILITY,
-            'create_posts'        => self::CAPABILITY,
-        ];
-
-        $args = [
-            'labels'             => $labels,
-            'public'             => false,
-            'show_ui'            => true,
-            'show_in_menu'       => false,
-            'supports'           => [ 'title' ],
-            'capability_type'    => 'post',
-            'map_meta_cap'       => true,
-            'capabilities'       => $capabilities,
-        ];
-
-        register_post_type( self::CPT, $args );
+        $this->cpt_helper->register();
     }
 
     /**

@@ -23,6 +23,8 @@ define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 
 // Funções auxiliares de template
 require_once DPS_BASE_DIR . 'includes/template-functions.php';
+// Helper para registro de CPTs
+require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
 // Logger e UI de logs
 require_once DPS_BASE_DIR . 'includes/class-dps-logger.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-logs-admin-page.php';
