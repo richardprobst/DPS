@@ -95,7 +95,7 @@
           $summary.show();
           
           // Update counter
-          $counter.text(selected.length + ' ' + (selected.length === 1 ? 'selecionado' : 'selecionados')).show();
+          $counter.text(selected.length + ' ' + (selected.length === 1 ? dpsBaseL10n.selectedSingle : dpsBaseL10n.selectedMultiple)).show();
         } else {
           $summary.hide();
           $counter.hide();
