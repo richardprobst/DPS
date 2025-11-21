@@ -4,6 +4,7 @@
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
 - A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, `dps_settings_nav_tabs`, etc.).
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis.
+- A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
 
 ## Add-ons complementares (`add-ons/`)
 ### Agenda (`desi-pet-shower-agenda_addon`)
@@ -33,6 +34,7 @@
 
 ### Financeiro (`desi-pet-shower-finance_addon`)
 - Acrescenta a aba "Financeiro", garante a criação das tabelas `dps_transacoes` e `dps_parcelas`, sincroniza alterações vindas dos agendamentos e oferece formulários para registrar, quitar (inclusive parcialmente) ou excluir transações, além de gerar documentos e shortcodes auxiliares.
+- Consome o hook `dps_finance_cleanup_for_appointment` para remover lançamentos associados sempre que um agendamento é excluído, centralizando a limpeza financeira.
 
 ### Pagamentos (`desi-pet-shower-payment_addon`)
 - Gera links de checkout no Mercado Pago sempre que agendamentos finalizados são salvos, injeta mensagens personalizadas no WhatsApp da agenda e provê tela de configurações com token de acesso e chave PIX, além de tratar notificações de *webhook* cedo no ciclo de inicialização.

@@ -70,6 +70,7 @@ class DPS_Finance_Addon {
         // durante o init para evitar problemas em instalações que não executam
         // rotinas de ativação.
         add_action( 'init', [ $this, 'maybe_create_transacoes_table' ] );
+        add_action( 'dps_finance_cleanup_for_appointment', [ $this, 'cleanup_transactions_for_appointment' ] );
 
         // Não cria mais uma página pública para documentos; apenas registra o shortcode
         add_shortcode( 'dps_fin_docs', [ $this, 'render_fin_docs_shortcode' ] );
@@ -334,6 +335,29 @@ class DPS_Finance_Addon {
             wp_redirect( $redir );
             exit;
         }
+    }
+
+    /**
+     * Remove transações associadas a um agendamento excluído.
+     *
+     * @param int $appointment_id ID do agendamento removido.
+     */
+    public function cleanup_transactions_for_appointment( $appointment_id ) {
+        global $wpdb;
+
+        $appointment_id = (int) $appointment_id;
+        if ( ! $appointment_id ) {
+            return;
+        }
+
+        $table        = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+
+        if ( $table_exists !== $table ) {
+            return;
+        }
+
+        $wpdb->delete( $table, [ 'agendamento_id' => $appointment_id ], [ '%d' ] );
     }
 
     /**
