@@ -366,8 +366,8 @@ Ao alterar CPTs ou tabelas:
 
 ### Documentação adicional
 
-- Documento de análise de refatoração em `REFACTORING_ANALYSIS.md` com problemas conhecidos de código e sugestões de melhoria
+- Documento de análise de refatoração em `../../docs/refactoring/REFACTORING_ANALYSIS.md` com problemas conhecidos de código e sugestões de melhoria
 - Exemplos práticos de refatoração em `includes/refactoring-examples.php`
-- Padrões de desenvolvimento de add-ons detalhados na seção correspondente de `ANALYSIS.md`
+- Padrões de desenvolvimento de add-ons detalhados na seção correspondente de `../../ANALYSIS.md`
 
-Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.
+Para o histórico completo de mudanças, consulte `../../CHANGELOG.md` na raiz do repositório.
