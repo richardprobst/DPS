@@ -23,8 +23,9 @@ O plugin base oferece classes utilitárias para padronizar operações comuns e 
 
 **Exemplos práticos**:
 ```php
-// Converter valor do formulário para centavos
-$valor_centavos = DPS_Money_Helper::parse_brazilian_format( $_POST['preco'] );
+// Validar e converter valor do formulário para centavos
+$preco_raw = isset( $_POST['preco'] ) ? sanitize_text_field( $_POST['preco'] ) : '';
+$valor_centavos = DPS_Money_Helper::parse_brazilian_format( $preco_raw );
 
 // Exibir valor formatado na tela
 echo 'R$ ' . DPS_Money_Helper::format_to_brazilian( $valor_centavos );
