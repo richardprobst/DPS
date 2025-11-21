@@ -28,6 +28,13 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
 - `CHANGELOG.md` deve refletir o que chega ao usuário ou integrador; siga a estrutura padrão de categorias.
 - Inclua exemplos de uso ou contratos de hooks ao criar novas extensões.
 - Use tabelas ou listas para requisitos de ambiente, permissões e dependências externas.
+- **Novos add-ons**: ao criar um novo add-on, adicione uma seção descritiva no `ANALYSIS.md` incluindo:
+  - Nome do add-on e diretório correspondente
+  - Propósito e funcionalidades principais
+  - Hooks utilizados ou expostos
+  - Dependências de outros add-ons, se aplicável
+  - Tabelas de banco de dados criadas ou utilizadas
+  - Shortcodes, CPTs ou capabilities adicionados
 
 ## Convenções de código
 - WordPress: indentação de 4 espaços; funções globais em `snake_case`; métodos e propriedades de classe em `camelCase`.

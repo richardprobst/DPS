@@ -55,27 +55,14 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 #### Fixed (Corrigido)
 - Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
 
+---
+
 ### [2025-11-17] v0.3.0 — Indique e Ganhe
 
 #### Added (Adicionado)
-- Criado módulo “Indique e Ganhe” no add-on de fidelidade com códigos únicos, tabela `dps_referrals`, cadastro de indicações e recompensas configuráveis por pontos ou créditos para indicador e indicado.
+- Criado módulo "Indique e Ganhe" no add-on de fidelidade com códigos únicos, tabela `dps_referrals`, cadastro de indicações e recompensas configuráveis por pontos ou créditos para indicador e indicado.
 - Incluída seção administrativa para ativar o programa, definir limites e tipos de bonificação, além de exibir código/link de convite e status de indicações no Portal do Cliente.
 - Adicionado hook `dps_finance_booking_paid` no fluxo financeiro e campo de código de indicação no cadastro público para registrar relações entre clientes.
-
-#### Changed (Alterado)
-- Nenhuma mudança aplicável.
-
-#### Fixed (Corrigido)
-- Nenhuma correção nesta versão.
-
-#### Removed (Removido)
-- Nada removido nesta versão.
-
-#### Deprecated (Depreciado)
-- Nenhuma funcionalidade depreciada.
-
-#### Security (Segurança)
-- Sem alterações específicas de segurança nesta entrega.
 
 ---
 
@@ -86,24 +73,9 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 - Registrado CPT `dps_campaign` com metabox de elegibilidade e rotina administrativa para identificar clientes alvo.
 - Incluída tela "Campanhas & Fidelidade" no menu principal do DPS com resumo de pontos por cliente e gatilho manual de campanhas.
 
-#### Changed (Alterado)
-- Nenhuma mudança aplicável.
-
-#### Fixed (Corrigido)
-- Nenhuma correção nesta versão.
-
-#### Removed (Removido)
-- Nada removido nesta versão.
-
-#### Deprecated (Depreciado)
-- Nenhuma funcionalidade depreciada.
-
-#### Security (Segurança)
-- Sem alterações específicas de segurança nesta entrega.
-
 ---
 
-### [YYYY-MM-DD] v0.1.0 — Primeira versão pública
+### [2024-01-15] v0.1.0 — Primeira versão pública
 
 #### Added (Adicionado)
 - Estrutura inicial do plugin base com hooks `dps_base_nav_tabs_*` e `dps_settings_*`.
