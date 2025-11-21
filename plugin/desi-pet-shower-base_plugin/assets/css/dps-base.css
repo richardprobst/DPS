@@ -180,40 +180,27 @@
 }
 .dps-appointments-group {
     margin-top: 20px;
-    padding: 16px;
-    border-radius: 10px;
-    border-left: 6px solid #0d6efd;
-    background: #f4f9ff;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    padding: 20px;
+    border-radius: 4px;
+    border-left: 4px solid #0ea5e9;
+    background: #f9fafb;
 }
 .dps-appointments-group h4 {
     margin-top: 0;
     margin-bottom: 12px;
 }
-.dps-appointments-group--overdue {
-    border-left-color: #dc3545;
-    background: #fff5f5;
-}
-.dps-appointments-group--finalized {
-    border-left-color: #198754;
-    background: #f3fdf7;
-}
-.dps-appointments-group--upcoming {
-    border-left-color: #0d6efd;
-    background: #f4f9ff;
-}
 .dps-table tr.status-pendente {
-    background: #fff9e6;
+    background: #fef3c7;
 }
 .dps-table tr.status-finalizado {
-    background: #e8f7fb;
+    background: #f3f4f6;
 }
 .dps-table tr.status-finalizado_pago,
 .dps-table tr.status-finalizado\ e\ pago {
-    background: #e6f4ea;
+    background: #d1fae5;
 }
 .dps-table tr.status-cancelado {
-    background: #fdecea;
+    opacity: 0.6;
 }
 .dps-inline-status-form {
     position: relative;
@@ -228,54 +215,81 @@
     pointer-events: none;
 }
 .dps-alert {
-    padding: 14px 16px;
-    border-radius: 8px;
-    margin: 15px 0;
-    border-left: 6px solid #ffc107;
-    background: #fff8e1;
-    color: #4b3d0a;
+    padding: 16px 20px;
+    border-left: 4px solid #f59e0b;
+    background: #ffffff;
+    margin: 20px 0;
+    border-radius: 4px;
+    color: #374151;
 }
 .dps-alert--danger {
-    border-left-color: #dc3545;
-    background: #fdecea;
-    color: #58151c;
+    border-left-color: #ef4444;
 }
 .dps-alert--pending {
-    position: relative;
-    padding-left: 46px;
-    border-left-color: #b54708;
-    background: #fff4d6;
-    color: #4b2c07;
-    box-shadow: 0 6px 16px rgba(181, 71, 8, 0.12);
-}
-.dps-alert--pending::before {
-    content: "!";
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #b54708;
-    color: #fff;
-    font-weight: 700;
-    text-align: center;
-    line-height: 20px;
-    box-shadow: 0 0 0 3px rgba(255, 244, 214, 0.9);
+    border-left-color: #f59e0b;
 }
 .dps-alert--info {
-    border-left-color: #0d6efd;
-    background: #eef5ff;
-    color: #0a1f44;
+    border-left-color: #0ea5e9;
+}
+.dps-alert--success {
+    border-left-color: #10b981;
 }
 .dps-alert strong {
     display: inline-block;
     margin-bottom: 6px;
 }
 .dps-client-select--warning {
-    border-color: #b54708 !important;
-    box-shadow: 0 0 0 2px rgba(181, 71, 8, 0.18);
-    background: #fff8ea;
-    color: #2c1601;
+    border-color: #f59e0b !important;
+    background: #fffbeb;
+    color: #374151;
+}
+
+/* Responsividade para tablets e mobile */
+@media (max-width: 1024px) {
+    .dps-history-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .dps-history-filters {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .dps-nav {
+        flex-direction: column;
+    }
+    .dps-nav li {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    
+    .dps-table,
+    .widefat {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+    .dps-table th,
+    .dps-table td {
+        padding: 8px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-pet-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-form input[type="text"],
+    .dps-form input[type="email"],
+    .dps-form select {
+        font-size: 16px;
+    }
+    
+    .dps-alert {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
 }
