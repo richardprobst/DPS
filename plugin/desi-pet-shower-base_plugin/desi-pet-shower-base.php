@@ -93,7 +93,7 @@ class DPS_Base_Plugin {
         }
 
         add_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
-        DPS_Logger::create_table();
+        DPS_Logger::maybe_install();
     }
 
     /**
@@ -356,6 +356,14 @@ class DPS_Base_Plugin {
         }
     }
 }
+
+/**
+ * Garante atualização de tabela de logs quando a flag de versão não coincide.
+ */
+function dps_base_maybe_install_logger_table() {
+    DPS_Logger::maybe_install();
+}
+add_action( 'plugins_loaded', 'dps_base_maybe_install_logger_table' );
 
 // Registra hook de ativação para criação de capabilities e papéis padrão
 register_activation_hook( __FILE__, [ 'DPS_Base_Plugin', 'activate' ] );
