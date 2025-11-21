@@ -39,7 +39,7 @@ Funcionalidades principais:
 
 ### Exportação de dados
 - **Escopo completo**: exporta todos os CPTs do DPS (clientes, pets, agendamentos, serviços, campanhas, etc.)
-- **Metadados inclusos**: preserva todos os custom fields vinculados aos posts
+- **Metadados incluídos**: preserva todos os custom fields vinculados aos posts
 - **Formato JSON**: arquivo legível e facilmente versionável
 - **Download direto**: arquivo `.json` gerado e enviado para download imediatamente
 
