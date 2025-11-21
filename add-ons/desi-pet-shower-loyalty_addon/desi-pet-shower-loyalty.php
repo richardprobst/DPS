@@ -833,95 +833,107 @@ dps_loyalty_init();
 
 register_activation_hook( __FILE__, [ 'DPS_Loyalty_Referrals', 'install' ] );
 
-function dps_loyalty_init() {
-    static $instance = null;
+if ( ! function_exists( 'dps_loyalty_init' ) ) {
+    function dps_loyalty_init() {
+        static $instance = null;
 
-    if ( null === $instance ) {
-        $instance = new DPS_Loyalty_Addon();
-        add_action( 'admin_init', [ $instance, 'register_settings' ] );
-        DPS_Loyalty_Referrals::get_instance();
+        if ( null === $instance ) {
+            $instance = new DPS_Loyalty_Addon();
+            add_action( 'admin_init', [ $instance, 'register_settings' ] );
+            DPS_Loyalty_Referrals::get_instance();
+        }
+
+        return $instance;
     }
-
-    return $instance;
 }
 
-function dps_loyalty_add_points( $client_id, $points, $context = '' ) {
-    $client_id = (int) $client_id;
-    $points    = (int) $points;
+if ( ! function_exists( 'dps_loyalty_add_points' ) ) {
+    function dps_loyalty_add_points( $client_id, $points, $context = '' ) {
+        $client_id = (int) $client_id;
+        $points    = (int) $points;
 
-    if ( $client_id <= 0 || $points <= 0 ) {
-        return false;
+        if ( $client_id <= 0 || $points <= 0 ) {
+            return false;
+        }
+
+        $current = dps_loyalty_get_points( $client_id );
+        $new     = $current + $points;
+
+        update_post_meta( $client_id, 'dps_loyalty_points', $new );
+        dps_loyalty_log_event( $client_id, 'add', $points, $context );
+
+        do_action( 'dps_loyalty_points_added', $client_id, $points, $context );
+
+        return $new;
     }
-
-    $current = dps_loyalty_get_points( $client_id );
-    $new     = $current + $points;
-
-    update_post_meta( $client_id, 'dps_loyalty_points', $new );
-    dps_loyalty_log_event( $client_id, 'add', $points, $context );
-
-    do_action( 'dps_loyalty_points_added', $client_id, $points, $context );
-
-    return $new;
 }
 
-function dps_loyalty_get_points( $client_id ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return 0;
+if ( ! function_exists( 'dps_loyalty_get_points' ) ) {
+    function dps_loyalty_get_points( $client_id ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return 0;
+        }
+
+        $points = get_post_meta( $client_id, 'dps_loyalty_points', true );
+        $points = $points ? (int) $points : 0;
+
+        return max( 0, $points );
     }
-
-    $points = get_post_meta( $client_id, 'dps_loyalty_points', true );
-    $points = $points ? (int) $points : 0;
-
-    return max( 0, $points );
 }
 
-function dps_loyalty_redeem_points( $client_id, $points, $context = '' ) {
-    $client_id = (int) $client_id;
-    $points    = (int) $points;
+if ( ! function_exists( 'dps_loyalty_redeem_points' ) ) {
+    function dps_loyalty_redeem_points( $client_id, $points, $context = '' ) {
+        $client_id = (int) $client_id;
+        $points    = (int) $points;
 
-    if ( $client_id <= 0 || $points <= 0 ) {
-        return false;
+        if ( $client_id <= 0 || $points <= 0 ) {
+            return false;
+        }
+
+        $current = dps_loyalty_get_points( $client_id );
+        if ( $points > $current ) {
+            return false;
+        }
+
+        $new = $current - $points;
+        update_post_meta( $client_id, 'dps_loyalty_points', $new );
+        dps_loyalty_log_event( $client_id, 'redeem', $points, $context );
+
+        do_action( 'dps_loyalty_points_redeemed', $client_id, $points, $context );
+
+        return $new;
     }
-
-    $current = dps_loyalty_get_points( $client_id );
-    if ( $points > $current ) {
-        return false;
-    }
-
-    $new = $current - $points;
-    update_post_meta( $client_id, 'dps_loyalty_points', $new );
-    dps_loyalty_log_event( $client_id, 'redeem', $points, $context );
-
-    do_action( 'dps_loyalty_points_redeemed', $client_id, $points, $context );
-
-    return $new;
 }
 
-function dps_loyalty_log_event( $client_id, $action, $points, $context = '' ) {
-    $entry = [
-        'action'  => $action,
-        'points'  => (int) $points,
-        'context' => sanitize_text_field( $context ),
-        'date'    => current_time( 'mysql' ),
-    ];
+if ( ! function_exists( 'dps_loyalty_log_event' ) ) {
+    function dps_loyalty_log_event( $client_id, $action, $points, $context = '' ) {
+        $entry = [
+            'action'  => $action,
+            'points'  => (int) $points,
+            'context' => sanitize_text_field( $context ),
+            'date'    => current_time( 'mysql' ),
+        ];
 
-    add_post_meta( $client_id, 'dps_loyalty_points_log', $entry );
+        add_post_meta( $client_id, 'dps_loyalty_points_log', $entry );
+    }
 }
 
-function dps_loyalty_get_logs( $client_id, $limit = 10 ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return [];
-    }
+if ( ! function_exists( 'dps_loyalty_get_logs' ) ) {
+    function dps_loyalty_get_logs( $client_id, $limit = 10 ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return [];
+        }
 
-    $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
-    if ( empty( $logs ) ) {
-        return [];
-    }
+        $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+        if ( empty( $logs ) ) {
+            return [];
+        }
 
-    $logs = array_reverse( $logs );
-    return array_slice( $logs, 0, $limit );
+        $logs = array_reverse( $logs );
+        return array_slice( $logs, 0, $limit );
+    }
 }
 
 if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
@@ -950,165 +962,187 @@ if ( ! function_exists( 'dps_format_money_br' ) ) {
     }
 }
 
-function dps_loyalty_generate_referral_code( $client_id ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return '';
+if ( ! function_exists( 'dps_loyalty_generate_referral_code' ) ) {
+    function dps_loyalty_generate_referral_code( $client_id ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return '';
+        }
+
+        $existing = get_post_meta( $client_id, '_dps_referral_code', true );
+        if ( $existing ) {
+            return $existing;
+        }
+
+        $attempts = 0;
+        $code     = '';
+        do {
+            $attempts++;
+            $code = strtoupper( wp_generate_password( 8, false, false ) );
+        } while ( $attempts < 5 && dps_referral_code_exists( $code ) );
+
+        update_post_meta( $client_id, '_dps_referral_code', $code );
+        return $code;
     }
-
-    $existing = get_post_meta( $client_id, '_dps_referral_code', true );
-    if ( $existing ) {
-        return $existing;
-    }
-
-    $attempts = 0;
-    $code     = '';
-    do {
-        $attempts++;
-        $code = strtoupper( wp_generate_password( 8, false, false ) );
-    } while ( $attempts < 5 && dps_referral_code_exists( $code ) );
-
-    update_post_meta( $client_id, '_dps_referral_code', $code );
-    return $code;
 }
 
-function dps_loyalty_get_referral_code( $client_id ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return '';
-    }
+if ( ! function_exists( 'dps_loyalty_get_referral_code' ) ) {
+    function dps_loyalty_get_referral_code( $client_id ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return '';
+        }
 
-    $code = get_post_meta( $client_id, '_dps_referral_code', true );
-    if ( ! $code ) {
-        $code = dps_loyalty_generate_referral_code( $client_id );
-    }
+        $code = get_post_meta( $client_id, '_dps_referral_code', true );
+        if ( ! $code ) {
+            $code = dps_loyalty_generate_referral_code( $client_id );
+        }
 
-    return $code;
+        return $code;
+    }
 }
 
-function dps_referral_code_exists( $code ) {
-    $clients = get_posts( [
-        'post_type'      => 'dps_cliente',
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-        'meta_query'     => [
-            [
-                'key'   => '_dps_referral_code',
-                'value' => $code,
+if ( ! function_exists( 'dps_referral_code_exists' ) ) {
+    function dps_referral_code_exists( $code ) {
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => '_dps_referral_code',
+                    'value' => $code,
+                ],
             ],
-        ],
-    ] );
+        ] );
 
-    return ! empty( $clients );
-}
-
-function dps_referrals_create( $data ) {
-    global $wpdb;
-
-    $defaults = [
-        'referrer_client_id' => 0,
-        'referee_client_id'  => null,
-        'referral_code'      => '',
-        'first_booking_id'   => null,
-        'status'             => 'pending',
-        'created_at'         => current_time( 'mysql' ),
-        'reward_type_referrer' => null,
-        'reward_value_referrer' => null,
-        'reward_type_referee' => null,
-        'reward_value_referee' => null,
-        'meta'               => null,
-    ];
-
-    $data = wp_parse_args( $data, $defaults );
-
-    $wpdb->insert(
-        $wpdb->prefix . 'dps_referrals',
-        $data,
-        [ '%d', '%d', '%s', '%d', '%s', '%s', '%s', '%f', '%s', '%f', '%s' ]
-    );
-
-    return $wpdb->insert_id;
-}
-
-function dps_referrals_find_pending_by_referee( $referee_client_id ) {
-    global $wpdb;
-    $table = $wpdb->prefix . 'dps_referrals';
-    return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE referee_client_id = %d AND status = %s ORDER BY created_at ASC LIMIT 1", $referee_client_id, 'pending' ) );
-}
-
-function dps_referrals_mark_rewarded( $referral_id, $first_booking_id, $reward_data ) {
-    global $wpdb;
-    $table = $wpdb->prefix . 'dps_referrals';
-    $data  = [
-        'status'             => 'rewarded',
-        'first_booking_id'   => $first_booking_id,
-        'reward_type_referrer' => isset( $reward_data['reward_type_referrer'] ) ? sanitize_text_field( $reward_data['reward_type_referrer'] ) : null,
-        'reward_value_referrer' => isset( $reward_data['reward_value_referrer'] ) ? $reward_data['reward_value_referrer'] : null,
-        'reward_type_referee' => isset( $reward_data['reward_type_referee'] ) ? sanitize_text_field( $reward_data['reward_type_referee'] ) : null,
-        'reward_value_referee' => isset( $reward_data['reward_value_referee'] ) ? $reward_data['reward_value_referee'] : null,
-    ];
-
-    $wpdb->update( $table, $data, [ 'id' => $referral_id ], [ '%s', '%d', '%s', '%f', '%s', '%f' ], [ '%d' ] );
-}
-
-function dps_referrals_get_settings() {
-    $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
-    $defaults = [
-        'referrals_enabled'          => 0,
-        'referrer_reward_type'       => 'none',
-        'referrer_reward_value'      => 0,
-        'referee_reward_type'        => 'none',
-        'referee_reward_value'       => 0,
-        'referrals_minimum_amount'   => 0,
-        'referrals_max_per_referrer' => 0,
-        'referrals_first_purchase'   => 0,
-    ];
-
-    return wp_parse_args( $settings, $defaults );
-}
-
-function dps_referrals_register_signup( $referral_code, $new_client_id, $client_email = '', $client_phone = '' ) {
-    $instance = DPS_Loyalty_Referrals::get_instance();
-    $instance->maybe_register_referral( $referral_code, $new_client_id, $client_email, $client_phone );
-}
-
-function dps_loyalty_add_credit( $client_id, $amount_in_cents, $context = '' ) {
-    $client_id        = (int) $client_id;
-    $amount_in_cents  = (int) $amount_in_cents;
-
-    if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
-        return 0;
+        return ! empty( $clients );
     }
-
-    $current = dps_loyalty_get_credit( $client_id );
-    $new     = $current + $amount_in_cents;
-    update_post_meta( $client_id, '_dps_credit_balance', $new );
-    dps_loyalty_log_event( $client_id, 'credit_add', $amount_in_cents, $context );
-    return $new;
 }
 
-function dps_loyalty_get_credit( $client_id ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return 0;
-    }
+if ( ! function_exists( 'dps_referrals_create' ) ) {
+    function dps_referrals_create( $data ) {
+        global $wpdb;
 
-    $balance = get_post_meta( $client_id, '_dps_credit_balance', true );
-    return $balance ? (int) $balance : 0;
+        $defaults = [
+            'referrer_client_id' => 0,
+            'referee_client_id'  => null,
+            'referral_code'      => '',
+            'first_booking_id'   => null,
+            'status'             => 'pending',
+            'created_at'         => current_time( 'mysql' ),
+            'reward_type_referrer' => null,
+            'reward_value_referrer' => null,
+            'reward_type_referee' => null,
+            'reward_value_referee' => null,
+            'meta'               => null,
+        ];
+
+        $data = wp_parse_args( $data, $defaults );
+
+        $wpdb->insert(
+            $wpdb->prefix . 'dps_referrals',
+            $data,
+            [ '%d', '%d', '%s', '%d', '%s', '%s', '%s', '%f', '%s', '%f', '%s' ]
+        );
+
+        return $wpdb->insert_id;
+    }
 }
 
-function dps_loyalty_use_credit( $client_id, $amount_in_cents, $context = '' ) {
-    $client_id       = (int) $client_id;
-    $amount_in_cents = (int) $amount_in_cents;
-
-    if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
-        return 0;
+if ( ! function_exists( 'dps_referrals_find_pending_by_referee' ) ) {
+    function dps_referrals_find_pending_by_referee( $referee_client_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_referrals';
+        return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE referee_client_id = %d AND status = %s ORDER BY created_at ASC LIMIT 1", $referee_client_id, 'pending' ) );
     }
+}
 
-    $current = dps_loyalty_get_credit( $client_id );
-    $amount  = min( $current, $amount_in_cents );
-    $new     = $current - $amount;
-    update_post_meta( $client_id, '_dps_credit_balance', $new );
-    dps_loyalty_log_event( $client_id, 'credit_use', $amount, $context );
-    return $amount;
+if ( ! function_exists( 'dps_referrals_mark_rewarded' ) ) {
+    function dps_referrals_mark_rewarded( $referral_id, $first_booking_id, $reward_data ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_referrals';
+        $data  = [
+            'status'             => 'rewarded',
+            'first_booking_id'   => $first_booking_id,
+            'reward_type_referrer' => isset( $reward_data['reward_type_referrer'] ) ? sanitize_text_field( $reward_data['reward_type_referrer'] ) : null,
+            'reward_value_referrer' => isset( $reward_data['reward_value_referrer'] ) ? $reward_data['reward_value_referrer'] : null,
+            'reward_type_referee' => isset( $reward_data['reward_type_referee'] ) ? sanitize_text_field( $reward_data['reward_type_referee'] ) : null,
+            'reward_value_referee' => isset( $reward_data['reward_value_referee'] ) ? $reward_data['reward_value_referee'] : null,
+        ];
+
+        $wpdb->update( $table, $data, [ 'id' => $referral_id ], [ '%s', '%d', '%s', '%f', '%s', '%f' ], [ '%d' ] );
+    }
+}
+
+if ( ! function_exists( 'dps_referrals_get_settings' ) ) {
+    function dps_referrals_get_settings() {
+        $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
+        $defaults = [
+            'referrals_enabled'          => 0,
+            'referrer_reward_type'       => 'none',
+            'referrer_reward_value'      => 0,
+            'referee_reward_type'        => 'none',
+            'referee_reward_value'       => 0,
+            'referrals_minimum_amount'   => 0,
+            'referrals_max_per_referrer' => 0,
+            'referrals_first_purchase'   => 0,
+        ];
+
+        return wp_parse_args( $settings, $defaults );
+    }
+}
+
+if ( ! function_exists( 'dps_referrals_register_signup' ) ) {
+    function dps_referrals_register_signup( $referral_code, $new_client_id, $client_email = '', $client_phone = '' ) {
+        $instance = DPS_Loyalty_Referrals::get_instance();
+        $instance->maybe_register_referral( $referral_code, $new_client_id, $client_email, $client_phone );
+    }
+}
+
+if ( ! function_exists( 'dps_loyalty_add_credit' ) ) {
+    function dps_loyalty_add_credit( $client_id, $amount_in_cents, $context = '' ) {
+        $client_id        = (int) $client_id;
+        $amount_in_cents  = (int) $amount_in_cents;
+
+        if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
+            return 0;
+        }
+
+        $current = dps_loyalty_get_credit( $client_id );
+        $new     = $current + $amount_in_cents;
+        update_post_meta( $client_id, '_dps_credit_balance', $new );
+        dps_loyalty_log_event( $client_id, 'credit_add', $amount_in_cents, $context );
+        return $new;
+    }
+}
+
+if ( ! function_exists( 'dps_loyalty_get_credit' ) ) {
+    function dps_loyalty_get_credit( $client_id ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return 0;
+        }
+
+        $balance = get_post_meta( $client_id, '_dps_credit_balance', true );
+        return $balance ? (int) $balance : 0;
+    }
+}
+
+if ( ! function_exists( 'dps_loyalty_use_credit' ) ) {
+    function dps_loyalty_use_credit( $client_id, $amount_in_cents, $context = '' ) {
+        $client_id       = (int) $client_id;
+        $amount_in_cents = (int) $amount_in_cents;
+
+        if ( $client_id <= 0 || $amount_in_cents <= 0 ) {
+            return 0;
+        }
+
+        $current = dps_loyalty_get_credit( $client_id );
+        $amount  = min( $current, $amount_in_cents );
+        $new     = $current - $amount;
+        update_post_meta( $client_id, '_dps_credit_balance', $new );
+        dps_loyalty_log_event( $client_id, 'credit_use', $amount, $context );
+        return $amount;
+    }
 }

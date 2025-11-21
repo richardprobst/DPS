@@ -33,11 +33,13 @@ require_once DPS_BASE_DIR . 'includes/class-dps-logs-admin-page.php';
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
-/**
- * Carrega o text domain do plugin base.
- */
-function dps_load_textdomain() {
-    load_plugin_textdomain( 'desi-pet-shower', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+if ( ! function_exists( 'dps_load_textdomain' ) ) {
+    /**
+     * Carrega o text domain do plugin base.
+     */
+    function dps_load_textdomain() {
+        load_plugin_textdomain( 'desi-pet-shower', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    }
 }
 add_action( 'plugins_loaded', 'dps_load_textdomain' );
 
@@ -531,11 +533,13 @@ class DPS_Base_Plugin {
     }
 }
 
-/**
- * Garante atualização de tabela de logs quando a flag de versão não coincide.
- */
-function dps_base_maybe_install_logger_table() {
-    DPS_Logger::maybe_install();
+if ( ! function_exists( 'dps_base_maybe_install_logger_table' ) ) {
+    /**
+     * Garante atualização de tabela de logs quando a flag de versão não coincide.
+     */
+    function dps_base_maybe_install_logger_table() {
+        DPS_Logger::maybe_install();
+    }
 }
 add_action( 'plugins_loaded', 'dps_base_maybe_install_logger_table' );
 
