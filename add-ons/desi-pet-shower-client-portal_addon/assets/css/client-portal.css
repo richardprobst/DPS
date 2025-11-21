@@ -1,38 +1,338 @@
+/* ========================================
+   PORTAL DO CLIENTE - Estilo Minimalista
+   ======================================== */
+
 .dps-client-portal {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
+/* Título principal H1 */
+.dps-portal-title {
+    margin: 0 0 1.5rem 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Navegação interna */
+.dps-portal-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.dps-portal-nav__link {
+    padding: 0.5rem 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dps-portal-nav__link:hover {
+    background: #0ea5e9;
+    color: #fff;
+    border-color: #0ea5e9;
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Seções do portal */
 .dps-portal-section {
     background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.dps-portal-section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
 }
 
 .dps-portal-section h3 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    color: #1e293b;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
 }
 
+/* Feedback visual - Notices */
+.dps-portal-notice {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.dps-portal-notice--success {
+    border-left-color: #10b981;
+    background: #d1fae5;
+    color: #047857;
+}
+
+.dps-portal-notice--error {
+    border-left-color: #ef4444;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dps-portal-notice--info {
+    border-left-color: #0ea5e9;
+    background: #e0f2fe;
+    color: #075985;
+}
+
+/* Alerts */
+.dps-alert {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.dps-alert__content {
+    font-weight: 500;
+}
+
+.dps-alert--warning {
+    border-left-color: #f59e0b;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-alert--success {
+    border-left-color: #10b981;
+    background: #d1fae5;
+    color: #047857;
+}
+
+/* Card de próximo agendamento */
+.dps-appointment-card {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.dps-appointment-card__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 1rem;
+    background: #0ea5e9;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.dps-appointment-card__day {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dps-appointment-card__month {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.dps-appointment-card__details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dps-appointment-card__time,
+.dps-appointment-card__pet,
+.dps-appointment-card__services {
+    font-size: 16px;
+    color: #374151;
+}
+
+.dps-appointment-card__status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #e5e7eb;
+    color: #374151;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    align-self: flex-start;
+}
+
+.dps-appointment-card__action {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #0ea5e9;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    align-self: flex-start;
+}
+
+.dps-appointment-card__action:hover {
+    background: #0284c7;
+}
+
+/* Estado vazio */
+.dps-empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.dps-empty-state__icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+}
+
+.dps-empty-state__message {
+    font-size: 16px;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+.dps-empty-state__action {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #10b981;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dps-empty-state__action:hover {
+    background: #059669;
+}
+
+/* Tabelas */
 .dps-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 1rem;
 }
 
 .dps-table th,
 .dps-table td {
-    border-bottom: 1px solid #e2e8f0;
-    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem;
     text-align: left;
 }
 
 .dps-table thead {
-    background: #f8fafc;
+    background: #f9fafb;
 }
 
+.dps-table th {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dps-table td {
+    color: #374151;
+}
+
+/* Botão de pagamento */
+.dps-btn-pay {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #fff !important;
+}
+
+.dps-btn-pay:hover {
+    background: #059669 !important;
+    border-color: #059669 !important;
+}
+
+/* Fieldsets */
+.dps-fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 1.5rem;
+}
+
+.dps-fieldset__legend {
+    font-weight: 600;
+    color: #374151;
+    font-size: 16px;
+    padding: 0 8px;
+}
+
+/* Formulários */
+.dps-portal-form input[type="text"],
+.dps-portal-form input[type="email"],
+.dps-portal-form input[type="tel"],
+.dps-portal-form input[type="date"],
+.dps-portal-form select,
+.dps-portal-form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.dps-portal-form input:focus,
+.dps-portal-form select:focus,
+.dps-portal-form textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+}
+
+.dps-submit-btn {
+    position: relative;
+}
+
+.dps-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dps-submit-btn.is-loading::after {
+    content: "...";
+    animation: loading 1s infinite;
+}
+
+@keyframes loading {
+    0%, 20% { content: "."; }
+    40% { content: ".."; }
+    60%, 100% { content: "..."; }
+}
+
+/* Galeria de fotos */
 .dps-portal-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -40,8 +340,9 @@
 }
 
 .dps-portal-photo-item {
-    background: #f8fafc;
-    border-radius: 6px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
     padding: 0.75rem;
     text-align: center;
 }
@@ -49,13 +350,19 @@
 .dps-share-whatsapp {
     display: inline-block;
     margin-top: 0.5rem;
-    padding: 0.4rem 0.75rem;
-    background: #16a34a;
+    padding: 0.5rem 0.75rem;
+    background: #10b981;
     color: #fff;
     border-radius: 4px;
     text-decoration: none;
+    font-weight: 500;
 }
 
+.dps-share-whatsapp:hover {
+    background: #059669;
+}
+
+/* Centro de mensagens */
 .dps-portal-messages {
     display: grid;
     gap: 1rem;
@@ -64,25 +371,25 @@
 .dps-portal-messages__list {
     display: grid;
     gap: 0.75rem;
-    max-height: 380px;
+    max-height: 400px;
     overflow-y: auto;
     padding-right: 0.5rem;
 }
 
 .dps-portal-message {
     border-left: 4px solid transparent;
-    background: #f8fafc;
-    border-radius: 6px;
+    background: #f9fafb;
+    border-radius: 4px;
     padding: 0.75rem 1rem;
-    box-shadow: inset 0 0 0 1px #e2e8f0;
+    border: 1px solid #e5e7eb;
 }
 
 .dps-portal-message--admin {
-    border-left-color: #2563eb;
+    border-left-color: #0ea5e9;
 }
 
 .dps-portal-message--client {
-    border-left-color: #16a34a;
+    border-left-color: #10b981;
 }
 
 .dps-portal-message__meta {
@@ -90,8 +397,8 @@
     justify-content: space-between;
     align-items: baseline;
     font-size: 0.85rem;
-    color: #475569;
-    margin-bottom: 0.35rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
 }
 
 .dps-portal-message__status {
@@ -107,9 +414,89 @@
     margin-top: 0.75rem;
 }
 
+/* ========================================
+   RESPONSIVIDADE MOBILE
+   ======================================== */
+
+/* Tabelas responsivas em mobile */
+@media (max-width: 640px) {
+    /* Navegação em mobile */
+    .dps-portal-nav {
+        flex-direction: column;
+    }
+    
+    .dps-portal-nav__link {
+        text-align: center;
+    }
+    
+    /* Card de agendamento em mobile */
+    .dps-appointment-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .dps-appointment-card__date {
+        width: 100%;
+        max-width: 120px;
+    }
+    
+    .dps-appointment-card__details {
+        align-items: center;
+    }
+    
+    /* Tabelas viram cards */
+    .dps-table thead {
+        display: none;
+    }
+    
+    .dps-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+    }
+    
+    .dps-table td {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 0.5rem;
+        border: none;
+        padding: 0.5rem 0;
+        text-align: left;
+    }
+    
+    .dps-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Botão de pagamento em mobile */
+    .dps-table td form {
+        grid-column: 1 / -1;
+        display: block !important;
+        margin-top: 0.5rem;
+    }
+    
+    .dps-table td button {
+        width: 100%;
+    }
+    
+    /* Galeria em mobile */
+    .dps-portal-gallery-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (min-width: 768px) {
     .dps-client-portal {
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .dps-portal-section {
