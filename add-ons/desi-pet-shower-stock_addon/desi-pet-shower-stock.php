@@ -32,44 +32,57 @@ class DPS_Stock_Addon {
     private $cpt_helper;
 
     /**
-     * Inicializa hooks do add-on.
+     * Inicializa o helper de CPT quando disponível.
      */
-    public function __construct() {
+    private function maybe_initialize_cpt_helper() {
+        if ( $this->cpt_helper ) {
+            return;
+        }
+
         if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
             require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
         }
 
-        if ( class_exists( 'DPS_CPT_Helper' ) ) {
-            $stock_capabilities = [
-                'publish_posts'       => self::CAPABILITY,
-                'edit_posts'          => self::CAPABILITY,
-                'edit_others_posts'   => self::CAPABILITY,
-                'delete_posts'        => self::CAPABILITY,
-                'delete_others_posts' => self::CAPABILITY,
-                'read_private_posts'  => self::CAPABILITY,
-                'edit_post'           => self::CAPABILITY,
-                'delete_post'         => self::CAPABILITY,
-                'read_post'           => self::CAPABILITY,
-                'create_posts'        => self::CAPABILITY,
-            ];
-
-            $this->cpt_helper = new DPS_CPT_Helper(
-                self::CPT,
-                [
-                    'name'          => __( 'Estoque', 'desi-pet-shower' ),
-                    'singular_name' => __( 'Item de estoque', 'desi-pet-shower' ),
-                ],
-                [
-                    'public'          => false,
-                    'show_ui'         => true,
-                    'show_in_menu'    => false,
-                    'supports'        => [ 'title' ],
-                    'capability_type' => 'post',
-                    'map_meta_cap'    => true,
-                    'capabilities'    => $stock_capabilities,
-                ]
-            );
+        if ( ! class_exists( 'DPS_CPT_Helper' ) ) {
+            return;
         }
+
+        $stock_capabilities = [
+            'publish_posts'       => self::CAPABILITY,
+            'edit_posts'          => self::CAPABILITY,
+            'edit_others_posts'   => self::CAPABILITY,
+            'delete_posts'        => self::CAPABILITY,
+            'delete_others_posts' => self::CAPABILITY,
+            'read_private_posts'  => self::CAPABILITY,
+            'edit_post'           => self::CAPABILITY,
+            'delete_post'         => self::CAPABILITY,
+            'read_post'           => self::CAPABILITY,
+            'create_posts'        => self::CAPABILITY,
+        ];
+
+        $this->cpt_helper = new DPS_CPT_Helper(
+            self::CPT,
+            [
+                'name'          => __( 'Estoque', 'desi-pet-shower' ),
+                'singular_name' => __( 'Item de estoque', 'desi-pet-shower' ),
+            ],
+            [
+                'public'          => false,
+                'show_ui'         => true,
+                'show_in_menu'    => false,
+                'supports'        => [ 'title' ],
+                'capability_type' => 'post',
+                'map_meta_cap'    => true,
+                'capabilities'    => $stock_capabilities,
+            ]
+        );
+    }
+
+    /**
+     * Inicializa hooks do add-on.
+     */
+    public function __construct() {
+        $this->maybe_initialize_cpt_helper();
 
         add_action( 'init', [ self::class, 'ensure_roles_have_capability' ] );
         add_action( 'init', [ $this, 'register_stock_cpt' ] );
@@ -111,6 +124,8 @@ class DPS_Stock_Addon {
      * Registra o tipo de post para itens de estoque.
      */
     public function register_stock_cpt() {
+        $this->maybe_initialize_cpt_helper();
+
         if ( ! $this->cpt_helper ) {
             return;
         }
