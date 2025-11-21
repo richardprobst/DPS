@@ -563,16 +563,16 @@ class DPS_Base_Frontend {
     /**
      * Obtém lista de pets
      */
-    private static function get_pets() {
+    private static function get_pets( $page = 1 ) {
         $args = [
             'post_type'      => 'dps_pet',
-            'posts_per_page' => -1,
+            'posts_per_page' => DPS_BASE_PETS_PER_PAGE,
             'post_status'    => 'publish',
             'orderby'        => 'title',
             'order'          => 'ASC',
+            'paged'          => max( 1, (int) $page ),
         ];
-        $query = new WP_Query( $args );
-        return $query->posts;
+        return new WP_Query( $args );
     }
 
     /**
@@ -718,8 +718,11 @@ class DPS_Base_Frontend {
      * Seção de pets: formulário e listagem
      */
     private static function section_pets() {
-        $clients = self::get_clients();
-        $pets    = self::get_pets();
+        $clients    = self::get_clients();
+        $pets_page  = isset( $_GET['dps_pets_page'] ) ? max( 1, intval( $_GET['dps_pets_page'] ) ) : 1;
+        $pets_query = self::get_pets( $pets_page );
+        $pets       = $pets_query->posts;
+        $pets_pages = (int) max( 1, $pets_query->max_num_pages );
         // Detecta edição
         $edit_id    = ( isset( $_GET['dps_edit'] ) && 'pet' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
         $editing    = null;
@@ -913,6 +916,20 @@ class DPS_Base_Frontend {
                 echo '</tr>';
             }
             echo '</tbody></table>';
+            if ( $pets_pages > 1 ) {
+                $pagination = paginate_links( [
+                    'base'      => add_query_arg( 'dps_pets_page', '%#%' ),
+                    'format'    => '',
+                    'prev_text' => __( '&laquo; Anterior', 'desi-pet-shower' ),
+                    'next_text' => __( 'Próxima &raquo;', 'desi-pet-shower' ),
+                    'current'   => $pets_page,
+                    'total'     => $pets_pages,
+                ] );
+
+                if ( $pagination ) {
+                    echo '<div class="dps-pagination">' . $pagination . '</div>';
+                }
+            }
         } else {
             echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'desi-pet-shower' ) . '</p>';
         }
@@ -924,8 +941,10 @@ class DPS_Base_Frontend {
      * Seção de agendamentos: formulário e listagem
      */
     private static function section_agendas( $visitor_only = false ) {
-        $clients = self::get_clients();
-        $pets    = self::get_pets();
+        $clients    = self::get_clients();
+        $pets_query = self::get_pets();
+        $pets       = $pets_query->posts;
+        $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
         // Detecta edição de agendamento
         $edit_id    = ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
         $editing    = null;
@@ -1091,10 +1110,14 @@ class DPS_Base_Frontend {
             if ( $multi_meta && is_array( $multi_meta ) ) {
                 $sel_pets = array_map( 'strval', $multi_meta );
             }
-            echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker">';
+            $pet_wrapper_attrs = ' id="dps-appointment-pet-wrapper" class="dps-pet-picker"';
+            $pet_wrapper_attrs .= ' data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '"';
+            echo '<div' . $pet_wrapper_attrs . '>';
             echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . '</strong></p>';
             echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
             echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
+            echo '<p class="dps-pet-search"><label class="screen-reader-text" for="dps-pet-search">' . esc_html__( 'Buscar pets', 'desi-pet-shower' ) . '</label>';
+            echo '<input type="search" id="dps-pet-search" placeholder="' . esc_attr__( 'Buscar pets por nome, tutor ou raça', 'desi-pet-shower' ) . '" aria-label="' . esc_attr__( 'Buscar pets', 'desi-pet-shower' ) . '"></p>';
             echo '<div class="dps-pet-picker-actions">';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'desi-pet-shower' ) . '</button> ';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'desi-pet-shower' ) . '</button>';
@@ -1125,6 +1148,9 @@ class DPS_Base_Frontend {
                 echo '</label>';
             }
             echo '</div>';
+            if ( $pet_pages > 1 ) {
+                echo '<p><button type="button" class="button dps-pet-load-more" data-next-page="2" data-loading="false">' . esc_html__( 'Carregar mais pets', 'desi-pet-shower' ) . '</button></p>';
+            }
             echo '<p id="dps-pet-summary" class="description" style="display:none;"></p>';
             echo '<p id="dps-no-pets-message" style="display:none;" class="description">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
