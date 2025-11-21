@@ -21,6 +21,8 @@ class DPS_Agenda_Addon {
     public function __construct() {
         // Cria páginas necessárias ao ativar o plugin (apenas agenda, sem a página de cobranças)
         register_activation_hook( __FILE__, [ $this, 'create_agenda_page' ] );
+        // Limpa cron jobs ao desativar o plugin
+        register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
         // Registra shortcodes
         add_shortcode( 'dps_agenda_page', [ $this, 'render_agenda_shortcode' ] );
         add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode' ] );
@@ -1264,6 +1266,17 @@ class DPS_Agenda_Addon {
     /**
      * Agenda um evento cron diário para enviar lembretes de agendamentos.
      * O evento é agendado às 08:00 (horário do site) caso ainda não exista.
+     */
+    /**
+     * Limpa cron jobs agendados quando o plugin é desativado.
+     */
+    public function deactivate() {
+        wp_clear_scheduled_hook( 'dps_agenda_send_reminders' );
+    }
+
+    /**
+     * Agenda envio diário de lembretes para clientes com agendamentos do dia.
+     * O evento é agendado apenas uma vez, no próximo horário configurado (padrão: 08:00).
      */
     public function maybe_schedule_reminders() {
         if ( ! function_exists( 'wp_next_scheduled' ) ) {
