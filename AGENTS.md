@@ -79,6 +79,39 @@ Qualquer agente (humano ou IA) que implemente mudanças no código deve seguir e
 - Scripts e estilos: prefira `wp_register_*` + `wp_enqueue_*` em pontos específicos; evite carregar assets no site inteiro.
 - Nomes de hooks, options e handles prefixados com `dps_`.
 
+## Diretrizes de estilo visual e interface
+
+O DPS adota um padrão **minimalista/clean** para todas as interfaces administrativas. Novos desenvolvimentos devem seguir estas diretrizes:
+
+### Paleta de cores
+- **Base neutra**: `#f9fafb` (fundos), `#e5e7eb` (bordas), `#374151` (texto principal), `#6b7280` (texto secundário)
+- **Destaque**: `#0ea5e9` (azul) para ações e links importantes
+- **Status** (uso essencial apenas):
+  - Verde `#10b981` / `#d1fae5` → sucesso, confirmações, status "pago"
+  - Amarelo `#f59e0b` / `#fef3c7` → avisos, status "pendente"
+  - Vermelho `#ef4444` → erros críticos, cancelamentos
+  - Cinza `#f3f4f6` → neutro, status "finalizado"
+
+### Princípios visuais
+- **Menos é mais**: evite sombras decorativas, gradientes, bordas grossas ou elementos puramente estéticos
+- **Cores com propósito**: use cores apenas quando comunicam informação (status, tipo de alerta, ação)
+- **Espaçamento generoso**: 20px padding em containers, 32px entre seções principais, 40px antes de subseções
+- **Bordas padronizadas**: `1px solid #e5e7eb` para separadores sutis, `4px solid [cor]` para bordas laterais de destaque
+- **Tipografia limpa**: peso 400 (normal) para texto, 600 (semibold) para títulos, tamanhos 24px (H1), 20px (H2), 18px (H3)
+
+### Estrutura de formulários e seções
+- **Hierarquia semântica**: H1 único por página, H2 para seções principais, H3 para subseções
+- **Agrupamento lógico**: use `<fieldset>` com `<legend>` para organizar campos relacionados (ex.: Dados Pessoais, Contato, Endereço)
+- **Feedback visual obrigatório**: use `DPS_Message_Helper` para mensagens de sucesso/erro/aviso em todas as operações
+- **Responsividade básica**: media queries em 480px, 768px e 1024px para adaptar tabelas, grids e navegação
+
+**Referências completas**:
+- `VISUAL_STYLE_GUIDE.md`: guia detalhado de cores, tipografia e componentes
+- `ADMIN_LAYOUT_ANALYSIS.md`: análise de usabilidade e padrões de layout
+- `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo de melhorias implementadas
+
+
+
 ## Diretrizes para add-ons
 - Cada add-on deve manter um arquivo principal `desi-pet-shower-<feature>-addon.php` e, se preciso, subpastas `includes/` ou específicas por domínio.
 - Use os hooks de extensão documentados no núcleo (`dps_base_nav_tabs_*`, `dps_base_sections_*`, `dps_settings_*`) sem alterar assinaturas existentes.

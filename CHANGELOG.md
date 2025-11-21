@@ -84,6 +84,10 @@ Antes de criar uma nova versão oficial:
   - `DPS_URL_Builder`: construção padronizada de URLs de edição, exclusão, visualização e navegação
   - `DPS_Query_Helper`: consultas WP_Query reutilizáveis com filtros comuns e paginação
   - `DPS_Request_Validator`: validação centralizada de nonces, capabilities e sanitização de campos
+- Criada classe `DPS_Message_Helper` para feedback visual consistente:
+  - Mensagens de sucesso, erro e aviso via transients específicos por usuário
+  - Exibição automática no topo das seções com remoção após visualização
+  - Integrada em todos os fluxos de salvamento e exclusão (clientes, pets, agendamentos)
 - Adicionado documento de análise de refatoração (`REFACTORING_ANALYSIS.md`) com identificação detalhada de problemas de código e sugestões de melhoria
 - Criado arquivo de exemplos práticos (`includes/refactoring-examples.php`) demonstrando uso das classes helper e padrões de refatoração
 - Implementado `register_deactivation_hook` no add-on Agenda para limpar cron job `dps_agenda_send_reminders` ao desativar
@@ -92,15 +96,58 @@ Antes de criar uma nova versão oficial:
   - Guia de uso correto de activation/deactivation hooks
   - Padrões de documentação com DocBlocks seguindo convenções WordPress
   - Boas práticas de prefixação, segurança, performance e integração
+- Criados documentos de análise e guias de estilo:
+  - `ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
+  - `VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
+  - `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas
 
 #### Changed (Alterado)
+- Interface administrativa completamente reformulada com design minimalista:
+  - Paleta de cores reduzida e consistente (base neutra + 3 cores de status essenciais)
+  - Remoção de sombras decorativas e elementos visuais desnecessários
+  - Alertas simplificados com borda lateral colorida (sem pseudo-elementos ou fundos vibrantes)
+  - Cores de status em tabelas mais suaves (amarelo claro, verde claro, cinza neutro, opacidade para cancelados)
+- Hierarquia semântica corrigida em todas as telas do painel:
+  - H1 único no topo do painel ("Painel de Gestão DPS")
+  - H2 para seções principais (Cadastro de Clientes, Cadastro de Pets, etc.)
+  - H3 para subseções e listagens com separação visual (borda superior + padding)
+- Formulários reorganizados com agrupamento lógico de campos:
+  - Formulário de clientes dividido em 4 fieldsets: Dados Pessoais, Contato, Redes Sociais, Endereço e Preferências
+  - Bordas sutis (#e5e7eb) e legends descritivos para cada grupo
+  - Redução de sobrecarga cognitiva através de organização visual clara
+- Responsividade básica implementada para dispositivos móveis:
+  - Tabelas com scroll horizontal em telas <768px
+  - Navegação por abas em layout vertical em mobile
+  - Grid de pets em coluna única em smartphones
+  - Inputs com tamanho de fonte 16px para evitar zoom automático no iOS
 - Documentação expandida com exemplos de como quebrar funções grandes em métodos menores e mais focados
 - Estabelecidos padrões de nomenclatura mais descritiva para variáveis e funções
 - Documentação do add-on Agenda atualizada para refletir limpeza de cron jobs na desativação
 
 #### Fixed (Corrigido)
-- Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
-- Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda.
+- Implementado feedback visual após todas as operações principais:
+  - Mensagens de sucesso ao salvar clientes, pets e agendamentos
+  - Mensagens de confirmação ao excluir registros
+  - Alertas de erro quando operações falham
+  - Feedback claro e imediato eliminando confusão sobre conclusão de ações
+- Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação
+- Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda
+
+#### Refactoring (Interno)
+- Reestruturação completa do CSS administrativo em `dps-base.css`:
+  - Simplificação da classe `.dps-alert` removendo pseudo-elementos decorativos e sombras
+  - Redução da paleta de cores de status de 4+ variantes para 3 cores essenciais
+  - Padronização de bordas (1px ou 4px) e espaçamentos (20px padding, 32px entre seções)
+  - Adição de media queries para responsividade básica (480px, 768px, 1024px breakpoints)
+- Melhorias estruturais em `class-dps-base-frontend.php`:
+  - Extração de lógica de mensagens para helper dedicado (`DPS_Message_Helper`)
+  - Separação de campos de formulário em fieldsets semânticos
+  - Padronização de títulos com hierarquia H1 → H2 → H3 em todas as seções
+  - Adição de chamadas `display_messages()` no início de cada seção do painel
+- Melhorias em páginas administrativas de add-ons:
+  - Logs: organização de filtros e tabelas seguindo padrão minimalista
+  - Clientes, pets e agendamentos: consistência visual com novo sistema de feedback
+  - Formulários dos add-ons alinhados ao estilo visual do núcleo
 
 ---
 
