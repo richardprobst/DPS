@@ -621,6 +621,16 @@ class DPS_Finance_Addon {
         $upload_dir = wp_upload_dir();
         $doc_dir    = trailingslashit( $upload_dir['basedir'] ) . 'dps_docs';
         $doc_urlbase= trailingslashit( $upload_dir['baseurl'] ) . 'dps_docs/';
+        global $wpdb;
+        $doc_options = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'dps_fin_doc_%'" );
+        $doc_map     = [];
+        if ( $doc_options ) {
+            foreach ( $doc_options as $opt ) {
+                if ( preg_match( '/^dps_fin_doc_(\d+)$/', $opt->option_name, $m ) ) {
+                    $doc_map[ $opt->option_value ] = intval( $m[1] );
+                }
+            }
+        }
         ob_start();
         echo '<div class="dps-fin-docs">';
         echo '<h3>' . esc_html__( 'Documentos Financeiros', 'dps-finance-addon' ) . '</h3>';
@@ -664,13 +674,8 @@ class DPS_Finance_Addon {
                     $url = $doc_urlbase . $doc;
                     // Tenta encontrar trans_id correspondente ao doc
                     $trans_id = 0;
-                    global $wpdb;
-                    $option_row = $wpdb->get_row( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_value = %s LIMIT 1", $url ) );
-                    if ( $option_row ) {
-                        $opt_name = $option_row->option_name;
-                        if ( preg_match( '/^dps_fin_doc_(\d+)$/', $opt_name, $m ) ) {
-                            $trans_id = intval( $m[1] );
-                        }
+                    if ( isset( $doc_map[ $url ] ) ) {
+                        $trans_id = $doc_map[ $url ];
                     }
                     // Define URL base atual removendo parâmetros de ação
                     $current_url = home_url( add_query_arg( null, null ) );
