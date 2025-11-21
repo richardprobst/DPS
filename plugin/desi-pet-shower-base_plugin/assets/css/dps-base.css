@@ -268,7 +268,7 @@
     .widefat {
         display: block;
         overflow-x: auto;
-        white-space: nowrap;
+        white-space: normal;
         font-size: 13px;
     }
     .dps-table th,
