@@ -35,8 +35,12 @@ wp_clear_scheduled_hook( 'dps_agenda_send_reminders' );
 $wpdb->delete( $wpdb->postmeta, [ 'meta_key' => '_dps_appointment_version' ], [ '%s' ] );
 
 // Remove transients
-$wpdb->query(
+$transient_like = $wpdb->esc_like( '_transient_dps_agenda' ) . '%';
+$transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_agenda' ) . '%';
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_agenda%' 
-     OR option_name LIKE '_transient_timeout_dps_agenda%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like,
+    $transient_timeout_like
+) );
