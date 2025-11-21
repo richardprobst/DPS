@@ -99,4 +99,3 @@ if ( $admin_role ) {
 remove_role( 'dps_reception' );
 
 // Limpa cache de rewrite rules
-flush_rewrite_rules();
