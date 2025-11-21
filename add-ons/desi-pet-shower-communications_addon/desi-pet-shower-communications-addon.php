@@ -20,99 +20,13 @@ class DPS_Communications_Addon {
     const OPTION_KEY = 'dps_comm_settings';
 
     public function __construct() {
-        add_action( 'admin_menu', [ $this, 'register_menu' ] );
-        add_action( 'admin_init', [ $this, 'register_settings' ] );
+        add_action( 'dps_settings_nav_tabs', [ $this, 'add_settings_tab' ], 40, 1 );
+        add_action( 'dps_settings_sections', [ $this, 'add_settings_section' ], 40, 1 );
+        add_action( 'init', [ $this, 'maybe_handle_save' ] );
 
         add_action( 'dps_base_after_save_appointment', [ $this, 'handle_after_save_appointment' ], 10, 2 );
         add_action( 'dps_comm_send_appointment_reminder', [ $this, 'send_appointment_reminder' ], 10, 1 );
         add_action( 'dps_comm_send_post_service', [ $this, 'send_post_service_message' ], 10, 1 );
-    }
-
-    public function register_menu() {
-        if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
-            add_menu_page(
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                'manage_options',
-                'desi-pet-shower',
-                '__return_null',
-                'dashicons-pets'
-            );
-        }
-
-        add_submenu_page(
-            'desi-pet-shower',
-            __( 'Comunicações', 'desi-pet-shower' ),
-            __( 'Comunicações', 'desi-pet-shower' ),
-            'manage_options',
-            'dps-communications',
-            [ $this, 'render_settings_page' ]
-        );
-    }
-
-    public function register_settings() {
-        register_setting( 'dps_comm_settings_group', self::OPTION_KEY, [ $this, 'sanitize_settings' ] );
-
-        add_settings_section(
-            'dps_comm_main_section',
-            __( 'Configurações de Comunicações', 'desi-pet-shower' ),
-            '__return_false',
-            'dps_comm_settings_page'
-        );
-
-        add_settings_field(
-            'dps_comm_whatsapp_api_key',
-            __( 'Chave de API do WhatsApp', 'desi-pet-shower' ),
-            [ $this, 'render_text_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_whatsapp_api_key', 'option_key' => 'whatsapp_api_key' ]
-        );
-
-        add_settings_field(
-            'dps_comm_whatsapp_api_url',
-            __( 'Endpoint/Base URL do WhatsApp', 'desi-pet-shower' ),
-            [ $this, 'render_text_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_whatsapp_api_url', 'option_key' => 'whatsapp_api_url' ]
-        );
-
-        add_settings_field(
-            'dps_comm_default_email_from',
-            __( 'E-mail remetente padrão', 'desi-pet-shower' ),
-            [ $this, 'render_text_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_default_email_from', 'option_key' => 'default_email_from' ]
-        );
-
-        add_settings_field(
-            'dps_comm_template_confirmation',
-            __( 'Template de confirmação de agendamento', 'desi-pet-shower' ),
-            [ $this, 'render_textarea_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_template_confirmation', 'option_key' => 'template_confirmation' ]
-        );
-
-        add_settings_field(
-            'dps_comm_template_reminder',
-            __( 'Template de lembrete', 'desi-pet-shower' ),
-            [ $this, 'render_textarea_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_template_reminder', 'option_key' => 'template_reminder' ]
-        );
-
-        add_settings_field(
-            'dps_comm_template_post_service',
-            __( 'Template de pós-atendimento', 'desi-pet-shower' ),
-            [ $this, 'render_textarea_field' ],
-            'dps_comm_settings_page',
-            'dps_comm_main_section',
-            [ 'label_for' => 'dps_comm_template_post_service', 'option_key' => 'template_post_service' ]
-        );
     }
 
     public function sanitize_settings( $input ) {
@@ -128,52 +42,106 @@ class DPS_Communications_Addon {
         return $output;
     }
 
-    public function render_text_field( $args ) {
-        $options   = get_option( self::OPTION_KEY, [] );
-        $option_id = isset( $args['label_for'] ) ? $args['label_for'] : '';
-        $key       = isset( $args['option_key'] ) ? $args['option_key'] : '';
-        $value     = isset( $options[ $key ] ) ? $options[ $key ] : '';
-
-        printf(
-            '<input type="text" id="%1$s" name="%2$s[%3$s]" value="%4$s" class="regular-text" />',
-            esc_attr( $option_id ),
-            esc_attr( self::OPTION_KEY ),
-            esc_attr( $key ),
-            esc_attr( $value )
-        );
-    }
-
-    public function render_textarea_field( $args ) {
-        $options   = get_option( self::OPTION_KEY, [] );
-        $option_id = isset( $args['label_for'] ) ? $args['label_for'] : '';
-        $key       = isset( $args['option_key'] ) ? $args['option_key'] : '';
-        $value     = isset( $options[ $key ] ) ? $options[ $key ] : '';
-
-        printf(
-            '<textarea id="%1$s" name="%2$s[%3$s]" rows="4" class="large-text">%4$s</textarea>',
-            esc_attr( $option_id ),
-            esc_attr( self::OPTION_KEY ),
-            esc_attr( $key ),
-            esc_textarea( $value )
-        );
-    }
-
-    public function render_settings_page() {
-        if ( ! current_user_can( 'manage_options' ) ) {
+    public function add_settings_tab( $visitor_only ) {
+        if ( $visitor_only ) {
             return;
         }
+
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+            echo '<li><a href="#" class="dps-tab-link" data-tab="comunicacoes">' . esc_html__( 'Comunicações', 'desi-pet-shower' ) . '</a></li>';
+        }
+    }
+
+    public function add_settings_section( $visitor_only ) {
+        if ( $visitor_only ) {
+            return;
+        }
+
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            echo '<div class="dps-section" id="dps-section-comunicacoes"><p>' . esc_html__( 'Você não tem permissão para gerenciar comunicações.', 'desi-pet-shower' ) . '</p></div>';
+            return;
+        }
+
+        echo $this->render_settings_section();
+    }
+
+    private function render_settings_section() {
+        $options = get_option( self::OPTION_KEY, [] );
+        $status  = isset( $_GET['updated'] ) ? sanitize_text_field( wp_unslash( $_GET['updated'] ) ) : '';
+
+        ob_start();
         ?>
-        <div class="wrap">
-            <h1><?php echo esc_html__( 'Comunicações', 'desi-pet-shower' ); ?></h1>
-            <form action="options.php" method="post">
-                <?php
-                settings_fields( 'dps_comm_settings_group' );
-                do_settings_sections( 'dps_comm_settings_page' );
-                submit_button();
-                ?>
+        <div class="dps-section" id="dps-section-comunicacoes">
+            <h3><?php echo esc_html__( 'Comunicações', 'desi-pet-shower' ); ?></h3>
+            <p><?php echo esc_html__( 'Defina integrações e mensagens automáticas para WhatsApp, SMS ou e-mail.', 'desi-pet-shower' ); ?></p>
+
+            <?php if ( '1' === $status ) : ?>
+                <div class="notice notice-success" style="margin: 10px 0;">
+                    <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'desi-pet-shower' ); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <form method="post">
+                <input type="hidden" name="dps_comm_action" value="save_settings" />
+                <?php wp_nonce_field( 'dps_comm_save', 'dps_comm_nonce' ); ?>
+
+                <p>
+                    <label for="dps_comm_whatsapp_api_key"><?php echo esc_html__( 'Chave de API do WhatsApp', 'desi-pet-shower' ); ?></label><br />
+                    <input type="text" id="dps_comm_whatsapp_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_key]" value="<?php echo esc_attr( $options['whatsapp_api_key'] ?? '' ); ?>" class="regular-text" />
+                </p>
+
+                <p>
+                    <label for="dps_comm_whatsapp_api_url"><?php echo esc_html__( 'Endpoint/Base URL do WhatsApp', 'desi-pet-shower' ); ?></label><br />
+                    <input type="text" id="dps_comm_whatsapp_api_url" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_url]" value="<?php echo esc_attr( $options['whatsapp_api_url'] ?? '' ); ?>" class="regular-text" />
+                </p>
+
+                <p>
+                    <label for="dps_comm_default_email_from"><?php echo esc_html__( 'E-mail remetente padrão', 'desi-pet-shower' ); ?></label><br />
+                    <input type="email" id="dps_comm_default_email_from" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[default_email_from]" value="<?php echo esc_attr( $options['default_email_from'] ?? '' ); ?>" class="regular-text" />
+                </p>
+
+                <p>
+                    <label for="dps_comm_template_confirmation"><?php echo esc_html__( 'Template de confirmação de agendamento', 'desi-pet-shower' ); ?></label><br />
+                    <textarea id="dps_comm_template_confirmation" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_confirmation]" rows="4" class="large-text"><?php echo esc_textarea( $options['template_confirmation'] ?? '' ); ?></textarea>
+                </p>
+
+                <p>
+                    <label for="dps_comm_template_reminder"><?php echo esc_html__( 'Template de lembrete', 'desi-pet-shower' ); ?></label><br />
+                    <textarea id="dps_comm_template_reminder" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_reminder]" rows="4" class="large-text"><?php echo esc_textarea( $options['template_reminder'] ?? '' ); ?></textarea>
+                </p>
+
+                <p>
+                    <label for="dps_comm_template_post_service"><?php echo esc_html__( 'Template de pós-atendimento', 'desi-pet-shower' ); ?></label><br />
+                    <textarea id="dps_comm_template_post_service" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_post_service]" rows="4" class="large-text"><?php echo esc_textarea( $options['template_post_service'] ?? '' ); ?></textarea>
+                </p>
+
+                <?php submit_button( __( 'Salvar configurações', 'desi-pet-shower' ) ); ?>
             </form>
         </div>
         <?php
+        return ob_get_clean();
+    }
+
+    public function maybe_handle_save() {
+        if ( ! isset( $_POST['dps_comm_action'] ) || 'save_settings' !== $_POST['dps_comm_action'] ) {
+            return;
+        }
+
+        if ( ! isset( $_POST['dps_comm_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_comm_nonce'] ) ), 'dps_comm_save' ) ) {
+            return;
+        }
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $raw_settings = isset( $_POST[ self::OPTION_KEY ] ) ? (array) wp_unslash( $_POST[ self::OPTION_KEY ] ) : [];
+        $settings     = $this->sanitize_settings( $raw_settings );
+
+        update_option( self::OPTION_KEY, $settings );
+
+        wp_redirect( add_query_arg( [ 'tab' => 'comunicacoes', 'updated' => '1' ], get_permalink() ) );
+        exit;
     }
 
     public function handle_after_save_appointment( $appointment_id, $type ) {

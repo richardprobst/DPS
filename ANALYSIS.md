@@ -21,11 +21,13 @@
 - Gerencia comunicações automatizadas via WhatsApp, SMS e e-mail para eventos do sistema (agendamentos, lembretes, pós-atendimento).
 - Registra configurações específicas para cada canal de comunicação e permite personalização de mensagens por tipo de evento.
 - Conecta-se aos hooks do plugin base (`dps_base_after_save_appointment`) e agenda tarefas (`dps_comm_send_appointment_reminder`, `dps_comm_send_post_service`) para envio automatizado.
+- Exibe suas configurações na navegação padrão do núcleo usando `dps_settings_nav_tabs`/`dps_settings_sections`, em vez de menus próprios no admin.
 
 ### Groomers (`desi-pet-shower-groomers_addon`)
 - Adiciona cadastro de profissionais (groomers) com papel de usuário dedicado `dps_groomer`.
 - Permite vincular atendimentos a profissionais específicos através de campos adicionais no formulário de agendamento via hook `dps_base_appointment_fields`.
 - Oferece relatórios por profissional para análise de produtividade e desempenho individual.
+- Usa a navegação do painel base via `dps_base_nav_tabs_after_history`/`dps_base_sections_after_history` para cadastro e relatórios, substituindo páginas de menu próprias.
 
 ### Portal do Cliente (`desi-pet-shower-client-portal_addon`)
 - A inicialização define constantes e instancia `DPS_Client_Portal`, que abre sessões próprias, gera logins para clientes recém-criados, expõe os *shortcodes* `[dps_client_portal]` e `[dps_client_login]`, registra tipos de mensagem e integra suas abas com o painel base.
@@ -53,6 +55,7 @@
 - Controla estoque de insumos utilizados nos atendimentos através do *custom post type* `dps_stock_item`.
 - Registra movimentações de entrada e saída de produtos, incluindo baixa automática quando atendimentos são concluídos via hook `dps_base_after_save_appointment`.
 - Oferece alertas de estoque baixo e relatórios de consumo por período, além de capability específica `dps_manage_stock` para controle de acesso.
+- Passou a renderizar a tela de estoque como aba/seção no painel principal (`dps_base_nav_tabs_after_history`/`dps_base_sections_after_history`), removendo menus próprios no admin.
 
 ### Assinaturas (`desi-pet-shower-subscription_addon`)
 - Define o *custom post type* `dps_subscription`, adiciona UI própria ao painel, integra-se ao módulo financeiro, cria/atualiza transações relacionadas e gera links de renovação no Mercado Pago com mensagens padrão para WhatsApp.

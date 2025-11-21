@@ -32,8 +32,8 @@ class DPS_Stock_Addon {
         add_action( 'init', [ $this, 'register_stock_cpt' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_meta_boxes' ] );
         add_action( 'save_post_' . self::CPT, [ $this, 'save_stock_meta' ], 10, 3 );
-        // Registra menus após o núcleo para aproveitar o menu principal existente.
-        add_action( 'admin_menu', [ $this, 'register_menu' ], 99 );
+        add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_stock_tab' ], 30, 1 );
+        add_action( 'dps_base_sections_after_history', [ $this, 'add_stock_section' ], 30, 1 );
 
         // Integração com agendamentos: baixa estoque quando o atendimento é concluído.
         add_action( 'dps_base_after_save_appointment', [ $this, 'maybe_handle_appointment_completion' ], 10, 2 );
@@ -165,41 +165,30 @@ class DPS_Stock_Addon {
         update_post_meta( $post_id, 'dps_stock_minimum', max( 0, $minimum ) );
     }
 
-    /**
-     * Adiciona submenu na área administrativa para visualizar o estoque.
-     */
-    public function register_menu() {
-        // O núcleo cria o menu principal "desi-pet-shower"; aqui apenas anexamos o submenu de estoque.
-        if ( isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
-            add_submenu_page(
-                'desi-pet-shower',
-                __( 'Estoque DPS', 'desi-pet-shower' ),
-                __( 'Estoque DPS', 'desi-pet-shower' ),
-                self::CAPABILITY,
-                'dps-stock',
-                [ $this, 'render_stock_page' ]
-            );
-
+    public function add_stock_tab( $visitor_only ) {
+        if ( $visitor_only ) {
             return;
         }
 
-        // Fallback: quando o núcleo não está ativo, criamos menu próprio com slug distinto.
-        add_menu_page(
-            __( 'Estoque DPS', 'desi-pet-shower' ),
-            __( 'Estoque DPS', 'desi-pet-shower' ),
-            self::CAPABILITY,
-            'dps-stock-root',
-            [ $this, 'render_stock_page' ],
-            'dashicons-products'
-        );
+        if ( is_user_logged_in() && current_user_can( self::CAPABILITY ) ) {
+            echo '<li><a href="#" class="dps-tab-link" data-tab="estoque">' . esc_html__( 'Estoque', 'desi-pet-shower' ) . '</a></li>';
+        }
+    }
+
+    public function add_stock_section( $visitor_only ) {
+        if ( $visitor_only ) {
+            return;
+        }
+
+        echo $this->render_stock_page();
     }
 
     /**
      * Renderiza a página de listagem e alertas do estoque.
      */
     public function render_stock_page() {
-        if ( ! current_user_can( self::CAPABILITY ) ) {
-            wp_die( esc_html__( 'Você não possui permissão para acessar esta página.', 'desi-pet-shower' ) );
+        if ( ! is_user_logged_in() || ! current_user_can( self::CAPABILITY ) ) {
+            return '<div class="dps-section" id="dps-section-estoque"><p>' . esc_html__( 'Você não possui permissão para acessar o estoque.', 'desi-pet-shower' ) . '</p></div>';
         }
 
         $only_critical = isset( $_GET['dps_show'] ) && 'critical' === sanitize_text_field( wp_unslash( $_GET['dps_show'] ) );
@@ -211,18 +200,20 @@ class DPS_Stock_Addon {
             'order'          => 'ASC',
         ];
 
-        $items  = get_posts( $args );
-        $alerts = get_option( self::ALERT_OPTION, [] );
-        $alerts = is_array( $alerts ) ? $alerts : [];
+        $items     = get_posts( $args );
+        $alerts    = get_option( self::ALERT_OPTION, [] );
+        $alerts    = is_array( $alerts ) ? $alerts : [];
+        $base_link = add_query_arg( 'tab', 'estoque', get_permalink() );
 
-        echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h1>';
+        ob_start();
+        echo '<div class="dps-section" id="dps-section-estoque">';
+        echo '<h3>' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h3>';
 
-        $filter_link = add_query_arg( 'dps_show', $only_critical ? 'all' : 'critical' );
+        $filter_link = add_query_arg( 'dps_show', $only_critical ? 'all' : 'critical', $base_link );
         $filter_text = $only_critical ? __( 'Ver todos', 'desi-pet-shower' ) : __( 'Mostrar apenas críticos', 'desi-pet-shower' );
         echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
 
-        $export_link = add_query_arg( 'dps_stock_export', '1' );
+        $export_link = add_query_arg( 'dps_stock_export', '1', $base_link );
         echo '<a class="button" href="' . esc_url( $export_link ) . '">' . esc_html__( 'Exportar estoque (em breve)', 'desi-pet-shower' ) . '</a>';
 
         echo '<p class="description">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'desi-pet-shower' ) . '</p>';
@@ -271,6 +262,8 @@ class DPS_Stock_Addon {
 
         echo '</tbody></table>';
         echo '</div>';
+
+        return ob_get_clean();
     }
 
     /**
