@@ -145,7 +145,7 @@ class DPS_Logs_Admin_Page {
                 $message_display .= esc_html( mb_substr( $message, 0, 100 ) ) . '...';
                 $message_display .= '</span>';
             } else {
-                $message_display = esc_html( $message_display );
+                // $message_display is already escaped, no need to escape again.
             }
             echo '<td>' . $message_display . '</td>';
             
