@@ -178,7 +178,7 @@ Ao modificar este add-on:
 - **Estrutura recomendada**: migrar para padrão modular com `includes/` e `assets/`
 - **Classes separadas**: extrair lógica de relatórios, formulários e listagem para classes próprias
 
-Consulte **REFACTORING_ANALYSIS.md** para detalhes e **refactoring-examples.php** para padrões recomendados.
+Consulte **[../docs/refactoring/REFACTORING_ANALYSIS.md](../docs/refactoring/REFACTORING_ANALYSIS.md)** para detalhes e **refactoring-examples.php** para padrões recomendados.
 
 ### Pontos de atenção
 

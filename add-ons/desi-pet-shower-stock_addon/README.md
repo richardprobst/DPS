@@ -200,7 +200,7 @@ Ao modificar este add-on:
 - **Classes separadas**: extrair lógica de movimentações, alertas e baixa automática
 - **Navegação integrada**: já migrado para painel base (bom exemplo)
 
-Consulte **REFACTORING_ANALYSIS.md** para detalhes.
+Consulte **[../docs/refactoring/REFACTORING_ANALYSIS.md](../docs/refactoring/REFACTORING_ANALYSIS.md)** para detalhes.
 
 ### Uso de DPS_CPT_Helper
 

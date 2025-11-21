@@ -88,7 +88,7 @@ Antes de criar uma nova versão oficial:
   - Mensagens de sucesso, erro e aviso via transients específicos por usuário
   - Exibição automática no topo das seções com remoção após visualização
   - Integrada em todos os fluxos de salvamento e exclusão (clientes, pets, agendamentos)
-- Adicionado documento de análise de refatoração (`REFACTORING_ANALYSIS.md`) com identificação detalhada de problemas de código e sugestões de melhoria
+- Adicionado documento de análise de refatoração (`docs/refactoring/REFACTORING_ANALYSIS.md`) com identificação detalhada de problemas de código e sugestões de melhoria
 - Criado arquivo de exemplos práticos (`includes/refactoring-examples.php`) demonstrando uso das classes helper e padrões de refatoração
 - Implementado `register_deactivation_hook` no add-on Agenda para limpar cron job `dps_agenda_send_reminders` ao desativar
 - Adicionada seção completa de "Padrões de desenvolvimento de add-ons" no `ANALYSIS.md` incluindo:
@@ -97,10 +97,10 @@ Antes de criar uma nova versão oficial:
   - Padrões de documentação com DocBlocks seguindo convenções WordPress
   - Boas práticas de prefixação, segurança, performance e integração
 - Criados documentos de análise e guias de estilo:
-  - `ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
-  - `VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
-  - `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas
-  - `FORMS_UX_ANALYSIS.md`: análise completa de UX dos formulários de cadastro com priorização de melhorias
+  - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
+  - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
+  - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas
+  - `docs/layout/forms/FORMS_UX_ANALYSIS.md`: análise completa de UX dos formulários de cadastro com priorização de melhorias
 - **Agenda Add-on**: Implementadas melhorias de FASE 1 e FASE 2:
   - Botão "➕ Novo Agendamento" adicionado à barra de navegação para workflow completo
   - Modal customizado para visualização de serviços (substitui alert() nativo)

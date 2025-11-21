@@ -6,9 +6,10 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
 ## Estrutura do repositório
 - **plugin/**: plugin WordPress principal (`desi-pet-shower-base_plugin`) com ponto de entrada, includes e assets compartilhados.
 - **add-ons/**: add-ons opcionais, cada um com arquivo principal próprio e subpastas por funcionalidade.
+- **docs/**: documentação detalhada de UX, layout, refatoração e planos de implementação (veja `/docs/README.md` para índice completo).
 - **ANALYSIS.md**: visão arquitetural, fluxos de integração e contratos entre núcleo e extensões.
 - **CHANGELOG.md**: histórico de versões e lançamentos. Deve ser atualizado em cada release.
-- **REFACTORING_ANALYSIS.md**: análise detalhada de problemas de código conhecidos e padrões de refatoração recomendados.
+- **docs/refactoring/REFACTORING_ANALYSIS.md**: análise detalhada de problemas de código conhecidos e padrões de refatoração recomendados.
 - **plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
 - Pastas adicionais podem surgir para ferramentas de build, exemplos ou documentação; mantenha-as descritas nesta seção quando adicionadas.
 
@@ -106,9 +107,9 @@ O DPS adota um padrão **minimalista/clean** para todas as interfaces administra
 - **Responsividade básica**: media queries em 480px, 768px e 1024px para adaptar tabelas, grids e navegação
 
 **Referências completas**:
-- `VISUAL_STYLE_GUIDE.md`: guia detalhado de cores, tipografia e componentes
-- `ADMIN_LAYOUT_ANALYSIS.md`: análise de usabilidade e padrões de layout
-- `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo de melhorias implementadas
+- `docs/visual/VISUAL_STYLE_GUIDE.md`: guia detalhado de cores, tipografia e componentes
+- `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise de usabilidade e padrões de layout
+- `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo de melhorias implementadas
 
 
 
@@ -124,7 +125,7 @@ O DPS adota um padrão **minimalista/clean** para todas as interfaces administra
 
 O repositório mantém recursos específicos para orientar refatorações de código:
 
-### REFACTORING_ANALYSIS.md
+### docs/refactoring/REFACTORING_ANALYSIS.md
 - Fonte oficial de problemas conhecidos de código (funções muito grandes, nomes pouco descritivos, duplicação)
 - Identifica candidatos prioritários para refatoração com métricas objetivas (linhas de código, complexidade)
 - Sugere versões refatoradas com nomes melhores e quebra em métodos menores
@@ -137,7 +138,7 @@ O repositório mantém recursos específicos para orientar refatorações de có
 - Use como referência ao refatorar código existente ou criar novos componentes
 
 **Quando usar esses recursos**:
-- Antes de refatorar funções grandes identificadas no REFACTORING_ANALYSIS.md
+- Antes de refatorar funções grandes identificadas no `docs/refactoring/REFACTORING_ANALYSIS.md`
 - Ao criar novos formulários ou fluxos que precisem de validação/sanitização
 - Sempre que precisar manipular valores monetários, construir URLs ou fazer queries otimizadas
 - Ao revisar pull requests que introduzem helpers ou padrões novos
@@ -148,7 +149,7 @@ O repositório mantém recursos específicos para orientar refatorações de có
 
 O agente tem liberdade para melhorar o código dentro dos seguintes limites:
 
-- ✅ **Quebrar funções grandes em métodos menores**: seguir sugestões do REFACTORING_ANALYSIS.md
+- ✅ **Quebrar funções grandes em métodos menores**: seguir sugestões do `docs/refactoring/REFACTORING_ANALYSIS.md`
 - ✅ **Extrair helpers reutilizáveis**: centralizar lógica duplicada em classes utilitárias
 - ✅ **Melhorar DocBlocks e nomenclatura**: tornar código mais legível e autodocumentado
 - ✅ **Aderir à estrutura proposta de add-ons**: reorganizar arquivos seguindo padrão modular de `includes/` e `assets/`
