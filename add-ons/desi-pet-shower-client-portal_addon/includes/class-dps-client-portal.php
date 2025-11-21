@@ -1009,23 +1009,25 @@ final class DPS_Client_Portal {
         echo '<fieldset class="dps-fieldset">';
         echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados de Contato', 'dps-client-portal' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'dps-client-portal' ) . '<br>';
-        echo '<input type="tel" name="client_phone" value="' . esc_attr( $meta['phone'] ) . '" autocomplete="tel" style="font-size: 16px;"></label></p>';
+        echo '<input type="tel" name="client_phone" value="' . esc_attr( $meta['phone'] ) . '" autocomplete="tel" placeholder="(00) 00000-0000" style="font-size: 16px;"></label></p>';
         echo '<p><label>' . esc_html__( 'Email', 'dps-client-portal' ) . '<br>';
-        echo '<input type="email" name="client_email" value="' . esc_attr( $meta['email'] ) . '" autocomplete="email" style="font-size: 16px;"></label></p>';
+        echo '<input type="email" name="client_email" value="' . esc_attr( $meta['email'] ) . '" autocomplete="email" placeholder="seuemail@exemplo.com" style="font-size: 16px;"></label></p>';
         echo '</fieldset>';
         
         // Fieldset: Endereço
         echo '<fieldset class="dps-fieldset">';
         echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Endereço', 'dps-client-portal' ) . '</legend>';
         echo '<p><label>' . esc_html__( 'Endereço completo', 'dps-client-portal' ) . '<br>';
-        echo '<textarea name="client_address" rows="2" autocomplete="street-address" style="font-size: 16px;">' . esc_textarea( $meta['address'] ) . '</textarea></label></p>';
+        echo '<textarea name="client_address" rows="2" autocomplete="street-address" placeholder="Rua, Número, Bairro, Cidade - UF" style="font-size: 16px;">' . esc_textarea( $meta['address'] ) . '</textarea></label></p>';
         echo '</fieldset>';
         
-        // Fieldset: Redes Sociais (Opcional)
+        // Fieldset: Redes Sociais (Opcional) - Grid 2 colunas
         echo '<fieldset class="dps-fieldset">';
         echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Redes Sociais (Opcional)', 'dps-client-portal' ) . '</legend>';
-        echo '<p><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $meta['instagram'] ) . '" style="font-size: 16px;"></label></p>';
-        echo '<p><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $meta['facebook'] ) . '" style="font-size: 16px;"></label></p>';
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        echo '<p class="dps-form-col"><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $meta['instagram'] ) . '" placeholder="@usuario" style="font-size: 16px;"></label></p>';
+        echo '<p class="dps-form-col"><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $meta['facebook'] ) . '" placeholder="Nome do perfil" style="font-size: 16px;"></label></p>';
+        echo '</div>';
         echo '</fieldset>';
         
         echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . esc_html__( 'Salvar Dados', 'dps-client-portal' ) . '</button></p>';
@@ -1063,35 +1065,56 @@ final class DPS_Client_Portal {
                 echo '<input type="hidden" name="dps_client_portal_action" value="update_pet">';
                 echo '<input type="hidden" name="pet_id" value="' . esc_attr( $pet_id ) . '">';
                 
-                // Fieldset: Dados Básicos
+                // Fieldset: Dados Básicos - reorganizado em grid
                 echo '<fieldset class="dps-fieldset">';
                 echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados Básicos', 'dps-client-portal' ) . '</legend>';
-                echo '<p><label>' . esc_html__( 'Nome', 'dps-client-portal' ) . '<br><input type="text" name="pet_name" value="' . esc_attr( $pet->post_title ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Espécie', 'dps-client-portal' ) . '<br><input type="text" name="pet_species" value="' . esc_attr( $meta_pet['species'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Raça', 'dps-client-portal' ) . '<br><input type="text" name="pet_breed" value="' . esc_attr( $meta_pet['breed'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Porte', 'dps-client-portal' ) . '<br><input type="text" name="pet_size" value="' . esc_attr( $meta_pet['size'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Peso', 'dps-client-portal' ) . '<br><input type="text" name="pet_weight" value="' . esc_attr( $meta_pet['weight'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Pelagem', 'dps-client-portal' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $meta_pet['coat'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Cor', 'dps-client-portal' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $meta_pet['color'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-client-portal' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $meta_pet['birth'] ) . '" style="font-size: 16px;"></label></p>';
-                echo '<p><label>' . esc_html__( 'Sexo', 'dps-client-portal' ) . '<br><select name="pet_sex" style="font-size: 16px;"><option value="">' . esc_html__( 'Selecione...', 'dps-client-portal' ) . '</option>';
+                echo '<p><label>' . esc_html__( 'Nome', 'dps-client-portal' ) . '<br><input type="text" name="pet_name" value="' . esc_attr( $pet->post_title ) . '" placeholder="Nome do pet" style="font-size: 16px;"></label></p>';
+                
+                echo '<div class="dps-form-row dps-form-row--2col">';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Espécie', 'dps-client-portal' ) . '<br><input type="text" name="pet_species" value="' . esc_attr( $meta_pet['species'] ) . '" placeholder="Cachorro, Gato..." style="font-size: 16px;"></label></p>';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Raça', 'dps-client-portal' ) . '<br><input type="text" name="pet_breed" value="' . esc_attr( $meta_pet['breed'] ) . '" placeholder="Raça do pet" style="font-size: 16px;"></label></p>';
+                echo '</div>';
+                
+                echo '<div class="dps-form-row dps-form-row--3col">';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Tamanho', 'dps-client-portal' ) . '<br><input type="text" name="pet_size" value="' . esc_attr( $meta_pet['size'] ) . '" placeholder="Pequeno/Médio/Grande" style="font-size: 16px;"></label></p>';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Peso (kg)', 'dps-client-portal' ) . '<br><input type="text" name="pet_weight" value="' . esc_attr( $meta_pet['weight'] ) . '" placeholder="5.5" style="font-size: 16px;"></label></p>';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Sexo', 'dps-client-portal' ) . '<br><select name="pet_sex" style="font-size: 16px;"><option value="">' . esc_html__( 'Selecione...', 'dps-client-portal' ) . '</option>';
                 $sex_opts = [ 'M' => 'Macho', 'F' => 'Fêmea' ];
                 foreach ( $sex_opts as $val => $label ) {
                     $sel = ( $meta_pet['sex'] === $val ) ? 'selected' : '';
                     echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
                 }
                 echo '</select></label></p>';
+                echo '</div>';
+                
+                echo '<div class="dps-form-row dps-form-row--2col">';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Tipo de pelo', 'dps-client-portal' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $meta_pet['coat'] ) . '" placeholder="Curto, longo..." style="font-size: 16px;"></label></p>';
+                echo '<p class="dps-form-col"><label>' . esc_html__( 'Cor predominante', 'dps-client-portal' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $meta_pet['color'] ) . '" placeholder="Branco, preto..." style="font-size: 16px;"></label></p>';
+                echo '</div>';
+                
+                echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-client-portal' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $meta_pet['birth'] ) . '" style="font-size: 16px;"></label></p>';
                 echo '</fieldset>';
                 
                 // Fieldset: Saúde e Comportamento
                 echo '<fieldset class="dps-fieldset">';
                 echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Saúde e Comportamento', 'dps-client-portal' ) . '</legend>';
-                echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'dps-client-portal' ) . '<br><textarea name="pet_vaccinations" rows="2" style="font-size: 16px;">' . esc_textarea( $meta_pet['vaccinations'] ) . '</textarea></label></p>';
-                echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'dps-client-portal' ) . '<br><textarea name="pet_allergies" rows="2" style="font-size: 16px;">' . esc_textarea( $meta_pet['allergies'] ) . '</textarea></label></p>';
-                echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'dps-client-portal' ) . '<br><textarea name="pet_behavior" rows="2" style="font-size: 16px;">' . esc_textarea( $meta_pet['behavior'] ) . '</textarea></label></p>';
+                echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'dps-client-portal' ) . '<br><textarea name="pet_vaccinations" rows="2" placeholder="Liste vacinas e condições de saúde..." style="font-size: 16px;">' . esc_textarea( $meta_pet['vaccinations'] ) . '</textarea></label></p>';
+                echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'dps-client-portal' ) . '<br><textarea name="pet_allergies" rows="2" placeholder="Alergias a alimentos, medicamentos..." style="font-size: 16px;">' . esc_textarea( $meta_pet['allergies'] ) . '</textarea></label></p>';
+                echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'dps-client-portal' ) . '<br><textarea name="pet_behavior" rows="2" placeholder="Como o pet costuma se comportar?" style="font-size: 16px;">' . esc_textarea( $meta_pet['behavior'] ) . '</textarea></label></p>';
                 echo '</fieldset>';
                 
-                echo '<p><label>' . esc_html__( 'Foto', 'dps-client-portal' ) . '<br><input type="file" name="pet_photo"></label></p>';
+                // Foto do Pet
+                echo '<fieldset class="dps-fieldset">';
+                echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Foto do Pet', 'dps-client-portal' ) . '</legend>';
+                echo '<div class="dps-file-upload">';
+                echo '<label class="dps-file-upload__label">';
+                echo '<input type="file" name="pet_photo" accept="image/*" class="dps-file-upload__input">';
+                echo '<span class="dps-file-upload__text">📷 ' . esc_html__( 'Atualizar foto', 'dps-client-portal' ) . '</span>';
+                echo '</label>';
+                echo '<div class="dps-file-upload__preview"></div>';
+                echo '</div>';
+                echo '</fieldset>';
+                
                 echo '<p><button type="submit" class="button dps-submit-btn">' . esc_html__( 'Salvar Pet', 'dps-client-portal' ) . '</button></p>';
                 echo '</form>';
                 echo '</div>';

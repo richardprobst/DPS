@@ -11,6 +11,7 @@
      */
     function init() {
         handleFormSubmits();
+        handleFileUploadPreview();
         handleSmoothScroll();
     }
 
@@ -41,6 +42,35 @@
                             submitBtn.textContent = originalText;
                         }
                     }, 100);
+                }
+            });
+        });
+    }
+
+    /**
+     * Preview de upload de foto
+     */
+    function handleFileUploadPreview() {
+        const fileInputs = document.querySelectorAll('.dps-file-upload__input');
+        
+        fileInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                const uploadDiv = this.closest('.dps-file-upload');
+                const preview = uploadDiv ? uploadDiv.querySelector('.dps-file-upload__preview') : null;
+                
+                if (!preview) return;
+                
+                if (file && file.type.match('image.*')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.innerHTML = '';
                 }
             });
         });

@@ -567,5 +567,53 @@
         });
       }
     })();
+
+    /*
+     * Melhorias de UX para formulários de cadastro
+     * - Desabilita botão de submit durante envio
+     * - Preview de upload de foto
+     */
+    (function(){
+      // Desabilita botão durante submit
+      $('.dps-form').on('submit', function(){
+        var $form = $(this);
+        var $btn  = $form.find('.dps-submit-btn, button[type="submit"]');
+        
+        if ($btn.data('submitting')) {
+          return false;
+        }
+        
+        $btn.data('submitting', true);
+        $btn.prop('disabled', true);
+        
+        var originalText = $btn.text();
+        $btn.text(dpsBaseL10n.savingText || 'Salvando...');
+        
+        // Restaura após 5 segundos caso falhe
+        setTimeout(function(){
+          $btn.prop('disabled', false);
+          $btn.text(originalText);
+          $btn.removeData('submitting');
+        }, 5000);
+      });
+      
+      // Preview de upload de foto
+      $('.dps-file-upload__input').on('change', function(){
+        var $input   = $(this);
+        var $preview = $input.closest('.dps-file-upload').find('.dps-file-upload__preview');
+        var file     = this.files[0];
+        
+        if (!file || !file.type.match('image.*')) {
+          $preview.empty();
+          return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function(e){
+          $preview.html('<img src="' + e.target.result + '" alt="Preview">');
+        };
+        reader.readAsDataURL(file);
+      });
+    })();
   });
 })(jQuery);

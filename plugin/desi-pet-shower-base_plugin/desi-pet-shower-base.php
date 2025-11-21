@@ -231,6 +231,9 @@ class DPS_Base_Plugin {
             'petLoadMore'           => __( 'Carregar mais pets', 'desi-pet-shower' ),
             'petLoading'            => __( 'Carregando pets...', 'desi-pet-shower' ),
             'petNoResults'          => __( 'Nenhum pet encontrado para o filtro atual.', 'desi-pet-shower' ),
+            'savingText'            => __( 'Salvando...', 'desi-pet-shower' ),
+            'selectedSingle'        => __( 'selecionado', 'desi-pet-shower' ),
+            'selectedMultiple'      => __( 'selecionados', 'desi-pet-shower' ),
         ] );
     }
 
