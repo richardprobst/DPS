@@ -140,7 +140,7 @@ class DPS_Communications_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
-        wp_redirect( add_query_arg( [ 'tab' => 'comunicacoes', 'updated' => '1' ], get_permalink() ) );
+        wp_redirect( add_query_arg( [ 'tab' => 'comunicacoes', 'updated' => '1' ], admin_url( $_SERVER['REQUEST_URI'] ) ) );
         exit;
     }
 
