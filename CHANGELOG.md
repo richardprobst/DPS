@@ -2,12 +2,31 @@
 
 Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do Desi Pet Shower (DPS). Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
 
+## Relação com outros documentos
+
+Este CHANGELOG complementa e se relaciona com:
+- **ANALYSIS.md**: contém detalhes arquiteturais, fluxos internos de integração e contratos de hooks entre núcleo e add-ons. Consulte-o para entender *como* o sistema funciona internamente.
+- **AGENTS.md**: define políticas de versionamento, git-flow, convenções de código e obrigações de documentação. Consulte-o para entender *como* contribuir e manter o código.
+
+Este CHANGELOG registra *o que* mudou, em qual versão e com qual impacto visível para usuários e integradores.
+
 ## Como atualizar este changelog
 1. **Abra uma nova seção** para cada versão liberada, usando o formato `AAAA-MM-DD` para a data real do lançamento.
 2. **Agrupe entradas por categoria**, mesmo que alguma fique vazia (remova a categoria vazia apenas se não houver conteúdo relevante).
 3. **Use linguagem imperativa e concisa**, indicando impacto visível para usuários e integradores.
 4. **Referencie tickets ou links**, quando útil, no final de cada item.
 5. **Não liste alterações internas triviais** (refactors menores ou ajustes de estilo) a menos que afetem integrações ou documentação.
+
+### Fluxo de release
+
+Antes de criar uma nova versão oficial:
+
+1. **Mover entradas de `[Unreleased]` para nova seção datada**: crie uma seção `### [AAAA-MM-DD] vX.Y.Z` e transfira todas as entradas acumuladas de `[Unreleased]` para ela.
+2. **Deixar `[Unreleased]` pronto para a próxima rodada**: mantenha a seção `[Unreleased]` com categorias vazias prontas para receber novas mudanças.
+3. **Conferir coerência com ANALYSIS.md e AGENTS.md**:
+   - Se houve mudanças de arquitetura, criação de helpers, novos hooks ou alterações de fluxo financeiro, valide que o `ANALYSIS.md` reflete essas mudanças.
+   - Se houve mudanças em políticas de versionamento, convenções de código ou estrutura de add-ons, valide que o `AGENTS.md` está atualizado.
+4. **Criar tag de release**: após garantir que todos os arquivos estão consistentes, crie a tag anotada `git tag -a vX.Y.Z -m "Descrição da versão"` e publique.
 
 ## Estrutura recomendada
 - Todas as versões listadas do mais recente para o mais antigo.
@@ -19,6 +38,7 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
   - Removed (Removido)
   - Deprecated (Depreciado)
   - Security (Segurança)
+  - Refactoring (Interno) — *opcional, apenas para grandes refatorações que impactam arquitetura ou helpers globais*
 
 ## Exemplos e placeholders
 
@@ -47,6 +67,12 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 #### Security (Segurança)
 - Registre correções de segurança, incluindo CVE/avisos internos.
 - Exemplo: "Sanitização reforçada nos parâmetros de webhook `dps_webhook_token`." (TCK-127)
+
+#### Refactoring (Interno)
+- Liste apenas grandes refatorações que impactam arquitetura, estrutura de add-ons ou criação de helpers globais.
+- Refatorações triviais (renomeação de variáveis, quebra de funções pequenas) devem ficar fora do changelog.
+- Exemplo: "Criadas classes helper `DPS_Money_Helper`, `DPS_URL_Builder`, `DPS_Query_Helper` e `DPS_Request_Validator` para padronizar operações comuns." (TCK-128)
+- Exemplo: "Documentado padrão de estrutura de arquivos para add-ons em `ANALYSIS.md` com exemplos práticos em `refactoring-examples.php`." (TCK-129)
 
 ---
 

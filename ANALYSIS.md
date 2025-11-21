@@ -8,6 +8,96 @@
 - A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
 - A criação de tabelas do núcleo (ex.: `dps_logs`) é registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versão não exista ou esteja desatualizada, `dbDelta` é chamado uma única vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificação em todos os ciclos de `init`.
 
+### Helpers globais do núcleo
+
+O plugin base oferece classes utilitárias para padronizar operações comuns e evitar duplicação de lógica. Estes helpers estão disponíveis em `plugin/desi-pet-shower-base_plugin/includes/` e podem ser usados tanto pelo núcleo quanto pelos add-ons.
+
+#### DPS_Money_Helper
+**Propósito**: Manipulação consistente de valores monetários com conversão entre formato brasileiro e centavos.
+
+**Entrada/Saída**:
+- `parse_brazilian_format( string )`: Converte string BR (ex.: "1.234,56") → int centavos (123456)
+- `format_to_brazilian( int )`: Converte centavos (123456) → string BR ("1.234,56")
+- `decimal_to_cents( float )`: Converte decimal (12.34) → int centavos (1234)
+- `cents_to_decimal( int )`: Converte centavos (1234) → float decimal (12.34)
+
+**Exemplos práticos**:
+```php
+// Converter valor do formulário para centavos
+$valor_centavos = DPS_Money_Helper::parse_brazilian_format( $_POST['preco'] );
+
+// Exibir valor formatado na tela
+echo 'R$ ' . DPS_Money_Helper::format_to_brazilian( $valor_centavos );
+```
+
+**Boas práticas**: Use sempre este helper para conversões monetárias. Evite lógica duplicada de `str_replace` e `number_format` espalhada pelo código.
+
+#### DPS_URL_Builder
+**Propósito**: Construção padronizada de URLs de ação (edição, exclusão, visualização, navegação entre abas).
+
+**Entrada/Saída**:
+- `build_edit_url( int $post_id, string $tab )`: Gera URL de edição com nonce
+- `build_delete_url( int $post_id, string $action, string $tab )`: Gera URL de exclusão com nonce
+- `build_view_url( int $post_id, string $tab )`: Gera URL de visualização
+- `build_tab_url( string $tab_name )`: Gera URL de navegação entre abas
+
+**Exemplos práticos**:
+```php
+// Gerar link de edição de cliente
+$url_editar = DPS_URL_Builder::build_edit_url( $client_id, 'clientes' );
+
+// Gerar link de exclusão de agendamento com confirmação
+$url_excluir = DPS_URL_Builder::build_delete_url( $appointment_id, 'delete_appointment', 'historico' );
+```
+
+**Boas práticas**: Centralize geração de URLs neste helper para garantir nonces consistentes e evitar links quebrados.
+
+#### DPS_Query_Helper
+**Propósito**: Consultas WP_Query reutilizáveis com filtros comuns, paginação e otimizações de performance.
+
+**Entrada/Saída**:
+- `get_all_posts_by_type( string $post_type, array $args )`: Retorna posts com argumentos otimizados
+- `get_paginated_posts( string $post_type, int $per_page, int $paged, array $args )`: Retorna posts paginados
+- `count_posts_by_status( string $post_type, string $status )`: Conta posts por status
+
+**Exemplos práticos**:
+```php
+// Buscar todos os clientes ativos
+$clientes = DPS_Query_Helper::get_all_posts_by_type( 'dps_client', [
+    'post_status' => 'publish',
+    'orderby' => 'title',
+    'order' => 'ASC'
+] );
+
+// Buscar agendamentos paginados
+$agendamentos = DPS_Query_Helper::get_paginated_posts( 'dps_appointment', 20, $paged );
+```
+
+**Boas práticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e pré-carregue metadados com `update_meta_cache()` quando precisar de metas.
+
+#### DPS_Request_Validator
+**Propósito**: Validação centralizada de nonces, capabilities e sanitização de campos de formulário.
+
+**Entrada/Saída**:
+- `verify_nonce_and_capability( string $nonce_field, string $capability )`: Valida nonce e permissão
+- `sanitize_text_field_from_post( string $field_name, string $default )`: Sanitiza campo de texto
+- `sanitize_email_from_post( string $field_name )`: Sanitiza e valida email
+- `sanitize_int_from_post( string $field_name, int $default )`: Sanitiza inteiro
+
+**Exemplos práticos**:
+```php
+// Validar requisição antes de processar formulário
+if ( ! DPS_Request_Validator::verify_nonce_and_capability( 'dps_nonce', 'edit_posts' ) ) {
+    wp_die( 'Acesso negado.' );
+}
+
+// Sanitizar campos do formulário
+$nome = DPS_Request_Validator::sanitize_text_field_from_post( 'client_name', '' );
+$email = DPS_Request_Validator::sanitize_email_from_post( 'client_email' );
+```
+
+**Boas práticas**: NUNCA implemente validação de nonce ou sanitização manual fora deste helper. Evite duplicar lógica de segurança.
+
 ### Histórico e exportação de agendamentos
 - A coleta de atendimentos finalizados é feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurável via filtro `dps_history_batch_size` (padrão: 200). Isso evita uma única consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
 - As metas dos agendamentos são pré-carregadas com `update_meta_cache('post')` antes do loop, reduzindo consultas repetidas às mesmas linhas durante a renderização e exportação.
@@ -15,60 +105,576 @@
 - O botão de exportação gera CSV apenas com as colunas exibidas e respeita os filtros aplicados na tabela, o que limita o volume exportado a um subconjunto relevante e já paginado/filtrado pelo usuário.
 
 ## Add-ons complementares (`add-ons/`)
+
 ### Agenda (`desi-pet-shower-agenda_addon`)
-- Cria automaticamente páginas de agenda e de cobranças, registra os *shortcodes* `[dps_agenda_page]` e `[dps_charges_notes]`, entrega scripts próprios e implementa fluxos AJAX para atualização de status e inspeção de serviços associados, além de agendar lembretes diários via `dps_agenda_send_reminders`.
-- O JavaScript (`agenda-addon.js`) trata interações de status, mensagens de feedback e leitura dos serviços retornados pela API do plugin base.
+
+**Diretório**: `add-ons/desi-pet-shower-agenda_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar agenda de atendimentos e cobranças pendentes
+- Enviar lembretes automáticos diários aos clientes
+- Atualizar status de agendamentos via interface AJAX
+
+**Shortcodes expostos**:
+- `[dps_agenda_page]`: renderiza página de agenda com filtros e ações
+- `[dps_charges_notes]`: exibe lista de cobranças pendentes
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs próprios; consome `dps_appointment` do núcleo
+- Cria páginas automaticamente: "Agenda DPS" e "Cobranças DPS"
+- Options: `dps_agenda_page_id`, `dps_charges_page_id`
+
+**Hooks consumidos**:
+- Nenhum hook específico do núcleo (opera diretamente sobre CPTs)
+
+**Hooks disparados**:
+- `dps_agenda_send_reminders`: cron job diário para envio de lembretes
+
+**Dependências**:
+- Depende do plugin base para CPTs de agendamento
+- Integra-se com add-on de Comunicações para envio de mensagens (se ativo)
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Assets**:
+- `assets/js/agenda-addon.js`: interações AJAX e feedback visual
+
+**Observações**:
+- Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar
+
+---
 
 ### Backup & Restauração (`desi-pet-shower-backup_addon`)
-- Adiciona a aba "Backup & Restauração" nas configurações do painel principal, gera arquivos JSON com todo o conteúdo e possibilita restauração completa, incluindo salvaguardas com *nonce* e validações de arquivo.
+
+**Diretório**: `add-ons/desi-pet-shower-backup_addon`
+
+**Propósito e funcionalidades principais**:
+- Exportar todo o conteúdo do sistema em formato JSON
+- Restaurar dados de backups anteriores
+- Proteger operações com nonces e validações
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Integra-se à navegação de configurações do plugin base
+
+**Hooks consumidos**:
+- `dps_settings_nav_tabs`: adiciona aba "Backup & Restauração"
+- `dps_settings_sections`: renderiza conteúdo da seção
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para estrutura de configurações
+- Acessa todos os CPTs do sistema para exportação/importação
+
+**Introduzido em**: v0.1.0 (estimado)
+
+---
 
 ### Campanhas & Fidelidade (`desi-pet-shower-loyalty_addon`)
-- Mantém o programa de pontos por faturamento e agora inclui o módulo "Indique e Ganhe" com geração automática de códigos únicos por cliente, tabela dedicada `dps_referrals` criada via `dbDelta` e CRUD auxiliar para registrar indicações e recompensas.
-- O módulo integra o cadastro público via `dps_registration_after_client_created` para armazenar indicações válidas e consome o novo hook financeiro `dps_finance_booking_paid` para bonificar indicador/indicado na primeira cobrança paga, aplicando pontos ou créditos conforme configuração administrativa.
+
+**Diretório**: `add-ons/desi-pet-shower-loyalty_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar programa de pontos por faturamento
+- Módulo "Indique e Ganhe" com códigos únicos e recompensas
+- Criar e executar campanhas de marketing direcionadas
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- CPT: `dps_campaign` (campanhas de marketing)
+- Tabela: `dps_referrals` (indicações de clientes)
+- Options: configurações de pontos, recompensas e elegibilidade
+
+**Hooks consumidos**:
+- `dps_registration_after_client_created`: registra indicações no cadastro público
+- `dps_finance_booking_paid`: bonifica indicador/indicado na primeira cobrança paga
+- `dps_base_nav_tabs_after_history`: adiciona aba "Campanhas & Fidelidade"
+- `dps_base_sections_after_history`: renderiza conteúdo da aba
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Integra-se com add-on Financeiro para bonificações
+- Integra-se com add-on de Cadastro Público para capturar códigos de indicação
+- Integra-se com Portal do Cliente para exibir código/link de convite
+
+**Introduzido em**: v0.2.0
+
+**Observações**:
+- Tabela `dps_referrals` criada via `dbDelta` na ativação
+- Oferece funções globais para crédito e resgate de pontos
+
+---
 
 ### Comunicações (`desi-pet-shower-communications_addon`)
-- Gerencia comunicações automatizadas via WhatsApp, SMS e e-mail para eventos do sistema (agendamentos, lembretes, pós-atendimento).
-- Registra configurações específicas para cada canal de comunicação e permite personalização de mensagens por tipo de evento.
-- Conecta-se aos hooks do plugin base (`dps_base_after_save_appointment`) e agenda tarefas (`dps_comm_send_appointment_reminder`, `dps_comm_send_post_service`) para envio automatizado.
-- Exibe suas configurações na navegação padrão do núcleo usando `dps_settings_nav_tabs`/`dps_settings_sections`, em vez de menus próprios no admin.
+
+**Diretório**: `add-ons/desi-pet-shower-communications_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar comunicações automatizadas via WhatsApp, SMS e e-mail
+- Enviar notificações para eventos do sistema (agendamentos, lembretes, pós-atendimento)
+- Personalizar mensagens por tipo de evento
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Options: configurações de canais (WhatsApp, SMS, e-mail) e templates de mensagens
+
+**Hooks consumidos**:
+- `dps_base_after_save_appointment`: dispara comunicações após salvar agendamento
+- `dps_settings_nav_tabs`: adiciona aba "Comunicações"
+- `dps_settings_sections`: renderiza configurações de canais e mensagens
+
+**Hooks disparados**:
+- `dps_comm_send_appointment_reminder`: cron job para lembretes de agendamento
+- `dps_comm_send_post_service`: cron job para mensagens pós-atendimento
+
+**Dependências**:
+- Depende do plugin base para estrutura de configurações e hooks de agendamento
+
+**Introduzido em**: v0.1.0 (estimado)
+
+---
 
 ### Groomers (`desi-pet-shower-groomers_addon`)
-- Adiciona cadastro de profissionais (groomers) com papel de usuário dedicado `dps_groomer`.
-- Permite vincular atendimentos a profissionais específicos através de campos adicionais no formulário de agendamento via hook `dps_base_appointment_fields`.
-- Oferece relatórios por profissional para análise de produtividade e desempenho individual.
-- Usa a navegação do painel base via `dps_base_nav_tabs_after_history`/`dps_base_sections_after_history` para cadastro e relatórios, substituindo páginas de menu próprias.
+
+**Diretório**: `add-ons/desi-pet-shower-groomers_addon`
+
+**Propósito e funcionalidades principais**:
+- Cadastrar e gerenciar profissionais (groomers)
+- Vincular atendimentos a profissionais específicos
+- Gerar relatórios de produtividade por profissional
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Role customizada: `dps_groomer` (profissional de banho e tosa)
+- Metadados: `_groomer_id` nos posts de agendamento
+
+**Hooks consumidos**:
+- `dps_base_appointment_fields`: adiciona campo de seleção de groomer no formulário de agendamento
+- `dps_base_nav_tabs_after_history`: adiciona aba "Groomers"
+- `dps_base_sections_after_history`: renderiza cadastro e relatórios
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para estrutura de navegação e agendamentos
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Arquivo único de 473 linhas; candidato a refatoração futura seguindo padrão de estrutura modular
+
+---
 
 ### Portal do Cliente (`desi-pet-shower-client-portal_addon`)
-- A inicialização define constantes e instancia `DPS_Client_Portal`, que abre sessões próprias, gera logins para clientes recém-criados, expõe os *shortcodes* `[dps_client_portal]` e `[dps_client_login]`, registra tipos de mensagem e integra suas abas com o painel base.
-- O portal permite que clientes atualizem dados próprios/pets e paguem pendências via links do Mercado Pago reutilizando a infraestrutura do add-on de pagamentos, além de exibir um bloco "Indique e Ganhe" com código, link e contagem de indicações bonificadas quando o módulo de fidelidade está ativo.
+
+**Diretório**: `add-ons/desi-pet-shower-client-portal_addon`
+
+**Propósito e funcionalidades principais**:
+- Fornecer área autenticada para clientes
+- Permitir atualização de dados pessoais e de pets
+- Exibir histórico de atendimentos e pendências financeiras
+- Integrar com módulo "Indique e Ganhe" quando ativo
+
+**Shortcodes expostos**:
+- `[dps_client_portal]`: renderiza portal completo do cliente
+- `[dps_client_login]`: exibe formulário de login
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Usa sessões PHP próprias para autenticação
+- Tipos de mensagem customizados para notificações
+
+**Hooks consumidos**:
+- `dps_base_nav_tabs_*`: integra abas ao painel base (quando aplicável)
+- Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para CPTs de clientes e pets
+- Integra-se com add-on Financeiro para exibir pendências
+- Integra-se com add-on de Fidelidade para exibir código de indicação
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Já segue padrão modular com estrutura `includes/` e `assets/`
+- Gera credenciais de login automaticamente para novos clientes
+
+---
 
 ### Financeiro (`desi-pet-shower-finance_addon`)
-- Acrescenta a aba "Financeiro", garante a criação das tabelas `dps_transacoes` e `dps_parcelas`, sincroniza alterações vindas dos agendamentos e oferece formulários para registrar, quitar (inclusive parcialmente) ou excluir transações, além de gerar documentos e shortcodes auxiliares.
-- Consome o hook `dps_finance_cleanup_for_appointment` para remover lançamentos associados sempre que um agendamento é excluído, centralizando a limpeza financeira.
+
+**Diretório**: `add-ons/desi-pet-shower-finance_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar transações financeiras e cobranças
+- Sincronizar lançamentos com agendamentos
+- Suportar quitação parcial e geração de documentos
+- Integrar com outros add-ons para bonificações e assinaturas
+
+**Shortcodes expostos**: Sim (não especificados na documentação atual)
+
+**CPTs, tabelas e opções**:
+- Tabela: `dps_transacoes` (lançamentos financeiros)
+- Tabela: `dps_parcelas` (parcelas de cobranças)
+
+**Hooks consumidos**:
+- `dps_finance_cleanup_for_appointment`: remove lançamentos ao excluir agendamento
+- `dps_base_nav_tabs_*`: adiciona aba "Financeiro"
+- `dps_base_sections_*`: renderiza seção financeira
+
+**Hooks disparados**:
+- `dps_finance_booking_paid`: disparado quando cobrança é marcada como paga
+
+**Dependências**:
+- Depende do plugin base para estrutura de navegação
+- Fornece infraestrutura para add-ons de Pagamentos, Assinaturas e Fidelidade
+
+**Introduzido em**: v0.1.0
+
+**Observações**:
+- Já segue padrão modular com classes auxiliares em `includes/`
+- Tabela compartilhada por múltiplos add-ons; mudanças de schema requerem migração cuidadosa
+
+---
 
 ### Pagamentos (`desi-pet-shower-payment_addon`)
-- Gera links de checkout no Mercado Pago sempre que agendamentos finalizados são salvos, injeta mensagens personalizadas no WhatsApp da agenda e provê tela de configurações com token de acesso e chave PIX, além de tratar notificações de *webhook* cedo no ciclo de inicialização.
+
+**Diretório**: `add-ons/desi-pet-shower-payment_addon`
+
+**Propósito e funcionalidades principais**:
+- Integrar com Mercado Pago para geração de links de pagamento
+- Processar notificações de webhook para atualização de status
+- Injetar mensagens de cobrança no WhatsApp via add-on de Agenda
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Options: `dps_mp_access_token`, `dps_pix_key` (credenciais Mercado Pago)
+
+**Hooks consumidos**:
+- Processa webhooks cedo no ciclo de inicialização do WordPress
+- Integra-se com add-on Financeiro para gerar cobranças
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do add-on Financeiro para criar transações
+- Integra-se com add-on de Agenda para envio de links via WhatsApp
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Validação de webhook aplicada apenas quando requisição traz indicadores de notificação do MP
+- Requer token de acesso e chave PIX configurados nas opções
+
+---
 
 ### Push Notifications (`desi-pet-shower-push_addon`)
-- Agenda tarefas recorrentes (agenda diária, relatório financeiro diário, relatório semanal de pets inativos), renderiza aba de configurações, coleta destinatários por filtros e envia e-mails ou integrações externas via `dps_send_push_notification`/Telegram.
+
+**Diretório**: `add-ons/desi-pet-shower-push_addon`
+
+**Propósito e funcionalidades principais**:
+- Agendar e enviar notificações recorrentes (agenda diária, relatórios financeiros)
+- Integrar com e-mail e Telegram para envio de mensagens
+- Filtrar destinatários por critérios configuráveis
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Options: configurações de destinatários e frequência de notificações
+
+**Hooks consumidos**:
+- `dps_settings_nav_tabs`: adiciona aba "Notificações"
+- `dps_settings_sections`: renderiza configurações
+
+**Hooks disparados**:
+- Múltiplos cron jobs: agenda diária, relatório financeiro diário, relatório semanal de pets inativos
+- `dps_send_push_notification`: hook customizado para envio via Telegram
+
+**Dependências**:
+- Depende do plugin base para estrutura de configurações
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Implementa `register_deactivation_hook` corretamente para limpar cron jobs
+
+---
 
 ### Cadastro Público (`desi-pet-shower-registration_addon`)
-- Cria a página de cadastro público com o shortcode `[dps_registration_form]`, expõe configurações para chave do Google Maps, sanitiza entradas e cadastra clientes/pets vinculados diretamente nos *custom post types* do plugin base.
+
+**Diretório**: `add-ons/desi-pet-shower-registration_addon`
+
+**Propósito e funcionalidades principais**:
+- Permitir cadastro público de clientes e pets via formulário web
+- Integrar com Google Maps para autocomplete de endereços
+- Disparar hook para outros add-ons após criação de cliente
+
+**Shortcodes expostos**:
+- `[dps_registration_form]`: renderiza formulário de cadastro público
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs próprios; cria posts do tipo `dps_client` e `dps_pet`
+- Options: `dps_google_maps_api_key` (chave de API do Google Maps)
+
+**Hooks consumidos**: Nenhum
+
+**Hooks disparados**:
+- `dps_registration_after_client_created`: disparado após criar novo cliente
+
+**Dependências**:
+- Depende do plugin base para CPTs de cliente e pet
+- Integra-se com add-on de Fidelidade para capturar códigos de indicação
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Sanitiza todas as entradas antes de criar posts
+- Arquivo único de 636 linhas; candidato a refatoração futura
+
+---
 
 ### Serviços (`desi-pet-shower-services_addon`)
-- Registra o *custom post type* `dps_service` via `DPS_CPT_Helper`, injeta abas/seções na interface principal, adiciona campos de seleção de serviços ao agendamento, salva metas auxiliares e povoa o catálogo padrão na ativação, incluindo preços/duração por porte.
+
+**Diretório**: `add-ons/desi-pet-shower-services_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar catálogo de serviços oferecidos
+- Definir preços e duração por porte de pet
+- Vincular serviços aos agendamentos
+- Povoar catálogo padrão na ativação
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- CPT: `dps_service` (registrado via `DPS_CPT_Helper`)
+- Metadados: preços e duração por porte (pequeno, médio, grande)
+
+**Hooks consumidos**:
+- `dps_base_nav_tabs_*`: adiciona aba "Serviços"
+- `dps_base_sections_*`: renderiza catálogo e formulários
+- Hook de agendamento: adiciona campos de seleção de serviços
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para estrutura de navegação
+- Reutiliza `DPS_CPT_Helper` para registro de CPT
+
+**Introduzido em**: v0.1.0 (estimado)
+
+---
 
 ### Estatísticas (`desi-pet-shower-stats_addon`)
-- Disponibiliza a aba "Estatísticas" com filtros de data, listas de clientes/pets inativos, contagem de atendimentos e serviços mais recorrentes, além de métricas de espécies, raças e receita recente consultando `dps_transacoes`.
+
+**Diretório**: `add-ons/desi-pet-shower-stats_addon`
+
+**Propósito e funcionalidades principais**:
+- Exibir métricas de uso do sistema (atendimentos, receita, clientes inativos)
+- Listar serviços mais recorrentes
+- Filtrar estatísticas por período
+- Analisar distribuição de espécies e raças
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Consulta `dps_transacoes` para métricas financeiras
+- Consulta CPTs do núcleo para métricas operacionais
+
+**Hooks consumidos**:
+- `dps_base_nav_tabs_after_history`: adiciona aba "Estatísticas"
+- `dps_base_sections_after_history`: renderiza gráficos e listas
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para CPTs
+- Depende do add-on Financeiro para métricas de receita
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Arquivo único de 538 linhas; candidato a refatoração futura
+
+---
 
 ### Estoque (`desi-pet-shower-stock_addon`)
-- Controla estoque de insumos utilizados nos atendimentos através do *custom post type* `dps_stock_item`, registrado com `DPS_CPT_Helper` e capabilities específicas (`dps_manage_stock`).
-- Registra movimentações de entrada e saída de produtos, incluindo baixa automática quando atendimentos são concluídos via hook `dps_base_after_save_appointment`.
-- Oferece alertas de estoque baixo e relatórios de consumo por período, além de capability específica `dps_manage_stock` para controle de acesso.
-- Passou a renderizar a tela de estoque como aba/seção no painel principal (`dps_base_nav_tabs_after_history`/`dps_base_sections_after_history`), removendo menus próprios no admin.
+
+**Diretório**: `add-ons/desi-pet-shower-stock_addon`
+
+**Propósito e funcionalidades principais**:
+- Controlar estoque de insumos utilizados nos atendimentos
+- Registrar movimentações de entrada e saída
+- Gerar alertas de estoque baixo
+- Baixar estoque automaticamente ao concluir atendimentos
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- CPT: `dps_stock_item` (registrado via `DPS_CPT_Helper`)
+- Capability customizada: `dps_manage_stock`
+- Metadados: quantidade atual, mínima, histórico de movimentações
+
+**Hooks consumidos**:
+- `dps_base_after_save_appointment`: baixa estoque automaticamente ao concluir atendimento
+- `dps_base_nav_tabs_after_history`: adiciona aba "Estoque"
+- `dps_base_sections_after_history`: renderiza controle de estoque
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do plugin base para estrutura de navegação e hooks de agendamento
+- Reutiliza `DPS_CPT_Helper` para registro de CPT
+
+**Introduzido em**: v0.1.0 (estimado)
+
+**Observações**:
+- Arquivo único de 432 linhas; candidato a refatoração futura
+- Passou a usar navegação integrada ao painel base, removendo menus próprios
+
+---
 
 ### Assinaturas (`desi-pet-shower-subscription_addon`)
-- Define o *custom post type* `dps_subscription`, adiciona UI própria ao painel, integra-se ao módulo financeiro, cria/atualiza transações relacionadas e gera links de renovação no Mercado Pago com mensagens padrão para WhatsApp.
+
+**Diretório**: `add-ons/desi-pet-shower-subscription_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar assinaturas recorrentes de clientes
+- Criar e atualizar transações relacionadas a assinaturas
+- Gerar links de renovação via Mercado Pago
+- Enviar mensagens padrão via WhatsApp para renovações
+
+**Shortcodes expostos**: Nenhum
+
+**CPTs, tabelas e opções**:
+- CPT: `dps_subscription` (planos de assinatura)
+- Integra-se com tabela `dps_transacoes` do add-on Financeiro
+
+**Hooks consumidos**:
+- Hooks do add-on Financeiro para criar transações recorrentes
+- Hooks do add-on de Pagamentos para gerar links de renovação
+
+**Hooks disparados**: Nenhum
+
+**Dependências**:
+- Depende do add-on Financeiro para gerenciar cobranças
+- Depende do add-on de Pagamentos para integração com Mercado Pago
+
+**Introduzido em**: v0.2.0 (estimado)
+
+**Observações**:
+- Define UI própria ao painel base
+- Integração estreita com fluxo financeiro e de pagamentos
+
+---
+
+## Mapa de hooks
+
+Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons, facilitando a integração entre componentes.
+
+### Hooks do plugin base (núcleo)
+
+#### Navegação e seções do painel
+
+- **`dps_base_nav_tabs_after_pets`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: adicionar abas de navegação após a aba "Pets"
+  - **Consumido por**: add-ons que precisam injetar abas customizadas no painel principal
+
+- **`dps_base_nav_tabs_after_history`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: adicionar abas de navegação após a aba "Histórico"
+  - **Consumido por**: Groomers, Estatísticas, Estoque (abas gerenciais)
+
+- **`dps_base_sections_after_pets`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: renderizar conteúdo de seções customizadas após a seção "Pets"
+  - **Consumido por**: add-ons que adicionaram abas via `dps_base_nav_tabs_after_pets`
+
+- **`dps_base_sections_after_history`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: renderizar conteúdo de seções customizadas após a seção "Histórico"
+  - **Consumido por**: Groomers, Estatísticas, Estoque, Campanhas & Fidelidade
+
+- **`dps_settings_nav_tabs`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: adicionar abas de navegação na página de configurações
+  - **Consumido por**: Backup, Comunicações, Push Notifications
+
+- **`dps_settings_sections`** (action)
+  - **Parâmetros**: nenhum
+  - **Propósito**: renderizar conteúdo de seções na página de configurações
+  - **Consumido por**: add-ons que adicionaram abas via `dps_settings_nav_tabs`
+
+#### Fluxo de agendamentos
+
+- **`dps_base_appointment_fields`** (action)
+  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos)
+  - **Propósito**: adicionar campos customizados ao formulário de agendamento
+  - **Consumido por**: Groomers (seleção de profissional), Serviços (seleção de serviços)
+
+- **`dps_base_after_save_appointment`** (action)
+  - **Parâmetros**: `$appointment_id` (int)
+  - **Propósito**: executar ações após salvar um agendamento
+  - **Consumido por**: Comunicações (envio de notificações), Estoque (baixa automática)
+
+#### Limpeza de dados
+
+- **`dps_finance_cleanup_for_appointment`** (action)
+  - **Parâmetros**: `$appointment_id` (int)
+  - **Propósito**: remover dados financeiros associados antes de excluir agendamento
+  - **Consumido por**: Financeiro (remove transações vinculadas)
+
+### Hooks de add-ons
+
+#### Add-on Financeiro
+
+- **`dps_finance_booking_paid`** (action)
+  - **Parâmetros**: `$transaction_id` (int), `$client_id` (int)
+  - **Propósito**: disparado quando uma cobrança é marcada como paga
+  - **Consumido por**: Campanhas & Fidelidade (bonifica indicador/indicado na primeira cobrança)
+
+#### Add-on de Cadastro Público
+
+- **`dps_registration_after_client_created`** (action)
+  - **Parâmetros**: `$client_id` (int), `$referral_code` (string|null)
+  - **Propósito**: disparado após criar novo cliente via formulário público
+  - **Consumido por**: Campanhas & Fidelidade (registra indicações)
+
+#### Cron jobs de add-ons
+
+- **`dps_agenda_send_reminders`** (action)
+  - **Frequência**: diária
+  - **Propósito**: enviar lembretes de agendamentos próximos
+  - **Registrado por**: Agenda
+
+- **`dps_comm_send_appointment_reminder`** (action)
+  - **Frequência**: conforme agendado
+  - **Propósito**: enviar lembretes de agendamento via canais configurados
+  - **Registrado por**: Comunicações
+
+- **`dps_comm_send_post_service`** (action)
+  - **Frequência**: conforme agendado
+  - **Propósito**: enviar mensagens pós-atendimento
+  - **Registrado por**: Comunicações
+
+- **`dps_send_push_notification`** (action)
+  - **Parâmetros**: `$message` (string), `$recipients` (array)
+  - **Propósito**: enviar notificações via Telegram ou e-mail
+  - **Registrado por**: Push Notifications
+
+---
 
 ## Considerações de estrutura e integração
 - Todos os add-ons se conectam por meio dos *hooks* expostos pelo plugin base (`dps_base_nav_tabs_after_pets`, `dps_base_sections_after_history`, `dps_settings_*`), preservando a renderização centralizada de navegação/abas feita por `DPS_Base_Frontend`.
