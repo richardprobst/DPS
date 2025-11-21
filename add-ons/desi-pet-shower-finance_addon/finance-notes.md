@@ -37,3 +37,16 @@ function dps_sync_status_to_finance( $meta_id, $object_id, $meta_key, $meta_valu
     // dps_transacoes alinhada com o status do agendamento.
 }
 ```
+
+## Consulta agregada de faturamento
+
+O helper `DPS_Finance_Revenue_Query::sum_by_period()` executa uma consulta
+direta em `_dps_total_at_booking` via `$wpdb->get_var`, filtrando por
+`appointment_date`. Esse fluxo evita loops de `WP_Query` e reduz o custo de
+carregar metas individualmente.
+
+Teste rápido (stub de `$wpdb`):
+
+```bash
+php add-ons/desi-pet-shower-finance_addon/tests/sum-revenue-by-period.test.php
+```
