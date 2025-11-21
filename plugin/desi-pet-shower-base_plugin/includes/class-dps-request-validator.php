@@ -52,7 +52,7 @@ class DPS_Request_Validator {
             return sanitize_text_field( wp_unslash( $raw_nonce ) );
         }
 
-        return wp_unslash( $raw_nonce );
+        return sanitize_text_field( wp_unslash( $raw_nonce ) );
     }
 
     /**
