@@ -25,10 +25,19 @@ foreach ( $options as $option ) {
 }
 
 // Remove transients
-$wpdb->query(
+$transient_like_1 = $wpdb->esc_like( '_transient_dps_payment' ) . '%';
+$timeout_like_1 = $wpdb->esc_like( '_transient_timeout_dps_payment' ) . '%';
+$transient_like_2 = $wpdb->esc_like( '_transient_dps_mercadopago' ) . '%';
+$timeout_like_2 = $wpdb->esc_like( '_transient_timeout_dps_mercadopago' ) . '%';
+
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_payment%' 
-     OR option_name LIKE '_transient_timeout_dps_payment%'
-     OR option_name LIKE '_transient_dps_mercadopago%' 
-     OR option_name LIKE '_transient_timeout_dps_mercadopago%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s
+     OR option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like_1,
+    $timeout_like_1,
+    $transient_like_2,
+    $timeout_like_2
+) );
