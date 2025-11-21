@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'DPS_BASE_VERSION', '1.0.1' );
 define( 'DPS_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
+define( 'DPS_BASE_PETS_PER_PAGE', 20 );
 
 // Funções auxiliares de template
 require_once DPS_BASE_DIR . 'includes/template-functions.php';
@@ -59,6 +60,10 @@ class DPS_Base_Plugin {
         // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
         add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
+
+        add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+        add_action( 'save_post_dps_pet', [ $this, 'clear_pets_cache' ], 10, 2 );
+        add_action( 'delete_post', [ $this, 'maybe_clear_pets_cache_on_delete' ] );
     }
 
     /**
@@ -179,30 +184,27 @@ class DPS_Base_Plugin {
      * Enfileira scripts e estilos para o frontend
      */
     public function enqueue_assets() {
+        global $post;
+
+        if ( is_admin() ) {
+            return;
+        }
+
+        $should_enqueue = ( $post instanceof WP_Post ) && ( has_shortcode( $post->post_content, 'dps_base' ) || has_shortcode( $post->post_content, 'dps_configuracoes' ) );
+        $should_enqueue = apply_filters( 'dps_base_should_enqueue_assets', $should_enqueue, $post );
+
+        if ( ! $should_enqueue ) {
+            return;
+        }
+
         // CSS
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], DPS_BASE_VERSION );
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], DPS_BASE_VERSION, true );
-        // Passa dados para o script (lista de pets para filtragem dinâmica)
-        $pets_data = [];
-        $pets_query = new WP_Query( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-        ] );
-        if ( $pets_query->have_posts() ) {
-            foreach ( $pets_query->posts as $pet_id ) {
-                $owner_id = get_post_meta( $pet_id, 'owner_id', true );
-                $pets_data[] = [
-                    'id'       => $pet_id,
-                    'name'     => get_the_title( $pet_id ),
-                    'owner_id' => $owner_id ? strval( $owner_id ) : '',
-                ];
-            }
-        }
-        wp_localize_script( 'dps-base-script', 'DPSBase', [
-            'pets' => $pets_data,
+        wp_localize_script( 'dps-base-script', 'dpsBaseData', [
+            'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
+            'restNonce'   => wp_create_nonce( 'wp_rest' ),
+            'petsPerPage' => DPS_BASE_PETS_PER_PAGE,
         ] );
         wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
             'summarySingle'     => __( 'Pet selecionado: %s', 'desi-pet-shower' ),
@@ -216,7 +218,179 @@ class DPS_Base_Plugin {
             'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'desi-pet-shower' ),
             'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'desi-pet-shower' ),
             'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'desi-pet-shower' ),
+            'petSearchPlaceholder'  => __( 'Buscar pets por nome, tutor ou raça', 'desi-pet-shower' ),
+            'petLoadMore'           => __( 'Carregar mais pets', 'desi-pet-shower' ),
+            'petLoading'            => __( 'Carregando pets...', 'desi-pet-shower' ),
+            'petNoResults'          => __( 'Nenhum pet encontrado para o filtro atual.', 'desi-pet-shower' ),
         ] );
+    }
+
+    /**
+     * Registra rotas REST para carregamento incremental de pets.
+     */
+    public function register_rest_routes() {
+        register_rest_route(
+            'dps/v1',
+            '/pets',
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ $this, 'rest_list_pets' ],
+                'permission_callback' => [ $this, 'rest_permissions' ],
+                'args'                => [
+                    'page'   => [
+                        'type'              => 'integer',
+                        'default'           => 1,
+                        'sanitize_callback' => 'absint',
+                    ],
+                    'search' => [
+                        'type'              => 'string',
+                        'default'           => '',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                    'owner'  => [
+                        'type'              => 'integer',
+                        'default'           => 0,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Verifica permissões para acesso às rotas REST do plugin.
+     */
+    public function rest_permissions() {
+        return current_user_can( 'dps_manage_pets' );
+    }
+
+    /**
+     * Retorna lista paginada de pets para uso no frontend.
+     *
+     * @param WP_REST_Request $request Requisição atual.
+     *
+     * @return WP_REST_Response
+     */
+    public function rest_list_pets( WP_REST_Request $request ) {
+        $page       = max( 1, (int) $request->get_param( 'page' ) );
+        $search     = $request->get_param( 'search' );
+        $owner_id   = (int) $request->get_param( 'owner' );
+        $cache_args = [
+            'page'   => $page,
+            'search' => $search,
+            'owner'  => $owner_id,
+        ];
+        $cache_key  = $this->build_pets_cache_key( $cache_args );
+        $cached     = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return rest_ensure_response( $cached );
+        }
+
+        $query_args = [
+            'post_type'      => 'dps_pet',
+            'post_status'    => 'publish',
+            'posts_per_page' => DPS_BASE_PETS_PER_PAGE,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'paged'          => $page,
+        ];
+
+        if ( $search ) {
+            $query_args['s'] = $search;
+        }
+
+        if ( $owner_id ) {
+            $query_args['meta_query'] = [
+                [
+                    'key'   => 'owner_id',
+                    'value' => $owner_id,
+                ],
+            ];
+        }
+
+        $pets_query = new WP_Query( $query_args );
+        $pets_data  = [];
+
+        if ( $pets_query->have_posts() ) {
+            foreach ( $pets_query->posts as $pet ) {
+                $owner_meta = get_post_meta( $pet->ID, 'owner_id', true );
+                $owner_name = $owner_meta ? get_the_title( (int) $owner_meta ) : '';
+                $pets_data[] = [
+                    'id'         => $pet->ID,
+                    'name'       => $pet->post_title,
+                    'owner_id'   => $owner_meta ? (string) $owner_meta : '',
+                    'owner_name' => $owner_name,
+                    'size'       => get_post_meta( $pet->ID, 'pet_size', true ),
+                    'breed'      => get_post_meta( $pet->ID, 'pet_breed', true ),
+                ];
+            }
+        }
+
+        $response = [
+            'items'       => $pets_data,
+            'page'        => $page,
+            'total_pages' => (int) max( 1, $pets_query->max_num_pages ),
+            'total'       => (int) $pets_query->found_posts,
+        ];
+
+        set_transient( $cache_key, $response, 15 * MINUTE_IN_SECONDS );
+        $this->remember_pets_cache_key( $cache_key );
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Monta uma chave única para o cache de pets.
+     *
+     * @param array $args Argumentos da consulta.
+     *
+     * @return string
+     */
+    private function build_pets_cache_key( array $args ) {
+        ksort( $args );
+        return 'dps_pets_' . md5( wp_json_encode( $args ) );
+    }
+
+    /**
+     * Armazena a referência das chaves de cache utilizadas.
+     *
+     * @param string $key Chave gerada para o cache.
+     */
+    private function remember_pets_cache_key( $key ) {
+        $keys = get_option( 'dps_pets_cache_keys', [] );
+        if ( ! is_array( $keys ) ) {
+            $keys = [];
+        }
+        if ( ! in_array( $key, $keys, true ) ) {
+            $keys[] = $key;
+            update_option( 'dps_pets_cache_keys', $keys, false );
+        }
+    }
+
+    /**
+     * Limpa todos os caches relacionados à listagem de pets.
+     */
+    public function clear_pets_cache() {
+        $keys = get_option( 'dps_pets_cache_keys', [] );
+        if ( is_array( $keys ) ) {
+            foreach ( $keys as $key ) {
+                delete_transient( $key );
+            }
+        }
+        delete_option( 'dps_pets_cache_keys' );
+    }
+
+    /**
+     * Limpa o cache quando um pet é removido.
+     *
+     * @param int $post_id ID do post removido.
+     */
+    public function maybe_clear_pets_cache_on_delete( $post_id ) {
+        if ( 'dps_pet' !== get_post_type( $post_id ) ) {
+            return;
+        }
+        $this->clear_pets_cache();
     }
 
     /**

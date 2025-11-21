@@ -62,13 +62,23 @@
       if (!$petWrapper.length) {
         return;
       }
-      var $petList      = $('#dps-appointment-pet-list');
-      var $petOptions   = $petWrapper.find('.dps-pet-option');
+      var $petList       = $('#dps-appointment-pet-list');
+      var $petOptions    = $petWrapper.find('.dps-pet-option');
       var $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
-      var $noPetsMsg    = $('#dps-no-pets-message');
-      var $summary      = $('#dps-pet-summary');
-      var $selectHint   = $('#dps-pet-select-client');
-      var $pendingAlert = $('#dps-client-pending-alert');
+      var $noPetsMsg     = $('#dps-no-pets-message');
+      var $summary       = $('#dps-pet-summary');
+      var $selectHint    = $('#dps-pet-select-client');
+      var $pendingAlert  = $('#dps-client-pending-alert');
+      var $searchInput   = $('#dps-pet-search');
+      var $loadMore      = $petWrapper.find('.dps-pet-load-more');
+      var restConfig     = window.dpsBaseData || {};
+      var petState = {
+        page: parseInt($petWrapper.data('currentPage'), 10) || 1,
+        totalPages: parseInt($petWrapper.data('totalPages'), 10) || 1,
+        search: '',
+        loading: false
+      };
+      var searchTimer;
 
       function updateSummary(){
         var selected = $petCheckboxes.filter(':checked');
@@ -121,48 +131,202 @@
           dpsBaseL10n.pendingGenericTitle;
         $pendingAlert.empty();
         $('<strong/>').text(titleText).appendTo($pendingAlert);
-        var $list = $('<ul/>').appendTo($pendingAlert);
-        pendingInfo.forEach(function(item){
-          var line = '';
-          if (item.date) {
-            line = dpsBaseL10n.pendingItem.replace('%1$s', item.date).replace('%2$s', item.value).replace('%3$s', item.description);
+        var $list = $('<ul/>');
+        pendingInfo.forEach(function(row){
+          var date = row.date || '';
+          var value = row.value || '0,00';
+          var desc = row.description || dpsBaseL10n.pendingItemNoDate;
+          var label;
+          if (date) {
+            label = dpsBaseL10n.pendingItem
+              .replace('%1$s', date)
+              .replace('%2$s', value)
+              .replace('%3$s', desc);
           } else {
-            line = dpsBaseL10n.pendingItemNoDate.replace('%1$s', item.value).replace('%2$s', item.description);
+            label = dpsBaseL10n.pendingItemNoDate
+              .replace('%1$s', value)
+              .replace('%2$s', desc);
           }
-          $('<li/>').text(line).appendTo($list);
+          $('<li/>').text(label).appendTo($list);
         });
+        $pendingAlert.append($list);
         $pendingAlert.attr('aria-hidden', 'false').show();
         $petWrapper.addClass('dps-pet-picker--warning');
         $clientSelect.addClass('dps-client-select--warning');
       }
 
-      function applyPetFilters(){
+      function updateLoadMore(page, total){
+        if (!$loadMore.length) {
+          return;
+        }
+        if (!restConfig.restUrl || page >= total) {
+          $loadMore.hide();
+          return;
+        }
+        $loadMore.show()
+          .attr('data-next-page', page + 1)
+          .attr('aria-busy', 'false')
+          .text(dpsBaseL10n.petLoadMore);
+      }
+
+      function buildPetOption(pet, selectedIds){
+        var $label = $('<label/>', {
+          'class': 'dps-pet-option',
+          'data-owner': pet.owner_id || '',
+          'data-search': (pet.name + ' ' + (pet.breed || '') + ' ' + (pet.owner_name || '')).toLowerCase()
+        });
+
+        if (pet.size) {
+          $label.attr('data-size', String(pet.size).toLowerCase());
+        }
+
+        var $checkbox = $('<input/>', {
+          type: 'checkbox',
+          'class': 'dps-pet-checkbox',
+          name: 'appointment_pet_ids[]',
+          value: pet.id
+        });
+
+        if (selectedIds.indexOf(String(pet.id)) !== -1) {
+          $checkbox.prop('checked', true);
+        }
+
+        $label.append($checkbox);
+        $('<span/>', { 'class': 'dps-pet-name', text: pet.name }).appendTo($label);
+
+        if (pet.breed) {
+          $('<span/>', { 'class': 'dps-pet-breed', text: ' – ' + pet.breed }).appendTo($label);
+        }
+
+        if (pet.owner_name) {
+          $('<span/>', { 'class': 'dps-pet-owner', text: ' (' + pet.owner_name + ')' }).appendTo($label);
+        }
+
+        if (pet.size) {
+          var label = String(pet.size).charAt(0).toUpperCase() + String(pet.size).slice(1);
+          $('<span/>', { 'class': 'dps-pet-size', text: ' · ' + label }).appendTo($label);
+        }
+
+        return $label;
+      }
+
+      function renderPets(items, append){
+        var previousSelection = $petWrapper.find('.dps-pet-checkbox:checked').map(function(){
+          return String($(this).val());
+        }).get();
+
+        if (!append) {
+          $petList.empty();
+        }
+
+        if (!items.length && !append) {
+          $petList.hide();
+          $noPetsMsg.text(dpsBaseL10n.petNoResults).show();
+          $petOptions = $();
+          $petCheckboxes = $();
+          updateSummary();
+          return;
+        }
+
+        $noPetsMsg.hide();
+        $petList.show();
+
+        items.forEach(function(pet){
+          var $option = buildPetOption(pet, previousSelection);
+          $petList.append($option);
+        });
+
+        $petOptions = $petWrapper.find('.dps-pet-option');
+        $petCheckboxes = $petWrapper.find('.dps-pet-checkbox');
+        applyPetFilters(true);
+      }
+
+      function applyPetFilters(skipReset){
         var ownerId = $clientSelect.val();
         var visible = 0;
+
         $petOptions.each(function(){
           var $option = $(this);
           var optionOwner = $option.attr('data-owner');
-          var matchesOwner = ownerId && String(optionOwner) === String(ownerId);
-          if (!matchesOwner) {
+          var matchesOwner = ownerId ? String(optionOwner) === String(ownerId) : false;
+
+          if (!matchesOwner && !skipReset) {
             $option.find('.dps-pet-checkbox').prop('checked', false);
           }
+
           $option.toggle(matchesOwner);
+
           if (matchesOwner) {
             visible++;
           }
         });
-        $petList.toggle(!!ownerId);
+
+        $petList.toggle(visible > 0);
         $noPetsMsg.toggle(visible === 0 && !!ownerId);
         $selectHint.toggle(!ownerId);
         $petWrapper.toggleClass('dps-pet-picker--disabled', !ownerId);
         $petWrapper.find('.dps-pet-toggle').prop('disabled', !ownerId || visible === 0);
+        if (!ownerId && $loadMore.length) {
+          $loadMore.hide();
+        }
         updateSummary();
         updatePendingAlert();
         $(document).trigger('dps-pet-selection-updated');
       }
 
+      function fetchPets(targetPage, append){
+        if (!restConfig.restUrl || petState.loading) {
+          return;
+        }
+
+        var ownerId = $clientSelect.val();
+        if (!ownerId) {
+          $petList.empty();
+          $petOptions = $();
+          $petCheckboxes = $();
+          applyPetFilters();
+          return;
+        }
+
+        petState.loading = true;
+
+        if ($loadMore.length) {
+          $loadMore.attr('aria-busy', 'true').text(dpsBaseL10n.petLoading);
+        }
+
+        $.ajax({
+          url: restConfig.restUrl,
+          method: 'GET',
+          data: {
+            page: targetPage,
+            owner: ownerId,
+            search: petState.search
+          },
+          beforeSend: function(xhr){
+            if (restConfig.restNonce) {
+              xhr.setRequestHeader('X-WP-Nonce', restConfig.restNonce);
+            }
+          }
+        }).done(function(resp){
+          petState.page = resp.page || targetPage;
+          petState.totalPages = resp.total_pages || 1;
+          renderPets(resp.items || [], append);
+          updateLoadMore(petState.page, petState.totalPages);
+        }).fail(function(){
+          updateLoadMore(petState.page, petState.totalPages);
+        }).always(function(){
+          petState.loading = false;
+          if ($loadMore.length) {
+            $loadMore.attr('aria-busy', 'false').text(dpsBaseL10n.petLoadMore);
+          }
+        });
+      }
+
       $clientSelect.on('change', function(){
-        applyPetFilters();
+        petState.page = 1;
+        petState.search = '';
+        $searchInput.val('');
+        fetchPets(1, false);
       });
 
       $petWrapper.on('change', '.dps-pet-checkbox', function(){
@@ -186,6 +350,25 @@
         $(document).trigger('dps-pet-selection-updated');
       });
 
+      $searchInput.on('input', function(){
+        petState.search = $(this).val();
+        petState.page = 1;
+        if (searchTimer) {
+          clearTimeout(searchTimer);
+        }
+        searchTimer = setTimeout(function(){
+          fetchPets(1, false);
+        }, 300);
+      });
+
+      $petWrapper.on('click', '.dps-pet-load-more', function(e){
+        e.preventDefault();
+        var nextPage = parseInt($(this).attr('data-next-page'), 10) || (petState.page + 1);
+        if (petState.page < petState.totalPages) {
+          fetchPets(nextPage, true);
+        }
+      });
+
       // Impede envio do formulário sem pet selecionado
       $petWrapper.closest('form').on('submit', function(){
         if ($petCheckboxes.filter(':checked').length === 0) {
@@ -195,8 +378,8 @@
         return true;
       });
 
-      // Aplica filtros iniciais considerando pré-seleções
-      applyPetFilters();
+      applyPetFilters(true);
+      updateLoadMore(petState.page, petState.totalPages);
     })();
 
     $(document).on('change', '.dps-inline-status-form select[name="appointment_status"]', function(){
