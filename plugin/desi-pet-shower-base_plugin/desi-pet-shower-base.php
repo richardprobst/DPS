@@ -210,6 +210,7 @@ class DPS_Base_Plugin {
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], DPS_BASE_VERSION );
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], DPS_BASE_VERSION, true );
+        wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], DPS_BASE_VERSION, true );
         wp_localize_script( 'dps-base-script', 'dpsBaseData', [
             'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
             'restNonce'   => wp_create_nonce( 'wp_rest' ),

@@ -1163,12 +1163,30 @@ class DPS_Base_Frontend {
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
             }
+            // FIELDSET 1: Tipo de Agendamento
+            echo '<fieldset class="dps-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Tipo de Agendamento', 'desi-pet-shower' ) . '</legend>';
+            
             // Campo: tipo de agendamento (simples ou assinatura)
             $appt_type = isset( $meta['appointment_type'] ) ? $meta['appointment_type'] : 'simple';
-            echo '<p><label>' . esc_html__( 'Tipo de agendamento', 'desi-pet-shower' ) . '<br>';
-            echo '<label><input type="radio" name="appointment_type" value="simple" ' . ( $appt_type === 'subscription' ? '' : 'checked' ) . '> ' . esc_html__( 'Agendamento simples', 'desi-pet-shower' ) . '</label> ';
-            echo '<label style="margin-left:20px;"><input type="radio" name="appointment_type" value="subscription" ' . ( $appt_type === 'subscription' ? 'checked' : '' ) . '> ' . esc_html__( 'Agendamento de assinatura', 'desi-pet-shower' ) . '</label>';
-            echo '</label></p>';
+            echo '<div class="dps-radio-group">';
+            echo '<label class="dps-radio-option">';
+            echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . checked( $appt_type, 'subscription', false ) . '>';
+            echo '<div class="dps-radio-label">';
+            echo '<strong>' . esc_html__( 'Agendamento Simples', 'desi-pet-shower' ) . '</strong>';
+            echo '<p>' . esc_html__( 'Atendimento único, sem recorrência', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            echo '</label>';
+            
+            echo '<label class="dps-radio-option">';
+            echo '<input type="radio" name="appointment_type" value="subscription" ' . checked( $appt_type, 'subscription', false ) . '>';
+            echo '<div class="dps-radio-label">';
+            echo '<strong>' . esc_html__( 'Agendamento de Assinatura', 'desi-pet-shower' ) . '</strong>';
+            echo '<p>' . esc_html__( 'Atendimentos recorrentes (semanal ou quinzenal)', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            echo '</label>';
+            echo '</div>';
+            
             // Campo: frequência para assinaturas (semanal ou quinzenal)
             $freq_val = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_frequency'] ) ) : '';
             if ( $edit_id ) {
@@ -1179,15 +1197,29 @@ class DPS_Base_Frontend {
                 }
             }
             $freq_display = ( $appt_type === 'subscription' ) ? 'block' : 'none';
-            echo '<p id="dps-appointment-frequency-wrapper" style="display:' . esc_attr( $freq_display ) . '"><label>' . esc_html__( 'Frequência', 'desi-pet-shower' ) . '<br><select name="appointment_frequency" id="dps-appointment-frequency"><option value="semanal" ' . selected( $freq_val, 'semanal', false ) . '>' . esc_html__( 'Semanal', 'desi-pet-shower' ) . '</option><option value="quinzenal" ' . selected( $freq_val, 'quinzenal', false ) . '>' . esc_html__( 'Quinzenal', 'desi-pet-shower' ) . '</option></select></label></p>';
-
+            echo '<div id="dps-appointment-frequency-wrapper" class="dps-conditional-field" style="display:' . esc_attr( $freq_display ) . ';">';
+            echo '<label for="dps-appointment-frequency">' . esc_html__( 'Frequência', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<select name="appointment_frequency" id="dps-appointment-frequency">';
+            echo '<option value="semanal" ' . selected( $freq_val, 'semanal', false ) . '>' . esc_html__( 'Semanal', 'desi-pet-shower' ) . '</option>';
+            echo '<option value="quinzenal" ' . selected( $freq_val, 'quinzenal', false ) . '>' . esc_html__( 'Quinzenal', 'desi-pet-shower' ) . '</option>';
+            echo '</select>';
+            echo '</div>';
+            
+            echo '</fieldset>';
+            
+            // FIELDSET 2: Cliente e Pet(s)
+            echo '<fieldset class="dps-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Cliente e Pet(s)', 'desi-pet-shower' ) . '</legend>';
+            
             // Cliente
             // Preenchimento: se não editando, usa pref_client se disponível
             if ( ! $edit_id && $pref_client ) {
                 $meta['client_id'] = $pref_client;
             }
             $sel_client = $meta['client_id'] ?? '';
-            echo '<p><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
+            echo '<div class="dps-form-field">';
+            echo '<label for="dps-appointment-cliente">' . esc_html__( 'Cliente', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
             echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
             $pending_cache = [];
             foreach ( $clients as $client ) {
@@ -1214,8 +1246,10 @@ class DPS_Base_Frontend {
                 $option_attrs .= $pending_attr;
                 echo '<option' . $option_attrs . '>' . esc_html( $client->post_title ) . '</option>';
             }
-            echo '</select></label></p>';
-            $initial_pending_rows = [];
+            echo '</select>';
+            echo '</div>';
+            
+            // Alerta de pendências financeiras
             if ( $sel_client && isset( $pending_cache[ $sel_client ] ) ) {
                 $initial_pending_rows = $pending_cache[ $sel_client ];
             }
@@ -1267,9 +1301,9 @@ class DPS_Base_Frontend {
             $pet_wrapper_attrs = ' id="dps-appointment-pet-wrapper" class="dps-pet-picker"';
             $pet_wrapper_attrs .= ' data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '"';
             echo '<div' . $pet_wrapper_attrs . '>';
-            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . '</strong><span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'desi-pet-shower' ) . '</span></p>';
-            echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
-            echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
+            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></strong><span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'desi-pet-shower' ) . '</span></p>';
+            echo '<p class="dps-field-hint">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
+            echo '<p id="dps-pet-select-client" class="dps-field-hint">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
             echo '<p class="dps-pet-search"><label class="screen-reader-text" for="dps-pet-search">' . esc_html__( 'Buscar pets', 'desi-pet-shower' ) . '</label>';
             echo '<input type="search" id="dps-pet-search" placeholder="' . esc_attr__( 'Buscar pets por nome, tutor ou raça', 'desi-pet-shower' ) . '" aria-label="' . esc_attr__( 'Buscar pets', 'desi-pet-shower' ) . '"></p>';
             echo '<div class="dps-pet-picker-actions">';
@@ -1305,122 +1339,109 @@ class DPS_Base_Frontend {
             if ( $pet_pages > 1 ) {
                 echo '<p><button type="button" class="button dps-pet-load-more" data-next-page="2" data-loading="false">' . esc_html__( 'Carregar mais pets', 'desi-pet-shower' ) . '</button></p>';
             }
-            echo '<p id="dps-pet-summary" class="description" style="display:none;"></p>';
-            echo '<p id="dps-no-pets-message" style="display:none;" class="description">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
+            echo '<p id="dps-pet-summary" class="dps-field-hint" style="display:none;"></p>';
+            echo '<p id="dps-no-pets-message" class="dps-field-hint" style="display:none;">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
-            // Data
+            
+            echo '</fieldset>';
+            
+            // FIELDSET 3: Data e Horário
+            echo '<fieldset class="dps-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Data e Horário', 'desi-pet-shower' ) . '</legend>';
+            
+            // Data e Horário em grid 2 colunas
             $date_val = $meta['date'] ?? '';
-            echo '<p><label>' . esc_html__( 'Data', 'desi-pet-shower' ) . '<br><input type="date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required></label></p>';
-            // Hora
             $time_val = $meta['time'] ?? '';
-            echo '<p><label>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '<br><input type="time" name="appointment_time" value="' . esc_attr( $time_val ) . '" required></label></p>';
-            // Campo: indicativo de necessidade de tosa.
-            // Campos relativos à tosa: exibidos apenas quando o tipo de agendamento for assinatura. Agrupamos em div para controle via JS.
+            echo '<div class="dps-form-row dps-form-row--2col">';
+            echo '<div class="dps-form-field">';
+            echo '<label for="appointment_date">' . esc_html__( 'Data', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<input type="date" id="appointment_date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required>';
+            echo '</div>';
+            echo '<div class="dps-form-field">';
+            echo '<label for="appointment_time">' . esc_html__( 'Horário', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<input type="time" id="appointment_time" name="appointment_time" value="' . esc_attr( $time_val ) . '" required>';
+            echo '</div>';
+            echo '</div>';
+            
+            echo '</fieldset>';
+            
+            // FIELDSET 4: Serviços e Extras
+            echo '<fieldset class="dps-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Serviços e Extras', 'desi-pet-shower' ) . '</legend>';
+            
+            // Campo: indicativo de necessidade de tosa (apenas para assinaturas)
             $tosa       = $meta['tosa'] ?? '';
             $tosa_price = $meta['tosa_price'] ?? '';
             $tosa_occ   = $meta['tosa_occurrence'] ?? '1';
             $tosa_display = ( '1' === $tosa ) ? 'block' : 'none';
-            echo '<div id="dps-tosa-wrapper" style="display:none; margin-bottom:10px;">';
-            echo '<p><label><input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '> ' . esc_html__( 'Precisa de tosa?', 'desi-pet-shower' ) . '</label> ';
-            echo '<small>' . esc_html__( 'Adicione um serviço de tosa à assinatura', 'desi-pet-shower' ) . '</small></p>';
-            echo '<div id="dps-tosa-fields" style="display:' . esc_attr( $tosa_display ) . ';">';
+            echo '<div id="dps-tosa-wrapper" class="dps-conditional-field" style="display:none;">';
+            echo '<label class="dps-checkbox-label">';
+            echo '<input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '>';
+            echo '<span class="dps-checkbox-text">';
+            echo esc_html__( 'Precisa de tosa?', 'desi-pet-shower' );
+            echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Adicione um serviço de tosa à assinatura', 'desi-pet-shower' ) . '">ℹ️</span>';
+            echo '</span>';
+            echo '</label>';
+            
+            echo '<div id="dps-tosa-fields" class="dps-conditional-field" style="display:' . esc_attr( $tosa_display ) . ';">';
             // Preço da tosa com valor padrão 30 se não definido
             $tosa_price_val = $tosa_price !== '' ? $tosa_price : '30';
-            echo '<p><label>' . esc_html__( 'Preço da tosa (R$)', 'desi-pet-shower' ) . '<br><input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:80px;"></label></p>';
+            echo '<label for="dps-tosa-price">' . esc_html__( 'Preço da tosa (R$)', 'desi-pet-shower' ) . '</label>';
+            echo '<input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:120px;">';
             // Ocorrência da tosa (selecionada via JS conforme frequência)
-            echo '<p><label>' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '<br>';
-            echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select></label></p>';
+            echo '<label for="appointment_tosa_occurrence" style="margin-left:20px;">' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '</label>';
+            echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select>';
             echo '</div>';
             echo '</div>';
 
             // Campo: escolha de TaxiDog
             $taxidog = $meta['taxidog'] ?? '';
-            echo '<p><label><input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '> ' . esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' ) . '</label>';
-            echo '<span id="dps-taxidog-extra" style="margin-left:10px; display:' . ( $taxidog ? 'inline-block' : 'none' ) . ';">';
-            echo esc_html__( 'Valor (R$)', 'desi-pet-shower' ) . ': <input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:80px;">';
-            echo '</span></p>';
-
-            // Observações
-            $notes_val = $meta['notes'] ?? '';
-            echo '<p><label>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '<br><textarea name="appointment_notes" rows="2">' . esc_textarea( $notes_val ) . '</textarea></label></p>';
+            echo '<label class="dps-checkbox-label">';
+            echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
+            echo '<span class="dps-checkbox-text">';
+            echo esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' );
+            echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Serviço de transporte do pet', 'desi-pet-shower' ) . '">ℹ️</span>';
+            echo '</span>';
+            echo '</label>';
+            echo '<div id="dps-taxidog-extra" class="dps-conditional-field" style="display:' . ( $taxidog ? 'block' : 'none' ) . ';">';
+            echo '<label for="dps-taxidog-price">' . esc_html__( 'Valor TaxiDog (R$)', 'desi-pet-shower' ) . '</label> ';
+            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:120px;">';
+            echo '</div>';
+            
+            // Hook para add-ons injetarem campos extras (ex.: serviços)
             /**
-             * Permite que add‑ons adicionem campos extras ao formulário de agendamento (ex.: serviços).
+             * Permite que add‑ons adicionem campos extras ao formulário de agendamento.
              *
              * @param int   $edit_id ID do agendamento em edição ou 0 se novo
              * @param array $meta    Meta dados do agendamento
              */
             do_action( 'dps_base_appointment_fields', $edit_id, $meta );
-            // Botão
+            
+            echo '</fieldset>';
+            
+            // FIELDSET 5: Observações
+            echo '<fieldset class="dps-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Observações e Notas', 'desi-pet-shower' ) . '</legend>';
+            
+            // Observações
+            $notes_val = $meta['notes'] ?? '';
+            echo '<label for="appointment_notes">' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</label>';
+            echo '<textarea id="appointment_notes" name="appointment_notes" rows="3" placeholder="' . esc_attr__( 'Instruções especiais, preferências do cliente, etc.', 'desi-pet-shower' ) . '">' . esc_textarea( $notes_val ) . '</textarea>';
+            echo '<p class="dps-field-hint">' . esc_html__( 'Opcional - use este campo para anotações internas', 'desi-pet-shower' ) . '</p>';
+            
+            echo '</fieldset>';
+            
+            // Botões de ação
             $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'desi-pet-shower' ) : esc_html__( 'Salvar Agendamento', 'desi-pet-shower' );
-            echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
-            // Script para alternar campos de acordo com o tipo de agendamento e uso de TaxiDog.  
-            // Utilizamos heredoc para evitar problemas de escape de aspas simples/dobras.
-            $dps_script = <<<EOT
-<script>
-jQuery(function($){
-    function toggleTaxiDog(){
-        var type = $('input[name="appointment_type"]:checked').val();
-        var hasTaxi = $('#dps-taxidog-toggle').is(':checked');
-        if(type === 'subscription'){
-            $('#dps-taxidog-extra').hide();
-        } else {
-            $('#dps-taxidog-extra').toggle(hasTaxi);
-        }
-    }
-
-    function updateTypeFields(){
-        var type = $('input[name="appointment_type"]:checked').val();
-        // Exibe ou oculta o seletor de frequência
-        $('#dps-appointment-frequency-wrapper').toggle(type === 'subscription');
-        // Exibe ou oculta campos de tosa somente nas assinaturas
-        $('#dps-tosa-wrapper').toggle(type === 'subscription');
-        $('.dps-simple-fields').toggle(type !== 'subscription');
-        $('.dps-subscription-fields').toggle(type === 'subscription');
-        toggleTaxiDog();
-    }
-
-    function updateTosaFields(){
-        var show = $('#dps-tosa-toggle').is(':checked');
-        $('#dps-tosa-fields').toggle(show);
-    }
-
-    // Atualiza opções de ocorrência da tosa conforme a frequência selecionada
-    function updateTosaOptions(){
-        var freq = $('select[name="appointment_frequency"]').val() || 'semanal';
-        var select = $('#appointment_tosa_occurrence');
-        var occurrences = (freq === 'quinzenal') ? 2 : 4;
-        var current = select.data('current');
-        select.empty();
-        for(var i = 1; i <= occurrences; i++){
-            select.append('<option value="'+i+'">'+i+'º Atendimento</option>');
-        }
-        if(current && current <= occurrences){
-            select.val(current);
-        }
-    }
-    // Inicializa campos de tipo e tosa
-    updateTypeFields();
-    updateTosaOptions();
-    updateTosaFields();
-    $(document).on('change','input[name="appointment_type"]', function(){
-        updateTypeFields();
-        updateTosaOptions();
-        updateTosaFields();
-    });
-    // Atualiza opções de tosa ao alterar a frequência
-    $('select[name="appointment_frequency"]').on('change', function(){
-        updateTosaOptions();
-    });
-    $('#dps-taxidog-toggle').on('change', function(){
-        toggleTaxiDog();
-    });
-    $('#dps-tosa-toggle').on('change', function(){
-        updateTosaFields();
-    });
-});
-</script>
-EOT;
-            echo $dps_script;
+            echo '<div class="dps-form-actions">';
+            echo '<button type="submit" class="dps-btn dps-btn--primary dps-submit-btn">✓ ' . $btn_text . '</button>';
+            $cancel_url = remove_query_arg( [ 'dps_edit', 'id' ] );
+            if ( $edit_id ) {
+                echo '<a href="' . esc_url( $cancel_url ) . '" class="dps-btn dps-btn--secondary">' . esc_html__( 'Cancelar', 'desi-pet-shower' ) . '</a>';
+            }
+            echo '</div>';
+            
+            // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
         }
         // Listagem de agendamentos organizados por status
