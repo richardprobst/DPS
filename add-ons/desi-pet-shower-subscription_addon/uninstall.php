@@ -29,8 +29,12 @@ foreach ( $subscriptions as $subscription_id ) {
 delete_option( 'dps_subscription_settings' );
 
 // Remove transients
-$wpdb->query(
+$transient_like = $wpdb->esc_like( '_transient_dps_subscription' ) . '%';
+$transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_subscription' ) . '%';
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_subscription%' 
-     OR option_name LIKE '_transient_timeout_dps_subscription%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like,
+    $transient_timeout_like
+) );
