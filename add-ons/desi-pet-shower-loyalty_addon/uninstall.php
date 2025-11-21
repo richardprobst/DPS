@@ -45,8 +45,12 @@ foreach ( $meta_keys as $meta_key ) {
 delete_option( 'dps_loyalty_settings' );
 
 // Remove transients
-$wpdb->query(
+$transient_like = $wpdb->esc_like( '_transient_dps_loyalty' ) . '%';
+$transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_loyalty' ) . '%';
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_loyalty%' 
-     OR option_name LIKE '_transient_timeout_dps_loyalty%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like,
+    $transient_timeout_like
+) );
