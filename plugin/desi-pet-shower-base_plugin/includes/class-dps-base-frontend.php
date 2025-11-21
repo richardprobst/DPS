@@ -1356,10 +1356,19 @@ class DPS_Base_Frontend {
             echo '<div class="dps-form-field">';
             echo '<label for="appointment_date">' . esc_html__( 'Data', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
             echo '<input type="date" id="appointment_date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required>';
+            echo '<p class="dps-field-hint">' . esc_html__( 'Horários disponíveis serão carregados após escolher a data', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
             echo '<div class="dps-form-field">';
             echo '<label for="appointment_time">' . esc_html__( 'Horário', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
-            echo '<input type="time" id="appointment_time" name="appointment_time" value="' . esc_attr( $time_val ) . '" required>';
+            // Usar select em vez de input time para carregar horários disponíveis via AJAX
+            echo '<select id="appointment_time" name="appointment_time" required>';
+            if ( $time_val ) {
+                // Se editando, mantém o horário atual como opção
+                echo '<option value="' . esc_attr( $time_val ) . '" selected>' . esc_html( $time_val ) . '</option>';
+            } else {
+                echo '<option value="">' . esc_html__( 'Escolha uma data primeiro', 'desi-pet-shower' ) . '</option>';
+            }
+            echo '</select>';
             echo '</div>';
             echo '</div>';
             
@@ -1431,15 +1440,34 @@ class DPS_Base_Frontend {
             
             echo '</fieldset>';
             
+            // Resumo dinâmico do agendamento (FASE 2)
+            echo '<div class="dps-appointment-summary" aria-live="polite">';
+            echo '<h3>' . esc_html__( 'Resumo do agendamento', 'desi-pet-shower' ) . '</h3>';
+            echo '<p class="dps-appointment-summary__empty">';
+            echo esc_html__( 'Preencha cliente, pet, data e horário para ver o resumo aqui.', 'desi-pet-shower' );
+            echo '</p>';
+            echo '<ul class="dps-appointment-summary__list" hidden>';
+            echo '<li><strong>' . esc_html__( 'Cliente:', 'desi-pet-shower' ) . '</strong> <span data-summary="client">-</span></li>';
+            echo '<li><strong>' . esc_html__( 'Pets:', 'desi-pet-shower' ) . '</strong> <span data-summary="pets">-</span></li>';
+            echo '<li><strong>' . esc_html__( 'Data:', 'desi-pet-shower' ) . '</strong> <span data-summary="date">-</span></li>';
+            echo '<li><strong>' . esc_html__( 'Horário:', 'desi-pet-shower' ) . '</strong> <span data-summary="time">-</span></li>';
+            echo '<li><strong>' . esc_html__( 'Serviços:', 'desi-pet-shower' ) . '</strong> <span data-summary="services">-</span></li>';
+            echo '<li><strong>' . esc_html__( 'Valor estimado:', 'desi-pet-shower' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
+            echo '</ul>';
+            echo '</div>';
+            
             // Botões de ação
             $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'desi-pet-shower' ) : esc_html__( 'Salvar Agendamento', 'desi-pet-shower' );
             echo '<div class="dps-form-actions">';
-            echo '<button type="submit" class="dps-btn dps-btn--primary dps-submit-btn">✓ ' . $btn_text . '</button>';
+            echo '<button type="submit" class="dps-btn dps-btn--primary dps-submit-btn dps-appointment-submit">✓ ' . $btn_text . '</button>';
             $cancel_url = remove_query_arg( [ 'dps_edit', 'id' ] );
             if ( $edit_id ) {
                 echo '<a href="' . esc_url( $cancel_url ) . '" class="dps-btn dps-btn--secondary">' . esc_html__( 'Cancelar', 'desi-pet-shower' ) . '</a>';
             }
             echo '</div>';
+            
+            // Bloco de erros de validação (FASE 2)
+            echo '<div class="dps-form-error" role="alert" aria-live="assertive" hidden></div>';
             
             // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
@@ -2937,5 +2965,88 @@ class DPS_Base_Frontend {
                 }
             }
         }
+    }
+
+    /**
+     * AJAX handler para buscar horários disponíveis para uma data específica
+     * 
+     * @since 1.0.0
+     */
+    public static function ajax_get_available_times() {
+        // Validação de nonce e permissões
+        check_ajax_referer( 'dps_action', 'nonce' );
+        
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'desi-pet-shower' ) ] );
+        }
+        
+        // Sanitiza e valida a data recebida
+        $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
+        $appointment_id = isset( $_POST['appointment_id'] ) ? intval( $_POST['appointment_id'] ) : 0;
+        
+        if ( empty( $date ) ) {
+            wp_send_json_error( [ 'message' => __( 'Data não fornecida.', 'desi-pet-shower' ) ] );
+        }
+        
+        // Valida formato da data
+        $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
+        if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
+            wp_send_json_error( [ 'message' => __( 'Data inválida.', 'desi-pet-shower' ) ] );
+        }
+        
+        // Busca agendamentos existentes nesta data
+        $args = [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $date,
+                    'compare' => '=',
+                ],
+            ],
+        ];
+        
+        $appointments = get_posts( $args );
+        
+        // Coleta horários já ocupados
+        $occupied_times = [];
+        foreach ( $appointments as $appt ) {
+            // Ignora o agendamento atual se estiver editando
+            if ( $appointment_id && $appt->ID === $appointment_id ) {
+                continue;
+            }
+            
+            $time = get_post_meta( $appt->ID, 'appointment_time', true );
+            if ( $time ) {
+                $occupied_times[] = $time;
+            }
+        }
+        
+        // Define horários de trabalho (8h às 18h, intervalos de 30 minutos)
+        $all_times = [];
+        for ( $hour = 8; $hour <= 18; $hour++ ) {
+            foreach ( [ '00', '30' ] as $min ) {
+                // Não adicionar 18:30
+                if ( $hour === 18 && $min === '30' ) {
+                    break;
+                }
+                
+                $time = sprintf( '%02d:%s', $hour, $min );
+                $is_occupied = in_array( $time, $occupied_times, true );
+                
+                $all_times[] = [
+                    'value'     => $time,
+                    'label'     => $time . ( $is_occupied ? ' - ' . __( 'Ocupado', 'desi-pet-shower' ) : '' ),
+                    'available' => ! $is_occupied,
+                ];
+            }
+        }
+        
+        wp_send_json_success( [
+            'times' => $all_times,
+            'date'  => $date,
+        ] );
     }
 }

@@ -73,6 +73,10 @@ class DPS_Base_Plugin {
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
         add_action( 'save_post_dps_pet', [ $this, 'clear_pets_cache' ], 10, 2 );
         add_action( 'delete_post', [ $this, 'maybe_clear_pets_cache_on_delete' ] );
+        
+        // AJAX handlers para funcionalidades do formulário de agendamento
+        add_action( 'wp_ajax_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
+        add_action( 'wp_ajax_nopriv_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
     }
 
     /**
@@ -211,6 +215,25 @@ class DPS_Base_Plugin {
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], DPS_BASE_VERSION, true );
         wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], DPS_BASE_VERSION, true );
+        
+        // Localização para o script de agendamento
+        wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
+            'ajaxurl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'dps_action' ),
+            'appointmentId' => isset( $_GET['dps_edit'] ) && isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0,
+            'l10n' => [
+                'loadingTimes'   => __( 'Carregando horários...', 'desi-pet-shower' ),
+                'selectTime'     => __( 'Selecione um horário', 'desi-pet-shower' ),
+                'noTimes'        => __( 'Nenhum horário disponível para esta data', 'desi-pet-shower' ),
+                'selectClient'   => __( 'Selecione um cliente', 'desi-pet-shower' ),
+                'selectPet'      => __( 'Selecione pelo menos um pet', 'desi-pet-shower' ),
+                'selectDate'     => __( 'Selecione uma data', 'desi-pet-shower' ),
+                'selectTimeSlot' => __( 'Selecione um horário', 'desi-pet-shower' ),
+                'pastDate'       => __( 'A data não pode ser anterior a hoje', 'desi-pet-shower' ),
+                'saving'         => __( 'Salvando...', 'desi-pet-shower' ),
+            ],
+        ] );
+        
         wp_localize_script( 'dps-base-script', 'dpsBaseData', [
             'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
             'restNonce'   => wp_create_nonce( 'wp_rest' ),
