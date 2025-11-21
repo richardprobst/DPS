@@ -58,6 +58,7 @@ class DPS_Base_Plugin {
         add_action( 'init', [ $this, 'register_post_types' ] );
         // Enfileira scripts e estilos
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         // Manipula ações de formulário (salvar e excluir)
         add_action( 'init', [ $this, 'maybe_handle_request' ] );
         // Impede exclusão de clientes/pets com agendamentos vinculados
@@ -230,6 +231,26 @@ class DPS_Base_Plugin {
             'petLoading'            => __( 'Carregando pets...', 'desi-pet-shower' ),
             'petNoResults'          => __( 'Nenhum pet encontrado para o filtro atual.', 'desi-pet-shower' ),
         ] );
+    }
+
+    /**
+     * Enfileira estilos para páginas administrativas do DPS
+     */
+    public function enqueue_admin_assets( $hook ) {
+        // Lista de páginas DPS no admin onde o CSS deve ser carregado
+        $dps_admin_pages = [
+            'toplevel_page_dps-logs',
+            'dps-logs',
+        ];
+
+        // Verifica se estamos em uma página DPS ou se o hook contém 'dps'
+        $is_dps_page = in_array( $hook, $dps_admin_pages, true ) || strpos( $hook, 'dps' ) !== false;
+
+        if ( ! $is_dps_page ) {
+            return;
+        }
+
+        wp_enqueue_style( 'dps-admin-style', DPS_BASE_URL . 'assets/css/dps-admin.css', [], DPS_BASE_VERSION );
     }
 
     /**

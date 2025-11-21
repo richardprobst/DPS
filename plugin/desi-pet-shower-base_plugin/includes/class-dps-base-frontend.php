@@ -574,6 +574,7 @@ class DPS_Base_Frontend {
         // Sempre mostrar interface completa para usuários administradores
         ob_start();
         echo '<div class="dps-base-wrapper">';
+        echo '<h1 style="margin-bottom: 24px; color: #374151;">' . esc_html__( 'Painel de Gestão DPS', 'desi-pet-shower' ) . '</h1>';
         echo '<ul class="dps-nav">';
         echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'desi-pet-shower' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'desi-pet-shower' ) . '</a></li>';
@@ -669,7 +670,7 @@ class DPS_Base_Frontend {
         }
         ob_start();
         echo '<div class="dps-section" id="dps-section-clientes">';
-        echo '<h3>' . esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ) . '</h3>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ) . '</h2>';
         echo '<form method="post" class="dps-form">';
         // Hidden fields
         echo '<input type="hidden" name="dps_action" value="save_client">';
@@ -718,7 +719,7 @@ class DPS_Base_Frontend {
         echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de clientes
-        echo '<h3>' . esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ) . '</h3>';
+        echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ) . '</h3>';
         echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
         if ( ! empty( $clients ) ) {
             $base_url = get_permalink();
