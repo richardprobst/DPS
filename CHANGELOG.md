@@ -52,6 +52,19 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+- Criadas classes helper para melhorar qualidade e manutenibilidade do código:
+  - `DPS_Money_Helper`: manipulação consistente de valores monetários, conversão formato brasileiro ↔ centavos
+  - `DPS_URL_Builder`: construção padronizada de URLs de edição, exclusão, visualização e navegação
+  - `DPS_Query_Helper`: consultas WP_Query reutilizáveis com filtros comuns e paginação
+  - `DPS_Request_Validator`: validação centralizada de nonces, capabilities e sanitização de campos
+- Adicionado documento de análise de refatoração (`REFACTORING_ANALYSIS.md`) com identificação detalhada de problemas de código e sugestões de melhoria
+- Criado arquivo de exemplos práticos (`includes/refactoring-examples.php`) demonstrando uso das classes helper e padrões de refatoração
+
+#### Changed (Alterado)
+- Documentação expandida com exemplos de como quebrar funções grandes em métodos menores e mais focados
+- Estabelecidos padrões de nomenclatura mais descritiva para variáveis e funções
+
 #### Fixed (Corrigido)
 - Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
 
