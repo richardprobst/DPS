@@ -515,24 +515,36 @@ class DPS_Base_Frontend {
                 if ( ! current_user_can( 'dps_manage_clients' ) ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
-                wp_delete_post( $id, true );
-                DPS_Message_Helper::add_success( __( 'Cliente excluído com sucesso!', 'desi-pet-shower' ) );
+                $deleted = wp_delete_post( $id, true );
+                if ( $deleted ) {
+                    DPS_Message_Helper::add_success( __( 'Cliente excluído com sucesso!', 'desi-pet-shower' ) );
+                } else {
+                    DPS_Message_Helper::add_error( __( 'Erro ao excluir cliente.', 'desi-pet-shower' ) );
+                }
                 break;
             case 'pet':
                 if ( ! current_user_can( 'dps_manage_pets' ) ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
-                wp_delete_post( $id, true );
-                DPS_Message_Helper::add_success( __( 'Pet excluído com sucesso!', 'desi-pet-shower' ) );
+                $deleted = wp_delete_post( $id, true );
+                if ( $deleted ) {
+                    DPS_Message_Helper::add_success( __( 'Pet excluído com sucesso!', 'desi-pet-shower' ) );
+                } else {
+                    DPS_Message_Helper::add_error( __( 'Erro ao excluir pet.', 'desi-pet-shower' ) );
+                }
                 break;
             case 'appointment':
                 if ( ! current_user_can( 'dps_manage_appointments' ) ) {
                     wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
                 }
                 // Exclui o agendamento
-                wp_delete_post( $id, true );
-                do_action( 'dps_finance_cleanup_for_appointment', $id );
-                DPS_Message_Helper::add_success( __( 'Agendamento excluído com sucesso!', 'desi-pet-shower' ) );
+                $deleted = wp_delete_post( $id, true );
+                if ( $deleted ) {
+                    do_action( 'dps_finance_cleanup_for_appointment', $id );
+                    DPS_Message_Helper::add_success( __( 'Agendamento excluído com sucesso!', 'desi-pet-shower' ) );
+                } else {
+                    DPS_Message_Helper::add_error( __( 'Erro ao excluir agendamento.', 'desi-pet-shower' ) );
+                }
                 break;
             default:
                 return;
