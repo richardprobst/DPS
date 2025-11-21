@@ -125,15 +125,42 @@ class DPS_Agenda_Addon {
 
     /**
      * Enfileira os scripts e estilos necessários apenas quando a página de agenda for carregada.
+     * 
+     * CSS e JS agora são carregados de arquivos externos (assets/css e assets/js)
+     * para melhor cache do navegador, minificação e separação de responsabilidades.
      */
     public function enqueue_assets() {
         $agenda_page_id  = get_option( 'dps_agenda_page_id' );
         $charges_page_id = get_option( 'dps_charges_page_id' );
-        // Agenda page: carrega FullCalendar e script de agenda
+        
+        // Agenda page: carrega CSS e scripts da agenda
         if ( $agenda_page_id && is_page( $agenda_page_id ) ) {
-            // Somente o script de atualização de status será necessário; não carregamos o calendário
-            // Carrega o script da agenda. Alteramos a versão para forçar atualização do cache quando o arquivo for modificado.
-            wp_enqueue_script( 'dps-agenda-addon', plugin_dir_url( __FILE__ ) . 'agenda-addon.js', [ 'jquery' ], '1.2.0', true );
+            // CSS da agenda (extraído do inline para arquivo dedicado)
+            wp_enqueue_style( 
+                'dps-agenda-addon-css', 
+                plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css', 
+                [], 
+                '1.1.0' 
+            );
+            
+            // Modal de serviços (precisa ser carregado antes do agenda-addon.js)
+            wp_enqueue_script( 
+                'dps-services-modal', 
+                plugin_dir_url( __FILE__ ) . 'assets/js/services-modal.js', 
+                [ 'jquery' ], 
+                '1.0.0', 
+                true 
+            );
+            
+            // Script principal da agenda (atualização de status e interações)
+            wp_enqueue_script( 
+                'dps-agenda-addon', 
+                plugin_dir_url( __FILE__ ) . 'agenda-addon.js', 
+                [ 'jquery', 'dps-services-modal' ], 
+                '1.3.0', 
+                true 
+            );
+            
             wp_localize_script( 'dps-agenda-addon', 'DPS_AG_Addon', [
                 'ajax'          => admin_url( 'admin-ajax.php' ),
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
@@ -152,8 +179,8 @@ class DPS_Agenda_Addon {
                 ],
                 'reloadDelay'  => 700,
             ] );
-            // Enfileira CSS opcional para tabela (reutilizamos estilos padrão do plugin principal se disponível)
         }
+        
         // Charges/notes page: pode precisar de estilos extras
         if ( $charges_page_id && is_page( $charges_page_id ) ) {
             // carregue CSS para tabelas se necessário; podemos reutilizar estilos de dps-table se o tema os define.
@@ -177,314 +204,8 @@ class DPS_Agenda_Addon {
             return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
         }
         // Nenhum controle adicional de cookies é necessário; o acesso é controlado por permissões do usuário.
-        // Adiciona estilos inline para destacar linhas da agenda conforme o status. Essas classes serão
-        // aplicadas nas linhas de cada agendamento e permitem uma rápida identificação visual da situação
-        // (pendente, finalizado, finalizado e pago ou cancelado).
+        // Wrapper da agenda (CSS agora carregado de arquivo externo via enqueue_assets)
         echo '<div class="dps-agenda-wrapper">';
-        echo '<style>
-        .dps-agenda-wrapper {
-            --dps-accent:#2563eb;
-            --dps-accent-strong:#1d4ed8;
-            --dps-accent-soft:#eff6ff;
-            --dps-surface:#ffffff;
-            --dps-background:#f8fafc;
-            --dps-border:#e2e8f0;
-            --dps-muted:#64748b;
-            max-width:100%;
-            color:#0f172a;
-        }
-        .dps-agenda-wrapper * { box-sizing:border-box; }
-        .dps-agenda-wrapper h3,
-        .dps-agenda-wrapper h4,
-        .dps-agenda-wrapper h5 {
-            margin:0 0 0.75rem;
-            color:#0f172a;
-        }
-        .dps-agenda-wrapper h4 { font-size:1.1rem; font-weight:600; }
-        .dps-agenda-wrapper .dps-agenda-nav,
-        .dps-agenda-wrapper .dps-agenda-date-form,
-        .dps-agenda-wrapper .dps-agenda-filters {
-            display:flex;
-            flex-wrap:wrap;
-            gap:1rem;
-            align-items:center;
-            margin-bottom:1.25rem;
-            padding:1rem 1.25rem;
-            background:var(--dps-surface);
-            border:1px solid var(--dps-border);
-            border-radius:0.75rem;
-            box-shadow:0 8px 16px rgba(15,23,42,0.04);
-        }
-        .dps-agenda-nav { justify-content:space-between; }
-        .dps-agenda-nav-group {
-            display:flex;
-            flex-wrap:wrap;
-            gap:0.6rem;
-            align-items:center;
-        }
-        .dps-agenda-date-form label,
-        .dps-agenda-filters label {
-            display:flex;
-            flex-direction:column;
-            gap:0.35rem;
-            font-weight:600;
-            color:#0f172a;
-            min-width:14rem;
-            flex:1 1 14rem;
-        }
-        .dps-agenda-date-form input[type="date"],
-        .dps-agenda-filters input,
-        .dps-agenda-filters select,
-        .dps-status-select {
-            width:100%;
-            padding:0.55rem 0.75rem;
-            border:1px solid var(--dps-border);
-            border-radius:0.65rem;
-            background:#fff;
-            color:#0f172a;
-            font-size:0.95rem;
-            line-height:1.4;
-            transition:border-color .2s ease, box-shadow .2s ease;
-        }
-        .dps-status-select { min-width:11.5rem; }
-        .dps-agenda-date-form input[type="date"]:focus,
-        .dps-agenda-filters input:focus,
-        .dps-agenda-filters select:focus,
-        .dps-status-select:focus {
-            outline:none;
-            border-color:var(--dps-accent);
-            box-shadow:0 0 0 3px rgba(37,99,235,0.2);
-        }
-        .dps-agenda-date-actions,
-        .dps-agenda-filter-actions {
-            display:flex;
-            gap:0.75rem;
-            margin-left:auto;
-            align-items:center;
-        }
-        .dps-agenda-date-actions .dps-btn,
-        .dps-agenda-filter-actions .dps-btn { min-width:8.5rem; }
-        .dps-agenda-empty {
-            margin:2rem auto 0;
-            padding:1.5rem;
-            max-width:min(100%, 32rem);
-            text-align:center;
-            line-height:1.6;
-            color:var(--dps-muted);
-            background:var(--dps-background);
-            border:1px dashed var(--dps-border);
-            border-radius:0.85rem;
-            box-shadow:0 6px 20px rgba(15,23,42,0.06);
-            word-break:break-word;
-        }
-        .dps-btn {
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:0.5rem;
-            padding:0.55rem 1.25rem;
-            border-radius:999px;
-            font-weight:600;
-            font-size:0.95rem;
-            line-height:1.1;
-            text-decoration:none;
-            border:1px solid transparent;
-            cursor:pointer;
-            transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
-            box-shadow:0 1px 2px rgba(15,23,42,0.08);
-        }
-        .dps-btn:focus-visible {
-            outline:none;
-            box-shadow:0 0 0 3px rgba(37,99,235,0.25);
-        }
-        .dps-btn--primary {
-            background:var(--dps-accent);
-            border-color:var(--dps-accent);
-            color:#fff;
-        }
-        .dps-btn--primary:hover {
-            background:var(--dps-accent-strong);
-            border-color:var(--dps-accent-strong);
-            transform:translateY(-1px);
-        }
-        .dps-btn--ghost {
-            background:transparent;
-            border-color:var(--dps-accent);
-            color:var(--dps-accent);
-        }
-        .dps-btn--ghost:hover { background:var(--dps-accent-soft); }
-        .dps-btn--soft {
-            background:var(--dps-background);
-            border-color:var(--dps-border);
-            color:#0f172a;
-        }
-        .dps-btn--soft:hover {
-            border-color:var(--dps-accent);
-            color:var(--dps-accent);
-        }
-        .dps-agenda-summary {
-            display:flex;
-            flex-wrap:wrap;
-            gap:0.75rem 1.5rem;
-            align-items:center;
-            margin:0.75rem 0 1.5rem;
-            padding:0.75rem 1rem;
-            background:var(--dps-accent-soft);
-            border:1px solid rgba(37,99,235,0.12);
-            border-radius:0.75rem;
-            color:#0f172a;
-        }
-        .dps-agenda-summary span {
-            display:flex;
-            align-items:center;
-            gap:0.35rem;
-            font-size:0.95rem;
-        }
-        .dps-agenda-summary span strong { font-size:1.05rem; }
-        .dps-agenda-table-container {
-            overflow-x:auto;
-            margin-bottom:1.5rem;
-            border-radius:0.75rem;
-            background:var(--dps-surface);
-            border:1px solid var(--dps-border);
-            -webkit-overflow-scrolling:touch;
-        }
-        .dps-agenda-table-container::-webkit-scrollbar { height:8px; }
-        .dps-agenda-table-container::-webkit-scrollbar-thumb {
-            background:rgba(15,23,42,0.2);
-            border-radius:999px;
-        }
-        .dps-agenda-wrapper table.dps-table {
-            width:100%;
-            min-width:780px;
-            border-collapse:separate;
-            border-spacing:0;
-            margin:0;
-        }
-        .dps-agenda-wrapper table.dps-table thead th {
-            text-align:left;
-            padding:0.75rem 1rem;
-            font-size:0.8rem;
-            font-weight:600;
-            text-transform:uppercase;
-            letter-spacing:0.02em;
-            color:var(--dps-muted);
-            background:var(--dps-background);
-        }
-        .dps-agenda-wrapper table.dps-table tbody tr {
-            transition:background .2s ease, border-left-color .2s ease;
-            border-left:4px solid transparent;
-        }
-        .dps-agenda-wrapper table.dps-table tbody tr:hover { background:#f9fafb; }
-        .dps-agenda-wrapper table.dps-table tbody td {
-            padding:0.85rem 1rem;
-            border-top:1px solid var(--dps-border);
-            vertical-align:top;
-            color:#0f172a;
-            font-size:0.95rem;
-        }
-        .dps-agenda-wrapper table.dps-table tbody tr:first-child td { border-top:0; }
-        .dps-agenda-wrapper table.dps-table tr.status-pendente {
-            border-left-color:#f59e0b;
-            background:#fffbeb;
-        }
-        .dps-agenda-wrapper table.dps-table tr.status-finalizado {
-            border-left-color:#0ea5e9;
-            background:#f0f9ff;
-        }
-        .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago {
-            border-left-color:#22c55e;
-            background:#f0fdf4;
-        }
-        .dps-agenda-wrapper table.dps-table tr.status-cancelado {
-            border-left-color:#ef4444;
-            background:#fef2f2;
-        }
-        .dps-services-link {
-            color:var(--dps-accent);
-            font-weight:600;
-            text-decoration:none;
-        }
-        .dps-services-link:hover { text-decoration:underline; }
-        .dps-status-feedback {
-            display:block;
-            margin-top:0.35rem;
-            font-size:0.85rem;
-            color:var(--dps-muted);
-        }
-        .dps-status-feedback--error { color:#ef4444; }
-        .dps-status-select.is-loading { opacity:0.6; pointer-events:none; }
-        @media (max-width:1024px) {
-            .dps-agenda-nav { justify-content:flex-start; }
-            .dps-agenda-nav-group { flex:1 1 100%; justify-content:flex-start; }
-        }
-        @media (max-width:860px) {
-            .dps-agenda-date-form label,
-            .dps-agenda-filters label { min-width:100%; flex:1 1 100%; }
-            .dps-agenda-date-actions,
-            .dps-agenda-filter-actions {
-                width:100%;
-                justify-content:flex-start;
-                flex-wrap:wrap;
-            }
-        }
-        @media (max-width:768px) {
-            .dps-agenda-wrapper .dps-agenda-nav,
-            .dps-agenda-wrapper .dps-agenda-date-form,
-            .dps-agenda-wrapper .dps-agenda-filters { padding:0.85rem 1rem; }
-            .dps-agenda-nav .dps-btn { flex:1 1 calc(50% - 0.5rem); }
-            .dps-agenda-date-actions .dps-btn,
-            .dps-agenda-filter-actions .dps-btn { flex:1 1 auto; }
-            .dps-agenda-table-container { border-radius:0.5rem; box-shadow:none; }
-            .dps-agenda-wrapper table.dps-table { min-width:640px; }
-        }
-        @media (max-width:640px) {
-            .dps-agenda-wrapper table.dps-table { min-width:0; }
-            .dps-agenda-wrapper table.dps-table thead { display:none; }
-            .dps-agenda-wrapper table.dps-table tbody {
-                display:flex;
-                flex-direction:column;
-                gap:1rem;
-            }
-            .dps-agenda-wrapper table.dps-table tr {
-                display:flex;
-                flex-direction:column;
-                border:1px solid var(--dps-border);
-                border-left-width:4px;
-                border-radius:0.75rem;
-                background:var(--dps-surface);
-                padding:1rem;
-            }
-            .dps-agenda-empty {
-                margin-top:1.5rem;
-                padding:1.25rem;
-            }
-            .dps-agenda-wrapper table.dps-table tbody td {
-                border:0;
-                padding:0.5rem 0;
-                display:flex;
-                flex-direction:column;
-                gap:0.25rem;
-            }
-            .dps-agenda-wrapper table.dps-table tbody td::before {
-                content:attr(data-label);
-                font-size:0.8rem;
-                font-weight:600;
-                color:var(--dps-muted);
-                text-transform:uppercase;
-            }
-            .dps-agenda-summary { width:100%; }
-        }
-        @media (max-width:420px) {
-            .dps-agenda-nav .dps-btn { flex:1 1 100%; }
-            .dps-agenda-date-actions,
-            .dps-agenda-filter-actions { gap:0.5rem; }
-            .dps-agenda-empty {
-                padding:1.1rem;
-                border-radius:0.75rem;
-            }
-        }
-        </style>';
         // Acesso permitido: mostrar agenda
         // Filtro de data e visualização
         $selected_date = isset( $_GET['dps_date'] ) ? sanitize_text_field( $_GET['dps_date'] ) : '';
@@ -527,42 +248,74 @@ class DPS_Agenda_Addon {
         // Ao gerar links, não propague show_all (nav_args não contém show_all)
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
         $next_args = array_merge( $nav_args, [ 'dps_date' => $next_date, 'view' => $view ] );
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Semana anterior', 'dps-agenda-addon' ) : esc_html__( 'Dia anterior', 'dps-agenda-addon' ) ) . '</a>';
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">' . ( $is_week_view ? esc_html__( 'Próxima semana', 'dps-agenda-addon' ) : esc_html__( 'Dia seguinte', 'dps-agenda-addon' ) ) . '</a>';
-        echo '</div>';
+        
+        // Navegação simplificada (FASE 2): consolidar botões
+        echo '<div class="dps-agenda-nav">';
+        
+        // Grupo 1: Navegação de data (Anterior | Hoje | Próximo)
         echo '<div class="dps-agenda-nav-group">';
-        // Toggle entre visualizações e botão de calendário alternativo
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft" title="' . esc_attr( $is_week_view ? __( 'Ver semana anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
+        echo '← ' . ( $is_week_view ? esc_html__( 'Anterior', 'dps-agenda-addon' ) : esc_html__( 'Anterior', 'dps-agenda-addon' ) );
+        echo '</a>';
+        
+        // Botão "Hoje"
+        $today = current_time( 'Y-m-d' );
+        $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
+        unset( $today_args['show_all'] );
+        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
+        echo esc_html__( 'Hoje', 'dps-agenda-addon' );
+        echo '</a>';
+        
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft" title="' . esc_attr( $is_week_view ? __( 'Ver próxima semana', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
+        echo ( $is_week_view ? esc_html__( 'Próximo', 'dps-agenda-addon' ) : esc_html__( 'Próximo', 'dps-agenda-addon' ) ) . ' →';
+        echo '</a>';
+        echo '</div>';
+        
+        // Grupo 2: Visualizações (Semana | Todos)
+        echo '<div class="dps-agenda-nav-group">';
+        
+        // Botão Ver Semana/Dia (toggle)
         $toggle_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
         if ( $is_week_view ) {
-            // Em visualização semanal ou de calendário, exibe botão para voltar à lista diária
+            // Em visualização semanal, exibe botão para voltar à lista diária
             $toggle_args['view'] = 'day';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Lista', 'dps-agenda-addon' ) . '</a>';
-            // Se estiver no calendário, também exibe botão para a visualização semanal de lista
-            if ( $view === 'calendar' ) {
-                $week_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'week' ] );
-                echo '<a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
-            }
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver lista diária', 'dps-agenda-addon' ) . '">';
+            echo '📅 ' . esc_html__( 'Dia', 'dps-agenda-addon' );
+            echo '</a>';
         } else {
             // Em visualização diária, exibe botão para a lista semanal
             $toggle_args['view'] = 'week';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Ver Semana', 'dps-agenda-addon' ) . '</a>';
+            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver lista semanal', 'dps-agenda-addon' ) . '">';
+            echo '📅 ' . esc_html__( 'Semana', 'dps-agenda-addon' );
+            echo '</a>';
         }
-        echo '</div>';
-        echo '<div class="dps-agenda-nav-group">';
-        // Botão "Ver Calendário" removido conforme solicitação do cliente. A visualização de calendário
-        // será implementada em uma futura atualização. Por enquanto, não exibe o botão para evitar confusão.
-        // Botão Ver Hoje: redefine a data selecionada para a data de hoje, preservando outros filtros
-        $today = current_time( 'Y-m-d' );
-        $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
-        // Se show_all estiver definido, removemos para voltar à visualização normal
-        unset( $today_args['show_all'] );
-        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver Hoje', 'dps-agenda-addon' ) . '</a>';
-        // Botão Todos os Atendimentos: remove data/view e define show_all=1
+        
+        // Botão Todos os Atendimentos
         $all_args = $current_args;
         unset( $all_args['dps_date'] );
         unset( $all_args['view'] );
         $all_args['show_all'] = '1';
-        echo '<a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Todos os Atendimentos', 'dps-agenda-addon' ) . '</a>';
+        echo '<a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver todos os agendamentos', 'dps-agenda-addon' ) . '">';
+        echo '📋 ' . esc_html__( 'Todos', 'dps-agenda-addon' );
+        echo '</a>';
+        echo '</div>';
+        
+        // Grupo 3: Ação principal (Novo Agendamento)
+        echo '<div class="dps-agenda-nav-group">';
+        
+        // Botão "Novo Agendamento" - link para tela de criação no plugin base
+        $base_page_id = get_option( 'dps_base_page_id' );
+        if ( $base_page_id ) {
+            $new_appt_url = add_query_arg( [
+                'tab' => 'agendas',
+                'action' => 'new'
+            ], get_permalink( $base_page_id ) );
+            
+            echo '<a href="' . esc_url( $new_appt_url ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '">';
+            echo '➕ ' . esc_html__( 'Novo Agendamento', 'dps-agenda-addon' );
+            echo '</a>';
+        }
+        
         echo '</div>';
         echo '</div>';
         // Formulário de seleção de data
@@ -849,14 +602,15 @@ class DPS_Agenda_Addon {
                     // Mostra a data no formato dia-mês-ano
                     echo '<td data-label="' . esc_attr( $column_labels['date'] ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
                     echo '<td data-label="' . esc_attr( $column_labels['time'] ) . '">' . esc_html( $time ) . '</td>';
-                    // Nome do pet e cliente com agressivo
+                    // Nome do pet e cliente com flag de agressividade melhorada (FASE 2)
                     $pet_name    = $pet_post ? $pet_post->post_title : '';
                     $client_name = $client_post ? $client_post->post_title : '';
                     $aggr_flag   = '';
                     if ( $pet_post ) {
                         $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
                         if ( $aggr ) {
-                            $aggr_flag = ' <span class="dps-aggressive-flag" style="color:red; font-weight:bold;">! </span>';
+                            // Flag melhorada com emoji e tooltip
+                            $aggr_flag = ' <span class="dps-aggressive-flag" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️</span>';
                         }
                     }
                     echo '<td data-label="' . esc_attr( $column_labels['pet'] ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
@@ -868,7 +622,10 @@ class DPS_Agenda_Addon {
                     }
                     $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
                     if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                        echo '<a href="#" class="dps-services-link" data-appt-id="' . esc_attr( $appt->ID ) . '">' . esc_html__( 'Ver serviços', 'dps-agenda-addon' ) . '</a>';
+                        // Link com ícone para abrir modal de serviços (FASE 2)
+                        echo '<a href="#" class="dps-services-link" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver detalhes dos serviços', 'dps-agenda-addon' ) . '">';
+                        echo esc_html__( 'Ver serviços', 'dps-agenda-addon' ) . ' ↗';
+                        echo '</a>';
                     } else {
                         echo '-';
                     }
@@ -982,7 +739,8 @@ class DPS_Agenda_Addon {
                                 $services_txt
                             );
                             $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
-                            $confirmation_html = '<a href="' . esc_url( 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message ) ) . '" target="_blank">' . esc_html__( 'Confirmar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            // Link de confirmação com ícone e tooltip (FASE 2)
+                            $confirmation_html = '<a href="' . esc_url( 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
                         }
                     }
                     echo $confirmation_html;
@@ -1014,13 +772,15 @@ class DPS_Agenda_Addon {
                             $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
                             $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
                             $links        = [];
-                            $links[]      = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg ) ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                            // Link de cobrança com ícone e tooltip (FASE 2)
+                            $links[]      = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
                             if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
                                 $group_total = number_format_i18n( $group_data['total'], 2 );
                                 $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
                                 $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
                                 $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
-                                $links[]     = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg ) ) . '" target="_blank">' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                                // Link de cobrança conjunta com ícone
+                                $links[]     = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
                             }
                             echo implode( '<br>', $links );
                         } else {

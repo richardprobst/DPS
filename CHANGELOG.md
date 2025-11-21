@@ -100,6 +100,12 @@ Antes de criar uma nova versão oficial:
   - `ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
   - `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas
+- **Agenda Add-on**: Implementadas melhorias de FASE 1 e FASE 2:
+  - Botão "➕ Novo Agendamento" adicionado à barra de navegação para workflow completo
+  - Modal customizado para visualização de serviços (substitui alert() nativo)
+  - Ícones e tooltips em links de ação (📍 Mapa, 💬 Confirmar, 💰 Cobrar)
+  - Flag de pet agressivo melhorada (⚠️ com tooltip "Pet agressivo - cuidado no manejo")
+  - Criados arquivos de assets: `assets/css/agenda-addon.css` e `assets/js/services-modal.js`
 
 #### Changed (Alterado)
 - Interface administrativa completamente reformulada com design minimalista:
@@ -123,6 +129,13 @@ Antes de criar uma nova versão oficial:
 - Documentação expandida com exemplos de como quebrar funções grandes em métodos menores e mais focados
 - Estabelecidos padrões de nomenclatura mais descritiva para variáveis e funções
 - Documentação do add-on Agenda atualizada para refletir limpeza de cron jobs na desativação
+- **Agenda Add-on**: Navegação simplificada e melhorias visuais:
+  - Botões de navegação consolidados de 7 para 6, organizados em 3 grupos lógicos
+  - Navegação: [← Anterior] [Hoje] [Próximo →] | [📅 Semana] [📋 Todos] | [➕ Novo]
+  - CSS extraído de inline (~487 linhas) para arquivo externo `assets/css/agenda-addon.css`
+  - Border-left de status reduzida de 4px para 3px (estilo mais clean)
+  - Remoção de transform: translateY(-1px) em hover dos botões (menos movimento visual)
+  - Remoção de sombras decorativas (apenas bordas 1px solid)
 
 #### Fixed (Corrigido)
 - Implementado feedback visual após todas as operações principais:
@@ -148,6 +161,12 @@ Antes de criar uma nova versão oficial:
   - Logs: organização de filtros e tabelas seguindo padrão minimalista
   - Clientes, pets e agendamentos: consistência visual com novo sistema de feedback
   - Formulários dos add-ons alinhados ao estilo visual do núcleo
+- **Agenda Add-on**: Separação de responsabilidades e melhoria de arquitetura:
+  - Extração de 487 linhas de CSS inline para arquivo dedicado `assets/css/agenda-addon.css`
+  - Criação de componente modal reutilizável em `assets/js/services-modal.js` (acessível, com ARIA)
+  - Atualização de `enqueue_assets()` para carregar CSS/JS externos (habilita cache do navegador e minificação)
+  - Integração do modal com fallback para alert() caso script não esteja carregado
+  - Benefícios: separação de responsabilidades, cache do navegador, minificação possível, manutenibilidade melhorada
 
 ---
 

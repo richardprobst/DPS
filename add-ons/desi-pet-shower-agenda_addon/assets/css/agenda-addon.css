@@ -1,0 +1,580 @@
+/**
+ * Estilos da Agenda de Atendimentos - DPS
+ * 
+ * Arquivo criado para centralizar os estilos da agenda, seguindo o padrão minimalista/clean:
+ * - Paleta enxuta de cores
+ * - Bordas simples (sem sombras exageradas)
+ * - Sem transformações de movimento em hover
+ * - Foco em legibilidade e espaço em branco
+ */
+
+/* === Variáveis CSS e Estrutura Base === */
+.dps-agenda-wrapper {
+    --dps-accent: #2563eb;
+    --dps-accent-strong: #1d4ed8;
+    --dps-accent-soft: #eff6ff;
+    --dps-surface: #ffffff;
+    --dps-background: #f8fafc;
+    --dps-border: #e2e8f0;
+    --dps-muted: #64748b;
+    max-width: 100%;
+    color: #0f172a;
+}
+
+.dps-agenda-wrapper * {
+    box-sizing: border-box;
+}
+
+/* === Tipografia === */
+.dps-agenda-wrapper h3,
+.dps-agenda-wrapper h4,
+.dps-agenda-wrapper h5 {
+    margin: 0 0 0.75rem;
+    color: #0f172a;
+}
+
+.dps-agenda-wrapper h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* === Navegação, Formulários e Filtros === */
+.dps-agenda-wrapper .dps-agenda-nav,
+.dps-agenda-wrapper .dps-agenda-date-form,
+.dps-agenda-wrapper .dps-agenda-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+    /* Estilo minimalista: sem sombras decorativas */
+}
+
+.dps-agenda-nav {
+    justify-content: space-between;
+}
+
+.dps-agenda-nav-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+/* Separador visual entre grupos de navegação */
+.dps-agenda-nav-group + .dps-agenda-nav-group::before {
+    content: '|';
+    color: var(--dps-border);
+    font-weight: 300;
+    margin: 0 0.25rem;
+}
+
+/* === Labels e Inputs === */
+.dps-agenda-date-form label,
+.dps-agenda-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: #0f172a;
+    min-width: 14rem;
+    flex: 1 1 14rem;
+}
+
+.dps-agenda-date-form input[type="date"],
+.dps-agenda-filters input,
+.dps-agenda-filters select,
+.dps-status-select {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.dps-status-select {
+    min-width: 11.5rem;
+}
+
+.dps-agenda-date-form input[type="date"]:focus,
+.dps-agenda-filters input:focus,
+.dps-agenda-filters select:focus,
+.dps-status-select:focus {
+    outline: none;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* === Ações de Filtros === */
+.dps-agenda-date-actions,
+.dps-agenda-filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+    align-items: center;
+}
+
+.dps-agenda-date-actions .dps-btn,
+.dps-agenda-filter-actions .dps-btn {
+    min-width: 8.5rem;
+}
+
+/* === Estado Vazio === */
+.dps-agenda-empty {
+    margin: 2rem auto 0;
+    padding: 1.5rem;
+    max-width: min(100%, 32rem);
+    text-align: center;
+    line-height: 1.6;
+    color: var(--dps-muted);
+    background: var(--dps-background);
+    border: 1px dashed var(--dps-border);
+    border-radius: 0.85rem;
+    word-break: break-word;
+}
+
+/* === Botões (Estilo Minimalista) === */
+.dps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+    /* Removido: transform no hover (estilo minimalista) */
+}
+
+.dps-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.dps-btn--primary {
+    background: var(--dps-accent);
+    border-color: var(--dps-accent);
+    color: #fff;
+}
+
+.dps-btn--primary:hover {
+    background: var(--dps-accent-strong);
+    border-color: var(--dps-accent-strong);
+    /* Removido: transform: translateY(-1px) - menos movimento visual */
+}
+
+.dps-btn--ghost {
+    background: transparent;
+    border-color: var(--dps-accent);
+    color: var(--dps-accent);
+}
+
+.dps-btn--ghost:hover {
+    background: var(--dps-accent-soft);
+}
+
+.dps-btn--soft {
+    background: var(--dps-background);
+    border-color: var(--dps-border);
+    color: #0f172a;
+}
+
+.dps-btn--soft:hover {
+    border-color: var(--dps-accent);
+    color: var(--dps-accent);
+}
+
+/* === Resumo de Atendimentos === */
+.dps-agenda-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    align-items: center;
+    margin: 0.75rem 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--dps-accent-soft);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 0.75rem;
+    color: #0f172a;
+}
+
+.dps-agenda-summary span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem;
+}
+
+.dps-agenda-summary span strong {
+    font-size: 1.05rem;
+}
+
+/* === Container da Tabela === */
+.dps-agenda-table-container {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    -webkit-overflow-scrolling: touch;
+}
+
+.dps-agenda-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.dps-agenda-table-container::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.2);
+    border-radius: 999px;
+}
+
+/* === Tabela de Agendamentos === */
+.dps-agenda-wrapper table.dps-table {
+    width: 100%;
+    min-width: 780px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+}
+
+.dps-agenda-wrapper table.dps-table thead th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--dps-muted);
+    background: var(--dps-background);
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr {
+    transition: background .2s ease, border-left-color .2s ease;
+    border-left: 3px solid transparent; /* Reduzido de 4px para 3px (estilo mais clean) */
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-agenda-wrapper table.dps-table tbody td {
+    padding: 0.85rem 1rem;
+    border-top: 1px solid var(--dps-border);
+    vertical-align: top;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr:first-child td {
+    border-top: 0;
+}
+
+/* === Status com Cores (Borda Esquerda de 3px) === */
+.dps-agenda-wrapper table.dps-table tr.status-pendente {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-finalizado {
+    border-left-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-finalizado_pago {
+    border-left-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-cancelado {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+/* === Links e Feedback === */
+.dps-services-link {
+    color: var(--dps-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dps-services-link:hover {
+    text-decoration: underline;
+}
+
+.dps-status-feedback {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--dps-muted);
+}
+
+.dps-status-feedback--error {
+    color: #ef4444;
+}
+
+.dps-status-select.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* === Flag de Pet Agressivo === */
+.dps-aggressive-flag {
+    color: #ef4444;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 0.25rem;
+}
+
+/* === Ícones em Links === */
+.dps-link-icon {
+    font-size: 1.1em;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+
+/* === Modal de Serviços === */
+.dps-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+}
+
+.dps-modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    max-width: 500px;
+    width: 100%;
+    border: 1px solid var(--dps-border);
+    /* Estilo minimalista: sem sombras exageradas */
+}
+
+.dps-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--dps-border);
+}
+
+.dps-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #0f172a;
+}
+
+.dps-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--dps-muted);
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    transition: background .2s ease, color .2s ease;
+}
+
+.dps-modal-close:hover {
+    background: var(--dps-background);
+    color: #0f172a;
+}
+
+.dps-modal-body {
+    margin-bottom: 1rem;
+}
+
+.dps-services-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dps-service-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--dps-border);
+}
+
+.dps-service-item:last-child {
+    border-bottom: none;
+}
+
+.dps-service-name {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.dps-service-price {
+    font-weight: 600;
+    color: var(--dps-accent);
+}
+
+.dps-services-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--dps-border);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.dps-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--dps-border);
+}
+
+/* === Responsividade === */
+
+/* Tablets e telas médias (até 1024px) */
+@media (max-width: 1024px) {
+    .dps-agenda-nav {
+        justify-content: flex-start;
+    }
+    
+    .dps-agenda-nav-group {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* Telas médias (até 860px) */
+@media (max-width: 860px) {
+    .dps-agenda-date-form label,
+    .dps-agenda-filters label {
+        min-width: 100%;
+        flex: 1 1 100%;
+    }
+    
+    .dps-agenda-date-actions,
+    .dps-agenda-filter-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+/* Tablets (até 768px) */
+@media (max-width: 768px) {
+    .dps-agenda-wrapper .dps-agenda-nav,
+    .dps-agenda-wrapper .dps-agenda-date-form,
+    .dps-agenda-wrapper .dps-agenda-filters {
+        padding: 0.85rem 1rem;
+    }
+    
+    .dps-agenda-nav .dps-btn {
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+    
+    .dps-agenda-date-actions .dps-btn,
+    .dps-agenda-filter-actions .dps-btn {
+        flex: 1 1 auto;
+    }
+    
+    .dps-agenda-table-container {
+        border-radius: 0.5rem;
+    }
+    
+    .dps-agenda-wrapper table.dps-table {
+        min-width: 640px;
+    }
+}
+
+/* Mobile (até 640px) - Cards Verticais */
+@media (max-width: 640px) {
+    .dps-agenda-wrapper table.dps-table {
+        min-width: 0;
+    }
+    
+    .dps-agenda-wrapper table.dps-table thead {
+        display: none;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--dps-border);
+        border-left-width: 3px; /* Mantido em 3px para consistência */
+        border-radius: 0.75rem;
+        background: var(--dps-surface);
+        padding: 1rem;
+    }
+    
+    .dps-agenda-empty {
+        margin-top: 1.5rem;
+        padding: 1.25rem;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody td {
+        border: 0;
+        padding: 0.5rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--dps-muted);
+        text-transform: uppercase;
+    }
+    
+    .dps-agenda-summary {
+        width: 100%;
+    }
+}
+
+/* Mobile pequeno (até 420px) */
+@media (max-width: 420px) {
+    .dps-agenda-nav .dps-btn {
+        flex: 1 1 100%;
+    }
+    
+    .dps-agenda-date-actions,
+    .dps-agenda-filter-actions {
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-empty {
+        padding: 1.1rem;
+        border-radius: 0.75rem;
+    }
+}
