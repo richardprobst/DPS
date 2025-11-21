@@ -34,6 +34,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-money-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-url-builder.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-query-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-request-validator.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-message-helper.php';
 
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
