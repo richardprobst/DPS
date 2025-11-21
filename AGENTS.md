@@ -8,6 +8,8 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
 - **add-ons/**: add-ons opcionais, cada um com arquivo principal próprio e subpastas por funcionalidade.
 - **ANALYSIS.md**: visão arquitetural, fluxos de integração e contratos entre núcleo e extensões.
 - **CHANGELOG.md**: histórico de versões e lançamentos. Deve ser atualizado em cada release.
+- **REFACTORING_ANALYSIS.md**: análise detalhada de problemas de código conhecidos e padrões de refatoração recomendados.
+- **plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
 - Pastas adicionais podem surgir para ferramentas de build, exemplos ou documentação; mantenha-as descritas nesta seção quando adicionadas.
 
 ## Versionamento e git-flow
@@ -36,6 +38,40 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
   - Tabelas de banco de dados criadas ou utilizadas
   - Shortcodes, CPTs ou capabilities adicionados
 
+## Fluxo obrigatório para mudanças
+
+Qualquer agente (humano ou IA) que implemente mudanças no código deve seguir este fluxo:
+
+1. **Ler ANALYSIS.md antes de começar**:
+   - Entender o fluxo atual e os hooks utilizados pelo núcleo e add-ons
+   - Identificar dependências entre componentes
+   - Localizar o add-on ou parte do núcleo afetado
+   - Verificar se a estrutura de arquivos segue o padrão recomendado na seção "Padrões de desenvolvimento de add-ons"
+
+2. **Implementar as mudanças**:
+   - Seguir as convenções de código descritas neste AGENTS.md (indentação, prefixação, nomenclatura)
+   - Aplicar as políticas de segurança obrigatórias (nonces, escape, sanitização, capabilities)
+   - Considerar performance (carregamento condicional de assets, otimização de queries)
+   - Reutilizar helpers globais quando disponíveis (DPS_Money_Helper, DPS_URL_Builder, etc.)
+
+3. **Atualizar ANALYSIS.md quando necessário**:
+   - Mudanças em fluxos de integração ou contratos de hooks
+   - Criação ou modificação de estrutura de dados (tabelas, CPTs, metadados)
+   - Novos pontos de extensão ou hooks expostos
+   - Alteração de assinaturas de hooks existentes (sempre marcar depreciação primeiro)
+   - Criação de novos add-ons ou helpers globais
+
+4. **Atualizar CHANGELOG.md antes de criar tags de release**:
+   - Adicionar entradas em `[Unreleased]` durante o desenvolvimento
+   - Usar categorias apropriadas (Added/Changed/Fixed/Removed/Deprecated/Security/Refactoring)
+   - Respeitar SemVer ao determinar se a mudança é MAJOR, MINOR ou PATCH
+   - Seguir o "Fluxo de release" descrito no próprio CHANGELOG.md antes de criar tags
+
+5. **Validar consistência entre documentos**:
+   - Conferir que ANALYSIS.md, CHANGELOG.md e AGENTS.md estão alinhados
+   - Garantir que novos hooks estão documentados em ANALYSIS.md com assinaturas e exemplos
+   - Verificar que mudanças de arquitetura estão refletidas em todos os documentos relevantes
+
 ## Convenções de código
 - WordPress: indentação de 4 espaços; funções globais em `snake_case`; métodos e propriedades de classe em `camelCase`.
 - Escape e sanitização são obrigatórios (`esc_html__`, `esc_attr`, `wp_nonce_*`, `sanitize_text_field`, etc.).
@@ -49,6 +85,73 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
 - Reutilize a tabela `dps_transacoes` e contratos de metadados para fluxos financeiros ou de assinatura.
 - Documente dependências entre add-ons (ex.: Financeiro + Assinaturas) e valide o comportamento conjunto em ambiente de testes.
 - Registre assets apenas nas páginas relevantes e considere colisões com temas/plugins instalados.
+- Para detalhes de estrutura de arquivos recomendada, cron hooks e prioridades de refatoração, consulte a seção "Padrões de desenvolvimento de add-ons" no **ANALYSIS.md**.
+
+## Recursos para refatoração
+
+O repositório mantém recursos específicos para orientar refatorações de código:
+
+### REFACTORING_ANALYSIS.md
+- Fonte oficial de problemas conhecidos de código (funções muito grandes, nomes pouco descritivos, duplicação)
+- Identifica candidatos prioritários para refatoração com métricas objetivas (linhas de código, complexidade)
+- Sugere versões refatoradas com nomes melhores e quebra em métodos menores
+- Deve ser consultado antes de iniciar refatorações significativas
+
+### plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php
+- Coleção de exemplos práticos de uso correto das classes helper globais
+- Demonstra padrões de refatoração recomendados (conversão de valores monetários, construção de URLs, validação de requisições)
+- Mostra comparações "antes/depois" para ilustrar melhorias de código
+- Use como referência ao refatorar código existente ou criar novos componentes
+
+**Quando usar esses recursos**:
+- Antes de refatorar funções grandes identificadas no REFACTORING_ANALYSIS.md
+- Ao criar novos formulários ou fluxos que precisem de validação/sanitização
+- Sempre que precisar manipular valores monetários, construir URLs ou fazer queries otimizadas
+- Ao revisar pull requests que introduzem helpers ou padrões novos
+
+## Liberdade x segurança
+
+### O que o agente está autorizado a fazer
+
+O agente tem liberdade para melhorar o código dentro dos seguintes limites:
+
+- ✅ **Quebrar funções grandes em métodos menores**: seguir sugestões do REFACTORING_ANALYSIS.md
+- ✅ **Extrair helpers reutilizáveis**: centralizar lógica duplicada em classes utilitárias
+- ✅ **Melhorar DocBlocks e nomenclatura**: tornar código mais legível e autodocumentado
+- ✅ **Aderir à estrutura proposta de add-ons**: reorganizar arquivos seguindo padrão modular de `includes/` e `assets/`
+- ✅ **Otimizar queries**: usar `fields => 'ids'`, `no_found_rows`, `update_meta_cache()` quando apropriado
+- ✅ **Refatorar lógica de formulários**: usar `DPS_Request_Validator` para nonces/sanitização, `DPS_Money_Helper` para valores monetários
+- ✅ **Adicionar hooks novos**: desde que documentados em ANALYSIS.md com assinatura, propósito e exemplos
+- ✅ **Melhorar segurança**: reforçar validações, escape e sanitização conforme políticas deste documento
+
+### O que o agente NÃO deve fazer sem documentação e validação extra
+
+As seguintes ações requerem cuidado especial e devem ser acompanhadas de documentação detalhada:
+
+- ❌ **Alterar schema de tabelas compartilhadas** (ex.: `dps_transacoes`, `dps_parcelas`) sem:
+  - Criar migração reversível
+  - Documentar impacto em todos os add-ons que usam a tabela
+  - Validar sincronização entre plugins
+
+- ❌ **Remover hooks existentes** sem:
+  - Marcar depreciação no CHANGELOG.md com versão alvo de remoção
+  - Manter retrocompatibilidade por pelo menos uma versão MINOR
+  - Notificar todos os add-ons que consomem o hook
+
+- ❌ **Afrouxar validações de segurança** (nonces, capabilities, sanitização):
+  - Sempre reforçar, nunca remover validações
+  - Qualquer mudança em validação de webhooks deve ser auditada
+
+- ❌ **Mudar assinaturas de hooks existentes** (número/tipo de parâmetros):
+  - Criar novo hook com nova assinatura
+  - Depreciar hook antigo mantendo retrocompatibilidade
+  - Documentar migração no CHANGELOG.md
+
+- ❌ **Remover ou modificar capabilities existentes**:
+  - Pode quebrar controle de acesso de add-ons
+  - Requer análise de impacto em todos os componentes
+
+**Princípio geral**: em caso de dúvida sobre impacto de uma mudança, prefira adicionalidade (criar novo em vez de modificar existente) e sempre documente extensivamente.
 
 ## Integração núcleo ⇄ extensões
 - Novos pontos de extensão no núcleo devem vir acompanhados de documentação mínima (assinatura, propósito, exemplos) no `ANALYSIS.md`.
