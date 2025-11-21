@@ -71,7 +71,18 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
                         $client     = $client_id ? get_post( $client_id ) : null;
                         $pet        = $pet_id ? get_post( $pet_id ) : null;
                         $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
-                        $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
+                        $delete_url = wp_nonce_url(
+                            add_query_arg(
+                                [
+                                    'tab'        => 'agendas',
+                                    'dps_delete' => 'appointment',
+                                    'id'         => $appt->ID,
+                                ],
+                                $base_url
+                            ),
+                            'dps_delete',
+                            'dps_nonce'
+                        );
                         $row_class  = 'status-' . sanitize_html_class( $status_meta );
                         $date_fmt   = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
                         $pet_name   = $pet ? $pet->post_title : '-';
