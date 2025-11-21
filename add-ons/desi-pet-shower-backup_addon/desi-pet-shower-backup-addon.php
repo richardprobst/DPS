@@ -919,15 +919,33 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 return [];
             }
 
+            $ids_in = implode( ',', array_map( 'intval', $attachment_ids ) );
+
             $attachments = [];
             $formats     = $this->get_post_formats();
 
+            $posts_rows = $wpdb->get_results( "SELECT * FROM {$posts_table} WHERE ID IN ( {$ids_in} )", ARRAY_A );
+            $posts_map  = [];
+            foreach ( $posts_rows as $row ) {
+                $posts_map[ (int) $row['ID'] ] = $row;
+            }
+
+            $meta_rows = $wpdb->get_results( "SELECT * FROM {$postmeta_table} WHERE post_id IN ( {$ids_in} )", ARRAY_A );
+            $meta_map  = [];
+            foreach ( $meta_rows as $meta_row ) {
+                $post_id = (int) $meta_row['post_id'];
+                if ( ! isset( $meta_map[ $post_id ] ) ) {
+                    $meta_map[ $post_id ] = [];
+                }
+                $meta_map[ $post_id ][] = $meta_row;
+            }
+
             foreach ( $attachment_ids as $attachment_id ) {
-                $post = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$posts_table} WHERE ID = %d", $attachment_id ), ARRAY_A );
+                $post = $posts_map[ $attachment_id ] ?? null;
                 if ( ! $post ) {
                     continue;
                 }
-                $meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$postmeta_table} WHERE post_id = %d", $attachment_id ), ARRAY_A );
+                $meta_rows = $meta_map[ $attachment_id ] ?? [];
 
                 $file_path = get_attached_file( $attachment_id );
                 $file      = null;
