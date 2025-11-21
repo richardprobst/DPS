@@ -680,61 +680,65 @@ class DPS_Base_Frontend {
         }
         
         // Grupo: Dados Pessoais
-        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
-        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</legend>';
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</legend>';
         
         // Name
         $name_value = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '<br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
-        // CPF
+        echo '<p><label>' . esc_html__( 'Nome', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
+        
+        // CPF e Data de Nascimento em grid
+        echo '<div class="dps-form-row dps-form-row--2col">';
         $cpf_val = $meta['cpf'] ?? '';
-        echo '<p><label>' . esc_html__( 'CPF', 'desi-pet-shower' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '"></label></p>';
-        // Birth date
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'CPF', 'desi-pet-shower' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '" placeholder="000.000.000-00"></label></p>';
         $birth_val = $meta['birth'] ?? '';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        echo '</div>';
         
         echo '</fieldset>';
         
         // Grupo: Contato
-        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
-        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Contato', 'desi-pet-shower' ) . '</legend>';
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Contato', 'desi-pet-shower' ) . '</legend>';
         
         // Phone / WhatsApp
         $phone_val = $meta['phone'] ?? '';
-        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . '<br><input type="text" name="client_phone" value="' . esc_attr( $phone_val ) . '" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" value="' . esc_attr( $phone_val ) . '" placeholder="(00) 00000-0000" required></label></p>';
         // Email
         $email_val = $meta['email'] ?? '';
-        echo '<p><label>Email<br><input type="email" name="client_email" value="' . esc_attr( $email_val ) . '"></label></p>';
+        echo '<p><label>Email<br><input type="email" name="client_email" value="' . esc_attr( $email_val ) . '" placeholder="seuemail@exemplo.com"></label></p>';
         
         echo '</fieldset>';
         
         // Grupo: Redes Sociais
-        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
-        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Redes Sociais', 'desi-pet-shower' ) . '</legend>';
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Redes Sociais', 'desi-pet-shower' ) . '</legend>';
         
+        echo '<div class="dps-form-row dps-form-row--2col">';
         // Instagram
         $insta_val = $meta['instagram'] ?? '';
-        echo '<p><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $insta_val ) . '" placeholder="@usuario"></label></p>';
+        echo '<p class="dps-form-col"><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $insta_val ) . '" placeholder="@usuario"></label></p>';
         // Facebook
         $fb_val = $meta['facebook'] ?? '';
-        echo '<p><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $fb_val ) . '"></label></p>';
+        echo '<p class="dps-form-col"><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $fb_val ) . '" placeholder="Nome do perfil"></label></p>';
+        echo '</div>';
         
         echo '</fieldset>';
         
         // Grupo: Endereço e Preferências
-        echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
-        echo '<legend class="dps-legend">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
         
         // Address
         $addr_val = $meta['address'] ?? '';
-        echo '<p><label>' . esc_html__( 'Endereço completo', 'desi-pet-shower' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
+        echo '<p><label>' . esc_html__( 'Endereço completo', 'desi-pet-shower' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2" placeholder="Rua, Número, Bairro, Cidade - UF">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
         // Referral (Como nos conheceu?)
         $ref_val = $meta['referral'] ?? '';
-        echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '"></label></p>';
+        echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '" placeholder="Google, indicação, Instagram..."></label></p>';
         // Photo authorization
         $auth = $meta['photo_auth'] ?? '';
         $checked = $auth ? 'checked' : '';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</label></p>';
+        echo '<p><label class="dps-checkbox-label"><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> <span class="dps-checkbox-text">' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</span></label></p>';
         
         echo '</fieldset>';
         
@@ -745,7 +749,7 @@ class DPS_Base_Frontend {
         echo '<input type="hidden" name="client_lng" id="dps-client-lng-admin" value="' . esc_attr( $lng_admin ) . '">';
         // Submit button
         $btn_text = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : esc_html__( 'Salvar Cliente', 'desi-pet-shower' );
-        echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
+        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de clientes
         echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ) . '</h3>';
@@ -866,27 +870,38 @@ class DPS_Base_Frontend {
         echo '<div class="dps-section" id="dps-section-pets">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h2>';
         // Define enctype multipart/form-data para permitir upload de foto
-        echo '<form method="post" enctype="multipart/form-data" class="dps-form">';
+        echo '<form method="post" enctype="multipart/form-data" class="dps-form dps-form--pet">';
         echo '<input type="hidden" name="dps_action" value="save_pet">';
         wp_nonce_field( 'dps_action', 'dps_nonce' );
         if ( $edit_id ) {
             echo '<input type="hidden" name="pet_id" value="' . esc_attr( $edit_id ) . '">';
         }
-        // Nome do pet
+        
+        // Fieldset 1: Dados Básicos
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados Básicos', 'desi-pet-shower' ) . '</legend>';
+        
+        // Nome do pet e Cliente em grid
+        echo '<div class="dps-form-row dps-form-row--2col">';
         $pet_name = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome do Pet', 'desi-pet-shower' ) . '<br><input type="text" name="pet_name" value="' . esc_attr( $pet_name ) . '" required></label></p>';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Nome do Pet', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="text" name="pet_name" value="' . esc_attr( $pet_name ) . '" required></label></p>';
+        
         // Cliente (tutor)
         $owner_selected = $meta['owner_id'] ?? '';
-        echo '<p><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select name="owner_id" id="dps-pet-owner" required>';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Cliente (Tutor)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="owner_id" id="dps-pet-owner" required>';
         echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
         foreach ( $clients as $client ) {
             $sel = (string) $client->ID === (string) $owner_selected ? 'selected' : '';
             echo '<option value="' . esc_attr( $client->ID ) . '" ' . $sel . '>' . esc_html( $client->post_title ) . '</option>';
         }
         echo '</select></label></p>';
+        echo '</div>';
+        
+        // Espécie, Raça e Sexo em grid de 3 colunas
+        echo '<div class="dps-form-row dps-form-row--3col">';
         // Espécie
         $species_val = $meta['species'] ?? '';
-        echo '<p><label>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '<br><select name="pet_species" required>';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_species" required>';
         $species_options = [
             ''      => __( 'Selecione...', 'desi-pet-shower' ),
             'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
@@ -898,76 +913,120 @@ class DPS_Base_Frontend {
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></p>';
+        
         // Raça (com datalist)
         $breed_val = $meta['breed'] ?? '';
-        echo '<p><label>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '<br>';
-        echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '">' ;
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '<br>';
+        echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '" placeholder="Digite ou selecione">';
         echo '</label></p>';
-        // Datalist definition (outside of label)
-        echo '<datalist id="dps-breed-list">';
-        foreach ( $breeds as $breed ) {
-            echo '<option value="' . esc_attr( $breed ) . '">';
-        }
-        echo '</datalist>';
-        // Porte
-        $size_val = $meta['size'] ?? '';
-        echo '<p><label>' . esc_html__( 'Porte', 'desi-pet-shower' ) . '<br><select name="pet_size" required>';
-        $sizes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'pequeno' => __( 'Pequeno', 'desi-pet-shower' ), 'medio' => __( 'Médio', 'desi-pet-shower' ), 'grande' => __( 'Grande', 'desi-pet-shower' ) ];
-        foreach ( $sizes as $val => $lab ) {
-            $sel = ( $size_val === $val ) ? 'selected' : '';
-            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
-        }
-        echo '</select></label></p>';
-        // Peso
-        $weight_val = $meta['weight'] ?? '';
-        echo '<p><label>' . esc_html__( 'Peso (kg)', 'desi-pet-shower' ) . '<br><input type="number" step="0.01" name="pet_weight" value="' . esc_attr( $weight_val ) . '"></label></p>';
-        // Pelagem
-        $coat_val = $meta['coat'] ?? '';
-        echo '<p><label>' . esc_html__( 'Pelagem', 'desi-pet-shower' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $coat_val ) . '"></label></p>';
-        // Cor
-        $color_val = $meta['color'] ?? '';
-        echo '<p><label>' . esc_html__( 'Cor', 'desi-pet-shower' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $color_val ) . '"></label></p>';
-        // Data de nascimento
-        $birth_val = $meta['birth'] ?? '';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        
         // Sexo
         $sex_val = $meta['sex'] ?? '';
-        echo '<p><label>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . '<br><select name="pet_sex" required>';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_sex" required>';
         $sexes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'macho' => __( 'Macho', 'desi-pet-shower' ), 'femea' => __( 'Fêmea', 'desi-pet-shower' ) ];
         foreach ( $sexes as $val => $lab ) {
             $sel = ( $sex_val === $val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
         }
         echo '</select></label></p>';
+        echo '</div>';
+        
+        // Datalist definition (fora do fieldset mas após uso)
+        echo '<datalist id="dps-breed-list">';
+        foreach ( $breeds as $breed ) {
+            echo '<option value="' . esc_attr( $breed ) . '">';
+        }
+        echo '</datalist>';
+        
+        echo '</fieldset>';
+        
+        // Fieldset 2: Características Físicas
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Características Físicas', 'desi-pet-shower' ) . '</legend>';
+        
+        // Tamanho, Peso e Data de Nascimento em grid
+        echo '<div class="dps-form-row dps-form-row--3col">';
+        $size_val = $meta['size'] ?? '';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Tamanho', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_size" required>';
+        $sizes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'pequeno' => __( 'Pequeno', 'desi-pet-shower' ), 'medio' => __( 'Médio', 'desi-pet-shower' ), 'grande' => __( 'Grande', 'desi-pet-shower' ) ];
+        foreach ( $sizes as $val => $lab ) {
+            $sel = ( $size_val === $val ) ? 'selected' : '';
+            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
+        }
+        echo '</select></label></p>';
+        
+        // Peso
+        $weight_val = $meta['weight'] ?? '';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Peso (kg)', 'desi-pet-shower' ) . '<br><input type="number" step="0.1" min="0.1" max="100" name="pet_weight" value="' . esc_attr( $weight_val ) . '" placeholder="5.5"></label></p>';
+        
+        // Data de nascimento
+        $birth_val = $meta['birth'] ?? '';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
+        echo '</div>';
+        
+        // Tipo de pelo e Cor em grid
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        $coat_val = $meta['coat'] ?? '';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Tipo de pelo', 'desi-pet-shower' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $coat_val ) . '" placeholder="Curto, longo, encaracolado..."></label></p>';
+        
+        $color_val = $meta['color'] ?? '';
+        echo '<p class="dps-form-col"><label>' . esc_html__( 'Cor predominante', 'desi-pet-shower' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $color_val ) . '" placeholder="Branco, preto, caramelo..."></label></p>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+        
+        // Fieldset 3: Saúde e Comportamento
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Saúde e Comportamento', 'desi-pet-shower' ) . '</legend>';
+        
+        // Vacinas / Saúde
+        $vaccinations_val = $meta['vaccinations'] ?? '';
+        echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'desi-pet-shower' ) . '<br><textarea name="pet_vaccinations" rows="2" placeholder="Liste vacinas, condições médicas...">' . esc_textarea( $vaccinations_val ) . '</textarea></label></p>';
+        
+        // Alergias / Restrições
+        $allergies_val = $meta['allergies'] ?? '';
+        echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'desi-pet-shower' ) . '<br><textarea name="pet_allergies" rows="2" placeholder="Alergias a alimentos, medicamentos...">' . esc_textarea( $allergies_val ) . '</textarea></label></p>';
+        
         // Cuidados especiais/restrições
         $care_val = $meta['care'] ?? '';
-        echo '<p><label>' . esc_html__( 'Algum cuidado especial ou restrição?', 'desi-pet-shower' ) . '<br><textarea name="pet_care" rows="2">' . esc_textarea( $care_val ) . '</textarea></label></p>';
-        // Agressivo
+        echo '<p><label>' . esc_html__( 'Cuidados especiais', 'desi-pet-shower' ) . '<br><textarea name="pet_care" rows="2" placeholder="Necessita cuidados especiais durante o banho?">' . esc_textarea( $care_val ) . '</textarea></label></p>';
+        
+        // Notas de Comportamento
+        $behavior_val = $meta['behavior'] ?? '';
+        echo '<p><label>' . esc_html__( 'Notas de comportamento', 'desi-pet-shower' ) . '<br><textarea name="pet_behavior" rows="2" placeholder="Como o pet costuma se comportar?">' . esc_textarea( $behavior_val ) . '</textarea></label></p>';
+        
+        // Agressivo (checkbox melhorado)
         $aggressive = $meta['aggressive'] ?? '';
         $checked_ag = $aggressive ? 'checked' : '';
-        echo '<p><label><input type="checkbox" name="pet_aggressive" value="1" ' . $checked_ag . '> ' . esc_html__( 'Cão agressivo', 'desi-pet-shower' ) . '</label></p>';
-
-        // Campos adicionais de saúde, alergias e comportamento, além de foto do pet
-        $vaccinations_val = $meta['vaccinations'] ?? '';
-        echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'desi-pet-shower' ) . '<br><textarea name="pet_vaccinations" rows="2">' . esc_textarea( $vaccinations_val ) . '</textarea></label></p>';
-        $allergies_val = $meta['allergies'] ?? '';
-        echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'desi-pet-shower' ) . '<br><textarea name="pet_allergies" rows="2">' . esc_textarea( $allergies_val ) . '</textarea></label></p>';
-        $behavior_val = $meta['behavior'] ?? '';
-        echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'desi-pet-shower' ) . '<br><textarea name="pet_behavior" rows="2">' . esc_textarea( $behavior_val ) . '</textarea></label></p>';
-        // Upload de foto do pet
+        echo '<p><label class="dps-checkbox-label"><input type="checkbox" name="pet_aggressive" value="1" ' . $checked_ag . '> <span class="dps-checkbox-text">⚠️ ' . esc_html__( 'Cão agressivo (requer cuidado especial)', 'desi-pet-shower' ) . '</span></label></p>';
+        
+        echo '</fieldset>';
+        
+        // Fieldset 4: Foto do Pet
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Foto do Pet', 'desi-pet-shower' ) . '</legend>';
+        
         $photo_id  = $meta['photo_id'] ?? '';
         $photo_url = '';
         if ( $photo_id ) {
             $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
         }
-        echo '<p><label>' . esc_html__( 'Foto do Pet', 'desi-pet-shower' ) . '<br><input type="file" name="pet_photo" accept="image/*"></label></p>';
+        
+        echo '<div class="dps-file-upload">';
+        echo '<label class="dps-file-upload__label">';
+        echo '<input type="file" name="pet_photo" accept="image/*" class="dps-file-upload__input">';
+        echo '<span class="dps-file-upload__text">📷 ' . esc_html__( 'Escolher foto', 'desi-pet-shower' ) . '</span>';
+        echo '</label>';
         if ( $photo_url ) {
-            // Exibe a foto atual
-            echo '<p><img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" style="max-width:100px;height:auto;"></p>';
+            echo '<div class="dps-file-upload__preview"><img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '"></div>';
         }
+        echo '</div>';
+        
+        echo '</fieldset>';
+        
         // Botão
         $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
-        echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
+        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de pets
         echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Pets Cadastrados', 'desi-pet-shower' ) . '</h3>';
