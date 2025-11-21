@@ -835,7 +835,7 @@ class DPS_Base_Frontend {
         ];
         ob_start();
         echo '<div class="dps-section" id="dps-section-pets">';
-        echo '<h3>' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h3>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h2>';
         // Define enctype multipart/form-data para permitir upload de foto
         echo '<form method="post" enctype="multipart/form-data" class="dps-form">';
         echo '<input type="hidden" name="dps_action" value="save_pet">';
@@ -941,7 +941,7 @@ class DPS_Base_Frontend {
         echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
         echo '</form>';
         // Listagem de pets
-        echo '<h3>' . esc_html__( 'Pets Cadastrados', 'desi-pet-shower' ) . '</h3>';
+        echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Pets Cadastrados', 'desi-pet-shower' ) . '</h3>';
         echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
         if ( ! empty( $pets ) ) {
             $base_url = get_permalink();
@@ -1045,7 +1045,7 @@ class DPS_Base_Frontend {
         $pref_pet    = isset( $_GET['pref_pet'] ) ? intval( $_GET['pref_pet'] ) : 0;
         ob_start();
         echo '<div class="dps-section" id="dps-section-agendas">';
-        echo '<h3>' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h3>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h2>';
         if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] && ! $visitor_only ) {
             $notice_key  = 'dps_pending_notice_' . get_current_user_id();
             $notice_data = get_transient( $notice_key );
@@ -1179,7 +1179,7 @@ class DPS_Base_Frontend {
             $pet_wrapper_attrs = ' id="dps-appointment-pet-wrapper" class="dps-pet-picker"';
             $pet_wrapper_attrs .= ' data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '"';
             echo '<div' . $pet_wrapper_attrs . '>';
-            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . '</strong></p>';
+            echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . '</strong><span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'desi-pet-shower' ) . '</span></p>';
             echo '<p class="description">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
             echo '<p id="dps-pet-select-client" class="description">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
             echo '<p class="dps-pet-search"><label class="screen-reader-text" for="dps-pet-search">' . esc_html__( 'Buscar pets', 'desi-pet-shower' ) . '</label>';
@@ -1499,7 +1499,7 @@ EOT;
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
-        echo '<h3>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h3>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
         echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'desi-pet-shower' ) . '</p>';
 
         echo '<div class="dps-history-toolbar">';

@@ -82,6 +82,8 @@
 
       function updateSummary(){
         var selected = $petCheckboxes.filter(':checked');
+        var $counter = $('#dps-pet-counter');
+        
         if (selected.length) {
           var names = selected.map(function(){
             return $(this).closest('.dps-pet-option').find('.dps-pet-name').text();
@@ -91,8 +93,12 @@
             dpsBaseL10n.summaryMultiple.replace('%d', selected.length).replace('%s', names.join(', '))
           );
           $summary.show();
+          
+          // Update counter
+          $counter.text(selected.length + ' ' + (selected.length === 1 ? 'selecionado' : 'selecionados')).show();
         } else {
           $summary.hide();
+          $counter.hide();
         }
       }
 

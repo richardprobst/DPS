@@ -291,14 +291,14 @@ class DPS_Groomers_Addon {
         ob_start();
         ?>
         <div class="dps-section" id="dps-section-groomers">
-            <h3><?php echo esc_html__( 'Groomers', 'desi-pet-shower' ); ?></h3>
+            <h2 style="margin-bottom: 20px; color: #374151;"><?php echo esc_html__( 'Groomers', 'desi-pet-shower' ); ?></h2>
             <p><?php echo esc_html__( 'Cadastre profissionais, associe-os a atendimentos e acompanhe relatórios por período.', 'desi-pet-shower' ); ?></p>
 
             <?php settings_errors( 'dps_groomers' ); ?>
 
-            <div style="display:flex; gap:30px; flex-wrap:wrap;">
-                <div style="flex:1 1 340px; min-width:300px; background:#f7f7f7; padding:20px; border-radius:6px;">
-                    <h4><?php echo esc_html__( 'Adicionar novo groomer', 'desi-pet-shower' ); ?></h4>
+            <div style="display:flex; gap:30px; flex-wrap:wrap; margin-top: 24px;">
+                <div class="dps-field-group" style="flex:1 1 340px; min-width:300px;">
+                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Adicionar novo groomer', 'desi-pet-shower' ); ?></h3>
                     <form method="post" action="">
                         <?php wp_nonce_field( 'dps_new_groomer', 'dps_new_groomer_nonce' ); ?>
                         <p>
@@ -322,7 +322,7 @@ class DPS_Groomers_Addon {
                 </div>
 
                 <div style="flex:2 1 400px; min-width:300px;">
-                    <h4><?php echo esc_html__( 'Groomers cadastrados', 'desi-pet-shower' ); ?></h4>
+                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Groomers cadastrados', 'desi-pet-shower' ); ?></h3>
                     <table class="widefat fixed striped">
                         <thead>
                             <tr>
