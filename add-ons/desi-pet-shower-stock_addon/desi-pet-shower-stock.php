@@ -253,8 +253,9 @@ class DPS_Stock_Addon {
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-estoque">';
-        echo '<h3>' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h3>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h2>';
 
+        echo '<div class="dps-field-group" style="margin-bottom: 24px;">';
         $filter_link = add_query_arg( 'dps_show', $only_critical ? 'all' : 'critical', $base_link );
         $filter_text = $only_critical ? __( 'Ver todos', 'desi-pet-shower' ) : __( 'Mostrar apenas críticos', 'desi-pet-shower' );
         echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
@@ -262,7 +263,9 @@ class DPS_Stock_Addon {
         $export_link = add_query_arg( 'dps_stock_export', '1', $base_link );
         echo '<a class="button" href="' . esc_url( $export_link ) . '">' . esc_html__( 'Exportar estoque (em breve)', 'desi-pet-shower' ) . '</a>';
 
-        echo '<p class="description">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'desi-pet-shower' ) . '</p>';
+        echo '<p class="description" style="margin-top: 12px;">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        
         echo '<table class="widefat fixed striped">';
         echo '<thead><tr>';
         echo '<th>' . esc_html__( 'Item', 'desi-pet-shower' ) . '</th>';
@@ -286,15 +289,15 @@ class DPS_Stock_Addon {
                 continue;
             }
 
-            $status_text = $is_low ? __( 'Abaixo do mínimo', 'desi-pet-shower' ) : __( 'OK', 'desi-pet-shower' );
-            $status_cls  = $is_low ? 'tag-description' : 'description';
+            $status_text = $is_low ? '⚠ ' . __( 'Abaixo do mínimo', 'desi-pet-shower' ) : '✓ ' . __( 'OK', 'desi-pet-shower' );
+            $status_style = $is_low ? 'color: #f59e0b; font-weight: 600;' : 'color: #10b981;';
 
             echo '<tr>';
             echo '<td><strong>' . esc_html( $item->post_title ) . '</strong></td>';
             echo '<td>' . esc_html( $unit ) . '</td>';
             echo '<td>' . esc_html( $quantity ) . '</td>';
             echo '<td>' . esc_html( $minimum ) . '</td>';
-            echo '<td><span class="' . esc_attr( $status_cls ) . '">' . esc_html( $status_text ) . '</span>';
+            echo '<td><span style="' . esc_attr( $status_style ) . '">' . esc_html( $status_text ) . '</span>';
 
             if ( $is_low && isset( $alerts[ $item->ID ] ) ) {
                 $alert_info = $alerts[ $item->ID ];

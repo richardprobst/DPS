@@ -1,0 +1,296 @@
+/**
+ * Estilos minimalistas para páginas administrativas nativas do WordPress do DPS.
+ * 
+ * Paleta de cores:
+ * - Fundo: #f9fafb
+ * - Bordas: #e5e7eb
+ * - Texto principal: #374151
+ * - Texto secundário: #6b7280
+ * - Destaque: #0ea5e9 (azul)
+ * - Status: verde #10b981, vermelho #ef4444, amarelo #f59e0b
+ */
+
+/* Container para páginas DPS no admin */
+.dps-admin-page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Tabelas widefat com estilo DPS */
+.dps-admin-page .widefat th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dps-admin-page .widefat tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-admin-page .widefat td {
+    color: #374151;
+}
+
+/* Botões primários com estilo minimalista */
+.dps-admin-page .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    text-shadow: none;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+.dps-admin-page .button-primary:hover,
+.dps-admin-page .button-primary:focus {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+.dps-admin-page .button-secondary {
+    border-color: #e5e7eb;
+    color: #374151;
+    background: #ffffff;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.dps-admin-page .button-secondary:hover,
+.dps-admin-page .button-secondary:focus {
+    border-color: #cbd5e1;
+    background: #f9fafb;
+}
+
+/* Avisos e notificações minimalistas */
+.dps-admin-page .notice {
+    border-left-width: 4px;
+    box-shadow: none;
+    background: #ffffff;
+}
+
+.dps-admin-page .notice-success {
+    border-left-color: #10b981;
+}
+
+.dps-admin-page .notice-error {
+    border-left-color: #ef4444;
+}
+
+.dps-admin-page .notice-warning {
+    border-left-color: #f59e0b;
+}
+
+.dps-admin-page .notice-info {
+    border-left-color: #0ea5e9;
+}
+
+/* Formulários com melhor espaçamento */
+.dps-admin-page .form-table th {
+    color: #374151;
+    font-weight: 600;
+}
+
+.dps-admin-page .form-table td {
+    color: #374151;
+}
+
+.dps-admin-page fieldset {
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.dps-admin-page legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+}
+
+/* Container de filtros */
+.dps-filter-container {
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Indicador de filtros ativos */
+.dps-active-filters {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: #eff6ff;
+    border-left: 4px solid #0ea5e9;
+    color: #0284c7;
+    font-weight: 600;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.dps-active-filters-icon {
+    margin-right: 6px;
+}
+
+/* Wrapper responsivo para tabelas */
+.dps-table-wrapper {
+    overflow-x: auto;
+    margin-top: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.dps-table-wrapper table {
+    margin: 0;
+}
+
+/* Mensagens truncadas com tooltip */
+.dps-truncated-text {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.dps-truncated-text:hover {
+    cursor: help;
+}
+
+/* Contexto formatado (JSON) */
+.dps-context-display {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #6b7280;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Paginação minimalista */
+.dps-admin-page .tablenav-pages {
+    color: #374151;
+}
+
+.dps-admin-page .tablenav-pages .page-numbers {
+    padding: 4px 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+.dps-admin-page .tablenav-pages .page-numbers:hover {
+    background: #f9fafb;
+    border-color: #cbd5e1;
+}
+
+.dps-admin-page .tablenav-pages .page-numbers.current {
+    background: #0ea5e9;
+    color: #ffffff;
+    border-color: #0ea5e9;
+}
+
+/* Contador de seleção */
+.dps-selection-counter {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #eff6ff;
+    color: #0284c7;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+/* Container de agrupamento de campos */
+.dps-field-group {
+    background: #f9fafb;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.dps-field-group-title {
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 16px 0;
+    font-size: 15px;
+}
+
+/* Tooltip discreto */
+.dps-tooltip {
+    position: relative;
+    display: inline-block;
+    margin-left: 4px;
+    color: #6b7280;
+    cursor: help;
+}
+
+.dps-tooltip::before {
+    content: '?';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dps-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: #374151;
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-admin-page .widefat th,
+    .dps-admin-page .widefat td {
+        padding: 8px 4px;
+        font-size: 13px;
+    }
+    
+    .dps-truncated-text {
+        max-width: 200px;
+    }
+    
+    .dps-context-display {
+        max-width: 150px;
+    }
+    
+    .dps-filter-container {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-field-group {
+        padding: 16px;
+    }
+    
+    .dps-active-filters {
+        font-size: 12px;
+    }
+}

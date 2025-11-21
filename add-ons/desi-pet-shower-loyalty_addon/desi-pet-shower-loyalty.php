@@ -108,29 +108,36 @@ class DPS_Loyalty_Addon {
                 <option value="double_points" <?php selected( $campaign_type, 'double_points' ); ?>><?php esc_html_e( 'Pontos em dobro', 'desi-pet-shower' ); ?></option>
             </select>
         </p>
-        <p>
-            <label><strong><?php esc_html_e( 'Critérios de elegibilidade', 'desi-pet-shower' ); ?></strong></label><br />
-            <label>
-                <input type="checkbox" name="dps_campaign_eligibility[]" value="inactive" <?php checked( in_array( 'inactive', $eligibility_selection, true ) ); ?> />
-                <?php esc_html_e( 'Clientes sem atendimento há X dias', 'desi-pet-shower' ); ?>
-            </label>
-            <input type="number" name="dps_campaign_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="0" class="small-text" />
-        </p>
-        <p>
-            <label>
-                <input type="checkbox" name="dps_campaign_eligibility[]" value="points" <?php checked( in_array( 'points', $eligibility_selection, true ) ); ?> />
-                <?php esc_html_e( 'Clientes com mais de N pontos', 'desi-pet-shower' ); ?>
-            </label>
-            <input type="number" name="dps_campaign_points_threshold" value="<?php echo esc_attr( $points_threshold ); ?>" min="0" class="small-text" />
-        </p>
-        <p>
-            <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'Início', 'desi-pet-shower' ); ?></strong></label>
-            <input type="date" id="dps_campaign_start_date" name="dps_campaign_start_date" value="<?php echo esc_attr( $start_date ); ?>" />
-        </p>
-        <p>
-            <label for="dps_campaign_end_date"><strong><?php esc_html_e( 'Fim', 'desi-pet-shower' ); ?></strong></label>
-            <input type="date" id="dps_campaign_end_date" name="dps_campaign_end_date" value="<?php echo esc_attr( $end_date ); ?>" />
-        </p>
+        
+        <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Critérios de elegibilidade', 'desi-pet-shower' ); ?></strong></legend>
+            <p>
+                <label>
+                    <input type="checkbox" name="dps_campaign_eligibility[]" value="inactive" <?php checked( in_array( 'inactive', $eligibility_selection, true ) ); ?> />
+                    <?php esc_html_e( 'Clientes sem atendimento há X dias', 'desi-pet-shower' ); ?>
+                </label>
+                <input type="number" name="dps_campaign_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="0" class="small-text" />
+            </p>
+            <p>
+                <label>
+                    <input type="checkbox" name="dps_campaign_eligibility[]" value="points" <?php checked( in_array( 'points', $eligibility_selection, true ) ); ?> />
+                    <?php esc_html_e( 'Clientes com mais de N pontos', 'desi-pet-shower' ); ?>
+                </label>
+                <input type="number" name="dps_campaign_points_threshold" value="<?php echo esc_attr( $points_threshold ); ?>" min="0" class="small-text" />
+            </p>
+        </fieldset>
+        
+        <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Período da campanha', 'desi-pet-shower' ); ?></strong></legend>
+            <p>
+                <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'Início', 'desi-pet-shower' ); ?></strong></label>
+                <input type="date" id="dps_campaign_start_date" name="dps_campaign_start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+            </p>
+            <p>
+                <label for="dps_campaign_end_date"><strong><?php esc_html_e( 'Fim', 'desi-pet-shower' ); ?></strong></label>
+                <input type="date" id="dps_campaign_end_date" name="dps_campaign_end_date" value="<?php echo esc_attr( $end_date ); ?>" />
+            </p>
+        </fieldset>
         <?php
     }
 

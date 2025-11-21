@@ -50,7 +50,7 @@ class DPS_Logs_Admin_Page {
 
         $current_url = admin_url( 'admin.php?page=dps-logs' );
 
-        echo '<div class="wrap">';
+        echo '<div class="wrap dps-admin-page">';
         echo '<h1>' . esc_html__( 'Logs DPS', 'desi-pet-shower' ) . '</h1>';
 
         if ( ! DPS_Logger::table_exists() ) {
@@ -63,8 +63,25 @@ class DPS_Logs_Admin_Page {
             echo '<div class="notice notice-success"><p>' . esc_html__( 'Logs antigos removidos com sucesso.', 'desi-pet-shower' ) . '</p></div>';
         }
 
-        echo '<form method="get" action="" style="margin-bottom: 16px;">';
+        echo '<div class="dps-filter-container">';
+        echo '<form method="get" action="">';
         echo '<input type="hidden" name="page" value="dps-logs" />';
+
+        // Indicação de filtros ativos
+        if ( ! empty( $level ) || ! empty( $source ) ) {
+            echo '<div class="dps-active-filters">';
+            echo '<span class="dps-active-filters-icon">🔍</span>';
+            echo esc_html__( 'Filtros ativos:', 'desi-pet-shower' ) . ' ';
+            $filters = [];
+            if ( $level ) {
+                $filters[] = esc_html__( 'Nível:', 'desi-pet-shower' ) . ' ' . esc_html( ucfirst( $level ) );
+            }
+            if ( $source ) {
+                $filters[] = esc_html__( 'Origem:', 'desi-pet-shower' ) . ' ' . esc_html( $source );
+            }
+            echo esc_html( implode( ' | ', $filters ) );
+            echo '</div>';
+        }
 
         echo '<label for="dps-log-level">' . esc_html__( 'Nível', 'desi-pet-shower' ) . '</label> ';
         echo '<select id="dps-log-level" name="level">';
@@ -87,6 +104,7 @@ class DPS_Logs_Admin_Page {
 
         submit_button( __( 'Filtrar', 'desi-pet-shower' ), 'secondary', '', false );
         echo '</form>';
+        echo '</div>';
 
         echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-bottom: 20px;">';
         wp_nonce_field( 'dps_purge_logs_action', 'dps_purge_logs_nonce' );
@@ -102,13 +120,14 @@ class DPS_Logs_Admin_Page {
             return;
         }
 
+        echo '<div class="dps-table-wrapper">';
         echo '<table class="widefat fixed striped">';
         echo '<thead><tr>';
-        echo '<th>' . esc_html__( 'Data/Hora (UTC)', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Nível', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Origem', 'desi-pet-shower' ) . '</th>';
+        echo '<th style="width: 180px;">' . esc_html__( 'Data/Hora (UTC)', 'desi-pet-shower' ) . '</th>';
+        echo '<th style="width: 100px;">' . esc_html__( 'Nível', 'desi-pet-shower' ) . '</th>';
+        echo '<th style="width: 120px;">' . esc_html__( 'Origem', 'desi-pet-shower' ) . '</th>';
         echo '<th>' . esc_html__( 'Mensagem', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Contexto', 'desi-pet-shower' ) . '</th>';
+        echo '<th style="width: 200px;">' . esc_html__( 'Contexto', 'desi-pet-shower' ) . '</th>';
         echo '</tr></thead>';
         echo '<tbody>';
 
@@ -117,30 +136,55 @@ class DPS_Logs_Admin_Page {
             echo '<td>' . esc_html( $item['date_time'] ) . '</td>';
             echo '<td>' . esc_html( ucfirst( $item['level'] ) ) . '</td>';
             echo '<td>' . esc_html( $item['source'] ) . '</td>';
-            echo '<td>' . esc_html( $item['message'] ) . '</td>';
-            echo '<td>' . esc_html( $item['context'] ? $item['context'] : '-' ) . '</td>';
+            
+            // Truncar mensagens longas
+            $message = $item['message'];
+            $message_display = esc_html( $message );
+            if ( mb_strlen( $message ) > 100 ) {
+                $message_display = '<span class="dps-truncated-text" title="' . esc_attr( $message ) . '">';
+                $message_display .= esc_html( mb_substr( $message, 0, 100 ) ) . '...';
+                $message_display .= '</span>';
+            } else {
+                // $message_display is already escaped, no need to escape again.
+            }
+            echo '<td>' . $message_display . '</td>';
+            
+            // Formatar contexto (normalmente JSON)
+            $context = $item['context'];
+            if ( ! empty( $context ) ) {
+                $context_display = '<span class="dps-context-display" title="' . esc_attr( $context ) . '">';
+                $context_display .= esc_html( mb_strlen( $context ) > 80 ? mb_substr( $context, 0, 80 ) . '...' : $context );
+                $context_display .= '</span>';
+                echo '<td>' . $context_display . '</td>';
+            } else {
+                echo '<td>-</td>';
+            }
+            
             echo '</tr>';
         }
 
         echo '</tbody>';
         echo '</table>';
+        echo '</div>';
 
         $total_pages = (int) ceil( $query_data['total'] / $per_page );
         if ( $total_pages > 1 ) {
             echo '<div class="tablenav"><div class="tablenav-pages">';
-            for ( $i = 1; $i <= $total_pages; $i++ ) {
-                $url = add_query_arg(
-                    array(
-                        'page'   => 'dps-logs',
-                        'level'  => $level,
-                        'source' => $source,
-                        'paged'  => $i,
-                    ),
-                    $current_url
-                );
-                $class = $i === $paged ? ' class="page-numbers current"' : ' class="page-numbers"';
-                printf( '<a%1$s href="%2$s">%3$d</a> ', $class, esc_url( $url ), $i );
-            }
+            
+            $base_url = remove_query_arg( 'paged' );
+            $pagination_args = [
+                'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+                'format'    => '',
+                'current'   => $paged,
+                'total'     => $total_pages,
+                'prev_text' => '‹ ' . __( 'Anterior', 'desi-pet-shower' ),
+                'next_text' => __( 'Próxima', 'desi-pet-shower' ) . ' ›',
+                'type'      => 'plain',
+                'end_size'  => 1,
+                'mid_size'  => 2,
+            ];
+            
+            echo paginate_links( $pagination_args );
             echo '</div></div>';
         }
 
