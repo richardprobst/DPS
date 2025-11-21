@@ -14,6 +14,33 @@ Este plugin oferece:
 - Pontos de extensão padronizados para add-ons
 - Sistema de logging centralizado
 
+## Estrutura de Pastas
+
+```
+desi-pet-shower-base_plugin/
+├── assets/              # CSS, JS e imagens do núcleo
+│   ├── css/            # Estilos globais
+│   ├── js/             # Scripts JavaScript
+│   └── images/         # Imagens e ícones
+├── includes/           # Classes PHP, hooks e helpers
+│   ├── class-*.php     # Classes principais do sistema
+│   └── helpers/        # Classes helper reutilizáveis
+├── templates/          # Templates de saída (shortcodes, telas admin/front)
+├── docs/               # Documentação específica do núcleo (se necessário)
+├── desi-pet-shower-base.php  # Arquivo principal do plugin
+├── uninstall.php       # Script de desinstalação
+└── README.md           # Este arquivo
+```
+
+## Documentação e Diretrizes
+
+Para entender a arquitetura geral do sistema e regras de desenvolvimento:
+
+- **[AGENTS.md](../../AGENTS.md)** - Regras e diretrizes para contribuidores (humanos e IAs)
+- **[ANALYSIS.md](../../ANALYSIS.md)** - Visão geral de arquitetura, fluxos de integração e contratos entre núcleo e extensões
+- **[CHANGELOG.md](../../CHANGELOG.md)** - Histórico de versões e lançamentos
+- **[/docs](../../docs/)** - Documentação detalhada de UX, layout, refatoração e implementação
+
 ## Localização e identificação
 
 - **Diretório**: `plugin/desi-pet-shower-base_plugin/`
