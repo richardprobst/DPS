@@ -574,7 +574,7 @@ class DPS_Base_Frontend {
         // Sempre mostrar interface completa para usuários administradores
         ob_start();
         echo '<div class="dps-base-wrapper">';
-        echo '<h1 style="margin-bottom: 24px; color: #374151;">' . esc_html__( 'Painel de Gestão DPS', 'desi-pet-shower' ) . '</h1>';
+        echo '<h1 class="dps-page-title">' . esc_html__( 'Painel de Gestão DPS', 'desi-pet-shower' ) . '</h1>';
         echo '<ul class="dps-nav">';
         echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'desi-pet-shower' ) . '</a></li>';
         echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'desi-pet-shower' ) . '</a></li>';
