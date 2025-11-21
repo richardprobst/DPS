@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 /**
  * Helper para registrar Custom Post Types com opções padronizadas.
  */
