@@ -450,13 +450,7 @@ class DPS_Base_Frontend {
                 }
                 // Exclui o agendamento
                 wp_delete_post( $id, true );
-                // Remove transações financeiras associadas a este agendamento, se existirem
-                global $wpdb;
-                $trans_table = $wpdb->prefix . 'dps_transacoes';
-                // Verifica se a tabela existe antes de tentar excluir
-                if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $trans_table ) ) === $trans_table ) {
-                    $wpdb->delete( $trans_table, [ 'agendamento_id' => $id ] );
-                }
+                do_action( 'dps_finance_cleanup_for_appointment', $id );
                 break;
             default:
                 return;
