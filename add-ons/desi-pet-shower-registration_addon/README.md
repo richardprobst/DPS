@@ -192,7 +192,7 @@ Ao modificar este add-on:
 - **Estrutura recomendada**: migrar para padrão modular com `includes/` e `assets/`
 - **Classes separadas**: extrair lógica de formulário, validação e criação de posts
 
-Consulte **REFACTORING_ANALYSIS.md** para detalhes.
+Consulte **[../docs/refactoring/REFACTORING_ANALYSIS.md](../docs/refactoring/REFACTORING_ANALYSIS.md)** para detalhes.
 
 ### Integração com Loyalty Add-on
 
