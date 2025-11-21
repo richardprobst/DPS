@@ -180,7 +180,7 @@ class DPS_Stock_Addon {
             return;
         }
 
-        echo $this->render_stock_page();
+        echo wp_kses_post( $this->render_stock_page() );
     }
 
     /**
