@@ -430,6 +430,9 @@ class DPS_Base_Frontend {
         if ( ! $id ) {
             return;
         }
+        if ( ! isset( $_GET['dps_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['dps_nonce'] ), 'dps_delete' ) ) {
+            wp_die( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
+        }
         // Verifica tipo e exclui
         switch ( $type ) {
             case 'client':
