@@ -325,7 +325,7 @@ class DPS_Groomers_Addon {
             </div>
 
             <hr />
-            <?php echo $this->render_report_block( $groomers ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php echo $this->render_report_block( $groomers ); ?>
         </div>
         <?php
         return ob_get_clean();
