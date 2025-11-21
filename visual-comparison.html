@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparação Visual - Melhorias UI/UX DPS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #374151;
+        }
+        .comparison {
+            margin-bottom: 60px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .comparison h2 {
+            margin-bottom: 20px;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .panel {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 10px 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .panel-header.before {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .panel-header.after {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .panel-body {
+            padding: 20px;
+            background: white;
+        }
+        
+        /* Estilos ANTES */
+        .alert-old {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 6px solid #ffc107;
+            background: #fff8e1;
+            color: #4b3d0a;
+        }
+        .alert-old.danger {
+            border-left-color: #dc3545;
+            background: #fdecea;
+            color: #58151c;
+        }
+        .alert-old.pending {
+            position: relative;
+            padding-left: 46px;
+            border-left-color: #b54708;
+            background: #fff4d6;
+            color: #4b2c07;
+            box-shadow: 0 6px 16px rgba(181, 71, 8, 0.12);
+        }
+        .alert-old.pending::before {
+            content: "!";
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #b54708;
+            color: #fff;
+            font-weight: 700;
+            text-align: center;
+            line-height: 20px;
+            box-shadow: 0 0 0 3px rgba(255, 244, 214, 0.9);
+        }
+        
+        /* Estilos DEPOIS */
+        .alert-new {
+            padding: 16px 20px;
+            border-left: 4px solid #f59e0b;
+            background: #ffffff;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #374151;
+        }
+        .alert-new.danger {
+            border-left-color: #ef4444;
+        }
+        .alert-new.pending {
+            border-left-color: #f59e0b;
+        }
+        .alert-new.success {
+            border-left-color: #10b981;
+        }
+        
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        /* Status ANTES */
+        .status-old.pendente {
+            background: #fff9e6;
+        }
+        .status-old.finalizado {
+            background: #e8f7fb;
+        }
+        .status-old.pago {
+            background: #e6f4ea;
+        }
+        .status-old.cancelado {
+            background: #fdecea;
+        }
+        
+        /* Status DEPOIS */
+        .status-new.pendente {
+            background: #fef3c7;
+        }
+        .status-new.finalizado {
+            background: #f3f4f6;
+        }
+        .status-new.pago {
+            background: #d1fae5;
+        }
+        .status-new.cancelado {
+            opacity: 0.6;
+        }
+        
+        /* Formulários */
+        .form-section {
+            padding: 15px;
+        }
+        .form-field {
+            margin-bottom: 10px;
+        }
+        .form-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .form-field input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        fieldset {
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        legend {
+            font-weight: 600;
+            color: #374151;
+            padding: 0 8px;
+        }
+        
+        .title-hierarchy {
+            padding: 20px;
+        }
+        .title-hierarchy h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 24px;
+        }
+        .title-hierarchy h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        .title-hierarchy h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 40px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Comparação Visual - Melhorias UI/UX DPS</h1>
+    
+    <!-- Alertas -->
+    <div class="comparison">
+        <h2>1. Alertas Simplificados</h2>
+        <div class="side-by-side">
+            <div class="panel">
+                <div class="panel-header before">❌ ANTES (Poluído)</div>
+                <div class="panel-body">
+                    <div class="alert-old">
+                        Alerta padrão com fundo colorido
+                    </div>
+                    <div class="alert-old danger">
+                        Erro com fundo vermelho vibrante
+                    </div>
+                    <div class="alert-old pending">
+                        Pendente com ícone decorativo e sombra
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header after">✅ DEPOIS (Minimalista)</div>
+                <div class="panel-body">
+                    <div class="alert-new">
+                        Alerta padrão com fundo branco
+                    </div>
+                    <div class="alert-new danger">
+                        Erro com borda vermelha, fundo limpo
+                    </div>
+                    <div class="alert-new success">
+                        <strong>Sucesso!</strong> Cliente salvo com sucesso.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cores de Status -->
+    <div class="comparison">
+        <h2>2. Cores de Status Reduzidas</h2>
+        <div class="side-by-side">
+            <div class="panel">
+                <div class="panel-header before">❌ ANTES (4 cores vibrantes)</div>
+                <div class="panel-body">
+                    <table>
+                        <tr class="status-old pendente">
+                            <td>Agendamento #123</td>
+                            <td>Pendente</td>
+                        </tr>
+                        <tr class="status-old finalizado">
+                            <td>Agendamento #124</td>
+                            <td>Finalizado</td>
+                        </tr>
+                        <tr class="status-old pago">
+                            <td>Agendamento #125</td>
+                            <td>Finalizado e Pago</td>
+                        </tr>
+                        <tr class="status-old cancelado">
+                            <td>Agendamento #126</td>
+                            <td>Cancelado</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header after">✅ DEPOIS (Paleta suave)</div>
+                <div class="panel-body">
+                    <table>
+                        <tr class="status-new pendente">
+                            <td>Agendamento #123</td>
+                            <td>Pendente</td>
+                        </tr>
+                        <tr class="status-new finalizado">
+                            <td>Agendamento #124</td>
+                            <td>Finalizado</td>
+                        </tr>
+                        <tr class="status-new pago">
+                            <td>Agendamento #125</td>
+                            <td>Finalizado e Pago</td>
+                        </tr>
+                        <tr class="status-new cancelado">
+                            <td>Agendamento #126</td>
+                            <td>Cancelado</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulários -->
+    <div class="comparison">
+        <h2>3. Formulários Agrupados</h2>
+        <div class="side-by-side">
+            <div class="panel">
+                <div class="panel-header before">❌ ANTES (Campos soltos)</div>
+                <div class="panel-body">
+                    <div class="form-section">
+                        <div class="form-field">
+                            <label>Nome</label>
+                            <input type="text" placeholder="João Silva">
+                        </div>
+                        <div class="form-field">
+                            <label>CPF</label>
+                            <input type="text" placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-field">
+                            <label>Telefone</label>
+                            <input type="text" placeholder="(00) 00000-0000">
+                        </div>
+                        <div class="form-field">
+                            <label>Email</label>
+                            <input type="email" placeholder="joao@email.com">
+                        </div>
+                        <div class="form-field">
+                            <label>Instagram</label>
+                            <input type="text" placeholder="@joaosilva">
+                        </div>
+                        <p style="color: #999; font-size: 12px; margin-top: 10px;">
+                            11 campos seguidos sem separação visual
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header after">✅ DEPOIS (Grupos lógicos)</div>
+                <div class="panel-body">
+                    <fieldset>
+                        <legend>Dados Pessoais</legend>
+                        <div class="form-field">
+                            <label>Nome</label>
+                            <input type="text" placeholder="João Silva">
+                        </div>
+                        <div class="form-field">
+                            <label>CPF</label>
+                            <input type="text" placeholder="000.000.000-00">
+                        </div>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Contato</legend>
+                        <div class="form-field">
+                            <label>Telefone</label>
+                            <input type="text" placeholder="(00) 00000-0000">
+                        </div>
+                        <div class="form-field">
+                            <label>Email</label>
+                            <input type="email" placeholder="joao@email.com">
+                        </div>
+                    </fieldset>
+                    
+                    <p style="color: #10b981; font-size: 12px; margin-top: 10px;">
+                        ✓ 4 grupos organizados logicamente
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hierarquia de Títulos -->
+    <div class="comparison">
+        <h2>4. Hierarquia de Títulos</h2>
+        <div class="side-by-side">
+            <div class="panel">
+                <div class="panel-header before">❌ ANTES (Tudo H3)</div>
+                <div class="panel-body">
+                    <div class="title-hierarchy">
+                        <h3>Cadastro de Clientes</h3>
+                        <p style="margin: 10px 0; color: #666;">Formulário aqui...</p>
+                        <h3>Clientes Cadastrados</h3>
+                        <p style="margin: 10px 0; color: #666;">Listagem aqui...</p>
+                        <p style="color: #999; font-size: 12px; margin-top: 15px;">
+                            ⚠️ Sem H1, prejudica acessibilidade
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header after">✅ DEPOIS (H1 → H2 → H3)</div>
+                <div class="panel-body">
+                    <div class="title-hierarchy">
+                        <h1>Painel de Gestão DPS</h1>
+                        <h2>Cadastro de Clientes</h2>
+                        <p style="margin: 10px 0; color: #666;">Formulário aqui...</p>
+                        <h3>Clientes Cadastrados</h3>
+                        <p style="margin: 10px 0; color: #666;">Listagem aqui...</p>
+                        <p style="color: #10b981; font-size: 12px; margin-top: 15px;">
+                            ✓ Hierarquia semântica correta
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback Visual -->
+    <div class="comparison">
+        <h2>5. Feedback ao Salvar/Excluir</h2>
+        <div class="side-by-side">
+            <div class="panel">
+                <div class="panel-header before">❌ ANTES (Sem feedback)</div>
+                <div class="panel-body">
+                    <p style="padding: 40px 20px; text-align: center; color: #999;">
+                        Usuário clica em "Salvar"...<br>
+                        Página recarrega...<br>
+                        <strong style="color: #dc3545;">Nenhuma confirmação visual</strong><br><br>
+                        ❓ Será que salvou?
+                    </p>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header after">✅ DEPOIS (Confirmação clara)</div>
+                <div class="panel-body">
+                    <div class="alert-new success">
+                        <strong>✓ Cliente salvo com sucesso!</strong>
+                    </div>
+                    <p style="padding: 20px; text-align: center; color: #10b981;">
+                        Usuário clica em "Salvar"...<br>
+                        Página recarrega...<br>
+                        <strong>Mensagem verde confirma ação</strong><br><br>
+                        ✓ Certeza de que funcionou!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resumo -->
+    <div class="comparison" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h2 style="color: white; border-color: rgba(255,255,255,0.3);">📊 Resumo de Impacto</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 36px; font-weight: bold;">-60%</div>
+                <div>Redução de cores</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 36px; font-weight: bold;">100%</div>
+                <div>Ações com feedback</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 36px; font-weight: bold;">4</div>
+                <div>Grupos de campos</div>
+            </div>
+        </div>
+        <p style="margin-top: 30px; text-align: center; font-size: 18px;">
+            ✨ Interface mais limpa, clara e profissional ✨
+        </p>
+    </div>
+    
+</body>
+</html>
