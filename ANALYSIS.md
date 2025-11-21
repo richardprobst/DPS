@@ -2,6 +2,7 @@
 
 ## Plugin base (`plugin/desi-pet-shower-base_plugin`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
+- `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rótulos e argumentos padrão; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opções comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
 - A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, `dps_settings_nav_tabs`, etc.).
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis.
 
@@ -44,13 +45,13 @@
 - Cria a página de cadastro público com o shortcode `[dps_registration_form]`, expõe configurações para chave do Google Maps, sanitiza entradas e cadastra clientes/pets vinculados diretamente nos *custom post types* do plugin base.
 
 ### Serviços (`desi-pet-shower-services_addon`)
-- Registra o *custom post type* `dps_service`, injeta abas/seções na interface principal, adiciona campos de seleção de serviços ao agendamento, salva metas auxiliares e povoa o catálogo padrão na ativação, incluindo preços/duração por porte.
+- Registra o *custom post type* `dps_service` via `DPS_CPT_Helper`, injeta abas/seções na interface principal, adiciona campos de seleção de serviços ao agendamento, salva metas auxiliares e povoa o catálogo padrão na ativação, incluindo preços/duração por porte.
 
 ### Estatísticas (`desi-pet-shower-stats_addon`)
 - Disponibiliza a aba "Estatísticas" com filtros de data, listas de clientes/pets inativos, contagem de atendimentos e serviços mais recorrentes, além de métricas de espécies, raças e receita recente consultando `dps_transacoes`.
 
 ### Estoque (`desi-pet-shower-stock_addon`)
-- Controla estoque de insumos utilizados nos atendimentos através do *custom post type* `dps_stock_item`.
+- Controla estoque de insumos utilizados nos atendimentos através do *custom post type* `dps_stock_item`, registrado com `DPS_CPT_Helper` e capabilities específicas (`dps_manage_stock`).
 - Registra movimentações de entrada e saída de produtos, incluindo baixa automática quando atendimentos são concluídos via hook `dps_base_after_save_appointment`.
 - Oferece alertas de estoque baixo e relatórios de consumo por período, além de capability específica `dps_manage_stock` para controle de acesso.
 

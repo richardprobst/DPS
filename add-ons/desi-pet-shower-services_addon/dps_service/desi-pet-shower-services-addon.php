@@ -16,7 +16,34 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class DPS_Services_Addon {
 
+    /**
+     * Helper para registrar o CPT de serviços.
+     *
+     * @var DPS_CPT_Helper|null
+     */
+    private $cpt_helper;
+
     public function __construct() {
+        if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
+            require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
+        }
+
+        if ( class_exists( 'DPS_CPT_Helper' ) ) {
+            $this->cpt_helper = new DPS_CPT_Helper(
+                'dps_service',
+                [
+                    'name'          => __( 'Serviços', 'dps-services-addon' ),
+                    'singular_name' => __( 'Serviço', 'dps-services-addon' ),
+                ],
+                [
+                    'public'       => false,
+                    'show_ui'      => false,
+                    'supports'     => [ 'title' ],
+                    'hierarchical' => false,
+                ]
+            );
+        }
+
         // Registra CPT
         add_action( 'init', [ $this, 'register_service_cpt' ] );
         // Adiciona abas e seções ao plugin base
@@ -83,18 +110,11 @@ class DPS_Services_Addon {
      * Registra o tipo de post personalizado para serviços
      */
     public function register_service_cpt() {
-        $labels = [
-            'name'          => __( 'Serviços', 'dps-services-addon' ),
-            'singular_name' => __( 'Serviço', 'dps-services-addon' ),
-        ];
-        $args = [
-            'labels'             => $labels,
-            'public'             => false,
-            'show_ui'            => false,
-            'supports'           => [ 'title' ],
-            'hierarchical'       => false,
-        ];
-        register_post_type( 'dps_service', $args );
+        if ( ! $this->cpt_helper ) {
+            return;
+        }
+
+        $this->cpt_helper->register();
     }
 
     /**
