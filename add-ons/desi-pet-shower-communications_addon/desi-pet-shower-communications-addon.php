@@ -213,30 +213,38 @@ class DPS_Communications_Addon {
 
 dps_comm_init();
 
-function dps_comm_init() {
-    static $instance = null;
+if ( ! function_exists( 'dps_comm_init' ) ) {
+    function dps_comm_init() {
+        static $instance = null;
 
-    if ( null === $instance ) {
-        $instance = new DPS_Communications_Addon();
+        if ( null === $instance ) {
+            $instance = new DPS_Communications_Addon();
+        }
+
+        return $instance;
     }
-
-    return $instance;
 }
 
-function dps_comm_send_whatsapp( $phone, $message ) {
-    $log_message = sprintf( 'DPS Communications: enviar WhatsApp para %s com mensagem: %s', $phone, $message );
-    error_log( $log_message );
+if ( ! function_exists( 'dps_comm_send_whatsapp' ) ) {
+    function dps_comm_send_whatsapp( $phone, $message ) {
+        $log_message = sprintf( 'DPS Communications: enviar WhatsApp para %s com mensagem: %s', $phone, $message );
+        error_log( $log_message );
 
-    return true;
+        return true;
+    }
 }
 
-function dps_comm_send_email( $email, $subject, $message ) {
-    return wp_mail( $email, $subject, $message );
+if ( ! function_exists( 'dps_comm_send_email' ) ) {
+    function dps_comm_send_email( $email, $subject, $message ) {
+        return wp_mail( $email, $subject, $message );
+    }
 }
 
-function dps_comm_send_sms( $phone, $message ) {
-    $log_message = sprintf( 'DPS Communications: enviar SMS para %s com mensagem: %s', $phone, $message );
-    error_log( $log_message );
+if ( ! function_exists( 'dps_comm_send_sms' ) ) {
+    function dps_comm_send_sms( $phone, $message ) {
+        $log_message = sprintf( 'DPS Communications: enviar SMS para %s com mensagem: %s', $phone, $message );
+        error_log( $log_message );
 
-    return true;
+        return true;
+    }
 }

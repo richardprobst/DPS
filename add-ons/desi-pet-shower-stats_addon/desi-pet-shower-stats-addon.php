@@ -17,87 +17,93 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/**
- * Monta uma chave de cache única para transients das estatísticas.
- *
- * @param string $prefix     Prefixo do transient.
- * @param string $start_date Data inicial (Y-m-d).
- * @param string $end_date   Data final (Y-m-d).
- *
- * @return string
- */
-function dps_stats_build_cache_key( $prefix, $start_date, $end_date = '' ) {
-    $start_key = preg_replace( '/[^0-9]/', '', $start_date );
-    $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
+if ( ! function_exists( 'dps_stats_build_cache_key' ) ) {
+    /**
+     * Monta uma chave de cache única para transients das estatísticas.
+     *
+     * @param string $prefix     Prefixo do transient.
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return string
+     */
+    function dps_stats_build_cache_key( $prefix, $start_date, $end_date = '' ) {
+        $start_key = preg_replace( '/[^0-9]/', '', $start_date );
+        $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
 
-    if ( $end_key ) {
-        return sprintf( '%s_%s_%s', $prefix, $start_key, $end_key );
+        if ( $end_key ) {
+            return sprintf( '%s_%s_%s', $prefix, $start_key, $end_key );
+        }
+
+        return sprintf( '%s_%s', $prefix, $start_key );
     }
-
-    return sprintf( '%s_%s', $prefix, $start_key );
 }
 
-/**
- * Calcula o total de receitas pagas no intervalo informado com cache via transient.
- *
- * @param string $start_date Data inicial (Y-m-d).
- * @param string $end_date   Data final (Y-m-d).
- *
- * @return float
- */
-function dps_get_total_revenue( $start_date, $end_date ) {
-    global $wpdb;
+if ( ! function_exists( 'dps_get_total_revenue' ) ) {
+    /**
+     * Calcula o total de receitas pagas no intervalo informado com cache via transient.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return float
+     */
+    function dps_get_total_revenue( $start_date, $end_date ) {
+        global $wpdb;
 
-    $start_date = sanitize_text_field( $start_date );
-    $end_date   = sanitize_text_field( $end_date );
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
 
-    $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
-    $cached    = get_transient( $cache_key );
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
+        $cached    = get_transient( $cache_key );
 
-    if ( false !== $cached ) {
-        return (float) $cached;
+        if ( false !== $cached ) {
+            return (float) $cached;
+        }
+
+        $table          = $wpdb->prefix . 'dps_transacoes';
+        $total_revenue  = (float) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
+                $start_date,
+                $end_date
+            )
+        );
+
+        set_transient( $cache_key, $total_revenue, HOUR_IN_SECONDS );
+
+        return $total_revenue;
     }
-
-    $table          = $wpdb->prefix . 'dps_transacoes';
-    $total_revenue  = (float) $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
-            $start_date,
-            $end_date
-        )
-    );
-
-    set_transient( $cache_key, $total_revenue, HOUR_IN_SECONDS );
-
-    return $total_revenue;
 }
 
-/**
- * Remove os transients relacionados às estatísticas do add-on.
- */
-function dps_stats_clear_cache() {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( esc_html__( 'Você não tem permissão para limpar o cache.', 'dps-stats-addon' ) );
+if ( ! function_exists( 'dps_stats_clear_cache' ) ) {
+    /**
+     * Remove os transients relacionados às estatísticas do add-on.
+     */
+    function dps_stats_clear_cache() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para limpar o cache.', 'dps-stats-addon' ) );
+        }
+
+        check_admin_referer( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' );
+
+        global $wpdb;
+
+        $transient_prefix      = $wpdb->esc_like( '_transient_dps_stats_' ) . '%';
+        $transient_timeout_pre = $wpdb->esc_like( '_transient_timeout_dps_stats_' ) . '%';
+
+        // Remove transients específicos do add-on de estatísticas.
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+                $transient_prefix,
+                $transient_timeout_pre
+            )
+        );
+
+        wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
+        exit;
     }
-
-    check_admin_referer( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' );
-
-    global $wpdb;
-
-    $transient_prefix      = $wpdb->esc_like( '_transient_dps_stats_' ) . '%';
-    $transient_timeout_pre = $wpdb->esc_like( '_transient_timeout_dps_stats_' ) . '%';
-
-    // Remove transients específicos do add-on de estatísticas.
-    $wpdb->query(
-        $wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-            $transient_prefix,
-            $transient_timeout_pre
-        )
-    );
-
-    wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
-    exit;
 }
 
 add_action( 'admin_post_dps_clear_stats_cache', 'dps_stats_clear_cache' );
