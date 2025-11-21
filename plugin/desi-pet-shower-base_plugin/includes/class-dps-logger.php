@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class DPS_Logger {
 
+    const DB_VERSION    = '1.0.0';
     const LEVEL_INFO    = 'info';
     const LEVEL_WARNING = 'warning';
     const LEVEL_ERROR   = 'error';
@@ -37,6 +38,18 @@ class DPS_Logger {
         ) {$charset_collate};";
 
         dbDelta( $sql );
+    }
+
+    /**
+     * Cria ou atualiza a tabela de logs apenas quando a versão não coincide.
+     */
+    public static function maybe_install() {
+        $installed_version = get_option( 'dps_logger_db_version' );
+
+        if ( self::DB_VERSION !== $installed_version ) {
+            self::create_table();
+            update_option( 'dps_logger_db_version', self::DB_VERSION );
+        }
     }
 
     /**
