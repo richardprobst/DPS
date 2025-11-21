@@ -102,6 +102,12 @@ class DPS_Groomers_Addon {
 
     /**
      * Renderiza a página de gestão de groomers.
+     *
+     * Exibe formulário para criação de novos groomers e lista de
+     * todos os profissionais cadastrados com a role dps_groomer.
+     * Processa submissão de formulário e exibe mensagens de feedback.
+     *
+     * @since 1.0.0
      */
     public function render_groomers_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
@@ -231,6 +237,16 @@ class DPS_Groomers_Addon {
         }
     }
 
+    /**
+     * Adiciona aba "Groomers" à navegação do painel principal.
+     *
+     * Conectado ao hook dps_base_nav_tabs_after_history para injetar
+     * a aba de gestão de groomers na interface do plugin base.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $visitor_only Se true, está no modo visitante (sem permissões admin).
+     */
     public function add_groomers_tab( $visitor_only ) {
         if ( $visitor_only ) {
             return;
@@ -241,6 +257,16 @@ class DPS_Groomers_Addon {
         }
     }
 
+    /**
+     * Renderiza seção de groomers no painel principal.
+     *
+     * Conectado ao hook dps_base_sections_after_history para exibir
+     * o conteúdo da aba de gestão de groomers.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $visitor_only Se true, está no modo visitante (sem permissões admin).
+     */
     public function add_groomers_section( $visitor_only ) {
         if ( $visitor_only ) {
             return;

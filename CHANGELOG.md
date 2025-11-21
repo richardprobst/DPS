@@ -60,13 +60,21 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
   - `DPS_Request_Validator`: validação centralizada de nonces, capabilities e sanitização de campos
 - Adicionado documento de análise de refatoração (`REFACTORING_ANALYSIS.md`) com identificação detalhada de problemas de código e sugestões de melhoria
 - Criado arquivo de exemplos práticos (`includes/refactoring-examples.php`) demonstrando uso das classes helper e padrões de refatoração
+- Implementado `register_deactivation_hook` no add-on Agenda para limpar cron job `dps_agenda_send_reminders` ao desativar
+- Adicionada seção completa de "Padrões de desenvolvimento de add-ons" no `ANALYSIS.md` incluindo:
+  - Estrutura de arquivos recomendada com separação de responsabilidades
+  - Guia de uso correto de activation/deactivation hooks
+  - Padrões de documentação com DocBlocks seguindo convenções WordPress
+  - Boas práticas de prefixação, segurança, performance e integração
 
 #### Changed (Alterado)
 - Documentação expandida com exemplos de como quebrar funções grandes em métodos menores e mais focados
 - Estabelecidos padrões de nomenclatura mais descritiva para variáveis e funções
+- Documentação do add-on Agenda atualizada para refletir limpeza de cron jobs na desativação
 
 #### Fixed (Corrigido)
 - Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
+- Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda.
 
 ---
 

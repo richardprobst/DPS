@@ -73,3 +73,164 @@
 ## Considerações de estrutura e integração
 - Todos os add-ons se conectam por meio dos *hooks* expostos pelo plugin base (`dps_base_nav_tabs_after_pets`, `dps_base_sections_after_history`, `dps_settings_*`), preservando a renderização centralizada de navegação/abas feita por `DPS_Base_Frontend`.
 - As integrações financeiras compartilham a tabela `dps_transacoes`, seja para sincronizar agendamentos (base + financeiro), gerar cobranças (pagamentos, assinaturas) ou exibir pendências no portal e na agenda, reforçando a necessidade de manter o esquema consistente ao evoluir o sistema.
+
+## Padrões de desenvolvimento de add-ons
+
+### Estrutura de arquivos recomendada
+Para novos add-ons ou refatorações futuras, recomenda-se seguir a estrutura modular:
+
+```
+add-ons/desi-pet-shower-NOME_addon/
+├── desi-pet-shower-NOME-addon.php    # Arquivo principal (apenas bootstrapping)
+├── includes/                          # Classes e lógica do negócio
+│   ├── class-dps-NOME-cpt.php        # Registro de Custom Post Types
+│   ├── class-dps-NOME-metaboxes.php  # Metaboxes e campos customizados
+│   ├── class-dps-NOME-admin.php      # Interface administrativa
+│   └── class-dps-NOME-frontend.php   # Lógica do frontend
+├── assets/                            # Recursos estáticos
+│   ├── css/                          # Estilos CSS
+│   │   └── NOME-addon.css
+│   └── js/                           # Scripts JavaScript
+│       └── NOME-addon.js
+└── uninstall.php                      # Limpeza de dados na desinstalação
+```
+
+**Benefícios desta estrutura:**
+- **Separação de responsabilidades**: cada classe tem um propósito claro
+- **Manutenibilidade**: mais fácil localizar e modificar funcionalidades específicas
+- **Reutilização**: classes podem ser testadas e reutilizadas independentemente
+- **Performance**: possibilita carregamento condicional de componentes
+
+**Add-ons que já seguem este padrão:**
+- `client-portal_addon`: estrutura bem organizada com `includes/` e `assets/`
+- `finance_addon`: possui `includes/` para classes auxiliares
+
+**Add-ons que poderiam se beneficiar de refatoração futura:**
+- `groomers_addon`: 473 linhas em um único arquivo
+- `stats_addon`: 538 linhas em um único arquivo
+- `stock_addon`: 432 linhas em um único arquivo
+- `loyalty_addon`: 1148 linhas em um único arquivo
+- `registration_addon`: 636 linhas em um único arquivo
+- `backup_addon`: 1131 linhas em um único arquivo
+
+### Activation e Deactivation Hooks
+
+**Activation Hook (`register_activation_hook`):**
+- Criar páginas necessárias
+- Criar tabelas de banco de dados via `dbDelta()`
+- Definir opções padrão do plugin
+- Criar roles e capabilities customizadas
+- **NÃO** agendar cron jobs (use `init` com verificação `wp_next_scheduled`)
+
+**Deactivation Hook (`register_deactivation_hook`):**
+- Limpar cron jobs agendados com `wp_clear_scheduled_hook()`
+- **NÃO** remover dados do usuário (reservado para `uninstall.php`)
+
+**Exemplo de implementação:**
+```php
+class DPS_Exemplo_Addon {
+    public function __construct() {
+        register_activation_hook( __FILE__, [ $this, 'activate' ] );
+        register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
+        
+        add_action( 'init', [ $this, 'maybe_schedule_cron' ] );
+        add_action( 'dps_exemplo_cron_event', [ $this, 'execute_cron' ] );
+    }
+    
+    public function activate() {
+        // Criar páginas, tabelas, opções padrão
+        $this->create_pages();
+        $this->create_database_tables();
+    }
+    
+    public function deactivate() {
+        // Limpar APENAS cron jobs temporários
+        wp_clear_scheduled_hook( 'dps_exemplo_cron_event' );
+    }
+    
+    public function maybe_schedule_cron() {
+        if ( ! wp_next_scheduled( 'dps_exemplo_cron_event' ) ) {
+            wp_schedule_event( time(), 'daily', 'dps_exemplo_cron_event' );
+        }
+    }
+}
+```
+
+**Add-ons que usam cron jobs:**
+- ✅ `push_addon`: implementa deactivation hook corretamente
+- ✅ `agenda_addon`: agora implementa deactivation hook para limpar `dps_agenda_send_reminders`
+
+### Padrões de documentação (DocBlocks)
+
+Todos os métodos devem seguir o padrão WordPress de DocBlocks:
+
+```php
+/**
+ * Breve descrição do método (uma linha).
+ *
+ * Descrição mais detalhada explicando o propósito, comportamento
+ * e contexto de uso do método (opcional).
+ *
+ * @since 1.0.0
+ *
+ * @param string $param1 Descrição do primeiro parâmetro.
+ * @param int    $param2 Descrição do segundo parâmetro.
+ * @param array  $args {
+ *     Argumentos opcionais.
+ *
+ *     @type string $key1 Descrição da chave 1.
+ *     @type int    $key2 Descrição da chave 2.
+ * }
+ * @return bool Retorna true em caso de sucesso, false caso contrário.
+ */
+public function exemplo_metodo( $param1, $param2, $args = [] ) {
+    // Implementação
+}
+```
+
+**Elementos obrigatórios:**
+- Descrição breve do propósito do método
+- `@param` para cada parâmetro, com tipo e descrição
+- `@return` com tipo e descrição do valor retornado
+- `@since` indicando a versão de introdução (opcional, mas recomendado)
+
+**Elementos opcionais mas úteis:**
+- Descrição detalhada para métodos complexos
+- `@throws` para exceções que podem ser lançadas
+- `@see` para referenciar métodos ou classes relacionadas
+- `@link` para documentação externa
+- `@global` para variáveis globais utilizadas
+
+**Prioridade de documentação:**
+1. Métodos públicos (sempre documentar)
+2. Métodos protegidos/privados complexos
+3. Hooks e filtros expostos
+4. Constantes e propriedades de classe
+
+### Boas práticas adicionais
+
+**Prefixação:**
+- Todas as funções globais: `dps_`
+- Todas as classes: `DPS_`
+- Hooks e filtros: `dps_`
+- Options: `dps_`
+- Handles de scripts/estilos: `dps-`
+- Custom Post Types: `dps_`
+
+**Segurança:**
+- Sempre usar nonces em formulários: `wp_nonce_field()` / `wp_verify_nonce()`
+- Escapar saída: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_js()`
+- Sanitizar entrada: `sanitize_text_field()`, `sanitize_email()`, `wp_kses_post()`
+- Verificar capabilities: `current_user_can()`
+
+**Performance:**
+- Registrar assets apenas onde necessário
+- Usar `wp_register_*` seguido de `wp_enqueue_*` condicionalmente
+- Otimizar queries com `fields => 'ids'` quando apropriado
+- Pré-carregar metadados com `update_meta_cache()`
+
+**Integração com o núcleo:**
+- Preferir hooks do plugin base (`dps_base_*`, `dps_settings_*`) a menus próprios
+- Reutilizar classes helper quando disponíveis (`DPS_CPT_Helper`, `DPS_Money_Helper`, etc.)
+- Seguir contratos de hooks existentes sem modificar assinaturas
+- Documentar novos hooks expostos com exemplos de uso

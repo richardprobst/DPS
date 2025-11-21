@@ -183,6 +183,16 @@ class DPS_Stock_Addon {
         update_post_meta( $post_id, 'dps_stock_minimum', max( 0, $minimum ) );
     }
 
+    /**
+     * Adiciona aba "Estoque" à navegação do painel principal.
+     *
+     * Conectado ao hook dps_base_nav_tabs_after_history para injetar
+     * a aba de gestão de estoque na interface do plugin base.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $visitor_only Se true, está no modo visitante (sem permissões admin).
+     */
     public function add_stock_tab( $visitor_only ) {
         if ( $visitor_only ) {
             return;
@@ -193,6 +203,16 @@ class DPS_Stock_Addon {
         }
     }
 
+    /**
+     * Renderiza seção de estoque no painel principal.
+     *
+     * Conectado ao hook dps_base_sections_after_history para exibir
+     * o conteúdo da aba de gestão de estoque.
+     *
+     * @since 1.0.0
+     *
+     * @param bool $visitor_only Se true, está no modo visitante (sem permissões admin).
+     */
     public function add_stock_section( $visitor_only ) {
         if ( $visitor_only ) {
             return;
@@ -203,6 +223,14 @@ class DPS_Stock_Addon {
 
     /**
      * Renderiza a página de listagem e alertas do estoque.
+     *
+     * Exibe lista completa de itens de estoque com suas quantidades,
+     * unidades e alertas de estoque baixo quando quantidade atual
+     * está abaixo do mínimo configurado.
+     *
+     * @since 1.0.0
+     *
+     * @return string HTML da página de estoque.
      */
     public function render_stock_page() {
         if ( ! is_user_logged_in() || ! current_user_can( self::CAPABILITY ) ) {
