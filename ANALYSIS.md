@@ -99,6 +99,42 @@ $email = DPS_Request_Validator::sanitize_email_from_post( 'client_email' );
 
 **Boas práticas**: NUNCA implemente validação de nonce ou sanitização manual fora deste helper. Evite duplicar lógica de segurança.
 
+#### DPS_Message_Helper
+**Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
+
+**Entrada/Saída**:
+- `add_success( string $message )`: Adiciona mensagem de sucesso
+- `add_error( string $message )`: Adiciona mensagem de erro
+- `add_warning( string $message )`: Adiciona mensagem de aviso
+- `display_messages()`: Retorna HTML com todas as mensagens pendentes e as remove automaticamente
+
+**Exemplos práticos**:
+```php
+// Após salvar cliente com sucesso
+DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
+wp_safe_redirect( $redirect_url );
+exit;
+
+// No início da seção, exibir mensagens pendentes
+echo '<div class="dps-section">';
+echo DPS_Message_Helper::display_messages(); // Renderiza alertas
+echo '<h2>Cadastro de Clientes</h2>';
+```
+
+**Boas práticas**: 
+- Use mensagens após operações que modificam dados (salvar, excluir, atualizar status)
+- Coloque `display_messages()` no início de cada seção do painel para feedback imediato
+- Mensagens são armazenadas via transients específicos por usuário, garantindo isolamento
+- Mensagens são exibidas apenas uma vez (single-use) e removidas automaticamente após renderização
+
+### Feedback visual e organização de interface
+- Todos os formulários principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback após salvar ou excluir
+- Formulários são organizados em fieldsets semânticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos
+- Hierarquia de títulos padronizada: H1 único no topo ("Painel de Gestão DPS"), H2 para seções principais, H3 para subseções
+- Design minimalista com paleta reduzida: base neutra (#f9fafb, #e5e7eb, #374151) + 3 cores de status essenciais (verde, amarelo, vermelho)
+- Responsividade básica implementada com media queries para mobile (480px), tablets (768px) e desktops pequenos (1024px)
+
+
 ### Histórico e exportação de agendamentos
 - A coleta de atendimentos finalizados é feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurável via filtro `dps_history_batch_size` (padrão: 200). Isso evita uma única consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
 - As metas dos agendamentos são pré-carregadas com `update_meta_cache('post')` antes do loop, reduzindo consultas repetidas às mesmas linhas durante a renderização e exportação.
