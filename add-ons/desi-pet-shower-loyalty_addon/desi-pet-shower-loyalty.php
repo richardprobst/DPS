@@ -848,34 +848,38 @@ if ( ! function_exists( 'dps_loyalty_init' ) ) {
 }
 
 if ( ! function_exists( 'dps_loyalty_add_points' ) ) {
-    $client_id = (int) $client_id;
-    $points    = (int) $points;
+    function dps_loyalty_add_points( $client_id, $points, $context = '' ) {
+        $client_id = (int) $client_id;
+        $points    = (int) $points;
 
-    if ( $client_id <= 0 || $points <= 0 ) {
-        return false;
+        if ( $client_id <= 0 || $points <= 0 ) {
+            return false;
+        }
+
+        $current = dps_loyalty_get_points( $client_id );
+        $new     = $current + $points;
+
+        update_post_meta( $client_id, 'dps_loyalty_points', $new );
+        dps_loyalty_log_event( $client_id, 'add', $points, $context );
+
+        do_action( 'dps_loyalty_points_added', $client_id, $points, $context );
+
+        return $new;
     }
-
-    $current = dps_loyalty_get_points( $client_id );
-    $new     = $current + $points;
-
-    update_post_meta( $client_id, 'dps_loyalty_points', $new );
-    dps_loyalty_log_event( $client_id, 'add', $points, $context );
-
-    do_action( 'dps_loyalty_points_added', $client_id, $points, $context );
-
-    return $new;
 }
 
-function dps_loyalty_get_points( $client_id ) {
-    $client_id = (int) $client_id;
-    if ( $client_id <= 0 ) {
-        return 0;
+if ( ! function_exists( 'dps_loyalty_get_points' ) ) {
+    function dps_loyalty_get_points( $client_id ) {
+        $client_id = (int) $client_id;
+        if ( $client_id <= 0 ) {
+            return 0;
+        }
+
+        $points = get_post_meta( $client_id, 'dps_loyalty_points', true );
+        $points = $points ? (int) $points : 0;
+
+        return max( 0, $points );
     }
-
-    $points = get_post_meta( $client_id, 'dps_loyalty_points', true );
-    $points = $points ? (int) $points : 0;
-
-    return max( 0, $points );
 }
 
 if ( ! function_exists( 'dps_loyalty_redeem_points' ) ) {
@@ -1072,19 +1076,21 @@ if ( ! function_exists( 'dps_referrals_mark_rewarded' ) ) {
 }
 
 if ( ! function_exists( 'dps_referrals_get_settings' ) ) {
-    $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
-    $defaults = [
-        'referrals_enabled'          => 0,
-        'referrer_reward_type'       => 'none',
-        'referrer_reward_value'      => 0,
-        'referee_reward_type'        => 'none',
-        'referee_reward_value'       => 0,
-        'referrals_minimum_amount'   => 0,
-        'referrals_max_per_referrer' => 0,
-        'referrals_first_purchase'   => 0,
-    ];
+    function dps_referrals_get_settings() {
+        $settings = get_option( DPS_Loyalty_Addon::OPTION_KEY, [] );
+        $defaults = [
+            'referrals_enabled'          => 0,
+            'referrer_reward_type'       => 'none',
+            'referrer_reward_value'      => 0,
+            'referee_reward_type'        => 'none',
+            'referee_reward_value'       => 0,
+            'referrals_minimum_amount'   => 0,
+            'referrals_max_per_referrer' => 0,
+            'referrals_first_purchase'   => 0,
+        ];
 
-    return wp_parse_args( $settings, $defaults );
+        return wp_parse_args( $settings, $defaults );
+    }
 }
 
 if ( ! function_exists( 'dps_referrals_register_signup' ) ) {

@@ -22,18 +22,28 @@ function dps_uninstall_remove_cpt_posts( $post_type ) {
     global $wpdb;
 
     // Busca todos os IDs de posts deste tipo
-    $posts = $wpdb->get_col( $wpdb->prepare(
+    $post_ids = $wpdb->get_col( $wpdb->prepare(
         "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s",
         $post_type
     ) );
 
-    // Remove cada post e seus metadados
-    foreach ( $posts as $post_id ) {
-        // Remove post meta
-        $wpdb->delete( $wpdb->postmeta, [ 'post_id' => $post_id ], [ '%d' ] );
-        // Remove post
-        $wpdb->delete( $wpdb->posts, [ 'ID' => $post_id ], [ '%d' ] );
+    if ( empty( $post_ids ) ) {
+        return;
     }
+
+    $ids_placeholder = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
+
+    // Remove post meta em lote
+    $wpdb->query( $wpdb->prepare(
+        "DELETE FROM {$wpdb->postmeta} WHERE post_id IN ({$ids_placeholder})",
+        ...$post_ids
+    ) );
+
+    // Remove posts em lote
+    $wpdb->query( $wpdb->prepare(
+        "DELETE FROM {$wpdb->posts} WHERE ID IN ({$ids_placeholder})",
+        ...$post_ids
+    ) );
 }
 
 // Remove Custom Post Types e todos os posts associados
@@ -59,11 +69,16 @@ foreach ( $dps_options as $option ) {
 }
 
 // Remove transients de cache
-$wpdb->query(
+$transient_like = $wpdb->esc_like( '_transient_dps_' ) . '%';
+$transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_' ) . '%';
+
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_%' 
-     OR option_name LIKE '_transient_timeout_dps_%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like,
+    $transient_timeout_like
+) );
 
 // Remove capabilities customizadas
 $dps_capabilities = [
