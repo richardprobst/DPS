@@ -100,12 +100,20 @@ Antes de criar uma nova versão oficial:
   - `ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
   - `UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas
+  - `FORMS_UX_ANALYSIS.md`: análise completa de UX dos formulários de cadastro com priorização de melhorias
 - **Agenda Add-on**: Implementadas melhorias de FASE 1 e FASE 2:
   - Botão "➕ Novo Agendamento" adicionado à barra de navegação para workflow completo
   - Modal customizado para visualização de serviços (substitui alert() nativo)
   - Ícones e tooltips em links de ação (📍 Mapa, 💬 Confirmar, 💰 Cobrar)
   - Flag de pet agressivo melhorada (⚠️ com tooltip "Pet agressivo - cuidado no manejo")
   - Criados arquivos de assets: `assets/css/agenda-addon.css` e `assets/js/services-modal.js`
+- **Formulários de cadastro**: Sistema completo de grid responsivo e componentes visuais:
+  - Classes CSS para grid: `.dps-form-row`, `.dps-form-row--2col`, `.dps-form-row--3col`
+  - Asterisco vermelho para campos obrigatórios: `.dps-required`
+  - Checkbox melhorado: `.dps-checkbox-label`, `.dps-checkbox-text`
+  - Upload de arquivo estilizado: `.dps-file-upload` com border dashed e hover
+  - Preview de imagem antes do upload via JavaScript (FileReader API)
+  - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
 - Interface administrativa completamente reformulada com design minimalista:
@@ -121,11 +129,34 @@ Antes de criar uma nova versão oficial:
   - Formulário de clientes dividido em 4 fieldsets: Dados Pessoais, Contato, Redes Sociais, Endereço e Preferências
   - Bordas sutis (#e5e7eb) e legends descritivos para cada grupo
   - Redução de sobrecarga cognitiva através de organização visual clara
+- **Formulário de Pet (Admin) completamente reestruturado**:
+  - Dividido em 4 fieldsets temáticos (antes eram 17+ campos soltos):
+    1. **Dados Básicos**: Nome, Cliente, Espécie, Raça, Sexo (grid 2col e 3col)
+    2. **Características Físicas**: Tamanho, Peso, Data nascimento, Tipo de pelo, Cor (grid 3col e 2col)
+    3. **Saúde e Comportamento**: Vacinas, Alergias, Cuidados, Notas, Checkbox "Cão agressivo ⚠️"
+    4. **Foto do Pet**: Upload estilizado com preview
+  - Labels melhorados: "Pelagem" → "Tipo de pelo", "Porte" → "Tamanho", "Cor" → "Cor predominante"
+  - Peso com validação HTML5: `min="0.1" max="100" step="0.1"`
+  - Placeholders descritivos em todos os campos (ex.: "Curto, longo, encaracolado...", "Branco, preto, caramelo...")
+- **Formulário de Cliente (Admin)** aprimorado:
+  - Grid 2 colunas para campos relacionados: CPF + Data nascimento, Instagram + Facebook
+  - Placeholders padronizados: CPF "000.000.000-00", Telefone "(00) 00000-0000", Email "seuemail@exemplo.com"
+  - Asteriscos (*) em campos obrigatórios (Nome, Telefone)
+  - Input `tel` para telefone em vez de `text` genérico
+  - Checkbox de autorização de foto com layout melhorado (`.dps-checkbox-label`)
+- **Portal do Cliente**: Formulários alinhados ao padrão minimalista:
+  - Grid responsivo em formulários de cliente e pet (2-3 colunas em desktop → 1 coluna em mobile)
+  - Placeholders em todos os campos (Telefone, Email, Endereço, Instagram, Facebook, campos do pet)
+  - Labels consistentes: "Pelagem" → "Tipo de pelo", "Porte" → "Tamanho"
+  - Upload de foto estilizado com `.dps-file-upload` e preview JavaScript
+  - Botões submit com classe `.dps-submit-btn` (largura 100% em mobile)
 - Responsividade básica implementada para dispositivos móveis:
   - Tabelas com scroll horizontal em telas <768px
   - Navegação por abas em layout vertical em mobile
   - Grid de pets em coluna única em smartphones
+  - Grid de formulários adaptativo: 2-3 colunas em desktop → 1 coluna em mobile @640px
   - Inputs com tamanho de fonte 16px para evitar zoom automático no iOS
+  - Botões submit com largura 100% em mobile para melhor área de toque
 - Documentação expandida com exemplos de como quebrar funções grandes em métodos menores e mais focados
 - Estabelecidos padrões de nomenclatura mais descritiva para variáveis e funções
 - Documentação do add-on Agenda atualizada para refletir limpeza de cron jobs na desativação
@@ -145,6 +176,14 @@ Antes de criar uma nova versão oficial:
   - Feedback claro e imediato eliminando confusão sobre conclusão de ações
 - Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação
 - Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda
+- **Formulários de cadastro**: Problemas críticos de UX resolvidos:
+  - ✅ Formulário de Pet sem fieldsets (17+ campos desorganizados)
+  - ✅ Campos obrigatórios sem indicação visual
+  - ✅ Placeholders ausentes em CPF, telefone, email, endereço
+  - ✅ Upload de foto sem preview
+  - ✅ Botões de submit sem desabilitação durante processamento (risco de duplicatas)
+  - ✅ Labels técnicos substituídos por termos mais claros
+  - ✅ Estilos inline substituídos por classes CSS reutilizáveis
 
 #### Refactoring (Interno)
 - Reestruturação completa do CSS administrativo em `dps-base.css`:
@@ -152,6 +191,7 @@ Antes de criar uma nova versão oficial:
   - Redução da paleta de cores de status de 4+ variantes para 3 cores essenciais
   - Padronização de bordas (1px ou 4px) e espaçamentos (20px padding, 32px entre seções)
   - Adição de media queries para responsividade básica (480px, 768px, 1024px breakpoints)
+  - Adição de classes para grid de formulários e componentes visuais (fieldsets, upload, checkbox)
 - Melhorias estruturais em `class-dps-base-frontend.php`:
   - Extração de lógica de mensagens para helper dedicado (`DPS_Message_Helper`)
   - Separação de campos de formulário em fieldsets semânticos

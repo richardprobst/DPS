@@ -332,6 +332,72 @@ html {
     60%, 100% { content: "..."; }
 }
 
+/* Grid responsivo para formulários */
+.dps-form-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.dps-form-row--2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.dps-form-row--3col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.dps-form-col {
+    margin: 0;
+}
+
+/* Upload de arquivo estilizado */
+.dps-file-upload {
+    margin-bottom: 12px;
+}
+
+.dps-file-upload__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.dps-file-upload__label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #f9fafb;
+    border: 2px dashed #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-file-upload__label:hover {
+    border-color: #0ea5e9;
+    background: #eff6ff;
+}
+
+.dps-file-upload__text {
+    display: inline-block;
+}
+
+.dps-file-upload__preview {
+    margin-top: 12px;
+    max-width: 200px;
+}
+
+.dps-file-upload__preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+}
+
 /* Galeria de fotos */
 .dps-portal-gallery-grid {
     display: grid;
@@ -427,6 +493,17 @@ html {
     
     .dps-portal-nav__link {
         text-align: center;
+    }
+    
+    /* Grid forms em mobile - 1 coluna */
+    .dps-form-row--2col,
+    .dps-form-row--3col {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Botões 100% largura em mobile */
+    .dps-submit-btn {
+        width: 100%;
     }
     
     /* Card de agendamento em mobile */
