@@ -357,6 +357,24 @@ class DPS_Finance_Addon {
             return;
         }
 
+        // Also delete related installment payments
+        $parcelas_table = $wpdb->prefix . 'dps_parcelas';
+        $parcelas_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $parcelas_table ) );
+        if ( $parcelas_exists === $parcelas_table ) {
+            // First get all transaction IDs to be deleted
+            $trans_ids = $wpdb->get_col( $wpdb->prepare(
+                "SELECT id FROM {$table} WHERE agendamento_id = %d",
+                $appointment_id
+            ) );
+
+            if ( ! empty( $trans_ids ) ) {
+                $placeholders = implode( ',', array_fill( 0, count( $trans_ids ), '%d' ) );
+                $wpdb->query( $wpdb->prepare(
+                    "DELETE FROM {$parcelas_table} WHERE trans_id IN ({$placeholders})",
+                    $trans_ids
+                ) );
+            }
+        }
         $wpdb->delete( $table, [ 'agendamento_id' => $appointment_id ], [ '%d' ] );
     }
 
