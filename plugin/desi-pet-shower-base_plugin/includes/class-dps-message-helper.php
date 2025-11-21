@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Utiliza transients do WordPress para armazenar mensagens temporárias
  * por usuário, que são exibidas uma única vez após redirecionamento.
  *
+ * @package DPS_Base
  * @since 1.0.0
  */
 class DPS_Message_Helper {
