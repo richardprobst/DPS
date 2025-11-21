@@ -16,6 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Evita redeclaração caso outro plugin já tenha definido esta classe
 if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
 
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-finance-revenue-query.php';
+
 if ( ! function_exists( 'dps_parse_money_br' ) ) {
     /**
      * Converte uma string de valor em formato brasileiro para inteiro em centavos.
@@ -705,27 +707,7 @@ class DPS_Finance_Addon {
      * @return int Total em centavos.
      */
     public function sum_revenue_by_period( $start_date, $end_date ) {
-        $query = new WP_Query( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-        ] );
-
-        $total = 0;
-        if ( $query->have_posts() ) {
-            foreach ( $query->posts as $appt_id ) {
-                $total += (int) get_post_meta( $appt_id, '_dps_total_at_booking', true );
-            }
-        }
-        wp_reset_postdata();
-
-        return $total;
+        return DPS_Finance_Revenue_Query::sum_by_period( $start_date, $end_date );
     }
 
     /**
