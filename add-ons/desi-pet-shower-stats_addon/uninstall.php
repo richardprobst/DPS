@@ -17,8 +17,12 @@ global $wpdb;
 delete_option( 'dps_stats_settings' );
 
 // Remove todos os transients de estatísticas
-$wpdb->query(
+$transient_like = $wpdb->esc_like( '_transient_dps_stats' ) . '%';
+$transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_stats' ) . '%';
+$wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
-     WHERE option_name LIKE '_transient_dps_stats%' 
-     OR option_name LIKE '_transient_timeout_dps_stats%'"
-);
+     WHERE option_name LIKE %s 
+     OR option_name LIKE %s",
+    $transient_like,
+    $transient_timeout_like
+) );
