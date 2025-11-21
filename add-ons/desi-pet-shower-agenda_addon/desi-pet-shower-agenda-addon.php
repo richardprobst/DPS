@@ -1264,10 +1264,6 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Agenda um evento cron diário para enviar lembretes de agendamentos.
-     * O evento é agendado às 08:00 (horário do site) caso ainda não exista.
-     */
-    /**
      * Limpa cron jobs agendados quando o plugin é desativado.
      */
     public function deactivate() {

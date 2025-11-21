@@ -73,8 +73,8 @@ Este documento registra, em ordem cronológica inversa, todas as alterações la
 - Documentação do add-on Agenda atualizada para refletir limpeza de cron jobs na desativação
 
 #### Fixed (Corrigido)
-- Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação
-- Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda
+- Evitado retorno 401 e mensagem "Unauthorized" em acessos comuns ao site, aplicando a validação do webhook do Mercado Pago apenas quando a requisição traz indicadores da notificação.
+- Corrigido potencial problema de cron jobs órfãos ao desativar add-on Agenda.
 
 ---
 
