@@ -742,7 +742,7 @@ class DPS_Base_Frontend {
         
         // Grupo: Endereço e Preferências
         echo '<fieldset style="border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; border-radius: 4px;">';
-        echo '<legend style="font-weight: 600; color: #374151; padding: 0 8px;">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
+        echo '<legend class="dps-legend">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
         
         // Address
         $addr_val = $meta['address'] ?? '';
