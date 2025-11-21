@@ -622,33 +622,22 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Obtém lista de clientes
+     * Obtém lista completa de clientes cadastrados.
+     *
+     * @return array Lista de posts do tipo dps_cliente.
      */
     private static function get_clients() {
-        $args = [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ];
-        $query = new WP_Query( $args );
-        return $query->posts;
+        return DPS_Query_Helper::get_all_posts_by_type( 'dps_cliente' );
     }
 
     /**
-     * Obtém lista de pets
+     * Obtém lista paginada de pets.
+     *
+     * @param int $page Número da página (default: 1).
+     * @return WP_Query Objeto de consulta com pets paginados.
      */
     private static function get_pets( $page = 1 ) {
-        $args = [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => DPS_BASE_PETS_PER_PAGE,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-            'paged'          => max( 1, (int) $page ),
-        ];
-        return new WP_Query( $args );
+        return DPS_Query_Helper::get_paginated_posts( 'dps_pet', $page, DPS_BASE_PETS_PER_PAGE );
     }
 
     /**
@@ -1643,20 +1632,29 @@ EOT;
      *
      * @param WP_Post $a Primeiro agendamento.
      * @param WP_Post $b Segundo agendamento.
+     * Compara dois agendamentos por data e hora de forma descendente.
      *
-     * @return int
+     * Ordena agendamentos do mais recente para o mais antigo. Em caso de
+     * data/hora iguais, ordena por ID (do maior para o menor).
+     *
+     * @param object $first_appointment Primeiro agendamento a comparar.
+     * @param object $second_appointment Segundo agendamento a comparar.
+     * @return int Resultado da comparação: -1, 0 ou 1.
      */
-    private static function compare_appointments_desc( $a, $b ) {
-        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
-        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
-        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
-        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
-        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
-        if ( $dt_a === $dt_b ) {
-            return $b->ID <=> $a->ID;
+    private static function compare_appointments_desc( $first_appointment, $second_appointment ) {
+        $first_date = get_post_meta( $first_appointment->ID, 'appointment_date', true );
+        $first_time = get_post_meta( $first_appointment->ID, 'appointment_time', true );
+        $second_date = get_post_meta( $second_appointment->ID, 'appointment_date', true );
+        $second_time = get_post_meta( $second_appointment->ID, 'appointment_time', true );
+
+        $first_datetime_timestamp = strtotime( trim( $first_date . ' ' . $first_time ) );
+        $second_datetime_timestamp = strtotime( trim( $second_date . ' ' . $second_time ) );
+
+        if ( $first_datetime_timestamp === $second_datetime_timestamp ) {
+            return $second_appointment->ID <=> $first_appointment->ID;
         }
-        return $dt_b <=> $dt_a;
+
+        return $second_datetime_timestamp <=> $first_datetime_timestamp;
     }
 
     /**
