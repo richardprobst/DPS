@@ -41,8 +41,15 @@ class DPS_Base_Frontend {
      * @return array|null
      */
     public static function get_multi_pet_charge_data( $appt_id ) {
+        static $cache = [];
+
+        if ( array_key_exists( $appt_id, $cache ) ) {
+            return $cache[ $appt_id ];
+        }
+
         $pet_ids = get_post_meta( $appt_id, 'appointment_pet_ids', true );
         if ( ! is_array( $pet_ids ) || count( $pet_ids ) < 2 ) {
+            $cache[ $appt_id ] = null;
             return null;
         }
 
@@ -66,6 +73,7 @@ class DPS_Base_Frontend {
         ] );
 
         if ( empty( $related ) ) {
+            $cache[ $appt_id ] = null;
             return null;
         }
 
@@ -96,12 +104,13 @@ class DPS_Base_Frontend {
 
         $ids = array_map( 'intval', $ids );
         if ( count( $ids ) < 2 ) {
+            $cache[ $appt_id ] = null;
             return null;
         }
 
         sort( $ids );
 
-        return [
+        $cache[ $appt_id ] = [
             'ids'       => $ids,
             'pet_names' => array_values( array_unique( $pet_names ) ),
             'total'     => $total,
@@ -109,6 +118,73 @@ class DPS_Base_Frontend {
             'date'      => $date,
             'time'      => $time,
             'signature' => $signature,
+        ];
+
+        return $cache[ $appt_id ];
+    }
+
+    /**
+     * Carrega os agendamentos finalizados de forma incremental, reutilizando cache de meta.
+     *
+     * @return array
+     */
+    private static function get_history_appointments_data() {
+        $batch_size = (int) apply_filters( 'dps_history_batch_size', 200 );
+        $batch_size = $batch_size > 0 ? $batch_size : 50;
+
+        $appointments = [];
+        $total_amount = 0;
+        $total_count  = 0;
+        $paged        = 1;
+
+        do {
+            $query = new WP_Query(
+                [
+                    'post_type'      => 'dps_agendamento',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => $batch_size,
+                    'fields'         => 'ids',
+                    'no_found_rows'  => true,
+                    'paged'          => $paged,
+                    'meta_query'     => [
+                        [
+                            'key'     => 'appointment_status',
+                            'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ],
+                            'compare' => 'IN',
+                        ],
+                    ],
+                ]
+            );
+
+            $batch_ids = $query->posts;
+            if ( empty( $batch_ids ) ) {
+                break;
+            }
+
+            update_meta_cache( 'post', $batch_ids );
+
+            foreach ( $batch_ids as $appt_id ) {
+                $status_meta = get_post_meta( $appt_id, 'appointment_status', true );
+                $total_count++;
+
+                if ( 'cancelado' !== $status_meta ) {
+                    $total_amount += (float) get_post_meta( $appt_id, 'appointment_total_value', true );
+                }
+
+                $appointments[] = (object) [ 'ID' => (int) $appt_id ];
+            }
+
+            $paged++;
+        } while ( count( $batch_ids ) === $batch_size );
+
+        if ( $appointments ) {
+            usort( $appointments, [ self::class, 'compare_appointments_desc' ] );
+        }
+
+        return [
+            'appointments' => $appointments,
+            'total_amount' => $total_amount,
+            'total_count'  => $total_count,
         ];
     }
 
@@ -1387,24 +1463,8 @@ EOT;
             return '';
         }
 
-        $args = [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_status',
-                    'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ],
-                    'compare' => 'IN',
-                ],
-            ],
-        ];
-        $appointments = get_posts( $args );
-        if ( $appointments ) {
-            usort( $appointments, [ self::class, 'compare_appointments_desc' ] );
-        } else {
-            $appointments = [];
-        }
+        $history_data = self::get_history_appointments_data();
+        $appointments = $history_data['appointments'];
 
         $clients = self::get_clients();
         $client_options = [];
@@ -1418,14 +1478,8 @@ EOT;
             'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
         ];
 
-        $total_count = count( $appointments );
-        $total_amount = 0;
-        foreach ( $appointments as $appt ) {
-            $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-            if ( 'cancelado' !== $status_meta ) {
-                $total_amount += (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
-            }
-        }
+        $total_count  = $history_data['total_count'];
+        $total_amount = $history_data['total_amount'];
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
@@ -1477,13 +1531,22 @@ EOT;
             echo '<th>' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
-            $base_url = get_permalink();
+            $base_url        = get_permalink();
+            $clients_cache   = [];
+            $pets_cache      = [];
+            $services_cache  = [];
+
             foreach ( $appointments as $appt ) {
-                $date    = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time    = get_post_meta( $appt->ID, 'appointment_time', true );
+                $date      = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time      = get_post_meta( $appt->ID, 'appointment_time', true );
                 $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                $client_post = $client_id ? get_post( $client_id ) : null;
+
+                if ( $client_id && ! array_key_exists( $client_id, $clients_cache ) ) {
+                    $clients_cache[ $client_id ] = get_post( $client_id );
+                }
+                $client_post = $client_id ? ( $clients_cache[ $client_id ] ?? null ) : null;
                 $client_name = $client_post ? $client_post->post_title : '-';
+
                 $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
                 $status_key  = strtolower( str_replace( ' ', '_', $status_meta ) );
                 if ( 'finalizado_e_pago' === $status_key ) {
@@ -1496,27 +1559,31 @@ EOT;
                     $pet_display = implode( ', ', $group_data['pet_names'] );
                 } else {
                     $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    if ( $pet_id ) {
-                        $pet_post = get_post( $pet_id );
-                        if ( $pet_post ) {
-                            $pet_display = $pet_post->post_title;
-                        }
+                    if ( $pet_id && ! array_key_exists( $pet_id, $pets_cache ) ) {
+                        $pets_cache[ $pet_id ] = get_post( $pet_id );
+                    }
+                    if ( $pet_id && isset( $pets_cache[ $pet_id ] ) ) {
+                        $pet_display = $pets_cache[ $pet_id ]->post_title;
                     }
                 }
-                $services = get_post_meta( $appt->ID, 'appointment_services', true );
+
+                $services      = get_post_meta( $appt->ID, 'appointment_services', true );
                 $services_text = '-';
                 if ( is_array( $services ) && ! empty( $services ) ) {
                     $names = [];
                     foreach ( $services as $srv_id ) {
-                        $srv_post = get_post( $srv_id );
-                        if ( $srv_post ) {
-                            $names[] = $srv_post->post_title;
+                        if ( ! array_key_exists( $srv_id, $services_cache ) ) {
+                            $services_cache[ $srv_id ] = get_post( $srv_id );
+                        }
+                        if ( isset( $services_cache[ $srv_id ] ) ) {
+                            $names[] = $services_cache[ $srv_id ]->post_title;
                         }
                     }
                     if ( $names ) {
                         $services_text = implode( ', ', $names );
                     }
                 }
+
                 $total_val = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
                 $total_display = $total_val > 0 ? 'R$ ' . number_format_i18n( $total_val, 2 ) : '—';
                 $paid_flag = ( 'finalizado' === $status_key ) ? '0' : '1';
