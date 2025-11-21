@@ -346,6 +346,12 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Já segue padrão modular com estrutura `includes/` e `assets/`
 - Gera credenciais de login automaticamente para novos clientes
 
+**Análise de Layout e UX**:
+- Consulte `CLIENT_PORTAL_UX_ANALYSIS.md` para análise detalhada de usabilidade (800+ linhas)
+- Consulte `CLIENT_PORTAL_SUMMARY.md` para resumo executivo das melhorias propostas
+- Principais achados: estrutura "all-in-one" sem navegação, responsividade precária em mobile, paleta de cores excessiva (15+ cores vs 8 recomendadas), feedback visual ausente
+- Melhorias prioritárias documentadas em 3 fases (26.5h totais): navegação interna, cards destacados, tabelas responsivas, feedback visual, redução de paleta, fieldsets em formulários
+
 ---
 
 ### Financeiro (`desi-pet-shower-finance_addon`)
