@@ -74,6 +74,7 @@
       }
     });
     // Evento para visualizar serviços de um agendamento
+    // Usa modal customizado em vez de alert() para melhor UX
     $(document).on('click', '.dps-services-link', function(e){
       e.preventDefault();
       var apptId = $(this).data('appt-id');
@@ -85,15 +86,21 @@
         if ( resp && resp.success ) {
           var services = resp.data.services || [];
           if ( services.length > 0 ) {
-            var message = '';
-            for ( var i=0; i < services.length; i++ ) {
-              var srv = services[i];
-              message += srv.name + ' - R$ ' + parseFloat(srv.price).toFixed(2);
-              if ( i < services.length - 1 ) message += "\n";
+            // Exibe modal customizado ao invés de alert()
+            if ( typeof window.DPSServicesModal !== 'undefined' ) {
+              window.DPSServicesModal.show(services);
+            } else {
+              // Fallback para alert() caso o modal não esteja carregado
+              var message = '';
+              for ( var i=0; i < services.length; i++ ) {
+                var srv = services[i];
+                message += srv.name + ' - R$ ' + parseFloat(srv.price).toFixed(2);
+                if ( i < services.length - 1 ) message += "\n";
+              }
+              alert(message);
             }
-            alert(message);
           } else {
-            alert('Nenhum serviço encontrado.');
+            window.DPSServicesModal.show([]);
           }
         } else {
           alert(resp.data ? resp.data.message : 'Erro ao buscar serviços.');
