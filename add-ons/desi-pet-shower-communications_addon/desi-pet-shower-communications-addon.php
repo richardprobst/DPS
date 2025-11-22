@@ -211,8 +211,6 @@ class DPS_Communications_Addon {
     }
 }
 
-dps_comm_init();
-
 if ( ! function_exists( 'dps_comm_init' ) ) {
     function dps_comm_init() {
         static $instance = null;
@@ -224,6 +222,8 @@ if ( ! function_exists( 'dps_comm_init' ) ) {
         return $instance;
     }
 }
+
+add_action( 'plugins_loaded', 'dps_comm_init' );
 
 if ( ! function_exists( 'dps_comm_send_whatsapp' ) ) {
     function dps_comm_send_whatsapp( $phone, $message ) {

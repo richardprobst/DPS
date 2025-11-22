@@ -208,6 +208,13 @@ Antes de criar uma nova versão oficial:
   - Integração do modal com fallback para alert() caso script não esteja carregado
   - Benefícios: separação de responsabilidades, cache do navegador, minificação possível, manutenibilidade melhorada
 
+#### Fixed (Corrigido)
+- Corrigido erro fatal "Call to undefined function" ao ativar add-ons de Communications e Loyalty:
+  - **Communications**: função `dps_comm_init()` era chamada antes de ser declarada (linha 214)
+  - **Loyalty**: função `dps_loyalty_init()` era chamada antes de ser declarada (linha 839)
+  - **Solução**: declarar funções primeiro, depois registrá-las no hook `plugins_loaded` (padrão seguido pelos demais add-ons)
+  - Os add-ons agora inicializam via `add_action('plugins_loaded', 'dps_*_init')` em vez de chamada direta em escopo global
+
 ---
 
 ### [2025-11-17] v0.3.0 — Indique e Ganhe
