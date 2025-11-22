@@ -696,7 +696,6 @@ final class DPS_Client_Portal {
      * @return string Conteúdo HTML renderizado.
      */
     public function render_portal_shortcode() {
-        ob_start();
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
@@ -709,18 +708,21 @@ final class DPS_Client_Portal {
             $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
             
             if ( file_exists( $template_path ) ) {
-                ob_end_clean();
+                ob_start();
                 include $template_path;
-                return '';
+                return ob_get_clean();
             }
             
             // Fallback se template não existir
+            ob_start();
             echo '<div class="dps-client-portal-login">';
             echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
             echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo à nossa equipe.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
             return ob_get_clean();
         }
+        
+        ob_start();
         // Filtro de mensagens de retorno
         if ( isset( $_GET['portal_msg'] ) ) {
             $msg = sanitize_text_field( $_GET['portal_msg'] );

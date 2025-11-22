@@ -1,6 +1,124 @@
 # Correção: Layout Quebrado do Portal do Cliente
 
-## Problema
+## Histórico de Correções
+
+Este documento registra as correções aplicadas ao Portal do Cliente para resolver problemas de layout onde o card aparecia fora da área de conteúdo.
+
+---
+
+## Correção #2: Output Buffering Incorreto (2025-11-22)
+
+### Problema
+
+O card "Portal do Cliente – Desi Pet Shower" aparecia ANTES do cabeçalho do tema (menu principal), quebrando completamente a estrutura visual da página `/portal-do-cliente/`.
+
+**Sintomas:**
+- O box do "Portal do Cliente" aparecia visualmente ANTES do conteúdo da página
+- Parecia estar "encaixado no cabeçalho"
+- O menu principal do site (tema YOOtheme) aparecia embaixo, como se a estrutura normal do tema tivesse sido "empurrada"
+- O card em si estava visualmente correto (título, texto, botão)
+- O problema era ONDE ele estava sendo injetado na página
+- Não havia fatal errors, apenas notices de tradução
+
+### Causa Raiz
+
+Bug no método `render_portal_shortcode()` em `class-dps-client-portal.php` (linhas 698-723):
+
+```php
+// CÓDIGO ERRADO (ANTES):
+public function render_portal_shortcode() {
+    ob_start();  // ← Inicia buffer
+    wp_enqueue_style( 'dps-client-portal' );
+    wp_enqueue_script( 'dps-client-portal' );
+    
+    $client_id = $this->get_authenticated_client_id();
+    
+    if ( ! $client_id ) {
+        $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
+        
+        if ( file_exists( $template_path ) ) {
+            ob_end_clean();  // ← PROBLEMA: Limpa o buffer!
+            include $template_path;  // ← Output vai direto para tela
+            return '';  // ← Retorna string VAZIA para shortcode
+        }
+        // ...
+    }
+}
+```
+
+**Por que quebrava:**
+1. `ob_end_clean()` descartava o conteúdo do buffer
+2. `include $template_path` imprimia HTML **diretamente no output stream** (não capturado)
+3. `return ''` fazia o shortcode retornar string vazia
+4. Resultado: HTML era emitido ANTES de `the_content()` finalizar processamento
+
+### Solução Implementada
+
+```php
+// CÓDIGO CORRETO (DEPOIS):
+public function render_portal_shortcode() {
+    wp_enqueue_style( 'dps-client-portal' );  // ← Movido para antes do buffer
+    wp_enqueue_script( 'dps-client-portal' );
+    
+    $client_id = $this->get_authenticated_client_id();
+    
+    if ( ! $client_id ) {
+        $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
+        
+        if ( file_exists( $template_path ) ) {
+            ob_start();  // ← CORREÇÃO: Inicia novo buffer
+            include $template_path;  // ← Output é capturado
+            return ob_get_clean();  // ← CORREÇÃO: Retorna conteúdo capturado
+        }
+        
+        // Fallback também com buffer correto
+        ob_start();
+        echo '<div class="dps-client-portal-login">';
+        echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
+        echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo à nossa equipe.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        return ob_get_clean();
+    }
+    
+    ob_start();  // ← Continua normal para cliente autenticado
+    // ...
+}
+```
+
+### Arquivos Modificados
+
+1. **`add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`**
+   - Linhas 698-725: Refatorado método `render_portal_shortcode()`
+   - Mudança principal: `ob_end_clean() + return ''` → `ob_start() + return ob_get_clean()`
+
+### Resultado
+
+✅ **Card do portal renderiza DENTRO da área de conteúdo**  
+✅ **Menu do tema permanece no topo** (não é mais empurrado para baixo)  
+✅ **Ordem correta**: Header → Conteúdo (com card do portal) → Footer  
+✅ **Shortcode retorna HTML corretamente** para `the_content()` processar
+
+### Fluxo Corrigido
+
+```
+[Tema abre: <html><head>...</head><body>]
+  [Header do tema]                     ← NO TOPO
+  [Menu principal]                     ← POSIÇÃO CORRETA
+  [Área de conteúdo inicia]
+    [WordPress processa the_content()]
+      [Shortcode dps_client_portal:]
+        ob_start()
+        include portal-access.php     ← Capturado no buffer
+        return ob_get_clean()         ← Retornado para shortcode
+      [WordPress insere HTML no lugar do shortcode]
+    [Área de conteúdo termina]
+  [Footer do tema]                     ← NO FINAL CORRETO
+[Tema fecha: </body></html>]
+```
+
+---
+
+## Correção #1: Documento HTML Completo no Template (Data anterior)
 
 O Portal do Cliente estava com layout quebrado no front-end quando acessado via página `/portal-do-cliente/`.
 
