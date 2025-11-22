@@ -1,7 +1,7 @@
 <?php
 /**
  * API Financeira Centralizada do DPS
- * 
+ *
  * Fornece interface pública para operações financeiras, centralizando toda a lógica
  * de criação, atualização e consulta de cobranças/transações. Outros add-ons (como Agenda)
  * devem usar esta API em vez de manipular a tabela dps_transacoes diretamente.
@@ -480,8 +480,10 @@ class DPS_Finance_API {
         }
 
         // Validação: value_cents obrigatório e positivo
-        if ( ! isset( $data['value_cents'] ) || absint( $data['value_cents'] ) <= 0 ) {
-            $errors[] = __( 'Valor deve ser maior que zero.', 'dps-finance-addon' );
+        if ( ! isset( $data['value_cents'] ) ) {
+            $errors[] = __( 'Valor é obrigatório.', 'dps-finance-addon' );
+        } elseif ( ! is_numeric( $data['value_cents'] ) || (int) $data['value_cents'] < 0 ) {
+            $errors[] = __( 'Valor deve ser maior ou igual a zero.', 'dps-finance-addon' );
         }
 
         // Validação: status válido
@@ -494,7 +496,7 @@ class DPS_Finance_API {
 
         // Validação: data no formato correto
         if ( isset( $data['date'] ) && ! empty( $data['date'] ) ) {
-            $date_obj = \DateTime::createFromFormat( 'Y-m-d', $data['date'] );
+            $date_obj = DateTime::createFromFormat( 'Y-m-d', $data['date'] );
             if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $data['date'] ) {
                 $errors[] = __( 'Data deve estar no formato Y-m-d (ex: 2025-01-15).', 'dps-finance-addon' );
             }

@@ -22,7 +22,7 @@ class DPS_Agenda_Addon {
         // Verifica dependência do Finance Add-on
         if ( ! class_exists( 'DPS_Finance_API' ) ) {
             add_action( 'admin_notices', [ $this, 'finance_dependency_notice' ] );
-            // Continua carregando para não quebrar completamente, mas funcionalidade financeira não estará disponível
+            // Continua a carregar para não quebrar completamente, mas funcionalidade financeira não estará disponível
         }
 
         // Cria páginas necessárias ao ativar o plugin (apenas agenda, sem a página de cobranças)
