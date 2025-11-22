@@ -38,7 +38,7 @@ $btn_text     = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) 
 <form method="post" class="dps-form">
 	<!-- Hidden fields -->
 	<input type="hidden" name="dps_action" value="save_client">
-	<?php wp_nonce_field( 'dps_action', 'dps_nonce' ); ?>
+	<?php wp_nonce_field( 'dps_action', 'dps_nonce_client_form' ); ?>
 	<?php if ( $edit_id ) : ?>
 		<input type="hidden" name="client_id" value="<?php echo esc_attr( $edit_id ); ?>">
 	<?php endif; ?>

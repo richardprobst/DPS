@@ -370,7 +370,11 @@ class DPS_Base_Frontend {
     private static function get_redirect_url( $tab = '' ) {
         $base = self::get_redirect_base_url();
         $base = remove_query_arg(
-            [ 'dps_delete', 'id', 'dps_edit', 'dps_view', 'tab', 'dps_action', 'dps_nonce' ],
+            [ 
+                'dps_delete', 'id', 'dps_edit', 'dps_view', 'tab', 'dps_action',
+                'dps_nonce', 'dps_nonce_client_form', 'dps_nonce_pets', 
+                'dps_nonce_agendamentos', 'dps_nonce_agendamentos_status', 'dps_nonce_passwords'
+            ],
             $base
         );
 
@@ -454,15 +458,29 @@ class DPS_Base_Frontend {
      * Processa submissões de formulários
      */
     public static function handle_request() {
+        // Determina qual campo de nonce verificar com base na ação
+        $action = isset( $_POST['dps_action'] ) ? sanitize_key( wp_unslash( $_POST['dps_action'] ) ) : '';
+        
+        // Mapeia ações para nomes de nonce
+        $nonce_map = [
+            'save_client'               => 'dps_nonce_client_form',
+            'save_pet'                  => 'dps_nonce_pets',
+            'save_appointment'          => 'dps_nonce_agendamentos',
+            'update_appointment_status' => 'dps_nonce_agendamentos_status',
+            'save_passwords'            => 'dps_nonce_passwords',
+        ];
+        
+        $nonce_field = isset( $nonce_map[ $action ] ) ? $nonce_map[ $action ] : 'dps_nonce';
+        
         // Verifica nonce
-        if ( ! isset( $_POST['dps_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce'] ) ), 'dps_action' ) ) {
+        if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ), 'dps_action' ) ) {
             return;
         }
 
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
-        $action = isset( $_POST['dps_action'] ) ? sanitize_key( wp_unslash( $_POST['dps_action'] ) ) : '';
+        
         switch ( $action ) {
             case 'save_client':
                 if ( ! current_user_can( 'dps_manage_clients' ) ) {
@@ -795,7 +813,7 @@ class DPS_Base_Frontend {
         // Define enctype multipart/form-data para permitir upload de foto
         echo '<form method="post" enctype="multipart/form-data" class="dps-form dps-form--pet">';
         echo '<input type="hidden" name="dps_action" value="save_pet">';
-        wp_nonce_field( 'dps_action', 'dps_nonce' );
+        wp_nonce_field( 'dps_action', 'dps_nonce_pets' );
         if ( $edit_id ) {
             echo '<input type="hidden" name="pet_id" value="' . esc_attr( $edit_id ) . '">';
         }
@@ -1081,7 +1099,7 @@ class DPS_Base_Frontend {
         if ( ! $visitor_only ) {
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
-            wp_nonce_field( 'dps_action', 'dps_nonce' );
+            wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos' );
             echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
@@ -1739,7 +1757,7 @@ class DPS_Base_Frontend {
             $label = $status_labels[ $status ] ?? ucwords( str_replace( '_', ' ', $status ) );
             return esc_html( $label );
         }
-        $nonce_field = wp_nonce_field( 'dps_action', 'dps_nonce', true, false );
+        $nonce_field = wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos_status', true, false );
         $html  = '<form method="post" class="dps-inline-status-form">';
         $html .= '<input type="hidden" name="dps_action" value="update_appointment_status">';
         $html .= $nonce_field;
@@ -1770,7 +1788,7 @@ class DPS_Base_Frontend {
         echo '<h3>' . esc_html__( 'Configuração de Senhas', 'desi-pet-shower' ) . '</h3>';
         echo '<form method="post" class="dps-form">';
         echo '<input type="hidden" name="dps_action" value="save_passwords">';
-        wp_nonce_field( 'dps_action', 'dps_nonce' );
+        wp_nonce_field( 'dps_action', 'dps_nonce_passwords' );
         // Senha do plugin base (admin)
         echo '<p><label>' . esc_html__( 'Senha do painel principal', 'desi-pet-shower' ) . '<br><input type="password" name="base_password" value="' . esc_attr( $base_pass ) . '" required></label></p>';
         // Senha da agenda
