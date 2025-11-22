@@ -1095,3 +1095,332 @@ public function exemplo_metodo( $param1, $param2, $args = [] ) {
 - Reutilizar classes helper quando disponíveis (`DPS_CPT_Helper`, `DPS_Money_Helper`, etc.)
 - Seguir contratos de hooks existentes sem modificar assinaturas
 - Documentar novos hooks expostos com exemplos de uso
+
+---
+
+## Add-on: AI (Assistente Virtual)
+
+**Diretório**: `add-ons/desi-pet-shower-ai_addon/`
+
+**Versão**: 1.2.0
+
+**Propósito**: Assistente virtual inteligente para o Portal do Cliente e para geração de sugestões de comunicações (WhatsApp e e-mail).
+
+### Funcionalidades Principais
+
+1. **Portal do Cliente**
+   - Widget de chat para clientes fazerem perguntas sobre agendamentos, serviços, histórico
+   - Respostas contextualizadas baseadas em dados reais do cliente e pets
+   - Escopo restrito a assuntos relacionados a Banho e Tosa
+
+2. **Assistente de Comunicações** (v1.2.0+)
+   - Gera sugestões de mensagens para WhatsApp
+   - Gera sugestões de e-mail (assunto e corpo)
+   - **NUNCA envia automaticamente** - apenas sugere textos para revisão humana
+
+### Classes Principais
+
+#### `DPS_AI_Client`
+
+Cliente HTTP para API da OpenAI.
+
+**Métodos:**
+- `chat( array $messages, array $options = [] )`: Faz chamada à API Chat Completions
+- `test_connection()`: Testa validação da API key
+
+**Configurações:**
+- API key armazenada em `dps_ai_settings['api_key']`
+- Modelo, temperatura, max_tokens, timeout configuráveis
+
+#### `DPS_AI_Assistant`
+
+Assistente principal para Portal do Cliente.
+
+**Métodos:**
+- `answer_portal_question( int $client_id, array $pet_ids, string $user_question )`: Responde pergunta do cliente
+- `get_base_system_prompt()`: Retorna prompt base de segurança (público, reutilizável)
+
+**System Prompt:**
+- Escopo restrito a Banho e Tosa, serviços, agendamentos, histórico, funcionalidades DPS
+- Proíbe assuntos fora do contexto (política, religião, finanças pessoais, etc.)
+- Protegido contra contradições de instruções adicionais
+
+#### `DPS_AI_Message_Assistant` (v1.2.0+)
+
+Assistente para geração de sugestões de comunicações.
+
+**Métodos:**
+
+```php
+/**
+ * Gera sugestão de mensagem para WhatsApp.
+ *
+ * @param array $context {
+ *     Contexto da mensagem.
+ *
+ *     @type string   $type              Tipo de mensagem (lembrete, confirmacao, pos_atendimento, etc.)
+ *     @type string   $client_name       Nome do cliente
+ *     @type string   $client_phone      Telefone do cliente
+ *     @type string   $pet_name          Nome do pet
+ *     @type string   $appointment_date  Data do agendamento (formato legível)
+ *     @type string   $appointment_time  Hora do agendamento
+ *     @type array    $services          Lista de nomes de serviços
+ *     @type string   $groomer_name      Nome do groomer (opcional)
+ *     @type string   $amount            Valor formatado (opcional, para cobranças)
+ *     @type string   $additional_info   Informações adicionais (opcional)
+ * }
+ * @return array|null Array com ['text' => 'mensagem'] ou null em caso de erro.
+ */
+public static function suggest_whatsapp_message( array $context )
+
+/**
+ * Gera sugestão de e-mail (assunto e corpo).
+ *
+ * @param array $context Contexto da mensagem (mesmos campos do WhatsApp).
+ * @return array|null Array com ['subject' => 'assunto', 'body' => 'corpo'] ou null.
+ */
+public static function suggest_email_message( array $context )
+```
+
+**Tipos de mensagens suportados:**
+- `lembrete`: Lembrete de agendamento
+- `confirmacao`: Confirmação de agendamento
+- `pos_atendimento`: Agradecimento pós-atendimento
+- `cobranca_suave`: Lembrete educado de pagamento
+- `cancelamento`: Notificação de cancelamento
+- `reagendamento`: Confirmação de reagendamento
+
+### Handlers AJAX
+
+#### `wp_ajax_dps_ai_suggest_whatsapp_message`
+
+Gera sugestão de mensagem WhatsApp via AJAX.
+
+**Request:**
+```javascript
+{
+    action: 'dps_ai_suggest_whatsapp_message',
+    nonce: 'dps_ai_comm_nonce',
+    context: {
+        type: 'lembrete',
+        client_name: 'João Silva',
+        pet_name: 'Rex',
+        appointment_date: '15/12/2024',
+        appointment_time: '14:00',
+        services: ['Banho', 'Tosa']
+    }
+}
+```
+
+**Response (sucesso):**
+```javascript
+{
+    success: true,
+    data: {
+        text: 'Olá João! Lembrete: amanhã às 14:00 temos o agendamento...'
+    }
+}
+```
+
+**Response (erro):**
+```javascript
+{
+    success: false,
+    data: {
+        message: 'Não foi possível gerar sugestão automática. A IA pode estar desativada...'
+    }
+}
+```
+
+#### `wp_ajax_dps_ai_suggest_email_message`
+
+Gera sugestão de e-mail via AJAX.
+
+**Request:** (mesma estrutura do WhatsApp)
+
+**Response (sucesso):**
+```javascript
+{
+    success: true,
+    data: {
+        subject: 'Lembrete de Agendamento - Desi Pet Shower',
+        body: 'Olá João,\n\nEste é um lembrete...'
+    }
+}
+```
+
+### Interface JavaScript
+
+**Arquivo:** `assets/js/dps-ai-communications.js`
+
+**Classes CSS:**
+- `.dps-ai-suggest-whatsapp`: Botão de sugestão para WhatsApp
+- `.dps-ai-suggest-email`: Botão de sugestão para e-mail
+
+**Atributos de dados (data-*):**
+
+Para WhatsApp:
+```html
+<button 
+    class="button dps-ai-suggest-whatsapp"
+    data-target="#campo-mensagem"
+    data-type="lembrete"
+    data-client-name="João Silva"
+    data-pet-name="Rex"
+    data-appointment-date="15/12/2024"
+    data-appointment-time="14:00"
+    data-services='["Banho", "Tosa"]'
+>
+    Sugerir com IA
+</button>
+```
+
+Para e-mail:
+```html
+<button 
+    class="button dps-ai-suggest-email"
+    data-target-subject="#campo-assunto"
+    data-target-body="#campo-corpo"
+    data-type="pos_atendimento"
+    data-client-name="Maria Santos"
+    data-pet-name="Mel"
+>
+    Sugerir E-mail com IA
+</button>
+```
+
+**Modal de pré-visualização:**
+- E-mails abrem modal para revisão antes de inserir nos campos
+- Usuário pode editar assunto e corpo no modal
+- Botão "Inserir" preenche os campos do formulário (não envia)
+
+### Configurações
+
+Armazenadas em `dps_ai_settings`:
+
+```php
+[
+    'enabled'                 => bool,   // Habilita/desabilita IA
+    'api_key'                 => string, // Chave da OpenAI (sk-...)
+    'model'                   => string, // gpt-3.5-turbo, gpt-4, etc.
+    'temperature'             => float,  // 0-1, padrão 0.4
+    'timeout'                 => int,    // Segundos, padrão 10
+    'max_tokens'              => int,    // Padrão 500
+    'additional_instructions' => string, // Instruções customizadas (max 2000 chars)
+]
+```
+
+**Opções específicas para comunicações:**
+- WhatsApp: `max_tokens => 300` (mensagens curtas)
+- E-mail: `max_tokens => 500` (pode ter mais contexto)
+- Temperatura: `0.5` (levemente mais criativo para tom amigável)
+
+### Segurança
+
+- ✅ Validação de nonce em todos os handlers AJAX
+- ✅ Verificação de capability `edit_posts`
+- ✅ Sanitização de todos os inputs (`sanitize_text_field`, `wp_unslash`)
+- ✅ System prompt base protegido contra sobrescrita
+- ✅ **NUNCA envia mensagens automaticamente**
+- ✅ API key server-side only (nunca exposta no JavaScript)
+
+### Falhas e Tratamento de Erros
+
+**IA desativada ou sem API key:**
+- Retorna `null` em métodos PHP
+- Retorna erro amigável em AJAX: "IA pode estar desativada..."
+- **Campo de mensagem não é alterado** - usuário pode escrever manualmente
+
+**Erro na API da OpenAI:**
+- Timeout, erro de rede, resposta inválida → retorna `null`
+- Logs em `error_log()` para debug
+- Não quebra a interface - usuário pode continuar
+
+**Parse de e-mail falha:**
+- Tenta múltiplos padrões (ASSUNTO:/CORPO:, Subject:/Body:, divisão por linhas)
+- Fallback: primeira linha como assunto, resto como corpo
+- Se tudo falhar: retorna `null`
+
+### Integração com Outros Add-ons
+
+**Communications Add-on:**
+- Sugestões de IA podem ser usadas com `DPS_Communications_API`
+- IA gera texto → usuário revisa → `send_whatsapp()` ou `send_email()`
+
+**Agenda Add-on:**
+- Pode adicionar botões de sugestão nas páginas de agendamento
+- Ver exemplos em `includes/ai-communications-examples.php`
+
+**Portal do Cliente:**
+- Widget de chat já integrado via `DPS_AI_Integration_Portal`
+- Usa mesmo system prompt base e configurações
+
+### Documentação Adicional
+
+- **Manual completo**: `add-ons/desi-pet-shower-ai_addon/AI_COMMUNICATIONS.md`
+- **Exemplos de código**: `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
+- **Comportamento da IA**: `add-ons/desi-pet-shower-ai_addon/BEHAVIOR_EXAMPLES.md`
+
+### Hooks Expostos
+
+Atualmente nenhum hook específico de comunicações. Possíveis hooks futuros:
+
+```php
+// Filtro antes de gerar sugestão
+$context = apply_filters( 'dps_ai_comm_whatsapp_context', $context, $type );
+
+// Filtro após gerar sugestão (permite pós-processamento)
+$message = apply_filters( 'dps_ai_comm_whatsapp_message', $message, $context );
+```
+
+### Tabelas de Banco de Dados
+
+Nenhuma tabela própria. Usa apenas configurações em `wp_options`.
+
+### Limitações Conhecidas
+
+- Depende de conexão com internet e API key válida da OpenAI
+- Custo por chamada à API (variável por modelo e tokens)
+- Qualidade das sugestões depende da qualidade dos dados fornecidos no contexto
+- Não substitui revisão humana - **sempre revisar antes de enviar**
+- Assets carregados em todas as páginas admin (TODO: otimizar para carregar apenas onde necessário)
+
+### Exemplos de Uso
+
+Ver arquivo completo de exemplos: `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
+
+**Exemplo rápido:**
+
+```php
+// Gerar sugestão de WhatsApp
+$result = DPS_AI_Message_Assistant::suggest_whatsapp_message([
+    'type'              => 'lembrete',
+    'client_name'       => 'João Silva',
+    'pet_name'          => 'Rex',
+    'appointment_date'  => '15/12/2024',
+    'appointment_time'  => '14:00',
+    'services'          => ['Banho', 'Tosa'],
+]);
+
+if ( null !== $result ) {
+    echo $result['text']; // Mensagem sugerida
+}
+```
+
+### Changelog
+
+**v1.0.0** - Lançamento inicial
+- Widget de chat no Portal do Cliente
+- Respostas contextualizadas sobre agendamentos e serviços
+
+**v1.1.0** - Instruções adicionais
+- Campo de instruções customizadas nas configurações
+- Método público `get_base_system_prompt()`
+
+**v1.2.0** - Assistente de Comunicações
+- Classe `DPS_AI_Message_Assistant`
+- Sugestões de WhatsApp e e-mail
+- Handlers AJAX e interface JavaScript
+- Modal de pré-visualização para e-mails
+- 6 tipos de mensagens suportados
+- Documentação e exemplos de integração

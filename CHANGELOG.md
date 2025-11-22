@@ -85,6 +85,16 @@ Antes de criar uma nova versão oficial:
   - Instruções adicionais são enviadas como segunda mensagem de sistema após prompt base
   - Prompt base protegido contra contradições posteriores
   - Novo método público `DPS_AI_Assistant::get_base_system_prompt()` para reutilização
+- **AI Add-on (v1.2.0)**: Assistente de IA para Comunicações
+  - Nova classe `DPS_AI_Message_Assistant` para gerar sugestões de mensagens
+  - `DPS_AI_Message_Assistant::suggest_whatsapp_message($context)` - Gera sugestão de mensagem para WhatsApp
+  - `DPS_AI_Message_Assistant::suggest_email_message($context)` - Gera sugestão de e-mail (assunto e corpo)
+  - Handlers AJAX `wp_ajax_dps_ai_suggest_whatsapp_message` e `wp_ajax_dps_ai_suggest_email_message`
+  - Interface JavaScript com botões de sugestão e modal de pré-visualização para e-mails
+  - Suporta 6 tipos de mensagens: lembrete, confirmação, pós-atendimento, cobrança suave, cancelamento, reagendamento
+  - **IMPORTANTE**: IA NUNCA envia automaticamente - apenas gera sugestões que o usuário revisa antes de enviar
+  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/AI_COMMUNICATIONS.md`
+  - Exemplos de integração em `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
 - **Services Add-on**: Nova API pública (`DPS_Services_API`) para centralizar lógica de serviços e cálculo de preços (v1.2.0)
   - `DPS_Services_API::get_service($service_id)` - Retornar dados completos de um serviço
   - `DPS_Services_API::calculate_price($service_id, $pet_size, $context)` - Calcular preço por porte do pet
