@@ -79,6 +79,21 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Finance Add-on**: Nova API financeira pública (`DPS_Finance_API`) para centralizar operações de cobranças
+  - `DPS_Finance_API::create_or_update_charge()` - Criar ou atualizar cobrança vinculada a agendamento
+  - `DPS_Finance_API::mark_as_paid()` - Marcar cobrança como paga
+  - `DPS_Finance_API::mark_as_pending()` - Reabrir cobrança como pendente
+  - `DPS_Finance_API::mark_as_cancelled()` - Cancelar cobrança
+  - `DPS_Finance_API::get_charge()` - Buscar dados de uma cobrança
+  - `DPS_Finance_API::get_charges_by_appointment()` - Buscar todas as cobranças de um agendamento
+  - `DPS_Finance_API::delete_charges_by_appointment()` - Remover cobranças ao excluir agendamento
+  - `DPS_Finance_API::validate_charge_data()` - Validar dados antes de criar/atualizar
+- **Finance Add-on**: Novos hooks para integração:
+  - `dps_finance_charge_created` - Disparado ao criar nova cobrança
+  - `dps_finance_charge_updated` - Disparado ao atualizar cobrança existente
+  - `dps_finance_charges_deleted` - Disparado ao deletar cobranças de um agendamento
+- **Agenda Add-on**: Verificação de dependência do Finance Add-on com aviso no admin
+- **Documentação**: `FINANCE_AGENDA_REORGANIZATION_DIAGNOSTIC.md` - Diagnóstico completo da reorganização arquitetural (33KB, 7 seções)
 - Criadas classes helper para melhorar qualidade e manutenibilidade do código:
   - `DPS_Money_Helper`: manipulação consistente de valores monetários, conversão formato brasileiro ↔ centavos
   - `DPS_URL_Builder`: construção padronizada de URLs de edição, exclusão, visualização e navegação
@@ -116,6 +131,12 @@ Antes de criar uma nova versão oficial:
   - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
+- **Agenda Add-on**: Agora depende do Finance Add-on para funcionalidade completa de cobranças
+- **Agenda Add-on**: Removida lógica financeira duplicada (~55 linhas de SQL direto)
+- **Agenda Add-on**: `update_status_ajax()` agora confia na sincronização automática do Finance via hooks
+- **Finance Add-on**: `cleanup_transactions_for_appointment()` agora delega para `DPS_Finance_API`
+- **Finance Add-on**: Funções `dps_parse_money_br()` e `dps_format_money_br()` agora delegam para `DPS_Money_Helper` do núcleo
+- **Loyalty Add-on**: Função `dps_format_money_br()` agora delega para `DPS_Money_Helper` do núcleo
 - Interface administrativa completamente reformulada com design minimalista:
   - Paleta de cores reduzida e consistente (base neutra + 3 cores de status essenciais)
   - Remoção de sombras decorativas e elementos visuais desnecessários
@@ -185,7 +206,18 @@ Antes de criar uma nova versão oficial:
   - ✅ Labels técnicos substituídos por termos mais claros
   - ✅ Estilos inline substituídos por classes CSS reutilizáveis
 
+#### Deprecated (Depreciado)
+- **Finance Add-on**: `dps_parse_money_br()` - Use `DPS_Money_Helper::parse_brazilian_format()` (retrocompatível, aviso de depreciação)
+- **Finance Add-on**: `dps_format_money_br()` - Use `DPS_Money_Helper::format_to_brazilian()` (retrocompatível, aviso de depreciação)
+- **Loyalty Add-on**: `dps_format_money_br()` - Use `DPS_Money_Helper::format_to_brazilian()` (retrocompatível, aviso de depreciação)
+- **Agenda Add-on**: Shortcode `[dps_charges_notes]` - Use `[dps_fin_docs]` do Finance (redirect automático, mensagem de depreciação)
+
 #### Refactoring (Interno)
+- **Arquitetura**: Centralização completa de lógica financeira no Finance Add-on (eliminação de duplicação, redução de acoplamento)
+- **Agenda Add-on**: Removidas ~55 linhas de SQL direto para `dps_transacoes` (agora usa sincronização automática via hooks do Finance)
+- **Finance Add-on**: `cleanup_transactions_for_appointment()` refatorado para delegar para `DPS_Finance_API`
+- **Prevenção de race conditions**: Apenas Finance escreve em dados financeiros (fonte de verdade única)
+- **Melhoria de manutenibilidade**: Mudanças financeiras centralizadas em 1 lugar (Finance Add-on API pública)
 - Reestruturação completa do CSS administrativo em `dps-base.css`:
   - Simplificação da classe `.dps-alert` removendo pseudo-elementos decorativos e sombras
   - Redução da paleta de cores de status de 4+ variantes para 3 cores essenciais

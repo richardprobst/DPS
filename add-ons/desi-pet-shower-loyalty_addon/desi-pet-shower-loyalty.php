@@ -963,7 +963,19 @@ if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
 }
 
 if ( ! function_exists( 'dps_format_money_br' ) ) {
+    /**
+     * Formata um valor em centavos para string no padrão brasileiro.
+     *
+     * @deprecated 1.1.0 Use DPS_Money_Helper::format_to_brazilian() instead.
+     * @param int $int Valor em centavos.
+     * @return string Valor formatado.
+     */
     function dps_format_money_br( $int ) {
+        _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Money_Helper::format_to_brazilian()' );
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return DPS_Money_Helper::format_to_brazilian( $int );
+        }
+        // Fallback se helper não disponível
         $float = (int) $int / 100;
         return number_format( $float, 2, ',', '.' );
     }
