@@ -159,40 +159,54 @@ class DPS_AI_Assistant {
     private static function build_client_context( $client_id, array $pet_ids ) {
         $context = "CONTEXTO DO SISTEMA:\n\n";
 
-        // Dados do cliente
-        $client_name  = get_the_title( $client_id );
-        $client_phone = get_post_meta( $client_id, 'client_phone', true );
-        $client_email = get_post_meta( $client_id, 'client_email', true );
+        // Dados do cliente - valida existência antes de usar
+        if ( $client_id && 'dps_cliente' === get_post_type( $client_id ) ) {
+            $client_name  = get_the_title( $client_id );
+            $client_phone = get_post_meta( $client_id, 'client_phone', true );
+            $client_email = get_post_meta( $client_id, 'client_email', true );
 
-        $context .= "Cliente: {$client_name}\n";
-        if ( $client_phone ) {
-            $context .= "Telefone: {$client_phone}\n";
-        }
-        if ( $client_email ) {
-            $context .= "E-mail: {$client_email}\n";
+            if ( $client_name && ! empty( $client_name ) ) {
+                $context .= "Cliente: {$client_name}\n";
+            }
+            if ( $client_phone ) {
+                $context .= "Telefone: {$client_phone}\n";
+            }
+            if ( $client_email ) {
+                $context .= "E-mail: {$client_email}\n";
+            }
         }
 
-        // Dados dos pets
+        // Dados dos pets - valida cada pet antes de usar
         if ( ! empty( $pet_ids ) ) {
-            $context .= "\nPets cadastrados:\n";
+            $valid_pets = [];
 
             foreach ( $pet_ids as $pet_id ) {
-                $pet_name   = get_the_title( $pet_id );
-                $pet_breed  = get_post_meta( $pet_id, 'pet_breed', true );
-                $pet_size   = get_post_meta( $pet_id, 'pet_size', true );
-                $pet_age    = get_post_meta( $pet_id, 'pet_age', true );
+                if ( $pet_id && 'dps_pet' === get_post_type( $pet_id ) ) {
+                    $pet_name = get_the_title( $pet_id );
+                    if ( $pet_name && ! empty( $pet_name ) ) {
+                        $pet_breed = get_post_meta( $pet_id, 'pet_breed', true );
+                        $pet_size  = get_post_meta( $pet_id, 'pet_size', true );
+                        $pet_age   = get_post_meta( $pet_id, 'pet_age', true );
 
-                $context .= "- {$pet_name}";
-                if ( $pet_breed ) {
-                    $context .= " (Raça: {$pet_breed})";
+                        $pet_desc = "- {$pet_name}";
+                        if ( $pet_breed ) {
+                            $pet_desc .= " (Raça: {$pet_breed})";
+                        }
+                        if ( $pet_size ) {
+                            $pet_desc .= " (Porte: {$pet_size})";
+                        }
+                        if ( $pet_age ) {
+                            $pet_desc .= " (Idade: {$pet_age})";
+                        }
+
+                        $valid_pets[] = $pet_desc;
+                    }
                 }
-                if ( $pet_size ) {
-                    $context .= " (Porte: {$pet_size})";
-                }
-                if ( $pet_age ) {
-                    $context .= " (Idade: {$pet_age})";
-                }
-                $context .= "\n";
+            }
+
+            if ( ! empty( $valid_pets ) ) {
+                $context .= "\nPets cadastrados:\n";
+                $context .= implode( "\n", $valid_pets ) . "\n";
             }
         }
 
@@ -300,10 +314,11 @@ class DPS_AI_Assistant {
                     $service_names = [];
                     foreach ( $services as $service_id ) {
                         $service_id = absint( $service_id );
-                        // Valida se o ID é válido e o post existe
-                        if ( $service_id && get_post_status( $service_id ) ) {
+                        // Valida tipo de post e existência antes de buscar título
+                        if ( $service_id && 'dps_servico' === get_post_type( $service_id ) ) {
                             $service_name = get_the_title( $service_id );
-                            if ( $service_name ) {
+                            // Verifica se o título não é vazio e não é false
+                            if ( $service_name && ! empty( $service_name ) && false !== $service_name ) {
                                 $service_names[] = $service_name;
                             }
                         }
