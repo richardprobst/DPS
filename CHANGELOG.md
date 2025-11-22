@@ -79,6 +79,12 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Services Add-on**: Nova API pública (`DPS_Services_API`) para centralizar lógica de serviços e cálculo de preços (v1.2.0)
+  - `DPS_Services_API::get_service($service_id)` - Retornar dados completos de um serviço
+  - `DPS_Services_API::calculate_price($service_id, $pet_size, $context)` - Calcular preço por porte do pet
+  - `DPS_Services_API::calculate_appointment_total($services_ids, $pets_ids, $context)` - Calcular total de agendamento
+  - `DPS_Services_API::get_services_details($appointment_id)` - Retornar detalhes dos serviços de um agendamento
+- **Services Add-on**: Endpoint AJAX `dps_get_services_details` movido da Agenda para Services (mantém compatibilidade)
 - **Finance Add-on**: Nova API financeira pública (`DPS_Finance_API`) para centralizar operações de cobranças
   - `DPS_Finance_API::create_or_update_charge()` - Criar ou atualizar cobrança vinculada a agendamento
   - `DPS_Finance_API::mark_as_paid()` - Marcar cobrança como paga
@@ -190,6 +196,7 @@ Antes de criar uma nova versão oficial:
   - Remoção de sombras decorativas (apenas bordas 1px solid)
 
 #### Fixed (Corrigido)
+- **Agenda Add-on**: Corrigido syntax error pré-existente (linha 936) com closing brace órfão e código quebrado usando variáveis indefinidas ($client_id, $pet_post, $date, $valor)
 - Implementado feedback visual após todas as operações principais:
   - Mensagens de sucesso ao salvar clientes, pets e agendamentos
   - Mensagens de confirmação ao excluir registros
@@ -207,12 +214,16 @@ Antes de criar uma nova versão oficial:
   - ✅ Estilos inline substituídos por classes CSS reutilizáveis
 
 #### Deprecated (Depreciado)
+- **Agenda Add-on**: Método `get_services_details_ajax()` - Lógica movida para Services Add-on (delega para `DPS_Services_API::get_services_details()`, mantém compatibilidade com fallback)
+- **Agenda Add-on**: Endpoint AJAX `dps_get_services_details` agora é gerenciado pelo Services Add-on (Agenda mantém por compatibilidade)
 - **Finance Add-on**: `dps_parse_money_br()` - Use `DPS_Money_Helper::parse_brazilian_format()` (retrocompatível, aviso de depreciação)
 - **Finance Add-on**: `dps_format_money_br()` - Use `DPS_Money_Helper::format_to_brazilian()` (retrocompatível, aviso de depreciação)
 - **Loyalty Add-on**: `dps_format_money_br()` - Use `DPS_Money_Helper::format_to_brazilian()` (retrocompatível, aviso de depreciação)
 - **Agenda Add-on**: Shortcode `[dps_charges_notes]` - Use `[dps_fin_docs]` do Finance (redirect automático, mensagem de depreciação)
 
 #### Refactoring (Interno)
+- **Services Add-on**: Removido header duplicado de plugin no arquivo `dps_service/desi-pet-shower-services-addon.php` (mantém apenas no wrapper)
+- **Services Add-on**: Centralização completa de lógica de serviços e cálculo de preços via `DPS_Services_API` (redução de duplicação, separação de responsabilidades)
 - **Arquitetura**: Centralização completa de lógica financeira no Finance Add-on (eliminação de duplicação, redução de acoplamento)
 - **Agenda Add-on**: Removidas ~55 linhas de SQL direto para `dps_transacoes` (agora usa sincronização automática via hooks do Finance)
 - **Finance Add-on**: `cleanup_transactions_for_appointment()` refatorado para delegar para `DPS_Finance_API`

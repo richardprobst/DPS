@@ -151,15 +151,16 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Gerenciar agenda de atendimentos e cobranças pendentes
 - Enviar lembretes automáticos diários aos clientes
 - Atualizar status de agendamentos via interface AJAX
+- **[Deprecated v1.1.0]** Endpoint `dps_get_services_details` (movido para Services Add-on)
 
 **Shortcodes expostos**:
 - `[dps_agenda_page]`: renderiza página de agenda com filtros e ações
-- `[dps_charges_notes]`: exibe lista de cobranças pendentes
+- `[dps_charges_notes]`: **[Deprecated]** redirecionado para Finance Add-on (`[dps_fin_docs]`)
 
 **CPTs, tabelas e opções**:
-- Não cria CPTs próprios; consome `dps_appointment` do núcleo
-- Cria páginas automaticamente: "Agenda DPS" e "Cobranças DPS"
-- Options: `dps_agenda_page_id`, `dps_charges_page_id`
+- Não cria CPTs próprios; consome `dps_agendamento` do núcleo
+- Cria páginas automaticamente: "Agenda DPS"
+- Options: `dps_agenda_page_id`
 
 **Hooks consumidos**:
 - Nenhum hook específico do núcleo (opera diretamente sobre CPTs)
@@ -167,17 +168,25 @@ echo '<h2>Cadastro de Clientes</h2>';
 **Hooks disparados**:
 - `dps_agenda_send_reminders`: cron job diário para envio de lembretes
 
+**Endpoints AJAX**:
+- `dps_update_status`: atualiza status de agendamento
+- `dps_get_services_details`: **[Deprecated v1.1.0]** mantido por compatibilidade, delega para `DPS_Services_API::get_services_details()`
+
 **Dependências**:
 - Depende do plugin base para CPTs de agendamento
+- **[Recomendado]** Services Add-on para cálculo de valores via API
 - Integra-se com add-on de Comunicações para envio de mensagens (se ativo)
+- Aviso exibido se Finance Add-on não estiver ativo (funcionalidades financeiras limitadas)
 
 **Introduzido em**: v0.1.0 (estimado)
 
 **Assets**:
 - `assets/js/agenda-addon.js`: interações AJAX e feedback visual
+- **[Deprecated]** `agenda-addon.js` e `agenda.js` na raiz (devem ser removidos)
 
 **Observações**:
 - Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar
+- **[v1.1.0]** Lógica de serviços movida para Services Add-on; Agenda delega cálculos para `DPS_Services_API`
 
 ---
 
@@ -496,6 +505,7 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Definir preços e duração por porte de pet
 - Vincular serviços aos agendamentos
 - Povoar catálogo padrão na ativação
+- **[v1.2.0]** Centralizar toda lógica de cálculo de preços via API pública
 
 **Shortcodes expostos**: Nenhum
 
@@ -510,11 +520,50 @@ echo '<h2>Cadastro de Clientes</h2>';
 
 **Hooks disparados**: Nenhum
 
+**Endpoints AJAX expostos**:
+- `dps_get_services_details`: retorna detalhes de serviços de um agendamento (movido da Agenda em v1.2.0)
+
+**API Pública** (desde v1.2.0):
+A classe `DPS_Services_API` centraliza toda a lógica de serviços e cálculo de preços:
+
+```php
+// Obter dados completos de um serviço
+$service = DPS_Services_API::get_service( $service_id );
+// Retorna: ['id', 'title', 'type', 'category', 'active', 'price', 'price_small', 'price_medium', 'price_large']
+
+// Calcular preço de um serviço por porte
+$price = DPS_Services_API::calculate_price( $service_id, 'medio' );
+// Aceita: 'pequeno'/'small', 'medio'/'medium', 'grande'/'large'
+
+// Calcular total de um agendamento
+$total = DPS_Services_API::calculate_appointment_total( 
+    $service_ids,  // array de IDs de serviços
+    $pet_ids,      // array de IDs de pets
+    [              // contexto opcional
+        'custom_prices' => [ service_id => price ],  // preços personalizados
+        'extras' => 50.00,     // valor de extras
+        'taxidog' => 25.00,    // valor de taxidog
+    ]
+);
+// Retorna: ['total', 'services_total', 'services_details', 'extras_total', 'taxidog_total']
+
+// Obter detalhes de serviços de um agendamento
+$details = DPS_Services_API::get_services_details( $appointment_id );
+// Retorna: ['services' => [['name', 'price'], ...], 'total']
+```
+
+**Contrato de integração**:
+- Outros add-ons DEVEM usar `DPS_Services_API` para cálculos de preços
+- Agenda Add-on delega `dps_get_services_details` para esta API (desde v1.1.0)
+- Finance Add-on DEVE usar esta API para obter valores históricos
+- Portal do Cliente DEVE usar esta API para exibir valores
+
 **Dependências**:
 - Depende do plugin base para estrutura de navegação
 - Reutiliza `DPS_CPT_Helper` para registro de CPT
 
-**Introduzido em**: v0.1.0 (estimado)
+**Introduzido em**: v0.1.0  
+**API pública**: v1.2.0
 
 ---
 
