@@ -100,6 +100,37 @@ $email = DPS_Request_Validator::sanitize_email_from_post( 'client_email' );
 
 **Boas práticas**: NUNCA implemente validação de nonce ou sanitização manual fora deste helper. Evite duplicar lógica de segurança.
 
+#### DPS_Phone_Helper
+**Propósito**: Formatação e validação padronizada de números de telefone para comunicações (WhatsApp, exibição).
+
+**Entrada/Saída**:
+- `format_for_whatsapp( string $phone )`: Formata telefone para WhatsApp (adiciona código do país 55 se necessário) → string apenas dígitos
+- `format_for_display( string $phone )`: Formata telefone para exibição brasileira → string formatada "(11) 98765-4321"
+- `is_valid_brazilian_phone( string $phone )`: Valida se telefone brasileiro é válido → bool
+
+**Exemplos práticos**:
+```php
+// Formatar para envio via WhatsApp
+$phone_raw = '(11) 98765-4321';
+$whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $phone_raw );
+// Retorna: '5511987654321'
+
+// Formatar para exibição na tela
+$phone_stored = '5511987654321';
+$phone_display = DPS_Phone_Helper::format_for_display( $phone_stored );
+// Retorna: '(11) 98765-4321'
+
+// Validar telefone antes de salvar
+if ( ! DPS_Phone_Helper::is_valid_brazilian_phone( $phone_input ) ) {
+    DPS_Message_Helper::add_error( 'Telefone inválido' );
+}
+```
+
+**Boas práticas**: 
+- Use sempre este helper para formatação de telefones
+- Evite duplicação de lógica `preg_replace` espalhada entre add-ons
+- Integrado com `DPS_Communications_API` para envio automático via WhatsApp
+
 #### DPS_Message_Helper
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 
@@ -253,29 +284,75 @@ echo '<h2>Cadastro de Clientes</h2>';
 **Diretório**: `add-ons/desi-pet-shower-communications_addon`
 
 **Propósito e funcionalidades principais**:
-- Gerenciar comunicações automatizadas via WhatsApp, SMS e e-mail
-- Enviar notificações para eventos do sistema (agendamentos, lembretes, pós-atendimento)
-- Personalizar mensagens por tipo de evento
+- **Centralizar TODAS as comunicações do sistema** via API pública `DPS_Communications_API`
+- Enviar mensagens via WhatsApp, e-mail e SMS (futuro)
+- Aplicar templates configuráveis com placeholders dinâmicos
+- Registrar logs automáticos de todas as comunicações via `DPS_Logger`
+- Fornecer hooks para extensibilidade por outros add-ons
 
-**Shortcodes expostos**: Nenhum
+**Arquitetura - Camada Centralizada**:
+- **API Central**: `DPS_Communications_API` (singleton) expõe métodos públicos
+- **Gatilhos**: Agenda, Portal e outros add-ons **delegam** envios para a API
+- **Interfaces mantidas**: Botões de ação (wa.me links) **permanecem** na Agenda e Portal
+- **Lógica de envio**: Concentrada na API, não duplicada entre add-ons
+
+**API Pública** (`includes/class-dps-communications-api.php`):
+```php
+$api = DPS_Communications_API::get_instance();
+
+// Métodos principais:
+$api->send_whatsapp( $to, $message, $context = [] );
+$api->send_email( $to, $subject, $body, $context = [] );
+$api->send_appointment_reminder( $appointment_id );
+$api->send_payment_notification( $client_id, $amount_cents, $context = [] );
+$api->send_message_from_client( $client_id, $message, $context = [] );
+```
+
+**Shortcodes expostos**: Nenhum (operação via API e configurações)
 
 **CPTs, tabelas e opções**:
 - Não cria CPTs ou tabelas próprias
-- Options: configurações de canais (WhatsApp, SMS, e-mail) e templates de mensagens
+- Option `dps_comm_settings`: configurações de gateways e templates
+  - `whatsapp_api_key`: chave de API do gateway WhatsApp
+  - `whatsapp_api_url`: endpoint base do gateway
+  - `default_email_from`: e-mail remetente padrão
+  - `template_confirmation`: template de confirmação de agendamento
+  - `template_reminder`: template de lembrete (placeholders: `{client_name}`, `{pet_name}`, `{date}`, `{time}`)
+  - `template_post_service`: template de pós-atendimento
 
 **Hooks consumidos**:
-- `dps_base_after_save_appointment`: dispara comunicações após salvar agendamento
+- `dps_base_after_save_appointment`: dispara confirmação após salvar agendamento
 - `dps_settings_nav_tabs`: adiciona aba "Comunicações"
-- `dps_settings_sections`: renderiza configurações de canais e mensagens
+- `dps_settings_sections`: renderiza configurações de canais e templates
 
-**Hooks disparados**:
+**Hooks disparados (Actions)**:
+- `dps_after_whatsapp_sent( $to, $message, $context, $result )`: após envio de WhatsApp
+- `dps_after_email_sent( $to, $subject, $body, $context, $result )`: após envio de e-mail
+- `dps_after_reminder_sent( $appointment_id, $sent )`: após envio de lembrete
 - `dps_comm_send_appointment_reminder`: cron job para lembretes de agendamento
 - `dps_comm_send_post_service`: cron job para mensagens pós-atendimento
 
-**Dependências**:
-- Depende do plugin base para estrutura de configurações e hooks de agendamento
+**Hooks disparados (Filters)**:
+- `dps_comm_whatsapp_message( $message, $to, $context )`: filtra mensagem WhatsApp antes de enviar
+- `dps_comm_email_subject( $subject, $to, $context )`: filtra assunto de e-mail
+- `dps_comm_email_body( $body, $to, $context )`: filtra corpo de e-mail
+- `dps_comm_email_headers( $headers, $to, $context )`: filtra headers de e-mail
+- `dps_comm_reminder_message( $message, $appointment_id )`: filtra mensagem de lembrete
+- `dps_comm_payment_notification_message( $message, $client_id, $amount_cents, $context )`: filtra notificação de pagamento
 
-**Introduzido em**: v0.1.0 (estimado)
+**Dependências**:
+- Depende do plugin base para `DPS_Logger` e `DPS_Phone_Helper`
+- Agenda e Portal delegam comunicações para esta API (dependência soft)
+
+**Integração com outros add-ons**:
+- **Agenda**: delega lembretes e notificações de status, **mantém** botões wa.me
+- **Portal**: delega mensagens de clientes para admin
+- **Finance**: pode usar API para notificar pagamentos
+
+**Introduzido em**: v0.1.0  
+**Refatorado em**: v0.2.0 (API centralizada)
+
+**Documentação completa**: `add-ons/desi-pet-shower-communications_addon/README.md`
 
 ---
 

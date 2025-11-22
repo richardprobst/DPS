@@ -79,6 +79,27 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Communications Add-on**: Nova API centralizada de comunicações (`DPS_Communications_API`)
+  - `send_whatsapp($to, $message, $context)` - Envia mensagem via WhatsApp com logs automáticos
+  - `send_email($to, $subject, $body, $context)` - Envia e-mail com logs automáticos
+  - `send_appointment_reminder($appointment_id)` - Envia lembrete de agendamento (WhatsApp ou e-mail)
+  - `send_payment_notification($client_id, $amount_cents, $context)` - Notifica pagamento ao cliente
+  - `send_message_from_client($client_id, $message, $context)` - Envia mensagem do Portal para admin
+- **Communications Add-on**: Novos hooks para extensibilidade:
+  - `dps_after_whatsapp_sent` - Disparado após envio de WhatsApp (com resultado)
+  - `dps_after_email_sent` - Disparado após envio de e-mail (com resultado)
+  - `dps_after_reminder_sent` - Disparado após envio de lembrete
+  - `dps_comm_whatsapp_message` (filter) - Filtra mensagem WhatsApp antes do envio
+  - `dps_comm_email_subject` (filter) - Filtra assunto de e-mail
+  - `dps_comm_email_body` (filter) - Filtra corpo de e-mail
+  - `dps_comm_email_headers` (filter) - Filtra headers de e-mail
+  - `dps_comm_reminder_message` (filter) - Filtra mensagem de lembrete
+  - `dps_comm_payment_notification_message` (filter) - Filtra notificação de pagamento
+- **Plugin Base**: Nova classe helper `DPS_Phone_Helper` para formatação padronizada de telefones
+  - `format_for_whatsapp($phone)` - Formata telefone para WhatsApp (adiciona código do país)
+  - `format_for_display($phone)` - Formata telefone para exibição brasileira "(11) 98765-4321"
+  - `is_valid_brazilian_phone($phone)` - Valida telefone brasileiro (10 ou 11 dígitos, DDD válido)
+- **Documentação**: README completo da Communications API com exemplos práticos e diagrama de arquitetura
 - **Finance Add-on**: Nova API financeira pública (`DPS_Finance_API`) para centralizar operações de cobranças
   - `DPS_Finance_API::create_or_update_charge()` - Criar ou atualizar cobrança vinculada a agendamento
   - `DPS_Finance_API::mark_as_paid()` - Marcar cobrança como paga
@@ -131,6 +152,19 @@ Antes de criar uma nova versão oficial:
   - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
+- **Communications Add-on v0.2.0**: Arquitetura completamente reorganizada
+  - Toda lógica de envio centralizada em `DPS_Communications_API`
+  - Templates de mensagens com suporte a placeholders (`{client_name}`, `{pet_name}`, `{date}`, `{time}`)
+  - Logs automáticos de envios via `DPS_Logger` (níveis INFO/ERROR/WARNING)
+  - Funções legadas `dps_comm_send_whatsapp()` e `dps_comm_send_email()` agora delegam para API (deprecated)
+- **Agenda Add-on**: Comunicações delegadas para Communications API
+  - Envio de lembretes diários via `DPS_Communications_API::send_appointment_reminder()`
+  - Notificações de status (finalizado/finalizado_pago) via `DPS_Communications_API::send_whatsapp()`
+  - Método `format_whatsapp_number()` agora delega para `DPS_Phone_Helper` (deprecated)
+  - **Mantidos**: botões de confirmação e cobrança via links wa.me (não são envios automáticos)
+- **Client Portal Add-on**: Mensagens de clientes delegadas para Communications API
+  - Envio de mensagens do Portal via `DPS_Communications_API::send_message_from_client()`
+  - Fallback para `wp_mail()` direto se API não estiver disponível (compatibilidade retroativa)
 - **Agenda Add-on**: Agora depende do Finance Add-on para funcionalidade completa de cobranças
 - **Agenda Add-on**: Removida lógica financeira duplicada (~55 linhas de SQL direto)
 - **Agenda Add-on**: `update_status_ajax()` agora confia na sincronização automática do Finance via hooks

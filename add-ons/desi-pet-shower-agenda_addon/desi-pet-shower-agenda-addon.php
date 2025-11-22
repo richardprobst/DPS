@@ -915,25 +915,41 @@ class DPS_Agenda_Addon {
         // Isso garante que o link de pagamento seja criado automaticamente mesmo quando
         // o status é alterado manualmente pela agenda.
         do_action( 'dps_base_after_save_appointment', $id, 'simple' );
-            // Envia notificação via WhatsApp se classe disponível
-            if ( class_exists( 'DPS_WhatsApp' ) ) {
-                $client_post = $client_id ? get_post( $client_id ) : null;
-                $client_name = $client_post ? $client_post->post_title : '';
+
+        // Envia notificação de status via Communications API
+        if ( class_exists( 'DPS_Communications_API' ) && in_array( $status, [ 'finalizado', 'finalizado_pago' ], true ) ) {
+            $client_id = get_post_meta( $id, 'appointment_client_id', true );
+            $pet_id    = get_post_meta( $id, 'appointment_pet_id', true );
+            $date      = get_post_meta( $id, 'appointment_date', true );
+            $valor     = get_post_meta( $id, 'appointment_total_value', true );
+            
+            $client_post = $client_id ? get_post( $client_id ) : null;
+            $pet_post    = $pet_id ? get_post( $pet_id ) : null;
+            
+            if ( $client_post ) {
+                $client_name = $client_post->post_title;
                 $pet_name    = $pet_post ? $pet_post->post_title : '';
-                // Formata a data para dia-mês-ano
                 $date_fmt    = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
-                $phone       = $client_id ? get_post_meta( $client_id, 'client_phone', true ) : '';
-                $phone_digits= $phone ? preg_replace( '/\D+/', '', $phone ) : '';
-                $valor_fmt   = number_format( (float) $valor, 2, ',', '.' );
-                $msg_template = ( $status === 'finalizado_pago' ) ?
-                    'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!' :
-                    'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
-                $message     = sprintf( $msg_template, $client_name, $pet_name, $date_fmt, $valor_fmt );
-                if ( $phone_digits ) {
-                    DPS_WhatsApp::send_text( $phone_digits, $message );
+                $phone       = get_post_meta( $client_id, 'client_phone', true );
+                
+                if ( $phone ) {
+                    $valor_fmt = number_format( (float) $valor, 2, ',', '.' );
+                    $msg_template = ( $status === 'finalizado_pago' ) ?
+                        'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!' :
+                        'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
+                    $message = sprintf( $msg_template, $client_name, $pet_name, $date_fmt, $valor_fmt );
+                    
+                    // Envia via Communications API
+                    $api = DPS_Communications_API::get_instance();
+                    $api->send_whatsapp( $phone, $message, [
+                        'appointment_id' => $id,
+                        'type'           => 'status_change',
+                        'status'         => $status,
+                    ] );
                 }
             }
         }
+
         wp_send_json_success(
             [
                 'message' => __( 'Status atualizado.', 'dps-agenda-addon' ),
@@ -1027,12 +1043,16 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Envia lembretes de agendamentos para clientes via e-mail.
+     * Envia lembretes de agendamentos para clientes.
      * Este método é executado pelo cron diário configurado em maybe_schedule_reminders().
+     *
+     * NOTA: A lógica de ENVIO está delegada à Communications API.
+     * A Agenda apenas identifica quais agendamentos precisam de lembrete.
      */
     public function send_reminders() {
         // Determina a data atual no fuso horário do site
         $date = current_time( 'Y-m-d' );
+        
         // Busca agendamentos do dia com status pendente
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -1042,58 +1062,102 @@ class DPS_Agenda_Addon {
                 [ 'key' => 'appointment_date', 'value' => $date, 'compare' => '=' ],
             ],
         ] );
+        
         if ( empty( $appointments ) ) {
             return;
         }
-        foreach ( $appointments as $appt ) {
-            // Apenas lembraremos agendamentos pendentes
-            $status = get_post_meta( $appt->ID, 'appointment_status', true );
-            if ( ! $status ) { $status = 'pendente'; }
-            if ( $status !== 'pendente' ) {
-                continue;
-            }
-            $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-            $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-            if ( ! $client_id ) {
-                continue;
-            }
-            $client_post = get_post( $client_id );
-            if ( ! $client_post ) {
-                continue;
-            }
-            // Recupera e-mail do cliente
-            $client_email = get_post_meta( $client_id, 'client_email', true );
-            if ( ! $client_email ) {
-                // Não envia se não houver e-mail
-                continue;
-            }
-            // Monta dados básicos
-            $client_name = $client_post->post_title;
-            $pet_name    = '';
-            if ( $pet_id ) {
-                $pet_post = get_post( $pet_id );
-                if ( $pet_post ) {
-                    $pet_name = $pet_post->post_title;
+
+        // Se Communications API estiver disponível, usa ela (método preferido)
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $api = DPS_Communications_API::get_instance();
+            
+            foreach ( $appointments as $appt ) {
+                $status = get_post_meta( $appt->ID, 'appointment_status', true );
+                if ( ! $status ) {
+                    $status = 'pendente';
                 }
+                
+                // Apenas lembretes para agendamentos pendentes
+                if ( $status !== 'pendente' ) {
+                    continue;
+                }
+                
+                // Delega envio para a Communications API
+                $api->send_appointment_reminder( $appt->ID );
             }
-            $time  = get_post_meta( $appt->ID, 'appointment_time', true );
-            $time  = $time ? $time : '';
-            // Conteúdo padrão do lembrete
-            $subject = sprintf( __( 'Lembrete de agendamento para %s', 'dps-agenda-addon' ), $client_name );
-            // Corpo do e-mail com dados do serviço
-            $message  = sprintf( __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\nDesi Pet Shower', 'dps-agenda-addon' ), $client_name, $pet_name ? $pet_name : __( 'seu pet', 'dps-agenda-addon' ), date_i18n( 'd-m-Y', strtotime( $date ) ), $time );
-            // Permite personalização via filtros
-            $recipients = apply_filters( 'dps_agenda_reminder_recipients', [ $client_email ], $appt->ID );
-            $subject    = apply_filters( 'dps_agenda_reminder_subject', $subject, $appt->ID );
-            $message    = apply_filters( 'dps_agenda_reminder_content', $message, $appt->ID );
-            // Envia email
-            foreach ( $recipients as $recipient ) {
-                wp_mail( $recipient, $subject, $message );
+        } else {
+            // Fallback: envio manual via wp_mail (compatibilidade retroativa)
+            foreach ( $appointments as $appt ) {
+                $status = get_post_meta( $appt->ID, 'appointment_status', true );
+                if ( ! $status ) {
+                    $status = 'pendente';
+                }
+                if ( $status !== 'pendente' ) {
+                    continue;
+                }
+                
+                $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                if ( ! $client_id ) {
+                    continue;
+                }
+                
+                $client_post = get_post( $client_id );
+                if ( ! $client_post ) {
+                    continue;
+                }
+                
+                $client_email = get_post_meta( $client_id, 'client_email', true );
+                if ( ! $client_email ) {
+                    continue;
+                }
+                
+                $client_name = $client_post->post_title;
+                $pet_id      = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                $pet_name    = '';
+                
+                if ( $pet_id ) {
+                    $pet_post = get_post( $pet_id );
+                    if ( $pet_post ) {
+                        $pet_name = $pet_post->post_title;
+                    }
+                }
+                
+                $time    = get_post_meta( $appt->ID, 'appointment_time', true );
+                $time    = $time ? $time : '';
+                $subject = sprintf( __( 'Lembrete de agendamento para %s', 'dps-agenda-addon' ), $client_name );
+                $message = sprintf(
+                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\nDesi Pet Shower', 'dps-agenda-addon' ),
+                    $client_name,
+                    $pet_name ? $pet_name : __( 'seu pet', 'dps-agenda-addon' ),
+                    date_i18n( 'd-m-Y', strtotime( $date ) ),
+                    $time
+                );
+                
+                $recipients = apply_filters( 'dps_agenda_reminder_recipients', [ $client_email ], $appt->ID );
+                $subject    = apply_filters( 'dps_agenda_reminder_subject', $subject, $appt->ID );
+                $message    = apply_filters( 'dps_agenda_reminder_content', $message, $appt->ID );
+                
+                foreach ( $recipients as $recipient ) {
+                    wp_mail( $recipient, $subject, $message );
+                }
             }
         }
     }
 
+    /**
+     * Formata número de telefone para WhatsApp
+     *
+     * @deprecated 0.2.0 Use DPS_Phone_Helper::format_for_whatsapp()
+     *
+     * @param string $phone Número de telefone
+     * @return string Número formatado
+     */
     private static function format_whatsapp_number( $phone ) {
+        if ( class_exists( 'DPS_Phone_Helper' ) ) {
+            return DPS_Phone_Helper::format_for_whatsapp( $phone );
+        }
+        
+        // Fallback
         $digits = preg_replace( '/\D+/', '', (string) $phone );
         if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
             $digits = '55' . $digits;
