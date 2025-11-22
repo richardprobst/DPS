@@ -233,28 +233,48 @@ class DPS_AI_Assistant {
             return [];
         }
 
+        // Busca todos os agendamentos e filtra manualmente para maior compatibilidade
         $query = new WP_Query( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
-            'posts_per_page' => $limit,
+            'posts_per_page' => 50, // Busca mais para garantir que temos suficientes após filtrar
             'orderby'        => 'meta_value',
             'order'          => 'DESC',
             'meta_key'       => 'appointment_date',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_pets',
-                    'value'   => array_map( 'strval', $pet_ids ),
-                    'compare' => 'IN',
-                ],
-            ],
         ] );
 
         $appointments = [];
+        $count        = 0;
 
         if ( $query->have_posts() ) {
-            while ( $query->have_posts() ) {
+            while ( $query->have_posts() && $count < $limit ) {
                 $query->the_post();
-                $appointment_id     = get_the_ID();
+                $appointment_id   = get_the_ID();
+                $appointment_pets = get_post_meta( $appointment_id, 'appointment_pets', true );
+
+                // Verifica se algum dos pets do cliente está neste agendamento
+                if ( empty( $appointment_pets ) ) {
+                    continue;
+                }
+
+                // appointment_pets pode ser array ou string serializada
+                if ( is_string( $appointment_pets ) ) {
+                    $appointment_pets = maybe_unserialize( $appointment_pets );
+                }
+
+                if ( ! is_array( $appointment_pets ) ) {
+                    continue;
+                }
+
+                // Converte para inteiros e verifica interseção
+                $appointment_pets = array_map( 'intval', $appointment_pets );
+                $pet_ids_int      = array_map( 'intval', $pet_ids );
+
+                if ( empty( array_intersect( $appointment_pets, $pet_ids_int ) ) ) {
+                    continue;
+                }
+
+                // Este agendamento pertence a um dos pets do cliente
                 $appointment_date   = get_post_meta( $appointment_id, 'appointment_date', true );
                 $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
                 $services_raw       = get_post_meta( $appointment_id, 'appointment_services', true );
@@ -277,10 +297,24 @@ class DPS_AI_Assistant {
 
                 $appointment_desc = "Data: {$appointment_date}, Status: {$status_label}";
                 if ( ! empty( $services ) ) {
-                    $appointment_desc .= ', Serviços: ' . implode( ', ', array_map( 'get_the_title', $services ) );
+                    $service_names = [];
+                    foreach ( $services as $service_id ) {
+                        $service_id = absint( $service_id );
+                        // Valida se o ID é válido e o post existe
+                        if ( $service_id && get_post_status( $service_id ) ) {
+                            $service_name = get_the_title( $service_id );
+                            if ( $service_name ) {
+                                $service_names[] = $service_name;
+                            }
+                        }
+                    }
+                    if ( ! empty( $service_names ) ) {
+                        $appointment_desc .= ', Serviços: ' . implode( ', ', $service_names );
+                    }
                 }
 
                 $appointments[] = $appointment_desc;
+                $count++;
             }
             wp_reset_postdata();
         }
@@ -305,11 +339,14 @@ class DPS_AI_Assistant {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
 
-        // Busca cobranças pendentes do cliente
-        $results = $wpdb->get_results( $wpdb->prepare(
-            "SELECT valor_centavos, descricao FROM {$table} WHERE cliente_id = %d AND status = 'pendente' ORDER BY data_vencimento ASC",
-            $client_id
-        ) );
+        // Busca cobranças pendentes do cliente - usando prepare para segurança
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT valor_centavos, descricao FROM `{$wpdb->prefix}dps_transacoes` WHERE cliente_id = %d AND status = %s ORDER BY data_vencimento ASC",
+                $client_id,
+                'pendente'
+            )
+        );
 
         if ( empty( $results ) ) {
             return null;

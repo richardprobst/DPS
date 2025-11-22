@@ -245,7 +245,8 @@ class DPS_AI_Addon {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-ai' ) );
         }
 
-        $raw_settings = isset( $_POST[ self::OPTION_KEY ] ) ? $_POST[ self::OPTION_KEY ] : [];
+        // Sanitiza todo o array POST antes de processar
+        $raw_settings = isset( $_POST[ self::OPTION_KEY ] ) ? wp_unslash( $_POST[ self::OPTION_KEY ] ) : [];
 
         $settings = [
             'enabled'     => ! empty( $raw_settings['enabled'] ),
