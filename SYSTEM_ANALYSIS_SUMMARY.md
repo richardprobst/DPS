@@ -41,6 +41,7 @@
 #### 5. Sem Interface Admin Nativa
 - ❌ CPTs com `show_ui => false`
 - **Impacto**: Todo gerenciamento via shortcodes front-end
+- **Análise completa disponível**: Consulte `docs/admin/ADMIN_CPT_INTERFACE_ANALYSIS.md` para avaliação detalhada de viabilidade, riscos, benefícios e plano de implementação para habilitar a interface admin nativa do WordPress para os CPTs principais (clientes, pets, agendamentos).
 
 ---
 

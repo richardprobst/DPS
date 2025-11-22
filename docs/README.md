@@ -14,6 +14,14 @@ Análises e padrões de layout das telas administrativas do WordPress.
 **Arquivos:**
 - `ADMIN_LAYOUT_ANALYSIS.md` - Análise detalhada do layout das telas administrativas
 
+### 📁 /docs/admin
+
+Análises e planos relacionados à interface administrativa do WordPress.
+
+**Arquivos:**
+- `ADMIN_CPT_INTERFACE_ANALYSIS.md` - Análise completa sobre habilitação da interface admin nativa para CPTs do DPS (clientes, pets, agendamentos)
+- `ADMIN_CPT_INTERFACE_SUMMARY.md` - Resumo executivo da análise de interface admin para CPTs
+
 #### `/docs/layout/agenda`
 Documentação visual e de UX da Agenda (add-on de agendamentos).
 
