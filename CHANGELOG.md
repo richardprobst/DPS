@@ -281,6 +281,12 @@ Antes de criar uma nova versão oficial:
   - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on**: Corrigido problema de layout onde o card "Portal do Cliente" aparecia antes do cabeçalho do tema
+  - **Causa raiz**: Método `render_portal_shortcode()` estava chamando `ob_end_clean()` seguido de `include`, causando output direto em vez de retornar HTML via shortcode
+  - **Sintoma**: Card do portal aparecia ANTES do menu principal do tema YOOtheme, como se estivesse "encaixado no header"
+  - **Solução**: Substituído `ob_end_clean() + include + return ''` por `ob_start() + include + return ob_get_clean()`
+  - **Impacto**: Portal agora renderiza corretamente DENTRO da área de conteúdo da página, respeitando header/footer do tema
+  - **Arquivos alterados**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (linhas 710-723)
 - **Groomers Add-on**: Corrigido fatal error ao renderizar seção no front-end via shortcode [dps_base]
   - Problema: função `add_settings_error()` só existe no contexto admin (wp-admin)
   - Solução: adicionada verificação `function_exists('add_settings_error')` antes de todas as chamadas
