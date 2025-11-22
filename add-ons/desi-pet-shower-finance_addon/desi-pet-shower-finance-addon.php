@@ -1,11 +1,15 @@
 <?php
-/*
- * Plugin Name: Desi Pet Shower – Financeiro Add-on
- * Description: Add-on para o plugin base Desi Pet Shower que cria uma aba de controle financeiro. Permite registrar receitas e despesas, marcar pagamentos e listar todas as transações.
- * Version:     1.0.0
- * Author:      PRObst
- * License:     GPL-2.0+
- * Text Domain: dps-finance-addon
+/**
+ * Plugin Name:       Desi Pet Shower – Financeiro Add-on
+ * Plugin URI:        https://probst.pro/desi-pet-shower
+ * Description:       Add-on para o plugin base Desi Pet Shower que cria uma aba de controle financeiro. Permite registrar receitas e despesas, marcar pagamentos e listar todas as transações.
+ * Version:           1.0.0
+ * Author:            PRObst
+ * Author URI:        https://probst.pro
+ * Text Domain:       dps-finance-addon
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
+ * License:           GPL-2.0+
  */
 
 // Impede acesso direto
@@ -13,10 +17,21 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Evita redeclaração caso outro plugin já tenha definido esta classe
-if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
+// Define constantes do add-on
+if ( ! defined( 'DPS_FINANCE_PLUGIN_FILE' ) ) {
+    define( 'DPS_FINANCE_PLUGIN_FILE', __FILE__ );
+}
+if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
+    define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
+if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
+    define( 'DPS_FINANCE_VERSION', '1.0.0' );
+}
 
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-finance-revenue-query.php';
+// Carrega dependências
+require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-revenue-query.php';
+
+// Funções auxiliares globais para conversão monetária
 
 if ( ! function_exists( 'dps_parse_money_br' ) ) {
     /**
@@ -56,6 +71,9 @@ if ( ! function_exists( 'dps_format_money_br' ) ) {
         return number_format( $float, 2, ',', '.' );
     }
 }
+
+// Define a classe principal do add-on financeiro
+if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
 
 class DPS_Finance_Addon {
     public function __construct() {
@@ -1289,9 +1307,9 @@ class DPS_Finance_Addon {
     }
 } // end class DPS_Finance_Addon
 
+} // end if ! class_exists
+
 // Instancia a classe somente se ainda não houver uma instância global
 if ( class_exists( 'DPS_Finance_Addon' ) && ! isset( $GLOBALS['dps_finance_addon'] ) ) {
     $GLOBALS['dps_finance_addon'] = new DPS_Finance_Addon();
 }
-
-} // end if class exists guard

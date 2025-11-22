@@ -20,8 +20,9 @@ Funcionalidades principais:
 
 - **Diretório**: `add-ons/desi-pet-shower-finance_addon/`
 - **Slug**: `dps-finance-addon`
-- **Classe principal**: (verificar em `includes/`)
-- **Arquivo principal**: `desi-pet-shower-finance-addon.php` ou `desi-pet-shower-finance.php`
+- **Classe principal**: `DPS_Finance_Addon`
+- **Arquivo principal**: `desi-pet-shower-finance-addon.php` (arquivo com cabeçalho de plugin)
+- **Arquivo de compatibilidade**: `desi-pet-shower-finance.php` (apenas para retrocompatibilidade, sem cabeçalho de plugin)
 - **Tipo**: Add-on (depende do plugin base)
 
 ## Dependências e compatibilidade
