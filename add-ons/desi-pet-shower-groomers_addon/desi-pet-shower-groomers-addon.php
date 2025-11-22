@@ -57,8 +57,10 @@ class DPS_Groomers_Addon {
 
     /**
      * Processa criação de novos groomers a partir do formulário de administração.
+     *
+     * @param bool $use_frontend_messages Se true, usa DPS_Message_Helper; se false, usa add_settings_error.
      */
-    private function handle_new_groomer_submission() {
+    private function handle_new_groomer_submission( $use_frontend_messages = false ) {
         if ( ! isset( $_POST['dps_new_groomer_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['dps_new_groomer_nonce'] ), 'dps_new_groomer' ) ) {
             return;
         }
@@ -73,12 +75,22 @@ class DPS_Groomers_Addon {
         $password = isset( $_POST['dps_groomer_password'] ) ? wp_unslash( $_POST['dps_groomer_password'] ) : '';
 
         if ( empty( $username ) || empty( $email ) || empty( $password ) ) {
-            add_settings_error( 'dps_groomers', 'missing_fields', __( 'Preencha usuário, email e senha para criar o groomer.', 'desi-pet-shower' ), 'error' );
+            $message = __( 'Preencha usuário, email e senha para criar o groomer.', 'desi-pet-shower' );
+            if ( $use_frontend_messages ) {
+                DPS_Message_Helper::add_error( $message );
+            } else {
+                add_settings_error( 'dps_groomers', 'missing_fields', $message, 'error' );
+            }
             return;
         }
 
         if ( username_exists( $username ) ) {
-            add_settings_error( 'dps_groomers', 'user_exists', __( 'Já existe um usuário com esse login.', 'desi-pet-shower' ), 'error' );
+            $message = __( 'Já existe um usuário com esse login.', 'desi-pet-shower' );
+            if ( $use_frontend_messages ) {
+                DPS_Message_Helper::add_error( $message );
+            } else {
+                add_settings_error( 'dps_groomers', 'user_exists', $message, 'error' );
+            }
             return;
         }
 
@@ -93,11 +105,21 @@ class DPS_Groomers_Addon {
         );
 
         if ( is_wp_error( $user_id ) ) {
-            add_settings_error( 'dps_groomers', 'create_error', $user_id->get_error_message(), 'error' );
+            $message = $user_id->get_error_message();
+            if ( $use_frontend_messages ) {
+                DPS_Message_Helper::add_error( $message );
+            } else {
+                add_settings_error( 'dps_groomers', 'create_error', $message, 'error' );
+            }
             return;
         }
 
-        add_settings_error( 'dps_groomers', 'created', __( 'Groomer criado com sucesso.', 'desi-pet-shower' ), 'updated' );
+        $message = __( 'Groomer criado com sucesso.', 'desi-pet-shower' );
+        if ( $use_frontend_messages ) {
+            DPS_Message_Helper::add_success( $message );
+        } else {
+            add_settings_error( 'dps_groomers', 'created', $message, 'updated' );
+        }
     }
 
     /**
@@ -114,9 +136,12 @@ class DPS_Groomers_Addon {
             wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
         }
 
-        $this->handle_new_groomer_submission();
+        $this->handle_new_groomer_submission( false );
 
-        settings_errors( 'dps_groomers' );
+        // settings_errors() só existe no contexto admin
+        if ( function_exists( 'settings_errors' ) ) {
+            settings_errors( 'dps_groomers' );
+        }
 
         $groomers = $this->get_groomers();
         ?>
@@ -285,7 +310,7 @@ class DPS_Groomers_Addon {
             return '<div class="dps-section" id="dps-section-groomers"><p>' . esc_html__( 'Você não tem permissão para gerenciar groomers.', 'desi-pet-shower' ) . '</p></div>';
         }
 
-        $this->handle_new_groomer_submission();
+        $this->handle_new_groomer_submission( true );
         $groomers = $this->get_groomers();
 
         ob_start();
@@ -294,7 +319,7 @@ class DPS_Groomers_Addon {
             <h2 style="margin-bottom: 20px; color: #374151;"><?php echo esc_html__( 'Groomers', 'desi-pet-shower' ); ?></h2>
             <p><?php echo esc_html__( 'Cadastre profissionais, associe-os a atendimentos e acompanhe relatórios por período.', 'desi-pet-shower' ); ?></p>
 
-            <?php settings_errors( 'dps_groomers' ); ?>
+            <?php echo DPS_Message_Helper::display_messages(); ?>
 
             <div style="display:flex; gap:30px; flex-wrap:wrap; margin-top: 24px;">
                 <div class="dps-field-group" style="flex:1 1 340px; min-width:300px;">
