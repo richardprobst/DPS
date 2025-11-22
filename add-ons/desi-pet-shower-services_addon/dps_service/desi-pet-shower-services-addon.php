@@ -1,18 +1,22 @@
 <?php
 /**
- * Arquivo principal do add-on de Serviços.
- * 
- * Este arquivo contém a implementação completa do add-on de Serviços.
- * É incluído pelo arquivo wrapper 'desi-pet-shower-services.php' na raiz do add-on.
- * 
- * IMPORTANTE: Este arquivo NÃO deve ter cabeçalho de plugin WordPress para
- * evitar que o add-on apareça duplicado na lista de plugins.
- * O arquivo de plugin principal é 'desi-pet-shower-services.php'.
+ * Arquivo principal do Services Add-on (carregado via wrapper)
+ *
+ * NOTA: Este arquivo NÃO deve ter header de plugin WordPress para evitar duplicação.
+ * O header oficial está em desi-pet-shower-services.php (arquivo wrapper).
+ *
+ * @package DPS_Services_Addon
+ * @version 1.2.0
  */
 
 // Impede acesso direto
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
+}
+
+// Carrega a API pública de serviços
+if ( ! class_exists( 'DPS_Services_API' ) ) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-services-api.php';
 }
 
 /**
