@@ -19,13 +19,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class DPS_Agenda_Addon {
     public function __construct() {
+        // Verifica dependência do Finance Add-on
+        if ( ! class_exists( 'DPS_Finance_API' ) ) {
+            add_action( 'admin_notices', [ $this, 'finance_dependency_notice' ] );
+            // Continua carregando para não quebrar completamente, mas funcionalidade financeira não estará disponível
+        }
+
         // Cria páginas necessárias ao ativar o plugin (apenas agenda, sem a página de cobranças)
         register_activation_hook( __FILE__, [ $this, 'create_agenda_page' ] );
         // Limpa cron jobs ao desativar o plugin
         register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
         // Registra shortcodes
         add_shortcode( 'dps_agenda_page', [ $this, 'render_agenda_shortcode' ] );
-        add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode' ] );
+        // Shortcode dps_charges_notes deprecated - redireciona para Finance
+        add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode_deprecated' ] );
         // Enfileira scripts e estilos somente quando páginas específicas forem exibidas
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // AJAX para atualizar status de agendamento
@@ -75,6 +82,22 @@ class DPS_Agenda_Addon {
         } else {
             update_option( 'dps_agenda_page_id', $page->ID );
         }
+    }
+
+    /**
+     * Exibe aviso no admin se Finance Add-on não estiver ativo.
+     *
+     * @since 1.1.0
+     */
+    public function finance_dependency_notice() {
+        ?>
+        <div class="notice notice-warning">
+            <p>
+                <strong><?php esc_html_e( 'Agenda Add-on:', 'dps-agenda-addon' ); ?></strong>
+                <?php esc_html_e( 'O Finance Add-on é recomendado para funcionalidade completa de cobranças. Algumas funcionalidades financeiras podem não estar disponíveis.', 'dps-agenda-addon' ); ?>
+            </p>
+        </div>
+        <?php
     }
 
     /**
@@ -816,32 +839,24 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza a lista de cobranças e notas geradas.
+     * Shortcode deprecated que redireciona para o Finance Add-on.
+     *
+     * @deprecated 1.1.0 Use [dps_fin_docs] do Finance Add-on
+     * @return string HTML do shortcode ou mensagem de depreciação
      */
-    public function render_charges_notes_shortcode() {
-        global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        // Busca transações do tipo receita associadas a agendamentos
-        $rows = $wpdb->get_results( "SELECT * FROM $table WHERE tipo = 'receita' ORDER BY data DESC" );
-        ob_start();
-        echo '<h3>' . __( 'Cobranças e Notas', 'dps-agenda-addon' ) . '</h3>';
-        if ( ! empty( $rows ) ) {
-            echo '<table class="dps-table"><thead><tr><th>' . __( 'Data', 'dps-agenda-addon' ) . '</th><th>' . __( 'Cliente', 'dps-agenda-addon' ) . '</th><th>' . __( 'Valor', 'dps-agenda-addon' ) . '</th><th>' . __( 'Status', 'dps-agenda-addon' ) . '</th><th>' . __( 'Descrição', 'dps-agenda-addon' ) . '</th></tr></thead><tbody>';
-            foreach ( $rows as $row ) {
-                $client_post = $row->cliente_id ? get_post( $row->cliente_id ) : null;
-                echo '<tr>';
-                echo '<td>' . esc_html( date_i18n( 'd-m-Y', strtotime( $row->data ) ) ) . '</td>';
-                echo '<td>' . esc_html( $client_post ? $client_post->post_title : '' ) . '</td>';
-                echo '<td>R$ ' . esc_html( number_format( (float) $row->valor, 2, ',', '.' ) ) . '</td>';
-                echo '<td>' . esc_html( ucfirst( str_replace( '_', ' ', $row->status ) ) ) . '</td>';
-                echo '<td>' . esc_html( $row->descricao ) . '</td>';
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-        } else {
-            echo '<p>' . __( 'Nenhuma cobrança ou nota registrada.', 'dps-agenda-addon' ) . '</p>';
+    public function render_charges_notes_shortcode_deprecated() {
+        _deprecated_function( 'Shortcode [dps_charges_notes]', '1.1.0', '[dps_fin_docs] (Finance Add-on)' );
+        
+        // Tenta redirecionar para shortcode do Finance
+        if ( shortcode_exists( 'dps_fin_docs' ) ) {
+            return do_shortcode( '[dps_fin_docs]' );
         }
-        return ob_get_clean();
+        
+        // Se Finance não estiver ativo, exibe mensagem
+        return '<div class="notice notice-warning" style="padding: 20px; margin: 20px 0; background: #fff3cd; border-left: 4px solid #ffc107;">' .
+               '<p><strong>' . esc_html__( 'Atenção:', 'dps-agenda-addon' ) . '</strong> ' .
+               esc_html__( 'Este shortcode foi movido para o Finance Add-on. Por favor, use [dps_fin_docs] ou ative o Finance Add-on.', 'dps-agenda-addon' ) .
+               '</p></div>';
     }
 
     /**
@@ -890,62 +905,16 @@ class DPS_Agenda_Addon {
         add_post_meta( $id, 'appointment_status', $status, true );
         $new_version = $current_version + 1;
         update_post_meta( $id, '_dps_appointment_version', $new_version );
-        // Criar ou atualizar transação se necessário (finalizado ou pago)
-        if ( $status === 'finalizado' || $status === 'finalizado_pago' ) {
-            // Dados do agendamento
-            $client_id  = get_post_meta( $id, 'appointment_client_id', true );
-            $date       = get_post_meta( $id, 'appointment_date', true );
-            $pet_id     = get_post_meta( $id, 'appointment_pet_id', true );
-            // Valor total
-            $valor = get_post_meta( $id, 'appointment_total_value', true );
-            $valor = $valor ? (float) $valor : 0;
-            // Descrição: lista de serviços e pet
-            $desc_parts = [];
-            // Recupera serviços selecionados
-            $service_ids = get_post_meta( $id, 'appointment_services', true );
-            if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                foreach ( $service_ids as $sid ) {
-                    $srv = get_post( $sid );
-                    if ( $srv ) {
-                        $desc_parts[] = $srv->post_title;
-                    }
-                }
-            }
-            $pet_post = $pet_id ? get_post( $pet_id ) : null;
-            if ( $pet_post ) {
-                $desc_parts[] = $pet_post->post_title;
-            }
-            $desc = implode( ' - ', $desc_parts );
-            // Inserir/atualizar transação em tabela customizada
-            global $wpdb;
-            $table = $wpdb->prefix . 'dps_transacoes';
-            // Verifica se já existe transação para este agendamento
-            $existing = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE agendamento_id = %d", $id ) );
-            $trans_data = [
-                'cliente_id'     => $client_id,
-                'agendamento_id' => $id,
-                'plano_id'       => null,
-                'data'           => $date ? $date : current_time( 'Y-m-d' ),
-                'valor'          => $valor,
-                'categoria'      => __( 'Serviço', 'dps-agenda-addon' ),
-                'tipo'           => 'receita',
-                'status'         => ( $status === 'finalizado' ? 'em_aberto' : 'pago' ),
-                'descricao'      => $desc,
-            ];
-            if ( $existing ) {
-                $wpdb->update( $table, [
-                    'status'    => $trans_data['status'],
-                    'valor'     => $trans_data['valor'],
-                    'descricao' => $trans_data['descricao'],
-                ], [ 'id' => $existing ], [ '%s','%f','%s' ], [ '%d' ] );
-            } else {
-                $wpdb->insert( $table, $trans_data, [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
-            }
-            // Após atualizar a transação, aciona o hook dps_base_after_save_appointment para que
-            // outros add-ons (como o de pagamentos) possam processar o agendamento finalizado.
-            // Isso garante que o link de pagamento seja criado automaticamente mesmo quando
-            // o status é alterado manualmente pela agenda.
-            do_action( 'dps_base_after_save_appointment', $id, 'simple' );
+
+        // A sincronização financeira é feita automaticamente pelo Finance Add-on via hook updated_post_meta
+        // O Finance monitora mudanças em appointment_status e cria/atualiza transações conforme necessário
+        // Não é necessário manipular dps_transacoes diretamente aqui
+
+        // Após atualizar a transação, aciona o hook dps_base_after_save_appointment para que
+        // outros add-ons (como o de pagamentos) possam processar o agendamento finalizado.
+        // Isso garante que o link de pagamento seja criado automaticamente mesmo quando
+        // o status é alterado manualmente pela agenda.
+        do_action( 'dps_base_after_save_appointment', $id, 'simple' );
             // Envia notificação via WhatsApp se classe disponível
             if ( class_exists( 'DPS_WhatsApp' ) ) {
                 $client_post = $client_id ? get_post( $client_id ) : null;
