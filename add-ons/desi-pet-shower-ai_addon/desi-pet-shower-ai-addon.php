@@ -123,6 +123,7 @@ class DPS_AI_Addon {
 
         $options = get_option( self::OPTION_KEY, [] );
         $status  = isset( $_GET['updated'] ) ? sanitize_text_field( wp_unslash( $_GET['updated'] ) ) : '';
+        $truncated = isset( $_GET['truncated'] ) ? sanitize_text_field( wp_unslash( $_GET['truncated'] ) ) : '';
 
         ?>
         <div class="wrap">
@@ -132,6 +133,12 @@ class DPS_AI_Addon {
             <?php if ( '1' === $status ) : ?>
                 <div class="notice notice-success is-dismissible">
                     <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'dps-ai' ); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( '1' === $truncated ) : ?>
+                <div class="notice notice-warning is-dismissible">
+                    <p><?php echo esc_html__( 'Atenção: As instruções adicionais foram reduzidas para 2000 caracteres (limite máximo). Revise o texto salvo.', 'dps-ai' ); ?></p>
                 </div>
             <?php endif; ?>
 
@@ -221,7 +228,27 @@ class DPS_AI_Addon {
                                     <?php esc_html_e( 'As regras principais de segurança e escopo do sistema já são aplicadas automaticamente. Não remova ou contradiga essas regras.', 'dps-ai' ); ?>
                                     <br />
                                     <?php esc_html_e( 'Use este campo apenas para complementar (ex.: tom de voz, expressões, estilo de atendimento, orientações da marca). Máximo: 2000 caracteres.', 'dps-ai' ); ?>
+                                    <br />
+                                    <span id="dps_ai_char_count" style="font-weight: 600; color: #666;">
+                                        <?php 
+                                        $current_length = isset( $options['additional_instructions'] ) ? mb_strlen( $options['additional_instructions'] ) : 0;
+                                        echo esc_html( sprintf( __( 'Caracteres: %d / 2000', 'dps-ai' ), $current_length ) );
+                                        ?>
+                                    </span>
                                 </p>
+                                <script>
+                                    (function() {
+                                        var textarea = document.getElementById('dps_ai_additional_instructions');
+                                        var counter = document.getElementById('dps_ai_char_count');
+                                        if (textarea && counter) {
+                                            textarea.addEventListener('input', function() {
+                                                var length = textarea.value.length;
+                                                counter.textContent = 'Caracteres: ' + length + ' / 2000';
+                                                counter.style.color = length > 2000 ? '#d63638' : (length > 1800 ? '#dba617' : '#666');
+                                            });
+                                        }
+                                    })();
+                                </script>
                             </td>
                         </tr>
                     </tbody>
@@ -267,11 +294,14 @@ class DPS_AI_Addon {
 
         // Processa instruções adicionais com limite de 2000 caracteres
         $additional_instructions = '';
+        $was_truncated = false;
         if ( ! empty( $raw_settings['additional_instructions'] ) ) {
             $additional_instructions = sanitize_textarea_field( $raw_settings['additional_instructions'] );
+            $original_length = mb_strlen( $additional_instructions );
             // Limita a 2000 caracteres
-            if ( mb_strlen( $additional_instructions ) > 2000 ) {
+            if ( $original_length > 2000 ) {
                 $additional_instructions = mb_substr( $additional_instructions, 0, 2000 );
+                $was_truncated = true;
             }
         }
 
@@ -287,7 +317,12 @@ class DPS_AI_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
-        wp_safe_redirect( add_query_arg( 'updated', '1', wp_get_referer() ) );
+        $redirect_args = [ 'updated' => '1' ];
+        if ( $was_truncated ) {
+            $redirect_args['truncated'] = '1';
+        }
+
+        wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ) );
         exit;
     }
 }
