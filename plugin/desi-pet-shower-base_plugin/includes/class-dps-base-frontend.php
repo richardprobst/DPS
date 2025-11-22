@@ -669,7 +669,7 @@ class DPS_Base_Frontend {
             }
         }
         
-        // Preparar dados para os templates
+        // Prepare data for templates
         $api_key  = get_option( 'dps_google_api_key', '' );
         $base_url = get_permalink();
         

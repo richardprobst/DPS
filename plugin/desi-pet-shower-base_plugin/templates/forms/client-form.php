@@ -156,7 +156,19 @@ $btn_text     = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) 
 </form>
 
 <?php
-// Se houver chave da API do Google Maps, injeta script de autocomplete de endereço
+/**
+ * LEGACY: Google Maps autocomplete script
+ * 
+ * This inline script is preserved from the original implementation for backward compatibility.
+ * 
+ * TODO (Phase 4+): Move to wp_enqueue_script() with proper dependency management and SRI.
+ * - Create separate JS file: assets/js/dps-google-maps-autocomplete.js
+ * - Enqueue with wp_enqueue_script() in appropriate hook
+ * - Add SRI (Subresource Integrity) for Google Maps API
+ * - Use wp_localize_script() to pass API key securely
+ * 
+ * Note: The API key is loaded from WordPress options and only included if configured.
+ */
 if ( $api_key ) :
 	?>
 	<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo esc_attr( $api_key ); ?>&libraries=places"></script>

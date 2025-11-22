@@ -38,16 +38,13 @@ $base_url = isset( $base_url ) ? $base_url : '';
 			<?php foreach ( $clients as $client ) : ?>
 				<?php
 				$phone_raw = get_post_meta( $client->ID, 'client_phone', true );
+				$wa_url = '';
 
 				// Gera link do WhatsApp se houver telefone
-				$phone_display = '';
 				if ( $phone_raw ) {
 					// Remove caracteres não numéricos
 					$phone_digits = preg_replace( '/\D+/', '', $phone_raw );
 					$wa_url = 'https://wa.me/' . $phone_digits;
-					$phone_display = '<a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $phone_raw ) . '</a>';
-				} else {
-					$phone_display = '-';
 				}
 
 				$edit_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
@@ -57,7 +54,13 @@ $base_url = isset( $base_url ) ? $base_url : '';
 				?>
 				<tr>
 					<td><a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( $client->post_title ); ?></a></td>
-					<td><?php echo $phone_display; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+					<td>
+						<?php if ( $phone_raw ) : ?>
+							<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank"><?php echo esc_html( $phone_raw ); ?></a>
+						<?php else : ?>
+							-
+						<?php endif; ?>
+					</td>
 					<td>
 						<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html__( 'Editar', 'desi-pet-shower' ); ?></a>
 						|
