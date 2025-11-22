@@ -668,147 +668,35 @@ class DPS_Base_Frontend {
                 ];
             }
         }
+        
+        // Prepare data for templates
+        $api_key  = get_option( 'dps_google_api_key', '' );
+        $base_url = get_permalink();
+        
         ob_start();
         echo '<div class="dps-section" id="dps-section-clientes">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ) . '</h2>';
-        echo '<form method="post" class="dps-form">';
-        // Hidden fields
-        echo '<input type="hidden" name="dps_action" value="save_client">';
-        wp_nonce_field( 'dps_action', 'dps_nonce' );
-        if ( $edit_id ) {
-            echo '<input type="hidden" name="client_id" value="' . esc_attr( $edit_id ) . '">';
-        }
         
-        // Grupo: Dados Pessoais
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</legend>';
+        // Renderizar formulário de cliente usando template
+        dps_get_template(
+            'forms/client-form.php',
+            [
+                'edit_id' => $edit_id,
+                'editing' => $editing,
+                'meta'    => $meta,
+                'api_key' => $api_key,
+            ]
+        );
         
-        // Name
-        $name_value = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" value="' . esc_attr( $name_value ) . '" required></label></p>';
+        // Renderizar listagem de clientes usando template
+        dps_get_template(
+            'lists/clients-list.php',
+            [
+                'clients'  => $clients,
+                'base_url' => $base_url,
+            ]
+        );
         
-        // CPF e Data de Nascimento em grid
-        echo '<div class="dps-form-row dps-form-row--2col">';
-        $cpf_val = $meta['cpf'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'CPF', 'desi-pet-shower' ) . '<br><input type="text" name="client_cpf" value="' . esc_attr( $cpf_val ) . '" placeholder="000.000.000-00"></label></p>';
-        $birth_val = $meta['birth'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="client_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
-        echo '</div>';
-        
-        echo '</fieldset>';
-        
-        // Grupo: Contato
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Contato', 'desi-pet-shower' ) . '</legend>';
-        
-        // Phone / WhatsApp
-        $phone_val = $meta['phone'] ?? '';
-        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" value="' . esc_attr( $phone_val ) . '" placeholder="(00) 00000-0000" required></label></p>';
-        // Email
-        $email_val = $meta['email'] ?? '';
-        echo '<p><label>Email<br><input type="email" name="client_email" value="' . esc_attr( $email_val ) . '" placeholder="seuemail@exemplo.com"></label></p>';
-        
-        echo '</fieldset>';
-        
-        // Grupo: Redes Sociais
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Redes Sociais', 'desi-pet-shower' ) . '</legend>';
-        
-        echo '<div class="dps-form-row dps-form-row--2col">';
-        // Instagram
-        $insta_val = $meta['instagram'] ?? '';
-        echo '<p class="dps-form-col"><label>Instagram<br><input type="text" name="client_instagram" value="' . esc_attr( $insta_val ) . '" placeholder="@usuario"></label></p>';
-        // Facebook
-        $fb_val = $meta['facebook'] ?? '';
-        echo '<p class="dps-form-col"><label>Facebook<br><input type="text" name="client_facebook" value="' . esc_attr( $fb_val ) . '" placeholder="Nome do perfil"></label></p>';
-        echo '</div>';
-        
-        echo '</fieldset>';
-        
-        // Grupo: Endereço e Preferências
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Endereço e Preferências', 'desi-pet-shower' ) . '</legend>';
-        
-        // Address
-        $addr_val = $meta['address'] ?? '';
-        echo '<p><label>' . esc_html__( 'Endereço completo', 'desi-pet-shower' ) . '<br><textarea name="client_address" id="dps-client-address-admin" rows="2" placeholder="Rua, Número, Bairro, Cidade - UF">' . esc_textarea( $addr_val ) . '</textarea></label></p>';
-        // Referral (Como nos conheceu?)
-        $ref_val = $meta['referral'] ?? '';
-        echo '<p><label>' . esc_html__( 'Como nos conheceu?', 'desi-pet-shower' ) . '<br><input type="text" name="client_referral" value="' . esc_attr( $ref_val ) . '" placeholder="Google, indicação, Instagram..."></label></p>';
-        // Photo authorization
-        $auth = $meta['photo_auth'] ?? '';
-        $checked = $auth ? 'checked' : '';
-        echo '<p><label class="dps-checkbox-label"><input type="checkbox" name="client_photo_auth" value="1" ' . $checked . '> <span class="dps-checkbox-text">' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ) . '</span></label></p>';
-        
-        echo '</fieldset>';
-        
-        // Campos ocultos para latitude e longitude (admin) - valores predefinidos se estiver editando
-        $lat_admin = isset( $meta['lat'] ) ? $meta['lat'] : '';
-        $lng_admin = isset( $meta['lng'] ) ? $meta['lng'] : '';
-        echo '<input type="hidden" name="client_lat" id="dps-client-lat-admin" value="' . esc_attr( $lat_admin ) . '">';
-        echo '<input type="hidden" name="client_lng" id="dps-client-lng-admin" value="' . esc_attr( $lng_admin ) . '">';
-        // Submit button
-        $btn_text = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) : esc_html__( 'Salvar Cliente', 'desi-pet-shower' );
-        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . $btn_text . '</button></p>';
-        echo '</form>';
-        // Listagem de clientes
-        echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
-        if ( ! empty( $clients ) ) {
-            $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Telefone', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
-            foreach ( $clients as $client ) {
-                $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
-                // Gera link do WhatsApp se houver telefone
-                $phone_display = '';
-                if ( $phone_raw ) {
-                    // Remove caracteres não numéricos
-                    $phone_digits = preg_replace( '/\D+/', '', $phone_raw );
-                    $wa_url = 'https://wa.me/' . $phone_digits;
-                    $phone_display = '<a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $phone_raw ) . '</a>';
-                } else {
-                    $phone_display = '-';
-                }
-                $edit_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
-                $delete_url = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
-                // Link para visualizar cadastro e histórico
-                $view_url = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
-                // Link para agendar
-                $schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client->ID ], $base_url );
-                echo '<tr>';
-                echo '<td><a href="' . esc_url( $view_url ) . '">' . esc_html( $client->post_title ) . '</a></td>';
-                echo '<td>' . $phone_display . '</td>';
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a></td>';
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-        } else {
-            echo '<p>' . esc_html__( 'Nenhum cliente cadastrado.', 'desi-pet-shower' ) . '</p>';
-        }
-        // Se houver chave da API do Google Maps, injeta script de autocomplete de endereço
-        $api_key = get_option( 'dps_google_api_key', '' );
-        if ( $api_key ) {
-            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places"></script>';
-            echo '<script>(function(){
-                var input = document.getElementById("dps-client-address-admin");
-                if ( input ) {
-                    var autocomplete = new google.maps.places.Autocomplete(input, { types: ["geocode"] });
-                    autocomplete.addListener("place_changed", function() {
-                        var place = autocomplete.getPlace();
-                        if ( place && place.geometry ) {
-                            var lat = place.geometry.location.lat();
-                            var lng = place.geometry.location.lng();
-                            var latField = document.getElementById("dps-client-lat-admin");
-                            var lngField = document.getElementById("dps-client-lng-admin");
-                            if ( latField && lngField ) {
-                                latField.value = lat;
-                                lngField.value = lng;
-                            }
-                        }
-                    });
-                }
-            })();</script>';
-        }
         echo '</div>';
         return ob_get_clean();
     }
