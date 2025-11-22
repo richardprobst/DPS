@@ -1,0 +1,143 @@
+/**
+ * DPS AI Communications - Estilos
+ *
+ * Estilos para modal de pré-visualização de e-mail e botões de sugestão de IA
+ *
+ * @package DPS_AI_Addon
+ * @since 1.2.0
+ */
+
+/* Modal de pré-visualização de e-mail */
+.dps-ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+}
+
+.dps-ai-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dps-ai-modal-content {
+    position: relative;
+    background-color: #fff;
+    max-width: 600px;
+    margin: 50px auto;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 100001;
+}
+
+.dps-ai-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dps-ai-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-ai-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-ai-modal-close:hover {
+    color: #374151;
+}
+
+.dps-ai-modal-body {
+    padding: 20px;
+}
+
+.dps-ai-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.dps-ai-form-field {
+    margin-bottom: 20px;
+}
+
+.dps-ai-form-field:last-child {
+    margin-bottom: 0;
+}
+
+.dps-ai-form-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.dps-ai-form-field input[type="text"],
+.dps-ai-form-field textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.dps-ai-form-field textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* Botões de sugestão de IA */
+.dps-ai-suggest-whatsapp,
+.dps-ai-suggest-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+}
+
+.dps-ai-suggest-whatsapp:before,
+.dps-ai-suggest-email:before {
+    content: "✨";
+    font-size: 14px;
+}
+
+.dps-ai-suggest-whatsapp:disabled,
+.dps-ai-suggest-email:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-ai-modal-content {
+        margin: 20px;
+        max-width: calc(100% - 40px);
+    }
+}

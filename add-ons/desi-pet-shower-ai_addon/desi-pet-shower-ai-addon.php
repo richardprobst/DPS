@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Desi Pet Shower – AI Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Assistente virtual focado em Banho e Tosa para o Portal do Cliente do Desi Pet Shower. Responde perguntas sobre agendamentos, serviços, histórico e funcionalidades do sistema usando OpenAI.
- * Version:           1.1.0
+ * Description:       Assistente virtual focado em Banho e Tosa para o Portal do Cliente do Desi Pet Shower. Responde perguntas sobre agendamentos, serviços, histórico e funcionalidades do sistema usando OpenAI. Inclui sugestões de mensagens para WhatsApp e e-mail.
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-ai
@@ -19,6 +19,10 @@
  *
  * O assistente NÃO responde sobre assuntos aleatórios fora desse contexto
  * (política, religião, finanças pessoais, etc.).
+ *
+ * NOVO v1.2.0: Assistente de comunicações - gera sugestões de mensagens para
+ * WhatsApp e e-mail. NUNCA envia automaticamente. Apenas sugere textos que
+ * o usuário humano revisa e confirma antes de enviar.
  */
 
 // Bloqueia acesso direto aos arquivos.
@@ -36,13 +40,14 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.1.0' );
+    define( 'DPS_AI_VERSION', '1.2.0' );
 }
 
 // Inclui as classes principais.
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
 
 /**
  * Classe principal do add-on de IA.
@@ -88,6 +93,13 @@ class DPS_AI_Addon {
 
         // Inicializa integração com Portal do Cliente
         add_action( 'plugins_loaded', [ $this, 'init_portal_integration' ], 20 );
+
+        // Registra handlers AJAX para sugestões de mensagens
+        add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
+        add_action( 'wp_ajax_dps_ai_suggest_email_message', [ $this, 'ajax_suggest_email_message' ] );
+
+        // Registra assets admin
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
     }
 
     /**
@@ -324,6 +336,190 @@ class DPS_AI_Addon {
 
         wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ) );
         exit;
+    }
+
+    /**
+     * Handler AJAX para sugestão de mensagem de WhatsApp.
+     *
+     * Espera $_POST com:
+     * - action: 'dps_ai_suggest_whatsapp_message'
+     * - nonce: 'dps_ai_comm_nonce'
+     * - context: array com dados da mensagem (type, client_name, pet_name, etc.)
+     */
+    public function ajax_suggest_whatsapp_message() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_comm_nonce' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
+            ] );
+        }
+
+        // Verifica permissão (qualquer usuário logado que possa editar posts)
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Você não tem permissão para usar esta funcionalidade.', 'dps-ai' ),
+            ] );
+        }
+
+        // Obtém e sanitiza contexto
+        $raw_context = isset( $_POST['context'] ) ? wp_unslash( $_POST['context'] ) : [];
+        $context     = $this->sanitize_message_context( $raw_context );
+
+        if ( empty( $context ) || empty( $context['type'] ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Contexto inválido ou incompleto.', 'dps-ai' ),
+            ] );
+        }
+
+        // Chama o assistente de mensagens
+        $result = DPS_AI_Message_Assistant::suggest_whatsapp_message( $context );
+
+        if ( null === $result ) {
+            wp_send_json_error( [
+                'message' => __( 'Não foi possível gerar sugestão automática. A IA pode estar desativada ou houve um erro na API. Escreva a mensagem manualmente.', 'dps-ai' ),
+            ] );
+        }
+
+        // Retorna sucesso com o texto sugerido
+        wp_send_json_success( [
+            'text' => $result['text'],
+        ] );
+    }
+
+    /**
+     * Handler AJAX para sugestão de e-mail.
+     *
+     * Espera $_POST com:
+     * - action: 'dps_ai_suggest_email_message'
+     * - nonce: 'dps_ai_comm_nonce'
+     * - context: array com dados da mensagem
+     */
+    public function ajax_suggest_email_message() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_comm_nonce' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
+            ] );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Você não tem permissão para usar esta funcionalidade.', 'dps-ai' ),
+            ] );
+        }
+
+        // Obtém e sanitiza contexto
+        $raw_context = isset( $_POST['context'] ) ? wp_unslash( $_POST['context'] ) : [];
+        $context     = $this->sanitize_message_context( $raw_context );
+
+        if ( empty( $context ) || empty( $context['type'] ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Contexto inválido ou incompleto.', 'dps-ai' ),
+            ] );
+        }
+
+        // Chama o assistente de mensagens
+        $result = DPS_AI_Message_Assistant::suggest_email_message( $context );
+
+        if ( null === $result ) {
+            wp_send_json_error( [
+                'message' => __( 'Não foi possível gerar sugestão de e-mail automaticamente. A IA pode estar desativada ou houve um erro na API. Edite ou escreva o texto manualmente.', 'dps-ai' ),
+            ] );
+        }
+
+        // Retorna sucesso com assunto e corpo
+        wp_send_json_success( [
+            'subject' => $result['subject'],
+            'body'    => $result['body'],
+        ] );
+    }
+
+    /**
+     * Sanitiza o contexto de mensagem recebido via AJAX.
+     *
+     * @param array $raw_context Contexto não sanitizado.
+     *
+     * @return array Contexto sanitizado.
+     */
+    private function sanitize_message_context( $raw_context ) {
+        if ( ! is_array( $raw_context ) ) {
+            return [];
+        }
+
+        $context = [];
+
+        // Campos de texto simples
+        $text_fields = [
+            'type',
+            'client_name',
+            'client_phone',
+            'pet_name',
+            'appointment_date',
+            'appointment_time',
+            'groomer_name',
+            'amount',
+            'additional_info',
+        ];
+
+        foreach ( $text_fields as $field ) {
+            if ( isset( $raw_context[ $field ] ) ) {
+                $context[ $field ] = sanitize_text_field( $raw_context[ $field ] );
+            }
+        }
+
+        // Campo services é array
+        if ( isset( $raw_context['services'] ) && is_array( $raw_context['services'] ) ) {
+            $context['services'] = array_map( 'sanitize_text_field', $raw_context['services'] );
+        }
+
+        return $context;
+    }
+
+    /**
+     * Enfileira assets admin (JavaScript e CSS).
+     *
+     * @param string $hook Hook da página atual.
+     */
+    public function enqueue_admin_assets( $hook ) {
+        // Por enquanto, carrega em todas as páginas admin
+        // TODO: Otimizar para carregar apenas nas páginas relevantes (agenda, clientes, etc.)
+        
+        // Enfileira CSS
+        wp_enqueue_style(
+            'dps-ai-communications',
+            DPS_AI_ADDON_URL . 'assets/css/dps-ai-communications.css',
+            [],
+            DPS_AI_VERSION
+        );
+
+        // Enfileira JavaScript
+        wp_enqueue_script(
+            'dps-ai-communications',
+            DPS_AI_ADDON_URL . 'assets/js/dps-ai-communications.js',
+            [ 'jquery' ],
+            DPS_AI_VERSION,
+            true
+        );
+
+        // Passa dados para JavaScript
+        wp_localize_script(
+            'dps-ai-communications',
+            'dpsAiComm',
+            [
+                'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'dps_ai_comm_nonce' ),
+                'i18n'    => [
+                    'generating'        => __( 'Gerando sugestão...', 'dps-ai' ),
+                    'error'             => __( 'Erro ao gerar sugestão', 'dps-ai' ),
+                    'insert'            => __( 'Inserir', 'dps-ai' ),
+                    'cancel'            => __( 'Cancelar', 'dps-ai' ),
+                    'emailPreviewTitle' => __( 'Pré-visualização do E-mail', 'dps-ai' ),
+                    'subject'           => __( 'Assunto', 'dps-ai' ),
+                    'body'              => __( 'Mensagem', 'dps-ai' ),
+                ],
+            ]
+        );
     }
 }
 
