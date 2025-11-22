@@ -1596,15 +1596,16 @@ class DPS_Base_Frontend {
         echo '</div>';
 
         if ( $appointments ) {
+            echo '<div class="dps-table-wrapper">';
             echo '<table class="dps-table" id="dps-history-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
             $base_url        = get_permalink();
@@ -1670,16 +1671,17 @@ class DPS_Base_Frontend {
                 echo '<td>' . esc_html( $time ) . '</td>';
                 echo '<td>' . esc_html( $client_name ) . '</td>';
                 echo '<td>' . esc_html( $pet_display ) . '</td>';
-                echo '<td>' . esc_html( $services_text ) . '</td>';
+                echo '<td class="hide-mobile">' . esc_html( $services_text ) . '</td>';
                 echo '<td>' . esc_html( $total_display ) . '</td>';
                 echo '<td>' . esc_html( $status_label ) . '</td>';
-                echo '<td>' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
+                echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
                 echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
+            echo '</div>';
         } else {
             echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'desi-pet-shower' ) . '</p>';
         }
