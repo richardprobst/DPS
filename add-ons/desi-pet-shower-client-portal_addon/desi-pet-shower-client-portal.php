@@ -37,6 +37,7 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
 // Inclui classes principais
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
 // Inicializa o add-on de forma segura após todos os plugins serem carregados.
@@ -52,6 +53,11 @@ add_action( 'plugins_loaded', function () {
     
     if ( class_exists( 'DPS_Portal_Session_Manager' ) ) {
         DPS_Portal_Session_Manager::get_instance();
+    }
+    
+    // Inicializa gerenciador de ações administrativas
+    if ( class_exists( 'DPS_Portal_Admin_Actions' ) ) {
+        DPS_Portal_Admin_Actions::get_instance();
     }
 } );
 
