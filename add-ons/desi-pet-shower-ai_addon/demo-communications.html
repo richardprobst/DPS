@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo: Assistente de IA para Comunicações - DPS</title>
+    <link rel="stylesheet" href="../assets/css/dps-ai-communications.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .demo-section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #374151;
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #374151;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            color: #374151;
+        }
+        .button:hover {
+            background-color: #e5e7eb;
+        }
+        .button-primary {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+        .button-primary:hover {
+            background-color: #0284c7;
+        }
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .info-box {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #92400e;
+        }
+        .info-box p {
+            margin-bottom: 0;
+            color: #92400e;
+        }
+        .actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ Demonstração: Assistente de IA para Comunicações</h1>
+
+    <div class="info-box">
+        <h3>⚠️ Nota Importante</h3>
+        <p>Este é um arquivo de DEMONSTRAÇÃO HTML estático. Em produção, os botões de IA estariam integrados no WordPress com handlers AJAX funcionais.</p>
+        <p><strong>A IA NUNCA envia mensagens automaticamente.</strong> Apenas preenche campos que o usuário revisa antes de enviar.</p>
+    </div>
+
+    <!-- EXEMPLO 1: WhatsApp -->
+    <div class="demo-section">
+        <h2>📱 Exemplo 1: Lembrete via WhatsApp</h2>
+        
+        <p><strong>Cenário:</strong> Cliente tem agendamento amanhã para banho e tosa do pet Rex.</p>
+        
+        <label for="whatsapp-message-1">Mensagem para o Cliente:</label>
+        <textarea 
+            id="whatsapp-message-1" 
+            placeholder="Clique em 'Sugerir com IA' ou escreva sua própria mensagem..."
+        ></textarea>
+        
+        <div class="actions">
+            <!-- Este botão em produção faria chamada AJAX -->
+            <button 
+                type="button"
+                class="button dps-ai-suggest-whatsapp"
+                data-target="#whatsapp-message-1"
+                data-type="lembrete"
+                data-client-name="João Silva"
+                data-pet-name="Rex"
+                data-appointment-date="15/12/2024"
+                data-appointment-time="14:00"
+                data-services='["Banho", "Tosa"]'
+                onclick="simulateSuggestion('whatsapp-message-1', 'whatsapp-lembrete')"
+            >
+                ✨ Sugerir com IA
+            </button>
+            
+            <button 
+                type="button"
+                class="button button-primary"
+                onclick="simulateWhatsAppOpen('whatsapp-message-1')"
+            >
+                📲 Abrir WhatsApp
+            </button>
+        </div>
+        
+        <div id="status-1" class="status"></div>
+    </div>
+
+    <!-- EXEMPLO 2: E-mail Pós-Atendimento -->
+    <div class="demo-section">
+        <h2>📧 Exemplo 2: E-mail de Agradecimento</h2>
+        
+        <p><strong>Cenário:</strong> Cliente finalizou atendimento de banho e hidratação para pet Mel.</p>
+        
+        <label for="email-subject-2">Assunto:</label>
+        <input 
+            type="text" 
+            id="email-subject-2" 
+            placeholder="Digite o assunto ou clique em 'Sugerir E-mail com IA'..."
+        />
+        
+        <label for="email-body-2">Mensagem:</label>
+        <textarea 
+            id="email-body-2" 
+            placeholder="Digite a mensagem ou clique em 'Sugerir E-mail com IA'..."
+        ></textarea>
+        
+        <div class="actions">
+            <!-- Este botão em produção faria chamada AJAX e abriria modal -->
+            <button 
+                type="button"
+                class="button dps-ai-suggest-email"
+                data-target-subject="#email-subject-2"
+                data-target-body="#email-body-2"
+                data-type="pos_atendimento"
+                data-client-name="Maria Santos"
+                data-pet-name="Mel"
+                data-appointment-date="10/12/2024"
+                data-services='["Banho", "Hidratação"]'
+                onclick="simulateSuggestion('email-2', 'email-pos-atendimento')"
+            >
+                ✨ Sugerir E-mail com IA
+            </button>
+            
+            <button 
+                type="button"
+                class="button button-primary"
+                onclick="simulateEmailSend('email-subject-2', 'email-body-2')"
+            >
+                📨 Enviar E-mail
+            </button>
+        </div>
+        
+        <div id="status-2" class="status"></div>
+    </div>
+
+    <!-- EXEMPLO 3: Cobrança Suave -->
+    <div class="demo-section">
+        <h2>💰 Exemplo 3: Lembrete de Pagamento</h2>
+        
+        <p><strong>Cenário:</strong> Cliente tem valor pendente de R$ 250,00 de atendimento anterior.</p>
+        
+        <label for="whatsapp-message-3">Mensagem:</label>
+        <textarea 
+            id="whatsapp-message-3" 
+            placeholder="Clique em 'Sugerir com IA' para gerar lembrete educado..."
+        ></textarea>
+        
+        <div class="actions">
+            <button 
+                type="button"
+                class="button dps-ai-suggest-whatsapp"
+                data-target="#whatsapp-message-3"
+                data-type="cobranca_suave"
+                data-client-name="Carlos Oliveira"
+                data-pet-name="Toby"
+                data-appointment-date="05/12/2024"
+                data-services='["Banho", "Tosa", "Perfume"]'
+                data-amount="R$ 250,00"
+                onclick="simulateSuggestion('whatsapp-message-3', 'whatsapp-cobranca')"
+            >
+                ✨ Sugerir com IA
+            </button>
+            
+            <button 
+                type="button"
+                class="button button-primary"
+                onclick="simulateWhatsAppOpen('whatsapp-message-3')"
+            >
+                📲 Abrir WhatsApp
+            </button>
+        </div>
+        
+        <div id="status-3" class="status"></div>
+    </div>
+
+    <script>
+        // SIMULAÇÕES para demonstração (em produção, seriam chamadas AJAX reais)
+        
+        const suggestions = {
+            'whatsapp-lembrete': 'Olá João! 🐕 Lembrete: amanhã às 14:00 temos o agendamento do Rex para Banho e Tosa. Estamos esperando vocês! Qualquer dúvida, é só chamar. 😊',
+            
+            'email-pos-atendimento': {
+                subject: 'Obrigado pela visita! 🐾',
+                body: 'Olá Maria,\n\nMuito obrigado por confiar no Desi Pet Shower para cuidar da Mel!\n\nEsperamos que você e a Mel tenham gostado do atendimento de Banho e Hidratação. Ficou alguma dúvida ou sugestão? Estamos à disposição!\n\nAguardamos vocês na próxima visita.\n\nAbraços,\nEquipe Desi Pet Shower'
+            },
+            
+            'whatsapp-cobranca': 'Olá Carlos! 😊 Tudo bem? Passando aqui para lembrar que temos um valor pendente de R$ 250,00 do atendimento do Toby em 05/12 (Banho, Tosa e Perfume). Se puder, seria ótimo regularizar. Aceitamos PIX, cartão ou dinheiro. Obrigado! 🙏'
+        };
+        
+        function simulateSuggestion(fieldId, suggestionKey) {
+            const button = event.target;
+            const originalText = button.textContent;
+            
+            // Simula "carregando"
+            button.disabled = true;
+            button.textContent = '⏳ Gerando sugestão...';
+            
+            setTimeout(() => {
+                const suggestion = suggestions[suggestionKey];
+                
+                if (suggestion) {
+                    if (typeof suggestion === 'string') {
+                        // WhatsApp
+                        document.getElementById(fieldId).value = suggestion;
+                        showStatus(fieldId.replace(/[^0-9]/g, ''), 'success', 'Sugestão gerada com sucesso! Revise antes de enviar.');
+                    } else {
+                        // E-mail
+                        const [, num] = fieldId.match(/email-(\d+)/);
+                        document.getElementById(`email-subject-${num}`).value = suggestion.subject;
+                        document.getElementById(`email-body-${num}`).value = suggestion.body;
+                        showStatus(num, 'success', 'Sugestão de e-mail gerada! Revise antes de enviar.');
+                    }
+                }
+                
+                button.disabled = false;
+                button.textContent = originalText;
+            }, 1500);
+        }
+        
+        function simulateWhatsAppOpen(fieldId) {
+            const message = document.getElementById(fieldId).value;
+            
+            if (!message.trim()) {
+                alert('Por favor, escreva ou gere uma mensagem antes de abrir o WhatsApp.');
+                return;
+            }
+            
+            const num = fieldId.replace(/[^0-9]/g, '');
+            showStatus(num, 'success', '✅ Em produção, o WhatsApp seria aberto com a mensagem pronta. O usuário então escolhe enviar ou não.');
+            
+            // Em produção, abriria:
+            // window.open('https://wa.me/5511987654321?text=' + encodeURIComponent(message));
+        }
+        
+        function simulateEmailSend(subjectId, bodyId) {
+            const subject = document.getElementById(subjectId).value;
+            const body = document.getElementById(bodyId).value;
+            
+            if (!subject.trim() || !body.trim()) {
+                alert('Por favor, preencha o assunto e a mensagem antes de enviar.');
+                return;
+            }
+            
+            if (!confirm('Deseja realmente enviar este e-mail?')) {
+                return;
+            }
+            
+            const num = subjectId.replace(/[^0-9]/g, '');
+            showStatus(num, 'success', '✅ Em produção, o e-mail seria enviado via wp_mail() após esta confirmação explícita do usuário.');
+            
+            // Em produção, faria chamada AJAX:
+            // jQuery.ajax({ action: 'dps_send_email', ... })
+        }
+        
+        function showStatus(num, type, message) {
+            const status = document.getElementById(`status-${num}`);
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
