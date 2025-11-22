@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – AI Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Assistente virtual focado em Banho e Tosa para o Portal do Cliente do Desi Pet Shower. Responde perguntas sobre agendamentos, serviços, histórico e funcionalidades do sistema usando OpenAI.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-ai
@@ -36,7 +36,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.0.0' );
+    define( 'DPS_AI_VERSION', '1.1.0' );
 }
 
 // Inclui as classes principais.
@@ -207,6 +207,23 @@ class DPS_AI_Addon {
                                 <p class="description"><?php esc_html_e( 'Limite de tokens na resposta (afeta custo e tamanho da resposta). Recomendado: 500', 'dps-ai' ); ?></p>
                             </td>
                         </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_additional_instructions"><?php echo esc_html__( 'Instruções adicionais para a IA (opcional)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_additional_instructions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[additional_instructions]" rows="6" class="large-text" maxlength="2000"><?php echo esc_textarea( $options['additional_instructions'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Use este campo para adicionar regras específicas de como a IA deve se comunicar com os clientes, dentro do contexto de Banho e Tosa e do Desi Pet Shower.', 'dps-ai' ); ?>
+                                    <br />
+                                    <strong><?php esc_html_e( 'Importante:', 'dps-ai' ); ?></strong>
+                                    <?php esc_html_e( 'As regras principais de segurança e escopo do sistema já são aplicadas automaticamente. Não remova ou contradiga essas regras.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Use este campo apenas para complementar (ex.: tom de voz, expressões, estilo de atendimento, orientações da marca). Máximo: 2000 caracteres.', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -248,13 +265,24 @@ class DPS_AI_Addon {
         // Sanitiza todo o array POST antes de processar
         $raw_settings = isset( $_POST[ self::OPTION_KEY ] ) ? wp_unslash( $_POST[ self::OPTION_KEY ] ) : [];
 
+        // Processa instruções adicionais com limite de 2000 caracteres
+        $additional_instructions = '';
+        if ( ! empty( $raw_settings['additional_instructions'] ) ) {
+            $additional_instructions = sanitize_textarea_field( $raw_settings['additional_instructions'] );
+            // Limita a 2000 caracteres
+            if ( mb_strlen( $additional_instructions ) > 2000 ) {
+                $additional_instructions = mb_substr( $additional_instructions, 0, 2000 );
+            }
+        }
+
         $settings = [
-            'enabled'     => ! empty( $raw_settings['enabled'] ),
-            'api_key'     => isset( $raw_settings['api_key'] ) ? sanitize_text_field( $raw_settings['api_key'] ) : '',
-            'model'       => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-3.5-turbo',
-            'temperature' => isset( $raw_settings['temperature'] ) ? floatval( $raw_settings['temperature'] ) : 0.4,
-            'timeout'     => isset( $raw_settings['timeout'] ) ? absint( $raw_settings['timeout'] ) : 10,
-            'max_tokens'  => isset( $raw_settings['max_tokens'] ) ? absint( $raw_settings['max_tokens'] ) : 500,
+            'enabled'                 => ! empty( $raw_settings['enabled'] ),
+            'api_key'                 => isset( $raw_settings['api_key'] ) ? sanitize_text_field( $raw_settings['api_key'] ) : '',
+            'model'                   => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-3.5-turbo',
+            'temperature'             => isset( $raw_settings['temperature'] ) ? floatval( $raw_settings['temperature'] ) : 0.4,
+            'timeout'                 => isset( $raw_settings['timeout'] ) ? absint( $raw_settings['timeout'] ) : 10,
+            'max_tokens'              => isset( $raw_settings['max_tokens'] ) ? absint( $raw_settings['max_tokens'] ) : 500,
+            'additional_instructions' => $additional_instructions,
         ];
 
         update_option( self::OPTION_KEY, $settings );

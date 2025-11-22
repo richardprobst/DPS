@@ -79,6 +79,12 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.1.0)**: Campo de "Instruções adicionais" nas configurações da IA
+  - Permite administrador complementar comportamento da IA sem substituir regras base de segurança
+  - Campo opcional com limite de 2000 caracteres
+  - Instruções adicionais são enviadas como segunda mensagem de sistema após prompt base
+  - Prompt base protegido contra contradições posteriores
+  - Novo método público `DPS_AI_Assistant::get_base_system_prompt()` para reutilização
 - **Services Add-on**: Nova API pública (`DPS_Services_API`) para centralizar lógica de serviços e cálculo de preços (v1.2.0)
   - `DPS_Services_API::get_service($service_id)` - Retornar dados completos de um serviço
   - `DPS_Services_API::calculate_price($service_id, $pet_size, $context)` - Calcular preço por porte do pet
