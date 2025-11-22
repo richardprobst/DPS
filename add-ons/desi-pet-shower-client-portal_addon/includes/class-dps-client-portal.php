@@ -1346,73 +1346,23 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza a página de administração dos logins de clientes.
-     * Lista todos os clientes e possibilita a redefinição de senha.
+     * Usa o novo sistema baseado em tokens de acesso (magic links).
+     *
+     * @param string $context  Contexto de renderização ('admin' ou 'frontend')
+     * @param string $base_url URL base para ações
      */
     public function render_client_logins_page( $context = 'admin', $base_url = '' ) {
         $context         = in_array( $context, [ 'admin', 'frontend' ], true ) ? $context : 'admin';
         $user_can_manage = current_user_can( 'manage_options' );
 
-        if ( ! $user_can_manage && 'admin' === $context ) {
-            return;
-        }
-
-        if ( ! $user_can_manage && 'frontend' === $context ) {
-            echo '<div class="dps-client-logins dps-client-logins--restricted">';
+        if ( ! $user_can_manage ) {
+            echo '<div class="dps-portal-logins-restricted">';
             echo '<p>' . esc_html__( 'Você não tem permissão para visualizar os logins dos clientes.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
             return;
         }
 
-        $feedback_messages = [];
-
-        if ( isset( $_GET['reset_pass'], $_GET['client_id'] ) ) {
-            $cid   = absint( $_GET['client_id'] );
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( $cid && wp_verify_nonce( $nonce, 'dps_reset_pass_' . $cid ) ) {
-                $plain = wp_generate_password( 8, false, false );
-                $hash  = wp_hash_password( $plain );
-                update_post_meta( $cid, 'client_password_hash', $hash );
-                set_transient( 'dps_client_pass_' . $cid, $plain, 30 * MINUTE_IN_SECONDS );
-                $feedback_messages[] = [
-                    'type' => 'success',
-                    'text' => esc_html__( 'Senha redefinida com sucesso.', 'dps-client-portal' ),
-                ];
-            } else {
-                $feedback_messages[] = [
-                    'type' => 'error',
-                    'text' => esc_html__( 'Falha ao validar a solicitação.', 'dps-client-portal' ),
-                ];
-            }
-        } elseif ( isset( $_GET['send_pass'], $_GET['client_id'] ) ) {
-            $cid   = absint( $_GET['client_id'] );
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( $cid && wp_verify_nonce( $nonce, 'dps_send_pass_' . $cid ) ) {
-                $plain = wp_generate_password( 8, false, false );
-                $hash  = wp_hash_password( $plain );
-                update_post_meta( $cid, 'client_password_hash', $hash );
-                set_transient( 'dps_client_pass_' . $cid, $plain, 30 * MINUTE_IN_SECONDS );
-                $phone       = get_post_meta( $cid, 'client_phone', true );
-                $clean_phone = preg_replace( '/[^0-9]/', '', (string) $phone );
-                $portal_page = get_page_by_title( 'Portal do Cliente' );
-                $portal_link = $portal_page ? get_permalink( $portal_page->ID ) : home_url();
-                $message     = sprintf(
-                    __( 'Olá! Aqui estão seus dados de acesso ao portal Desi Pet Shower:\nTelefone: %s\nSenha: %s\nAcesse: %s', 'dps-client-portal' ),
-                    $phone,
-                    $plain,
-                    $portal_link
-                );
-                $wa_text = urlencode( $message );
-                $wa_link = 'https://wa.me/' . $clean_phone . '?text=' . $wa_text;
-                wp_redirect( $wa_link );
-                exit;
-            } else {
-                $feedback_messages[] = [
-                    'type' => 'error',
-                    'text' => esc_html__( 'Falha ao validar a solicitação.', 'dps-client-portal' ),
-                ];
-            }
-        }
-
+        // Determina URL base
         if ( ! $base_url ) {
             if ( 'admin' === $context ) {
                 $base_url = menu_page_url( 'dps-client-logins', false );
@@ -1422,245 +1372,73 @@ final class DPS_Client_Portal {
             }
         }
 
-        $base_url = remove_query_arg( [ 'reset_pass', 'send_pass', 'client_id', '_wpnonce' ], $base_url );
-
         if ( 'frontend' === $context ) {
             $base_url = add_query_arg( 'tab', 'logins', $base_url );
         }
 
-        $search      = isset( $_GET['dps_client_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_client_search'] ) ) : '';
-        $filter_temp = isset( $_GET['dps_filter_temp'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['dps_filter_temp'] ) );
+        // Processa feedback
+        $feedback_messages = [];
 
-        $normalized_search        = $search ? strtolower( remove_accents( $search ) ) : '';
-        $normalized_search_digits  = $search ? preg_replace( '/\D+/', '', $search ) : '';
-        $normalized_search_digits  = is_string( $normalized_search_digits ) ? $normalized_search_digits : '';
-
-        $clients = get_posts(
-            [
-                'post_type'      => 'dps_cliente',
-                'post_status'    => 'publish',
-                'posts_per_page' => -1,
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-            ]
-        );
-
-        $total_clients        = count( $clients );
-        $total_with_temp      = 0;
-        $displayed_clients    = [];
-        $displayed_temp_count = 0;
-
-        foreach ( $clients as $client ) {
-            $cid   = $client->ID;
-            $phone = get_post_meta( $cid, 'client_phone', true );
-            $temp  = get_transient( 'dps_client_pass_' . $cid );
-
-            if ( $temp ) {
-                $total_with_temp++;
-            }
-
-            $matches_search = true;
-
-            if ( $search ) {
-                $client_name_normalized = strtolower( remove_accents( $client->post_title ) );
-                $matches_search         = false !== strpos( $client_name_normalized, $normalized_search );
-
-                if ( ! $matches_search && $normalized_search_digits ) {
-                    $phone_digits  = preg_replace( '/\D+/', '', (string) $phone );
-                    $matches_search = false !== strpos( (string) $phone_digits, $normalized_search_digits );
-                }
-            }
-
-            if ( ! $matches_search ) {
-                continue;
-            }
-
-            if ( $filter_temp && ! $temp ) {
-                continue;
-            }
-
-            if ( $temp ) {
-                $displayed_temp_count++;
-            }
-
-            $displayed_clients[] = [
-                'id'        => $cid,
-                'name'      => $client->post_title,
-                'phone'     => $phone,
-                'temp'      => $temp,
-                'edit_link' => get_edit_post_link( $cid ),
+        if ( isset( $_GET['dps_token_generated'], $_GET['client_id'] ) ) {
+            $client_name = get_the_title( absint( $_GET['client_id'] ) );
+            $feedback_messages[] = [
+                'type' => 'success',
+                'text' => sprintf( __( 'Link de acesso gerado com sucesso para %s.', 'dps-client-portal' ), $client_name ),
             ];
         }
 
-        $title_tag = ( 'admin' === $context ) ? 'h1' : 'h2';
-
-        if ( 'admin' === $context ) {
-            echo '<div class="wrap">';
+        if ( isset( $_GET['dps_tokens_revoked'], $_GET['client_id'] ) ) {
+            $count = absint( $_GET['dps_tokens_revoked'] );
+            $feedback_messages[] = [
+                'type' => 'success',
+                'text' => sprintf( _n( '%d link foi revogado.', '%d links foram revogados.', $count, 'dps-client-portal' ), $count ),
+            ];
         }
 
-        echo '<div class="dps-client-logins">';
-        echo '<' . esc_attr( $title_tag ) . ' class="dps-client-logins__title">' . esc_html__( 'Logins de Clientes', 'dps-client-portal' ) . '</' . esc_attr( $title_tag ) . '>';
+        // Busca clientes
+        $search = isset( $_GET['dps_search'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_search'] ) ) : '';
 
-        if ( $feedback_messages ) {
-            echo '<div class="dps-client-logins__feedback">';
-            foreach ( $feedback_messages as $feedback ) {
-                $notice_class = 'success' === $feedback['type'] ? 'dps-client-logins__notice--success' : 'dps-client-logins__notice--error';
-                echo '<div class="dps-client-logins__notice ' . esc_attr( $notice_class ) . '"><p>' . esc_html( $feedback['text'] ) . '</p></div>';
+        $query_args = [
+            'post_type'      => 'dps_cliente',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ];
+
+        if ( $search ) {
+            $query_args['s'] = $search;
+        }
+
+        $clients_query = new WP_Query( $query_args );
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $clients       = [];
+
+        if ( $clients_query->have_posts() ) {
+            while ( $clients_query->have_posts() ) {
+                $clients_query->the_post();
+                $client_id = get_the_ID();
+
+                $clients[] = [
+                    'id'          => $client_id,
+                    'name'        => get_the_title(),
+                    'phone'       => get_post_meta( $client_id, 'client_phone', true ),
+                    'email'       => get_post_meta( $client_id, 'client_email', true ),
+                    'token_stats' => $token_manager->get_client_stats( $client_id ),
+                ];
             }
-            echo '</div>';
+            wp_reset_postdata();
         }
 
-        $summary_items = [];
-        $summary_items[] = sprintf(
-            /* translators: %s: quantidade de clientes. */
-            esc_html__( 'Total de clientes: %s', 'dps-client-portal' ),
-            '<strong>' . esc_html( number_format_i18n( $total_clients ) ) . '</strong>'
-        );
-
-        $summary_items[] = sprintf(
-            /* translators: %s: quantidade de senhas temporárias ativas. */
-            esc_html__( 'Com senha temporária ativa: %s', 'dps-client-portal' ),
-            '<strong>' . esc_html( number_format_i18n( $total_with_temp ) ) . '</strong>'
-        );
-
-        $summary_items[] = sprintf(
-            /* translators: %s: quantidade de senhas temporárias exibidas na tabela. */
-            esc_html__( 'Senhas temporárias exibidas: %s', 'dps-client-portal' ),
-            '<strong>' . esc_html( number_format_i18n( $displayed_temp_count ) ) . '</strong>'
-        );
-
-        $summary_items[] = sprintf(
-            /* translators: 1: quantidade exibida, 2: quantidade total */
-            esc_html__( 'Exibindo %1$s de %2$s clientes', 'dps-client-portal' ),
-            '<strong>' . esc_html( number_format_i18n( count( $displayed_clients ) ) ) . '</strong>',
-            '<strong>' . esc_html( number_format_i18n( $total_clients ) ) . '</strong>'
-        );
-
-        echo '<ul class="dps-client-logins__summary">';
-        foreach ( $summary_items as $item ) {
-            echo '<li class="dps-client-logins__summary-item">' . wp_kses_post( $item ) . '</li>';
-        }
-        echo '</ul>';
-
-        echo '<form method="get" action="' . esc_url( $base_url ) . '" class="dps-client-logins__filters">';
-        if ( 'frontend' === $context ) {
-            echo '<input type="hidden" name="tab" value="logins" />';
-        }
-        echo '<div class="dps-client-logins__field">';
-        echo '<label class="dps-client-logins__label" for="dps-client-logins-search">' . esc_html__( 'Buscar por nome ou telefone', 'dps-client-portal' ) . '</label>';
-        echo '<input type="search" id="dps-client-logins-search" name="dps_client_search" value="' . esc_attr( $search ) . '" placeholder="' . esc_attr__( 'Ex.: Maria ou 11999999999', 'dps-client-portal' ) . '" />';
-        echo '</div>';
-        echo '<div class="dps-client-logins__field dps-client-logins__field--checkbox">';
-        echo '<input type="checkbox" id="dps-client-logins-temp" name="dps_filter_temp" value="1" ' . checked( $filter_temp, true, false ) . ' />';
-        echo '<label for="dps-client-logins-temp">' . esc_html__( 'Mostrar apenas clientes com senha temporária ativa', 'dps-client-portal' ) . '</label>';
-        echo '</div>';
-        echo '<div class="dps-client-logins__actions">';
-        echo '<button type="submit" class="button button-primary dps-client-logins__submit">' . esc_html__( 'Aplicar filtros', 'dps-client-portal' ) . '</button>';
-        $reset_filters_url = remove_query_arg( [ 'dps_client_search', 'dps_filter_temp' ], $base_url );
-        if ( $search || $filter_temp ) {
-            echo '<a class="button button-secondary dps-client-logins__reset" href="' . esc_url( $reset_filters_url ) . '">' . esc_html__( 'Limpar filtros', 'dps-client-portal' ) . '</a>';
-        }
-        echo '</div>';
-        echo '</form>';
-
-        echo '<div class="dps-client-logins__table-wrapper">';
-
-        if ( $displayed_clients ) {
-            echo '<table class="dps-client-logins__table widefat fixed striped">';
-            echo '<thead><tr>';
-            echo '<th scope="col">' . esc_html__( 'ID', 'dps-client-portal' ) . '</th>';
-            echo '<th scope="col">' . esc_html__( 'Cliente', 'dps-client-portal' ) . '</th>';
-            echo '<th scope="col">' . esc_html__( 'Telefone', 'dps-client-portal' ) . '</th>';
-            echo '<th scope="col">' . esc_html__( 'Senha Temporária', 'dps-client-portal' ) . '</th>';
-            echo '<th scope="col">' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>';
-            echo '</tr></thead><tbody>';
-
-            foreach ( $displayed_clients as $client_data ) {
-                $cid       = $client_data['id'];
-                $temp      = $client_data['temp'];
-                $has_temp  = ! empty( $temp );
-                $temp_text = $has_temp ? esc_html__( 'Ativa', 'dps-client-portal' ) : esc_html__( 'Indisponível', 'dps-client-portal' );
-                $temp_hint = $has_temp
-                    ? esc_html__( 'Senha válida por 30 minutos após a geração.', 'dps-client-portal' )
-                    : esc_html__( 'Nenhuma senha temporária ativa. Gere uma nova para o cliente.', 'dps-client-portal' );
-
-                $common_args = [];
-                if ( $search ) {
-                    $common_args['dps_client_search'] = $search;
-                }
-                if ( $filter_temp ) {
-                    $common_args['dps_filter_temp'] = '1';
-                }
-
-                $reset_url = wp_nonce_url(
-                    add_query_arg(
-                        array_merge(
-                            $common_args,
-                            [
-                                'reset_pass' => 1,
-                                'client_id'  => $cid,
-                            ]
-                        ),
-                        $base_url
-                    ),
-                    'dps_reset_pass_' . $cid
-                );
-
-                $send_url = wp_nonce_url(
-                    add_query_arg(
-                        array_merge(
-                            $common_args,
-                            [
-                                'send_pass' => 1,
-                                'client_id' => $cid,
-                            ]
-                        ),
-                        $base_url
-                    ),
-                    'dps_send_pass_' . $cid
-                );
-
-                echo '<tr>';
-                echo '<td data-title="' . esc_attr__( 'ID', 'dps-client-portal' ) . '"><span class="dps-client-logins__cell-id">#' . esc_html( $cid ) . '</span></td>';
-                echo '<td data-title="' . esc_attr__( 'Cliente', 'dps-client-portal' ) . '"><strong>' . esc_html( $client_data['name'] ) . '</strong></td>';
-                echo '<td data-title="' . esc_attr__( 'Telefone', 'dps-client-portal' ) . '">' . ( $client_data['phone'] ? esc_html( $client_data['phone'] ) : '&mdash;' ) . '</td>';
-                echo '<td data-title="' . esc_attr__( 'Senha Temporária', 'dps-client-portal' ) . '">';
-                $badge_class = $has_temp ? 'dps-client-logins__badge--active' : 'dps-client-logins__badge--inactive';
-                echo '<span class="dps-client-logins__badge ' . esc_attr( $badge_class ) . '">' . $temp_text . '</span>';
-                if ( $has_temp ) {
-                    echo '<code class="dps-client-logins__code">' . esc_html( $temp ) . '</code>';
-                }
-                echo '<small class="dps-client-logins__hint">' . esc_html( $temp_hint ) . '</small>';
-                echo '</td>';
-                echo '<td data-title="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '" class="dps-client-logins__actions-cell">';
-                echo '<a class="button button-secondary dps-client-logins__action" href="' . esc_url( $reset_url ) . '">' . esc_html__( 'Redefinir senha', 'dps-client-portal' ) . '</a>';
-                echo '<a class="button button-secondary dps-client-logins__action" href="' . esc_url( $send_url ) . '">' . esc_html__( 'Enviar via WhatsApp', 'dps-client-portal' ) . '</a>';
-                if ( $client_data['edit_link'] ) {
-                    echo '<a class="button dps-client-logins__action" href="' . esc_url( $client_data['edit_link'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Ver cliente', 'dps-client-portal' ) . '</a>';
-                }
-                echo '</td>';
-                echo '</tr>';
-            }
-
-            echo '</tbody></table>';
+        // Carrega template
+        $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/admin-logins.php';
+        
+        if ( file_exists( $template_path ) ) {
+            include $template_path;
         } else {
-            echo '<p class="dps-client-logins__empty">' . esc_html__( 'Nenhum cliente encontrado com os filtros informados.', 'dps-client-portal' ) . '</p>';
-        }
-
-        echo '</div>';
-        echo '</div>';
-
-        if ( 'admin' === $context ) {
-            echo '</div>';
+            echo '<p>' . esc_html__( 'Template não encontrado.', 'dps-client-portal' ) . '</p>';
         }
     }
-
-    /**
-     * Exibe formulário de login e processa autenticação usando o fluxo padrão do WordPress.
-     * Quando autenticado, redireciona para a página contendo o portal.
-     *
-     * @return string HTML do formulário de login
-     */
     public function render_login_shortcode() {
         if ( is_user_logged_in() ) {
             $portal_page = get_page_by_title( 'Portal do Cliente' );
