@@ -78,7 +78,7 @@ class DPS_Groomers_Addon {
             $message = __( 'Preencha usuário, email e senha para criar o groomer.', 'desi-pet-shower' );
             if ( $use_frontend_messages ) {
                 DPS_Message_Helper::add_error( $message );
-            } else {
+            } elseif ( function_exists( 'add_settings_error' ) ) {
                 add_settings_error( 'dps_groomers', 'missing_fields', $message, 'error' );
             }
             return;
@@ -88,7 +88,7 @@ class DPS_Groomers_Addon {
             $message = __( 'Já existe um usuário com esse login.', 'desi-pet-shower' );
             if ( $use_frontend_messages ) {
                 DPS_Message_Helper::add_error( $message );
-            } else {
+            } elseif ( function_exists( 'add_settings_error' ) ) {
                 add_settings_error( 'dps_groomers', 'user_exists', $message, 'error' );
             }
             return;
@@ -108,7 +108,7 @@ class DPS_Groomers_Addon {
             $message = $user_id->get_error_message();
             if ( $use_frontend_messages ) {
                 DPS_Message_Helper::add_error( $message );
-            } else {
+            } elseif ( function_exists( 'add_settings_error' ) ) {
                 add_settings_error( 'dps_groomers', 'create_error', $message, 'error' );
             }
             return;
@@ -117,7 +117,7 @@ class DPS_Groomers_Addon {
         $message = __( 'Groomer criado com sucesso.', 'desi-pet-shower' );
         if ( $use_frontend_messages ) {
             DPS_Message_Helper::add_success( $message );
-        } else {
+        } elseif ( function_exists( 'add_settings_error' ) ) {
             add_settings_error( 'dps_groomers', 'created', $message, 'updated' );
         }
     }

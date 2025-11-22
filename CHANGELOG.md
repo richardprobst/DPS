@@ -281,6 +281,11 @@ Antes de criar uma nova versão oficial:
   - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
 
 #### Fixed (Corrigido)
+- **Groomers Add-on**: Corrigido fatal error ao renderizar seção no front-end via shortcode [dps_base]
+  - Problema: função `add_settings_error()` só existe no contexto admin (wp-admin)
+  - Solução: adicionada verificação `function_exists('add_settings_error')` antes de todas as chamadas
+  - Impacto: aba "Groomers" agora funciona corretamente no Painel de Gestão DPS sem fatal errors
+  - Mensagens no front-end exibidas via `DPS_Message_Helper`, mantendo compatibilidade com admin
 - **Agenda Add-on**: Corrigido syntax error pré-existente (linha 936) com closing brace órfão e código quebrado usando variáveis indefinidas ($client_id, $pet_post, $date, $valor)
 - Implementado feedback visual após todas as operações principais:
   - Mensagens de sucesso ao salvar clientes, pets e agendamentos
