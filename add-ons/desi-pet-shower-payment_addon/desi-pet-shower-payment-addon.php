@@ -64,12 +64,13 @@ class DPS_Payment_Addon {
     }
 
     /**
-     * Adiciona uma página de configurações no menu Configurações do WordPress.
+     * Adiciona uma página de configurações no menu principal "Desi Pet Shower".
      */
     public function add_settings_page() {
-        add_options_page(
-            __( 'Desi Pet Shower - Pagamentos', 'dps-payment-addon' ),
-            __( 'DPS Pagamentos', 'dps-payment-addon' ),
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Pagamentos', 'dps-payment-addon' ),
+            __( 'Pagamentos', 'dps-payment-addon' ),
             'manage_options',
             'dps-payment-settings',
             [ $this, 'render_settings_page' ]
