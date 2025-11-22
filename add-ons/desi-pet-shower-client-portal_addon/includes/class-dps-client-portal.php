@@ -71,6 +71,7 @@ final class DPS_Client_Portal {
         // Registra tipos de dados e recursos do portal
         add_action( 'init', [ $this, 'register_message_post_type' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
         // Metaboxes e salvamento das mensagens no admin
         add_action( 'add_meta_boxes_dps_portal_message', [ $this, 'add_message_meta_boxes' ] );
@@ -497,6 +498,43 @@ final class DPS_Client_Portal {
         $script_version = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
         
         wp_register_script( 'dps-client-portal', $script_url, [], $script_version, true );
+    }
+
+    /**
+     * Enqueue admin assets para a tela de gerenciamento de logins
+     */
+    public function enqueue_admin_assets( $hook_suffix ) {
+        // Verifica se estamos na página de configurações onde a aba de logins pode aparecer
+        // ou em páginas que usam o shortcode [dps_base] com tab=logins
+        $should_load = false;
+
+        // Carrega se estiver na tela de configurações do DPS
+        if ( isset( $_GET['page'] ) && false !== strpos( $_GET['page'], 'dps' ) ) {
+            $should_load = true;
+        }
+
+        // Carrega se estiver visualizando uma página que pode conter o shortcode
+        if ( function_exists( 'get_current_screen' ) ) {
+            $screen = get_current_screen();
+            if ( $screen && 'post' === $screen->base ) {
+                $should_load = true;
+            }
+        }
+
+        if ( ! $should_load ) {
+            return;
+        }
+
+        $script_path = trailingslashit( DPS_CLIENT_PORTAL_ADDON_DIR ) . 'assets/js/portal-admin.js';
+        $script_url  = trailingslashit( DPS_CLIENT_PORTAL_ADDON_URL ) . 'assets/js/portal-admin.js';
+        $script_version = file_exists( $script_path ) ? filemtime( $script_path ) : '1.0.0';
+
+        wp_enqueue_script( 'dps-portal-admin', $script_url, [ 'jquery' ], $script_version, true );
+
+        // Localiza script com nonce para AJAX
+        wp_localize_script( 'dps-portal-admin', 'dpsPortalAdmin', [
+            'nonce' => wp_create_nonce( 'dps_portal_admin_actions' ),
+        ] );
     }
 
     /**
