@@ -26,8 +26,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * Registra os hooks do add-on.
          */
         public function __construct() {
-            add_action( 'dps_settings_nav_tabs', [ $this, 'add_backup_tab' ], 10, 1 );
-            add_action( 'dps_settings_sections', [ $this, 'add_backup_section' ], 10, 1 );
+            // Registra menu admin para backup
+            add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
 
             add_action( 'admin_post_' . self::ACTION_EXPORT, [ $this, 'handle_export' ] );
             add_action( 'admin_post_nopriv_' . self::ACTION_EXPORT, [ $this, 'deny_anonymous' ] );
@@ -37,92 +37,77 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         }
 
         /**
-         * Adiciona a aba de backup ao menu principal do plugin base.
-         *
-         * @param bool $visitor_only Indica se o modo visitante está ativo.
+         * Registra submenu admin para backup & restauração.
          */
-        public function add_backup_tab( $visitor_only ) {
-            if ( $visitor_only ) {
-                return;
-            }
-
-            echo '<li><a href="#" class="dps-tab-link" data-tab="backup">' . esc_html__( 'Backup & Restauração', 'dps-backup-addon' ) . '</a></li>';
+        public function register_admin_menu() {
+            add_submenu_page(
+                'desi-pet-shower',
+                __( 'Backup & Restauração', 'dps-backup-addon' ),
+                __( 'Backup & Restauração', 'dps-backup-addon' ),
+                'manage_options',
+                'dps-backup',
+                [ $this, 'render_admin_page' ]
+            );
         }
 
         /**
-         * Adiciona a seção de backup na interface principal.
-         *
-         * @param bool $visitor_only Indica se o modo visitante está ativo.
+         * Renderiza a página admin de backup & restauração.
          */
-        public function add_backup_section( $visitor_only ) {
-            if ( $visitor_only ) {
-                return;
-            }
-
+        public function render_admin_page() {
             if ( ! $this->can_manage() ) {
-                echo '<div class="dps-section" id="dps-section-backup"><p>' . esc_html__( 'Apenas administradores podem acessar as ferramentas de backup.', 'dps-backup-addon' ) . '</p></div>';
-                return;
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-backup-addon' ) );
             }
 
-            echo $this->render_section();
-        }
-
-        /**
-         * Renderiza o conteúdo da seção de backup.
-         *
-         * @return string
-         */
-        private function render_section() {
-            $redirect_url = $this->get_redirect_url();
             $status       = isset( $_GET['dps_backup_status'] ) ? sanitize_key( wp_unslash( $_GET['dps_backup_status'] ) ) : '';
             $raw_message  = isset( $_GET['dps_backup_message'] ) ? wp_unslash( $_GET['dps_backup_message'] ) : '';
             $message      = $raw_message ? sanitize_text_field( urldecode( $raw_message ) ) : '';
+            $redirect_url = admin_url( 'admin.php?page=dps-backup' );
 
-            ob_start();
             ?>
-            <div class="dps-section" id="dps-section-backup">
-                <h3><?php esc_html_e( 'Backup e Restauração Completa', 'dps-backup-addon' ); ?></h3>
+            <div class="wrap">
+                <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+                
                 <p><?php esc_html_e( 'Gere um arquivo JSON contendo todos os dados do sistema e restaure-o em outro ambiente para migrar ou recuperar informações.', 'dps-backup-addon' ); ?></p>
                 <p><?php esc_html_e( 'O backup inclui clientes, pets, agendamentos, serviços, assinaturas, opções do plugin, tabelas personalizadas e arquivos enviados (como fotos dos pets e documentos financeiros).', 'dps-backup-addon' ); ?></p>
-                <p><?php esc_html_e( 'A restauração substitui completamente os dados existentes do Desi Pet Shower. Recomenda-se executar em um ambiente vazio ou após realizar um backup completo do site.', 'dps-backup-addon' ); ?></p>
+                
                 <?php if ( $status && $message ) : ?>
-                    <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?>" style="margin:20px 0; padding:15px; border-left:4px solid <?php echo ( 'success' === $status ) ? '#46b450' : '#dc3232'; ?>; background:#fff;">
+                    <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?> is-dismissible">
                         <p><strong><?php echo ( 'success' === $status ) ? esc_html__( 'Sucesso:', 'dps-backup-addon' ) : esc_html__( 'Erro:', 'dps-backup-addon' ); ?></strong> <?php echo esc_html( $message ); ?></p>
                     </div>
                 <?php endif; ?>
-                <div class="dps-backup-actions" style="display:flex; gap:40px; flex-wrap:wrap;">
-                    <div class="dps-backup-box" style="flex:1 1 280px; background:#f7f7f7; padding:20px; border-radius:8px;">
-                        <h4><?php esc_html_e( 'Gerar backup', 'dps-backup-addon' ); ?></h4>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 30px;">
+                    <div class="card" style="padding: 20px;">
+                        <h2 style="margin-top: 0;"><?php esc_html_e( 'Gerar backup', 'dps-backup-addon' ); ?></h2>
                         <p><?php esc_html_e( 'Clique no botão abaixo para baixar um arquivo JSON com todos os dados do sistema.', 'dps-backup-addon' ); ?></p>
                         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_EXPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_EXPORT, 'dps_backup_nonce' ); ?>
-                            <button type="submit" class="button button-primary" style="margin-top:10px;">
-                                <?php esc_html_e( 'Baixar backup completo', 'dps-backup-addon' ); ?>
-                            </button>
+                            <?php submit_button( __( 'Baixar backup completo', 'dps-backup-addon' ), 'primary', 'submit', false ); ?>
                         </form>
                     </div>
-                    <div class="dps-backup-box" style="flex:1 1 280px; background:#f7f7f7; padding:20px; border-radius:8px;">
-                        <h4><?php esc_html_e( 'Restaurar backup', 'dps-backup-addon' ); ?></h4>
+
+                    <div class="card" style="padding: 20px;">
+                        <h2 style="margin-top: 0;"><?php esc_html_e( 'Restaurar backup', 'dps-backup-addon' ); ?></h2>
                         <p><?php esc_html_e( 'Selecione um arquivo JSON gerado anteriormente para restaurar todos os dados.', 'dps-backup-addon' ); ?></p>
                         <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_IMPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_IMPORT, 'dps_backup_nonce' ); ?>
-                            <input type="file" name="dps_backup_file" accept="application/json" required style="margin:10px 0;" />
-                            <p style="font-size:12px; color:#555;">
+                            <p>
+                                <input type="file" name="dps_backup_file" accept="application/json" required style="margin-bottom: 10px;" />
+                            </p>
+                            <p class="description" style="color: #d63638; margin-bottom: 15px;">
+                                <strong><?php esc_html_e( 'AVISO:', 'dps-backup-addon' ); ?></strong>
                                 <?php esc_html_e( 'O processo substituirá os dados atuais do Desi Pet Shower. Todos os registros existentes serão removidos antes da restauração.', 'dps-backup-addon' ); ?>
                             </p>
-                            <button type="submit" class="button button-secondary">
-                                <?php esc_html_e( 'Restaurar dados', 'dps-backup-addon' ); ?>
-                            </button>
+                            <?php submit_button( __( 'Restaurar dados', 'dps-backup-addon' ), 'secondary', 'submit', false ); ?>
                         </form>
                     </div>
                 </div>
             </div>
             <?php
-            return ob_get_clean();
         }
 
         /**
@@ -1082,15 +1067,12 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         }
 
         /**
-         * Calcula a URL de redirecionamento utilizada após ações.
+         * Calcula a URL de redirecionamento para a página admin de backup.
          *
          * @return string
          */
         private function get_redirect_url() {
-            $current = add_query_arg( null, null );
-            $current = remove_query_arg( [ 'dps_backup_status', 'dps_backup_message' ], $current );
-            $current = add_query_arg( 'tab', 'backup', $current );
-            return $current;
+            return admin_url( 'admin.php?page=dps-backup' );
         }
 
         /**
@@ -1118,7 +1100,6 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 [
                     'dps_backup_status'  => $status,
                     'dps_backup_message' => rawurlencode( $message ),
-                    'tab'                => 'backup',
                 ],
                 $redirect
             );
