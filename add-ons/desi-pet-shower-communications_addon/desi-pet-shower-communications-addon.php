@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – Communications Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Add-on de comunicações para enviar mensagens via WhatsApp, SMS e e-mail nos eventos do Desi Pet Shower.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       desi-pet-shower
@@ -14,6 +14,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Carrega a API centralizada de comunicações
+require_once __DIR__ . '/includes/class-dps-communications-api.php';
 
 class DPS_Communications_Addon {
 
@@ -144,6 +147,15 @@ class DPS_Communications_Addon {
         exit;
     }
 
+    /**
+     * Handler para envio de confirmação após salvar agendamento
+     *
+     * NOTA: Este método é chamado pela Agenda ao criar novo agendamento.
+     * A lógica de ENVIO está delegada à Communications API.
+     *
+     * @param int    $appointment_id ID do agendamento
+     * @param string $type           Tipo de operação ('new' ou 'update')
+     */
     public function handle_after_save_appointment( $appointment_id, $type ) {
         if ( 'new' !== $type ) {
             return;
@@ -151,11 +163,21 @@ class DPS_Communications_Addon {
 
         $options  = get_option( self::OPTION_KEY, [] );
         $template = isset( $options['template_confirmation'] ) ? $options['template_confirmation'] : '';
+        
+        if ( empty( $template ) ) {
+            return;
+        }
+
         $message  = $this->prepare_message_from_template( $template, $appointment_id );
         $phone    = get_post_meta( $appointment_id, 'dps_client_phone', true );
 
         if ( ! empty( $phone ) && ! empty( $message ) ) {
-            dps_comm_send_whatsapp( $phone, $message );
+            // Delega o envio para a API central
+            $api = DPS_Communications_API::get_instance();
+            $api->send_whatsapp( $phone, $message, [
+                'appointment_id' => $appointment_id,
+                'type'           => 'confirmation',
+            ] );
         }
 
         $this->schedule_reminder( $appointment_id );
@@ -178,15 +200,18 @@ class DPS_Communications_Addon {
         wp_schedule_single_event( $reminder_time, 'dps_comm_send_appointment_reminder', [ $appointment_id ] );
     }
 
+    /**
+     * Envia lembrete de agendamento (via cron job)
+     *
+     * NOTA: Este método é chamado automaticamente pelo cron job agendado.
+     * A lógica de ENVIO está delegada à Communications API.
+     *
+     * @param int $appointment_id ID do agendamento
+     */
     public function send_appointment_reminder( $appointment_id ) {
-        $options  = get_option( self::OPTION_KEY, [] );
-        $template = isset( $options['template_reminder'] ) ? $options['template_reminder'] : '';
-        $message  = $this->prepare_message_from_template( $template, $appointment_id );
-        $phone    = get_post_meta( $appointment_id, 'dps_client_phone', true );
-
-        if ( ! empty( $phone ) && ! empty( $message ) ) {
-            dps_comm_send_whatsapp( $phone, $message );
-        }
+        // Delega para a API central que já implementa toda a lógica
+        $api = DPS_Communications_API::get_instance();
+        $api->send_appointment_reminder( $appointment_id );
     }
 
     private function prepare_message_from_template( $template, $appointment_id ) {
@@ -199,14 +224,31 @@ class DPS_Communications_Addon {
         return strtr( $template, $replacements );
     }
 
+    /**
+     * Envia mensagem pós-atendimento
+     *
+     * NOTA: A lógica de ENVIO está delegada à Communications API.
+     *
+     * @param int $appointment_id ID do agendamento
+     */
     public function send_post_service_message( $appointment_id ) {
         $options  = get_option( self::OPTION_KEY, [] );
         $template = isset( $options['template_post_service'] ) ? $options['template_post_service'] : '';
+        
+        if ( empty( $template ) ) {
+            return;
+        }
+
         $message  = $this->prepare_message_from_template( $template, $appointment_id );
         $phone    = get_post_meta( $appointment_id, 'dps_client_phone', true );
 
         if ( ! empty( $phone ) && ! empty( $message ) ) {
-            dps_comm_send_whatsapp( $phone, $message );
+            // Delega o envio para a API central
+            $api = DPS_Communications_API::get_instance();
+            $api->send_whatsapp( $phone, $message, [
+                'appointment_id' => $appointment_id,
+                'type'           => 'post_service',
+            ] );
         }
     }
 }
@@ -225,26 +267,71 @@ if ( ! function_exists( 'dps_comm_init' ) ) {
 
 add_action( 'plugins_loaded', 'dps_comm_init' );
 
+/**
+ * Funções helper para compatibilidade retroativa
+ *
+ * NOTA: Estas funções delegam para a Communications API.
+ * Outros add-ons DEVEM usar DPS_Communications_API::get_instance() diretamente.
+ */
+
 if ( ! function_exists( 'dps_comm_send_whatsapp' ) ) {
+    /**
+     * Envia mensagem via WhatsApp
+     *
+     * @deprecated 0.2.0 Use DPS_Communications_API::get_instance()->send_whatsapp()
+     *
+     * @param string $phone   Telefone do destinatário
+     * @param string $message Mensagem a enviar
+     * @return bool True se enviado, false caso contrário
+     */
     function dps_comm_send_whatsapp( $phone, $message ) {
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $api = DPS_Communications_API::get_instance();
+            return $api->send_whatsapp( $phone, $message, [ 'source' => 'legacy_function' ] );
+        }
+
+        // Fallback se API não estiver disponível
         $log_message = sprintf( 'DPS Communications: enviar WhatsApp para %s com mensagem: %s', $phone, $message );
         error_log( $log_message );
-
         return true;
     }
 }
 
 if ( ! function_exists( 'dps_comm_send_email' ) ) {
+    /**
+     * Envia e-mail
+     *
+     * @deprecated 0.2.0 Use DPS_Communications_API::get_instance()->send_email()
+     *
+     * @param string $email   E-mail do destinatário
+     * @param string $subject Assunto
+     * @param string $message Corpo da mensagem
+     * @return bool True se enviado, false caso contrário
+     */
     function dps_comm_send_email( $email, $subject, $message ) {
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $api = DPS_Communications_API::get_instance();
+            return $api->send_email( $email, $subject, $message, [ 'source' => 'legacy_function' ] );
+        }
+
+        // Fallback se API não estiver disponível
         return wp_mail( $email, $subject, $message );
     }
 }
 
 if ( ! function_exists( 'dps_comm_send_sms' ) ) {
+    /**
+     * Envia SMS
+     *
+     * @deprecated 0.2.0 Funcionalidade não implementada
+     *
+     * @param string $phone   Telefone
+     * @param string $message Mensagem
+     * @return bool
+     */
     function dps_comm_send_sms( $phone, $message ) {
-        $log_message = sprintf( 'DPS Communications: enviar SMS para %s com mensagem: %s', $phone, $message );
+        $log_message = sprintf( 'DPS Communications: SMS não implementado. Telefone: %s, Mensagem: %s', $phone, $message );
         error_log( $log_message );
-
-        return true;
+        return false;
     }
 }
