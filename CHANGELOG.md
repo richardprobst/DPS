@@ -79,6 +79,29 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Client Portal Add-on (v2.0.0)**: Sistema completo de autenticação por token (magic links)
+  - **BREAKING CHANGE**: Substituído sistema de login com senha por autenticação via links com token
+  - Nova tabela `wp_dps_portal_tokens` para gerenciar tokens de acesso
+  - Classe `DPS_Portal_Token_Manager` para geração, validação e revogação de tokens
+  - Classe `DPS_Portal_Session_Manager` para gerenciar sessões independentes do WordPress
+  - Classe `DPS_Portal_Admin_Actions` para processar ações administrativas
+  - Tokens seguros de 64 caracteres com hash (password_hash/password_verify)
+  - Expiração configurável (padrão 30 minutos)
+  - Marcação de uso (single use)
+  - Cleanup automático via cron job (tokens > 30 dias)
+  - Tela de acesso pública minimalista (`templates/portal-access.php`)
+  - Interface administrativa completa de gerenciamento (`templates/admin-logins.php`)
+  - Tabela responsiva de clientes com status de acesso e último login
+  - Botões "Primeiro Acesso" e "Gerar Novo Link"
+  - Botão "Revogar" para invalidar tokens ativos
+  - Exibição temporária de links gerados (5 minutos)
+  - Integração com WhatsApp: abre WhatsApp Web com mensagem pronta
+  - Integração com E-mail: modal de pré-visualização obrigatória antes de enviar
+  - JavaScript para copiar links, modais e AJAX (`assets/js/portal-admin.js`)
+  - Busca de clientes por nome ou telefone
+  - Feedback visual para todas as ações
+  - Compatibilidade com sistema antigo mantida (fallback)
+  - Documentação em `templates/portal-access.php` e `templates/admin-logins.php`
 - **AI Add-on (v1.1.0)**: Campo de "Instruções adicionais" nas configurações da IA
   - Permite administrador complementar comportamento da IA sem substituir regras base de segurança
   - Campo opcional com limite de 2000 caracteres
@@ -239,6 +262,16 @@ Antes de criar uma nova versão oficial:
   - Remoção de transform: translateY(-1px) em hover dos botões (menos movimento visual)
   - Remoção de sombras decorativas (apenas bordas 1px solid)
 
+#### Changed (Alterado)
+- **Client Portal Add-on (v2.0.0)**: Método de autenticação completamente substituído
+  - Sistema antigo de login com usuário/senha do WordPress REMOVIDO
+  - Novo sistema baseado 100% em tokens (magic links)
+  - Shortcode `[dps_client_login]` agora exibe apenas a tela de acesso minimalista
+  - Método `render_client_logins_page()` completamente reescrito (de ~400 para ~100 linhas)
+  - Interface administrativa totalmente nova baseada em templates
+  - Compatibilidade retroativa mantida via fallback no método `get_authenticated_client_id()`
+  - **IMPORTANTE**: Clientes existentes precisarão solicitar novo link de acesso na primeira vez após a atualização
+
 #### Fixed (Corrigido)
 - **Agenda Add-on**: Corrigido syntax error pré-existente (linha 936) com closing brace órfão e código quebrado usando variáveis indefinidas ($client_id, $pet_post, $date, $valor)
 - Implementado feedback visual após todas as operações principais:
@@ -258,6 +291,11 @@ Antes de criar uma nova versão oficial:
   - ✅ Estilos inline substituídos por classes CSS reutilizáveis
 
 #### Deprecated (Depreciado)
+- **Client Portal Add-on (v2.0.0)**: Sistema de login com usuário/senha descontinuado
+  - Shortcode `[dps_client_login]` ainda existe mas comportamento mudou (não exibe mais formulário de login)
+  - Método `maybe_create_login_for_client()` ainda é executado mas não tem mais utilidade prática
+  - Método `get_client_id_for_current_user()` ainda funciona como fallback mas será removido em v3.0.0
+  - Métodos relacionados a senha serão removidos em versão futura: `render_login_shortcode()` (parcialmente mantido), ações de reset/send password
 - **Agenda Add-on**: Método `get_services_details_ajax()` - Lógica movida para Services Add-on (delega para `DPS_Services_API::get_services_details()`, mantém compatibilidade com fallback)
 - **Agenda Add-on**: Endpoint AJAX `dps_get_services_details` agora é gerenciado pelo Services Add-on (Agenda mantém por compatibilidade)
 - **Finance Add-on**: `dps_parse_money_br()` - Use `DPS_Money_Helper::parse_brazilian_format()` (retrocompatível, aviso de depreciação)
