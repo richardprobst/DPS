@@ -918,29 +918,38 @@ class DPS_Agenda_Addon {
 
         // Envia notificação de status via Communications API
         if ( class_exists( 'DPS_Communications_API' ) && in_array( $status, [ 'finalizado', 'finalizado_pago' ], true ) ) {
-            $client_post = $client_id ? get_post( $client_id ) : null;
-            $client_name = $client_post ? $client_post->post_title : '';
-            $pet_name    = $pet_post ? $pet_post->post_title : '';
-            $date_fmt    = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
-            $phone       = $client_id ? get_post_meta( $client_id, 'client_phone', true ) : '';
+            $client_id = get_post_meta( $id, 'appointment_client_id', true );
+            $pet_id    = get_post_meta( $id, 'appointment_pet_id', true );
+            $date      = get_post_meta( $id, 'appointment_date', true );
+            $valor     = get_post_meta( $id, 'appointment_total_value', true );
             
-            if ( $phone ) {
-                $valor_fmt = number_format( (float) $valor, 2, ',', '.' );
-                $msg_template = ( $status === 'finalizado_pago' ) ?
-                    'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!' :
-                    'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
-                $message = sprintf( $msg_template, $client_name, $pet_name, $date_fmt, $valor_fmt );
+            $client_post = $client_id ? get_post( $client_id ) : null;
+            $pet_post    = $pet_id ? get_post( $pet_id ) : null;
+            
+            if ( $client_post ) {
+                $client_name = $client_post->post_title;
+                $pet_name    = $pet_post ? $pet_post->post_title : '';
+                $date_fmt    = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
+                $phone       = get_post_meta( $client_id, 'client_phone', true );
                 
-                // Envia via Communications API
-                $api = DPS_Communications_API::get_instance();
-                $api->send_whatsapp( $phone, $message, [
-                    'appointment_id' => $id,
-                    'type'           => 'status_change',
-                    'status'         => $status,
-                ] );
+                if ( $phone ) {
+                    $valor_fmt = number_format( (float) $valor, 2, ',', '.' );
+                    $msg_template = ( $status === 'finalizado_pago' ) ?
+                        'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!' :
+                        'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
+                    $message = sprintf( $msg_template, $client_name, $pet_name, $date_fmt, $valor_fmt );
+                    
+                    // Envia via Communications API
+                    $api = DPS_Communications_API::get_instance();
+                    $api->send_whatsapp( $phone, $message, [
+                        'appointment_id' => $id,
+                        'type'           => 'status_change',
+                        'status'         => $status,
+                    ] );
+                }
             }
         }
-    }
+
         wp_send_json_success(
             [
                 'message' => __( 'Status atualizado.', 'dps-agenda-addon' ),
