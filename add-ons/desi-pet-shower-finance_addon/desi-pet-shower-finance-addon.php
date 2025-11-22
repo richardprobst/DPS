@@ -30,26 +30,31 @@ if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
 
 // Carrega dependências
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-revenue-query.php';
+require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-api.php';
 
 // Funções auxiliares globais para conversão monetária
+// DEPRECATED: Use DPS_Money_Helper do núcleo em vez dessas funções.
 
 if ( ! function_exists( 'dps_parse_money_br' ) ) {
     /**
      * Converte uma string de valor em formato brasileiro para inteiro em centavos.
-     * Aceita entradas com vírgula ou ponto como separador decimal e remove milhares.
      *
+     * @deprecated 1.1.0 Use DPS_Money_Helper::parse_brazilian_format() instead.
      * @param string $str Valor monetário (ex.: "129,90" ou "129.90").
      * @return int Valor em centavos (ex.: 12990)
      */
     function dps_parse_money_br( $str ) {
+        _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Money_Helper::parse_brazilian_format()' );
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return DPS_Money_Helper::parse_brazilian_format( $str );
+        }
+        // Fallback se helper não disponível
         $raw = trim( (string) $str );
         if ( $raw === '' ) {
             return 0;
         }
-        // Mantém apenas dígitos, vírgula, ponto e sinal de menos
         $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
         $normalized = str_replace( ' ', '', $normalized );
-        // Se houver vírgula, assume separador decimal brasileiro e remove pontos de milhar
         if ( strpos( $normalized, ',' ) !== false ) {
             $normalized = str_replace( '.', '', $normalized );
             $normalized = str_replace( ',', '.', $normalized );
@@ -63,10 +68,16 @@ if ( ! function_exists( 'dps_format_money_br' ) ) {
     /**
      * Formata um valor em centavos para string no padrão brasileiro.
      *
+     * @deprecated 1.1.0 Use DPS_Money_Helper::format_to_brazilian() instead.
      * @param int $int Valor em centavos (ex.: 12990).
      * @return string Valor formatado (ex.: "129,90").
      */
     function dps_format_money_br( $int ) {
+        _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Money_Helper::format_to_brazilian()' );
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return DPS_Money_Helper::format_to_brazilian( $int );
+        }
+        // Fallback se helper não disponível
         $float = (int) $int / 100;
         return number_format( $float, 2, ',', '.' );
     }
@@ -363,39 +374,10 @@ class DPS_Finance_Addon {
      * @param int $appointment_id ID do agendamento removido.
      */
     public function cleanup_transactions_for_appointment( $appointment_id ) {
-        global $wpdb;
-
-        $appointment_id = (int) $appointment_id;
-        if ( ! $appointment_id ) {
-            return;
+        // Delega para a API financeira
+        if ( class_exists( 'DPS_Finance_API' ) ) {
+            DPS_Finance_API::delete_charges_by_appointment( $appointment_id );
         }
-
-        $table        = $wpdb->prefix . 'dps_transacoes';
-        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-
-        if ( $table_exists !== $table ) {
-            return;
-        }
-
-        // Also delete related installment payments
-        $parcelas_table = $wpdb->prefix . 'dps_parcelas';
-        $parcelas_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $parcelas_table ) );
-        if ( $parcelas_exists === $parcelas_table ) {
-            // First get all transaction IDs to be deleted
-            $trans_ids = $wpdb->get_col( $wpdb->prepare(
-                "SELECT id FROM {$table} WHERE agendamento_id = %d",
-                $appointment_id
-            ) );
-
-            if ( ! empty( $trans_ids ) ) {
-                $placeholders = implode( ',', array_fill( 0, count( $trans_ids ), '%d' ) );
-                $wpdb->query( $wpdb->prepare(
-                    "DELETE FROM {$parcelas_table} WHERE trans_id IN ({$placeholders})",
-                    $trans_ids
-                ) );
-            }
-        }
-        $wpdb->delete( $table, [ 'agendamento_id' => $appointment_id ], [ '%d' ] );
     }
 
     /**
