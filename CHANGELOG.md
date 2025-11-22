@@ -272,6 +272,14 @@ Antes de criar uma nova versão oficial:
   - Compatibilidade retroativa mantida via fallback no método `get_authenticated_client_id()`
   - **IMPORTANTE**: Clientes existentes precisarão solicitar novo link de acesso na primeira vez após a atualização
 
+#### Security (Segurança)
+- **Client Portal Add-on (v2.0.0)**: Melhorias de segurança no sistema de sessões e e-mails
+  - Configuração de flags de segurança em cookies de sessão (httponly, secure, samesite=Strict)
+  - Modo estrito de sessão habilitado (use_strict_mode)
+  - Regeneração sistemática de session_id em autenticação (proteção contra session fixation)
+  - E-mails enviados apenas em formato plain text (proteção contra social engineering)
+  - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
+
 #### Fixed (Corrigido)
 - **Agenda Add-on**: Corrigido syntax error pré-existente (linha 936) com closing brace órfão e código quebrado usando variáveis indefinidas ($client_id, $pet_post, $date, $valor)
 - Implementado feedback visual após todas as operações principais:

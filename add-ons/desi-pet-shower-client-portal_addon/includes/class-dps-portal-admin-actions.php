@@ -357,7 +357,7 @@ final class DPS_Portal_Admin_Actions {
 
         $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
         $subject   = isset( $_POST['subject'] ) ? sanitize_text_field( wp_unslash( $_POST['subject'] ) ) : '';
-        $body      = isset( $_POST['body'] ) ? wp_kses_post( wp_unslash( $_POST['body'] ) ) : '';
+        $body      = isset( $_POST['body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['body'] ) ) : '';
 
         if ( ! $client_id || ! $subject || ! $body ) {
             wp_send_json_error( [ 'message' => __( 'Dados incompletos.', 'dps-client-portal' ) ] );
@@ -369,8 +369,9 @@ final class DPS_Portal_Admin_Actions {
             wp_send_json_error( [ 'message' => __( 'E-mail do cliente não encontrado ou inválido.', 'dps-client-portal' ) ] );
         }
 
-        // Envia e-mail
-        $sent = wp_mail( $client_email, $subject, $body );
+        // Envia e-mail (formato plain text para segurança)
+        $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+        $sent = wp_mail( $client_email, $subject, $body, $headers );
 
         if ( $sent ) {
             wp_send_json_success( [ 'message' => __( 'E-mail enviado com sucesso!', 'dps-client-portal' ) ] );

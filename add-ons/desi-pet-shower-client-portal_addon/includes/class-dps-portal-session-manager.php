@@ -89,6 +89,12 @@ final class DPS_Portal_Session_Manager {
         }
 
         if ( ! session_id() ) {
+            // Configura parâmetros seguros de sessão
+            ini_set( 'session.cookie_httponly', 1 );
+            ini_set( 'session.cookie_secure', is_ssl() ? 1 : 0 );
+            ini_set( 'session.cookie_samesite', 'Strict' );
+            ini_set( 'session.use_strict_mode', 1 );
+            
             session_start();
         }
     }
@@ -107,7 +113,7 @@ final class DPS_Portal_Session_Manager {
             return false;
         }
 
-        // Regenera ID da sessão por segurança
+        // Regenera ID da sessão por segurança (proteção contra session fixation)
         if ( session_id() ) {
             session_regenerate_id( true );
         }
