@@ -171,17 +171,7 @@ class DPS_Loyalty_Addon {
     }
 
     public function register_menu() {
-        if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
-            add_menu_page(
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                __( 'Desi Pet Shower', 'desi-pet-shower' ),
-                'manage_options',
-                'desi-pet-shower',
-                '__return_null',
-                'dashicons-pets'
-            );
-        }
-
+        // Submenu dentro do menu principal "Desi Pet Shower" (criado pelo plugin base)
         add_submenu_page(
             'desi-pet-shower',
             __( 'Campanhas & Fidelidade', 'desi-pet-shower' ),

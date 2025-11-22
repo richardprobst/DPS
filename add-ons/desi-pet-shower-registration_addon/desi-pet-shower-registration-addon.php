@@ -58,12 +58,13 @@ class DPS_Registration_Addon {
     }
 
     /**
-     * Adiciona a página de configurações no menu Configurações
+     * Adiciona a página de configurações no menu principal "Desi Pet Shower"
      */
     public function add_settings_page() {
-        add_options_page(
-            __( 'Configurações de Cadastro Desi Pet Shower', 'dps-registration-addon' ),
-            __( 'DPS Cadastro', 'dps-registration-addon' ),
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Cadastro Público', 'dps-registration-addon' ),
+            __( 'Cadastro Público', 'dps-registration-addon' ),
             'manage_options',
             'dps-registration-settings',
             [ $this, 'render_settings_page' ]

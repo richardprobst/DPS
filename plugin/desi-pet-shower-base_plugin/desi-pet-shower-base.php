@@ -58,6 +58,8 @@ class DPS_Base_Plugin {
     public function __construct() {
         // Registra tipos de posts personalizados
         add_action( 'init', [ $this, 'register_post_types' ] );
+        // Registra menu admin unificado
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
         // Enfileira scripts e estilos
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -113,6 +115,53 @@ class DPS_Base_Plugin {
 
         add_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
         DPS_Logger::maybe_install();
+    }
+
+    /**
+     * Registra o menu admin principal unificado do DPS.
+     * Este menu centraliza todos os submenus de configuração dos add-ons.
+     */
+    public function register_admin_menu() {
+        add_menu_page(
+            __( 'Desi Pet Shower', 'desi-pet-shower' ),
+            __( 'Desi Pet Shower', 'desi-pet-shower' ),
+            'manage_options',
+            'desi-pet-shower',
+            [ $this, 'render_main_settings_page' ],
+            'dashicons-pets',
+            56
+        );
+    }
+
+    /**
+     * Renderiza a página principal de configurações do DPS.
+     * Por enquanto, exibe apenas uma mensagem de boas-vindas.
+     */
+    public function render_main_settings_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
+        }
+
+        ?>
+        <div class="wrap">
+            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <div class="card" style="max-width: 800px; margin-top: 20px;">
+                <h2><?php esc_html_e( 'Bem-vindo ao Desi Pet Shower', 'desi-pet-shower' ); ?></h2>
+                <p><?php esc_html_e( 'Sistema completo de gestão para pet shops, incluindo cadastro de clientes, pets, agendamentos, serviços, fidelidade e muito mais.', 'desi-pet-shower' ); ?></p>
+                <p><?php esc_html_e( 'Utilize o menu lateral para acessar as diferentes configurações e funcionalidades do sistema.', 'desi-pet-shower' ); ?></p>
+                
+                <h3><?php esc_html_e( 'Configurações Disponíveis', 'desi-pet-shower' ); ?></h3>
+                <ul style="list-style: disc; margin-left: 20px;">
+                    <li><?php esc_html_e( 'Backup & Restauração: Exportar e importar dados do sistema', 'desi-pet-shower' ); ?></li>
+                    <li><?php esc_html_e( 'Comunicações: Configurar WhatsApp, e-mail e templates de mensagens', 'desi-pet-shower' ); ?></li>
+                    <li><?php esc_html_e( 'Notificações: Configurar Telegram e relatórios automáticos', 'desi-pet-shower' ); ?></li>
+                    <li><?php esc_html_e( 'Logins de Clientes: Gerenciar credenciais do portal', 'desi-pet-shower' ); ?></li>
+                    <li><?php esc_html_e( 'Campanhas & Fidelidade: Configurar programa de pontos e campanhas', 'desi-pet-shower' ); ?></li>
+                    <li><?php esc_html_e( 'Pagamentos: Configurar integração com Mercado Pago', 'desi-pet-shower' ); ?></li>
+                </ul>
+            </div>
+        </div>
+        <?php
     }
 
     /**
