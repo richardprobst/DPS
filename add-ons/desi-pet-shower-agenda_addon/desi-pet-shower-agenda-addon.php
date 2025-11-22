@@ -915,25 +915,11 @@ class DPS_Agenda_Addon {
         // Isso garante que o link de pagamento seja criado automaticamente mesmo quando
         // o status é alterado manualmente pela agenda.
         do_action( 'dps_base_after_save_appointment', $id, 'simple' );
-            // Envia notificação via WhatsApp se classe disponível
-            if ( class_exists( 'DPS_WhatsApp' ) ) {
-                $client_post = $client_id ? get_post( $client_id ) : null;
-                $client_name = $client_post ? $client_post->post_title : '';
-                $pet_name    = $pet_post ? $pet_post->post_title : '';
-                // Formata a data para dia-mês-ano
-                $date_fmt    = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
-                $phone       = $client_id ? get_post_meta( $client_id, 'client_phone', true ) : '';
-                $phone_digits= $phone ? preg_replace( '/\D+/', '', $phone ) : '';
-                $valor_fmt   = number_format( (float) $valor, 2, ',', '.' );
-                $msg_template = ( $status === 'finalizado_pago' ) ?
-                    'Olá %s, o atendimento de %s em %s foi finalizado e o pagamento recebido. Muito obrigado!' :
-                    'Olá %s, o atendimento de %s em %s foi finalizado. O valor total é R$ %s. Obrigado!';
-                $message     = sprintf( $msg_template, $client_name, $pet_name, $date_fmt, $valor_fmt );
-                if ( $phone_digits ) {
-                    DPS_WhatsApp::send_text( $phone_digits, $message );
-                }
-            }
-        }
+
+        // TODO: Implementar notificação via WhatsApp quando necessário
+        // Atualmente o código abaixo usa variáveis não definidas ($client_id, $pet_post, $date, $valor)
+        // e precisa ser refatorado para obter esses dados do agendamento
+
         wp_send_json_success(
             [
                 'message' => __( 'Status atualizado.', 'dps-agenda-addon' ),
@@ -946,6 +932,9 @@ class DPS_Agenda_Addon {
     /**
      * AJAX handler para retornar detalhes de serviços de um agendamento.
      * Retorna lista de serviços (nome e preço) para o agendamento.
+     *
+     * @deprecated 1.1.0 Lógica movida para Services Add-on (DPS_Services_API).
+     *                   Mantido por compatibilidade, mas delega para API quando disponível.
      */
     public function get_services_details_ajax() {
         // Apenas administradores podem consultar detalhes de serviços. Garante que usuários não
@@ -966,7 +955,17 @@ class DPS_Agenda_Addon {
         if ( ! $id_param ) {
             wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
         }
-        // Recupera serviços do agendamento
+
+        // Delega para Services API se disponível (recomendado)
+        if ( class_exists( 'DPS_Services_API' ) ) {
+            $details = DPS_Services_API::get_services_details( $id_param );
+            wp_send_json_success( [
+                'services' => $details['services'],
+                'nonce_ok' => $nonce_ok,
+            ] );
+        }
+
+        // Fallback: implementação legada (mantida se Services Add-on não estiver ativo)
         $service_ids    = get_post_meta( $id_param, 'appointment_services', true );
         $service_prices = get_post_meta( $id_param, 'appointment_service_prices', true );
         if ( ! is_array( $service_prices ) ) {
