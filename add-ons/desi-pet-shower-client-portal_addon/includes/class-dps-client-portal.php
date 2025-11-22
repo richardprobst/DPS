@@ -51,6 +51,12 @@ final class DPS_Client_Portal {
             }
         }, 1 );
 
+        // Processa autenticação por token
+        add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
+        
+        // Processa logout
+        add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
+
         // Cria login para novo cliente ao salvar post do tipo dps_cliente
         add_action( 'save_post_dps_cliente', [ $this, 'maybe_create_login_for_client' ], 10, 3 );
 
@@ -75,6 +81,99 @@ final class DPS_Client_Portal {
         // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+    }
+
+    /**
+     * Processa autenticação por token na URL
+     */
+    public function handle_token_authentication() {
+        // Verifica se há um token na URL
+        if ( ! isset( $_GET['dps_token'] ) ) {
+            return;
+        }
+
+        $token_plain = sanitize_text_field( wp_unslash( $_GET['dps_token'] ) );
+        
+        if ( empty( $token_plain ) ) {
+            return;
+        }
+
+        // Valida o token
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $token_data    = $token_manager->validate_token( $token_plain );
+
+        if ( false === $token_data ) {
+            // Token inválido - redireciona para tela de acesso com mensagem de erro
+            $this->redirect_to_access_screen( 'invalid' );
+            return;
+        }
+
+        // Token válido - autentica o cliente
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $authenticated   = $session_manager->authenticate_client( $token_data['client_id'] );
+
+        if ( ! $authenticated ) {
+            $this->redirect_to_access_screen( 'invalid' );
+            return;
+        }
+
+        // Marca token como usado
+        $token_manager->mark_as_used( $token_data['id'] );
+
+        // Redireciona para o portal (remove o token da URL)
+        $portal_page = get_page_by_title( 'Portal do Cliente' );
+        if ( $portal_page ) {
+            $redirect_url = get_permalink( $portal_page->ID );
+        } else {
+            $redirect_url = home_url( '/portal-cliente/' );
+        }
+
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Processa requisição de logout
+     */
+    public function handle_logout_request() {
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $session_manager->handle_logout_request();
+    }
+
+    /**
+     * Redireciona para a tela de acesso com mensagem de erro
+     *
+     * @param string $error_type Tipo do erro (invalid, expired, used)
+     */
+    private function redirect_to_access_screen( $error_type = 'invalid' ) {
+        $portal_page = get_page_by_title( 'Portal do Cliente' );
+        if ( $portal_page ) {
+            $redirect_url = get_permalink( $portal_page->ID );
+        } else {
+            $redirect_url = home_url( '/portal-cliente/' );
+        }
+
+        $redirect_url = add_query_arg( 'token_error', $error_type, $redirect_url );
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Retorna o ID do cliente autenticado via sessão ou usuário WP (compatibilidade)
+     *
+     * @return int
+     */
+    private function get_authenticated_client_id() {
+        // Tenta obter do sistema novo de sessão
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $client_id       = $session_manager->get_authenticated_client_id();
+
+        if ( $client_id > 0 ) {
+            return $client_id;
+        }
+
+        // Fallback: tenta obter do sistema antigo de usuários WP
+        return $this->get_client_id_for_current_user();
     }
 
     /**
@@ -554,7 +653,7 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Renderiza a página do portal para o shortcode.  Mostra login form se usuário não estiver logado.
+     * Renderiza a página do portal para o shortcode. Mostra tela de acesso se não autenticado.
      *
      * @return string Conteúdo HTML renderizado.
      */
@@ -562,19 +661,26 @@ final class DPS_Client_Portal {
         ob_start();
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
-        // Se o usuário não estiver autenticado, exibe o formulário de login do WordPress
-        if ( ! is_user_logged_in() ) {
+        
+        // Verifica autenticação pelo novo sistema
+        $client_id = $this->get_authenticated_client_id();
+        
+        // Se não autenticado, exibe tela de acesso
+        if ( ! $client_id ) {
+            // Carrega template de acesso
+            $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
+            
+            if ( file_exists( $template_path ) ) {
+                ob_end_clean();
+                include $template_path;
+                return '';
+            }
+            
+            // Fallback se template não existir
             echo '<div class="dps-client-portal-login">';
             echo '<h3>' . esc_html__( 'Acesso ao Portal do Cliente', 'dps-client-portal' ) . '</h3>';
-            echo do_shortcode( '[dps_client_login]' );
+            echo '<p>' . esc_html__( 'Para acessar o portal, solicite seu link exclusivo à nossa equipe.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
-            return ob_get_clean();
-        }
-
-        $client_id = $this->get_client_id_for_current_user();
-
-        if ( ! $client_id ) {
-            echo '<p>' . esc_html__( 'Nenhum cadastro de cliente foi encontrado para sua conta.', 'dps-client-portal' ) . '</p>';
             return ob_get_clean();
         }
         // Filtro de mensagens de retorno
@@ -591,7 +697,16 @@ final class DPS_Client_Portal {
             }
         }
         echo '<div class="dps-client-portal">';
+        
+        // Header com título e botão de logout
+        echo '<div class="dps-portal-header">';
         echo '<h1 class="dps-portal-title">' . esc_html__( 'Bem-vindo ao Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        
+        // Botão de logout
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $logout_url      = $session_manager->get_logout_url();
+        echo '<a href="' . esc_url( $logout_url ) . '" class="dps-portal-logout">' . esc_html__( 'Sair', 'dps-client-portal' ) . '</a>';
+        echo '</div>';
         
         // Menu de navegação interna
         echo '<nav class="dps-portal-nav">';
