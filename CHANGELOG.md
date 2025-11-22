@@ -118,6 +118,21 @@ Antes de criar uma nova versão oficial:
   - Padrões de documentação com DocBlocks seguindo convenções WordPress
   - Boas práticas de prefixação, segurança, performance e integração
 - Criados documentos de análise e guias de estilo:
+  - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia completo de cores, tipografia, componentes e ícones (450+ linhas)
+  - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade das telas administrativas (600+ linhas)
+  - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo executivo de melhorias implementadas
+- **AI Add-on**: Novo add-on de Assistente Virtual para Portal do Cliente (v1.0.0)
+  - Assistente focado EXCLUSIVAMENTE em Banho e Tosa, serviços, agendamentos, histórico e funcionalidades do DPS
+  - Integração com OpenAI Chat Completions API (GPT-3.5 Turbo / GPT-4 / GPT-4 Turbo)
+  - System prompt restritivo que proíbe conversas sobre política, religião, tecnologia e outros assuntos fora do contexto
+  - Filtro preventivo de palavras-chave antes de chamar API (economiza custos e protege contexto)
+  - Widget de chat responsivo no Portal do Cliente com estilos minimalistas DPS
+  - Contexto automático incluindo dados do cliente/pet, agendamentos recentes, pendências financeiras e pontos de fidelidade
+  - Endpoint AJAX `dps_ai_portal_ask` com validação de nonce e cliente logado
+  - Interface administrativa para configuração (API key, modelo, temperatura, timeout, max_tokens)
+  - Sistema autocontido: falhas não afetam funcionamento do Portal
+  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/README.md`
+- **Client Portal Add-on**: Novo hook `dps_client_portal_after_content` para permitir add-ons adicionarem conteúdo ao final do portal (usado pelo AI Add-on)
   - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
   - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas

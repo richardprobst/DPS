@@ -1,0 +1,320 @@
+/**
+ * Estilos do widget de IA no Portal do Cliente.
+ *
+ * Segue o padrão visual minimalista/clean do DPS:
+ * - Paleta neutra (#f9fafb fundos, #e5e7eb bordas, #374151 texto)
+ * - Destaque em azul #0ea5e9 para ações
+ * - Espaçamento generoso e bordas sutis
+ */
+
+/* Container principal do widget */
+.dps-ai-widget {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 32px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Cabeçalho do widget */
+.dps-ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-ai-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-ai-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #6b7280;
+    transition: color 0.2s;
+}
+
+.dps-ai-toggle:hover {
+    color: #0ea5e9;
+}
+
+.dps-ai-toggle .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Conteúdo do widget */
+.dps-ai-content {
+    padding: 20px;
+}
+
+/* Descrição inicial */
+.dps-ai-description {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 4px;
+}
+
+.dps-ai-description p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #374151;
+}
+
+/* Container de mensagens */
+.dps-ai-messages {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.dps-ai-messages:empty {
+    display: none;
+}
+
+/* Mensagem individual */
+.dps-ai-message {
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.dps-ai-message:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Label da mensagem (remetente) */
+.dps-ai-message-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Conteúdo da mensagem */
+.dps-ai-message-content {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Mensagem do usuário */
+.dps-ai-message-user .dps-ai-message-label {
+    color: #0ea5e9;
+}
+
+.dps-ai-message-user .dps-ai-message-content {
+    background: #e0f2fe;
+    color: #0c4a6e;
+    margin-left: 20px;
+}
+
+/* Mensagem do assistente */
+.dps-ai-message-assistant .dps-ai-message-label {
+    color: #10b981;
+}
+
+.dps-ai-message-assistant .dps-ai-message-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    margin-right: 20px;
+}
+
+/* Mensagem de erro */
+.dps-ai-message-error .dps-ai-message-label {
+    color: #ef4444;
+}
+
+.dps-ai-message-error .dps-ai-message-content {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+/* Wrapper do input */
+.dps-ai-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Textarea de pergunta */
+.dps-ai-question {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.5;
+    color: #374151;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.dps-ai-question:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-ai-question::placeholder {
+    color: #9ca3af;
+}
+
+.dps-ai-question:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+}
+
+/* Botão de envio */
+.dps-ai-submit {
+    align-self: flex-end;
+    padding: 12px 24px;
+    background: #0ea5e9;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.dps-ai-submit:hover {
+    background: #0284c7;
+}
+
+.dps-ai-submit:active {
+    transform: scale(0.98);
+}
+
+.dps-ai-submit:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Indicador de carregamento */
+.dps-ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-ai-loading .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #0ea5e9;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+    .dps-ai-widget {
+        margin-top: 24px;
+    }
+
+    .dps-ai-content {
+        padding: 16px;
+    }
+
+    .dps-ai-messages {
+        max-height: 300px;
+    }
+
+    .dps-ai-message-user .dps-ai-message-content {
+        margin-left: 10px;
+    }
+
+    .dps-ai-message-assistant .dps-ai-message-content {
+        margin-right: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dps-ai-header {
+        padding: 12px 16px;
+    }
+
+    .dps-ai-header h3 {
+        font-size: 16px;
+    }
+
+    .dps-ai-content {
+        padding: 12px;
+    }
+
+    .dps-ai-description {
+        padding: 12px;
+    }
+
+    .dps-ai-messages {
+        max-height: 250px;
+        padding: 8px;
+    }
+
+    .dps-ai-message-content {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .dps-ai-question {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+
+    .dps-ai-submit {
+        width: 100%;
+        padding: 10px;
+    }
+}
