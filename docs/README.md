@@ -87,21 +87,29 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 - **`AGENTS.md`** - Regras e diretrizes para contribuidores (humanos e IAs)
 - **`ANALYSIS.md`** - Visão geral de arquitetura, fluxos de integração e contratos entre núcleo e extensões
 - **`CHANGELOG.md`** - Histórico de versões e lançamentos
+- **`BACKEND_FRONTEND_MAPPING.md`** - 🆕 Mapeamento completo BACK-END vs FRONT-END (classificação CONFIG vs OPERAÇÃO)
+- **`SYSTEM_ANALYSIS_COMPLETE.md`** - Análise profunda do sistema (duplicações, lógica espalhada, sugestões)
+- **`SYSTEM_ANALYSIS_SUMMARY.md`** - Resumo executivo da análise com ações priorizadas
 
 ## Como Usar Esta Documentação
 
 1. **Para entender a arquitetura geral**: comece com `ANALYSIS.md` na raiz
 2. **Para contribuir com código**: leia `AGENTS.md` na raiz
 3. **Para ver o histórico de mudanças**: consulte `CHANGELOG.md` na raiz
-4. **Para detalhes de UX/UI de um componente específico**: navegue até a subpasta correspondente em `/docs/layout`
-5. **Para planos de refatoração**: consulte `/docs/refactoring`
-6. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
+4. **Para mapeamento BACK-END vs FRONT-END**: veja `BACKEND_FRONTEND_MAPPING.md` na raiz ⚠️
+5. **Para análise profunda do sistema**: consulte `SYSTEM_ANALYSIS_COMPLETE.md` ou `SYSTEM_ANALYSIS_SUMMARY.md`
+6. **Para detalhes de UX/UI de um componente específico**: navegue até a subpasta correspondente em `/docs/layout`
+7. **Para planos de refatoração**: consulte `/docs/refactoring`
+8. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ## Navegação Rápida
 
 - [Voltar para raiz do repositório](../)
 - [Plugin Base](../plugin/desi-pet-shower-base_plugin/)
 - [Add-ons](../add-ons/)
-- [AGENTS.md](../AGENTS.md)
-- [ANALYSIS.md](../ANALYSIS.md)
-- [CHANGELOG.md](../CHANGELOG.md)
+- [AGENTS.md](../AGENTS.md) - Regras de desenvolvimento
+- [ANALYSIS.md](../ANALYSIS.md) - Arquitetura
+- [CHANGELOG.md](../CHANGELOG.md) - Histórico
+- [BACKEND_FRONTEND_MAPPING.md](../BACKEND_FRONTEND_MAPPING.md) - 🆕 Mapeamento CONFIG vs OPERAÇÃO
+- [SYSTEM_ANALYSIS_COMPLETE.md](../SYSTEM_ANALYSIS_COMPLETE.md) - Análise completa
+- [SYSTEM_ANALYSIS_SUMMARY.md](../SYSTEM_ANALYSIS_SUMMARY.md) - Resumo executivo
