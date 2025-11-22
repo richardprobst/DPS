@@ -41,21 +41,22 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
         ?>
         <div class="dps-appointments-group <?php echo esc_attr( $group['class'] ?? '' ); ?>">
             <h4><?php echo esc_html( $group['title'] ?? '' ); ?></h4>
-            <table class="dps-table">
-                <thead>
-                    <tr>
-                        <th><?php echo esc_html__( 'Data', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Horário', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Cliente', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Pet', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Status', 'desi-pet-shower' ); ?></th>
-                        <?php if ( ! $visitor_only ) : ?>
-                            <th><?php echo esc_html__( 'Cobrança', 'desi-pet-shower' ); ?></th>
-                            <th><?php echo esc_html__( 'Ações', 'desi-pet-shower' ); ?></th>
-                        <?php endif; ?>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="dps-table-wrapper">
+                <table class="dps-table">
+                    <thead>
+                        <tr>
+                            <th><?php echo esc_html__( 'Data', 'desi-pet-shower' ); ?></th>
+                            <th><?php echo esc_html__( 'Horário', 'desi-pet-shower' ); ?></th>
+                            <th><?php echo esc_html__( 'Cliente', 'desi-pet-shower' ); ?></th>
+                            <th><?php echo esc_html__( 'Pet', 'desi-pet-shower' ); ?></th>
+                            <th><?php echo esc_html__( 'Status', 'desi-pet-shower' ); ?></th>
+                            <?php if ( ! $visitor_only ) : ?>
+                                <th class="hide-mobile"><?php echo esc_html__( 'Cobrança', 'desi-pet-shower' ); ?></th>
+                                <th><?php echo esc_html__( 'Ações', 'desi-pet-shower' ); ?></th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php foreach ( $items as $appt ) : ?>
                         <?php
                         $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
@@ -105,7 +106,7 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
                                 ?>
                             </td>
                             <?php if ( ! $visitor_only ) : ?>
-                                <td>
+                                <td class="hide-mobile">
                                     <?php
                                     if ( $charge_renderer ) {
                                         echo $charge_renderer( $appt->ID ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -124,8 +125,9 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
                             <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     <?php endforeach; ?>
 
