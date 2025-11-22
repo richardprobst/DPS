@@ -1,10 +1,14 @@
 <?php
-/*
-Plugin Name: Desi Pet Shower – Serviços Add-on
-Description: Add-on para o plugin Desi Pet Shower Base. Adiciona cadastro de serviços (padrão e extras) e integração com o agendamento, incluindo cálculo automático do valor total.
-Version: 1.0.0
-Author: PRObst
-*/
+/**
+ * Arquivo principal do add-on de Serviços.
+ * 
+ * Este arquivo contém a implementação completa do add-on de Serviços.
+ * É incluído pelo arquivo wrapper 'desi-pet-shower-services.php' na raiz do add-on.
+ * 
+ * IMPORTANTE: Este arquivo NÃO deve ter cabeçalho de plugin WordPress para
+ * evitar que o add-on apareça duplicado na lista de plugins.
+ * O arquivo de plugin principal é 'desi-pet-shower-services.php'.
+ */
 
 // Impede acesso direto
 if ( ! defined( 'ABSPATH' ) ) {
