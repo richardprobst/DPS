@@ -441,6 +441,90 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ---
 
+### Assistente de IA (`desi-pet-shower-ai_addon`)
+
+**Diretório**: `add-ons/desi-pet-shower-ai_addon`
+
+**Propósito e funcionalidades principais**:
+- Fornecer assistente virtual inteligente no Portal do Cliente
+- Responder perguntas EXCLUSIVAMENTE sobre: Banho e Tosa, serviços, agendamentos, histórico, pagamentos, fidelidade, assinaturas e dados do cliente/pet
+- NÃO responder sobre assuntos aleatórios fora do contexto (política, religião, tecnologia, etc.)
+- Integrar-se com OpenAI via API Chat Completions (GPT-3.5 Turbo / GPT-4)
+
+**Shortcodes expostos**: Nenhum (integra-se diretamente ao Portal via hook)
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Option: `dps_ai_settings` (armazena configurações: enabled, api_key, model, temperature, timeout, max_tokens)
+
+**Hooks consumidos**:
+- `dps_client_portal_after_content`: renderiza widget de chat após conteúdo do portal
+
+**Hooks disparados**: Nenhum
+
+**Endpoints AJAX**:
+- `dps_ai_portal_ask` (wp_ajax e wp_ajax_nopriv): processa perguntas do cliente e retorna respostas da IA
+
+**Dependências**:
+- **Obrigatório**: Client Portal (fornece autenticação e shortcode `[dps_client_portal]`)
+- **Opcional**: Finance, Loyalty, Services (enriquecem contexto disponível para a IA)
+
+**Introduzido em**: v1.0.0
+
+**Assets**:
+- `assets/js/dps-ai-portal.js`: gerencia widget de chat e envio de perguntas via AJAX
+- `assets/css/dps-ai-portal.css`: estilos minimalistas seguindo paleta visual DPS
+
+**Arquitetura interna**:
+- `includes/class-dps-ai-client.php`: cliente da API OpenAI com tratamento de erros e timeouts
+- `includes/class-dps-ai-assistant.php`: lógica do assistente (system prompt restritivo, montagem de contexto, filtro de palavras-chave)
+- `includes/class-dps-ai-integration-portal.php`: integração com Portal do Cliente (widget, AJAX handlers)
+
+**System Prompt e Regras**:
+- Prompt restritivo define domínio permitido (banho/tosa, pet shop, sistema DPS)
+- Proíbe explicitamente assuntos fora do contexto
+- Instrui a IA a recusar educadamente perguntas inadequadas
+- Recomenda procurar veterinário para problemas de saúde graves do pet
+- Proíbe inventar descontos, promoções ou alterações de plano não documentadas
+- Exige honestidade quando dados não forem encontrados no sistema
+
+**Filtro Preventivo**:
+- Antes de chamar API, valida se pergunta contém palavras-chave do contexto (pet, banho, tosa, agendamento, pagamento, etc.)
+- Economiza chamadas de API e protege contra perguntas totalmente fora de escopo
+- Resposta padrão retornada sem chamar API se pergunta não passar no filtro
+
+**Contexto Fornecido à IA**:
+- Dados do cliente (nome, telefone, email)
+- Lista de pets cadastrados (nome, raça, porte, idade)
+- Últimos 5 agendamentos (data, status, serviços)
+- Pendências financeiras (se Finance add-on ativo)
+- Pontos de fidelidade (se Loyalty add-on ativo)
+
+**Comportamento em Cenários**:
+- **IA ativa e funcionando**: Widget aparece e processa perguntas normalmente
+- **IA desabilitada ou sem API key**: Widget não aparece; Portal funciona normalmente
+- **Falha na API**: Mensagem amigável exibida; Portal continua funcional
+
+**Segurança**:
+- API key NUNCA exposta no JavaScript (chamadas server-side only)
+- Nonces em todas as requisições AJAX
+- Sanitização de entrada do usuário
+- Validação de cliente logado antes de processar pergunta
+- Timeout configurável para evitar requisições travadas
+- Logs de erro apenas no server (error_log, não expostos ao cliente)
+
+**Interface Administrativa**:
+- Menu: **Desi Pet Shower > Assistente de IA**
+- Configurações: ativar/desativar IA, API key, modelo GPT, temperatura, timeout, max_tokens
+- Documentação inline sobre comportamento do assistente
+
+**Observações**:
+- Sistema totalmente autocontido: falhas não afetam funcionamento do Portal
+- Custo por requisição varia conforme modelo escolhido (GPT-3.5 Turbo recomendado para custo/benefício)
+- Consulte `add-ons/desi-pet-shower-ai_addon/README.md` para documentação completa de uso e manutenção
+
+---
+
 ### Financeiro (`desi-pet-shower-finance_addon`)
 
 **Diretório**: `add-ons/desi-pet-shower-finance_addon`
