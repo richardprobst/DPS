@@ -342,6 +342,14 @@ Antes de criar uma nova versão oficial:
   - Benefícios: separação de responsabilidades, cache do navegador, minificação possível, manutenibilidade melhorada
 
 #### Fixed (Corrigido)
+- **Groomers Add-on**: Corrigido erro fatal "Call to undefined function settings_errors()" no front-end ao usar shortcode [dps_base]
+  - **Problema**: `settings_errors()` é função exclusiva do WordPress admin, não disponível no front-end
+  - **Impacto**: Fatal error na seção Groomers do Painel de Gestão DPS (shortcode)
+  - **Solução**: Implementada separação de contexto:
+    - Método `handle_new_groomer_submission()` agora aceita parâmetro `$use_frontend_messages`
+    - Front-end (`render_groomers_section`): usa `DPS_Message_Helper::add_error/add_success()` e `display_messages()`
+    - Admin (`render_groomers_page`): usa `add_settings_error()` e `settings_errors()` com guard `function_exists()`
+  - O shortcode [dps_base] agora funciona normalmente no front-end sem fatal errors
 - Corrigido erro fatal "Call to undefined function" ao ativar add-ons de Communications e Loyalty:
   - **Communications**: função `dps_comm_init()` era chamada antes de ser declarada (linha 214)
   - **Loyalty**: função `dps_loyalty_init()` era chamada antes de ser declarada (linha 839)
