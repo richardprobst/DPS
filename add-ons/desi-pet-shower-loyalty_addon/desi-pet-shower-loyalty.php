@@ -836,10 +836,6 @@ class DPS_Loyalty_Referrals {
     }
 }
 
-dps_loyalty_init();
-
-register_activation_hook( __FILE__, [ 'DPS_Loyalty_Referrals', 'install' ] );
-
 if ( ! function_exists( 'dps_loyalty_init' ) ) {
     function dps_loyalty_init() {
         static $instance = null;
@@ -853,6 +849,10 @@ if ( ! function_exists( 'dps_loyalty_init' ) ) {
         return $instance;
     }
 }
+
+add_action( 'plugins_loaded', 'dps_loyalty_init' );
+
+register_activation_hook( __FILE__, [ 'DPS_Loyalty_Referrals', 'install' ] );
 
 if ( ! function_exists( 'dps_loyalty_add_points' ) ) {
     function dps_loyalty_add_points( $client_id, $points, $context = '' ) {
