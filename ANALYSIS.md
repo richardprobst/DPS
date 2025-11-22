@@ -420,7 +420,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_base_nav_tabs_*`: integra abas ao painel base (quando aplicável)
 - Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
 
-**Hooks disparados**: Nenhum
+**Hooks disparados**:
+- `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
 
 **Dependências**:
 - Depende do plugin base para CPTs de clientes e pets

@@ -611,6 +611,10 @@ final class DPS_Client_Portal {
             $this->render_referrals_summary( $client_id );
         }
         $this->render_update_forms( $client_id );
+
+        // Hook para add-ons adicionarem conteúdo ao final do portal (ex: AI Assistant)
+        do_action( 'dps_client_portal_after_content', $client_id );
+
         echo '</div>';
         return ob_get_clean();
     }

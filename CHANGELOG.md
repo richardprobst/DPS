@@ -132,6 +132,7 @@ Antes de criar uma nova versão oficial:
   - Interface administrativa para configuração (API key, modelo, temperatura, timeout, max_tokens)
   - Sistema autocontido: falhas não afetam funcionamento do Portal
   - Documentação completa em `add-ons/desi-pet-shower-ai_addon/README.md`
+- **Client Portal Add-on**: Novo hook `dps_client_portal_after_content` para permitir add-ons adicionarem conteúdo ao final do portal (usado pelo AI Add-on)
   - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
   - `docs/implementation/UI_UX_IMPROVEMENTS_SUMMARY.md`: resumo das melhorias implementadas

@@ -59,8 +59,10 @@ class DPS_AI_Integration_Portal {
 
     /**
      * Renderiza o widget de IA no Portal do Cliente.
+     *
+     * @param int $client_id ID do cliente logado.
      */
-    public function render_ai_widget() {
+    public function render_ai_widget( $client_id = 0 ) {
         // Verifica se a IA está habilitada
         $settings = get_option( 'dps_ai_settings', [] );
         if ( empty( $settings['enabled'] ) || empty( $settings['api_key'] ) ) {
@@ -68,8 +70,11 @@ class DPS_AI_Integration_Portal {
             return;
         }
 
-        // Verifica se o usuário está logado (Portal do Cliente usa sessão PHP)
-        $client_id = $this->get_current_client_id();
+        // Fallback: obtém client_id se não foi passado pelo hook
+        if ( ! $client_id ) {
+            $client_id = $this->get_current_client_id();
+        }
+
         if ( ! $client_id ) {
             return;
         }
