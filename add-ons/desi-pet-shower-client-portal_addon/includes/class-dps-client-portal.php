@@ -324,6 +324,7 @@ final class DPS_Client_Portal {
                 $client_name = get_the_title( $client_id );
                 $title       = $subject ? $subject : sprintf( __( 'Mensagem do cliente %s', 'dps-client-portal' ), $client_name );
 
+                // Cria registro da mensagem no CPT
                 $message_id = wp_insert_post( [
                     'post_type'    => 'dps_portal_message',
                     'post_status'  => 'publish',
@@ -336,22 +337,33 @@ final class DPS_Client_Portal {
                     update_post_meta( $message_id, 'message_sender', 'client' );
                     update_post_meta( $message_id, 'message_status', 'open' );
 
-                    $admin_email = get_option( 'admin_email' );
-                    if ( $admin_email ) {
-                        $phone   = get_post_meta( $client_id, 'client_phone', true );
-                        $email   = get_post_meta( $client_id, 'client_email', true );
-                        $subject_line = sprintf( __( 'Nova mensagem do cliente %s', 'dps-client-portal' ), $client_name );
-                        $body_lines   = [
-                            sprintf( __( 'Cliente: %s (ID #%d)', 'dps-client-portal' ), $client_name, $client_id ),
-                            $phone ? sprintf( __( 'Telefone: %s', 'dps-client-portal' ), $phone ) : '',
-                            $email ? sprintf( __( 'Email: %s', 'dps-client-portal' ), $email ) : '',
-                            $subject ? sprintf( __( 'Assunto: %s', 'dps-client-portal' ), $subject ) : '',
-                            '',
-                            __( 'Mensagem:', 'dps-client-portal' ),
-                            $content,
-                        ];
-                        $body_lines = array_filter( $body_lines, 'strlen' );
-                        wp_mail( $admin_email, $subject_line, implode( "\n", $body_lines ) );
+                    // Envia notificação ao admin via Communications API
+                    if ( class_exists( 'DPS_Communications_API' ) ) {
+                        $api = DPS_Communications_API::get_instance();
+                        $full_message = $subject ? $subject . "\n\n" . $content : $content;
+                        $api->send_message_from_client( $client_id, $full_message, [
+                            'message_id' => $message_id,
+                            'subject'    => $subject,
+                        ] );
+                    } else {
+                        // Fallback: envia diretamente via wp_mail (compatibilidade retroativa)
+                        $admin_email = get_option( 'admin_email' );
+                        if ( $admin_email ) {
+                            $phone        = get_post_meta( $client_id, 'client_phone', true );
+                            $email        = get_post_meta( $client_id, 'client_email', true );
+                            $subject_line = sprintf( __( 'Nova mensagem do cliente %s', 'dps-client-portal' ), $client_name );
+                            $body_lines   = [
+                                sprintf( __( 'Cliente: %s (ID #%d)', 'dps-client-portal' ), $client_name, $client_id ),
+                                $phone ? sprintf( __( 'Telefone: %s', 'dps-client-portal' ), $phone ) : '',
+                                $email ? sprintf( __( 'Email: %s', 'dps-client-portal' ), $email ) : '',
+                                $subject ? sprintf( __( 'Assunto: %s', 'dps-client-portal' ), $subject ) : '',
+                                '',
+                                __( 'Mensagem:', 'dps-client-portal' ),
+                                $content,
+                            ];
+                            $body_lines = array_filter( $body_lines, 'strlen' );
+                            wp_mail( $admin_email, $subject_line, implode( "\n", $body_lines ) );
+                        }
                     }
 
                     $redirect_url = add_query_arg( 'portal_msg', 'message_sent', $redirect_url );

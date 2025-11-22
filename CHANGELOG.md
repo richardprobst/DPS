@@ -137,6 +137,19 @@ Antes de criar uma nova versão oficial:
   - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
+- **Communications Add-on v0.2.0**: Arquitetura completamente reorganizada
+  - Toda lógica de envio centralizada em `DPS_Communications_API`
+  - Templates de mensagens com suporte a placeholders (`{client_name}`, `{pet_name}`, `{date}`, `{time}`)
+  - Logs automáticos de envios via `DPS_Logger` (níveis INFO/ERROR/WARNING)
+  - Funções legadas `dps_comm_send_whatsapp()` e `dps_comm_send_email()` agora delegam para API (deprecated)
+- **Agenda Add-on**: Comunicações delegadas para Communications API
+  - Envio de lembretes diários via `DPS_Communications_API::send_appointment_reminder()`
+  - Notificações de status (finalizado/finalizado_pago) via `DPS_Communications_API::send_whatsapp()`
+  - Método `format_whatsapp_number()` agora delega para `DPS_Phone_Helper` (deprecated)
+  - **Mantidos**: botões de confirmação e cobrança via links wa.me (não são envios automáticos)
+- **Client Portal Add-on**: Mensagens de clientes delegadas para Communications API
+  - Envio de mensagens do Portal via `DPS_Communications_API::send_message_from_client()`
+  - Fallback para `wp_mail()` direto se API não estiver disponível (compatibilidade retroativa)
 - **Agenda Add-on**: Agora depende do Finance Add-on para funcionalidade completa de cobranças
 - **Agenda Add-on**: Removida lógica financeira duplicada (~55 linhas de SQL direto)
 - **Agenda Add-on**: `update_status_ajax()` agora confia na sincronização automática do Finance via hooks

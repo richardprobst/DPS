@@ -1,11 +1,13 @@
 <?php
-/*
- * Plugin Name: Desi Pet Shower – Assinaturas Add-on
- * Description: Add-on para o plugin base do Desi Pet Shower. Permite cadastrar pacotes mensais de banho com frequências semanal ou quinzenal. Gera automaticamente os agendamentos do mês, controla pagamento e permite renovação.
- * Version:     1.0.0
- * Author:      PRObst
- * License:     GPL-2.0+
- * Text Domain: dps-subscription-addon
+/**
+ * Arquivo principal do add-on de Assinaturas.
+ * 
+ * Este arquivo contém a implementação completa do add-on de Assinaturas.
+ * É incluído pelo arquivo wrapper 'desi-pet-shower-subscription.php' na raiz do add-on.
+ * 
+ * IMPORTANTE: Este arquivo NÃO deve ter cabeçalho de plugin WordPress para
+ * evitar que o add-on apareça duplicado na lista de plugins.
+ * O arquivo de plugin principal é 'desi-pet-shower-subscription.php'.
  */
 
 // Impede acesso direto
