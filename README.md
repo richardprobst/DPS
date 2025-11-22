@@ -23,6 +23,8 @@ DPS/
 ├── AGENTS.md                           # Regras para contribuidores (humanos e IAs)
 ├── ANALYSIS.md                         # Visão geral de arquitetura
 ├── CHANGELOG.md                        # Histórico de versões
+├── SYSTEM_ANALYSIS_COMPLETE.md        # Análise profunda do sistema (back + front)
+├── SYSTEM_ANALYSIS_SUMMARY.md         # Resumo executivo da análise
 └── README.md                           # Este arquivo
 ```
 
@@ -80,6 +82,19 @@ Plugins complementares que estendem o sistema com funcionalidades específicas:
   - Mudanças por versão
   - Breaking changes
   - Migrações necessárias
+
+- **[SYSTEM_ANALYSIS_COMPLETE.md](SYSTEM_ANALYSIS_COMPLETE.md)** - 🆕 Análise profunda do sistema
+  - Mapeamento completo de back-end (admin) e front-end
+  - Identificação de duplicações de arquivos, funções e classes
+  - Lógica espalhada entre core e add-ons
+  - Sugestões detalhadas de reorganização
+  - Baseado no código real (não em documentação)
+
+- **[SYSTEM_ANALYSIS_SUMMARY.md](SYSTEM_ANALYSIS_SUMMARY.md)** - 🆕 Resumo executivo da análise
+  - Quick reference com principais descobertas
+  - Ações priorizadas (Alta/Média/Baixa prioridade)
+  - Problemas críticos identificados
+  - Guia rápido para tomada de decisões
 
 ### Documentação Detalhada (`/docs`)
 
@@ -157,12 +172,21 @@ Software proprietário - todos os direitos reservados.
 
 ## 🔗 Links Rápidos
 
+### Código e Estrutura
 - [Plugin Base](plugin/desi-pet-shower-base_plugin/README.md)
 - [Add-ons](add-ons/README.md)
 - [Documentação Completa](docs/README.md)
+
+### Desenvolvimento
 - [Guia de Desenvolvimento](AGENTS.md)
 - [Arquitetura do Sistema](ANALYSIS.md)
 - [Histórico de Versões](CHANGELOG.md)
+
+### Análise do Sistema 🆕
+- [**Análise Completa**](SYSTEM_ANALYSIS_COMPLETE.md) - Mapeamento detalhado back + front
+- [**Resumo Executivo**](SYSTEM_ANALYSIS_SUMMARY.md) - Quick reference e ações priorizadas
+
+### UX e Refatoração
 - [Guia de Estilo Visual](docs/visual/VISUAL_STYLE_GUIDE.md)
 - [Padrões de Refatoração](docs/refactoring/REFACTORING_ANALYSIS.md)
 
