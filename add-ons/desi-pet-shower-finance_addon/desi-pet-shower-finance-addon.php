@@ -1102,7 +1102,13 @@ class DPS_Finance_Addon {
                         $pet_title   = $pet_name !== '-' ? $pet_name : '';
                         $date_str    = date_i18n( 'd-m-Y', strtotime( $tr->data ) );
                         $valor_str   = DPS_Money_Helper::format_to_brazilian( $tr_valor_cents );
-                        $msg = sprintf( 'Olá %s, tudo bem? O atendimento do pet %s em %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: https://link.mercadopago.com.br/desipetshower. Obrigado pela confiança!', $client_name, $pet_title, $date_str, $valor_str );
+                        $msg = sprintf( 
+                            __( 'Olá %s, tudo bem? O atendimento do pet %s em %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: https://link.mercadopago.com.br/desipetshower. Obrigado pela confiança!', 'dps-finance-addon' ), 
+                            $client_name, 
+                            $pet_title, 
+                            $date_str, 
+                            $valor_str 
+                        );
                         $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-finance-addon' ) . '</a>';
                     } else {
@@ -1194,7 +1200,11 @@ class DPS_Finance_Addon {
                                     $digits = '55' . $digits;
                                 }
                                 $valor_str = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $pdata['due'] * 100 ) );
-                                $msg = sprintf( 'Olá %s, tudo bem? Há pagamentos pendentes no total de R$ %s relacionados aos seus atendimentos na Desi Pet Shower. Para regularizar, você pode pagar via PIX ou utilizar nosso link: https://link.mercadopago.com.br/desipetshower. Muito obrigado!', $cname, $valor_str );
+                                $msg = sprintf( 
+                                    __( 'Olá %s, tudo bem? Há pagamentos pendentes no total de R$ %s relacionados aos seus atendimentos na Desi Pet Shower. Para regularizar, você pode pagar via PIX ou utilizar nosso link: https://link.mercadopago.com.br/desipetshower. Muito obrigado!', 'dps-finance-addon' ), 
+                                    $cname, 
+                                    $valor_str 
+                                );
                                 $phone_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                             }
                         }

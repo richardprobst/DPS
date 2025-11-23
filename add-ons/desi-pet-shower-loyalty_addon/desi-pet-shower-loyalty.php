@@ -6,7 +6,7 @@
  * Version:           0.1.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
- * Text Domain:       desi-pet-shower
+ * Text Domain:       dps-loyalty-addon
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -35,19 +35,19 @@ class DPS_Loyalty_Addon {
             $this->cpt_helper = new DPS_CPT_Helper(
                 'dps_campaign',
                 [
-                    'name'               => _x( 'Campanhas', 'post type general name', 'desi-pet-shower' ),
-                    'singular_name'      => _x( 'Campanha', 'post type singular name', 'desi-pet-shower' ),
-                    'menu_name'          => _x( 'Campanhas', 'admin menu', 'desi-pet-shower' ),
-                    'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'desi-pet-shower' ),
-                    'add_new'            => _x( 'Adicionar nova', 'campaign', 'desi-pet-shower' ),
-                    'add_new_item'       => __( 'Adicionar nova campanha', 'desi-pet-shower' ),
-                    'new_item'           => __( 'Nova campanha', 'desi-pet-shower' ),
-                    'edit_item'          => __( 'Editar campanha', 'desi-pet-shower' ),
-                    'view_item'          => __( 'Ver campanha', 'desi-pet-shower' ),
-                    'all_items'          => __( 'Todas as campanhas', 'desi-pet-shower' ),
-                    'search_items'       => __( 'Buscar campanhas', 'desi-pet-shower' ),
-                    'not_found'          => __( 'Nenhuma campanha encontrada.', 'desi-pet-shower' ),
-                    'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'desi-pet-shower' ),
+                    'name'               => _x( 'Campanhas', 'post type general name', 'dps-loyalty-addon' ),
+                    'singular_name'      => _x( 'Campanha', 'post type singular name', 'dps-loyalty-addon' ),
+                    'menu_name'          => _x( 'Campanhas', 'admin menu', 'dps-loyalty-addon' ),
+                    'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'dps-loyalty-addon' ),
+                    'add_new'            => _x( 'Adicionar nova', 'campaign', 'dps-loyalty-addon' ),
+                    'add_new_item'       => __( 'Adicionar nova campanha', 'dps-loyalty-addon' ),
+                    'new_item'           => __( 'Nova campanha', 'dps-loyalty-addon' ),
+                    'edit_item'          => __( 'Editar campanha', 'dps-loyalty-addon' ),
+                    'view_item'          => __( 'Ver campanha', 'dps-loyalty-addon' ),
+                    'all_items'          => __( 'Todas as campanhas', 'dps-loyalty-addon' ),
+                    'search_items'       => __( 'Buscar campanhas', 'dps-loyalty-addon' ),
+                    'not_found'          => __( 'Nenhuma campanha encontrada.', 'dps-loyalty-addon' ),
+                    'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'dps-loyalty-addon' ),
                 ],
                 [
                     'public'          => false,
@@ -81,7 +81,7 @@ class DPS_Loyalty_Addon {
     public function register_campaign_metaboxes() {
         add_meta_box(
             'dps_campaign_details',
-            __( 'Configurações da campanha', 'desi-pet-shower' ),
+            __( 'Configurações da campanha', 'dps-loyalty-addon' ),
             [ $this, 'render_campaign_details_meta_box' ],
             'dps_campaign',
             'normal',
@@ -101,40 +101,40 @@ class DPS_Loyalty_Addon {
         $eligibility_selection = is_array( $eligibility ) ? $eligibility : [];
         ?>
         <p>
-            <label for="dps_campaign_type"><strong><?php esc_html_e( 'Tipo de campanha', 'desi-pet-shower' ); ?></strong></label>
+            <label for="dps_campaign_type"><strong><?php esc_html_e( 'Tipo de campanha', 'dps-loyalty-addon' ); ?></strong></label>
             <select id="dps_campaign_type" name="dps_campaign_type" class="widefat">
-                <option value="percentage" <?php selected( $campaign_type, 'percentage' ); ?>><?php esc_html_e( 'Desconto percentual', 'desi-pet-shower' ); ?></option>
-                <option value="fixed" <?php selected( $campaign_type, 'fixed' ); ?>><?php esc_html_e( 'Desconto fixo', 'desi-pet-shower' ); ?></option>
-                <option value="double_points" <?php selected( $campaign_type, 'double_points' ); ?>><?php esc_html_e( 'Pontos em dobro', 'desi-pet-shower' ); ?></option>
+                <option value="percentage" <?php selected( $campaign_type, 'percentage' ); ?>><?php esc_html_e( 'Desconto percentual', 'dps-loyalty-addon' ); ?></option>
+                <option value="fixed" <?php selected( $campaign_type, 'fixed' ); ?>><?php esc_html_e( 'Desconto fixo', 'dps-loyalty-addon' ); ?></option>
+                <option value="double_points" <?php selected( $campaign_type, 'double_points' ); ?>><?php esc_html_e( 'Pontos em dobro', 'dps-loyalty-addon' ); ?></option>
             </select>
         </p>
         
         <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
-            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Critérios de elegibilidade', 'desi-pet-shower' ); ?></strong></legend>
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Critérios de elegibilidade', 'dps-loyalty-addon' ); ?></strong></legend>
             <p>
                 <label>
                     <input type="checkbox" name="dps_campaign_eligibility[]" value="inactive" <?php checked( in_array( 'inactive', $eligibility_selection, true ) ); ?> />
-                    <?php esc_html_e( 'Clientes sem atendimento há X dias', 'desi-pet-shower' ); ?>
+                    <?php esc_html_e( 'Clientes sem atendimento há X dias', 'dps-loyalty-addon' ); ?>
                 </label>
                 <input type="number" name="dps_campaign_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="0" class="small-text" />
             </p>
             <p>
                 <label>
                     <input type="checkbox" name="dps_campaign_eligibility[]" value="points" <?php checked( in_array( 'points', $eligibility_selection, true ) ); ?> />
-                    <?php esc_html_e( 'Clientes com mais de N pontos', 'desi-pet-shower' ); ?>
+                    <?php esc_html_e( 'Clientes com mais de N pontos', 'dps-loyalty-addon' ); ?>
                 </label>
                 <input type="number" name="dps_campaign_points_threshold" value="<?php echo esc_attr( $points_threshold ); ?>" min="0" class="small-text" />
             </p>
         </fieldset>
         
         <fieldset style="border: 1px solid #e5e7eb; padding: 16px; margin: 16px 0; border-radius: 4px;">
-            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Período da campanha', 'desi-pet-shower' ); ?></strong></legend>
+            <legend style="font-weight: 600; color: #374151; padding: 0 8px;"><strong><?php esc_html_e( 'Período da campanha', 'dps-loyalty-addon' ); ?></strong></legend>
             <p>
-                <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'Início', 'desi-pet-shower' ); ?></strong></label>
+                <label for="dps_campaign_start_date"><strong><?php esc_html_e( 'Início', 'dps-loyalty-addon' ); ?></strong></label>
                 <input type="date" id="dps_campaign_start_date" name="dps_campaign_start_date" value="<?php echo esc_attr( $start_date ); ?>" />
             </p>
             <p>
-                <label for="dps_campaign_end_date"><strong><?php esc_html_e( 'Fim', 'desi-pet-shower' ); ?></strong></label>
+                <label for="dps_campaign_end_date"><strong><?php esc_html_e( 'Fim', 'dps-loyalty-addon' ); ?></strong></label>
                 <input type="date" id="dps_campaign_end_date" name="dps_campaign_end_date" value="<?php echo esc_attr( $end_date ); ?>" />
             </p>
         </fieldset>
@@ -173,18 +173,18 @@ class DPS_Loyalty_Addon {
     public function register_menu() {
         // Submenu dentro do menu principal "Desi Pet Shower" (criado pelo plugin base)
         add_submenu_page(
-            'desi-pet-shower',
-            __( 'Campanhas & Fidelidade', 'desi-pet-shower' ),
-            __( 'Campanhas & Fidelidade', 'desi-pet-shower' ),
+            'dps-loyalty-addon',
+            __( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ),
+            __( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ),
             'manage_options',
             'dps-loyalty',
             [ $this, 'render_loyalty_page' ]
         );
 
         add_submenu_page(
-            'desi-pet-shower',
-            __( 'Campanhas', 'desi-pet-shower' ),
-            __( 'Campanhas', 'desi-pet-shower' ),
+            'dps-loyalty-addon',
+            __( 'Campanhas', 'dps-loyalty-addon' ),
+            __( 'Campanhas', 'dps-loyalty-addon' ),
             'manage_options',
             'edit.php?post_type=dps_campaign'
         );
@@ -217,7 +217,7 @@ class DPS_Loyalty_Addon {
         $logs = $selected_id ? dps_loyalty_get_logs( $selected_id ) : [];
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__( 'Campanhas & Fidelidade', 'desi-pet-shower' ); ?></h1>
+            <h1><?php echo esc_html__( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ); ?></h1>
             <form method="post" action="options.php">
                 <?php
                 settings_fields( 'dps_loyalty_settings_group' );
@@ -225,12 +225,12 @@ class DPS_Loyalty_Addon {
                 ?>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row"><?php esc_html_e( 'Regra de pontos', 'desi-pet-shower' ); ?></th>
+                        <th scope="row"><?php esc_html_e( 'Regra de pontos', 'dps-loyalty-addon' ); ?></th>
                         <td>
                             <label>
-                                <?php esc_html_e( '1 ponto a cada', 'desi-pet-shower' ); ?>
+                                <?php esc_html_e( '1 ponto a cada', 'dps-loyalty-addon' ); ?>
                                 <input type="number" step="0.01" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[brl_per_point]" value="<?php echo esc_attr( $brl_per_pt ); ?>" />
-                                <?php esc_html_e( 'reais faturados', 'desi-pet-shower' ); ?>
+                                <?php esc_html_e( 'reais faturados', 'dps-loyalty-addon' ); ?>
                             </label>
                         </td>
                     </tr>
@@ -239,17 +239,17 @@ class DPS_Loyalty_Addon {
             </form>
 
             <hr />
-            <h2><?php esc_html_e( 'Resumo de Fidelidade', 'desi-pet-shower' ); ?></h2>
+            <h2><?php esc_html_e( 'Resumo de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
             <form method="get">
                 <input type="hidden" name="page" value="dps-loyalty" />
-                <label for="dps_client_id"><?php esc_html_e( 'Selecionar cliente', 'desi-pet-shower' ); ?></label>
+                <label for="dps_client_id"><?php esc_html_e( 'Selecionar cliente', 'dps-loyalty-addon' ); ?></label>
                 <select id="dps_client_id" name="dps_client_id">
-                    <option value="0"><?php esc_html_e( 'Selecione um cliente', 'desi-pet-shower' ); ?></option>
+                    <option value="0"><?php esc_html_e( 'Selecione um cliente', 'dps-loyalty-addon' ); ?></option>
                     <?php foreach ( $clients as $client ) : ?>
                         <option value="<?php echo esc_attr( $client->ID ); ?>" <?php selected( $selected_id, $client->ID ); ?>><?php echo esc_html( $client->post_title ); ?></option>
                     <?php endforeach; ?>
                 </select>
-                <?php submit_button( __( 'Filtrar', 'desi-pet-shower' ), 'secondary', '', false ); ?>
+                <?php submit_button( __( 'Filtrar', 'dps-loyalty-addon' ), 'secondary', '', false ); ?>
             </form>
 
             <?php
@@ -269,20 +269,20 @@ class DPS_Loyalty_Addon {
                     printf(
                         '<a class="button" href="%s">&laquo; %s</a> ',
                         esc_url( add_query_arg( 'loyalty_page', $prev_page, $base_url ) ),
-                        esc_html__( 'Anterior', 'desi-pet-shower' )
+                        esc_html__( 'Anterior', 'dps-loyalty-addon' )
                     );
                 }
 
                 printf(
                     '<span>%s</span>',
-                    esc_html( sprintf( __( 'Página %d de %d', 'desi-pet-shower' ), $paged, $total_pages ) )
+                    esc_html( sprintf( __( 'Página %d de %d', 'dps-loyalty-addon' ), $paged, $total_pages ) )
                 );
 
                 if ( $next_page ) {
                     printf(
                         ' <a class="button" href="%s">%s &raquo;</a>',
                         esc_url( add_query_arg( 'loyalty_page', $next_page, $base_url ) ),
-                        esc_html__( 'Próxima', 'desi-pet-shower' )
+                        esc_html__( 'Próxima', 'dps-loyalty-addon' )
                     );
                 }
                 echo '</div>';
@@ -290,26 +290,26 @@ class DPS_Loyalty_Addon {
             ?>
 
             <?php if ( $selected_id ) : ?>
-                <p><strong><?php esc_html_e( 'Pontos acumulados:', 'desi-pet-shower' ); ?></strong> <?php echo esc_html( dps_loyalty_get_points( $selected_id ) ); ?></p>
+                <p><strong><?php esc_html_e( 'Pontos acumulados:', 'dps-loyalty-addon' ); ?></strong> <?php echo esc_html( dps_loyalty_get_points( $selected_id ) ); ?></p>
                 <?php if ( ! empty( $logs ) ) : ?>
-                    <h3><?php esc_html_e( 'Histórico recente', 'desi-pet-shower' ); ?></h3>
+                    <h3><?php esc_html_e( 'Histórico recente', 'dps-loyalty-addon' ); ?></h3>
                     <ul>
                         <?php foreach ( $logs as $entry ) : ?>
                             <li><?php echo esc_html( sprintf( '%1$s: %2$s pontos (%3$s)', $entry['date'], $entry['points'], $entry['context'] ) ); ?></li>
                         <?php endforeach; ?>
                     </ul>
                 <?php else : ?>
-                    <p><?php esc_html_e( 'Nenhum histórico disponível.', 'desi-pet-shower' ); ?></p>
+                    <p><?php esc_html_e( 'Nenhum histórico disponível.', 'dps-loyalty-addon' ); ?></p>
                 <?php endif; ?>
             <?php endif; ?>
 
             <hr />
-            <h2><?php esc_html_e( 'Rotinas de Campanhas', 'desi-pet-shower' ); ?></h2>
-            <p><?php esc_html_e( 'Execute uma varredura para identificar clientes elegíveis e registrar ofertas pendentes.', 'desi-pet-shower' ); ?></p>
+            <h2><?php esc_html_e( 'Rotinas de Campanhas', 'dps-loyalty-addon' ); ?></h2>
+            <p><?php esc_html_e( 'Execute uma varredura para identificar clientes elegíveis e registrar ofertas pendentes.', 'dps-loyalty-addon' ); ?></p>
             <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <?php wp_nonce_field( 'dps_loyalty_run_audit', 'dps_loyalty_run_audit_nonce' ); ?>
                 <input type="hidden" name="action" value="dps_loyalty_run_audit" />
-                <?php submit_button( __( 'Rodar rotina de elegibilidade', 'desi-pet-shower' ), 'primary', 'dps_loyalty_run_audit_btn', false ); ?>
+                <?php submit_button( __( 'Rodar rotina de elegibilidade', 'dps-loyalty-addon' ), 'primary', 'dps_loyalty_run_audit_btn', false ); ?>
             </form>
         </div>
         <?php
@@ -317,11 +317,11 @@ class DPS_Loyalty_Addon {
 
     public function handle_campaign_audit() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+            wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
         }
 
         if ( ! isset( $_POST['dps_loyalty_run_audit_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dps_loyalty_run_audit_nonce'] ), 'dps_loyalty_run_audit' ) ) {
-            wp_die( __( 'Nonce inválido.', 'desi-pet-shower' ) );
+            wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
         }
 
         // Limite de campanhas processadas em uma única execução.
@@ -412,14 +412,14 @@ class DPS_Loyalty_Addon {
 
         add_settings_section(
             'dps_loyalty_referrals_section',
-            __( 'Indique e Ganhe', 'desi-pet-shower' ),
+            __( 'Indique e Ganhe', 'dps-loyalty-addon' ),
             [ $this, 'render_referrals_section_intro' ],
             'dps_loyalty_settings_page'
         );
 
         add_settings_field(
             'dps_loyalty_referrals_enabled',
-            __( 'Ativar programa', 'desi-pet-shower' ),
+            __( 'Ativar programa', 'dps-loyalty-addon' ),
             [ $this, 'render_referrals_enabled_field' ],
             'dps_loyalty_settings_page',
             'dps_loyalty_referrals_section'
@@ -427,7 +427,7 @@ class DPS_Loyalty_Addon {
 
         add_settings_field(
             'dps_loyalty_referrer_reward',
-            __( 'Recompensa do indicador', 'desi-pet-shower' ),
+            __( 'Recompensa do indicador', 'dps-loyalty-addon' ),
             [ $this, 'render_referrer_reward_field' ],
             'dps_loyalty_settings_page',
             'dps_loyalty_referrals_section'
@@ -435,7 +435,7 @@ class DPS_Loyalty_Addon {
 
         add_settings_field(
             'dps_loyalty_referee_reward',
-            __( 'Recompensa do indicado', 'desi-pet-shower' ),
+            __( 'Recompensa do indicado', 'dps-loyalty-addon' ),
             [ $this, 'render_referee_reward_field' ],
             'dps_loyalty_settings_page',
             'dps_loyalty_referrals_section'
@@ -443,7 +443,7 @@ class DPS_Loyalty_Addon {
 
         add_settings_field(
             'dps_loyalty_referrals_rules',
-            __( 'Regras gerais', 'desi-pet-shower' ),
+            __( 'Regras gerais', 'dps-loyalty-addon' ),
             [ $this, 'render_referrals_rules_field' ],
             'dps_loyalty_settings_page',
             'dps_loyalty_referrals_section'
@@ -469,13 +469,13 @@ class DPS_Loyalty_Addon {
     }
 
     public function render_referrals_section_intro() {
-        echo '<p>' . esc_html__( 'Configure as regras do programa de indicações, incluindo recompensas e limites.', 'desi-pet-shower' ) . '</p>';
+        echo '<p>' . esc_html__( 'Configure as regras do programa de indicações, incluindo recompensas e limites.', 'dps-loyalty-addon' ) . '</p>';
     }
 
     public function render_referrals_enabled_field() {
         $settings = get_option( self::OPTION_KEY, [] );
         $enabled  = ! empty( $settings['referrals_enabled'] );
-        echo '<label><input type="checkbox" name="' . esc_attr( self::OPTION_KEY ) . '[referrals_enabled]" value="1" ' . checked( $enabled, true, false ) . ' /> ' . esc_html__( 'Ativar programa Indique e Ganhe', 'desi-pet-shower' ) . '</label>';
+        echo '<label><input type="checkbox" name="' . esc_attr( self::OPTION_KEY ) . '[referrals_enabled]" value="1" ' . checked( $enabled, true, false ) . ' /> ' . esc_html__( 'Ativar programa Indique e Ganhe', 'dps-loyalty-addon' ) . '</label>';
     }
 
     public function render_referrer_reward_field() {
@@ -500,20 +500,20 @@ class DPS_Loyalty_Addon {
         ?>
         <p>
             <label>
-                <?php esc_html_e( 'Valor mínimo do primeiro atendimento para liberar recompensa (R$)', 'desi-pet-shower' ); ?><br />
+                <?php esc_html_e( 'Valor mínimo do primeiro atendimento para liberar recompensa (R$)', 'dps-loyalty-addon' ); ?><br />
                 <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_minimum_amount]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( $minimum_amount ) ); ?>" />
             </label>
         </p>
         <p>
             <label>
-                <?php esc_html_e( 'Máximo de indicações recompensadas por cliente (0 para ilimitado)', 'desi-pet-shower' ); ?><br />
+                <?php esc_html_e( 'Máximo de indicações recompensadas por cliente (0 para ilimitado)', 'dps-loyalty-addon' ); ?><br />
                 <input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_max_per_referrer]" value="<?php echo esc_attr( $max_referrals ); ?>" />
             </label>
         </p>
         <p>
             <label>
                 <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_first_purchase]" value="1" <?php checked( $first_purchase ); ?> />
-                <?php esc_html_e( 'Somente a primeira compra conta', 'desi-pet-shower' ); ?>
+                <?php esc_html_e( 'Somente a primeira compra conta', 'dps-loyalty-addon' ); ?>
             </label>
         </p>
         <?php
@@ -526,13 +526,13 @@ class DPS_Loyalty_Addon {
         <fieldset>
             <label for="<?php echo esc_attr( $type_key ); ?>">
                 <select id="<?php echo esc_attr( $type_key ); ?>" name="<?php echo esc_attr( $type_key ); ?>">
-                    <option value="none" <?php selected( $type, 'none' ); ?>><?php esc_html_e( 'Sem recompensa', 'desi-pet-shower' ); ?></option>
-                    <option value="points" <?php selected( $type, 'points' ); ?>><?php esc_html_e( 'Pontos de fidelidade', 'desi-pet-shower' ); ?></option>
-                    <option value="fixed" <?php selected( $type, 'fixed' ); ?>><?php esc_html_e( 'Crédito fixo (R$)', 'desi-pet-shower' ); ?></option>
-                    <option value="percent" <?php selected( $type, 'percent' ); ?>><?php esc_html_e( 'Crédito percentual', 'desi-pet-shower' ); ?></option>
+                    <option value="none" <?php selected( $type, 'none' ); ?>><?php esc_html_e( 'Sem recompensa', 'dps-loyalty-addon' ); ?></option>
+                    <option value="points" <?php selected( $type, 'points' ); ?>><?php esc_html_e( 'Pontos de fidelidade', 'dps-loyalty-addon' ); ?></option>
+                    <option value="fixed" <?php selected( $type, 'fixed' ); ?>><?php esc_html_e( 'Crédito fixo (R$)', 'dps-loyalty-addon' ); ?></option>
+                    <option value="percent" <?php selected( $type, 'percent' ); ?>><?php esc_html_e( 'Crédito percentual', 'dps-loyalty-addon' ); ?></option>
                 </select>
             </label>
-            <input type="text" name="<?php echo esc_attr( $value_key ); ?>" value="<?php echo esc_attr( $this->format_reward_value( $value, $type ) ); ?>" placeholder="<?php esc_attr_e( 'Valor', 'desi-pet-shower' ); ?>" />
+            <input type="text" name="<?php echo esc_attr( $value_key ); ?>" value="<?php echo esc_attr( $this->format_reward_value( $value, $type ) ); ?>" placeholder="<?php esc_attr_e( 'Valor', 'dps-loyalty-addon' ); ?>" />
         </fieldset>
         <?php
     }
@@ -684,7 +684,7 @@ class DPS_Loyalty_Referrals {
         $referral_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
         ?>
         <p class="dps-referral-field">
-            <label><?php esc_html_e( 'Código de indicação (opcional)', 'desi-pet-shower' ); ?><br />
+            <label><?php esc_html_e( 'Código de indicação (opcional)', 'dps-loyalty-addon' ); ?><br />
                 <input type="text" name="dps_referral_code" value="<?php echo esc_attr( $referral_param ); ?>" maxlength="20" />
             </label>
         </p>

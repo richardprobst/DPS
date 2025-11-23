@@ -6,7 +6,7 @@
  * Version:           0.2.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
- * Text Domain:       desi-pet-shower
+ * Text Domain:       dps-communications-addon
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -38,8 +38,8 @@ class DPS_Communications_Addon {
     public function register_admin_menu() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Comunicações', 'desi-pet-shower' ),
-            __( 'Comunicações', 'desi-pet-shower' ),
+            __( 'Comunicações', 'dps-communications-addon' ),
+            __( 'Comunicações', 'dps-communications-addon' ),
             'manage_options',
             'dps-communications',
             [ $this, 'render_admin_page' ]
@@ -51,7 +51,7 @@ class DPS_Communications_Addon {
      */
     public function render_admin_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-communications-addon' ) );
         }
 
         $options = get_option( self::OPTION_KEY, [] );
@@ -60,11 +60,11 @@ class DPS_Communications_Addon {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-            <p><?php echo esc_html__( 'Configure integrações e mensagens automáticas para WhatsApp, SMS ou e-mail.', 'desi-pet-shower' ); ?></p>
+            <p><?php echo esc_html__( 'Configure integrações e mensagens automáticas para WhatsApp, SMS ou e-mail.', 'dps-communications-addon' ); ?></p>
 
             <?php if ( '1' === $status ) : ?>
                 <div class="notice notice-success is-dismissible">
-                    <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'desi-pet-shower' ); ?></p>
+                    <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'dps-communications-addon' ); ?></p>
                 </div>
             <?php endif; ?>
 
@@ -76,73 +76,73 @@ class DPS_Communications_Addon {
                     <tbody>
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_whatsapp_api_key"><?php echo esc_html__( 'Chave de API do WhatsApp', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_whatsapp_api_key"><?php echo esc_html__( 'Chave de API do WhatsApp', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <input type="text" id="dps_comm_whatsapp_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_key]" value="<?php echo esc_attr( $options['whatsapp_api_key'] ?? '' ); ?>" class="regular-text" />
-                                <p class="description"><?php esc_html_e( 'Token de autenticação para o gateway de WhatsApp.', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Token de autenticação para o gateway de WhatsApp.', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_whatsapp_api_url"><?php echo esc_html__( 'Endpoint/Base URL do WhatsApp', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_whatsapp_api_url"><?php echo esc_html__( 'Endpoint/Base URL do WhatsApp', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <input type="url" id="dps_comm_whatsapp_api_url" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_url]" value="<?php echo esc_attr( $options['whatsapp_api_url'] ?? '' ); ?>" class="regular-text" />
-                                <p class="description"><?php esc_html_e( 'URL base da API de envio de mensagens WhatsApp.', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'URL base da API de envio de mensagens WhatsApp.', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_default_email_from"><?php echo esc_html__( 'E-mail remetente padrão', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_default_email_from"><?php echo esc_html__( 'E-mail remetente padrão', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <input type="email" id="dps_comm_default_email_from" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[default_email_from]" value="<?php echo esc_attr( $options['default_email_from'] ?? '' ); ?>" class="regular-text" />
-                                <p class="description"><?php esc_html_e( 'Endereço de e-mail usado como remetente nas mensagens automáticas.', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Endereço de e-mail usado como remetente nas mensagens automáticas.', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h2><?php esc_html_e( 'Templates de Mensagens', 'desi-pet-shower' ); ?></h2>
+                <h2><?php esc_html_e( 'Templates de Mensagens', 'dps-communications-addon' ); ?></h2>
 
                 <table class="form-table" role="presentation">
                     <tbody>
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_template_confirmation"><?php echo esc_html__( 'Template de confirmação de agendamento', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_template_confirmation"><?php echo esc_html__( 'Template de confirmação de agendamento', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <textarea id="dps_comm_template_confirmation" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_confirmation]" rows="4" class="large-text code"><?php echo esc_textarea( $options['template_confirmation'] ?? '' ); ?></textarea>
-                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {hora}, {servico}', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {hora}, {servico}', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_template_reminder"><?php echo esc_html__( 'Template de lembrete', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_template_reminder"><?php echo esc_html__( 'Template de lembrete', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <textarea id="dps_comm_template_reminder" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_reminder]" rows="4" class="large-text code"><?php echo esc_textarea( $options['template_reminder'] ?? '' ); ?></textarea>
-                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {hora}, {servico}', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {hora}, {servico}', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 
                         <tr>
                             <th scope="row">
-                                <label for="dps_comm_template_post_service"><?php echo esc_html__( 'Template de pós-atendimento', 'desi-pet-shower' ); ?></label>
+                                <label for="dps_comm_template_post_service"><?php echo esc_html__( 'Template de pós-atendimento', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <textarea id="dps_comm_template_post_service" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[template_post_service]" rows="4" class="large-text code"><?php echo esc_textarea( $options['template_post_service'] ?? '' ); ?></textarea>
-                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {servico}', 'desi-pet-shower' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Variáveis disponíveis: {cliente}, {pet}, {data}, {servico}', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <?php submit_button( __( 'Salvar configurações', 'desi-pet-shower' ) ); ?>
+                <?php submit_button( __( 'Salvar configurações', 'dps-communications-addon' ) ); ?>
             </form>
         </div>
         <?php

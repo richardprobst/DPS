@@ -6,7 +6,7 @@
  * Version:           1.0.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
- * Text Domain:       desi-pet-shower
+ * Text Domain:       dps-groomers-addon
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ class DPS_Groomers_Addon {
     public static function activate() {
         add_role(
             'dps_groomer',
-            __( 'Groomer DPS', 'desi-pet-shower' ),
+            __( 'Groomer DPS', 'dps-groomers-addon' ),
             [ 'read' => true ]
         );
     }
@@ -75,7 +75,7 @@ class DPS_Groomers_Addon {
         $password = isset( $_POST['dps_groomer_password'] ) ? wp_unslash( $_POST['dps_groomer_password'] ) : '';
 
         if ( empty( $username ) || empty( $email ) || empty( $password ) ) {
-            $message = __( 'Preencha usuário, email e senha para criar o groomer.', 'desi-pet-shower' );
+            $message = __( 'Preencha usuário, email e senha para criar o groomer.', 'dps-groomers-addon' );
             if ( $use_frontend_messages ) {
                 DPS_Message_Helper::add_error( $message );
             } elseif ( function_exists( 'add_settings_error' ) ) {
@@ -85,7 +85,7 @@ class DPS_Groomers_Addon {
         }
 
         if ( username_exists( $username ) ) {
-            $message = __( 'Já existe um usuário com esse login.', 'desi-pet-shower' );
+            $message = __( 'Já existe um usuário com esse login.', 'dps-groomers-addon' );
             if ( $use_frontend_messages ) {
                 DPS_Message_Helper::add_error( $message );
             } elseif ( function_exists( 'add_settings_error' ) ) {
@@ -114,7 +114,7 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        $message = __( 'Groomer criado com sucesso.', 'desi-pet-shower' );
+        $message = __( 'Groomer criado com sucesso.', 'dps-groomers-addon' );
         if ( $use_frontend_messages ) {
             DPS_Message_Helper::add_success( $message );
         } elseif ( function_exists( 'add_settings_error' ) ) {
@@ -133,7 +133,7 @@ class DPS_Groomers_Addon {
      */
     public function render_groomers_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-groomers-addon' ) );
         }
 
         $this->handle_new_groomer_submission( false );
@@ -146,46 +146,46 @@ class DPS_Groomers_Addon {
         $groomers = $this->get_groomers();
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__( 'Groomers', 'desi-pet-shower' ); ?></h1>
-            <p><?php echo esc_html__( 'Cadastre groomers e visualize todos os profissionais com a role dedicada.', 'desi-pet-shower' ); ?></p>
+            <h1><?php echo esc_html__( 'Groomers', 'dps-groomers-addon' ); ?></h1>
+            <p><?php echo esc_html__( 'Cadastre groomers e visualize todos os profissionais com a role dedicada.', 'dps-groomers-addon' ); ?></p>
 
-            <h2><?php echo esc_html__( 'Adicionar novo groomer', 'desi-pet-shower' ); ?></h2>
+            <h2><?php echo esc_html__( 'Adicionar novo groomer', 'dps-groomers-addon' ); ?></h2>
             <form method="post" action="">
                 <?php wp_nonce_field( 'dps_new_groomer', 'dps_new_groomer_nonce' ); ?>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row"><label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?></label></th>
                         <td><input name="dps_groomer_username" id="dps_groomer_username" type="text" class="regular-text" required></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="dps_groomer_name"><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_groomer_name"><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></label></th>
                         <td><input name="dps_groomer_name" id="dps_groomer_name" type="text" class="regular-text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></label></th>
                         <td><input name="dps_groomer_email" id="dps_groomer_email" type="email" class="regular-text" required></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'dps-groomers-addon' ); ?></label></th>
                         <td><input name="dps_groomer_password" id="dps_groomer_password" type="password" class="regular-text" required></td>
                     </tr>
                 </table>
-                <?php submit_button( __( 'Criar groomer', 'desi-pet-shower' ) ); ?>
+                <?php submit_button( __( 'Criar groomer', 'dps-groomers-addon' ) ); ?>
             </form>
 
-            <h2><?php echo esc_html__( 'Groomers cadastrados', 'desi-pet-shower' ); ?></h2>
+            <h2><?php echo esc_html__( 'Groomers cadastrados', 'dps-groomers-addon' ); ?></h2>
             <table class="widefat fixed striped">
                 <thead>
                     <tr>
-                        <th><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Usuário', 'desi-pet-shower' ); ?></th>
-                        <th><?php echo esc_html__( 'Email', 'desi-pet-shower' ); ?></th>
+                        <th><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php if ( empty( $groomers ) ) : ?>
                     <tr>
-                        <td colspan="3"><?php echo esc_html__( 'Nenhum groomer encontrado.', 'desi-pet-shower' ); ?></td>
+                        <td colspan="3"><?php echo esc_html__( 'Nenhum groomer encontrado.', 'dps-groomers-addon' ); ?></td>
                     </tr>
                 <?php else : ?>
                     <?php foreach ( $groomers as $groomer ) : ?>
@@ -218,10 +218,10 @@ class DPS_Groomers_Addon {
         }
 
         $groomers = $this->get_groomers();
-        echo '<p><label>' . esc_html__( 'Groomers responsáveis', 'desi-pet-shower' ) . '<br>';
+        echo '<p><label>' . esc_html__( 'Groomers responsáveis', 'dps-groomers-addon' ) . '<br>';
         echo '<select name="dps_groomers[]" multiple size="4" style="min-width:220px;">';
         if ( empty( $groomers ) ) {
-            echo '<option value="">' . esc_html__( 'Nenhum groomer cadastrado', 'desi-pet-shower' ) . '</option>';
+            echo '<option value="">' . esc_html__( 'Nenhum groomer cadastrado', 'dps-groomers-addon' ) . '</option>';
         } else {
             foreach ( $groomers as $groomer ) {
                 $selected_attr = in_array( $groomer->ID, $selected, true ) ? 'selected' : '';
@@ -229,7 +229,7 @@ class DPS_Groomers_Addon {
             }
         }
         echo '</select>';
-        echo '<span class="description">' . esc_html__( 'Selecione um ou mais groomers para este atendimento.', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="description">' . esc_html__( 'Selecione um ou mais groomers para este atendimento.', 'dps-groomers-addon' ) . '</span>';
         echo '</label></p>';
     }
 
@@ -278,7 +278,7 @@ class DPS_Groomers_Addon {
         }
 
         if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-            echo '<li><a href="#" class="dps-tab-link" data-tab="groomers">' . esc_html__( 'Groomers', 'desi-pet-shower' ) . '</a></li>';
+            echo '<li><a href="#" class="dps-tab-link" data-tab="groomers">' . esc_html__( 'Groomers', 'dps-groomers-addon' ) . '</a></li>';
         }
     }
 
@@ -307,7 +307,7 @@ class DPS_Groomers_Addon {
      */
     private function render_groomers_section() {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            return '<div class="dps-section" id="dps-section-groomers"><p>' . esc_html__( 'Você não tem permissão para gerenciar groomers.', 'desi-pet-shower' ) . '</p></div>';
+            return '<div class="dps-section" id="dps-section-groomers"><p>' . esc_html__( 'Você não tem permissão para gerenciar groomers.', 'dps-groomers-addon' ) . '</p></div>';
         }
 
         $this->handle_new_groomer_submission( true );
@@ -316,50 +316,50 @@ class DPS_Groomers_Addon {
         ob_start();
         ?>
         <div class="dps-section" id="dps-section-groomers">
-            <h2 style="margin-bottom: 20px; color: #374151;"><?php echo esc_html__( 'Groomers', 'desi-pet-shower' ); ?></h2>
-            <p><?php echo esc_html__( 'Cadastre profissionais, associe-os a atendimentos e acompanhe relatórios por período.', 'desi-pet-shower' ); ?></p>
+            <h2 style="margin-bottom: 20px; color: #374151;"><?php echo esc_html__( 'Groomers', 'dps-groomers-addon' ); ?></h2>
+            <p><?php echo esc_html__( 'Cadastre profissionais, associe-os a atendimentos e acompanhe relatórios por período.', 'dps-groomers-addon' ); ?></p>
 
             <?php echo DPS_Message_Helper::display_messages(); ?>
 
             <div style="display:flex; gap:30px; flex-wrap:wrap; margin-top: 24px;">
                 <div class="dps-field-group" style="flex:1 1 340px; min-width:300px;">
-                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Adicionar novo groomer', 'desi-pet-shower' ); ?></h3>
+                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Adicionar novo groomer', 'dps-groomers-addon' ); ?></h3>
                     <form method="post" action="">
                         <?php wp_nonce_field( 'dps_new_groomer', 'dps_new_groomer_nonce' ); ?>
                         <p>
-                            <label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'desi-pet-shower' ); ?></label><br />
+                            <label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?></label><br />
                             <input name="dps_groomer_username" id="dps_groomer_username" type="text" class="regular-text" required />
                         </p>
                         <p>
-                            <label for="dps_groomer_name"><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></label><br />
+                            <label for="dps_groomer_name"><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></label><br />
                             <input name="dps_groomer_name" id="dps_groomer_name" type="text" class="regular-text" />
                         </p>
                         <p>
-                            <label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'desi-pet-shower' ); ?></label><br />
+                            <label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></label><br />
                             <input name="dps_groomer_email" id="dps_groomer_email" type="email" class="regular-text" required />
                         </p>
                         <p>
-                            <label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'desi-pet-shower' ); ?></label><br />
+                            <label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'dps-groomers-addon' ); ?></label><br />
                             <input name="dps_groomer_password" id="dps_groomer_password" type="password" class="regular-text" required />
                         </p>
-                        <?php submit_button( __( 'Criar groomer', 'desi-pet-shower' ), 'primary', 'submit', false ); ?>
+                        <?php submit_button( __( 'Criar groomer', 'dps-groomers-addon' ), 'primary', 'submit', false ); ?>
                     </form>
                 </div>
 
                 <div style="flex:2 1 400px; min-width:300px;">
-                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Groomers cadastrados', 'desi-pet-shower' ); ?></h3>
+                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Groomers cadastrados', 'dps-groomers-addon' ); ?></h3>
                     <table class="widefat fixed striped">
                         <thead>
                             <tr>
-                                <th><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></th>
-                                <th><?php echo esc_html__( 'Usuário', 'desi-pet-shower' ); ?></th>
-                                <th><?php echo esc_html__( 'Email', 'desi-pet-shower' ); ?></th>
+                                <th><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php if ( empty( $groomers ) ) : ?>
                             <tr>
-                                <td colspan="3"><?php echo esc_html__( 'Nenhum groomer encontrado.', 'desi-pet-shower' ); ?></td>
+                                <td colspan="3"><?php echo esc_html__( 'Nenhum groomer encontrado.', 'dps-groomers-addon' ); ?></td>
                             </tr>
                         <?php else : ?>
                             <?php foreach ( $groomers as $groomer ) : ?>
@@ -446,16 +446,16 @@ class DPS_Groomers_Addon {
         ob_start();
         ?>
         <div>
-            <h4><?php echo esc_html__( 'Relatório por Groomer', 'desi-pet-shower' ); ?></h4>
+            <h4><?php echo esc_html__( 'Relatório por Groomer', 'dps-groomers-addon' ); ?></h4>
             <form method="get" action="">
                 <input type="hidden" name="tab" value="groomers" />
                 <?php wp_nonce_field( 'dps_report', 'dps_report_nonce' ); ?>
                 <table class="form-table" role="presentation">
                     <tr>
-                        <th scope="row"><label for="dps_report_groomer"><?php echo esc_html__( 'Groomer', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_report_groomer"><?php echo esc_html__( 'Groomer', 'dps-groomers-addon' ); ?></label></th>
                         <td>
                             <select name="dps_report_groomer" id="dps_report_groomer" required>
-                                <option value=""><?php echo esc_html__( 'Selecione um groomer', 'desi-pet-shower' ); ?></option>
+                                <option value=""><?php echo esc_html__( 'Selecione um groomer', 'dps-groomers-addon' ); ?></option>
                                 <?php foreach ( $groomers as $groomer ) : ?>
                                     <option value="<?php echo esc_attr( $groomer->ID ); ?>" <?php selected( $selected, $groomer->ID ); ?>>
                                         <?php echo esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>
@@ -465,41 +465,41 @@ class DPS_Groomers_Addon {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="dps_report_start"><?php echo esc_html__( 'Data inicial', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_report_start"><?php echo esc_html__( 'Data inicial', 'dps-groomers-addon' ); ?></label></th>
                         <td><input type="date" name="dps_report_start" id="dps_report_start" value="<?php echo esc_attr( $start_date ); ?>" required /></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="dps_report_end"><?php echo esc_html__( 'Data final', 'desi-pet-shower' ); ?></label></th>
+                        <th scope="row"><label for="dps_report_end"><?php echo esc_html__( 'Data final', 'dps-groomers-addon' ); ?></label></th>
                         <td><input type="date" name="dps_report_end" id="dps_report_end" value="<?php echo esc_attr( $end_date ); ?>" required /></td>
                     </tr>
                 </table>
-                <?php submit_button( __( 'Gerar relatório', 'desi-pet-shower' ) ); ?>
+                <?php submit_button( __( 'Gerar relatório', 'dps-groomers-addon' ) ); ?>
             </form>
 
             <?php if ( $filters_ok && ( ! $selected || ! $start_date || ! $end_date ) ) : ?>
-                <div class="notice notice-error"><p><?php echo esc_html__( 'Selecione um groomer e o intervalo de datas.', 'desi-pet-shower' ); ?></p></div>
+                <div class="notice notice-error"><p><?php echo esc_html__( 'Selecione um groomer e o intervalo de datas.', 'dps-groomers-addon' ); ?></p></div>
             <?php endif; ?>
 
             <?php if ( $filters_ok && $selected && $start_date && $end_date ) : ?>
-                <h5><?php echo esc_html__( 'Resultados', 'desi-pet-shower' ); ?></h5>
-                <p><?php echo esc_html( sprintf( __( 'Total de atendimentos: %d', 'desi-pet-shower' ), count( $appointments ) ) ); ?></p>
+                <h5><?php echo esc_html__( 'Resultados', 'dps-groomers-addon' ); ?></h5>
+                <p><?php echo esc_html( sprintf( __( 'Total de atendimentos: %d', 'dps-groomers-addon' ), count( $appointments ) ) ); ?></p>
                 <?php if ( count( $appointments ) === 500 ) : ?>
-                    <div class="notice notice-warning inline"><p><?php echo esc_html__( 'Atenção: Relatório limitado a 500 atendimentos. Para períodos maiores, ajuste o intervalo de datas.', 'desi-pet-shower' ); ?></p></div>
+                    <div class="notice notice-warning inline"><p><?php echo esc_html__( 'Atenção: Relatório limitado a 500 atendimentos. Para períodos maiores, ajuste o intervalo de datas.', 'dps-groomers-addon' ); ?></p></div>
                 <?php endif; ?>
-                <p><?php echo esc_html( sprintf( __( 'Total financeiro (receitas pagas): R$ %s', 'desi-pet-shower' ), number_format_i18n( $total_amount, 2 ) ) ); ?></p>
+                <p><?php echo esc_html( sprintf( __( 'Total financeiro (receitas pagas): R$ %s', 'dps-groomers-addon' ), number_format_i18n( $total_amount, 2 ) ) ); ?></p>
 
                 <table class="widefat fixed striped">
                     <thead>
                         <tr>
-                            <th><?php echo esc_html__( 'Data', 'desi-pet-shower' ); ?></th>
-                            <th><?php echo esc_html__( 'Horário', 'desi-pet-shower' ); ?></th>
-                            <th><?php echo esc_html__( 'Cliente', 'desi-pet-shower' ); ?></th>
-                            <th><?php echo esc_html__( 'Status', 'desi-pet-shower' ); ?></th>
+                            <th><?php echo esc_html__( 'Data', 'dps-groomers-addon' ); ?></th>
+                            <th><?php echo esc_html__( 'Horário', 'dps-groomers-addon' ); ?></th>
+                            <th><?php echo esc_html__( 'Cliente', 'dps-groomers-addon' ); ?></th>
+                            <th><?php echo esc_html__( 'Status', 'dps-groomers-addon' ); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if ( empty( $appointments ) ) : ?>
-                            <tr><td colspan="4"><?php echo esc_html__( 'Nenhum agendamento encontrado para o período.', 'desi-pet-shower' ); ?></td></tr>
+                            <tr><td colspan="4"><?php echo esc_html__( 'Nenhum agendamento encontrado para o período.', 'dps-groomers-addon' ); ?></td></tr>
                         <?php else : ?>
                             <?php foreach ( $appointments as $appointment ) :
                                 $date        = get_post_meta( $appointment->ID, 'appointment_date', true );

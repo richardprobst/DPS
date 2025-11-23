@@ -242,7 +242,7 @@ class DPS_Base_Frontend {
         $link_to_use  = $payment_link ? $payment_link : $default_link;
 
         $message = sprintf(
-            'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!',
+            __( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', 'desi-pet-shower' ),
             $client_name,
             $pets_label,
             $valor_formatado,
@@ -262,7 +262,7 @@ class DPS_Base_Frontend {
                     $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
                     $time_fmt    = $group_data['time'];
                     $group_message = sprintf(
-                        'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!',
+                        __( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', 'desi-pet-shower' ),
                         $client_name,
                         $group_names,
                         $date_fmt,
@@ -641,7 +641,7 @@ class DPS_Base_Frontend {
         // Log de depreciação para administradores
         if ( current_user_can( 'manage_options' ) ) {
             DPS_Logger::log(
-                'O shortcode [dps_configuracoes] está deprecated e será removido em versões futuras. Use o menu admin "Desi Pet Shower".',
+                __( 'O shortcode [dps_configuracoes] está deprecated e será removido em versões futuras. Use o menu admin "Desi Pet Shower".', 'desi-pet-shower' ),
                 DPS_Logger::LEVEL_WARNING,
                 'shortcode_deprecated'
             );
@@ -904,7 +904,7 @@ class DPS_Base_Frontend {
         // Raça (com datalist)
         $breed_val = $meta['breed'] ?? '';
         echo '<p class="dps-form-col"><label>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '<br>';
-        echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '" placeholder="Digite ou selecione">';
+        echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '" placeholder="' . esc_attr__( 'Digite ou selecione', 'desi-pet-shower' ) . '">';
         echo '</label></p>';
         
         // Sexo
@@ -2547,7 +2547,7 @@ class DPS_Base_Frontend {
         ob_start();
         // Exibe mensagem de sucesso se enviada via email
         if ( isset( $_GET['sent'] ) && '1' === $_GET['sent'] ) {
-            echo '<div class="dps-notice" style="padding:10px;background:#dff0d8;border:1px solid #d6e9c6;margin-bottom:10px;">Histórico enviado por email com sucesso.</div>';
+            echo '<div class="dps-notice" style="padding:10px;background:#dff0d8;border:1px solid #d6e9c6;margin-bottom:10px;">' . esc_html__( 'Histórico enviado por email com sucesso.', 'desi-pet-shower' ) . '</div>';
         }
         echo '<div class="dps-client-detail">';
         echo '<p><a href="' . esc_url( remove_query_arg( [ 'dps_view', 'id', 'tab' ] ) ) . '">' . esc_html__( '← Voltar', 'desi-pet-shower' ) . '</a></p>';
@@ -2696,7 +2696,7 @@ class DPS_Base_Frontend {
         // Botão de envio com prompt para email personalizado
         echo '<a href="#" class="button dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar histórico por email', 'desi-pet-shower' ) . '</a></p>';
         // Script para solicitar email e redirecionar
-        echo '<script>(function($){$(document).on("click", ".dps-send-history-email", function(e){e.preventDefault();var base=$(this).data("base");var email=prompt("Para qual email deseja enviar? Deixe em branco para usar o email cadastrado.");if(email===null){return;}email=email.trim();var url=base; if(email){url += "&to_email=" + encodeURIComponent(email);} window.location.href=url;});})(jQuery);</script>';
+        echo '<script>(function($){$(document).on("click", ".dps-send-history-email", function(e){e.preventDefault();var base=$(this).data("base");var email=prompt("' . esc_js( __( 'Para qual email deseja enviar? Deixe em branco para usar o email cadastrado.', 'desi-pet-shower' ) ) . '");if(email===null){return;}email=email.trim();var url=base; if(email){url += "&to_email=" + encodeURIComponent(email);} window.location.href=url;});})(jQuery);</script>';
         // Histórico de agendamentos
         echo '<h4>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h4>';
         if ( $appointments ) {
