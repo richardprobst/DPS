@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – Agenda Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Add-on para o plugin Desi Pet Shower que cria automaticamente uma página com a agenda de atendimentos.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-agenda-addon
@@ -19,11 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class DPS_Agenda_Addon {
     public function __construct() {
-        // Verifica dependência do Finance Add-on
-        if ( ! class_exists( 'DPS_Finance_API' ) ) {
-            add_action( 'admin_notices', [ $this, 'finance_dependency_notice' ] );
-            // Continua a carregar para não quebrar completamente, mas funcionalidade financeira não estará disponível
-        }
+        // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
+        add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );
 
         // Cria páginas necessárias ao ativar o plugin (apenas agenda, sem a página de cobranças)
         register_activation_hook( __FILE__, [ $this, 'create_agenda_page' ] );
@@ -49,6 +46,21 @@ class DPS_Agenda_Addon {
         // Agenda: agendamento de envio de lembretes diários
         add_action( 'init', [ $this, 'maybe_schedule_reminders' ] );
         add_action( 'dps_agenda_send_reminders', [ $this, 'send_reminders' ] );
+    }
+
+    /**
+     * Verifica se o Finance Add-on está ativo após todos os plugins terem sido carregados.
+     *
+     * Este método é executado no hook 'plugins_loaded' para garantir que todos os plugins
+     * já tenham sido carregados antes de verificar a existência da classe DPS_Finance_API.
+     *
+     * @since 1.0.1
+     */
+    public function check_finance_dependency() {
+        if ( ! class_exists( 'DPS_Finance_API' ) ) {
+            add_action( 'admin_notices', [ $this, 'finance_dependency_notice' ] );
+            // Continua a carregar para não quebrar completamente, mas funcionalidade financeira não estará disponível
+        }
     }
 
     /**
