@@ -86,6 +86,31 @@ class DPS_Logger {
     }
 
     /**
+     * Registra log genérico validando o nível solicitado.
+     *
+     * @param string       $message Texto principal.
+     * @param string       $level   Nível do log (info, warning, error).
+     * @param string       $source  Origem do evento.
+     * @param array|string $context Dados adicionais para contexto.
+     */
+    public static function log( $message, $level = self::LEVEL_INFO, $source = 'base', $context = array() ) {
+        $level = in_array( $level, self::get_levels(), true ) ? $level : self::LEVEL_INFO;
+
+        switch ( $level ) {
+            case self::LEVEL_WARNING:
+                self::warning( $message, $context, $source );
+                break;
+            case self::LEVEL_ERROR:
+                self::error( $message, $context, $source );
+                break;
+            case self::LEVEL_INFO:
+            default:
+                self::info( $message, $context, $source );
+                break;
+        }
+    }
+
+    /**
      * Registra log de informação.
      *
      * @param string $message Texto principal.
