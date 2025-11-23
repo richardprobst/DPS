@@ -80,6 +80,13 @@ Planos e resumos de implementação de melhorias de UX/UI.
 - `IMPLEMENTATION_SUMMARY.md` - Resumo geral de implementações
 - `UI_UX_IMPROVEMENTS_SUMMARY.md` - Resumo de melhorias de UI/UX
 
+### 📁 /docs/compatibility
+
+Documentação de compatibilidade com temas e page builders.
+
+**Arquivos:**
+- `YOOTHEME_COMPATIBILITY.md` - Guia de compatibilidade com YooTheme PRO (resolução de erros comuns e melhores práticas)
+
 ## Documentos Centrais na Raiz
 
 Os seguintes documentos permanecem na raiz do repositório como **documentos centrais**:

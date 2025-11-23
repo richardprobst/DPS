@@ -198,6 +198,9 @@ Software proprietário - todos os direitos reservados.
 - [Guia de Estilo Visual](docs/visual/VISUAL_STYLE_GUIDE.md)
 - [Padrões de Refatoração](docs/refactoring/REFACTORING_ANALYSIS.md)
 
+### Compatibilidade
+- [**YooTheme PRO**](docs/compatibility/YOOTHEME_COMPATIBILITY.md) - ⚠️ Resolver erro "O construtor não está disponível"
+
 ---
 
 **Desi Pet Shower** - Sistema completo de gestão para pet shops especializados em banho e tosa.
