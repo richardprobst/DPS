@@ -21,7 +21,7 @@ $base_url = isset( $base_url ) ? $base_url : '';
 	<?php echo esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ); ?>
 </h3>
 
-<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>" style="margin-bottom: 16px;">
+<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>">
 
 <?php if ( ! empty( $clients ) ) : ?>
 	<div class="dps-table-wrapper">

@@ -92,8 +92,12 @@
     transition: background-color 0.2s ease;
 }
 
-.dps-table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.02) !important;
+.dps-table tbody tr:hover,
+.dps-table tbody tr.status-pendente:hover,
+.dps-table tbody tr.status-finalizado:hover,
+.dps-table tbody tr.status-finalizado_pago:hover,
+.dps-table tbody tr.status-cancelado:hover {
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* Wrapper para prevenir overflow horizontal em tabelas */
@@ -151,7 +155,7 @@
 .dps-search {
     width: 100%;
     padding: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
     box-sizing: border-box;
 }
 .dps-history-toolbar {
