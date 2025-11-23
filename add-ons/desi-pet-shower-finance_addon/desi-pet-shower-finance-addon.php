@@ -162,6 +162,11 @@ class DPS_Finance_Addon {
 
     /**
      * Manipula ações de salvamento ou exclusão de transações.
+     * 
+     * SEGURANÇA: Revisado em 2025-11-23
+     * - Adicionadas verificações de capability (manage_options)
+     * - Sanitização consistente com wp_unslash()
+     * - Queries SQL usando $wpdb->prepare()
      */
     public function maybe_handle_finance_actions() {
         // Sempre declara o objeto $wpdb e a tabela de transações no início, pois são usados
@@ -171,16 +176,21 @@ class DPS_Finance_Addon {
         $table = $wpdb->prefix . 'dps_transacoes';
         // Registrar pagamento parcial
         if ( isset( $_POST['dps_finance_action'] ) && $_POST['dps_finance_action'] === 'save_partial' && check_admin_referer( 'dps_finance_action', 'dps_finance_nonce' ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $trans_id = isset( $_POST['trans_id'] ) ? intval( $_POST['trans_id'] ) : 0;
-            $date     = sanitize_text_field( $_POST['partial_date'] ?? '' );
+            $date     = isset( $_POST['partial_date'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_date'] ) ) : '';
             if ( ! $date ) {
                 $date = current_time( 'Y-m-d' );
             }
             // Converte valor informado em centavos para evitar imprecisão de ponto flutuante
-            $raw_value   = sanitize_text_field( wp_unslash( $_POST['partial_value'] ?? '0' ) );
+            $raw_value   = isset( $_POST['partial_value'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_value'] ) ) : '0';
             $value_cents = dps_parse_money_br( $raw_value );
             $value       = $value_cents / 100;
-            $method    = sanitize_text_field( $_POST['partial_method'] ?? '' );
+            $method    = isset( $_POST['partial_method'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_method'] ) ) : '';
             if ( $trans_id && $value > 0 ) {
                 $parc_table = $wpdb->prefix . 'dps_parcelas';
                 // Insere a parcela
@@ -212,6 +222,11 @@ class DPS_Finance_Addon {
 
         // Geração de documento (nota ou cobrança) a partir da lista de transações.
         if ( isset( $_GET['dps_gen_doc'] ) && isset( $_GET['id'] ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $trans_id = intval( $_GET['id'] );
             $doc_url  = $this->generate_document( $trans_id );
             if ( $doc_url ) {
@@ -221,15 +236,20 @@ class DPS_Finance_Addon {
         }
         // Salvar nova transação
         if ( isset( $_POST['dps_finance_action'] ) && $_POST['dps_finance_action'] === 'save_trans' && check_admin_referer( 'dps_finance_action', 'dps_finance_nonce' ) ) {
-            $date       = sanitize_text_field( $_POST['finance_date'] ?? '' );
-            $value_raw  = sanitize_text_field( wp_unslash( $_POST['finance_value'] ?? '0' ) );
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
+            $date       = isset( $_POST['finance_date'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_date'] ) ) : '';
+            $value_raw  = isset( $_POST['finance_value'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_value'] ) ) : '0';
             $value_cent = dps_parse_money_br( $value_raw );
             $value      = $value_cent / 100;
-            $category   = sanitize_text_field( $_POST['finance_category'] ?? '' );
-            $type       = sanitize_text_field( $_POST['finance_type'] ?? 'receita' );
-            $status     = sanitize_text_field( $_POST['finance_status'] ?? 'em_aberto' );
-            $desc       = sanitize_text_field( $_POST['finance_desc'] ?? '' );
-            $client_id  = intval( $_POST['finance_client_id'] ?? 0 );
+            $category   = isset( $_POST['finance_category'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_category'] ) ) : '';
+            $type       = isset( $_POST['finance_type'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_type'] ) ) : 'receita';
+            $status     = isset( $_POST['finance_status'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_status'] ) ) : 'em_aberto';
+            $desc       = isset( $_POST['finance_desc'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_desc'] ) ) : '';
+            $client_id  = isset( $_POST['finance_client_id'] ) ? intval( $_POST['finance_client_id'] ) : 0;
             // Insere no banco
             $wpdb->insert( $table, [
                 'cliente_id'    => $client_id ?: null,
@@ -249,8 +269,13 @@ class DPS_Finance_Addon {
         }
         // Excluir transação
         if ( isset( $_GET['dps_delete_trans'] ) && isset( $_GET['id'] ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $trans_id = intval( $_GET['id'] );
-            $wpdb->delete( $table, [ 'id' => $trans_id ] );
+            $wpdb->delete( $table, [ 'id' => $trans_id ], [ '%d' ] );
             $base_url = get_permalink();
             $redir = remove_query_arg( [ 'dps_delete_trans', 'id' ], $base_url );
             $redir = add_query_arg( [ 'tab' => 'financeiro' ], $redir );
@@ -259,8 +284,13 @@ class DPS_Finance_Addon {
         }
         // Atualizar status de transação
         if ( isset( $_POST['dps_update_trans_status'] ) && isset( $_POST['trans_id'] ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $id     = intval( $_POST['trans_id'] );
-            $status = sanitize_text_field( $_POST['trans_status'] );
+            $status = isset( $_POST['trans_status'] ) ? sanitize_text_field( wp_unslash( $_POST['trans_status'] ) ) : 'em_aberto';
             $wpdb->update( $table, [ 'status' => $status ], [ 'id' => $id ] );
 
             // Se for marcado como recorrente e status foi alterado para pago, cria nova transação recorrente para 30 dias depois
@@ -318,6 +348,11 @@ class DPS_Finance_Addon {
          */
         // Excluir documento
         if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             if ( $file ) {
                 $uploads = wp_upload_dir();
@@ -329,7 +364,10 @@ class DPS_Finance_Addon {
                 // Também remove qualquer opção que referencie este arquivo (transações)
                 $file_url = trailingslashit( $uploads['baseurl'] ) . 'dps_docs/' . basename( $file );
                 // Remove dps_fin_doc_* que contenham esta URL
-                $option_rows = $wpdb->get_results( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'dps_fin_doc_%'" );
+                $option_rows = $wpdb->get_results( $wpdb->prepare(
+                    "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                    'dps_fin_doc_%'
+                ) );
                 if ( $option_rows ) {
                     foreach ( $option_rows as $opt ) {
                         $val = get_option( $opt->option_name );
@@ -353,6 +391,11 @@ class DPS_Finance_Addon {
 
         // Enviar documento por email
         if ( isset( $_GET['dps_send_doc'] ) && '1' === $_GET['dps_send_doc'] && isset( $_GET['file'] ) ) {
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
             $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             $to_email = '';
             if ( isset( $_GET['to_email'] ) ) {
@@ -622,7 +665,10 @@ class DPS_Finance_Addon {
         $doc_dir    = trailingslashit( $upload_dir['basedir'] ) . 'dps_docs';
         $doc_urlbase= trailingslashit( $upload_dir['baseurl'] ) . 'dps_docs/';
         global $wpdb;
-        $doc_options = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'dps_fin_doc_%'" );
+        $doc_options = $wpdb->get_results( $wpdb->prepare(
+            "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+            'dps_fin_doc_%'
+        ) );
         $doc_map     = [];
         if ( $doc_options ) {
             foreach ( $doc_options as $opt ) {
@@ -717,17 +763,21 @@ class DPS_Finance_Addon {
 
     /**
      * Renderiza a seção do controle financeiro: formulário para nova transação e listagem.
+     * 
+     * SEGURANÇA: Revisado em 2025-11-23
+     * - Sanitização consistente de $_GET com wp_unslash()
+     * - Queries SQL usando $wpdb->prepare()
      */
     private function section_financeiro() {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
-        // Filtros de datas
-        $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( $_GET['fin_start'] ) : '';
-        $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( $_GET['fin_end'] ) : '';
+        // Filtros de datas - SEGURANÇA: Sanitiza com wp_unslash()
+        $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_start'] ) ) : '';
+        $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : '';
         // Filtro de categoria
-        $cat_filter = isset( $_GET['fin_cat'] ) ? sanitize_text_field( $_GET['fin_cat'] ) : '';
+        $cat_filter = isset( $_GET['fin_cat'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_cat'] ) ) : '';
         // Intervalos rápidos: últimos 7/30 dias
-        $range      = isset( $_GET['fin_range'] ) ? sanitize_text_field( $_GET['fin_range'] ) : '';
+        $range      = isset( $_GET['fin_range'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_range'] ) ) : '';
         if ( $range === '7' || $range === '30' ) {
             // Calcula intervalo relativo ao dia atual
             $days = intval( $range );
@@ -823,11 +873,14 @@ class DPS_Finance_Addon {
         // Formulário de filtro por data e categoria
         echo '<form method="get" class="dps-finance-date-filter" style="margin-bottom:10px;">';
         // Mantém parâmetros existentes (exceto filtros de data, intervalo e categoria)
+        // SEGURANÇA: Sanitiza valores de $_GET antes de usar
         foreach ( $_GET as $k => $v ) {
             if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat' ], true ) ) {
                 continue;
             }
-            echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
+            $safe_key = sanitize_key( $k );
+            $safe_val = is_array( $v ) ? '' : sanitize_text_field( wp_unslash( $v ) );
+            echo '<input type="hidden" name="' . esc_attr( $safe_key ) . '" value="' . esc_attr( $safe_val ) . '">';
         }
         echo '<label>' . esc_html__( 'De', 'dps-finance-addon' ) . ' <input type="date" name="fin_start" value="' . esc_attr( $start_date ) . '"></label> ';
         echo '<label>' . esc_html__( 'Até', 'dps-finance-addon' ) . ' <input type="date" name="fin_end" value="' . esc_attr( $end_date ) . '"></label> ';
