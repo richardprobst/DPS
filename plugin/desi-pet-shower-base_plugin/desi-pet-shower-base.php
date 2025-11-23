@@ -626,8 +626,12 @@ class DPS_Base_Plugin {
      * Verifica se há solicitações de salvamento ou exclusão e delega para a classe de frontend
      */
     public function maybe_handle_request() {
+        // Processa logout via GET
+        if ( isset( $_GET['dps_logout'] ) ) {
+            DPS_Base_Frontend::handle_logout();
+        }
+        // Processa ações de formulário via POST
         if ( isset( $_POST['dps_action'] ) ) {
-            // Processa ações de formulário
             DPS_Base_Frontend::handle_request();
         }
         // Processa exclusões via GET
