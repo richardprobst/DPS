@@ -238,15 +238,25 @@ class DPS_Stock_Addon {
         }
 
         $only_critical = isset( $_GET['dps_show'] ) && 'critical' === sanitize_text_field( wp_unslash( $_GET['dps_show'] ) );
-        $args          = [
+
+        // Implementa paginação para lidar com estoque grande.
+        $per_page = 50;
+        $paged    = isset( $_GET['stock_page'] ) ? max( 1, absint( $_GET['stock_page'] ) ) : 1;
+
+        $args = [
             'post_type'      => self::CPT,
             'post_status'    => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => $per_page,
+            'paged'          => $paged,
             'orderby'        => 'title',
             'order'          => 'ASC',
         ];
 
-        $items     = get_posts( $args );
+        $query = new WP_Query( $args );
+        $items = $query->posts;
+        $total_items = $query->found_posts;
+        $total_pages = $query->max_num_pages;
+
         $alerts    = get_option( self::ALERT_OPTION, [] );
         $alerts    = is_array( $alerts ) ? $alerts : [];
         $base_link = add_query_arg( 'tab', 'estoque', get_permalink() );
@@ -256,7 +266,11 @@ class DPS_Stock_Addon {
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h2>';
 
         echo '<div class="dps-field-group" style="margin-bottom: 24px;">';
-        $filter_link = add_query_arg( 'dps_show', $only_critical ? 'all' : 'critical', $base_link );
+        $filter_link = add_query_arg( 'dps_show', $only_critical ? '' : 'critical', $base_link );
+        if ( $only_critical ) {
+            // Remove the filter parameter when showing all
+            $filter_link = remove_query_arg( 'dps_show', $base_link );
+        }
         $filter_text = $only_critical ? __( 'Ver todos', 'desi-pet-shower' ) : __( 'Mostrar apenas críticos', 'desi-pet-shower' );
         echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
 
@@ -285,6 +299,9 @@ class DPS_Stock_Addon {
             $unit     = get_post_meta( $item->ID, 'dps_stock_unit', true );
             $is_low   = $minimum > 0 && $quantity < $minimum;
 
+            // Filtro "críticos" aplicado em PHP pois requer comparação de dois metadados
+            // (quantity < minimum). Meta_query do WordPress não suporta comparação entre
+            // dois meta_values. Como a paginação já limita a 50 itens, o overhead é mínimo.
             if ( $only_critical && ! $is_low ) {
                 continue;
             }
@@ -310,6 +327,27 @@ class DPS_Stock_Addon {
         }
 
         echo '</tbody></table>';
+
+        // Renderiza paginação se houver múltiplas páginas.
+        if ( $total_pages > 1 ) {
+            echo '<div class="dps-pagination" style="margin-top: 20px; text-align: center;">';
+            echo '<p>' . esc_html( sprintf( __( 'Página %d de %d (%d itens no total)', 'desi-pet-shower' ), $paged, $total_pages, $total_items ) ) . '</p>';
+
+            $prev_link = $paged > 1 ? add_query_arg( [ 'stock_page' => $paged - 1, 'dps_show' => $only_critical ? 'critical' : 'all' ], $base_link ) : '';
+            $next_link = $paged < $total_pages ? add_query_arg( [ 'stock_page' => $paged + 1, 'dps_show' => $only_critical ? 'critical' : 'all' ], $base_link ) : '';
+
+            if ( $prev_link ) {
+                echo '<a class="button" href="' . esc_url( $prev_link ) . '">&laquo; ' . esc_html__( 'Anterior', 'desi-pet-shower' ) . '</a> ';
+            }
+
+            echo '<span style="margin: 0 10px;">' . esc_html( sprintf( __( 'Página %d de %d', 'desi-pet-shower' ), $paged, $total_pages ) ) . '</span>';
+
+            if ( $next_link ) {
+                echo ' <a class="button" href="' . esc_url( $next_link ) . '">' . esc_html__( 'Próxima', 'desi-pet-shower' ) . ' &raquo;</a>';
+            }
+            echo '</div>';
+        }
+
         echo '</div>';
 
         return ob_get_clean();
