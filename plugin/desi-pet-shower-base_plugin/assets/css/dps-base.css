@@ -64,18 +64,90 @@
 .dps-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 .dps-table th,
 .dps-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
     text-align: left;
+    vertical-align: middle;
 }
 .dps-table th {
-    background: #f0f0f0;
-    font-weight: bold;
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
 }
+.dps-table td {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.dps-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.dps-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Wrapper para prevenir overflow horizontal em tabelas */
+.dps-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+
+.dps-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.dps-table-wrapper::-webkit-scrollbar-track {
+    background: #f9fafb;
+    border-radius: 4px;
+}
+
+.dps-table-wrapper::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.dps-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+.dps-table-wrapper .dps-table {
+    margin: 0;
+    border: 0;
+}
+
+.dps-table-wrapper .dps-table th:first-child,
+.dps-table-wrapper .dps-table td:first-child {
+    border-left: 0;
+}
+
+.dps-table-wrapper .dps-table th:last-child,
+.dps-table-wrapper .dps-table td:last-child {
+    border-right: 0;
+}
+
+.dps-table-wrapper .dps-table thead tr:first-child th {
+    border-top: 0;
+}
+
+.dps-table-wrapper .dps-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
 .dps-search {
     width: 100%;
     padding: 6px;
@@ -178,16 +250,52 @@
 .dps-pet-option .dps-pet-size::before {
     content: '';
 }
-.dps-appointments-group {
+
+/* Container principal de listagem de agendamentos */
+.dps-appointments {
     margin-top: 20px;
-    padding: 20px;
-    border-radius: 4px;
-    border-left: 4px solid #0ea5e9;
+}
+
+.dps-appointments > h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-appointments .dps-appointments-search {
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.dps-appointments-empty {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+    background: #f9fafb;
+    border: 1px dashed #e5e7eb;
+    border-radius: 6px;
+    margin-top: 16px;
+}
+
+.dps-appointments-group {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 6px;
+    border-left: 3px solid #0ea5e9;
     background: #f9fafb;
 }
 .dps-appointments-group h4 {
     margin-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
 }
 .dps-table tr.status-pendente {
     background: #fef3c7;
@@ -261,15 +369,16 @@
         width: 100%;
     }
     
-    /* Wrapper rolável para tabelas */
-    .dps-table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    /* Garantir que tabelas tenham largura mínima em tablets */
+    .dps-table-wrapper .dps-table {
+        min-width: 700px;
     }
     
-    .dps-table-wrapper .dps-table {
-        min-width: 800px;
+    /* Ajustar espaçamento em grupos de agendamentos */
+    .dps-appointments-group {
+        margin-top: 12px;
+        margin-bottom: 12px;
+        padding: 12px;
     }
 }
 
@@ -287,16 +396,11 @@
         margin-bottom: 8px;
     }
     
-    .dps-table,
-    .widefat {
-        display: block;
-        overflow-x: auto;
-        white-space: normal;
-        font-size: 13px;
-    }
+    /* Ajustar padding das células em mobile */
     .dps-table th,
     .dps-table td {
-        padding: 8px 4px;
+        padding: 8px 6px;
+        font-size: 0.875rem;
     }
     
     /* Esconder colunas menos importantes em mobile */
@@ -326,6 +430,38 @@
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 180px;
+    }
+    
+    /* Compactar grupos de agendamentos em mobile */
+    .dps-appointments-group {
+        padding: 12px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Tabelas ainda mais compactas em mobile pequeno */
+    .dps-table th,
+    .dps-table td {
+        padding: 6px 4px;
+        font-size: 0.8125rem;
+    }
+    
+    .dps-table-wrapper .dps-table {
+        min-width: 500px;
+    }
+    
+    /* Reduzir ainda mais o espaçamento dos grupos */
+    .dps-appointments-group {
+        padding: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .dps-appointments-group h4 {
+        font-size: 1rem;
+        margin-bottom: 8px;
     }
 }
 
