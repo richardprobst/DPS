@@ -79,6 +79,15 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Plugin Base (v1.1.0)**: Interface administrativa nativa do WordPress habilitada para CPTs principais
+  - CPTs `dps_cliente`, `dps_pet` e `dps_agendamento` agora aparecem no menu admin com UI completa
+  - Capabilities específicas aplicadas: `dps_manage_clients`, `dps_manage_pets`, `dps_manage_appointments`
+  - Ícones visuais distintos: dashicons-groups (Clientes), dashicons-pets (Pets), dashicons-calendar-alt (Agendamentos)
+  - Administradores e recepcionistas podem visualizar, criar, editar e buscar registros pela interface nativa
+  - `public => false` mantido para evitar exposição no frontend
+  - Segurança: `map_meta_cap => true` com mapeamento explícito de todas as capabilities
+  - Facilita debug, suporte e gestão administrativa sem afetar funcionalidade frontend existente
+  - Documentação completa em `CPT_UI_ENABLEMENT_SUMMARY.md`
 - **Client Portal Add-on (v2.0.0)**: Sistema completo de autenticação por token (magic links)
   - **BREAKING CHANGE**: Substituído sistema de login com senha por autenticação via links com token
   - Nova tabela `wp_dps_portal_tokens` para gerenciar tokens de acesso
