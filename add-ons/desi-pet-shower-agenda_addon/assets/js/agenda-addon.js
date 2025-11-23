@@ -100,7 +100,12 @@
               alert(message);
             }
           } else {
-            window.DPSServicesModal.show([]);
+            // Lista vazia - exibe modal com mensagem apropriada se disponível
+            if ( typeof window.DPSServicesModal !== 'undefined' ) {
+              window.DPSServicesModal.show([]);
+            } else {
+              alert('Nenhum serviço encontrado para este agendamento.');
+            }
           }
         } else {
           alert(resp.data ? resp.data.message : 'Erro ao buscar serviços.');
