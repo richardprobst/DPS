@@ -398,10 +398,12 @@ class DPS_Groomers_Addon {
         $filters_ok   = isset( $_GET['dps_report_nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['dps_report_nonce'] ), 'dps_report' );
 
         if ( $filters_ok && $selected && $start_date && $end_date ) {
+            // Limite de 500 agendamentos por relatório.
+            // Para relatórios maiores, considerar paginação ou exportação em background.
             $appointments = get_posts(
                 [
                     'post_type'      => 'dps_agendamento',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 500,
                     'post_status'    => 'publish',
                     'meta_query'     => [
                         'relation' => 'AND',
@@ -481,6 +483,9 @@ class DPS_Groomers_Addon {
             <?php if ( $filters_ok && $selected && $start_date && $end_date ) : ?>
                 <h5><?php echo esc_html__( 'Resultados', 'desi-pet-shower' ); ?></h5>
                 <p><?php echo esc_html( sprintf( __( 'Total de atendimentos: %d', 'desi-pet-shower' ), count( $appointments ) ) ); ?></p>
+                <?php if ( count( $appointments ) === 500 ) : ?>
+                    <div class="notice notice-warning inline"><p><?php echo esc_html__( 'Atenção: Relatório limitado a 500 atendimentos. Para períodos maiores, ajuste o intervalo de datas.', 'desi-pet-shower' ); ?></p></div>
+                <?php endif; ?>
                 <p><?php echo esc_html( sprintf( __( 'Total financeiro (receitas pagas): R$ %s', 'desi-pet-shower' ), number_format_i18n( $total_amount, 2 ) ) ); ?></p>
 
                 <table class="widefat fixed striped">

@@ -198,13 +198,23 @@ class DPS_Loyalty_Addon {
         $settings    = get_option( self::OPTION_KEY, [] );
         $brl_per_pt  = isset( $settings['brl_per_point'] ) && $settings['brl_per_point'] > 0 ? (float) $settings['brl_per_point'] : 10.0;
         $selected_id = isset( $_GET['dps_client_id'] ) ? intval( $_GET['dps_client_id'] ) : 0;
-        $clients     = get_posts( [
+
+        // Implementa paginação para melhor performance com muitos clientes.
+        $per_page = 100;
+        $paged    = isset( $_GET['loyalty_page'] ) ? max( 1, absint( $_GET['loyalty_page'] ) ) : 1;
+
+        $clients_query = new WP_Query( [
             'post_type'      => 'dps_cliente',
-            'posts_per_page' => 200,
+            'posts_per_page' => $per_page,
+            'paged'          => $paged,
             'orderby'        => 'title',
             'order'          => 'ASC',
         ] );
-        $logs        = $selected_id ? dps_loyalty_get_logs( $selected_id ) : [];
+
+        $clients = $clients_query->posts;
+        $total_pages = $clients_query->max_num_pages;
+
+        $logs = $selected_id ? dps_loyalty_get_logs( $selected_id ) : [];
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__( 'Campanhas & Fidelidade', 'desi-pet-shower' ); ?></h1>
@@ -241,6 +251,38 @@ class DPS_Loyalty_Addon {
                 </select>
                 <?php submit_button( __( 'Filtrar', 'desi-pet-shower' ), 'secondary', '', false ); ?>
             </form>
+
+            <?php
+            // Renderiza paginação de clientes se houver múltiplas páginas.
+            if ( $total_pages > 1 ) {
+                echo '<div class="dps-pagination" style="margin: 10px 0;">';
+                $prev_page = $paged > 1 ? $paged - 1 : 0;
+                $next_page = $paged < $total_pages ? $paged + 1 : 0;
+
+                if ( $prev_page ) {
+                    printf(
+                        '<a class="button" href="%s">&laquo; %s</a> ',
+                        esc_url( add_query_arg( 'loyalty_page', $prev_page, admin_url( 'admin.php?page=dps-loyalty' ) ) ),
+                        esc_html__( 'Anterior', 'desi-pet-shower' )
+                    );
+                }
+
+                printf(
+                    '<span>%s</span>',
+                    esc_html( sprintf( __( 'Página %d de %d', 'desi-pet-shower' ), $paged, $total_pages ) )
+                );
+
+                if ( $next_page ) {
+                    printf(
+                        ' <a class="button" href="%s">%s &raquo;</a>',
+                        esc_url( add_query_arg( 'loyalty_page', $next_page, admin_url( 'admin.php?page=dps-loyalty' ) ) ),
+                        esc_html__( 'Próxima', 'desi-pet-shower' )
+                    );
+                }
+                echo '</div>';
+            }
+            ?>
+
             <?php if ( $selected_id ) : ?>
                 <p><strong><?php esc_html_e( 'Pontos acumulados:', 'desi-pet-shower' ); ?></strong> <?php echo esc_html( dps_loyalty_get_points( $selected_id ) ); ?></p>
                 <?php if ( ! empty( $logs ) ) : ?>
@@ -276,9 +318,10 @@ class DPS_Loyalty_Addon {
             wp_die( __( 'Nonce inválido.', 'desi-pet-shower' ) );
         }
 
+        // Limite de campanhas processadas em uma única execução.
         $campaigns = get_posts( [
             'post_type'      => 'dps_campaign',
-            'posts_per_page' => -1,
+            'posts_per_page' => 50,
             'post_status'    => 'publish',
         ] );
 
@@ -298,9 +341,11 @@ class DPS_Loyalty_Addon {
         $points_threshold = absint( get_post_meta( $campaign_id, 'dps_campaign_points_threshold', true ) );
         $eligible_clients = [];
 
+        // Limite de clientes processados por campanha (500 clientes).
+        // Para bases maiores, considerar processamento em background via cron job.
         $clients = get_posts( [
             'post_type'      => 'dps_cliente',
-            'posts_per_page' => -1,
+            'posts_per_page' => 500,
             'fields'         => 'ids',
         ] );
 

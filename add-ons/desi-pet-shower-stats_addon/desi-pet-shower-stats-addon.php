@@ -337,16 +337,27 @@ class DPS_Stats_Addon {
             return $cached;
         }
 
+        // Limite razoável: 500 clientes para análise de inatividade.
+        // Para bases maiores, considerar processamento em background.
         $clients = get_posts( [
             'post_type'      => 'dps_cliente',
-            'posts_per_page' => -1,
+            'posts_per_page' => 500,
             'post_status'    => 'publish',
+            'fields'         => 'ids',
         ] );
 
         $inactive_clients = [];
         $inactive_pets    = [];
 
-        foreach ( $clients as $client ) {
+        // Pré-carregar objetos de clientes para evitar queries adicionais.
+        $client_objects = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 500,
+            'post_status'    => 'publish',
+            'include'        => $clients,
+        ] );
+
+        foreach ( $client_objects as $client ) {
             $last_appt = get_posts( [
                 'post_type'      => 'dps_agendamento',
                 'posts_per_page' => 1,
@@ -368,9 +379,10 @@ class DPS_Stats_Addon {
                 $inactive_clients[] = [ 'client' => $client, 'last_date' => $last_date ];
             }
 
+            // Limite razoável de pets por cliente (maioria dos clientes tem 1-3 pets).
             $pets = get_posts( [
                 'post_type'      => 'dps_pet',
-                'posts_per_page' => -1,
+                'posts_per_page' => 50,
                 'post_status'    => 'publish',
                 'meta_key'       => 'owner_id',
                 'meta_value'     => $client->ID,
@@ -426,9 +438,11 @@ class DPS_Stats_Addon {
             return $cached;
         }
 
+        // Limite de 1000 agendamentos para estatísticas de período.
+        // Para períodos muito longos com muitos dados, considerar agregação via SQL direto.
         $recent_appts = get_posts( [
             'post_type'      => 'dps_agendamento',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1000,
             'post_status'    => 'publish',
             'meta_query'     => [
                 'relation' => 'AND',
