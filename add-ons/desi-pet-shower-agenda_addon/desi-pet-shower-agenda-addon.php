@@ -439,10 +439,14 @@ class DPS_Agenda_Addon {
         $appointments = [];
         if ( $show_all ) {
             // Carrega todos os agendamentos a partir de hoje (inclusive)
+            // PERFORMANCE: Implementada paginação com limite de 50 registros por página
             $today = current_time( 'Y-m-d' );
+            $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+            
             $appointments['todos'] = get_posts( [
                 'post_type'      => 'dps_agendamento',
-                'posts_per_page' => -1,
+                'posts_per_page' => 50,
+                'paged'          => $paged,
                 'post_status'    => 'publish',
                 'meta_query'     => [
                     [
@@ -530,6 +534,14 @@ class DPS_Agenda_Addon {
             }
             // Se semanal e multiple days, show heading
             echo '<h4>' . esc_html( $day_title ) . '</h4>';
+            
+            // PERFORMANCE: Pre-cache metadata para todos os agendamentos do dia
+            // Reduz chamadas ao banco de dados durante o loop de filtros
+            if ( ! empty( $appts ) ) {
+                $appointment_ids = wp_list_pluck( $appts, 'ID' );
+                update_meta_cache( 'post', $appointment_ids );
+            }
+            
             // Aplica filtros de cliente, status e serviço
             $filtered = [];
             foreach ( $appts as $appt ) {
@@ -834,6 +846,40 @@ class DPS_Agenda_Addon {
         if ( ! $has_any ) {
             echo '<p class="dps-agenda-empty" role="status">' . __( 'Nenhum agendamento.', 'dps-agenda-addon' ) . '</p>';
         }
+        
+        // PERFORMANCE: Controles de paginação para modo "Todos os Atendimentos"
+        if ( $show_all ) {
+            $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+            $prev_page = max( 1, $paged - 1 );
+            $next_page = $paged + 1;
+            
+            // Preserva todos os parâmetros de filtro na paginação
+            $pagination_args = $_GET;
+            
+            echo '<div class="dps-agenda-pagination" style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">';
+            
+            if ( $paged > 1 ) {
+                $pagination_args['paged'] = $prev_page;
+                echo '<a href="' . esc_url( add_query_arg( $pagination_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">';
+                echo '← ' . esc_html__( 'Página anterior', 'dps-agenda-addon' );
+                echo '</a>';
+            }
+            
+            echo '<span class="dps-pagination-info" style="padding: 8px 15px; background: #f9fafb; border-radius: 4px;">';
+            echo sprintf( esc_html__( 'Página %d', 'dps-agenda-addon' ), $paged );
+            echo '</span>';
+            
+            // Só mostra "Próxima" se retornou 50 registros (indicando que pode haver mais)
+            if ( ! empty( $appointments['todos'] ) && count( $appointments['todos'] ) >= 50 ) {
+                $pagination_args['paged'] = $next_page;
+                echo '<a href="' . esc_url( add_query_arg( $pagination_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">';
+                echo esc_html__( 'Próxima página', 'dps-agenda-addon' ) . ' →';
+                echo '</a>';
+            }
+            
+            echo '</div>';
+        }
+        
         echo '</div>';
         return ob_get_clean();
     }
@@ -905,6 +951,25 @@ class DPS_Agenda_Addon {
         add_post_meta( $id, 'appointment_status', $status, true );
         $new_version = $current_version + 1;
         update_post_meta( $id, '_dps_appointment_version', $new_version );
+
+        // AUDITORIA: Registra mudança de status no log
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Status alterado para "%s" por usuário #%d',
+                    $id,
+                    $status,
+                    get_current_user_id()
+                ),
+                [
+                    'appointment_id' => $id,
+                    'new_status'     => $status,
+                    'user_id'        => get_current_user_id(),
+                    'version'        => $new_version,
+                ],
+                'agenda'
+            );
+        }
 
         // A sincronização financeira é feita automaticamente pelo Finance Add-on via hook updated_post_meta
         // O Finance monitora mudanças em appointment_status e cria/atualiza transações conforme necessário
@@ -1046,9 +1111,30 @@ class DPS_Agenda_Addon {
             ],
         ] );
         
+        // AUDITORIA: Registra início do envio de lembretes
+        $total_appointments = count( $appointments );
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Cron de lembretes iniciado: %d agendamentos encontrados para %s',
+                    $total_appointments,
+                    $date
+                ),
+                [
+                    'date'              => $date,
+                    'total_found'       => $total_appointments,
+                    'cron_job'          => 'dps_agenda_send_reminders',
+                ],
+                'agenda'
+            );
+        }
+        
         if ( empty( $appointments ) ) {
             return;
         }
+
+        $reminders_sent = 0;
+        $reminders_skipped = 0;
 
         // Se Communications API estiver disponível, usa ela (método preferido)
         if ( class_exists( 'DPS_Communications_API' ) ) {
@@ -1062,11 +1148,13 @@ class DPS_Agenda_Addon {
                 
                 // Apenas lembretes para agendamentos pendentes
                 if ( $status !== 'pendente' ) {
+                    $reminders_skipped++;
                     continue;
                 }
                 
                 // Delega envio para a Communications API
                 $api->send_appointment_reminder( $appt->ID );
+                $reminders_sent++;
             }
         } else {
             // Fallback: envio manual via wp_mail (compatibilidade retroativa)
@@ -1076,21 +1164,25 @@ class DPS_Agenda_Addon {
                     $status = 'pendente';
                 }
                 if ( $status !== 'pendente' ) {
+                    $reminders_skipped++;
                     continue;
                 }
                 
                 $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
                 if ( ! $client_id ) {
+                    $reminders_skipped++;
                     continue;
                 }
                 
                 $client_post = get_post( $client_id );
                 if ( ! $client_post ) {
+                    $reminders_skipped++;
                     continue;
                 }
                 
                 $client_email = get_post_meta( $client_id, 'client_email', true );
                 if ( ! $client_email ) {
+                    $reminders_skipped++;
                     continue;
                 }
                 
@@ -1123,7 +1215,27 @@ class DPS_Agenda_Addon {
                 foreach ( $recipients as $recipient ) {
                     wp_mail( $recipient, $subject, $message );
                 }
+                $reminders_sent++;
             }
+        }
+        
+        // AUDITORIA: Registra resultado do envio de lembretes
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Cron de lembretes finalizado: %d enviados, %d ignorados (não pendentes ou sem dados)',
+                    $reminders_sent,
+                    $reminders_skipped
+                ),
+                [
+                    'date'              => $date,
+                    'total_found'       => $total_appointments,
+                    'reminders_sent'    => $reminders_sent,
+                    'reminders_skipped' => $reminders_skipped,
+                    'cron_job'          => 'dps_agenda_send_reminders',
+                ],
+                'agenda'
+            );
         }
     }
 
