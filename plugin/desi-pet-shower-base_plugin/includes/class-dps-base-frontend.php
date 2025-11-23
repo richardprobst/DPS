@@ -18,20 +18,7 @@ class DPS_Base_Frontend {
         return current_user_can( 'manage_options' );
     }
 
-    /**
-     * Normaliza números de telefone para uso no WhatsApp.
-     *
-     * @param string $raw_phone Telefone original.
-     *
-     * @return string
-     */
-    private static function format_whatsapp_number( $raw_phone ) {
-        $digits = preg_replace( '/\D+/', '', (string) $raw_phone );
-        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
-            $digits = '55' . $digits;
-        }
-        return $digits;
-    }
+
 
     /**
      * Retorna dados agregados de agendamentos multi-pet para cobrança consolidada.
@@ -233,7 +220,7 @@ class DPS_Base_Frontend {
             return '-';
         }
 
-        $number = self::format_whatsapp_number( $client_phone );
+        $number = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
         if ( empty( $number ) ) {
             return '-';
         }

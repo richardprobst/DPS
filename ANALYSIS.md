@@ -130,6 +130,7 @@ if ( ! DPS_Phone_Helper::is_valid_brazilian_phone( $phone_input ) ) {
 - Use sempre este helper para formatação de telefones
 - Evite duplicação de lógica `preg_replace` espalhada entre add-ons
 - Integrado com `DPS_Communications_API` para envio automático via WhatsApp
+- **IMPORTANTE**: Todas as funções duplicadas `format_whatsapp_number()` foram removidas do plugin base e add-ons. Use SEMPRE `DPS_Phone_Helper::format_for_whatsapp()` diretamente
 
 #### DPS_Message_Helper
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.

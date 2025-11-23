@@ -344,6 +344,13 @@ Antes de criar uma nova versão oficial:
 - **Agenda Add-on**: Shortcode `[dps_charges_notes]` - Use `[dps_fin_docs]` do Finance (redirect automático, mensagem de depreciação)
 
 #### Refactoring (Interno)
+- **Plugin Base + Agenda Add-on**: Centralização completa da formatação de WhatsApp em `DPS_Phone_Helper::format_for_whatsapp()`
+  - Removido método privado `format_whatsapp_number()` de `DPS_Base_Frontend` (13 linhas duplicadas)
+  - Removido método wrapper deprecado `format_whatsapp_number()` de `DPS_Agenda_Addon` (19 linhas)
+  - Total de 32 linhas de código duplicado eliminadas
+  - Todas as chamadas agora usam diretamente `DPS_Phone_Helper::format_for_whatsapp()`
+  - **Benefícios**: eliminação de duplicação, manutenção simplificada, consistência entre add-ons
+  - **Arquivos modificados**: `class-dps-base-frontend.php`, `desi-pet-shower-agenda-addon.php`
 - **Services Add-on**: Removido header duplicado de plugin no arquivo `dps_service/desi-pet-shower-services-addon.php` (mantém apenas no wrapper)
 - **Services Add-on**: Centralização completa de lógica de serviços e cálculo de preços via `DPS_Services_API` (redução de duplicação, separação de responsabilidades)
 - **Arquitetura**: Centralização completa de lógica financeira no Finance Add-on (eliminação de duplicação, redução de acoplamento)
