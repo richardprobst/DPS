@@ -266,7 +266,11 @@ class DPS_Stock_Addon {
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h2>';
 
         echo '<div class="dps-field-group" style="margin-bottom: 24px;">';
-        $filter_link = add_query_arg( 'dps_show', $only_critical ? 'all' : 'critical', $base_link );
+        $filter_link = add_query_arg( 'dps_show', $only_critical ? '' : 'critical', $base_link );
+        if ( $only_critical ) {
+            // Remove the filter parameter when showing all
+            $filter_link = remove_query_arg( 'dps_show', $base_link );
+        }
         $filter_text = $only_critical ? __( 'Ver todos', 'desi-pet-shower' ) : __( 'Mostrar apenas críticos', 'desi-pet-shower' );
         echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
 
@@ -295,6 +299,9 @@ class DPS_Stock_Addon {
             $unit     = get_post_meta( $item->ID, 'dps_stock_unit', true );
             $is_low   = $minimum > 0 && $quantity < $minimum;
 
+            // Filtro "críticos" aplicado em PHP pois requer comparação de dois metadados
+            // (quantity < minimum). Meta_query do WordPress não suporta comparação entre
+            // dois meta_values. Como a paginação já limita a 50 itens, o overhead é mínimo.
             if ( $only_critical && ! $is_low ) {
                 continue;
             }

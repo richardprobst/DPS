@@ -259,10 +259,16 @@ class DPS_Loyalty_Addon {
                 $prev_page = $paged > 1 ? $paged - 1 : 0;
                 $next_page = $paged < $total_pages ? $paged + 1 : 0;
 
+                // Preserva o filtro de cliente selecionado nos links de paginação.
+                $base_url = admin_url( 'admin.php?page=dps-loyalty' );
+                if ( $selected_id ) {
+                    $base_url = add_query_arg( 'dps_client_id', $selected_id, $base_url );
+                }
+
                 if ( $prev_page ) {
                     printf(
                         '<a class="button" href="%s">&laquo; %s</a> ',
-                        esc_url( add_query_arg( 'loyalty_page', $prev_page, admin_url( 'admin.php?page=dps-loyalty' ) ) ),
+                        esc_url( add_query_arg( 'loyalty_page', $prev_page, $base_url ) ),
                         esc_html__( 'Anterior', 'desi-pet-shower' )
                     );
                 }
@@ -275,7 +281,7 @@ class DPS_Loyalty_Addon {
                 if ( $next_page ) {
                     printf(
                         ' <a class="button" href="%s">%s &raquo;</a>',
-                        esc_url( add_query_arg( 'loyalty_page', $next_page, admin_url( 'admin.php?page=dps-loyalty' ) ) ),
+                        esc_url( add_query_arg( 'loyalty_page', $next_page, $base_url ) ),
                         esc_html__( 'Próxima', 'desi-pet-shower' )
                     );
                 }
