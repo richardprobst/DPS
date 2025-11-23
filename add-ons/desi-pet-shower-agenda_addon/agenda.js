@@ -1,3 +1,13 @@
+/**
+ * ⚠️ ARQUIVO LEGADO - NÃO UTILIZADO ⚠️
+ * 
+ * Este arquivo contém código antigo do FullCalendar que não é mais utilizado.
+ * NÃO é enfileirado via wp_enqueue_script() e pode ser removido fisicamente.
+ * 
+ * Data de depreciação: 2025-11-23
+ * Consulte DEPRECATED_FILES.md para mais informações.
+ */
+
 (function($){
   $(document).ready(function(){
     // Verifica se FullCalendar está disponível e se o contêiner existe

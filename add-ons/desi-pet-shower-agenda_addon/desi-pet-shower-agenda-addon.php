@@ -198,7 +198,7 @@ class DPS_Agenda_Addon {
             // Script principal da agenda (atualização de status e interações)
             wp_enqueue_script( 
                 'dps-agenda-addon', 
-                plugin_dir_url( __FILE__ ) . 'agenda-addon.js', 
+                plugin_dir_url( __FILE__ ) . 'assets/js/agenda-addon.js', 
                 [ 'jquery', 'dps-services-modal' ], 
                 '1.3.0', 
                 true 

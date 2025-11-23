@@ -1,13 +1,3 @@
-/**
- * ⚠️ ARQUIVO MOVIDO - USE assets/js/agenda-addon.js ⚠️
- * 
- * Este arquivo foi movido para assets/js/agenda-addon.js para padronização.
- * Esta cópia na raiz do add-on pode ser removida fisicamente.
- * 
- * Data de movimentação: 2025-11-23
- * Consulte DEPRECATED_FILES.md para mais informações.
- */
-
 (function($){
   $(document).ready(function(){
     var reloadDelay = parseInt(DPS_AG_Addon.reloadDelay, 10) || 600;
