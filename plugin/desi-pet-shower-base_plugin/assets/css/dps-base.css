@@ -502,7 +502,8 @@
     font-size: 14px;
 }
 
-.dps-appointment-summary__list li:last-child {
+.dps-appointment-summary__list li:last-child,
+.dps-appointment-summary__list .dps-appointment-summary__notes {
     border-bottom: none;
 }
 
@@ -520,7 +521,6 @@
 }
 
 .dps-appointment-summary__notes {
-    border-bottom: none !important;
     display: none; /* Hidden by default, shown via JS when notes exist */
 }
 
