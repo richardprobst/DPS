@@ -148,7 +148,7 @@ class DPS_Payment_Addon {
      */
     public function render_webhook_secret_field() {
         $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
-        $site_url = home_url( '?secret=SUA_CHAVE_AQUI' );
+        $site_url = home_url( '?secret=' . esc_html__( 'SUA_CHAVE_AQUI', 'dps-payment-addon' ) );
         
         echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
         echo '<p class="description">';
@@ -157,14 +157,14 @@ class DPS_Payment_Addon {
         
         // Instruções passo a passo inline
         echo '<strong>' . esc_html__( 'Como configurar:', 'dps-payment-addon' ) . '</strong><br>';
-        echo '1️⃣ ' . esc_html__( 'Gere uma senha forte (exemplo: use um gerenciador de senhas)', 'dps-payment-addon' ) . '<br>';
-        echo '2️⃣ ' . esc_html__( 'Cole a senha neste campo e salve', 'dps-payment-addon' ) . '<br>';
-        echo '3️⃣ ' . esc_html__( 'No painel do Mercado Pago, configure a URL do webhook como:', 'dps-payment-addon' ) . '<br>';
+        echo '1. ' . esc_html__( 'Gere uma senha forte (exemplo: use um gerenciador de senhas)', 'dps-payment-addon' ) . '<br>';
+        echo '2. ' . esc_html__( 'Cole a senha neste campo e salve', 'dps-payment-addon' ) . '<br>';
+        echo '3. ' . esc_html__( 'No painel do Mercado Pago, configure a URL do webhook como:', 'dps-payment-addon' ) . '<br>';
         echo '<code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">' . esc_html( $site_url ) . '</code><br>';
         echo '<small>' . esc_html__( '(Substitua SUA_CHAVE_AQUI pela senha que você definiu acima)', 'dps-payment-addon' ) . '</small><br><br>';
         
         // Link para documentação completa
-        echo '📖 <strong>';
+        echo '<strong>';
         echo '<a href="https://github.com/richardprobst/DPS/blob/main/add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md" target="_blank">';
         echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
         echo '</a></strong>';

@@ -41,8 +41,6 @@ openssl rand -base64 32
 3. No campo **"Webhook secret"**, cole a chave que você gerou no passo 1
 4. Clique em **"Salvar alterações"**
 
-![Campo Webhook Secret](https://via.placeholder.com/600x100/f0f0f0/333333?text=Campo+Webhook+Secret)
-
 ### 3. Configurar no Mercado Pago
 
 Agora você precisa configurar o webhook no painel do Mercado Pago para que ele envie notificações para o seu site.
