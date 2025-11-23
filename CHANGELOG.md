@@ -79,6 +79,13 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Payment Add-on**: Documentação completa de configuração do webhook secret
+  - Novo arquivo `WEBHOOK_CONFIGURATION.md` com guia passo a passo completo
+  - Instruções detalhadas sobre geração de senha forte, configuração no DPS e no Mercado Pago
+  - Exemplos de URLs de webhook com os 4 métodos suportados (query parameter, headers)
+  - Seção de troubleshooting com erros comuns e soluções
+  - Seção de validação e testes com exemplos de logs
+  - FAQ com perguntas frequentes sobre segurança e configuração
 - **Internacionalização (i18n)**: Documentação de text domains oficiais em ANALYSIS.md para facilitar tradução
 - **Client Portal Add-on (v2.0.0)**: Sistema completo de autenticação por token (magic links)
   - **BREAKING CHANGE**: Substituído sistema de login com senha por autenticação via links com token
@@ -192,6 +199,18 @@ Antes de criar uma nova versão oficial:
   - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
+- **Payment Add-on**: Campo "Webhook secret" nas configurações melhorado com instruções inline
+  - Descrição expandida com passos numerados de configuração
+  - Exemplo de URL do webhook com domínio real do site
+  - Link para guia completo de configuração (abre em nova aba)
+  - Destaque visual para facilitar compreensão da configuração obrigatória
+- **Payment Add-on README.md**: Seção de configuração atualizada com destaque para webhook secret
+  - Aviso destacado sobre obrigatoriedade do webhook secret no topo do documento
+  - Link proeminente para guia de configuração em múltiplas seções
+  - Fluxo automático atualizado com passo de validação do webhook secret
+- **ANALYSIS.md**: Documentação do Payment Add-on atualizada
+  - Option `dps_mercadopago_webhook_secret` adicionada à lista de opções armazenadas
+  - Referência ao guia de configuração completo em observações do add-on
 - **Communications Add-on v0.2.0**: Arquitetura completamente reorganizada
   - Toda lógica de envio centralizada em `DPS_Communications_API`
   - Templates de mensagens com suporte a placeholders (`{client_name}`, `{pet_name}`, `{date}`, `{time}`)
