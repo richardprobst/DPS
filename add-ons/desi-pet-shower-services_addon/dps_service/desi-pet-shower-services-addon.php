@@ -733,7 +733,7 @@ class DPS_Services_Addon {
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
                 echo esc_html( $srv['name'] ) . ' (R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0" style="width:80px;">)';
+                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
                 echo '</label></p>';
             }
         }
@@ -770,7 +770,7 @@ class DPS_Services_Addon {
                         . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                         . $checked . '> ';
                     echo esc_html( $srv['name'] ) . ' (R$ ';
-                    echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0" style="width:80px;">)';
+                    echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
                     echo '</label></p>';
                 }
             }
@@ -795,7 +795,7 @@ class DPS_Services_Addon {
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
                 echo esc_html( $srv['name'] ) . ' (R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0" style="width:80px;">)';
+                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
                 echo '</label></p>';
             }
         }
@@ -1146,6 +1146,7 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.0.0' );
         wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.0.0', true );
     }
 }

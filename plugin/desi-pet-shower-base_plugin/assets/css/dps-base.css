@@ -689,3 +689,28 @@
         padding: 16px;
     }
 }
+
+/* Pet Picker com scroll vertical em mobile/tablet */
+@media (max-width: 768px) {
+    .dps-pet-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 8px;
+        margin-top: 8px;
+    }
+    
+    .dps-pet-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .dps-pet-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    .dps-pet-list::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+}
