@@ -111,6 +111,8 @@ Renderiza o painel principal do sistema com navegação por abas.
 
 **Permissões**: Usuário deve ter capability `dps_manage_clients`, `dps_manage_pets` ou `dps_manage_appointments`.
 
+**⚠️ Problemas com Page Builders?** Se você usa YooTheme PRO ou outro page builder e encontra erros ao adicionar este shortcode, consulte [Guia de Compatibilidade com YooTheme PRO](../../docs/compatibility/YOOTHEME_COMPATIBILITY.md).
+
 ---
 
 #### `[dps_configuracoes]`
