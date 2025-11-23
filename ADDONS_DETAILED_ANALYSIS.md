@@ -77,8 +77,9 @@ Gerenciar a visualização e manipulação da agenda de atendimentos do sistema.
 **Assets**:
 - `assets/css/agenda-addon.css` - Estilos da interface (carregado condicionalmente)
 - `assets/js/services-modal.js` - Modal para exibir detalhes de serviços
-- `agenda-addon.js` (raiz) - **DEPRECATED**: Script principal de AJAX (deveria estar em `assets/js/`)
-- `agenda.js` (raiz) - **DEPRECATED**: Duplicado, deve ser removido
+- `assets/js/agenda-addon.js` - Script principal de AJAX (movido da raiz em 2025-11-23)
+- ~~`agenda-addon.js` (raiz)~~ - **DEPRECATED**: Movido para `assets/js/` (manter por 1-2 versões)
+- ~~`agenda.js` (raiz)~~ - **DEPRECATED**: Arquivo legado não utilizado (marcar para remoção)
 
 **Estrutura atual**:
 ```
@@ -86,9 +87,13 @@ desi-pet-shower-agenda_addon/
 ├── desi-pet-shower-agenda-addon.php  # Arquivo único com toda lógica
 ├── assets/
 │   ├── css/agenda-addon.css
-│   └── js/services-modal.js
-├── agenda-addon.js  ❌ DEPRECATED (mover para assets/js/)
-├── agenda.js        ❌ DEPRECATED (remover)
+│   └── js/
+│       ├── agenda-addon.js     ✅ OFICIAL (movido da raiz)
+│       └── services-modal.js   ✅ OFICIAL
+├── agenda-addon.js  ⚠️ DEPRECATED (movido, pode ser removido)
+├── agenda.js        ⚠️ DEPRECATED (legado, pode ser removido)
+├── DEPRECATED_FILES.md  # Documentação de arquivos legados
+├── CLEANUP_SUMMARY.md   # Resumo da limpeza realizada
 ├── uninstall.php
 └── README.md
 ```
@@ -271,8 +276,8 @@ desi-pet-shower-agenda_addon/
 
 **Assets**:
 - ✅ CSS/JS carregados condicionalmente apenas na página de agenda
-- ❌ `agenda-addon.js` na raiz (deveria estar em `assets/js/`)
-- ❌ `agenda.js` duplicado
+- ✅ Scripts organizados em `assets/js/` (padronizado em 2025-11-23)
+- ⚠️ Arquivos legados na raiz marcados para remoção futura
 
 **Caching**:
 - ❌ Nenhum cache de agendamentos (recarrega do DB em cada view)
@@ -381,9 +386,10 @@ if ( class_exists( 'DPS_Logger' ) ) {
      └── class-dps-agenda-reminders.php   # Lógica de lembretes
      ```
 
-2. **Scripts JS na raiz** - PRIORIDADE: MÉDIA
-   - **Problema**: `agenda-addon.js` e `agenda.js` fora de `assets/js/`
-   - **Solução**: Mover para `assets/js/agenda-addon.js` e remover duplicado
+2. **Scripts JS na raiz** - PRIORIDADE: ✅ RESOLVIDO (2025-11-23)
+   - Scripts movidos para `assets/js/agenda-addon.js`
+   - Arquivos legados marcados com comentários de depreciação
+   - Documentação criada em `DEPRECATED_FILES.md` e `CLEANUP_SUMMARY.md`
 
 3. **Performance em agendas grandes** - PRIORIDADE: ALTA
    - **Problema**: Query `posts_per_page => -1` pode retornar milhares de registros
