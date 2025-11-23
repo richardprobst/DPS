@@ -103,7 +103,7 @@ class DPS_Refactoring_Examples_Money {
      */
     public static function save_transaction_old_way() {
         $value_raw = sanitize_text_field( wp_unslash( $_POST['finance_value'] ?? '0' ) );
-        $value_cent = dps_parse_money_br( $value_raw );
+        $value_cent = DPS_Money_Helper::parse_brazilian_format( $value_raw );
         $value = $value_cent / 100;
 
         $extra_value = isset( $_POST['appointment_extra_value'] ) 

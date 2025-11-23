@@ -450,7 +450,7 @@ class DPS_Loyalty_Addon {
         <p>
             <label>
                 <?php esc_html_e( 'Valor mínimo do primeiro atendimento para liberar recompensa (R$)', 'desi-pet-shower' ); ?><br />
-                <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_minimum_amount]" value="<?php echo esc_attr( dps_format_money_br( $minimum_amount ) ); ?>" />
+                <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referrals_minimum_amount]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( $minimum_amount ) ); ?>" />
             </label>
         </p>
         <p>
@@ -504,7 +504,7 @@ class DPS_Loyalty_Addon {
 
     private function format_reward_value( $value, $type ) {
         if ( 'fixed' === $type ) {
-            return dps_format_money_br( (int) $value );
+            return DPS_Money_Helper::format_to_brazilian( (int) $value );
         }
 
         return $value;

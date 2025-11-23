@@ -1149,7 +1149,7 @@ final class DPS_Client_Portal {
         echo '<li><strong>' . esc_html__( 'Indicações com recompensa:', 'desi-pet-shower' ) . '</strong> ' . esc_html( (int) $rewarded_cnt ) . '</li>';
         echo '<li><strong>' . esc_html__( 'Pontos acumulados:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $points ) . '</li>';
         if ( $credit ) {
-            $formatted_credit = function_exists( 'dps_format_money_br' ) ? dps_format_money_br( $credit ) : $credit;
+            $formatted_credit = class_exists( 'DPS_Money_Helper' ) ? DPS_Money_Helper::format_to_brazilian( $credit ) : $credit;
             echo '<li><strong>' . esc_html__( 'Créditos disponíveis:', 'desi-pet-shower' ) . '</strong> R$ ' . esc_html( $formatted_credit ) . '</li>';
         }
         echo '</ul>';
