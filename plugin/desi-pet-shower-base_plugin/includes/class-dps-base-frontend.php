@@ -512,7 +512,14 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Processa logout do painel via query string
+     * Processa logout do painel DPS via query string.
+     * 
+     * Este método é chamado via hook 'init' antes da renderização do shortcode.
+     * Remove cookies de role do usuário e redireciona para a URL limpa.
+     * Requer nonce válido para proteção CSRF.
+     * 
+     * @since 1.0.2
+     * @return void Redireciona e encerra execução se logout for processado, retorna void caso contrário.
      */
     public static function handle_logout() {
         // Verifica se parâmetro de logout está presente
@@ -530,7 +537,8 @@ class DPS_Base_Frontend {
         setcookie( 'dps_role', '', time() - 3600, '/' );
         
         // Redireciona removendo parâmetros da URL para evitar loops
-        $redirect_url = remove_query_arg( [ 'dps_logout', '_wpnonce', 'tab', 'dps_edit', 'id', 'dps_view' ] );
+        $current_url = ( isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '' );
+        $redirect_url = remove_query_arg( [ 'dps_logout', '_wpnonce', 'tab', 'dps_edit', 'id', 'dps_view' ], $current_url );
         wp_safe_redirect( $redirect_url );
         exit;
     }
