@@ -718,60 +718,75 @@ class DPS_Base_Frontend {
     /**
      * Seção de clientes: formulário e listagem
      */
+    /**
+     * Seção de clientes: formulário e listagem.
+     * 
+     * REFATORADO: Separa preparação de dados da renderização.
+     * A lógica de dados permanece aqui, a renderização foi movida para template.
+     */
     private static function section_clients() {
+        // 1. Preparar dados (lógica de negócio)
+        $data = self::prepare_clients_section_data();
+        
+        // 2. Renderizar usando template (apresentação)
+        return self::render_clients_section( $data );
+    }
+    
+    /**
+     * Prepara os dados necessários para a seção de clientes.
+     * 
+     * @return array Dados estruturados para o template.
+     */
+    private static function prepare_clients_section_data() {
         $clients = self::get_clients();
-        // Detecta edição
-        $edit_id    = ( isset( $_GET['dps_edit'] ) && 'client' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
-        $editing    = null;
-        $meta       = [];
+        
+        // Detecta edição via parâmetros GET
+        $edit_id = ( isset( $_GET['dps_edit'] ) && 'client' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) 
+                   ? intval( $_GET['id'] ) 
+                   : 0;
+        
+        $editing = null;
+        $meta    = [];
+        
         if ( $edit_id ) {
             $editing = get_post( $edit_id );
             if ( $editing ) {
+                // Carrega metadados do cliente para edição
                 $meta = [
-                    'cpf'      => get_post_meta( $edit_id, 'client_cpf', true ),
-                    'phone'    => get_post_meta( $edit_id, 'client_phone', true ),
-                    'email'    => get_post_meta( $edit_id, 'client_email', true ),
-                    'birth'    => get_post_meta( $edit_id, 'client_birth', true ),
-                    'instagram'=> get_post_meta( $edit_id, 'client_instagram', true ),
-                    'facebook' => get_post_meta( $edit_id, 'client_facebook', true ),
+                    'cpf'        => get_post_meta( $edit_id, 'client_cpf', true ),
+                    'phone'      => get_post_meta( $edit_id, 'client_phone', true ),
+                    'email'      => get_post_meta( $edit_id, 'client_email', true ),
+                    'birth'      => get_post_meta( $edit_id, 'client_birth', true ),
+                    'instagram'  => get_post_meta( $edit_id, 'client_instagram', true ),
+                    'facebook'   => get_post_meta( $edit_id, 'client_facebook', true ),
                     'photo_auth' => get_post_meta( $edit_id, 'client_photo_auth', true ),
-                    'address'  => get_post_meta( $edit_id, 'client_address', true ),
-                    'referral' => get_post_meta( $edit_id, 'client_referral', true ),
-                    'lat'      => get_post_meta( $edit_id, 'client_lat', true ),
-                    'lng'      => get_post_meta( $edit_id, 'client_lng', true ),
+                    'address'    => get_post_meta( $edit_id, 'client_address', true ),
+                    'referral'   => get_post_meta( $edit_id, 'client_referral', true ),
+                    'lat'        => get_post_meta( $edit_id, 'client_lat', true ),
+                    'lng'        => get_post_meta( $edit_id, 'client_lng', true ),
                 ];
             }
         }
         
-        // Prepare data for templates
-        $api_key  = get_option( 'dps_google_api_key', '' );
-        $base_url = get_permalink();
-        
+        return [
+            'clients'  => $clients,
+            'edit_id'  => $edit_id,
+            'editing'  => $editing,
+            'meta'     => $meta,
+            'api_key'  => get_option( 'dps_google_api_key', '' ),
+            'base_url' => get_permalink(),
+        ];
+    }
+    
+    /**
+     * Renderiza a seção de clientes usando template.
+     * 
+     * @param array $data Dados preparados para renderização.
+     * @return string HTML da seção.
+     */
+    private static function render_clients_section( $data ) {
         ob_start();
-        echo '<div class="dps-section" id="dps-section-clientes">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ) . '</h2>';
-        
-        // Renderizar formulário de cliente usando template
-        dps_get_template(
-            'forms/client-form.php',
-            [
-                'edit_id' => $edit_id,
-                'editing' => $editing,
-                'meta'    => $meta,
-                'api_key' => $api_key,
-            ]
-        );
-        
-        // Renderizar listagem de clientes usando template
-        dps_get_template(
-            'lists/clients-list.php',
-            [
-                'clients'  => $clients,
-                'base_url' => $base_url,
-            ]
-        );
-        
-        echo '</div>';
+        dps_get_template( 'frontend/clients-section.php', $data );
         return ob_get_clean();
     }
 
