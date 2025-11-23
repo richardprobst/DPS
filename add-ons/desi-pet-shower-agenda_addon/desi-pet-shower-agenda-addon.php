@@ -18,6 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class DPS_Agenda_Addon {
+    
+    /**
+     * Número de agendamentos por página no modo "Todos".
+     * 
+     * @since 1.1.0
+     */
+    const APPOINTMENTS_PER_PAGE = 50;
+    
     public function __construct() {
         // Verifica dependência do Finance Add-on
         if ( ! class_exists( 'DPS_Finance_API' ) ) {
@@ -445,7 +453,7 @@ class DPS_Agenda_Addon {
             
             $appointments['todos'] = get_posts( [
                 'post_type'      => 'dps_agendamento',
-                'posts_per_page' => 50,
+                'posts_per_page' => self::APPOINTMENTS_PER_PAGE,
                 'paged'          => $paged,
                 'post_status'    => 'publish',
                 'meta_query'     => [
@@ -853,8 +861,24 @@ class DPS_Agenda_Addon {
             $prev_page = max( 1, $paged - 1 );
             $next_page = $paged + 1;
             
-            // Preserva todos os parâmetros de filtro na paginação
-            $pagination_args = $_GET;
+            // Preserva parâmetros de filtro válidos na paginação
+            // Sanitiza cada parâmetro para prevenir injeção de código
+            $pagination_args = [
+                'show_all' => '1',
+                'dps_date' => $selected_date,
+                'view'     => $view,
+            ];
+            
+            // Adiciona filtros se definidos
+            if ( $filter_client ) {
+                $pagination_args['filter_client'] = $filter_client;
+            }
+            if ( $filter_status ) {
+                $pagination_args['filter_status'] = $filter_status;
+            }
+            if ( $filter_service ) {
+                $pagination_args['filter_service'] = $filter_service;
+            }
             
             echo '<div class="dps-agenda-pagination" style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">';
             
@@ -869,8 +893,8 @@ class DPS_Agenda_Addon {
             echo sprintf( esc_html__( 'Página %d', 'dps-agenda-addon' ), $paged );
             echo '</span>';
             
-            // Só mostra "Próxima" se retornou 50 registros (indicando que pode haver mais)
-            if ( ! empty( $appointments['todos'] ) && count( $appointments['todos'] ) >= 50 ) {
+            // Só mostra "Próxima" se retornou o máximo de registros (indicando que pode haver mais)
+            if ( ! empty( $appointments['todos'] ) && count( $appointments['todos'] ) >= self::APPOINTMENTS_PER_PAGE ) {
                 $pagination_args['paged'] = $next_page;
                 echo '<a href="' . esc_url( add_query_arg( $pagination_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft">';
                 echo esc_html__( 'Próxima página', 'dps-agenda-addon' ) . ' →';
