@@ -515,8 +515,14 @@ class DPS_Base_Frontend {
      * Processa logout do painel via query string
      */
     public static function handle_logout() {
+        // Verifica se parâmetro de logout está presente
         if ( ! isset( $_GET['dps_logout'] ) ) {
             return;
+        }
+        
+        // Verifica nonce para proteção CSRF
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_logout' ) ) {
+            wp_die( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
         
         // Remove role cookies. Define caminho "/" para que os cookies sejam removidos em todo o site.
@@ -524,7 +530,7 @@ class DPS_Base_Frontend {
         setcookie( 'dps_role', '', time() - 3600, '/' );
         
         // Redireciona removendo parâmetros da URL para evitar loops
-        $redirect_url = remove_query_arg( [ 'dps_logout', 'tab', 'dps_edit', 'id', 'dps_view' ] );
+        $redirect_url = remove_query_arg( [ 'dps_logout', '_wpnonce', 'tab', 'dps_edit', 'id', 'dps_view' ] );
         wp_safe_redirect( $redirect_url );
         exit;
     }

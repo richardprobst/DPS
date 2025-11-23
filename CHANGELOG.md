@@ -273,6 +273,11 @@ Antes de criar uma nova versão oficial:
   - **IMPORTANTE**: Clientes existentes precisarão solicitar novo link de acesso na primeira vez após a atualização
 
 #### Security (Segurança)
+- **Plugin Base**: Adicionada proteção CSRF no logout do painel DPS
+  - Novo método `DPS_Base_Frontend::handle_logout()` agora requer nonce válido (`_wpnonce`)
+  - Proteção contra logout forçado via links maliciosos (CSRF)
+  - Sanitização adequada de parâmetros GET
+  - **IMPORTANTE**: Links de logout devem incluir `wp_nonce_url()` com action `dps_logout`
 - **Client Portal Add-on (v2.0.0)**: Melhorias de segurança no sistema de sessões e e-mails
   - Configuração de flags de segurança em cookies de sessão (httponly, secure, samesite=Strict)
   - Modo estrito de sessão habilitado (use_strict_mode)
@@ -281,6 +286,16 @@ Antes de criar uma nova versão oficial:
   - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
 
 #### Fixed (Corrigido)
+- **Plugin Base**: Corrigido erro "Falha ao atualizar. A resposta não é um JSON válido" ao inserir shortcode `[dps_base]` no Block Editor
+  - **Causa raiz**: Método `render_app()` processava logout e POST requests ANTES de iniciar output buffering (`ob_start()`)
+  - **Sintoma**: Block Editor falhava ao validar shortcode porque redirects/exits causavam conflito com resposta JSON esperada
+  - **Solução**: Movido processamento de logout para hook `init` (novo método `DPS_Base_Frontend::handle_logout()`)
+  - **Solução**: Removida chamada redundante a `handle_request()` dentro de `render_app()` (já processado via `init`)
+  - **Impacto**: Shortcode `[dps_base]` agora é método puro de renderização sem side-effects, compatível com Block Editor
+  - **Arquivos alterados**: 
+    - `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (adicionado logout ao `maybe_handle_request()`)
+    - `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (novo método `handle_logout()`, `render_app()` simplificado)
+  - **Verificação**: Todos os outros shortcodes (`[dps_agenda_page]`, `[dps_client_portal]`, `[dps_registration_form]`, etc.) já seguem o padrão correto
 - **Client Portal Add-on**: Corrigido problema de layout onde o card "Portal do Cliente" aparecia antes do cabeçalho do tema
   - **Causa raiz**: Método `render_portal_shortcode()` estava chamando `ob_end_clean()` seguido de `include`, causando output direto em vez de retornar HTML via shortcode
   - **Sintoma**: Card do portal aparecia ANTES do menu principal do tema YOOtheme, como se estivesse "encaixado no header"
