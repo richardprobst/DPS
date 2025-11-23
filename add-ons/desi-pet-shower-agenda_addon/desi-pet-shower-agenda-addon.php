@@ -757,7 +757,7 @@ class DPS_Agenda_Addon {
                     $confirmation_html = '-';
                     if ( $status === 'pendente' && $client_post ) {
                         $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
-                        $whatsapp  = self::format_whatsapp_number( $raw_phone );
+                        $whatsapp  = DPS_Phone_Helper::format_for_whatsapp( $raw_phone );
                         if ( $whatsapp ) {
                             $client_name = $client_post->post_title;
                             $pet_names   = [];
@@ -807,7 +807,7 @@ class DPS_Agenda_Addon {
                     if ( $status === 'finalizado' && empty( $sub_meta ) ) {
                         $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
                         $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
-                        $digits       = self::format_whatsapp_number( $client_phone );
+                        $digits       = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
                         if ( $digits && $total_val > 0 ) {
                             $client_name = $client_post ? $client_post->post_title : '';
                             $pet_names   = [];
@@ -1275,26 +1275,7 @@ class DPS_Agenda_Addon {
         }
     }
 
-    /**
-     * Formata número de telefone para WhatsApp
-     *
-     * @deprecated 0.2.0 Use DPS_Phone_Helper::format_for_whatsapp()
-     *
-     * @param string $phone Número de telefone
-     * @return string Número formatado
-     */
-    private static function format_whatsapp_number( $phone ) {
-        if ( class_exists( 'DPS_Phone_Helper' ) ) {
-            return DPS_Phone_Helper::format_for_whatsapp( $phone );
-        }
-        
-        // Fallback
-        $digits = preg_replace( '/\D+/', '', (string) $phone );
-        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
-            $digits = '55' . $digits;
-        }
-        return $digits;
-    }
+
 }
 
 new DPS_Agenda_Addon();
