@@ -524,7 +524,7 @@ desi-pet-shower-finance_addon/
 1. Constantes definidas: `DPS_FINANCE_PLUGIN_FILE`, `DPS_FINANCE_PLUGIN_DIR`, `DPS_FINANCE_VERSION`
 2. Require de dependências: `class-dps-finance-revenue-query.php`, `class-dps-finance-api.php`
 3. Funções globais deprecated: `dps_parse_money_br()`, `dps_format_money_br()` (delegam para `DPS_Money_Helper`)
-4. `init`: Cria tabelas `dps_transacoes` e `dps_parcelas` se não existirem
+4. **Activation hook**: Cria tabelas `dps_transacoes` e `dps_parcelas` na ativação do plugin (com versionamento para idempotência)
 5. Hooks de integração com plugin base: `dps_base_nav_tabs_after_history`, `dps_base_sections_after_history`
 
 ---
@@ -544,9 +544,9 @@ desi-pet-shower-finance_addon/
 - `[dps_fin_docs]`: Renderiza página de documentos financeiros (cobranças e notas)
 
 **Páginas criadas** (activation hook):
-- "Documentos Financeiros" (`dps_fin_docs_page_id`) - **NÃO** criada automaticamente (método `activate()` existe mas não está registrado!)
+- "Documentos Financeiros" (`dps_fin_docs_page_id`) - Criada automaticamente na ativação do plugin com slug `dps-documentos-financeiros`
 
-**Não registra activation hook** - ❌ **PROBLEMA**: Método `activate()` não está vinculado ao `register_activation_hook()`
+**Activation hook registrado** - ✅ **CORRIGIDO**: Método `activate()` está corretamente vinculado ao `register_activation_hook()` e é idempotente
 
 ---
 

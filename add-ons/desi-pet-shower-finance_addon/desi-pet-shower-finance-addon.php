@@ -93,14 +93,6 @@ class DPS_Finance_Addon {
         add_action( 'dps_base_sections_after_history', [ $this, 'add_finance_section' ], 10, 1 );
         // Trata salvamento e exclusão de transações
         add_action( 'init', [ $this, 'maybe_handle_finance_actions' ] );
-        // Cria tabela de parcelas de pagamentos (pagamentos parciais) se ainda não existir
-        add_action( 'init', [ $this, 'maybe_create_parcelas_table' ] );
-        // Garante que a tabela principal de transações exista. Sem esta tabela,
-        // receitas e despesas não podem ser registradas e as abas Financeiro e
-        // Estatísticas permanecerão vazias. A criação é feita em cada request
-        // durante o init para evitar problemas em instalações que não executam
-        // rotinas de ativação.
-        add_action( 'init', [ $this, 'maybe_create_transacoes_table' ] );
         add_action( 'dps_finance_cleanup_for_appointment', [ $this, 'cleanup_transactions_for_appointment' ] );
 
         // Não cria mais uma página pública para documentos; apenas registra o shortcode
@@ -113,26 +105,107 @@ class DPS_Finance_Addon {
     }
 
     /**
-     * Executado na ativação do add‑on financeiro. Garante que exista uma página para listar os
-     * documentos (notas e cobranças) gerados. A página recebe o shortcode [dps_fin_docs].
+     * Executado na ativação do add‑on financeiro.
+     * 
+     * Este método:
+     * 1. Cria as tabelas dps_transacoes e dps_parcelas se não existirem
+     * 2. Garante que exista uma página para listar documentos financeiros
+     * 3. É idempotente: pode ser executado múltiplas vezes sem problemas
      */
-    public function activate() {
-        $title = __( 'Documentos Financeiros', 'dps-finance-addon' );
-        $slug  = sanitize_title( $title );
-        $page  = get_page_by_path( $slug );
-        if ( ! $page ) {
-            $page_id = wp_insert_post( [
-                'post_title'   => $title,
-                'post_name'    => $slug,
-                'post_content' => '[dps_fin_docs]',
-                'post_status'  => 'publish',
-                'post_type'    => 'page',
-            ] );
-            if ( $page_id ) {
-                update_option( 'dps_fin_docs_page_id', $page_id );
+    public static function activate() {
+        global $wpdb;
+        
+        // Define versão atual do schema
+        $current_version = '1.0.0';
+        
+        // ========== 1. Criar tabela dps_transacoes ==========
+        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
+        $transacoes_version = get_option( 'dps_transacoes_db_version', '0' );
+        
+        // Só cria/atualiza se a versão for diferente
+        if ( version_compare( $transacoes_version, $current_version, '<' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+            $charset_collate = $wpdb->get_charset_collate();
+            
+            $sql = "CREATE TABLE $transacoes_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                cliente_id bigint(20) DEFAULT NULL,
+                agendamento_id bigint(20) DEFAULT NULL,
+                plano_id bigint(20) DEFAULT NULL,
+                data date DEFAULT NULL,
+                valor float DEFAULT 0,
+                categoria varchar(255) NOT NULL DEFAULT '',
+                tipo varchar(50) NOT NULL DEFAULT '',
+                status varchar(20) NOT NULL DEFAULT '',
+                descricao text NOT NULL DEFAULT '',
+                PRIMARY KEY  (id),
+                KEY cliente_id (cliente_id),
+                KEY agendamento_id (agendamento_id),
+                KEY plano_id (plano_id)
+            ) $charset_collate;";
+            
+            dbDelta( $sql );
+            update_option( 'dps_transacoes_db_version', $current_version );
+        }
+        
+        // ========== 2. Criar tabela dps_parcelas ==========
+        $parcelas_table = $wpdb->prefix . 'dps_parcelas';
+        $parcelas_version = get_option( 'dps_parcelas_db_version', '0' );
+        
+        // Só cria/atualiza se a versão for diferente
+        if ( version_compare( $parcelas_version, $current_version, '<' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+            $charset_collate = $wpdb->get_charset_collate();
+            
+            $sql = "CREATE TABLE $parcelas_table (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                trans_id bigint(20) NOT NULL,
+                data date NOT NULL,
+                valor float NOT NULL,
+                metodo varchar(50) DEFAULT NULL,
+                PRIMARY KEY  (id),
+                KEY trans_id (trans_id)
+            ) $charset_collate;";
+            
+            dbDelta( $sql );
+            update_option( 'dps_parcelas_db_version', $current_version );
+        }
+        
+        // ========== 3. Criar página de Documentos Financeiros ==========
+        $page_id = get_option( 'dps_fin_docs_page_id' );
+        
+        // Verifica se a página existe (pode ter sido excluída)
+        if ( $page_id ) {
+            $page = get_post( $page_id );
+            if ( ! $page || $page->post_status === 'trash' ) {
+                $page_id = false;
             }
-        } else {
-            update_option( 'dps_fin_docs_page_id', $page->ID );
+        }
+        
+        // Se não existe ou foi excluída, cria uma nova
+        if ( ! $page_id ) {
+            $title = __( 'Documentos Financeiros', 'dps-finance-addon' );
+            $slug  = 'dps-documentos-financeiros';
+            
+            // Verifica se já existe uma página com este slug
+            $page = get_page_by_path( $slug );
+            
+            if ( ! $page ) {
+                $new_page_id = wp_insert_post( [
+                    'post_title'   => $title,
+                    'post_name'    => $slug,
+                    'post_content' => '[dps_fin_docs]',
+                    'post_status'  => 'publish',
+                    'post_type'    => 'page',
+                ] );
+                
+                if ( $new_page_id && ! is_wp_error( $new_page_id ) ) {
+                    update_option( 'dps_fin_docs_page_id', $new_page_id );
+                }
+            } else {
+                // Página já existe com o slug, apenas atualiza a option
+                update_option( 'dps_fin_docs_page_id', $page->ID );
+            }
         }
     }
 
@@ -1200,82 +1273,6 @@ class DPS_Finance_Addon {
     }
 
     /**
-     * Cria a tabela de parcelas de pagamentos, se ainda não existir.
-     *
-     * A tabela dps_parcelas armazena valores pagos parcialmente para cada transação,
-     * permitindo registrar entradas parciais e diferentes métodos de pagamento. Cada linha
-     * inclui a data do pagamento, o valor e o método (PIX, cartão, dinheiro ou outro).
-     */
-    public function maybe_create_parcelas_table() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'dps_parcelas';
-        // Verifica se a tabela já existe
-        $exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) );
-        if ( $exists != $table_name ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-            $charset_collate = $wpdb->get_charset_collate();
-            $sql = "CREATE TABLE $table_name (
-                id mediumint(9) NOT NULL AUTO_INCREMENT,
-                trans_id bigint(20) NOT NULL,
-                data date NOT NULL,
-                valor float NOT NULL,
-                metodo varchar(50) DEFAULT NULL,
-                PRIMARY KEY  (id),
-                KEY trans_id (trans_id)
-            ) $charset_collate;";
-            dbDelta( $sql );
-        }
-    }
-
-    /**
-     * Cria a tabela principal de transações financeiras (dps_transacoes) se ela não
-     * existir. Esta tabela armazena todas as receitas e despesas registradas
-     * pelos módulos de pagamentos, assinaturas e pelo próprio controle financeiro.
-     * Sem esta tabela, as abas Financeiro e Estatísticas não conseguem exibir
-     * registros de transações. A verificação e criação são realizadas no hook
-     * init para cobrir casos em que a função de ativação não foi executada.
-     *
-     * Estrutura de campos:
-     * - id: chave primária
-     * - cliente_id: ID do cliente associado (nullable)
-     * - agendamento_id: ID do agendamento (nullable)
-     * - plano_id: ID da assinatura/plano (nullable)
-     * - data: data da transação (DATE)
-     * - valor: valor monetário (FLOAT)
-     * - categoria: categoria da transação (ex.: Serviço, Assinatura, Despesa)
-     * - tipo: receita ou despesa
-     * - status: em_aberto ou pago
-     * - descricao: descrição detalhada
-     */
-    public function maybe_create_transacoes_table() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'dps_transacoes';
-        // Verifica se a tabela já existe
-        $exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) );
-        if ( $exists != $table_name ) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-            $charset_collate = $wpdb->get_charset_collate();
-            $sql = "CREATE TABLE $table_name (
-                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                cliente_id bigint(20) DEFAULT NULL,
-                agendamento_id bigint(20) DEFAULT NULL,
-                plano_id bigint(20) DEFAULT NULL,
-                data date DEFAULT NULL,
-                valor float DEFAULT 0,
-                categoria varchar(255) NOT NULL DEFAULT '',
-                tipo varchar(50) NOT NULL DEFAULT '',
-                status varchar(20) NOT NULL DEFAULT '',
-                descricao text NOT NULL DEFAULT '',
-                PRIMARY KEY  (id),
-                KEY cliente_id (cliente_id),
-                KEY agendamento_id (agendamento_id),
-                KEY plano_id (plano_id)
-            ) $charset_collate;";
-            dbDelta( $sql );
-        }
-    }
-
-    /**
      * Calcula a soma de todos os pagamentos parciais registrados para uma transação.
      *
      * @param int $trans_id ID da transação
@@ -1290,6 +1287,9 @@ class DPS_Finance_Addon {
 } // end class DPS_Finance_Addon
 
 } // end if ! class_exists
+
+// Registra o hook de ativação do plugin
+register_activation_hook( __FILE__, [ 'DPS_Finance_Addon', 'activate' ] );
 
 // Instancia a classe somente se ainda não houver uma instância global
 if ( class_exists( 'DPS_Finance_Addon' ) && ! isset( $GLOBALS['dps_finance_addon'] ) ) {
