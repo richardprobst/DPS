@@ -88,13 +88,34 @@ class DPS_Logger {
     /**
      * Registra log genérico validando o nível solicitado.
      *
-     * @param string       $message Texto principal.
-     * @param string       $level   Nível do log (info, warning, error).
-     * @param string       $source  Origem do evento.
-     * @param array|string $context Dados adicionais para contexto.
+     * Aceita tanto a ordem original ( $level, $message, $context, $source ) quanto
+     * a ordem adicionada na versão anterior ( $message, $level, $source, $context ).
+     *
+     * @param mixed $arg1 Primeiro argumento (nível ou mensagem).
+     * @param mixed $arg2 Segundo argumento (mensagem ou nível).
+     * @param mixed $arg3 Terceiro argumento (contexto ou origem).
+     * @param mixed $arg4 Quarto argumento (origem ou contexto).
      */
-    public static function log( $message, $level = self::LEVEL_INFO, $source = 'base', $context = array() ) {
-        $level = in_array( $level, self::get_levels(), true ) ? $level : self::LEVEL_INFO;
+    public static function log( $arg1, $arg2 = '', $arg3 = array(), $arg4 = 'base' ) {
+        $levels = self::get_levels();
+
+        if ( in_array( $arg1, $levels, true ) ) {
+            $level   = $arg1;
+            $message = $arg2;
+            $context = ( is_array( $arg3 ) || is_object( $arg3 ) ) ? $arg3 : array();
+            $source  = is_scalar( $arg4 ) ? (string) $arg4 : 'base';
+        } else {
+            $message = $arg1;
+            $level   = in_array( $arg2, $levels, true ) ? $arg2 : self::LEVEL_INFO;
+
+            if ( is_scalar( $arg3 ) ) {
+                $source  = (string) $arg3;
+                $context = ( is_array( $arg4 ) || is_object( $arg4 ) ) ? $arg4 : array();
+            } else {
+                $context = ( is_array( $arg3 ) || is_object( $arg3 ) ) ? $arg3 : array();
+                $source  = is_scalar( $arg4 ) ? (string) $arg4 : 'base';
+            }
+        }
 
         switch ( $level ) {
             case self::LEVEL_WARNING:
