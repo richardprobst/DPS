@@ -148,8 +148,31 @@ class DPS_Payment_Addon {
      */
     public function render_webhook_secret_field() {
         $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
+        // URL de exemplo usando placeholder simples sem caracteres especiais
+        $site_url = home_url( '?secret=SUA_CHAVE_AQUI' );
+        
         echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
-        echo '<p class="description">' . esc_html__( 'Defina um secret para validar a origem das notificações do Mercado Pago. Configure o mesmo valor na URL ou header do webhook.', 'dps-payment-addon' ) . '</p>';
+        echo '<p class="description">';
+        echo esc_html__( 'Chave de segurança para validar notificações do Mercado Pago. Gere uma senha forte (mínimo 20 caracteres) e configure no painel do Mercado Pago.', 'dps-payment-addon' );
+        echo '<br><br>';
+        
+        // Instruções passo a passo inline
+        echo '<strong>' . esc_html__( 'Como configurar:', 'dps-payment-addon' ) . '</strong><br>';
+        echo '1. ' . esc_html__( 'Gere uma senha forte (exemplo: use um gerenciador de senhas)', 'dps-payment-addon' ) . '<br>';
+        echo '2. ' . esc_html__( 'Cole a senha neste campo e salve', 'dps-payment-addon' ) . '<br>';
+        echo '3. ' . esc_html__( 'No painel do Mercado Pago, configure a URL do webhook como:', 'dps-payment-addon' ) . '<br>';
+        echo '<code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">' . esc_html( $site_url ) . '</code><br>';
+        echo '<small>' . esc_html__( '(Substitua SUA_CHAVE_AQUI pela senha que você definiu acima)', 'dps-payment-addon' ) . '</small><br><br>';
+        
+        // Link para documentação completa - usando path relativo do plugin
+        $doc_url = plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ );
+        echo '<strong>';
+        echo '<a href="' . esc_url( $doc_url ) . '" target="_blank">';
+        echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
+        echo '</a></strong>';
+        echo ' ' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' );
+        
+        echo '</p>';
     }
 
     /**
