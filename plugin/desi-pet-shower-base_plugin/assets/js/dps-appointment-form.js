@@ -41,6 +41,7 @@
             $('#appointment_time').on('change', this.updateAppointmentSummary.bind(this));
             $('#dps-taxidog-toggle, #dps-tosa-toggle').on('change', this.updateAppointmentSummary.bind(this));
             $('#dps-taxidog-price, #dps-tosa-price').on('input', this.updateAppointmentSummary.bind(this));
+            $('#appointment_notes').on('input', this.updateAppointmentSummary.bind(this));
             
             // Eventos para serviços do Services Add-on
             $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
@@ -145,6 +146,7 @@
             
             const date = $('#appointment_date').val();
             const time = $('#appointment_time').val();
+            const notes = $('#appointment_notes').val();
             
             // Coleta serviços selecionados
             const services = [];
@@ -213,6 +215,14 @@
                     services.length > 0 ? services.join(', ') : 'Nenhum serviço extra'
                 );
                 $list.find('[data-summary="price"]').text('R$ ' + totalValue.toFixed(2));
+                
+                // Atualiza observações (exibe somente se tiver conteúdo)
+                if (notes && notes.trim() !== '') {
+                    $list.find('[data-summary="notes"]').text(notes.trim());
+                    $('.dps-appointment-summary__notes').show();
+                } else {
+                    $('.dps-appointment-summary__notes').hide();
+                }
                 
                 // Mostra o resumo
                 $empty.hide();

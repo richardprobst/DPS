@@ -274,6 +274,11 @@
 }
 
 @media (max-width: 768px) {
+    /* Prevenir overflow horizontal */
+    .dps-section {
+        overflow-x: hidden;
+    }
+    
     .dps-nav {
         flex-direction: column;
     }
@@ -305,9 +310,22 @@
         white-space: nowrap;
     }
     
+    /* Grid de formulários empilha em coluna única */
     .dps-form-row--2col,
     .dps-form-row--3col {
         grid-template-columns: 1fr;
+    }
+    
+    /* Ajustes para fieldsets */
+    .dps-fieldset {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    /* Inputs de valor em mobile */
+    .dps-form input.dps-input-money {
+        width: 100%;
+        max-width: 180px;
     }
 }
 
@@ -440,13 +458,22 @@
     padding-left: 24px;
 }
 
+/* Inputs de valores monetários */
+.dps-form input.dps-input-money {
+    width: 120px;
+    max-width: 100%;
+    text-align: right;
+    box-sizing: border-box;
+}
+
 /* Resumo do agendamento */
 .dps-appointment-summary {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 20px;
-    margin: 32px 0 20px 0;
+    margin: 32px auto 20px auto;
+    max-width: 800px;
 }
 
 .dps-appointment-summary h3 {
@@ -475,7 +502,8 @@
     font-size: 14px;
 }
 
-.dps-appointment-summary__list li:last-child {
+.dps-appointment-summary__list li:last-child,
+.dps-appointment-summary__list .dps-appointment-summary__notes {
     border-bottom: none;
 }
 
@@ -490,6 +518,19 @@
     color: #0ea5e9;
     font-weight: 700;
     font-size: 16px;
+}
+
+.dps-appointment-summary__notes {
+    display: none; /* Hidden by default, shown via JS when notes exist */
+}
+
+.dps-appointment-summary__notes [data-summary="notes"] {
+    display: block;
+    margin-top: 4px;
+    color: #6b7280;
+    font-style: italic;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* Mensagens de erro do formulário */
@@ -687,6 +728,14 @@
     
     .dps-appointment-summary {
         padding: 16px;
+        margin: 24px auto 16px auto;
+    }
+    
+    /* Inputs de valor em mobile pequeno */
+    .dps-form input.dps-input-money {
+        width: 100%;
+        max-width: 150px;
+        font-size: 16px; /* Evita zoom automático no iOS */
     }
 }
 
