@@ -185,11 +185,23 @@ class DPS_Base_Plugin {
         $args = [
             'labels'             => $labels,
             'public'             => false,
-            'show_ui'            => false,
-            'capability_type'    => 'post',
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'capability_type'    => 'dps_client',
+            'map_meta_cap'       => true,
+            'capabilities'       => [
+                'edit_post'          => 'dps_manage_clients',
+                'read_post'          => 'dps_manage_clients',
+                'delete_post'        => 'dps_manage_clients',
+                'edit_posts'         => 'dps_manage_clients',
+                'edit_others_posts'  => 'dps_manage_clients',
+                'publish_posts'      => 'dps_manage_clients',
+                'read_private_posts' => 'dps_manage_clients',
+            ],
             'hierarchical'       => false,
             'supports'           => [ 'title' ],
             'has_archive'        => false,
+            'menu_icon'          => 'dashicons-groups',
         ];
         register_post_type( 'dps_cliente', $args );
 
@@ -210,11 +222,23 @@ class DPS_Base_Plugin {
         $args = [
             'labels'             => $labels,
             'public'             => false,
-            'show_ui'            => false,
-            'capability_type'    => 'post',
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'capability_type'    => 'dps_pet',
+            'map_meta_cap'       => true,
+            'capabilities'       => [
+                'edit_post'          => 'dps_manage_pets',
+                'read_post'          => 'dps_manage_pets',
+                'delete_post'        => 'dps_manage_pets',
+                'edit_posts'         => 'dps_manage_pets',
+                'edit_others_posts'  => 'dps_manage_pets',
+                'publish_posts'      => 'dps_manage_pets',
+                'read_private_posts' => 'dps_manage_pets',
+            ],
             'hierarchical'       => false,
             'supports'           => [ 'title' ],
             'has_archive'        => false,
+            'menu_icon'          => 'dashicons-pets',
         ];
         register_post_type( 'dps_pet', $args );
 
@@ -234,11 +258,23 @@ class DPS_Base_Plugin {
         $args = [
             'labels'             => $labels,
             'public'             => false,
-            'show_ui'            => false,
-            'capability_type'    => 'post',
+            'show_ui'            => true,
+            'show_in_menu'       => true,
+            'capability_type'    => 'dps_appointment',
+            'map_meta_cap'       => true,
+            'capabilities'       => [
+                'edit_post'          => 'dps_manage_appointments',
+                'read_post'          => 'dps_manage_appointments',
+                'delete_post'        => 'dps_manage_appointments',
+                'edit_posts'         => 'dps_manage_appointments',
+                'edit_others_posts'  => 'dps_manage_appointments',
+                'publish_posts'      => 'dps_manage_appointments',
+                'read_private_posts' => 'dps_manage_appointments',
+            ],
             'hierarchical'       => false,
             'supports'           => [ 'title' ],
             'has_archive'        => false,
+            'menu_icon'          => 'dashicons-calendar-alt',
         ];
         register_post_type( 'dps_agendamento', $args );
     }
