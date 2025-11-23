@@ -352,6 +352,7 @@ Antes de criar uma nova versão oficial:
   - **Benefícios**: eliminação de duplicação, manutenção simplificada, consistência entre add-ons
   - **Arquivos modificados**: `class-dps-base-frontend.php`, `desi-pet-shower-agenda-addon.php`
 - **Services Add-on**: Removido header duplicado de plugin no arquivo `dps_service/desi-pet-shower-services-addon.php` (mantém apenas no wrapper)
+- **Subscription Add-on**: Removido header duplicado de plugin no arquivo `dps_subscription/desi-pet-shower-subscription-addon.php` (mantém apenas no wrapper)
 - **Services Add-on**: Centralização completa de lógica de serviços e cálculo de preços via `DPS_Services_API` (redução de duplicação, separação de responsabilidades)
 - **Arquitetura**: Centralização completa de lógica financeira no Finance Add-on (eliminação de duplicação, redução de acoplamento)
 - **Agenda Add-on**: Removidas ~55 linhas de SQL direto para `dps_transacoes` (agora usa sincronização automática via hooks do Finance)
