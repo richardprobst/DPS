@@ -722,7 +722,10 @@ class DPS_Base_Frontend {
      * Seção de clientes: formulário e listagem.
      * 
      * REFATORADO: Separa preparação de dados da renderização.
-     * A lógica de dados permanece aqui, a renderização foi movida para template.
+     * A lógica de dados permanece aqui, a renderização foi movida para o template.
+     * 
+     * @since 1.0.0
+     * @return string HTML da seção de clientes.
      */
     private static function section_clients() {
         // 1. Preparar dados (lógica de negócio)
@@ -735,7 +738,17 @@ class DPS_Base_Frontend {
     /**
      * Prepara os dados necessários para a seção de clientes.
      * 
-     * @return array Dados estruturados para o template.
+     * @since 1.0.0
+     * @return array {
+     *     Dados estruturados para o template.
+     *     
+     *     @type array       $clients  Lista de posts de clientes (WP_Post[]).
+     *     @type int         $edit_id  ID do cliente sendo editado (0 se novo).
+     *     @type WP_Post|null $editing Post do cliente em edição (null se novo).
+     *     @type array       $meta     Metadados do cliente (cpf, phone, email, etc.).
+     *     @type string      $api_key  Chave da API do Google Maps.
+     *     @type string      $base_url URL base da página atual.
+     * }
      */
     private static function prepare_clients_section_data() {
         $clients = self::get_clients();
@@ -781,7 +794,17 @@ class DPS_Base_Frontend {
     /**
      * Renderiza a seção de clientes usando template.
      * 
-     * @param array $data Dados preparados para renderização.
+     * @since 1.0.0
+     * @param array $data {
+     *     Dados preparados para renderização.
+     *     
+     *     @type array       $clients  Lista de posts de clientes.
+     *     @type int         $edit_id  ID do cliente sendo editado.
+     *     @type WP_Post|null $editing Post do cliente em edição.
+     *     @type array       $meta     Metadados do cliente.
+     *     @type string      $api_key  Chave da API do Google Maps.
+     *     @type string      $base_url URL base da página.
+     * }
      * @return string HTML da seção.
      */
     private static function render_clients_section( $data ) {
