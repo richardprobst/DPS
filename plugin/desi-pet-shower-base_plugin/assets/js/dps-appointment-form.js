@@ -42,6 +42,10 @@
             $('#dps-taxidog-toggle, #dps-tosa-toggle').on('change', this.updateAppointmentSummary.bind(this));
             $('#dps-taxidog-price, #dps-tosa-price').on('input', this.updateAppointmentSummary.bind(this));
             
+            // Eventos para serviços do Services Add-on
+            $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
+            $(document).on('input', '.dps-service-price', this.updateAppointmentSummary.bind(this));
+            
             // FASE 2: Validação e estado do botão submit
             $('form.dps-form').on('submit', this.handleFormSubmit.bind(this));
         },
@@ -153,6 +157,26 @@
                 services.push('Tosa (R$ ' + parseFloat(tosaPrice).toFixed(2) + ')');
             }
             
+            // Coleta serviços do Services Add-on (se existirem)
+            if ($('.dps-service-checkbox').length > 0) {
+                $('.dps-service-checkbox:checked').each(function() {
+                    const checkbox = $(this);
+                    const label = checkbox.closest('label');
+                    const priceInput = label.find('.dps-service-price');
+                    
+                    // Extrai nome do serviço (texto antes do "(R$")
+                    const fullText = label.text().trim();
+                    const serviceName = fullText.split('(R$')[0].trim();
+                    
+                    // Obtém preço do input
+                    const price = parseFloat(priceInput.val()) || 0;
+                    
+                    if (serviceName && price > 0) {
+                        services.push(serviceName + ' (R$ ' + price.toFixed(2) + ')');
+                    }
+                });
+            }
+            
             // Calcula valor estimado
             let totalValue = 0;
             if ($('#dps-taxidog-toggle').is(':checked')) {
@@ -160,6 +184,15 @@
             }
             if ($('#dps-tosa-toggle').is(':checked')) {
                 totalValue += parseFloat($('#dps-tosa-price').val() || 30);
+            }
+            
+            // Soma serviços do Services Add-on
+            if ($('.dps-service-checkbox').length > 0) {
+                $('.dps-service-checkbox:checked').each(function() {
+                    const priceInput = $(this).closest('label').find('.dps-service-price');
+                    const price = parseFloat(priceInput.val()) || 0;
+                    totalValue += price;
+                });
             }
             
             // Verifica se campos mínimos estão preenchidos
