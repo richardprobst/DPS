@@ -1076,8 +1076,8 @@ class DPS_Services_Addon {
      * @return int Valor em centavos.
      */
     private function parse_to_cents( $value ) {
-        if ( function_exists( 'dps_parse_money_br' ) ) {
-            return max( 0, (int) dps_parse_money_br( $value ) );
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return max( 0, (int) DPS_Money_Helper::parse_brazilian_format( $value ) );
         }
 
         $raw = is_string( $value ) ? str_replace( ',', '.', $value ) : $value;

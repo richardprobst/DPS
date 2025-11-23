@@ -355,6 +355,14 @@ Antes de criar uma nova versão oficial:
 - **Services Add-on**: Centralização completa de lógica de serviços e cálculo de preços via `DPS_Services_API` (redução de duplicação, separação de responsabilidades)
 - **Arquitetura**: Centralização completa de lógica financeira no Finance Add-on (eliminação de duplicação, redução de acoplamento)
 - **Agenda Add-on**: Removidas ~55 linhas de SQL direto para `dps_transacoes` (agora usa sincronização automática via hooks do Finance)
+- **Funções monetárias**: Todas as chamadas legadas `dps_format_money_br()` e `dps_parse_money_br()` substituídas por `DPS_Money_Helper`
+  - Finance Add-on: 11 substituições (4x parse, 7x format)
+  - Loyalty Add-on: 2 substituições (format)
+  - Services Add-on: 1 substituição (parse com class_exists)
+  - Client Portal Add-on: 1 substituição (format com class_exists)
+  - Refactoring Examples: 1 substituição (parse)
+  - Funções legadas mantidas como wrappers deprecados para compatibilidade retroativa
+  - Garantia de que `DPS_Money_Helper` é sempre usado internamente, eliminando duplicação de lógica
 - **Finance Add-on**: `cleanup_transactions_for_appointment()` refatorado para delegar para `DPS_Finance_API`
 - **Prevenção de race conditions**: Apenas Finance escreve em dados financeiros (fonte de verdade única)
 - **Melhoria de manutenibilidade**: Mudanças financeiras centralizadas em 1 lugar (Finance Add-on API pública)

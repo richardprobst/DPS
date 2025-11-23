@@ -261,7 +261,7 @@ class DPS_Finance_Addon {
             }
             // Converte valor informado em centavos para evitar imprecisão de ponto flutuante
             $raw_value   = isset( $_POST['partial_value'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_value'] ) ) : '0';
-            $value_cents = dps_parse_money_br( $raw_value );
+            $value_cents = DPS_Money_Helper::parse_brazilian_format( $raw_value );
             $value       = $value_cents / 100;
             $method    = isset( $_POST['partial_method'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_method'] ) ) : '';
             if ( $trans_id && $value > 0 ) {
@@ -316,7 +316,7 @@ class DPS_Finance_Addon {
             
             $date       = isset( $_POST['finance_date'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_date'] ) ) : '';
             $value_raw  = isset( $_POST['finance_value'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_value'] ) ) : '0';
-            $value_cent = dps_parse_money_br( $value_raw );
+            $value_cent = DPS_Money_Helper::parse_brazilian_format( $value_raw );
             $value      = $value_cent / 100;
             $category   = isset( $_POST['finance_category'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_category'] ) ) : '';
             $type       = isset( $_POST['finance_type'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_type'] ) ) : 'receita';
@@ -524,7 +524,7 @@ class DPS_Finance_Addon {
         // Datas no formato dia-mês-ano
         $date     = $trans->data ? date_i18n( 'd-m-Y', strtotime( $trans->data ) ) : current_time( 'd-m-Y' );
         $date_key = $trans->data ? date( 'Y-m-d', strtotime( $trans->data ) ) : date( 'Y-m-d' );
-        $valor_fmt = dps_format_money_br( (int) round( (float) $trans->valor * 100 ) );
+        $valor_fmt = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans->valor * 100 ) );
         // Cliente e pet
         $client_name = '';
         $client_email = '';
@@ -594,7 +594,7 @@ class DPS_Finance_Addon {
                         } else {
                             $price = (float) get_post_meta( $sid, 'service_price', true );
                         }
-                        $service_lines[] = esc_html( $srv->post_title ) . ' - R$ ' . dps_format_money_br( (int) round( $price * 100 ) );
+                        $service_lines[] = esc_html( $srv->post_title ) . ' - R$ ' . DPS_Money_Helper::format_to_brazilian( (int) round( $price * 100 ) );
                     }
                 }
             }
@@ -897,8 +897,8 @@ class DPS_Finance_Addon {
             $trans_pp  = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $partial_id ) );
             if ( $trans_pp ) {
                 $already_paid = $this->get_partial_sum( $partial_id );
-                $desc_value   = dps_format_money_br( (int) round( (float) $trans_pp->valor * 100 ) );
-                $paid_value   = dps_format_money_br( (int) round( (float) $already_paid * 100 ) );
+                $desc_value   = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans_pp->valor * 100 ) );
+                $paid_value   = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $already_paid * 100 ) );
                 echo '<div class="dps-partial-form" style="margin:15px 0;padding:10px;border:1px solid #ddd;background:#f9f9f9;">';
                 echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
                 echo '<form method="post" class="dps-form">';
@@ -1045,7 +1045,7 @@ class DPS_Finance_Addon {
                 echo '<tr class="fin-status-' . esc_attr( $tr->status ) . '">';
                 echo '<td>' . esc_html( date_i18n( 'd-m-Y', strtotime( $tr->data ) ) ) . '</td>';
                 $tr_valor_cents = (int) round( (float) $tr->valor * 100 );
-                echo '<td>R$ ' . esc_html( dps_format_money_br( $tr_valor_cents ) ) . '</td>';
+                echo '<td>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $tr_valor_cents ) ) . '</td>';
                 echo '<td>' . esc_html( $tr->categoria ) . '</td>';
                 echo '<td>' . esc_html( $tr->tipo ) . '</td>';
                 echo '<td>';
@@ -1063,7 +1063,7 @@ class DPS_Finance_Addon {
                 $partial_paid = $this->get_partial_sum( $tr->id );
                 echo '<td>';
                 $partial_paid_cents = (int) round( (float) $partial_paid * 100 );
-                echo 'R$ ' . esc_html( dps_format_money_br( $partial_paid_cents ) ) . ' / R$ ' . esc_html( dps_format_money_br( $tr_valor_cents ) );
+                echo 'R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $partial_paid_cents ) ) . ' / R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $tr_valor_cents ) );
                 if ( $tr->status !== 'pago' ) {
                     // Mantém parâmetros de filtro existentes ao gerar o link de registro
                     $link_params = $_GET;
@@ -1101,7 +1101,7 @@ class DPS_Finance_Addon {
                         $client_name = $client_name ? $client_name : '';
                         $pet_title   = $pet_name !== '-' ? $pet_name : '';
                         $date_str    = date_i18n( 'd-m-Y', strtotime( $tr->data ) );
-                        $valor_str   = dps_format_money_br( $tr_valor_cents );
+                        $valor_str   = DPS_Money_Helper::format_to_brazilian( $tr_valor_cents );
                         $msg = sprintf( 'Olá %s, tudo bem? O atendimento do pet %s em %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: https://link.mercadopago.com.br/desipetshower. Obrigado pela confiança!', $client_name, $pet_title, $date_str, $valor_str );
                         $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-finance-addon' ) . '</a>';
@@ -1193,14 +1193,14 @@ class DPS_Finance_Addon {
                                 if ( strlen( $digits ) == 10 || strlen( $digits ) == 11 ) {
                                     $digits = '55' . $digits;
                                 }
-                                $valor_str = dps_format_money_br( (int) round( (float) $pdata['due'] * 100 ) );
+                                $valor_str = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $pdata['due'] * 100 ) );
                                 $msg = sprintf( 'Olá %s, tudo bem? Há pagamentos pendentes no total de R$ %s relacionados aos seus atendimentos na Desi Pet Shower. Para regularizar, você pode pagar via PIX ou utilizar nosso link: https://link.mercadopago.com.br/desipetshower. Muito obrigado!', $cname, $valor_str );
                                 $phone_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                             }
                         }
                     }
                     $due_cents = (int) round( (float) $pdata['due'] * 100 );
-                    echo '<tr><td>' . esc_html( $cname ?: '-' ) . '</td><td>R$ ' . esc_html( dps_format_money_br( $due_cents ) ) . '</td><td>';
+                    echo '<tr><td>' . esc_html( $cname ?: '-' ) . '</td><td>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $due_cents ) ) . '</td><td>';
                     if ( $phone_link ) {
                         echo '<a href="' . esc_url( $phone_link ) . '" target="_blank">' . esc_html__( 'Cobrar via WhatsApp', 'dps-finance-addon' ) . '</a>';
                     } else {
@@ -1271,7 +1271,7 @@ class DPS_Finance_Addon {
         $valor_cents = (int) get_post_meta( $appt_id, '_dps_total_at_booking', true );
         if ( $valor_cents <= 0 ) {
             $valor_meta  = get_post_meta( $appt_id, 'appointment_total_value', true );
-            $valor_cents = dps_parse_money_br( $valor_meta );
+            $valor_cents = DPS_Money_Helper::parse_brazilian_format( $valor_meta );
         }
         $valor = $valor_cents / 100;
         // Monta descrição a partir de serviços e pet
