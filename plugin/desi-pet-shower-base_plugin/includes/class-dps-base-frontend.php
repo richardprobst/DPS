@@ -512,6 +512,24 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Processa logout do painel via query string
+     */
+    public static function handle_logout() {
+        if ( ! isset( $_GET['dps_logout'] ) ) {
+            return;
+        }
+        
+        // Remove role cookies. Define caminho "/" para que os cookies sejam removidos em todo o site.
+        setcookie( 'dps_base_role', '', time() - 3600, '/' );
+        setcookie( 'dps_role', '', time() - 3600, '/' );
+        
+        // Redireciona removendo parâmetros da URL para evitar loops
+        $redirect_url = remove_query_arg( [ 'dps_logout', 'tab', 'dps_edit', 'id', 'dps_view' ] );
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
      * Processa exclusões de registros via query string
      */
     public static function handle_delete() {
@@ -564,24 +582,12 @@ class DPS_Base_Frontend {
      * Renderiza a aplicação no frontend (abas para clientes, pets e agendamentos)
      */
     public static function render_app() {
-        // Processa ações de salvamento/exclusão (já verificadas por maybe_handle_request)
-        self::handle_request();
-        // Manipula login e logout
-        // Logout via query param
-        if ( isset( $_GET['dps_logout'] ) ) {
-            // Remove role cookies. Define caminho "/" para que os cookies sejam removidos em todo o site.
-            setcookie( 'dps_base_role', '', time() - 3600, '/' );
-            setcookie( 'dps_role', '', time() - 3600, '/' );
-            // Redireciona removendo parâmetros da URL para evitar loops
-            wp_redirect( remove_query_arg( [ 'dps_logout', 'tab', 'dps_edit', 'id', 'dps_view' ] ) );
-            exit;
-        }
-        $login_error = '';
         // Verifica se há visualização específica (detalhes do cliente)
         if ( isset( $_GET['dps_view'] ) && 'client' === $_GET['dps_view'] && isset( $_GET['id'] ) ) {
             $client_id = intval( $_GET['id'] );
             return self::render_client_page( $client_id );
         }
+        
         $can_manage = self::can_manage();
 
         // Verifica se o usuário atual está logado e possui permissão para gerenciar o painel
@@ -589,6 +595,7 @@ class DPS_Base_Frontend {
             $login_url = wp_login_url( get_permalink() );
             return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
+        
         // Sempre mostrar interface completa para usuários administradores
         ob_start();
         echo '<div class="dps-base-wrapper">';
