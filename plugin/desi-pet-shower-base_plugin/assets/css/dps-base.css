@@ -351,7 +351,7 @@
     margin-bottom: 6px;
 }
 .dps-client-select--warning {
-    border-color: #f59e0b !important;
+    border-color: #f59e0b !important; /* Override default border regardless of state */
     background: #fffbeb;
     color: #374151;
 }
@@ -453,7 +453,7 @@
     }
     
     .dps-table-wrapper .dps-table {
-        min-width: 500px;
+        min-width: 450px;
     }
     
     /* Reduzir ainda mais o espaçamento dos grupos */
