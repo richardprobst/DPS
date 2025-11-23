@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – Agenda Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Add-on para o plugin Desi Pet Shower que cria automaticamente uma página com a agenda de atendimentos.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-agenda-addon
