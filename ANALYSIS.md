@@ -608,7 +608,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Shortcodes expostos**: Nenhum
 
 **CPTs, tabelas e opções**:
-- Options: `dps_mp_access_token`, `dps_pix_key` (credenciais Mercado Pago)
+- Options: `dps_mercadopago_access_token`, `dps_pix_key`, `dps_mercadopago_webhook_secret` (credenciais Mercado Pago)
 
 **Hooks consumidos**:
 - Processa webhooks cedo no ciclo de inicialização do WordPress
@@ -625,6 +625,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Observações**:
 - Validação de webhook aplicada apenas quando requisição traz indicadores de notificação do MP
 - Requer token de acesso e chave PIX configurados nas opções
+- **IMPORTANTE**: Configuração do webhook secret é obrigatória para processamento automático de pagamentos. Veja documentação completa em `add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md`
 
 ---
 

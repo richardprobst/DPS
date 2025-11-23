@@ -2,6 +2,8 @@
 
 Integração com Mercado Pago para geração de links de pagamento e processamento de webhooks.
 
+> 📌 **CONFIGURAÇÃO OBRIGATÓRIA**: Para que os pagamentos sejam confirmados automaticamente, você precisa configurar o **Webhook secret**. [**Veja o guia completo aqui →**](WEBHOOK_CONFIGURATION.md)
+
 ## Visão geral
 
 O **Pagamentos Add-on** integra o sistema DPS com o Mercado Pago, permitindo geração automática de links de pagamento PIX/boleto e processamento de notificações de webhook para atualização de status de cobranças. É essencial para pet shops que desejam oferecer pagamento digital aos clientes.
@@ -101,10 +103,13 @@ Este add-on NÃO cria tabelas próprias. Utiliza `dps_transacoes` do Finance Add
 ### Para administradores
 
 1. **Configurar credenciais**:
-   - Acesse configurações do DPS
-   - Insira Access Token do Mercado Pago (obtido no painel do MP)
-   - Insira chave PIX (se aplicável)
-   - Configure URL de webhook no painel do Mercado Pago
+   - Acesse **Desi Pet Shower > Pagamentos** no painel do WordPress
+   - Insira **Access Token** do Mercado Pago (obtido no painel do MP)
+   - Insira **chave PIX** (se aplicável)
+   - Configure **Webhook secret** - veja [guia completo de configuração](WEBHOOK_CONFIGURATION.md)
+   - Configure URL de webhook no painel do Mercado Pago (formato: `https://seusite.com.br?secret=SUA_CHAVE`)
+
+   **⚠️ IMPORTANTE**: O webhook secret é obrigatório para que pagamentos sejam confirmados automaticamente. [Leia o guia completo aqui](WEBHOOK_CONFIGURATION.md).
 
 2. **Gerar link de pagamento**:
    - Via Finance Add-on, localize transação pendente
@@ -117,7 +122,7 @@ Este add-on NÃO cria tabelas próprias. Utiliza `dps_transacoes` do Finance Add
    - Use integração com Agenda Add-on para envio automático
 
 4. **Acompanhar pagamentos**:
-   - Webhooks atualizam status automaticamente
+   - Webhooks atualizam status automaticamente (se configurado corretamente)
    - Verifique transação marcada como "paga" no Finance Add-on
 
 ### Fluxo automático
@@ -128,7 +133,7 @@ Este add-on NÃO cria tabelas próprias. Utiliza `dps_transacoes` do Finance Add
 3. Link é enviado ao cliente (manual ou automático)
 4. Cliente paga via PIX/boleto
 5. Mercado Pago envia webhook para o site
-6. Payment Add-on valida e processa webhook
+6. Payment Add-on valida e processa webhook (verifica webhook secret)
 7. Transação é marcada como "paga" em dps_transacoes
 8. Finance dispara hook dps_finance_booking_paid
 9. Loyalty bonifica pontos (se ativo)

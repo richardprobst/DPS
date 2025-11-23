@@ -149,7 +149,20 @@ class DPS_Payment_Addon {
     public function render_webhook_secret_field() {
         $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
         echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
-        echo '<p class="description">' . esc_html__( 'Defina um secret para validar a origem das notificações do Mercado Pago. Configure o mesmo valor na URL ou header do webhook.', 'dps-payment-addon' ) . '</p>';
+        echo '<p class="description">';
+        echo esc_html__( 'Chave de segurança para validar notificações do Mercado Pago. Gere uma senha forte (mínimo 20 caracteres) e configure no painel do Mercado Pago.', 'dps-payment-addon' );
+        echo '<br>';
+        echo sprintf(
+            /* translators: %s: URL da documentação */
+            esc_html__( 'Formato da URL no Mercado Pago: %s', 'dps-payment-addon' ),
+            '<code>' . esc_html( home_url( '?secret=SUA_CHAVE_AQUI' ) ) . '</code>'
+        );
+        echo '<br>';
+        echo '<strong>' . esc_html__( '📖 Veja o guia completo:', 'dps-payment-addon' ) . ' ';
+        echo '<a href="' . esc_url( plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ ) ) . '" target="_blank">';
+        echo esc_html__( 'Como configurar o Webhook secret', 'dps-payment-addon' );
+        echo '</a></strong>';
+        echo '</p>';
     }
 
     /**
