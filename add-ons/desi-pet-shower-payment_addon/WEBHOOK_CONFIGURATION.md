@@ -211,4 +211,4 @@ Se após seguir este guia você ainda tiver problemas:
 
 - [Documentação de Webhooks do Mercado Pago](https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks)
 - [ANALYSIS.md](../../ANALYSIS.md) - Arquitetura técnica do DPS
-- [Código do Payment Add-on](desi-pet-shower-payment-addon.php) - Implementação da validação (linhas 770-789)
+- [Código do Payment Add-on](desi-pet-shower-payment-addon.php) - Implementação da validação (função `validate_mp_webhook_request()`)

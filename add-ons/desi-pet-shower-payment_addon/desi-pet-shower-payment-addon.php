@@ -148,7 +148,8 @@ class DPS_Payment_Addon {
      */
     public function render_webhook_secret_field() {
         $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
-        $site_url = home_url( '?secret=' . esc_html__( 'SUA_CHAVE_AQUI', 'dps-payment-addon' ) );
+        // URL de exemplo usando placeholder simples sem caracteres especiais
+        $site_url = home_url( '?secret=SUA_CHAVE_AQUI' );
         
         echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
         echo '<p class="description">';
@@ -163,9 +164,10 @@ class DPS_Payment_Addon {
         echo '<code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">' . esc_html( $site_url ) . '</code><br>';
         echo '<small>' . esc_html__( '(Substitua SUA_CHAVE_AQUI pela senha que você definiu acima)', 'dps-payment-addon' ) . '</small><br><br>';
         
-        // Link para documentação completa
+        // Link para documentação completa - usando path relativo do plugin
+        $doc_url = plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ );
         echo '<strong>';
-        echo '<a href="https://github.com/richardprobst/DPS/blob/main/add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md" target="_blank">';
+        echo '<a href="' . esc_url( $doc_url ) . '" target="_blank">';
         echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
         echo '</a></strong>';
         echo ' ' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' );
