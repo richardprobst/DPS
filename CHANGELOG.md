@@ -79,6 +79,7 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Internacionalização (i18n)**: Documentação de text domains oficiais em ANALYSIS.md para facilitar tradução
 - **Client Portal Add-on (v2.0.0)**: Sistema completo de autenticação por token (magic links)
   - **BREAKING CHANGE**: Substituído sistema de login com senha por autenticação via links com token
   - Nova tabela `wp_dps_portal_tokens` para gerenciar tokens de acesso
@@ -286,6 +287,20 @@ Antes de criar uma nova versão oficial:
   - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
 
 #### Fixed (Corrigido)
+- **Internacionalização (i18n)**: Corrigidas strings hardcoded não traduzíveis
+  - **Plugin Base**: 6 strings envolvidas em funções de tradução
+    - Mensagens WhatsApp de cobrança (individual e conjunta) agora usam `__()` com 'desi-pet-shower'
+    - Mensagem de depreciação do shortcode `[dps_configuracoes]` agora usa `__()`
+    - Placeholder "Digite ou selecione" no campo de raça agora usa `esc_attr__()`
+    - Mensagem de sucesso de envio de histórico agora usa `esc_html__()`
+    - Prompt de email JavaScript agora usa `esc_js( __() )`
+  - **Finance Add-on**: 2 mensagens WhatsApp de cobrança agora usam `__()` com 'dps-finance-addon'
+- **Internacionalização (i18n)**: Corrigidos text domains incorretos em 4 add-ons
+  - **Communications Add-on**: Todas strings (20 ocorrências) atualizadas de 'desi-pet-shower' para 'dps-communications-addon'
+  - **Stock Add-on**: Todas strings (15 ocorrências) atualizadas de 'desi-pet-shower' para 'dps-stock-addon'
+  - **Groomers Add-on**: Todas strings (12 ocorrências) atualizadas de 'desi-pet-shower' para 'dps-groomers-addon'
+  - **Loyalty Add-on**: Todas strings (8 ocorrências) atualizadas de 'desi-pet-shower' para 'dps-loyalty-addon'
+  - Headers dos plugins também atualizados para refletir text domains corretos
 - **Agenda Add-on**: Corrigido aviso incorreto de dependência do Finance Add-on no painel administrativo
   - **Problema**: Mensagem "O Finance Add-on é recomendado para funcionalidade completa de cobranças" aparecia mesmo com Finance ativo
   - **Causa raiz**: Verificação `class_exists('DPS_Finance_API')` no construtor executava antes do Finance carregar (ordem alfabética de plugins)

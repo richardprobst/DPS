@@ -176,6 +176,39 @@ echo '<h2>Cadastro de Clientes</h2>';
 
 ## Add-ons complementares (`add-ons/`)
 
+### Text Domains para Internacionalização (i18n)
+
+Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains para internacionalização. Os text domains oficiais são:
+
+**Plugin Base**:
+- `desi-pet-shower` - Plugin base que fornece CPTs e funcionalidades core
+
+**Add-ons**:
+- `dps-agenda-addon` - Agenda e agendamentos
+- `dps-ai` - Assistente de IA
+- `dps-backup-addon` - Backup e restauração
+- `dps-client-portal` - Portal do cliente
+- `dps-communications-addon` - Comunicações (WhatsApp, SMS, email)
+- `dps-finance-addon` - Financeiro (transações, parcelas, cobranças)
+- `dps-groomers-addon` - Gestão de groomers/profissionais
+- `dps-loyalty-addon` - Campanhas e fidelidade
+- `dps-payment-addon` - Integração de pagamentos
+- `dps-push-addon` - Notificações push
+- `dps-registration-addon` - Registro e autenticação
+- `dps-services-addon` - Serviços e produtos
+- `dps-stats-addon` - Estatísticas e relatórios
+- `dps-stock-addon` - Controle de estoque
+- `dps-subscription-addon` - Assinaturas e recorrência
+
+**Boas práticas de i18n**:
+- Use sempre `__()`, `_e()`, `esc_html__()`, `esc_attr__()` ou `esc_html_e()` para strings exibidas ao usuário
+- Sempre especifique o text domain correto do plugin/add-on correspondente
+- Para strings JavaScript em `prompt()` ou `alert()`, use `esc_js( __() )` para escapar e traduzir
+- Mensagens de erro, sucesso, labels de formulário e textos de interface devem sempre ser traduzíveis
+- Dados de negócio (nomes de clientes, endereços hardcoded, etc.) não precisam de tradução
+
+---
+
 ### Agenda (`desi-pet-shower-agenda_addon`)
 
 **Diretório**: `add-ons/desi-pet-shower-agenda_addon`
