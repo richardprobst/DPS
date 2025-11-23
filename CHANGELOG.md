@@ -286,6 +286,12 @@ Antes de criar uma nova versão oficial:
   - Sanitização com `sanitize_textarea_field()` em vez de `wp_kses_post()` para e-mails
 
 #### Fixed (Corrigido)
+- **Agenda Add-on**: Corrigido aviso incorreto de dependência do Finance Add-on no painel administrativo
+  - **Problema**: Mensagem "O Finance Add-on é recomendado para funcionalidade completa de cobranças" aparecia mesmo com Finance ativo
+  - **Causa raiz**: Verificação `class_exists('DPS_Finance_API')` no construtor executava antes do Finance carregar (ordem alfabética de plugins)
+  - **Solução**: Movida verificação do construtor para hook `plugins_loaded` (novo método `check_finance_dependency()`)
+  - **Impacto**: Aviso agora aparece apenas quando Finance realmente não está ativo
+  - **Arquivo alterado**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
 - **Plugin Base**: Corrigido erro "Falha ao atualizar. A resposta não é um JSON válido" ao inserir shortcode `[dps_base]` no Block Editor
   - **Causa raiz**: Método `render_app()` processava logout e POST requests ANTES de iniciar output buffering (`ob_start()`)
   - **Sintoma**: Block Editor falhava ao validar shortcode porque redirects/exits causavam conflito com resposta JSON esperada
