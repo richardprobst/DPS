@@ -1440,7 +1440,7 @@ class DPS_Base_Frontend {
             echo '<li><strong>' . esc_html__( 'Horário:', 'desi-pet-shower' ) . '</strong> <span data-summary="time">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Serviços:', 'desi-pet-shower' ) . '</strong> <span data-summary="services">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Valor estimado:', 'desi-pet-shower' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
-            echo '<li class="dps-appointment-summary__notes" style="display:none;"><strong>' . esc_html__( 'Observações:', 'desi-pet-shower' ) . '</strong> <span data-summary="notes">-</span></li>';
+            echo '<li class="dps-appointment-summary__notes"><strong>' . esc_html__( 'Observações:', 'desi-pet-shower' ) . '</strong> <span data-summary="notes">-</span></li>';
             echo '</ul>';
             echo '</div>';
             
