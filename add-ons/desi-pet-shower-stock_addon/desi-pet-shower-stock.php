@@ -6,7 +6,7 @@
  * Version:           0.1.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
- * Text Domain:       desi-pet-shower
+ * Text Domain:       dps-stock-addon
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -56,8 +56,8 @@ class DPS_Stock_Addon {
             $this->cpt_helper = new DPS_CPT_Helper(
                 self::CPT,
                 [
-                    'name'          => __( 'Estoque', 'desi-pet-shower' ),
-                    'singular_name' => __( 'Item de estoque', 'desi-pet-shower' ),
+                    'name'          => __( 'Estoque', 'dps-stock-addon' ),
+                    'singular_name' => __( 'Item de estoque', 'dps-stock-addon' ),
                 ],
                 [
                     'public'          => false,
@@ -124,7 +124,7 @@ class DPS_Stock_Addon {
     public function register_meta_boxes() {
         add_meta_box(
             'dps_stock_details',
-            __( 'Detalhes do estoque', 'desi-pet-shower' ),
+            __( 'Detalhes do estoque', 'dps-stock-addon' ),
             [ $this, 'render_stock_metabox' ],
             self::CPT,
             'normal',
@@ -148,13 +148,13 @@ class DPS_Stock_Addon {
         $quantity = get_post_meta( $post->ID, 'dps_stock_quantity', true );
         $minimum  = get_post_meta( $post->ID, 'dps_stock_minimum', true );
 
-        echo '<p><label for="dps_stock_unit">' . esc_html__( 'Unidade (ml, un, pct...)', 'desi-pet-shower' ) . '</label><br>';
+        echo '<p><label for="dps_stock_unit">' . esc_html__( 'Unidade (ml, un, pct...)', 'dps-stock-addon' ) . '</label><br>';
         echo '<input type="text" id="dps_stock_unit" name="dps_stock_unit" value="' . esc_attr( $unit ) . '" class="widefat" /></p>';
 
-        echo '<p><label for="dps_stock_quantity">' . esc_html__( 'Quantidade atual', 'desi-pet-shower' ) . '</label><br>';
+        echo '<p><label for="dps_stock_quantity">' . esc_html__( 'Quantidade atual', 'dps-stock-addon' ) . '</label><br>';
         echo '<input type="number" step="0.01" min="0" id="dps_stock_quantity" name="dps_stock_quantity" value="' . esc_attr( $quantity ) . '" class="widefat" /></p>';
 
-        echo '<p><label for="dps_stock_minimum">' . esc_html__( 'Quantidade mínima para alerta', 'desi-pet-shower' ) . '</label><br>';
+        echo '<p><label for="dps_stock_minimum">' . esc_html__( 'Quantidade mínima para alerta', 'dps-stock-addon' ) . '</label><br>';
         echo '<input type="number" step="0.01" min="0" id="dps_stock_minimum" name="dps_stock_minimum" value="' . esc_attr( $minimum ) . '" class="widefat" /></p>';
     }
 
@@ -199,7 +199,7 @@ class DPS_Stock_Addon {
         }
 
         if ( is_user_logged_in() && current_user_can( self::CAPABILITY ) ) {
-            echo '<li><a href="#" class="dps-tab-link" data-tab="estoque">' . esc_html__( 'Estoque', 'desi-pet-shower' ) . '</a></li>';
+            echo '<li><a href="#" class="dps-tab-link" data-tab="estoque">' . esc_html__( 'Estoque', 'dps-stock-addon' ) . '</a></li>';
         }
     }
 
@@ -234,7 +234,7 @@ class DPS_Stock_Addon {
      */
     public function render_stock_page() {
         if ( ! is_user_logged_in() || ! current_user_can( self::CAPABILITY ) ) {
-            return '<div class="dps-section" id="dps-section-estoque"><p>' . esc_html__( 'Você não possui permissão para acessar o estoque.', 'desi-pet-shower' ) . '</p></div>';
+            return '<div class="dps-section" id="dps-section-estoque"><p>' . esc_html__( 'Você não possui permissão para acessar o estoque.', 'dps-stock-addon' ) . '</p></div>';
         }
 
         $only_critical = isset( $_GET['dps_show'] ) && 'critical' === sanitize_text_field( wp_unslash( $_GET['dps_show'] ) );
@@ -263,7 +263,7 @@ class DPS_Stock_Addon {
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-estoque">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'desi-pet-shower' ) . '</h2>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'dps-stock-addon' ) . '</h2>';
 
         echo '<div class="dps-field-group" style="margin-bottom: 24px;">';
         $filter_link = add_query_arg( 'dps_show', $only_critical ? '' : 'critical', $base_link );
@@ -271,26 +271,26 @@ class DPS_Stock_Addon {
             // Remove the filter parameter when showing all
             $filter_link = remove_query_arg( 'dps_show', $base_link );
         }
-        $filter_text = $only_critical ? __( 'Ver todos', 'desi-pet-shower' ) : __( 'Mostrar apenas críticos', 'desi-pet-shower' );
+        $filter_text = $only_critical ? __( 'Ver todos', 'dps-stock-addon' ) : __( 'Mostrar apenas críticos', 'dps-stock-addon' );
         echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
 
         $export_link = add_query_arg( 'dps_stock_export', '1', $base_link );
-        echo '<a class="button" href="' . esc_url( $export_link ) . '">' . esc_html__( 'Exportar estoque (em breve)', 'desi-pet-shower' ) . '</a>';
+        echo '<a class="button" href="' . esc_url( $export_link ) . '">' . esc_html__( 'Exportar estoque (em breve)', 'dps-stock-addon' ) . '</a>';
 
-        echo '<p class="description" style="margin-top: 12px;">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'desi-pet-shower' ) . '</p>';
+        echo '<p class="description" style="margin-top: 12px;">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'dps-stock-addon' ) . '</p>';
         echo '</div>';
         
         echo '<table class="widefat fixed striped">';
         echo '<thead><tr>';
-        echo '<th>' . esc_html__( 'Item', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Unidade', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Qtd. atual', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Qtd. mínima', 'desi-pet-shower' ) . '</th>';
-        echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
+        echo '<th>' . esc_html__( 'Item', 'dps-stock-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Unidade', 'dps-stock-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Qtd. atual', 'dps-stock-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Qtd. mínima', 'dps-stock-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Status', 'dps-stock-addon' ) . '</th>';
         echo '</tr></thead><tbody>';
 
         if ( empty( $items ) ) {
-            echo '<tr><td colspan="5">' . esc_html__( 'Nenhum item cadastrado.', 'desi-pet-shower' ) . '</td></tr>';
+            echo '<tr><td colspan="5">' . esc_html__( 'Nenhum item cadastrado.', 'dps-stock-addon' ) . '</td></tr>';
         }
 
         foreach ( $items as $item ) {
@@ -306,7 +306,7 @@ class DPS_Stock_Addon {
                 continue;
             }
 
-            $status_text = $is_low ? '⚠ ' . __( 'Abaixo do mínimo', 'desi-pet-shower' ) : '✓ ' . __( 'OK', 'desi-pet-shower' );
+            $status_text = $is_low ? '⚠ ' . __( 'Abaixo do mínimo', 'dps-stock-addon' ) : '✓ ' . __( 'OK', 'dps-stock-addon' );
             $status_style = $is_low ? 'color: #f59e0b; font-weight: 600;' : 'color: #10b981;';
 
             echo '<tr>';
@@ -319,7 +319,7 @@ class DPS_Stock_Addon {
             if ( $is_low && isset( $alerts[ $item->ID ] ) ) {
                 $alert_info = $alerts[ $item->ID ];
                 $label      = isset( $alert_info['created_at'] ) ? $alert_info['created_at'] : '';
-                echo '<br><small>' . esc_html__( 'Alerta registrado em:', 'desi-pet-shower' ) . ' ' . esc_html( $label ) . '</small>';
+                echo '<br><small>' . esc_html__( 'Alerta registrado em:', 'dps-stock-addon' ) . ' ' . esc_html( $label ) . '</small>';
             }
 
             echo '</td>';
@@ -331,19 +331,19 @@ class DPS_Stock_Addon {
         // Renderiza paginação se houver múltiplas páginas.
         if ( $total_pages > 1 ) {
             echo '<div class="dps-pagination" style="margin-top: 20px; text-align: center;">';
-            echo '<p>' . esc_html( sprintf( __( 'Página %d de %d (%d itens no total)', 'desi-pet-shower' ), $paged, $total_pages, $total_items ) ) . '</p>';
+            echo '<p>' . esc_html( sprintf( __( 'Página %d de %d (%d itens no total)', 'dps-stock-addon' ), $paged, $total_pages, $total_items ) ) . '</p>';
 
             $prev_link = $paged > 1 ? add_query_arg( [ 'stock_page' => $paged - 1, 'dps_show' => $only_critical ? 'critical' : 'all' ], $base_link ) : '';
             $next_link = $paged < $total_pages ? add_query_arg( [ 'stock_page' => $paged + 1, 'dps_show' => $only_critical ? 'critical' : 'all' ], $base_link ) : '';
 
             if ( $prev_link ) {
-                echo '<a class="button" href="' . esc_url( $prev_link ) . '">&laquo; ' . esc_html__( 'Anterior', 'desi-pet-shower' ) . '</a> ';
+                echo '<a class="button" href="' . esc_url( $prev_link ) . '">&laquo; ' . esc_html__( 'Anterior', 'dps-stock-addon' ) . '</a> ';
             }
 
-            echo '<span style="margin: 0 10px;">' . esc_html( sprintf( __( 'Página %d de %d', 'desi-pet-shower' ), $paged, $total_pages ) ) . '</span>';
+            echo '<span style="margin: 0 10px;">' . esc_html( sprintf( __( 'Página %d de %d', 'dps-stock-addon' ), $paged, $total_pages ) ) . '</span>';
 
             if ( $next_link ) {
-                echo ' <a class="button" href="' . esc_url( $next_link ) . '">' . esc_html__( 'Próxima', 'desi-pet-shower' ) . ' &raquo;</a>';
+                echo ' <a class="button" href="' . esc_url( $next_link ) . '">' . esc_html__( 'Próxima', 'dps-stock-addon' ) . ' &raquo;</a>';
             }
             echo '</div>';
         }
