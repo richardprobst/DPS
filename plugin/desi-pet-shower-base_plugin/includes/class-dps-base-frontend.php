@@ -1383,7 +1383,7 @@ class DPS_Base_Frontend {
             // Preço da tosa com valor padrão 30 se não definido
             $tosa_price_val = $tosa_price !== '' ? $tosa_price : '30';
             echo '<label for="dps-tosa-price">' . esc_html__( 'Preço da tosa (R$)', 'desi-pet-shower' ) . '</label>';
-            echo '<input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" style="width:120px;">';
+            echo '<input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" class="dps-input-money">';
             // Ocorrência da tosa (selecionada via JS conforme frequência)
             echo '<label for="appointment_tosa_occurrence" style="margin-left:20px;">' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '</label>';
             echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select>';
@@ -1401,7 +1401,7 @@ class DPS_Base_Frontend {
             echo '</label>';
             echo '<div id="dps-taxidog-extra" class="dps-conditional-field" style="display:' . ( $taxidog ? 'block' : 'none' ) . ';">';
             echo '<label for="dps-taxidog-price">' . esc_html__( 'Valor TaxiDog (R$)', 'desi-pet-shower' ) . '</label> ';
-            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" style="width:120px;">';
+            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" class="dps-input-money">';
             echo '</div>';
             
             // Hook para add-ons injetarem campos extras (ex.: serviços)
@@ -1440,6 +1440,7 @@ class DPS_Base_Frontend {
             echo '<li><strong>' . esc_html__( 'Horário:', 'desi-pet-shower' ) . '</strong> <span data-summary="time">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Serviços:', 'desi-pet-shower' ) . '</strong> <span data-summary="services">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Valor estimado:', 'desi-pet-shower' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
+            echo '<li class="dps-appointment-summary__notes" style="display:none;"><strong>' . esc_html__( 'Observações:', 'desi-pet-shower' ) . '</strong> <span data-summary="notes">-</span></li>';
             echo '</ul>';
             echo '</div>';
             
