@@ -39,7 +39,7 @@ class DPS_Payment_Addon {
         add_action( 'admin_init', [ $this, 'register_settings' ] );
 
         // Adiciona página de configurações no painel para definir o Access Token do Mercado Pago
-        add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+        add_action( 'admin_menu', [ $this, 'add_settings_page' ], 20 );
 
         // Registra seção e campos das configurações. Também registra o manipulador do webhook
         add_action( 'admin_init', [ $this, 'register_settings_fields' ] );

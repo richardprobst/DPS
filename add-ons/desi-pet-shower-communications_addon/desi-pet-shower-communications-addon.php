@@ -24,7 +24,7 @@ class DPS_Communications_Addon {
 
     public function __construct() {
         // Registra menu admin para comunicações
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
 
         add_action( 'dps_base_after_save_appointment', [ $this, 'handle_after_save_appointment' ], 10, 2 );

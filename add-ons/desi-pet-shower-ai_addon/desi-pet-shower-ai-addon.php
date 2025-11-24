@@ -86,7 +86,7 @@ class DPS_AI_Addon {
      */
     private function __construct() {
         // Registra menu admin
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 
         // Processa salvamento de configurações
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
