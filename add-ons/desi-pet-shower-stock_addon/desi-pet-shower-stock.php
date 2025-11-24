@@ -51,16 +51,18 @@ class DPS_Stock_Addon {
 
         if ( class_exists( 'DPS_CPT_Helper' ) ) {
             $stock_capabilities = [
-                'publish_posts'       => self::CAPABILITY,
-                'edit_posts'          => self::CAPABILITY,
-                'edit_others_posts'   => self::CAPABILITY,
-                'delete_posts'        => self::CAPABILITY,
-                'delete_others_posts' => self::CAPABILITY,
-                'read_private_posts'  => self::CAPABILITY,
-                'edit_post'           => self::CAPABILITY,
-                'delete_post'         => self::CAPABILITY,
-                'read_post'           => self::CAPABILITY,
-                'create_posts'        => self::CAPABILITY,
+                'publish_posts'          => self::CAPABILITY,
+                'edit_posts'             => self::CAPABILITY,
+                'edit_others_posts'      => self::CAPABILITY,
+                'delete_posts'           => self::CAPABILITY,
+                'delete_others_posts'    => self::CAPABILITY,
+                'delete_private_posts'   => self::CAPABILITY,
+                'delete_published_posts' => self::CAPABILITY,
+                'read_private_posts'     => self::CAPABILITY,
+                'edit_post'              => self::CAPABILITY,
+                'delete_post'            => self::CAPABILITY,
+                'read_post'              => self::CAPABILITY,
+                'create_posts'           => self::CAPABILITY,
             ];
 
             $this->cpt_helper = new DPS_CPT_Helper(

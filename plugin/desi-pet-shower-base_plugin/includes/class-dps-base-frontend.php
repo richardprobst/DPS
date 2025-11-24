@@ -1254,6 +1254,7 @@ class DPS_Base_Frontend {
             echo '</div>';
             
             // Alerta de pendências financeiras
+            $initial_pending_rows = [];
             if ( $sel_client && isset( $pending_cache[ $sel_client ] ) ) {
                 $initial_pending_rows = $pending_cache[ $sel_client ];
             }
