@@ -79,6 +79,12 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Fixed (Corrigido)
+- **Menus Administrativos**: Corrigido registro de menus em add-ons
+  - Backup Add-on: submenu agora aparece corretamente sob "Desi Pet Shower" (corrigida ordem de carregamento)
+  - Loyalty Add-on: menus agora aparecem sob "Desi Pet Shower" em vez de criar menu próprio separado
+  - Todos os add-ons com menus agora usam prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe
+  - Estrutura de menus documentada em `ANALYSIS.md` na seção "Estrutura de Menus Administrativos"
+  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "Desi Pet Shower" para facilitar gerenciamento
 - **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
   - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
   - Ajustado tamanho de inputs e selects para mobile (`padding: 8px` em ≤768px, `10px 8px` em ≤480px)

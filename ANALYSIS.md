@@ -209,6 +209,42 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 
 ---
 
+### Estrutura de Menus Administrativos
+
+Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu principal **"Desi Pet Shower"** (slug: `desi-pet-shower`) para manter a interface administrativa organizada e unificada.
+
+**Menu Principal** (criado pelo plugin base):
+- Slug: `desi-pet-shower`
+- Ícone: `dashicons-pets`
+- Capability: `manage_options`
+- Posição: 56 (após "Settings")
+
+**Submenus Ativos** (registrados pelos add-ons):
+- **Backup & Restauração** (`dps-backup`) - Backup Add-on
+- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on
+- **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (CPT)
+- **Comunicações** (`dps-communications`) - Communications Add-on
+- **Notificações** (`dps-notifications`) - Push Add-on
+- **Pagamentos** (`dps-payment-settings`) - Payment Add-on
+- **Cadastro Público** (`dps-registration-settings`) - Registration Add-on
+- **Assistente de IA** (`dps-ai-settings`) - AI Add-on
+
+**Boas práticas para registro de menus**:
+- Sempre use `add_submenu_page()` com `'desi-pet-shower'` como menu pai
+- Use prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe:
+  ```php
+  add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
+  ```
+- Evite criar menus próprios separados (ex: `add_menu_page()` em add-ons)
+- Para CPTs que precisam aparecer no menu, use `add_submenu_page()` apontando para `edit.php?post_type=meu_cpt`
+- Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
+
+**Histórico de correções**:
+- **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
+- **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
+
+---
+
 ### Agenda (`desi-pet-shower-agenda_addon`)
 
 **Diretório**: `add-ons/desi-pet-shower-agenda_addon`
