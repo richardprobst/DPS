@@ -64,7 +64,7 @@ class DPS_Loyalty_Addon {
         add_action( 'init', [ $this, 'register_post_type' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_campaign_metaboxes' ] );
         add_action( 'save_post_dps_campaign', [ $this, 'save_campaign_meta' ] );
-        add_action( 'admin_menu', [ $this, 'register_menu' ] );
+        add_action( 'admin_menu', [ $this, 'register_menu' ], 20 );
         add_action( 'admin_post_dps_loyalty_run_audit', [ $this, 'handle_campaign_audit' ] );
         add_action( 'updated_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         add_action( 'added_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
@@ -173,7 +173,7 @@ class DPS_Loyalty_Addon {
     public function register_menu() {
         // Submenu dentro do menu principal "Desi Pet Shower" (criado pelo plugin base)
         add_submenu_page(
-            'dps-loyalty-addon',
+            'desi-pet-shower',
             __( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ),
             __( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ),
             'manage_options',
@@ -182,7 +182,7 @@ class DPS_Loyalty_Addon {
         );
 
         add_submenu_page(
-            'dps-loyalty-addon',
+            'desi-pet-shower',
             __( 'Campanhas', 'dps-loyalty-addon' ),
             __( 'Campanhas', 'dps-loyalty-addon' ),
             'manage_options',

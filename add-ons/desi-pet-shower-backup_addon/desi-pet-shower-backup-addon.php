@@ -26,8 +26,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * Registra os hooks do add-on.
          */
         public function __construct() {
-            // Registra menu admin para backup
-            add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
+            // Registra menu admin para backup - prioridade 20 para garantir que o menu pai já existe
+            add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 
             add_action( 'admin_post_' . self::ACTION_EXPORT, [ $this, 'handle_export' ] );
             add_action( 'admin_post_nopriv_' . self::ACTION_EXPORT, [ $this, 'deny_anonymous' ] );

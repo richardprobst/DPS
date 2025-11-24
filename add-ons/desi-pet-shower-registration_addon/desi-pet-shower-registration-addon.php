@@ -30,7 +30,7 @@ class DPS_Registration_Addon {
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
 
         // Adiciona página de configurações para API do Google Maps
-        add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
+        add_action( 'admin_menu', [ $this, 'add_settings_page' ], 20 );
         add_action( 'admin_init', [ $this, 'register_settings' ] );
     }
 

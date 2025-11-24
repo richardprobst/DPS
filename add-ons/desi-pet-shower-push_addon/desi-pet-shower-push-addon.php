@@ -33,7 +33,7 @@ class DPS_Push_Notifications_Addon {
         add_action( 'dps_send_daily_report', [ $this, 'send_daily_report' ] );
 
         // Registra menu admin
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 
         // Lida com salvamento do formulário de configurações
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
