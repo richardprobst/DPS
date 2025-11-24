@@ -13,8 +13,8 @@
 .dps-service-price-wrapper {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .dps-service-price {
@@ -61,26 +61,20 @@
 /* Mobile (até 480px) */
 @media (max-width: 480px) {
     .dps-service-price-wrapper {
-        width: 100%;
-        gap: 8px;
+        gap: 4px;
     }
 
     .dps-service-price {
-        width: 100%;
-        max-width: 200px;
-        display: block;
-        margin-top: 4px;
-        margin-left: 24px; /* Alinha com checkbox */
-        flex: 1 1 140px;
+        width: 90px;
+        min-width: 70px;
+        max-width: 110px;
         font-size: 16px; /* Evita zoom automático no iOS */
         padding: 6px 8px;
     }
     
     /* Labels de serviços em mobile */
     .dps-services-fields label {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        display: block;
         padding: 8px 0;
     }
 }
@@ -88,8 +82,9 @@
 /* Mobile pequeno (até 375px) */
 @media (max-width: 375px) {
     .dps-service-price {
-        max-width: 100px;
-        margin-left: 20px;
+        width: 80px;
+        min-width: 60px;
+        max-width: 90px;
     }
 }
 
