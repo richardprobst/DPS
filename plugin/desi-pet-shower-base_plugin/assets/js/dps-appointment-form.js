@@ -16,6 +16,7 @@
             this.updateTypeFields();
             this.updateTosaOptions();
             this.updateTosaFields();
+            this.togglePastPaymentValue();
             this.updateAppointmentSummary();
         },
         
@@ -30,6 +31,9 @@
             $('#appointment_frequency, select[name="appointment_frequency"]').on('change', this.updateTosaOptions.bind(this));
             $('#dps-taxidog-toggle').on('change', this.toggleTaxiDog.bind(this));
             $('#dps-tosa-toggle').on('change', this.updateTosaFields.bind(this));
+            
+            // Eventos para agendamento passado
+            $('#past_payment_status').on('change', this.togglePastPaymentValue.bind(this));
             
             // FASE 2: Eventos para atualização de resumo
             $('#dps-appointment-cliente').on('change', this.updateAppointmentSummary.bind(this));
@@ -67,6 +71,7 @@
         updateTypeFields: function() {
             const type = $('input[name="appointment_type"]:checked').val();
             const isSubscription = (type === 'subscription');
+            const isPast = (type === 'past');
             
             // Exibe ou oculta o seletor de frequência
             $('#dps-appointment-frequency-wrapper').toggle(isSubscription);
@@ -74,8 +79,11 @@
             // Exibe ou oculta campos de tosa somente nas assinaturas
             $('#dps-tosa-wrapper').toggle(isSubscription);
             
+            // Exibe ou oculta campos de pagamento passado
+            $('#dps-past-payment-wrapper').toggle(isPast);
+            
             // Controla campos específicos de cada tipo
-            $('.dps-simple-fields').toggle(!isSubscription);
+            $('.dps-simple-fields').toggle(!isSubscription && !isPast);
             $('.dps-subscription-fields').toggle(isSubscription);
             
             // Atualiza campos de TaxiDog
@@ -89,7 +97,7 @@
             const type = $('input[name="appointment_type"]:checked').val();
             const hasTaxi = $('#dps-taxidog-toggle').is(':checked');
             
-            if (type === 'subscription') {
+            if (type === 'subscription' || type === 'past') {
                 $('#dps-taxidog-extra').hide();
             } else {
                 $('#dps-taxidog-extra').toggle(hasTaxi);
@@ -102,6 +110,14 @@
         updateTosaFields: function() {
             const show = $('#dps-tosa-toggle').is(':checked');
             $('#dps-tosa-fields').toggle(show);
+        },
+        
+        /**
+         * Alterna exibição do campo de valor do pagamento pendente
+         */
+        togglePastPaymentValue: function() {
+            const status = $('#past_payment_status').val();
+            $('#dps-past-payment-value-wrapper').toggle(status === 'pending');
         },
         
         /**

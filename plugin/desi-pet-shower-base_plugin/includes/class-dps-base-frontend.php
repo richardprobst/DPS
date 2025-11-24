@@ -1163,11 +1163,11 @@ class DPS_Base_Frontend {
             echo '<fieldset class="dps-fieldset">';
             echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Tipo de Agendamento', 'desi-pet-shower' ) . '</legend>';
             
-            // Campo: tipo de agendamento (simples ou assinatura)
+            // Campo: tipo de agendamento (simples, assinatura ou passado)
             $appt_type = isset( $meta['appointment_type'] ) ? $meta['appointment_type'] : 'simple';
             echo '<div class="dps-radio-group">';
             echo '<label class="dps-radio-option">';
-            echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . checked( $appt_type, 'subscription', false ) . '>';
+            echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . checked( $appt_type, 'subscription', false ) . checked( $appt_type, 'past', false ) . '>';
             echo '<div class="dps-radio-label">';
             echo '<strong>' . esc_html__( 'Agendamento Simples', 'desi-pet-shower' ) . '</strong>';
             echo '<p>' . esc_html__( 'Atendimento único, sem recorrência', 'desi-pet-shower' ) . '</p>';
@@ -1179,6 +1179,14 @@ class DPS_Base_Frontend {
             echo '<div class="dps-radio-label">';
             echo '<strong>' . esc_html__( 'Agendamento de Assinatura', 'desi-pet-shower' ) . '</strong>';
             echo '<p>' . esc_html__( 'Atendimentos recorrentes (semanal ou quinzenal)', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            echo '</label>';
+            
+            echo '<label class="dps-radio-option">';
+            echo '<input type="radio" name="appointment_type" value="past" ' . checked( $appt_type, 'past', false ) . '>';
+            echo '<div class="dps-radio-label">';
+            echo '<strong>' . esc_html__( 'Agendamento Passado', 'desi-pet-shower' ) . '</strong>';
+            echo '<p>' . esc_html__( 'Registrar atendimento já realizado anteriormente', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
             echo '</label>';
             echo '</div>';
@@ -1424,7 +1432,35 @@ class DPS_Base_Frontend {
             
             echo '</fieldset>';
             
-            // FIELDSET 5: Observações
+            // FIELDSET 5: Informações de Pagamento (apenas para agendamentos passados)
+            $past_payment_status = $meta['past_payment_status'] ?? '';
+            $past_payment_value  = $meta['past_payment_value'] ?? '';
+            $past_display = ( $appt_type === 'past' ) ? 'block' : 'none';
+            echo '<fieldset id="dps-past-payment-wrapper" class="dps-fieldset dps-conditional-field" style="display:' . esc_attr( $past_display ) . ';">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Informações de Pagamento', 'desi-pet-shower' ) . '</legend>';
+            
+            // Campo: status do pagamento
+            echo '<div class="dps-form-field">';
+            echo '<label for="past_payment_status">' . esc_html__( 'Status do Pagamento', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<select name="past_payment_status" id="past_payment_status">';
+            echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
+            echo '<option value="paid" ' . selected( $past_payment_status, 'paid', false ) . '>' . esc_html__( 'Pago', 'desi-pet-shower' ) . '</option>';
+            echo '<option value="pending" ' . selected( $past_payment_status, 'pending', false ) . '>' . esc_html__( 'Pendente', 'desi-pet-shower' ) . '</option>';
+            echo '</select>';
+            echo '<p class="dps-field-hint">' . esc_html__( 'Informe se o pagamento deste atendimento já foi realizado ou está pendente', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            
+            // Campo: valor do pagamento pendente (condicional)
+            $payment_value_display = ( $past_payment_status === 'pending' ) ? 'block' : 'none';
+            echo '<div id="dps-past-payment-value-wrapper" class="dps-form-field dps-conditional-field" style="display:' . esc_attr( $payment_value_display ) . ';">';
+            echo '<label for="past_payment_value">' . esc_html__( 'Valor Pendente (R$)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></label>';
+            echo '<input type="number" step="0.01" min="0" id="past_payment_value" name="past_payment_value" value="' . esc_attr( $past_payment_value ) . '" class="dps-input-money" placeholder="0,00">';
+            echo '<p class="dps-field-hint">' . esc_html__( 'Informe o valor que ainda está pendente de pagamento', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            
+            echo '</fieldset>';
+            
+            // FIELDSET 6: Observações
             echo '<fieldset class="dps-fieldset">';
             echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Observações e Notas', 'desi-pet-shower' ) . '</legend>';
             
@@ -2401,7 +2437,7 @@ class DPS_Base_Frontend {
                     update_post_meta( $appt_id, 'subscription_id', $subs[0]->ID );
                 }
             } else {
-                // Agendamento simples: soma valor total dos serviços selecionados mais valor do TaxiDog
+                // Agendamento simples ou passado: soma valor total dos serviços selecionados mais valor do TaxiDog
                 // dps_service add-on salva appointment_total via POST; recupera
                 $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
                 update_post_meta( $appt_id, 'appointment_total_value', $posted_total );
@@ -2411,6 +2447,23 @@ class DPS_Base_Frontend {
                 } else {
                     delete_post_meta( $appt_id, 'appointment_extra_description' );
                     delete_post_meta( $appt_id, 'appointment_extra_value' );
+                }
+                
+                // Lógica específica para agendamentos passados
+                if ( 'past' === $appt_type ) {
+                    $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
+                    $past_payment_value  = isset( $_POST['past_payment_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['past_payment_value'] ) ) ) : 0;
+                    
+                    update_post_meta( $appt_id, 'past_payment_status', $past_payment_status );
+                    
+                    if ( 'pending' === $past_payment_status && $past_payment_value > 0 ) {
+                        update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
+                    } else {
+                        delete_post_meta( $appt_id, 'past_payment_value' );
+                    }
+                    
+                    // Define status inicial como "realizado" para agendamentos passados
+                    update_post_meta( $appt_id, 'appointment_status', 'realizado' );
                 }
             }
         }
