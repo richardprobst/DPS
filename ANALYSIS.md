@@ -440,22 +440,32 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Permitir atualização de dados pessoais e de pets
 - Exibir histórico de atendimentos e pendências financeiras
 - Integrar com módulo "Indique e Ganhe" quando ativo
+- Sistema de autenticação via tokens (magic links) sem necessidade de senhas
 
 **Shortcodes expostos**:
 - `[dps_client_portal]`: renderiza portal completo do cliente
 - `[dps_client_login]`: exibe formulário de login
 
 **CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
-- Usa sessões PHP próprias para autenticação
+- Não cria CPTs próprios
+- Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
+- Sessões PHP próprias para autenticação independente do WordPress
+- Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Tipos de mensagem customizados para notificações
 
 **Hooks consumidos**:
-- `dps_base_nav_tabs_*`: integra abas ao painel base (quando aplicável)
+- `dps_settings_nav_tabs`: adiciona aba "Portal" nas configurações (prioridade 15)
+- `dps_settings_sections`: renderiza seção de configurações do portal (prioridade 15)
+- `dps_settings_nav_tabs`: adiciona aba "Logins de Clientes" (prioridade 20)
+- `dps_settings_sections`: renderiza seção de gerenciamento de logins (prioridade 20)
 - Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
 
 **Hooks disparados**:
 - `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
+
+**Funções helper globais**:
+- `dps_get_portal_page_url()`: retorna URL da página do portal (configurada ou fallback)
+- `dps_get_portal_page_id()`: retorna ID da página do portal (configurada ou fallback)
 
 **Dependências**:
 - Depende do plugin base para CPTs de clientes e pets
@@ -463,10 +473,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Integra-se com add-on de Fidelidade para exibir código de indicação
 
 **Introduzido em**: v0.1.0 (estimado)
+**Versão atual**: v2.1.0
 
 **Observações**:
 - Já segue padrão modular com estrutura `includes/` e `assets/`
-- Gera credenciais de login automaticamente para novos clientes
+- Sistema de tokens com expiração de 30 minutos e uso único
+- Cleanup automático de tokens antigos via cron job
+- Configuração centralizada da página do portal via interface administrativa
 
 **Análise de Layout e UX**:
 - Consulte `docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md` para análise detalhada de usabilidade (800+ linhas)
