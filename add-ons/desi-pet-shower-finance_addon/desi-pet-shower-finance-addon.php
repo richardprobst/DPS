@@ -1205,17 +1205,23 @@ class DPS_Finance_Addon {
                             $cname = $cpost->post_title;
                             $phone_meta = get_post_meta( $cid, 'client_phone', true );
                             if ( $phone_meta ) {
-                                $digits = preg_replace( '/\D+/', '', $phone_meta );
-                                if ( strlen( $digits ) == 10 || strlen( $digits ) == 11 ) {
-                                    $digits = '55' . $digits;
-                                }
                                 $valor_str = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $pdata['due'] * 100 ) );
                                 $msg = sprintf( 
                                     __( 'Olá %s, tudo bem? Há pagamentos pendentes no total de R$ %s relacionados aos seus atendimentos na Desi Pet Shower. Para regularizar, você pode pagar via PIX ou utilizar nosso link: https://link.mercadopago.com.br/desipetshower. Muito obrigado!', 'dps-finance-addon' ), 
                                     $cname, 
                                     $valor_str 
                                 );
-                                $phone_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                                // Gera link usando helper centralizado
+                                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                    $phone_link = DPS_WhatsApp_Helper::get_link_to_client( $phone_meta, $msg );
+                                } else {
+                                    // Fallback
+                                    $digits = preg_replace( '/\D+/', '', $phone_meta );
+                                    if ( strlen( $digits ) == 10 || strlen( $digits ) == 11 ) {
+                                        $digits = '55' . $digits;
+                                    }
+                                    $phone_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                                }
                             }
                         }
                     }

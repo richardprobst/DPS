@@ -310,17 +310,22 @@ class DPS_Stats_Addon {
                 $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
                 $whats_link = '';
                 if ( $phone_raw ) {
-                    // Remove caracteres não numéricos
-                    $number = preg_replace( '/\D+/', '', $phone_raw );
-                    // Prefixa com 55 se não houver código do país
-                    if ( strlen( $number ) >= 10 && substr( $number, 0, 2 ) !== '55' ) {
-                        $number = '55' . $number;
-                    }
                     $client_name = $client->post_title;
                     $pet_name    = $pet->post_title;
                     $message = sprintf( __( 'Olá %s, esperamos que você e %s estejam bem! Notamos que %s está há mais de 30 dias sem um banho/tosa. Que tal agendar um horário conosco? 😊', 'dps-stats-addon' ), $client_name, $pet_name, $pet_name );
-                    $encoded  = rawurlencode( $message );
-                    $whats_link = '<a href="https://wa.me/' . esc_attr( $number ) . '?text=' . $encoded . '" target="_blank">WhatsApp</a>';
+                    // Gera link usando helper centralizado
+                    if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                        $whats_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw, $message );
+                    } else {
+                        // Fallback
+                        $number = preg_replace( '/\D+/', '', $phone_raw );
+                        if ( strlen( $number ) >= 10 && substr( $number, 0, 2 ) !== '55' ) {
+                            $number = '55' . $number;
+                        }
+                        $encoded  = rawurlencode( $message );
+                        $whats_url = 'https://wa.me/' . $number . '?text=' . $encoded;
+                    }
+                    $whats_link = '<a href="' . esc_url( $whats_url ) . '" target="_blank">WhatsApp</a>';
                 }
                 echo '<tr><td>' . esc_html( $pet->post_title ) . '</td><td>' . esc_html( $client->post_title ) . '</td><td>' . esc_html( $last_fmt ) . '</td><td>' . ( $whats_link ? $whats_link : '-' ) . '</td></tr>';
             }

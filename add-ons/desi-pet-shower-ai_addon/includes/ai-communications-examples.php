@@ -81,10 +81,13 @@ function example_agenda_reminder_whatsapp() {
             return;
         }
         
-        // Formata número e abre WhatsApp
+        // Formata número e abre WhatsApp usando número do cliente
         var formattedPhone = phone.replace(/\D/g, '');
         if (formattedPhone.length >= 10 && formattedPhone.length <= 11) {
-            formattedPhone = '55' + formattedPhone;
+            // Adiciona código do país (55) se não existir
+            if (!formattedPhone.startsWith('55')) {
+                formattedPhone = '55' + formattedPhone;
+            }
         }
         
         var url = 'https://wa.me/' + formattedPhone + '?text=' + encodeURIComponent(message);
