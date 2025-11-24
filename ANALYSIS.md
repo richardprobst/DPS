@@ -207,6 +207,13 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - Mensagens de erro, sucesso, labels de formulário e textos de interface devem sempre ser traduzíveis
 - Dados de negócio (nomes de clientes, endereços hardcoded, etc.) não precisam de tradução
 
+**Carregamento de text domains (WordPress 6.7+)**:
+- Add-ons devem carregar text domains usando `load_plugin_textdomain()` no hook `init` com prioridade 1
+- Instanciar classes principais no hook `init` com prioridade 5 (após carregamento do text domain)
+- Isso garante que strings traduzíveis no constructor sejam traduzidas corretamente
+- Métodos de registro (CPT, taxonomias, etc.) devem ser adicionados ao `init` com prioridade padrão (10)
+- **Não** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
+
 ---
 
 ### Estrutura de Menus Administrativos

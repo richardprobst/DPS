@@ -92,11 +92,14 @@ Antes de criar uma nova versão oficial:
   - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
 
 #### Fixed (Corrigido)
-- **Services Add-on & Loyalty Add-on**: Corrigido carregamento de traduções antes do hook 'init'
-  - Adicionado `load_plugin_textdomain()` no hook 'init' para ambos os add-ons
-  - Movidas strings traduzíveis do construtor para métodos chamados no hook 'init'
-  - **Corrigido**: Notice "Translation loading triggered too early" no WordPress 6.7.0+
-  - **Corrigido**: Mensagem "Acesso negado" ao alterar status de agendamento
+- **Services Add-on & Loyalty Add-on (WordPress 6.7+)**: Corrigido carregamento de traduções antes do hook 'init'
+  - Movido carregamento de text domain para hook 'init' com prioridade 1 (anteriormente prioridade padrão 10)
+  - Movida instanciação de classes para hook 'init' com prioridade 5:
+    - Services Add-on: de escopo global para `init` priority 5
+    - Loyalty Add-on: de hook `plugins_loaded` para `init` priority 5
+  - Ordem de execução garantida: (1) text domain carrega em init:1, (2) classe instancia em init:5, (3) CPT registra em init:10
+  - **Corrigido**: PHP Notice "Translation loading for the domain was triggered too early" no WordPress 6.7.0+
+  - **Documentado**: Padrão de carregamento de text domains no ANALYSIS.md seção "Text Domains para Internacionalização"
 - **Loyalty Add-on**: Corrigido erro de capability check ao atribuir pontos
   - Adicionada verificação se o post existe antes de chamar `get_post_type()`
   - **Corrigido**: Notice "map_meta_cap was called incorrectly" ao verificar capability `delete_post`
