@@ -22,7 +22,7 @@ if ( ! defined( 'DPS_SERVICES_PLUGIN_FILE' ) ) {
 
 /**
  * Carrega o text domain do Services Add-on.
- * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 10).
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
  */
 function dps_services_load_textdomain() {
     load_plugin_textdomain( 'dps-services-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
