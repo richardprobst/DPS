@@ -10,16 +10,23 @@
  */
 
 /* === Inputs de Preço de Serviços === */
+.dps-service-price-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 .dps-service-price {
-    width: 80px;
+    width: 120px;
     max-width: 100%;
-    min-width: 60px;
+    min-width: 88px;
     box-sizing: border-box;
     padding: 4px 6px;
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     font-size: 14px;
-    text-align: right;
+    text-align: left;
     transition: border-color 0.2s ease;
 }
 
@@ -46,19 +53,25 @@
 /* Tablets e telas médias (até 768px) */
 @media (max-width: 768px) {
     .dps-service-price {
-        width: 90px;
+        width: 110px;
         font-size: 15px; /* Ligeiramente maior para mobile */
     }
 }
 
 /* Mobile (até 480px) */
 @media (max-width: 480px) {
+    .dps-service-price-wrapper {
+        width: 100%;
+        gap: 8px;
+    }
+
     .dps-service-price {
         width: 100%;
-        max-width: 120px;
+        max-width: 200px;
         display: block;
         margin-top: 4px;
         margin-left: 24px; /* Alinha com checkbox */
+        flex: 1 1 140px;
         font-size: 16px; /* Evita zoom automático no iOS */
         padding: 6px 8px;
     }
