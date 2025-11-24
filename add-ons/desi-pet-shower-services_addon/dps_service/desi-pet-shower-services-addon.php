@@ -1154,6 +1154,8 @@ class DPS_Services_Addon {
 
 /**
  * Inicializa o add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * dos métodos de registro que usam prioridade padrão (10).
  */
 function dps_services_addon_init() {
 	static $instance = null;
@@ -1164,4 +1166,4 @@ function dps_services_addon_init() {
 	
 	return $instance;
 }
-add_action( 'init', 'dps_services_addon_init', 20 );
+add_action( 'init', 'dps_services_addon_init', 5 );
