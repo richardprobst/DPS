@@ -79,6 +79,14 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Fixed (Corrigido)
+- **Plugin Base**: Corrigido acesso ao painel de gestão para usuários com role `dps_reception`
+  - Função `can_manage()` agora aceita `manage_options` OU qualquer capability DPS específica (`dps_manage_clients`, `dps_manage_pets`, `dps_manage_appointments`)
+  - Removida verificação duplicada de `manage_options` no método `handle_request()` que bloqueava usuários sem permissão de administrador
+  - Usuários com capabilities DPS específicas agora podem acessar o painel e executar ações permitidas
+  - **Corrigido**: Pets vinculados ao cliente não apareciam ao selecionar cliente (causado pelo bloqueio de acesso ao painel)
+  - **Corrigido**: Erro "Acesso negado" ao alterar status de agendamento (causado pela verificação duplicada de permissões)
+  - Atualizada mensagem de erro de login para refletir que não apenas administradores podem acessar
+  - Adicionada documentação explicando modelo de permissões: painel visível para qualquer capability DPS, mas ações protegidas individualmente
 - **Menus Administrativos**: Corrigido registro de menus em add-ons
   - Backup Add-on: submenu agora aparece corretamente sob "Desi Pet Shower" (corrigida ordem de carregamento)
   - Loyalty Add-on: menus agora aparecem sob "Desi Pet Shower" em vez de criar menu próprio separado
