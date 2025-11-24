@@ -1433,8 +1433,8 @@ class DPS_Base_Frontend {
             echo '</fieldset>';
             
             // FIELDSET 5: Informações de Pagamento (apenas para agendamentos passados)
-            $past_payment_status = $meta['past_payment_status'] ?? '';
-            $past_payment_value  = $meta['past_payment_value'] ?? '';
+            $past_payment_status = isset( $meta['past_payment_status'] ) ? $meta['past_payment_status'] : '';
+            $past_payment_value  = isset( $meta['past_payment_value'] ) ? $meta['past_payment_value'] : '';
             $past_display = ( $appt_type === 'past' ) ? 'block' : 'none';
             echo '<fieldset id="dps-past-payment-wrapper" class="dps-fieldset dps-conditional-field" style="display:' . esc_attr( $past_display ) . ';">';
             echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Informações de Pagamento', 'desi-pet-shower' ) . '</legend>';
@@ -2452,11 +2452,11 @@ class DPS_Base_Frontend {
                 // Lógica específica para agendamentos passados
                 if ( 'past' === $appt_type ) {
                     $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
-                    $past_payment_value  = isset( $_POST['past_payment_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['past_payment_value'] ) ) ) : 0;
+                    $past_payment_value  = isset( $_POST['past_payment_value'] ) ? max( 0, floatval( str_replace( ',', '.', wp_unslash( $_POST['past_payment_value'] ) ) ) ) : 0;
                     
                     update_post_meta( $appt_id, 'past_payment_status', $past_payment_status );
                     
-                    if ( 'pending' === $past_payment_status && $past_payment_value > 0 ) {
+                    if ( 'pending' === $past_payment_status ) {
                         update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
                     } else {
                         delete_post_meta( $appt_id, 'past_payment_value' );
