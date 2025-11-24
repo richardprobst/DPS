@@ -39,9 +39,11 @@ $base_url = isset( $base_url ) ? $base_url : '';
 				$phone_raw = get_post_meta( $client->ID, 'client_phone', true );
 				$wa_url = '';
 
-				// Gera link do WhatsApp se houver telefone
-				if ( $phone_raw ) {
-					// Remove caracteres não numéricos
+				// Gera link do WhatsApp se houver telefone usando helper centralizado
+				if ( $phone_raw && class_exists( 'DPS_WhatsApp_Helper' ) ) {
+					$wa_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw );
+				} elseif ( $phone_raw ) {
+					// Fallback para compatibilidade
 					$phone_digits = preg_replace( '/\D+/', '', $phone_raw );
 					$wa_url = 'https://wa.me/' . $phone_digits;
 				}

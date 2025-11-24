@@ -804,8 +804,14 @@ class DPS_Agenda_Addon {
                                 $services_txt
                             );
                             $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
-                            // Link de confirmação com ícone e tooltip (FASE 2)
-                            $confirmation_html = '<a href="' . esc_url( 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
+                            // Link de confirmação com ícone e tooltip usando helper centralizado
+                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $whatsapp, $message );
+                            } else {
+                                // Fallback
+                                $wa_url = 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message );
+                            }
+                            $confirmation_html = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
                         }
                     }
                     echo $confirmation_html;
@@ -837,15 +843,27 @@ class DPS_Agenda_Addon {
                             $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
                             $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
                             $links        = [];
-                            // Link de cobrança com ícone e tooltip (FASE 2)
-                            $links[]      = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
+                            // Link de cobrança com ícone e tooltip usando helper centralizado
+                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
+                            } else {
+                                // Fallback
+                                $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                            }
+                            $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
                             if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
                                 $group_total = number_format_i18n( $group_data['total'], 2 );
                                 $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
                                 $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
                                 $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
-                                // Link de cobrança conjunta com ícone
-                                $links[]     = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg ) ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                                // Link de cobrança conjunta com ícone usando helper centralizado
+                                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                    $wa_url_group = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $group_msg );
+                                } else {
+                                    // Fallback
+                                    $wa_url_group = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg );
+                                }
+                                $links[]     = '<a href="' . esc_url( $wa_url_group ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
                             }
                             echo implode( '<br>', $links );
                         } else {

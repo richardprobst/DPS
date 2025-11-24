@@ -61,23 +61,32 @@ if ( ! defined( 'ABSPATH' ) ) {
             <?php endif; ?>
 
             <?php
-            // Busca número de WhatsApp das configurações
-            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
-            
-            if ( $whatsapp_number ) :
-                // Limpa o número de WhatsApp
-                if ( class_exists( 'DPS_Phone_Helper' ) ) {
-                    $whatsapp_clean = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            // Gera link para o cliente solicitar acesso via WhatsApp
+            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                $whatsapp_message = DPS_WhatsApp_Helper::get_portal_access_request_message();
+                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+            } else {
+                // Fallback: busca número das configurações
+                $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+                
+                if ( $whatsapp_number ) {
+                    if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                        $whatsapp_clean = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                    } else {
+                        $whatsapp_clean = preg_replace( '/\D/', '', $whatsapp_number );
+                    }
+                    
+                    $whatsapp_message = sprintf(
+                        __( 'Olá, gostaria de acesso ao Portal do Cliente. Meu nome é ______ e o nome do meu pet é ______.', 'dps-client-portal' )
+                    );
+                    
+                    $whatsapp_url = 'https://wa.me/' . $whatsapp_clean . '?text=' . rawurlencode( $whatsapp_message );
                 } else {
-                    $whatsapp_clean = preg_replace( '/\D/', '', $whatsapp_number );
+                    $whatsapp_url = '';
                 }
-                
-                // Monta mensagem padrão
-                $whatsapp_message = sprintf(
-                    __( 'Olá, gostaria de acesso ao Portal do Cliente. Meu nome é ______ e o nome do meu pet é ______.', 'dps-client-portal' )
-                );
-                
-                $whatsapp_url = 'https://wa.me/' . $whatsapp_clean . '?text=' . rawurlencode( $whatsapp_message );
+            }
+            
+            if ( $whatsapp_url ) :
             ?>
             
             <a href="<?php echo esc_url( $whatsapp_url ); ?>" 

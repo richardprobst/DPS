@@ -916,17 +916,21 @@ class DPS_Subscription_Addon {
                 if ( $completed_count >= $total_appts ) {
                     // Link para renovar
                     echo ' | <a href="' . esc_url( add_query_arg( [ 'tab' => 'assinaturas', 'dps_renew' => '1', 'id' => $sub->ID ], $base_url ) ) . '">' . esc_html__( 'Renovar', 'dps-subscription-addon' ) . '</a>';
-                    // Link de cobrança via WhatsApp
-                    // Recupera telefone do cliente
+                    // Link de cobrança via WhatsApp usando helper centralizado
                     $client_phone = $cid ? get_post_meta( $cid, 'client_phone', true ) : '';
                     if ( $client_phone ) {
-                        $digits = preg_replace( '/\D+/', '', $client_phone );
-                        if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
-                            $digits = '55' . $digits;
-                        }
                         $payment_link = $this->get_subscription_payment_link( $sub->ID, $price );
                         $msg = $this->build_subscription_whatsapp_message( $sub, $payment_link );
-                        $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                            $wa_link = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
+                        } else {
+                            // Fallback
+                            $digits = preg_replace( '/\D+/', '', $client_phone );
+                            if ( strlen( $digits ) >= 10 && substr( $digits, 0, 2 ) !== '55' ) {
+                                $digits = '55' . $digits;
+                            }
+                            $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                        }
                         echo ' | <a href="' . esc_url( $wa_link ) . '" target="_blank">' . esc_html__( 'Cobrar', 'dps-subscription-addon' ) . '</a>';
                     }
                 }
