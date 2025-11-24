@@ -127,6 +127,11 @@ Antes de criar uma nova versão oficial:
 - **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
 
 #### Fixed (Corrigido)
+- **Plugin Base**: Corrigido seletor de pets não exibir pets ao selecionar cliente no formulário de agendamentos
+  - A função `buildPetOption` usava `$('<label/>', { 'data-owner': ... })` que armazena dados no cache interno do jQuery
+  - A função `applyPetFilters` usava `.attr('data-owner')` para ler, que busca no atributo DOM (sempre vazio)
+  - **Corrigido**: Alterado para usar `.attr()` para definir `data-owner` e `data-search`, garantindo consistência
+  - **Impacto**: Pets do cliente selecionado agora aparecem corretamente na lista de seleção de pets
 - **Plugin Base**: Corrigido aviso PHP `map_meta_cap was called incorrectly` no WordPress 6.1+
   - Adicionadas capabilities de exclusão faltantes (`delete_posts`, `delete_private_posts`, `delete_published_posts`, `delete_others_posts`) nos CPTs:
     - `dps_cliente` (Clientes)
