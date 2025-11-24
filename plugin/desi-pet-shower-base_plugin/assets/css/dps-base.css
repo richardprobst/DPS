@@ -392,6 +392,11 @@
         overflow-x: hidden;
     }
     
+    .dps-form {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
     .dps-nav {
         flex-direction: column;
     }
@@ -428,6 +433,18 @@
     .dps-fieldset {
         padding: 16px;
         margin-bottom: 16px;
+    }
+    
+    /* Reduzir padding em inputs e selects para mobile */
+    .dps-form input[type="text"],
+    .dps-form input[type="email"],
+    .dps-form input[type="date"],
+    .dps-form input[type="time"],
+    .dps-form input[type="number"],
+    .dps-form select,
+    .dps-form textarea {
+        padding: 8px;
+        font-size: 16px;
     }
     
     /* Inputs de valor em mobile */
@@ -596,6 +613,11 @@
 .dps-conditional-field {
     margin-top: 12px;
     padding-left: 24px;
+}
+
+/* Form field wrapper */
+.dps-form-field {
+    margin-bottom: 12px;
 }
 
 /* Inputs de valores monetários */
@@ -847,10 +869,21 @@
         grid-template-columns: 1fr;
     }
     
+    /* Ajustar todos os inputs de formulário em mobile pequeno */
     .dps-form input[type="text"],
     .dps-form input[type="email"],
+    .dps-form input[type="date"],
+    .dps-form input[type="time"],
+    .dps-form input[type="number"],
     .dps-form select {
         font-size: 16px;
+        padding: 10px 8px;
+    }
+    
+    /* Textarea também precisa de ajuste */
+    .dps-form textarea {
+        font-size: 16px;
+        padding: 10px 8px;
     }
     
     .dps-alert {
@@ -871,11 +904,36 @@
         margin: 24px auto 16px auto;
     }
     
+    /* Reduzir largura mínima dos labels em telas pequenas */
+    .dps-appointment-summary__list strong {
+        min-width: 100px;
+        font-size: 13px;
+    }
+    
+    .dps-appointment-summary__list li {
+        font-size: 13px;
+    }
+    
+    .dps-appointment-summary h3 {
+        font-size: 16px;
+    }
+    
     /* Inputs de valor em mobile pequeno */
     .dps-form input.dps-input-money {
         width: 100%;
         max-width: 150px;
         font-size: 16px; /* Evita zoom automático no iOS */
+    }
+    
+    /* Reduzir padding em fieldsets para aproveitar espaço */
+    .dps-fieldset {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    /* Labels e textos menores em telas muito pequenas */
+    .dps-fieldset__legend {
+        font-size: 15px;
     }
 }
 
