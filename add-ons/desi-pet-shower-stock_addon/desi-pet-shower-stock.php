@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-stock-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -14,6 +15,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Carrega o text domain do Stock Add-on.
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ */
+function dps_stock_load_textdomain() {
+    load_plugin_textdomain( 'dps-stock-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_stock_load_textdomain', 1 );
 
 /**
  * Classe principal do add-on de estoque.
@@ -494,8 +504,16 @@ class DPS_Stock_Addon {
     }
 }
 
-add_action( 'plugins_loaded', function() {
-    new DPS_Stock_Addon();
-} );
+/**
+ * Inicializa o Stock Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * de outros registros (prioridade 10).
+ */
+function dps_stock_init_addon() {
+    if ( class_exists( 'DPS_Stock_Addon' ) ) {
+        new DPS_Stock_Addon();
+    }
+}
+add_action( 'init', 'dps_stock_init_addon', 5 );
 
 register_activation_hook( __FILE__, [ 'DPS_Stock_Addon', 'activate' ] );

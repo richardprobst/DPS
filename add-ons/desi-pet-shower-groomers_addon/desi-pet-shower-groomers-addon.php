@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-groomers-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * License:           GPL-2.0+
@@ -16,6 +17,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Carrega o text domain do Groomers Add-on.
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ */
+function dps_groomers_load_textdomain() {
+    load_plugin_textdomain( 'dps-groomers-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_groomers_load_textdomain', 1 );
 
 class DPS_Groomers_Addon {
 
@@ -526,4 +536,15 @@ class DPS_Groomers_Addon {
 }
 
 register_activation_hook( __FILE__, [ 'DPS_Groomers_Addon', 'activate' ] );
-new DPS_Groomers_Addon();
+
+/**
+ * Inicializa o Groomers Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * de outros registros (prioridade 10).
+ */
+function dps_groomers_init_addon() {
+    if ( class_exists( 'DPS_Groomers_Addon' ) ) {
+        new DPS_Groomers_Addon();
+    }
+}
+add_action( 'init', 'dps_groomers_init_addon', 5 );

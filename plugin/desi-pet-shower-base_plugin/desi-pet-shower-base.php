@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       desi-pet-shower
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -43,12 +44,15 @@ require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 if ( ! function_exists( 'dps_load_textdomain' ) ) {
     /**
      * Carrega o text domain do plugin base.
+     * 
+     * Usa hook 'init' conforme WordPress 6.7+ para garantir que strings
+     * traduzíveis sejam carregadas corretamente antes de qualquer uso.
      */
     function dps_load_textdomain() {
         load_plugin_textdomain( 'desi-pet-shower', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 }
-add_action( 'plugins_loaded', 'dps_load_textdomain' );
+add_action( 'init', 'dps_load_textdomain', 1 );
 
 /**
  * Classe principal do plugin

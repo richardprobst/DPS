@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-loyalty-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */

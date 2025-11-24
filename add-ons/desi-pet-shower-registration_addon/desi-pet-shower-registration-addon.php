@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-registration-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * License:           GPL-2.0+
@@ -16,6 +17,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Carrega o text domain do Registration Add-on.
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ */
+function dps_registration_load_textdomain() {
+    load_plugin_textdomain( 'dps-registration-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_registration_load_textdomain', 1 );
 
 class DPS_Registration_Addon {
 
@@ -635,4 +645,14 @@ class DPS_Registration_Addon {
     }
 }
 
-new DPS_Registration_Addon();
+/**
+ * Inicializa o Registration Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * de outros registros (prioridade 10).
+ */
+function dps_registration_init_addon() {
+    if ( class_exists( 'DPS_Registration_Addon' ) ) {
+        new DPS_Registration_Addon();
+    }
+}
+add_action( 'init', 'dps_registration_init_addon', 5 );
