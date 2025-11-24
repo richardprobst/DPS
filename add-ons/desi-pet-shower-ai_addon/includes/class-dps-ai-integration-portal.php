@@ -46,8 +46,8 @@ class DPS_AI_Integration_Portal {
      * Construtor privado. Registra hooks necessários.
      */
     private function __construct() {
-        // Adiciona widget ao Portal do Cliente
-        add_action( 'dps_client_portal_after_content', [ $this, 'render_ai_widget' ] );
+        // Adiciona widget ao Portal do Cliente (antes do conteúdo, no topo)
+        add_action( 'dps_client_portal_before_content', [ $this, 'render_ai_widget' ] );
 
         // Registra handler AJAX para perguntas (usuários logados e não logados)
         add_action( 'wp_ajax_dps_ai_portal_ask', [ $this, 'handle_ajax_ask' ] );

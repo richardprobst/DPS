@@ -180,6 +180,16 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Método público para obter o ID do cliente autenticado.
+     * Permite que add-ons acessem o cliente logado no portal.
+     *
+     * @return int ID do cliente autenticado ou 0 se não autenticado
+     */
+    public function get_current_client_id() {
+        return $this->get_authenticated_client_id();
+    }
+
+    /**
      * Retorna o ID do cliente associado ao usuário logado.
      *
      * @return int
@@ -758,6 +768,10 @@ final class DPS_Client_Portal {
         echo '<a href="#mensagens" class="dps-portal-nav__link">' . esc_html__( 'Mensagens', 'dps-client-portal' ) . '</a>';
         echo '<a href="#dados" class="dps-portal-nav__link">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</a>';
         echo '</nav>';
+        
+        // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
+        do_action( 'dps_client_portal_before_content', $client_id );
+        
         // Renderiza seções utilizando o ID do cliente
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
