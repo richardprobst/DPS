@@ -92,6 +92,13 @@ Antes de criar uma nova versão oficial:
   - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
 
 #### Fixed (Corrigido)
+- **AI Add-on & Client Portal Add-on**: Corrigido assistente virtual no Portal do Cliente
+  - Adicionado método público `get_current_client_id()` na classe `DPS_Client_Portal` para permitir acesso externo ao ID do cliente autenticado
+  - Criado novo hook `dps_client_portal_before_content` que dispara após a navegação e antes das seções de conteúdo
+  - Movido widget do assistente virtual de `dps_client_portal_after_content` para `dps_client_portal_before_content`
+  - **Corrigido**: Erro "Você precisa estar logado para usar o assistente" ao acessar portal via link de acesso
+  - **Corrigido**: Posicionamento do assistente agora é no topo da página (após navegação), conforme especificação
+  - **Impacto**: Assistente virtual agora funciona corretamente quando cliente acessa via token/link permanente
 - **Services Add-on & Loyalty Add-on (WordPress 6.7+)**: Corrigido carregamento de traduções antes do hook 'init'
   - Movido carregamento de text domain para hook 'init' com prioridade 1 (anteriormente prioridade padrão 10)
   - Movida instanciação de classes para hook 'init' com prioridade 5:
