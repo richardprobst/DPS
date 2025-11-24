@@ -15,6 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Carrega o text domain do Loyalty Add-on.
+ */
+function dps_loyalty_load_textdomain() {
+    load_plugin_textdomain( 'dps-loyalty-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_loyalty_load_textdomain' );
+
 class DPS_Loyalty_Addon {
 
     const OPTION_KEY = 'dps_loyalty_settings';
@@ -27,40 +35,7 @@ class DPS_Loyalty_Addon {
     private $cpt_helper;
 
     public function __construct() {
-        if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
-            require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
-        }
-
-        if ( class_exists( 'DPS_CPT_Helper' ) ) {
-            $this->cpt_helper = new DPS_CPT_Helper(
-                'dps_campaign',
-                [
-                    'name'               => _x( 'Campanhas', 'post type general name', 'dps-loyalty-addon' ),
-                    'singular_name'      => _x( 'Campanha', 'post type singular name', 'dps-loyalty-addon' ),
-                    'menu_name'          => _x( 'Campanhas', 'admin menu', 'dps-loyalty-addon' ),
-                    'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'dps-loyalty-addon' ),
-                    'add_new'            => _x( 'Adicionar nova', 'campaign', 'dps-loyalty-addon' ),
-                    'add_new_item'       => __( 'Adicionar nova campanha', 'dps-loyalty-addon' ),
-                    'new_item'           => __( 'Nova campanha', 'dps-loyalty-addon' ),
-                    'edit_item'          => __( 'Editar campanha', 'dps-loyalty-addon' ),
-                    'view_item'          => __( 'Ver campanha', 'dps-loyalty-addon' ),
-                    'all_items'          => __( 'Todas as campanhas', 'dps-loyalty-addon' ),
-                    'search_items'       => __( 'Buscar campanhas', 'dps-loyalty-addon' ),
-                    'not_found'          => __( 'Nenhuma campanha encontrada.', 'dps-loyalty-addon' ),
-                    'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'dps-loyalty-addon' ),
-                ],
-                [
-                    'public'          => false,
-                    'show_ui'         => true,
-                    'show_in_menu'    => false,
-                    'supports'        => [ 'title', 'editor' ],
-                    'capability_type' => 'post',
-                    'map_meta_cap'    => true,
-                    'has_archive'     => false,
-                ]
-            );
-        }
-
+        // Registra CPT (o helper será inicializado dentro do método register_post_type)
         add_action( 'init', [ $this, 'register_post_type' ] );
         add_action( 'add_meta_boxes', [ $this, 'register_campaign_metaboxes' ] );
         add_action( 'save_post_dps_campaign', [ $this, 'save_campaign_meta' ] );
@@ -71,11 +46,46 @@ class DPS_Loyalty_Addon {
     }
 
     public function register_post_type() {
+        // Inicializa o CPT helper se necessário
         if ( ! $this->cpt_helper ) {
-            return;
+            if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
+                require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
+            }
+
+            if ( class_exists( 'DPS_CPT_Helper' ) ) {
+                $this->cpt_helper = new DPS_CPT_Helper(
+                    'dps_campaign',
+                    [
+                        'name'               => _x( 'Campanhas', 'post type general name', 'dps-loyalty-addon' ),
+                        'singular_name'      => _x( 'Campanha', 'post type singular name', 'dps-loyalty-addon' ),
+                        'menu_name'          => _x( 'Campanhas', 'admin menu', 'dps-loyalty-addon' ),
+                        'name_admin_bar'     => _x( 'Campanha', 'add new on admin bar', 'dps-loyalty-addon' ),
+                        'add_new'            => _x( 'Adicionar nova', 'campaign', 'dps-loyalty-addon' ),
+                        'add_new_item'       => __( 'Adicionar nova campanha', 'dps-loyalty-addon' ),
+                        'new_item'           => __( 'Nova campanha', 'dps-loyalty-addon' ),
+                        'edit_item'          => __( 'Editar campanha', 'dps-loyalty-addon' ),
+                        'view_item'          => __( 'Ver campanha', 'dps-loyalty-addon' ),
+                        'all_items'          => __( 'Todas as campanhas', 'dps-loyalty-addon' ),
+                        'search_items'       => __( 'Buscar campanhas', 'dps-loyalty-addon' ),
+                        'not_found'          => __( 'Nenhuma campanha encontrada.', 'dps-loyalty-addon' ),
+                        'not_found_in_trash' => __( 'Nenhuma campanha na lixeira.', 'dps-loyalty-addon' ),
+                    ],
+                    [
+                        'public'          => false,
+                        'show_ui'         => true,
+                        'show_in_menu'    => false,
+                        'supports'        => [ 'title', 'editor' ],
+                        'capability_type' => 'post',
+                        'map_meta_cap'    => true,
+                        'has_archive'     => false,
+                    ]
+                );
+            }
         }
 
-        $this->cpt_helper->register();
+        if ( $this->cpt_helper ) {
+            $this->cpt_helper->register();
+        }
     }
 
     public function register_campaign_metaboxes() {
@@ -566,7 +576,9 @@ class DPS_Loyalty_Addon {
             return;
         }
 
-        if ( get_post_type( $object_id ) !== 'dps_agendamento' ) {
+        // Verifica se o post existe antes de chamar get_post_type para evitar erro de map_meta_cap
+        $post = get_post( $object_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
             return;
         }
 
