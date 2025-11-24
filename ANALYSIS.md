@@ -524,7 +524,11 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
 
 **Hooks disparados**:
+- `dps_client_portal_before_content`: disparado após o menu de navegação e antes das seções de conteúdo; passa $client_id como parâmetro; útil para adicionar conteúdo no topo do portal (ex: widgets, assistentes)
 - `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
+
+**Métodos públicos da classe `DPS_Client_Portal`**:
+- `get_current_client_id()`: retorna o ID do cliente autenticado via sessão ou usuário WordPress (0 se não autenticado); permite que add-ons obtenham o cliente logado no portal
 
 **Funções helper globais**:
 - `dps_get_portal_page_url()`: retorna URL da página do portal (configurada ou fallback)
@@ -570,7 +574,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Option: `dps_ai_settings` (armazena configurações: enabled, api_key, model, temperature, timeout, max_tokens)
 
 **Hooks consumidos**:
-- `dps_client_portal_after_content`: renderiza widget de chat após conteúdo do portal
+- `dps_client_portal_before_content`: renderiza widget de chat no topo do portal (após navegação, antes das seções)
 
 **Hooks disparados**: Nenhum
 
