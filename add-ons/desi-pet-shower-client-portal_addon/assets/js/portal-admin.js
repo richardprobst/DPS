@@ -73,7 +73,8 @@
                 const urlPermanent = $button.data('url-permanent');
                 
                 if (!clientId || !urlTemporary || !urlPermanent) {
-                    alert('Dados incompletos.');
+                    console.error('Missing data attributes:', { clientId, urlTemporary, urlPermanent });
+                    alert('Erro: dados do cliente não encontrados. Recarregue a página e tente novamente.');
                     return;
                 }
                 
@@ -88,9 +89,26 @@
                 // Reseta seleção para temporário
                 $modal.find('input[name="dps_token_type"][value="login"]').prop('checked', true);
                 
+                // Atualiza classes visuais para fallback do :has() selector
+                TokenAdmin.updateRadioStyles($modal);
+                
                 // Abre modal
                 ModalManager.open('dps-token-type-modal');
             });
+            
+            // Bind para atualizar estilos quando radio é alterado (fallback para :has())
+            $(document).on('change', '#dps-token-type-modal input[name="dps_token_type"]', function() {
+                const $modal = $('#dps-token-type-modal');
+                TokenAdmin.updateRadioStyles($modal);
+            });
+        },
+        
+        /**
+         * Atualiza estilos visuais dos radio buttons (fallback para :has())
+         */
+        updateRadioStyles: function($modal) {
+            $modal.find('label').removeClass('dps-radio-checked');
+            $modal.find('input[name="dps_token_type"]:checked').closest('label').addClass('dps-radio-checked');
         },
 
         /**
@@ -106,7 +124,8 @@
                 const urlPermanent = $modal.data('url-permanent');
                 
                 if (!tokenType || !urlTemporary || !urlPermanent) {
-                    alert('Erro ao obter dados. Tente novamente.');
+                    console.error('Missing modal data:', { tokenType, urlTemporary, urlPermanent });
+                    alert('Erro ao processar solicitação. Por favor, feche o modal e tente novamente.');
                     return;
                 }
                 

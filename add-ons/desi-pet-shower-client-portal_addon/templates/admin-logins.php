@@ -325,7 +325,18 @@ if ( 'admin' === $context ) {
     color: #0ea5e9;
 }
 
+/* Estilo para label com radio selecionado - compatível com navegadores sem :has() */
+#dps-token-type-modal label {
+    transition: all 0.2s;
+}
+
 #dps-token-type-modal label:has(input[type="radio"]:checked) {
+    border-color: #0ea5e9;
+    background-color: #f0f9ff;
+}
+
+/* Fallback para navegadores sem suporte a :has() - será aplicado via JS */
+#dps-token-type-modal label.dps-radio-checked {
     border-color: #0ea5e9;
     background-color: #f0f9ff;
 }
