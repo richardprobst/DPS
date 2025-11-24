@@ -79,6 +79,17 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **DPS_WhatsApp_Helper**: Classe helper centralizada para geração de links WhatsApp
+  - Método `get_link_to_team()` para cliente contatar equipe (usa número configurado)
+  - Método `get_link_to_client()` para equipe contatar cliente (formata número automaticamente)
+  - Método `get_share_link()` para compartilhamento genérico (ex: fotos de pets)
+  - Método `get_team_phone()` para obter número da equipe (configurável ou padrão)
+  - Métodos auxiliares para mensagens padrão (portal, agendamento, cobrança)
+  - Constante padrão `TEAM_PHONE = '5515991606299'` (+55 15 99160-6299)
+- **Configuração de WhatsApp**: Campo "Número do WhatsApp da Equipe" nas configurações de Comunicações
+  - Option `dps_whatsapp_number` para armazenar número da equipe (padrão: +55 15 99160-6299)
+  - Número configurável centralmente em Admin → Desi Pet Shower → Comunicações
+  - Suporte a filtro `dps_team_whatsapp_number` para customização programática
 - **Plugin Base**: Nova opção "Agendamento Passado" no formulário de agendamentos
   - Adicionada terceira opção de tipo de agendamento para registrar atendimentos já realizados
   - Novo fieldset "Informações de Pagamento" com campos específicos:
@@ -101,7 +112,25 @@ Antes de criar uma nova versão oficial:
   - Tokens permanentes facilitam acesso recorrente sem necessidade de gerar novos links
   - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
 
+#### Changed (Mudado)
+- **Lista de Clientes**: Atualizada para usar `DPS_WhatsApp_Helper::get_link_to_client()`
+- **Add-on de Agenda**: Botões de confirmação e cobrança (individual e conjunta) usam helper centralizado
+- **Add-on de Assinaturas**: Botão de cobrança de renovação usa helper centralizado
+- **Add-on de Finance**: Botão de cobrança em pendências financeiras usa helper centralizado
+- **Add-on de Stats**: Link de reengajamento para clientes inativos usa helper centralizado
+- **Portal do Cliente**: Todos os botões WhatsApp atualizados:
+  - Botão "Quero acesso ao meu portal" usa número configurado da equipe
+  - Envio de link do portal via WhatsApp usa helper para formatar número do cliente
+  - Botão "Agendar via WhatsApp" (empty state) usa número configurado da equipe
+  - Botão "Compartilhar via WhatsApp" (fotos de pets) usa helper para compartilhamento
+- **Add-on de AI**: Função JavaScript `openWhatsAppWithMessage` melhorada com comentários
+- **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
+
 #### Fixed (Corrigido)
+- Número da equipe agora é configurável e centralizado (antes estava hardcoded em vários locais)
+- Formatação de números de telefone padronizada em todo o sistema usando `DPS_Phone_Helper`
+- Portal do Cliente agora usa número da equipe configurado ao invés de placeholder `5551999999999`
+- Todos os links WhatsApp agora formatam números de clientes corretamente (adicionam código do país automaticamente)
 - **AI Add-on & Client Portal Add-on**: Corrigido assistente virtual no Portal do Cliente
   - Adicionado método público `get_current_client_id()` na classe `DPS_Client_Portal` para permitir acesso externo ao ID do cliente autenticado
   - Criado novo hook `dps_client_portal_before_content` que dispara após a navegação e antes das seções de conteúdo
@@ -145,6 +174,12 @@ Antes de criar uma nova versão oficial:
     - Labels strong: `min-width: 100px` (era 140px) em ≤480px
     - Font-size reduzido para 13px (itens) e 16px (título H3)
   - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
+
+#### Security (Segurança)
+- Todas as URLs de WhatsApp usam `esc_url()` para escape adequado
+- Mensagens de WhatsApp usam `rawurlencode()` para encoding seguro de caracteres especiais
+- Números de telefone são sanitizados via `sanitize_text_field()` antes de salvar configuração
+- Helper `DPS_WhatsApp_Helper` implementa validação de entrada para prevenir links malformados
 
 #### Documentation (Documentação)
 - **ANALYSIS.md**: Atualizada seção "Portal do Cliente" com novos hooks, funções helper e versão 2.1.0
