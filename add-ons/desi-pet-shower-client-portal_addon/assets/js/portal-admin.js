@@ -55,6 +55,67 @@
             this.bindEmailPreviewButtons();
             this.bindModalCloseButtons();
             this.bindEmailSendButton();
+            this.bindGenerateTokenButtons();
+            this.bindConfirmGenerateButton();
+        },
+
+        /**
+         * Bind para botões de gerar token
+         */
+        bindGenerateTokenButtons: function() {
+            $(document).on('click', '.dps-generate-token-btn', function(e) {
+                e.preventDefault();
+                
+                const $button = $(this);
+                const clientId = $button.data('client-id');
+                const clientName = $button.data('client-name');
+                const urlTemporary = $button.data('url-temporary');
+                const urlPermanent = $button.data('url-permanent');
+                
+                if (!clientId || !urlTemporary || !urlPermanent) {
+                    alert('Dados incompletos.');
+                    return;
+                }
+                
+                // Armazena dados no modal
+                const $modal = $('#dps-token-type-modal');
+                $modal.data('url-temporary', urlTemporary);
+                $modal.data('url-permanent', urlPermanent);
+                
+                // Atualiza nome do cliente no modal
+                $modal.find('#dps-token-client-name').text('Cliente: ' + clientName);
+                
+                // Reseta seleção para temporário
+                $modal.find('input[name="dps_token_type"][value="login"]').prop('checked', true);
+                
+                // Abre modal
+                ModalManager.open('dps-token-type-modal');
+            });
+        },
+
+        /**
+         * Bind para botão de confirmar geração
+         */
+        bindConfirmGenerateButton: function() {
+            $(document).on('click', '#dps-confirm-generate-token', function(e) {
+                e.preventDefault();
+                
+                const $modal = $('#dps-token-type-modal');
+                const tokenType = $modal.find('input[name="dps_token_type"]:checked').val();
+                const urlTemporary = $modal.data('url-temporary');
+                const urlPermanent = $modal.data('url-permanent');
+                
+                if (!tokenType || !urlTemporary || !urlPermanent) {
+                    alert('Erro ao obter dados. Tente novamente.');
+                    return;
+                }
+                
+                // Seleciona URL apropriada
+                const targetUrl = (tokenType === 'permanent') ? urlPermanent : urlTemporary;
+                
+                // Redireciona para gerar o token
+                window.location.href = targetUrl;
+            });
         },
 
         /**
