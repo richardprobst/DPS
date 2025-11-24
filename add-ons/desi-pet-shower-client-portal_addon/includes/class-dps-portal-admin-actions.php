@@ -203,15 +203,18 @@ final class DPS_Portal_Admin_Actions {
 
         $message = $this->get_whatsapp_message_template( $client_name, $pet_name, $access_url );
 
-        // Formata telefone
-        if ( class_exists( 'DPS_Phone_Helper' ) ) {
-            $phone_clean = DPS_Phone_Helper::format_for_whatsapp( $phone );
+        // Gera link do WhatsApp usando helper centralizado
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_client( $phone, $message );
         } else {
-            $phone_clean = preg_replace( '/\D/', '', $phone );
+            // Fallback para compatibilidade
+            if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                $phone_clean = DPS_Phone_Helper::format_for_whatsapp( $phone );
+            } else {
+                $phone_clean = preg_replace( '/\D/', '', $phone );
+            }
+            $whatsapp_url = 'https://wa.me/' . $phone_clean . '?text=' . rawurlencode( $message );
         }
-
-        // Monta URL do WhatsApp
-        $whatsapp_url = 'https://wa.me/' . $phone_clean . '?text=' . rawurlencode( $message );
 
         // Redireciona para WhatsApp
         wp_safe_redirect( $whatsapp_url );

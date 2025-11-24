@@ -867,9 +867,19 @@ final class DPS_Client_Portal {
             echo '<div class="dps-empty-state">';
             echo '<div class="dps-empty-state__icon">📅</div>';
             echo '<div class="dps-empty-state__message">' . esc_html__( 'Você não tem agendamentos futuros.', 'dps-client-portal' ) . '</div>';
-            $whatsapp_number = '5551999999999'; // TODO: configurar número do WhatsApp
-            $whatsapp_text = urlencode( 'Olá! Gostaria de agendar um serviço.' );
-            $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
+            // Gera link para agendar via WhatsApp usando helper centralizado
+            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
+                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+            } else {
+                // Fallback
+                $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $whatsapp_text = urlencode( 'Olá! Gostaria de agendar um serviço.' );
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
+            }
             echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action button button-primary">💬 ' . esc_html__( 'Agendar via WhatsApp', 'dps-client-portal' ) . '</a>';
             echo '</div>';
         }
@@ -1029,9 +1039,15 @@ final class DPS_Client_Portal {
                 if ( $photo_id ) {
                     $img_url = wp_get_attachment_image_url( $photo_id, 'medium' );
                     if ( $img_url ) {
-                        // Link para compartilhar via WhatsApp
-                        $wa_text = urlencode( sprintf( __( 'Olha que fofo estou após o banho/tosa no Desi Pet Shower! %s', 'dps-client-portal' ), $img_url ) );
-                        $wa_link = 'https://wa.me/?text=' . $wa_text;
+                        // Link para compartilhar via WhatsApp usando helper centralizado
+                        $share_message = sprintf( __( 'Olha que fofo estou após o banho/tosa no Desi Pet Shower! %s', 'dps-client-portal' ), $img_url );
+                        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                            $wa_link = DPS_WhatsApp_Helper::get_share_link( $share_message );
+                        } else {
+                            // Fallback
+                            $wa_text = urlencode( $share_message );
+                            $wa_link = 'https://wa.me/?text=' . $wa_text;
+                        }
                         echo '<a href="' . esc_url( $img_url ) . '" target="_blank"><img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet_name ) . '" style="max-width:100%;height:auto;" /></a><br>';
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" class="dps-share-whatsapp">' . esc_html__( 'Compartilhar via WhatsApp', 'dps-client-portal' ) . '</a>';
                     } else {

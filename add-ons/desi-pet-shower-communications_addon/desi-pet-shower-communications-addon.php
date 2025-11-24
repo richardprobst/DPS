@@ -82,15 +82,27 @@ class DPS_Communications_Addon {
                 <input type="hidden" name="dps_comm_action" value="save_settings" />
                 <?php wp_nonce_field( 'dps_comm_save', 'dps_comm_nonce' ); ?>
 
+                <h2><?php esc_html_e( 'Configurações do WhatsApp', 'dps-communications-addon' ); ?></h2>
+
                 <table class="form-table" role="presentation">
                     <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_whatsapp_number"><?php echo esc_html__( 'Número do WhatsApp da Equipe', 'dps-communications-addon' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_whatsapp_number" name="dps_whatsapp_number" value="<?php echo esc_attr( get_option( 'dps_whatsapp_number', '+55 15 99160-6299' ) ); ?>" class="regular-text" />
+                                <p class="description"><?php esc_html_e( 'Número de telefone da equipe Desi Pet Shower (formato: +55 15 99160-6299). Este número será usado em todos os botões que permitem o cliente entrar em contato com a equipe.', 'dps-communications-addon' ); ?></p>
+                            </td>
+                        </tr>
+
                         <tr>
                             <th scope="row">
                                 <label for="dps_comm_whatsapp_api_key"><?php echo esc_html__( 'Chave de API do WhatsApp', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
                                 <input type="text" id="dps_comm_whatsapp_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_key]" value="<?php echo esc_attr( $options['whatsapp_api_key'] ?? '' ); ?>" class="regular-text" />
-                                <p class="description"><?php esc_html_e( 'Token de autenticação para o gateway de WhatsApp.', 'dps-communications-addon' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Token de autenticação para o gateway de WhatsApp (Evolution API, etc.).', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 
@@ -103,7 +115,13 @@ class DPS_Communications_Addon {
                                 <p class="description"><?php esc_html_e( 'URL base da API de envio de mensagens WhatsApp.', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
+                    </tbody>
+                </table>
 
+                <h2><?php esc_html_e( 'Configurações de E-mail', 'dps-communications-addon' ); ?></h2>
+
+                <table class="form-table" role="presentation">
+                    <tbody>
                         <tr>
                             <th scope="row">
                                 <label for="dps_comm_default_email_from"><?php echo esc_html__( 'E-mail remetente padrão', 'dps-communications-addon' ); ?></label>
@@ -188,6 +206,12 @@ class DPS_Communications_Addon {
         $settings     = $this->sanitize_settings( $raw_settings );
 
         update_option( self::OPTION_KEY, $settings );
+
+        // Salva o número do WhatsApp da equipe separadamente
+        if ( isset( $_POST['dps_whatsapp_number'] ) ) {
+            $whatsapp_number = sanitize_text_field( wp_unslash( $_POST['dps_whatsapp_number'] ) );
+            update_option( 'dps_whatsapp_number', $whatsapp_number );
+        }
 
         wp_redirect( add_query_arg( [ 'page' => 'dps-communications', 'updated' => '1' ], admin_url( 'admin.php' ) ) );
         exit;
