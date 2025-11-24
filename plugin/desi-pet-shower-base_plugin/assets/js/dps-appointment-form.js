@@ -135,11 +135,24 @@
             const $summary = $('.dps-appointment-summary');
             const $empty = $('.dps-appointment-summary__empty');
             const $list = $('.dps-appointment-summary__list');
-            
+            const appointmentType = $('input[name="appointment_type"]:checked').val() || 'simple';
+
+            const parseCurrency = function(value, fallback) {
+                if (value === undefined || value === null || value === '') {
+                    return fallback || 0;
+                }
+                const normalized = String(value).replace(',', '.');
+                const parsed = parseFloat(normalized);
+                if (Number.isNaN(parsed)) {
+                    return fallback || 0;
+                }
+                return parsed;
+            };
+
             // Coleta dados do formulário
             const clientText = $('#dps-appointment-cliente option:selected').text();
             const clientId = $('#dps-appointment-cliente').val();
-            
+
             const selectedPets = $('.dps-pet-checkbox:checked').map(function() {
                 return $(this).closest('.dps-pet-option').find('.dps-pet-name').text();
             }).get();
@@ -147,56 +160,69 @@
             const date = $('#appointment_date').val();
             const time = $('#appointment_time').val();
             const notes = $('#appointment_notes').val();
-            
+
             // Coleta serviços selecionados
             const services = [];
+            let totalValue = 0;
             if ($('#dps-taxidog-toggle').is(':checked')) {
-                const taxiPrice = $('#dps-taxidog-price').val() || '0';
-                services.push('TaxiDog (R$ ' + parseFloat(taxiPrice).toFixed(2) + ')');
+                const taxiPrice = parseCurrency($('#dps-taxidog-price').val());
+                services.push('TaxiDog (R$ ' + taxiPrice.toFixed(2) + ')');
+                totalValue += taxiPrice;
             }
             if ($('#dps-tosa-toggle').is(':checked')) {
-                const tosaPrice = $('#dps-tosa-price').val() || '30';
-                services.push('Tosa (R$ ' + parseFloat(tosaPrice).toFixed(2) + ')');
+                const tosaPrice = parseCurrency($('#dps-tosa-price').val(), 30);
+                services.push('Tosa (R$ ' + tosaPrice.toFixed(2) + ')');
+                totalValue += tosaPrice;
             }
-            
+
             // Coleta serviços do Services Add-on (se existirem)
             if ($('.dps-service-checkbox').length > 0) {
                 $('.dps-service-checkbox:checked').each(function() {
                     const checkbox = $(this);
                     const label = checkbox.closest('label');
                     const priceInput = label.find('.dps-service-price');
-                    
+                    const sanitizedLabel = label.clone();
+                    sanitizedLabel.find('.dps-service-price').remove();
+
                     // Extrai nome do serviço (texto antes do "(R$")
-                    const fullText = label.text().trim();
+                    const fullText = sanitizedLabel.text().trim();
                     const serviceName = fullText.split('(R$')[0].trim();
-                    
-                    // Obtém preço do input
-                    const price = parseFloat(priceInput.val()) || 0;
-                    
-                    if (serviceName && price > 0) {
+
+                    const price = parseCurrency(priceInput.val());
+
+                    if (serviceName) {
                         services.push(serviceName + ' (R$ ' + price.toFixed(2) + ')');
                     }
-                });
-            }
-            
-            // Calcula valor estimado
-            let totalValue = 0;
-            if ($('#dps-taxidog-toggle').is(':checked')) {
-                totalValue += parseFloat($('#dps-taxidog-price').val() || 0);
-            }
-            if ($('#dps-tosa-toggle').is(':checked')) {
-                totalValue += parseFloat($('#dps-tosa-price').val() || 30);
-            }
-            
-            // Soma serviços do Services Add-on
-            if ($('.dps-service-checkbox').length > 0) {
-                $('.dps-service-checkbox:checked').each(function() {
-                    const priceInput = $(this).closest('label').find('.dps-service-price');
-                    const price = parseFloat(priceInput.val()) || 0;
                     totalValue += price;
                 });
             }
-            
+
+            if (appointmentType === 'subscription') {
+                const baseValue = parseCurrency($('#dps-subscription-base').val());
+                if (baseValue > 0) {
+                    services.push('Assinatura base (R$ ' + baseValue.toFixed(2) + ')');
+                    totalValue += baseValue;
+                }
+
+                const extraWrapper = $('#dps-subscription-extra-fields');
+                const extraDesc = $('input[name="subscription_extra_description"]').val();
+                const extraValue = parseCurrency($('#dps-subscription-extra-value').val());
+                if (extraWrapper.length && extraWrapper.is(':visible') && extraValue > 0) {
+                    const labelText = extraDesc && extraDesc.trim() !== '' ? extraDesc.trim() : 'Extra';
+                    services.push(labelText + ' (R$ ' + extraValue.toFixed(2) + ')');
+                    totalValue += extraValue;
+                }
+            } else {
+                const extraWrapper = $('#dps-simple-extra-fields');
+                const extraDesc = $('input[name="appointment_extra_description"]').val();
+                const extraValue = parseCurrency($('#dps-simple-extra-value').val());
+                if (extraWrapper.length && extraWrapper.is(':visible') && extraValue > 0) {
+                    const labelText = extraDesc && extraDesc.trim() !== '' ? extraDesc.trim() : 'Extra';
+                    services.push(labelText + ' (R$ ' + extraValue.toFixed(2) + ')');
+                    totalValue += extraValue;
+                }
+            }
+
             // Verifica se campos mínimos estão preenchidos
             const hasMinimumData = clientId && selectedPets.length > 0 && date && time;
             
