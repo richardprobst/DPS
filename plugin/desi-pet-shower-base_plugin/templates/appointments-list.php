@@ -22,13 +22,11 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
 ?>
 <div class="dps-appointments" id="dps-section-agendas-list">
     <h3><?php echo esc_html__( 'Próximos Agendamentos', 'desi-pet-shower' ); ?></h3>
-    <p>
-        <input
-            type="text"
-            class="dps-search dps-appointments-search"
-            placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>"
-        >
-    </p>
+    <input
+        type="text"
+        class="dps-search dps-appointments-search"
+        placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>"
+    >
 
     <?php $has_items = false; ?>
     <?php foreach ( $groups as $group ) : ?>

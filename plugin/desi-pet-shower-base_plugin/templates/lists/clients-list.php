@@ -21,12 +21,11 @@ $base_url = isset( $base_url ) ? $base_url : '';
 	<?php echo esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ); ?>
 </h3>
 
-<p>
-	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>">
-</p>
+<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>">
 
 <?php if ( ! empty( $clients ) ) : ?>
-	<table class="dps-table">
+	<div class="dps-table-wrapper">
+		<table class="dps-table">
 		<thead>
 			<tr>
 				<th><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></th>
@@ -74,6 +73,7 @@ $base_url = isset( $base_url ) ? $base_url : '';
 			<?php endforeach; ?>
 		</tbody>
 	</table>
+	</div>
 <?php else : ?>
 	<p><?php echo esc_html__( 'Nenhum cliente cadastrado.', 'desi-pet-shower' ); ?></p>
 <?php endif; ?>
