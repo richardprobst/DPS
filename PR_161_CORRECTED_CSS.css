@@ -1,0 +1,175 @@
+/**
+ * Estilos do Services Add-on - DPS
+ * 
+ * Estilos responsivos e minimalistas para campos de serviços
+ * injetados no formulário de agendamento.
+ * 
+ * VERSÃO CORRIGIDA DO PR #161
+ * 
+ * @package DesiPetShower
+ * @subpackage ServicesAddon
+ * @since 1.0.0
+ */
+
+/* === Inputs de Preço de Serviços === */
+
+/* Wrapper para manter parênteses alinhados com o input */
+.dps-service-price-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;  /* CORRIGIDO: 6px → 8px (múltiplo de 4px conforme VISUAL_STYLE_GUIDE.md) */
+    flex-wrap: wrap;
+}
+
+.dps-service-price {
+    width: 120px;  /* CORRETO: alinha com .dps-input-money do base plugin */
+    max-width: 100%;
+    min-width: 88px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: right;  /* CORRIGIDO: left → right (padrão DPS para inputs monetários) */
+    transition: border-color 0.2s ease;
+}
+
+.dps-service-price:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.dps-service-price:disabled {
+    background: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* === Checkboxes de Serviços === */
+.dps-service-checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* === Layout Responsivo === */
+
+/* Tablets e telas médias (até 768px) */
+@media (max-width: 768px) {
+    .dps-service-price {
+        width: 100%;  /* CORRIGIDO: 110px → 100% (conforme padrão .dps-input-money) */
+        max-width: 180px;  /* ADICIONADO: conforme padrão DPS tablet */
+        font-size: 15px; /* Ligeiramente maior para mobile */
+    }
+}
+
+/* Mobile (até 480px) */
+@media (max-width: 480px) {
+    .dps-service-price-wrapper {
+        width: 100%;
+        gap: 8px;  /* Mantém múltiplo de 4px */
+    }
+
+    .dps-service-price {
+        width: 100%;
+        max-width: 150px;  /* CORRIGIDO: 200px → 150px (padrão DPS mobile) */
+        display: block;
+        margin-top: 4px;
+        margin-left: 24px; /* Alinha com checkbox */
+        /* REMOVIDO: flex: 1 1 140px; - redundante com width: 100% */
+        font-size: 16px; /* Evita zoom automático no iOS */
+        /* REMOVIDO: padding: 6px 8px; - usar padrão global */
+    }
+    
+    /* Labels de serviços em mobile */
+    .dps-services-fields label {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8px 0;
+    }
+}
+
+/* Mobile pequeno (até 375px) */
+@media (max-width: 375px) {
+    .dps-service-price {
+        max-width: 100px;
+        margin-left: 20px;
+    }
+}
+
+/* === Fieldset de Serviços === */
+.dps-services-fields {
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.dps-services-fields legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+    font-size: 16px;
+}
+
+.dps-services-fields p {
+    margin: 8px 0;
+}
+
+.dps-services-fields strong {
+    color: #374151;
+    font-size: 14px;
+    display: block;
+    margin: 12px 0 8px 0;
+}
+
+/* === Campos de Extras === */
+#dps-simple-extra-fields,
+#dps-subscription-extra-fields {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+#dps-simple-extra-value,
+#dps-subscription-extra-value {
+    width: 100px;
+    max-width: 100%;
+}
+
+/* === Campo de Total === */
+#dps-appointment-total,
+#dps-subscription-total {
+    font-weight: 600;
+    color: #0ea5e9;
+    font-size: 16px;
+    background: #f9fafb;
+}
+
+@media (max-width: 480px) {
+    #dps-appointment-total,
+    #dps-subscription-total {
+        width: 100%;
+        max-width: 200px;
+        font-size: 18px;
+        padding: 8px;
+    }
+}
+
+/* 
+ * RESUMO DAS CORREÇÕES:
+ * 
+ * 1. Gap do wrapper: 6px → 8px (múltiplo de 4px)
+ * 2. Text-align: left → right (padrão inputs monetários)
+ * 3. Tablet width: 110px fixo → 100% + max-width 180px
+ * 4. Mobile max-width: 200px → 150px (padrão DPS)
+ * 5. Removido flex: 1 1 140px (redundante)
+ * 6. Removido override de padding (usa padrão global)
+ * 
+ * CONFORMIDADE:
+ * ✅ VISUAL_STYLE_GUIDE.md - múltiplos de 4px
+ * ✅ APPOINTMENT_FORM_LAYOUT_FIXES.md - larguras padronizadas
+ * ✅ Memória do repositório - "width 120px desktop, max-width 180px tablet, 150px mobile"
+ * ✅ Alinhamento com .dps-input-money do plugin base
+ */
