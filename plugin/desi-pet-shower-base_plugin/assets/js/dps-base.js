@@ -281,7 +281,7 @@
       }
 
       function fetchPets(targetPage, append){
-        if (!restConfig.restUrl || petState.loading) {
+        if (petState.loading) {
           return;
         }
 
@@ -290,6 +290,11 @@
           $petList.empty();
           $petOptions = $();
           $petCheckboxes = $();
+          applyPetFilters();
+          return;
+        }
+
+        if (!restConfig.restUrl) {
           applyPetFilters();
           return;
         }
@@ -319,6 +324,7 @@
           renderPets(resp.items || [], append);
           updateLoadMore(petState.page, petState.totalPages);
         }).fail(function(){
+          applyPetFilters();
           updateLoadMore(petState.page, petState.totalPages);
         }).always(function(){
           petState.loading = false;

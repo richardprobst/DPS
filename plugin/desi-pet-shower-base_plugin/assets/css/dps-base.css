@@ -58,6 +58,12 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+.dps-form .dps-client-select,
+.dps-form #appointment_date,
+.dps-form #appointment_time {
+    max-width: 420px;
+    width: 100%;
+}
 .dps-form textarea {
     resize: vertical;
 }
@@ -301,6 +307,13 @@
     font-weight: 600;
     color: #374151;
 }
+.dps-appointments .dps-table {
+    min-width: 640px;
+}
+.dps-appointments .dps-table th,
+.dps-appointments .dps-table td {
+    padding: 8px 10px;
+}
 .dps-table tr.status-pendente {
     background: #fef3c7;
 }
@@ -372,10 +385,10 @@
         min-width: 0;
         width: 100%;
     }
-    
+
     /* Garantir que tabelas tenham largura mínima em tablets */
     .dps-table-wrapper .dps-table {
-        min-width: 700px;
+        min-width: 620px;
     }
     
     /* Ajustar espaçamento em grupos de agendamentos */
@@ -499,6 +512,11 @@
 
 .dps-form-row--3col {
     grid-template-columns: 1fr 1fr 1fr;
+}
+
+.dps-form-row--2col .dps-form-field,
+.dps-form-row--3col .dps-form-field {
+    min-width: 0;
 }
 
 .dps-form-col {
@@ -626,6 +644,16 @@
     max-width: 100%;
     text-align: right;
     box-sizing: border-box;
+}
+.dps-form .dps-service-price,
+.dps-form #dps-appointment-total,
+.dps-form #dps-subscription-total,
+.dps-form #dps-subscription-base,
+.dps-form #dps-simple-extra-value,
+.dps-form #dps-subscription-extra-value {
+    width: 140px;
+    max-width: 100%;
+    display: inline-block;
 }
 
 /* Resumo do agendamento */
