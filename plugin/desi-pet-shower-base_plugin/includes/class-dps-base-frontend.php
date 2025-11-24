@@ -14,6 +14,11 @@ class DPS_Base_Frontend {
      * 
      * Permite acesso a administradores (manage_options) ou usuários com qualquer
      * capacidade DPS específica (recepção, etc).
+     * 
+     * NOTA: O painel será visível para usuários com QUALQUER capability DPS, mas
+     * cada ação (salvar cliente, salvar pet, salvar agendamento, etc) é protegida
+     * individualmente pela capability específica. Isso permite que usuários vejam
+     * o painel mas apenas executem ações permitidas pelo seu perfil.
      *
      * @return bool
      */
@@ -598,7 +603,7 @@ class DPS_Base_Frontend {
         // Verifica se o usuário atual está logado e possui permissão para gerenciar o painel
         if ( ! is_user_logged_in() || ! $can_manage ) {
             $login_url = wp_login_url( get_permalink() );
-            return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
+            return '<p>' . esc_html__( 'Você precisa estar logado com as permissões adequadas para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
         
         // Sempre mostrar interface completa para usuários administradores
