@@ -78,6 +78,18 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Fixed (Corrigido)
+- **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
+  - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
+  - Ajustado tamanho de inputs e selects para mobile (`padding: 8px` em ≤768px, `10px 8px` em ≤480px)
+  - Incluídos todos os tipos de input (date, time, number) nas regras de font-size mobile (16px para evitar zoom iOS)
+  - Adicionado wrapper `.dps-form-field` com margin-bottom consistente (12px)
+  - Reduzido padding de fieldsets em mobile pequeno (12px em ≤480px)
+  - Ajustado card de resumo para telas pequenas:
+    - Labels strong: `min-width: 100px` (era 140px) em ≤480px
+    - Font-size reduzido para 13px (itens) e 16px (título H3)
+  - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
+
 #### Added (Adicionado)
 - **Payment Add-on**: Documentação completa de configuração do webhook secret
   - Novo arquivo `WEBHOOK_CONFIGURATION.md` com guia passo a passo completo

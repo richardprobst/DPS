@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Responsivo - Formulário de Agendamentos DPS</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        
+        /* Base styles */
+        .dps-section {
+            border: 1px solid #ccc;
+            padding: 15px;
+            background: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+        
+        .dps-form {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .dps-form input[type="text"],
+        .dps-form input[type="email"],
+        .dps-form input[type="date"],
+        .dps-form input[type="time"],
+        .dps-form input[type="number"],
+        .dps-form select,
+        .dps-form textarea {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .dps-form textarea {
+            resize: vertical;
+        }
+        
+        .dps-form-field {
+            margin-bottom: 12px;
+        }
+        
+        .dps-form-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .dps-form-row--2col {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .dps-fieldset {
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .dps-fieldset__legend {
+            font-weight: 600;
+            color: #374151;
+            padding: 0 8px;
+            font-size: 16px;
+        }
+        
+        .dps-form input.dps-input-money {
+            width: 120px;
+            max-width: 100%;
+            text-align: right;
+            box-sizing: border-box;
+        }
+        
+        .dps-appointment-summary {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 32px auto 20px auto;
+            max-width: 800px;
+        }
+        
+        .dps-appointment-summary h3 {
+            margin: 0 0 16px 0;
+            color: #374151;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .dps-appointment-summary__list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .dps-appointment-summary__list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .dps-appointment-summary__list li:last-child {
+            border-bottom: none;
+        }
+        
+        .dps-appointment-summary__list strong {
+            display: inline-block;
+            min-width: 140px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .dps-appointment-summary__list [data-summary="price"] {
+            color: #0ea5e9;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .dps-appointment-summary__notes [data-summary="notes"] {
+            display: block;
+            margin-top: 4px;
+            color: #6b7280;
+            font-style: italic;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* Responsividade 768px */
+        @media (max-width: 768px) {
+            .dps-section {
+                overflow-x: hidden;
+            }
+            
+            .dps-form {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .dps-form-row--2col {
+                grid-template-columns: 1fr;
+            }
+            
+            .dps-fieldset {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .dps-form input[type="text"],
+            .dps-form input[type="email"],
+            .dps-form input[type="date"],
+            .dps-form input[type="time"],
+            .dps-form input[type="number"],
+            .dps-form select,
+            .dps-form textarea {
+                padding: 8px;
+                font-size: 16px;
+            }
+            
+            .dps-form input.dps-input-money {
+                width: 100%;
+                max-width: 180px;
+            }
+        }
+        
+        /* Responsividade 480px */
+        @media (max-width: 480px) {
+            .dps-form input[type="text"],
+            .dps-form input[type="email"],
+            .dps-form input[type="date"],
+            .dps-form input[type="time"],
+            .dps-form input[type="number"],
+            .dps-form select {
+                font-size: 16px;
+                padding: 10px 8px;
+            }
+            
+            .dps-form textarea {
+                font-size: 16px;
+                padding: 10px 8px;
+            }
+            
+            .dps-appointment-summary {
+                padding: 16px;
+                margin: 24px auto 16px auto;
+            }
+            
+            .dps-appointment-summary__list strong {
+                min-width: 100px;
+                font-size: 13px;
+            }
+            
+            .dps-appointment-summary__list li {
+                font-size: 13px;
+            }
+            
+            .dps-appointment-summary h3 {
+                font-size: 16px;
+            }
+            
+            .dps-form input.dps-input-money {
+                width: 100%;
+                max-width: 150px;
+                font-size: 16px;
+            }
+            
+            .dps-fieldset {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            .dps-fieldset__legend {
+                font-size: 15px;
+            }
+        }
+        
+        /* Utilidades */
+        .dps-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .dps-btn--primary {
+            background: #0ea5e9;
+            color: white;
+        }
+        
+        .dps-form-actions {
+            margin-top: 20px;
+        }
+        
+        .dps-required {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .viewport-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #374151;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-info" id="viewport-info"></div>
+    
+    <div class="dps-section">
+        <h2 style="margin-bottom: 20px; color: #374151;">Agendamento de Serviços</h2>
+        
+        <form method="post" class="dps-form">
+            <!-- FIELDSET 1: Cliente e Pet -->
+            <fieldset class="dps-fieldset">
+                <legend class="dps-fieldset__legend">Cliente e Pet(s)</legend>
+                
+                <div class="dps-form-field">
+                    <label for="cliente">Cliente <span class="dps-required">*</span></label>
+                    <select id="cliente" name="cliente" required>
+                        <option value="">Selecione...</option>
+                        <option value="1" selected>João da Silva</option>
+                        <option value="2">Maria Santos</option>
+                    </select>
+                </div>
+                
+                <div class="dps-form-field">
+                    <label for="pet">Pet <span class="dps-required">*</span></label>
+                    <select id="pet" name="pet" required>
+                        <option value="">Selecione...</option>
+                        <option value="1" selected>Thor (Golden Retriever)</option>
+                        <option value="2">Mel (Maltês)</option>
+                    </select>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 2: Data e Horário -->
+            <fieldset class="dps-fieldset">
+                <legend class="dps-fieldset__legend">Data e Horário</legend>
+                
+                <div class="dps-form-row dps-form-row--2col">
+                    <div class="dps-form-field">
+                        <label for="data">Data <span class="dps-required">*</span></label>
+                        <input type="date" id="data" name="data" value="2024-11-25" required>
+                    </div>
+                    <div class="dps-form-field">
+                        <label for="horario">Horário <span class="dps-required">*</span></label>
+                        <select id="horario" name="horario" required>
+                            <option value="">Selecione...</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="14:00" selected>14:00</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 3: Serviços -->
+            <fieldset class="dps-fieldset">
+                <legend class="dps-fieldset__legend">Serviços e Extras</legend>
+                
+                <div class="dps-form-field">
+                    <label>
+                        <input type="checkbox" id="taxidog" name="taxidog" checked>
+                        Solicitar TaxiDog?
+                    </label>
+                    <div style="margin-top: 8px; margin-left: 24px;">
+                        <label for="taxidog-price">Valor TaxiDog (R$)</label>
+                        <input type="number" id="taxidog-price" name="taxidog-price" step="0.01" min="0" value="15" class="dps-input-money">
+                    </div>
+                </div>
+                
+                <div class="dps-form-field">
+                    <label>
+                        <input type="checkbox" id="tosa" name="tosa" checked>
+                        Precisa de tosa?
+                    </label>
+                    <div style="margin-top: 8px; margin-left: 24px;">
+                        <label for="tosa-price">Preço da tosa (R$)</label>
+                        <input type="number" id="tosa-price" name="tosa-price" step="0.01" min="0" value="30" class="dps-input-money">
+                    </div>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 4: Observações -->
+            <fieldset class="dps-fieldset">
+                <legend class="dps-fieldset__legend">Observações e Notas</legend>
+                
+                <div class="dps-form-field">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" placeholder="Instruções especiais, preferências do cliente, etc.">Cliente prefere horários pela manhã.
+Pet tem medo de secador.</textarea>
+                    <p style="font-size: 12px; color: #6b7280; margin-top: 4px;">Opcional - use este campo para anotações internas</p>
+                </div>
+            </fieldset>
+            
+            <!-- Resumo do Agendamento -->
+            <div class="dps-appointment-summary">
+                <h3>Resumo do agendamento</h3>
+                <ul class="dps-appointment-summary__list">
+                    <li><strong>Cliente:</strong> <span data-summary="client">João da Silva</span></li>
+                    <li><strong>Pets:</strong> <span data-summary="pets">Thor</span></li>
+                    <li><strong>Data:</strong> <span data-summary="date">25/11/2024</span></li>
+                    <li><strong>Horário:</strong> <span data-summary="time">14:00</span></li>
+                    <li><strong>Serviços:</strong> <span data-summary="services">TaxiDog (R$ 15.00), Tosa (R$ 30.00)</span></li>
+                    <li><strong>Valor estimado:</strong> <span data-summary="price">R$ 45,00</span></li>
+                    <li class="dps-appointment-summary__notes"><strong>Observações:</strong> <span data-summary="notes">Cliente prefere horários pela manhã.
+Pet tem medo de secador.</span></li>
+                </ul>
+            </div>
+            
+            <!-- Botões -->
+            <div class="dps-form-actions">
+                <button type="submit" class="dps-btn dps-btn--primary">✓ Salvar Agendamento</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            let breakpoint = 'Desktop';
+            if (width <= 480) breakpoint = 'Mobile (<480px)';
+            else if (width <= 768) breakpoint = 'Tablet (<768px)';
+            else if (width <= 1024) breakpoint = 'Desktop (<1024px)';
+            
+            document.getElementById('viewport-info').textContent = 
+                `${width}x${height} - ${breakpoint}`;
+        }
+        
+        window.addEventListener('resize', updateViewportInfo);
+        updateViewportInfo();
+    </script>
+</body>
+</html>
