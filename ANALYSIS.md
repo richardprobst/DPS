@@ -132,6 +132,65 @@ if ( ! DPS_Phone_Helper::is_valid_brazilian_phone( $phone_input ) ) {
 - Integrado com `DPS_Communications_API` para envio automático via WhatsApp
 - **IMPORTANTE**: Todas as funções duplicadas `format_whatsapp_number()` foram removidas do plugin base e add-ons. Use SEMPRE `DPS_Phone_Helper::format_for_whatsapp()` diretamente
 
+#### DPS_WhatsApp_Helper
+**Propósito**: Geração centralizada de links do WhatsApp com mensagens personalizadas. Introduzida para padronizar criação de URLs do WhatsApp em todo o sistema.
+
+**Constante**:
+- `TEAM_PHONE = '5515991606299'`: Número padrão da equipe (+55 15 99160-6299)
+
+**Entrada/Saída**:
+- `get_link_to_team( string $message = '' )`: Gera link para cliente → equipe → string URL
+- `get_link_to_client( string $client_phone, string $message = '' )`: Gera link para equipe → cliente → string URL ou vazio se inválido
+- `get_share_link( string $message )`: Gera link de compartilhamento genérico → string URL
+- `get_team_phone()`: Obtém número da equipe configurado → string (formatado)
+
+**Métodos auxiliares para mensagens padrão**:
+- `get_portal_access_request_message( $client_name = '', $pet_name = '' )`: Mensagem padrão para solicitar acesso
+- `get_portal_link_message( $client_name, $portal_url )`: Mensagem padrão para enviar link do portal
+- `get_appointment_confirmation_message( $appointment_data )`: Mensagem padrão de confirmação de agendamento
+- `get_payment_request_message( $client_name, $amount, $payment_url = '' )`: Mensagem padrão de cobrança
+
+**Exemplos práticos**:
+```php
+// Cliente quer contatar a equipe (ex: solicitar acesso ao portal)
+$message = DPS_WhatsApp_Helper::get_portal_access_request_message();
+$url = DPS_WhatsApp_Helper::get_link_to_team( $message );
+echo '<a href="' . esc_url( $url ) . '" target="_blank">Quero acesso</a>';
+
+// Equipe quer contatar cliente (ex: enviar link do portal)
+$client_phone = get_post_meta( $client_id, 'client_phone', true );
+$portal_url = 'https://exemplo.com/portal?token=abc123';
+$message = DPS_WhatsApp_Helper::get_portal_link_message( 'João Silva', $portal_url );
+$url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $message );
+echo '<a href="' . esc_url( $url ) . '" target="_blank">Enviar via WhatsApp</a>';
+
+// Compartilhamento genérico (ex: foto do pet)
+$share_text = 'Olha a foto do meu pet: https://exemplo.com/foto.jpg';
+$url = DPS_WhatsApp_Helper::get_share_link( $share_text );
+echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
+```
+
+**Configuração**:
+- Número da equipe configurável em: Admin → Desi Pet Shower → Comunicações
+- Option: `dps_whatsapp_number` (padrão: +55 15 99160-6299)
+- Fallback automático para constante `TEAM_PHONE` se option não existir
+- Filtro disponível: `dps_team_whatsapp_number` para customização programática
+
+**Boas práticas**:
+- Use sempre este helper para criar links WhatsApp (não construa URLs manualmente)
+- Helper formata automaticamente números de clientes usando `DPS_Phone_Helper`
+- Sempre escape URLs com `esc_url()` ao exibir em HTML
+- Mensagens são codificadas automaticamente com `rawurlencode()`
+- Retorna string vazia se número do cliente for inválido (verificar antes de exibir link)
+
+**Locais que usam este helper**:
+- Lista de clientes (plugin base)
+- Add-on de Agenda (confirmação e cobrança)
+- Add-on de Assinaturas (cobrança de renovação)
+- Add-on de Finance (pendências financeiras)
+- Add-on de Stats (reengajamento de clientes inativos)
+- Portal do Cliente (solicitação de acesso, envio de link, agendamento, compartilhamento)
+
 #### DPS_Message_Helper
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 
