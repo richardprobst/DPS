@@ -92,6 +92,15 @@ Antes de criar uma nova versão oficial:
   - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
 
 #### Fixed (Corrigido)
+- **Services Add-on & Loyalty Add-on**: Corrigido carregamento de traduções antes do hook 'init'
+  - Adicionado `load_plugin_textdomain()` no hook 'init' para ambos os add-ons
+  - Movidas strings traduzíveis do construtor para métodos chamados no hook 'init'
+  - **Corrigido**: Notice "Translation loading triggered too early" no WordPress 6.7.0+
+  - **Corrigido**: Mensagem "Acesso negado" ao alterar status de agendamento
+- **Loyalty Add-on**: Corrigido erro de capability check ao atribuir pontos
+  - Adicionada verificação se o post existe antes de chamar `get_post_type()`
+  - **Corrigido**: Notice "map_meta_cap was called incorrectly" ao verificar capability `delete_post`
+  - Previne erro quando WordPress verifica capabilities internamente durante mudança de status de agendamento
 - **Plugin Base**: Corrigido acesso ao painel de gestão para usuários com role `dps_reception`
   - Função `can_manage()` agora aceita `manage_options` OU qualquer capability DPS específica (`dps_manage_clients`, `dps_manage_pets`, `dps_manage_appointments`)
   - Removida verificação duplicada de `manage_options` no método `handle_request()` que bloqueava usuários sem permissão de administrador

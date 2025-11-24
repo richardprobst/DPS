@@ -32,27 +32,7 @@ class DPS_Services_Addon {
     private $cpt_helper;
 
     public function __construct() {
-        if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
-            require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
-        }
-
-        if ( class_exists( 'DPS_CPT_Helper' ) ) {
-            $this->cpt_helper = new DPS_CPT_Helper(
-                'dps_service',
-                [
-                    'name'          => __( 'Serviços', 'dps-services-addon' ),
-                    'singular_name' => __( 'Serviço', 'dps-services-addon' ),
-                ],
-                [
-                    'public'       => false,
-                    'show_ui'      => false,
-                    'supports'     => [ 'title' ],
-                    'hierarchical' => false,
-                ]
-            );
-        }
-
-        // Registra CPT
+        // Registra CPT (o helper será inicializado dentro do método register_service_cpt)
         add_action( 'init', [ $this, 'register_service_cpt' ] );
         // Adiciona abas e seções ao plugin base
         add_action( 'dps_base_nav_tabs_after_pets', [ $this, 'add_services_tab' ], 10, 1 );
@@ -118,11 +98,32 @@ class DPS_Services_Addon {
      * Registra o tipo de post personalizado para serviços
      */
     public function register_service_cpt() {
+        // Inicializa o CPT helper se necessário
         if ( ! $this->cpt_helper ) {
-            return;
+            if ( ! class_exists( 'DPS_CPT_Helper' ) && defined( 'DPS_BASE_DIR' ) ) {
+                require_once DPS_BASE_DIR . 'includes/class-dps-cpt-helper.php';
+            }
+
+            if ( class_exists( 'DPS_CPT_Helper' ) ) {
+                $this->cpt_helper = new DPS_CPT_Helper(
+                    'dps_service',
+                    [
+                        'name'          => __( 'Serviços', 'dps-services-addon' ),
+                        'singular_name' => __( 'Serviço', 'dps-services-addon' ),
+                    ],
+                    [
+                        'public'       => false,
+                        'show_ui'      => false,
+                        'supports'     => [ 'title' ],
+                        'hierarchical' => false,
+                    ]
+                );
+            }
         }
 
-        $this->cpt_helper->register();
+        if ( $this->cpt_helper ) {
+            $this->cpt_helper->register();
+        }
     }
 
     /**
