@@ -77,9 +77,10 @@ final class DPS_Client_Portal {
         add_action( 'add_meta_boxes_dps_portal_message', [ $this, 'add_message_meta_boxes' ] );
         add_action( 'save_post_dps_portal_message', [ $this, 'save_message_meta' ], 10, 3 );
 
-        // --- MUDANÇAS AQUI ---
-        // Remove o menu do admin e adiciona abas no front-end
-        // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
+        // Registra menu administrativo seguindo padrão DPS
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
+        
+        // Adiciona abas no front-end via shortcode [dps_configuracoes]
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
@@ -1371,18 +1372,46 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Adiciona a página de administração para gerenciar logins de clientes.
-     * Coloca a página como submenu do post type dps_cliente.
+     * Registra menu administrativo seguindo padrão DPS
+     * Todos os add-ons devem usar prioridade 20 e registrar sob 'desi-pet-shower'
      */
-    public function register_client_logins_page() {
+    public function register_admin_menu() {
+        // Submenu: Portal do Cliente - Configurações
         add_submenu_page(
-            'edit.php?post_type=dps_cliente',
+            'desi-pet-shower',
+            __( 'Portal do Cliente - Configurações', 'dps-client-portal' ),
+            __( 'Portal do Cliente', 'dps-client-portal' ),
+            'manage_options',
+            'dps-client-portal-settings',
+            [ $this, 'render_portal_settings_admin_page' ]
+        );
+        
+        // Submenu: Logins de Clientes
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Portal do Cliente - Logins', 'dps-client-portal' ),
             __( 'Logins de Clientes', 'dps-client-portal' ),
-            __( 'Logins', 'dps-client-portal' ),
             'manage_options',
             'dps-client-logins',
-            [ $this, 'render_client_logins_page' ]
+            [ $this, 'render_client_logins_admin_page' ]
         );
+    }
+    
+    /**
+     * Renderiza a página administrativa de configurações do portal
+     */
+    public function render_portal_settings_admin_page() {
+        echo '<div class="wrap">';
+        $base_url = menu_page_url( 'dps-client-portal-settings', false );
+        $this->render_portal_settings_page( $base_url );
+        echo '</div>';
+    }
+    
+    /**
+     * Renderiza a página administrativa de logins
+     */
+    public function render_client_logins_admin_page() {
+        $this->render_client_logins_page( 'admin', '' );
     }
 
     /**

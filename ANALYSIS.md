@@ -226,6 +226,8 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **Comunicações** (`dps-communications`) - Communications Add-on
 - **Notificações** (`dps-notifications`) - Push Add-on
 - **Pagamentos** (`dps-payment-settings`) - Payment Add-on
+- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on
+- **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on
 - **Cadastro Público** (`dps-registration-settings`) - Registration Add-on
 - **Assistente de IA** (`dps-ai-settings`) - AI Add-on
 
@@ -240,6 +242,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
 
 **Histórico de correções**:
+- **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
 - **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
 
@@ -485,9 +488,18 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **CPTs, tabelas e opções**:
 - Não cria CPTs próprios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
+  - Suporta 3 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação)
 - Sessões PHP próprias para autenticação independente do WordPress
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Tipos de mensagem customizados para notificações
+
+**Menus administrativos**:
+- **Portal do Cliente** (`dps-client-portal-settings`): configurações gerais do portal
+- **Logins de Clientes** (`dps-client-logins`): gerenciamento de tokens de acesso
+  - Interface para gerar tokens temporários ou permanentes
+  - Revogação manual de tokens ativos
+  - Envio de links por WhatsApp ou e-mail
+  - Histórico de acessos por cliente
 
 **Hooks consumidos**:
 - `dps_settings_nav_tabs`: adiciona aba "Portal" nas configurações (prioridade 15)
@@ -513,9 +525,10 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Observações**:
 - Já segue padrão modular com estrutura `includes/` e `assets/`
-- Sistema de tokens com expiração de 30 minutos e uso único
-- Cleanup automático de tokens antigos via cron job
+- Sistema de tokens com suporte a temporários (30min) e permanentes (até revogação)
+- Cleanup automático de tokens expirados via cron job hourly
 - Configuração centralizada da página do portal via interface administrativa
+- Menu administrativo registrado sob `desi-pet-shower` desde v2.1.0
 
 **Análise de Layout e UX**:
 - Consulte `docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md` para análise detalhada de usabilidade (800+ linhas)

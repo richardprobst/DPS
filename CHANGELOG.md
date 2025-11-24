@@ -78,6 +78,19 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+- **Client Portal Add-on (v2.2.0)**: Menu administrativo e tokens permanentes
+  - Adicionado menu "Portal do Cliente" sob "Desi Pet Shower" com dois submenus:
+    - "Portal do Cliente": configurações gerais do portal
+    - "Logins de Clientes": gerenciamento de tokens de acesso
+  - Implementado suporte a tokens permanentes (válidos até revogação manual)
+  - Modal de seleção de tipo de token ao gerar links:
+    - "Temporário (30 minutos)": expira automaticamente após 30 minutos
+    - "Permanente (até revogar)": válido por 10 anos, revogável manualmente
+  - Interface atualizada para exibir tipo de token gerado
+  - Tokens permanentes facilitam acesso recorrente sem necessidade de gerar novos links
+  - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
+
 #### Fixed (Corrigido)
 - **Plugin Base**: Corrigido acesso ao painel de gestão para usuários com role `dps_reception`
   - Função `can_manage()` agora aceita `manage_options` OU qualquer capability DPS específica (`dps_manage_clients`, `dps_manage_pets`, `dps_manage_appointments`)

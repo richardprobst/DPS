@@ -133,33 +133,44 @@ if ( ! empty( $clients ) ) {
         echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '">';
         echo '<div class="dps-portal-logins__actions">';
         
+        // Gera URLs com nonce para ambos os tipos
+        $url_temporary = wp_nonce_url(
+            add_query_arg( [
+                'dps_action'  => 'generate_token',
+                'client_id'   => $client_id,
+                'token_type'  => 'login',
+            ], $base_url ),
+            'dps_generate_token_' . $client_id
+        );
+        
+        $url_permanent = wp_nonce_url(
+            add_query_arg( [
+                'dps_action'  => 'generate_token',
+                'client_id'   => $client_id,
+                'token_type'  => 'permanent',
+            ], $base_url ),
+            'dps_generate_token_' . $client_id
+        );
+        
         // Determina qual botão mostrar
         if ( $stats['total_generated'] === 0 ) {
-            // Primeiro acesso
-            $generate_url = wp_nonce_url(
-                add_query_arg( [
-                    'dps_action'  => 'generate_token',
-                    'client_id'   => $client_id,
-                    'token_type'  => 'first_access',
-                ], $base_url ),
-                'dps_generate_token_' . $client_id
-            );
-            echo '<a href="' . esc_url( $generate_url ) . '" class="button button-primary">';
-            echo esc_html__( 'Primeiro Acesso', 'dps-client-portal' );
-            echo '</a>';
+            // Primeiro acesso - mostra botão que abre modal
+            echo '<button type="button" class="button button-primary dps-generate-token-btn" ';
+            echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
+            echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
+            echo 'data-url-temporary="' . esc_attr( $url_temporary ) . '" ';
+            echo 'data-url-permanent="' . esc_attr( $url_permanent ) . '">';
+            echo esc_html__( 'Gerar Link de Acesso', 'dps-client-portal' );
+            echo '</button>';
         } else {
-            // Gerar novo link
-            $generate_url = wp_nonce_url(
-                add_query_arg( [
-                    'dps_action'  => 'generate_token',
-                    'client_id'   => $client_id,
-                    'token_type'  => 'regenerate',
-                ], $base_url ),
-                'dps_generate_token_' . $client_id
-            );
-            echo '<a href="' . esc_url( $generate_url ) . '" class="button">';
+            // Gerar novo link - mostra botão que abre modal
+            echo '<button type="button" class="button dps-generate-token-btn" ';
+            echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
+            echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
+            echo 'data-url-temporary="' . esc_attr( $url_temporary ) . '" ';
+            echo 'data-url-permanent="' . esc_attr( $url_permanent ) . '">';
             echo esc_html__( 'Gerar Novo Link', 'dps-client-portal' );
-            echo '</a>';
+            echo '</button>';
         }
         
         // Revogar (se houver tokens ativos)
@@ -211,7 +222,16 @@ if ( ! empty( $clients ) ) {
             }
             
             echo '</div>';
-            echo '<small class="dps-portal-logins__token-note">' . esc_html__( 'Link válido por 30 minutos', 'dps-client-portal' ) . '</small>';
+            
+            // Determina mensagem de validade baseado no tipo
+            $token_type = isset( $generated_token['type'] ) ? $generated_token['type'] : 'login';
+            if ( 'permanent' === $token_type ) {
+                $validity_note = __( 'Link permanente - válido até revogar manualmente', 'dps-client-portal' );
+            } else {
+                $validity_note = __( 'Link válido por 30 minutos', 'dps-client-portal' );
+            }
+            
+            echo '<small class="dps-portal-logins__token-note">' . esc_html( $validity_note ) . '</small>';
             echo '</div>';
         }
         
@@ -258,7 +278,73 @@ if ( 'admin' === $context ) {
     </div>
 </div>
 
+<!-- Modal de seleção de tipo de token -->
+<div id="dps-token-type-modal" class="dps-modal" style="display:none;">
+    <div class="dps-modal__overlay"></div>
+    <div class="dps-modal__content">
+        <div class="dps-modal__header">
+            <h2><?php esc_html_e( 'Gerar Link de Acesso', 'dps-client-portal' ); ?></h2>
+            <button type="button" class="dps-modal__close">&times;</button>
+        </div>
+        <div class="dps-modal__body">
+            <p id="dps-token-client-name" style="margin-bottom: 20px; font-weight: 600;"></p>
+            
+            <div class="dps-form-field">
+                <label><?php esc_html_e( 'Tipo de Link:', 'dps-client-portal' ); ?></label>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; margin-bottom: 12px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="dps_token_type" value="login" checked style="margin-right: 8px;">
+                        <strong><?php esc_html_e( 'Temporário (30 minutos)', 'dps-client-portal' ); ?></strong>
+                        <br>
+                        <small style="color: #6b7280; margin-left: 24px;">
+                            <?php esc_html_e( 'O link expira após 30 minutos. Ideal para acesso único e imediato.', 'dps-client-portal' ); ?>
+                        </small>
+                    </label>
+                    
+                    <label style="display: block; padding: 12px; border: 2px solid #e5e7eb; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="dps_token_type" value="permanent" style="margin-right: 8px;">
+                        <strong><?php esc_html_e( 'Permanente (até revogar)', 'dps-client-portal' ); ?></strong>
+                        <br>
+                        <small style="color: #6b7280; margin-left: 24px;">
+                            <?php esc_html_e( 'O link permanece válido até que seja revogado manualmente. Ideal para acesso recorrente.', 'dps-client-portal' ); ?>
+                        </small>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="dps-modal__footer">
+            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Cancelar', 'dps-client-portal' ); ?></button>
+            <button type="button" class="button button-primary" id="dps-confirm-generate-token"><?php esc_html_e( 'Gerar Link', 'dps-client-portal' ); ?></button>
+        </div>
+    </div>
+</div>
+
 <style>
+/* Estilos para radio buttons personalizados */
+#dps-token-type-modal input[type="radio"]:checked + strong {
+    color: #0ea5e9;
+}
+
+/* Estilo para label com radio selecionado - compatível com navegadores sem :has() */
+#dps-token-type-modal label {
+    transition: all 0.2s;
+}
+
+#dps-token-type-modal label:has(input[type="radio"]:checked) {
+    border-color: #0ea5e9;
+    background-color: #f0f9ff;
+}
+
+/* Fallback para navegadores sem suporte a :has() - será aplicado via JS */
+#dps-token-type-modal label.dps-radio-checked {
+    border-color: #0ea5e9;
+    background-color: #f0f9ff;
+}
+
+#dps-token-type-modal label:hover {
+    border-color: #0ea5e9;
+}
+
 /* Estilos básicos para a tela de logins */
 .dps-portal-logins {
     max-width: 1200px;

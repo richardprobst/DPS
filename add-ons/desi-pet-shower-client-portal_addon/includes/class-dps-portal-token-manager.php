@@ -41,6 +41,13 @@ final class DPS_Portal_Token_Manager {
      * @var int
      */
     const DEFAULT_EXPIRATION_MINUTES = 30;
+    
+    /**
+     * Tempo de expiração para tokens permanentes em minutos (10 anos)
+     *
+     * @var int
+     */
+    const PERMANENT_EXPIRATION_MINUTES = 60 * 24 * 365 * 10;
 
     /**
      * Única instância da classe
@@ -150,18 +157,23 @@ final class DPS_Portal_Token_Manager {
         }
 
         // Valida o tipo
-        $allowed_types = [ 'login', 'first_access' ];
+        $allowed_types = [ 'login', 'first_access', 'permanent' ];
         if ( ! in_array( $type, $allowed_types, true ) ) {
             $type = 'login';
         }
 
         // Define expiração
-        if ( null === $expiration_minutes ) {
+        // Tokens permanentes recebem data de expiração muito distante (10 anos)
+        // Para revogá-los, usa-se a coluna revoked_at
+        if ( 'permanent' === $type ) {
+            $expiration_minutes = self::PERMANENT_EXPIRATION_MINUTES;
+        } elseif ( null === $expiration_minutes ) {
             $expiration_minutes = self::DEFAULT_EXPIRATION_MINUTES;
-        }
-        $expiration_minutes = absint( $expiration_minutes );
-        if ( $expiration_minutes < 1 ) {
-            $expiration_minutes = self::DEFAULT_EXPIRATION_MINUTES;
+        } else {
+            $expiration_minutes = absint( $expiration_minutes );
+            if ( $expiration_minutes < 1 ) {
+                $expiration_minutes = self::DEFAULT_EXPIRATION_MINUTES;
+            }
         }
 
         // Gera token aleatório seguro (32 bytes = 64 caracteres hex)
