@@ -1167,7 +1167,7 @@ class DPS_Base_Frontend {
             $appt_type = isset( $meta['appointment_type'] ) ? $meta['appointment_type'] : 'simple';
             echo '<div class="dps-radio-group">';
             echo '<label class="dps-radio-option">';
-            echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . checked( $appt_type, 'subscription', false ) . checked( $appt_type, 'past', false ) . '>';
+            echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . '>';
             echo '<div class="dps-radio-label">';
             echo '<strong>' . esc_html__( 'Agendamento Simples', 'desi-pet-shower' ) . '</strong>';
             echo '<p>' . esc_html__( 'Atendimento único, sem recorrência', 'desi-pet-shower' ) . '</p>';
