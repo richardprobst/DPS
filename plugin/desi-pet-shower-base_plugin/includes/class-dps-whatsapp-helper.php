@@ -72,8 +72,9 @@ class DPS_WhatsApp_Helper {
         } else {
             // Fallback: remove caracteres não numéricos
             $formatted_phone = preg_replace( '/\D/', '', $client_phone );
-            // Adiciona código do país se necessário
+            // Adiciona código do país apenas se número brasileiro (10-11 dígitos) sem código
             if ( strlen( $formatted_phone ) >= 10 && strlen( $formatted_phone ) <= 11 ) {
+                // Apenas adiciona 55 se não começar com código de país (assumindo que números com mais de 11 dígitos já têm código)
                 $formatted_phone = '55' . $formatted_phone;
             }
         }
@@ -168,6 +169,10 @@ class DPS_WhatsApp_Helper {
     /**
      * Gera mensagem padrão para solicitação de acesso ao portal
      *
+     * NOTA DE SEGURANÇA: Os parâmetros $client_name e $pet_name não precisam de sanitização
+     * adicional aqui pois são usados apenas em mensagens de texto que serão URL-encoded
+     * via rawurlencode() antes de serem enviadas ao WhatsApp. Não são exibidos como HTML.
+     *
      * @param string $client_name Nome do cliente (opcional)
      * @param string $pet_name    Nome do pet (opcional)
      * @return string Mensagem formatada
@@ -187,6 +192,9 @@ class DPS_WhatsApp_Helper {
     /**
      * Gera mensagem padrão para envio de link do portal ao cliente
      *
+     * NOTA DE SEGURANÇA: Os parâmetros são usados em mensagens de texto que serão URL-encoded.
+     * A URL do portal deve ser validada antes de chamar este método usando validate_portal_link().
+     *
      * @param string $client_name Nome do cliente
      * @param string $portal_url  URL completa do portal com token
      * @return string Mensagem formatada
@@ -201,6 +209,9 @@ class DPS_WhatsApp_Helper {
 
     /**
      * Gera mensagem padrão para confirmação de agendamento
+     *
+     * NOTA DE SEGURANÇA: Os dados do array $appointment_data vêm do banco de dados (post meta)
+     * e são usados apenas em mensagens de texto URL-encoded. Não precisam de sanitização HTML.
      *
      * @param array $appointment_data Array com dados do agendamento
      *                                Esperado: client_name, pet_name, date, time
@@ -227,6 +238,9 @@ class DPS_WhatsApp_Helper {
 
     /**
      * Gera mensagem padrão para cobrança
+     *
+     * NOTA DE SEGURANÇA: Valores monetários devem ser formatados com DPS_Money_Helper antes
+     * de chamar este método. URLs de pagamento devem ser validadas.
      *
      * @param string $client_name Nome do cliente
      * @param string $amount      Valor formatado (ex: 'R$ 80,00')
