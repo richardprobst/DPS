@@ -17,11 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Carrega o text domain do Loyalty Add-on.
+ * Usa prioridade 5 para garantir que rode antes da inicialização da classe (prioridade 20).
  */
 function dps_loyalty_load_textdomain() {
     load_plugin_textdomain( 'dps-loyalty-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
-add_action( 'init', 'dps_loyalty_load_textdomain' );
+add_action( 'init', 'dps_loyalty_load_textdomain', 5 );
 
 class DPS_Loyalty_Addon {
 
@@ -890,6 +891,10 @@ class DPS_Loyalty_Referrals {
 }
 
 if ( ! function_exists( 'dps_loyalty_init' ) ) {
+    /**
+     * Inicializa o Loyalty Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+     * Usa prioridade 20 para rodar após o carregamento do text domain (prioridade 5).
+     */
     function dps_loyalty_init() {
         static $instance = null;
 
@@ -903,7 +908,7 @@ if ( ! function_exists( 'dps_loyalty_init' ) ) {
     }
 }
 
-add_action( 'plugins_loaded', 'dps_loyalty_init' );
+add_action( 'init', 'dps_loyalty_init', 20 );
 
 register_activation_hook( __FILE__, [ 'DPS_Loyalty_Referrals', 'install' ] );
 

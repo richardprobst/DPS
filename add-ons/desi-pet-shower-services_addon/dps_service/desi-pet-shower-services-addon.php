@@ -1152,5 +1152,16 @@ class DPS_Services_Addon {
     }
 }
 
-// Inicializa o add-on
-new DPS_Services_Addon();
+/**
+ * Inicializa o add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ */
+function dps_services_addon_init() {
+	static $instance = null;
+	
+	if ( null === $instance ) {
+		$instance = new DPS_Services_Addon();
+	}
+	
+	return $instance;
+}
+add_action( 'init', 'dps_services_addon_init', 20 );

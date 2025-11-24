@@ -22,11 +22,12 @@ if ( ! defined( 'DPS_SERVICES_PLUGIN_FILE' ) ) {
 
 /**
  * Carrega o text domain do Services Add-on.
+ * Usa prioridade 5 para garantir que rode antes da inicialização da classe (prioridade 20).
  */
 function dps_services_load_textdomain() {
     load_plugin_textdomain( 'dps-services-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
-add_action( 'init', 'dps_services_load_textdomain' );
+add_action( 'init', 'dps_services_load_textdomain', 5 );
 
 // Inclui o arquivo principal do add-on localizado na subpasta
 require_once plugin_dir_path( __FILE__ ) . 'dps_service/desi-pet-shower-services-addon.php';
