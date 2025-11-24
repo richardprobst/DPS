@@ -79,6 +79,16 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Plugin Base**: Nova opção "Agendamento Passado" no formulário de agendamentos
+  - Adicionada terceira opção de tipo de agendamento para registrar atendimentos já realizados
+  - Novo fieldset "Informações de Pagamento" com campos específicos:
+    - Status do Pagamento: dropdown com opções "Pago" ou "Pendente"
+    - Valor Pendente: campo numérico exibido condicionalmente quando status = "Pendente"
+  - Campos salvos como metadados: `past_payment_status` e `past_payment_value`
+  - Agendamentos passados recebem automaticamente status "realizado"
+  - JavaScript atualizado para controlar visibilidade dos campos condicionais
+  - TaxiDog e Tosa ocultados automaticamente para agendamentos passados (não aplicável)
+  - **Impacto**: Permite registrar no sistema atendimentos realizados anteriormente e controlar pagamentos pendentes
 - **Client Portal Add-on (v2.2.0)**: Menu administrativo e tokens permanentes
   - Adicionado menu "Portal do Cliente" sob "Desi Pet Shower" com dois submenus:
     - "Portal do Cliente": configurações gerais do portal

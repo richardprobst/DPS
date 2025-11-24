@@ -167,6 +167,62 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Design minimalista com paleta reduzida: base neutra (#f9fafb, #e5e7eb, #374151) + 3 cores de status essenciais (verde, amarelo, vermelho)
 - Responsividade básica implementada com media queries para mobile (480px), tablets (768px) e desktops pequenos (1024px)
 
+### Tipos de Agendamento
+
+O sistema suporta três tipos de agendamentos, identificados pelo metadado `appointment_type`:
+
+#### 1. Agendamento Simples (`simple`)
+- **Propósito**: Atendimento único, sem recorrência
+- **Campos específicos**: Permite adicionar TaxiDog com valor personalizado
+- **Comportamento**: Status inicial "pendente", precisa ser manualmente atualizado para "realizado"
+- **Metadados salvos**: 
+  - `appointment_type` = 'simple'
+  - `appointment_taxidog` (0 ou 1)
+  - `appointment_taxidog_price` (float)
+  - `appointment_total_value` (calculado pelo Services Add-on)
+
+#### 2. Agendamento de Assinatura (`subscription`)
+- **Propósito**: Atendimentos recorrentes (semanal ou quinzenal)
+- **Campos específicos**: 
+  - Frequência (semanal ou quinzenal)
+  - Tosa opcional com preço e ocorrência configurável
+  - TaxiDog disponível mas sem custo adicional
+- **Comportamento**: Vincula-se a um registro de assinatura (`dps_subscription`) e gera atendimentos recorrentes
+- **Metadados salvos**:
+  - `appointment_type` = 'subscription'
+  - `subscription_id` (ID do post de assinatura vinculado)
+  - `appointment_tosa` (0 ou 1)
+  - `appointment_tosa_price` (float)
+  - `appointment_tosa_occurrence` (1-4 para semanal, 1-2 para quinzenal)
+  - `subscription_base_value`, `subscription_total_value`
+
+#### 3. Agendamento Passado (`past`)
+- **Propósito**: Registrar atendimentos já realizados anteriormente
+- **Campos específicos**:
+  - Status do Pagamento: dropdown com opções "Pago" ou "Pendente"
+  - Valor Pendente: campo numérico condicional (exibido apenas se status = "Pendente")
+- **Comportamento**: 
+  - Status inicial automaticamente definido como "realizado"
+  - TaxiDog e Tosa não disponíveis (não aplicável para registros passados)
+  - Permite controlar pagamentos pendentes de atendimentos históricos
+- **Metadados salvos**:
+  - `appointment_type` = 'past'
+  - `appointment_status` = 'realizado' (definido automaticamente)
+  - `past_payment_status` ('paid' ou 'pending')
+  - `past_payment_value` (float, salvo apenas se status = 'pending')
+  - `appointment_total_value` (calculado pelo Services Add-on)
+- **Casos de uso**:
+  - Migração de dados de sistemas anteriores
+  - Registro de atendimentos realizados antes da implementação do sistema
+  - Controle de pagamentos em atraso de atendimentos históricos
+
+**Controle de visibilidade de campos (JavaScript)**:
+- A função `updateTypeFields()` em `dps-appointment-form.js` controla a exibição condicional de campos baseada no tipo selecionado
+- Campos de frequência: visíveis apenas para tipo `subscription`
+- Campos de tosa: visíveis apenas para tipo `subscription`
+- Campos de pagamento passado: visíveis apenas para tipo `past`
+- TaxiDog com preço: visível apenas para tipo `simple`
+
 
 ### Histórico e exportação de agendamentos
 - A coleta de atendimentos finalizados é feita em lotes pelo `WP_Query` com `fields => 'ids'`, `no_found_rows => true` e tamanho configurável via filtro `dps_history_batch_size` (padrão: 200). Isso evita uma única consulta gigante em tabelas volumosas e permite tratar listas grandes de forma incremental.
