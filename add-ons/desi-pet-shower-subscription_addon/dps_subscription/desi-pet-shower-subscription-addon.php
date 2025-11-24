@@ -978,4 +978,14 @@ class DPS_Subscription_Addon {
     }
 }
 
-new DPS_Subscription_Addon();
+/**
+ * Inicializa o Subscription Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+ * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+ * de outros registros (prioridade 10).
+ */
+function dps_subscription_init_addon() {
+    if ( class_exists( 'DPS_Subscription_Addon' ) ) {
+        new DPS_Subscription_Addon();
+    }
+}
+add_action( 'init', 'dps_subscription_init_addon', 5 );

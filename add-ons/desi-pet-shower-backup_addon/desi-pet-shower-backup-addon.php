@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-backup-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -14,6 +15,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Carrega o text domain do Backup Add-on.
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ */
+function dps_backup_load_textdomain() {
+    load_plugin_textdomain( 'dps-backup-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_backup_load_textdomain', 1 );
 
 if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
     class DPS_Backup_Addon {
@@ -1108,5 +1118,15 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         }
     }
 
-    new DPS_Backup_Addon();
+    /**
+     * Inicializa o Backup Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+     * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+     * de outros registros (prioridade 10).
+     */
+    function dps_backup_init_addon() {
+        if ( class_exists( 'DPS_Backup_Addon' ) ) {
+            new DPS_Backup_Addon();
+        }
+    }
+    add_action( 'init', 'dps_backup_init_addon', 5 );
 }

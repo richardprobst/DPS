@@ -208,11 +208,19 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - Dados de negócio (nomes de clientes, endereços hardcoded, etc.) não precisam de tradução
 
 **Carregamento de text domains (WordPress 6.7+)**:
+- Todos os plugins devem incluir o header `Domain Path: /languages` para indicar onde os arquivos de tradução devem ser armazenados
 - Add-ons devem carregar text domains usando `load_plugin_textdomain()` no hook `init` com prioridade 1
 - Instanciar classes principais no hook `init` com prioridade 5 (após carregamento do text domain)
 - Isso garante que strings traduzíveis no constructor sejam traduzidas corretamente
 - Métodos de registro (CPT, taxonomias, etc.) devem ser adicionados ao `init` com prioridade padrão (10)
 - **Não** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
+
+**Status de localização pt_BR**:
+- ✅ Todos os 16 plugins (1 base + 15 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
+- ✅ Todos os plugins carregam text domain no hook `init` com prioridade 1
+- ✅ Todas as classes são inicializadas no hook `init` com prioridade 5
+- ✅ Todo código, comentários e strings estão em Português do Brasil
+- ✅ Sistema pronto para expansão multilíngue com arquivos .po/.mo em `/languages`
 
 ---
 

@@ -7,6 +7,7 @@
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-communications-addon
+ * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
  */
@@ -14,6 +15,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Carrega o text domain do Communications Add-on.
+ * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
+ */
+function dps_communications_load_textdomain() {
+    load_plugin_textdomain( 'dps-communications-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'dps_communications_load_textdomain', 1 );
 
 // Carrega a API centralizada de comunicações
 require_once __DIR__ . '/includes/class-dps-communications-api.php';
@@ -290,6 +300,11 @@ class DPS_Communications_Addon {
 }
 
 if ( ! function_exists( 'dps_comm_init' ) ) {
+    /**
+     * Inicializa o Communications Add-on após o hook 'init' para garantir que o text domain seja carregado primeiro.
+     * Usa prioridade 5 para rodar após o carregamento do text domain (prioridade 1) mas antes
+     * de outros registros (prioridade 10).
+     */
     function dps_comm_init() {
         static $instance = null;
 
@@ -301,7 +316,7 @@ if ( ! function_exists( 'dps_comm_init' ) ) {
     }
 }
 
-add_action( 'plugins_loaded', 'dps_comm_init' );
+add_action( 'init', 'dps_comm_init', 5 );
 
 /**
  * Funções helper para compatibilidade retroativa
