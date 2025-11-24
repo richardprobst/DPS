@@ -253,7 +253,14 @@ echo '</div>'; // .dps-portal-settings
         
         copyButtons.forEach(function(button) {
             button.addEventListener('click', function() {
-                const url = this.dataset.url || this.previousElementSibling.value;
+                // Find the input in the parent container
+                const container = this.closest('.dps-portal-url-display');
+                const input = container ? container.querySelector('.dps-input-url') : null;
+                const url = this.dataset.url || (input ? input.value : '');
+                
+                if (!url) {
+                    return;
+                }
                 
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(url).then(function() {
@@ -273,15 +280,16 @@ echo '</div>'; // .dps-portal-settings
                     });
                 } else {
                     // Fallback para navegadores antigos
-                    const input = button.previousElementSibling;
-                    input.select();
-                    document.execCommand('copy');
-                    
-                    const originalText = button.textContent;
-                    button.textContent = '✓ Copiado!';
-                    setTimeout(function() {
-                        button.textContent = originalText;
-                    }, 2000);
+                    if (input) {
+                        input.select();
+                        document.execCommand('copy');
+                        
+                        const originalText = button.textContent;
+                        button.textContent = '✓ Copiado!';
+                        setTimeout(function() {
+                            button.textContent = originalText;
+                        }, 2000);
+                    }
                 }
             });
         });

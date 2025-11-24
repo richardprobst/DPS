@@ -1598,7 +1598,8 @@ final class DPS_Client_Portal {
         
         // Feedback de salvamento
         $feedback_messages = [];
-        if ( isset( $_GET['dps_portal_settings_saved'] ) && $_GET['dps_portal_settings_saved'] === '1' ) {
+        $saved_param = isset( $_GET['dps_portal_settings_saved'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_portal_settings_saved'] ) ) : '';
+        if ( $saved_param === '1' ) {
             $feedback_messages[] = [
                 'type' => 'success',
                 'text' => __( 'Configurações do portal salvas com sucesso!', 'dps-client-portal' ),
