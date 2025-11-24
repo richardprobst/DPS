@@ -34,6 +34,9 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
+// Inclui funções auxiliares
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/functions-portal-helpers.php';
+
 // Inclui classes principais
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';

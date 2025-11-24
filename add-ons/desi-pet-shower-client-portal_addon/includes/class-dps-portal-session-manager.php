@@ -217,13 +217,7 @@ final class DPS_Portal_Session_Manager {
         $this->logout();
 
         // Redireciona para a tela de acesso
-        $portal_page = get_page_by_title( 'Portal do Cliente' );
-        if ( $portal_page ) {
-            $redirect_url = get_permalink( $portal_page->ID );
-        } else {
-            $redirect_url = home_url( '/portal-cliente/' );
-        }
-
+        $redirect_url = dps_get_portal_page_url();
         wp_safe_redirect( $redirect_url );
         exit;
     }
@@ -234,12 +228,7 @@ final class DPS_Portal_Session_Manager {
      * @return string URL de logout com nonce
      */
     public function get_logout_url() {
-        $portal_page = get_page_by_title( 'Portal do Cliente' );
-        if ( $portal_page ) {
-            $base_url = get_permalink( $portal_page->ID );
-        } else {
-            $base_url = home_url( '/portal-cliente/' );
-        }
+        $base_url = dps_get_portal_page_url();
 
         return wp_nonce_url( 
             add_query_arg( 'dps_portal_logout', '1', $base_url ), 

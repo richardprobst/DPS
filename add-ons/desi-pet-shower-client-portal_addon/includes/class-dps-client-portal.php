@@ -80,8 +80,13 @@ final class DPS_Client_Portal {
         // --- MUDANÇAS AQUI ---
         // Remove o menu do admin e adiciona abas no front-end
         // add_action( 'admin_menu', [ $this, 'register_client_logins_page' ] ); // Comentamos ou removemos esta linha
+        add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
+        add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+        
+        // Processa salvamento das configurações do portal
+        add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
     }
 
     /**
@@ -122,12 +127,7 @@ final class DPS_Client_Portal {
         $token_manager->mark_as_used( $token_data['id'] );
 
         // Redireciona para o portal (remove o token da URL)
-        $portal_page = get_page_by_title( 'Portal do Cliente' );
-        if ( $portal_page ) {
-            $redirect_url = get_permalink( $portal_page->ID );
-        } else {
-            $redirect_url = home_url( '/portal-cliente/' );
-        }
+        $redirect_url = dps_get_portal_page_url();
 
         wp_safe_redirect( $redirect_url );
         exit;
@@ -147,9 +147,10 @@ final class DPS_Client_Portal {
      * @param string $error_type Tipo do erro (invalid, expired, used)
      */
     private function redirect_to_access_screen( $error_type = 'invalid' ) {
-        $portal_page = get_page_by_title( 'Portal do Cliente' );
-        if ( $portal_page ) {
-            $redirect_url = get_permalink( $portal_page->ID );
+        $portal_page_id = dps_get_portal_page_id();
+        
+        if ( $portal_page_id ) {
+            $redirect_url = get_permalink( $portal_page_id );
         } else {
             $redirect_url = home_url( '/portal-cliente/' );
         }
@@ -1481,14 +1482,9 @@ final class DPS_Client_Portal {
     }
     public function render_login_shortcode() {
         if ( is_user_logged_in() ) {
-            $portal_page = get_page_by_title( 'Portal do Cliente' );
-
-            if ( $portal_page ) {
-                wp_safe_redirect( get_permalink( $portal_page->ID ) );
-                exit;
-            }
-
-            return '';
+            $redirect_url = dps_get_portal_page_url();
+            wp_safe_redirect( $redirect_url );
+            exit;
         }
 
         $feedback    = '';
@@ -1532,14 +1528,8 @@ final class DPS_Client_Portal {
                     wp_set_current_user( $user->ID );
                     wp_set_auth_cookie( $user->ID, true );
 
-                    $portal_page = get_page_by_title( 'Portal do Cliente' );
-
-                    if ( $portal_page ) {
-                        wp_safe_redirect( get_permalink( $portal_page->ID ) );
-                    } else {
-                        wp_safe_redirect( home_url() );
-                    }
-
+                    $redirect_url = dps_get_portal_page_url();
+                    wp_safe_redirect( $redirect_url );
                     exit;
                 }
             }
@@ -1561,6 +1551,111 @@ final class DPS_Client_Portal {
         echo '</form>';
 
         return ob_get_clean();
+    }
+    
+    /**
+     * Renderiza a aba "Portal" na navegação do front-end.
+     */
+    public function render_portal_settings_tab( $visitor_only = false ) {
+        if ( $visitor_only ) {
+            return;
+        }
+        echo '<li><a href="#" class="dps-tab-link" data-tab="portal">' . esc_html__( 'Portal', 'dps-client-portal' ) . '</a></li>';
+    }
+
+    /**
+     * Renderiza o conteúdo da seção "Portal" no front-end.
+     */
+    public function render_portal_settings_section( $visitor_only = false ) {
+        if ( $visitor_only ) {
+            return;
+        }
+        
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        
+        echo '<div class="dps-section" id="dps-section-portal">';
+        $page_id   = get_queried_object_id();
+        $page_link = $page_id ? get_permalink( $page_id ) : home_url();
+        $page_link = add_query_arg( 'tab', 'portal', $page_link );
+        $this->render_portal_settings_page( $page_link );
+        echo '</div>';
+    }
+    
+    /**
+     * Renderiza a página de configurações do portal
+     * 
+     * @param string $base_url URL base da página
+     */
+    public function render_portal_settings_page( $base_url = '' ) {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            echo '<div class="dps-portal-settings-restricted">';
+            echo '<p>' . esc_html__( 'Você não tem permissão para visualizar as configurações do portal.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+            return;
+        }
+        
+        // Feedback de salvamento
+        $feedback_messages = [];
+        if ( isset( $_GET['dps_portal_settings_saved'] ) && $_GET['dps_portal_settings_saved'] === '1' ) {
+            $feedback_messages[] = [
+                'type' => 'success',
+                'text' => __( 'Configurações do portal salvas com sucesso!', 'dps-client-portal' ),
+            ];
+        }
+        
+        // Obtém configurações atuais
+        $portal_page_id = (int) get_option( 'dps_portal_page_id', 0 );
+        $portal_url     = dps_get_portal_page_url();
+        
+        // Busca todas as páginas publicadas
+        $pages = get_pages( [
+            'post_status' => 'publish',
+            'sort_column' => 'post_title',
+        ] );
+        
+        // Template
+        $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-settings.php';
+        
+        if ( file_exists( $template_path ) ) {
+            include $template_path;
+        } else {
+            echo '<p>' . esc_html__( 'Template de configurações não encontrado.', 'dps-client-portal' ) . '</p>';
+        }
+    }
+    
+    /**
+     * Processa salvamento das configurações do portal
+     */
+    public function handle_portal_settings_save() {
+        if ( ! isset( $_POST['dps_save_portal_settings'] ) ) {
+            return;
+        }
+        
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        
+        if ( ! isset( $_POST['_dps_portal_settings_nonce'] ) || 
+             ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_dps_portal_settings_nonce'] ) ), 'dps_save_portal_settings' ) ) {
+            return;
+        }
+        
+        // Salva ID da página do portal
+        if ( isset( $_POST['dps_portal_page_id'] ) ) {
+            $page_id = absint( $_POST['dps_portal_page_id'] );
+            update_option( 'dps_portal_page_id', $page_id );
+        }
+        
+        // Redireciona com mensagem de sucesso
+        $redirect_url = add_query_arg( [
+            'tab'                       => 'portal',
+            'dps_portal_settings_saved' => '1',
+        ], wp_get_referer() );
+        
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
     
     /**
