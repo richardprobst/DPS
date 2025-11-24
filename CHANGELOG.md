@@ -127,6 +127,19 @@ Antes de criar uma nova versão oficial:
 - **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
 
 #### Fixed (Corrigido)
+- **Plugin Base**: Corrigido aviso PHP `map_meta_cap was called incorrectly` no WordPress 6.1+
+  - Adicionadas capabilities de exclusão faltantes (`delete_posts`, `delete_private_posts`, `delete_published_posts`, `delete_others_posts`) nos CPTs:
+    - `dps_cliente` (Clientes)
+    - `dps_pet` (Pets)
+    - `dps_agendamento` (Agendamentos)
+  - **Corrigido**: Notices repetidos no error log sobre `delete_post` capability sem post específico
+  - **Impacto**: Elimina avisos no log ao excluir ou gerenciar posts dos CPTs personalizados
+- **Plugin Base**: Corrigido aviso PHP `Undefined variable $initial_pending_rows`
+  - Inicializada variável como array vazio antes de uso condicional
+  - **Corrigido**: Notice na linha 1261 de class-dps-base-frontend.php
+  - **Impacto**: Elimina aviso no error log ao carregar formulário de agendamentos
+- **Stock Add-on**: Adicionadas capabilities de exclusão faltantes (`delete_private_posts`, `delete_published_posts`)
+  - Complementa capabilities já existentes para total compatibilidade com `map_meta_cap`
 - Número da equipe agora é configurável e centralizado (antes estava hardcoded em vários locais)
 - Formatação de números de telefone padronizada em todo o sistema usando `DPS_Phone_Helper`
 - Portal do Cliente agora usa número da equipe configurado ao invés de placeholder `5551999999999`
