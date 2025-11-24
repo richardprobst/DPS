@@ -90,7 +90,21 @@ Antes de criar uma nova versão oficial:
     - Font-size reduzido para 13px (itens) e 16px (título H3)
   - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
 
+#### Documentation (Documentação)
+- **ANALYSIS.md**: Atualizada seção "Portal do Cliente" com novos hooks, funções helper e versão 2.1.0
+- **Client Portal README.md**: Atualizada seção "Para administradores" com instruções de configuração da página do portal
+
 #### Added (Adicionado)
+- **Client Portal Add-on (v2.1.0)**: Interface de configurações para gerenciamento do Portal do Cliente
+  - Nova aba "Portal" nas configurações do sistema para configurar página do portal
+  - Campo de seleção (dropdown) para escolher a página onde o shortcode `[dps_client_portal]` está inserido
+  - Exibição do link do portal com botão "Copiar Link" para facilitar compartilhamento
+  - Instruções de uso do portal com passos detalhados
+  - Salvamento de configurações via option `dps_portal_page_id` com validação de nonce
+  - Funções helper globais `dps_get_portal_page_url()` e `dps_get_portal_page_id()` para obter URL/ID do portal
+  - Fallback automático para página com título "Portal do Cliente" (compatibilidade com versões anteriores)
+  - Template `templates/portal-settings.php` com estilos minimalistas DPS
+  - Script inline para copiar URL do portal com feedback visual
 - **Payment Add-on**: Documentação completa de configuração do webhook secret
   - Novo arquivo `WEBHOOK_CONFIGURATION.md` com guia passo a passo completo
   - Instruções detalhadas sobre geração de senha forte, configuração no DPS e no Mercado Pago
@@ -211,6 +225,10 @@ Antes de criar uma nova versão oficial:
   - Desabilitação automática de botão submit durante salvamento (previne duplicatas)
 
 #### Changed (Alterado)
+- **Client Portal Add-on**: Refatoração de 7 ocorrências de `get_page_by_title('Portal do Cliente')` hardcoded
+  - Substituído por chamadas às funções helper centralizadas `dps_get_portal_page_url()` e `dps_get_portal_page_id()`
+  - Modificados: `class-dps-client-portal.php` (4x), `class-dps-portal-session-manager.php` (2x), `class-dps-portal-token-manager.php` (1x)
+  - Mantido comportamento legado como fallback dentro das funções helper
 - **Payment Add-on**: Campo "Webhook secret" nas configurações melhorado com instruções inline
   - Descrição expandida com passos numerados de configuração
   - Exemplo de URL do webhook com domínio real do site

@@ -408,15 +408,7 @@ final class DPS_Portal_Token_Manager {
      * @return string URL completa com token
      */
     public function generate_access_url( $token_plain ) {
-        // Busca a página do portal
-        $portal_page = get_page_by_title( 'Portal do Cliente' );
-        
-        if ( ! $portal_page ) {
-            $portal_url = home_url( '/portal-cliente/' );
-        } else {
-            $portal_url = get_permalink( $portal_page->ID );
-        }
-
+        $portal_url = dps_get_portal_page_url();
         return add_query_arg( 'dps_token', $token_plain, $portal_url );
     }
 }

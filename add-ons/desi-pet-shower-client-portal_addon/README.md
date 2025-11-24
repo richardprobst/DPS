@@ -197,14 +197,23 @@ Este add-on não armazena options globais.
 
 ### Para administradores
 
-1. **Criar credenciais de cliente**:
-   - Ao salvar cliente no painel base, credenciais são geradas automaticamente
-   - Usuário WordPress é criado com e-mail do cliente
-   - Senha temporária é gerada (notifique o cliente)
+1. **Configurar página do portal**:
+   - Acesse a aba "Configurações" do DPS
+   - Clique na aba "Portal"
+   - Selecione a página onde o shortcode `[dps_client_portal]` está inserido
+   - Salve as configurações
+   - Copie o link do portal se necessário
 
-2. **Redefinir senha de cliente**:
-   - Use funcionalidade padrão WordPress "Redefinir senha"
-   - Cliente receberá e-mail com link de redefinição
+2. **Gerar links de acesso para clientes**:
+   - Acesse a aba "Logins de Clientes" nas configurações
+   - Busque o cliente desejado
+   - Clique em "Primeiro Acesso" (para novos clientes) ou "Gerar Novo Link"
+   - O link gerado é válido por 30 minutos
+   - Envie por WhatsApp ou e-mail usando os botões disponíveis
+
+3. **Revogar acessos**:
+   - Na aba "Logins de Clientes", clique em "Revogar" para invalidar links ativos
+   - Use quando o cliente reportar perda de acesso ou por segurança
 
 ## Notas para desenvolvimento
 
@@ -269,10 +278,19 @@ Ao modificar este add-on:
 
 ### Principais marcos
 
+- **v2.1.0**: Adicionada configuração centralizada da página do portal
+  - Nova aba "Portal" nas configurações para selecionar página do portal
+  - Funções helper `dps_get_portal_page_url()` e `dps_get_portal_page_id()`
+  - Refatoração de 7 chamadas hardcoded para usar funções centralizadas
+- **v2.0.0**: Sistema de autenticação por tokens (magic links)
+  - Substituído login com senha por autenticação via tokens únicos
+  - Tabela `wp_dps_portal_tokens` para gerenciar tokens
+  - Tokens com expiração de 30 minutos e uso único
 - **v1.0.0**: Lançamento inicial com portal completo (login, histórico, galeria, atualização de dados, integração com Finance/Payment/Loyalty)
 
 ### Melhorias implementadas
 - Estrutura modular com classes em `includes/` e assets em `assets/`
 - Integração condicional com add-ons opcionais via `function_exists()`
+- Interface administrativa integrada às configurações do sistema
 
 Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.
