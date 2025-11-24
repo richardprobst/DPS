@@ -733,8 +733,10 @@ class DPS_Services_Addon {
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
-                echo esc_html( $srv['name'] ) . ' (R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
+                echo esc_html( $srv['name'] ) . ' ';
+                echo '<span class="dps-service-price-wrapper">(R$ ';
+                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
+                echo ')</span>';
                 echo '</label></p>';
             }
         }
@@ -770,8 +772,10 @@ class DPS_Services_Addon {
                         . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                         . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                         . $checked . '> ';
-                    echo esc_html( $srv['name'] ) . ' (R$ ';
-                    echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
+                    echo esc_html( $srv['name'] ) . ' ';
+                    echo '<span class="dps-service-price-wrapper">(R$ ';
+                    echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
+                    echo ')</span>';
                     echo '</label></p>';
                 }
             }
@@ -795,8 +799,10 @@ class DPS_Services_Addon {
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
-                echo esc_html( $srv['name'] ) . ' (R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">)';
+                echo esc_html( $srv['name'] ) . ' ';
+                echo '<span class="dps-service-price-wrapper">(R$ ';
+                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
+                echo ')</span>';
                 echo '</label></p>';
             }
         }
