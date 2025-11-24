@@ -177,10 +177,12 @@
 
       function buildPetOption(pet, selectedIds){
         var $label = $('<label/>', {
-          'class': 'dps-pet-option',
-          'data-owner': pet.owner_id || '',
-          'data-search': (pet.name + ' ' + (pet.breed || '') + ' ' + (pet.owner_name || '')).toLowerCase()
+          'class': 'dps-pet-option'
         });
+        // Set data attributes using .attr() to ensure they are DOM attributes
+        // (not jQuery internal data). This is required for .attr() reads in applyPetFilters.
+        $label.attr('data-owner', pet.owner_id || '');
+        $label.attr('data-search', (pet.name + ' ' + (pet.breed || '') + ' ' + (pet.owner_name || '')).toLowerCase());
 
         if (pet.size) {
           $label.attr('data-size', String(pet.size).toLowerCase());
