@@ -354,7 +354,8 @@
         var ownerId = $clientSelect.val();
         $petOptions.each(function(){
           var $option = $(this);
-          var optionOwner = $option.data('owner');
+          // Use .attr() instead of .data() to read DOM attributes set by buildPetOption
+          var optionOwner = $option.attr('data-owner');
           var matches = ownerId && String(optionOwner) === String(ownerId);
           if (matches) {
             $option.find('.dps-pet-checkbox').prop('checked', action === 'select');

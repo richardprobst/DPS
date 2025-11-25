@@ -127,6 +127,12 @@ Antes de criar uma nova versão oficial:
 - **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
 
 #### Fixed (Corrigido)
+- **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
+  - O handler de toggle de pets usava `.data('owner')` que lê do cache interno do jQuery
+  - Após PR #165, `buildPetOption` passou a usar `.attr()` para definir atributos DOM
+  - O handler de toggle não foi atualizado junto, causando inconsistência
+  - **Corrigido**: Alterado handler para usar `.attr('data-owner')` ao invés de `.data('owner')`
+  - **Impacto**: Botões de seleção/desmarcar todos os pets agora funcionam corretamente
 - **Plugin Base**: Corrigido seletor de pets não exibir pets ao selecionar cliente no formulário de agendamentos
   - A função `buildPetOption` usava `$('<label/>', { 'data-owner': ... })` que armazena dados no cache interno do jQuery
   - A função `applyPetFilters` usava `.attr('data-owner')` para ler, que busca no atributo DOM (sempre vazio)
