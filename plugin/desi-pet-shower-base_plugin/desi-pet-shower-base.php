@@ -123,6 +123,26 @@ class DPS_Base_Plugin {
     }
 
     /**
+     * Rotina de desativação do plugin.
+     *
+     * Limpa transients de cache e cron jobs agendados para evitar
+     * dados órfãos no banco de dados.
+     */
+    public static function deactivate() {
+        // Limpa transients de cache de pets
+        $keys = get_option( 'dps_pets_cache_keys', [] );
+        if ( is_array( $keys ) ) {
+            foreach ( $keys as $key ) {
+                delete_transient( $key );
+            }
+        }
+        delete_option( 'dps_pets_cache_keys' );
+
+        // Limpa scheduled events se houver
+        wp_clear_scheduled_hook( 'dps_daily_cleanup' );
+    }
+
+    /**
      * Registra o menu admin principal unificado do DPS.
      * Este menu centraliza todos os submenus de configuração dos add-ons.
      */
@@ -325,15 +345,17 @@ class DPS_Base_Plugin {
             'nonce'   => wp_create_nonce( 'dps_action' ),
             'appointmentId' => isset( $_GET['dps_edit'] ) && isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0,
             'l10n' => [
-                'loadingTimes'   => __( 'Carregando horários...', 'desi-pet-shower' ),
-                'selectTime'     => __( 'Selecione um horário', 'desi-pet-shower' ),
-                'noTimes'        => __( 'Nenhum horário disponível para esta data', 'desi-pet-shower' ),
-                'selectClient'   => __( 'Selecione um cliente', 'desi-pet-shower' ),
-                'selectPet'      => __( 'Selecione pelo menos um pet', 'desi-pet-shower' ),
-                'selectDate'     => __( 'Selecione uma data', 'desi-pet-shower' ),
-                'selectTimeSlot' => __( 'Selecione um horário', 'desi-pet-shower' ),
-                'pastDate'       => __( 'A data não pode ser anterior a hoje', 'desi-pet-shower' ),
-                'saving'         => __( 'Salvando...', 'desi-pet-shower' ),
+                'loadingTimes'    => __( 'Carregando horários...', 'desi-pet-shower' ),
+                'selectTime'      => __( 'Selecione um horário', 'desi-pet-shower' ),
+                'noTimes'         => __( 'Nenhum horário disponível para esta data', 'desi-pet-shower' ),
+                'selectClient'    => __( 'Selecione um cliente', 'desi-pet-shower' ),
+                'selectPet'       => __( 'Selecione pelo menos um pet', 'desi-pet-shower' ),
+                'selectDate'      => __( 'Selecione uma data', 'desi-pet-shower' ),
+                'selectTimeSlot'  => __( 'Selecione um horário', 'desi-pet-shower' ),
+                'pastDate'        => __( 'A data não pode ser anterior a hoje', 'desi-pet-shower' ),
+                'saving'          => __( 'Salvando...', 'desi-pet-shower' ),
+                'loadError'       => __( 'Erro ao carregar horários', 'desi-pet-shower' ),
+                'formErrorsTitle' => __( 'Por favor, corrija os seguintes erros:', 'desi-pet-shower' ),
             ],
         ] );
         
@@ -706,6 +728,9 @@ add_action( 'plugins_loaded', 'dps_base_maybe_install_logger_table' );
 
 // Registra hook de ativação para criação de capabilities e papéis padrão
 register_activation_hook( __FILE__, [ 'DPS_Base_Plugin', 'activate' ] );
+
+// Registra hook de desativação para limpeza de transients e cron jobs
+register_deactivation_hook( __FILE__, [ 'DPS_Base_Plugin', 'deactivate' ] );
 
 // Instancia o plugin
 new DPS_Base_Plugin();

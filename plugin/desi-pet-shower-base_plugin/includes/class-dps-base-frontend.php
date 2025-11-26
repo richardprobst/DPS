@@ -552,7 +552,10 @@ class DPS_Base_Frontend {
         if ( ! $id ) {
             return;
         }
-        if ( ! isset( $_GET['dps_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['dps_nonce'] ), 'dps_delete' ) ) {
+        $nonce_value = isset( $_GET['dps_nonce'] )
+            ? sanitize_text_field( wp_unslash( $_GET['dps_nonce'] ) )
+            : '';
+        if ( ! wp_verify_nonce( $nonce_value, 'dps_delete' ) ) {
             wp_die( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
         // Verifica tipo e exclui
@@ -2133,6 +2136,18 @@ class DPS_Base_Frontend {
             $subscription_extra_value = 0;
         }
         if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
+            DPS_Logger::warning(
+                __( 'Tentativa de salvar agendamento com dados incompletos', 'desi-pet-shower' ),
+                [
+                    'client_id' => $client_id,
+                    'pet_ids'   => $pet_ids,
+                    'date'      => $date,
+                    'time'      => $time,
+                    'user_id'   => get_current_user_id(),
+                ],
+                'appointments'
+            );
+            DPS_Message_Helper::add_error( __( 'Por favor, preencha todos os campos obrigatórios.', 'desi-pet-shower' ) );
             return;
         }
         $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
@@ -2655,6 +2670,10 @@ class DPS_Base_Frontend {
         // Pets do cliente
         echo '<h4>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</h4>';
         if ( $pets ) {
+            // Pré-carrega metadados de todos os pets para evitar múltiplas queries no loop
+            $pet_ids = wp_list_pluck( $pets, 'ID' );
+            update_meta_cache( 'post', $pet_ids );
+
             // Tabela de pets com detalhes
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Foto', 'desi-pet-shower' ) . '</th>';
@@ -2931,8 +2950,38 @@ class DPS_Base_Frontend {
         // Rodapé com dados da loja (informações fixas conforme solicitado)
         $html .= '<p style="margin-top:30px;font-size:12px;">Banho e Tosa Desi Pet Shower – Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP<br>Whatsapp: 15 9 9160-6299<br>Email: contato@desi.pet</p>';
         $html .= '</body></html>';
-        // Salva arquivo
-        file_put_contents( $filepath, $html );
+
+        // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
+        $allowed_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
+        $real_allowed_dir = realpath( $allowed_dir );
+        $real_file_dir = realpath( dirname( $filepath ) );
+
+        if ( false === $real_allowed_dir || false === $real_file_dir || 0 !== strpos( $real_file_dir, $real_allowed_dir ) ) {
+            DPS_Logger::error(
+                __( 'Tentativa de escrita fora do diretório permitido', 'desi-pet-shower' ),
+                [
+                    'filepath'    => $filepath,
+                    'allowed_dir' => $allowed_dir,
+                ],
+                'security'
+            );
+            return false;
+        }
+
+        // Salva arquivo com tratamento de erro
+        $written = file_put_contents( $filepath, $html );
+        if ( false === $written ) {
+            DPS_Logger::error(
+                __( 'Erro ao gerar documento de histórico', 'desi-pet-shower' ),
+                [
+                    'filepath'  => $filepath,
+                    'client_id' => $client_id,
+                ],
+                'documents'
+            );
+            return false;
+        }
+
         return $url;
     }
 
@@ -2965,9 +3014,38 @@ class DPS_Base_Frontend {
         $uploads  = wp_upload_dir();
         $file_path = str_replace( $uploads['baseurl'], $uploads['basedir'], $doc_url );
         $body_html = '';
-        if ( file_exists( $file_path ) ) {
-            $body_html = file_get_contents( $file_path );
+
+        // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
+        $allowed_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
+        $real_allowed_dir = realpath( $allowed_dir );
+        $real_file_path = realpath( $file_path );
+        $is_allowed_path = ( false !== $real_allowed_dir && false !== $real_file_path && 0 === strpos( $real_file_path, $real_allowed_dir ) );
+
+        if ( $is_allowed_path && file_exists( $file_path ) ) {
+            $content = file_get_contents( $file_path );
+            if ( false !== $content ) {
+                $body_html = $content;
+            } else {
+                DPS_Logger::warning(
+                    __( 'Falha ao ler conteúdo do documento de histórico', 'desi-pet-shower' ),
+                    [
+                        'file_path'  => $file_path,
+                        'client_id'  => $client_id,
+                    ],
+                    'documents'
+                );
+            }
+        } elseif ( ! $is_allowed_path && file_exists( $file_path ) ) {
+            DPS_Logger::error(
+                __( 'Tentativa de leitura fora do diretório permitido', 'desi-pet-shower' ),
+                [
+                    'file_path'   => $file_path,
+                    'allowed_dir' => $allowed_dir,
+                ],
+                'security'
+            );
         }
+
         // Monta corpo com saudação e dados da loja
         $message  = '<p>Olá ' . esc_html( $name ) . ',</p>';
         $message .= '<p>Segue abaixo o histórico de atendimentos do seu pet:</p>';
@@ -2979,9 +3057,9 @@ class DPS_Base_Frontend {
         // Dados da loja conforme solicitado
         $message .= '<p>Atenciosamente,<br>Banho e Tosa Desi Pet Shower<br>Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP<br>Whatsapp: 15 9 9160-6299<br>Email: contato@desi.pet</p>';
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
-        // Anexa arquivo HTML
+        // Anexa arquivo HTML (apenas se caminho for permitido)
         $attachments = [];
-        if ( file_exists( $file_path ) ) {
+        if ( $is_allowed_path && file_exists( $file_path ) ) {
             $attachments[] = $file_path;
         }
         @wp_mail( $to, $subject, $message, $headers, $attachments );

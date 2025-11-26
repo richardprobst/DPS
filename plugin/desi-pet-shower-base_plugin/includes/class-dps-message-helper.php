@@ -122,8 +122,12 @@ class DPS_Message_Helper {
             } elseif ( $msg['type'] === 'warning' ) {
                 $class .= ' dps-alert--pending';
             }
+
+            // Define atributos de acessibilidade conforme o tipo de mensagem
+            $role      = ( $msg['type'] === 'error' ) ? 'alert' : 'status';
+            $aria_live = ( $msg['type'] === 'error' ) ? 'assertive' : 'polite';
             
-            $html .= '<div class="' . esc_attr( $class ) . '">';
+            $html .= '<div class="' . esc_attr( $class ) . '" role="' . esc_attr( $role ) . '" aria-live="' . esc_attr( $aria_live ) . '">';
             $html .= esc_html( $msg['text'] );
             $html .= '</div>';
         }
