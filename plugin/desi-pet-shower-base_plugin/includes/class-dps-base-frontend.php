@@ -2952,16 +2952,32 @@ class DPS_Base_Frontend {
         $html .= '</body></html>';
 
         // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
-        $allowed_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
-        $real_allowed_dir = realpath( $allowed_dir );
-        $real_file_dir = realpath( dirname( $filepath ) );
+        // Usa $dir que já foi criado no início da função
+        $real_allowed_dir = realpath( $dir );
+        $file_dir = dirname( $filepath );
+        $real_file_dir = realpath( $file_dir );
 
-        if ( false === $real_allowed_dir || false === $real_file_dir || 0 !== strpos( $real_file_dir, $real_allowed_dir ) ) {
+        // Se o diretório permitido não existe ou não foi resolvido, há problema na configuração
+        if ( false === $real_allowed_dir ) {
+            DPS_Logger::error(
+                __( 'Diretório de documentos não existe', 'desi-pet-shower' ),
+                [
+                    'dir'        => $dir,
+                    'filepath'   => $filepath,
+                    'client_id'  => $client_id,
+                ],
+                'documents'
+            );
+            return false;
+        }
+
+        // Se o diretório do arquivo não foi resolvido ou não está dentro do diretório permitido
+        if ( false === $real_file_dir || 0 !== strpos( $real_file_dir, $real_allowed_dir ) ) {
             DPS_Logger::error(
                 __( 'Tentativa de escrita fora do diretório permitido', 'desi-pet-shower' ),
                 [
                     'filepath'    => $filepath,
-                    'allowed_dir' => $allowed_dir,
+                    'allowed_dir' => $dir,
                 ],
                 'security'
             );
@@ -2971,11 +2987,13 @@ class DPS_Base_Frontend {
         // Salva arquivo com tratamento de erro
         $written = file_put_contents( $filepath, $html );
         if ( false === $written ) {
+            $last_error = error_get_last();
             DPS_Logger::error(
                 __( 'Erro ao gerar documento de histórico', 'desi-pet-shower' ),
                 [
-                    'filepath'  => $filepath,
-                    'client_id' => $client_id,
+                    'filepath'   => $filepath,
+                    'client_id'  => $client_id,
+                    'php_error'  => $last_error ? $last_error['message'] : '',
                 ],
                 'documents'
             );
@@ -3018,24 +3036,32 @@ class DPS_Base_Frontend {
         // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
         $allowed_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
         $real_allowed_dir = realpath( $allowed_dir );
-        $real_file_path = realpath( $file_path );
-        $is_allowed_path = ( false !== $real_allowed_dir && false !== $real_file_path && 0 === strpos( $real_file_path, $real_allowed_dir ) );
 
-        if ( $is_allowed_path && file_exists( $file_path ) ) {
+        // Se o diretório permitido não existe, não há como validar o caminho seguramente
+        $is_allowed_path = false;
+        if ( false !== $real_allowed_dir && file_exists( $file_path ) ) {
+            $real_file_path = realpath( $file_path );
+            $is_allowed_path = ( false !== $real_file_path && 0 === strpos( $real_file_path, $real_allowed_dir ) );
+        }
+
+        if ( $is_allowed_path ) {
             $content = file_get_contents( $file_path );
             if ( false !== $content ) {
                 $body_html = $content;
             } else {
+                $last_error = error_get_last();
                 DPS_Logger::warning(
                     __( 'Falha ao ler conteúdo do documento de histórico', 'desi-pet-shower' ),
                     [
                         'file_path'  => $file_path,
                         'client_id'  => $client_id,
+                        'php_error'  => $last_error ? $last_error['message'] : '',
                     ],
                     'documents'
                 );
             }
-        } elseif ( ! $is_allowed_path && file_exists( $file_path ) ) {
+        } elseif ( file_exists( $file_path ) ) {
+            // Arquivo existe mas não está no caminho permitido
             DPS_Logger::error(
                 __( 'Tentativa de leitura fora do diretório permitido', 'desi-pet-shower' ),
                 [
