@@ -3084,8 +3084,9 @@ class DPS_Base_Frontend {
         $message .= '<p>Atenciosamente,<br>Banho e Tosa Desi Pet Shower<br>Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP<br>Whatsapp: 15 9 9160-6299<br>Email: contato@desi.pet</p>';
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
         // Anexa arquivo HTML (apenas se caminho for permitido)
+        // Nota: $is_allowed_path só é true se file_exists() for verdadeiro
         $attachments = [];
-        if ( $is_allowed_path && file_exists( $file_path ) ) {
+        if ( $is_allowed_path ) {
             $attachments[] = $file_path;
         }
         @wp_mail( $to, $subject, $message, $headers, $attachments );
