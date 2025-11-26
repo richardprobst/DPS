@@ -552,7 +552,10 @@ class DPS_Base_Frontend {
         if ( ! $id ) {
             return;
         }
-        if ( ! isset( $_GET['dps_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['dps_nonce'] ), 'dps_delete' ) ) {
+        $nonce_value = isset( $_GET['dps_nonce'] )
+            ? sanitize_text_field( wp_unslash( $_GET['dps_nonce'] ) )
+            : '';
+        if ( ! wp_verify_nonce( $nonce_value, 'dps_delete' ) ) {
             wp_die( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
         // Verifica tipo e exclui
@@ -2133,6 +2136,18 @@ class DPS_Base_Frontend {
             $subscription_extra_value = 0;
         }
         if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
+            DPS_Logger::warning(
+                __( 'Tentativa de salvar agendamento com dados incompletos', 'desi-pet-shower' ),
+                [
+                    'client_id' => $client_id,
+                    'pet_ids'   => $pet_ids,
+                    'date'      => $date,
+                    'time'      => $time,
+                    'user_id'   => get_current_user_id(),
+                ],
+                'appointments'
+            );
+            DPS_Message_Helper::add_error( __( 'Por favor, preencha todos os campos obrigatórios.', 'desi-pet-shower' ) );
             return;
         }
         $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
@@ -2655,6 +2670,10 @@ class DPS_Base_Frontend {
         // Pets do cliente
         echo '<h4>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</h4>';
         if ( $pets ) {
+            // Pré-carrega metadados de todos os pets para evitar múltiplas queries no loop
+            $pet_ids = wp_list_pluck( $pets, 'ID' );
+            update_meta_cache( 'post', $pet_ids );
+
             // Tabela de pets com detalhes
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Foto', 'desi-pet-shower' ) . '</th>';
@@ -2931,8 +2950,56 @@ class DPS_Base_Frontend {
         // Rodapé com dados da loja (informações fixas conforme solicitado)
         $html .= '<p style="margin-top:30px;font-size:12px;">Banho e Tosa Desi Pet Shower – Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP<br>Whatsapp: 15 9 9160-6299<br>Email: contato@desi.pet</p>';
         $html .= '</body></html>';
-        // Salva arquivo
-        file_put_contents( $filepath, $html );
+
+        // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
+        // Usa $dir que já foi criado no início da função
+        $real_allowed_dir = realpath( $dir );
+        $file_dir = dirname( $filepath );
+        $real_file_dir = realpath( $file_dir );
+
+        // Se o diretório permitido não existe ou não foi resolvido, há problema na configuração
+        if ( false === $real_allowed_dir ) {
+            DPS_Logger::error(
+                __( 'Diretório de documentos não existe', 'desi-pet-shower' ),
+                [
+                    'dir'        => $dir,
+                    'filepath'   => $filepath,
+                    'client_id'  => $client_id,
+                ],
+                'documents'
+            );
+            return false;
+        }
+
+        // Se o diretório do arquivo não foi resolvido ou não está dentro do diretório permitido
+        if ( false === $real_file_dir || 0 !== strpos( $real_file_dir, $real_allowed_dir ) ) {
+            DPS_Logger::error(
+                __( 'Tentativa de escrita fora do diretório permitido', 'desi-pet-shower' ),
+                [
+                    'filepath'    => $filepath,
+                    'allowed_dir' => $dir,
+                ],
+                'security'
+            );
+            return false;
+        }
+
+        // Salva arquivo com tratamento de erro
+        $written = file_put_contents( $filepath, $html );
+        if ( false === $written ) {
+            $last_error = error_get_last();
+            DPS_Logger::error(
+                __( 'Erro ao gerar documento de histórico', 'desi-pet-shower' ),
+                [
+                    'filepath'   => $filepath,
+                    'client_id'  => $client_id,
+                    'php_error'  => $last_error ? $last_error['message'] : '',
+                ],
+                'documents'
+            );
+            return false;
+        }
+
         return $url;
     }
 
@@ -2965,9 +3032,46 @@ class DPS_Base_Frontend {
         $uploads  = wp_upload_dir();
         $file_path = str_replace( $uploads['baseurl'], $uploads['basedir'], $doc_url );
         $body_html = '';
-        if ( file_exists( $file_path ) ) {
-            $body_html = file_get_contents( $file_path );
+
+        // Valida que o caminho do arquivo está dentro do diretório permitido (uploads/dps_docs)
+        $allowed_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
+        $real_allowed_dir = realpath( $allowed_dir );
+
+        // Se o diretório permitido não existe, não há como validar o caminho seguramente
+        $is_allowed_path = false;
+        if ( false !== $real_allowed_dir && file_exists( $file_path ) ) {
+            $real_file_path = realpath( $file_path );
+            $is_allowed_path = ( false !== $real_file_path && 0 === strpos( $real_file_path, $real_allowed_dir ) );
         }
+
+        if ( $is_allowed_path ) {
+            $content = file_get_contents( $file_path );
+            if ( false !== $content ) {
+                $body_html = $content;
+            } else {
+                $last_error = error_get_last();
+                DPS_Logger::warning(
+                    __( 'Falha ao ler conteúdo do documento de histórico', 'desi-pet-shower' ),
+                    [
+                        'file_path'  => $file_path,
+                        'client_id'  => $client_id,
+                        'php_error'  => $last_error ? $last_error['message'] : '',
+                    ],
+                    'documents'
+                );
+            }
+        } elseif ( file_exists( $file_path ) ) {
+            // Arquivo existe mas não está no caminho permitido
+            DPS_Logger::error(
+                __( 'Tentativa de leitura fora do diretório permitido', 'desi-pet-shower' ),
+                [
+                    'file_path'   => $file_path,
+                    'allowed_dir' => $allowed_dir,
+                ],
+                'security'
+            );
+        }
+
         // Monta corpo com saudação e dados da loja
         $message  = '<p>Olá ' . esc_html( $name ) . ',</p>';
         $message .= '<p>Segue abaixo o histórico de atendimentos do seu pet:</p>';
@@ -2979,9 +3083,10 @@ class DPS_Base_Frontend {
         // Dados da loja conforme solicitado
         $message .= '<p>Atenciosamente,<br>Banho e Tosa Desi Pet Shower<br>Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP<br>Whatsapp: 15 9 9160-6299<br>Email: contato@desi.pet</p>';
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
-        // Anexa arquivo HTML
+        // Anexa arquivo HTML (apenas se caminho for permitido)
+        // Nota: $is_allowed_path só é true se file_exists() for verdadeiro
         $attachments = [];
-        if ( file_exists( $file_path ) ) {
+        if ( $is_allowed_path ) {
             $attachments[] = $file_path;
         }
         @wp_mail( $to, $subject, $message, $headers, $attachments );

@@ -321,11 +321,11 @@
                         
                         $timeSelect.html(html).prop('disabled', false);
                     } else {
-                        $timeSelect.html('<option value="">Erro ao carregar horários</option>').prop('disabled', false);
+                        $timeSelect.html('<option value="">' + (dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários') + '</option>').prop('disabled', false);
                     }
                 },
                 error: function() {
-                    $timeSelect.html('<option value="">Erro ao carregar horários</option>').prop('disabled', false);
+                    $timeSelect.html('<option value="">' + (dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários') + '</option>').prop('disabled', false);
                 }
             });
         },
@@ -387,7 +387,7 @@
                 event.preventDefault();
                 
                 // Mostra erros
-                let errorHtml = '<strong>Por favor, corrija os seguintes erros:</strong><ul>';
+                let errorHtml = '<strong>' + (dpsAppointmentData.l10n.formErrorsTitle || 'Por favor, corrija os seguintes erros:') + '</strong><ul>';
                 errors.forEach(function(error) {
                     errorHtml += '<li>' + error + '</li>';
                 });
