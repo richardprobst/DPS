@@ -2222,11 +2222,8 @@ class DPS_Base_Frontend {
         }
 
         // Fluxo 3: Agendamento único (novo ou edição de qualquer tipo).
+        // Nota: save_single_appointment() já trata mensagem de sucesso e redirecionamento.
         self::save_single_appointment( $data );
-        // Adiciona mensagem de sucesso
-        DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
-        // Redireciona para aba agendas
-        self::redirect_with_pending_notice( $client_id );
     }
 
     /**
