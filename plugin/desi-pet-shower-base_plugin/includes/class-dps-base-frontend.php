@@ -1091,45 +1091,136 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Seção de agendamentos: formulário e listagem
+     * Seção de agendamentos: formulário e listagem.
+     *
+     * REFATORAÇÃO: Este método foi reorganizado para separar a preparação de dados
+     * da renderização. Segue o mesmo padrão usado em section_clients().
+     * Em uma fase futura, o formulário pode ser movido para um template dedicado.
+     *
+     * @since 1.0.0
+     * @since 1.0.2 Documentação de refatoração adicionada.
+     * @param bool $visitor_only Se true, exibe apenas a listagem sem formulário.
+     * @return string HTML da seção de agendamentos.
      */
     private static function section_agendas( $visitor_only = false ) {
+        // Passo 1: Preparar dados necessários para a seção.
+        $data = self::prepare_appointments_section_data( $visitor_only );
+
+        // Passo 2: Renderizar usando os dados preparados.
+        return self::render_appointments_section( $data, $visitor_only );
+    }
+
+    /**
+     * Prepara os dados necessários para a seção de agendamentos.
+     *
+     * Este método centraliza toda a lógica de coleta e preparação de dados
+     * para o formulário e listagem de agendamentos. Separa a lógica de negócio
+     * da renderização para facilitar testes e manutenção.
+     *
+     * REFATORAÇÃO: Este método foi extraído de section_agendas() como parte
+     * de uma refatoração gradual para melhorar a organização do código.
+     *
+     * @since 1.0.2
+     * @param bool $visitor_only Se true, não prepara dados do formulário.
+     * @return array {
+     *     Dados estruturados para renderização.
+     *
+     *     @type array       $clients      Lista de clientes disponíveis.
+     *     @type array       $pets         Lista de pets disponíveis.
+     *     @type int         $pet_pages    Total de páginas de pets.
+     *     @type int         $edit_id      ID do agendamento sendo editado (0 se novo).
+     *     @type WP_Post|null $editing     Post do agendamento em edição.
+     *     @type array       $meta         Metadados do agendamento.
+     *     @type int         $pref_client  Cliente pré-selecionado via URL.
+     *     @type int         $pref_pet     Pet pré-selecionado via URL.
+     *     @type string      $base_url     URL base da página atual.
+     *     @type string      $current_url  URL completa atual.
+     * }
+     */
+    private static function prepare_appointments_section_data( $visitor_only = false ) {
         $clients    = self::get_clients();
         $pets_query = self::get_pets();
         $pets       = $pets_query->posts;
         $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
-        // Detecta edição de agendamento
-        $edit_id    = ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
-        $editing    = null;
-        $meta       = [];
+
+        // Detecta edição de agendamento.
+        $edit_id = ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) )
+            ? intval( $_GET['id'] )
+            : 0;
+
+        $editing = null;
+        $meta    = [];
+
         if ( $edit_id ) {
             $editing = get_post( $edit_id );
             if ( $editing ) {
                 $meta = [
-                    'client_id' => get_post_meta( $edit_id, 'appointment_client_id', true ),
-                    'pet_id'    => get_post_meta( $edit_id, 'appointment_pet_id', true ),
-                    'date'      => get_post_meta( $edit_id, 'appointment_date', true ),
-                    'time'      => get_post_meta( $edit_id, 'appointment_time', true ),
-                    'notes'     => get_post_meta( $edit_id, 'appointment_notes', true ),
-                    'appointment_type' => get_post_meta( $edit_id, 'appointment_type', true ),
-                    'tosa'      => get_post_meta( $edit_id, 'appointment_tosa', true ),
-                    // Recupera preço e ocorrência da tosa para pré-preenchimento (caso existam)
-                    'tosa_price'     => get_post_meta( $edit_id, 'appointment_tosa_price', true ),
-                    'tosa_occurrence' => get_post_meta( $edit_id, 'appointment_tosa_occurrence', true ),
-                    'taxidog'   => get_post_meta( $edit_id, 'appointment_taxidog', true ),
-                    'taxidog_price' => get_post_meta( $edit_id, 'appointment_taxidog_price', true ),
-                    'extra_description' => get_post_meta( $edit_id, 'appointment_extra_description', true ),
-                    'extra_value'       => get_post_meta( $edit_id, 'appointment_extra_value', true ),
-                    'subscription_base_value'  => get_post_meta( $edit_id, 'subscription_base_value', true ),
-                    'subscription_total_value' => get_post_meta( $edit_id, 'subscription_total_value', true ),
+                    'client_id'                      => get_post_meta( $edit_id, 'appointment_client_id', true ),
+                    'pet_id'                         => get_post_meta( $edit_id, 'appointment_pet_id', true ),
+                    'date'                           => get_post_meta( $edit_id, 'appointment_date', true ),
+                    'time'                           => get_post_meta( $edit_id, 'appointment_time', true ),
+                    'notes'                          => get_post_meta( $edit_id, 'appointment_notes', true ),
+                    'appointment_type'               => get_post_meta( $edit_id, 'appointment_type', true ),
+                    'tosa'                           => get_post_meta( $edit_id, 'appointment_tosa', true ),
+                    'tosa_price'                     => get_post_meta( $edit_id, 'appointment_tosa_price', true ),
+                    'tosa_occurrence'                => get_post_meta( $edit_id, 'appointment_tosa_occurrence', true ),
+                    'taxidog'                        => get_post_meta( $edit_id, 'appointment_taxidog', true ),
+                    'taxidog_price'                  => get_post_meta( $edit_id, 'appointment_taxidog_price', true ),
+                    'extra_description'              => get_post_meta( $edit_id, 'appointment_extra_description', true ),
+                    'extra_value'                    => get_post_meta( $edit_id, 'appointment_extra_value', true ),
+                    'subscription_base_value'        => get_post_meta( $edit_id, 'subscription_base_value', true ),
+                    'subscription_total_value'       => get_post_meta( $edit_id, 'subscription_total_value', true ),
                     'subscription_extra_description' => get_post_meta( $edit_id, 'subscription_extra_description', true ),
                     'subscription_extra_value'       => get_post_meta( $edit_id, 'subscription_extra_value', true ),
                 ];
             }
         }
-        // Pré‑seleção de cliente e pet se não estiver editando
+
+        // Pré-seleção de cliente e pet via URL.
         $pref_client = isset( $_GET['pref_client'] ) ? intval( $_GET['pref_client'] ) : 0;
         $pref_pet    = isset( $_GET['pref_pet'] ) ? intval( $_GET['pref_pet'] ) : 0;
+
+        return [
+            'clients'     => $clients,
+            'pets'        => $pets,
+            'pet_pages'   => $pet_pages,
+            'edit_id'     => $edit_id,
+            'editing'     => $editing,
+            'meta'        => $meta,
+            'pref_client' => $pref_client,
+            'pref_pet'    => $pref_pet,
+            'base_url'    => get_permalink(),
+            'current_url' => self::get_current_page_url(),
+        ];
+    }
+
+    /**
+     * Renderiza a seção de agendamentos com os dados preparados.
+     *
+     * Este método contém toda a lógica de renderização do formulário e listagem.
+     * Em uma fase futura de refatoração, o formulário pode ser movido para
+     * um template dedicado em templates/frontend/appointments-section.php.
+     *
+     * REFATORAÇÃO: Este método foi extraído de section_agendas() para separar
+     * a preparação de dados da renderização. O HTML ainda é gerado inline,
+     * mas está organizado de forma mais clara.
+     *
+     * @since 1.0.2
+     * @param array $data         Dados preparados por prepare_appointments_section_data().
+     * @param bool  $visitor_only Se true, exibe apenas a listagem sem formulário.
+     * @return string HTML da seção.
+     */
+    private static function render_appointments_section( array $data, $visitor_only = false ) {
+        // Extrai variáveis do array de dados.
+        $clients     = $data['clients'];
+        $pets        = $data['pets'];
+        $pet_pages   = $data['pet_pages'];
+        $edit_id     = $data['edit_id'];
+        $editing     = $data['editing'];
+        $meta        = $data['meta'];
+        $pref_client = $data['pref_client'];
+        $pref_pet    = $data['pref_pet'];
+
         ob_start();
         echo '<div class="dps-section" id="dps-section-agendas">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h2>';
@@ -2054,7 +2145,14 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Salva agendamento (inserção ou atualização)
+     * Atualiza status de um agendamento existente.
+     *
+     * Este método é chamado via handle_request() quando o usuário altera o status
+     * de um agendamento usando o seletor inline. Valida o status contra lista de
+     * valores permitidos e dispara hooks pós-salvamento quando finalizado.
+     *
+     * @since 1.0.0
+     * @return void
      */
     private static function update_appointment_status() {
         if ( ! current_user_can( 'dps_manage_appointments' ) ) {
@@ -2078,12 +2176,98 @@ class DPS_Base_Frontend {
         self::redirect_with_pending_notice( $client_id );
     }
 
+    /**
+     * Salva agendamento (inserção ou atualização).
+     *
+     * Este método é o ponto de entrada para salvar agendamentos. Ele:
+     * 1. Valida e sanitiza os dados via validate_and_sanitize_appointment_data().
+     * 2. Decide qual fluxo seguir (assinatura, multi-pet, ou agendamento único).
+     * 3. Delega para os métodos especializados correspondentes.
+     *
+     * REFATORAÇÃO: Este método foi reorganizado para melhorar legibilidade.
+     * A lógica de negócio foi preservada, apenas a estrutura foi modularizada
+     * em métodos menores com responsabilidades claras.
+     *
+     * @since 1.0.0
+     * @since 1.0.2 Refatorado para usar métodos auxiliares.
+     * @return void
+     */
     private static function save_appointment() {
         if ( ! current_user_can( 'dps_manage_appointments' ) ) {
             wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
+
+        // Passo 1: Validar e sanitizar dados do formulário.
+        $data = self::validate_and_sanitize_appointment_data();
+        if ( null === $data ) {
+            return;
+        }
+
+        $appt_type = $data['appt_type'];
+        $edit_id   = $data['edit_id'];
+        $pet_ids   = $data['pet_ids'];
+
+        // Passo 2: Decidir qual fluxo seguir e delegar para método especializado.
+
+        // Fluxo 1: Nova assinatura (cria múltiplos agendamentos recorrentes).
+        if ( ! $edit_id && 'subscription' === $appt_type ) {
+            self::create_subscription_appointments( $data );
+            return;
+        }
+
+        // Fluxo 2: Agendamento simples com múltiplos pets (cria um agendamento por pet).
+        if ( ! $edit_id && 'simple' === $appt_type && count( $pet_ids ) > 1 ) {
+            self::create_multi_pet_appointments( $data );
+            return;
+        }
+
+        // Fluxo 3: Agendamento único (novo ou edição de qualquer tipo).
+        self::save_single_appointment( $data );
+        // Adiciona mensagem de sucesso
+        DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
+        // Redireciona para aba agendas
+        self::redirect_with_pending_notice( $client_id );
+    }
+
+    /**
+     * Valida e sanitiza os dados de agendamento recebidos via POST.
+     *
+     * Este método centraliza toda a lógica de validação e sanitização dos campos
+     * do formulário de agendamento. Extrai e processa dados de $_POST, aplicando
+     * sanitização apropriada para cada tipo de campo.
+     *
+     * REFATORAÇÃO: Este método foi extraído de save_appointment() para melhorar
+     * legibilidade e facilitar testes. É o primeiro passo de uma refatoração
+     * gradual para quebrar métodos monolíticos em blocos menores.
+     *
+     * @since 1.0.2
+     * @return array|null Array com dados validados e sanitizados, ou null se validação falhar.
+     *                    Estrutura do array:
+     *                    - client_id: int
+     *                    - pet_ids: array<int>
+     *                    - pet_id: int (primeiro pet da lista)
+     *                    - date: string (Y-m-d)
+     *                    - time: string (H:i)
+     *                    - notes: string
+     *                    - appt_type: string ('simple'|'subscription'|'past')
+     *                    - appt_freq: string ('semanal'|'quinzenal')
+     *                    - tosa: string ('0'|'1')
+     *                    - tosa_price: float
+     *                    - tosa_occurrence: int
+     *                    - taxidog: string ('0'|'1')
+     *                    - taxi_price: float
+     *                    - extra_description: string
+     *                    - extra_value: float
+     *                    - subscription_base_value: float
+     *                    - subscription_total_value: float
+     *                    - subscription_extra_description: string
+     *                    - subscription_extra_value: float
+     *                    - edit_id: int (ID do agendamento sendo editado, ou 0 se novo)
+     */
+    private static function validate_and_sanitize_appointment_data() {
         $client_id = isset( $_POST['appointment_client_id'] ) ? intval( wp_unslash( $_POST['appointment_client_id'] ) ) : 0;
-        // Recebe lista de pets (multi‑seleção). Pode ser array ou valor único.
+
+        // Recebe lista de pets (multi-seleção). Pode ser array ou valor único.
         $raw_pets = isset( $_POST['appointment_pet_ids'] ) ? (array) wp_unslash( $_POST['appointment_pet_ids'] ) : [];
         $pet_ids  = [];
         foreach ( $raw_pets as $pid_raw ) {
@@ -2092,20 +2276,17 @@ class DPS_Base_Frontend {
                 $pet_ids[] = $pid;
             }
         }
-        // Remove duplicados
         $pet_ids = array_values( array_unique( $pet_ids ) );
+        $pet_id  = ! empty( $pet_ids ) ? $pet_ids[0] : 0;
 
-        // Define pet_id como o primeiro ID da lista para compatibilidade com lógica existente
-        $pet_id = ! empty( $pet_ids ) ? $pet_ids[0] : 0;
-        $date      = isset( $_POST['appointment_date'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_date'] ) ) : '';
-        $time      = isset( $_POST['appointment_time'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_time'] ) ) : '';
-        $notes     = isset( $_POST['appointment_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['appointment_notes'] ) ) : '';
-        // Novo: tipo de agendamento (simple ou subscription)
+        $date  = isset( $_POST['appointment_date'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_date'] ) ) : '';
+        $time  = isset( $_POST['appointment_time'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_time'] ) ) : '';
+        $notes = isset( $_POST['appointment_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['appointment_notes'] ) ) : '';
+
         $appt_type = isset( $_POST['appointment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_type'] ) ) : 'simple';
-        // Frequência (apenas para assinaturas)
         $appt_freq = isset( $_POST['appointment_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_frequency'] ) ) : '';
-        $tosa      = isset( $_POST['appointment_tosa'] ) ? '1' : '0';
-        // Preço e ocorrência da tosa: somente relevantes para assinaturas, mas definimos aqui para ter valores padrão
+
+        $tosa            = isset( $_POST['appointment_tosa'] ) ? '1' : '0';
         $tosa_price      = 0;
         if ( isset( $_POST['appointment_tosa_price'] ) ) {
             $tosa_price = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_tosa_price'] ) ) );
@@ -2114,8 +2295,8 @@ class DPS_Base_Frontend {
             }
         }
         $tosa_occurrence = isset( $_POST['appointment_tosa_occurrence'] ) ? intval( wp_unslash( $_POST['appointment_tosa_occurrence'] ) ) : 1;
-        $taxidog   = isset( $_POST['appointment_taxidog'] ) ? '1' : '0';
-        // Valor do TaxiDog somente para agendamento simples; se vazio ou não numérico, trata como 0
+
+        $taxidog    = isset( $_POST['appointment_taxidog'] ) ? '1' : '0';
         $taxi_price = 0;
         if ( 'simple' === $appt_type && $taxidog && isset( $_POST['appointment_taxidog_price'] ) ) {
             $taxi_price = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_taxidog_price'] ) ) );
@@ -2123,18 +2304,22 @@ class DPS_Base_Frontend {
                 $taxi_price = 0;
             }
         }
+
         $extra_description = isset( $_POST['appointment_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_extra_description'] ) ) : '';
         $extra_value       = isset( $_POST['appointment_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_extra_value'] ) ) ) : 0;
         if ( $extra_value < 0 ) {
             $extra_value = 0;
         }
-        $subscription_base_value  = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
-        $subscription_total_value = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
+
+        $subscription_base_value        = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
+        $subscription_total_value       = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
         $subscription_extra_description = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
         $subscription_extra_value       = isset( $_POST['subscription_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_extra_value'] ) ) ) : 0;
         if ( $subscription_extra_value < 0 ) {
             $subscription_extra_value = 0;
         }
+
+        // Validação de campos obrigatórios.
         if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
             DPS_Logger::warning(
                 __( 'Tentativa de salvar agendamento com dados incompletos', 'desi-pet-shower' ),
@@ -2148,206 +2333,333 @@ class DPS_Base_Frontend {
                 'appointments'
             );
             DPS_Message_Helper::add_error( __( 'Por favor, preencha todos os campos obrigatórios.', 'desi-pet-shower' ) );
+            return null;
+        }
+
+        $edit_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
+
+        return [
+            'client_id'                      => $client_id,
+            'pet_ids'                        => $pet_ids,
+            'pet_id'                         => $pet_id,
+            'date'                           => $date,
+            'time'                           => $time,
+            'notes'                          => $notes,
+            'appt_type'                      => $appt_type,
+            'appt_freq'                      => $appt_freq,
+            'tosa'                           => $tosa,
+            'tosa_price'                     => $tosa_price,
+            'tosa_occurrence'                => $tosa_occurrence,
+            'taxidog'                        => $taxidog,
+            'taxi_price'                     => $taxi_price,
+            'extra_description'              => $extra_description,
+            'extra_value'                    => $extra_value,
+            'subscription_base_value'        => $subscription_base_value,
+            'subscription_total_value'       => $subscription_total_value,
+            'subscription_extra_description' => $subscription_extra_description,
+            'subscription_extra_value'       => $subscription_extra_value,
+            'edit_id'                        => $edit_id,
+        ];
+    }
+
+    /**
+     * Cria agendamentos recorrentes para uma nova assinatura.
+     *
+     * Este método é responsável por criar a assinatura (post dps_subscription)
+     * e todos os agendamentos individuais (posts dps_agendamento) para cada
+     * pet e cada ocorrência no ciclo (semanal ou quinzenal).
+     *
+     * REFATORAÇÃO: Este método foi extraído de save_appointment() para isolar
+     * a lógica específica de assinaturas, melhorando legibilidade e manutenção.
+     *
+     * @since 1.0.2
+     * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
+     * @return void Redireciona ao final.
+     */
+    private static function create_subscription_appointments( array $data ) {
+        $client_id                      = $data['client_id'];
+        $pet_ids                        = $data['pet_ids'];
+        $date                           = $data['date'];
+        $time                           = $data['time'];
+        $appt_freq                      = $data['appt_freq'];
+        $tosa                           = $data['tosa'];
+        $tosa_price                     = $data['tosa_price'];
+        $tosa_occurrence                = $data['tosa_occurrence'];
+        $taxidog                        = $data['taxidog'];
+        $subscription_base_value        = $data['subscription_base_value'];
+        $subscription_total_value       = $data['subscription_total_value'];
+        $subscription_extra_description = $data['subscription_extra_description'];
+        $subscription_extra_value       = $data['subscription_extra_value'];
+
+        // Define serviços padrão: Tosa higiênica e Hidratação.
+        $service_names = [ 'Tosa higienica', 'Hidratação' ];
+        $service_ids   = [];
+        $prices        = [];
+        foreach ( $service_names as $sname ) {
+            $srv = get_posts( [
+                'post_type'      => 'dps_service',
+                'posts_per_page' => 1,
+                'post_status'    => 'publish',
+                'title'          => $sname,
+            ] );
+            if ( $srv ) {
+                $srv_id            = $srv[0]->ID;
+                $service_ids[]     = $srv_id;
+                $base_price        = (float) get_post_meta( $srv_id, 'service_price', true );
+                $prices[ $srv_id ] = $base_price;
+            }
+        }
+
+        // Calcula preço base do evento.
+        $base_event_price = 0;
+        foreach ( $prices as $p ) {
+            $base_event_price += (float) $p;
+        }
+
+        // Define número de ocorrências no ciclo.
+        $count_events     = ( 'quinzenal' === $appt_freq ) ? 2 : 4;
+        $base_cycle_value = ( $subscription_base_value > 0 ) ? $subscription_base_value : ( $base_event_price * $count_events );
+        $extra_cycle_value = ( $subscription_extra_value > 0 ) ? $subscription_extra_value : 0;
+        $package_per_pet   = $base_cycle_value + ( ( '1' === $tosa ) ? $tosa_price : 0 ) + $extra_cycle_value;
+        $total_package     = $package_per_pet * count( $pet_ids );
+
+        if ( $subscription_total_value > 0 ) {
+            $total_package = $subscription_total_value;
+            if ( count( $pet_ids ) > 0 ) {
+                $package_per_pet = $total_package / count( $pet_ids );
+            }
+        }
+
+        // Cria post da assinatura.
+        $sub_id = wp_insert_post( [
+            'post_type'   => 'dps_subscription',
+            'post_title'  => $date . ' ' . $time . ' - ' . __( 'Assinatura', 'desi-pet-shower' ),
+            'post_status' => 'publish',
+        ] );
+
+        if ( ! $sub_id ) {
+            DPS_Message_Helper::add_error( __( 'Erro ao criar assinatura.', 'desi-pet-shower' ) );
             return;
         }
-        $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
 
-        /*
-         * Caso seja uma nova assinatura e não esteja editando, cria uma assinatura para um ou mais pets.
-         */
-        if ( ! $appt_id && 'subscription' === $appt_type ) {
-            // Define serviços padrão: Tosa higienica e Hidratação
-            $service_names = [ 'Tosa higienica', 'Hidratação' ];
-            $service_ids   = [];
-            $prices        = [];
-            foreach ( $service_names as $sname ) {
-                $srv = get_posts( [
-                    'post_type'      => 'dps_service',
-                    'posts_per_page' => 1,
-                    'post_status'    => 'publish',
-                    'title'          => $sname,
-                ] );
-                if ( $srv ) {
-                    $srv_id = $srv[0]->ID;
-                    $service_ids[] = $srv_id;
-                    $base_price    = (float) get_post_meta( $srv_id, 'service_price', true );
-                    $prices[ $srv_id ] = $base_price;
-                }
-            }
-            // Calcula preços de serviços base (valor de cada evento)
-            $base_event_price = 0;
-            foreach ( $prices as $p ) {
-                $base_event_price += (float) $p;
-            }
-            // Define número de ocorrências no ciclo com base na frequência
-            $count_events  = ( $appt_freq === 'quinzenal' ) ? 2 : 4;
-            // Calcula valor do pacote por pet permitindo valores personalizados
-            $base_cycle_value   = ( $subscription_base_value > 0 ) ? $subscription_base_value : ( $base_event_price * $count_events );
-            $extra_cycle_value  = ( $subscription_extra_value > 0 ) ? $subscription_extra_value : 0;
-            $package_per_pet    = $base_cycle_value + ( ( '1' === $tosa ) ? $tosa_price : 0 ) + $extra_cycle_value;
-            $total_package      = $package_per_pet * count( $pet_ids );
-            if ( $subscription_total_value > 0 ) {
-                $total_package = $subscription_total_value;
-                if ( count( $pet_ids ) > 0 ) {
-                    $package_per_pet = $total_package / count( $pet_ids );
-                }
-            }
-            // Cria post da assinatura
-            $sub_id = wp_insert_post( [
-                'post_type'   => 'dps_subscription',
-                'post_title'  => $date . ' ' . $time . ' - ' . __( 'Assinatura', 'desi-pet-shower' ),
-                'post_status' => 'publish',
-            ] );
-            if ( $sub_id ) {
-                update_post_meta( $sub_id, 'subscription_client_id', $client_id );
-                // Armazena o primeiro pet em subscription_pet_id para compatibilidade antiga
-                update_post_meta( $sub_id, 'subscription_pet_id', $pet_ids[0] );
-                // Novo: armazena lista de pets atendidos na assinatura
-                update_post_meta( $sub_id, 'subscription_pet_ids', $pet_ids );
-                update_post_meta( $sub_id, 'subscription_service', 'Assinatura' );
-                update_post_meta( $sub_id, 'subscription_frequency', $appt_freq ?: 'semanal' );
-                update_post_meta( $sub_id, 'subscription_price', $total_package );
-                if ( $subscription_base_value > 0 ) {
-                    update_post_meta( $sub_id, 'subscription_base_value', $subscription_base_value );
-                }
-                if ( $subscription_total_value > 0 ) {
-                    update_post_meta( $sub_id, 'subscription_total_value', $subscription_total_value );
-                }
-                if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
-                    update_post_meta( $sub_id, 'subscription_extra_description', $subscription_extra_description );
-                    update_post_meta( $sub_id, 'subscription_extra_value', $subscription_extra_value );
-                } else {
-                    delete_post_meta( $sub_id, 'subscription_extra_description' );
-                    delete_post_meta( $sub_id, 'subscription_extra_value' );
-                }
-                // Salva informações de tosa na assinatura
-                update_post_meta( $sub_id, 'subscription_tosa', $tosa );
-                update_post_meta( $sub_id, 'subscription_tosa_price', $tosa_price );
-                update_post_meta( $sub_id, 'subscription_tosa_occurrence', $tosa_occurrence );
-                update_post_meta( $sub_id, 'subscription_start_date', $date );
-                update_post_meta( $sub_id, 'subscription_start_time', $time );
-                update_post_meta( $sub_id, 'subscription_payment_status', 'pendente' );
-                // Define quantas ocorrências no período (2 para quinzenal, 4 para semanal)
-                $interval_days = ( $appt_freq === 'quinzenal' ) ? 14 : 7;
-                $count_events  = ( $appt_freq === 'quinzenal' ) ? 2 : 4;
-                // Para cada pet e para cada ocorrência, cria agendamento
-                foreach ( $pet_ids as $p_id_each ) {
-                    $current_dt = DateTime::createFromFormat( 'Y-m-d', $date );
-                    if ( ! $current_dt ) {
-                        $current_dt = date_create( $date );
-                    }
-                    if ( ! $current_dt ) {
-                        continue;
-                    }
-                    for ( $i = 0; $i < $count_events; $i++ ) {
-                        $date_i   = $current_dt->format( 'Y-m-d' );
-                        $appt_new = wp_insert_post( [
-                            'post_type'   => 'dps_agendamento',
-                            'post_title'  => $date_i . ' ' . $time,
-                            'post_status' => 'publish',
-                        ] );
-                        if ( $appt_new ) {
-                            update_post_meta( $appt_new, 'appointment_client_id', $client_id );
-                            update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
-                            update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
-                            update_post_meta( $appt_new, 'appointment_date', $date_i );
-                            update_post_meta( $appt_new, 'appointment_time', $time );
-                            update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'desi-pet-shower' ) );
-                            update_post_meta( $appt_new, 'appointment_type', 'subscription' );
-                            // Determina se este agendamento inclui tosa (somente uma vez por ciclo)
-                            $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
-                            update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
-                            update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
-                            update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
-                            update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
-                            update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
-                            update_post_meta( $appt_new, 'appointment_services', $service_ids );
-                            update_post_meta( $appt_new, 'appointment_service_prices', $prices );
-                            // Define valor total individual: preço de serviços base + preço da tosa apenas na ocorrência definida
-                            $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
-                            update_post_meta( $appt_new, 'appointment_total_value', $total_single );
-                            update_post_meta( $appt_new, 'appointment_status', 'pendente' );
-                            update_post_meta( $appt_new, 'subscription_id', $sub_id );
-                            // Dispara gancho pós‑salvamento para cada agendamento
-                            do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
-                        }
-                        $current_dt->modify( '+' . $interval_days . ' days' );
-                    }
-                }
-                // Registra transação financeira única para a assinatura (valor total de todos os pets)
-                global $wpdb;
-                $table     = $wpdb->prefix . 'dps_transacoes';
-                $status_fin = 'em_aberto';
-                $desc_fin  = sprintf( __( 'Assinatura: %s (%s)', 'desi-pet-shower' ), 'Assinatura', ( $appt_freq ?: 'semanal' ) );
-                $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE plano_id = %d AND data = %s", $sub_id, $date ) );
-                if ( $existing_id ) {
-                    $wpdb->update( $table, [
-                        'cliente_id' => $client_id ?: null,
-                        'valor'      => (float) $total_package,
-                        'status'     => $status_fin,
-                        'categoria'  => __( 'Assinatura', 'desi-pet-shower' ),
-                        'tipo'       => 'receita',
-                        'descricao'  => $desc_fin,
-                    ], [ 'id' => $existing_id ] );
-                } else {
-                    $wpdb->insert( $table, [
-                        'cliente_id'     => $client_id ?: null,
-                        'agendamento_id' => null,
-                        'plano_id'       => $sub_id,
-                        'data'           => $date,
-                        'valor'          => (float) $total_package,
-                        'categoria'      => __( 'Assinatura', 'desi-pet-shower' ),
-                        'tipo'           => 'receita',
-                        'status'         => $status_fin,
-                        'descricao'      => $desc_fin,
-                    ] );
-                }
-            }
-            // Adiciona mensagem de sucesso
-            DPS_Message_Helper::add_success( __( 'Agendamento de assinatura salvo com sucesso!', 'desi-pet-shower' ) );
-            // Redireciona após salvar assinatura
-            self::redirect_with_pending_notice( $client_id );
+        // Salva metadados da assinatura.
+        update_post_meta( $sub_id, 'subscription_client_id', $client_id );
+        update_post_meta( $sub_id, 'subscription_pet_id', $pet_ids[0] );
+        update_post_meta( $sub_id, 'subscription_pet_ids', $pet_ids );
+        update_post_meta( $sub_id, 'subscription_service', 'Assinatura' );
+        update_post_meta( $sub_id, 'subscription_frequency', $appt_freq ?: 'semanal' );
+        update_post_meta( $sub_id, 'subscription_price', $total_package );
+
+        if ( $subscription_base_value > 0 ) {
+            update_post_meta( $sub_id, 'subscription_base_value', $subscription_base_value );
         }
-        // Para agendamentos simples de múltiplos pets (novo), cria um agendamento para cada pet
-        if ( ! $appt_id && 'simple' === $appt_type && count( $pet_ids ) > 1 ) {
-            foreach ( $pet_ids as $p_id_each ) {
-                $new_appt = wp_insert_post( [
+        if ( $subscription_total_value > 0 ) {
+            update_post_meta( $sub_id, 'subscription_total_value', $subscription_total_value );
+        }
+        if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+            update_post_meta( $sub_id, 'subscription_extra_description', $subscription_extra_description );
+            update_post_meta( $sub_id, 'subscription_extra_value', $subscription_extra_value );
+        } else {
+            delete_post_meta( $sub_id, 'subscription_extra_description' );
+            delete_post_meta( $sub_id, 'subscription_extra_value' );
+        }
+
+        update_post_meta( $sub_id, 'subscription_tosa', $tosa );
+        update_post_meta( $sub_id, 'subscription_tosa_price', $tosa_price );
+        update_post_meta( $sub_id, 'subscription_tosa_occurrence', $tosa_occurrence );
+        update_post_meta( $sub_id, 'subscription_start_date', $date );
+        update_post_meta( $sub_id, 'subscription_start_time', $time );
+        update_post_meta( $sub_id, 'subscription_payment_status', 'pendente' );
+
+        // Cria agendamentos individuais.
+        $interval_days = ( 'quinzenal' === $appt_freq ) ? 14 : 7;
+        $count_events  = ( 'quinzenal' === $appt_freq ) ? 2 : 4;
+
+        foreach ( $pet_ids as $p_id_each ) {
+            $current_dt = DateTime::createFromFormat( 'Y-m-d', $date );
+            if ( ! $current_dt ) {
+                $current_dt = date_create( $date );
+            }
+            if ( ! $current_dt ) {
+                continue;
+            }
+
+            for ( $i = 0; $i < $count_events; $i++ ) {
+                $date_i   = $current_dt->format( 'Y-m-d' );
+                $appt_new = wp_insert_post( [
                     'post_type'   => 'dps_agendamento',
-                    'post_title'  => $date . ' ' . $time,
+                    'post_title'  => $date_i . ' ' . $time,
                     'post_status' => 'publish',
                 ] );
-                if ( $new_appt ) {
-                    // Meta básicos
-                    update_post_meta( $new_appt, 'appointment_client_id', $client_id );
-                    update_post_meta( $new_appt, 'appointment_pet_id', $p_id_each );
-                    update_post_meta( $new_appt, 'appointment_pet_ids', $pet_ids );
-                    update_post_meta( $new_appt, 'appointment_date', $date );
-                    update_post_meta( $new_appt, 'appointment_time', $time );
-                    update_post_meta( $new_appt, 'appointment_notes', $notes );
-                    update_post_meta( $new_appt, 'appointment_type', $appt_type );
-                    update_post_meta( $new_appt, 'appointment_tosa', $tosa );
-                    update_post_meta( $new_appt, 'appointment_taxidog', $taxidog );
-                    update_post_meta( $new_appt, 'appointment_taxidog_price', $taxi_price );
-                    // Serviços e total são definidos pelo add‑on de serviços; recuperamos total postado
-                    $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                    update_post_meta( $new_appt, 'appointment_total_value', $posted_total );
-                    if ( '' !== $extra_description || $extra_value > 0 ) {
-                        update_post_meta( $new_appt, 'appointment_extra_description', $extra_description );
-                        update_post_meta( $new_appt, 'appointment_extra_value', $extra_value );
-                    }
-                    // Status inicial
-                    update_post_meta( $new_appt, 'appointment_status', 'pendente' );
-                    // Dispara gancho pós‑salvamento
-                    do_action( 'dps_base_after_save_appointment', $new_appt, 'simple' );
+
+                if ( $appt_new ) {
+                    update_post_meta( $appt_new, 'appointment_client_id', $client_id );
+                    update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
+                    update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
+                    update_post_meta( $appt_new, 'appointment_date', $date_i );
+                    update_post_meta( $appt_new, 'appointment_time', $time );
+                    update_post_meta( $appt_new, 'appointment_notes', __( 'Serviço de assinatura', 'desi-pet-shower' ) );
+                    update_post_meta( $appt_new, 'appointment_type', 'subscription' );
+
+                    $is_tosa_event = ( '1' === $tosa && ( $i + 1 ) == $tosa_occurrence );
+                    update_post_meta( $appt_new, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
+                    update_post_meta( $appt_new, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
+                    update_post_meta( $appt_new, 'appointment_tosa_occurrence', $tosa_occurrence );
+                    update_post_meta( $appt_new, 'appointment_taxidog', $taxidog );
+                    update_post_meta( $appt_new, 'appointment_taxidog_price', 0 );
+                    update_post_meta( $appt_new, 'appointment_services', $service_ids );
+                    update_post_meta( $appt_new, 'appointment_service_prices', $prices );
+
+                    $total_single = $base_event_price + ( $is_tosa_event ? $tosa_price : 0 );
+                    update_post_meta( $appt_new, 'appointment_total_value', $total_single );
+                    update_post_meta( $appt_new, 'appointment_status', 'pendente' );
+                    update_post_meta( $appt_new, 'subscription_id', $sub_id );
+
+                    do_action( 'dps_base_after_save_appointment', $appt_new, 'subscription' );
                 }
+                $current_dt->modify( '+' . $interval_days . ' days' );
             }
-            // Adiciona mensagem de sucesso
-            DPS_Message_Helper::add_success( __( 'Agendamentos salvos com sucesso!', 'desi-pet-shower' ) );
-            // Após criar todos os agendamentos, redireciona
-            self::redirect_with_pending_notice( $client_id );
         }
 
-        // Para agendamentos simples ou edição de qualquer tipo (único pet) continua com a lógica padrão
+        // Registra transação financeira.
+        global $wpdb;
+        $table      = $wpdb->prefix . 'dps_transacoes';
+        $status_fin = 'em_aberto';
+        $desc_fin   = sprintf( __( 'Assinatura: %s (%s)', 'desi-pet-shower' ), 'Assinatura', ( $appt_freq ?: 'semanal' ) );
+        $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE plano_id = %d AND data = %s", $sub_id, $date ) );
+
+        if ( $existing_id ) {
+            $wpdb->update(
+                $table,
+                [
+                    'cliente_id' => $client_id ?: null,
+                    'valor'      => (float) $total_package,
+                    'status'     => $status_fin,
+                    'categoria'  => __( 'Assinatura', 'desi-pet-shower' ),
+                    'tipo'       => 'receita',
+                    'descricao'  => $desc_fin,
+                ],
+                [ 'id' => $existing_id ]
+            );
+        } else {
+            $wpdb->insert(
+                $table,
+                [
+                    'cliente_id'     => $client_id ?: null,
+                    'agendamento_id' => null,
+                    'plano_id'       => $sub_id,
+                    'data'           => $date,
+                    'valor'          => (float) $total_package,
+                    'categoria'      => __( 'Assinatura', 'desi-pet-shower' ),
+                    'tipo'           => 'receita',
+                    'status'         => $status_fin,
+                    'descricao'      => $desc_fin,
+                ]
+            );
+        }
+
+        DPS_Message_Helper::add_success( __( 'Agendamento de assinatura salvo com sucesso!', 'desi-pet-shower' ) );
+        self::redirect_with_pending_notice( $client_id );
+    }
+
+    /**
+     * Cria agendamentos para múltiplos pets em um atendimento simples.
+     *
+     * Quando o usuário seleciona mais de um pet para um agendamento simples
+     * (não assinatura), este método cria um agendamento individual para cada pet.
+     *
+     * REFATORAÇÃO: Este método foi extraído de save_appointment() para isolar
+     * a lógica de multi-pets, melhorando legibilidade e manutenção.
+     *
+     * @since 1.0.2
+     * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
+     * @return void Redireciona ao final.
+     */
+    private static function create_multi_pet_appointments( array $data ) {
+        $client_id         = $data['client_id'];
+        $pet_ids           = $data['pet_ids'];
+        $date              = $data['date'];
+        $time              = $data['time'];
+        $notes             = $data['notes'];
+        $appt_type         = $data['appt_type'];
+        $tosa              = $data['tosa'];
+        $taxidog           = $data['taxidog'];
+        $taxi_price        = $data['taxi_price'];
+        $extra_description = $data['extra_description'];
+        $extra_value       = $data['extra_value'];
+
+        $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
+
+        foreach ( $pet_ids as $p_id_each ) {
+            $new_appt = wp_insert_post( [
+                'post_type'   => 'dps_agendamento',
+                'post_title'  => $date . ' ' . $time,
+                'post_status' => 'publish',
+            ] );
+
+            if ( $new_appt ) {
+                update_post_meta( $new_appt, 'appointment_client_id', $client_id );
+                update_post_meta( $new_appt, 'appointment_pet_id', $p_id_each );
+                update_post_meta( $new_appt, 'appointment_pet_ids', $pet_ids );
+                update_post_meta( $new_appt, 'appointment_date', $date );
+                update_post_meta( $new_appt, 'appointment_time', $time );
+                update_post_meta( $new_appt, 'appointment_notes', $notes );
+                update_post_meta( $new_appt, 'appointment_type', $appt_type );
+                update_post_meta( $new_appt, 'appointment_tosa', $tosa );
+                update_post_meta( $new_appt, 'appointment_taxidog', $taxidog );
+                update_post_meta( $new_appt, 'appointment_taxidog_price', $taxi_price );
+                update_post_meta( $new_appt, 'appointment_total_value', $posted_total );
+
+                if ( '' !== $extra_description || $extra_value > 0 ) {
+                    update_post_meta( $new_appt, 'appointment_extra_description', $extra_description );
+                    update_post_meta( $new_appt, 'appointment_extra_value', $extra_value );
+                }
+
+                update_post_meta( $new_appt, 'appointment_status', 'pendente' );
+                do_action( 'dps_base_after_save_appointment', $new_appt, 'simple' );
+            }
+        }
+
+        DPS_Message_Helper::add_success( __( 'Agendamentos salvos com sucesso!', 'desi-pet-shower' ) );
+        self::redirect_with_pending_notice( $client_id );
+    }
+
+    /**
+     * Salva ou atualiza um agendamento único (simple, subscription edit, ou past).
+     *
+     * Este método lida com a criação ou atualização de agendamentos individuais.
+     * É usado para:
+     * - Agendamentos simples de um único pet.
+     * - Edição de agendamentos existentes (de qualquer tipo).
+     * - Agendamentos passados (registro de atendimentos já realizados).
+     *
+     * REFATORAÇÃO: Este método foi extraído de save_appointment() para isolar
+     * a lógica de agendamentos únicos, melhorando legibilidade e manutenção.
+     *
+     * @since 1.0.2
+     * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
+     * @return void Redireciona ao final.
+     */
+    private static function save_single_appointment( array $data ) {
+        $client_id                      = $data['client_id'];
+        $pet_id                         = $data['pet_id'];
+        $date                           = $data['date'];
+        $time                           = $data['time'];
+        $notes                          = $data['notes'];
+        $appt_type                      = $data['appt_type'];
+        $tosa                           = $data['tosa'];
+        $tosa_price                     = $data['tosa_price'];
+        $taxidog                        = $data['taxidog'];
+        $taxi_price                     = $data['taxi_price'];
+        $extra_description              = $data['extra_description'];
+        $extra_value                    = $data['extra_value'];
+        $subscription_base_value        = $data['subscription_base_value'];
+        $subscription_total_value       = $data['subscription_total_value'];
+        $subscription_extra_description = $data['subscription_extra_description'];
+        $subscription_extra_value       = $data['subscription_extra_value'];
+        $appt_id                        = $data['edit_id'];
+
+        // Cria ou atualiza o post do agendamento.
         if ( $appt_id ) {
             wp_update_post( [
                 'ID'         => $appt_id,
@@ -2361,132 +2673,181 @@ class DPS_Base_Frontend {
             ] );
         }
 
-        if ( $appt_id ) {
-            update_post_meta( $appt_id, 'appointment_client_id', $client_id );
-            update_post_meta( $appt_id, 'appointment_pet_id', $pet_id );
-            update_post_meta( $appt_id, 'appointment_date', $date );
-            update_post_meta( $appt_id, 'appointment_time', $time );
-            update_post_meta( $appt_id, 'appointment_notes', $notes );
-            // Salva tipo e flags adicionais
-            update_post_meta( $appt_id, 'appointment_type', $appt_type );
-            update_post_meta( $appt_id, 'appointment_tosa', $tosa );
-            update_post_meta( $appt_id, 'appointment_taxidog', $taxidog );
-            if ( 'simple' === $appt_type ) {
-                update_post_meta( $appt_id, 'appointment_taxidog_price', $taxi_price );
-            } else {
-                // Nas assinaturas, valor do TaxiDog é cortesia
-                update_post_meta( $appt_id, 'appointment_taxidog_price', 0 );
-            }
+        if ( ! $appt_id ) {
+            DPS_Message_Helper::add_error( __( 'Erro ao salvar agendamento.', 'desi-pet-shower' ) );
+            return;
         }
-        // Lógica específica para agendamentos do tipo assinatura: define serviços padrão e total
-        if ( $appt_id ) {
-            if ( 'subscription' === $appt_type ) {
-                // Serviços padrão: Tosa higienica (nome pode variar em maiúsculas/minúsculas) e Hidratação
-                $service_names = [ 'Tosa higienica', 'Hidratação' ];
-                $service_ids   = [];
-                $prices        = [];
-                foreach ( $service_names as $sname ) {
-                    $srv = get_posts( [
-                        'post_type'      => 'dps_service',
-                        'posts_per_page' => 1,
-                        'post_status'    => 'publish',
-                        'title'          => $sname,
-                    ] );
-                    if ( $srv ) {
-                        $srv_id = $srv[0]->ID;
-                        $service_ids[] = $srv_id;
-                        $base_price    = (float) get_post_meta( $srv_id, 'service_price', true );
-                        $prices[ $srv_id ] = $base_price;
-                    }
-                }
-                // Salva serviços selecionados e preços
-                update_post_meta( $appt_id, 'appointment_services', $service_ids );
-                update_post_meta( $appt_id, 'appointment_service_prices', $prices );
-                // Define valor total: soma preços base dos serviços e adiciona o valor da tosa somente se marcada
-                $base_total = 0;
-                foreach ( $prices as $p ) {
-                    $base_total += (float) $p;
-                }
-                $calculated_total = $base_total;
-                if ( '1' === $tosa ) {
-                    $calculated_total += $tosa_price;
-                    // Registra preço da tosa para esta ocorrência
-                    update_post_meta( $appt_id, 'appointment_tosa_price', $tosa_price );
-                    update_post_meta( $appt_id, 'appointment_tosa_occurrence', 1 );
-                } else {
-                    update_post_meta( $appt_id, 'appointment_tosa_price', 0 );
-                    update_post_meta( $appt_id, 'appointment_tosa_occurrence', 0 );
-                }
-                if ( $subscription_extra_value > 0 ) {
-                    $calculated_total += $subscription_extra_value;
-                }
-                $final_subscription_total = $subscription_total_value > 0 ? $subscription_total_value : $calculated_total;
-                update_post_meta( $appt_id, 'appointment_total_value', $final_subscription_total );
-                if ( $subscription_base_value > 0 ) {
-                    update_post_meta( $appt_id, 'subscription_base_value', $subscription_base_value );
-                } elseif ( $base_total > 0 ) {
-                    update_post_meta( $appt_id, 'subscription_base_value', $base_total );
-                }
-                if ( $subscription_total_value > 0 ) {
-                    update_post_meta( $appt_id, 'subscription_total_value', $subscription_total_value );
-                } else {
-                    update_post_meta( $appt_id, 'subscription_total_value', $final_subscription_total );
-                }
-                if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
-                    update_post_meta( $appt_id, 'subscription_extra_description', $subscription_extra_description );
-                    update_post_meta( $appt_id, 'subscription_extra_value', $subscription_extra_value );
-                } else {
-                    delete_post_meta( $appt_id, 'subscription_extra_description' );
-                    delete_post_meta( $appt_id, 'subscription_extra_value' );
-                }
-                // Vincula a assinatura se existir para este cliente/pet
-                $subs = get_posts( [
-                    'post_type'      => 'dps_subscription',
-                    'posts_per_page' => 1,
-                    'post_status'    => 'publish',
-                    'meta_query'     => [
-                        [ 'key' => 'subscription_client_id', 'value' => $client_id, 'compare' => '=' ],
-                        [ 'key' => 'subscription_pet_id', 'value' => $pet_id, 'compare' => '=' ],
-                    ],
-                ] );
-                if ( $subs ) {
-                    update_post_meta( $appt_id, 'subscription_id', $subs[0]->ID );
-                }
-            } else {
-                // Agendamento simples ou passado: soma valor total dos serviços selecionados mais valor do TaxiDog
-                // dps_service add-on salva appointment_total via POST; recupera
-                $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
-                update_post_meta( $appt_id, 'appointment_total_value', $posted_total );
-                if ( '' !== $extra_description || $extra_value > 0 ) {
-                    update_post_meta( $appt_id, 'appointment_extra_description', $extra_description );
-                    update_post_meta( $appt_id, 'appointment_extra_value', $extra_value );
-                } else {
-                    delete_post_meta( $appt_id, 'appointment_extra_description' );
-                    delete_post_meta( $appt_id, 'appointment_extra_value' );
-                }
-                
-                // Lógica específica para agendamentos passados
-                if ( 'past' === $appt_type ) {
-                    $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
-                    $past_payment_value  = isset( $_POST['past_payment_value'] ) ? max( 0, floatval( str_replace( ',', '.', wp_unslash( $_POST['past_payment_value'] ) ) ) ) : 0;
-                    
-                    update_post_meta( $appt_id, 'past_payment_status', $past_payment_status );
-                    
-                    if ( 'pending' === $past_payment_status ) {
-                        update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
-                    } else {
-                        delete_post_meta( $appt_id, 'past_payment_value' );
-                    }
-                    
-                    // Define status inicial como "realizado" para agendamentos passados
-                    update_post_meta( $appt_id, 'appointment_status', 'realizado' );
-                }
-            }
+
+        // Salva metadados básicos.
+        update_post_meta( $appt_id, 'appointment_client_id', $client_id );
+        update_post_meta( $appt_id, 'appointment_pet_id', $pet_id );
+        update_post_meta( $appt_id, 'appointment_date', $date );
+        update_post_meta( $appt_id, 'appointment_time', $time );
+        update_post_meta( $appt_id, 'appointment_notes', $notes );
+        update_post_meta( $appt_id, 'appointment_type', $appt_type );
+        update_post_meta( $appt_id, 'appointment_tosa', $tosa );
+        update_post_meta( $appt_id, 'appointment_taxidog', $taxidog );
+
+        if ( 'simple' === $appt_type ) {
+            update_post_meta( $appt_id, 'appointment_taxidog_price', $taxi_price );
+        } else {
+            update_post_meta( $appt_id, 'appointment_taxidog_price', 0 );
         }
-        // Adiciona mensagem de sucesso
+
+        // Lógica específica por tipo de agendamento.
+        if ( 'subscription' === $appt_type ) {
+            self::save_subscription_appointment_meta( $appt_id, $data );
+        } else {
+            self::save_simple_or_past_appointment_meta( $appt_id, $data );
+        }
+
         DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
-        // Redireciona para aba agendas
         self::redirect_with_pending_notice( $client_id );
+    }
+
+    /**
+     * Salva metadados específicos de agendamento tipo assinatura.
+     *
+     * Este método auxiliar é chamado por save_single_appointment() para
+     * processar os campos específicos de assinaturas.
+     *
+     * @since 1.0.2
+     * @param int   $appt_id ID do agendamento.
+     * @param array $data    Dados validados do formulário.
+     * @return void
+     */
+    private static function save_subscription_appointment_meta( $appt_id, array $data ) {
+        $client_id                      = $data['client_id'];
+        $pet_id                         = $data['pet_id'];
+        $tosa                           = $data['tosa'];
+        $tosa_price                     = $data['tosa_price'];
+        $subscription_base_value        = $data['subscription_base_value'];
+        $subscription_total_value       = $data['subscription_total_value'];
+        $subscription_extra_description = $data['subscription_extra_description'];
+        $subscription_extra_value       = $data['subscription_extra_value'];
+
+        // Serviços padrão para assinaturas.
+        $service_names = [ 'Tosa higienica', 'Hidratação' ];
+        $service_ids   = [];
+        $prices        = [];
+
+        foreach ( $service_names as $sname ) {
+            $srv = get_posts( [
+                'post_type'      => 'dps_service',
+                'posts_per_page' => 1,
+                'post_status'    => 'publish',
+                'title'          => $sname,
+            ] );
+            if ( $srv ) {
+                $srv_id            = $srv[0]->ID;
+                $service_ids[]     = $srv_id;
+                $base_price        = (float) get_post_meta( $srv_id, 'service_price', true );
+                $prices[ $srv_id ] = $base_price;
+            }
+        }
+
+        update_post_meta( $appt_id, 'appointment_services', $service_ids );
+        update_post_meta( $appt_id, 'appointment_service_prices', $prices );
+
+        $base_total = 0;
+        foreach ( $prices as $p ) {
+            $base_total += (float) $p;
+        }
+
+        $calculated_total = $base_total;
+        if ( '1' === $tosa ) {
+            $calculated_total += $tosa_price;
+            update_post_meta( $appt_id, 'appointment_tosa_price', $tosa_price );
+            update_post_meta( $appt_id, 'appointment_tosa_occurrence', 1 );
+        } else {
+            update_post_meta( $appt_id, 'appointment_tosa_price', 0 );
+            update_post_meta( $appt_id, 'appointment_tosa_occurrence', 0 );
+        }
+
+        if ( $subscription_extra_value > 0 ) {
+            $calculated_total += $subscription_extra_value;
+        }
+
+        $final_subscription_total = $subscription_total_value > 0 ? $subscription_total_value : $calculated_total;
+        update_post_meta( $appt_id, 'appointment_total_value', $final_subscription_total );
+
+        if ( $subscription_base_value > 0 ) {
+            update_post_meta( $appt_id, 'subscription_base_value', $subscription_base_value );
+        } elseif ( $base_total > 0 ) {
+            update_post_meta( $appt_id, 'subscription_base_value', $base_total );
+        }
+
+        if ( $subscription_total_value > 0 ) {
+            update_post_meta( $appt_id, 'subscription_total_value', $subscription_total_value );
+        } else {
+            update_post_meta( $appt_id, 'subscription_total_value', $final_subscription_total );
+        }
+
+        if ( '' !== $subscription_extra_description || $subscription_extra_value > 0 ) {
+            update_post_meta( $appt_id, 'subscription_extra_description', $subscription_extra_description );
+            update_post_meta( $appt_id, 'subscription_extra_value', $subscription_extra_value );
+        } else {
+            delete_post_meta( $appt_id, 'subscription_extra_description' );
+            delete_post_meta( $appt_id, 'subscription_extra_value' );
+        }
+
+        // Vincula assinatura existente, se houver.
+        $subs = get_posts( [
+            'post_type'      => 'dps_subscription',
+            'posts_per_page' => 1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [ 'key' => 'subscription_client_id', 'value' => $client_id, 'compare' => '=' ],
+                [ 'key' => 'subscription_pet_id', 'value' => $pet_id, 'compare' => '=' ],
+            ],
+        ] );
+        if ( $subs ) {
+            update_post_meta( $appt_id, 'subscription_id', $subs[0]->ID );
+        }
+    }
+
+    /**
+     * Salva metadados específicos de agendamento simples ou passado.
+     *
+     * Este método auxiliar é chamado por save_single_appointment() para
+     * processar campos de agendamentos simples e passados.
+     *
+     * @since 1.0.2
+     * @param int   $appt_id ID do agendamento.
+     * @param array $data    Dados validados do formulário.
+     * @return void
+     */
+    private static function save_simple_or_past_appointment_meta( $appt_id, array $data ) {
+        $appt_type         = $data['appt_type'];
+        $extra_description = $data['extra_description'];
+        $extra_value       = $data['extra_value'];
+
+        $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
+        update_post_meta( $appt_id, 'appointment_total_value', $posted_total );
+
+        if ( '' !== $extra_description || $extra_value > 0 ) {
+            update_post_meta( $appt_id, 'appointment_extra_description', $extra_description );
+            update_post_meta( $appt_id, 'appointment_extra_value', $extra_value );
+        } else {
+            delete_post_meta( $appt_id, 'appointment_extra_description' );
+            delete_post_meta( $appt_id, 'appointment_extra_value' );
+        }
+
+        // Lógica específica para agendamentos passados.
+        if ( 'past' === $appt_type ) {
+            $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
+            $past_payment_value  = isset( $_POST['past_payment_value'] ) ? max( 0, floatval( str_replace( ',', '.', wp_unslash( $_POST['past_payment_value'] ) ) ) ) : 0;
+
+            update_post_meta( $appt_id, 'past_payment_status', $past_payment_status );
+
+            if ( 'pending' === $past_payment_status ) {
+                update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
+            } else {
+                delete_post_meta( $appt_id, 'past_payment_value' );
+            }
+
+            update_post_meta( $appt_id, 'appointment_status', 'realizado' );
+        }
     }
 
     /**
