@@ -65,27 +65,21 @@ Este add-on não expõe shortcodes próprios. A interface é acessada através d
 
 - **`admin_post_dps_backup_export`**: gera e faz download do arquivo JSON de backup
   - **Método**: POST
-  - **Parâmetros**: `_wpnonce`, `action=dps_backup_export`
+  - **Parâmetros**: `dps_backup_nonce`, `action=dps_backup_export`
   - **Capability**: `manage_options`
   
 - **`admin_post_dps_backup_import`**: processa upload e restauração de backup
   - **Método**: POST (multipart/form-data)
-  - **Parâmetros**: `_wpnonce`, `action=dps_backup_import`, `backup_file` (arquivo)
+  - **Parâmetros**: `dps_backup_nonce`, `action=dps_backup_import`, `dps_backup_file` (arquivo JSON, máx. 50 MB)
   - **Capability**: `manage_options`
 
 ## Hooks (actions e filters) relevantes
 
 ### Hooks CONSUMIDOS por este add-on
 
-#### `dps_settings_nav_tabs` (action)
-- **Propósito**: adiciona aba "Backup & Restauração" à navegação de configurações
-- **Parâmetros**: `$visitor_only` (bool)
-- **Implementação**: método `add_backup_tab()`
-
-#### `dps_settings_sections` (action)
-- **Propósito**: renderiza conteúdo da seção de backup na tela de configurações
-- **Parâmetros**: `$active_tab` (string)
-- **Implementação**: método `add_backup_section()`
+#### `admin_menu` (action, prioridade 20)
+- **Propósito**: registra submenu "Backup & Restauração" sob o menu principal Desi Pet Shower
+- **Implementação**: método `register_admin_menu()`
 
 ### Hooks DISPARADOS por este add-on
 
@@ -95,19 +89,16 @@ Este add-on não dispara hooks customizados; opera de forma autônoma.
 
 ### Custom Post Types
 Este add-on NÃO cria CPTs próprios. Exporta/importa os seguintes CPTs do sistema DPS:
-- `dps_client` (clientes)
+- `dps_cliente` (clientes)
 - `dps_pet` (pets)
-- `dps_appointment` (agendamentos)
-- `dps_service` (serviços, se instalado)
-- `dps_campaign` (campanhas, se instalado)
-- `dps_subscription` (assinaturas, se instalado)
-- `dps_stock_item` (itens de estoque, se instalado)
+- `dps_agendamento` (agendamentos)
+- Outros CPTs prefixados com `dps_` (serviços, campanhas, assinaturas, etc.)
 
 ### Tabelas customizadas
-Este add-on NÃO exporta tabelas customizadas (ex.: `dps_transacoes`, `dps_parcelas`, `dps_referrals`). Apenas CPTs e seus metadados são incluídos no backup.
+Este add-on EXPORTA tabelas customizadas prefixadas com `dps_` (ex.: `dps_transacoes`, `dps_parcelas`). O backup inclui estrutura (CREATE TABLE) e dados das tabelas.
 
 ### Options armazenadas
-Este add-on não armazena options próprias.
+Este add-on exporta/importa options prefixadas com `dps_`. Não armazena options próprias permanentemente.
 
 ## Como usar (visão funcional)
 
@@ -176,28 +167,32 @@ Ao modificar este add-on:
 - ✅ **Nonces**: valida `_wpnonce` em exportação e importação
 - ✅ **Sanitização**: valida estrutura JSON e sanitiza dados antes de importar
 - ✅ **Escape**: saída escapada em mensagens de feedback
-- ⚠️ **Validação de arquivo**: verifica extensão e tipo MIME do upload
+- ✅ **Validação de arquivo**: verifica extensão (apenas .json) e tamanho máximo (50 MB)
+- ✅ **Validação de estrutura JSON**: verifica integridade do payload antes de restaurar
+- ✅ **Sanitização de dados**: sanitiza meta keys, post status e campos de texto durante restauração
 
 ### Pontos de atenção
 
 - **Timeout PHP**: backups muito grandes podem estourar `max_execution_time`; considerar processamento em lotes
 - **Memória PHP**: JSON grande consome memória; verificar `memory_limit` adequado
-- **Conflitos de ID**: restauração em ambiente com dados pode gerar IDs duplicados
-- **Tabelas não incluídas**: adicionar suporte a backup de `dps_transacoes` e outras tabelas requer funcionalidade adicional
+- **Restauração destrutiva**: todos os dados existentes são removidos antes de restaurar; use em ambientes limpos
 
 ### Melhorias futuras sugeridas
 
-- Exportar/importar tabelas customizadas (`dps_transacoes`, `dps_parcelas`, etc.)
 - Processamento em lotes para backups grandes
 - Compressão ZIP do arquivo JSON
 - Agendamento de backups automáticos via cron
 - Versionamento de backups com histórico
 - Backup incremental (apenas mudanças desde último backup)
+- Integração com DPS_Logger para auditoria de operações
 
 ## Histórico de mudanças (resumo)
 
 ### Principais marcos
 
-- **v1.0.0**: Lançamento inicial com exportação/importação de CPTs via JSON, integração à tela de configurações do plugin base
+- **v1.0.0**: Lançamento inicial com exportação/importação completa via JSON
+  - Suporte a CPTs, metadados, tabelas customizadas, opções e arquivos
+  - Interface administrativa sob menu Desi Pet Shower
+  - Proteção de segurança com nonces e capabilities
 
 Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.
