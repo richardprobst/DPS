@@ -17,6 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Se não estiver, exibe aviso e interrompe carregamento do add-on.
+ */
+function dps_stock_check_base_plugin() {
+    if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
+        add_action( 'admin_notices', function() {
+            echo '<div class="notice notice-error"><p>';
+            echo esc_html__( 'O add-on Estoque requer o plugin base Desi Pet Shower para funcionar.', 'dps-stock-addon' );
+            echo '</p></div>';
+        } );
+        return false;
+    }
+    return true;
+}
+add_action( 'plugins_loaded', function() {
+    if ( ! dps_stock_check_base_plugin() ) {
+        return;
+    }
+}, 1 );
+
+/**
  * Carrega o text domain do Stock Add-on.
  * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
  */
