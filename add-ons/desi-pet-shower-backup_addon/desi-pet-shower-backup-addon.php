@@ -192,7 +192,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', $payload->get_error_message() );
             }
 
-            $filename = sanitize_file_name( 'dps-backup-' . gmdate( 'Ymd-His' ) . '.json' );
+            // Nome do arquivo gerado internamente com gmdate(), não precisa de sanitize_file_name
+            $filename = 'dps-backup-' . gmdate( 'Ymd-His' ) . '.json';
 
             nocache_headers();
             header( 'Content-Type: application/json; charset=utf-8' );
@@ -240,7 +241,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             // Validação adicional: verificar se o conteúdo inicia com caracteres JSON válidos
             $trimmed_contents = ltrim( $file_contents );
-            if ( ! in_array( $trimmed_contents[0] ?? '', [ '{', '[' ], true ) ) {
+            if ( strlen( $trimmed_contents ) === 0 || ! in_array( $trimmed_contents[0], [ '{', '[' ], true ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'O arquivo não contém JSON válido.', 'dps-backup-addon' ) );
             }
 
@@ -841,8 +842,10 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $value = $option['option_value'] ?? '';
                 
                 // Se o valor parece ser serializado, validar antes de usar
-                if ( is_string( $value ) && preg_match( '/^[aOs]:/', $value ) ) {
+                // Detecta todos os tipos serializados: a (array), O (object), s (string), i (int), d (double), b (bool), N (null)
+                if ( is_string( $value ) && preg_match( '/^[aOsidNb]:/', $value ) ) {
                     // Tentar deserializar de forma segura, rejeitando objetos
+                    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- allowed_classes=false impede instanciação de objetos
                     $unserialized = @unserialize( $value, [ 'allowed_classes' => false ] );
                     if ( false !== $unserialized || 'b:0;' === $value ) {
                         $value = $unserialized;
