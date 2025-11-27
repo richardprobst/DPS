@@ -489,12 +489,46 @@ class DPS_AI_Addon {
     /**
      * Enfileira assets admin (JavaScript e CSS).
      *
+     * Carrega apenas em páginas relevantes do DPS onde os botões de sugestão
+     * de IA podem ser utilizados (agenda, clientes, pets, configurações).
+     *
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
-        // Por enquanto, carrega em todas as páginas admin
-        // TODO: Otimizar para carregar apenas nas páginas relevantes (agenda, clientes, etc.)
-        
+        // Verifica se estamos em uma página relevante do DPS
+        $screen = get_current_screen();
+        if ( ! $screen ) {
+            return;
+        }
+
+        // Lista de post types e páginas do DPS onde os assets são necessários
+        $dps_post_types = [
+            'dps_agendamento',
+            'dps_cliente',
+            'dps_pet',
+            'dps_servico',
+        ];
+
+        $dps_pages = [
+            'toplevel_page_desi-pet-shower',
+            'desi-pet-shower_page_dps-ai-settings',
+        ];
+
+        // Verifica se é um post type do DPS (comparação estrita)
+        $is_dps_post_type = in_array( $screen->post_type, $dps_post_types, true );
+
+        // Verifica se é uma página administrativa do DPS
+        // Usa comparação estrita para páginas conhecidas e strpos para submenus dinâmicos
+        // pois add-ons podem registrar submenus com slugs como 'desi-pet-shower_page_dps-*'
+        $is_dps_page = in_array( $hook, $dps_pages, true );
+        if ( ! $is_dps_page && is_string( $hook ) ) {
+            $is_dps_page = strpos( $hook, 'desi-pet-shower' ) !== false;
+        }
+
+        if ( ! $is_dps_post_type && ! $is_dps_page ) {
+            return;
+        }
+
         // Enfileira CSS
         wp_enqueue_style(
             'dps-ai-communications',

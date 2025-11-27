@@ -59,7 +59,7 @@
 
             // Valida se há pergunta
             if (!question) {
-                addMessage('error', 'Por favor, digite uma pergunta.', 'system');
+                addMessage('error', dpsAI.i18n.pleaseEnterQuestion, 'system');
                 return;
             }
 

@@ -209,9 +209,10 @@ class DPS_AI_Integration_Portal {
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'dps_ai_ask' ),
             'i18n'    => [
-                'errorGeneric' => __( 'Ocorreu um erro ao processar sua pergunta. Tente novamente.', 'dps-ai' ),
-                'you'          => __( 'Você', 'dps-ai' ),
-                'assistant'    => __( 'Assistente', 'dps-ai' ),
+                'errorGeneric'        => __( 'Ocorreu um erro ao processar sua pergunta. Tente novamente.', 'dps-ai' ),
+                'you'                 => __( 'Você', 'dps-ai' ),
+                'assistant'           => __( 'Assistente', 'dps-ai' ),
+                'pleaseEnterQuestion' => __( 'Por favor, digite uma pergunta.', 'dps-ai' ),
             ],
         ] );
     }

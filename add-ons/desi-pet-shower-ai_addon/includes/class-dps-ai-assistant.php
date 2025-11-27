@@ -63,8 +63,7 @@ class DPS_AI_Assistant {
 
         // Filtro preventivo: verifica se a pergunta contém palavras-chave relacionadas ao contexto
         if ( ! self::is_question_in_context( $user_question ) ) {
-            return 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do Desi Pet Shower. ' .
-                   'Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.';
+            return __( 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do Desi Pet Shower. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.', 'dps-ai' );
         }
 
         // Monta contexto do cliente e pets
