@@ -165,10 +165,12 @@ public function create_pages() {
 
 **Localização:** `desi-pet-shower-agenda-addon.php`, linhas 403, 411, 504, 522, 1171
 
+**Código problemático encontrado:**
 ```php
+// ⚠️ Este é um exemplo do código ATUAL que precisa ser corrigido:
 $clients = get_posts( [
     'post_type'      => 'dps_cliente',
-    'posts_per_page' => -1,  // ⚠️ Sem limite
+    'posts_per_page' => -1,  // ⚠️ Sem limite - problema de performance
     ...
 ] );
 ```
@@ -581,4 +583,4 @@ public function enqueue_assets() {
 
 ---
 
-*Relatório gerado automaticamente. Última atualização: 2025-11-27*
+*Relatório de revisão manual realizado por Copilot Code Review. Última atualização: 2025-11-27*
