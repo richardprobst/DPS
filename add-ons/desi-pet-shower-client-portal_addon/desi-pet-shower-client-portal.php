@@ -86,3 +86,14 @@ register_activation_hook( __FILE__, function() {
         $token_manager->maybe_create_table();
     }
 } );
+
+/**
+ * Hook de desativação para limpar cron jobs.
+ *
+ * @since 2.0.0
+ */
+function dps_client_portal_deactivate() {
+    // Limpa cron job de limpeza de tokens
+    wp_clear_scheduled_hook( 'dps_portal_cleanup_tokens' );
+}
+register_deactivation_hook( __FILE__, 'dps_client_portal_deactivate' );

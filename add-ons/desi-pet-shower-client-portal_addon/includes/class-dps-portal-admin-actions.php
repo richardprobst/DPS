@@ -84,10 +84,12 @@ final class DPS_Portal_Admin_Actions {
 
     /**
      * Gera um novo token para o cliente
+     *
+     * @since 2.0.0
      */
     private function handle_generate_token() {
-        $client_id = absint( $_GET['client_id'] );
-        $nonce     = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
+        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
         $type      = isset( $_GET['token_type'] ) ? sanitize_text_field( wp_unslash( $_GET['token_type'] ) ) : 'login';
 
         // Valida nonce
@@ -140,10 +142,12 @@ final class DPS_Portal_Admin_Actions {
 
     /**
      * Revoga todos os tokens ativos do cliente
+     *
+     * @since 2.0.0
      */
     private function handle_revoke_tokens() {
-        $client_id = absint( $_GET['client_id'] );
-        $nonce     = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
+        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
         // Valida nonce
         if ( ! wp_verify_nonce( $nonce, 'dps_revoke_tokens_' . $client_id ) ) {
@@ -156,7 +160,7 @@ final class DPS_Portal_Admin_Actions {
         // Redireciona de volta
         $redirect_url = $this->get_redirect_url();
         $redirect_url = add_query_arg( [
-            'dps_tokens_revoked' => $revoked_count !== false ? $revoked_count : 0,
+            'dps_tokens_revoked' => false !== $revoked_count ? $revoked_count : 0,
             'client_id'          => $client_id,
         ], $redirect_url );
 
@@ -166,10 +170,12 @@ final class DPS_Portal_Admin_Actions {
 
     /**
      * Prepara link para WhatsApp
+     *
+     * @since 2.0.0
      */
     private function handle_whatsapp_link() {
-        $client_id = absint( $_GET['client_id'] );
-        $nonce     = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+        $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
+        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
         // Valida nonce
         if ( ! wp_verify_nonce( $nonce, 'dps_whatsapp_link_' . $client_id ) ) {
