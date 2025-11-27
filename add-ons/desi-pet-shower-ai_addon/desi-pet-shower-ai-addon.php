@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – AI Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Assistente virtual focado em Banho e Tosa para o Portal do Cliente do Desi Pet Shower. Responde perguntas sobre agendamentos, serviços, histórico e funcionalidades do sistema usando OpenAI. Inclui sugestões de mensagens para WhatsApp e e-mail.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-ai
@@ -41,7 +41,16 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.2.0' );
+    define( 'DPS_AI_VERSION', '1.3.0' );
+}
+
+/**
+ * Capability específica para uso do assistente de IA.
+ *
+ * @var string
+ */
+if ( ! defined( 'DPS_AI_CAPABILITY' ) ) {
+    define( 'DPS_AI_CAPABILITY', 'dps_use_ai_assistant' );
 }
 
 /**
@@ -52,6 +61,47 @@ function dps_ai_load_textdomain() {
     load_plugin_textdomain( 'dps-ai', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'init', 'dps_ai_load_textdomain', 1 );
+
+/**
+ * Ativação do plugin: adiciona capabilities.
+ */
+function dps_ai_activate() {
+    // Adiciona capability aos roles que podem editar posts
+    $roles_with_capability = [ 'administrator', 'editor' ];
+
+    foreach ( $roles_with_capability as $role_name ) {
+        $role = get_role( $role_name );
+        if ( $role ) {
+            $role->add_cap( DPS_AI_CAPABILITY );
+        }
+    }
+
+    // Limpa rewrite rules
+    flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'dps_ai_activate' );
+
+/**
+ * Desativação do plugin: limpa transients temporários.
+ */
+function dps_ai_deactivate() {
+    // Limpa transients de contexto (são temporários, não precisam persistir)
+    global $wpdb;
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Necessário para limpeza de transients na desativação
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+            '_transient_dps_ai_ctx_%',
+            '_transient_timeout_dps_ai_ctx_%'
+        )
+    );
+
+    // Limpa cache
+    if ( function_exists( 'wp_cache_flush' ) ) {
+        wp_cache_flush();
+    }
+}
+register_deactivation_hook( __FILE__, 'dps_ai_deactivate' );
 
 // Inclui as classes principais.
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
@@ -364,8 +414,8 @@ class DPS_AI_Addon {
             ] );
         }
 
-        // Verifica permissão (qualquer usuário logado que possa editar posts)
-        if ( ! current_user_can( 'edit_posts' ) ) {
+        // Verifica permissão usando capability específica com fallback
+        if ( ! $this->user_can_use_ai() ) {
             wp_send_json_error( [
                 'message' => __( 'Você não tem permissão para usar esta funcionalidade.', 'dps-ai' ),
             ] );
@@ -412,8 +462,8 @@ class DPS_AI_Addon {
             ] );
         }
 
-        // Verifica permissão
-        if ( ! current_user_can( 'edit_posts' ) ) {
+        // Verifica permissão usando capability específica com fallback
+        if ( ! $this->user_can_use_ai() ) {
             wp_send_json_error( [
                 'message' => __( 'Você não tem permissão para usar esta funcionalidade.', 'dps-ai' ),
             ] );
@@ -484,6 +534,34 @@ class DPS_AI_Addon {
         }
 
         return $context;
+    }
+
+    /**
+     * Verifica se o usuário atual pode usar o assistente de IA.
+     *
+     * Usa a capability específica DPS_AI_CAPABILITY com fallback para
+     * 'edit_posts' para retrocompatibilidade.
+     *
+     * @return bool True se o usuário pode usar a IA, false caso contrário.
+     */
+    private function user_can_use_ai() {
+        // Verifica capability específica primeiro
+        if ( current_user_can( DPS_AI_CAPABILITY ) ) {
+            return true;
+        }
+
+        // Fallback: admin sempre pode
+        if ( current_user_can( 'manage_options' ) ) {
+            return true;
+        }
+
+        // Fallback para retrocompatibilidade: quem pode editar posts
+        // Isso será removido em versão futura após migração completa
+        if ( current_user_can( 'edit_posts' ) ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

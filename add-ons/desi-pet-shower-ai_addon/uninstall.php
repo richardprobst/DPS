@@ -19,8 +19,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // Remove as opções de configurações do AI Add-on
 delete_option( 'dps_ai_settings' );
 
-// Remove quaisquer transients criados pelo plugin (se existirem no futuro)
-// Formato: dps_ai_context_{client_id}
+// Remove capability específica de todos os roles
+$capability = 'dps_use_ai_assistant';
+$roles      = [ 'administrator', 'editor', 'author', 'contributor', 'subscriber' ];
+
+foreach ( $roles as $role_name ) {
+    $role = get_role( $role_name );
+    if ( $role && $role->has_cap( $capability ) ) {
+        $role->remove_cap( $capability );
+    }
+}
+
+// Remove quaisquer transients criados pelo plugin
+// Formato: dps_ai_ctx_{client_id}_{hash}
 // Nota: $wpdb->options é uma propriedade interna segura do WordPress
 // que contém o nome da tabela de options com o prefixo correto.
 global $wpdb;
