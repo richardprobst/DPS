@@ -416,16 +416,22 @@ final class DPS_Client_Portal {
                         'webp'         => 'image/webp',
                     ];
                     
+                    // Extrai extensões permitidas dos MIME types (single source of truth)
+                    $allowed_exts = [];
+                    foreach ( array_keys( $allowed_mimes ) as $ext_pattern ) {
+                        $exts = explode( '|', $ext_pattern );
+                        $allowed_exts = array_merge( $allowed_exts, $exts );
+                    }
+                    
                     // Verifica extensão do arquivo
                     $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
-                    $allowed_exts = [ 'jpg', 'jpeg', 'jpe', 'gif', 'png', 'webp' ];
                     
                     if ( ! in_array( $file_ext, $allowed_exts, true ) ) {
                         // Extensão não permitida, não processa upload
                         $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
                     } else {
-                        // Valida tamanho máximo (5MB)
-                        $max_size = 5 * 1024 * 1024; // 5MB em bytes
+                        // Usa limite de upload do WordPress (respeita configuração do servidor)
+                        $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
                         if ( $file['size'] > $max_size ) {
                             $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
                         } else {
@@ -443,7 +449,7 @@ final class DPS_Client_Portal {
                                 $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
                                 
                                 // Valida MIME type real do arquivo
-                                if ( ! empty( $file_type['type'] ) && strpos( $file_type['type'], 'image/' ) === 0 ) {
+                                if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
                                     $attachment = [
                                         'post_title'     => sanitize_file_name( $file_name ),
                                         'post_mime_type' => $file_type['type'],
@@ -1595,7 +1601,11 @@ final class DPS_Client_Portal {
         $feedback    = '';
         $ip_address  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
         $attempt_key = $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
-        $attempts    = $attempt_key ? absint( get_transient( $attempt_key ) ) : 0;
+        $attempts    = 0;
+        if ( $attempt_key ) {
+            $stored_attempts = get_transient( $attempt_key );
+            $attempts        = false !== $stored_attempts ? absint( $stored_attempts ) : 0;
+        }
         $max_attempt = 5;
         $lock_time   = 15 * MINUTE_IN_SECONDS;
 
@@ -1609,34 +1619,42 @@ final class DPS_Client_Portal {
                 $feedback = esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' );
             } else {
                 $login    = isset( $_POST['dps_client_login'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_client_login'] ) ) : '';
-                $password = isset( $_POST['dps_client_password'] ) ? wp_unslash( $_POST['dps_client_password'] ) : ''; // Não sanitiza senha
-
-                $creds = [
-                    'user_login'    => $login,
-                    'user_password' => $password,
-                    'remember'      => true,
-                ];
-
-                $user = wp_signon( $creds, false );
-
-                if ( is_wp_error( $user ) ) {
-                    $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
-
-                    if ( $attempt_key ) {
-                        $attempts++;
-                        set_transient( $attempt_key, $attempts, $lock_time );
-                    }
+                // Senha não é sanitizada mas é validada (mínimo 1 caractere)
+                $password = isset( $_POST['dps_client_password'] ) ? wp_unslash( $_POST['dps_client_password'] ) : '';
+                
+                // Validação básica de senha
+                if ( empty( $password ) || strlen( $password ) < 1 ) {
+                    $feedback = esc_html__( 'Por favor, informe uma senha válida.', 'dps-client-portal' );
+                } elseif ( empty( $login ) ) {
+                    $feedback = esc_html__( 'Por favor, informe o usuário ou e-mail.', 'dps-client-portal' );
                 } else {
-                    if ( $attempt_key ) {
-                        delete_transient( $attempt_key );
+                    $creds = [
+                        'user_login'    => $login,
+                        'user_password' => $password,
+                        'remember'      => true,
+                    ];
+
+                    $user = wp_signon( $creds, false );
+
+                    if ( is_wp_error( $user ) ) {
+                        $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
+
+                        if ( $attempt_key ) {
+                            $attempts++;
+                            set_transient( $attempt_key, $attempts, $lock_time );
+                        }
+                    } else {
+                        if ( $attempt_key ) {
+                            delete_transient( $attempt_key );
+                        }
+
+                        wp_set_current_user( $user->ID );
+                        wp_set_auth_cookie( $user->ID, true );
+
+                        $redirect_url = dps_get_portal_page_url();
+                        wp_safe_redirect( $redirect_url );
+                        exit;
                     }
-
-                    wp_set_current_user( $user->ID );
-                    wp_set_auth_cookie( $user->ID, true );
-
-                    $redirect_url = dps_get_portal_page_url();
-                    wp_safe_redirect( $redirect_url );
-                    exit;
                 }
             }
         }

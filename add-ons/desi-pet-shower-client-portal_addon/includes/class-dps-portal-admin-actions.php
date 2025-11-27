@@ -160,7 +160,7 @@ final class DPS_Portal_Admin_Actions {
         // Redireciona de volta
         $redirect_url = $this->get_redirect_url();
         $redirect_url = add_query_arg( [
-            'dps_tokens_revoked' => false !== $revoked_count ? $revoked_count : 0,
+            'dps_tokens_revoked' => $revoked_count !== false ? $revoked_count : 0,
             'client_id'          => $client_id,
         ], $redirect_url );
 
