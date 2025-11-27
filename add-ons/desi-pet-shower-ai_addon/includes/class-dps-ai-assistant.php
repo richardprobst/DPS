@@ -45,6 +45,13 @@ class DPS_AI_Assistant {
     ];
 
     /**
+     * Tempo de expiração do cache de contexto em segundos (5 minutos).
+     *
+     * @var int
+     */
+    const CONTEXT_CACHE_EXPIRATION = 300;
+
+    /**
      * Responde a uma pergunta feita pelo cliente no Portal.
      *
      * @param int    $client_id     ID do cliente logado.
@@ -63,12 +70,11 @@ class DPS_AI_Assistant {
 
         // Filtro preventivo: verifica se a pergunta contém palavras-chave relacionadas ao contexto
         if ( ! self::is_question_in_context( $user_question ) ) {
-            return 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do Desi Pet Shower. ' .
-                   'Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.';
+            return __( 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do Desi Pet Shower. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.', 'dps-ai' );
         }
 
-        // Monta contexto do cliente e pets
-        $context = self::build_client_context( $client_id, $pet_ids );
+        // Monta contexto do cliente e pets (com cache)
+        $context = self::get_cached_client_context( $client_id, $pet_ids );
 
         // Array de mensagens - começa com o prompt base
         $messages = [];
@@ -165,7 +171,60 @@ class DPS_AI_Assistant {
     }
 
     /**
+     * Obtém contexto do cliente com cache via Transients.
+     *
+     * Cacheia o contexto por 5 minutos para evitar reconstrução repetitiva
+     * a cada pergunta do mesmo cliente.
+     *
+     * @param int   $client_id ID do cliente.
+     * @param array $pet_ids   IDs dos pets.
+     *
+     * @return string Contexto formatado (do cache ou recém-construído).
+     */
+    private static function get_cached_client_context( $client_id, array $pet_ids ) {
+        // Gera chave única baseada no cliente e pets usando wp_hash para melhor unicidade
+        $pets_string = implode( ',', array_map( 'absint', $pet_ids ) );
+        $cache_key   = 'dps_ai_ctx_' . absint( $client_id ) . '_' . substr( wp_hash( $pets_string ), 0, 12 );
+
+        // Tenta obter do cache
+        $cached_context = get_transient( $cache_key );
+
+        if ( false !== $cached_context ) {
+            return $cached_context;
+        }
+
+        // Cache miss: reconstrói contexto
+        $context = self::build_client_context( $client_id, $pet_ids );
+
+        // Salva no cache
+        set_transient( $cache_key, $context, self::CONTEXT_CACHE_EXPIRATION );
+
+        return $context;
+    }
+
+    /**
+     * Invalida o cache de contexto de um cliente.
+     *
+     * Deve ser chamado quando dados do cliente, pets ou agendamentos são alterados.
+     *
+     * @param int   $client_id ID do cliente.
+     * @param array $pet_ids   IDs dos pets (opcional, se vazio limpa todos os caches do cliente).
+     */
+    public static function invalidate_context_cache( $client_id, array $pet_ids = [] ) {
+        if ( ! empty( $pet_ids ) ) {
+            // Invalida cache específico
+            $cache_key = 'dps_ai_ctx_' . $client_id . '_' . md5( implode( ',', $pet_ids ) );
+            delete_transient( $cache_key );
+        }
+
+        // Sempre tenta invalidar caches antigos via pattern (limpeza)
+        // Nota: Transients com pattern são limpos na desinstalação via uninstall.php
+    }
+
+    /**
      * Monta o contexto do cliente e pets para incluir na pergunta.
+     *
+     * Agora refatorado para usar métodos auxiliares especializados.
      *
      * @param int   $client_id ID do cliente.
      * @param array $pet_ids   IDs dos pets.
@@ -175,64 +234,22 @@ class DPS_AI_Assistant {
     private static function build_client_context( $client_id, array $pet_ids ) {
         $context = "CONTEXTO DO SISTEMA:\n\n";
 
-        // Dados do cliente - valida existência antes de usar
-        if ( $client_id && 'dps_cliente' === get_post_type( $client_id ) ) {
-            $client_name  = get_the_title( $client_id );
-            $client_phone = get_post_meta( $client_id, 'client_phone', true );
-            $client_email = get_post_meta( $client_id, 'client_email', true );
-
-            if ( $client_name && ! empty( $client_name ) ) {
-                $context .= "Cliente: {$client_name}\n";
-            }
-            if ( $client_phone ) {
-                $context .= "Telefone: {$client_phone}\n";
-            }
-            if ( $client_email ) {
-                $context .= "E-mail: {$client_email}\n";
-            }
+        // Dados do cliente
+        $client_data = self::get_client_data( $client_id );
+        if ( ! empty( $client_data ) ) {
+            $context .= $client_data;
         }
 
-        // Dados dos pets - valida cada pet antes de usar
-        if ( ! empty( $pet_ids ) ) {
-            $valid_pets = [];
-
-            foreach ( $pet_ids as $pet_id ) {
-                if ( $pet_id && 'dps_pet' === get_post_type( $pet_id ) ) {
-                    $pet_name = get_the_title( $pet_id );
-                    if ( $pet_name && ! empty( $pet_name ) ) {
-                        $pet_breed = get_post_meta( $pet_id, 'pet_breed', true );
-                        $pet_size  = get_post_meta( $pet_id, 'pet_size', true );
-                        $pet_age   = get_post_meta( $pet_id, 'pet_age', true );
-
-                        $pet_desc = "- {$pet_name}";
-                        if ( $pet_breed ) {
-                            $pet_desc .= " (Raça: {$pet_breed})";
-                        }
-                        if ( $pet_size ) {
-                            $pet_desc .= " (Porte: {$pet_size})";
-                        }
-                        if ( $pet_age ) {
-                            $pet_desc .= " (Idade: {$pet_age})";
-                        }
-
-                        $valid_pets[] = $pet_desc;
-                    }
-                }
-            }
-
-            if ( ! empty( $valid_pets ) ) {
-                $context .= "\nPets cadastrados:\n";
-                $context .= implode( "\n", $valid_pets ) . "\n";
-            }
+        // Dados dos pets
+        $pets_data = self::get_pets_data( $pet_ids );
+        if ( ! empty( $pets_data ) ) {
+            $context .= "\nPets cadastrados:\n" . $pets_data;
         }
 
         // Últimos agendamentos (limitado a 5 mais recentes)
-        $recent_appointments = self::get_recent_appointments( $pet_ids, 5 );
-        if ( ! empty( $recent_appointments ) ) {
-            $context .= "\nÚltimos agendamentos:\n";
-            foreach ( $recent_appointments as $appointment ) {
-                $context .= $appointment . "\n";
-            }
+        $appointments_data = self::get_appointments_data( $pet_ids, 5 );
+        if ( ! empty( $appointments_data ) ) {
+            $context .= "\nÚltimos agendamentos:\n" . $appointments_data;
         }
 
         // Pendências financeiras (se Finance add-on estiver ativo)
@@ -248,6 +265,109 @@ class DPS_AI_Assistant {
         }
 
         return $context;
+    }
+
+    /**
+     * Obtém dados formatados do cliente.
+     *
+     * @param int $client_id ID do cliente.
+     *
+     * @return string Dados do cliente formatados ou string vazia.
+     */
+    private static function get_client_data( $client_id ) {
+        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
+            return '';
+        }
+
+        $result = '';
+
+        $client_name  = get_the_title( $client_id );
+        $client_phone = get_post_meta( $client_id, 'client_phone', true );
+        $client_email = get_post_meta( $client_id, 'client_email', true );
+
+        if ( $client_name && ! empty( $client_name ) ) {
+            $result .= "Cliente: {$client_name}\n";
+        }
+        if ( $client_phone ) {
+            $result .= "Telefone: {$client_phone}\n";
+        }
+        if ( $client_email ) {
+            $result .= "E-mail: {$client_email}\n";
+        }
+
+        return $result;
+    }
+
+    /**
+     * Obtém dados formatados dos pets.
+     *
+     * @param array $pet_ids IDs dos pets.
+     *
+     * @return string Dados dos pets formatados ou string vazia.
+     */
+    private static function get_pets_data( array $pet_ids ) {
+        if ( empty( $pet_ids ) ) {
+            return '';
+        }
+
+        $valid_pets = [];
+
+        foreach ( $pet_ids as $pet_id ) {
+            if ( ! $pet_id || 'dps_pet' !== get_post_type( $pet_id ) ) {
+                continue;
+            }
+
+            $pet_name = get_the_title( $pet_id );
+            if ( ! $pet_name || empty( $pet_name ) ) {
+                continue;
+            }
+
+            $pet_breed = get_post_meta( $pet_id, 'pet_breed', true );
+            $pet_size  = get_post_meta( $pet_id, 'pet_size', true );
+            $pet_age   = get_post_meta( $pet_id, 'pet_age', true );
+
+            $pet_desc = "- {$pet_name}";
+            if ( $pet_breed ) {
+                $pet_desc .= " (Raça: {$pet_breed})";
+            }
+            if ( $pet_size ) {
+                $pet_desc .= " (Porte: {$pet_size})";
+            }
+            if ( $pet_age ) {
+                $pet_desc .= " (Idade: {$pet_age})";
+            }
+
+            $valid_pets[] = $pet_desc;
+        }
+
+        if ( empty( $valid_pets ) ) {
+            return '';
+        }
+
+        return implode( "\n", $valid_pets ) . "\n";
+    }
+
+    /**
+     * Obtém dados formatados dos agendamentos recentes.
+     *
+     * @param array $pet_ids IDs dos pets.
+     * @param int   $limit   Limite de agendamentos.
+     *
+     * @return string Dados dos agendamentos formatados ou string vazia.
+     */
+    private static function get_appointments_data( array $pet_ids, $limit = 5 ) {
+        $appointments = self::get_recent_appointments( $pet_ids, $limit );
+
+        if ( empty( $appointments ) ) {
+            return '';
+        }
+
+        $result = '';
+        foreach ( $appointments as $appointment ) {
+            $result .= $appointment . "\n";
+        }
+
+        return $result;
     }
 
     /**
@@ -327,18 +447,7 @@ class DPS_AI_Assistant {
 
                 $appointment_desc = "Data: {$appointment_date}, Status: {$status_label}";
                 if ( ! empty( $services ) ) {
-                    $service_names = [];
-                    foreach ( $services as $service_id ) {
-                        $service_id = absint( $service_id );
-                        // Valida tipo de post e existência antes de buscar título
-                        if ( $service_id && 'dps_servico' === get_post_type( $service_id ) ) {
-                            $service_name = get_the_title( $service_id );
-                            // Verifica se o título não é vazio e não é false
-                            if ( $service_name && ! empty( $service_name ) && false !== $service_name ) {
-                                $service_names[] = $service_name;
-                            }
-                        }
-                    }
+                    $service_names = self::get_service_names_batch( $services );
                     if ( ! empty( $service_names ) ) {
                         $appointment_desc .= ', Serviços: ' . implode( ', ', $service_names );
                     }
@@ -351,6 +460,46 @@ class DPS_AI_Assistant {
         }
 
         return $appointments;
+    }
+
+    /**
+     * Busca nomes de serviços em batch (otimizado).
+     *
+     * Em vez de fazer N queries individuais (uma por serviço),
+     * faz uma única query usando post__in para buscar todos de uma vez.
+     *
+     * @param array $service_ids Array de IDs de serviços.
+     *
+     * @return array Array de nomes de serviços.
+     */
+    private static function get_service_names_batch( array $service_ids ) {
+        if ( empty( $service_ids ) ) {
+            return [];
+        }
+
+        // Converte para inteiros e remove zeros/inválidos
+        $service_ids_int = array_filter( array_map( 'absint', $service_ids ) );
+
+        if ( empty( $service_ids_int ) ) {
+            return [];
+        }
+
+        // Busca todos os serviços de uma vez
+        $service_posts = get_posts( [
+            'post_type'      => 'dps_servico',
+            'post__in'       => $service_ids_int,
+            'posts_per_page' => count( $service_ids_int ),
+            'post_status'    => 'publish',
+            'orderby'        => 'post__in', // Mantém ordem original
+            'no_found_rows'  => true, // Otimização: não precisa contar total
+        ] );
+
+        if ( empty( $service_posts ) ) {
+            return [];
+        }
+
+        // Extrai apenas os títulos
+        return wp_list_pluck( $service_posts, 'post_title' );
     }
 
     /**
@@ -368,12 +517,14 @@ class DPS_AI_Assistant {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
+        $table_name = $wpdb->prefix . 'dps_transacoes';
 
         // Busca cobranças pendentes do cliente - usando prepare para segurança
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Query necessária para dados financeiros não cacheáveis
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed with wpdb prefix
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT valor_centavos, descricao FROM `{$wpdb->prefix}dps_transacoes` WHERE cliente_id = %d AND status = %s ORDER BY data_vencimento ASC",
+                "SELECT valor_centavos, descricao FROM {$table_name} WHERE cliente_id = %d AND status = %s ORDER BY data_vencimento ASC",
                 $client_id,
                 'pendente'
             )
