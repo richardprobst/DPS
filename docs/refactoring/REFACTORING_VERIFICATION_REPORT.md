@@ -67,8 +67,9 @@ Adicionar verificação de dependência no início de cada add-on:
 // No início do arquivo principal de cada add-on
 if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
     add_action( 'admin_notices', function() {
-        echo '<div class="error"><p>';
-        echo esc_html__( 'Este add-on requer o plugin base Desi Pet Shower.', 'text-domain' );
+        echo '<div class="notice notice-error"><p>';
+        // Usar o text domain específico do add-on (ex: 'dps-finance-addon', 'dps-agenda-addon')
+        echo esc_html__( 'Este add-on requer o plugin base Desi Pet Shower.', 'dps-ADDON-addon' );
         echo '</p></div>';
     } );
     return;
