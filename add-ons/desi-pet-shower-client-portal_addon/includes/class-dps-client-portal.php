@@ -105,12 +105,18 @@ final class DPS_Client_Portal {
             return;
         }
 
+        // Obtém IP para logging
+        $ip_address = $this->get_client_ip();
+
         // Valida o token
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $token_data    = $token_manager->validate_token( $token_plain );
 
         if ( false === $token_data ) {
-            // Token inválido - redireciona para tela de acesso com mensagem de erro
+            // Token inválido - registra tentativa e redireciona
+            $this->log_security_event( 'token_invalid', [
+                'ip' => $ip_address,
+            ] );
             $this->redirect_to_access_screen( 'invalid' );
             return;
         }
@@ -120,12 +126,22 @@ final class DPS_Client_Portal {
         $authenticated   = $session_manager->authenticate_client( $token_data['client_id'] );
 
         if ( ! $authenticated ) {
+            $this->log_security_event( 'session_auth_failed', [
+                'client_id' => $token_data['client_id'],
+                'ip'        => $ip_address,
+            ] );
             $this->redirect_to_access_screen( 'invalid' );
             return;
         }
 
         // Marca token como usado
         $token_manager->mark_as_used( $token_data['id'] );
+
+        // Registra acesso bem-sucedido
+        $this->log_security_event( 'token_auth_success', [
+            'client_id' => $token_data['client_id'],
+            'ip'        => $ip_address,
+        ], DPS_Logger::LEVEL_INFO );
 
         // Redireciona para o portal (remove o token da URL)
         $redirect_url = dps_get_portal_page_url();
@@ -1599,8 +1615,8 @@ final class DPS_Client_Portal {
         }
 
         $feedback    = '';
-        $ip_address  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-        $attempt_key = $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
+        $ip_address  = $this->get_client_ip();
+        $attempt_key = $ip_address && 'unknown' !== $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
         $attempts    = 0;
         if ( $attempt_key ) {
             $stored_attempts = get_transient( $attempt_key );
@@ -1611,12 +1627,20 @@ final class DPS_Client_Portal {
 
         if ( $attempts >= $max_attempt ) {
             $feedback = esc_html__( 'Muitas tentativas de login. Tente novamente em alguns minutos.', 'dps-client-portal' );
+            // Registra bloqueio por excesso de tentativas
+            $this->log_security_event( 'login_blocked', [
+                'ip'       => $ip_address,
+                'attempts' => $attempts,
+            ] );
         }
 
         if ( isset( $_POST['dps_client_login_action'] ) && ! $feedback ) {
             $nonce = isset( $_POST['_dps_client_login_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_client_login_nonce'] ) ) : '';
             if ( ! wp_verify_nonce( $nonce, 'dps_client_login_action' ) ) {
                 $feedback = esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' );
+                $this->log_security_event( 'login_nonce_failed', [
+                    'ip' => $ip_address,
+                ] );
             } else {
                 $login    = isset( $_POST['dps_client_login'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_client_login'] ) ) : '';
                 // Senha não é sanitizada mas é validada (mínimo 1 caractere)
@@ -1643,6 +1667,12 @@ final class DPS_Client_Portal {
                             $attempts++;
                             set_transient( $attempt_key, $attempts, $lock_time );
                         }
+                        
+                        // Registra tentativa de login falha (não expõe senha)
+                        $this->log_security_event( 'login_failed', [
+                            'ip'       => $ip_address,
+                            'attempts' => $attempts,
+                        ] );
                     } else {
                         if ( $attempt_key ) {
                             delete_transient( $attempt_key );
@@ -1650,6 +1680,12 @@ final class DPS_Client_Portal {
 
                         wp_set_current_user( $user->ID );
                         wp_set_auth_cookie( $user->ID, true );
+                        
+                        // Registra login bem-sucedido
+                        $this->log_security_event( 'login_success', [
+                            'user_id' => $user->ID,
+                            'ip'      => $ip_address,
+                        ], DPS_Logger::LEVEL_INFO );
 
                         $redirect_url = dps_get_portal_page_url();
                         wp_safe_redirect( $redirect_url );
@@ -1818,6 +1854,54 @@ final class DPS_Client_Portal {
         $page_link = add_query_arg( 'tab', 'logins', $page_link );
         $this->render_client_logins_page( 'frontend', $page_link );
         echo '</div>';
+    }
+
+    /**
+     * Obtém o endereço IP do cliente de forma segura.
+     *
+     * @since 2.2.0
+     *
+     * @return string Endereço IP sanitizado ou 'unknown' se não disponível.
+     */
+    private function get_client_ip() {
+        if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+            return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+        }
+        return 'unknown';
+    }
+
+    /**
+     * Registra evento de segurança no sistema de logs.
+     *
+     * Utiliza DPS_Logger para registrar eventos relacionados a autenticação,
+     * tentativas de login e outras ações de segurança do portal.
+     *
+     * IMPORTANTE: Nunca registra senhas ou tokens completos para evitar
+     * exposição de dados sensíveis. Usa allowlist de campos seguros.
+     *
+     * @since 2.2.0
+     *
+     * @param string $event   Nome do evento (ex: 'login_failed', 'token_auth_success').
+     * @param array  $context Dados do contexto (IP, client_id, etc.). Não incluir senhas.
+     * @param string $level   Nível do log (padrão: warning). Use DPS_Logger::LEVEL_* constants.
+     */
+    private function log_security_event( $event, $context = [], $level = null ) {
+        // Verifica se DPS_Logger existe (plugin base ativo)
+        if ( ! class_exists( 'DPS_Logger' ) ) {
+            return;
+        }
+
+        // Define nível padrão como warning para eventos de segurança
+        if ( null === $level ) {
+            $level = DPS_Logger::LEVEL_WARNING;
+        }
+
+        // Allowlist de campos seguros para evitar exposição de dados sensíveis
+        $allowed_fields = [ 'ip', 'client_id', 'user_id', 'attempts', 'event_type', 'timestamp' ];
+        $safe_context   = array_intersect_key( $context, array_flip( $allowed_fields ) );
+
+        $message = sprintf( 'Portal security event: %s', $event );
+        DPS_Logger::log( $level, $message, $safe_context, 'client-portal' );
     }
 }
 endif;
