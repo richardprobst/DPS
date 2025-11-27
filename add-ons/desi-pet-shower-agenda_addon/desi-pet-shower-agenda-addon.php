@@ -36,6 +36,30 @@ class DPS_Agenda_Addon {
      */
     const APPOINTMENTS_PER_PAGE = 50;
     
+    /**
+     * Limite de agendamentos por dia nas queries de visualização.
+     * Pode ser filtrado via 'dps_agenda_daily_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const DAILY_APPOINTMENTS_LIMIT = 200;
+    
+    /**
+     * Limite de clientes na lista de filtros.
+     * Pode ser filtrado via 'dps_agenda_clients_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const CLIENTS_LIST_LIMIT = 300;
+    
+    /**
+     * Limite de serviços na lista de filtros.
+     * Pode ser filtrado via 'dps_agenda_services_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const SERVICES_LIST_LIMIT = 200;
+    
     public function __construct() {
         // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
         add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );
@@ -50,16 +74,14 @@ class DPS_Agenda_Addon {
         add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode_deprecated' ] );
         // Enfileira scripts e estilos somente quando páginas específicas forem exibidas
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-        // AJAX para atualizar status de agendamento
+        // AJAX para atualizar status de agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_update_status', [ $this, 'update_status_ajax' ] );
-        add_action( 'wp_ajax_nopriv_dps_update_status', [ $this, 'update_status_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
 
-        // AJAX para obter detalhes de serviços de um agendamento
+        // AJAX para obter detalhes de serviços de um agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
-        add_action( 'wp_ajax_nopriv_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
 
         // Agenda: agendamento de envio de lembretes diários
         add_action( 'init', [ $this, 'maybe_schedule_reminders' ] );
@@ -82,17 +104,10 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Cria automaticamente a página de agenda ao ativar o plugin.
-     */
-    /**
-     * Dispara criação de páginas necessárias ao addon.
-     */
-    public function create_pages() {
-        // Esta função não é mais usada para criar páginas. A agenda será criada apenas por create_agenda_page().
-    }
-
-    /**
      * Cria a página de agenda de atendimentos.
+     * 
+     * @since 1.0.0
+     * @return void
      */
     public function create_agenda_page() {
         $title = __( 'Agenda de Atendimentos', 'dps-agenda-addon' );
@@ -181,6 +196,9 @@ class DPS_Agenda_Addon {
      * 
      * CSS e JS agora são carregados de arquivos externos (assets/css e assets/js)
      * para melhor cache do navegador, minificação e separação de responsabilidades.
+     *
+     * @since 1.0.0
+     * @return void
      */
     public function enqueue_assets() {
         $agenda_page_id  = get_option( 'dps_agenda_page_id' );
@@ -397,22 +415,41 @@ class DPS_Agenda_Addon {
         $filter_client  = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
         $filter_status  = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
         $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
-        // Lista de clientes
-        $clients = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
-        // Lista de serviços
-        $services = get_posts( [
-            'post_type'      => 'dps_service',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
+        
+        // Limites configuráveis via filtro
+        $clients_limit = apply_filters( 'dps_agenda_clients_limit', self::CLIENTS_LIST_LIMIT );
+        $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
+        
+        // PERFORMANCE: Lista de clientes com cache transient (1 hora)
+        $clients_cache_key = 'dps_agenda_clients_list';
+        $clients = get_transient( $clients_cache_key );
+        if ( false === $clients ) {
+            $clients = get_posts( [
+                'post_type'      => 'dps_cliente',
+                'posts_per_page' => $clients_limit,
+                'post_status'    => 'publish',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'no_found_rows'  => true, // Otimização: não conta total
+            ] );
+            set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
+        }
+        
+        // PERFORMANCE: Lista de serviços com cache transient (1 hora)
+        $services_cache_key = 'dps_agenda_services_list';
+        $services = get_transient( $services_cache_key );
+        if ( false === $services ) {
+            $services = get_posts( [
+                'post_type'      => 'dps_service',
+                'posts_per_page' => $services_limit,
+                'post_status'    => 'publish',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'no_found_rows'  => true, // Otimização: não conta total
+            ] );
+            set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
+        }
+        
         $status_options = [
             ''                => __( 'Todos os status', 'dps-agenda-addon' ),
             'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
@@ -491,6 +528,9 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
             ] );
         } elseif ( $view === 'week' ) {
+            // Limite diário configurável via filtro
+            $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+            
             // Calcula início (segunda-feira) da semana contendo $selected_date
             $dt      = DateTime::createFromFormat( 'Y-m-d', $selected_date );
             $weekday = (int) $dt->format( 'N' ); // 1 = seg, 7 = dom
@@ -501,7 +541,7 @@ class DPS_Agenda_Addon {
                 $day_date->modify( '+' . $i . ' days' );
                 $appointments[ $day_date->format( 'Y-m-d' ) ] = get_posts( [
                     'post_type'      => 'dps_agendamento',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => $daily_limit,
                     'post_status'    => 'publish',
                     'meta_query'     => [
                         [
@@ -513,13 +553,17 @@ class DPS_Agenda_Addon {
                     'orderby'        => 'meta_value',
                     'meta_key'       => 'appointment_time',
                     'order'          => 'ASC',
+                    'no_found_rows'  => true, // PERFORMANCE: não conta total
                 ] );
             }
         } else {
+            // Limite diário configurável via filtro
+            $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+            
             // Visualização diária
             $appointments[ $selected_date ] = get_posts( [
                 'post_type'      => 'dps_agendamento',
-                'posts_per_page' => -1,
+                'posts_per_page' => $daily_limit,
                 'post_status'    => 'publish',
                 'meta_query'     => [
                     [
@@ -531,6 +575,7 @@ class DPS_Agenda_Addon {
                 'orderby'        => 'meta_value',
                 'meta_key'       => 'appointment_time',
                 'order'          => 'ASC',
+                'no_found_rows'  => true, // PERFORMANCE: não conta total
             ] );
         }
         // Renderiza tabela para cada dia, aplicando filtros se necessário
@@ -697,13 +742,9 @@ class DPS_Agenda_Addon {
                     echo '</td>';
                     // Status (editable if admin)
                     echo '<td data-label="' . esc_attr( $column_labels['status'] ) . '">';
-                    $plugin_role = '';
-                    if ( isset( $_COOKIE['dps_base_role'] ) ) {
-                        $plugin_role = sanitize_text_field( $_COOKIE['dps_base_role'] );
-                    } elseif ( isset( $_COOKIE['dps_role'] ) ) {
-                        $plugin_role = sanitize_text_field( $_COOKIE['dps_role'] );
-                    }
-                    $can_edit = ( is_user_logged_in() || $plugin_role === 'admin' );
+                    // SEGURANÇA: Apenas usuários autenticados com capability manage_options podem editar
+                    // NUNCA confie em cookies para controle de acesso - são facilmente manipuláveis
+                    $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
                     // Define lista de status padrão
                     $statuses = [
                         'pendente'   => __( 'Pendente', 'dps-agenda-addon' ),
@@ -1071,11 +1112,11 @@ class DPS_Agenda_Addon {
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
         }
-        // Verificação de nonce tolerante: se o nonce existir, tentamos validar. Esta ação somente
-        // realiza leitura de dados, portanto não bloqueamos totalmente em caso de falha, mas
-        // indicamos via flag 'nonce_ok' no resultado retornado.
-        $nonce     = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
-        $nonce_ok  = $nonce && wp_verify_nonce( $nonce, 'dps_get_services_details' );
+        // SEGURANÇA: Verificação de nonce obrigatória para prevenir CSRF
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_get_services_details' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
         $id_param  = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
         if ( ! $id_param ) {
             // Compatibilidade: aceita "id" como fallback
@@ -1090,7 +1131,6 @@ class DPS_Agenda_Addon {
             $details = DPS_Services_API::get_services_details( $id_param );
             wp_send_json_success( [
                 'services' => $details['services'],
-                'nonce_ok' => $nonce_ok,
             ] );
         }
 
@@ -1117,7 +1157,7 @@ class DPS_Agenda_Addon {
                 }
             }
         }
-        wp_send_json_success( [ 'services' => $services, 'nonce_ok' => $nonce_ok ] );
+        wp_send_json_success( [ 'services' => $services ] );
     }
 
     /**
@@ -1160,19 +1200,26 @@ class DPS_Agenda_Addon {
      *
      * NOTA: A lógica de ENVIO está delegada à Communications API.
      * A Agenda apenas identifica quais agendamentos precisam de lembrete.
+     * 
+     * @since 1.0.0
+     * @return void
      */
     public function send_reminders() {
         // Determina a data atual no fuso horário do site
         $date = current_time( 'Y-m-d' );
         
-        // Busca agendamentos do dia com status pendente
+        // Limite diário configurável (mesmo usado nas queries de visualização)
+        $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+        
+        // PERFORMANCE: Busca agendamentos do dia com limite e otimização
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
-            'posts_per_page' => -1,
+            'posts_per_page' => $daily_limit,
             'post_status'    => 'publish',
             'meta_query'     => [
                 [ 'key' => 'appointment_date', 'value' => $date, 'compare' => '=' ],
             ],
+            'no_found_rows'  => true, // Otimização: não conta total
         ] );
         
         // AUDITORIA: Registra início do envio de lembretes

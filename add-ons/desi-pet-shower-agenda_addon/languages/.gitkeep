@@ -1,0 +1,2 @@
+# Pasta para arquivos de tradução (.pot, .po, .mo)
+# Para gerar o arquivo .pot, use: wp i18n make-pot . languages/dps-agenda-addon.pot
