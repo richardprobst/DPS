@@ -539,18 +539,18 @@ public function enqueue_assets() {
 ## 📋 Checklist de Correções
 
 ### Segurança (Crítico)
-- [ ] Remover verificação de cookies para controle de acesso
-- [ ] Remover handlers AJAX `nopriv` desnecessários
-- [ ] Tornar verificação de nonce obrigatória em todos os endpoints
+- [x] Remover verificação de cookies para controle de acesso ✅ **CORRIGIDO em 2025-11-27**
+- [x] Remover handlers AJAX `nopriv` desnecessários ✅ **CORRIGIDO em 2025-11-27**
+- [x] Tornar verificação de nonce obrigatória em todos os endpoints ✅ **CORRIGIDO em 2025-11-27**
 
 ### Código Limpo
-- [ ] Remover arquivos deprecados da raiz
-- [ ] Remover método `create_pages()` vazio
-- [ ] Criar pasta `languages/`
+- [x] Remover arquivos deprecados da raiz ✅ **CORRIGIDO em 2025-11-27**
+- [x] Remover método `create_pages()` vazio ✅ **CORRIGIDO em 2025-11-27**
+- [x] Criar pasta `languages/` ✅ **CORRIGIDO em 2025-11-27**
 
 ### Performance
-- [ ] Adicionar cache transient para listas de filtros
-- [ ] Adicionar `no_found_rows => true` em queries de listagem
+- [x] Adicionar cache transient para listas de filtros ✅ **CORRIGIDO em 2025-11-27**
+- [x] Adicionar `no_found_rows => true` em queries de listagem ✅ **CORRIGIDO em 2025-11-27**
 - [ ] Implementar pré-carregamento de posts relacionados
 
 ### Arquitetura
@@ -558,7 +558,7 @@ public function enqueue_assets() {
 - [ ] Converter closure `$render_table` em método privado
 
 ### Documentação
-- [ ] Completar DocBlocks de todos os métodos
+- [x] Completar DocBlocks de métodos principais ✅ **PARCIAL em 2025-11-27**
 - [ ] Adicionar exemplos de uso no README
 
 ### Testes
@@ -568,17 +568,17 @@ public function enqueue_assets() {
 
 ---
 
-## 📈 Métricas do Código
+## 📈 Métricas do Código (Atualizado em 2025-11-27)
 
 | Métrica | Valor | Status |
 |---------|-------|--------|
-| Linhas de código (PHP) | 1319 | ⚠️ Extenso |
+| Linhas de código (PHP) | ~1330 | ⚠️ Extenso |
 | Funções de tradução | 163+ | ✅ Bom |
 | Chamadas sanitize_* | 8 | ✅ Adequado |
 | Chamadas esc_* | 50+ | ✅ Bom |
-| Verificações wp_verify_nonce | 2 | ⚠️ Parcial |
+| Verificações wp_verify_nonce | 2 | ✅ **Obrigatórias** |
 | Verificações current_user_can | 3 | ✅ Adequado |
-| Código morto identificado | 3 arquivos/métodos | ⚠️ Limpar |
+| Código morto identificado | 0 | ✅ **Limpo** |
 | Cobertura de testes | 0% | 🔴 Crítico |
 
 ---

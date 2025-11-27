@@ -1,34 +1,32 @@
 # Arquivos Legados - Agenda Add-on
 
-Este documento lista arquivos que foram movidos ou que não são mais utilizados e podem ser removidos fisicamente do repositório.
+Este documento lista arquivos que foram movidos ou removidos.
 
-## Arquivos para Remoção
+## Arquivos Removidos (2025-11-27)
 
 ### `agenda-addon.js` (raiz do add-on)
-- **Status**: MOVIDO para `assets/js/agenda-addon.js`
-- **Data**: 2025-11-23
-- **Motivo**: Padronização da estrutura de assets conforme boas práticas WordPress
-- **Ação**: Este arquivo pode ser removido fisicamente. O script agora é carregado de `assets/js/agenda-addon.js`
+- **Status**: ✅ REMOVIDO
+- **Data de remoção**: 2025-11-27
+- **Motivo**: Arquivo duplicado. O script oficial está em `assets/js/agenda-addon.js`
 
 ### `agenda.js` (raiz do add-on)
-- **Status**: LEGADO / NÃO UTILIZADO
-- **Data**: Identificado em 2025-11-23
-- **Motivo**: Contém código antigo do FullCalendar que não é mais enfileirado via `wp_enqueue_script()`
-- **Conteúdo**: Implementação de visualização de calendário semanal usando FullCalendar
-- **Ação**: Este arquivo pode ser removido fisicamente. Não há referências ativas no código PHP.
+- **Status**: ✅ REMOVIDO
+- **Data de remoção**: 2025-11-27
+- **Motivo**: Código legado do FullCalendar que não era mais utilizado
 
-## Notas
+## Estrutura Atual
 
-- Antes de remover fisicamente, verifique se nenhum tema ou plugin de terceiros está fazendo referência direta a esses arquivos
-- A estrutura atual recomendada é:
-  ```
-  desi-pet-shower-agenda_addon/
-  ├── assets/
-  │   ├── css/
-  │   │   └── agenda-addon.css
-  │   └── js/
-  │       ├── agenda-addon.js      ← OFICIAL
-  │       └── services-modal.js     ← OFICIAL
-  ├── desi-pet-shower-agenda-addon.php
-  └── ...
-  ```
+```
+desi-pet-shower-agenda_addon/
+├── assets/
+│   ├── css/
+│   │   └── agenda-addon.css
+│   └── js/
+│       ├── agenda-addon.js      ← OFICIAL
+│       └── services-modal.js     ← OFICIAL
+├── languages/
+│   └── .gitkeep                  ← Pasta para traduções
+├── desi-pet-shower-agenda-addon.php
+├── uninstall.php
+└── ...
+```
