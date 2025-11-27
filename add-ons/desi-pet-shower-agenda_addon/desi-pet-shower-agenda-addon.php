@@ -36,6 +36,30 @@ class DPS_Agenda_Addon {
      */
     const APPOINTMENTS_PER_PAGE = 50;
     
+    /**
+     * Limite de agendamentos por dia nas queries de visualização.
+     * Pode ser filtrado via 'dps_agenda_daily_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const DAILY_APPOINTMENTS_LIMIT = 200;
+    
+    /**
+     * Limite de clientes na lista de filtros.
+     * Pode ser filtrado via 'dps_agenda_clients_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const CLIENTS_LIST_LIMIT = 300;
+    
+    /**
+     * Limite de serviços na lista de filtros.
+     * Pode ser filtrado via 'dps_agenda_services_limit'.
+     * 
+     * @since 1.2.0
+     */
+    const SERVICES_LIST_LIMIT = 200;
+    
     public function __construct() {
         // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
         add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );
@@ -392,13 +416,17 @@ class DPS_Agenda_Addon {
         $filter_status  = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
         $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
         
+        // Limites configuráveis via filtro
+        $clients_limit = apply_filters( 'dps_agenda_clients_limit', self::CLIENTS_LIST_LIMIT );
+        $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
+        
         // PERFORMANCE: Lista de clientes com cache transient (1 hora)
         $clients_cache_key = 'dps_agenda_clients_list';
         $clients = get_transient( $clients_cache_key );
         if ( false === $clients ) {
             $clients = get_posts( [
                 'post_type'      => 'dps_cliente',
-                'posts_per_page' => 500, // Limite razoável para performance
+                'posts_per_page' => $clients_limit,
                 'post_status'    => 'publish',
                 'orderby'        => 'title',
                 'order'          => 'ASC',
@@ -413,7 +441,7 @@ class DPS_Agenda_Addon {
         if ( false === $services ) {
             $services = get_posts( [
                 'post_type'      => 'dps_service',
-                'posts_per_page' => 200, // Limite razoável para performance
+                'posts_per_page' => $services_limit,
                 'post_status'    => 'publish',
                 'orderby'        => 'title',
                 'order'          => 'ASC',
@@ -500,6 +528,9 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
             ] );
         } elseif ( $view === 'week' ) {
+            // Limite diário configurável via filtro
+            $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+            
             // Calcula início (segunda-feira) da semana contendo $selected_date
             $dt      = DateTime::createFromFormat( 'Y-m-d', $selected_date );
             $weekday = (int) $dt->format( 'N' ); // 1 = seg, 7 = dom
@@ -510,7 +541,7 @@ class DPS_Agenda_Addon {
                 $day_date->modify( '+' . $i . ' days' );
                 $appointments[ $day_date->format( 'Y-m-d' ) ] = get_posts( [
                     'post_type'      => 'dps_agendamento',
-                    'posts_per_page' => 100, // Limite razoável por dia
+                    'posts_per_page' => $daily_limit,
                     'post_status'    => 'publish',
                     'meta_query'     => [
                         [
@@ -526,10 +557,13 @@ class DPS_Agenda_Addon {
                 ] );
             }
         } else {
+            // Limite diário configurável via filtro
+            $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+            
             // Visualização diária
             $appointments[ $selected_date ] = get_posts( [
                 'post_type'      => 'dps_agendamento',
-                'posts_per_page' => 100, // Limite razoável por dia
+                'posts_per_page' => $daily_limit,
                 'post_status'    => 'publish',
                 'meta_query'     => [
                     [
@@ -1174,10 +1208,13 @@ class DPS_Agenda_Addon {
         // Determina a data atual no fuso horário do site
         $date = current_time( 'Y-m-d' );
         
-        // PERFORMANCE: Busca agendamentos do dia com limite razoável e otimização
+        // Limite diário configurável (mesmo usado nas queries de visualização)
+        $daily_limit = apply_filters( 'dps_agenda_daily_limit', self::DAILY_APPOINTMENTS_LIMIT );
+        
+        // PERFORMANCE: Busca agendamentos do dia com limite e otimização
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 200, // Limite razoável para um dia
+            'posts_per_page' => $daily_limit,
             'post_status'    => 'publish',
             'meta_query'     => [
                 [ 'key' => 'appointment_date', 'value' => $date, 'compare' => '=' ],
