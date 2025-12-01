@@ -9,13 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Logs_Admin_Page {
 
     public function __construct() {
+        // Prioridade 20 garante que o menu pai 'desi-pet-shower' já foi registrado pelo plugin base.
         add_action( 'admin_menu', array( $this, 'register_page' ), 20 );
         add_action( 'admin_post_dps_purge_logs', array( $this, 'handle_purge' ) );
     }
 
     /**
      * Registra a página de Logs do sistema como submenu de "Desi Pet Shower".
-     * Usa prioridade 20 para garantir que o menu pai já existe.
      */
     public function register_page() {
         add_submenu_page(
