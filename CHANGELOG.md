@@ -79,6 +79,17 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **GUIA_SISTEMA_DPS.md**: Documento completo de apresentação e configuração do sistema
+  - Apresentação geral do sistema e arquitetura modular
+  - Instruções detalhadas de instalação do plugin base e add-ons
+  - Configuração passo a passo de todos os 15 add-ons
+  - Guia de uso do sistema (clientes, pets, agendamentos, financeiro)
+  - Recursos avançados (assinaturas, fidelidade, WhatsApp)
+  - Seção de resolução de problemas comuns
+  - Referência técnica (shortcodes, roles, estrutura de dados)
+  - Formatado para publicação web (HTML-ready)
+  - Instruções para manter documento atualizado
+  - **Localização**: `docs/GUIA_SISTEMA_DPS.md`
 - **DPS_WhatsApp_Helper**: Classe helper centralizada para geração de links WhatsApp
   - Método `get_link_to_team()` para cliente contatar equipe (usa número configurado)
   - Método `get_link_to_client()` para equipe contatar cliente (formata número automaticamente)

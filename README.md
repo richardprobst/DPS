@@ -107,6 +107,7 @@ Plugins complementares que estendem o sistema com funcionalidades específicas:
 
 A pasta `/docs` contém análises detalhadas de UX, layout, refatoração e implementação:
 
+- **🌟 [/docs/GUIA_SISTEMA_DPS.md](docs/GUIA_SISTEMA_DPS.md)** - **Guia completo do sistema** (apresentação, instalação, configuração e uso)
 - **[/docs/README.md](docs/README.md)** - Índice completo da documentação
 - `/docs/layout/` - Análises de layout (admin, agenda, portal do cliente, formulários)
 - `/docs/forms/` - Documentação do formulário de agendamento
@@ -117,6 +118,8 @@ A pasta `/docs` contém análises detalhadas de UX, layout, refatoração e impl
 ## 🚀 Como Começar
 
 ### Para Usuários
+
+> 📖 **Recomendado**: Leia o [Guia Completo do Sistema](docs/GUIA_SISTEMA_DPS.md) para instruções detalhadas de instalação e configuração.
 
 1. Instale o plugin base (`desi-pet-shower-base_plugin`)
 2. Ative os add-ons desejados conforme suas necessidades
@@ -178,6 +181,9 @@ Este é um repositório privado desenvolvido para uso específico. Para contribu
 Software proprietário - todos os direitos reservados.
 
 ## 🔗 Links Rápidos
+
+### 🌟 Para Usuários
+- [**Guia Completo do Sistema**](docs/GUIA_SISTEMA_DPS.md) - Instalação, configuração e uso
 
 ### Código e Estrutura
 - [Plugin Base](plugin/desi-pet-shower-base_plugin/README.md)
