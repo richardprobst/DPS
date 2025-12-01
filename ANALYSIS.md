@@ -349,17 +349,31 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Capability: `manage_options`
 - Posição: 56 (após "Settings")
 
-**Submenus Ativos** (registrados pelos add-ons):
-- **Backup & Restauração** (`dps-backup`) - Backup Add-on
-- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on
-- **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (CPT)
-- **Comunicações** (`dps-communications`) - Communications Add-on
-- **Notificações** (`dps-notifications`) - Push Add-on
-- **Pagamentos** (`dps-payment-settings`) - Payment Add-on
-- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on
-- **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on
-- **Cadastro Público** (`dps-registration-settings`) - Registration Add-on
-- **Assistente de IA** (`dps-ai-settings`) - AI Add-on
+**Submenus Ativos** (registrados pelo plugin base e add-ons):
+- **Assistente de IA** (`dps-ai-settings`) - AI Add-on (configurações do assistente virtual)
+- **Backup & Restauração** (`dps-backup`) - Backup Add-on (exportar/importar dados)
+- **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (listagem de campanhas)
+- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configurações de pontos e indicações)
+- **Comunicações** (`dps-communications`) - Communications Add-on (templates e gateways)
+- **Formulário de Cadastro** (`dps-registration-settings`) - Registration Add-on (configurações do formulário público para clientes se cadastrarem)
+- **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)
+- **Logs do Sistema** (`dps-logs`) - Plugin Base (visualização de logs do sistema)
+- **Mensagens do Portal** (`edit.php?post_type=dps_portal_message`) - Client Portal Add-on (mensagens enviadas pelos clientes)
+- **Notificações** (`dps-notifications`) - Push Add-on (agenda, relatórios, Telegram)
+- **Pagamentos** (`dps-payment-settings`) - Payment Add-on (Mercado Pago, PIX)
+- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configurações do portal)
+
+**Nomenclatura de Menus - Diretrizes de Usabilidade**:
+- Use nomes curtos e descritivos que indiquem claramente a função
+- Evite prefixos redundantes como "DPS" ou "Desi Pet Shower" nos nomes de submenu
+- Use verbos ou substantivos que descrevam a ação/entidade gerenciada
+- Exemplos de nomes descritivos:
+  - ✅ "Logs do Sistema" (indica claramente que são logs técnicos)
+  - ✅ "Backup & Restauração" (ações disponíveis)
+  - ✅ "Formulário de Cadastro" (indica que é um formulário para clientes se registrarem)
+  - ❌ "DPS Logs" (prefixo redundante - já está no menu pai)
+  - ❌ "Settings" (genérico demais)
+  - ❌ "Cadastro Público" (pouco intuitivo, prefira "Formulário de Cadastro")
 
 **Boas práticas para registro de menus**:
 - Sempre use `add_submenu_page()` com `'desi-pet-shower'` como menu pai
@@ -368,10 +382,19 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
   add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
   ```
 - Evite criar menus próprios separados (ex: `add_menu_page()` em add-ons)
-- Para CPTs que precisam aparecer no menu, use `add_submenu_page()` apontando para `edit.php?post_type=meu_cpt`
+- Para CPTs que precisam aparecer no menu, use `show_in_menu => 'desi-pet-shower'` ao registrar o CPT:
+  ```php
+  register_post_type( 'meu_cpt', [
+      'show_in_menu' => 'desi-pet-shower', // Agrupa no menu principal
+      // ...
+  ] );
+  ```
 - Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
 
 **Histórico de correções**:
+- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do Desi Pet Shower (CPT com show_in_menu)
+- **2025-12-01**: Cadastro Público renomeado para "Formulário de Cadastro" (mais intuitivo)
+- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do Desi Pet Shower
 - **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
 - **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)

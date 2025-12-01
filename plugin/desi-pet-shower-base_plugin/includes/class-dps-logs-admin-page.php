@@ -9,22 +9,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Logs_Admin_Page {
 
     public function __construct() {
-        add_action( 'admin_menu', array( $this, 'register_page' ) );
+        // Prioridade 20 garante que o menu pai 'desi-pet-shower' já foi registrado pelo plugin base.
+        add_action( 'admin_menu', array( $this, 'register_page' ), 20 );
         add_action( 'admin_post_dps_purge_logs', array( $this, 'handle_purge' ) );
     }
 
     /**
-     * Registra a página de Logs DPS no menu principal.
+     * Registra a página de Logs do sistema como submenu de "Desi Pet Shower".
      */
     public function register_page() {
-        add_menu_page(
-            __( 'Logs DPS', 'desi-pet-shower' ),
-            __( 'Logs DPS', 'desi-pet-shower' ),
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Logs do Sistema', 'desi-pet-shower' ),
+            __( 'Logs do Sistema', 'desi-pet-shower' ),
             'manage_options',
             'dps-logs',
-            array( $this, 'render_page' ),
-            'dashicons-clipboard',
-            56
+            array( $this, 'render_page' )
         );
     }
 
@@ -51,7 +51,7 @@ class DPS_Logs_Admin_Page {
         $current_url = admin_url( 'admin.php?page=dps-logs' );
 
         echo '<div class="wrap dps-admin-page">';
-        echo '<h1>' . esc_html__( 'Logs DPS', 'desi-pet-shower' ) . '</h1>';
+        echo '<h1>' . esc_html__( 'Logs do Sistema', 'desi-pet-shower' ) . '</h1>';
 
         if ( ! DPS_Logger::table_exists() ) {
             echo '<div class="notice notice-error"><p>' . esc_html__( 'A tabela de logs ainda não existe. Reative o plugin para criar a estrutura.', 'desi-pet-shower' ) . '</p></div>';

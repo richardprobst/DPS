@@ -196,8 +196,12 @@ Antes de criar uma nova versão oficial:
 - **Menus Administrativos**: Corrigido registro de menus em add-ons
   - Backup Add-on: submenu agora aparece corretamente sob "Desi Pet Shower" (corrigida ordem de carregamento)
   - Loyalty Add-on: menus agora aparecem sob "Desi Pet Shower" em vez de criar menu próprio separado
+  - Logs do Sistema: migrado de menu separado para submenu sob "Desi Pet Shower" (melhor organização)
+  - Mensagens do Portal: migrado de menu separado para submenu sob "Desi Pet Shower" (CPT com show_in_menu)
+  - Cadastro Público renomeado para "Formulário de Cadastro" (nome mais intuitivo)
   - Todos os add-ons com menus agora usam prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe
   - Estrutura de menus documentada em `ANALYSIS.md` na seção "Estrutura de Menus Administrativos"
+  - Adicionadas diretrizes de nomenclatura para melhorar usabilidade (nomes descritivos, sem prefixos redundantes)
   - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "Desi Pet Shower" para facilitar gerenciamento
 - **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
   - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
