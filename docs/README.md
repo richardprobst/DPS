@@ -2,6 +2,22 @@
 
 Este diretório contém a documentação detalhada de UX, layout, refatoração e planos de implementação do sistema DPS.
 
+## 📚 Guia Principal do Sistema
+
+> **🌟 Novo! [GUIA_SISTEMA_DPS.md](GUIA_SISTEMA_DPS.md)** - Guia completo de apresentação, instalação, configuração e uso do sistema. Documento principal para usuários e administradores.
+
+O guia inclui:
+- Apresentação do sistema e funcionalidades
+- Instalação do plugin base e add-ons
+- Configuração detalhada de cada componente
+- Instruções de uso passo a passo
+- Resolução de problemas comuns
+- Referência técnica (shortcodes, roles, estrutura de dados)
+
+**⚠️ Mantenha este documento atualizado** sempre que houver mudanças no sistema.
+
+---
+
 ## Estrutura da Documentação
 
 ### 📁 /docs/admin
@@ -179,14 +195,15 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 
 ## Como Usar Esta Documentação
 
-1. **Para entender a arquitetura geral**: comece com `ANALYSIS.md` na raiz
-2. **Para contribuir com código**: leia `AGENTS.md` na raiz
-3. **Para ver o histórico de mudanças**: consulte `CHANGELOG.md` na raiz
-4. **Para análise de sistema**: veja `docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md`
-5. **Para mapeamento BACK-END vs FRONT-END**: veja `docs/analysis/BACKEND_FRONTEND_MAPPING.md`
-6. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
-7. **Para planos de refatoração**: consulte `/docs/refactoring`
-8. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
+1. **🌟 Para usuários e administradores**: comece com [GUIA_SISTEMA_DPS.md](GUIA_SISTEMA_DPS.md) - guia completo do sistema
+2. **Para entender a arquitetura geral**: comece com `ANALYSIS.md` na raiz
+3. **Para contribuir com código**: leia `AGENTS.md` na raiz
+4. **Para ver o histórico de mudanças**: consulte `CHANGELOG.md` na raiz
+5. **Para análise de sistema**: veja `docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md`
+6. **Para mapeamento BACK-END vs FRONT-END**: veja `docs/analysis/BACKEND_FRONTEND_MAPPING.md`
+7. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
+8. **Para planos de refatoração**: consulte `/docs/refactoring`
+9. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ## Navegação Rápida
 
