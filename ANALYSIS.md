@@ -349,17 +349,29 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Capability: `manage_options`
 - Posição: 56 (após "Settings")
 
-**Submenus Ativos** (registrados pelos add-ons):
-- **Backup & Restauração** (`dps-backup`) - Backup Add-on
-- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on
-- **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (CPT)
-- **Comunicações** (`dps-communications`) - Communications Add-on
-- **Notificações** (`dps-notifications`) - Push Add-on
-- **Pagamentos** (`dps-payment-settings`) - Payment Add-on
-- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on
-- **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on
-- **Cadastro Público** (`dps-registration-settings`) - Registration Add-on
-- **Assistente de IA** (`dps-ai-settings`) - AI Add-on
+**Submenus Ativos** (registrados pelo plugin base e add-ons):
+- **Logs do Sistema** (`dps-logs`) - Plugin Base (visualização de logs do sistema)
+- **Assistente de IA** (`dps-ai-settings`) - AI Add-on (configurações do assistente virtual)
+- **Backup & Restauração** (`dps-backup`) - Backup Add-on (exportar/importar dados)
+- **Cadastro Público** (`dps-registration-settings`) - Registration Add-on (configurações do formulário público)
+- **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (listagem de campanhas)
+- **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configurações de pontos e indicações)
+- **Comunicações** (`dps-communications`) - Communications Add-on (templates e gateways)
+- **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)
+- **Notificações** (`dps-notifications`) - Push Add-on (agenda, relatórios, Telegram)
+- **Pagamentos** (`dps-payment-settings`) - Payment Add-on (Mercado Pago, PIX)
+- **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configurações do portal)
+
+**Nomenclatura de Menus - Diretrizes de Usabilidade**:
+- Use nomes curtos e descritivos que indiquem claramente a função
+- Evite prefixos redundantes como "DPS" ou "Desi Pet Shower" nos nomes de submenu
+- Use verbos ou substantivos que descrevam a ação/entidade gerenciada
+- Exemplos de nomes descritivos:
+  - ✅ "Logs do Sistema" (indica claramente que são logs técnicos)
+  - ✅ "Backup & Restauração" (ações disponíveis)
+  - ✅ "Cadastro Público" (entidade gerenciada)
+  - ❌ "DPS Logs" (prefixo redundante - já está no menu pai)
+  - ❌ "Settings" (genérico demais)
 
 **Boas práticas para registro de menus**:
 - Sempre use `add_submenu_page()` com `'desi-pet-shower'` como menu pai
@@ -372,6 +384,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
 
 **Histórico de correções**:
+- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do Desi Pet Shower
 - **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
 - **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
