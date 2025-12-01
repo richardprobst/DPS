@@ -13,6 +13,43 @@ Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `
 - **plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
 - Pastas adicionais podem surgir para ferramentas de build, exemplos ou documentação; mantenha-as descritas nesta seção quando adicionadas.
 
+## Organização de arquivos
+
+### Arquivos permitidos na raiz do repositório
+Apenas os seguintes arquivos devem permanecer na raiz:
+- `README.md` - Introdução e visão geral do projeto
+- `AGENTS.md` - Diretrizes para agentes (humanos e IA)
+- `ANALYSIS.md` - Visão arquitetural do sistema
+- `CHANGELOG.md` - Histórico de versões
+- `.gitignore` - Configuração de arquivos ignorados pelo Git
+
+### Estrutura da pasta docs/
+Toda documentação adicional deve ser organizada nas seguintes subpastas:
+
+| Pasta | Propósito | Exemplos |
+|-------|-----------|----------|
+| `docs/admin/` | Interface administrativa, CPTs, menus | Análises de UI admin, mockups, habilitação de CPTs |
+| `docs/analysis/` | Análises arquiteturais e de sistema | Análises de add-ons, mapeamentos backend/frontend |
+| `docs/compatibility/` | Compatibilidade com temas e plugins | YooTheme, Elementor, page builders |
+| `docs/fixes/` | Correções e diagnósticos | Fixes de ativação, correções de layout |
+| `docs/forms/` | Formulários e inputs | Análises de UX de formulários, melhorias de campos |
+| `docs/implementation/` | Resumos de implementação | Sumários de features implementadas |
+| `docs/improvements/` | Melhorias gerais | Propostas e análises de melhoria |
+| `docs/layout/` | Layout e UX (com subpastas) | `admin/`, `agenda/`, `client-portal/`, `forms/` |
+| `docs/performance/` | Otimizações de performance | Análises e guias de performance |
+| `docs/refactoring/` | Refatoração de código | Planos, análises, diagramas |
+| `docs/review/` | Revisões de código e PRs | Verificações de PRs (ex: `pr-161/`) |
+| `docs/security/` | Segurança e auditoria | Correções de segurança, exemplos de vulnerabilidades |
+| `docs/visual/` | Estilo visual e design | Guias de estilo, comparações visuais |
+
+### Regras para novos arquivos de documentação
+1. **NUNCA** criar arquivos `.md` soltos na raiz do repositório (exceto os 4 permitidos)
+2. Identifique a categoria mais apropriada na tabela acima
+3. Se nenhuma categoria existente for adequada, crie uma nova subpasta em `docs/` e documente-a aqui
+4. Arquivos de revisão de PRs devem ir em `docs/review/pr-XXX/` onde XXX é o número do PR
+5. Arquivos de demonstração HTML devem acompanhar a documentação relacionada (ex: demos do portal em `docs/layout/client-portal/`)
+6. Mantenha o `docs/README.md` atualizado ao adicionar novas pastas ou categorias
+
 ## Versionamento e git-flow
 - Utilize SemVer (MAJOR.MINOR.PATCH) para o plugin base e para cada add-on.
 - Branches:
