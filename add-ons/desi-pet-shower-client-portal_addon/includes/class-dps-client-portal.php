@@ -77,6 +77,11 @@ final class DPS_Client_Portal {
         add_action( 'add_meta_boxes_dps_portal_message', [ $this, 'add_message_meta_boxes' ] );
         add_action( 'save_post_dps_portal_message', [ $this, 'save_message_meta' ], 10, 3 );
 
+        // Colunas customizadas para listagem de mensagens no admin
+        add_filter( 'manage_dps_portal_message_posts_columns', [ $this, 'add_message_columns' ] );
+        add_action( 'manage_dps_portal_message_posts_custom_column', [ $this, 'render_message_column' ], 10, 2 );
+        add_filter( 'manage_edit-dps_portal_message_sortable_columns', [ $this, 'make_message_columns_sortable' ] );
+
         // Registra menu administrativo seguindo padrão DPS
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
         
@@ -324,14 +329,16 @@ final class DPS_Client_Portal {
     /**
      * Processa requisições de formulários enviados pelo portal do cliente.
      * Utiliza nonce para proteção CSRF e atualiza metas conforme necessário.
+     *
+     * Suporta autenticação via:
+     * - Sistema de tokens/sessão (preferencial para clientes via magic link)
+     * - Usuários WordPress logados (retrocompatibilidade)
      */
     public function handle_portal_actions() {
-        if ( ! is_user_logged_in() ) {
-            return;
-        }
-
-        $client_id = $this->get_client_id_for_current_user();
-
+        // Tenta obter cliente do sistema de sessão/token primeiro
+        $client_id = $this->get_authenticated_client_id();
+        
+        // Se não encontrou, não está autenticado em nenhum sistema
         if ( ! $client_id ) {
             return;
         }
@@ -718,6 +725,94 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Adiciona colunas customizadas na listagem de mensagens no admin.
+     *
+     * @param array $columns Colunas existentes.
+     * @return array Colunas modificadas.
+     */
+    public function add_message_columns( $columns ) {
+        $new_columns = [];
+
+        foreach ( $columns as $key => $label ) {
+            $new_columns[ $key ] = $label;
+
+            // Insere após o título
+            if ( 'title' === $key ) {
+                $new_columns['message_client']  = __( 'Cliente', 'dps-client-portal' );
+                $new_columns['message_sender']  = __( 'Origem', 'dps-client-portal' );
+                $new_columns['message_status']  = __( 'Status', 'dps-client-portal' );
+            }
+        }
+
+        return $new_columns;
+    }
+
+    /**
+     * Renderiza conteúdo das colunas customizadas.
+     *
+     * @param string $column  Nome da coluna.
+     * @param int    $post_id ID do post.
+     */
+    public function render_message_column( $column, $post_id ) {
+        switch ( $column ) {
+            case 'message_client':
+                $client_id = (int) get_post_meta( $post_id, 'message_client_id', true );
+                if ( $client_id ) {
+                    $client = get_post( $client_id );
+                    if ( $client ) {
+                        echo '<a href="' . esc_url( get_edit_post_link( $client_id ) ) . '">';
+                        echo esc_html( $client->post_title );
+                        echo '</a>';
+                    } else {
+                        echo '<em>' . esc_html__( 'Cliente não encontrado', 'dps-client-portal' ) . '</em>';
+                    }
+                } else {
+                    echo '<em>' . esc_html__( 'Não vinculado', 'dps-client-portal' ) . '</em>';
+                }
+                break;
+
+            case 'message_sender':
+                $sender = get_post_meta( $post_id, 'message_sender', true );
+                if ( 'client' === $sender ) {
+                    echo '<span style="color: #0ea5e9;">📤 ' . esc_html__( 'Cliente', 'dps-client-portal' ) . '</span>';
+                } else {
+                    echo '<span style="color: #10b981;">📥 ' . esc_html__( 'Equipe', 'dps-client-portal' ) . '</span>';
+                }
+                break;
+
+            case 'message_status':
+                $status = get_post_meta( $post_id, 'message_status', true );
+                $status_labels = [
+                    'open'     => [ __( 'Em aberto', 'dps-client-portal' ), '#f59e0b' ],
+                    'answered' => [ __( 'Respondida', 'dps-client-portal' ), '#0ea5e9' ],
+                    'closed'   => [ __( 'Concluída', 'dps-client-portal' ), '#10b981' ],
+                ];
+
+                if ( isset( $status_labels[ $status ] ) ) {
+                    echo '<span style="background-color: ' . esc_attr( $status_labels[ $status ][1] ) . '; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">';
+                    echo esc_html( $status_labels[ $status ][0] );
+                    echo '</span>';
+                } else {
+                    echo '—';
+                }
+                break;
+        }
+    }
+
+    /**
+     * Define quais colunas são ordenáveis.
+     *
+     * @param array $columns Colunas ordenáveis.
+     * @return array Colunas modificadas.
+     */
+    public function make_message_columns_sortable( $columns ) {
+        $columns['message_client'] = 'message_client';
+        $columns['message_status'] = 'message_status';
+        $columns['message_sender'] = 'message_sender';
+        return $columns;
+    }
+
+    /**
      * Salva metadados da mensagem no admin.
      *
      * @param int     $post_id ID da mensagem.
@@ -756,6 +851,57 @@ final class DPS_Client_Portal {
             $status = 'open';
         }
         update_post_meta( $post_id, 'message_status', $status );
+
+        // Notifica o cliente quando o admin envia uma nova mensagem (não atualização)
+        if ( ! $update && 'admin' === $sender && $client_id ) {
+            $this->notify_client_of_admin_message( $post_id, $client_id, $post );
+        }
+    }
+
+    /**
+     * Notifica o cliente quando a equipe envia uma mensagem via admin.
+     *
+     * Utiliza a Communications API para enviar e-mail de notificação ao cliente.
+     *
+     * @param int     $message_id ID da mensagem.
+     * @param int     $client_id  ID do cliente.
+     * @param WP_Post $post       Objeto da mensagem.
+     */
+    private function notify_client_of_admin_message( $message_id, $client_id, $post ) {
+        // Busca e-mail do cliente
+        $client_email = get_post_meta( $client_id, 'client_email', true );
+        $client_name  = get_the_title( $client_id );
+
+        if ( ! $client_email || ! is_email( $client_email ) ) {
+            return;
+        }
+
+        // Monta assunto e corpo do e-mail
+        $subject = sprintf(
+            __( 'Nova mensagem da equipe Desi Pet Shower para você', 'dps-client-portal' )
+        );
+
+        $portal_url = dps_get_portal_page_url();
+
+        $body = sprintf(
+            __( "Olá, %s!\n\nA equipe Desi Pet Shower enviou uma nova mensagem para você.\n\nAssunto: %s\n\nPara ver a mensagem completa, acesse seu portal:\n%s\n\nEquipe Desi Pet Shower", 'dps-client-portal' ),
+            $client_name,
+            $post->post_title,
+            $portal_url
+        );
+
+        // Envia via Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $api = DPS_Communications_API::get_instance();
+            $api->send_email( $client_email, $subject, $body, [
+                'type'       => 'portal_message_notification',
+                'message_id' => $message_id,
+                'client_id'  => $client_id,
+            ] );
+        } else {
+            // Fallback direto via wp_mail
+            wp_mail( $client_email, $subject, $body );
+        }
     }
 
     /**
