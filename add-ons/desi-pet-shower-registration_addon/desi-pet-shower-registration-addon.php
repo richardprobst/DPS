@@ -94,8 +94,8 @@ class DPS_Registration_Addon {
     public function add_settings_page() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Cadastro Público', 'dps-registration-addon' ),
-            __( 'Cadastro Público', 'dps-registration-addon' ),
+            __( 'Formulário de Cadastro', 'dps-registration-addon' ),
+            __( 'Formulário de Cadastro', 'dps-registration-addon' ),
             'manage_options',
             'dps-registration-settings',
             [ $this, 'render_settings_page' ]

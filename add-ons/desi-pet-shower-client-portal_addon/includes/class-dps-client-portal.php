@@ -629,9 +629,7 @@ final class DPS_Client_Portal {
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,
-            'show_in_menu'       => true,
-            'menu_position'      => 26,
-            'menu_icon'          => 'dashicons-email-alt2',
+            'show_in_menu'       => 'desi-pet-shower', // Agrupa no menu principal DPS
             'supports'           => [ 'title', 'editor' ],
             'has_archive'        => false,
             'rewrite'            => false,
