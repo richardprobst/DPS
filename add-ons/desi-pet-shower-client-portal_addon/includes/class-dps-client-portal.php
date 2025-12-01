@@ -611,6 +611,33 @@ final class DPS_Client_Portal {
         wp_localize_script( 'dps-portal-admin', 'dpsPortalAdmin', [
             'nonce' => wp_create_nonce( 'dps_portal_admin_actions' ),
         ] );
+
+        // CSS para colunas da listagem de mensagens
+        $this->enqueue_message_list_styles();
+    }
+
+    /**
+     * Adiciona estilos CSS para a listagem de mensagens no admin.
+     */
+    private function enqueue_message_list_styles() {
+        $screen = get_current_screen();
+        
+        // Apenas na listagem de mensagens do portal
+        if ( ! $screen || 'edit-dps_portal_message' !== $screen->id ) {
+            return;
+        }
+
+        $custom_css = '
+            .dps-message-sender { font-weight: 500; }
+            .dps-message-sender--client { color: #0ea5e9; }
+            .dps-message-sender--admin { color: #10b981; }
+            .dps-message-status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; }
+            .dps-message-status--open { background-color: #f59e0b; }
+            .dps-message-status--answered { background-color: #0ea5e9; }
+            .dps-message-status--closed { background-color: #10b981; }
+        ';
+
+        wp_add_inline_style( 'wp-admin', $custom_css );
     }
 
     /**
@@ -774,23 +801,29 @@ final class DPS_Client_Portal {
             case 'message_sender':
                 $sender = get_post_meta( $post_id, 'message_sender', true );
                 if ( 'client' === $sender ) {
-                    echo '<span style="color: #0ea5e9;">📤 ' . esc_html__( 'Cliente', 'dps-client-portal' ) . '</span>';
+                    echo '<span class="dps-message-sender dps-message-sender--client">📤 ' . esc_html__( 'Cliente', 'dps-client-portal' ) . '</span>';
                 } else {
-                    echo '<span style="color: #10b981;">📥 ' . esc_html__( 'Equipe', 'dps-client-portal' ) . '</span>';
+                    echo '<span class="dps-message-sender dps-message-sender--admin">📥 ' . esc_html__( 'Equipe', 'dps-client-portal' ) . '</span>';
                 }
                 break;
 
             case 'message_status':
                 $status = get_post_meta( $post_id, 'message_status', true );
+                $status_classes = [
+                    'open'     => 'dps-message-status--open',
+                    'answered' => 'dps-message-status--answered',
+                    'closed'   => 'dps-message-status--closed',
+                ];
                 $status_labels = [
-                    'open'     => [ __( 'Em aberto', 'dps-client-portal' ), '#f59e0b' ],
-                    'answered' => [ __( 'Respondida', 'dps-client-portal' ), '#0ea5e9' ],
-                    'closed'   => [ __( 'Concluída', 'dps-client-portal' ), '#10b981' ],
+                    'open'     => __( 'Em aberto', 'dps-client-portal' ),
+                    'answered' => __( 'Respondida', 'dps-client-portal' ),
+                    'closed'   => __( 'Concluída', 'dps-client-portal' ),
                 ];
 
                 if ( isset( $status_labels[ $status ] ) ) {
-                    echo '<span style="background-color: ' . esc_attr( $status_labels[ $status ][1] ) . '; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">';
-                    echo esc_html( $status_labels[ $status ][0] );
+                    $class = isset( $status_classes[ $status ] ) ? $status_classes[ $status ] : '';
+                    echo '<span class="dps-message-status ' . esc_attr( $class ) . '">';
+                    echo esc_html( $status_labels[ $status ] );
                     echo '</span>';
                 } else {
                     echo '—';
@@ -852,7 +885,10 @@ final class DPS_Client_Portal {
         }
         update_post_meta( $post_id, 'message_status', $status );
 
-        // Notifica o cliente quando o admin envia uma nova mensagem (não atualização)
+        // Notifica o cliente quando o admin cria uma nova mensagem
+        // Condições: não é atualização, sender é 'admin' (padrão para novas mensagens via admin),
+        // e há um cliente vinculado. Isso garante que apenas mensagens novas da equipe
+        // disparem notificação ao cliente.
         if ( ! $update && 'admin' === $sender && $client_id ) {
             $this->notify_client_of_admin_message( $post_id, $client_id, $post );
         }
