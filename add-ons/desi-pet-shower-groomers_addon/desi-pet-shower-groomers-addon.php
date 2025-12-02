@@ -73,6 +73,9 @@ class DPS_Groomers_Addon {
         
         // Shortcode do dashboard do groomer
         add_shortcode( 'dps_groomer_dashboard', [ $this, 'render_groomer_dashboard_shortcode' ] );
+        
+        // Shortcode da agenda do groomer
+        add_shortcode( 'dps_groomer_agenda', [ $this, 'render_groomer_agenda_shortcode' ] );
     }
 
     /**
@@ -1879,6 +1882,209 @@ class DPS_Groomers_Addon {
         );
 
         return (float) $total;
+    }
+
+    /**
+     * Renderiza o shortcode de agenda do groomer.
+     *
+     * Mostra os atendimentos do groomer em formato de agenda semanal/diária.
+     *
+     * @since 1.3.0
+     *
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML da agenda.
+     */
+    public function render_groomer_agenda_shortcode( $atts ) {
+        // Enfileirar assets
+        $this->register_and_enqueue_assets();
+
+        // Verificar se usuário está logado
+        if ( ! is_user_logged_in() ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Você precisa estar logado para acessar a agenda.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        $current_user = wp_get_current_user();
+        
+        // Verificar se é um groomer ou admin
+        if ( ! in_array( 'dps_groomer', (array) $current_user->roles, true ) && ! current_user_can( 'manage_options' ) ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Acesso restrito a groomers.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        // Se for admin, pode selecionar qualquer groomer
+        $groomer_id = $current_user->ID;
+        if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
+            $groomer_id = absint( $_GET['groomer_id'] );
+        }
+
+        // Data base (padrão: hoje)
+        $base_date = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : date( 'Y-m-d' );
+        $view_type = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'week';
+
+        // Calcular período
+        if ( $view_type === 'day' ) {
+            $start_date = $base_date;
+            $end_date   = $base_date;
+        } else {
+            // Semana (segunda a domingo)
+            $start_date = date( 'Y-m-d', strtotime( 'monday this week', strtotime( $base_date ) ) );
+            $end_date   = date( 'Y-m-d', strtotime( 'sunday this week', strtotime( $base_date ) ) );
+        }
+
+        // Buscar atendimentos do período
+        $appointments = get_posts(
+            [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => 100,
+                'post_status'    => 'publish',
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_time',
+                'order'          => 'ASC',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $start_date,
+                        'compare' => '>=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $end_date,
+                        'compare' => '<=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => '_dps_groomers',
+                        'value'   => '"' . $groomer_id . '"',
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ]
+        );
+
+        // Organizar por dia
+        $appointments_by_day = [];
+        foreach ( $appointments as $appointment ) {
+            $date = get_post_meta( $appointment->ID, 'appointment_date', true );
+            if ( ! isset( $appointments_by_day[ $date ] ) ) {
+                $appointments_by_day[ $date ] = [];
+            }
+            $appointments_by_day[ $date ][] = $appointment;
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        $groomer_name = $groomer ? ( $groomer->display_name ? $groomer->display_name : $groomer->user_login ) : '';
+
+        // Gerar dias da semana
+        $week_days = [];
+        $current = strtotime( $start_date );
+        $end = strtotime( $end_date );
+        while ( $current <= $end ) {
+            $week_days[] = date( 'Y-m-d', $current );
+            $current = strtotime( '+1 day', $current );
+        }
+
+        // URLs de navegação
+        $prev_date = date( 'Y-m-d', strtotime( '-1 week', strtotime( $base_date ) ) );
+        $next_date = date( 'Y-m-d', strtotime( '+1 week', strtotime( $base_date ) ) );
+        $today_date = date( 'Y-m-d' );
+
+        ob_start();
+        ?>
+        <div class="dps-groomer-agenda">
+            <div class="dps-agenda-header">
+                <h2 class="dps-section-title">
+                    <?php 
+                    echo esc_html( 
+                        sprintf( 
+                            /* translators: %s: groomer name */
+                            __( 'Agenda de %s', 'dps-groomers-addon' ), 
+                            $groomer_name 
+                        ) 
+                    ); 
+                    ?>
+                </h2>
+                
+                <!-- Navegação -->
+                <div class="dps-agenda-nav">
+                    <a href="?date=<?php echo esc_attr( $prev_date ); ?>&view=<?php echo esc_attr( $view_type ); ?><?php echo current_user_can( 'manage_options' ) ? '&groomer_id=' . esc_attr( $groomer_id ) : ''; ?>" class="dps-btn dps-btn--secondary">
+                        ← <?php echo esc_html__( 'Anterior', 'dps-groomers-addon' ); ?>
+                    </a>
+                    <a href="?date=<?php echo esc_attr( $today_date ); ?>&view=<?php echo esc_attr( $view_type ); ?><?php echo current_user_can( 'manage_options' ) ? '&groomer_id=' . esc_attr( $groomer_id ) : ''; ?>" class="dps-btn dps-btn--primary">
+                        <?php echo esc_html__( 'Hoje', 'dps-groomers-addon' ); ?>
+                    </a>
+                    <a href="?date=<?php echo esc_attr( $next_date ); ?>&view=<?php echo esc_attr( $view_type ); ?><?php echo current_user_can( 'manage_options' ) ? '&groomer_id=' . esc_attr( $groomer_id ) : ''; ?>" class="dps-btn dps-btn--secondary">
+                        <?php echo esc_html__( 'Próxima', 'dps-groomers-addon' ); ?> →
+                    </a>
+                </div>
+            </div>
+
+            <div class="dps-agenda-period">
+                <?php 
+                echo esc_html( 
+                    date_i18n( 'd/m/Y', strtotime( $start_date ) ) . 
+                    ' - ' . 
+                    date_i18n( 'd/m/Y', strtotime( $end_date ) ) 
+                ); 
+                ?>
+            </div>
+
+            <!-- Calendário semanal -->
+            <div class="dps-agenda-week">
+                <?php foreach ( $week_days as $day ) : 
+                    $is_today = ( $day === $today_date );
+                    $day_appointments = isset( $appointments_by_day[ $day ] ) ? $appointments_by_day[ $day ] : [];
+                    $day_class = $is_today ? 'dps-agenda-day dps-agenda-day--today' : 'dps-agenda-day';
+                    ?>
+                    <div class="<?php echo esc_attr( $day_class ); ?>">
+                        <div class="dps-agenda-day__header">
+                            <span class="dps-agenda-day__name"><?php echo esc_html( date_i18n( 'D', strtotime( $day ) ) ); ?></span>
+                            <span class="dps-agenda-day__date"><?php echo esc_html( date_i18n( 'd/m', strtotime( $day ) ) ); ?></span>
+                        </div>
+                        <div class="dps-agenda-day__content">
+                            <?php if ( empty( $day_appointments ) ) : ?>
+                                <div class="dps-agenda-empty">
+                                    <?php echo esc_html__( 'Livre', 'dps-groomers-addon' ); ?>
+                                </div>
+                            <?php else : ?>
+                                <?php foreach ( $day_appointments as $appointment ) :
+                                    $time      = get_post_meta( $appointment->ID, 'appointment_time', true );
+                                    $client_id = get_post_meta( $appointment->ID, 'appointment_client_id', true );
+                                    $pet_ids   = get_post_meta( $appointment->ID, 'appointment_pet_ids', true );
+                                    $status    = get_post_meta( $appointment->ID, 'appointment_status', true );
+                                    $client    = $client_id ? get_the_title( $client_id ) : '-';
+                                    
+                                    $pet_names = [];
+                                    if ( is_array( $pet_ids ) ) {
+                                        foreach ( $pet_ids as $pet_id ) {
+                                            $pet_name = get_the_title( $pet_id );
+                                            if ( $pet_name ) {
+                                                $pet_names[] = $pet_name;
+                                            }
+                                        }
+                                    }
+                                    $pets = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : '-';
+                                    
+                                    $status_class = 'dps-agenda-item dps-agenda-item--' . sanitize_html_class( $status ? $status : 'pendente' );
+                                    ?>
+                                    <div class="<?php echo esc_attr( $status_class ); ?>">
+                                        <span class="dps-agenda-item__time"><?php echo esc_html( $time ); ?></span>
+                                        <span class="dps-agenda-item__client"><?php echo esc_html( $client ); ?></span>
+                                        <span class="dps-agenda-item__pet"><?php echo esc_html( $pets ); ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 }
 

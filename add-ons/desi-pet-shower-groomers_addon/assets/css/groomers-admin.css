@@ -892,3 +892,171 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   15. Agenda do Groomer
+   ========================================================================== */
+
+.dps-groomer-agenda {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dps-agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-agenda-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-agenda-period {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 24px;
+}
+
+.dps-agenda-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.dps-agenda-day {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-agenda-day--today {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.dps-agenda-day__header {
+    padding: 12px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 7px 7px 0 0;
+    text-align: center;
+}
+
+.dps-agenda-day--today .dps-agenda-day__header {
+    background: #0ea5e9;
+    color: #ffffff;
+}
+
+.dps-agenda-day__name {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-agenda-day__date {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.dps-agenda-day__content {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-agenda-empty {
+    color: #9ca3af;
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.dps-agenda-item {
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    border-left: 3px solid;
+}
+
+.dps-agenda-item--pendente {
+    background: #fef3c7;
+    border-left-color: #f59e0b;
+}
+
+.dps-agenda-item--realizado {
+    background: #d1fae5;
+    border-left-color: #10b981;
+}
+
+.dps-agenda-item--cancelado {
+    background: #f3f4f6;
+    border-left-color: #6b7280;
+    opacity: 0.7;
+}
+
+.dps-agenda-item__time {
+    display: block;
+    font-weight: 700;
+    color: #374151;
+}
+
+.dps-agenda-item__client {
+    display: block;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dps-agenda-item__pet {
+    display: block;
+    color: #6b7280;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 1024px) {
+    .dps-agenda-week {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .dps-agenda-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dps-agenda-week {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dps-agenda-week {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-agenda-day {
+        min-height: auto;
+    }
+}
