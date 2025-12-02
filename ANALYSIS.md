@@ -453,27 +453,50 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 **Diretório**: `add-ons/desi-pet-shower-backup_addon`
 
 **Propósito e funcionalidades principais**:
-- Exportar todo o conteúdo do sistema em formato JSON
-- Restaurar dados de backups anteriores
-- Proteger operações com nonces e validações
+- Exportar todo o conteúdo do sistema em formato JSON (CPTs, metadados, options, tabelas, anexos)
+- Restaurar dados de backups anteriores com mapeamento inteligente de IDs
+- Proteger operações com nonces, validações e transações SQL
+- Suportar migração entre ambientes WordPress
 
 **Shortcodes expostos**: Nenhum
 
+**Menus administrativos**:
+- **Backup & Restauração** (`dps-backup`): interface para exportar e restaurar dados
+
 **CPTs, tabelas e opções**:
 - Não cria CPTs ou tabelas próprias
-- Integra-se à navegação de configurações do plugin base
+- **Exporta/Importa**: todos os CPTs prefixados com `dps_`, tabelas `dps_*`, options `dps_*`
+- Options de histórico (planejado): `dps_backup_history`, `dps_backup_settings`
 
 **Hooks consumidos**:
-- `dps_settings_nav_tabs`: adiciona aba "Backup & Restauração"
-- `dps_settings_sections`: renderiza conteúdo da seção
+- `admin_menu` (prioridade 20): registra submenu sob "Desi Pet Shower"
+- `admin_post_dps_backup_export`: processa exportação de backup
+- `admin_post_dps_backup_import`: processa importação de backup
 
-**Hooks disparados**: Nenhum
+**Hooks disparados**: Nenhum (opera de forma autônoma)
+
+**Segurança implementada**:
+- ✅ Nonces em exportação e importação (`dps_backup_nonce`)
+- ✅ Verificação de capability `manage_options`
+- ✅ Validação de extensão (apenas `.json`) e tamanho (máx. 50MB)
+- ✅ Sanitização de tabelas e options (apenas prefixo `dps_`)
+- ✅ Deserialização segura (`allowed_classes => false`)
+- ✅ Transações SQL com rollback em caso de falha
 
 **Dependências**:
-- Depende do plugin base para estrutura de configurações
-- Acessa todos os CPTs do sistema para exportação/importação
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- Acessa todos os CPTs e tabelas do sistema para exportação/importação
 
 **Introduzido em**: v0.1.0 (estimado)
+
+**Versão atual**: 1.0.0
+
+**Observações**:
+- Arquivo único de 1338 linhas; candidato a refatoração modular futura
+- Suporta exportação de anexos (fotos de pets) e documentos financeiros (`dps_docs`)
+- Mapeamento inteligente de IDs: clientes → pets → agendamentos → transações
+
+**Análise completa**: Consulte `docs/analysis/BACKUP_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades, segurança e melhorias propostas
 
 ---
 
@@ -1333,12 +1356,13 @@ add-ons/desi-pet-shower-NOME_addon/
 - `finance_addon`: possui `includes/` para classes auxiliares
 
 **Add-ons que poderiam se beneficiar de refatoração futura:**
-- `groomers_addon`: 473 linhas em um único arquivo
-- `stats_addon`: 538 linhas em um único arquivo
-- `stock_addon`: 432 linhas em um único arquivo
+- `backup_addon`: 1338 linhas em um único arquivo (análise em `docs/analysis/BACKUP_ADDON_ANALYSIS.md`)
 - `loyalty_addon`: 1148 linhas em um único arquivo
+- `subscription_addon`: 995 linhas em um único arquivo (análise em `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md`)
 - `registration_addon`: 636 linhas em um único arquivo
-- `backup_addon`: 1131 linhas em um único arquivo
+- `stats_addon`: 538 linhas em um único arquivo
+- `groomers_addon`: 473 linhas em um único arquivo (análise em `docs/analysis/GROOMERS_ADDON_ANALYSIS.md`)
+- `stock_addon`: 432 linhas em um único arquivo (análise em `docs/analysis/STOCK_ADDON_ANALYSIS.md`)
 
 ### Activation e Deactivation Hooks
 

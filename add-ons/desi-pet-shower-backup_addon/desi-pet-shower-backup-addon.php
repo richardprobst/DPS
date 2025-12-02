@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – Backup & Restauração Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Add-on para gerar backups completos dos dados do Desi Pet Shower e restaurá-los em outro ambiente.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-backup-addon
@@ -15,6 +15,18 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Definir constante de versão
+if ( ! defined( 'DPS_BACKUP_VERSION' ) ) {
+    define( 'DPS_BACKUP_VERSION', '1.1.0' );
+}
+
+// Carregar classes auxiliares
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-history.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-scheduler.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-exporter.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-comparator.php';
 
 /**
  * Verifica se o plugin base Desi Pet Shower está ativo.
@@ -66,7 +78,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.0.0
          * @var string
          */
-        const VERSION = '1.0.0';
+        const VERSION = '1.1.0';
 
         /**
          * Action name para exportação.
@@ -85,6 +97,14 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         const ACTION_IMPORT = 'dps_backup_import';
 
         /**
+         * Action name para salvar configurações.
+         *
+         * @since 1.1.0
+         * @var string
+         */
+        const ACTION_SAVE_SETTINGS = 'dps_backup_save_settings';
+
+        /**
          * Tamanho máximo do arquivo de backup em bytes (50 MB).
          *
          * @since 1.0.0
@@ -101,11 +121,27 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             // Registra menu admin para backup - prioridade 20 para garantir que o menu pai já existe
             add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 
+            // Registrar assets
+            add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+            // Actions de formulário
             add_action( 'admin_post_' . self::ACTION_EXPORT, [ $this, 'handle_export' ] );
             add_action( 'admin_post_nopriv_' . self::ACTION_EXPORT, [ $this, 'deny_anonymous' ] );
 
             add_action( 'admin_post_' . self::ACTION_IMPORT, [ $this, 'handle_import' ] );
             add_action( 'admin_post_nopriv_' . self::ACTION_IMPORT, [ $this, 'deny_anonymous' ] );
+
+            add_action( 'admin_post_' . self::ACTION_SAVE_SETTINGS, [ $this, 'handle_save_settings' ] );
+            add_action( 'admin_post_nopriv_' . self::ACTION_SAVE_SETTINGS, [ $this, 'deny_anonymous' ] );
+
+            // AJAX handlers
+            add_action( 'wp_ajax_dps_compare_backup', [ $this, 'ajax_compare_backup' ] );
+            add_action( 'wp_ajax_dps_delete_backup', [ $this, 'ajax_delete_backup' ] );
+            add_action( 'wp_ajax_dps_download_backup', [ $this, 'ajax_download_backup' ] );
+            add_action( 'wp_ajax_dps_restore_from_history', [ $this, 'ajax_restore_from_history' ] );
+
+            // Inicializar scheduler
+            DPS_Backup_Scheduler::init();
         }
 
         /**
@@ -125,6 +161,49 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         }
 
         /**
+         * Registra assets CSS e JS.
+         *
+         * @since 1.1.0
+         * @param string $hook Hook da página atual.
+         */
+        public function enqueue_admin_assets( $hook ) {
+            if ( 'desi-pet-shower_page_dps-backup' !== $hook ) {
+                return;
+            }
+
+            wp_enqueue_style(
+                'dps-backup-addon',
+                plugin_dir_url( __FILE__ ) . 'assets/css/backup-addon.css',
+                [],
+                self::VERSION
+            );
+
+            wp_enqueue_script(
+                'dps-backup-addon',
+                plugin_dir_url( __FILE__ ) . 'assets/js/backup-addon.js',
+                [ 'jquery' ],
+                self::VERSION,
+                true
+            );
+
+            wp_localize_script( 'dps-backup-addon', 'dpsBackupL10n', [
+                'nonce'            => wp_create_nonce( 'dps_backup_ajax' ),
+                'confirmRestore'   => __( 'ATENÇÃO: Esta ação irá substituir todos os dados do Desi Pet Shower. Deseja continuar?', 'dps-backup-addon' ),
+                'confirmDelete'    => __( 'Tem certeza que deseja excluir este backup?', 'dps-backup-addon' ),
+                'confirmRequired'  => __( 'Você precisa confirmar que entende as consequências da restauração.', 'dps-backup-addon' ),
+                'comparing'        => __( 'Comparando...', 'dps-backup-addon' ),
+                'compare'          => __( 'Comparar', 'dps-backup-addon' ),
+                'restoring'        => __( 'Restaurando...', 'dps-backup-addon' ),
+                'restore'          => __( 'Restaurar', 'dps-backup-addon' ),
+                'restoreSuccess'   => __( 'Backup restaurado com sucesso!', 'dps-backup-addon' ),
+                'error'            => __( 'Ocorreu um erro. Tente novamente.', 'dps-backup-addon' ),
+                'noBackups'        => __( 'Nenhum backup realizado ainda.', 'dps-backup-addon' ),
+                'comparisonTitle'  => __( 'Comparação de Backup', 'dps-backup-addon' ),
+                'close'            => __( 'Fechar', 'dps-backup-addon' ),
+            ] );
+        }
+
+        /**
          * Renderiza a página admin de backup & restauração.
          *
          * @since 1.0.0
@@ -139,12 +218,19 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $message      = $raw_message ? sanitize_text_field( urldecode( $raw_message ) ) : '';
             $redirect_url = admin_url( 'admin.php?page=dps-backup' );
 
+            // Obter dados para exibição
+            $exporter = new DPS_Backup_Exporter();
+            $counts = $exporter->get_component_counts();
+            $history = DPS_Backup_History::get_history( 10 );
+            $settings = DPS_Backup_Settings::get_all();
+            $components = DPS_Backup_Settings::get_available_components();
+            $next_run = DPS_Backup_Scheduler::get_next_run();
+
             ?>
-            <div class="wrap">
+            <div class="wrap dps-backup-wrap">
                 <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
                 
-                <p><?php esc_html_e( 'Gere um arquivo JSON contendo todos os dados do sistema e restaure-o em outro ambiente para migrar ou recuperar informações.', 'dps-backup-addon' ); ?></p>
-                <p><?php esc_html_e( 'O backup inclui clientes, pets, agendamentos, serviços, assinaturas, opções do plugin, tabelas personalizadas e arquivos enviados (como fotos dos pets e documentos financeiros).', 'dps-backup-addon' ); ?></p>
+                <p class="page-description"><?php esc_html_e( 'Gerencie backups completos do Desi Pet Shower: exporte, restaure, agende e compare versões.', 'dps-backup-addon' ); ?></p>
                 
                 <?php if ( $status && $message ) : ?>
                     <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?> is-dismissible">
@@ -152,35 +238,212 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     </div>
                 <?php endif; ?>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 30px;">
-                    <div class="card" style="padding: 20px;">
-                        <h2 style="margin-top: 0;"><?php esc_html_e( 'Gerar backup', 'dps-backup-addon' ); ?></h2>
-                        <p><?php esc_html_e( 'Clique no botão abaixo para baixar um arquivo JSON com todos os dados do sistema.', 'dps-backup-addon' ); ?></p>
+                <!-- Dashboard de Status -->
+                <div class="dps-backup-dashboard">
+                    <?php foreach ( [ 'clients' => __( 'Clientes', 'dps-backup-addon' ), 'pets' => __( 'Pets', 'dps-backup-addon' ), 'appointments' => __( 'Agendamentos', 'dps-backup-addon' ), 'transactions' => __( 'Transações', 'dps-backup-addon' ), 'services' => __( 'Serviços', 'dps-backup-addon' ) ] as $key => $label ) : ?>
+                        <div class="dps-stat-card">
+                            <div class="stat-value"><?php echo esc_html( number_format_i18n( $counts[ $key ] ?? 0 ) ); ?></div>
+                            <div class="stat-label"><?php echo esc_html( $label ); ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Cards de Ação -->
+                <div class="dps-backup-cards">
+                    <!-- Card: Backup Seletivo -->
+                    <div class="dps-backup-card">
+                        <h2><span class="dashicons dashicons-download"></span> <?php esc_html_e( 'Gerar Backup', 'dps-backup-addon' ); ?></h2>
+                        <p><?php esc_html_e( 'Selecione os componentes a incluir no backup e baixe o arquivo JSON.', 'dps-backup-addon' ); ?></p>
+                        
                         <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_EXPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_EXPORT, 'dps_backup_nonce' ); ?>
-                            <?php submit_button( __( 'Baixar backup completo', 'dps-backup-addon' ), 'primary', 'submit', false ); ?>
+                            
+                            <div class="dps-components-list">
+                                <div class="dps-component-item">
+                                    <input type="checkbox" id="dps-select-all-components" checked>
+                                    <label for="dps-select-all-components"><strong><?php esc_html_e( 'Selecionar todos', 'dps-backup-addon' ); ?></strong></label>
+                                </div>
+                                <?php foreach ( $components as $key => $label ) : ?>
+                                    <div class="dps-component-item">
+                                        <input type="checkbox" name="components[]" id="component-<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $key ); ?>" checked>
+                                        <label for="component-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label>
+                                        <span class="component-count"><?php echo esc_html( number_format_i18n( $counts[ $key ] ?? 0 ) ); ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            
+                            <div class="dps-progress-container">
+                                <div class="dps-progress-bar"><div class="progress"></div></div>
+                                <div class="dps-progress-text"><?php esc_html_e( 'Gerando backup...', 'dps-backup-addon' ); ?></div>
+                            </div>
+                            
+                            <?php submit_button( __( 'Baixar Backup', 'dps-backup-addon' ), 'primary', 'submit', false ); ?>
                         </form>
                     </div>
 
-                    <div class="card" style="padding: 20px;">
-                        <h2 style="margin-top: 0;"><?php esc_html_e( 'Restaurar backup', 'dps-backup-addon' ); ?></h2>
-                        <p><?php esc_html_e( 'Selecione um arquivo JSON gerado anteriormente para restaurar todos os dados.', 'dps-backup-addon' ); ?></p>
-                        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <!-- Card: Restaurar Backup -->
+                    <div class="dps-backup-card">
+                        <h2><span class="dashicons dashicons-upload"></span> <?php esc_html_e( 'Restaurar Backup', 'dps-backup-addon' ); ?></h2>
+                        <p><?php esc_html_e( 'Selecione um arquivo JSON de backup para restaurar os dados.', 'dps-backup-addon' ); ?></p>
+                        
+                        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dps-restore-form">
                             <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_IMPORT ); ?>">
                             <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
                             <?php wp_nonce_field( self::ACTION_IMPORT, 'dps_backup_nonce' ); ?>
+                            
+                            <div class="dps-upload-area">
+                                <span class="dashicons dashicons-cloud-upload"></span>
+                                <p><?php esc_html_e( 'Arraste um arquivo ou clique para selecionar', 'dps-backup-addon' ); ?></p>
+                                <p class="file-types"><?php esc_html_e( 'Apenas arquivos .json (máx. 50 MB)', 'dps-backup-addon' ); ?></p>
+                                <input type="file" name="dps_backup_file" accept="application/json,.json" required style="display: none;">
+                            </div>
+                            
+                            <div class="dps-danger-box">
+                                <span class="dashicons dashicons-warning"></span>
+                                <p><?php esc_html_e( 'ATENÇÃO: A restauração irá substituir TODOS os dados atuais do Desi Pet Shower. Esta ação não pode ser desfeita.', 'dps-backup-addon' ); ?></p>
+                            </div>
+                            
                             <p>
-                                <input type="file" name="dps_backup_file" accept="application/json" required style="margin-bottom: 10px;" />
+                                <label>
+                                    <input type="checkbox" name="confirm_restore" id="dps-confirm-restore" value="1">
+                                    <?php esc_html_e( 'Eu entendo que todos os dados atuais serão removidos.', 'dps-backup-addon' ); ?>
+                                </label>
                             </p>
-                            <p class="description" style="color: #d63638; margin-bottom: 15px;">
-                                <strong><?php esc_html_e( 'AVISO:', 'dps-backup-addon' ); ?></strong>
-                                <?php esc_html_e( 'O processo substituirá os dados atuais do Desi Pet Shower. Todos os registros existentes serão removidos antes da restauração.', 'dps-backup-addon' ); ?>
-                            </p>
-                            <?php submit_button( __( 'Restaurar dados', 'dps-backup-addon' ), 'secondary', 'submit', false ); ?>
+                            
+                            <div class="dps-progress-container">
+                                <div class="dps-progress-bar"><div class="progress"></div></div>
+                                <div class="dps-progress-text"><?php esc_html_e( 'Restaurando...', 'dps-backup-addon' ); ?></div>
+                            </div>
+                            
+                            <?php submit_button( __( 'Restaurar Dados', 'dps-backup-addon' ), 'secondary', 'submit', false ); ?>
                         </form>
                     </div>
+                </div>
+
+                <!-- Histórico de Backups -->
+                <?php if ( ! empty( $history ) ) : ?>
+                <div class="dps-backup-history">
+                    <h2><span class="dashicons dashicons-backup"></span> <?php esc_html_e( 'Histórico de Backups', 'dps-backup-addon' ); ?></h2>
+                    
+                    <table class="dps-history-table widefat">
+                        <thead>
+                            <tr>
+                                <th><?php esc_html_e( 'Data', 'dps-backup-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Arquivo', 'dps-backup-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Tamanho', 'dps-backup-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Tipo', 'dps-backup-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Ações', 'dps-backup-addon' ); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ( $history as $entry ) : ?>
+                            <tr>
+                                <td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $entry['date'] ) ) ); ?></td>
+                                <td><?php echo esc_html( $entry['filename'] ); ?></td>
+                                <td><?php echo esc_html( DPS_Backup_History::format_size( $entry['size'] ) ); ?></td>
+                                <td>
+                                    <span class="backup-type <?php echo esc_attr( $entry['type'] ); ?>">
+                                        <?php echo 'scheduled' === $entry['type'] ? esc_html__( 'Agendado', 'dps-backup-addon' ) : esc_html__( 'Manual', 'dps-backup-addon' ); ?>
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <?php if ( ! empty( $entry['stored'] ) ) : ?>
+                                        <a href="#" class="button button-small dps-download-backup" data-backup-id="<?php echo esc_attr( $entry['id'] ); ?>" title="<?php esc_attr_e( 'Baixar', 'dps-backup-addon' ); ?>">
+                                            <span class="dashicons dashicons-download"></span>
+                                        </a>
+                                        <a href="#" class="button button-small dps-compare-backup" data-backup-id="<?php echo esc_attr( $entry['id'] ); ?>" title="<?php esc_attr_e( 'Comparar', 'dps-backup-addon' ); ?>">
+                                            <span class="dashicons dashicons-randomize"></span>
+                                        </a>
+                                        <a href="#" class="button button-small dps-restore-from-history" data-backup-id="<?php echo esc_attr( $entry['id'] ); ?>" title="<?php esc_attr_e( 'Restaurar', 'dps-backup-addon' ); ?>">
+                                            <span class="dashicons dashicons-backup"></span>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="#" class="button button-small dps-delete-backup" data-backup-id="<?php echo esc_attr( $entry['id'] ); ?>" title="<?php esc_attr_e( 'Excluir', 'dps-backup-addon' ); ?>">
+                                        <span class="dashicons dashicons-trash"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+
+                <!-- Configurações de Agendamento -->
+                <div class="dps-schedule-settings">
+                    <h2><span class="dashicons dashicons-calendar-alt"></span> <?php esc_html_e( 'Backup Agendado', 'dps-backup-addon' ); ?></h2>
+                    
+                    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                        <input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_SAVE_SETTINGS ); ?>">
+                        <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_url ); ?>">
+                        <?php wp_nonce_field( self::ACTION_SAVE_SETTINGS, 'dps_backup_settings_nonce' ); ?>
+                        
+                        <div class="dps-schedule-toggle">
+                            <input type="checkbox" name="scheduled_enabled" id="dps-schedule-enabled" value="1" <?php checked( $settings['scheduled_enabled'] ); ?>>
+                            <label for="dps-schedule-enabled"><?php esc_html_e( 'Ativar backup automático', 'dps-backup-addon' ); ?></label>
+                        </div>
+                        
+                        <div class="dps-schedule-fields" <?php echo empty( $settings['scheduled_enabled'] ) ? 'style="display:none;"' : ''; ?>>
+                            <div class="dps-schedule-row">
+                                <div class="dps-schedule-field">
+                                    <label for="dps-schedule-frequency"><?php esc_html_e( 'Frequência', 'dps-backup-addon' ); ?></label>
+                                    <select name="scheduled_frequency" id="dps-schedule-frequency">
+                                        <?php foreach ( DPS_Backup_Settings::get_frequencies() as $value => $label ) : ?>
+                                            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $settings['scheduled_frequency'], $value ); ?>><?php echo esc_html( $label ); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="dps-schedule-field">
+                                    <label for="dps-schedule-day"><?php esc_html_e( 'Dia da semana', 'dps-backup-addon' ); ?></label>
+                                    <select name="scheduled_day" id="dps-schedule-day">
+                                        <?php foreach ( DPS_Backup_Settings::get_weekdays() as $value => $label ) : ?>
+                                            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $settings['scheduled_day'], $value ); ?>><?php echo esc_html( $label ); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="dps-schedule-field">
+                                    <label for="dps-schedule-time"><?php esc_html_e( 'Horário', 'dps-backup-addon' ); ?></label>
+                                    <input type="time" name="scheduled_time" id="dps-schedule-time" value="<?php echo esc_attr( $settings['scheduled_time'] ); ?>">
+                                </div>
+                            </div>
+                            
+                            <div class="dps-schedule-row">
+                                <div class="dps-schedule-field">
+                                    <label for="dps-retention-count"><?php esc_html_e( 'Manter últimos backups', 'dps-backup-addon' ); ?></label>
+                                    <select name="retention_count" id="dps-retention-count">
+                                        <?php for ( $i = 1; $i <= 10; $i++ ) : ?>
+                                            <option value="<?php echo esc_attr( $i ); ?>" <?php selected( $settings['retention_count'], $i ); ?>><?php echo esc_html( $i ); ?></option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="dps-schedule-field">
+                                    <label>
+                                        <input type="checkbox" name="email_notification" value="1" <?php checked( $settings['email_notification'] ); ?>>
+                                        <?php esc_html_e( 'Enviar notificação por e-mail', 'dps-backup-addon' ); ?>
+                                    </label>
+                                </div>
+                                
+                                <div class="dps-schedule-field">
+                                    <label for="dps-notification-email"><?php esc_html_e( 'E-mail para notificação', 'dps-backup-addon' ); ?></label>
+                                    <input type="email" name="notification_email" id="dps-notification-email" value="<?php echo esc_attr( $settings['notification_email'] ?: get_option( 'admin_email' ) ); ?>" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <?php if ( $next_run ) : ?>
+                            <div class="dps-next-run">
+                                <strong><?php esc_html_e( 'Próximo backup:', 'dps-backup-addon' ); ?></strong>
+                                <?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $next_run ) ); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php submit_button( __( 'Salvar Configurações', 'dps-backup-addon' ), 'primary', 'submit', true ); ?>
+                    </form>
                 </div>
             </div>
             <?php
@@ -191,6 +454,43 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         public function deny_anonymous() {
             wp_die( esc_html__( 'Você precisa estar autenticado como administrador para executar esta ação.', 'dps-backup-addon' ), esc_html__( 'Acesso negado', 'dps-backup-addon' ), [ 'response' => 403 ] );
+        }
+
+        /**
+         * Processa a ação de salvar configurações.
+         *
+         * @since 1.1.0
+         * @return void
+         */
+        public function handle_save_settings() {
+            if ( ! $this->can_manage() ) {
+                $this->deny_anonymous();
+            }
+
+            if ( ! isset( $_POST['dps_backup_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_backup_settings_nonce'] ) ), self::ACTION_SAVE_SETTINGS ) ) {
+                $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Nonce inválido.', 'dps-backup-addon' ) );
+            }
+
+            $settings = [
+                'scheduled_enabled'   => ! empty( $_POST['scheduled_enabled'] ),
+                'scheduled_frequency' => isset( $_POST['scheduled_frequency'] ) ? sanitize_key( wp_unslash( $_POST['scheduled_frequency'] ) ) : 'weekly',
+                'scheduled_day'       => isset( $_POST['scheduled_day'] ) ? sanitize_key( wp_unslash( $_POST['scheduled_day'] ) ) : 'sunday',
+                'scheduled_time'      => isset( $_POST['scheduled_time'] ) ? sanitize_text_field( wp_unslash( $_POST['scheduled_time'] ) ) : '02:00',
+                'retention_count'     => isset( $_POST['retention_count'] ) ? absint( $_POST['retention_count'] ) : 5,
+                'email_notification'  => ! empty( $_POST['email_notification'] ),
+                'notification_email'  => isset( $_POST['notification_email'] ) ? sanitize_email( wp_unslash( $_POST['notification_email'] ) ) : '',
+            ];
+
+            DPS_Backup_Settings::save( $settings );
+
+            // Atualizar agendamento
+            if ( $settings['scheduled_enabled'] ) {
+                DPS_Backup_Scheduler::schedule();
+            } else {
+                DPS_Backup_Scheduler::unschedule();
+            }
+
+            $this->redirect_with_message( $this->get_post_redirect(), 'success', __( 'Configurações salvas com sucesso.', 'dps-backup-addon' ) );
         }
 
         /**
@@ -208,19 +508,192 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Nonce inválido para exportação.', 'dps-backup-addon' ) );
             }
 
-            $payload = $this->build_backup_payload();
+            // Obter componentes selecionados
+            $components = isset( $_POST['components'] ) && is_array( $_POST['components'] ) 
+                ? array_map( 'sanitize_key', wp_unslash( $_POST['components'] ) ) 
+                : array_keys( DPS_Backup_Settings::get_available_components() );
+
+            // Gerar backup seletivo
+            $exporter = new DPS_Backup_Exporter();
+            $payload = $exporter->build_selective_backup( $components );
+
             if ( is_wp_error( $payload ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', $payload->get_error_message() );
             }
 
-            // Nome do arquivo gerado internamente com gmdate(), não precisa de sanitize_file_name
             $filename = 'dps-backup-' . gmdate( 'Ymd-His' ) . '.json';
+            $content = wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+
+            // Salvar no histórico
+            $stats = $exporter->get_backup_stats( $payload );
+            $filepath = DPS_Backup_History::save_backup_file( $filename, $content );
+            
+            DPS_Backup_History::add_entry( [
+                'filename'   => $filename,
+                'size'       => strlen( $content ),
+                'type'       => 'manual',
+                'components' => $components,
+                'stats'      => $stats,
+                'stored'     => ! is_wp_error( $filepath ),
+                'file_path'  => is_wp_error( $filepath ) ? '' : $filepath,
+            ] );
+
+            // Log da operação
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::log(
+                    'backup_export',
+                    sprintf(
+                        'Backup manual realizado: %s (%d clientes, %d pets, %d agendamentos)',
+                        $filename,
+                        $stats['clients'] ?? 0,
+                        $stats['pets'] ?? 0,
+                        $stats['appointments'] ?? 0
+                    ),
+                    'info'
+                );
+            }
 
             nocache_headers();
             header( 'Content-Type: application/json; charset=utf-8' );
             header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
-            echo wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+            echo $content;
             exit;
+        }
+
+        /**
+         * AJAX: Comparar backup com dados atuais.
+         *
+         * @since 1.1.0
+         */
+        public function ajax_compare_backup() {
+            check_ajax_referer( 'dps_backup_ajax', 'nonce' );
+
+            if ( ! $this->can_manage() ) {
+                wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-backup-addon' ) ] );
+            }
+
+            $backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( $_POST['backup_id'] ) ) : '';
+            $entry = DPS_Backup_History::get_entry( $backup_id );
+
+            if ( ! $entry || empty( $entry['file_path'] ) ) {
+                wp_send_json_error( [ 'message' => __( 'Backup não encontrado.', 'dps-backup-addon' ) ] );
+            }
+
+            $content = DPS_Backup_History::get_backup_content( $entry['file_path'] );
+            if ( is_wp_error( $content ) ) {
+                wp_send_json_error( [ 'message' => $content->get_error_message() ] );
+            }
+
+            $payload = json_decode( $content, true );
+            if ( ! $payload ) {
+                wp_send_json_error( [ 'message' => __( 'Erro ao ler o backup.', 'dps-backup-addon' ) ] );
+            }
+
+            $comparison = DPS_Backup_Comparator::compare( $payload );
+            $html = DPS_Backup_Comparator::format_summary( $comparison );
+
+            wp_send_json_success( $html );
+        }
+
+        /**
+         * AJAX: Excluir backup do histórico.
+         *
+         * @since 1.1.0
+         */
+        public function ajax_delete_backup() {
+            check_ajax_referer( 'dps_backup_ajax', 'nonce' );
+
+            if ( ! $this->can_manage() ) {
+                wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-backup-addon' ) ] );
+            }
+
+            $backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( $_POST['backup_id'] ) ) : '';
+            
+            if ( DPS_Backup_History::remove_entry( $backup_id ) ) {
+                wp_send_json_success();
+            } else {
+                wp_send_json_error( [ 'message' => __( 'Erro ao excluir backup.', 'dps-backup-addon' ) ] );
+            }
+        }
+
+        /**
+         * AJAX: Baixar backup do histórico.
+         *
+         * @since 1.1.0
+         */
+        public function ajax_download_backup() {
+            if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_backup_ajax' ) ) {
+                wp_die( esc_html__( 'Nonce inválido.', 'dps-backup-addon' ) );
+            }
+
+            if ( ! $this->can_manage() ) {
+                wp_die( esc_html__( 'Permissão negada.', 'dps-backup-addon' ) );
+            }
+
+            $backup_id = isset( $_GET['backup_id'] ) ? sanitize_text_field( wp_unslash( $_GET['backup_id'] ) ) : '';
+            $entry = DPS_Backup_History::get_entry( $backup_id );
+
+            if ( ! $entry || empty( $entry['file_path'] ) || ! file_exists( $entry['file_path'] ) ) {
+                wp_die( esc_html__( 'Backup não encontrado.', 'dps-backup-addon' ) );
+            }
+
+            nocache_headers();
+            header( 'Content-Type: application/json; charset=utf-8' );
+            header( 'Content-Disposition: attachment; filename="' . $entry['filename'] . '"' );
+            header( 'Content-Length: ' . filesize( $entry['file_path'] ) );
+            readfile( $entry['file_path'] );
+            exit;
+        }
+
+        /**
+         * AJAX: Restaurar backup do histórico.
+         *
+         * @since 1.1.0
+         */
+        public function ajax_restore_from_history() {
+            check_ajax_referer( 'dps_backup_ajax', 'nonce' );
+
+            if ( ! $this->can_manage() ) {
+                wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-backup-addon' ) ] );
+            }
+
+            $backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( $_POST['backup_id'] ) ) : '';
+            $entry = DPS_Backup_History::get_entry( $backup_id );
+
+            if ( ! $entry || empty( $entry['file_path'] ) ) {
+                wp_send_json_error( [ 'message' => __( 'Backup não encontrado.', 'dps-backup-addon' ) ] );
+            }
+
+            $content = DPS_Backup_History::get_backup_content( $entry['file_path'] );
+            if ( is_wp_error( $content ) ) {
+                wp_send_json_error( [ 'message' => $content->get_error_message() ] );
+            }
+
+            $payload = json_decode( $content, true );
+            if ( ! $payload ) {
+                wp_send_json_error( [ 'message' => __( 'Erro ao ler o backup.', 'dps-backup-addon' ) ] );
+            }
+
+            $validated = $this->validate_import_payload( $payload );
+            if ( is_wp_error( $validated ) ) {
+                wp_send_json_error( [ 'message' => $validated->get_error_message() ] );
+            }
+
+            $result = $this->restore_backup_payload( $validated );
+            if ( is_wp_error( $result ) ) {
+                wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+            }
+
+            // Log da operação
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::log(
+                    'backup_restore',
+                    sprintf( 'Backup restaurado do histórico: %s', $entry['filename'] ),
+                    'info'
+                );
+            }
+
+            wp_send_json_success( [ 'message' => __( 'Backup restaurado com sucesso!', 'dps-backup-addon' ) ] );
         }
 
         /**
