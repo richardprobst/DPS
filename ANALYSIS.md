@@ -1059,32 +1059,93 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 **Diretório**: `add-ons/desi-pet-shower-subscription_addon`
 
 **Propósito e funcionalidades principais**:
-- Gerenciar assinaturas recorrentes de clientes
-- Criar e atualizar transações relacionadas a assinaturas
-- Gerar links de renovação via Mercado Pago
-- Enviar mensagens padrão via WhatsApp para renovações
+- Gerenciar pacotes mensais de banho e tosa com frequências semanal (4 atendimentos) ou quinzenal (2 atendimentos)
+- Gerar automaticamente os agendamentos do ciclo vinculados à assinatura
+- Criar e sincronizar transações financeiras na tabela `dps_transacoes`
+- Controlar status de pagamento (pendente, pago, em atraso) por ciclo
+- Gerar links de renovação via API do Mercado Pago
+- Enviar mensagens de cobrança via WhatsApp usando `DPS_WhatsApp_Helper`
 
 **Shortcodes expostos**: Nenhum
 
 **CPTs, tabelas e opções**:
-- CPT: `dps_subscription` (planos de assinatura)
-- Integra-se com tabela `dps_transacoes` do add-on Financeiro
+
+**CPT `dps_subscription`** (show_ui: false, opera via aba no painel base):
+
+| Meta Key | Tipo | Descrição |
+|----------|------|-----------|
+| `subscription_client_id` | int | ID do cliente (`dps_cliente`) |
+| `subscription_pet_id` | int | ID do pet (`dps_pet`) |
+| `subscription_service` | string | "Banho" ou "Banho e Tosa" |
+| `subscription_frequency` | string | "semanal" (4 atendimentos) ou "quinzenal" (2 atendimentos) |
+| `subscription_price` | float | Valor do pacote mensal |
+| `subscription_start_date` | date | Data de início do ciclo (Y-m-d) |
+| `subscription_start_time` | time | Horário dos atendimentos (H:i) |
+| `subscription_payment_status` | string | "pendente", "pago" ou "em_atraso" |
+| `dps_subscription_payment_link` | url | Cache do link de pagamento Mercado Pago |
+| `dps_generated_cycle_YYYY-mm` | bool | Flag indicando ciclo já gerado (evita duplicação) |
+| `dps_cycle_status_YYYY-mm` | string | Status de pagamento do ciclo específico |
+
+**Metadados em agendamentos vinculados** (`dps_agendamento`):
+
+| Meta Key | Tipo | Descrição |
+|----------|------|-----------|
+| `subscription_id` | int | ID da assinatura vinculada |
+| `subscription_cycle` | string | Ciclo no formato Y-m (ex: "2025-12") |
+
+**Options armazenadas**: Nenhuma (usa options do Payment Add-on para credenciais Mercado Pago)
 
 **Hooks consumidos**:
-- Hooks do add-on Financeiro para criar transações recorrentes
-- Hooks do add-on de Pagamentos para gerar links de renovação
+- `dps_base_nav_tabs_after_pets`: Adiciona aba "Assinaturas" no painel (prioridade 20)
+- `dps_base_sections_after_pets`: Renderiza seção de assinaturas (prioridade 20)
+- Usa options `dps_mercadopago_access_token` e `dps_pix_key` do Payment Add-on
 
-**Hooks disparados**: Nenhum
+**Hooks disparados**:
+- `dps_subscription_payment_status` (action): Permite add-ons de pagamento atualizar status do ciclo
+  - **Assinatura**: `do_action( 'dps_subscription_payment_status', int $sub_id, string $cycle_key, string $status )`
+  - **Parâmetros**:
+    - `$sub_id`: ID da assinatura
+    - `$cycle_key`: Ciclo no formato Y-m (ex: "2025-12"), vazio usa ciclo atual
+    - `$status`: "paid", "approved", "success" → pago | "failed", "rejected" → em_atraso | outros → pendente
+  - **Exemplo de uso**: `do_action( 'dps_subscription_payment_status', 123, '2025-12', 'paid' );`
+- `dps_subscription_whatsapp_message` (filter): Permite customizar mensagem de cobrança via WhatsApp
+  - **Assinatura**: `apply_filters( 'dps_subscription_whatsapp_message', string $message, WP_Post $subscription, string $payment_link )`
+
+**Fluxo de geração de agendamentos**:
+1. Admin salva assinatura com cliente, pet, serviço, frequência, valor, data/hora
+2. Sistema calcula datas: semanal = 4 datas (+7 dias cada), quinzenal = 2 datas (+14 dias cada)
+3. Remove agendamentos existentes do mesmo ciclo (evita duplicação)
+4. Cria novos `dps_agendamento` com metas vinculadas
+5. Marca ciclo como gerado (`dps_generated_cycle_YYYY-mm`)
+6. Cria/atualiza transação em `dps_transacoes` via Finance Add-on
+
+**Fluxo de renovação**:
+1. Quando todos os atendimentos do ciclo são finalizados, botão "Renovar" aparece
+2. Admin clica em "Renovar"
+3. Sistema avança `subscription_start_date` para próximo mês (mesmo dia da semana)
+4. Reseta `subscription_payment_status` para "pendente"
+5. Gera novos agendamentos para o novo ciclo
+6. Cria nova transação financeira
 
 **Dependências**:
-- Depende do add-on Financeiro para gerenciar cobranças
-- Depende do add-on de Pagamentos para integração com Mercado Pago
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin` na inicialização)
+- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e sincronização de cobranças)
+- **Recomendada**: Payment Add-on (para geração de links Mercado Pago via API)
+- **Opcional**: Communications Add-on (para mensagens via WhatsApp)
 
-**Introduzido em**: v0.2.0 (estimado)
+**Introduzido em**: v0.2.0
+
+**Versão atual**: 1.0.0
 
 **Observações**:
-- Define UI própria ao painel base
-- Integração estreita com fluxo financeiro e de pagamentos
+- Arquivo único de 995 linhas; candidato a refatoração futura para padrão modular (`includes/`, `assets/`, `templates/`)
+- CSS e JavaScript inline na função `section_subscriptions()`; recomenda-se extrair para arquivos externos
+- Usa `DPS_WhatsApp_Helper::get_link_to_client()` para links de cobrança (desde v1.0.0)
+- Cancela assinatura via `wp_trash_post()` (soft delete), preservando dados para possível restauração
+- Exclusão permanente remove assinatura E todas as transações financeiras vinculadas
+- Geração de links Mercado Pago usa `external_reference` no formato `dps_subscription_{ID}` para rastreamento via webhook
+
+**Análise completa**: Consulte `docs/analysis/SUBSCRIPTION_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas (32KB, 10 seções)
 
 ---
 

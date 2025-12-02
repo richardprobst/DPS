@@ -1,0 +1,189 @@
+/**
+ * Estilos do Add-on de Assinaturas
+ *
+ * @package Desi_Pet_Shower_Subscription
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   Status de Pagamento nas Tabelas
+   ========================================================================== */
+
+table.dps-table tr.pay-status-pendente {
+    background-color: #fff8e1;
+}
+
+table.dps-table tr.pay-status-pago {
+    background-color: #e6ffed;
+}
+
+table.dps-table tr.pay-status-em_atraso {
+    background-color: #fee2e2;
+}
+
+/* ==========================================================================
+   Cards de Resumo (Dashboard)
+   ========================================================================== */
+
+.dps-subscription-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-stat-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.dps-stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-stat-label {
+    display: block;
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.dps-stat-card.dps-stat-warning .dps-stat-number {
+    color: #f59e0b;
+}
+
+.dps-stat-card.dps-stat-success .dps-stat-number {
+    color: #10b981;
+}
+
+/* ==========================================================================
+   Formulário de Assinatura
+   ========================================================================== */
+
+.dps-subscription-form {
+    max-width: 600px;
+}
+
+.dps-subscription-form fieldset {
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.dps-subscription-form legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+    font-size: 15px;
+}
+
+.dps-subscription-form .dps-form-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-subscription-form .dps-form-row--2col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dps-subscription-form .dps-form-field label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.dps-subscription-form .dps-required {
+    color: #ef4444;
+}
+
+/* ==========================================================================
+   Barra de Progresso de Atendimentos
+   ========================================================================== */
+
+.dps-progress-bar {
+    position: relative;
+    height: 24px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.dps-progress-fill {
+    height: 100%;
+    background: #10b981;
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+
+.dps-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* ==========================================================================
+   Ações da Tabela
+   ========================================================================== */
+
+.dps-subscription-actions {
+    margin-bottom: 16px;
+}
+
+.dps-subscription-actions .button {
+    margin-right: 8px;
+}
+
+/* Ícones de ação */
+.dps-action-icon {
+    display: inline-block;
+    margin-right: 4px;
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .dps-subscription-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-subscription-form .dps-form-row--2col {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Wrapper para tabela com scroll horizontal */
+    .dps-subscription-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-subscription-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-stat-card {
+        padding: 16px;
+    }
+    
+    .dps-stat-number {
+        font-size: 24px;
+    }
+}

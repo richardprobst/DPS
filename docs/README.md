@@ -39,6 +39,7 @@ Análises arquiteturais e de sistema.
 - `ADDONS_DETAILED_ANALYSIS.md` - Análise detalhada de todos os 15 add-ons
 - `BACKEND_FRONTEND_MAPPING.md` - Mapeamento completo BACK-END vs FRONT-END
 - `STOCK_ADDON_ANALYSIS.md` - Análise profunda do Add-on Estoque (funcionalidade, integração com Serviços, fluxo de uso)
+- `SUBSCRIPTION_ADDON_ANALYSIS.md` - **🆕** Análise profunda do Add-on Assinaturas (código, funcionalidades, layout, melhorias propostas)
 - `SYSTEM_ANALYSIS_COMPLETE.md` - Análise profunda do sistema
 - `SYSTEM_ANALYSIS_SUMMARY.md` - Resumo executivo da análise de sistema
 
