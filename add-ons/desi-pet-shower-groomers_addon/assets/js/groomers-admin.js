@@ -83,6 +83,8 @@
             var groomerId = $button.data('groomer-id');
             var groomerName = $button.data('groomer-name') || '';
             var groomerEmail = $button.data('groomer-email') || '';
+            var groomerPhone = $button.data('groomer-phone') || '';
+            var groomerCommission = $button.data('groomer-commission') || '';
             
             var $modal = $('#dps-edit-groomer-modal');
             
@@ -90,6 +92,8 @@
             $modal.find('#edit_groomer_id').val(groomerId);
             $modal.find('#edit_groomer_name').val(groomerName);
             $modal.find('#edit_groomer_email').val(groomerEmail);
+            $modal.find('#edit_groomer_phone').val(groomerPhone);
+            $modal.find('#edit_groomer_commission').val(groomerCommission);
             
             // Exibe o modal
             $modal.fadeIn(200);

@@ -346,7 +346,8 @@
 }
 
 .dps-status-badge--realizado,
-.dps-status-badge--pago {
+.dps-status-badge--pago,
+.dps-status-badge--ativo {
     background: #d1fae5;
     color: #065f46;
 }
@@ -356,9 +357,25 @@
     color: #92400e;
 }
 
-.dps-status-badge--cancelado {
+.dps-status-badge--cancelado,
+.dps-status-badge--inativo {
     background: #f3f4f6;
     color: #6b7280;
+}
+
+/* Linha de groomer inativo na tabela */
+.dps-groomer-inactive {
+    opacity: 0.6;
+}
+
+.dps-groomer-inactive:hover {
+    opacity: 1;
+}
+
+/* Dados não preenchidos */
+.dps-no-data {
+    color: #9ca3af;
+    font-style: italic;
 }
 
 /* ==========================================================================
