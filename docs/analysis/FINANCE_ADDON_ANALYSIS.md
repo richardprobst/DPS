@@ -511,7 +511,7 @@ private function render_pending_charges_summary() { /* ... */ }
 
 ```php
 $store_name    = 'Banho e Tosa Desi Pet Shower';
-$store_address = 'Rua Agua Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP';
+$store_address = 'Rua Água Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP';
 $store_phone   = '15 9 9160-6299';
 $store_email   = 'contato@desi.pet';
 ```
@@ -531,20 +531,28 @@ $store_email   = get_option( 'dps_store_email', get_option( 'admin_email' ) );
 
 **Exemplo:**
 ```php
-// Atual (float)
+// Atual (float) - problema de precisão
 $valor = 129.90;
-$total = $valor * 100; // 12989.999999...
+$total = $valor * 100;
+echo $total; // Resultado: 12989.999999999998 (impreciso!)
 
-// Recomendado (centavos)
+// Recomendado (centavos) - sempre exato
 $valor_cents = 12990;
-$total = $valor_cents; // 12990 (exato)
+$total = $valor_cents;
+echo $total; // Resultado: 12990 (exato)
 ```
 
 **Migração sugerida:**
-1. Criar coluna `valor_cents bigint`
-2. Copiar dados: `UPDATE ... SET valor_cents = ROUND(valor * 100)`
-3. Alterar código para usar nova coluna
-4. Após validação, remover coluna `valor`
+1. **Backup obrigatório** - Fazer backup completo das tabelas `dps_transacoes` e `dps_parcelas`
+2. Criar coluna `valor_cents bigint`
+3. Copiar dados: `UPDATE ... SET valor_cents = ROUND(valor * 100)`
+4. Validar: conferir que soma de `valor_cents` = soma de `ROUND(valor * 100)` para todas as linhas
+5. Alterar código para usar nova coluna
+6. Após validação em ambiente de staging, remover coluna `valor`
+
+**Rollback (se necessário):**
+- Se algo der errado, restaurar backup das tabelas
+- Reverter código para usar coluna `valor` original
 
 ### 9.4 Funções Deprecated Ainda Presentes
 
