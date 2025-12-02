@@ -816,6 +816,44 @@
     color: #374151;
 }
 
+/* Seção de gráficos */
+.dps-charts-section {
+    margin: 32px 0;
+}
+
+.dps-charts-section h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #374151;
+}
+
+.dps-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.dps-chart-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.dps-chart-container h4 {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-chart-container canvas {
+    height: 250px !important;
+    width: 100% !important;
+}
+
 @media screen and (max-width: 768px) {
     .dps-dashboard-filters .dps-form-row {
         flex-direction: column;
@@ -831,5 +869,9 @@
     
     .dps-status-card {
         min-width: 100%;
+    }
+    
+    .dps-charts-grid {
+        grid-template-columns: 1fr;
     }
 }

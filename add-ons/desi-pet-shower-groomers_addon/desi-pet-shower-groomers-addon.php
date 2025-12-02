@@ -137,6 +137,21 @@ class DPS_Groomers_Addon {
     }
 
     /**
+     * Registra e enfileira Chart.js para gráficos.
+     *
+     * @since 1.3.0
+     */
+    private function enqueue_chartjs() {
+        wp_enqueue_script(
+            'chartjs',
+            'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+            [],
+            '4.4.1',
+            true
+        );
+    }
+
+    /**
      * Processa ações de edição, exclusão e exportação de groomers.
      *
      * @since 1.2.0
@@ -1310,6 +1325,7 @@ class DPS_Groomers_Addon {
     public function render_groomer_dashboard_shortcode( $atts ) {
         // Enfileirar assets
         $this->register_and_enqueue_assets();
+        $this->enqueue_chartjs();
 
         // Verificar se usuário está logado
         if ( ! is_user_logged_in() ) {
@@ -1391,6 +1407,32 @@ class DPS_Groomers_Addon {
             }
         }
 
+        // Preparar dados para gráficos
+        $daily_data = [];
+        foreach ( $appointments as $appointment ) {
+            $date = get_post_meta( $appointment->ID, 'appointment_date', true );
+            if ( $date ) {
+                if ( ! isset( $daily_data[ $date ] ) ) {
+                    $daily_data[ $date ] = [
+                        'count'   => 0,
+                        'revenue' => 0,
+                    ];
+                }
+                $daily_data[ $date ]['count']++;
+                $daily_data[ $date ]['revenue'] += $this->get_appointment_value( $appointment->ID );
+            }
+        }
+        ksort( $daily_data );
+        
+        $chart_labels = [];
+        $chart_counts = [];
+        $chart_revenue = [];
+        foreach ( $daily_data as $date => $data ) {
+            $chart_labels[]  = date_i18n( 'd/m', strtotime( $date ) );
+            $chart_counts[]  = $data['count'];
+            $chart_revenue[] = $data['revenue'];
+        }
+
         $groomer = get_user_by( 'id', $groomer_id );
         $groomer_name = $groomer ? ( $groomer->display_name ? $groomer->display_name : $groomer->user_login ) : '';
 
@@ -1467,6 +1509,102 @@ class DPS_Groomers_Addon {
                     <span class="dps-status-card__label"><?php echo esc_html__( 'Cancelados', 'dps-groomers-addon' ); ?></span>
                 </div>
             </div>
+
+            <!-- Gráficos de desempenho -->
+            <?php if ( ! empty( $chart_labels ) ) : ?>
+            <div class="dps-charts-section">
+                <h3><?php echo esc_html__( 'Desempenho por Período', 'dps-groomers-addon' ); ?></h3>
+                <div class="dps-charts-grid">
+                    <div class="dps-chart-container">
+                        <h4><?php echo esc_html__( 'Atendimentos por Dia', 'dps-groomers-addon' ); ?></h4>
+                        <canvas id="dps-appointments-chart"></canvas>
+                    </div>
+                    <div class="dps-chart-container">
+                        <h4><?php echo esc_html__( 'Receita por Dia', 'dps-groomers-addon' ); ?></h4>
+                        <canvas id="dps-revenue-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Dados do PHP
+                var labels = <?php echo wp_json_encode( $chart_labels ); ?>;
+                var appointmentCounts = <?php echo wp_json_encode( $chart_counts ); ?>;
+                var revenueData = <?php echo wp_json_encode( $chart_revenue ); ?>;
+
+                // Gráfico de atendimentos
+                var appointmentsCtx = document.getElementById('dps-appointments-chart');
+                if (appointmentsCtx) {
+                    new Chart(appointmentsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '<?php echo esc_js( __( 'Atendimentos', 'dps-groomers-addon' ) ); ?>',
+                                data: appointmentCounts,
+                                backgroundColor: 'rgba(14, 165, 233, 0.7)',
+                                borderColor: 'rgba(14, 165, 233, 1)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1 }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Gráfico de receita
+                var revenueCtx = document.getElementById('dps-revenue-chart');
+                if (revenueCtx) {
+                    new Chart(revenueCtx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '<?php echo esc_js( __( 'Receita (R$)', 'dps-groomers-addon' ) ); ?>',
+                                data: revenueData,
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 4,
+                                pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'R$ ' + value.toFixed(2);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            </script>
+            <?php endif; ?>
 
             <!-- Lista de atendimentos -->
             <div class="dps-dashboard-appointments">
