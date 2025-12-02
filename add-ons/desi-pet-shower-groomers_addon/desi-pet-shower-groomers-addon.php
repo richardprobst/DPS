@@ -70,6 +70,9 @@ class DPS_Groomers_Addon {
         
         // Handlers para edição, exclusão e exportação
         add_action( 'init', [ $this, 'handle_groomer_actions' ] );
+        
+        // Shortcode do dashboard do groomer
+        add_shortcode( 'dps_groomer_dashboard', [ $this, 'render_groomer_dashboard_shortcode' ] );
     }
 
     /**
@@ -1290,6 +1293,237 @@ class DPS_Groomers_Addon {
                 </table>
             </div>
         <?php endif; ?>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o shortcode do dashboard do groomer.
+     *
+     * Permite que groomers logados vejam seus próprios atendimentos.
+     *
+     * @since 1.3.0
+     *
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML do dashboard.
+     */
+    public function render_groomer_dashboard_shortcode( $atts ) {
+        // Enfileirar assets
+        $this->register_and_enqueue_assets();
+
+        // Verificar se usuário está logado
+        if ( ! is_user_logged_in() ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Você precisa estar logado para acessar o dashboard.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        $current_user = wp_get_current_user();
+        
+        // Verificar se é um groomer
+        if ( ! in_array( 'dps_groomer', (array) $current_user->roles, true ) && ! current_user_can( 'manage_options' ) ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Acesso restrito a groomers.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        // Se for admin, pode selecionar qualquer groomer
+        $groomer_id = $current_user->ID;
+        if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
+            $groomer_id = absint( $_GET['groomer_id'] );
+        }
+
+        // Período do relatório (padrão: últimos 30 dias)
+        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : date( 'Y-m-d' );
+        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : date( 'Y-m-d', strtotime( '-30 days' ) );
+
+        // Buscar atendimentos do groomer
+        $appointments = get_posts(
+            [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => 100,
+                'post_status'    => 'publish',
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_date',
+                'order'          => 'DESC',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $start_date,
+                        'compare' => '>=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $end_date,
+                        'compare' => '<=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => '_dps_groomers',
+                        'value'   => '"' . $groomer_id . '"',
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ]
+        );
+
+        // Calcular métricas
+        $total_appointments = count( $appointments );
+        $total_revenue      = $this->calculate_total_revenue( $appointments );
+        $commission_rate    = (float) get_user_meta( $groomer_id, '_dps_groomer_commission_rate', true );
+        $total_commission   = $total_revenue * ( $commission_rate / 100 );
+        $avg_ticket         = $total_appointments > 0 ? $total_revenue / $total_appointments : 0;
+
+        // Contagem por status
+        $status_counts = [
+            'realizado' => 0,
+            'pendente'  => 0,
+            'cancelado' => 0,
+        ];
+        foreach ( $appointments as $appointment ) {
+            $status = get_post_meta( $appointment->ID, 'appointment_status', true );
+            if ( isset( $status_counts[ $status ] ) ) {
+                $status_counts[ $status ]++;
+            } else {
+                $status_counts['pendente']++;
+            }
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        $groomer_name = $groomer ? ( $groomer->display_name ? $groomer->display_name : $groomer->user_login ) : '';
+
+        ob_start();
+        ?>
+        <div class="dps-groomer-dashboard">
+            <h2 class="dps-section-title">
+                <?php 
+                echo esc_html( 
+                    sprintf( 
+                        /* translators: %s: groomer name */
+                        __( 'Dashboard de %s', 'dps-groomers-addon' ), 
+                        $groomer_name 
+                    ) 
+                ); 
+                ?>
+            </h2>
+
+            <!-- Filtros de período -->
+            <form method="get" class="dps-dashboard-filters">
+                <?php if ( current_user_can( 'manage_options' ) ) : ?>
+                    <input type="hidden" name="groomer_id" value="<?php echo esc_attr( $groomer_id ); ?>" />
+                <?php endif; ?>
+                
+                <div class="dps-form-row">
+                    <div class="dps-form-field">
+                        <label for="start_date"><?php echo esc_html__( 'Data inicial', 'dps-groomers-addon' ); ?></label>
+                        <input type="date" name="start_date" id="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+                    </div>
+                    <div class="dps-form-field">
+                        <label for="end_date"><?php echo esc_html__( 'Data final', 'dps-groomers-addon' ); ?></label>
+                        <input type="date" name="end_date" id="end_date" value="<?php echo esc_attr( $end_date ); ?>" />
+                    </div>
+                    <div class="dps-form-field dps-form-field--button">
+                        <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Filtrar', 'dps-groomers-addon' ); ?></button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Cards de métricas -->
+            <div class="dps-metrics-grid dps-metrics-grid--dashboard">
+                <div class="dps-metric-card dps-metric-card--info">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Atendimentos', 'dps-groomers-addon' ); ?></span>
+                    <span class="dps-metric-card__value"><?php echo esc_html( $total_appointments ); ?></span>
+                </div>
+                <div class="dps-metric-card dps-metric-card--success">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Receita Total', 'dps-groomers-addon' ); ?></span>
+                    <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_revenue, 2 ) ); ?></span>
+                </div>
+                <?php if ( $commission_rate > 0 ) : ?>
+                <div class="dps-metric-card dps-metric-card--warning">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Comissão', 'dps-groomers-addon' ); ?> (<?php echo esc_html( number_format_i18n( $commission_rate, 1 ) ); ?>%)</span>
+                    <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_commission, 2 ) ); ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="dps-metric-card">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Ticket Médio', 'dps-groomers-addon' ); ?></span>
+                    <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $avg_ticket, 2 ) ); ?></span>
+                </div>
+            </div>
+
+            <!-- Cards de status -->
+            <div class="dps-status-cards">
+                <div class="dps-status-card dps-status-card--realizado">
+                    <span class="dps-status-card__count"><?php echo esc_html( $status_counts['realizado'] ); ?></span>
+                    <span class="dps-status-card__label"><?php echo esc_html__( 'Realizados', 'dps-groomers-addon' ); ?></span>
+                </div>
+                <div class="dps-status-card dps-status-card--pendente">
+                    <span class="dps-status-card__count"><?php echo esc_html( $status_counts['pendente'] ); ?></span>
+                    <span class="dps-status-card__label"><?php echo esc_html__( 'Pendentes', 'dps-groomers-addon' ); ?></span>
+                </div>
+                <div class="dps-status-card dps-status-card--cancelado">
+                    <span class="dps-status-card__count"><?php echo esc_html( $status_counts['cancelado'] ); ?></span>
+                    <span class="dps-status-card__label"><?php echo esc_html__( 'Cancelados', 'dps-groomers-addon' ); ?></span>
+                </div>
+            </div>
+
+            <!-- Lista de atendimentos -->
+            <div class="dps-dashboard-appointments">
+                <h3><?php echo esc_html__( 'Meus Atendimentos', 'dps-groomers-addon' ); ?></h3>
+                
+                <?php if ( empty( $appointments ) ) : ?>
+                    <p class="dps-empty-message"><?php echo esc_html__( 'Nenhum atendimento encontrado no período selecionado.', 'dps-groomers-addon' ); ?></p>
+                <?php else : ?>
+                    <table class="dps-report-table">
+                        <thead>
+                            <tr>
+                                <th><?php echo esc_html__( 'Data', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Horário', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Cliente', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Pet', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Status', 'dps-groomers-addon' ); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ( $appointments as $appointment ) :
+                                $date        = get_post_meta( $appointment->ID, 'appointment_date', true );
+                                $time        = get_post_meta( $appointment->ID, 'appointment_time', true );
+                                $client_id   = get_post_meta( $appointment->ID, 'appointment_client_id', true );
+                                $pet_ids     = get_post_meta( $appointment->ID, 'appointment_pet_ids', true );
+                                $status      = get_post_meta( $appointment->ID, 'appointment_status', true );
+                                $client_name = $client_id ? get_the_title( $client_id ) : '-';
+                                
+                                $pet_names = [];
+                                if ( is_array( $pet_ids ) ) {
+                                    foreach ( $pet_ids as $pet_id ) {
+                                        $pet_name = get_the_title( $pet_id );
+                                        if ( $pet_name ) {
+                                            $pet_names[] = $pet_name;
+                                        }
+                                    }
+                                }
+                                $pet_display  = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : '-';
+                                $date_display = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '-';
+                                $status_class = 'dps-status-badge dps-status-badge--' . sanitize_html_class( $status ? $status : 'pendente' );
+                                ?>
+                                <tr>
+                                    <td><?php echo esc_html( $date_display ); ?></td>
+                                    <td><?php echo esc_html( $time ? $time : '-' ); ?></td>
+                                    <td><?php echo esc_html( $client_name ); ?></td>
+                                    <td><?php echo esc_html( $pet_display ); ?></td>
+                                    <td>
+                                        <span class="<?php echo esc_attr( $status_class ); ?>">
+                                            <?php echo esc_html( $status ? ucfirst( $status ) : __( 'Pendente', 'dps-groomers-addon' ) ); ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+        </div>
         <?php
         return ob_get_clean();
     }

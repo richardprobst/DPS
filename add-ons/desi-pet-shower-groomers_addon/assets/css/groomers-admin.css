@@ -719,3 +719,117 @@
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   14. Dashboard do Groomer
+   ========================================================================== */
+
+.dps-groomer-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dps-dashboard-filters {
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.dps-dashboard-filters .dps-form-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.dps-dashboard-filters .dps-form-field {
+    flex: 1;
+    min-width: 150px;
+}
+
+.dps-dashboard-filters .dps-form-field--button {
+    flex: 0 0 auto;
+}
+
+.dps-metrics-grid--dashboard {
+    margin-bottom: 24px;
+}
+
+/* Cards de status */
+.dps-status-cards {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.dps-status-card {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.dps-status-card__count {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.dps-status-card__label {
+    display: block;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.dps-status-card--realizado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-status-card--pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-card--cancelado {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Comissão card */
+.dps-metric-card--warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-dashboard-appointments {
+    margin-top: 24px;
+}
+
+.dps-dashboard-appointments h3 {
+    margin-bottom: 16px;
+    font-size: 18px;
+    color: #374151;
+}
+
+@media screen and (max-width: 768px) {
+    .dps-dashboard-filters .dps-form-row {
+        flex-direction: column;
+    }
+    
+    .dps-dashboard-filters .dps-form-field {
+        width: 100%;
+    }
+    
+    .dps-status-cards {
+        flex-direction: column;
+    }
+    
+    .dps-status-card {
+        min-width: 100%;
+    }
+}
