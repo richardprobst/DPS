@@ -94,10 +94,12 @@ private function render_services_table( $services ) { ... }
 private function get_service_form_scripts() { ... }
 ```
 
-**2. Vulnerabilidade CSRF em exclusão e toggle (Crítico)**
+**2. Vulnerabilidade CSRF em exclusão e toggle (Crítico)** ✅ CORRIGIDO
+
+O código original no método `maybe_handle_service_request()` processava exclusões e alterações de status sem verificação de nonce:
 
 ```php
-// Linha 631-639: Exclusão via GET sem nonce
+// Código vulnerável (ANTES da correção):
 if ( isset( $_GET['dps_service_delete'] ) ) {
     $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
     if ( $id ) {
@@ -105,21 +107,16 @@ if ( isset( $_GET['dps_service_delete'] ) ) {
     }
     // ...
 }
-
-// Linha 642-652: Toggle via GET sem nonce
-if ( isset( $_GET['dps_toggle_service'] ) ) {
-    $id = intval( wp_unslash( $_GET['dps_toggle_service'] ) );
-    // ...
-}
 ```
 
-**Correção necessária:**
+**Correção aplicada:**
 ```php
-// Exclusão com verificação de nonce
+// Código seguro (APÓS a correção):
 if ( isset( $_GET['dps_service_delete'] ) && isset( $_GET['_wpnonce'] ) ) {
-    if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_service' ) ) {
-        $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
-        if ( $id ) {
+    $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
+    if ( $id && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_service_' . $id ) ) {
+        $service = get_post( $id );
+        if ( $service && 'dps_service' === $service->post_type ) {
             wp_delete_post( $id, true );
             DPS_Message_Helper::add_success( __( 'Serviço excluído com sucesso.', 'dps-services-addon' ) );
         }
@@ -129,8 +126,10 @@ if ( isset( $_GET['dps_service_delete'] ) && isset( $_GET['_wpnonce'] ) ) {
 
 **3. Queries não otimizadas**
 
+No método `section_services()`, a query de serviços pode ser otimizada:
+
 ```php
-// Linha 253-259: Query sem otimização
+// Query atual:
 $services = get_posts( [
     'post_type'      => 'dps_service',
     'posts_per_page' => -1,
@@ -267,22 +266,24 @@ public static function calculate_duration( $service_ids, $pet_size = '' ) {
 
 | Severidade | Tipo | Local | Status |
 |------------|------|-------|--------|
-| **Alta** | CSRF | Exclusão de serviço via GET | ❌ Não corrigido |
-| **Alta** | CSRF | Toggle de status via GET | ❌ Não corrigido |
-| **Média** | Falta de capability | Toggle não verifica permissão | ❌ Não corrigido |
+| **Alta** | CSRF | Exclusão de serviço via GET | ✅ Corrigido |
+| **Alta** | CSRF | Toggle de status via GET | ✅ Corrigido |
+| **Média** | Falta de capability | Toggle não verifica permissão | ✅ Corrigido (via can_manage()) |
 | Baixa | Escape inconsistente | JavaScript inline | ⚠️ Parcialmente |
 
 ### 3.2 Boas Práticas Já Implementadas
 
 - ✅ Nonces no formulário de salvamento
+- ✅ Nonces em exclusão e toggle (ADICIONADO)
+- ✅ Verificação de post_type antes de modificar (ADICIONADO)
 - ✅ Sanitização de inputs com `sanitize_text_field()`, `floatval()`, `intval()`
 - ✅ Escape de saída com `esc_html()`, `esc_attr()`, `esc_url()`
 - ✅ Verificação de capability em `can_manage()`
 - ✅ Uso de `wp_unslash()` antes de sanitizar
 
-### 3.3 Correções Recomendadas
+### 3.3 Correções Aplicadas
 
-**1. Adicionar nonces às URLs de exclusão e toggle:**
+**1. Nonces nas URLs de exclusão e toggle (✅ Implementado):**
 
 ```php
 // Em section_services(), ao gerar URLs:
@@ -296,16 +297,19 @@ $toggle_url = wp_nonce_url(
 );
 ```
 
-**2. Verificar nonces e capabilities em handlers:**
+**2. Verificação de nonces e post_type em handlers (✅ Implementado):**
 
 ```php
 // Exclusão
 if ( isset( $_GET['dps_service_delete'] ) ) {
     $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
-    if ( $id && check_admin_referer( 'dps_delete_service_' . $id ) && $this->can_manage() ) {
-        wp_delete_post( $id, true );
-        if ( class_exists( 'DPS_Message_Helper' ) ) {
-            DPS_Message_Helper::add_success( __( 'Serviço excluído com sucesso.', 'dps-services-addon' ) );
+    if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_service_' . $id ) ) {
+        $service = get_post( $id );
+        if ( $service && 'dps_service' === $service->post_type ) {
+            wp_delete_post( $id, true );
+            if ( class_exists( 'DPS_Message_Helper' ) ) {
+                DPS_Message_Helper::add_success( __( 'Serviço excluído com sucesso.', 'dps-services-addon' ) );
+            }
         }
     }
     $redirect = $this->get_redirect_url();
@@ -827,26 +831,26 @@ public function render_catalog_shortcode( $atts ) {
 
 ## 8. Recomendações Prioritárias
 
-### 8.1 Correções Críticas (Implementar Imediatamente)
+### 8.1 Correções Críticas ✅ CONCLUÍDAS
 
-1. **[SEGURANÇA]** Adicionar verificação de nonce em exclusão de serviço
-2. **[SEGURANÇA]** Adicionar verificação de nonce em toggle de status
-3. **[SEGURANÇA]** Adicionar verificação de capability em toggle
+1. ✅ **[SEGURANÇA]** Adicionar verificação de nonce em exclusão de serviço
+2. ✅ **[SEGURANÇA]** Adicionar verificação de nonce em toggle de status
+3. ✅ **[SEGURANÇA]** Adicionar verificação de post_type antes de modificar
+4. ✅ **[UX]** Adicionar mensagens de feedback via `DPS_Message_Helper`
+5. ✅ **[UX]** Adicionar badges de status na tabela
 
 ### 8.2 Melhorias de Alta Prioridade (Próxima Release)
 
 1. **[PERFORMANCE]** Implementar cache de metas com `update_meta_cache()`
-2. **[UX]** Adicionar mensagens de feedback via `DPS_Message_Helper`
-3. **[UX]** Organizar formulário em fieldsets temáticos
-4. **[CÓDIGO]** Refatorar `section_services()` em métodos menores
+2. **[UX]** Organizar formulário em fieldsets temáticos
+3. **[CÓDIGO]** Refatorar `section_services()` em métodos menores
 
 ### 8.3 Melhorias de Média Prioridade (Futuras Releases)
 
 1. **[FUNCIONALIDADE]** Implementar duplicação de serviço
 2. **[FUNCIONALIDADE]** Adicionar histórico de preços
 3. **[FUNCIONALIDADE]** Melhorar cálculo de pacotes promocionais
-4. **[UX]** Adicionar badges de status na tabela
-5. **[UX]** Implementar acordeão para categorias de extras
+4. **[UX]** Implementar acordeão para categorias de extras
 
 ### 8.4 Melhorias de Baixa Prioridade (Roadmap)
 
@@ -862,32 +866,40 @@ public function render_catalog_shortcode( $atts ) {
 
 | Tarefa | Esforço | Impacto |
 |--------|---------|---------|
-| Correções de segurança (CSRF) | 2h | Alto |
+| ~~Correções de segurança (CSRF)~~ | ~~2h~~ | ~~Alto~~ ✅ Concluído |
+| ~~Mensagens de feedback~~ | ~~1h~~ | ~~Alto~~ ✅ Concluído |
 | Otimização de queries | 1h | Médio |
-| Mensagens de feedback | 1h | Alto |
 | Refatoração de `section_services()` | 4h | Médio |
 | Fieldsets no formulário | 2h | Alto |
 | Duplicação de serviço | 2h | Médio |
 | Histórico de preços | 3h | Baixo |
 | Shortcode de catálogo | 4h | Médio |
-| **Total estimado** | **~19h** | - |
+| **Total restante estimado** | **~16h** | - |
 
 ---
 
 ## 10. Conclusão
 
-O Services Add-on é um componente funcional e bem estruturado do sistema DPS, com uma API pública sólida que facilita integrações. As principais áreas de melhoria são:
+O Services Add-on é um componente funcional e bem estruturado do sistema DPS, com uma API pública sólida que facilita integrações. 
 
-1. **Segurança**: Vulnerabilidades CSRF devem ser corrigidas imediatamente
-2. **Performance**: Queries podem ser otimizadas com caching simples
-3. **UX**: Interface pode ser modernizada seguindo o Visual Style Guide
-4. **Código**: Classe principal pode ser refatorada para melhor manutenibilidade
+### Correções Aplicadas Nesta Análise
 
-Com as correções e melhorias propostas, o add-on estará alinhado com as melhores práticas do repositório DPS e pronto para expansões futuras como catálogo público e pacotes promocionais avançados.
+1. ✅ **Segurança**: Vulnerabilidades CSRF corrigidas com nonces em exclusão e toggle
+2. ✅ **UX**: Mensagens de feedback adicionadas via `DPS_Message_Helper`
+3. ✅ **UX**: Badges de status visuais adicionados na tabela de serviços
+4. ✅ **CSS**: Estilos responsivos e semânticos melhorados
+
+### Áreas de Melhoria Restantes
+
+1. **Performance**: Queries podem ser otimizadas com caching simples
+2. **UX**: Formulário pode ser organizado em fieldsets temáticos
+3. **Código**: Classe principal pode ser refatorada para melhor manutenibilidade
+
+Com as correções já aplicadas e as melhorias propostas, o add-on está alinhado com as melhores práticas do repositório DPS e pronto para expansões futuras como catálogo público e pacotes promocionais avançados.
 
 ---
 
 **Próximos passos recomendados:**
-1. Criar issue para correções de segurança (P0)
-2. Planejar refatoração de UX para próximo sprint
-3. Adicionar funcionalidades de duplicação e histórico em backlog
+1. ~~Criar issue para correções de segurança (P0)~~ ✅ Corrigido
+2. Planejar refatoração de UX para próximo sprint (P1)
+3. Adicionar funcionalidades de duplicação e histórico em backlog (P2)
