@@ -1,0 +1,502 @@
+/**
+ * Groomers Add-on Styles
+ * 
+ * Estilos para a interface de gestão de groomers no painel DPS.
+ * Segue o guia de estilo visual minimalista do DPS.
+ * 
+ * @package Desi_Pet_Shower_Groomers
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   1. Layout Principal
+   ========================================================================== */
+
+.dps-groomers-container {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+.dps-groomers-form-container {
+    flex: 1 1 340px;
+    min-width: 300px;
+}
+
+.dps-groomers-list-container {
+    flex: 2 1 400px;
+    min-width: 300px;
+}
+
+/* ==========================================================================
+   2. Formulário de Cadastro
+   ========================================================================== */
+
+.dps-groomers-form fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #ffffff;
+}
+
+.dps-groomers-form legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+    padding: 0 10px;
+}
+
+.dps-groomers-form .dps-form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-groomers-form .dps-form-row--2col {
+    flex-wrap: wrap;
+}
+
+.dps-groomers-form .dps-form-row--2col > .dps-form-field {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 140px;
+}
+
+.dps-groomers-form .dps-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-groomers-form .dps-form-field label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-groomers-form .dps-form-field input {
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    transition: border-color 0.2s ease;
+}
+
+.dps-groomers-form .dps-form-field input:focus {
+    border-color: #0ea5e9;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.dps-groomers-form .dps-form-field input::placeholder {
+    color: #9ca3af;
+}
+
+.dps-required {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+/* ==========================================================================
+   3. Tabela de Groomers
+   ========================================================================== */
+
+.dps-groomers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dps-groomers-table thead {
+    background: #f9fafb;
+}
+
+.dps-groomers-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-groomers-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-groomers-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-groomers-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-groomers-table .dps-empty-message {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.dps-groomers-table .dps-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-groomers-table .dps-action-link {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.dps-groomers-table .dps-action-link:hover {
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.dps-groomers-table .dps-action-link--delete {
+    color: #ef4444;
+}
+
+.dps-groomers-table .dps-action-link--delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ==========================================================================
+   4. Seção de Relatórios
+   ========================================================================== */
+
+.dps-groomers-report {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-groomers-report h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+.dps-report-filters {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.dps-report-filters .dps-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 180px;
+    min-width: 150px;
+}
+
+.dps-report-filters .dps-form-field label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-report-filters .dps-form-field select,
+.dps-report-filters .dps-form-field input[type="date"] {
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+}
+
+.dps-report-filters .dps-form-field select:focus,
+.dps-report-filters .dps-form-field input[type="date"]:focus {
+    border-color: #0ea5e9;
+    outline: none;
+}
+
+.dps-report-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ==========================================================================
+   5. Cards de Métricas
+   ========================================================================== */
+
+.dps-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-metric-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-metric-card__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-metric-card__value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+}
+
+.dps-metric-card--success .dps-metric-card__value {
+    color: #10b981;
+}
+
+.dps-metric-card--warning .dps-metric-card__value {
+    color: #f59e0b;
+}
+
+.dps-metric-card--info .dps-metric-card__value {
+    color: #0ea5e9;
+}
+
+/* ==========================================================================
+   6. Tabela de Resultados do Relatório
+   ========================================================================== */
+
+.dps-report-results h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+}
+
+.dps-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dps-report-table thead {
+    background: #f9fafb;
+}
+
+.dps-report-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-report-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-report-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 9999px;
+    text-transform: capitalize;
+}
+
+.dps-status-badge--realizado,
+.dps-status-badge--pago {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-status-badge--pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-badge--cancelado {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* ==========================================================================
+   7. Avisos e Notificações
+   ========================================================================== */
+
+.dps-groomers-notice {
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.dps-groomers-notice--warning {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+}
+
+.dps-groomers-notice--error {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+}
+
+.dps-groomers-notice--info {
+    background: #dbeafe;
+    border: 1px solid #3b82f6;
+    color: #1e40af;
+}
+
+/* ==========================================================================
+   8. Botões
+   ========================================================================== */
+
+.dps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+}
+
+.dps-btn--primary {
+    background: #0ea5e9;
+    color: #ffffff;
+}
+
+.dps-btn--primary:hover {
+    background: #0284c7;
+}
+
+.dps-btn--secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-btn--secondary:hover {
+    background: #e5e7eb;
+}
+
+.dps-btn--success {
+    background: #10b981;
+    color: #ffffff;
+}
+
+.dps-btn--success:hover {
+    background: #059669;
+}
+
+.dps-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   9. Responsividade
+   ========================================================================== */
+
+@media screen and (max-width: 768px) {
+    .dps-groomers-container {
+        flex-direction: column;
+    }
+    
+    .dps-groomers-form-container,
+    .dps-groomers-list-container {
+        flex: 1 1 100%;
+    }
+    
+    .dps-groomers-form .dps-form-row--2col > .dps-form-field {
+        flex: 1 1 100%;
+    }
+    
+    .dps-report-filters {
+        flex-direction: column;
+    }
+    
+    .dps-report-filters .dps-form-field {
+        flex: 1 1 100%;
+    }
+    
+    .dps-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-groomers-table,
+    .dps-report-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dps-groomers-form fieldset {
+        padding: 16px;
+    }
+    
+    .dps-groomers-table th,
+    .dps-groomers-table td,
+    .dps-report-table th,
+    .dps-report-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .dps-metric-card {
+        padding: 16px;
+    }
+    
+    .dps-metric-card__value {
+        font-size: 24px;
+    }
+}

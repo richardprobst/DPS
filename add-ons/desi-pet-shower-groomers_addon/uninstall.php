@@ -17,8 +17,8 @@ global $wpdb;
 remove_role( 'dps_groomer' );
 
 // Remove post meta de groomers vinculados a agendamentos
-$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => 'appointment_groomer_id' ], [ '%s' ] );
-$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => 'appointment_groomers' ], [ '%s' ] );
+// Meta key correta usada pelo add-on: _dps_groomers
+$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => '_dps_groomers' ], [ '%s' ] );
 
 // Remove transients
 $transient_like = $wpdb->esc_like( '_transient_dps_groomer' ) . '%';
