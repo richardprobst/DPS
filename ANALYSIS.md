@@ -869,30 +869,65 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Diretório**: `add-ons/desi-pet-shower-push_addon`
 
 **Propósito e funcionalidades principais**:
-- Agendar e enviar notificações recorrentes (agenda diária, relatórios financeiros)
-- Integrar com e-mail e Telegram para envio de mensagens
-- Filtrar destinatários por critérios configuráveis
+- Enviar resumo diário de agendamentos para equipe administrativa
+- Enviar relatório financeiro diário com atendimentos e transações
+- Enviar relatório semanal de pets inativos (sem atendimento há 30 dias)
+- Integrar com e-mail (via `wp_mail()`) e Telegram Bot API
+- Horários e dias configuráveis para cada tipo de notificação
 
 **Shortcodes expostos**: Nenhum
 
 **CPTs, tabelas e opções**:
-- Options: configurações de destinatários e frequência de notificações
+
+| Option | Tipo | Descrição |
+|--------|------|-----------|
+| `dps_push_emails_agenda` | array | Lista de emails para agenda diária |
+| `dps_push_emails_report` | array | Lista de emails para relatório financeiro |
+| `dps_push_agenda_time` | string | Horário do resumo de agendamentos (HH:MM) |
+| `dps_push_report_time` | string | Horário do relatório financeiro (HH:MM) |
+| `dps_push_weekly_day` | string | Dia da semana para relatório semanal (english) |
+| `dps_push_weekly_time` | string | Horário do relatório semanal (HH:MM) |
+| `dps_push_telegram_token` | string | Token do bot do Telegram |
+| `dps_push_telegram_chat` | string | ID do chat/grupo Telegram |
+
+**Menus administrativos**:
+- **Notificações** (`dps-notifications`): configurações de destinatários, horários e integração Telegram
 
 **Hooks consumidos**:
-- `dps_settings_nav_tabs`: adiciona aba "Notificações"
-- `dps_settings_sections`: renderiza configurações
+- Nenhum hook do sistema de configurações (usa menu admin próprio)
 
 **Hooks disparados**:
-- Múltiplos cron jobs: agenda diária, relatório financeiro diário, relatório semanal de pets inativos
-- `dps_send_push_notification`: hook customizado para envio via Telegram
+
+| Hook | Tipo | Parâmetros | Descrição |
+|------|------|------------|-----------|
+| `dps_send_agenda_notification` | cron | - | Dispara envio da agenda diária |
+| `dps_send_daily_report` | cron | - | Dispara envio do relatório financeiro |
+| `dps_send_weekly_inactive_report` | cron | - | Dispara envio do relatório de pets inativos |
+| `dps_send_push_notification` | action | `$message`, `$context` | Permite add-ons enviarem notificações via Telegram |
+| `dps_push_notification_content` | filter | `$content`, `$appointments` | Filtra conteúdo do email antes de enviar |
+| `dps_push_notification_recipients` | filter | `$recipients` | Filtra destinatários da agenda diária |
+| `dps_daily_report_recipients` | filter | `$recipients` | Filtra destinatários do relatório financeiro |
+| `dps_daily_report_content` | filter | `$content`, `$appointments`, `$trans` | Filtra conteúdo do relatório |
+| `dps_daily_report_html` | filter | `$html`, `$appointments`, `$trans` | Filtra HTML do relatório |
+| `dps_weekly_inactive_report_recipients` | filter | `$recipients` | Filtra destinatários do relatório semanal |
 
 **Dependências**:
-- Depende do plugin base para estrutura de configurações
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- **Opcional**: Finance Add-on (para relatório financeiro com tabela `dps_transacoes`)
 
 **Introduzido em**: v0.1.0 (estimado)
 
+**Versão atual**: 1.0.0
+
 **Observações**:
 - Implementa `register_deactivation_hook` corretamente para limpar cron jobs
+- Usa timezone do WordPress para agendamentos (`get_option('timezone_string')`)
+- Emails enviados em formato HTML com headers `Content-Type: text/html; charset=UTF-8`
+- Integração Telegram envia mensagens em texto plano com `parse_mode` HTML
+- Arquivo único de 788 linhas; candidato a refatoração modular futura
+- Threshold de inatividade fixo em 30 dias (não configurável atualmente)
+
+**Análise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas
 
 ---
 

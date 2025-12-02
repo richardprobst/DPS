@@ -13,21 +13,36 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 global $wpdb;
 
-// Remove todos os cron jobs do plugin
+// Remove todos os cron jobs do plugin (nomes corretos usados no código)
 $cron_hooks = [
-    'dps_push_daily_schedule',
-    'dps_push_daily_finance_report',
-    'dps_push_weekly_inactive_pets',
+    'dps_send_agenda_notification',
+    'dps_send_daily_report',
+    'dps_send_weekly_inactive_report',
 ];
 
 foreach ( $cron_hooks as $hook ) {
     wp_clear_scheduled_hook( $hook );
 }
 
-// Remove options de configuração
+// Remove options de configuração (nomes corretos usados no código)
 $options = [
-    'dps_push_settings',
-    'dps_push_recipients',
+    // Options atuais
+    'dps_push_emails_agenda',
+    'dps_push_emails_report',
+    'dps_push_agenda_time',
+    'dps_push_report_time',
+    'dps_push_weekly_day',
+    'dps_push_weekly_time',
+    'dps_push_telegram_token',
+    'dps_push_telegram_chat',
+    // Novas options v1.1.0
+    'dps_push_agenda_enabled',
+    'dps_push_report_enabled',
+    'dps_push_weekly_enabled',
+    'dps_push_inactive_days',
+    // Options legacy (fallback)
+    'dps_push_agenda_hour',
+    'dps_push_report_hour',
 ];
 
 foreach ( $options as $option ) {
@@ -37,6 +52,7 @@ foreach ( $options as $option ) {
 // Remove transients
 $transient_like = $wpdb->esc_like( '_transient_dps_push' ) . '%';
 $transient_timeout_like = $wpdb->esc_like( '_transient_timeout_dps_push' ) . '%';
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 $wpdb->query( $wpdb->prepare(
     "DELETE FROM {$wpdb->options} 
      WHERE option_name LIKE %s 
