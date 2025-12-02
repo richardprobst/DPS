@@ -79,6 +79,33 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Groomers Add-on (v1.2.0)**: Edição, exclusão de groomers e exportação de relatórios
+  - Coluna "Ações" na tabela de groomers com botões Editar e Excluir
+  - Modal de edição de groomer (nome e email)
+  - Confirmação de exclusão com aviso de agendamentos vinculados
+  - Botão "Exportar CSV" no relatório de produtividade
+  - Exportação inclui: data, horário, cliente, pet, status, valor
+  - Linha de totais no final do CSV exportado
+  - Handlers seguros com nonces para todas as ações
+  - Validação de role antes de excluir groomer
+  - Mensagens de feedback via DPS_Message_Helper
+  - CSS para modal responsivo com animação
+  - **Impacto**: CRUD completo de groomers e exportação de dados
+- **Groomers Add-on (v1.1.0)**: Refatoração completa com melhorias de código e layout
+  - Nova estrutura de assets: pasta `assets/css/` e `assets/js/`
+  - Arquivo CSS externo `groomers-admin.css` com ~400 linhas de estilos minimalistas
+  - Arquivo JS externo `groomers-admin.js` com validações e interatividade
+  - Cards de métricas visuais no relatório: profissional, atendimentos, receita total, ticket médio
+  - Coluna "Pet" adicionada na tabela de resultados do relatório
+  - Formatação de data no padrão brasileiro (dd/mm/yyyy)
+  - Badges de status com cores semânticas (realizado, pendente, cancelado)
+  - Fieldsets no formulário de cadastro: "Dados de Acesso" e "Informações Pessoais"
+  - Indicadores de campos obrigatórios (asterisco vermelho)
+  - Placeholders descritivos em todos os campos
+  - Integração com Finance API para cálculo de receitas (com fallback para SQL direto)
+  - Novo método `calculate_total_revenue()` com suporte à Finance API
+  - Documento de análise completa: `docs/analysis/GROOMERS_ADDON_ANALYSIS.md`
+  - **Impacto**: Interface mais profissional e consistente com o padrão visual DPS
 - **GUIA_SISTEMA_DPS.md**: Documento completo de apresentação e configuração do sistema
   - Apresentação geral do sistema e arquitetura modular
   - Instruções detalhadas de instalação do plugin base e add-ons
@@ -124,6 +151,10 @@ Antes de criar uma nova versão oficial:
   - **Impacto**: Administradores agora têm acesso direto ao gerenciamento do portal via menu WP Admin
 
 #### Changed (Mudado)
+- **Groomers Add-on**: Removidos estilos inline, substituídos por classes CSS
+- **Groomers Add-on**: Layout responsivo com flexbox e grid
+- **Groomers Add-on**: Formulário reorganizado com fieldsets semânticos
+- **Groomers Add-on**: Tabela de groomers e relatórios com classes CSS customizadas
 - **Lista de Clientes**: Atualizada para usar `DPS_WhatsApp_Helper::get_link_to_client()`
 - **Add-on de Agenda**: Botões de confirmação e cobrança (individual e conjunta) usam helper centralizado
 - **Add-on de Assinaturas**: Botão de cobrança de renovação usa helper centralizado
@@ -144,6 +175,10 @@ Antes de criar uma nova versão oficial:
   - O handler de toggle não foi atualizado junto, causando inconsistência
   - **Corrigido**: Alterado handler para usar `.attr('data-owner')` ao invés de `.data('owner')`
   - **Impacto**: Botões de seleção/desmarcar todos os pets agora funcionam corretamente
+- **Groomers Add-on**: Corrigido `uninstall.php` para usar meta key correta `_dps_groomers`
+  - Problema: arquivo tentava deletar meta keys incorretas (`appointment_groomer_id`, `appointment_groomers`)
+  - Meta key correta é `_dps_groomers` (array de IDs de groomers)
+  - **Impacto**: Desinstalação do add-on agora remove corretamente os metadados
 - **Plugin Base**: Corrigido seletor de pets não exibir pets ao selecionar cliente no formulário de agendamentos
   - A função `buildPetOption` usava `$('<label/>', { 'data-owner': ... })` que armazena dados no cache interno do jQuery
   - A função `applyPetFilters` usava `.attr('data-owner')` para ler, que busca no atributo DOM (sempre vazio)

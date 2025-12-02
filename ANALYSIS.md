@@ -596,30 +596,46 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Diretório**: `add-ons/desi-pet-shower-groomers_addon`
 
 **Propósito e funcionalidades principais**:
-- Cadastrar e gerenciar profissionais (groomers)
-- Vincular atendimentos a profissionais específicos
-- Gerar relatórios de produtividade por profissional
+- Cadastrar e gerenciar profissionais (groomers) via role customizada
+- Vincular múltiplos groomers por atendimento
+- Gerar relatórios de produtividade por profissional com métricas visuais
+- Exibir cards de métricas: total de atendimentos, receita total, ticket médio
+- Integração com Finance API para cálculo de receitas
 
 **Shortcodes expostos**: Nenhum
 
 **CPTs, tabelas e opções**:
 - Role customizada: `dps_groomer` (profissional de banho e tosa)
-- Metadados: `_groomer_id` nos posts de agendamento
+- Metadados: `_dps_groomers` (array de IDs de groomers por agendamento)
 
 **Hooks consumidos**:
-- `dps_base_appointment_fields`: adiciona campo de seleção de groomer no formulário de agendamento
-- `dps_base_nav_tabs_after_history`: adiciona aba "Groomers"
-- `dps_base_sections_after_history`: renderiza cadastro e relatórios
+- `dps_base_appointment_fields`: adiciona campo de seleção múltipla de groomers
+- `dps_base_after_save_appointment`: salva groomers selecionados
+- `dps_base_nav_tabs_after_history`: adiciona aba "Groomers" (prioridade 15)
+- `dps_base_sections_after_history`: renderiza cadastro e relatórios (prioridade 15)
+- `wp_enqueue_scripts`: carrega CSS e JS no frontend
+- `admin_enqueue_scripts`: carrega CSS e JS no admin
 
 **Hooks disparados**: Nenhum
 
 **Dependências**:
 - Depende do plugin base para estrutura de navegação e agendamentos
+- **Opcional**: Finance Add-on para cálculo automático de receitas nos relatórios
 
 **Introduzido em**: v0.1.0 (estimado)
 
+**Versão atual**: v1.1.0
+
+**Assets**:
+- `assets/css/groomers-admin.css`: estilos seguindo padrão visual minimalista DPS
+- `assets/js/groomers-admin.js`: validações e interatividade do formulário
+
 **Observações**:
-- Arquivo único de 473 linhas; candidato a refatoração futura seguindo padrão de estrutura modular
+- v1.1.0: Refatorado com assets externos, fieldsets no formulário e cards de métricas
+- Formulário de cadastro com fieldsets: Dados de Acesso e Informações Pessoais
+- Relatórios exibem detalhes de cliente e pet por atendimento
+- Integração inteligente com Finance API (fallback para SQL direto)
+- Consulte `docs/analysis/GROOMERS_ADDON_ANALYSIS.md` para análise detalhada e plano de melhorias
 
 ---
 
