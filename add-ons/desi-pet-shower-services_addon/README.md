@@ -11,6 +11,11 @@ Funcionalidades principais:
 - Preços diferenciados por porte do pet
 - Duração estimada por serviço e porte
 - Vinculação de serviços a agendamentos
+- **Pacotes promocionais** com desconto ou preço fixo
+- **Histórico de alterações de preços** para rastreabilidade
+- **Duplicação de serviços** para agilizar cadastros
+- **Shortcode de catálogo público** para exibição no site
+- **API para Portal do Cliente** com histórico de uso
 - Catálogo padrão criado automaticamente na ativação
 - Interface integrada ao painel principal
 
@@ -20,7 +25,8 @@ Funcionalidades principais:
 
 - **Diretório**: `add-ons/desi-pet-shower-services_addon/`
 - **Slug**: `dps-services-addon`
-- **Classe principal**: (verificar no arquivo principal)
+- **Classe principal**: `DPS_Services_Addon`
+- **API pública**: `DPS_Services_API`
 - **Arquivo principal**: `desi-pet-shower-services-addon.php`
 - **Tipo**: Add-on (depende do plugin base)
 
@@ -32,21 +38,32 @@ Funcionalidades principais:
 - **PHP**: 7.4 ou superior
 
 ### Versão
-- **Introduzido em**: v0.1.0 (estimado)
+- **Versão atual**: v1.3.0
+- **Introduzido em**: v0.1.0
 - **Compatível com plugin base**: v1.0.0+
 
 ## Funcionalidades principais
 
 ### Catálogo de serviços
 - **Cadastro de serviços**: criar serviços customizados (ex.: Banho Completo, Tosa Higiênica, Hidratação)
-- **Descrição**: adicionar descrição detalhada de cada serviço
-- **Imagem**: (se suportado) anexar foto ilustrativa do serviço
+- **Tipos de serviço**: Padrão, Extra e Pacote promocional
+- **Categorização**: agrupar extras por categoria (Tosa, Tratamento, Cuidados, etc.)
+
+### Pacotes promocionais (v1.3.0)
+- **Combinar serviços**: selecionar múltiplos serviços para compor um pacote
+- **Desconto percentual**: definir desconto (ex.: 10% off no combo)
+- **Preço fixo**: definir valor único para o pacote
 
 ### Precificação por porte
 - **Pequeno**: preço e duração para pets pequenos (até 10kg)
 - **Médio**: preço e duração para pets médios (10-25kg)
 - **Grande**: preço e duração para pets grandes (acima de 25kg)
-- **Flexibilidade**: cada serviço pode ter preços diferentes para cada porte
+- **Histórico de preços**: rastreabilidade de todas as alterações
+
+### Duplicação de serviços (v1.3.0)
+- **Ação rápida**: botão "Duplicar" na tabela de serviços
+- **Cópia completa**: copia todos os metadados incluindo preços por porte
+- **Segurança**: serviço duplicado inicia como inativo
 
 ### Vinculação a agendamentos
 - **Campo de seleção**: adiciona dropdown de serviços no formulário de agendamento
@@ -65,7 +82,62 @@ Funcionalidades principais:
 ## Shortcodes, widgets e endpoints
 
 ### Shortcodes
-Este add-on não expõe shortcodes públicos.
+
+#### `[dps_services_catalog]` (v1.3.0)
+Exibe catálogo público de serviços ativos.
+
+**Atributos:**
+- `show_prices` (yes|no): Exibir preços. Padrão: 'yes'
+- `type` (padrao|extra|package): Filtrar por tipo de serviço
+- `category` (slug): Filtrar por categoria
+- `layout` (list|grid): Layout de exibição. Padrão: 'list'
+
+**Exemplos:**
+```
+[dps_services_catalog]
+[dps_services_catalog show_prices="no"]
+[dps_services_catalog type="package" layout="grid"]
+[dps_services_catalog category="tratamento"]
+```
+
+## API Pública (v1.3.0)
+
+A classe `DPS_Services_API` fornece métodos estáticos para integração:
+
+### Métodos principais
+
+```php
+// Obter dados de um serviço
+$service = DPS_Services_API::get_service( $service_id );
+
+// Calcular preço por porte
+$price = DPS_Services_API::calculate_price( $service_id, 'medium' );
+
+// Calcular preço de pacote promocional
+$package_price = DPS_Services_API::calculate_package_price( $package_id, 'large' );
+
+// Listar serviços públicos
+$services = DPS_Services_API::get_public_services( [
+    'type'           => 'padrao',
+    'category'       => '',
+    'include_prices' => true,
+] );
+
+// Obter histórico de preços
+$history = DPS_Services_API::get_price_history( $service_id );
+
+// Duplicar serviço
+$new_id = DPS_Services_API::duplicate_service( $service_id );
+
+// Obter serviços para Portal do Cliente
+$data = DPS_Services_API::get_portal_services( $client_id, [
+    'include_history' => true,
+    'limit_history'   => 10,
+] );
+
+// Histórico de uso de serviços por cliente
+$usage = DPS_Services_API::get_client_service_history( $client_id, 10 );
+```
 
 ## Hooks (actions e filters) relevantes
 
@@ -85,7 +157,10 @@ Este add-on não expõe shortcodes públicos.
 
 ### Hooks DISPARADOS por este add-on
 
-Este add-on não dispara hooks customizados próprios.
+#### `dps_service_duplicated` (action) (v1.3.0)
+- **Quando dispara**: após duplicar um serviço com sucesso
+- **Parâmetros**: `$new_id` (int), `$original_id` (int)
+- **Uso**: realizar ações adicionais após duplicação
 
 ## Dados armazenados (CPTs, tabelas, options)
 
@@ -95,20 +170,32 @@ Este add-on não dispara hooks customizados próprios.
 Armazena serviços oferecidos pelo pet shop.
 
 **Metadados principais**:
-- **`service_price_small`**: preço para pets pequenos (em centavos)
-- **`service_price_medium`**: preço para pets médios (em centavos)
-- **`service_price_large`**: preço para pets grandes (em centavos)
-- **`service_duration_small`**: duração estimada para pequenos (em minutos)
-- **`service_duration_medium`**: duração estimada para médios (em minutos)
-- **`service_duration_large`**: duração estimada para grandes (em minutos)
-- **`service_description`**: descrição do serviço
+- **`service_type`**: tipo do serviço ('padrao', 'extra', 'package')
+- **`service_category`**: categoria (para extras)
+- **`service_active`**: status ativo/inativo ('0' ou '1')
+- **`service_price`**: preço base
+- **`service_price_small`**: preço para pets pequenos
+- **`service_price_medium`**: preço para pets médios
+- **`service_price_large`**: preço para pets grandes
+- **`service_duration`**: duração base (minutos)
+- **`service_duration_small`**: duração para pequenos
+- **`service_duration_medium`**: duração para médios
+- **`service_duration_large`**: duração para grandes
+- **`service_package_items`**: array de IDs (para pacotes)
+- **`service_package_discount`**: desconto percentual (para pacotes)
+- **`service_package_fixed_price`**: preço fixo (para pacotes)
+- **`service_price_history`**: histórico de alterações de preço
+- **`dps_service_stock_consumption`**: consumo de estoque por atendimento
 
 **Uso**: Registrado via `DPS_CPT_Helper` com rótulos e capabilities padrão.
 
 ### Metadados em agendamentos
 
-#### Em `dps_appointment`
-- **`appointment_services`**: array serializado de IDs de serviços vinculados ao agendamento
+#### Em `dps_agendamento`
+- **`appointment_services`**: array de IDs de serviços vinculados
+- **`appointment_service_prices`**: array de preços customizados por serviço
+- **`_dps_total_at_booking`**: total histórico em centavos
+- **`_dps_services_at_booking`**: snapshot de serviços e preços
 
 ### Tabelas customizadas
 Este add-on NÃO cria tabelas próprias.
@@ -123,27 +210,33 @@ Este add-on não armazena options globais.
 1. **Gerenciar serviços**:
    - No painel base, clique na aba "Serviços"
    - Visualize lista de serviços cadastrados
-   - Clique em "Adicionar Novo Serviço"
+   - Use a busca para encontrar serviços específicos
 
 2. **Criar serviço**:
    - Preencha nome do serviço (ex.: "Banho Premium")
-   - Insira descrição
+   - Selecione tipo (Padrão, Extra ou Pacote)
    - Defina preços por porte:
      - Pequeno: R$ 40,00
      - Médio: R$ 60,00
      - Grande: R$ 80,00
-   - Defina duração estimada por porte (em minutos)
+   - Defina duração estimada por porte
    - Salve
 
-3. **Editar/excluir serviço**:
-   - Na lista de serviços, clique em "Editar"
-   - Altere dados conforme necessário
-   - Salve ou exclua
+3. **Criar pacote promocional**:
+   - Selecione tipo "Pacote de serviços"
+   - Escolha os serviços incluídos
+   - Defina desconto percentual OU preço fixo
+   - Salve
 
-4. **Vincular a agendamento**:
-   - Ao criar/editar agendamento, selecione serviços na lista
-   - Sistema calcula valor total baseado em serviços + porte do pet
-   - Salve agendamento
+4. **Duplicar serviço**:
+   - Clique em "Duplicar" na linha do serviço
+   - Serviço é copiado como inativo
+   - Edite e ative conforme necessário
+
+5. **Exibir catálogo no site**:
+   - Crie uma página WordPress
+   - Insira `[dps_services_catalog]`
+   - Publique
 
 ### Para recepcionistas
 
@@ -171,8 +264,9 @@ Ao modificar este add-on:
 
 ### Políticas de segurança
 
-- ✅ **Capabilities**: verificar `dps_manage_services` ou similar antes de salvar
-- ✅ **Sanitização**: sanitizar valores monetários com `DPS_Money_Helper`
+- ✅ **Capabilities**: verificar `manage_options` antes de salvar
+- ✅ **Nonces**: todas as ações protegidas com nonce
+- ✅ **Sanitização**: sanitizar valores monetários
 - ✅ **Validação**: validar que preços/durações são números positivos
 - ✅ **Escape**: escapar saída em listagens
 
@@ -189,23 +283,24 @@ Este add-on utiliza corretamente `DPS_CPT_Helper` para registro de CPT, seguindo
 ### Pontos de atenção
 
 - **Catálogo padrão**: validar se serviços já existem antes de criar na ativação (evitar duplicatas em reativações)
-- **Valores em centavos**: SEMPRE armazenar preços como inteiros em centavos
-- **Conversão de moeda**: usar `DPS_Money_Helper` para conversões
+- **Histórico de preços**: mantém apenas últimos 50 registros
+- **Duplicação**: serviços duplicados iniciam inativos por segurança
 - **Porte do pet**: garantir que porte está definido para calcular preço correto
 
 ### Melhorias futuras sugeridas
 
-- Combos de serviços (pacotes promocionais)
-- Desconto por quantidade (ex.: 3 banhos = desconto de 10%)
 - Sazonalidade de preços (preços diferentes em períodos específicos)
 - Galeria de fotos de serviços
 - Avaliações de clientes por serviço
 - Sugestão de serviços baseada em histórico do cliente
+- Ordenação customizada (drag-and-drop)
 
 ## Histórico de mudanças (resumo)
 
 ### Principais marcos
 
+- **v1.3.0**: Pacotes promocionais, histórico de preços, duplicação de serviço, shortcode de catálogo, API para Portal
+- **v1.2.0**: Correções de segurança CSRF, badges de status, mensagens de feedback
 - **v0.1.0**: Lançamento inicial com catálogo de serviços, preços por porte, vinculação a agendamentos e catálogo padrão pré-povoado
 
 Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.

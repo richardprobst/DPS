@@ -79,6 +79,42 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Services Add-on (v1.3.0)**: Novas funcionalidades de pacotes, histórico e catálogo
+  - **Pacotes promocionais com desconto**:
+    - Combinar múltiplos serviços em um pacote
+    - Definir desconto percentual (ex: 10% off no combo)
+    - Definir preço fixo alternativo ao desconto
+    - Método `DPS_Services_API::calculate_package_price()` para cálculo automático
+  - **Histórico de alterações de preços**:
+    - Registro automático de todas as alterações de preço
+    - Armazena data, usuário, preço antigo e novo
+    - Método `DPS_Services_API::get_price_history()` para consulta
+    - Mantém últimos 50 registros por serviço
+  - **Duplicação de serviço**:
+    - Botão "Duplicar" na tabela de serviços
+    - Copia todos os metadados (preços, durações, consumo de estoque)
+    - Serviço duplicado inicia como inativo (segurança)
+    - Método `DPS_Services_API::duplicate_service()` na API
+    - Hook `dps_service_duplicated` disparado após duplicação
+  - **Shortcode de catálogo público**:
+    - `[dps_services_catalog]` para exibir serviços no site
+    - Atributos: `show_prices`, `type`, `category`, `layout`
+    - Layouts: lista e grid responsivo
+    - Agrupa por tipo e categoria automaticamente
+    - Destaca pacotes com badge de desconto
+  - **API para Portal do Cliente**:
+    - Método `get_public_services()` para listar serviços ativos
+    - Método `get_portal_services()` com dados para o portal
+    - Método `get_client_service_history()` com histórico de uso
+    - Método `get_service_categories()` para categorias disponíveis
+  - **Impacto**: Funcionalidades completas de catálogo, pacotes e rastreabilidade
+- **Services Add-on**: Documento de análise completa do add-on
+  - `docs/analysis/SERVICES_ADDON_ANALYSIS.md` com ~850 linhas de análise
+  - Avaliação de funcionalidade, código, segurança, performance e UX
+  - Identificação de vulnerabilidades e propostas de correção
+  - Roadmap de melhorias futuras (pacotes, histórico de preços, catálogo público)
+  - Estimativas de esforço para cada melhoria
+  - **Impacto**: Documentação técnica para orientar desenvolvimento futuro
 - **Groomers Add-on (v1.2.0)**: Edição, exclusão de groomers e exportação de relatórios
   - Coluna "Ações" na tabela de groomers com botões Editar e Excluir
   - Modal de edição de groomer (nome e email)
@@ -167,6 +203,12 @@ Antes de criar uma nova versão oficial:
   - Botão "Compartilhar via WhatsApp" (fotos de pets) usa helper para compartilhamento
 - **Add-on de AI**: Função JavaScript `openWhatsAppWithMessage` melhorada com comentários
 - **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
+- **Services Add-on**: Melhorias de UX na interface de serviços
+  - Mensagens de feedback (sucesso/erro) via `DPS_Message_Helper` em todas as ações
+  - Badges de status visual (Ativo/Inativo) na tabela de serviços
+  - Tabela de serviços com classes CSS dedicadas para melhor responsividade
+  - Wrapper responsivo na tabela com scroll horizontal em mobile
+  - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
 - **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
@@ -250,6 +292,12 @@ Antes de criar uma nova versão oficial:
   - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
 
 #### Security (Segurança)
+- **Services Add-on**: Corrigidas vulnerabilidades CSRF críticas
+  - Adicionada verificação de nonce em exclusão de serviço (`dps_delete_service_{id}`)
+  - Adicionada verificação de nonce em toggle de status (`dps_toggle_service_{id}`)
+  - Adicionada verificação de post_type antes de excluir/modificar
+  - URLs de ação agora usam `wp_nonce_url()` para proteção automática
+  - **Impacto**: Elimina possibilidade de exclusão/alteração de serviços via links maliciosos
 - Todas as URLs de WhatsApp usam `esc_url()` para escape adequado
 - Mensagens de WhatsApp usam `rawurlencode()` para encoding seguro de caracteres especiais
 - Números de telefone são sanitizados via `sanitize_text_field()` antes de salvar configuração
