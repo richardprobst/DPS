@@ -2,6 +2,8 @@
 
 Controle de estoque de insumos com baixa automática em atendimentos.
 
+> 📚 **Documentação completa**: Para uma análise detalhada da funcionalidade, integração com Serviços e fluxo de uso, consulte [`docs/analysis/STOCK_ADDON_ANALYSIS.md`](../../docs/analysis/STOCK_ADDON_ANALYSIS.md).
+
 ## Visão geral
 
 O **Estoque Add-on** permite controlar o inventário de insumos utilizados nos atendimentos (shampoos, condicionadores, tosas, etc.), registrar movimentações de entrada e saída, gerar alertas de estoque baixo e baixar estoque automaticamente quando atendimentos são concluídos.
