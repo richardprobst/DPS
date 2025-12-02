@@ -4,7 +4,7 @@
 
 **Sistema de Gestão para Pet Shops Especializados em Banho e Tosa**
 
-*Versão 1.1 | Última atualização: Dezembro 2024*
+*Versão 1.1 | Última atualização: Dezembro de 2024*
 
 ---
 
@@ -674,7 +674,7 @@ O groomer possui um portal exclusivo para acompanhar sua agenda e desempenho:
 
 1. Acesse **Configurações DPS > Logins de Groomers**
 2. Selecione o tipo de token:
-   - **Temporário (30min)**: ideal para envio por WhatsApp
+   - **Temporário (30 min)**: ideal para envio por WhatsApp
    - **Permanente**: válido até revogação manual
 3. Clique em **Gerar Link** e envie ao profissional
 4. Groomer acessa dashboard, agenda semanal e avaliações
@@ -1083,7 +1083,7 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `[dps_configuracoes]` | Base | Tela de configurações |
 | `[dps_agenda_page]` | Agenda | Visualização da agenda |
 | `[dps_client_portal]` | Portal | Portal do cliente |
-| `[dps_client_login]` | Portal | Página de acesso do cliente |
+| `[dps_client_login]` | Portal | Formulário de login do cliente |
 | `[dps_registration_form]` | Cadastro | Formulário público de cadastro |
 | `[dps_groomer_portal]` | Groomers | Portal completo do groomer |
 | `[dps_groomer_login]` | Groomers | Página de login do groomer |
