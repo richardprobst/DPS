@@ -80,7 +80,7 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 - **Stats Add-on**: Documento de análise completa do add-on
-  - `docs/analysis/STATS_ADDON_ANALYSIS.md` com ~700 linhas de análise detalhada
+  - `docs/analysis/STATS_ADDON_ANALYSIS.md` com ~850 linhas de análise detalhada
   - Avaliação de funcionalidade, código, segurança, performance e UX (notas 5-8/10)
   - Identificação de 7 problemas de código (método muito grande, queries N+1, dados não exibidos, etc.)
   - Boas práticas já implementadas (cache, nonces, sanitização, escape, capabilities)
