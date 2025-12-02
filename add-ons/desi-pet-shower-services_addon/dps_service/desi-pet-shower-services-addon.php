@@ -1591,7 +1591,7 @@ class DPS_Services_Addon {
             padding: 40px;
         }
         /* Grid layout */
-        .dps-catalog-grid .dps-catalog-grid {
+        .dps-catalog-grid .dps-catalog-section {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;

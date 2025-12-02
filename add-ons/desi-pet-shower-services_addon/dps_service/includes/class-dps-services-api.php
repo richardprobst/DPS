@@ -327,8 +327,8 @@ class DPS_Services_API {
         $discount = (float) get_post_meta( $package_id, 'service_package_discount', true );
         $fixed    = get_post_meta( $package_id, 'service_package_fixed_price', true );
 
-        // Se tem preço fixo definido, usa ele
-        if ( '' !== $fixed && (float) $fixed > 0 ) {
+        // Se tem preço fixo definido e é maior que zero, usa ele
+        if ( null !== $fixed && '' !== $fixed && (float) $fixed > 0 ) {
             return (float) $fixed;
         }
 
@@ -392,7 +392,9 @@ class DPS_Services_API {
 
         // Ordena por data (mais recente primeiro)
         usort( $history, function( $a, $b ) {
-            return strtotime( $b['date'] ?? 0 ) - strtotime( $a['date'] ?? 0 );
+            $date_a = isset( $a['date'] ) && $a['date'] ? strtotime( $a['date'] ) : 0;
+            $date_b = isset( $b['date'] ) && $b['date'] ? strtotime( $b['date'] ) : 0;
+            return $date_b - $date_a;
         } );
 
         return $history;
