@@ -1072,7 +1072,175 @@ class DPS_Groomers_Addon {
             <div class="dps-groomers-report">
                 <?php echo $this->render_report_block( $groomers ); ?>
             </div>
+
+            <div class="dps-commissions-report">
+                <?php echo $this->render_commissions_report( $groomers ); ?>
+            </div>
         </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o relatório de comissões de todos os groomers.
+     *
+     * @since 1.3.0
+     *
+     * @param WP_User[] $groomers Lista de profissionais.
+     * @return string HTML do relatório de comissões.
+     */
+    private function render_commissions_report( $groomers ) {
+        $start_date = isset( $_GET['dps_commission_start'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_commission_start'] ) ) : date( 'Y-m-01' );
+        $end_date   = isset( $_GET['dps_commission_end'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_commission_end'] ) ) : date( 'Y-m-d' );
+        
+        $filters_ok = true;
+        if ( isset( $_GET['dps_commission_nonce'] ) ) {
+            if ( ! wp_verify_nonce( wp_unslash( $_GET['dps_commission_nonce'] ), 'dps_commission_report' ) ) {
+                $filters_ok = false;
+            }
+        }
+
+        // Calcular comissões para cada groomer
+        $commissions_data = [];
+        $total_revenue    = 0;
+        $total_commission = 0;
+
+        if ( $filters_ok && ! empty( $groomers ) ) {
+            foreach ( $groomers as $groomer ) {
+                $commission_rate = (float) get_user_meta( $groomer->ID, '_dps_groomer_commission_rate', true );
+                
+                // Buscar atendimentos do período
+                $appointments = get_posts(
+                    [
+                        'post_type'      => 'dps_agendamento',
+                        'posts_per_page' => 500,
+                        'post_status'    => 'publish',
+                        'meta_query'     => [
+                            'relation' => 'AND',
+                            [
+                                'key'     => 'appointment_date',
+                                'value'   => $start_date,
+                                'compare' => '>=',
+                                'type'    => 'DATE',
+                            ],
+                            [
+                                'key'     => 'appointment_date',
+                                'value'   => $end_date,
+                                'compare' => '<=',
+                                'type'    => 'DATE',
+                            ],
+                            [
+                                'key'     => '_dps_groomers',
+                                'value'   => '"' . $groomer->ID . '"',
+                                'compare' => 'LIKE',
+                            ],
+                            [
+                                'key'     => 'appointment_status',
+                                'value'   => 'realizado',
+                                'compare' => '=',
+                            ],
+                        ],
+                    ]
+                );
+
+                $groomer_revenue    = $this->calculate_total_revenue( $appointments );
+                $groomer_commission = $groomer_revenue * ( $commission_rate / 100 );
+
+                $commissions_data[] = [
+                    'id'              => $groomer->ID,
+                    'name'            => $groomer->display_name ? $groomer->display_name : $groomer->user_login,
+                    'appointments'    => count( $appointments ),
+                    'revenue'         => $groomer_revenue,
+                    'commission_rate' => $commission_rate,
+                    'commission'      => $groomer_commission,
+                ];
+
+                $total_revenue    += $groomer_revenue;
+                $total_commission += $groomer_commission;
+            }
+        }
+
+        ob_start();
+        ?>
+        <h4 class="dps-field-group-title"><?php echo esc_html__( 'Relatório de Comissões', 'dps-groomers-addon' ); ?></h4>
+        
+        <form method="get" action="" class="dps-report-filters">
+            <input type="hidden" name="tab" value="groomers" />
+            <?php wp_nonce_field( 'dps_commission_report', 'dps_commission_nonce' ); ?>
+            
+            <div class="dps-form-field">
+                <label for="dps_commission_start"><?php echo esc_html__( 'Data inicial', 'dps-groomers-addon' ); ?></label>
+                <input type="date" name="dps_commission_start" id="dps_commission_start" value="<?php echo esc_attr( $start_date ); ?>" required />
+            </div>
+            
+            <div class="dps-form-field">
+                <label for="dps_commission_end"><?php echo esc_html__( 'Data final', 'dps-groomers-addon' ); ?></label>
+                <input type="date" name="dps_commission_end" id="dps_commission_end" value="<?php echo esc_attr( $end_date ); ?>" required />
+            </div>
+            
+            <div class="dps-report-actions">
+                <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Calcular comissões', 'dps-groomers-addon' ); ?></button>
+            </div>
+        </form>
+
+        <?php if ( ! empty( $commissions_data ) ) : ?>
+            <!-- Cards de totais -->
+            <div class="dps-metrics-grid" style="margin-bottom: 24px;">
+                <div class="dps-metric-card dps-metric-card--success">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Receita Total', 'dps-groomers-addon' ); ?></span>
+                    <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_revenue, 2 ) ); ?></span>
+                </div>
+                <div class="dps-metric-card dps-metric-card--warning">
+                    <span class="dps-metric-card__label"><?php echo esc_html__( 'Total a Pagar', 'dps-groomers-addon' ); ?></span>
+                    <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_commission, 2 ) ); ?></span>
+                </div>
+            </div>
+
+            <!-- Tabela de comissões -->
+            <table class="dps-report-table">
+                <thead>
+                    <tr>
+                        <th><?php echo esc_html__( 'Groomer', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Atendimentos', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Receita', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Taxa (%)', 'dps-groomers-addon' ); ?></th>
+                        <th><?php echo esc_html__( 'Comissão', 'dps-groomers-addon' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $commissions_data as $data ) : ?>
+                        <tr>
+                            <td><strong><?php echo esc_html( $data['name'] ); ?></strong></td>
+                            <td><?php echo esc_html( $data['appointments'] ); ?></td>
+                            <td>R$ <?php echo esc_html( number_format_i18n( $data['revenue'], 2 ) ); ?></td>
+                            <td>
+                                <?php if ( $data['commission_rate'] > 0 ) : ?>
+                                    <?php echo esc_html( number_format_i18n( $data['commission_rate'], 1 ) ); ?>%
+                                <?php else : ?>
+                                    <span class="dps-no-data">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ( $data['commission'] > 0 ) : ?>
+                                    <strong>R$ <?php echo esc_html( number_format_i18n( $data['commission'], 2 ) ); ?></strong>
+                                <?php else : ?>
+                                    <span class="dps-no-data">-</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong><?php echo esc_html__( 'TOTAL', 'dps-groomers-addon' ); ?></strong></td>
+                        <td><strong><?php echo esc_html( array_sum( array_column( $commissions_data, 'appointments' ) ) ); ?></strong></td>
+                        <td><strong>R$ <?php echo esc_html( number_format_i18n( $total_revenue, 2 ) ); ?></strong></td>
+                        <td>-</td>
+                        <td><strong>R$ <?php echo esc_html( number_format_i18n( $total_commission, 2 ) ); ?></strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        <?php endif; ?>
         <?php
         return ob_get_clean();
     }
