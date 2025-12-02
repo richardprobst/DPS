@@ -10,6 +10,15 @@
     'use strict';
 
     /**
+     * Format currency value to Brazilian format
+     * @param {number} value - Value to format
+     * @returns {string} Formatted currency string
+     */
+    function formatCurrency(value) {
+        return parseFloat(value).toFixed(2).replace('.', ',');
+    }
+
+    /**
      * Initialize Finance Add-on functionality
      */
     function init() {
@@ -81,15 +90,13 @@
         
         for (var i = 0; i < services.length; i++) {
             var srv = services[i];
-            var price = parseFloat(srv.price).toFixed(2).replace('.', ',');
-            html += '<tr><td>' + escapeHtml(srv.name) + '</td><td>R$ ' + price + '</td></tr>';
+            html += '<tr><td>' + escapeHtml(srv.name) + '</td><td>R$ ' + formatCurrency(srv.price) + '</td></tr>';
         }
         
         html += '</tbody>';
         
         if (total) {
-            var totalFormatted = parseFloat(total).toFixed(2).replace('.', ',');
-            html += '<tfoot><tr><th>' + (dpsFinance.i18n.total || 'Total') + '</th><th>R$ ' + totalFormatted + '</th></tr></tfoot>';
+            html += '<tfoot><tr><th>' + (dpsFinance.i18n.total || 'Total') + '</th><th>R$ ' + formatCurrency(total) + '</th></tr></tfoot>';
         }
         
         html += '</table>';
