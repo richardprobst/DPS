@@ -171,7 +171,7 @@ class DPS_Stock_Addon {
      * @param WP_Post $post Objeto do post atual.
      */
     public function render_stock_metabox( $post ) {
-        if ( ! current_user_can( self::CAPABILITY ) ) {
+        if ( ! current_user_can( self::CAPABILITY ) && ! current_user_can( 'manage_options' ) ) {
             return;
         }
 
@@ -203,7 +203,7 @@ class DPS_Stock_Addon {
             return;
         }
 
-        if ( ! current_user_can( self::CAPABILITY ) ) {
+        if ( ! current_user_can( self::CAPABILITY ) && ! current_user_can( 'manage_options' ) ) {
             return;
         }
 
@@ -214,6 +214,20 @@ class DPS_Stock_Addon {
         update_post_meta( $post_id, 'dps_stock_unit', $unit );
         update_post_meta( $post_id, 'dps_stock_quantity', max( 0, $quantity ) );
         update_post_meta( $post_id, 'dps_stock_minimum', max( 0, $minimum ) );
+    }
+
+    /**
+     * Verifica se o usuário atual pode acessar o módulo de estoque.
+     *
+     * Aceita tanto a capability customizada quanto manage_options
+     * para garantir que administradores sempre tenham acesso.
+     *
+     * @since 1.1.0
+     *
+     * @return bool True se o usuário pode acessar o estoque.
+     */
+    public function can_access_stock() {
+        return is_user_logged_in() && ( current_user_can( self::CAPABILITY ) || current_user_can( 'manage_options' ) );
     }
 
     /**
@@ -231,7 +245,7 @@ class DPS_Stock_Addon {
             return;
         }
 
-        if ( is_user_logged_in() && current_user_can( self::CAPABILITY ) ) {
+        if ( $this->can_access_stock() ) {
             echo '<li><a href="#" class="dps-tab-link" data-tab="estoque">' . esc_html__( 'Estoque', 'dps-stock-addon' ) . '</a></li>';
         }
     }
@@ -266,7 +280,7 @@ class DPS_Stock_Addon {
      * @return string HTML da página de estoque.
      */
     public function render_stock_page() {
-        if ( ! is_user_logged_in() || ! current_user_can( self::CAPABILITY ) ) {
+        if ( ! $this->can_access_stock() ) {
             return '<div class="dps-section" id="dps-section-estoque"><p>' . esc_html__( 'Você não possui permissão para acessar o estoque.', 'dps-stock-addon' ) . '</p></div>';
         }
 
@@ -296,34 +310,70 @@ class DPS_Stock_Addon {
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-estoque">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque DPS', 'dps-stock-addon' ) . '</h2>';
+        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Estoque de Insumos', 'dps-stock-addon' ) . '</h2>';
 
-        echo '<div class="dps-field-group" style="margin-bottom: 24px;">';
+        // Barra de ações com botões
+        echo '<div class="dps-field-group" style="margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">';
+        
+        // Botão para adicionar novo item (link para admin)
+        $add_new_url = admin_url( 'post-new.php?post_type=' . self::CPT );
+        echo '<a class="button button-primary" href="' . esc_url( $add_new_url ) . '" target="_blank" style="background: #0ea5e9; border-color: #0ea5e9;">';
+        echo '<span class="dashicons dashicons-plus-alt" style="vertical-align: middle; margin-right: 4px;"></span>';
+        echo esc_html__( 'Adicionar Item', 'dps-stock-addon' ) . '</a> ';
+        
+        // Botão para ver todos os itens no admin
+        $all_items_url = admin_url( 'edit.php?post_type=' . self::CPT );
+        echo '<a class="button" href="' . esc_url( $all_items_url ) . '" target="_blank">';
+        echo '<span class="dashicons dashicons-list-view" style="vertical-align: middle; margin-right: 4px;"></span>';
+        echo esc_html__( 'Gerenciar no Admin', 'dps-stock-addon' ) . '</a> ';
+        
+        // Filtro críticos
         $filter_link = add_query_arg( 'dps_show', $only_critical ? '' : 'critical', $base_link );
         if ( $only_critical ) {
-            // Remove the filter parameter when showing all
             $filter_link = remove_query_arg( 'dps_show', $base_link );
         }
         $filter_text = $only_critical ? __( 'Ver todos', 'dps-stock-addon' ) : __( 'Mostrar apenas críticos', 'dps-stock-addon' );
-        echo '<a class="button" href="' . esc_url( $filter_link ) . '">' . esc_html( $filter_text ) . '</a> ';
-
-        $export_link = add_query_arg( 'dps_stock_export', '1', $base_link );
-        echo '<a class="button" href="' . esc_url( $export_link ) . '">' . esc_html__( 'Exportar estoque (em breve)', 'dps-stock-addon' ) . '</a>';
-
-        echo '<p class="description" style="margin-top: 12px;">' . esc_html__( 'Cadastre os itens em "Todos os itens" para controlar insumos internos.', 'dps-stock-addon' ) . '</p>';
-        echo '</div>';
+        $filter_icon = $only_critical ? 'visibility' : 'warning';
+        echo '<a class="button" href="' . esc_url( $filter_link ) . '">';
+        echo '<span class="dashicons dashicons-' . esc_attr( $filter_icon ) . '" style="vertical-align: middle; margin-right: 4px;"></span>';
+        echo esc_html( $filter_text ) . '</a>';
         
-        echo '<table class="widefat fixed striped">';
-        echo '<thead><tr>';
-        echo '<th>' . esc_html__( 'Item', 'dps-stock-addon' ) . '</th>';
-        echo '<th>' . esc_html__( 'Unidade', 'dps-stock-addon' ) . '</th>';
-        echo '<th>' . esc_html__( 'Qtd. atual', 'dps-stock-addon' ) . '</th>';
-        echo '<th>' . esc_html__( 'Qtd. mínima', 'dps-stock-addon' ) . '</th>';
-        echo '<th>' . esc_html__( 'Status', 'dps-stock-addon' ) . '</th>';
+        echo '</div>';
+
+        // Resumo rápido
+        $critical_count = 0;
+        foreach ( $items as $item ) {
+            $qty = (float) get_post_meta( $item->ID, 'dps_stock_quantity', true );
+            $min = (float) get_post_meta( $item->ID, 'dps_stock_minimum', true );
+            if ( $min > 0 && $qty < $min ) {
+                $critical_count++;
+            }
+        }
+        
+        if ( $critical_count > 0 ) {
+            echo '<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px;">';
+            echo '<span style="color: #92400e; font-weight: 600;">';
+            echo '<span class="dashicons dashicons-warning" style="vertical-align: middle;"></span> ';
+            echo esc_html( sprintf( _n( '%d item abaixo do mínimo', '%d itens abaixo do mínimo', $critical_count, 'dps-stock-addon' ), $critical_count ) );
+            echo '</span></div>';
+        }
+        
+        echo '<table class="widefat fixed striped" style="border-radius: 6px; overflow: hidden;">';
+        echo '<thead style="background: #f9fafb;"><tr>';
+        echo '<th style="font-weight: 600; color: #374151;">' . esc_html__( 'Item', 'dps-stock-addon' ) . '</th>';
+        echo '<th style="font-weight: 600; color: #374151; width: 80px;">' . esc_html__( 'Unidade', 'dps-stock-addon' ) . '</th>';
+        echo '<th style="font-weight: 600; color: #374151; width: 100px;">' . esc_html__( 'Qtd. atual', 'dps-stock-addon' ) . '</th>';
+        echo '<th style="font-weight: 600; color: #374151; width: 100px;">' . esc_html__( 'Qtd. mínima', 'dps-stock-addon' ) . '</th>';
+        echo '<th style="font-weight: 600; color: #374151; width: 140px;">' . esc_html__( 'Status', 'dps-stock-addon' ) . '</th>';
+        echo '<th style="font-weight: 600; color: #374151; width: 80px;">' . esc_html__( 'Ações', 'dps-stock-addon' ) . '</th>';
         echo '</tr></thead><tbody>';
 
         if ( empty( $items ) ) {
-            echo '<tr><td colspan="5">' . esc_html__( 'Nenhum item cadastrado.', 'dps-stock-addon' ) . '</td></tr>';
+            echo '<tr><td colspan="6" style="text-align: center; padding: 40px 20px;">';
+            echo '<span class="dashicons dashicons-archive" style="font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px;"></span>';
+            echo '<p style="color: #6b7280; margin: 0 0 12px;">' . esc_html__( 'Nenhum item de estoque cadastrado.', 'dps-stock-addon' ) . '</p>';
+            echo '<a class="button button-primary" href="' . esc_url( $add_new_url ) . '" target="_blank">' . esc_html__( 'Cadastrar primeiro item', 'dps-stock-addon' ) . '</a>';
+            echo '</td></tr>';
         }
 
         foreach ( $items as $item ) {
@@ -339,23 +389,37 @@ class DPS_Stock_Addon {
                 continue;
             }
 
-            $status_text = $is_low ? '⚠ ' . __( 'Abaixo do mínimo', 'dps-stock-addon' ) : '✓ ' . __( 'OK', 'dps-stock-addon' );
-            $status_style = $is_low ? 'color: #f59e0b; font-weight: 600;' : 'color: #10b981;';
+            $status_text = $is_low ? __( 'Baixo', 'dps-stock-addon' ) : __( 'OK', 'dps-stock-addon' );
+            $status_style = $is_low 
+                ? 'background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;' 
+                : 'background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;';
+            $status_icon = $is_low ? '⚠️' : '✓';
 
-            echo '<tr>';
+            $row_style = $is_low ? 'background: #fffbeb;' : '';
+
+            echo '<tr style="' . esc_attr( $row_style ) . '">';
             echo '<td><strong>' . esc_html( $item->post_title ) . '</strong></td>';
-            echo '<td>' . esc_html( $unit ) . '</td>';
-            echo '<td>' . esc_html( $quantity ) . '</td>';
-            echo '<td>' . esc_html( $minimum ) . '</td>';
-            echo '<td><span style="' . esc_attr( $status_style ) . '">' . esc_html( $status_text ) . '</span>';
+            echo '<td>' . esc_html( $unit ?: '—' ) . '</td>';
+            echo '<td style="' . ( $is_low ? 'color: #dc2626; font-weight: 600;' : '' ) . '">' . esc_html( number_format_i18n( $quantity, 2 ) ) . '</td>';
+            echo '<td>' . esc_html( number_format_i18n( $minimum, 2 ) ) . '</td>';
+            echo '<td><span style="' . esc_attr( $status_style ) . '">' . esc_html( $status_icon . ' ' . $status_text ) . '</span>';
 
             if ( $is_low && isset( $alerts[ $item->ID ] ) ) {
                 $alert_info = $alerts[ $item->ID ];
                 $label      = isset( $alert_info['created_at'] ) ? $alert_info['created_at'] : '';
-                echo '<br><small>' . esc_html__( 'Alerta registrado em:', 'dps-stock-addon' ) . ' ' . esc_html( $label ) . '</small>';
+                echo '<br><small style="color: #6b7280;">' . esc_html__( 'Desde:', 'dps-stock-addon' ) . ' ' . esc_html( $label ) . '</small>';
             }
 
             echo '</td>';
+            
+            // Coluna de ações
+            $edit_url = admin_url( 'post.php?post=' . $item->ID . '&action=edit' );
+            echo '<td>';
+            echo '<a href="' . esc_url( $edit_url ) . '" target="_blank" class="button button-small" title="' . esc_attr__( 'Editar item', 'dps-stock-addon' ) . '">';
+            echo '<span class="dashicons dashicons-edit" style="vertical-align: middle; font-size: 14px;"></span>';
+            echo '</a>';
+            echo '</td>';
+            
             echo '</tr>';
         }
 
