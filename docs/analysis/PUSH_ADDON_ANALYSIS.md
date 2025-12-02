@@ -1,7 +1,7 @@
 # Análise Profunda: Add-on Push Notifications
 
 **Data:** 2025-12-02  
-**Versão analisada:** 1.0.0  
+**Versão analisada:** 1.1.0 (atualizada)  
 **Autor:** Copilot Coding Agent  
 **Tipo:** Análise completa de código, funcionalidades, layout e melhorias propostas
 
@@ -20,23 +20,26 @@ O **Push Notifications Add-on** é um add-on do Desi Pet Shower para envio de no
 - ✅ Verificação de plugin base na inicialização
 - ✅ Text domain correto para internacionalização
 - ✅ Arquivo uninstall.php implementado
+- ✅ **NOVO v1.1.0:** Status card com próximos envios
+- ✅ **NOVO v1.1.0:** Botão "Enviar Teste" para cada tipo
+- ✅ **NOVO v1.1.0:** Checkbox habilitar/desabilitar por relatório
+- ✅ **NOVO v1.1.0:** Threshold de inatividade configurável
+- ✅ **NOVO v1.1.0:** Botão "Testar Conexão" para Telegram
+- ✅ **NOVO v1.1.0:** Integração com DPS_Logger
+- ✅ **NOVO v1.1.0:** CSS e JS externos para melhor UX
 
-### Pontos a Melhorar
-- ⚠️ Arquivo único com 788 linhas - candidato a refatoração modular
-- ⚠️ CSS inexistente - usa apenas estilos WordPress nativos
-- ⚠️ Sem integração com Communications Add-on (lógica de envio duplicada)
-- ⚠️ Sem logs de envio (não usa DPS_Logger)
-- ⚠️ Sem botão "Enviar Teste" para validar configurações
-- ⚠️ Inconsistências no uninstall.php (nomes de hooks e options incorretos)
-- ⚠️ Sem histórico de notificações enviadas
-- ⚠️ Método de pets inativos usa 30 dias, mas README menciona 90+ dias
+### Pontos a Melhorar (para versões futuras)
+- ⚠️ Arquivo único com ~1100 linhas - candidato a refatoração modular
+- ⚠️ Sem integração com Communications Add-on (lógica de envio paralela)
+- ⚠️ Sem histórico de notificações enviadas (apenas logs)
+- ⚠️ Templates de email não customizáveis
 
-### Classificação Geral
-- **Código:** 6/10 (funcional mas com oportunidades de melhoria)
-- **Funcionalidades:** 7/10 (cobre casos de uso essenciais)
-- **Layout/UX:** 5/10 (minimalista, sem feedback visual rico)
+### Classificação Geral (Atualizada)
+- **Código:** 7/10 (funcional com melhorias v1.1.0)
+- **Funcionalidades:** 9/10 (cobre casos de uso essenciais + testes)
+- **Layout/UX:** 8/10 (status card, feedback visual, botões de teste)
 - **Segurança:** 8/10 (nonces, capabilities e sanitização corretas)
-- **Documentação:** 7/10 (README detalhado, mas ANALYSIS.md incompleto)
+- **Documentação:** 8/10 (README detalhado, ANALYSIS.md completo)
 
 ---
 
@@ -54,20 +57,29 @@ O **Push Notifications Add-on** é um add-on do Desi Pet Shower para envio de no
 | Configuração de destinatários | ✅ Funcional | Lista de emails separados por vírgula |
 | Horários configuráveis | ✅ Funcional | Inputs type="time" para cada relatório |
 | Dia da semana configurável | ✅ Funcional | Para relatório semanal |
-| Habilitar/desabilitar relatórios | ❌ Ausente | Todos os relatórios sempre ativos |
-| Botão "Enviar Teste" | ❌ Ausente | Não há forma de testar configurações |
-| Histórico de envios | ❌ Ausente | Sem registro de mensagens enviadas |
+| Habilitar/desabilitar relatórios | ✅ **NOVO v1.1.0** | Checkbox para cada tipo de notificação |
+| Botão "Enviar Teste" | ✅ **NOVO v1.1.0** | Botão AJAX para cada tipo de relatório |
+| Testar conexão Telegram | ✅ **NOVO v1.1.0** | Valida token e envia mensagem de teste |
+| Threshold configurável | ✅ **NOVO v1.1.0** | Dias de inatividade (7-365) |
+| Status card | ✅ **NOVO v1.1.0** | Mostra próximos envios e status |
+| Logging integrado | ✅ **NOVO v1.1.0** | Via DPS_Logger quando disponível |
+| Histórico de envios | ⚠️ Parcial | Apenas em logs, sem UI dedicada |
 | Retry automático | ❌ Ausente | Falhas não são reprocessadas |
 | Templates customizáveis | ❌ Ausente | Mensagens são hardcoded |
 | Integração com WhatsApp | ❌ Ausente | Apenas email e Telegram |
 
-### 1.2 Fluxo de Uso Atual
+### 1.2 Fluxo de Uso Atual (v1.1.0)
 
 ```
 1. Admin acessa menu "Desi Pet Shower > Notificações"
+   └── Visualiza status card com próximos envios
+   └── Habilita/desabilita tipos de notificação
    └── Configura destinatários (emails separados por vírgula)
    └── Define horários para cada tipo de relatório
+   └── Configura threshold de inatividade
    └── Configura credenciais do Telegram (opcional)
+   └── Testa conexão do Telegram
+   └── Envia testes de notificação
    └── Salva configurações
    
 2. WordPress Cron dispara eventos agendados:
@@ -79,6 +91,7 @@ O **Push Notifications Add-on** é um add-on do Desi Pet Shower para envio de no
    └── Monta conteúdo HTML para email
    └── Envia para cada destinatário via wp_mail()
    └── Dispara hook dps_send_push_notification para Telegram
+   └── Registra log via DPS_Logger
 ```
 
 ### 1.3 Dados Armazenados
@@ -93,6 +106,10 @@ O **Push Notifications Add-on** é um add-on do Desi Pet Shower para envio de no
 | Option | `dps_push_weekly_time` | Horário do relatório semanal (HH:MM) |
 | Option | `dps_push_telegram_token` | Token do bot do Telegram |
 | Option | `dps_push_telegram_chat` | ID do chat/grupo Telegram |
+| Option | `dps_push_agenda_enabled` | **NOVO v1.1.0** Habilitar agenda diária (bool) |
+| Option | `dps_push_report_enabled` | **NOVO v1.1.0** Habilitar relatório financeiro (bool) |
+| Option | `dps_push_weekly_enabled` | **NOVO v1.1.0** Habilitar pets inativos (bool) |
+| Option | `dps_push_inactive_days` | **NOVO v1.1.0** Dias de inatividade (int, 7-365) |
 
 **Nota:** Existem options legacy (`dps_push_agenda_hour`, `dps_push_report_hour`) que são usadas como fallback.
 
@@ -100,27 +117,40 @@ O **Push Notifications Add-on** é um add-on do Desi Pet Shower para envio de no
 
 ## 2. Análise de Código
 
-### 2.1 Estrutura Atual
+### 2.1 Estrutura Atual (v1.1.0)
 
 ```
 add-ons/desi-pet-shower-push_addon/
-├── desi-pet-shower-push-addon.php   # 788 linhas (arquivo único)
+├── desi-pet-shower-push-addon.php   # ~1100 linhas (arquivo principal)
+├── assets/
+│   ├── css/
+│   │   └── push-admin.css           # Estilos da página admin
+│   └── js/
+│       └── push-admin.js            # Interatividade (testes, toggles)
 ├── README.md                         # Documentação detalhada
 └── uninstall.php                     # Limpeza na desinstalação
 ```
 
-**Problema:** Todo o código está em um único arquivo, incluindo:
-- Lógica de negócio (montagem de relatórios)
-- Integração com APIs (Telegram, wp_mail)
-- Interface administrativa
-- Manipulação de cron jobs
+**Nota:** Na v1.1.0, assets foram extraídos para arquivos separados. Ainda há espaço para modularização futura.
 
 ### 2.2 Classe Principal: `DPS_Push_Notifications_Addon`
 
-| Método | Linhas | Responsabilidade | Observação |
-|--------|--------|------------------|------------|
-| `__construct()` | 53-80 | Registro de hooks | ✅ Bem organizado |
-| `register_admin_menu()` | 85-94 | Menu admin | ✅ Segue padrão DPS |
+| Método | Responsabilidade | Status v1.1.0 |
+|--------|------------------|---------------|
+| `__construct()` | Registro de hooks | ✅ Inclui AJAX handlers |
+| `register_admin_menu()` | Menu admin | ✅ Segue padrão DPS |
+| `enqueue_admin_assets()` | **NOVO** Assets CSS/JS | ✅ Apenas na página |
+| `render_admin_page()` | Renderiza configurações | ✅ Inclui status card |
+| `activate()` | Agenda cron jobs | ✅ Respeita enabled/disabled |
+| `deactivate()` | Limpa cron jobs | ✅ Correto |
+| `send_agenda_notification()` | Envia agenda diária | ✅ Verifica enabled + log |
+| `send_daily_report()` | Envia relatório financeiro | ✅ Verifica enabled + log |
+| `send_weekly_inactive_report()` | Relatório semanal | ✅ Threshold configurável + log |
+| `send_to_telegram()` | Integração Telegram | ✅ Logging de resultado |
+| `ajax_send_test()` | **NOVO** Teste de notificação | ✅ AJAX com nonce |
+| `ajax_test_telegram()` | **NOVO** Teste conexão | ✅ Valida token e chat |
+| `maybe_handle_save()` | Processa formulário | ✅ Inclui novas opções |
+| `log()` | **NOVO** Logging | ✅ Integra DPS_Logger |
 | `render_admin_page()` | 99-246 | Renderiza configurações | ⚠️ 147 linhas, muito grande |
 | `activate()` | 251-271 | Agenda cron jobs | ✅ Correto |
 | `deactivate()` | 276-280 | Limpa cron jobs | ✅ Correto |
@@ -572,31 +602,31 @@ A interface administrativa é **funcional mas básica**, usando apenas estilos n
 
 ## 6. Plano de Refatoração Priorizado
 
-### Fase 1: Correções Críticas (4-8h)
+### Fase 1: Correções Críticas (4-8h) ✅ CONCLUÍDA
 
-- [ ] Corrigir uninstall.php (hooks e options)
-- [ ] Adicionar integração com DPS_Logger
-- [ ] Documentar threshold de inatividade (30 dias)
+- [x] Corrigir uninstall.php (hooks e options)
+- [x] Adicionar integração com DPS_Logger
+- [x] Documentar threshold de inatividade (30 dias)
 
-### Fase 2: Melhorias de UX (8-12h)
+### Fase 2: Melhorias de UX (8-12h) ✅ CONCLUÍDA
 
-- [ ] Adicionar checkbox habilitar/desabilitar
-- [ ] Implementar botão "Enviar Teste"
-- [ ] Adicionar threshold configurável
-- [ ] Melhorar feedback visual (DPS_Message_Helper)
+- [x] Adicionar checkbox habilitar/desabilitar
+- [x] Implementar botão "Enviar Teste"
+- [x] Adicionar threshold configurável
+- [x] Melhorar feedback visual (status card + CSS)
 
-### Fase 3: Integração com Sistema (8-16h)
+### Fase 3: Integração com Sistema (8-16h) ✅ PARCIALMENTE CONCLUÍDA
 
-- [ ] Integrar com DPS_Communications_API
-- [ ] Integrar com DPS_Finance_API
-- [ ] Adicionar botão "Testar Conexão Telegram"
+- [ ] Integrar com DPS_Communications_API (futuro)
+- [ ] Integrar com DPS_Finance_API (futuro)
+- [x] Adicionar botão "Testar Conexão Telegram"
 
-### Fase 4: Modularização (16-24h)
+### Fase 4: Modularização (16-24h) ✅ PARCIALMENTE CONCLUÍDA
 
-- [ ] Separar classes por responsabilidade
-- [ ] Criar templates para emails
-- [ ] Extrair CSS para arquivo externo
-- [ ] Implementar histórico de envios
+- [ ] Separar classes por responsabilidade (futuro)
+- [ ] Criar templates para emails (futuro)
+- [x] Extrair CSS para arquivo externo
+- [ ] Implementar histórico de envios (futuro)
 
 ---
 

@@ -35,6 +35,11 @@ $options = [
     'dps_push_weekly_time',
     'dps_push_telegram_token',
     'dps_push_telegram_chat',
+    // Novas options v1.1.0
+    'dps_push_agenda_enabled',
+    'dps_push_report_enabled',
+    'dps_push_weekly_enabled',
+    'dps_push_inactive_days',
     // Options legacy (fallback)
     'dps_push_agenda_hour',
     'dps_push_report_hour',
