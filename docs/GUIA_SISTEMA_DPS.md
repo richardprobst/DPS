@@ -4,7 +4,7 @@
 
 **Sistema de Gestão para Pet Shops Especializados em Banho e Tosa**
 
-*Versão 1.0 | Última atualização: Dezembro 2024*
+*Versão 1.1 | Última atualização: Dezembro 2024*
 
 ---
 
@@ -435,7 +435,14 @@ O webhook permite que pagamentos sejam confirmados automaticamente.
 
 **Templates de Mensagem:**
 
-Configure templates para automações:
+Configure templates para automações usando placeholders:
+
+| Placeholder | Descrição |
+|-------------|-----------|
+| `{client_name}` | Nome do cliente |
+| `{pet_name}` | Nome do pet |
+| `{date}` | Data do agendamento |
+| `{time}` | Horário do agendamento |
 
 ```
 Template de Confirmação:
@@ -447,6 +454,13 @@ Template de Lembrete:
 Template Pós-Atendimento:
 "Obrigado por trazer {pet_name}! Esperamos que tenha gostado do nosso serviço. ⭐"
 ```
+
+**API Centralizada:**
+
+Todos os envios de mensagens são processados pela `DPS_Communications_API`, garantindo:
+- Logs automáticos de todos os envios
+- Substituição de placeholders
+- Tratamento de erros consistente
 
 ---
 
@@ -631,21 +645,46 @@ Não requer configuração específica. Acesse a aba **Estatísticas** no painel
 
 ### 12. Groomers Add-on
 
-**Propósito:** Gestão de profissionais/tosadores
+**Propósito:** Gestão de profissionais/tosadores com portal exclusivo
 
 **Configuração:**
 
 1. Acesse a aba **Groomers** no painel
 2. Cadastre profissionais:
-   - Nome
-   - Especialidades
-   - Horários de trabalho
+   - Nome e e-mail
+   - Telefone
+   - Percentual de comissão
+   - Status (ativo/inativo)
 3. Vincule agendamentos a groomers específicos
 
-**Relatórios:**
-- Produtividade por profissional
-- Atendimentos por período
-- Avaliações de clientes (se integrado)
+**Funcionalidades:**
+- CRUD completo: cadastro, edição e exclusão de groomers
+- Vinculação de múltiplos groomers por atendimento
+- Exportação de relatórios em CSV
+
+**Relatórios de Produtividade:**
+- Cards com métricas: atendimentos, receita total, ticket médio
+- Filtro por profissional e período
+- Coluna de pet na tabela de resultados
+- Exportação para CSV com totais
+
+**Portal do Groomer (Acesso via Token):**
+
+O groomer possui um portal exclusivo para acompanhar sua agenda e desempenho:
+
+1. Acesse **Configurações DPS > Logins de Groomers**
+2. Selecione o tipo de token:
+   - **Temporário (30min)**: ideal para envio por WhatsApp
+   - **Permanente**: válido até revogação manual
+3. Clique em **Gerar Link** e envie ao profissional
+4. Groomer acessa dashboard, agenda semanal e avaliações
+
+| Funcionalidade | Descrição |
+|---------------|-----------|
+| Dashboard | Métricas pessoais com gráficos |
+| Agenda Semanal | Visualização de agendamentos |
+| Avaliações | Feedback dos clientes |
+| Comissões | Valores a receber |
 
 ---
 
@@ -1044,8 +1083,12 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `[dps_configuracoes]` | Base | Tela de configurações |
 | `[dps_agenda_page]` | Agenda | Visualização da agenda |
 | `[dps_client_portal]` | Portal | Portal do cliente |
-| `[dps_client_login]` | Portal | Formulário de login |
+| `[dps_client_login]` | Portal | Página de acesso do cliente |
 | `[dps_registration_form]` | Cadastro | Formulário público de cadastro |
+| `[dps_groomer_portal]` | Groomers | Portal completo do groomer |
+| `[dps_groomer_login]` | Groomers | Página de login do groomer |
+| `[dps_groomer_dashboard]` | Groomers | Dashboard individual (param: `groomer_id`) |
+| `[dps_groomer_agenda]` | Groomers | Agenda semanal (param: `groomer_id`) |
 
 ### Roles e Capabilities
 
@@ -1090,7 +1133,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `wp_dps_transacoes` | Financeiro | Lançamentos financeiros |
 | `wp_dps_parcelas` | Financeiro | Parcelas de cobranças |
 | `wp_dps_referrals` | Fidelidade | Indicações de clientes |
-| `wp_dps_portal_tokens` | Portal | Tokens de acesso |
+| `wp_dps_portal_tokens` | Portal | Tokens de acesso de clientes |
+| `wp_dps_groomer_tokens` | Groomers | Tokens de acesso de groomers |
 
 ---
 
