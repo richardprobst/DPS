@@ -77,7 +77,10 @@ class DPS_Groomers_Addon {
     public function enqueue_frontend_assets() {
         // Verifica se estamos em uma página com o shortcode do DPS base
         global $post;
-        if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'dps_base' ) ) {
+        if ( ! $post || ! is_a( $post, 'WP_Post' ) ) {
+            return;
+        }
+        if ( ! isset( $post->post_content ) || ! has_shortcode( $post->post_content, 'dps_base' ) ) {
             return;
         }
 
@@ -717,14 +720,23 @@ class DPS_Groomers_Addon {
 
         // Fallback: query direta ao banco
         global $wpdb;
-        $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-        $table        = $wpdb->prefix . 'dps_transacoes';
+        
+        // Sanitiza e valida IDs
+        $sanitized_ids = array_map( 'absint', $ids );
+        $sanitized_ids = array_filter( $sanitized_ids );
+        
+        if ( empty( $sanitized_ids ) ) {
+            return 0.0;
+        }
+        
+        $placeholders = implode( ',', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+        $table_name   = $wpdb->prefix . 'dps_transacoes';
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders são gerados dinamicamente mas de forma segura
         $total = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT SUM(valor) FROM {$table} WHERE status = 'pago' AND tipo = 'receita' AND agendamento_id IN ($placeholders)",
-                ...$ids
+                "SELECT SUM(valor) FROM {$table_name} WHERE status = 'pago' AND tipo = 'receita' AND agendamento_id IN ($placeholders)",
+                ...$sanitized_ids
             )
         );
 

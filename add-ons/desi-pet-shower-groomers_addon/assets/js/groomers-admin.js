@@ -31,7 +31,7 @@
             $(document).on('click', '.dps-delete-groomer', this.confirmDelete);
             
             // Desabilita botão durante submit
-            $(document).on('submit', '.dps-groomers-form form', this.handleFormSubmit);
+            $(document).on('submit', '.dps-groomers-form', this.handleFormSubmit);
             
             // Validação em tempo real
             $(document).on('blur', '.dps-groomers-form input[required]', this.validateField);
@@ -116,11 +116,26 @@
         },
 
         /**
-         * Valida formato de email
+         * Valida formato de email.
+         * 
+         * Usa validação HTML5 nativa quando disponível, com fallback para regex básico.
+         * O input já é do tipo email, então o navegador faz validação principal.
+         * Este método é uma validação adicional de UX.
+         *
          * @param {string} email Email a validar
          * @returns {boolean}
          */
         isValidEmail: function(email) {
+            // Tenta usar a validação nativa do HTML5 se disponível
+            var emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.value = email;
+            
+            if (typeof emailInput.checkValidity === 'function') {
+                return emailInput.checkValidity();
+            }
+            
+            // Fallback: regex básico para navegadores antigos
             var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return regex.test(email);
         },
