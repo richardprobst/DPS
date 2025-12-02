@@ -107,25 +107,33 @@ Cada item possui:
 
 Na aba "Estoque" do painel frontend, você pode:
 
+- **Adicionar novos itens** diretamente (botão "Adicionar Item")
+- **Gerenciar itens no admin** (botão "Gerenciar no Admin")
 - **Ver todos os itens** cadastrados com quantidades atuais
 - **Filtrar por críticos** (itens abaixo do mínimo)
 - **Ver alertas** de estoque baixo com data de registro
+- **Editar itens** rapidamente (coluna de ações)
 - **Paginar** resultados (50 itens por página)
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│ Estoque DPS                                                    │
-├────────────────────────────────────────────────────────────────┤
-│ [Mostrar apenas críticos] [Exportar estoque (em breve)]        │
-│ Cadastre os itens em "Todos os itens" para controlar insumos.  │
-├─────────────────────────────────────────────────────────────────┤
-│ Item              │ Unidade │ Qtd. atual │ Qtd. mínima │ Status │
-│───────────────────│─────────│────────────│─────────────│────────│
-│ Shampoo Neutro    │ litro   │ 3.5        │ 2           │ ✓ OK   │
-│ Condicionador     │ litro   │ 0.8        │ 1           │ ⚠ Baixo│
-│ Toalha Descartável│ unidade │ 45         │ 50          │ ⚠ Baixo│
-└────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│ Estoque de Insumos                                                   │
+├──────────────────────────────────────────────────────────────────────┤
+│ [+ Adicionar Item] [Gerenciar no Admin] [Mostrar apenas críticos]    │
+│                                                                      │
+│ ⚠️ 2 itens abaixo do mínimo                                          │
+├──────────────────────────────────────────────────────────────────────┤
+│ Item              │ Unidade │ Qtd. atual │ Qtd. mínima │ Status │ ✎  │
+│───────────────────│─────────│────────────│─────────────│────────│────│
+│ Shampoo Neutro    │ litro   │ 3.50       │ 2.00        │ ✓ OK   │ ✎  │
+│ Condicionador     │ litro   │ 0.80       │ 1.00        │ ⚠️ Baixo│ ✎  │
+│ Toalha Descartável│ unidade │ 45.00      │ 50.00       │ ⚠️ Baixo│ ✎  │
+└──────────────────────────────────────────────────────────────────────┘
 ```
+
+**Requisitos de acesso**: A aba "Estoque" aparece para usuários com:
+- Capability `dps_manage_stock` (atribuída na ativação do plugin)
+- **OU** capability `manage_options` (administradores WordPress)
 
 ### 3.3 Baixa Automática de Estoque
 
@@ -286,6 +294,17 @@ Estrutura:
 
 ## 7. Perguntas Frequentes
 
+### "A aba Estoque não aparece para mim!"
+
+A aba "Estoque" requer uma das seguintes permissões:
+- **`manage_options`** (administrador WordPress) — sempre funciona
+- **`dps_manage_stock`** (capability customizada)
+
+**Soluções:**
+1. Verifique se você está logado como **administrador**
+2. Se você é administrador e ainda não vê, **desative e reative** o Add-on Estoque para reassociar a capability
+3. Confirme que o Add-on Estoque está **ativo** em Plugins
+
 ### "Por que vejo Estoque na aba Serviços?"
 
 Você está vendo a **integração** de consumo de estoque, não o módulo de Estoque em si. É onde você configura *quanto* de cada insumo é usado por serviço. Para gerenciar os itens de estoque (cadastrar, ver quantidades, alertas), use a aba "Estoque".
@@ -296,7 +315,9 @@ Você está vendo a **integração** de consumo de estoque, não o módulo de Es
 
 ### "Como adiciono mais itens de estoque?"
 
-Vá ao Admin WordPress → Desi Pet Shower → (procure por "Itens de Estoque" ou similar). Use a interface padrão do WordPress para adicionar novos itens. Depois, eles aparecerão nos dropdowns do cadastro de Serviços.
+**Opção 1 (Rápido)**: Na aba "Estoque" do painel DPS, clique no botão **"Adicionar Item"** no topo.
+
+**Opção 2 (Completo)**: Clique em **"Gerenciar no Admin"** para acessar a interface administrativa completa do WordPress.
 
 ### "Por que o estoque não está baixando automaticamente?"
 
