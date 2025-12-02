@@ -5,6 +5,7 @@
  * 
  * @package Desi_Pet_Shower_Groomers
  * @since 1.1.0
+ * @updated 1.2.0 - Adicionado modal de edição e confirmação melhorada de exclusão
  */
 
 (function($) {
@@ -30,6 +31,14 @@
             // Confirmação de exclusão de groomer
             $(document).on('click', '.dps-delete-groomer', this.confirmDelete);
             
+            // Abrir modal de edição
+            $(document).on('click', '.dps-edit-groomer', this.openEditModal);
+            
+            // Fechar modal
+            $(document).on('click', '.dps-modal-close, .dps-modal-cancel', this.closeModal);
+            $(document).on('click', '.dps-modal', this.closeModalOnOverlay);
+            $(document).on('keydown', this.closeModalOnEsc);
+            
             // Desabilita botão durante submit
             $(document).on('submit', '.dps-groomers-form', this.handleFormSubmit);
             
@@ -44,8 +53,16 @@
          */
         confirmDelete: function(e) {
             var groomerName = $(this).data('groomer-name') || 'este groomer';
-            var message = 'Tem certeza que deseja excluir ' + groomerName + '?\n\n';
-            message += 'Esta ação não pode ser desfeita. Os atendimentos vinculados permanecerão sem groomer associado.';
+            var appointmentsCount = $(this).data('appointments') || 0;
+            
+            var message = 'Tem certeza que deseja excluir "' + groomerName + '"?\n\n';
+            
+            if (appointmentsCount > 0) {
+                message += '⚠️ Este groomer possui ' + appointmentsCount + ' agendamento(s) vinculado(s).\n';
+                message += 'Os agendamentos serão mantidos, mas ficarão sem groomer associado.\n\n';
+            }
+            
+            message += 'Esta ação não pode ser desfeita.';
             
             if (!confirm(message)) {
                 e.preventDefault();
@@ -53,6 +70,66 @@
             }
             
             return true;
+        },
+
+        /**
+         * Abre modal de edição de groomer
+         * @param {Event} e Evento de clique
+         */
+        openEditModal: function(e) {
+            e.preventDefault();
+            
+            var $button = $(this);
+            var groomerId = $button.data('groomer-id');
+            var groomerName = $button.data('groomer-name') || '';
+            var groomerEmail = $button.data('groomer-email') || '';
+            
+            var $modal = $('#dps-edit-groomer-modal');
+            
+            // Preenche os campos do modal
+            $modal.find('#edit_groomer_id').val(groomerId);
+            $modal.find('#edit_groomer_name').val(groomerName);
+            $modal.find('#edit_groomer_email').val(groomerEmail);
+            
+            // Exibe o modal
+            $modal.fadeIn(200);
+            
+            // Foca no primeiro campo
+            setTimeout(function() {
+                $modal.find('#edit_groomer_name').focus();
+            }, 250);
+        },
+
+        /**
+         * Fecha o modal
+         * @param {Event} e Evento de clique
+         */
+        closeModal: function(e) {
+            e.preventDefault();
+            $('#dps-edit-groomer-modal').fadeOut(200);
+        },
+
+        /**
+         * Fecha o modal ao clicar no overlay
+         * @param {Event} e Evento de clique
+         */
+        closeModalOnOverlay: function(e) {
+            if ($(e.target).hasClass('dps-modal')) {
+                $(this).fadeOut(200);
+            }
+        },
+
+        /**
+         * Fecha o modal ao pressionar ESC
+         * @param {Event} e Evento de teclado
+         */
+        closeModalOnEsc: function(e) {
+            if (e.keyCode === 27) { // ESC
+                var $modal = $('#dps-edit-groomer-modal');
+                if ($modal.is(':visible')) {
+                    $modal.fadeOut(200);
+                }
+            }
         },
 
         /**
@@ -76,7 +153,7 @@
          * Inicializa validação do formulário
          */
         initFormValidation: function() {
-            var $form = $('.dps-groomers-form form');
+            var $form = $('.dps-groomers-form');
             
             if ($form.length === 0) {
                 return;

@@ -3,7 +3,7 @@
  * Plugin Name:       Desi Pet Shower – Groomers Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
  * Description:       Add-on para cadastrar groomers, vincular atendimentos e gerar relatórios por profissional.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-groomers-addon
@@ -55,7 +55,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
 
     /**
      * Inicializa hooks do add-on.
@@ -67,6 +67,9 @@ class DPS_Groomers_Addon {
         add_action( 'dps_base_after_save_appointment', [ $this, 'save_appointment_groomers' ], 10, 2 );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+        
+        // Handlers para edição, exclusão e exportação
+        add_action( 'init', [ $this, 'handle_groomer_actions' ] );
     }
 
     /**
@@ -128,6 +131,361 @@ class DPS_Groomers_Addon {
             true
         );
         wp_enqueue_script( 'dps-groomers-admin' );
+    }
+
+    /**
+     * Processa ações de edição, exclusão e exportação de groomers.
+     *
+     * @since 1.2.0
+     */
+    public function handle_groomer_actions() {
+        // Não processar se não houver ação
+        if ( ! isset( $_REQUEST['dps_groomer_action'] ) ) {
+            return;
+        }
+
+        // Verificar permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $action = sanitize_text_field( wp_unslash( $_REQUEST['dps_groomer_action'] ) );
+
+        switch ( $action ) {
+            case 'delete':
+                $this->handle_delete_groomer();
+                break;
+            case 'update':
+                $this->handle_update_groomer();
+                break;
+            case 'export_csv':
+                $this->handle_export_csv();
+                break;
+        }
+    }
+
+    /**
+     * Processa exclusão de groomer.
+     *
+     * @since 1.2.0
+     */
+    private function handle_delete_groomer() {
+        if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            return;
+        }
+
+        $groomer_id = absint( $_GET['groomer_id'] );
+        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        if ( ! wp_verify_nonce( $nonce, 'dps_delete_groomer_' . $groomer_id ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $user = get_user_by( 'id', $groomer_id );
+        if ( ! $user || ! in_array( 'dps_groomer', (array) $user->roles, true ) ) {
+            DPS_Message_Helper::add_error( __( 'Groomer não encontrado.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        // Verificar se o usuário tem roles privilegiadas (proteção adicional)
+        $privileged_roles = [ 'administrator', 'editor', 'author' ];
+        foreach ( $privileged_roles as $role ) {
+            if ( in_array( $role, (array) $user->roles, true ) ) {
+                DPS_Message_Helper::add_error( __( 'Não é possível excluir usuários com permissões elevadas.', 'dps-groomers-addon' ) );
+                return;
+            }
+        }
+
+        // Verificar se há agendamentos vinculados
+        $linked_appointments = $this->get_groomer_appointments_count( $groomer_id );
+        
+        // Excluir o usuário
+        require_once ABSPATH . 'wp-admin/includes/user.php';
+        $result = wp_delete_user( $groomer_id );
+
+        if ( $result ) {
+            $message = sprintf(
+                /* translators: %1$s: groomer name, %2$d: number of appointments */
+                __( 'Groomer "%1$s" excluído com sucesso. %2$d agendamento(s) mantido(s) sem groomer vinculado.', 'dps-groomers-addon' ),
+                $user->display_name ? $user->display_name : $user->user_login,
+                $linked_appointments
+            );
+            DPS_Message_Helper::add_success( $message );
+        } else {
+            DPS_Message_Helper::add_error( __( 'Erro ao excluir groomer.', 'dps-groomers-addon' ) );
+        }
+
+        // Redirecionar para evitar resubmissão
+        $redirect_url = remove_query_arg( [ 'dps_groomer_action', 'groomer_id', '_wpnonce' ] );
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Conta quantos agendamentos estão vinculados a um groomer.
+     *
+     * @since 1.2.0
+     *
+     * @param int $groomer_id ID do groomer.
+     * @return int Número de agendamentos.
+     */
+    private function get_groomer_appointments_count( $groomer_id ) {
+        $appointments = get_posts(
+            [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'meta_query'     => [
+                    [
+                        'key'     => '_dps_groomers',
+                        'value'   => '"' . $groomer_id . '"',
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ]
+        );
+
+        return count( $appointments );
+    }
+
+    /**
+     * Processa atualização de groomer.
+     *
+     * @since 1.2.0
+     */
+    private function handle_update_groomer() {
+        if ( ! isset( $_POST['dps_edit_groomer_nonce'] ) ) {
+            return;
+        }
+
+        if ( ! wp_verify_nonce( wp_unslash( $_POST['dps_edit_groomer_nonce'] ), 'dps_edit_groomer' ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $groomer_id = isset( $_POST['groomer_id'] ) ? absint( $_POST['groomer_id'] ) : 0;
+        if ( ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $user = get_user_by( 'id', $groomer_id );
+        if ( ! $user || ! in_array( 'dps_groomer', (array) $user->roles, true ) ) {
+            DPS_Message_Helper::add_error( __( 'Groomer não encontrado.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $email = isset( $_POST['dps_groomer_email'] ) ? sanitize_email( wp_unslash( $_POST['dps_groomer_email'] ) ) : '';
+        $name  = isset( $_POST['dps_groomer_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_groomer_name'] ) ) : '';
+
+        $update_data = [
+            'ID' => $groomer_id,
+        ];
+
+        if ( $email && $email !== $user->user_email ) {
+            // Verificar se email já existe para outro usuário
+            $existing = get_user_by( 'email', $email );
+            if ( $existing && $existing->ID !== $groomer_id ) {
+                DPS_Message_Helper::add_error( __( 'Este email já está em uso por outro usuário.', 'dps-groomers-addon' ) );
+                return;
+            }
+            $update_data['user_email'] = $email;
+        }
+
+        if ( $name ) {
+            $update_data['display_name'] = $name;
+        }
+
+        $result = wp_update_user( $update_data );
+
+        if ( is_wp_error( $result ) ) {
+            DPS_Message_Helper::add_error( $result->get_error_message() );
+        } else {
+            DPS_Message_Helper::add_success( __( 'Groomer atualizado com sucesso.', 'dps-groomers-addon' ) );
+        }
+    }
+
+    /**
+     * Processa exportação de relatório em CSV.
+     *
+     * @since 1.2.0
+     */
+    private function handle_export_csv() {
+        if ( ! isset( $_GET['_wpnonce'] ) ) {
+            return;
+        }
+
+        if ( ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'dps_export_csv' ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $groomer_id = isset( $_GET['groomer_id'] ) ? absint( $_GET['groomer_id'] ) : 0;
+        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : '';
+        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : '';
+
+        if ( ! $groomer_id || ! $start_date || ! $end_date ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros inválidos para exportação.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer ) {
+            DPS_Message_Helper::add_error( __( 'Groomer não encontrado.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        // Buscar agendamentos
+        $appointments = get_posts(
+            [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => 500,
+                'post_status'    => 'publish',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $start_date,
+                        'compare' => '>=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => $end_date,
+                        'compare' => '<=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => '_dps_groomers',
+                        'value'   => '"' . $groomer_id . '"',
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ]
+        );
+
+        // Gerar nome do arquivo de forma segura (usando apenas ID e datas)
+        // Evita problemas de header injection com nomes de usuário
+        $filename = sprintf(
+            'relatorio-groomer-%d-%s-a-%s.csv',
+            $groomer_id,
+            preg_replace( '/[^0-9-]/', '', $start_date ),
+            preg_replace( '/[^0-9-]/', '', $end_date )
+        );
+
+        // Headers para download
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+
+        // BOM para UTF-8 no Excel
+        echo "\xEF\xBB\xBF";
+
+        $output = fopen( 'php://output', 'w' );
+        
+        // Informações do relatório (nome do groomer e período)
+        $groomer_display_name = $groomer->display_name ? $groomer->display_name : $groomer->user_login;
+        fputcsv( $output, [
+            __( 'Relatório de Produtividade', 'dps-groomers-addon' ),
+        ], ';' );
+        fputcsv( $output, [
+            __( 'Groomer:', 'dps-groomers-addon' ),
+            $groomer_display_name,
+        ], ';' );
+        fputcsv( $output, [
+            __( 'Período:', 'dps-groomers-addon' ),
+            date_i18n( 'd/m/Y', strtotime( $start_date ) ) . ' - ' . date_i18n( 'd/m/Y', strtotime( $end_date ) ),
+        ], ';' );
+        fputcsv( $output, [], ';' ); // Linha em branco
+        
+        // Cabeçalhos do CSV
+        fputcsv( $output, [
+            __( 'Data', 'dps-groomers-addon' ),
+            __( 'Horário', 'dps-groomers-addon' ),
+            __( 'Cliente', 'dps-groomers-addon' ),
+            __( 'Pet', 'dps-groomers-addon' ),
+            __( 'Status', 'dps-groomers-addon' ),
+            __( 'Valor', 'dps-groomers-addon' ),
+        ], ';' );
+
+        // Dados
+        $total_revenue = 0;
+        foreach ( $appointments as $appointment ) {
+            $date      = get_post_meta( $appointment->ID, 'appointment_date', true );
+            $time      = get_post_meta( $appointment->ID, 'appointment_time', true );
+            $client_id = get_post_meta( $appointment->ID, 'appointment_client_id', true );
+            $pet_ids   = get_post_meta( $appointment->ID, 'appointment_pet_ids', true );
+            $status    = get_post_meta( $appointment->ID, 'appointment_status', true );
+
+            $client_name = $client_id ? get_the_title( $client_id ) : '-';
+
+            // Obter nome(s) do(s) pet(s)
+            $pet_names = [];
+            if ( is_array( $pet_ids ) ) {
+                foreach ( $pet_ids as $pet_id ) {
+                    $pet_name = get_the_title( $pet_id );
+                    if ( $pet_name ) {
+                        $pet_names[] = $pet_name;
+                    }
+                }
+            }
+            $pet_display = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : '-';
+
+            // Formatar data
+            $date_display = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '-';
+
+            // Valor do agendamento (se disponível)
+            $valor = $this->get_appointment_value( $appointment->ID );
+            $total_revenue += $valor;
+
+            fputcsv( $output, [
+                $date_display,
+                $time ? $time : '-',
+                $client_name,
+                $pet_display,
+                $status ? ucfirst( $status ) : __( 'Pendente', 'dps-groomers-addon' ),
+                number_format_i18n( $valor, 2 ),
+            ], ';' );
+        }
+
+        // Linha de totais
+        fputcsv( $output, [], ';' );
+        fputcsv( $output, [
+            __( 'TOTAL', 'dps-groomers-addon' ),
+            '',
+            '',
+            '',
+            count( $appointments ) . ' ' . __( 'atendimentos', 'dps-groomers-addon' ),
+            'R$ ' . number_format_i18n( $total_revenue, 2 ),
+        ], ';' );
+
+        fclose( $output );
+        exit;
+    }
+
+    /**
+     * Obtém o valor de um agendamento.
+     *
+     * @since 1.2.0
+     *
+     * @param int $appointment_id ID do agendamento.
+     * @return float Valor do agendamento.
+     */
+    private function get_appointment_value( $appointment_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+
+        $valor = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE agendamento_id = %d AND tipo = 'receita'",
+                $appointment_id
+            )
+        );
+
+        return (float) $valor;
     }
 
     /**
@@ -468,24 +826,87 @@ class DPS_Groomers_Addon {
                                 <th><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></th>
                                 <th><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?></th>
                                 <th><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Ações', 'dps-groomers-addon' ); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php if ( empty( $groomers ) ) : ?>
                             <tr>
-                                <td colspan="3" class="dps-empty-message"><?php echo esc_html__( 'Nenhum groomer cadastrado ainda. Use o formulário ao lado para adicionar o primeiro profissional.', 'dps-groomers-addon' ); ?></td>
+                                <td colspan="4" class="dps-empty-message"><?php echo esc_html__( 'Nenhum groomer cadastrado ainda. Use o formulário ao lado para adicionar o primeiro profissional.', 'dps-groomers-addon' ); ?></td>
                             </tr>
                         <?php else : ?>
-                            <?php foreach ( $groomers as $groomer ) : ?>
+                            <?php foreach ( $groomers as $groomer ) : 
+                                $delete_url = wp_nonce_url(
+                                    add_query_arg(
+                                        [
+                                            'dps_groomer_action' => 'delete',
+                                            'groomer_id'         => $groomer->ID,
+                                        ]
+                                    ),
+                                    'dps_delete_groomer_' . $groomer->ID
+                                );
+                                $appointments_count = $this->get_groomer_appointments_count( $groomer->ID );
+                                ?>
                                 <tr>
                                     <td><strong><?php echo esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?></strong></td>
                                     <td><?php echo esc_html( $groomer->user_login ); ?></td>
                                     <td><?php echo esc_html( $groomer->user_email ); ?></td>
+                                    <td class="dps-actions">
+                                        <button type="button" 
+                                            class="dps-action-link dps-edit-groomer" 
+                                            data-groomer-id="<?php echo esc_attr( $groomer->ID ); ?>"
+                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ); ?>"
+                                            data-groomer-email="<?php echo esc_attr( $groomer->user_email ); ?>"
+                                            title="<?php echo esc_attr__( 'Editar groomer', 'dps-groomers-addon' ); ?>">
+                                            ✏️ <?php echo esc_html__( 'Editar', 'dps-groomers-addon' ); ?>
+                                        </button>
+                                        <a href="<?php echo esc_url( $delete_url ); ?>" 
+                                            class="dps-action-link dps-action-link--delete dps-delete-groomer"
+                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
+                                            data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
+                                            title="<?php echo esc_attr__( 'Excluir groomer', 'dps-groomers-addon' ); ?>">
+                                            🗑️ <?php echo esc_html__( 'Excluir', 'dps-groomers-addon' ); ?>
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Modal de Edição de Groomer -->
+            <div id="dps-edit-groomer-modal" class="dps-modal" style="display: none;">
+                <div class="dps-modal-content">
+                    <div class="dps-modal-header">
+                        <h4><?php echo esc_html__( 'Editar Groomer', 'dps-groomers-addon' ); ?></h4>
+                        <button type="button" class="dps-modal-close">&times;</button>
+                    </div>
+                    <form method="post" action="" class="dps-groomers-form">
+                        <?php wp_nonce_field( 'dps_edit_groomer', 'dps_edit_groomer_nonce' ); ?>
+                        <input type="hidden" name="dps_groomer_action" value="update" />
+                        <input type="hidden" name="groomer_id" id="edit_groomer_id" value="" />
+                        
+                        <div class="dps-modal-body">
+                            <div class="dps-form-field">
+                                <label for="edit_groomer_name"><?php echo esc_html__( 'Nome completo', 'dps-groomers-addon' ); ?></label>
+                                <input type="text" name="dps_groomer_name" id="edit_groomer_name" class="regular-text" />
+                            </div>
+                            <div class="dps-form-field">
+                                <label for="edit_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                <input type="email" name="dps_groomer_email" id="edit_groomer_email" class="regular-text" required />
+                            </div>
+                            <p class="dps-modal-note">
+                                <?php echo esc_html__( 'Nota: O nome de usuário não pode ser alterado após a criação.', 'dps-groomers-addon' ); ?>
+                            </p>
+                        </div>
+                        
+                        <div class="dps-modal-footer">
+                            <button type="button" class="dps-btn dps-btn--secondary dps-modal-cancel"><?php echo esc_html__( 'Cancelar', 'dps-groomers-addon' ); ?></button>
+                            <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Salvar alterações', 'dps-groomers-addon' ); ?></button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -626,6 +1047,26 @@ class DPS_Groomers_Addon {
                     <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_amount / count( $appointments ), 2 ) ); ?></span>
                 </div>
                 <?php endif; ?>
+            </div>
+            
+            <!-- Botão de Exportação CSV -->
+            <?php
+            $export_url = wp_nonce_url(
+                add_query_arg(
+                    [
+                        'dps_groomer_action' => 'export_csv',
+                        'groomer_id'         => $selected,
+                        'start_date'         => $start_date,
+                        'end_date'           => $end_date,
+                    ]
+                ),
+                'dps_export_csv'
+            );
+            ?>
+            <div class="dps-export-actions">
+                <a href="<?php echo esc_url( $export_url ); ?>" class="dps-btn dps-btn--secondary" target="_blank">
+                    📊 <?php echo esc_html__( 'Exportar CSV', 'dps-groomers-addon' ); ?>
+                </a>
             </div>
             
             <!-- Tabela de Resultados -->

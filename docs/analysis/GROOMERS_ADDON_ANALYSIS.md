@@ -363,16 +363,21 @@ A interface do add-on é **funcional mas básica**, sem os refinamentos visuais 
 
 ### 4.2 Melhorias de Funcionalidades
 
+> **Status v1.2.0:** Itens 1 e 2 foram implementados nesta versão.
+
 #### Prioridade Alta
 
-1. **Edição e exclusão de groomers**
-   - Botões de ação na tabela de listagem
-   - Modal de confirmação para exclusão
-   - Verificar impacto em agendamentos existentes
+1. ✅ ~~**Edição e exclusão de groomers**~~ - **IMPLEMENTADO v1.2.0**
+   - ✅ Botões de ação na tabela de listagem (Editar e Excluir)
+   - ✅ Modal de edição para nome e email
+   - ✅ Confirmação de exclusão com aviso de agendamentos vinculados
+   - ✅ Handlers seguros com nonces
 
-2. **Exportação de relatórios**
-   - Botão "Exportar CSV" no relatório
-   - Incluir: data, horário, cliente, pet, status, valor
+2. ✅ ~~**Exportação de relatórios**~~ - **IMPLEMENTADO v1.2.0**
+   - ✅ Botão "Exportar CSV" no relatório
+   - ✅ Inclui: data, horário, cliente, pet, status, valor
+   - ✅ Linha de totais no final do arquivo
+   - ✅ BOM UTF-8 para compatibilidade com Excel
 
 3. **Indicador de status do groomer**
    - Campo para ativar/desativar groomer

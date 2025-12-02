@@ -8,17 +8,21 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 
 ### Funcionalidades principais
 - ✅ Cadastro de profissionais via role customizada do WordPress
+- ✅ Edição e exclusão de groomers via interface
 - ✅ Vinculação de múltiplos groomers por atendimento
 - ✅ Relatórios de produtividade por profissional
+- ✅ Exportação de relatórios em CSV
 - ✅ Métricas: total de atendimentos, receita, ticket médio
 - ✅ Listagem de atendimentos por groomer com detalhes de cliente e pet
 - ✅ Interface integrada ao painel principal do sistema
 - ✅ CSS externo seguindo padrão visual minimalista do DPS
 - ✅ Formulários com fieldsets e indicadores de campos obrigatórios
+- ✅ Modal de edição com validação
+- ✅ Confirmação de exclusão com aviso de agendamentos vinculados
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
-**Versão atual**: 1.1.0
+**Versão atual**: 1.2.0
 
 ## Localização e identificação
 
@@ -34,9 +38,9 @@ add-ons/desi-pet-shower-groomers_addon/
 ├── desi-pet-shower-groomers-addon.php   # Arquivo principal
 ├── assets/
 │   ├── css/
-│   │   └── groomers-admin.css           # Estilos da interface
+│   │   └── groomers-admin.css           # Estilos da interface (~600 linhas)
 │   └── js/
-│       └── groomers-admin.js            # Interatividade e validações
+│       └── groomers-admin.js            # Interatividade, modal e validações
 ├── README.md                             # Esta documentação
 └── uninstall.php                         # Limpeza na desinstalação
 ```
@@ -110,18 +114,33 @@ Role criada na ativação do plugin para identificar profissionais.
    - Preencha o formulário "Adicionar novo groomer"
    - Clique em "Criar groomer"
 
-2. **Vincular groomer a atendimento**:
+2. **Editar groomer**:
+   - Na tabela de groomers, clique em "✏️ Editar"
+   - Modifique o nome ou email no modal
+   - Clique em "Salvar alterações"
+
+3. **Excluir groomer**:
+   - Na tabela de groomers, clique em "🗑️ Excluir"
+   - Confirme a exclusão (será informado quantos agendamentos estão vinculados)
+   - Agendamentos vinculados são mantidos sem groomer associado
+
+4. **Vincular groomer a atendimento**:
    - Ao criar/editar agendamento
    - Localize o campo "Groomers responsáveis"
    - Selecione um ou mais profissionais (Ctrl+clique para múltiplos)
    - Salve o agendamento
 
-3. **Visualizar relatórios**:
+5. **Visualizar relatórios**:
    - Na aba "Groomers", role até "Relatório por Groomer"
    - Selecione o profissional
    - Defina período (data inicial e final)
    - Clique em "Gerar relatório"
    - Visualize métricas e lista de atendimentos
+
+6. **Exportar relatório**:
+   - Após gerar o relatório, clique em "📊 Exportar CSV"
+   - O arquivo inclui: data, horário, cliente, pet, status, valor
+   - Linha de totais no final do arquivo
 
 ### Para recepcionistas
 
@@ -129,6 +148,21 @@ Role criada na ativação do plugin para identificar profissionais.
 - Sistema valida se os usuários selecionados têm a role correta
 
 ## Changelog
+
+### [1.2.0] - 2025-12-02
+
+#### Added
+- Coluna "Ações" na tabela de groomers com botões Editar e Excluir
+- Modal de edição de groomer (nome e email)
+- Confirmação de exclusão com aviso de agendamentos vinculados
+- Botão "Exportar CSV" no relatório de produtividade
+- Exportação CSV inclui: data, horário, cliente, pet, status, valor
+- Linha de totais no final do CSV exportado
+- Handlers seguros com nonces para todas as ações
+- Método `get_groomer_appointments_count()` para contagem de vínculos
+- Método `get_appointment_value()` para obter valor de agendamentos
+- CSS para modal responsivo com animação
+- Estilos para ações na tabela e botão de exportação
 
 ### [1.1.0] - 2025-12-02
 

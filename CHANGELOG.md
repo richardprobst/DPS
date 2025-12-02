@@ -79,6 +79,18 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Groomers Add-on (v1.2.0)**: Edição, exclusão de groomers e exportação de relatórios
+  - Coluna "Ações" na tabela de groomers com botões Editar e Excluir
+  - Modal de edição de groomer (nome e email)
+  - Confirmação de exclusão com aviso de agendamentos vinculados
+  - Botão "Exportar CSV" no relatório de produtividade
+  - Exportação inclui: data, horário, cliente, pet, status, valor
+  - Linha de totais no final do CSV exportado
+  - Handlers seguros com nonces para todas as ações
+  - Validação de role antes de excluir groomer
+  - Mensagens de feedback via DPS_Message_Helper
+  - CSS para modal responsivo com animação
+  - **Impacto**: CRUD completo de groomers e exportação de dados
 - **Groomers Add-on (v1.1.0)**: Refatoração completa com melhorias de código e layout
   - Nova estrutura de assets: pasta `assets/css/` e `assets/js/`
   - Arquivo CSS externo `groomers-admin.css` com ~400 linhas de estilos minimalistas
