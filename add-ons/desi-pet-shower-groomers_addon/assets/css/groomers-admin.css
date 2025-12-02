@@ -1236,3 +1236,274 @@
     border: 1px solid #ef4444;
     color: #991b1b;
 }
+
+/* ==========================================================================
+   13. Portal do Groomer
+   ========================================================================== */
+
+.dps-groomer-portal {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dps-groomer-portal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.dps-groomer-portal__welcome h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-groomer-portal__subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-groomer-portal__actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Portal Tabs */
+.dps-portal-tabs {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dps-portal-tabs__item {
+    margin-bottom: -2px;
+}
+
+.dps-portal-tabs__link {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #6b7280;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.dps-portal-tabs__link:hover {
+    color: #0ea5e9;
+}
+
+.dps-portal-tabs__item--active .dps-portal-tabs__link {
+    color: #0ea5e9;
+    border-bottom-color: #0ea5e9;
+}
+
+.dps-portal-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Login Required Box */
+.dps-groomer-login-required {
+    max-width: 500px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.dps-login-box {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 40px;
+}
+
+.dps-login-box h2 {
+    margin: 0 0 16px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-login-box p {
+    color: #6b7280;
+    margin: 0 0 16px;
+    line-height: 1.6;
+}
+
+.dps-login-hint {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+/* ==========================================================================
+   14. Gerenciamento de Tokens
+   ========================================================================== */
+
+.dps-groomers-tokens-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.dps-groomers-tokens-table th,
+.dps-groomers-tokens-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-groomers-tokens-table th {
+    font-weight: 600;
+    color: #374151;
+    background: #f9fafb;
+}
+
+.dps-inline-form {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.dps-select-small {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.dps-btn--tiny {
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+/* Token URL Box */
+.dps-token-url-row {
+    background: #f0f9ff;
+}
+
+.dps-token-url-box {
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #0ea5e9;
+    border-radius: 4px;
+}
+
+.dps-token-url-box label {
+    display: block;
+    font-weight: 500;
+    color: #0369a1;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.dps-token-url-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-token-url-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+    background: #f9fafb;
+}
+
+.dps-copy-token-btn {
+    white-space: nowrap;
+}
+
+/* Tokens Detail */
+.dps-tokens-detail-row {
+    background: #f9fafb;
+}
+
+.dps-tokens-details {
+    padding: 8px 0;
+}
+
+.dps-tokens-details summary {
+    cursor: pointer;
+    color: #0ea5e9;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dps-tokens-details summary:hover {
+    text-decoration: underline;
+}
+
+.dps-table--nested {
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.dps-table--nested th,
+.dps-table--nested td {
+    padding: 8px 12px;
+}
+
+/* Badge Variants */
+.dps-badge--info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.dps-badge--warning {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.dps-badge--neutral {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Buttons */
+.dps-btn--outline {
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+.dps-btn--outline:hover {
+    background: #f3f4f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dps-groomer-portal__header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .dps-portal-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .dps-inline-form {
+        flex-wrap: wrap;
+    }
+
+    .dps-token-url-input-group {
+        flex-direction: column;
+    }
+}

@@ -19,20 +19,53 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 - ✅ Agenda semanal do groomer
 - ✅ Relatório de comissões a pagar
 - ✅ Sistema de avaliações de clientes
+- ✅ **Portal do Groomer com acesso via token (magic link)**
+- ✅ **Gerenciamento de tokens de acesso no admin**
 - ✅ CSS externo seguindo padrão visual minimalista do DPS
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
-**Versão atual**: 1.3.0
+**Versão atual**: 1.4.0
 
 ## Shortcodes disponíveis
 
 | Shortcode | Descrição | Parâmetros |
 |-----------|-----------|------------|
-| `[dps_groomer_dashboard]` | Dashboard individual do groomer | - |
-| `[dps_groomer_agenda]` | Agenda semanal do groomer | - |
+| `[dps_groomer_portal]` | Portal completo do groomer (dashboard, agenda, avaliações) | - |
+| `[dps_groomer_login]` | Página de login/acesso do groomer | - |
+| `[dps_groomer_dashboard]` | Dashboard individual do groomer | `groomer_id` |
+| `[dps_groomer_agenda]` | Agenda semanal do groomer | `groomer_id` |
 | `[dps_groomer_review]` | Formulário de avaliação | `groomer_id`, `appointment_id` |
 | `[dps_groomer_reviews]` | Lista de avaliações | `groomer_id`, `limit` |
+
+## Sistema de Acesso via Token (Magic Link)
+
+### Como funciona
+
+O groomer pode acessar seu portal sem precisar de senha. O administrador gera um link de acesso (magic link) que autentica o profissional automaticamente.
+
+### Tipos de tokens
+
+| Tipo | Duração | Uso |
+|------|---------|-----|
+| **Temporário** | 30 minutos | Uso único, ideal para envio por WhatsApp/SMS |
+| **Permanente** | 10 anos | Válido até revogação, ideal para bookmark |
+
+### Fluxo de autenticação
+
+1. Admin acessa **Configurações DPS > Logins de Groomers**
+2. Seleciona o tipo de token (temporário ou permanente)
+3. Clica em **Gerar Link**
+4. Copia o link gerado e envia ao groomer
+5. Groomer clica no link e é autenticado automaticamente
+6. Sessão válida por 24 horas
+
+### Gerenciamento de tokens
+
+- **Gerar**: Cria novo token para o groomer
+- **Revogar**: Invalida um token específico
+- **Revogar Todos**: Invalida todos os tokens ativos do groomer
+- **Estatísticas**: Total gerado, usado, ativos, último acesso
 
 ## Localização e identificação
 
@@ -45,10 +78,13 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 
 ```
 add-ons/desi-pet-shower-groomers_addon/
-├── desi-pet-shower-groomers-addon.php   # Arquivo principal (~2400 linhas)
+├── desi-pet-shower-groomers-addon.php   # Arquivo principal (~3000 linhas)
+├── includes/
+│   ├── class-dps-groomer-token-manager.php  # Gerenciador de tokens
+│   └── class-dps-groomer-session-manager.php # Gerenciador de sessões
 ├── assets/
 │   ├── css/
-│   │   └── groomers-admin.css           # Estilos da interface (~1200 linhas)
+│   │   └── groomers-admin.css           # Estilos da interface (~1500 linhas)
 │   └── js/
 │       └── groomers-admin.js            # Interatividade, modal e validações
 ├── README.md                             # Esta documentação
@@ -67,6 +103,24 @@ add-ons/desi-pet-shower-groomers_addon/
 - **Chart.js**: Carregado via CDN para gráficos de desempenho
 
 ## Dados armazenados
+
+### Tabela de tokens
+
+#### `{prefix}dps_groomer_tokens`
+Armazena tokens de acesso dos groomers.
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | bigint | ID do token |
+| `groomer_id` | bigint | ID do usuário groomer |
+| `token_hash` | varchar(255) | Hash do token (password_hash) |
+| `type` | varchar(50) | Tipo: 'login' ou 'permanent' |
+| `created_at` | datetime | Data de criação |
+| `expires_at` | datetime | Data de expiração |
+| `used_at` | datetime | Data de uso (tokens temporários) |
+| `revoked_at` | datetime | Data de revogação |
+| `ip_created` | varchar(45) | IP de criação |
+| `user_agent` | text | User agent de criação |
 
 ### Role customizada
 
@@ -102,6 +156,21 @@ Post type para armazenar avaliações de clientes.
 | `_dps_review_appointment_id` | int | ID do agendamento relacionado (opcional) |
 
 ## Changelog
+
+### [1.4.0] - 2025-12-02
+
+#### Added
+- **Portal do Groomer** com shortcode `[dps_groomer_portal]`
+- Acesso via magic link (token) sem necessidade de senha
+- Gerenciador de tokens (`DPS_Groomer_Token_Manager`)
+- Gerenciador de sessões (`DPS_Groomer_Session_Manager`)
+- Tokens temporários (30min) e permanentes (10 anos)
+- Aba "Logins de Groomers" no admin para gerenciamento
+- Geração, revogação e listagem de tokens ativos
+- Shortcode `[dps_groomer_login]` para página de acesso
+- Navegação por abas no portal (Dashboard, Agenda, Avaliações)
+- Suporte a autenticação via sessão independente do WP
+- Tabela `dps_groomer_tokens` para armazenamento seguro
 
 ### [1.3.0] - 2025-12-02
 
@@ -168,3 +237,6 @@ Este add-on segue as diretrizes do repositório DPS:
 - ✅ Sanitização de todos os inputs
 - ✅ Escape de todos os outputs
 - ✅ Validação de role antes de salvar groomers em agendamentos
+- ✅ Tokens armazenados como hash (password_hash)
+- ✅ Sessões com proteção contra session fixation
+- ✅ Cron job para limpeza de tokens expirados

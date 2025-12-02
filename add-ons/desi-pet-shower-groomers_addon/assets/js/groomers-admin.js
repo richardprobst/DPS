@@ -6,6 +6,7 @@
  * @package Desi_Pet_Shower_Groomers
  * @since 1.1.0
  * @updated 1.2.0 - Adicionado modal de edição e confirmação melhorada de exclusão
+ * @updated 1.4.0 - Adicionado portal do groomer e gerenciamento de tokens
  */
 
 (function($) {
@@ -22,6 +23,7 @@
         init: function() {
             this.bindEvents();
             this.initFormValidation();
+            this.initPortalTabs();
         },
 
         /**
@@ -44,6 +46,12 @@
             
             // Validação em tempo real
             $(document).on('blur', '.dps-groomers-form input[required]', this.validateField);
+            
+            // Copiar token URL
+            $(document).on('click', '.dps-copy-token-btn', this.copyTokenUrl);
+            
+            // Tabs do portal
+            $(document).on('click', '.dps-portal-tabs__link', this.handlePortalTabClick);
         },
 
         /**
@@ -239,6 +247,123 @@
                     $(this).remove();
                 });
             }, 5000);
+        },
+
+        /**
+         * Copia a URL do token para a área de transferência
+         * @param {Event} e Evento de clique
+         */
+        copyTokenUrl: function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var url = $btn.data('url');
+            
+            if (!url) {
+                return;
+            }
+
+            // Usa a API Clipboard moderna se disponível
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    DPSGroomersAdmin.showCopyFeedback($btn, true);
+                }).catch(function() {
+                    DPSGroomersAdmin.fallbackCopy(url, $btn);
+                });
+            } else {
+                DPSGroomersAdmin.fallbackCopy(url, $btn);
+            }
+        },
+
+        /**
+         * Fallback para copiar em navegadores antigos
+         * @param {string} text Texto a copiar
+         * @param {jQuery} $btn Botão clicado
+         */
+        fallbackCopy: function(text, $btn) {
+            var $temp = $('<input>');
+            $('body').append($temp);
+            $temp.val(text).select();
+            
+            try {
+                document.execCommand('copy');
+                DPSGroomersAdmin.showCopyFeedback($btn, true);
+            } catch (err) {
+                DPSGroomersAdmin.showCopyFeedback($btn, false);
+            }
+            
+            $temp.remove();
+        },
+
+        /**
+         * Exibe feedback visual de cópia
+         * @param {jQuery} $btn Botão clicado
+         * @param {boolean} success Se a cópia foi bem-sucedida
+         */
+        showCopyFeedback: function($btn, success) {
+            var originalText = $btn.text();
+            
+            if (success) {
+                $btn.text('✓ Copiado!');
+                $btn.addClass('dps-btn--success');
+            } else {
+                $btn.text('✗ Erro');
+                $btn.addClass('dps-btn--danger');
+            }
+            
+            setTimeout(function() {
+                $btn.text(originalText);
+                $btn.removeClass('dps-btn--success dps-btn--danger');
+            }, 2000);
+        },
+
+        /**
+         * Inicializa as abas do portal
+         */
+        initPortalTabs: function() {
+            var $portal = $('.dps-groomer-portal');
+            
+            if ($portal.length === 0) {
+                return;
+            }
+
+            // Verifica hash na URL
+            var hash = window.location.hash;
+            if (hash && hash.startsWith('#portal-')) {
+                this.activateTab(hash.substring(1));
+            }
+        },
+
+        /**
+         * Manipula clique nas abas do portal
+         * @param {Event} e Evento de clique
+         */
+        handlePortalTabClick: function(e) {
+            e.preventDefault();
+            
+            var tabId = $(this).data('tab');
+            if (tabId) {
+                DPSGroomersAdmin.activateTab(tabId);
+            }
+        },
+
+        /**
+         * Ativa uma aba do portal
+         * @param {string} tabId ID da aba
+         */
+        activateTab: function(tabId) {
+            // Remove classes ativas
+            $('.dps-portal-tabs__item').removeClass('dps-portal-tabs__item--active');
+            $('.dps-portal-section').hide();
+            
+            // Ativa a aba selecionada
+            $('[data-tab="' + tabId + '"]').closest('.dps-portal-tabs__item').addClass('dps-portal-tabs__item--active');
+            $('#' + tabId).show();
+            
+            // Atualiza URL
+            if (history.pushState) {
+                history.pushState(null, null, '#' + tabId);
+            }
         }
     };
 

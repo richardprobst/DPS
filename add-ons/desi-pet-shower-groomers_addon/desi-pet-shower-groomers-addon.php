@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Desi Pet Shower – Groomers Add-on
  * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para cadastrar groomers, vincular atendimentos e gerar relatórios por profissional.
- * Version:           1.3.0
+ * Description:       Add-on para cadastrar groomers, vincular atendimentos e gerar relatórios por profissional. Inclui portal do groomer com acesso via token.
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://probst.pro
  * Text Domain:       dps-groomers-addon
@@ -17,6 +17,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Carrega classes auxiliares
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-token-manager.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-session-manager.php';
 
 /**
  * Verifica se o plugin base Desi Pet Shower está ativo.
@@ -37,6 +41,9 @@ add_action( 'plugins_loaded', function() {
     if ( ! dps_groomers_check_base_plugin() ) {
         return;
     }
+    // Inicializa gerenciadores de token e sessão
+    DPS_Groomer_Token_Manager::get_instance();
+    DPS_Groomer_Session_Manager::get_instance();
 }, 1 );
 
 /**
@@ -55,7 +62,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.3.0';
+    const VERSION = '1.4.0';
 
     /**
      * Inicializa hooks do add-on.
@@ -71,6 +78,12 @@ class DPS_Groomers_Addon {
         // Handlers para edição, exclusão e exportação
         add_action( 'init', [ $this, 'handle_groomer_actions' ] );
         
+        // Handler para autenticação por token
+        add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
+        
+        // Handler para logout
+        add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
+        
         // Registrar CPT de avaliações
         add_action( 'init', [ $this, 'register_review_post_type' ] );
         
@@ -85,6 +98,590 @@ class DPS_Groomers_Addon {
         
         // Shortcode de exibição de avaliações
         add_shortcode( 'dps_groomer_reviews', [ $this, 'render_reviews_list_shortcode' ] );
+        
+        // Shortcode do portal do groomer (acesso via token)
+        add_shortcode( 'dps_groomer_portal', [ $this, 'render_groomer_portal_shortcode' ] );
+        
+        // Shortcode de login do groomer
+        add_shortcode( 'dps_groomer_login', [ $this, 'render_groomer_login_shortcode' ] );
+        
+        // Adiciona seção de gerenciamento de tokens no admin
+        add_action( 'dps_settings_nav_tabs', [ $this, 'render_groomer_tokens_tab' ], 25, 1 );
+        add_action( 'dps_settings_sections', [ $this, 'render_groomer_tokens_section' ], 25, 1 );
+        
+        // Handler para ações de tokens no admin
+        add_action( 'init', [ $this, 'handle_token_admin_actions' ] );
+    }
+
+    /**
+     * Processa autenticação por token na URL.
+     *
+     * @since 1.4.0
+     */
+    public function handle_token_authentication() {
+        // Verifica se há um token na URL
+        if ( ! isset( $_GET['dps_groomer_token'] ) ) {
+            return;
+        }
+
+        $token_plain = sanitize_text_field( wp_unslash( $_GET['dps_groomer_token'] ) );
+        
+        if ( empty( $token_plain ) ) {
+            return;
+        }
+
+        // Valida o token
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+        $token_data    = $token_manager->validate_token( $token_plain );
+
+        if ( false === $token_data ) {
+            // Token inválido - redireciona com erro
+            $this->redirect_with_error( 'invalid' );
+            return;
+        }
+
+        // Token válido - autentica o groomer
+        $session_manager = DPS_Groomer_Session_Manager::get_instance();
+        $authenticated   = $session_manager->authenticate_groomer( $token_data['groomer_id'] );
+
+        if ( ! $authenticated ) {
+            $this->redirect_with_error( 'auth_failed' );
+            return;
+        }
+
+        // Marca token como usado (apenas para tokens não permanentes)
+        if ( 'permanent' !== $token_data['type'] ) {
+            $token_manager->mark_as_used( $token_data['id'] );
+        }
+
+        // Redireciona para o portal (remove o token da URL)
+        $redirect_url = $this->get_portal_page_url();
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Redireciona com mensagem de erro.
+     *
+     * @since 1.4.0
+     * @param string $error_type Tipo do erro.
+     */
+    private function redirect_with_error( $error_type ) {
+        $redirect_url = add_query_arg( 'groomer_token_error', $error_type, home_url() );
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Obtém a URL da página do portal do groomer.
+     *
+     * @since 1.4.0
+     * @return string URL do portal.
+     */
+    public function get_portal_page_url() {
+        // Busca uma página com o shortcode [dps_groomer_portal]
+        global $wpdb;
+        $page_id = $wpdb->get_var(
+            "SELECT ID FROM {$wpdb->posts} 
+            WHERE post_type = 'page' 
+            AND post_status = 'publish' 
+            AND post_content LIKE '%[dps_groomer_portal%' 
+            LIMIT 1"
+        );
+
+        if ( $page_id ) {
+            return get_permalink( $page_id );
+        }
+
+        return home_url( '/portal-groomer/' );
+    }
+
+    /**
+     * Processa requisição de logout.
+     *
+     * @since 1.4.0
+     */
+    public function handle_logout_request() {
+        $session_manager = DPS_Groomer_Session_Manager::get_instance();
+        $session_manager->handle_logout_request();
+    }
+
+    /**
+     * Processa ações de tokens no admin.
+     *
+     * @since 1.4.0
+     */
+    public function handle_token_admin_actions() {
+        if ( ! isset( $_REQUEST['dps_groomer_token_action'] ) ) {
+            return;
+        }
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $action = sanitize_text_field( wp_unslash( $_REQUEST['dps_groomer_token_action'] ) );
+
+        switch ( $action ) {
+            case 'generate':
+                $this->handle_generate_token();
+                break;
+            case 'revoke':
+                $this->handle_revoke_token();
+                break;
+            case 'revoke_all':
+                $this->handle_revoke_all_tokens();
+                break;
+        }
+    }
+
+    /**
+     * Gera um novo token para um groomer.
+     *
+     * @since 1.4.0
+     */
+    private function handle_generate_token() {
+        if ( ! isset( $_POST['groomer_id'] ) || ! isset( $_POST['_wpnonce'] ) ) {
+            return;
+        }
+
+        $groomer_id = absint( $_POST['groomer_id'] );
+        $nonce      = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
+        $type       = isset( $_POST['token_type'] ) ? sanitize_text_field( wp_unslash( $_POST['token_type'] ) ) : 'login';
+
+        if ( ! wp_verify_nonce( $nonce, 'dps_generate_groomer_token_' . $groomer_id ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+        $token         = $token_manager->generate_token( $groomer_id, $type );
+
+        if ( $token ) {
+            // Gera a URL completa com o token
+            $portal_url = $this->get_portal_page_url();
+            $token_url  = add_query_arg( 'dps_groomer_token', $token, $portal_url );
+
+            // Armazena temporariamente para exibição (apenas uma vez)
+            set_transient( 'dps_groomer_token_url_' . $groomer_id, $token_url, 300 );
+
+            DPS_Message_Helper::add_success( __( 'Token gerado com sucesso! Copie o link abaixo.', 'dps-groomers-addon' ) );
+        } else {
+            DPS_Message_Helper::add_error( __( 'Erro ao gerar token.', 'dps-groomers-addon' ) );
+        }
+    }
+
+    /**
+     * Revoga um token específico.
+     *
+     * @since 1.4.0
+     */
+    private function handle_revoke_token() {
+        if ( ! isset( $_GET['token_id'] ) || ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            return;
+        }
+
+        $token_id   = absint( $_GET['token_id'] );
+        $groomer_id = absint( $_GET['groomer_id'] );
+        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        if ( ! wp_verify_nonce( $nonce, 'dps_revoke_groomer_token_' . $token_id ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+        $revoked       = $token_manager->revoke_single_token( $token_id, $groomer_id );
+
+        if ( $revoked ) {
+            DPS_Message_Helper::add_success( __( 'Token revogado com sucesso.', 'dps-groomers-addon' ) );
+        } else {
+            DPS_Message_Helper::add_error( __( 'Erro ao revogar token.', 'dps-groomers-addon' ) );
+        }
+    }
+
+    /**
+     * Revoga todos os tokens de um groomer.
+     *
+     * @since 1.4.0
+     */
+    private function handle_revoke_all_tokens() {
+        if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            return;
+        }
+
+        $groomer_id = absint( $_GET['groomer_id'] );
+        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        if ( ! wp_verify_nonce( $nonce, 'dps_revoke_all_groomer_tokens_' . $groomer_id ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+        $count         = $token_manager->revoke_tokens( $groomer_id );
+
+        if ( false !== $count ) {
+            DPS_Message_Helper::add_success( 
+                sprintf( 
+                    /* translators: %d: number of tokens revoked */
+                    __( '%d token(s) revogado(s) com sucesso.', 'dps-groomers-addon' ), 
+                    $count 
+                ) 
+            );
+        } else {
+            DPS_Message_Helper::add_error( __( 'Erro ao revogar tokens.', 'dps-groomers-addon' ) );
+        }
+    }
+
+    /**
+     * Renderiza a aba de gerenciamento de tokens.
+     *
+     * @since 1.4.0
+     * @param string $active_tab Aba ativa.
+     */
+    public function render_groomer_tokens_tab( $active_tab ) {
+        $is_active = ( 'groomer-tokens' === $active_tab );
+        ?>
+        <li class="dps-tab-item<?php echo $is_active ? ' dps-tab-item--active' : ''; ?>">
+            <a href="#groomer-tokens" class="dps-tab-link" data-tab="groomer-tokens">
+                <?php echo esc_html__( 'Logins de Groomers', 'dps-groomers-addon' ); ?>
+            </a>
+        </li>
+        <?php
+    }
+
+    /**
+     * Renderiza a seção de gerenciamento de tokens.
+     *
+     * @since 1.4.0
+     * @param string $active_tab Aba ativa.
+     */
+    public function render_groomer_tokens_section( $active_tab ) {
+        $is_active = ( 'groomer-tokens' === $active_tab );
+        ?>
+        <section id="groomer-tokens" class="dps-section<?php echo $is_active ? ' dps-section--active' : ''; ?>" style="<?php echo $is_active ? '' : 'display:none;'; ?>">
+            <h2><?php echo esc_html__( 'Gerenciamento de Logins de Groomers', 'dps-groomers-addon' ); ?></h2>
+            <p class="dps-section-description">
+                <?php echo esc_html__( 'Gere links de acesso (magic links) para que os groomers acessem seu portal sem precisar de senha.', 'dps-groomers-addon' ); ?>
+            </p>
+            
+            <?php $this->render_groomer_tokens_list(); ?>
+        </section>
+        <?php
+    }
+
+    /**
+     * Renderiza a lista de groomers com gerenciamento de tokens.
+     *
+     * @since 1.4.0
+     */
+    private function render_groomer_tokens_list() {
+        $groomers = get_users( [ 'role' => 'dps_groomer' ] );
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+
+        if ( empty( $groomers ) ) {
+            echo '<p>' . esc_html__( 'Nenhum groomer cadastrado.', 'dps-groomers-addon' ) . '</p>';
+            return;
+        }
+        ?>
+        <table class="dps-table dps-groomers-tokens-table">
+            <thead>
+                <tr>
+                    <th><?php echo esc_html__( 'Groomer', 'dps-groomers-addon' ); ?></th>
+                    <th><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?></th>
+                    <th><?php echo esc_html__( 'Tokens Ativos', 'dps-groomers-addon' ); ?></th>
+                    <th><?php echo esc_html__( 'Último Acesso', 'dps-groomers-addon' ); ?></th>
+                    <th><?php echo esc_html__( 'Ações', 'dps-groomers-addon' ); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $groomers as $groomer ) : 
+                    $stats          = $token_manager->get_groomer_stats( $groomer->ID );
+                    $active_tokens  = $token_manager->get_active_tokens( $groomer->ID );
+                    $token_url      = get_transient( 'dps_groomer_token_url_' . $groomer->ID );
+                    
+                    // Limpa o transient após exibição
+                    if ( $token_url ) {
+                        delete_transient( 'dps_groomer_token_url_' . $groomer->ID );
+                    }
+                ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_html( $groomer->display_name ); ?></strong>
+                        </td>
+                        <td><?php echo esc_html( $groomer->user_email ); ?></td>
+                        <td>
+                            <span class="dps-badge dps-badge--<?php echo $stats['active_tokens'] > 0 ? 'success' : 'neutral'; ?>">
+                                <?php echo esc_html( $stats['active_tokens'] ); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php 
+                            if ( $stats['last_used_at'] ) {
+                                echo esc_html( date_i18n( 'd/m/Y H:i', strtotime( $stats['last_used_at'] ) ) );
+                            } else {
+                                echo '<span class="dps-text-muted">' . esc_html__( 'Nunca', 'dps-groomers-addon' ) . '</span>';
+                            }
+                            ?>
+                        </td>
+                        <td class="dps-table-actions">
+                            <form method="post" class="dps-inline-form">
+                                <?php wp_nonce_field( 'dps_generate_groomer_token_' . $groomer->ID ); ?>
+                                <input type="hidden" name="dps_groomer_token_action" value="generate" />
+                                <input type="hidden" name="groomer_id" value="<?php echo esc_attr( $groomer->ID ); ?>" />
+                                <select name="token_type" class="dps-select-small">
+                                    <option value="login"><?php echo esc_html__( 'Temporário (30min)', 'dps-groomers-addon' ); ?></option>
+                                    <option value="permanent"><?php echo esc_html__( 'Permanente', 'dps-groomers-addon' ); ?></option>
+                                </select>
+                                <button type="submit" class="dps-btn dps-btn--small dps-btn--primary">
+                                    <?php echo esc_html__( 'Gerar Link', 'dps-groomers-addon' ); ?>
+                                </button>
+                            </form>
+                            
+                            <?php if ( $stats['active_tokens'] > 0 ) : ?>
+                                <a href="<?php echo esc_url( wp_nonce_url( 
+                                    add_query_arg( [
+                                        'dps_groomer_token_action' => 'revoke_all',
+                                        'groomer_id'               => $groomer->ID,
+                                    ] ),
+                                    'dps_revoke_all_groomer_tokens_' . $groomer->ID
+                                ) ); ?>" 
+                                   class="dps-btn dps-btn--small dps-btn--danger"
+                                   onclick="return confirm('<?php echo esc_js( __( 'Revogar todos os tokens deste groomer?', 'dps-groomers-addon' ) ); ?>');">
+                                    <?php echo esc_html__( 'Revogar Todos', 'dps-groomers-addon' ); ?>
+                                </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    
+                    <?php if ( $token_url ) : ?>
+                    <tr class="dps-token-url-row">
+                        <td colspan="5">
+                            <div class="dps-token-url-box">
+                                <label><?php echo esc_html__( 'Link de acesso gerado (copie agora, não será exibido novamente):', 'dps-groomers-addon' ); ?></label>
+                                <div class="dps-token-url-input-group">
+                                    <input type="text" value="<?php echo esc_url( $token_url ); ?>" readonly class="dps-token-url-input" onclick="this.select();" />
+                                    <button type="button" class="dps-btn dps-btn--secondary dps-copy-token-btn" data-url="<?php echo esc_url( $token_url ); ?>">
+                                        📋 <?php echo esc_html__( 'Copiar', 'dps-groomers-addon' ); ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    
+                    <?php if ( ! empty( $active_tokens ) ) : ?>
+                    <tr class="dps-tokens-detail-row">
+                        <td colspan="5">
+                            <details class="dps-tokens-details">
+                                <summary><?php echo esc_html__( 'Ver tokens ativos', 'dps-groomers-addon' ); ?></summary>
+                                <table class="dps-table dps-table--nested">
+                                    <thead>
+                                        <tr>
+                                            <th><?php echo esc_html__( 'Tipo', 'dps-groomers-addon' ); ?></th>
+                                            <th><?php echo esc_html__( 'Criado em', 'dps-groomers-addon' ); ?></th>
+                                            <th><?php echo esc_html__( 'Expira em', 'dps-groomers-addon' ); ?></th>
+                                            <th><?php echo esc_html__( 'IP', 'dps-groomers-addon' ); ?></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ( $active_tokens as $token_data ) : ?>
+                                        <tr>
+                                            <td>
+                                                <span class="dps-badge dps-badge--<?php echo 'permanent' === $token_data['type'] ? 'info' : 'warning'; ?>">
+                                                    <?php echo 'permanent' === $token_data['type'] ? esc_html__( 'Permanente', 'dps-groomers-addon' ) : esc_html__( 'Temporário', 'dps-groomers-addon' ); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo esc_html( date_i18n( 'd/m/Y H:i', strtotime( $token_data['created_at'] ) ) ); ?></td>
+                                            <td><?php echo esc_html( date_i18n( 'd/m/Y H:i', strtotime( $token_data['expires_at'] ) ) ); ?></td>
+                                            <td><?php echo esc_html( $token_data['ip_created'] ?: '-' ); ?></td>
+                                            <td>
+                                                <a href="<?php echo esc_url( wp_nonce_url( 
+                                                    add_query_arg( [
+                                                        'dps_groomer_token_action' => 'revoke',
+                                                        'token_id'                 => $token_data['id'],
+                                                        'groomer_id'               => $groomer->ID,
+                                                    ] ),
+                                                    'dps_revoke_groomer_token_' . $token_data['id']
+                                                ) ); ?>" 
+                                                   class="dps-btn dps-btn--tiny dps-btn--danger"
+                                                   onclick="return confirm('<?php echo esc_js( __( 'Revogar este token?', 'dps-groomers-addon' ) ); ?>');">
+                                                    <?php echo esc_html__( 'Revogar', 'dps-groomers-addon' ); ?>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </details>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php
+    }
+
+    /**
+     * Renderiza o shortcode do portal do groomer.
+     *
+     * @since 1.4.0
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML do portal.
+     */
+    public function render_groomer_portal_shortcode( $atts ) {
+        $this->register_and_enqueue_assets();
+        $this->enqueue_chartjs();
+
+        $session_manager = DPS_Groomer_Session_Manager::get_instance();
+        $groomer_id      = $session_manager->get_authenticated_groomer_id();
+
+        // Se não autenticado via sessão, verifica se é admin
+        if ( ! $groomer_id && current_user_can( 'manage_options' ) ) {
+            // Admin pode visualizar o portal de qualquer groomer via parâmetro
+            $groomer_id = isset( $_GET['groomer_id'] ) ? absint( $_GET['groomer_id'] ) : 0;
+        }
+
+        // Se ainda não tem groomer_id, verifica se o usuário logado é um groomer
+        if ( ! $groomer_id && is_user_logged_in() ) {
+            $current_user = wp_get_current_user();
+            if ( in_array( 'dps_groomer', (array) $current_user->roles, true ) ) {
+                $groomer_id = $current_user->ID;
+            }
+        }
+
+        // Se não autenticado, mostra mensagem de erro ou formulário de login
+        if ( ! $groomer_id ) {
+            $error = isset( $_GET['groomer_token_error'] ) ? sanitize_text_field( wp_unslash( $_GET['groomer_token_error'] ) ) : '';
+            return $this->render_login_required_message( $error );
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer || ! in_array( 'dps_groomer', (array) $groomer->roles, true ) ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Groomer não encontrado.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        ob_start();
+        ?>
+        <div class="dps-groomer-portal">
+            <header class="dps-groomer-portal__header">
+                <div class="dps-groomer-portal__welcome">
+                    <h1><?php echo esc_html( sprintf( __( 'Olá, %s!', 'dps-groomers-addon' ), $groomer->display_name ) ); ?></h1>
+                    <p class="dps-groomer-portal__subtitle"><?php echo esc_html__( 'Bem-vindo ao seu portal de atendimentos', 'dps-groomers-addon' ); ?></p>
+                </div>
+                <div class="dps-groomer-portal__actions">
+                    <a href="<?php echo esc_url( $session_manager->get_logout_url() ); ?>" class="dps-btn dps-btn--outline">
+                        <?php echo esc_html__( 'Sair', 'dps-groomers-addon' ); ?>
+                    </a>
+                </div>
+            </header>
+
+            <nav class="dps-groomer-portal__nav">
+                <ul class="dps-portal-tabs">
+                    <li class="dps-portal-tabs__item dps-portal-tabs__item--active">
+                        <a href="#portal-dashboard" class="dps-portal-tabs__link" data-tab="portal-dashboard">
+                            📊 <?php echo esc_html__( 'Dashboard', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                    <li class="dps-portal-tabs__item">
+                        <a href="#portal-agenda" class="dps-portal-tabs__link" data-tab="portal-agenda">
+                            📅 <?php echo esc_html__( 'Minha Agenda', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                    <li class="dps-portal-tabs__item">
+                        <a href="#portal-reviews" class="dps-portal-tabs__link" data-tab="portal-reviews">
+                            ⭐ <?php echo esc_html__( 'Minhas Avaliações', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <main class="dps-groomer-portal__content">
+                <!-- Dashboard Tab -->
+                <section id="portal-dashboard" class="dps-portal-section dps-portal-section--active">
+                    <?php echo $this->render_groomer_dashboard_shortcode( [ 'groomer_id' => $groomer_id ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </section>
+
+                <!-- Agenda Tab -->
+                <section id="portal-agenda" class="dps-portal-section" style="display:none;">
+                    <?php echo $this->render_groomer_agenda_shortcode( [ 'groomer_id' => $groomer_id ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </section>
+
+                <!-- Reviews Tab -->
+                <section id="portal-reviews" class="dps-portal-section" style="display:none;">
+                    <?php echo $this->render_reviews_list_shortcode( [ 'groomer_id' => $groomer_id, 'limit' => 20 ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </section>
+            </main>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza mensagem de login necessário.
+     *
+     * @since 1.4.0
+     * @param string $error Tipo de erro.
+     * @return string HTML da mensagem.
+     */
+    private function render_login_required_message( $error = '' ) {
+        $error_messages = [
+            'invalid'     => __( 'O link de acesso é inválido ou expirou. Solicite um novo link ao administrador.', 'dps-groomers-addon' ),
+            'auth_failed' => __( 'Não foi possível autenticar. Tente novamente ou solicite um novo link.', 'dps-groomers-addon' ),
+        ];
+
+        ob_start();
+        ?>
+        <div class="dps-groomer-login-required">
+            <?php if ( $error && isset( $error_messages[ $error ] ) ) : ?>
+                <div class="dps-groomers-notice dps-groomers-notice--error">
+                    <?php echo esc_html( $error_messages[ $error ] ); ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="dps-login-box">
+                <h2><?php echo esc_html__( 'Portal do Groomer', 'dps-groomers-addon' ); ?></h2>
+                <p><?php echo esc_html__( 'Para acessar seu portal, utilize o link de acesso enviado pelo administrador.', 'dps-groomers-addon' ); ?></p>
+                <p class="dps-login-hint">
+                    <?php echo esc_html__( 'Não tem um link de acesso? Entre em contato com o administrador para solicitar.', 'dps-groomers-addon' ); ?>
+                </p>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o shortcode de login do groomer.
+     *
+     * @since 1.4.0
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML do login.
+     */
+    public function render_groomer_login_shortcode( $atts ) {
+        $this->register_and_enqueue_assets();
+
+        $session_manager = DPS_Groomer_Session_Manager::get_instance();
+        
+        // Se já está autenticado, redireciona para o portal
+        if ( $session_manager->is_groomer_authenticated() ) {
+            $portal_url = $this->get_portal_page_url();
+            return '<div class="dps-groomers-notice dps-groomers-notice--info">' . 
+                sprintf(
+                    /* translators: %s: portal link */
+                    esc_html__( 'Você já está autenticado. %s', 'dps-groomers-addon' ),
+                    '<a href="' . esc_url( $portal_url ) . '">' . esc_html__( 'Acessar Portal', 'dps-groomers-addon' ) . '</a>'
+                ) . 
+                '</div>';
+        }
+
+        return $this->render_login_required_message();
     }
 
     /**
@@ -652,6 +1249,8 @@ class DPS_Groomers_Addon {
         $username = isset( $_POST['dps_groomer_username'] ) ? sanitize_user( wp_unslash( $_POST['dps_groomer_username'] ) ) : '';
         $email    = isset( $_POST['dps_groomer_email'] ) ? sanitize_email( wp_unslash( $_POST['dps_groomer_email'] ) ) : '';
         $name     = isset( $_POST['dps_groomer_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_groomer_name'] ) ) : '';
+        // Password: wp_unslash removes PHP magic quotes, wp_create_user handles hashing
+        // Do NOT sanitize password to preserve special characters
         $password = isset( $_POST['dps_groomer_password'] ) ? wp_unslash( $_POST['dps_groomer_password'] ) : '';
 
         if ( empty( $username ) || empty( $email ) || empty( $password ) ) {
@@ -1536,35 +2135,55 @@ class DPS_Groomers_Addon {
      * @return string HTML do dashboard.
      */
     public function render_groomer_dashboard_shortcode( $atts ) {
+        $atts = shortcode_atts(
+            [
+                'groomer_id' => 0,
+            ],
+            $atts,
+            'dps_groomer_dashboard'
+        );
+
         // Enfileirar assets
         $this->register_and_enqueue_assets();
         $this->enqueue_chartjs();
 
-        // Verificar se usuário está logado
-        if ( ! is_user_logged_in() ) {
+        // Determinar groomer_id: parâmetro > sessão > usuário logado
+        $groomer_id = absint( $atts['groomer_id'] );
+        
+        if ( ! $groomer_id ) {
+            // Tenta obter da sessão
+            $session_manager = DPS_Groomer_Session_Manager::get_instance();
+            $groomer_id      = $session_manager->get_authenticated_groomer_id();
+        }
+
+        if ( ! $groomer_id && is_user_logged_in() ) {
+            $current_user = wp_get_current_user();
+            
+            // Se for admin, pode selecionar qualquer groomer via GET
+            if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
+                $groomer_id = absint( $_GET['groomer_id'] );
+            } elseif ( in_array( 'dps_groomer', (array) $current_user->roles, true ) ) {
+                $groomer_id = $current_user->ID;
+            }
+        }
+
+        if ( ! $groomer_id ) {
             return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
                 esc_html__( 'Você precisa estar logado para acessar o dashboard.', 'dps-groomers-addon' ) . 
                 '</div>';
         }
 
-        $current_user = wp_get_current_user();
-        
-        // Verificar se é um groomer
-        if ( ! in_array( 'dps_groomer', (array) $current_user->roles, true ) && ! current_user_can( 'manage_options' ) ) {
+        // Validar se é um groomer válido
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer || ! in_array( 'dps_groomer', (array) $groomer->roles, true ) ) {
             return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
-                esc_html__( 'Acesso restrito a groomers.', 'dps-groomers-addon' ) . 
+                esc_html__( 'Groomer não encontrado.', 'dps-groomers-addon' ) . 
                 '</div>';
         }
 
-        // Se for admin, pode selecionar qualquer groomer
-        $groomer_id = $current_user->ID;
-        if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
-            $groomer_id = absint( $_GET['groomer_id'] );
-        }
-
         // Período do relatório (padrão: últimos 30 dias)
-        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : date( 'Y-m-d' );
-        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : date( 'Y-m-d', strtotime( '-30 days' ) );
+        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : gmdate( 'Y-m-d' );
+        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : gmdate( 'Y-m-d', strtotime( '-30 days' ) );
 
         // Buscar atendimentos do groomer
         $appointments = get_posts(
@@ -1937,33 +2556,53 @@ class DPS_Groomers_Addon {
      * @return string HTML da agenda.
      */
     public function render_groomer_agenda_shortcode( $atts ) {
+        $atts = shortcode_atts(
+            [
+                'groomer_id' => 0,
+            ],
+            $atts,
+            'dps_groomer_agenda'
+        );
+
         // Enfileirar assets
         $this->register_and_enqueue_assets();
 
-        // Verificar se usuário está logado
-        if ( ! is_user_logged_in() ) {
+        // Determinar groomer_id: parâmetro > sessão > usuário logado
+        $groomer_id = absint( $atts['groomer_id'] );
+        
+        if ( ! $groomer_id ) {
+            // Tenta obter da sessão
+            $session_manager = DPS_Groomer_Session_Manager::get_instance();
+            $groomer_id      = $session_manager->get_authenticated_groomer_id();
+        }
+
+        if ( ! $groomer_id && is_user_logged_in() ) {
+            $current_user = wp_get_current_user();
+            
+            // Se for admin, pode selecionar qualquer groomer via GET
+            if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
+                $groomer_id = absint( $_GET['groomer_id'] );
+            } elseif ( in_array( 'dps_groomer', (array) $current_user->roles, true ) ) {
+                $groomer_id = $current_user->ID;
+            }
+        }
+
+        if ( ! $groomer_id ) {
             return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
                 esc_html__( 'Você precisa estar logado para acessar a agenda.', 'dps-groomers-addon' ) . 
                 '</div>';
         }
 
-        $current_user = wp_get_current_user();
-        
-        // Verificar se é um groomer ou admin
-        if ( ! in_array( 'dps_groomer', (array) $current_user->roles, true ) && ! current_user_can( 'manage_options' ) ) {
+        // Validar se é um groomer válido
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer || ! in_array( 'dps_groomer', (array) $groomer->roles, true ) ) {
             return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
-                esc_html__( 'Acesso restrito a groomers.', 'dps-groomers-addon' ) . 
+                esc_html__( 'Groomer não encontrado.', 'dps-groomers-addon' ) . 
                 '</div>';
         }
 
-        // Se for admin, pode selecionar qualquer groomer
-        $groomer_id = $current_user->ID;
-        if ( current_user_can( 'manage_options' ) && isset( $_GET['groomer_id'] ) ) {
-            $groomer_id = absint( $_GET['groomer_id'] );
-        }
-
         // Data base (padrão: hoje)
-        $base_date = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : date( 'Y-m-d' );
+        $base_date = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : gmdate( 'Y-m-d' );
         $view_type = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'week';
 
         // Calcular período
@@ -1972,8 +2611,8 @@ class DPS_Groomers_Addon {
             $end_date   = $base_date;
         } else {
             // Semana (segunda a domingo)
-            $start_date = date( 'Y-m-d', strtotime( 'monday this week', strtotime( $base_date ) ) );
-            $end_date   = date( 'Y-m-d', strtotime( 'sunday this week', strtotime( $base_date ) ) );
+            $start_date = gmdate( 'Y-m-d', strtotime( 'monday this week', strtotime( $base_date ) ) );
+            $end_date   = gmdate( 'Y-m-d', strtotime( 'sunday this week', strtotime( $base_date ) ) );
         }
 
         // Buscar atendimentos do período
