@@ -54,6 +54,8 @@ class DPS_Services_Addon {
         add_action( 'save_post_dps_agendamento', [ $this, 'save_appointment_finalization_meta' ], 20, 3 );
         // Enfileira scripts
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+        // Registra shortcodes
+        add_shortcode( 'dps_services_catalog', [ $this, 'render_catalog_shortcode' ] );
         // Popula serviços padrões na ativação
         if ( defined( 'DPS_SERVICES_PLUGIN_FILE' ) ) {
             register_activation_hook( DPS_SERVICES_PLUGIN_FILE, [ $this, 'activate' ] );
@@ -380,11 +382,15 @@ class DPS_Services_Addon {
         echo '</div>';
         // Campos específicos para pacotes: seleção de serviços incluídos
         $package_items = [];
+        $package_discount = '';
+        $package_fixed_price = '';
         if ( $edit_id ) {
             $package_items = get_post_meta( $edit_id, 'service_package_items', true );
             if ( ! is_array( $package_items ) ) {
                 $package_items = [];
             }
+            $package_discount = get_post_meta( $edit_id, 'service_package_discount', true );
+            $package_fixed_price = get_post_meta( $edit_id, 'service_package_fixed_price', true );
         }
         echo '<div id="dps-package-items-wrap" style="display:none;margin-bottom:10px;">';
         // List all services except this one for package selection
@@ -406,6 +412,13 @@ class DPS_Services_Addon {
             echo '<option value="' . esc_attr( $asrv->ID ) . '" ' . $sel . '>' . esc_html( $asrv->post_title ) . '</option>';
         }
         echo '</select>';
+        // Campos de preço do pacote: desconto percentual ou preço fixo
+        echo '<div class="dps-package-pricing" style="margin-top:15px;padding:15px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;">';
+        echo '<p style="margin-bottom:10px;"><strong>' . esc_html__( 'Preço do Pacote', 'dps-services-addon' ) . '</strong><br><span class="description">' . esc_html__( 'Defina um desconto percentual OU um preço fixo para o pacote.', 'dps-services-addon' ) . '</span></p>';
+        echo '<p><label>' . esc_html__( 'Desconto (%)', 'dps-services-addon' ) . ' <input type="number" name="service_package_discount" step="1" min="0" max="100" value="' . esc_attr( $package_discount ) . '" placeholder="' . esc_attr__( 'Ex: 10', 'dps-services-addon' ) . '" style="width:100px;"></label></p>';
+        echo '<p>' . esc_html__( '— ou —', 'dps-services-addon' ) . '</p>';
+        echo '<p><label>' . esc_html__( 'Preço fixo (R$)', 'dps-services-addon' ) . ' <input type="number" name="service_package_fixed_price" step="0.01" min="0" value="' . esc_attr( $package_fixed_price ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '" style="width:120px;"></label></p>';
+        echo '</div>';
         echo '</div>';
 
         // Ativo
@@ -505,9 +518,15 @@ class DPS_Services_Addon {
                 $status_class = ( '0' === $active ) ? 'dps-badge-inactive' : 'dps-badge-active';
                 $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
                 echo '<td class="dps-col-status"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
-                // Ações: editar, ativar/desativar, excluir
+                // URL para duplicar serviço
+                $duplicate_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'servicos', 'dps_duplicate_service' => $service->ID ], $base_url ),
+                    'dps_duplicate_service_' . $service->ID
+                );
+                // Ações: editar, duplicar, ativar/desativar, excluir
                 echo '<td class="dps-col-actions">';
                 echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-services-addon' ) . '</a> | ';
+                echo '<a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Criar cópia deste serviço', 'dps-services-addon' ) . '">' . esc_html__( 'Duplicar', 'dps-services-addon' ) . '</a> | ';
                 if ( '0' === $active ) {
                     echo '<a href="' . esc_url( $toggle_url ) . '">' . esc_html__( 'Ativar', 'dps-services-addon' ) . '</a> | ';
                 } else {
@@ -576,11 +595,32 @@ class DPS_Services_Addon {
                 $srv_id = wp_insert_post( [ 'post_type' => 'dps_service', 'post_title' => $name, 'post_status' => 'publish' ] );
             }
             if ( $srv_id ) {
+                // Obtém preços anteriores para histórico
+                $old_price_small  = (float) get_post_meta( $srv_id, 'service_price_small', true );
+                $old_price_medium = (float) get_post_meta( $srv_id, 'service_price_medium', true );
+                $old_price_large  = (float) get_post_meta( $srv_id, 'service_price_large', true );
+                $old_price_base   = (float) get_post_meta( $srv_id, 'service_price', true );
+
                 update_post_meta( $srv_id, 'service_type', $type );
                 update_post_meta( $srv_id, 'service_category', $category );
                 update_post_meta( $srv_id, 'service_price', $price );
                 update_post_meta( $srv_id, 'service_duration', $duration );
                 update_post_meta( $srv_id, 'service_active', $active );
+
+                // Registra histórico de alteração de preços
+                if ( class_exists( 'DPS_Services_API' ) ) {
+                    DPS_Services_API::log_price_change( $srv_id, 'base', $old_price_base, $price );
+                    if ( null !== $price_small ) {
+                        DPS_Services_API::log_price_change( $srv_id, 'small', $old_price_small, $price_small );
+                    }
+                    if ( null !== $price_medium ) {
+                        DPS_Services_API::log_price_change( $srv_id, 'medium', $old_price_medium, $price_medium );
+                    }
+                    if ( null !== $price_large ) {
+                        DPS_Services_API::log_price_change( $srv_id, 'large', $old_price_large, $price_large );
+                    }
+                }
+
                 // Salva variações de preço e duração por porte (pode ser vazia para usar padrão)
                 if ( null !== $price_small ) {
                     update_post_meta( $srv_id, 'service_price_small', $price_small );
@@ -639,8 +679,28 @@ class DPS_Services_Addon {
                 if ( 'package' === $type && isset( $_POST['service_package_items'] ) && is_array( $_POST['service_package_items'] ) ) {
                     $items = array_map( 'intval', (array) wp_unslash( $_POST['service_package_items'] ) );
                     update_post_meta( $srv_id, 'service_package_items', $items );
+
+                    // Salva desconto percentual do pacote
+                    $package_discount = isset( $_POST['service_package_discount'] ) ? floatval( wp_unslash( $_POST['service_package_discount'] ) ) : 0;
+                    if ( $package_discount > 0 && $package_discount <= 100 ) {
+                        update_post_meta( $srv_id, 'service_package_discount', $package_discount );
+                    } else {
+                        delete_post_meta( $srv_id, 'service_package_discount' );
+                    }
+
+                    // Salva preço fixo do pacote (alternativa ao desconto)
+                    $package_fixed = isset( $_POST['service_package_fixed_price'] ) && '' !== $_POST['service_package_fixed_price'] 
+                        ? floatval( wp_unslash( $_POST['service_package_fixed_price'] ) ) 
+                        : null;
+                    if ( null !== $package_fixed && $package_fixed > 0 ) {
+                        update_post_meta( $srv_id, 'service_package_fixed_price', $package_fixed );
+                    } else {
+                        delete_post_meta( $srv_id, 'service_package_fixed_price' );
+                    }
                 } else {
                     delete_post_meta( $srv_id, 'service_package_items' );
+                    delete_post_meta( $srv_id, 'service_package_discount' );
+                    delete_post_meta( $srv_id, 'service_package_fixed_price' );
                 }
                 // Adiciona mensagem de sucesso baseado no tipo de operação
                 if ( class_exists( 'DPS_Message_Helper' ) ) {
@@ -689,6 +749,36 @@ class DPS_Services_Addon {
                             ? __( 'Serviço ativado com sucesso.', 'dps-services-addon' )
                             : __( 'Serviço desativado com sucesso.', 'dps-services-addon' );
                         DPS_Message_Helper::add_success( $message );
+                    }
+                }
+            }
+            $redirect = $this->get_redirect_url();
+            wp_safe_redirect( $redirect );
+            exit;
+        }
+
+        // Duplicar serviço via GET com verificação de nonce
+        if ( isset( $_GET['dps_duplicate_service'] ) ) {
+            $id = intval( wp_unslash( $_GET['dps_duplicate_service'] ) );
+            if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_duplicate_service_' . $id ) ) {
+                $new_id = DPS_Services_API::duplicate_service( $id );
+                if ( $new_id ) {
+                    if ( class_exists( 'DPS_Message_Helper' ) ) {
+                        $edit_url = add_query_arg(
+                            [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $new_id ],
+                            get_permalink()
+                        );
+                        DPS_Message_Helper::add_success(
+                            sprintf(
+                                /* translators: %s: link para editar o serviço duplicado */
+                                __( 'Serviço duplicado com sucesso! O novo serviço está inativo. <a href="%s">Editar cópia</a>', 'dps-services-addon' ),
+                                esc_url( $edit_url )
+                            )
+                        );
+                    }
+                } else {
+                    if ( class_exists( 'DPS_Message_Helper' ) ) {
+                        DPS_Message_Helper::add_error( __( 'Erro ao duplicar serviço.', 'dps-services-addon' ) );
                     }
                 }
             }
@@ -1199,8 +1289,334 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.0.0' );
-        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.0.0', true );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.3.0' );
+        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.3.0', true );
+    }
+
+    /**
+     * Renderiza o shortcode de catálogo público de serviços.
+     *
+     * Uso: [dps_services_catalog]
+     * Atributos:
+     *   - show_prices: 'yes'|'no' (padrão: 'yes') - Exibir preços
+     *   - type: 'padrao'|'extra'|'package' - Filtrar por tipo
+     *   - category: slug da categoria - Filtrar por categoria
+     *   - layout: 'list'|'grid' (padrão: 'list') - Layout de exibição
+     *
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML do catálogo.
+     *
+     * @since 1.3.0
+     */
+    public function render_catalog_shortcode( $atts ) {
+        $atts = shortcode_atts( [
+            'show_prices' => 'yes',
+            'type'        => '',
+            'category'    => '',
+            'layout'      => 'list',
+        ], $atts, 'dps_services_catalog' );
+
+        $include_prices = 'yes' === $atts['show_prices'];
+        $layout         = in_array( $atts['layout'], [ 'list', 'grid' ], true ) ? $atts['layout'] : 'list';
+
+        // Obtém serviços via API
+        $services = DPS_Services_API::get_public_services( [
+            'type'           => sanitize_text_field( $atts['type'] ),
+            'category'       => sanitize_text_field( $atts['category'] ),
+            'include_prices' => $include_prices,
+        ] );
+
+        if ( empty( $services ) ) {
+            return '<p class="dps-catalog-empty">' . esc_html__( 'Nenhum serviço disponível no momento.', 'dps-services-addon' ) . '</p>';
+        }
+
+        // Agrupa por tipo e categoria para melhor organização
+        $grouped = [
+            'padrao'  => [],
+            'package' => [],
+            'extra'   => [],
+        ];
+
+        foreach ( $services as $service ) {
+            $type = $service['type'] ?: 'extra';
+            if ( ! isset( $grouped[ $type ] ) ) {
+                $type = 'extra';
+            }
+            $grouped[ $type ][] = $service;
+        }
+
+        $categories = DPS_Services_API::get_service_categories();
+        $type_labels = [
+            'padrao'  => __( 'Serviços Principais', 'dps-services-addon' ),
+            'package' => __( 'Pacotes Promocionais', 'dps-services-addon' ),
+            'extra'   => __( 'Serviços Extras', 'dps-services-addon' ),
+        ];
+
+        ob_start();
+        ?>
+        <div class="dps-services-catalog dps-catalog-<?php echo esc_attr( $layout ); ?>">
+            <?php foreach ( [ 'padrao', 'package', 'extra' ] as $type ) : ?>
+                <?php if ( ! empty( $grouped[ $type ] ) ) : ?>
+                    <div class="dps-catalog-section dps-catalog-type-<?php echo esc_attr( $type ); ?>">
+                        <h3 class="dps-catalog-section-title"><?php echo esc_html( $type_labels[ $type ] ?? $type ); ?></h3>
+                        
+                        <?php if ( 'grid' === $layout ) : ?>
+                            <div class="dps-catalog-grid">
+                        <?php endif; ?>
+
+                        <?php
+                        // Agrupa extras por categoria
+                        if ( 'extra' === $type ) :
+                            $by_category = [];
+                            foreach ( $grouped[ $type ] as $service ) {
+                                $cat = $service['category'] ?: 'outros';
+                                $by_category[ $cat ][] = $service;
+                            }
+                            foreach ( $by_category as $cat_key => $cat_services ) :
+                                $cat_label = $categories[ $cat_key ] ?? ucfirst( $cat_key );
+                                ?>
+                                <div class="dps-catalog-category">
+                                    <h4 class="dps-catalog-category-title"><?php echo esc_html( $cat_label ); ?></h4>
+                                    <?php foreach ( $cat_services as $service ) : ?>
+                                        <?php echo $this->render_catalog_item( $service, $include_prices, $layout ); ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <?php foreach ( $grouped[ $type ] as $service ) : ?>
+                                <?php echo $this->render_catalog_item( $service, $include_prices, $layout ); ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if ( 'grid' === $layout ) : ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+        <?php
+
+        // Adiciona estilos inline para o catálogo
+        $this->render_catalog_styles();
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza um item individual do catálogo.
+     *
+     * @param array  $service        Dados do serviço.
+     * @param bool   $include_prices Incluir preços na exibição.
+     * @param string $layout         Layout ('list' ou 'grid').
+     * @return string HTML do item.
+     *
+     * @since 1.3.0
+     */
+    private function render_catalog_item( $service, $include_prices, $layout ) {
+        $is_package = 'package' === $service['type'];
+        $has_discount = $is_package && ! empty( $service['package_discount'] ) && $service['package_discount'] > 0;
+
+        ob_start();
+        ?>
+        <div class="dps-catalog-item <?php echo $is_package ? 'dps-catalog-package' : ''; ?>">
+            <div class="dps-catalog-item-content">
+                <h4 class="dps-catalog-item-title">
+                    <?php echo esc_html( $service['title'] ); ?>
+                    <?php if ( $has_discount ) : ?>
+                        <span class="dps-catalog-discount-badge"><?php echo esc_html( sprintf( __( '-%d%%', 'dps-services-addon' ), $service['package_discount'] ) ); ?></span>
+                    <?php endif; ?>
+                </h4>
+                
+                <?php if ( ! empty( $service['description'] ) ) : ?>
+                    <p class="dps-catalog-item-description"><?php echo esc_html( $service['description'] ); ?></p>
+                <?php endif; ?>
+
+                <?php if ( $is_package && ! empty( $service['package_items'] ) ) : ?>
+                    <div class="dps-catalog-package-items">
+                        <span class="dps-catalog-includes"><?php esc_html_e( 'Inclui:', 'dps-services-addon' ); ?></span>
+                        <?php
+                        $item_names = [];
+                        foreach ( $service['package_items'] as $item_id ) {
+                            $item = DPS_Services_API::get_service( $item_id );
+                            if ( $item ) {
+                                $item_names[] = $item['title'];
+                            }
+                        }
+                        echo esc_html( implode( ', ', $item_names ) );
+                        ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ( $include_prices ) : ?>
+                <div class="dps-catalog-item-price">
+                    <?php
+                    // Determina o melhor preço a exibir
+                    if ( $is_package && ! empty( $service['package_fixed_price'] ) ) {
+                        $price_display = sprintf( 'R$ %s', number_format_i18n( $service['package_fixed_price'], 2 ) );
+                    } elseif ( $is_package ) {
+                        // Calcula preço do pacote
+                        $package_price = DPS_Services_API::calculate_package_price( $service['id'] );
+                        $price_display = sprintf( 'R$ %s', number_format_i18n( $package_price, 2 ) );
+                    } else {
+                        // Verifica se tem variação de preço por porte
+                        $prices = array_filter( [
+                            $service['price'] ?? 0,
+                            $service['price_small'] ?? null,
+                            $service['price_medium'] ?? null,
+                            $service['price_large'] ?? null,
+                        ], function( $p ) { return null !== $p && $p > 0; } );
+
+                        if ( count( $prices ) > 1 ) {
+                            $min = min( $prices );
+                            $max = max( $prices );
+                            if ( abs( $min - $max ) > 0.01 ) {
+                                $price_display = sprintf(
+                                    __( 'A partir de R$ %s', 'dps-services-addon' ),
+                                    number_format_i18n( $min, 2 )
+                                );
+                            } else {
+                                $price_display = sprintf( 'R$ %s', number_format_i18n( $min, 2 ) );
+                            }
+                        } else {
+                            $price_display = sprintf( 'R$ %s', number_format_i18n( $service['price'] ?? 0, 2 ) );
+                        }
+                    }
+                    echo '<span class="dps-catalog-price">' . esc_html( $price_display ) . '</span>';
+                    ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza estilos CSS para o catálogo público.
+     *
+     * @since 1.3.0
+     */
+    private function render_catalog_styles() {
+        static $rendered = false;
+        if ( $rendered ) {
+            return;
+        }
+        $rendered = true;
+        ?>
+        <style>
+        .dps-services-catalog {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .dps-catalog-section {
+            margin-bottom: 32px;
+        }
+        .dps-catalog-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #0ea5e9;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .dps-catalog-category {
+            margin-bottom: 24px;
+        }
+        .dps-catalog-category-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        .dps-catalog-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            background: #fff;
+            transition: box-shadow 0.2s ease;
+        }
+        .dps-catalog-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .dps-catalog-package {
+            border-left: 4px solid #0ea5e9;
+            background: #f0f9ff;
+        }
+        .dps-catalog-item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 4px 0;
+        }
+        .dps-catalog-discount-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+        .dps-catalog-item-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
+        }
+        .dps-catalog-package-items {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+        .dps-catalog-includes {
+            font-weight: 600;
+            color: #374151;
+        }
+        .dps-catalog-item-price {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .dps-catalog-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+        .dps-catalog-empty {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px;
+        }
+        /* Grid layout */
+        .dps-catalog-grid .dps-catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .dps-catalog-grid .dps-catalog-item {
+            flex-direction: column;
+        }
+        .dps-catalog-grid .dps-catalog-item-price {
+            text-align: left;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dps-catalog-item {
+                flex-direction: column;
+            }
+            .dps-catalog-item-price {
+                text-align: left;
+                margin-top: 12px;
+            }
+        }
+        </style>
+        <?php
     }
 }
 

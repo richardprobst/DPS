@@ -79,6 +79,35 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Services Add-on (v1.3.0)**: Novas funcionalidades de pacotes, histórico e catálogo
+  - **Pacotes promocionais com desconto**:
+    - Combinar múltiplos serviços em um pacote
+    - Definir desconto percentual (ex: 10% off no combo)
+    - Definir preço fixo alternativo ao desconto
+    - Método `DPS_Services_API::calculate_package_price()` para cálculo automático
+  - **Histórico de alterações de preços**:
+    - Registro automático de todas as alterações de preço
+    - Armazena data, usuário, preço antigo e novo
+    - Método `DPS_Services_API::get_price_history()` para consulta
+    - Mantém últimos 50 registros por serviço
+  - **Duplicação de serviço**:
+    - Botão "Duplicar" na tabela de serviços
+    - Copia todos os metadados (preços, durações, consumo de estoque)
+    - Serviço duplicado inicia como inativo (segurança)
+    - Método `DPS_Services_API::duplicate_service()` na API
+    - Hook `dps_service_duplicated` disparado após duplicação
+  - **Shortcode de catálogo público**:
+    - `[dps_services_catalog]` para exibir serviços no site
+    - Atributos: `show_prices`, `type`, `category`, `layout`
+    - Layouts: lista e grid responsivo
+    - Agrupa por tipo e categoria automaticamente
+    - Destaca pacotes com badge de desconto
+  - **API para Portal do Cliente**:
+    - Método `get_public_services()` para listar serviços ativos
+    - Método `get_portal_services()` com dados para o portal
+    - Método `get_client_service_history()` com histórico de uso
+    - Método `get_service_categories()` para categorias disponíveis
+  - **Impacto**: Funcionalidades completas de catálogo, pacotes e rastreabilidade
 - **Services Add-on**: Documento de análise completa do add-on
   - `docs/analysis/SERVICES_ADDON_ANALYSIS.md` com ~850 linhas de análise
   - Avaliação de funcionalidade, código, segurança, performance e UX
