@@ -639,46 +639,57 @@ class DPS_Push_Notifications_Addon {
             'meta_key'       => 'appointment_time',
             'order'          => 'ASC',
         ] );
+        
+        // Não envia mensagem se não houver atendimentos agendados
+        if ( empty( $appointments ) ) {
+            $this->log( 'info', 'Agenda diária não enviada - sem agendamentos', [
+                'date' => $today,
+            ] );
+            return;
+        }
+        
         // Constrói o resumo
         $lines = [];
         foreach ( $appointments as $appt ) {
-            $time   = get_post_meta( $appt->ID, 'appointment_time', true );
-            $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            $time      = get_post_meta( $appt->ID, 'appointment_time', true );
+            $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
             $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-            $pet   = $pet_id ? get_post( $pet_id ) : null;
-            $client= $client_id ? get_post( $client_id ) : null;
+            $service   = get_post_meta( $appt->ID, 'appointment_service', true );
+            $pet       = $pet_id ? get_post( $pet_id ) : null;
+            $client    = $client_id ? get_post( $client_id ) : null;
             $pet_name    = $pet ? $pet->post_title : '-';
             $client_name = $client ? $client->post_title : '-';
-            $lines[] = $time . ' – ' . $pet_name . ' (' . $client_name . ')';
+            
+            $lines[] = [
+                'time'    => $time ?: '--:--',
+                'pet'     => $pet_name,
+                'client'  => $client_name,
+                'service' => $service ?: '',
+            ];
         }
-        // Mensagem vazia se não houver atendimentos
-        $content = '';
-        if ( $lines ) {
-            $content .= "Agendamentos para hoje (" . date_i18n( 'd/m/Y', current_time( 'timestamp' ) ) . "):\n";
-            foreach ( $lines as $line ) {
-                $content .= '- ' . $line . "\n";
+        
+        // Conteúdo texto para Telegram
+        $date_formatted = date_i18n( 'd/m/Y', current_time( 'timestamp' ) );
+        $content = "📅 *Agenda do Dia - {$date_formatted}*\n\n";
+        $content .= "Total: " . count( $lines ) . " agendamento(s)\n\n";
+        foreach ( $lines as $item ) {
+            $content .= "🕐 *{$item['time']}* - {$item['pet']} ({$item['client']})";
+            if ( $item['service'] ) {
+                $content .= " - {$item['service']}";
             }
-        } else {
-            $content = 'Não há agendamentos para hoje.';
+            $content .= "\n";
         }
+        
         // Permite modificar o conteúdo via filtro
         $content = apply_filters( 'dps_push_notification_content', $content, $appointments );
+        
         // Determina destinatários
         $to      = apply_filters( 'dps_push_notification_recipients', [ get_option( 'admin_email' ) ] );
-        $subject = 'Resumo de agendamentos do dia';
-        // Constrói versão HTML
-        $html    = '<html><body>';
-        $html   .= '<p>Agendamentos para hoje (' . date_i18n( 'd/m/Y', current_time( 'timestamp' ) ) . '):</p>';
-        if ( $lines ) {
-            $html .= '<ul>';
-            foreach ( $lines as $line ) {
-                $html .= '<li>' . esc_html( $line ) . '</li>';
-            }
-            $html .= '</ul>';
-        } else {
-            $html .= '<p>Não há agendamentos para hoje.</p>';
-        }
-        $html .= '</body></html>';
+        $subject = '📅 Agenda do Dia - ' . $date_formatted . ' (' . count( $lines ) . ' agendamentos)';
+        
+        // Constrói versão HTML com layout melhorado
+        $html = $this->build_agenda_email_html( $lines, $date_formatted );
+        
         // Define headers para HTML
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
         
@@ -703,6 +714,102 @@ class DPS_Push_Notifications_Addon {
     }
 
     /**
+     * Constrói HTML do email de agenda com layout melhorado.
+     *
+     * @param array  $lines          Lista de agendamentos
+     * @param string $date_formatted Data formatada
+     * @return string HTML do email
+     */
+    private function build_agenda_email_html( $lines, $date_formatted ) {
+        $count = count( $lines );
+        
+        $html = '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 24px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">📅 Agenda do Dia</h1>
+                            <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">' . esc_html( $date_formatted ) . '</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Summary -->
+                    <tr>
+                        <td style="padding: 20px 24px; background-color: #f0f9ff; border-bottom: 1px solid #e0f2fe;">
+                            <p style="margin: 0; color: #0369a1; font-size: 16px; font-weight: 500;">
+                                🐾 <strong>' . $count . '</strong> agendamento' . ( $count > 1 ? 's' : '' ) . ' para hoje
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Appointments List -->
+                    <tr>
+                        <td style="padding: 24px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">';
+        
+        foreach ( $lines as $index => $item ) {
+            $bg_color = ( $index % 2 === 0 ) ? '#ffffff' : '#f9fafb';
+            $border_style = ( $index < count( $lines ) - 1 ) ? 'border-bottom: 1px solid #e5e7eb;' : '';
+            
+            $html .= '
+                                <tr>
+                                    <td style="padding: 16px; background-color: ' . $bg_color . '; ' . $border_style . '">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="70" style="vertical-align: top;">
+                                                    <span style="display: inline-block; background-color: #0ea5e9; color: #ffffff; padding: 6px 12px; border-radius: 4px; font-size: 14px; font-weight: 600;">' . esc_html( $item['time'] ) . '</span>
+                                                </td>
+                                                <td style="vertical-align: top; padding-left: 12px;">
+                                                    <p style="margin: 0 0 4px 0; color: #1f2937; font-size: 16px; font-weight: 600;">🐕 ' . esc_html( $item['pet'] ) . '</p>
+                                                    <p style="margin: 0; color: #6b7280; font-size: 14px;">👤 ' . esc_html( $item['client'] ) . '</p>';
+            
+            if ( ! empty( $item['service'] ) ) {
+                $html .= '
+                                                    <p style="margin: 4px 0 0 0; color: #059669; font-size: 13px;">✂️ ' . esc_html( $item['service'] ) . '</p>';
+            }
+            
+            $html .= '
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>';
+        }
+        
+        $html .= '
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+        
+        return $html;
+    }
+
+    /**
      * Envia um relatório diário às 19:00 contendo resumo de atendimentos e dados financeiros.
      */
     public function send_daily_report() {
@@ -713,6 +820,8 @@ class DPS_Push_Notifications_Addon {
         
         // Data atual
         $today = date_i18n( 'Y-m-d', current_time( 'timestamp' ) );
+        $date_formatted = date_i18n( 'd/m/Y', current_time( 'timestamp' ) );
+        
         // ----- Resumo de atendimentos -----
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -729,26 +838,34 @@ class DPS_Push_Notifications_Addon {
             'meta_key'       => 'appointment_time',
             'order'          => 'ASC',
         ] );
+        
         $ap_lines = [];
         foreach ( $appointments as $appt ) {
-            $time   = get_post_meta( $appt->ID, 'appointment_time', true );
-            $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            $time      = get_post_meta( $appt->ID, 'appointment_time', true );
+            $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
             $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-            $pet   = $pet_id ? get_post( $pet_id ) : null;
-            $client= $client_id ? get_post( $client_id ) : null;
-            $pet_name    = $pet ? $pet->post_title : '-';
-            $client_name = $client ? $client->post_title : '-';
-            $ap_lines[]  = $time . ' – ' . $pet_name . ' (' . $client_name . ')';
+            $service   = get_post_meta( $appt->ID, 'appointment_service', true );
+            $pet       = $pet_id ? get_post( $pet_id ) : null;
+            $client    = $client_id ? get_post( $client_id ) : null;
+            
+            $ap_lines[] = [
+                'time'    => $time ?: '--:--',
+                'pet'     => $pet ? $pet->post_title : '-',
+                'client'  => $client ? $client->post_title : '-',
+                'service' => $service ?: '',
+            ];
         }
+        
         // ----- Resumo financeiro -----
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
-        // Seleciona transações cuja data seja hoje (ignorando hora)
         $trans = [];
         $total_pago = 0.0;
         $total_aberto = 0.0;
+        
         if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table ) ) === $table ) {
-            $trans = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE DATE(data) = %s", $today ) );
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+            $trans = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE DATE(data) = %s ORDER BY data ASC", $today ) );
             foreach ( $trans as $t ) {
                 $valor = (float) $t->valor;
                 if ( $t->status === 'pago' ) {
@@ -758,66 +875,40 @@ class DPS_Push_Notifications_Addon {
                 }
             }
         }
-        // Monta conteúdo de email em HTML e texto
-        $content = 'Relatório diário de ' . date_i18n( 'd/m/Y', current_time( 'timestamp' ) ) . "\n\n";
-        $content .= "Resumo de atendimentos:\n";
-        if ( $ap_lines ) {
-            foreach ( $ap_lines as $line ) {
-                $content .= '- ' . $line . "\n";
-            }
-        } else {
-            $content .= "Nenhum atendimento registrado hoje.\n";
+        
+        // Não envia se não houver atendimentos nem transações
+        if ( empty( $appointments ) && empty( $trans ) ) {
+            $this->log( 'info', 'Relatório financeiro não enviado - sem dados', [
+                'date' => $today,
+            ] );
+            return;
         }
-        $content .= "\nResumo financeiro:\n";
-        if ( $trans ) {
-            $content .= sprintf( "Total recebido (pago): R$ %s\n", number_format( $total_pago, 2, ',', '.' ) );
-            $content .= sprintf( "Total em aberto: R$ %s\n", number_format( $total_aberto, 2, ',', '.' ) );
-            $content .= "Transações:\n";
-            foreach ( $trans as $t ) {
-                $date_fmt = $t->data ? date_i18n( 'H:i', strtotime( $t->data ) ) : '';
-                $valor_fmt = number_format( (float) $t->valor, 2, ',', '.' );
-                $status_label = ( $t->status === 'pago' ) ? 'Pago' : 'Em aberto';
-                $desc = $t->descricao ?: '';
-                $content .= '- ' . $date_fmt . ': R$ ' . $valor_fmt . ' (' . $status_label . ') ' . $desc . "\n";
+        
+        // Monta conteúdo texto para Telegram
+        $content = "📊 *Relatório do Dia - {$date_formatted}*\n\n";
+        
+        if ( ! empty( $ap_lines ) ) {
+            $content .= "📅 *Atendimentos:* " . count( $ap_lines ) . "\n";
+            foreach ( $ap_lines as $item ) {
+                $content .= "  • {$item['time']} - {$item['pet']} ({$item['client']})\n";
             }
-        } else {
-            $content .= "Nenhuma transação financeira registrada hoje.\n";
+            $content .= "\n";
         }
-        // Constrói HTML
-        $html = '<html><body>';
-        $html .= '<h3>Relatório diário de ' . date_i18n( 'd/m/Y', current_time( 'timestamp' ) ) . '</h3>';
-        $html .= '<h4>Resumo de atendimentos:</h4>';
-        if ( $ap_lines ) {
-            $html .= '<ul>';
-            foreach ( $ap_lines as $line ) {
-                $html .= '<li>' . esc_html( $line ) . '</li>';
-            }
-            $html .= '</ul>';
-        } else {
-            $html .= '<p>Nenhum atendimento registrado hoje.</p>';
-        }
-        $html .= '<h4>Resumo financeiro:</h4>';
-        if ( $trans ) {
-            $html .= '<p>Total recebido (pago): <strong>R$ ' . esc_html( number_format( $total_pago, 2, ',', '.' ) ) . '</strong><br>';
-            $html .= 'Total em aberto: <strong>R$ ' . esc_html( number_format( $total_aberto, 2, ',', '.' ) ) . '</strong></p>';
-            $html .= '<ul>';
-            foreach ( $trans as $t ) {
-                $date_fmt = $t->data ? date_i18n( 'H:i', strtotime( $t->data ) ) : '';
-                $valor_fmt = number_format( (float) $t->valor, 2, ',', '.' );
-                $status_label = ( $t->status === 'pago' ) ? 'Pago' : 'Em aberto';
-                $desc = $t->descricao ?: '';
-                $html .= '<li>' . esc_html( $date_fmt ) . ': R$ ' . esc_html( $valor_fmt ) . ' (' . esc_html( $status_label ) . ') ' . esc_html( $desc ) . '</li>';
-            }
-            $html .= '</ul>';
-        } else {
-            $html .= '<p>Nenhuma transação financeira registrada hoje.</p>';
-        }
-        $html .= '</body></html>';
+        
+        $content .= "💰 *Resumo Financeiro:*\n";
+        $content .= "  ✅ Recebido: R$ " . number_format( $total_pago, 2, ',', '.' ) . "\n";
+        $content .= "  ⏳ Em aberto: R$ " . number_format( $total_aberto, 2, ',', '.' ) . "\n";
+        
         // Permite filtros no conteúdo e destinatários
         $content = apply_filters( 'dps_daily_report_content', $content, $appointments, $trans );
-        $html    = apply_filters( 'dps_daily_report_html', $html, $appointments, $trans );
+        
+        // Constrói HTML com layout melhorado
+        $html = $this->build_daily_report_html( $ap_lines, $trans, $total_pago, $total_aberto, $date_formatted );
+        $html = apply_filters( 'dps_daily_report_html', $html, $appointments, $trans );
+        
         $recipients = apply_filters( 'dps_daily_report_recipients', [ get_option( 'admin_email' ) ] );
-        $subject = 'Relatório diário de atendimentos e financeiro';
+        $subject = '📊 Relatório do Dia - ' . $date_formatted;
+        
         // HTML header
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
         
@@ -839,6 +930,166 @@ class DPS_Push_Notifications_Addon {
             'total_pago'   => $total_pago,
             'total_aberto' => $total_aberto,
         ] );
+    }
+
+    /**
+     * Constrói HTML do relatório diário com layout melhorado.
+     *
+     * @param array  $ap_lines       Lista de atendimentos
+     * @param array  $trans          Lista de transações
+     * @param float  $total_pago     Total pago
+     * @param float  $total_aberto   Total em aberto
+     * @param string $date_formatted Data formatada
+     * @return string HTML do email
+     */
+    private function build_daily_report_html( $ap_lines, $trans, $total_pago, $total_aberto, $date_formatted ) {
+        $html = '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 24px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">📊 Relatório do Dia</h1>
+                            <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">' . esc_html( $date_formatted ) . '</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Financial Summary Cards -->
+                    <tr>
+                        <td style="padding: 24px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="48%" style="background-color: #d1fae5; border-radius: 8px; padding: 16px; text-align: center;">
+                                        <p style="margin: 0 0 4px 0; color: #065f46; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Recebido</p>
+                                        <p style="margin: 0; color: #059669; font-size: 24px; font-weight: 700;">R$ ' . esc_html( number_format( $total_pago, 2, ',', '.' ) ) . '</p>
+                                    </td>
+                                    <td width="4%"></td>
+                                    <td width="48%" style="background-color: #fef3c7; border-radius: 8px; padding: 16px; text-align: center;">
+                                        <p style="margin: 0 0 4px 0; color: #92400e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Em Aberto</p>
+                                        <p style="margin: 0; color: #d97706; font-size: 24px; font-weight: 700;">R$ ' . esc_html( number_format( $total_aberto, 2, ',', '.' ) ) . '</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>';
+        
+        // Seção de atendimentos
+        if ( ! empty( $ap_lines ) ) {
+            $html .= '
+                    <!-- Appointments Section -->
+                    <tr>
+                        <td style="padding: 0 24px 24px 24px;">
+                            <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px; font-weight: 600; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+                                📅 Atendimentos do Dia (' . count( $ap_lines ) . ')
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">';
+            
+            foreach ( $ap_lines as $index => $item ) {
+                $bg_color = ( $index % 2 === 0 ) ? '#ffffff' : '#f9fafb';
+                $html .= '
+                                <tr>
+                                    <td style="padding: 12px; background-color: ' . $bg_color . '; border-bottom: 1px solid #e5e7eb;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="60" style="vertical-align: middle;">
+                                                    <span style="display: inline-block; background-color: #8b5cf6; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 600;">' . esc_html( $item['time'] ) . '</span>
+                                                </td>
+                                                <td style="vertical-align: middle; padding-left: 12px;">
+                                                    <span style="color: #1f2937; font-weight: 500;">' . esc_html( $item['pet'] ) . '</span>
+                                                    <span style="color: #6b7280;"> • ' . esc_html( $item['client'] ) . '</span>';
+                if ( ! empty( $item['service'] ) ) {
+                    $html .= '
+                                                    <span style="color: #059669; font-size: 12px;"> • ' . esc_html( $item['service'] ) . '</span>';
+                }
+                $html .= '
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>';
+            }
+            
+            $html .= '
+                            </table>
+                        </td>
+                    </tr>';
+        }
+        
+        // Seção de transações
+        if ( ! empty( $trans ) ) {
+            $html .= '
+                    <!-- Transactions Section -->
+                    <tr>
+                        <td style="padding: 0 24px 24px 24px;">
+                            <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px; font-weight: 600; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+                                💳 Transações (' . count( $trans ) . ')
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">';
+            
+            foreach ( $trans as $index => $t ) {
+                $bg_color = ( $index % 2 === 0 ) ? '#ffffff' : '#f9fafb';
+                $time_fmt = $t->data ? date_i18n( 'H:i', strtotime( $t->data ) ) : '--:--';
+                $valor_fmt = number_format( (float) $t->valor, 2, ',', '.' );
+                $is_paid = ( $t->status === 'pago' );
+                $status_bg = $is_paid ? '#d1fae5' : '#fef3c7';
+                $status_color = $is_paid ? '#065f46' : '#92400e';
+                $status_label = $is_paid ? '✓ Pago' : '⏳ Aberto';
+                
+                $html .= '
+                                <tr>
+                                    <td style="padding: 12px; background-color: ' . $bg_color . '; border-bottom: 1px solid #e5e7eb;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="50" style="vertical-align: middle; color: #6b7280; font-size: 13px;">' . esc_html( $time_fmt ) . '</td>
+                                                <td style="vertical-align: middle;">
+                                                    <span style="color: #1f2937; font-weight: 500;">R$ ' . esc_html( $valor_fmt ) . '</span>';
+                if ( ! empty( $t->descricao ) ) {
+                    $html .= '
+                                                    <span style="color: #6b7280; font-size: 13px;"> – ' . esc_html( $t->descricao ) . '</span>';
+                }
+                $html .= '
+                                                </td>
+                                                <td width="80" style="vertical-align: middle; text-align: right;">
+                                                    <span style="display: inline-block; background-color: ' . $status_bg . '; color: ' . $status_color . '; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">' . $status_label . '</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>';
+            }
+            
+            $html .= '
+                            </table>
+                        </td>
+                    </tr>';
+        }
+        
+        $html .= '
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+        
+        return $html;
     }
 
     /**
@@ -975,12 +1226,15 @@ class DPS_Push_Notifications_Addon {
         
         // Data limite: X dias atrás
         $cutoff_date = date_i18n( 'Y-m-d', strtotime( "-{$inactive_days} days", current_time( 'timestamp' ) ) );
+        $today_label = date_i18n( 'd/m/Y', current_time( 'timestamp' ) );
+        
         // Busca todos os pets
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
         ] );
+        
         $inactive = [];
         foreach ( $pets as $pet ) {
             $pet_id = $pet->ID;
@@ -1006,41 +1260,64 @@ class DPS_Push_Notifications_Addon {
             }
             // Se não há data ou é anterior ao cutoff, adiciona à lista
             if ( ! $last_date || $last_date < $cutoff_date ) {
-                // Obter nome do dono e data formatada
+                // Obter nome do dono, telefone e data formatada
                 $owner_id = get_post_meta( $pet_id, 'owner_id', true );
                 $owner    = $owner_id ? get_post( $owner_id ) : null;
+                $phone    = $owner_id ? get_post_meta( $owner_id, 'client_phone', true ) : '';
                 $last_fmt = $last_date ? date_i18n( 'd/m/Y', strtotime( $last_date ) ) : 'Nunca';
+                
+                // Calcular dias desde o último atendimento
+                $days_since = $last_date ? floor( ( current_time( 'timestamp' ) - strtotime( $last_date ) ) / DAY_IN_SECONDS ) : null;
+                
                 $inactive[] = [
                     'pet_name'   => $pet->post_title,
                     'owner_name' => $owner ? $owner->post_title : '-',
+                    'phone'      => $phone ?: '',
                     'last_date'  => $last_fmt,
+                    'days_since' => $days_since,
                 ];
             }
         }
-        // Monta mensagem de relatório
-        $today_label = date_i18n( 'd/m/Y', current_time( 'timestamp' ) );
-        $content = "Relatório semanal de pets inativos ({$today_label})\n\n";
-        $html    = '<html><body>';
-        $html   .= '<h3>Relatório semanal de pets inativos (' . esc_html( $today_label ) . ')</h3>';
-        if ( $inactive ) {
-            /* translators: %d: number of days without appointments */
-            $content .= sprintf( __( "Pets sem atendimento nos últimos %d dias:\n", 'dps-push-addon' ), $inactive_days );
-            /* translators: %d: number of days without appointments */
-            $html    .= '<p>' . sprintf( esc_html__( 'Pets sem atendimento nos últimos %d dias:', 'dps-push-addon' ), $inactive_days ) . '</p><ul>';
-            foreach ( $inactive as $item ) {
-                $line = $item['pet_name'] . ' – ' . $item['owner_name'] . ' (último: ' . $item['last_date'] . ')';
-                $content .= '- ' . $line . "\n";
-                $html    .= '<li>' . esc_html( $line ) . '</li>';
-            }
-            $html .= '</ul>';
-        } else {
-            $content .= "Todos os pets tiveram atendimento recente.\n";
-            $html    .= '<p>Todos os pets tiveram atendimento recente.</p>';
+        
+        // Não envia se não houver pets inativos
+        if ( empty( $inactive ) ) {
+            $this->log( 'info', 'Relatório semanal não enviado - sem pets inativos', [
+                'threshold' => $inactive_days,
+            ] );
+            return;
         }
-        $html .= '</body></html>';
+        
+        // Ordena por dias desde o último atendimento (mais antigo primeiro)
+        usort( $inactive, function( $a, $b ) {
+            if ( $a['days_since'] === null ) return -1;
+            if ( $b['days_since'] === null ) return 1;
+            return $b['days_since'] - $a['days_since'];
+        } );
+        
+        // Monta mensagem de relatório para Telegram
+        $content = "🐾 *Relatório Semanal - Pets Inativos*\n";
+        $content .= "📅 {$today_label}\n\n";
+        $content .= "⚠️ *" . count( $inactive ) . " pets* sem atendimento há mais de {$inactive_days} dias:\n\n";
+        
+        foreach ( $inactive as $item ) {
+            $content .= "🐕 *{$item['pet_name']}* ({$item['owner_name']})\n";
+            $content .= "   📆 Último: {$item['last_date']}";
+            if ( $item['days_since'] !== null ) {
+                $content .= " ({$item['days_since']} dias)";
+            }
+            $content .= "\n";
+            if ( ! empty( $item['phone'] ) ) {
+                $content .= "   📞 {$item['phone']}\n";
+            }
+            $content .= "\n";
+        }
+        
+        // Constrói HTML com layout melhorado
+        $html = $this->build_weekly_report_html( $inactive, $inactive_days, $today_label );
+        
         // Determina destinatários (usar emails de relatório por padrão)
         $recipients = apply_filters( 'dps_weekly_inactive_report_recipients', get_option( 'dps_push_emails_report', [ get_option( 'admin_email' ) ] ) );
-        $subject = 'Relatório semanal de pets inativos';
+        $subject = '🐾 Pets Inativos - ' . count( $inactive ) . ' pets sem atendimento há ' . $inactive_days . '+ dias';
         $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
         
         $sent_count = 0;
@@ -1062,6 +1339,129 @@ class DPS_Push_Notifications_Addon {
         
         // Aciona serviço de push se configurado
         do_action( 'dps_send_push_notification', $content, $inactive );
+    }
+
+    /**
+     * Constrói HTML do relatório semanal de pets inativos com layout melhorado.
+     *
+     * @param array  $inactive       Lista de pets inativos
+     * @param int    $inactive_days  Threshold de dias
+     * @param string $date_formatted Data formatada
+     * @return string HTML do email
+     */
+    private function build_weekly_report_html( $inactive, $inactive_days, $date_formatted ) {
+        $count = count( $inactive );
+        
+        $html = '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 24px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">🐾 Pets Inativos</h1>
+                            <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">Relatório Semanal - ' . esc_html( $date_formatted ) . '</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Summary Alert -->
+                    <tr>
+                        <td style="padding: 20px 24px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 16px;">
+                                        <p style="margin: 0; color: #92400e; font-size: 16px;">
+                                            ⚠️ <strong>' . $count . '</strong> pet' . ( $count > 1 ? 's' : '' ) . ' sem atendimento há mais de <strong>' . $inactive_days . ' dias</strong>
+                                        </p>
+                                        <p style="margin: 8px 0 0 0; color: #a16207; font-size: 14px;">
+                                            Considere entrar em contato com esses clientes para reagendar.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Pets List -->
+                    <tr>
+                        <td style="padding: 0 24px 24px 24px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">';
+        
+        foreach ( $inactive as $index => $item ) {
+            $bg_color = ( $index % 2 === 0 ) ? '#ffffff' : '#f9fafb';
+            $border_style = ( $index < count( $inactive ) - 1 ) ? 'border-bottom: 1px solid #e5e7eb;' : '';
+            
+            // Cor do badge baseado na quantidade de dias
+            $days = $item['days_since'];
+            if ( $days === null ) {
+                $badge_bg = '#ef4444';
+                $badge_text = 'Nunca';
+            } elseif ( $days > 90 ) {
+                $badge_bg = '#ef4444';
+                $badge_text = $days . ' dias';
+            } elseif ( $days > 60 ) {
+                $badge_bg = '#f59e0b';
+                $badge_text = $days . ' dias';
+            } else {
+                $badge_bg = '#6b7280';
+                $badge_text = $days . ' dias';
+            }
+            
+            $html .= '
+                                <tr>
+                                    <td style="padding: 16px; background-color: ' . $bg_color . '; ' . $border_style . '">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="vertical-align: top;">
+                                                    <p style="margin: 0 0 4px 0; color: #1f2937; font-size: 16px; font-weight: 600;">🐕 ' . esc_html( $item['pet_name'] ) . '</p>
+                                                    <p style="margin: 0; color: #6b7280; font-size: 14px;">👤 ' . esc_html( $item['owner_name'] ) . '</p>';
+            
+            if ( ! empty( $item['phone'] ) ) {
+                $html .= '
+                                                    <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 13px;">📞 ' . esc_html( $item['phone'] ) . '</p>';
+            }
+            
+            $html .= '
+                                                </td>
+                                                <td width="100" style="vertical-align: top; text-align: right;">
+                                                    <span style="display: inline-block; background-color: ' . $badge_bg . '; color: #ffffff; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">' . esc_html( $badge_text ) . '</span>
+                                                    <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 12px;">Último: ' . esc_html( $item['last_date'] ) . '</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>';
+        }
+        
+        $html .= '
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+        
+        return $html;
     }
 
     /**
