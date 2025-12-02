@@ -573,9 +573,13 @@ class DPS_Push_Notifications_Addon {
     /**
      * Normaliza horário no formato HH:MM, com fallback para hora inteira.
      *
+     * Esta função garante que sempre haverá um horário válido, mesmo se o
+     * usuário não preencher o campo ou enviar valor inválido. Isso permite
+     * que os inputs não tenham 'required' quando o relatório está desabilitado.
+     *
      * @param string $time_string Horário recebido do formulário/option.
      * @param int    $fallback_hour Hora padrão caso formato seja inválido.
-     * @return string Horário normalizado.
+     * @return string Horário normalizado no formato HH:MM.
      */
     private function normalize_time_option( $time_string, $fallback_hour = 8 ) {
         $time_string = is_string( $time_string ) ? trim( $time_string ) : '';
