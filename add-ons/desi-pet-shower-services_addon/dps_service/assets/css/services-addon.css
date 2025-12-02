@@ -48,6 +48,64 @@
     cursor: pointer;
 }
 
+/* === Badges de Status === */
+.dps-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dps-badge-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.dps-badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* === Tabela de Serviços === */
+.dps-services-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-services-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dps-services-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+.dps-services-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-services-table td a {
+    color: #0ea5e9;
+    text-decoration: none;
+}
+
+.dps-services-table td a:hover {
+    text-decoration: underline;
+}
+
 /* === Layout Responsivo === */
 
 /* Tablets e telas médias (até 768px) */
@@ -55,6 +113,14 @@
     .dps-service-price {
         width: 110px;
         font-size: 15px; /* Ligeiramente maior para mobile */
+    }
+    
+    /* Tabela responsiva */
+    .dps-services-table th:nth-child(3),
+    .dps-services-table td:nth-child(3),
+    .dps-services-table th:nth-child(4),
+    .dps-services-table td:nth-child(4) {
+        display: none;
     }
 }
 
@@ -76,6 +142,18 @@
     .dps-services-fields label {
         display: block;
         padding: 8px 0;
+    }
+    
+    /* Tabela mais compacta */
+    .dps-services-table th,
+    .dps-services-table td {
+        padding: 8px;
+        font-size: 13px;
+    }
+    
+    .dps-services-table th:nth-child(2),
+    .dps-services-table td:nth-child(2) {
+        display: none;
     }
 }
 
@@ -145,4 +223,46 @@
         font-size: 18px;
         padding: 8px;
     }
+}
+
+/* === Formulário de Cadastro de Serviços === */
+.dps-price-by-size,
+.dps-duration-by-size {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-price-by-size p:first-of-type,
+.dps-duration-by-size p:first-of-type {
+    margin-top: 0;
+}
+
+.dps-stock-consumption {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+#dps-stock-consumption-table {
+    margin-top: 12px;
+}
+
+#dps-stock-consumption-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+}
+
+#dps-stock-consumption-table td {
+    padding: 8px 12px;
+}
+
+#dps-stock-consumption-table select,
+#dps-stock-consumption-table input[type="number"] {
+    width: 100%;
+    max-width: 200px;
 }

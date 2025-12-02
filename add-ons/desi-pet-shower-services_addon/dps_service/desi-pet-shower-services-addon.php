@@ -275,6 +275,10 @@ class DPS_Services_Addon {
         ];
         ob_start();
         echo '<div class="dps-section" id="dps-section-servicos">';
+        // Exibe mensagens de feedback
+        if ( class_exists( 'DPS_Message_Helper' ) ) {
+            echo DPS_Message_Helper::display_messages();
+        }
         echo '<h3>' . esc_html__( 'Cadastro de Serviços', 'dps-services-addon' ) . '</h3>';
         echo '<form method="post" class="dps-form">';
         echo '<input type="hidden" name="dps_service_action" value="save_service">';
@@ -443,7 +447,8 @@ class DPS_Services_Addon {
         echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-services-addon' ) . '"></p>';
         if ( $services ) {
             $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Tipo', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Preço', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Status', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Ações', 'dps-services-addon' ) . '</th></tr></thead><tbody>';
+            echo '<div class="dps-table-wrapper">';
+            echo '<table class="dps-table dps-services-table"><thead><tr><th>' . esc_html__( 'Nome', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Tipo', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Preço', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Status', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Ações', 'dps-services-addon' ) . '</th></tr></thead><tbody>';
             foreach ( $services as $service ) {
                 $type  = get_post_meta( $service->ID, 'service_type', true );
                 $cat   = get_post_meta( $service->ID, 'service_category', true );
@@ -475,19 +480,27 @@ class DPS_Services_Addon {
                 $type_label = isset( $types[ $type ] ) ? $types[ $type ] : $type;
                 $cat_label  = isset( $categories[ $cat ] ) ? $categories[ $cat ] : $cat;
                 $edit_url   = add_query_arg( [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $service->ID ], $base_url );
-                $del_url    = add_query_arg( [ 'tab' => 'servicos', 'dps_service_delete' => $service->ID ], $base_url );
+                // URLs com nonce para proteção CSRF
+                $del_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'servicos', 'dps_service_delete' => $service->ID ], $base_url ),
+                    'dps_delete_service_' . $service->ID
+                );
+                $toggle_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'servicos', 'dps_toggle_service' => $service->ID ], $base_url ),
+                    'dps_toggle_service_' . $service->ID
+                );
                 echo '<tr>';
                 echo '<td>' . esc_html( $service->post_title ) . '</td>';
                 echo '<td>' . esc_html( $type_label ) . '</td>';
                 echo '<td>' . esc_html( $cat_label ) . '</td>';
                 echo '<td>' . esc_html( $price_display ) . '</td>';
                 $active = get_post_meta( $service->ID, 'service_active', true );
+                $status_class = ( '0' === $active ) ? 'dps-badge-inactive' : 'dps-badge-active';
                 $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
-                echo '<td>' . esc_html( $status_label ) . '</td>';
+                echo '<td><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
                 // Ações: editar, ativar/desativar, excluir
                 echo '<td>';
                 echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-services-addon' ) . '</a> | ';
-                $toggle_url = add_query_arg( [ 'tab' => 'servicos', 'dps_toggle_service' => $service->ID ], $base_url );
                 if ( '0' === $active ) {
                     echo '<a href="' . esc_url( $toggle_url ) . '">' . esc_html__( 'Ativar', 'dps-services-addon' ) . '</a> | ';
                 } else {
@@ -498,6 +511,7 @@ class DPS_Services_Addon {
                 echo '</tr>';
             }
             echo '</tbody></table>';
+            echo '</div>'; // .dps-table-wrapper
         } else {
             echo '<p>' . esc_html__( 'Nenhum serviço cadastrado.', 'dps-services-addon' ) . '</p>';
         }
@@ -621,30 +635,54 @@ class DPS_Services_Addon {
                 } else {
                     delete_post_meta( $srv_id, 'service_package_items' );
                 }
+                // Adiciona mensagem de sucesso
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    $message = isset( $_POST['service_id'] ) && intval( $_POST['service_id'] ) > 0
+                        ? __( 'Serviço atualizado com sucesso.', 'dps-services-addon' )
+                        : __( 'Serviço cadastrado com sucesso.', 'dps-services-addon' );
+                    DPS_Message_Helper::add_success( $message );
+                }
             }
             // Redireciona para aba serviços
             $redirect = $this->get_redirect_url();
             wp_safe_redirect( $redirect );
             exit;
         }
-        // Exclusão via GET
+        // Exclusão via GET com verificação de nonce
         if ( isset( $_GET['dps_service_delete'] ) ) {
             $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
-            if ( $id ) {
-                wp_delete_post( $id, true );
+            // Verifica nonce antes de excluir
+            if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_service_' . $id ) ) {
+                $service = get_post( $id );
+                if ( $service && 'dps_service' === $service->post_type ) {
+                    wp_delete_post( $id, true );
+                    if ( class_exists( 'DPS_Message_Helper' ) ) {
+                        DPS_Message_Helper::add_success( __( 'Serviço excluído com sucesso.', 'dps-services-addon' ) );
+                    }
+                }
             }
             $redirect = $this->get_redirect_url();
             wp_safe_redirect( $redirect );
             exit;
         }
 
-        // Alterna status ativo/inativo via GET
+        // Alterna status ativo/inativo via GET com verificação de nonce
         if ( isset( $_GET['dps_toggle_service'] ) ) {
             $id = intval( wp_unslash( $_GET['dps_toggle_service'] ) );
-            if ( $id ) {
-                $curr = get_post_meta( $id, 'service_active', true );
-                $new  = ( '0' === $curr ) ? '1' : '0';
-                update_post_meta( $id, 'service_active', $new );
+            // Verifica nonce antes de alterar status
+            if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_toggle_service_' . $id ) ) {
+                $service = get_post( $id );
+                if ( $service && 'dps_service' === $service->post_type ) {
+                    $curr = get_post_meta( $id, 'service_active', true );
+                    $new  = ( '0' === $curr ) ? '1' : '0';
+                    update_post_meta( $id, 'service_active', $new );
+                    if ( class_exists( 'DPS_Message_Helper' ) ) {
+                        $message = ( '1' === $new ) 
+                            ? __( 'Serviço ativado com sucesso.', 'dps-services-addon' )
+                            : __( 'Serviço desativado com sucesso.', 'dps-services-addon' );
+                        DPS_Message_Helper::add_success( $message );
+                    }
+                }
             }
             $redirect = $this->get_redirect_url();
             wp_safe_redirect( $redirect );

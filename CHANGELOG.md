@@ -79,6 +79,13 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Services Add-on**: Documento de análise completa do add-on
+  - `docs/analysis/SERVICES_ADDON_ANALYSIS.md` com ~850 linhas de análise
+  - Avaliação de funcionalidade, código, segurança, performance e UX
+  - Identificação de vulnerabilidades e propostas de correção
+  - Roadmap de melhorias futuras (pacotes, histórico de preços, catálogo público)
+  - Estimativas de esforço para cada melhoria
+  - **Impacto**: Documentação técnica para orientar desenvolvimento futuro
 - **Groomers Add-on (v1.2.0)**: Edição, exclusão de groomers e exportação de relatórios
   - Coluna "Ações" na tabela de groomers com botões Editar e Excluir
   - Modal de edição de groomer (nome e email)
@@ -167,6 +174,12 @@ Antes de criar uma nova versão oficial:
   - Botão "Compartilhar via WhatsApp" (fotos de pets) usa helper para compartilhamento
 - **Add-on de AI**: Função JavaScript `openWhatsAppWithMessage` melhorada com comentários
 - **Add-on de Comunicações**: Interface reorganizada com seções separadas para WhatsApp, E-mail e Templates
+- **Services Add-on**: Melhorias de UX na interface de serviços
+  - Mensagens de feedback (sucesso/erro) via `DPS_Message_Helper` em todas as ações
+  - Badges de status visual (Ativo/Inativo) na tabela de serviços
+  - Tabela de serviços com classes CSS dedicadas para melhor responsividade
+  - Wrapper responsivo na tabela com scroll horizontal em mobile
+  - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
 - **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
@@ -250,6 +263,12 @@ Antes de criar uma nova versão oficial:
   - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
 
 #### Security (Segurança)
+- **Services Add-on**: Corrigidas vulnerabilidades CSRF críticas
+  - Adicionada verificação de nonce em exclusão de serviço (`dps_delete_service_{id}`)
+  - Adicionada verificação de nonce em toggle de status (`dps_toggle_service_{id}`)
+  - Adicionada verificação de post_type antes de excluir/modificar
+  - URLs de ação agora usam `wp_nonce_url()` para proteção automática
+  - **Impacto**: Elimina possibilidade de exclusão/alteração de serviços via links maliciosos
 - Todas as URLs de WhatsApp usam `esc_url()` para escape adequado
 - Mensagens de WhatsApp usam `rawurlencode()` para encoding seguro de caracteres especiais
 - Números de telefone são sanitizados via `sanitize_text_field()` antes de salvar configuração
