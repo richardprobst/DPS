@@ -273,6 +273,16 @@ class DPS_Push_Notifications_Addon {
                         </div>
                     </div>
                 </div>
+                <p style="margin: 12px 0 0 0; color: #6b7280; font-size: 13px;">
+                    <?php
+                    /* translators: %1$s: timezone name, %2$s: current local time */
+                    printf(
+                        esc_html__( '⏰ Fuso horário: %1$s (Hora atual: %2$s)', 'dps-push-addon' ),
+                        esc_html( wp_timezone_string() ),
+                        esc_html( date_i18n( 'H:i:s' ) )
+                    );
+                    ?>
+                </p>
             </div>
 
             <form method="post" action="">
@@ -556,6 +566,12 @@ class DPS_Push_Notifications_Addon {
      * @return DateTimeZone
      */
     private function get_wp_timezone() {
+        // Usa a função nativa do WordPress se disponível (WP 5.3+)
+        if ( function_exists( 'wp_timezone' ) ) {
+            return wp_timezone();
+        }
+        
+        // Fallback para versões anteriores
         $timezone_string = get_option( 'timezone_string' );
         if ( $timezone_string ) {
             return new DateTimeZone( $timezone_string );
@@ -1157,14 +1173,36 @@ class DPS_Push_Notifications_Addon {
             if ( $agenda_enabled ) {
                 $timestamp = $this->get_next_daily_timestamp( $agenda_time );
                 wp_schedule_event( $timestamp, 'daily', 'dps_send_agenda_notification' );
+                $this->log( 'info', 'Cron agendado: Agenda diária', [
+                    'horario_config'  => $agenda_time,
+                    'timestamp'       => $timestamp,
+                    'data_local'      => date_i18n( 'd/m/Y H:i:s', $timestamp ),
+                    'data_utc'        => gmdate( 'Y-m-d H:i:s', $timestamp ),
+                    'fuso_horario'    => wp_timezone_string(),
+                ] );
             }
             if ( $report_enabled ) {
                 $report_timestamp = $this->get_next_daily_timestamp( $report_time );
                 wp_schedule_event( $report_timestamp, 'daily', 'dps_send_daily_report' );
+                $this->log( 'info', 'Cron agendado: Relatório financeiro', [
+                    'horario_config'  => $report_time,
+                    'timestamp'       => $report_timestamp,
+                    'data_local'      => date_i18n( 'd/m/Y H:i:s', $report_timestamp ),
+                    'data_utc'        => gmdate( 'Y-m-d H:i:s', $report_timestamp ),
+                    'fuso_horario'    => wp_timezone_string(),
+                ] );
             }
             if ( $weekly_enabled ) {
                 $weekly_timestamp = $this->get_next_weekly_timestamp( $weekly_day, $weekly_time );
                 wp_schedule_event( $weekly_timestamp, 'weekly', 'dps_send_weekly_inactive_report' );
+                $this->log( 'info', 'Cron agendado: Pets inativos', [
+                    'dia_semana'      => $weekly_day,
+                    'horario_config'  => $weekly_time,
+                    'timestamp'       => $weekly_timestamp,
+                    'data_local'      => date_i18n( 'd/m/Y H:i:s', $weekly_timestamp ),
+                    'data_utc'        => gmdate( 'Y-m-d H:i:s', $weekly_timestamp ),
+                    'fuso_horario'    => wp_timezone_string(),
+                ] );
             }
             
             // Log de salvamento
