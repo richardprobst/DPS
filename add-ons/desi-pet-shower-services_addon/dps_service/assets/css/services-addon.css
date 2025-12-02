@@ -115,11 +115,9 @@
         font-size: 15px; /* Ligeiramente maior para mobile */
     }
     
-    /* Tabela responsiva */
-    .dps-services-table th:nth-child(3),
-    .dps-services-table td:nth-child(3),
-    .dps-services-table th:nth-child(4),
-    .dps-services-table td:nth-child(4) {
+    /* Tabela responsiva - ocultar colunas de categoria e preço em tablet */
+    .dps-services-table .dps-col-category,
+    .dps-services-table .dps-col-price {
         display: none;
     }
 }
@@ -151,8 +149,8 @@
         font-size: 13px;
     }
     
-    .dps-services-table th:nth-child(2),
-    .dps-services-table td:nth-child(2) {
+    /* Ocultar coluna de tipo em mobile pequeno */
+    .dps-services-table .dps-col-type {
         display: none;
     }
 }

@@ -448,7 +448,14 @@ class DPS_Services_Addon {
         if ( $services ) {
             $base_url = get_permalink();
             echo '<div class="dps-table-wrapper">';
-            echo '<table class="dps-table dps-services-table"><thead><tr><th>' . esc_html__( 'Nome', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Tipo', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Preço', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Status', 'dps-services-addon' ) . '</th><th>' . esc_html__( 'Ações', 'dps-services-addon' ) . '</th></tr></thead><tbody>';
+            echo '<table class="dps-table dps-services-table"><thead><tr>';
+            echo '<th class="dps-col-name">' . esc_html__( 'Nome', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-type">' . esc_html__( 'Tipo', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-category">' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-price">' . esc_html__( 'Preço', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-status">' . esc_html__( 'Status', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-actions">' . esc_html__( 'Ações', 'dps-services-addon' ) . '</th>';
+            echo '</tr></thead><tbody>';
             foreach ( $services as $service ) {
                 $type  = get_post_meta( $service->ID, 'service_type', true );
                 $cat   = get_post_meta( $service->ID, 'service_category', true );
@@ -490,16 +497,16 @@ class DPS_Services_Addon {
                     'dps_toggle_service_' . $service->ID
                 );
                 echo '<tr>';
-                echo '<td>' . esc_html( $service->post_title ) . '</td>';
-                echo '<td>' . esc_html( $type_label ) . '</td>';
-                echo '<td>' . esc_html( $cat_label ) . '</td>';
-                echo '<td>' . esc_html( $price_display ) . '</td>';
+                echo '<td class="dps-col-name">' . esc_html( $service->post_title ) . '</td>';
+                echo '<td class="dps-col-type">' . esc_html( $type_label ) . '</td>';
+                echo '<td class="dps-col-category">' . esc_html( $cat_label ) . '</td>';
+                echo '<td class="dps-col-price">' . esc_html( $price_display ) . '</td>';
                 $active = get_post_meta( $service->ID, 'service_active', true );
                 $status_class = ( '0' === $active ) ? 'dps-badge-inactive' : 'dps-badge-active';
                 $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
-                echo '<td><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
+                echo '<td class="dps-col-status"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
                 // Ações: editar, ativar/desativar, excluir
-                echo '<td>';
+                echo '<td class="dps-col-actions">';
                 echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-services-addon' ) . '</a> | ';
                 if ( '0' === $active ) {
                     echo '<a href="' . esc_url( $toggle_url ) . '">' . esc_html__( 'Ativar', 'dps-services-addon' ) . '</a> | ';
@@ -635,9 +642,10 @@ class DPS_Services_Addon {
                 } else {
                     delete_post_meta( $srv_id, 'service_package_items' );
                 }
-                // Adiciona mensagem de sucesso
+                // Adiciona mensagem de sucesso baseado no tipo de operação
                 if ( class_exists( 'DPS_Message_Helper' ) ) {
-                    $message = isset( $_POST['service_id'] ) && intval( $_POST['service_id'] ) > 0
+                    $is_update = isset( $_POST['service_id'] ) && intval( wp_unslash( $_POST['service_id'] ) ) > 0;
+                    $message   = $is_update
                         ? __( 'Serviço atualizado com sucesso.', 'dps-services-addon' )
                         : __( 'Serviço cadastrado com sucesso.', 'dps-services-addon' );
                     DPS_Message_Helper::add_success( $message );
