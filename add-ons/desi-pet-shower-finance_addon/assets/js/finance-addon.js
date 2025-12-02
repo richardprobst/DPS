@@ -25,6 +25,7 @@
         initServicesModal();
         initDeleteConfirmation();
         initStatusChangeConfirmation();
+        initPartialHistory();
     }
 
     /**
@@ -181,6 +182,162 @@
                 }
             }
         });
+    }
+
+    /**
+     * Initialize partial payment history functionality
+     */
+    function initPartialHistory() {
+        $(document).on('click', '.dps-view-partials', function(e) {
+            e.preventDefault();
+            
+            var $link = $(this);
+            var transId = $link.data('trans-id');
+            
+            if (!transId) {
+                return;
+            }
+
+            // Show loading state
+            $link.addClass('loading').text(dpsFinance.i18n.loading || 'Carregando...');
+
+            $.post(dpsFinance.ajaxUrl, {
+                action: 'dps_get_partial_history',
+                trans_id: transId,
+                nonce: dpsFinance.partialHistoryNonce
+            }, function(resp) {
+                $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
+                
+                if (resp && resp.success) {
+                    showPartialHistoryModal(transId, resp.data);
+                } else {
+                    var msg = resp.data ? resp.data.message : (dpsFinance.i18n.error || 'Erro ao buscar histórico.');
+                    showMessage(msg, 'error');
+                }
+            }).fail(function() {
+                $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
+                showMessage(dpsFinance.i18n.error || 'Erro ao buscar histórico.', 'error');
+            });
+        });
+
+        // Handler for deleting partials
+        $(document).on('click', '.dps-delete-partial', function(e) {
+            e.preventDefault();
+            
+            var confirmMsg = dpsFinance.i18n.confirmDeletePartial || 'Tem certeza que deseja excluir este pagamento?';
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            var $btn = $(this);
+            var partialId = $btn.data('partial-id');
+            var transId = $btn.data('trans-id');
+
+            $btn.prop('disabled', true).text('...');
+
+            $.post(dpsFinance.ajaxUrl, {
+                action: 'dps_delete_partial',
+                partial_id: partialId,
+                nonce: dpsFinance.deletePartialNonce
+            }, function(resp) {
+                if (resp && resp.success) {
+                    // Remove row from table
+                    $btn.closest('tr').fadeOut(200, function() {
+                        $(this).remove();
+                        
+                        // Update totals in modal
+                        if (resp.data.total_pago !== undefined) {
+                            $('#dps-partial-total-pago').text('R$ ' + resp.data.total_pago);
+                        }
+                        if (resp.data.restante !== undefined) {
+                            $('#dps-partial-restante').text('R$ ' + resp.data.restante);
+                        }
+
+                        // Check if table is empty
+                        if ($('#dps-partial-modal tbody tr').length === 0) {
+                            $('#dps-partial-modal tbody').html(
+                                '<tr><td colspan="4" style="text-align:center;">' + 
+                                (dpsFinance.i18n.noPartials || 'Nenhum pagamento registrado.') + 
+                                '</td></tr>'
+                            );
+                        }
+                    });
+                    showMessage(resp.data.message || 'Parcela excluída.', 'success');
+                } else {
+                    $btn.prop('disabled', false).text(dpsFinance.i18n.delete || 'Excluir');
+                    var msg = resp.data ? resp.data.message : 'Erro ao excluir.';
+                    showMessage(msg, 'error');
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false).text(dpsFinance.i18n.delete || 'Excluir');
+                showMessage('Erro ao excluir.', 'error');
+            });
+        });
+    }
+
+    /**
+     * Show partial payment history in a modal
+     */
+    function showPartialHistoryModal(transId, data) {
+        // Remove existing modal
+        $('#dps-partial-modal').remove();
+
+        var html = '<div id="dps-partial-modal" class="dps-modal-overlay">';
+        html += '<div class="dps-modal-content">';
+        html += '<div class="dps-modal-header">';
+        html += '<h3>' + (dpsFinance.i18n.partialHistoryTitle || 'Histórico de Pagamentos') + ' #' + transId + '</h3>';
+        html += '<button type="button" class="dps-modal-close">&times;</button>';
+        html += '</div>';
+        html += '<div class="dps-modal-body">';
+
+        // Summary
+        html += '<div class="dps-partial-summary" style="margin-bottom:15px;padding:10px;background:#f9fafb;border-radius:6px;">';
+        html += '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
+        html += '<span><strong>' + (dpsFinance.i18n.total || 'Total') + ':</strong> R$ ' + data.total + '</span>';
+        html += '<span><strong>' + (dpsFinance.i18n.totalPaid || 'Total Pago') + ':</strong> <span id="dps-partial-total-pago">R$ ' + data.total_pago + '</span></span>';
+        html += '<span><strong>' + (dpsFinance.i18n.remaining || 'Restante') + ':</strong> <span id="dps-partial-restante">R$ ' + data.restante + '</span></span>';
+        html += '</div>';
+        html += '</div>';
+
+        // Table
+        html += '<table class="dps-modal-table">';
+        html += '<thead><tr>';
+        html += '<th>' + (dpsFinance.i18n.date || 'Data') + '</th>';
+        html += '<th>' + (dpsFinance.i18n.value || 'Valor') + '</th>';
+        html += '<th>' + (dpsFinance.i18n.method || 'Método') + '</th>';
+        html += '<th>' + (dpsFinance.i18n.actions || 'Ações') + '</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+        
+        if (data.parcelas && data.parcelas.length > 0) {
+            for (var i = 0; i < data.parcelas.length; i++) {
+                var p = data.parcelas[i];
+                html += '<tr>';
+                html += '<td>' + escapeHtml(p.date) + '</td>';
+                html += '<td>R$ ' + escapeHtml(p.value) + '</td>';
+                html += '<td>' + escapeHtml(p.method) + '</td>';
+                html += '<td><button type="button" class="button button-small dps-delete-partial" data-partial-id="' + p.id + '" data-trans-id="' + transId + '">' + (dpsFinance.i18n.delete || 'Excluir') + '</button></td>';
+                html += '</tr>';
+            }
+        } else {
+            html += '<tr><td colspan="4" style="text-align:center;">' + (dpsFinance.i18n.noPartials || 'Nenhum pagamento registrado.') + '</td></tr>';
+        }
+        
+        html += '</tbody></table>';
+        html += '</div>';
+        html += '<div class="dps-modal-footer">';
+        html += '<button type="button" class="button dps-modal-close">' + (dpsFinance.i18n.close || 'Fechar') + '</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Add modal styles if not present
+        addModalStyles();
+
+        $('body').append(html);
+
+        // Show modal
+        $('#dps-partial-modal').fadeIn(200);
     }
 
     /**

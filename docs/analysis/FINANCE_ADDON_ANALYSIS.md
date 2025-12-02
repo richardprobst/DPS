@@ -1,32 +1,47 @@
 # Análise Profunda do Add-on Financeiro (DPS Finance)
 
 **Data da Análise**: 02/12/2025  
-**Versão Analisada**: 1.0.0 → **1.1.0** (atualizado)  
-**Arquivo Principal**: `desi-pet-shower-finance-addon.php` (~1600 linhas)  
-**Arquivos Auxiliares**: `includes/class-dps-finance-api.php` (562 linhas), `includes/class-dps-finance-revenue-query.php` (55 linhas)  
+**Versão Analisada**: 1.0.0 → **1.2.0** (atualizado)  
+**Arquivo Principal**: `desi-pet-shower-finance-addon.php` (~2000 linhas)  
+**Arquivos Auxiliares**: `includes/class-dps-finance-api.php` (562 linhas), `includes/class-dps-finance-revenue-query.php` (55 linhas), `includes/class-dps-finance-settings.php` (novo em v1.2.0)  
 **Assets**: `assets/css/finance-addon.css`, `assets/js/finance-addon.js` (novos em 1.1.0)
 
 ---
 
-## ✅ Melhorias Implementadas (v1.1.0)
+## ✅ Melhorias Implementadas
 
-As seguintes melhorias foram implementadas baseadas nesta análise:
+### v1.1.0 - Fase 1 e 2
 
-### Fase 1 - Quick Wins (Implementado)
+#### Fase 1 - Quick Wins
 - ✅ **Feedback visual após ações** - Mensagens de sucesso/erro usando DPS_Message_Helper
 - ✅ **Nonces em links GET sensíveis** - Exclusão e geração de documentos agora verificam nonce
 - ✅ **Estilos CSS separados** - Novo arquivo `assets/css/finance-addon.css` com badges de status, cards, responsividade
 - ✅ **Scripts JS separados** - Novo arquivo `assets/js/finance-addon.js` (modal de serviços estilizado, confirmação de exclusão)
 
-### Fase 2 - Usabilidade (Parcialmente Implementado)
+#### Fase 2 - Usabilidade
 - ✅ **Dashboard de resumo financeiro** - Cards mostrando Receitas, Despesas, Pendente e Saldo
 - ✅ **Exportação CSV real** - Método `export_transactions_csv()` implementado com filtros
 - ✅ **Tabela responsiva** - CSS para layout card em mobile
-- ⏳ Paginação de transações (próxima fase)
+- ✅ **Paginação de transações** - 20 por página com navegação completa
+
+### v1.2.0 - Fase 3 e 4
+
+#### Fase 3 - Funcionalidades
+- ✅ **Histórico de parcelas** - Modal com lista de pagamentos parciais, opção de exclusão
+- ✅ **Dados da loja configuráveis** - Nova classe `DPS_Finance_Settings` com options no banco
+- ✅ **Mensagens de WhatsApp configuráveis** - Templates com placeholders (`{cliente}`, `{valor}`, etc.)
+- ✅ **AJAX handlers para parcelas** - `dps_get_partial_history` e `dps_delete_partial`
+
+#### Fase 4 - Refatoração Técnica
+- ✅ **Migração de schema** - Adicionadas colunas `valor_cents` (bigint) em transações e parcelas
+- ✅ **Campos de auditoria** - Colunas `created_at` e `updated_at` em ambas as tabelas
+- ✅ **Migração automática** - Conversão de valores float para centavos na ativação
+- ✅ **Versão do schema** - Controle via `dps_transacoes_db_version` e `dps_parcelas_db_version`
 
 ### Segurança Reforçada
 - ✅ Nonces em links de exclusão (`dps_finance_delete_{id}`)
 - ✅ Nonces em links de geração de documento (`dps_finance_doc_{id}`)
+- ✅ Nonces em AJAX de parcelas (`dps_partial_history`, `dps_delete_partial`)
 - ✅ Verificação de nonce antes de processar ações GET
 
 ---
@@ -46,25 +61,31 @@ O **Finance Add-on** é o núcleo financeiro do sistema DPS, responsável por ge
 - ✅ **Dashboard de resumo financeiro** (novo em v1.1.0)
 - ✅ **Exportação CSV funcional** (novo em v1.1.0)
 - ✅ **Interface responsiva** (novo em v1.1.0)
+- ✅ **Histórico de parcelas com modal** (novo em v1.2.0)
+- ✅ **Configurações de loja via options** (novo em v1.2.0)
+- ✅ **Schema com campos de auditoria** (novo em v1.2.0)
 
-### Pontos de Atenção (Restantes)
-- ⚠️ Valores armazenados como `float` em vez de `int` (centavos)
-- ⚠️ Alguns métodos ainda longos (ex: `section_financeiro`)
-- ⚠️ Falta paginação na lista de transações
+### Pontos de Atenção (Menores)
+- ⚠️ Alguns métodos ainda longos (ex: `section_financeiro`) - candidatos a refatoração futura
+- ⚠️ Coluna `valor` (float) mantida para retrocompatibilidade - usar `valor_cents` para novos desenvolvimentos
 
 ---
 
 ## 1. Arquitetura e Estrutura de Arquivos
 
-### Estrutura Atual
+### Estrutura Atual (v1.2.0)
 
 ```
 desi-pet-shower-finance_addon/
-├── desi-pet-shower-finance-addon.php    # Arquivo principal (1404 linhas)
+├── desi-pet-shower-finance-addon.php    # Arquivo principal (~2000 linhas)
 ├── desi-pet-shower-finance.php          # Retrocompatibilidade (27 linhas)
 ├── includes/
 │   ├── class-dps-finance-api.php        # API centralizada (562 linhas)
-│   └── class-dps-finance-revenue-query.php  # Consulta de faturamento (55 linhas)
+│   ├── class-dps-finance-revenue-query.php  # Consulta de faturamento (55 linhas)
+│   └── class-dps-finance-settings.php   # Configurações (novo em v1.2.0)
+├── assets/
+│   ├── css/finance-addon.css            # Estilos (novo em v1.1.0)
+│   └── js/finance-addon.js              # Scripts (novo em v1.1.0)
 ├── tests/
 │   └── sum-revenue-by-period.test.php   # Teste unitário
 ├── README.md                            # Documentação
@@ -76,8 +97,8 @@ desi-pet-shower-finance_addon/
 
 | Aspecto | Status | Observação |
 |---------|--------|------------|
-| Separação em `includes/` | ✅ Bom | API e queries separadas |
-| Arquivo principal | ⚠️ Médio | 1404 linhas, poderia ser dividido |
+| Separação em `includes/` | ✅ Bom | API, queries e settings separadas |
+| Arquivo principal | ⚠️ Médio | ~2000 linhas, poderia ser dividido |
 | Testes | ✅ Bom | Teste unitário presente |
 | Documentação | ✅ Bom | README e notes bem escritos |
 | Uninstall | ✅ Bom | Limpa tabelas e options |
