@@ -2,7 +2,7 @@
 /**
  * Rotina de desinstalação do plugin Desi Pet Shower - Backup Add-on.
  *
- * Remove options de configuração e transients criados pelo add-on.
+ * Remove options de configuração, histórico e transients criados pelo add-on.
  * Arquivos de backup NÃO são removidos por segurança.
  *
  * @package    DesiPetShower
@@ -20,12 +20,16 @@ global $wpdb;
 // Remove options criadas pelo add-on
 $options = [
     'dps_backup_settings',
+    'dps_backup_history',
     'dps_last_backup_date',
 ];
 
 foreach ( $options as $option ) {
     delete_option( $option );
 }
+
+// Limpar agendamentos de cron
+wp_clear_scheduled_hook( 'dps_scheduled_backup' );
 
 // Opcionalmente, remove arquivos de backup gerados
 // NOTA: Comentado por padrão para segurança - arquivos de backup podem ser valiosos

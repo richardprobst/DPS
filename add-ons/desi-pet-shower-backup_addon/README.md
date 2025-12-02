@@ -1,12 +1,19 @@
 # Desi Pet Shower – Backup & Restauração Add-on
 
-Exportação e restauração completa de dados do sistema DPS.
+Exportação e restauração completa de dados do sistema DPS, com suporte a backup seletivo, agendado e diferencial.
 
 ## Visão geral
 
 O **Backup & Restauração Add-on** permite aos administradores exportar todo o conteúdo do sistema Desi Pet Shower em formato JSON e restaurar esses dados em outro ambiente WordPress. É ideal para migrações, cópias de segurança e testes em ambientes de staging.
 
-Funcionalidades principais:
+### Funcionalidades principais (v1.1.0)
+
+- **Backup Seletivo**: escolha quais componentes incluir (clientes, pets, agendamentos, etc.)
+- **Histórico de Backups**: registro dos últimos N backups com opções de download, restaurar e excluir
+- **Backup Agendado**: cron job para backups automáticos (diário, semanal ou mensal)
+- **Comparação de Backups**: preview do impacto antes de restaurar
+- **Backup Diferencial**: exportar apenas dados modificados desde uma data
+- **Dashboard de Status**: cards com contagem de registros por tipo
 - Exportação completa de CPTs (clientes, pets, agendamentos, serviços, etc.)
 - Inclusão de metadados e relacionamentos entre entidades
 - Exportação de tabelas customizadas (`dps_transacoes`, `dps_parcelas`, etc.)
@@ -24,8 +31,28 @@ Funcionalidades principais:
 - **Slug**: `dps-backup-addon`
 - **Text Domain**: `dps-backup-addon`
 - **Classe principal**: `DPS_Backup_Addon`
-- **Arquivo principal**: `desi-pet-shower-backup-addon.php` (1338 linhas)
+- **Arquivo principal**: `desi-pet-shower-backup-addon.php`
+- **Classes auxiliares**: `includes/` (5 classes)
+- **Assets**: `assets/css/backup-addon.css`, `assets/js/backup-addon.js`
 - **Tipo**: Add-on (depende do plugin base)
+
+## Estrutura de arquivos
+
+```
+add-ons/desi-pet-shower-backup_addon/
+├── desi-pet-shower-backup-addon.php       # Arquivo principal
+├── includes/
+│   ├── class-dps-backup-settings.php      # Configurações do add-on
+│   ├── class-dps-backup-history.php       # Histórico de backups
+│   ├── class-dps-backup-scheduler.php     # Agendamento (cron)
+│   ├── class-dps-backup-exporter.php      # Lógica de exportação
+│   └── class-dps-backup-comparator.php    # Comparação de backups
+├── assets/
+│   ├── css/backup-addon.css               # Estilos
+│   └── js/backup-addon.js                 # Interatividade
+├── README.md
+└── uninstall.php
+```
 
 ## Dependências e compatibilidade
 
@@ -36,10 +63,41 @@ Funcionalidades principais:
 
 ### Versão
 - **Introduzido em**: v0.1.0 (estimado)
-- **Versão atual**: v1.0.0
+- **Versão atual**: v1.1.0
 - **Compatível com plugin base**: v1.0.0+
 
 ## Funcionalidades principais
+
+### Backup Seletivo (v1.1.0)
+Escolha quais componentes incluir no backup:
+- Clientes e Pets
+- Agendamentos
+- Transações Financeiras
+- Serviços
+- Assinaturas
+- Campanhas
+- Configurações do Sistema
+- Tabelas Personalizadas
+- Arquivos (fotos, documentos)
+
+### Histórico de Backups (v1.1.0)
+- Lista dos últimos N backups (configurável)
+- Ações disponíveis: baixar, comparar, restaurar, excluir
+- Armazenamento seguro no servidor (pasta protegida)
+- Retenção automática (exclui backups antigos)
+
+### Backup Agendado (v1.1.0)
+- Frequência: diário, semanal ou mensal
+- Dia e horário personalizáveis
+- Notificação por e-mail após conclusão
+- Limite de retenção configurável
+
+### Comparação de Backups (v1.1.0)
+Antes de restaurar, visualize:
+- Quantos registros serão adicionados
+- Quantos registros serão atualizados
+- Quantos registros atuais serão removidos
+- Avisos sobre diferenças (site de origem diferente, etc.)
 
 ### Exportação de dados
 - **Escopo completo**: exporta todos os CPTs do DPS (clientes, pets, agendamentos, serviços, campanhas, etc.)

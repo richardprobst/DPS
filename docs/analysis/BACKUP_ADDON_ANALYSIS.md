@@ -1,9 +1,55 @@
 # Análise Profunda do Add-on Backup & Restauração
 
 **Data da Análise**: 02/12/2025  
-**Versão Analisada**: 1.0.0  
-**Arquivo Principal**: `desi-pet-shower-backup-addon.php` (1338 linhas)  
-**Arquivos Auxiliares**: `README.md`, `uninstall.php`
+**Versão Analisada**: 1.0.0 → **1.1.0** (atualizado)  
+**Arquivo Principal**: `desi-pet-shower-backup-addon.php`  
+**Arquivos Auxiliares**: `includes/` (5 classes), `assets/` (CSS + JS), `README.md`, `uninstall.php`
+
+---
+
+## ✅ Melhorias Implementadas (v1.1.0)
+
+### Funcionalidades Novas
+
+| Funcionalidade | Status | Descrição |
+|----------------|--------|-----------|
+| **Backup Seletivo** | ✅ Implementado | Escolher quais componentes incluir no backup |
+| **Histórico de Backups** | ✅ Implementado | Registro dos últimos N backups com opção de download, restaurar e excluir |
+| **Backup Agendado** | ✅ Implementado | Cron job para backups automáticos (diário/semanal/mensal) |
+| **Restauração do Histórico** | ✅ Implementado | Restaurar backup diretamente do histórico sem upload |
+| **Comparação de Backups** | ✅ Implementado | Preview do impacto antes de restaurar (o que será adicionado/atualizado/removido) |
+| **Backup Diferencial** | ✅ Implementado | Classe `DPS_Backup_Exporter` com método `build_differential_backup()` |
+
+### Melhorias de UI/UX
+
+| Melhoria | Status | Descrição |
+|----------|--------|-----------|
+| Dashboard de Status | ✅ Implementado | Cards mostrando contagem de clientes, pets, agendamentos, etc. |
+| Assets Externos | ✅ Implementado | CSS e JS separados em `assets/` |
+| Área de Upload | ✅ Implementado | Drag and drop para upload de arquivo |
+| Tabela de Histórico | ✅ Implementado | Lista de backups com ações (baixar, comparar, restaurar, excluir) |
+| Configurações de Agendamento | ✅ Implementado | Interface para configurar backup automático |
+| Progress Bar | ✅ Implementado | Indicador visual durante operações longas |
+
+### Arquitetura Modular
+
+Nova estrutura com separação de responsabilidades:
+
+```
+add-ons/desi-pet-shower-backup_addon/
+├── desi-pet-shower-backup-addon.php    # Arquivo principal (~700 linhas)
+├── includes/
+│   ├── class-dps-backup-settings.php   # Configurações
+│   ├── class-dps-backup-history.php    # Histórico de backups
+│   ├── class-dps-backup-scheduler.php  # Cron jobs
+│   ├── class-dps-backup-exporter.php   # Lógica de exportação
+│   └── class-dps-backup-comparator.php # Comparação de backups
+├── assets/
+│   ├── css/backup-addon.css            # Estilos
+│   └── js/backup-addon.js              # Interatividade
+├── README.md
+└── uninstall.php
+```
 
 ---
 
@@ -30,7 +76,12 @@ O **Backup & Restauração Add-on** permite exportar e restaurar dados completos
 ### 1.1 Propósito Principal
 
 - **Exportação**: Gera arquivo JSON com todos os dados do DPS
+- **Exportação Seletiva**: Escolher componentes específicos para backup (v1.1.0)
+- **Exportação Diferencial**: Exportar apenas dados modificados desde última data (v1.1.0)
 - **Restauração**: Reconstrói o sistema a partir de um backup existente
+- **Histórico**: Mantém registro e arquivos dos últimos backups (v1.1.0)
+- **Agendamento**: Backup automático via cron (v1.1.0)
+- **Comparação**: Preview do impacto antes de restaurar (v1.1.0)
 - **Migração**: Permite transferir dados entre ambientes WordPress
 
 ### 1.2 Dependências
