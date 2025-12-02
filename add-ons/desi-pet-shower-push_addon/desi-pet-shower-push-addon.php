@@ -865,7 +865,7 @@ class DPS_Push_Notifications_Addon {
         
         if ( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table ) ) === $table ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-            $trans = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE DATE(data) = %s ORDER BY data ASC", $today ) );
+            $trans = $wpdb->get_results( $wpdb->prepare( "SELECT id, data, valor, status, descricao FROM {$table} WHERE DATE(data) = %s ORDER BY data ASC", $today ) );
             foreach ( $trans as $t ) {
                 $valor = (float) $t->valor;
                 if ( $t->status === 'pago' ) {
@@ -1250,7 +1250,7 @@ class DPS_Push_Notifications_Addon {
                         'compare' => '=',
                     ],
                 ],
-                'orderby'        => 'meta_value_num',
+                'orderby'        => 'meta_value',
                 'meta_key'       => 'appointment_date',
                 'order'          => 'DESC',
             ] );
@@ -1287,11 +1287,11 @@ class DPS_Push_Notifications_Addon {
             return;
         }
         
-        // Ordena por dias desde o último atendimento (mais antigo primeiro)
+        // Ordena por dias desde o último atendimento (pets que nunca vieram primeiro, depois maior tempo sem vir)
         usort( $inactive, function( $a, $b ) {
-            if ( $a['days_since'] === null ) return -1;
+            if ( $a['days_since'] === null ) return -1; // Nunca veio = prioridade máxima
             if ( $b['days_since'] === null ) return 1;
-            return $b['days_since'] - $a['days_since'];
+            return $b['days_since'] - $a['days_since']; // Mais dias = mais no topo
         } );
         
         // Monta mensagem de relatório para Telegram
