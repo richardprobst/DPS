@@ -9,20 +9,30 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 ### Funcionalidades principais
 - ✅ Cadastro de profissionais via role customizada do WordPress
 - ✅ Edição e exclusão de groomers via interface
+- ✅ Status ativo/inativo para groomers
+- ✅ Campo de telefone e percentual de comissão
 - ✅ Vinculação de múltiplos groomers por atendimento
 - ✅ Relatórios de produtividade por profissional
 - ✅ Exportação de relatórios em CSV
-- ✅ Métricas: total de atendimentos, receita, ticket médio
-- ✅ Listagem de atendimentos por groomer com detalhes de cliente e pet
-- ✅ Interface integrada ao painel principal do sistema
+- ✅ Métricas: total de atendimentos, receita, ticket médio, comissão
+- ✅ Dashboard individual do groomer com gráficos
+- ✅ Agenda semanal do groomer
+- ✅ Relatório de comissões a pagar
+- ✅ Sistema de avaliações de clientes
 - ✅ CSS externo seguindo padrão visual minimalista do DPS
-- ✅ Formulários com fieldsets e indicadores de campos obrigatórios
-- ✅ Modal de edição com validação
-- ✅ Confirmação de exclusão com aviso de agendamentos vinculados
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
-**Versão atual**: 1.2.0
+**Versão atual**: 1.3.0
+
+## Shortcodes disponíveis
+
+| Shortcode | Descrição | Parâmetros |
+|-----------|-----------|------------|
+| `[dps_groomer_dashboard]` | Dashboard individual do groomer | - |
+| `[dps_groomer_agenda]` | Agenda semanal do groomer | - |
+| `[dps_groomer_review]` | Formulário de avaliação | `groomer_id`, `appointment_id` |
+| `[dps_groomer_reviews]` | Lista de avaliações | `groomer_id`, `limit` |
 
 ## Localização e identificação
 
@@ -35,10 +45,10 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 
 ```
 add-ons/desi-pet-shower-groomers_addon/
-├── desi-pet-shower-groomers-addon.php   # Arquivo principal
+├── desi-pet-shower-groomers-addon.php   # Arquivo principal (~2400 linhas)
 ├── assets/
 │   ├── css/
-│   │   └── groomers-admin.css           # Estilos da interface (~600 linhas)
+│   │   └── groomers-admin.css           # Estilos da interface (~1200 linhas)
 │   └── js/
 │       └── groomers-admin.js            # Interatividade, modal e validações
 ├── README.md                             # Esta documentação
@@ -54,29 +64,7 @@ add-ons/desi-pet-shower-groomers_addon/
 
 ### Integrações opcionais
 - **Finance Add-on**: Para cálculo automático de receitas nos relatórios
-- **Stats Add-on**: Para métricas consolidadas (futuro)
-
-## Funcionalidades principais
-
-### Gestão de groomers
-- **Cadastro via formulário**: cria usuários WordPress com role `dps_groomer`
-- **Campos**: usuário, email, nome completo, senha
-- **Listagem**: visualize todos os groomers cadastrados
-- **Validação**: verificação de email e usuário já existentes
-
-### Vinculação a atendimentos
-- **Campo de seleção múltipla**: permite associar vários groomers por atendimento
-- **Metadado `_dps_groomers`**: array de IDs armazenado no agendamento
-- **Validação de role**: apenas usuários com role `dps_groomer` são aceitos
-
-### Relatórios de produtividade
-- **Filtros**: groomer específico + período (data inicial e final)
-- **Métricas exibidas**:
-  - Total de atendimentos no período
-  - Receita total (soma de transações pagas)
-  - Ticket médio
-- **Detalhamento**: tabela com data, horário, cliente, pet e status
-- **Limite**: 500 atendimentos por consulta (aviso exibido se atingido)
+- **Chart.js**: Carregado via CDN para gráficos de desempenho
 
 ## Dados armazenados
 
@@ -85,8 +73,18 @@ add-ons/desi-pet-shower-groomers_addon/
 #### `dps_groomer`
 Role criada na ativação do plugin para identificar profissionais.
 
-**Capabilities**:
-- `read`: true (acesso básico ao painel WordPress)
+### CPT de avaliações
+
+#### `dps_groomer_review`
+Post type para armazenar avaliações de clientes.
+
+### Metadados em usuários
+
+| Meta Key | Tipo | Descrição |
+|----------|------|-----------|
+| `_dps_groomer_status` | string | Status: 'active' ou 'inactive' |
+| `_dps_groomer_phone` | string | Telefone do groomer |
+| `_dps_groomer_commission_rate` | float | Percentual de comissão (0-100) |
 
 ### Metadados em agendamentos
 
@@ -94,60 +92,39 @@ Role criada na ativação do plugin para identificar profissionais.
 |----------|------|-----------|
 | `_dps_groomers` | array | IDs dos groomers responsáveis pelo atendimento |
 
-## Hooks consumidos
+### Metadados em avaliações
 
-| Hook | Prioridade | Propósito |
-|------|------------|-----------|
-| `dps_base_nav_tabs_after_history` | 15 | Adiciona aba "Groomers" |
-| `dps_base_sections_after_history` | 15 | Renderiza seção de groomers |
-| `dps_base_appointment_fields` | 10 | Campo de seleção no form de agendamento |
-| `dps_base_after_save_appointment` | 10 | Salva groomers selecionados |
-| `wp_enqueue_scripts` | default | Carrega assets no frontend |
-| `admin_enqueue_scripts` | default | Carrega assets no admin |
-
-## Como usar
-
-### Para administradores
-
-1. **Cadastrar groomer**:
-   - Acesse a aba "Groomers" no Painel de Gestão DPS
-   - Preencha o formulário "Adicionar novo groomer"
-   - Clique em "Criar groomer"
-
-2. **Editar groomer**:
-   - Na tabela de groomers, clique em "✏️ Editar"
-   - Modifique o nome ou email no modal
-   - Clique em "Salvar alterações"
-
-3. **Excluir groomer**:
-   - Na tabela de groomers, clique em "🗑️ Excluir"
-   - Confirme a exclusão (será informado quantos agendamentos estão vinculados)
-   - Agendamentos vinculados são mantidos sem groomer associado
-
-4. **Vincular groomer a atendimento**:
-   - Ao criar/editar agendamento
-   - Localize o campo "Groomers responsáveis"
-   - Selecione um ou mais profissionais (Ctrl+clique para múltiplos)
-   - Salve o agendamento
-
-5. **Visualizar relatórios**:
-   - Na aba "Groomers", role até "Relatório por Groomer"
-   - Selecione o profissional
-   - Defina período (data inicial e final)
-   - Clique em "Gerar relatório"
-   - Visualize métricas e lista de atendimentos
-
-6. **Exportar relatório**:
-   - Após gerar o relatório, clique em "📊 Exportar CSV"
-   - O arquivo inclui: data, horário, cliente, pet, status, valor
-   - Linha de totais no final do arquivo
-
-### Para recepcionistas
-
-- Ao criar agendamentos, selecione os groomers disponíveis
-- Sistema valida se os usuários selecionados têm a role correta
+| Meta Key | Tipo | Descrição |
+|----------|------|-----------|
+| `_dps_review_groomer_id` | int | ID do groomer avaliado |
+| `_dps_review_rating` | int | Nota de 1 a 5 estrelas |
+| `_dps_review_name` | string | Nome do avaliador (opcional) |
+| `_dps_review_appointment_id` | int | ID do agendamento relacionado (opcional) |
 
 ## Changelog
+
+### [1.3.0] - 2025-12-02
+
+#### Added
+- Campo de telefone no cadastro e edição de groomers
+- Campo de percentual de comissão no cadastro e edição
+- Status ativo/inativo com toggle clicável na tabela
+- Groomers inativos não aparecem no select de agendamentos
+- Shortcode `[dps_groomer_dashboard]` para dashboard individual
+- Métricas pessoais: atendimentos, receita, comissão, ticket médio
+- Contagem por status: realizados, pendentes, cancelados
+- Gráficos de desempenho com Chart.js
+- Gráfico de barras: atendimentos por dia
+- Gráfico de linha: receita por dia
+- Relatório de comissões a pagar de todos os groomers
+- Shortcode `[dps_groomer_agenda]` para agenda semanal
+- Visualização em grid de 7 dias com navegação
+- Destaque visual para o dia atual
+- CPT `dps_groomer_review` para avaliações
+- Shortcode `[dps_groomer_review]` para formulário de avaliação
+- Shortcode `[dps_groomer_reviews]` para exibição de avaliações
+- Sistema de 5 estrelas com média calculada
+- Método `get_groomer_rating()` para obter média de avaliações
 
 ### [1.2.0] - 2025-12-02
 
@@ -158,39 +135,16 @@ Role criada na ativação do plugin para identificar profissionais.
 - Botão "Exportar CSV" no relatório de produtividade
 - Exportação CSV inclui: data, horário, cliente, pet, status, valor
 - Linha de totais no final do CSV exportado
-- Handlers seguros com nonces para todas as ações
-- Método `get_groomer_appointments_count()` para contagem de vínculos
-- Método `get_appointment_value()` para obter valor de agendamentos
-- CSS para modal responsivo com animação
-- Estilos para ações na tabela e botão de exportação
 
 ### [1.1.0] - 2025-12-02
 
 #### Added
 - Estrutura de assets: pasta `assets/css/` e `assets/js/`
-- Arquivo CSS externo `groomers-admin.css` com ~400 linhas de estilos
-- Arquivo JS externo `groomers-admin.js` com validações e interatividade
-- Método `calculate_total_revenue()` com integração à Finance API
-- Enqueue de assets no frontend e admin
-- Cards de métricas visuais no relatório (profissional, atendimentos, receita, ticket médio)
-- Coluna "Pet" na tabela de resultados do relatório
-- Formatação de data no padrão brasileiro (dd/mm/yyyy)
-- Badges de status com cores semânticas
-- Fieldsets no formulário de cadastro (Dados de Acesso, Informações Pessoais)
-- Indicadores de campos obrigatórios (asterisco vermelho)
-- Placeholders descritivos em todos os campos
-
-#### Changed
-- Removidos estilos inline, substituídos por classes CSS
-- Layout responsivo com flexbox e grid
-- Formulário reorganizado com fieldsets semânticos
-- Tabela de groomers com classes CSS customizadas
-- Seção de relatórios com design minimalista
-- Integração com Finance API (quando disponível) para cálculo de receitas
+- Cards de métricas visuais no relatório
+- Fieldsets no formulário de cadastro
 
 #### Fixed
 - Corrigido `uninstall.php` para usar meta key correta `_dps_groomers`
-- Mensagem de empty state mais descritiva na tabela de groomers
 
 ### [1.0.0] - Versão inicial
 
@@ -198,24 +152,6 @@ Role criada na ativação do plugin para identificar profissionais.
 - Listagem de profissionais cadastrados
 - Vinculação de múltiplos groomers a agendamentos
 - Relatórios de produtividade por período
-- Integração com hooks do plugin base
-
-## Melhorias futuras sugeridas
-
-Consulte o documento de análise completa em `docs/analysis/GROOMERS_ADDON_ANALYSIS.md` para:
-- Plano de refatoração modular
-- Novas funcionalidades propostas
-- Melhorias de UX detalhadas
-- Estimativas de esforço
-
-### Funcionalidades planejadas
-- [ ] Edição e exclusão de groomers via interface
-- [ ] Status ativo/inativo para groomers
-- [ ] Exportação de relatórios em CSV
-- [ ] Campo de telefone do groomer
-- [ ] Dashboard individual do groomer
-- [ ] Sistema de comissões
-- [ ] Gráficos de desempenho
 
 ## Notas para desenvolvimento
 

@@ -71,11 +71,53 @@ class DPS_Groomers_Addon {
         // Handlers para edição, exclusão e exportação
         add_action( 'init', [ $this, 'handle_groomer_actions' ] );
         
+        // Registrar CPT de avaliações
+        add_action( 'init', [ $this, 'register_review_post_type' ] );
+        
         // Shortcode do dashboard do groomer
         add_shortcode( 'dps_groomer_dashboard', [ $this, 'render_groomer_dashboard_shortcode' ] );
         
         // Shortcode da agenda do groomer
         add_shortcode( 'dps_groomer_agenda', [ $this, 'render_groomer_agenda_shortcode' ] );
+        
+        // Shortcode de avaliação
+        add_shortcode( 'dps_groomer_review', [ $this, 'render_review_form_shortcode' ] );
+        
+        // Shortcode de exibição de avaliações
+        add_shortcode( 'dps_groomer_reviews', [ $this, 'render_reviews_list_shortcode' ] );
+    }
+
+    /**
+     * Registra o CPT de avaliações de groomers.
+     *
+     * @since 1.3.0
+     */
+    public function register_review_post_type() {
+        $labels = [
+            'name'               => __( 'Avaliações de Groomers', 'dps-groomers-addon' ),
+            'singular_name'      => __( 'Avaliação', 'dps-groomers-addon' ),
+            'menu_name'          => __( 'Avaliações', 'dps-groomers-addon' ),
+            'add_new'            => __( 'Adicionar Nova', 'dps-groomers-addon' ),
+            'add_new_item'       => __( 'Adicionar Nova Avaliação', 'dps-groomers-addon' ),
+            'edit_item'          => __( 'Editar Avaliação', 'dps-groomers-addon' ),
+            'new_item'           => __( 'Nova Avaliação', 'dps-groomers-addon' ),
+            'view_item'          => __( 'Ver Avaliação', 'dps-groomers-addon' ),
+            'search_items'       => __( 'Buscar Avaliações', 'dps-groomers-addon' ),
+            'not_found'          => __( 'Nenhuma avaliação encontrada', 'dps-groomers-addon' ),
+            'not_found_in_trash' => __( 'Nenhuma avaliação na lixeira', 'dps-groomers-addon' ),
+        ];
+
+        $args = [
+            'labels'       => $labels,
+            'public'       => false,
+            'show_ui'      => true,
+            'show_in_menu' => false,
+            'supports'     => [ 'title', 'editor' ],
+            'has_archive'  => false,
+            'rewrite'      => false,
+        ];
+
+        register_post_type( 'dps_groomer_review', $args );
     }
 
     /**
@@ -2085,6 +2127,309 @@ class DPS_Groomers_Addon {
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o shortcode do formulário de avaliação.
+     *
+     * Permite que clientes avaliem groomers após atendimento.
+     *
+     * @since 1.3.0
+     *
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML do formulário.
+     */
+    public function render_review_form_shortcode( $atts ) {
+        $atts = shortcode_atts(
+            [
+                'groomer_id'     => 0,
+                'appointment_id' => 0,
+            ],
+            $atts,
+            'dps_groomer_review'
+        );
+
+        $this->register_and_enqueue_assets();
+
+        // Permitir passagem via GET
+        $groomer_id     = $atts['groomer_id'] ? absint( $atts['groomer_id'] ) : ( isset( $_GET['groomer_id'] ) ? absint( $_GET['groomer_id'] ) : 0 );
+        $appointment_id = $atts['appointment_id'] ? absint( $atts['appointment_id'] ) : ( isset( $_GET['appointment_id'] ) ? absint( $_GET['appointment_id'] ) : 0 );
+
+        if ( ! $groomer_id ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Groomer não especificado.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer || ! in_array( 'dps_groomer', (array) $groomer->roles, true ) ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Groomer não encontrado.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        // Processar submissão
+        $message = '';
+        if ( isset( $_POST['dps_review_nonce'] ) && wp_verify_nonce( wp_unslash( $_POST['dps_review_nonce'] ), 'dps_submit_review' ) ) {
+            $rating  = isset( $_POST['dps_review_rating'] ) ? absint( $_POST['dps_review_rating'] ) : 0;
+            $comment = isset( $_POST['dps_review_comment'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_review_comment'] ) ) : '';
+            $name    = isset( $_POST['dps_review_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_review_name'] ) ) : '';
+
+            if ( $rating >= 1 && $rating <= 5 ) {
+                $review_id = wp_insert_post(
+                    [
+                        'post_type'    => 'dps_groomer_review',
+                        'post_title'   => sprintf(
+                            /* translators: %1$s: groomer name, %2$d: rating */
+                            __( 'Avaliação de %1$s - %2$d estrelas', 'dps-groomers-addon' ),
+                            $groomer->display_name,
+                            $rating
+                        ),
+                        'post_content' => $comment,
+                        'post_status'  => 'publish',
+                    ]
+                );
+
+                if ( $review_id && ! is_wp_error( $review_id ) ) {
+                    update_post_meta( $review_id, '_dps_review_groomer_id', $groomer_id );
+                    update_post_meta( $review_id, '_dps_review_rating', $rating );
+                    update_post_meta( $review_id, '_dps_review_name', $name );
+                    if ( $appointment_id ) {
+                        update_post_meta( $review_id, '_dps_review_appointment_id', $appointment_id );
+                    }
+
+                    $message = '<div class="dps-groomers-notice dps-groomers-notice--success">' . 
+                        esc_html__( 'Obrigado pela sua avaliação!', 'dps-groomers-addon' ) . 
+                        '</div>';
+                }
+            } else {
+                $message = '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                    esc_html__( 'Por favor, selecione uma avaliação de 1 a 5 estrelas.', 'dps-groomers-addon' ) . 
+                    '</div>';
+            }
+        }
+
+        $groomer_name = $groomer->display_name ? $groomer->display_name : $groomer->user_login;
+
+        ob_start();
+        ?>
+        <div class="dps-review-form-container">
+            <h3>
+                <?php 
+                echo esc_html( 
+                    sprintf( 
+                        /* translators: %s: groomer name */
+                        __( 'Avaliar %s', 'dps-groomers-addon' ), 
+                        $groomer_name 
+                    ) 
+                ); 
+                ?>
+            </h3>
+
+            <?php echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+            <?php if ( empty( $message ) || strpos( $message, 'error' ) !== false ) : ?>
+            <form method="post" class="dps-review-form">
+                <?php wp_nonce_field( 'dps_submit_review', 'dps_review_nonce' ); ?>
+                
+                <div class="dps-form-field">
+                    <label><?php echo esc_html__( 'Sua avaliação', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                    <div class="dps-star-rating">
+                        <?php for ( $i = 5; $i >= 1; $i-- ) : ?>
+                            <input type="radio" name="dps_review_rating" id="dps_star_<?php echo esc_attr( $i ); ?>" value="<?php echo esc_attr( $i ); ?>" required />
+                            <label for="dps_star_<?php echo esc_attr( $i ); ?>" title="<?php echo esc_attr( $i ); ?> <?php echo esc_attr( _n( 'estrela', 'estrelas', $i, 'dps-groomers-addon' ) ); ?>">★</label>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+
+                <div class="dps-form-field">
+                    <label for="dps_review_name"><?php echo esc_html__( 'Seu nome', 'dps-groomers-addon' ); ?></label>
+                    <input type="text" name="dps_review_name" id="dps_review_name" placeholder="<?php echo esc_attr__( 'Opcional', 'dps-groomers-addon' ); ?>" />
+                </div>
+
+                <div class="dps-form-field">
+                    <label for="dps_review_comment"><?php echo esc_html__( 'Comentário', 'dps-groomers-addon' ); ?></label>
+                    <textarea name="dps_review_comment" id="dps_review_comment" rows="4" placeholder="<?php echo esc_attr__( 'Conte como foi sua experiência...', 'dps-groomers-addon' ); ?>"></textarea>
+                </div>
+
+                <button type="submit" class="dps-btn dps-btn--primary">
+                    <?php echo esc_html__( 'Enviar avaliação', 'dps-groomers-addon' ); ?>
+                </button>
+            </form>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o shortcode de exibição de avaliações.
+     *
+     * @since 1.3.0
+     *
+     * @param array $atts Atributos do shortcode.
+     * @return string HTML das avaliações.
+     */
+    public function render_reviews_list_shortcode( $atts ) {
+        $atts = shortcode_atts(
+            [
+                'groomer_id' => 0,
+                'limit'      => 10,
+            ],
+            $atts,
+            'dps_groomer_reviews'
+        );
+
+        $this->register_and_enqueue_assets();
+
+        $groomer_id = absint( $atts['groomer_id'] );
+        $limit      = absint( $atts['limit'] );
+
+        if ( ! $groomer_id ) {
+            return '<div class="dps-groomers-notice dps-groomers-notice--error">' . 
+                esc_html__( 'Groomer não especificado.', 'dps-groomers-addon' ) . 
+                '</div>';
+        }
+
+        $groomer = get_user_by( 'id', $groomer_id );
+        if ( ! $groomer ) {
+            return '';
+        }
+
+        // Buscar avaliações
+        $reviews = get_posts(
+            [
+                'post_type'      => 'dps_groomer_review',
+                'posts_per_page' => $limit,
+                'post_status'    => 'publish',
+                'meta_query'     => [
+                    [
+                        'key'   => '_dps_review_groomer_id',
+                        'value' => $groomer_id,
+                    ],
+                ],
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+            ]
+        );
+
+        // Calcular média
+        $total_rating = 0;
+        $review_count = count( $reviews );
+        foreach ( $reviews as $review ) {
+            $total_rating += (int) get_post_meta( $review->ID, '_dps_review_rating', true );
+        }
+        $avg_rating = $review_count > 0 ? round( $total_rating / $review_count, 1 ) : 0;
+
+        $groomer_name = $groomer->display_name ? $groomer->display_name : $groomer->user_login;
+
+        ob_start();
+        ?>
+        <div class="dps-reviews-container">
+            <div class="dps-reviews-header">
+                <h3>
+                    <?php 
+                    echo esc_html( 
+                        sprintf( 
+                            /* translators: %s: groomer name */
+                            __( 'Avaliações de %s', 'dps-groomers-addon' ), 
+                            $groomer_name 
+                        ) 
+                    ); 
+                    ?>
+                </h3>
+                
+                <?php if ( $review_count > 0 ) : ?>
+                <div class="dps-reviews-summary">
+                    <span class="dps-reviews-avg">
+                        <span class="dps-reviews-avg__stars"><?php echo esc_html( str_repeat( '★', round( $avg_rating ) ) ); ?></span>
+                        <span class="dps-reviews-avg__value"><?php echo esc_html( number_format_i18n( $avg_rating, 1 ) ); ?></span>
+                    </span>
+                    <span class="dps-reviews-count">
+                        <?php 
+                        echo esc_html( 
+                            sprintf( 
+                                /* translators: %d: number of reviews */
+                                _n( '%d avaliação', '%d avaliações', $review_count, 'dps-groomers-addon' ), 
+                                $review_count 
+                            ) 
+                        ); 
+                        ?>
+                    </span>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if ( empty( $reviews ) ) : ?>
+                <p class="dps-empty-message"><?php echo esc_html__( 'Nenhuma avaliação ainda.', 'dps-groomers-addon' ); ?></p>
+            <?php else : ?>
+                <div class="dps-reviews-list">
+                    <?php foreach ( $reviews as $review ) :
+                        $rating = (int) get_post_meta( $review->ID, '_dps_review_rating', true );
+                        $name   = get_post_meta( $review->ID, '_dps_review_name', true );
+                        $date   = get_the_date( 'd/m/Y', $review );
+                        ?>
+                        <div class="dps-review-item">
+                            <div class="dps-review-item__header">
+                                <span class="dps-review-item__stars"><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></span>
+                                <span class="dps-review-item__date"><?php echo esc_html( $date ); ?></span>
+                            </div>
+                            <?php if ( $name ) : ?>
+                                <div class="dps-review-item__author"><?php echo esc_html( $name ); ?></div>
+                            <?php endif; ?>
+                            <?php if ( $review->post_content ) : ?>
+                                <div class="dps-review-item__comment"><?php echo esc_html( $review->post_content ); ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Obtém a média de avaliações de um groomer.
+     *
+     * @since 1.3.0
+     *
+     * @param int $groomer_id ID do groomer.
+     * @return array Array com 'average' e 'count'.
+     */
+    public function get_groomer_rating( $groomer_id ) {
+        $reviews = get_posts(
+            [
+                'post_type'      => 'dps_groomer_review',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'meta_query'     => [
+                    [
+                        'key'   => '_dps_review_groomer_id',
+                        'value' => $groomer_id,
+                    ],
+                ],
+            ]
+        );
+
+        $count = count( $reviews );
+        if ( $count === 0 ) {
+            return [
+                'average' => 0,
+                'count'   => 0,
+            ];
+        }
+
+        $total = 0;
+        foreach ( $reviews as $review_id ) {
+            $total += (int) get_post_meta( $review_id, '_dps_review_rating', true );
+        }
+
+        return [
+            'average' => round( $total / $count, 1 ),
+            'count'   => $count,
+        ];
     }
 }
 

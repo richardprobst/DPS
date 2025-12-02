@@ -1060,3 +1060,179 @@
         min-height: auto;
     }
 }
+
+/* ==========================================================================
+   16. Sistema de Avaliações
+   ========================================================================== */
+
+/* Formulário de avaliação */
+.dps-review-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dps-review-form-container h3 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    color: #374151;
+}
+
+.dps-review-form .dps-form-field {
+    margin-bottom: 20px;
+}
+
+.dps-review-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dps-review-form input[type="text"],
+.dps-review-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.dps-review-form textarea {
+    resize: vertical;
+}
+
+/* Star rating input */
+.dps-star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.dps-star-rating input {
+    display: none;
+}
+
+.dps-star-rating label {
+    font-size: 32px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin: 0;
+}
+
+.dps-star-rating label:hover,
+.dps-star-rating label:hover ~ label,
+.dps-star-rating input:checked ~ label {
+    color: #f59e0b;
+}
+
+/* Lista de avaliações */
+.dps-reviews-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dps-reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-reviews-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #374151;
+}
+
+.dps-reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dps-reviews-avg {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-reviews-avg__stars {
+    color: #f59e0b;
+    font-size: 18px;
+}
+
+.dps-reviews-avg__value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.dps-reviews-count {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dps-review-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.dps-review-item__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.dps-review-item__stars {
+    color: #f59e0b;
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+.dps-review-item__date {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.dps-review-item__author {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.dps-review-item__comment {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Avisos de sucesso */
+.dps-groomers-notice--success {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+}
+
+.dps-groomers-notice--error {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+}
