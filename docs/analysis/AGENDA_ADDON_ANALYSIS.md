@@ -598,13 +598,22 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 - **Métodos extraídos para Query**: `query_appointments_for_date()`, `query_appointments_for_week()`, `query_all_appointments()`, `query_appointments_for_export()`, `get_client_group_data()`
 - **Testes**: Pendente para próxima iteração
 
-### 12.4 Fase 4: Funcionalidades Avançadas (20-40h)
+### 12.4 Fase 4: Funcionalidades Avançadas (20-40h) ⏳ PARCIALMENTE IMPLEMENTADA
 
-| Item | Esforço | Prioridade |
-|------|---------|------------|
-| Calendário mensal (FullCalendar) | 8-12h | 🟡 Média |
-| Drag-and-drop para reagendamento | 10-14h | 🟢 Baixa |
-| Notificações em tempo real | 8-12h | 🟢 Baixa |
+| Item | Esforço | Prioridade | Status |
+|------|---------|------------|--------|
+| Calendário mensal | 8-12h | 🟡 Média | ✅ Implementado |
+| Drag-and-drop para reagendamento | 10-14h | 🟢 Baixa | ⏳ Pendente |
+| Notificações em tempo real | 8-12h | 🟢 Baixa | ⏳ Pendente |
+
+**Detalhes da implementação (2025-12-03):**
+- **Calendário mensal**: Implementado calendário HTML nativo (sem dependência de FullCalendar.js)
+- **Navegação**: Botão "📆 Mês" na barra de navegação, navegação entre meses
+- **Grid visual**: 7 colunas (Seg-Dom), células por dia com badges de status coloridos
+- **Indicadores**: Contagem por status (pendente=laranja, finalizado=azul, pago=verde, cancelado=vermelho)
+- **Interação**: Clique no dia abre visualização diária
+- **AJAX endpoint**: `calendar_events_ajax()` preparado para integrações futuras
+- **Responsivo**: Adaptado para mobile com breakpoints em 768px e 480px
 
 ---
 

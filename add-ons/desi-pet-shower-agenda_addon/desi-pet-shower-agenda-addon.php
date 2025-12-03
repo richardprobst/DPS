@@ -115,6 +115,9 @@ class DPS_Agenda_Addon {
         // FASE 2: AJAX para exportação CSV da agenda
         add_action( 'wp_ajax_dps_agenda_export_csv', [ $this, 'export_csv_ajax' ] );
 
+        // FASE 4: AJAX para calendário mensal
+        add_action( 'wp_ajax_dps_agenda_calendar_events', [ $this, 'calendar_events_ajax' ] );
+
         // Agenda: agendamento de envio de lembretes diários
         add_action( 'init', [ $this, 'maybe_schedule_reminders' ] );
         add_action( 'dps_agenda_send_reminders', [ $this, 'send_reminders' ] );
@@ -376,7 +379,7 @@ class DPS_Agenda_Addon {
         echo '</a>';
         echo '</div>';
         
-        // Grupo 2: Visualizações (Semana | Todos)
+        // Grupo 2: Visualizações (Dia | Semana | Mês | Todos)
         echo '<div class="dps-agenda-nav-group">';
         
         // Botão Ver Semana/Dia (toggle)
@@ -392,6 +395,21 @@ class DPS_Agenda_Addon {
             $toggle_args['view'] = 'week';
             echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver lista semanal', 'dps-agenda-addon' ) . '">';
             echo '📅 ' . esc_html__( 'Semana', 'dps-agenda-addon' );
+            echo '</a>';
+        }
+        
+        // FASE 4: Botão Calendário Mensal
+        $is_calendar_view = ( $view === 'calendar' );
+        $calendar_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
+        if ( $is_calendar_view ) {
+            $calendar_args['view'] = 'day';
+            echo '<a href="' . esc_url( add_query_arg( $calendar_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Voltar para lista', 'dps-agenda-addon' ) . '">';
+            echo '📆 ' . esc_html__( 'Lista', 'dps-agenda-addon' );
+            echo '</a>';
+        } else {
+            $calendar_args['view'] = 'calendar';
+            echo '<a href="' . esc_url( add_query_arg( $calendar_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver calendário mensal', 'dps-agenda-addon' ) . '">';
+            echo '📆 ' . esc_html__( 'Mês', 'dps-agenda-addon' );
             echo '</a>';
         }
         
@@ -634,6 +652,14 @@ class DPS_Agenda_Addon {
                 'no_found_rows'  => true, // PERFORMANCE: não conta total
             ] );
         }
+        
+        // FASE 4: Renderiza calendário mensal se view=calendar
+        if ( $view === 'calendar' ) {
+            $this->render_calendar_view( $selected_date );
+            echo '</div>';
+            return ob_get_clean();
+        }
+        
         // Renderiza tabela para cada dia, aplicando filtros se necessário
         $has_any = false;
         $column_labels = [
@@ -1846,6 +1872,328 @@ class DPS_Agenda_Addon {
             'filename' => $filename,
             'content'  => base64_encode( $csv_content ),
         ] );
+    }
+
+    /**
+     * FASE 4: Renderiza a visualização de calendário mensal.
+     *
+     * @since 1.3.0
+     * @param string $selected_date Data selecionada no formato Y-m-d.
+     */
+    private function render_calendar_view( $selected_date ) {
+        $base_url = remove_query_arg( [ 'dps_date', 'view', 'show_all' ] );
+        
+        // Valida e cria objeto de data
+        $date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
+        if ( ! $date_obj ) {
+            $date_obj = new DateTime();
+            $selected_date = $date_obj->format( 'Y-m-d' );
+        }
+        
+        // Calcula mês anterior e próximo
+        $prev_month = ( clone $date_obj )->modify( 'first day of previous month' )->format( 'Y-m-d' );
+        $next_month = ( clone $date_obj )->modify( 'first day of next month' )->format( 'Y-m-d' );
+        
+        // Header do calendário
+        echo '<div class="dps-calendar-header">';
+        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $prev_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">← ' . esc_html__( 'Mês anterior', 'dps-agenda-addon' ) . '</a>';
+        echo '<h4 class="dps-calendar-title">' . esc_html( ucfirst( date_i18n( 'F Y', $date_obj->getTimestamp() ) ) ) . '</h4>';
+        echo '<a href="' . esc_url( add_query_arg( [ 'dps_date' => $next_month, 'view' => 'calendar' ], $base_url ) ) . '" class="dps-calendar-nav-btn">' . esc_html__( 'Próximo mês', 'dps-agenda-addon' ) . ' →</a>';
+        echo '</div>';
+        
+        // Container do calendário
+        $calendar_attrs = sprintf(
+            'id="dps-calendar-container" class="dps-calendar" data-date="%s" data-ajax="%s" data-nonce="%s"',
+            esc_attr( $selected_date ),
+            esc_attr( admin_url( 'admin-ajax.php' ) ),
+            esc_attr( wp_create_nonce( 'dps_agenda_calendar' ) )
+        );
+        echo '<div ' . $calendar_attrs . '>';
+        
+        // Renderiza calendário HTML (fallback se JS não carregar)
+        $this->render_calendar_grid( $selected_date );
+        
+        echo '</div>';
+        
+        // Legenda
+        echo '<div class="dps-calendar-legend">';
+        echo '<span class="dps-legend-item"><span class="dps-legend-color dps-status-pendente"></span> ' . esc_html__( 'Pendente', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-legend-item"><span class="dps-legend-color dps-status-finalizado"></span> ' . esc_html__( 'Finalizado', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-legend-item"><span class="dps-legend-color dps-status-pago"></span> ' . esc_html__( 'Pago', 'dps-agenda-addon' ) . '</span>';
+        echo '<span class="dps-legend-item"><span class="dps-legend-color dps-status-cancelado"></span> ' . esc_html__( 'Cancelado', 'dps-agenda-addon' ) . '</span>';
+        echo '</div>';
+    }
+
+    /**
+     * FASE 4: Renderiza o grid HTML do calendário.
+     *
+     * @since 1.3.0
+     * @param string $selected_date Data selecionada no formato Y-m-d.
+     */
+    private function render_calendar_grid( $selected_date ) {
+        $date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
+        if ( ! $date_obj ) {
+            $date_obj = new DateTime();
+        }
+        $year = (int) $date_obj->format( 'Y' );
+        $month = (int) $date_obj->format( 'm' );
+        
+        // Primeiro dia do mês
+        $first_day = new DateTime( "$year-$month-01" );
+        $days_in_month = (int) $first_day->format( 't' );
+        $start_weekday = (int) $first_day->format( 'N' ); // 1=seg, 7=dom
+        
+        // Busca agendamentos do mês
+        $appointments = $this->get_month_appointments( $year, $month );
+        
+        // Header dos dias da semana
+        $weekdays = [
+            __( 'Seg', 'dps-agenda-addon' ),
+            __( 'Ter', 'dps-agenda-addon' ),
+            __( 'Qua', 'dps-agenda-addon' ),
+            __( 'Qui', 'dps-agenda-addon' ),
+            __( 'Sex', 'dps-agenda-addon' ),
+            __( 'Sáb', 'dps-agenda-addon' ),
+            __( 'Dom', 'dps-agenda-addon' ),
+        ];
+        
+        echo '<div class="dps-calendar-grid">';
+        
+        // Header
+        echo '<div class="dps-calendar-weekdays">';
+        foreach ( $weekdays as $wd ) {
+            echo '<div class="dps-calendar-weekday">' . esc_html( $wd ) . '</div>';
+        }
+        echo '</div>';
+        
+        // Dias
+        echo '<div class="dps-calendar-days">';
+        
+        // Células vazias antes do primeiro dia
+        for ( $i = 1; $i < $start_weekday; $i++ ) {
+            echo '<div class="dps-calendar-day dps-calendar-day--empty"></div>';
+        }
+        
+        $base_url = remove_query_arg( [ 'dps_date', 'view', 'show_all' ] );
+        $today = current_time( 'Y-m-d' );
+        
+        // Dias do mês
+        for ( $day = 1; $day <= $days_in_month; $day++ ) {
+            $date = sprintf( '%04d-%02d-%02d', $year, $month, $day );
+            $is_today = ( $date === $today );
+            $day_appointments = isset( $appointments[ $date ] ) ? $appointments[ $date ] : [];
+            $count = count( $day_appointments );
+            
+            // Conta por status
+            $status_counts = [ 'pendente' => 0, 'finalizado' => 0, 'finalizado_pago' => 0, 'cancelado' => 0 ];
+            foreach ( $day_appointments as $appt ) {
+                $st = get_post_meta( $appt->ID, 'appointment_status', true );
+                if ( ! $st ) {
+                    $st = 'pendente';
+                }
+                if ( isset( $status_counts[ $st ] ) ) {
+                    $status_counts[ $st ]++;
+                }
+            }
+            
+            $classes = [ 'dps-calendar-day' ];
+            if ( $is_today ) {
+                $classes[] = 'dps-calendar-day--today';
+            }
+            if ( $count > 0 ) {
+                $classes[] = 'dps-calendar-day--has-events';
+            }
+            
+            $day_url = add_query_arg( [ 'dps_date' => $date, 'view' => 'day' ], $base_url );
+            
+            echo '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">';
+            echo '<a href="' . esc_url( $day_url ) . '" class="dps-calendar-day-link">';
+            echo '<span class="dps-calendar-day-number">' . esc_html( $day ) . '</span>';
+            
+            if ( $count > 0 ) {
+                echo '<div class="dps-calendar-day-events">';
+                
+                // Indicadores de status
+                if ( $status_counts['pendente'] > 0 ) {
+                    echo '<span class="dps-calendar-badge dps-status-pendente" title="' . esc_attr( sprintf( __( '%d pendente(s)', 'dps-agenda-addon' ), $status_counts['pendente'] ) ) . '">' . esc_html( $status_counts['pendente'] ) . '</span>';
+                }
+                if ( $status_counts['finalizado'] > 0 ) {
+                    echo '<span class="dps-calendar-badge dps-status-finalizado" title="' . esc_attr( sprintf( __( '%d finalizado(s)', 'dps-agenda-addon' ), $status_counts['finalizado'] ) ) . '">' . esc_html( $status_counts['finalizado'] ) . '</span>';
+                }
+                if ( $status_counts['finalizado_pago'] > 0 ) {
+                    echo '<span class="dps-calendar-badge dps-status-pago" title="' . esc_attr( sprintf( __( '%d pago(s)', 'dps-agenda-addon' ), $status_counts['finalizado_pago'] ) ) . '">' . esc_html( $status_counts['finalizado_pago'] ) . '</span>';
+                }
+                if ( $status_counts['cancelado'] > 0 ) {
+                    echo '<span class="dps-calendar-badge dps-status-cancelado" title="' . esc_attr( sprintf( __( '%d cancelado(s)', 'dps-agenda-addon' ), $status_counts['cancelado'] ) ) . '">' . esc_html( $status_counts['cancelado'] ) . '</span>';
+                }
+                
+                echo '</div>';
+            }
+            
+            echo '</a>';
+            echo '</div>';
+        }
+        
+        // Células vazias após o último dia
+        $end_weekday = (int) ( new DateTime( "$year-$month-$days_in_month" ) )->format( 'N' );
+        for ( $i = $end_weekday; $i < 7; $i++ ) {
+            echo '<div class="dps-calendar-day dps-calendar-day--empty"></div>';
+        }
+        
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * FASE 4: Busca agendamentos do mês.
+     *
+     * @since 1.3.0
+     * @param int $year Ano.
+     * @param int $month Mês.
+     * @return array Agendamentos indexados por data.
+     */
+    private function get_month_appointments( $year, $month ) {
+        $first_day = sprintf( '%04d-%02d-01', $year, $month );
+        $last_day = sprintf( '%04d-%02d-%02d', $year, $month, cal_days_in_month( CAL_GREGORIAN, $month, $year ) );
+        
+        $appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => [ $first_day, $last_day ],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+            'no_found_rows'  => true,
+        ] );
+        
+        // Pre-carrega metadados
+        if ( ! empty( $appointments ) ) {
+            $ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $ids );
+        }
+        
+        // Agrupa por data
+        $grouped = [];
+        foreach ( $appointments as $appt ) {
+            $date = get_post_meta( $appt->ID, 'appointment_date', true );
+            if ( ! isset( $grouped[ $date ] ) ) {
+                $grouped[ $date ] = [];
+            }
+            $grouped[ $date ][] = $appt;
+        }
+        
+        return $grouped;
+    }
+
+    /**
+     * FASE 4: Handler AJAX para buscar eventos do calendário.
+     *
+     * @since 1.3.0
+     */
+    public function calendar_events_ajax() {
+        // Verificar nonce
+        if ( ! check_ajax_referer( 'dps_agenda_calendar', 'nonce', false ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verificar permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $start = isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '';
+        $end = isset( $_POST['end'] ) ? sanitize_text_field( $_POST['end'] ) : '';
+        
+        // Validar formato de data Y-m-d
+        if ( empty( $start ) || empty( $end ) || 
+             ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start ) || 
+             ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end ) ) {
+            wp_send_json_error( [ 'message' => __( 'Formato de data inválido.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Busca agendamentos no período
+        $appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => [ $start, $end ],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ] );
+        
+        // Pre-carrega caches
+        if ( ! empty( $appointments ) ) {
+            $ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $ids );
+            
+            $related_ids = [];
+            foreach ( $appointments as $appt ) {
+                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $cid ) {
+                    $related_ids[] = (int) $cid;
+                }
+                if ( $pid ) {
+                    $related_ids[] = (int) $pid;
+                }
+            }
+            if ( ! empty( $related_ids ) ) {
+                _prime_post_caches( array_unique( $related_ids ), false, false );
+            }
+        }
+        
+        // Formata eventos para o calendário
+        $events = [];
+        $status_colors = [
+            'pendente'        => '#f59e0b',
+            'finalizado'      => '#0ea5e9',
+            'finalizado_pago' => '#22c55e',
+            'cancelado'       => '#ef4444',
+        ];
+        
+        foreach ( $appointments as $appt ) {
+            $date = get_post_meta( $appt->ID, 'appointment_date', true );
+            $time = get_post_meta( $appt->ID, 'appointment_time', true );
+            $status = get_post_meta( $appt->ID, 'appointment_status', true );
+            if ( ! $status ) {
+                $status = 'pendente';
+            }
+            
+            $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
+            $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+            $client_post = $client_id ? get_post( $client_id ) : null;
+            $pet_post = $pet_id ? get_post( $pet_id ) : null;
+            
+            $title = $time;
+            if ( $pet_post ) {
+                $title .= ' - ' . $pet_post->post_title;
+            }
+            if ( $client_post ) {
+                $title .= ' (' . $client_post->post_title . ')';
+            }
+            
+            $events[] = [
+                'id'        => $appt->ID,
+                'title'     => $title,
+                'start'     => $date . 'T' . $time,
+                'color'     => $status_colors[ $status ] ?? '#6b7280',
+                'status'    => $status,
+                'client'    => $client_post ? $client_post->post_title : '',
+                'pet'       => $pet_post ? $pet_post->post_title : '',
+            ];
+        }
+        
+        wp_send_json_success( $events );
     }
 
 

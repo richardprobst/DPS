@@ -830,3 +830,243 @@
         order: 1;
     }
 }
+
+/* === FASE 4: Calendário Mensal === */
+.dps-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--dps-background);
+    border-radius: 0.75rem;
+    border: 1px solid var(--dps-border);
+}
+
+.dps-calendar-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.dps-calendar-nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: var(--dps-muted);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dps-calendar-nav-btn:hover {
+    background: var(--dps-border);
+    color: #0f172a;
+}
+
+.dps-calendar {
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--dps-surface);
+}
+
+.dps-calendar-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--dps-background);
+    border-bottom: 1px solid var(--dps-border);
+}
+
+.dps-calendar-weekday {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--dps-muted);
+    text-transform: uppercase;
+}
+
+.dps-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.dps-calendar-day {
+    min-height: 80px;
+    border-right: 1px solid var(--dps-border);
+    border-bottom: 1px solid var(--dps-border);
+    padding: 0.25rem;
+    background: var(--dps-surface);
+    transition: background 0.2s;
+}
+
+.dps-calendar-day:nth-child(7n) {
+    border-right: none;
+}
+
+.dps-calendar-day--empty {
+    background: var(--dps-background);
+}
+
+.dps-calendar-day--today {
+    background: #eff6ff;
+}
+
+.dps-calendar-day--has-events:hover {
+    background: #f0f9ff;
+}
+
+.dps-calendar-day-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dps-calendar-day-number {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    padding: 0.25rem;
+}
+
+.dps-calendar-day--today .dps-calendar-day-number {
+    background: #0ea5e9;
+    color: #fff;
+    border-radius: 999px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-calendar-day-events {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 0.25rem;
+    margin-top: auto;
+}
+
+.dps-calendar-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+}
+
+.dps-calendar-badge.dps-status-pendente {
+    background: #f59e0b;
+}
+
+.dps-calendar-badge.dps-status-finalizado {
+    background: #0ea5e9;
+}
+
+.dps-calendar-badge.dps-status-pago {
+    background: #22c55e;
+}
+
+.dps-calendar-badge.dps-status-cancelado {
+    background: #ef4444;
+}
+
+.dps-calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--dps-background);
+    border-radius: 0.5rem;
+    justify-content: center;
+}
+
+.dps-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--dps-muted);
+}
+
+.dps-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.dps-legend-color.dps-status-pendente {
+    background: #f59e0b;
+}
+
+.dps-legend-color.dps-status-finalizado {
+    background: #0ea5e9;
+}
+
+.dps-legend-color.dps-status-pago {
+    background: #22c55e;
+}
+
+.dps-legend-color.dps-status-cancelado {
+    background: #ef4444;
+}
+
+/* === Responsividade Fase 4 === */
+@media (max-width: 768px) {
+    .dps-calendar-day {
+        min-height: 60px;
+    }
+    
+    .dps-calendar-weekday {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.7rem;
+    }
+    
+    .dps-calendar-day-number {
+        font-size: 0.8rem;
+    }
+    
+    .dps-calendar-badge {
+        font-size: 0.6rem;
+        padding: 1px 4px;
+    }
+    
+    .dps-calendar-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .dps-calendar-nav-btn {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-calendar-day {
+        min-height: 45px;
+    }
+    
+    .dps-calendar-day-events {
+        padding: 0.15rem;
+    }
+    
+    .dps-calendar-badge {
+        font-size: 0.55rem;
+        padding: 1px 3px;
+    }
+    
+    .dps-legend-item {
+        font-size: 0.7rem;
+    }
+}
