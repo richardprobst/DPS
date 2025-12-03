@@ -1,0 +1,357 @@
+/**
+ * DPS Debugging Admin Styles
+ *
+ * Estilos para a interface administrativa do add-on de debugging.
+ *
+ * @package DPS_Debugging_Addon
+ */
+
+/* ==========================================================================
+   Estrutura Principal
+   ========================================================================== */
+
+.dps-debugging-wrap {
+    max-width: 1200px;
+}
+
+.dps-debugging-wrap .nav-tab-wrapper {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+.dps-debugging-content .card {
+    max-width: 100%;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dps-debugging-content .card h2 {
+    margin-top: 0;
+}
+
+.dps-debugging-content .card:last-child {
+    margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Aba de Configurações
+   ========================================================================== */
+
+.dps-debugging-settings-tab .notice.inline {
+    margin: 0 0 20px;
+}
+
+.dps-debugging-constants-table th {
+    width: 250px;
+    vertical-align: top;
+    padding-top: 15px;
+}
+
+.dps-debugging-constants-table th code {
+    font-size: 13px;
+    background: #f0f0f1;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.dps-debugging-constants-table td {
+    vertical-align: top;
+}
+
+.dps-debugging-constants-table td p.description {
+    margin-top: 5px;
+    color: #646970;
+}
+
+.dps-debugging-current-constants {
+    background: #1e1e1e;
+    color: #fff;
+    padding: 15px 20px;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+/* ==========================================================================
+   Aba de Visualizador de Log
+   ========================================================================== */
+
+.dps-debugging-log-viewer-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dps-debugging-log-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f0f0f1;
+    border-radius: 4px;
+}
+
+.dps-debugging-log-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-debugging-log-info code {
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.dps-debugging-log-size {
+    color: #646970;
+    font-size: 13px;
+}
+
+.dps-debugging-log-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Conteúdo do Log */
+.dps-debugging-log-content {
+    background: #1e1e1e;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dps-debugging-log-empty {
+    color: #a1a1a1;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+/* Log Raw */
+.dps-debugging-log-raw {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    padding: 20px;
+    margin: 0;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 600px;
+    overflow: auto;
+}
+
+/* Log Formatado */
+.dps-debugging-log-intro {
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    background: #2d2d2d;
+}
+
+.dps-debugging-log-count {
+    color: #a1a1a1;
+    margin: 0;
+    font-size: 13px;
+}
+
+.dps-debugging-log-entries {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.dps-debugging-log-entry {
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.dps-debugging-log-entry:last-child {
+    border-bottom: none;
+}
+
+.dps-debugging-log-entry-content {
+    color: #e0e0e0;
+}
+
+.dps-debugging-log-entry-content p {
+    margin: 0 0 8px;
+}
+
+.dps-debugging-log-entry-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Tipos de Entrada */
+.dps-debugging-log-entry-fatal {
+    background: rgba(220, 50, 50, 0.1);
+    border-left: 3px solid #dc3232;
+}
+
+.dps-debugging-log-entry-warning {
+    background: rgba(255, 185, 0, 0.1);
+    border-left: 3px solid #ffb900;
+}
+
+.dps-debugging-log-entry-notice {
+    background: rgba(0, 160, 210, 0.1);
+    border-left: 3px solid #00a0d2;
+}
+
+.dps-debugging-log-entry-deprecated {
+    background: rgba(150, 100, 200, 0.1);
+    border-left: 3px solid #9664c8;
+}
+
+.dps-debugging-log-entry-parse {
+    background: rgba(220, 50, 50, 0.15);
+    border-left: 3px solid #dc3232;
+}
+
+.dps-debugging-log-entry-wordpress-db {
+    background: rgba(50, 50, 255, 0.1);
+    border-left: 3px solid #3232ff;
+}
+
+/* Data/Hora */
+.dps-debugging-log-datetime {
+    color: #8899aa;
+    font-weight: 300;
+}
+
+/* Labels de Tipo */
+.dps-debugging-log-label {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-right: 5px;
+}
+
+.dps-debugging-log-label-fatal {
+    background: #dc3232;
+    color: #fff;
+}
+
+.dps-debugging-log-label-warning {
+    background: #ffb900;
+    color: #1e1e1e;
+}
+
+.dps-debugging-log-label-notice {
+    background: #00a0d2;
+    color: #fff;
+}
+
+.dps-debugging-log-label-deprecated {
+    background: #9664c8;
+    color: #fff;
+}
+
+.dps-debugging-log-label-parse {
+    background: #dc3232;
+    color: #fff;
+}
+
+.dps-debugging-log-label-wordpress-db {
+    background: #3232ff;
+    color: #fff;
+}
+
+/* Stack Trace */
+.dps-debugging-log-stacktrace-title {
+    color: #9664c8;
+    font-weight: 600;
+    margin: 10px 0 5px !important;
+}
+
+.dps-debugging-log-stacktrace {
+    margin: 0 0 10px 20px !important;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-debugging-log-stacktrace li {
+    color: #a1a1a1;
+    padding: 2px 0;
+    font-size: 11px;
+}
+
+.dps-debugging-log-stacktrace li::before {
+    content: '›';
+    color: #646970;
+    margin-right: 8px;
+}
+
+/* JSON */
+.dps-debugging-log-json {
+    background: #2d2d2d;
+    padding: 10px 15px;
+    margin: 10px 0 !important;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #9cdcfe;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .dps-debugging-constants-table th {
+        width: 100%;
+        padding-bottom: 5px;
+    }
+
+    .dps-debugging-constants-table th,
+    .dps-debugging-constants-table td {
+        display: block;
+    }
+
+    .dps-debugging-log-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dps-debugging-log-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .dps-debugging-log-buttons .button {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dps-debugging-content {
+        padding: 15px;
+    }
+
+    .dps-debugging-log-entry {
+        padding: 10px 15px;
+    }
+
+    .dps-debugging-log-raw {
+        font-size: 11px;
+        padding: 15px;
+    }
+}

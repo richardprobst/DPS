@@ -1243,6 +1243,109 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 ---
 
+### Debugging (`desi-pet-shower-debugging_addon`)
+
+**Diretório**: `add-ons/desi-pet-shower-debugging_addon`
+
+**Propósito e funcionalidades principais**:
+- Gerenciar constantes de debug do WordPress (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, SAVEQUERIES, WP_DISABLE_FATAL_ERROR_HANDLER)
+- Modificar wp-config.php de forma segura para ativar/desativar constantes
+- Visualizar o arquivo debug.log com formatação inteligente (destaque de erros, warnings, stack traces, JSON)
+- Limpar (purge) o arquivo debug.log
+- Acesso rápido via admin bar com status das constantes e contador de entradas de log
+
+**Shortcodes expostos**: Nenhum
+
+**Menus administrativos**:
+- **Debugging** (`dps-debugging`): interface completa de configuração e visualização de logs
+
+**CPTs, tabelas e opções**:
+- Não cria CPTs ou tabelas próprias
+- Option `dps_debugging_options`: armazena configurações das constantes de debug
+- Option `dps_debugging_restore_state`: salva estado original das constantes para restauração na desativação
+
+**Hooks consumidos**:
+- `admin_menu` (prioridade 20): registra submenu sob "Desi Pet Shower"
+- `admin_init`: processa salvamento de configurações e ações de log
+- `admin_bar_menu` (prioridade 999): adiciona menu de debug na admin bar
+- `admin_enqueue_scripts`: carrega estilos na página de configurações
+- `wp_head` / `admin_head`: adiciona estilos da admin bar
+
+**Hooks disparados (Filters)**:
+- `dps_debugging_config_path`: permite customizar caminho do wp-config.php
+- `dps_debugging_admin_bar_cap`: permite customizar capability para exibição na admin bar (padrão: manage_options)
+
+**Estrutura de arquivos**:
+```
+add-ons/desi-pet-shower-debugging_addon/
+├── desi-pet-shower-debugging-addon.php    # Arquivo principal com classe DPS_Debugging_Addon
+├── includes/
+│   ├── class-dps-debugging-config-transformer.php  # Leitura/escrita do wp-config.php
+│   ├── class-dps-debugging-log-viewer.php          # Visualização e parsing do debug.log
+│   └── class-dps-debugging-admin-bar.php           # Integração com admin bar
+├── assets/
+│   └── css/
+│       └── debugging-admin.css                      # Estilos da interface
+└── uninstall.php                                    # Limpeza na desinstalação
+```
+
+**Classes principais**:
+
+#### DPS_Debugging_Config_Transformer
+- `is_writable()`: verifica se wp-config.php é gravável
+- `get_constant( $name )`: obtém valor de constante
+- `has_constant( $name )`: verifica se constante existe
+- `update_constant( $name, $value )`: adiciona ou atualiza constante
+- `remove_constant( $name )`: remove constante do arquivo
+
+#### DPS_Debugging_Log_Viewer
+- `get_debug_log_path()`: obtém caminho do arquivo de log
+- `log_exists()`: verifica se log existe e não está vazio
+- `get_log_size_formatted()`: tamanho do arquivo formatado (KB, MB)
+- `get_raw_content()`: conteúdo sem formatação
+- `get_formatted_content()`: conteúdo com formatação HTML (data, labels, stack traces, JSON)
+- `purge_log()`: limpa o arquivo de log
+- `get_entry_count()`: contagem de entradas
+
+#### DPS_Debugging_Admin_Bar
+- `init()`: inicializa hooks da admin bar
+- `add_admin_bar_menu( $wp_admin_bar )`: adiciona menu com submenus (View, Raw, Purge, Settings, Status)
+- `add_admin_bar_styles()`: estilos inline para a admin bar
+
+**Segurança implementada**:
+- ✅ Nonces em todas as ações (configurações e purge)
+- ✅ Verificação de capability `manage_options`
+- ✅ Validação de wp-config.php gravável antes de modificar
+- ✅ Confirmação JavaScript antes de purge
+- ✅ Sanitização de todas as entradas
+- ✅ Escape de saída em todos os templates
+
+**Funcionalidades de visualização de log**:
+- Agrupamento de linhas por entrada (data/hora como delimitador)
+- Destaque visual por tipo: Fatal (vermelho), Warning (amarelo), Notice (azul), Deprecated (roxo), Parse (vermelho), DB Error (azul escuro)
+- Formatação de stack traces como lista
+- Pretty-print de JSON encontrado nas entradas
+- Ordenação mais recente primeiro
+- Limite de 1000 linhas para performance
+- Modo raw para visualização sem formatação
+
+**Dependências**:
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- **Sem dependências externas**: não requer bibliotecas adicionais
+
+**Introduzido em**: v1.0.0
+
+**Versão atual**: 1.0.0
+
+**Observações**:
+- Inspirado no plugin WP Debugging de Andy Fragen e Debug Quick Look de Andrew Norcross
+- Estrutura modular desde o início com separação de responsabilidades
+- Restaura constantes originais na desativação do add-on
+- Admin bar exibe contador de entradas e status visual de cada constante
+- CSS tema escuro para visualização de logs (inspirado em IDEs modernas)
+
+---
+
 ## Mapa de hooks
 
 Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons, facilitando a integração entre componentes.
