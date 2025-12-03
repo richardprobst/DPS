@@ -113,7 +113,8 @@
     color: #374151;
     display: inline-block;
     margin: 4px 0;
-    word-break: break-all;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .dps-payment-wrap .description strong {
