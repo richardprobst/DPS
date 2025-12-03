@@ -62,6 +62,193 @@
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
+/* Campo de valor com prefixo R$ */
+.dps-input-money-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dps-input-prefix {
+    position: absolute;
+    left: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.dps-input-money {
+    padding-left: 36px !important;
+}
+
+/* Campo que ocupa linha inteira */
+.dps-field-full {
+    grid-column: 1 / -1;
+}
+
+/* Campo individual */
+.dps-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-field label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.dps-field input,
+.dps-field select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.dps-field input:focus,
+.dps-field select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Ações do formulário */
+.dps-form-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Formulário de nova transação */
+.dps-finance-new-form {
+    margin-bottom: 30px;
+}
+
+/* Estado de erro nos campos */
+.dps-input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.dps-input-error:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* ========================================
+   11. GRÁFICOS FINANCEIROS
+   ======================================== */
+
+.dps-finance-chart-container {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-chart-container h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-finance-chart-wrapper {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .dps-finance-chart-wrapper {
+        height: 200px;
+    }
+}
+
+/* ========================================
+   12. RELATÓRIO DRE
+   ======================================== */
+
+.dps-finance-dre {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-dre h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-dre-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-dre-table th,
+.dps-dre-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-dre-header {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px !important;
+}
+
+.dps-dre-header.dps-dre-receitas {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-dre-header.dps-dre-despesas {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dps-dre-value {
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.dps-dre-subtotal {
+    background: #f9fafb;
+}
+
+.dps-dre-subtotal td {
+    border-top: 2px solid #e5e7eb;
+}
+
+.dps-dre-resultado {
+    font-size: 15px;
+}
+
+.dps-dre-resultado td {
+    padding: 14px 12px !important;
+    border-top: 2px solid #374151;
+}
+
+.dps-dre-positivo {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.dps-dre-negativo {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
 /* ========================================
    3. BADGES DE STATUS
    ======================================== */

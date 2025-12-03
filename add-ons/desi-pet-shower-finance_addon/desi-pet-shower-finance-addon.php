@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos e visualize transações.
- * Version:           1.2.0
+ * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,12 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.2.0' );
+    define( 'DPS_FINANCE_VERSION', '1.3.0' );
+}
+
+// Constante para limite de meses no gráfico financeiro
+if ( ! defined( 'DPS_FINANCE_CHART_MONTHS' ) ) {
+    define( 'DPS_FINANCE_CHART_MONTHS', 6 );
 }
 
 // Carrega dependências
@@ -159,11 +164,20 @@ class DPS_Finance_Addon {
                 DPS_FINANCE_VERSION
             );
 
+            // Chart.js via CDN para gráficos financeiros
+            wp_enqueue_script(
+                'chartjs',
+                'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+                [],
+                '4.4.1',
+                true
+            );
+
             // JS
             wp_enqueue_script(
                 'dps-finance-addon',
                 plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/js/finance-addon.js',
-                [ 'jquery' ],
+                [ 'jquery', 'chartjs' ],
                 DPS_FINANCE_VERSION,
                 true
             );
@@ -198,6 +212,10 @@ class DPS_Finance_Addon {
                     'confirmDeletePartial' => __( 'Tem certeza que deseja excluir este pagamento?', 'dps-finance-addon' ),
                     'noPartials'           => __( 'Nenhum pagamento registrado.', 'dps-finance-addon' ),
                     'history'              => __( 'Histórico', 'dps-finance-addon' ),
+                    // Validação de formulário
+                    'valueRequired'        => __( 'O valor deve ser maior que zero.', 'dps-finance-addon' ),
+                    'dateRequired'         => __( 'A data é obrigatória.', 'dps-finance-addon' ),
+                    'categoryRequired'     => __( 'A categoria é obrigatória.', 'dps-finance-addon' ),
                 ],
             ] );
         }
@@ -1017,6 +1035,8 @@ class DPS_Finance_Addon {
         $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : '';
         // Filtro de categoria
         $cat_filter = isset( $_GET['fin_cat'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_cat'] ) ) : '';
+        // Filtro por status
+        $status_filter = isset( $_GET['fin_status'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_status'] ) ) : '';
         // Intervalos rápidos: últimos 7/30 dias
         $range      = isset( $_GET['fin_range'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_range'] ) ) : '';
         if ( $range === '7' || $range === '30' ) {
@@ -1039,6 +1059,11 @@ class DPS_Finance_Addon {
         if ( $cat_filter !== '' ) {
             $where  .= ' AND categoria = %s';
             $params[] = $cat_filter;
+        }
+        // Filtro por status
+        if ( $status_filter !== '' && in_array( $status_filter, [ 'em_aberto', 'pago', 'cancelado' ], true ) ) {
+            $where  .= ' AND status = %s';
+            $params[] = $status_filter;
         }
 
         // Paginação - configuração
@@ -1090,6 +1115,12 @@ class DPS_Finance_Addon {
 
         // Dashboard de resumo financeiro (usa todos os registros, não paginados)
         $this->render_finance_summary( $all_trans );
+        
+        // Relatório DRE simplificado (mostra quando há filtro de data aplicado ou quando solicitado)
+        $show_dre = isset( $_GET['show_dre'] ) || ( $start_date && $end_date );
+        if ( $show_dre && ! empty( $all_trans ) ) {
+            $this->render_dre_report( $all_trans );
+        }
 
         // Se um ID de transação foi passado via query para registrar pagamento parcial, exibe formulário especializado
         if ( isset( $_GET['register_partial'] ) && is_numeric( $_GET['register_partial'] ) ) {
@@ -1116,40 +1147,95 @@ class DPS_Finance_Addon {
                 echo '</div>';
             }
         }
-        // Formulário de nova transação
-        echo '<h4>' . esc_html__( 'Registrar transação', 'dps-finance-addon' ) . '</h4>';
-        echo '<form method="post" class="dps-form">';
+        // Formulário de nova transação com fieldsets semânticos
+        echo '<form method="post" class="dps-form dps-finance-new-form" id="dps-finance-new-form">';
         echo '<input type="hidden" name="dps_finance_action" value="save_trans">';
         wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
-        echo '<p><label>' . esc_html__( 'Data', 'dps-finance-addon' ) . '<br><input type="date" name="finance_date" value="' . esc_attr( date( 'Y-m-d' ) ) . '" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="finance_value" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Categoria', 'dps-finance-addon' ) . '<br><input type="text" name="finance_category" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Tipo', 'dps-finance-addon' ) . '<br><select name="finance_type">';
+        
+        // Fieldset: Dados Básicos
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Dados Básicos', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_date">' . esc_html__( 'Data', 'dps-finance-addon' ) . ' *</label>';
+        echo '<input type="date" id="finance_date" name="finance_date" value="' . esc_attr( date( 'Y-m-d' ) ) . '" required>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_value">' . esc_html__( 'Valor', 'dps-finance-addon' ) . ' *</label>';
+        echo '<div class="dps-input-money-wrapper">';
+        echo '<span class="dps-input-prefix">R$</span>';
+        echo '<input type="text" id="finance_value" name="finance_value" class="dps-input-money" placeholder="0,00" required>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_desc">' . esc_html__( 'Descrição', 'dps-finance-addon' ) . '</label>';
+        echo '<input type="text" id="finance_desc" name="finance_desc" placeholder="' . esc_attr__( 'Ex: Pagamento de serviço', 'dps-finance-addon' ) . '">';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        // Fieldset: Classificação
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Classificação', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_category">' . esc_html__( 'Categoria', 'dps-finance-addon' ) . ' *</label>';
+        echo '<input type="text" id="finance_category" name="finance_category" list="finance_categories" required placeholder="' . esc_attr__( 'Ex: Serviço, Produto, Aluguel...', 'dps-finance-addon' ) . '">';
+        // Datalist com categorias existentes
+        echo '<datalist id="finance_categories">';
+        if ( $cats ) {
+            foreach ( $cats as $cat ) {
+                echo '<option value="' . esc_attr( $cat ) . '">';
+            }
+        }
+        echo '</datalist>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_type">' . esc_html__( 'Tipo', 'dps-finance-addon' ) . ' *</label>';
+        echo '<select id="finance_type" name="finance_type" required>';
         echo '<option value="receita">' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
         echo '<option value="despesa">' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
-        echo '</select></label></p>';
-        echo '<p><label>' . esc_html__( 'Status', 'dps-finance-addon' ) . '<br><select name="finance_status">';
+        echo '</select>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_status">' . esc_html__( 'Status', 'dps-finance-addon' ) . ' *</label>';
+        echo '<select id="finance_status" name="finance_status" required>';
         echo '<option value="em_aberto">' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
         echo '<option value="pago">' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
-        echo '</select></label></p>';
-        // Cliente opcional
-        echo '<p><label>' . esc_html__( 'Cliente (opcional)', 'dps-finance-addon' ) . '<br><select name="finance_client_id">';
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        // Fieldset: Vínculo (opcional)
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Vínculo (opcional)', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_client_id">' . esc_html__( 'Cliente', 'dps-finance-addon' ) . '</label>';
+        echo '<select id="finance_client_id" name="finance_client_id">';
         echo '<option value="">' . esc_html__( 'Nenhum', 'dps-finance-addon' ) . '</option>';
         foreach ( $clients as $cli ) {
             echo '<option value="' . esc_attr( $cli->ID ) . '">' . esc_html( $cli->post_title ) . '</option>';
         }
-        echo '</select></label></p>';
-        echo '<p><label>' . esc_html__( 'Descrição', 'dps-finance-addon' ) . '<br><input type="text" name="finance_desc"></label></p>';
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button></p>';
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Transação', 'dps-finance-addon' ) . '</button>';
+        echo '</div>';
         echo '</form>';
+        
         // Lista de transações
         echo '<h4>' . esc_html__( 'Transações Registradas', 'dps-finance-addon' ) . '</h4>';
         // Formulário de filtro por data e categoria
-        echo '<form method="get" class="dps-finance-date-filter" style="margin-bottom:10px;">';
-        // Mantém parâmetros existentes (exceto filtros de data, intervalo e categoria)
+        echo '<form method="get" class="dps-finance-date-filter dps-finance-filters" style="margin-bottom:10px;">';
+        // Mantém parâmetros existentes (exceto filtros de data, intervalo, categoria e status)
         // SEGURANÇA: Sanitiza valores de $_GET antes de usar
         foreach ( $_GET as $k => $v ) {
-            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat' ], true ) ) {
+            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status' ], true ) ) {
                 continue;
             }
             $safe_key = sanitize_key( $k );
@@ -1171,30 +1257,76 @@ class DPS_Finance_Addon {
             }
         }
         echo '</select></label> ';
+        // Dropdown de status
+        echo '<label>' . esc_html__( 'Status', 'dps-finance-addon' ) . ' <select name="fin_status">';
+        echo '<option value="">' . esc_html__( 'Todos', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="em_aberto"' . selected( $status_filter, 'em_aberto', false ) . '>' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="pago"' . selected( $status_filter, 'pago', false ) . '>' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="cancelado"' . selected( $status_filter, 'cancelado', false ) . '>' . esc_html__( 'Cancelado', 'dps-finance-addon' ) . '</option>';
+        echo '</select></label> ';
+        echo '<div class="dps-finance-filter-buttons">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button> ';
-        // Links rápidos: preserva categoria
+        // Links rápidos: preserva categoria e status
         $quick_params = $_GET;
         unset( $quick_params['fin_start'], $quick_params['fin_end'], $quick_params['fin_range'] );
-        // Garante manter a categoria selecionada
+        // Garante manter a categoria e status selecionados
         if ( $cat_filter !== '' ) {
             $quick_params['fin_cat'] = $cat_filter;
         }
+        if ( $status_filter !== '' ) {
+            $quick_params['fin_status'] = $status_filter;
+        }
         $link7  = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '7' ] ), get_permalink() ) . '#financeiro';
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $link7 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
-        echo '<a href="' . esc_url( $link30 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
-        // Link de limpar filtros: remove todos os filtros inclusive categoria
+        echo '<a href="' . esc_url( $link7 ) . '" class="button">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
+        echo '<a href="' . esc_url( $link30 ) . '" class="button">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
+        // Link de limpar filtros: remove todos os filtros inclusive categoria e status
         $clear_params = $quick_params;
-        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'] );
+        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'] );
         $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $clear_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
         $export_link = add_query_arg( $export_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $export_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $export_link ) . '" class="button">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '</div>';
         echo '</form>';
         if ( $trans ) {
+            // PRÉ-CARREGA POSTS PARA PERFORMANCE
+            // Coleta IDs de clientes, pets e agendamentos para pré-carregar
+            $client_ids = [];
+            $appt_ids   = [];
+            foreach ( $trans as $tr ) {
+                if ( $tr->cliente_id ) {
+                    $client_ids[] = (int) $tr->cliente_id;
+                }
+                if ( $tr->agendamento_id ) {
+                    $appt_ids[] = (int) $tr->agendamento_id;
+                }
+            }
+            
+            // Primeiro pré-carrega agendamentos (precisamos dos metadados para obter IDs de pets)
+            $appt_ids = array_unique( $appt_ids );
+            if ( ! empty( $appt_ids ) ) {
+                _prime_post_caches( $appt_ids, true, false );
+            }
+            
+            // Coleta IDs de pets dos metadados de agendamentos
+            $pet_ids = [];
+            foreach ( $appt_ids as $appt_id ) {
+                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $pet_ids[] = (int) $pet_id;
+                }
+            }
+            
+            // Combina clientes e pets em uma única chamada de pré-carregamento
+            $all_post_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+            if ( ! empty( $all_post_ids ) ) {
+                _prime_post_caches( $all_post_ids, false, false );
+            }
+            
             // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas
             // e linhas com status pago ficam esverdeadas, facilitando a identificação rápida.
             echo '<style>
@@ -1217,7 +1349,7 @@ class DPS_Finance_Addon {
             echo '<th>' . esc_html__( 'Ações', 'dps-finance-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $trans as $tr ) {
-                // Cliente
+                // Cliente (já pré-carregado)
                 $client_name = '';
                 if ( $tr->cliente_id ) {
                     $cpost = get_post( $tr->cliente_id );
@@ -1225,7 +1357,7 @@ class DPS_Finance_Addon {
                         $client_name = $cpost->post_title;
                     }
                 }
-                // Pet atendido (se agendamento vinculado)
+                // Pet atendido (se agendamento vinculado) - já pré-carregado
                 $pet_name = '-';
                 if ( $tr->agendamento_id ) {
                     $pet_id = get_post_meta( $tr->agendamento_id, 'appointment_pet_id', true );
@@ -1611,11 +1743,24 @@ class DPS_Finance_Addon {
         $total_receitas  = 0;
         $total_despesas  = 0;
         $total_pendente  = 0;
+        
+        // Dados para gráfico mensal
+        $monthly_data = [];
 
         foreach ( $trans as $tr ) {
             $valor = (float) $tr->valor;
+            $month_key = date( 'Y-m', strtotime( $tr->data ) );
+            
+            if ( ! isset( $monthly_data[ $month_key ] ) ) {
+                $monthly_data[ $month_key ] = [
+                    'receitas' => 0,
+                    'despesas' => 0,
+                ];
+            }
+            
             if ( $tr->tipo === 'receita' ) {
                 $total_receitas += $valor;
+                $monthly_data[ $month_key ]['receitas'] += $valor;
                 if ( $tr->status === 'em_aberto' ) {
                     $remaining = $valor - $this->get_partial_sum( $tr->id );
                     if ( $remaining > 0 ) {
@@ -1624,6 +1769,7 @@ class DPS_Finance_Addon {
                 }
             } else {
                 $total_despesas += $valor;
+                $monthly_data[ $month_key ]['despesas'] += $valor;
             }
         }
 
@@ -1655,6 +1801,222 @@ class DPS_Finance_Addon {
         echo '<span class="dps-finance-card-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $saldo * 100 ) ) ) . '</span>';
         echo '</div>';
 
+        echo '</div>';
+        
+        // Gráfico de Receitas x Despesas Mensais
+        if ( count( $monthly_data ) > 1 ) {
+            $this->render_monthly_chart( $monthly_data );
+        }
+    }
+    
+    /**
+     * Renderiza gráfico de receitas e despesas mensais.
+     *
+     * @since 1.3.0
+     * @param array $monthly_data Dados agrupados por mês.
+     */
+    private function render_monthly_chart( $monthly_data ) {
+        // Ordena por mês
+        ksort( $monthly_data );
+        
+        // Prepara dados para Chart.js
+        $labels    = [];
+        $receitas  = [];
+        $despesas  = [];
+        
+        $month_names = [
+            '01' => __( 'Jan', 'dps-finance-addon' ),
+            '02' => __( 'Fev', 'dps-finance-addon' ),
+            '03' => __( 'Mar', 'dps-finance-addon' ),
+            '04' => __( 'Abr', 'dps-finance-addon' ),
+            '05' => __( 'Mai', 'dps-finance-addon' ),
+            '06' => __( 'Jun', 'dps-finance-addon' ),
+            '07' => __( 'Jul', 'dps-finance-addon' ),
+            '08' => __( 'Ago', 'dps-finance-addon' ),
+            '09' => __( 'Set', 'dps-finance-addon' ),
+            '10' => __( 'Out', 'dps-finance-addon' ),
+            '11' => __( 'Nov', 'dps-finance-addon' ),
+            '12' => __( 'Dez', 'dps-finance-addon' ),
+        ];
+        
+        // Limita aos últimos N meses para melhor visualização (configurável via constante)
+        $chart_months = defined( 'DPS_FINANCE_CHART_MONTHS' ) ? DPS_FINANCE_CHART_MONTHS : 6;
+        $monthly_data = array_slice( $monthly_data, -$chart_months, $chart_months, true );
+        
+        foreach ( $monthly_data as $month_key => $data ) {
+            $parts = explode( '-', $month_key );
+            $month_name = isset( $month_names[ $parts[1] ] ) ? $month_names[ $parts[1] ] : $parts[1];
+            $labels[]   = $month_name . '/' . substr( $parts[0], 2 );
+            $receitas[] = round( $data['receitas'], 2 );
+            $despesas[] = round( $data['despesas'], 2 );
+        }
+        
+        $chart_id = 'dps-finance-chart-' . wp_rand( 1000, 9999 );
+        
+        echo '<div class="dps-finance-chart-container">';
+        echo '<h4>' . esc_html__( 'Receitas x Despesas Mensais', 'dps-finance-addon' ) . '</h4>';
+        echo '<div class="dps-finance-chart-wrapper">';
+        echo '<canvas id="' . esc_attr( $chart_id ) . '" width="400" height="200"></canvas>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Script para inicializar o gráfico
+        ?>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded');
+                return;
+            }
+            
+            var ctx = document.getElementById('<?php echo esc_js( $chart_id ); ?>');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: <?php echo wp_json_encode( $labels ); ?>,
+                    datasets: [
+                        {
+                            label: '<?php echo esc_js( __( 'Receitas', 'dps-finance-addon' ) ); ?>',
+                            data: <?php echo wp_json_encode( $receitas ); ?>,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: '<?php echo esc_js( __( 'Despesas', 'dps-finance-addon' ) ); ?>',
+                            data: <?php echo wp_json_encode( $despesas ); ?>,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var value = context.parsed.y;
+                                    return context.dataset.label + ': R$ ' + value.toLocaleString('pt-BR', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        </script>
+        <?php
+    }
+    
+    /**
+     * Renderiza relatório DRE simplificado.
+     *
+     * @since 1.3.0
+     * @param array $trans Array de transações.
+     */
+    private function render_dre_report( $trans ) {
+        if ( empty( $trans ) ) {
+            return;
+        }
+        
+        // Agrupa por categoria e tipo
+        $receitas_por_cat = [];
+        $despesas_por_cat = [];
+        $total_receitas   = 0;
+        $total_despesas   = 0;
+        
+        foreach ( $trans as $tr ) {
+            $valor    = (float) $tr->valor;
+            $categoria = $tr->categoria ?: __( 'Sem categoria', 'dps-finance-addon' );
+            
+            if ( $tr->tipo === 'receita' ) {
+                if ( ! isset( $receitas_por_cat[ $categoria ] ) ) {
+                    $receitas_por_cat[ $categoria ] = 0;
+                }
+                $receitas_por_cat[ $categoria ] += $valor;
+                $total_receitas += $valor;
+            } else {
+                if ( ! isset( $despesas_por_cat[ $categoria ] ) ) {
+                    $despesas_por_cat[ $categoria ] = 0;
+                }
+                $despesas_por_cat[ $categoria ] += $valor;
+                $total_despesas += $valor;
+            }
+        }
+        
+        $resultado = $total_receitas - $total_despesas;
+        
+        // Ordena por valor
+        arsort( $receitas_por_cat );
+        arsort( $despesas_por_cat );
+        
+        echo '<div class="dps-finance-dre">';
+        echo '<h4>' . esc_html__( 'Demonstrativo de Resultado (DRE Simplificado)', 'dps-finance-addon' ) . '</h4>';
+        echo '<table class="dps-table dps-dre-table">';
+        
+        // Receitas
+        echo '<thead><tr><th colspan="2" class="dps-dre-header dps-dre-receitas">' . esc_html__( 'RECEITAS', 'dps-finance-addon' ) . '</th></tr></thead>';
+        echo '<tbody>';
+        foreach ( $receitas_por_cat as $cat => $valor ) {
+            echo '<tr>';
+            echo '<td>' . esc_html( $cat ) . '</td>';
+            echo '<td class="dps-dre-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ) . '</td>';
+            echo '</tr>';
+        }
+        echo '<tr class="dps-dre-subtotal">';
+        echo '<td><strong>' . esc_html__( 'Total Receitas', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $total_receitas * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tbody>';
+        
+        // Despesas
+        echo '<thead><tr><th colspan="2" class="dps-dre-header dps-dre-despesas">' . esc_html__( 'DESPESAS', 'dps-finance-addon' ) . '</th></tr></thead>';
+        echo '<tbody>';
+        foreach ( $despesas_por_cat as $cat => $valor ) {
+            echo '<tr>';
+            echo '<td>' . esc_html( $cat ) . '</td>';
+            echo '<td class="dps-dre-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ) . '</td>';
+            echo '</tr>';
+        }
+        echo '<tr class="dps-dre-subtotal">';
+        echo '<td><strong>' . esc_html__( 'Total Despesas', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $total_despesas * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tbody>';
+        
+        // Resultado
+        $resultado_class = $resultado >= 0 ? 'dps-dre-positivo' : 'dps-dre-negativo';
+        echo '<tfoot>';
+        echo '<tr class="dps-dre-resultado ' . esc_attr( $resultado_class ) . '">';
+        echo '<td><strong>' . esc_html__( 'RESULTADO DO PERÍODO', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $resultado * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tfoot>';
+        
+        echo '</table>';
         echo '</div>';
     }
 
