@@ -59,6 +59,11 @@ if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
     define( 'DPS_FINANCE_VERSION', '1.3.0' );
 }
 
+// Constante para limite de meses no gráfico financeiro
+if ( ! defined( 'DPS_FINANCE_CHART_MONTHS' ) ) {
+    define( 'DPS_FINANCE_CHART_MONTHS', 6 );
+}
+
 // Carrega dependências
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-revenue-query.php';
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-api.php';
@@ -1289,7 +1294,7 @@ class DPS_Finance_Addon {
         echo '</form>';
         if ( $trans ) {
             // PRÉ-CARREGA POSTS PARA PERFORMANCE
-            // Coleta IDs de clientes, pets e agendamentos para pré-carregar em uma única query
+            // Coleta IDs de clientes, pets e agendamentos para pré-carregar
             $client_ids = [];
             $appt_ids   = [];
             foreach ( $trans as $tr ) {
@@ -1301,27 +1306,25 @@ class DPS_Finance_Addon {
                 }
             }
             
-            // Pré-carrega posts de clientes
-            if ( ! empty( $client_ids ) ) {
-                _prime_post_caches( array_unique( $client_ids ), false, false );
+            // Primeiro pré-carrega agendamentos (precisamos dos metadados para obter IDs de pets)
+            $appt_ids = array_unique( $appt_ids );
+            if ( ! empty( $appt_ids ) ) {
+                _prime_post_caches( $appt_ids, true, false );
             }
             
-            // Pré-carrega posts de agendamentos e obtém IDs de pets
+            // Coleta IDs de pets dos metadados de agendamentos
             $pet_ids = [];
-            if ( ! empty( $appt_ids ) ) {
-                _prime_post_caches( array_unique( $appt_ids ), true, false );
-                // Agora coleta IDs de pets dos metadados
-                foreach ( $appt_ids as $appt_id ) {
-                    $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-                    if ( $pet_id ) {
-                        $pet_ids[] = (int) $pet_id;
-                    }
+            foreach ( $appt_ids as $appt_id ) {
+                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $pet_ids[] = (int) $pet_id;
                 }
             }
             
-            // Pré-carrega posts de pets
-            if ( ! empty( $pet_ids ) ) {
-                _prime_post_caches( array_unique( $pet_ids ), false, false );
+            // Combina clientes e pets em uma única chamada de pré-carregamento
+            $all_post_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+            if ( ! empty( $all_post_ids ) ) {
+                _prime_post_caches( $all_post_ids, false, false );
             }
             
             // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas
@@ -1836,8 +1839,9 @@ class DPS_Finance_Addon {
             '12' => __( 'Dez', 'dps-finance-addon' ),
         ];
         
-        // Limita aos últimos 6 meses para melhor visualização
-        $monthly_data = array_slice( $monthly_data, -6, 6, true );
+        // Limita aos últimos N meses para melhor visualização (configurável via constante)
+        $chart_months = defined( 'DPS_FINANCE_CHART_MONTHS' ) ? DPS_FINANCE_CHART_MONTHS : 6;
+        $monthly_data = array_slice( $monthly_data, -$chart_months, $chart_months, true );
         
         foreach ( $monthly_data as $month_key => $data ) {
             $parts = explode( '-', $month_key );

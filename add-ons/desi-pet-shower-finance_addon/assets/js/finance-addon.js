@@ -25,9 +25,30 @@
      */
     function parseBrazilianCurrency(value) {
         if (!value) return 0;
-        // Remove thousand separators and replace decimal comma with dot
-        var cleaned = value.replace(/\./g, '').replace(',', '.');
-        return parseFloat(cleaned) || 0;
+        
+        var str = String(value).trim();
+        
+        // Remove currency symbol and extra spaces
+        str = str.replace(/R\$\s*/g, '').trim();
+        
+        // Brazilian format: 1.234,56 (dot as thousand separator, comma as decimal)
+        // International format: 1234.56 (dot as decimal)
+        
+        // Check if it's Brazilian format (has comma as decimal separator)
+        if (str.indexOf(',') !== -1) {
+            // Brazilian format: remove thousand separators (dots) and replace decimal comma with dot
+            str = str.replace(/\./g, '').replace(',', '.');
+        } else if (str.indexOf('.') !== -1) {
+            // Check if dot is thousand separator (more than 3 digits after) or decimal
+            var parts = str.split('.');
+            if (parts.length === 2 && parts[1].length === 3 && parts[0].length > 0) {
+                // Likely thousand separator (e.g., "1.234"), remove it
+                str = str.replace(/\./g, '');
+            }
+            // Otherwise keep as is (e.g., "1.5" stays "1.5")
+        }
+        
+        return parseFloat(str) || 0;
     }
 
     /**
