@@ -170,6 +170,14 @@ class DPS_Debugging_Log_Viewer {
             return [];
         }
 
+        // Para arquivos muito grandes, lê apenas as últimas N linhas de forma eficiente
+        $file_size = filesize( $this->log_path );
+        
+        // Se o arquivo for maior que 5MB, usa abordagem de tail
+        if ( $file_size > 5 * 1024 * 1024 ) {
+            return $this->tail_log_file( $this->max_lines );
+        }
+
         $lines = file( $this->log_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
         if ( false === $lines ) {
             return [];
@@ -179,6 +187,47 @@ class DPS_Debugging_Log_Viewer {
         if ( count( $lines ) > $this->max_lines ) {
             $lines = array_slice( $lines, -$this->max_lines );
         }
+
+        return array_map( 'rtrim', $lines );
+    }
+
+    /**
+     * Lê as últimas N linhas de um arquivo grande de forma eficiente.
+     *
+     * @param int $num_lines Número de linhas a retornar.
+     * @return array
+     */
+    private function tail_log_file( $num_lines ) {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+        $file = fopen( $this->log_path, 'r' );
+        if ( ! $file ) {
+            return [];
+        }
+
+        $lines = [];
+        $buffer = '';
+        $chunk_size = 4096;
+        
+        // Vai para o final do arquivo
+        fseek( $file, 0, SEEK_END );
+        $pos = ftell( $file );
+
+        // Lê de trás para frente até ter linhas suficientes
+        while ( $pos > 0 && count( $lines ) < $num_lines ) {
+            $to_read = min( $chunk_size, $pos );
+            $pos -= $to_read;
+            fseek( $file, $pos );
+            $buffer = fread( $file, $to_read ) . $buffer;
+            
+            $lines = explode( "\n", $buffer );
+        }
+
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+        fclose( $file );
+
+        // Remove linhas vazias e retorna as últimas N
+        $lines = array_filter( $lines, 'strlen' );
+        $lines = array_slice( $lines, -$num_lines );
 
         return array_map( 'rtrim', $lines );
     }
@@ -348,22 +397,67 @@ class DPS_Debugging_Log_Viewer {
      * @return string Entrada com JSON formatado.
      */
     private function format_json( $entry ) {
-        $pattern = '/\{(?:[^{}]|(?R))*\}/x';
+        // Encontra possíveis blocos JSON usando um padrão simples
+        // Depois valida cada um com json_decode
+        $potential_json = $this->extract_json_candidates( $entry );
 
-        if ( preg_match_all( $pattern, $entry, $matches ) ) {
-            foreach ( $matches[0] as $json_string ) {
-                $decoded = json_decode( $json_string, true );
-                if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
-                    $pretty = wp_json_encode( $decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-                    if ( $pretty ) {
-                        $formatted = '<pre class="dps-debugging-log-json">' . esc_html( $pretty ) . '</pre>';
-                        $entry = str_replace( $json_string, $formatted, $entry );
-                    }
+        foreach ( $potential_json as $json_string ) {
+            // Valida se é realmente JSON válido
+            $decoded = json_decode( $json_string, true );
+            if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
+                $pretty = wp_json_encode( $decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+                if ( $pretty ) {
+                    $formatted = '<pre class="dps-debugging-log-json">' . esc_html( $pretty ) . '</pre>';
+                    $entry = str_replace( $json_string, $formatted, $entry );
                 }
             }
         }
 
         return $entry;
+    }
+
+    /**
+     * Extrai candidatos a JSON de uma string.
+     *
+     * @param string $text Texto a analisar.
+     * @return array Lista de strings que podem ser JSON.
+     */
+    private function extract_json_candidates( $text ) {
+        $candidates = [];
+        $length = strlen( $text );
+        $i = 0;
+
+        while ( $i < $length ) {
+            // Procura por início de objeto JSON
+            if ( '{' === $text[ $i ] ) {
+                $start = $i;
+                $depth = 1;
+                $i++;
+
+                // Percorre até encontrar o fechamento correspondente
+                while ( $i < $length && $depth > 0 ) {
+                    if ( '{' === $text[ $i ] ) {
+                        $depth++;
+                    } elseif ( '}' === $text[ $i ] ) {
+                        $depth--;
+                    }
+                    $i++;
+                }
+
+                // Se fechou corretamente, adiciona como candidato
+                if ( 0 === $depth ) {
+                    $candidate = substr( $text, $start, $i - $start );
+                    // Só considera se tiver pelo menos 10 caracteres (JSON mínimo válido)
+                    if ( strlen( $candidate ) >= 10 ) {
+                        $candidates[] = $candidate;
+                    }
+                }
+            } else {
+                $i++;
+            }
+        }
+
+        return $candidates;
     }
 
     /**

@@ -60,15 +60,21 @@ function dps_debugging_init() {
  * Exibe aviso se o plugin base não estiver ativo.
  */
 function dps_debugging_missing_base_notice() {
+    $allowed_tags = [
+        'strong' => [],
+    ];
     ?>
     <div class="notice notice-error">
         <p>
             <?php
-            printf(
-                /* translators: %s: Plugin base name */
-                esc_html__( 'O add-on %1$s requer o plugin %2$s para funcionar.', 'dps-debugging-addon' ),
-                '<strong>Desi Pet Shower – Debugging</strong>',
-                '<strong>Desi Pet Shower – Base</strong>'
+            echo wp_kses(
+                sprintf(
+                    /* translators: %1$s: Debugging add-on name, %2$s: Base plugin name */
+                    __( 'O add-on %1$s requer o plugin %2$s para funcionar.', 'dps-debugging-addon' ),
+                    '<strong>Desi Pet Shower – Debugging</strong>',
+                    '<strong>Desi Pet Shower – Base</strong>'
+                ),
+                $allowed_tags
             );
             ?>
         </p>
@@ -313,8 +319,15 @@ class DPS_Debugging_Addon {
 
         $new_options = [];
 
+        // Sanitiza os valores do POST antes de processar
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitização feita no loop
+        $posted_debugging = isset( $_POST['dps_debugging'] ) && is_array( $_POST['dps_debugging'] )
+            ? array_map( 'sanitize_text_field', wp_unslash( $_POST['dps_debugging'] ) )
+            : [];
+
         foreach ( $this->debug_constants as $constant ) {
-            $new_options[ $constant ] = isset( $_POST['dps_debugging'][ $constant ] ) && '1' === $_POST['dps_debugging'][ $constant ];
+            // Verifica se a chave (que é uma constante conhecida) existe e tem valor '1'
+            $new_options[ $constant ] = isset( $posted_debugging[ $constant ] ) && '1' === $posted_debugging[ $constant ];
         }
 
         // Atualiza constantes no wp-config.php

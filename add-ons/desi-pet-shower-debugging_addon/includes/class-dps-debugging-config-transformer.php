@@ -68,8 +68,8 @@ class DPS_Debugging_Config_Transformer {
             return null;
         }
 
-        // Padrão para encontrar define('CONSTANT', value);
-        $pattern = '/define\s*\(\s*[\'"]' . preg_quote( $constant, '/' ) . '[\'"]\s*,\s*(.+?)\s*\)\s*;/i';
+        // Padrão para encontrar define('CONSTANT', value); com captura do valor
+        $pattern = $this->build_define_pattern( $constant, true );
 
         if ( preg_match( $pattern, $contents, $matches ) ) {
             $value = trim( $matches[1] );
@@ -102,6 +102,39 @@ class DPS_Debugging_Config_Transformer {
     }
 
     /**
+     * Constrói o padrão regex para encontrar uma constante define().
+     *
+     * @param string $constant      Nome da constante.
+     * @param bool   $capture_value Se true, captura o valor em um grupo.
+     * @param bool   $include_newline Se true, inclui quebra de linha opcional no final.
+     * @return string Padrão regex.
+     */
+    private function build_define_pattern( $constant, $capture_value = false, $include_newline = false ) {
+        $escaped_constant = preg_quote( $constant, '/' );
+        
+        // Padrão base para define
+        $pattern = '/define\s*\(\s*[\'"]' . $escaped_constant . '[\'"]\s*,\s*';
+        
+        if ( $capture_value ) {
+            // Captura o valor - usa grupo para valores simples (true, false, números, strings)
+            $pattern .= '([^)]+)';
+        } else {
+            // Não captura, apenas match
+            $pattern .= '[^)]+';
+        }
+        
+        $pattern .= '\s*\)\s*;';
+        
+        if ( $include_newline ) {
+            $pattern .= '\s*\n?';
+        }
+        
+        $pattern .= '/i';
+        
+        return $pattern;
+    }
+
+    /**
      * Atualiza ou adiciona uma constante no wp-config.php.
      *
      * @param string $constant Nome da constante.
@@ -124,7 +157,7 @@ class DPS_Debugging_Config_Transformer {
         $new_define      = "define( '" . $constant . "', " . $formatted_value . " );";
 
         // Padrão para encontrar define existente
-        $pattern = '/define\s*\(\s*[\'"]' . preg_quote( $constant, '/' ) . '[\'"]\s*,\s*.+?\s*\)\s*;/i';
+        $pattern = $this->build_define_pattern( $constant );
 
         if ( preg_match( $pattern, $contents ) ) {
             // Atualiza constante existente
@@ -160,7 +193,7 @@ class DPS_Debugging_Config_Transformer {
         }
 
         // Padrão para encontrar define existente (incluindo linha em branco após)
-        $pattern = '/define\s*\(\s*[\'"]' . preg_quote( $constant, '/' ) . '[\'"]\s*,\s*.+?\s*\)\s*;\s*\n?/i';
+        $pattern = $this->build_define_pattern( $constant, false, true );
 
         if ( ! preg_match( $pattern, $contents ) ) {
             return true; // Constante não existe, considera sucesso
