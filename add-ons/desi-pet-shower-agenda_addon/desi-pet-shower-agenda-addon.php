@@ -486,26 +486,26 @@ class DPS_Agenda_Addon {
         if ( $show_all ) {
             echo '<input type="hidden" name="show_all" value="1">';
         }
-        // Cliente select
+        // Cliente select - FASE 1: Adicionado aria-label para acessibilidade
         echo '<label>' . esc_html__( 'Cliente', 'dps-agenda-addon' );
-        echo '<select name="filter_client">';
+        echo '<select name="filter_client" aria-label="' . esc_attr__( 'Filtrar por cliente', 'dps-agenda-addon' ) . '">';
         echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
         foreach ( $clients as $cl ) {
             $selected = ( $filter_client === $cl->ID ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $cl->ID ) . '" ' . $selected . '>' . esc_html( $cl->post_title ) . '</option>';
         }
         echo '</select></label>';
-        // Status select
+        // Status select - FASE 1: Adicionado aria-label para acessibilidade
         echo '<label>' . esc_html__( 'Status', 'dps-agenda-addon' );
-        echo '<select name="filter_status">';
+        echo '<select name="filter_status" aria-label="' . esc_attr__( 'Filtrar por status do agendamento', 'dps-agenda-addon' ) . '">';
         foreach ( $status_options as $val => $label ) {
             $selected = ( $filter_status === $val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select></label>';
-        // Serviço select
+        // Serviço select - FASE 1: Adicionado aria-label para acessibilidade
         echo '<label>' . esc_html__( 'Serviço', 'dps-agenda-addon' );
-        echo '<select name="filter_service">';
+        echo '<select name="filter_service" aria-label="' . esc_attr__( 'Filtrar por serviço', 'dps-agenda-addon' ) . '">';
         echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
         foreach ( $services as $srv ) {
             $selected = ( $filter_service === $srv->ID ) ? 'selected' : '';
@@ -686,6 +686,29 @@ class DPS_Agenda_Addon {
                 if ( empty( $apts ) ) {
                     return;
                 }
+                
+                // FASE 1 PERFORMANCE: Pre-carregar posts relacionados (clientes e pets)
+                // Coleta IDs únicos de clientes e pets para carregar em batch
+                $client_ids = [];
+                $pet_ids    = [];
+                foreach ( $apts as $appt ) {
+                    $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                    $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                    if ( $cid ) {
+                        $client_ids[] = (int) $cid;
+                    }
+                    if ( $pid ) {
+                        $pet_ids[] = (int) $pid;
+                    }
+                }
+                // Carrega todos os posts de uma só vez (reduz queries N+1)
+                $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+                if ( ! empty( $related_ids ) ) {
+                    _prime_post_caches( $related_ids, false, false );
+                    // Também pré-carrega metadados dos posts relacionados (pet_aggressive, client_address, etc.)
+                    update_meta_cache( 'post', $related_ids );
+                }
+                
                 usort(
                     $apts,
                     function( $a, $b ) {
@@ -784,7 +807,8 @@ class DPS_Agenda_Addon {
                         }
                     }
                     if ( $can_edit ) {
-                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '">';
+                        // FASE 1: Adicionado aria-label para acessibilidade
+                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '" aria-label="' . esc_attr__( 'Alterar status do agendamento', 'dps-agenda-addon' ) . '">';
                         foreach ( $statuses as $value => $label ) {
                             echo '<option value="' . esc_attr( $value ) . '"' . selected( $status, $value, false ) . '>' . esc_html( $label ) . '</option>';
                         }

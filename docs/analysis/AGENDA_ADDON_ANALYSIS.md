@@ -552,14 +552,19 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 
 ## 12. Plano de Implementação
 
-### 12.1 Fase 1: Melhorias Imediatas (4-8h)
+### 12.1 Fase 1: Melhorias Imediatas (4-8h) ✅ IMPLEMENTADA
 
-| Item | Esforço | Prioridade |
-|------|---------|------------|
-| Pre-carregamento de posts relacionados | 2h | 🔴 Alta |
-| ARIA labels em selects | 1h | 🟡 Média |
-| Teste de cores para daltonismo | 1h | 🟢 Baixa |
-| Criar arquivo .pot | 1h | 🟢 Baixa |
+| Item | Esforço | Prioridade | Status |
+|------|---------|------------|--------|
+| Pre-carregamento de posts relacionados | 2h | 🔴 Alta | ✅ Implementado |
+| ARIA labels em selects | 1h | 🟡 Média | ✅ Implementado |
+| Teste de cores para daltonismo | 1h | 🟢 Baixa | ⏳ Pendente (manual) |
+| Criar arquivo .pot | 1h | 🟢 Baixa | ✅ Implementado |
+
+**Detalhes da implementação (2025-12-03):**
+- **Pre-carregamento**: Adicionado `_prime_post_caches()` e `update_meta_cache()` antes do loop de renderização, coletando IDs de clientes e pets para carregar em batch.
+- **ARIA labels**: Adicionados `aria-label` nos selects de filtros (cliente, status, serviço) e no select de alteração de status na tabela.
+- **Arquivo .pot**: Criado `languages/dps-agenda-addon.pot` com ~70 strings traduzíveis.
 
 ### 12.2 Fase 2: Funcionalidades Novas (12-20h)
 
