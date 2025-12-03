@@ -3,10 +3,38 @@
  * Fornece navegação por abas e filtragem dinâmica de pets em agendamentos.
  */
 (function($){
+  // Constantes de configuração
+  var DPS_MOBILE_BREAKPOINT = 768; // Deve corresponder ao breakpoint CSS em dps-base.css
+  
   $(document).ready(function(){
     // Controle das abas
+    var $nav = $('.dps-nav');
     var $tabs = $('.dps-nav .dps-tab-link');
     var $sections = $('.dps-section');
+    var $navContainer = $nav.parent('.dps-nav-container');
+    var $mobileToggle = $('.dps-nav-mobile-toggle');
+    
+    // Função para atualizar o texto do toggle mobile com a aba ativa
+    function updateMobileToggleText() {
+      if ($mobileToggle.length) {
+        var $activeTab = $tabs.filter('.active');
+        if ($activeTab.length) {
+          $mobileToggle.text($activeTab.text());
+        }
+      }
+    }
+    
+    // Função para fechar o menu mobile
+    function closeMobileNav() {
+      $navContainer.removeClass('is-open');
+      $mobileToggle.removeClass('is-open').attr('aria-expanded', 'false');
+    }
+    
+    // Função para verificar se está em modo mobile
+    function isMobileView() {
+      return window.matchMedia('(max-width: ' + DPS_MOBILE_BREAKPOINT + 'px)').matches;
+    }
+    
     // Determina tab inicial via parâmetro de URL (tab) ou pela primeira aba padrão
     var urlParams = new URLSearchParams(window.location.search);
     var initialTab = urlParams.get('tab');
@@ -31,6 +59,23 @@
       $first.addClass('active');
       $('#dps-section-' + $first.data('tab')).addClass('active');
     }
+    
+    // Atualizar texto do toggle mobile na inicialização
+    updateMobileToggleText();
+    
+    // Toggle do menu mobile
+    $mobileToggle.on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var isOpen = $navContainer.hasClass('is-open');
+      if (isOpen) {
+        closeMobileNav();
+      } else {
+        $navContainer.addClass('is-open');
+        $mobileToggle.addClass('is-open').attr('aria-expanded', 'true');
+      }
+    });
+    
     // Clique das abas
     $tabs.on('click', function(e){
       e.preventDefault();
@@ -39,6 +84,39 @@
       $(this).addClass('active');
       $sections.removeClass('active');
       $('#dps-section-' + tab).addClass('active');
+      
+      // Fechar menu mobile e atualizar texto do toggle
+      if (isMobileView()) {
+        closeMobileNav();
+        updateMobileToggleText();
+      }
+    });
+    
+    // Fechar menu ao clicar fora
+    $(document).on('click', function(e) {
+      if (isMobileView() && $navContainer.hasClass('is-open')) {
+        if (!$(e.target).closest('.dps-nav-container').length) {
+          closeMobileNav();
+        }
+      }
+    });
+    
+    // Fechar menu ao pressionar Escape (suporte cross-browser)
+    $(document).on('keydown', function(e) {
+      var isEscape = (e.key === 'Escape' || e.keyCode === 27);
+      if (isEscape && $navContainer.hasClass('is-open')) {
+        closeMobileNav();
+        $mobileToggle.focus();
+      }
+    });
+    
+    // Ajustar ao redimensionar a janela
+    $(window).on('resize', function() {
+      if (!isMobileView()) {
+        // Remover classes mobile quando voltar para desktop
+        $navContainer.removeClass('is-open');
+        $mobileToggle.removeClass('is-open').attr('aria-expanded', 'false');
+      }
     });
     // Filtro de busca nas tabelas
     $('.dps-search').on('input', function(){
