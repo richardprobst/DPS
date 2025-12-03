@@ -485,6 +485,8 @@
         border-radius: 0 0 4px 4px;
         background: #ffffff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        /* 300px permite exibir ~6-7 itens de 44px cada (padrão de altura de toque em mobile)
+           Se houver mais itens, scroll vertical é habilitado */
         max-height: 300px;
         overflow-y: auto;
     }

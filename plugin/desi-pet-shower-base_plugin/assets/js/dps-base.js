@@ -3,6 +3,9 @@
  * Fornece navegação por abas e filtragem dinâmica de pets em agendamentos.
  */
 (function($){
+  // Constantes de configuração
+  var DPS_MOBILE_BREAKPOINT = 768; // Deve corresponder ao breakpoint CSS em dps-base.css
+  
   $(document).ready(function(){
     // Controle das abas
     var $nav = $('.dps-nav');
@@ -29,7 +32,7 @@
     
     // Função para verificar se está em modo mobile
     function isMobileView() {
-      return window.matchMedia('(max-width: 768px)').matches;
+      return window.matchMedia('(max-width: ' + DPS_MOBILE_BREAKPOINT + 'px)').matches;
     }
     
     // Determina tab inicial via parâmetro de URL (tab) ou pela primeira aba padrão
@@ -98,9 +101,10 @@
       }
     });
     
-    // Fechar menu ao pressionar Escape
+    // Fechar menu ao pressionar Escape (suporte cross-browser)
     $(document).on('keydown', function(e) {
-      if (e.key === 'Escape' && $navContainer.hasClass('is-open')) {
+      var isEscape = (e.key === 'Escape' || e.keyCode === 27);
+      if (isEscape && $navContainer.hasClass('is-open')) {
         closeMobileNav();
         $mobileToggle.focus();
       }
