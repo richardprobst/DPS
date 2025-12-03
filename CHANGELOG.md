@@ -79,6 +79,31 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Debugging Add-on (v1.0.0)**: Novo add-on para gerenciamento de debug do WordPress
+  - **Funcionalidades principais**:
+    - Configuração de constantes de debug (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, SAVEQUERIES, WP_DISABLE_FATAL_ERROR_HANDLER) diretamente via interface administrativa
+    - Modificação segura do wp-config.php com backup de estado original
+    - Visualizador de debug.log com formatação inteligente
+    - Destaque visual por tipo de erro (Fatal, Warning, Notice, Deprecated, Parse, DB Error)
+    - Formatação de stack traces e pretty-print de JSON
+    - Função de limpeza (purge) do arquivo de log
+    - Menu na admin bar com acesso rápido e status das constantes
+    - Contador de entradas de log na admin bar
+  - **Estrutura modular**:
+    - Nova pasta `includes/` com classes especializadas:
+      - `class-dps-debugging-config-transformer.php` - leitura/escrita do wp-config.php
+      - `class-dps-debugging-log-viewer.php` - visualização e parsing do debug.log
+      - `class-dps-debugging-admin-bar.php` - integração com admin bar
+    - Nova pasta `assets/css/` com `debugging-admin.css` (tema escuro para logs)
+  - **Segurança**:
+    - Nonces em todas as ações
+    - Verificação de capability `manage_options`
+    - Validação de permissões de arquivo antes de modificar
+    - Confirmação JavaScript antes de purge
+  - **Filtros expostos**:
+    - `dps_debugging_config_path` - customizar caminho do wp-config.php
+    - `dps_debugging_admin_bar_cap` - customizar capability para admin bar
+  - **Impacto**: Facilita debugging durante desenvolvimento sem necessidade de plugins externos
 - **Stats Add-on (v1.1.0)**: Refatoração completa com novas funcionalidades
   - **Estrutura modular**:
     - Nova pasta `includes/` com `class-dps-stats-api.php` (API pública)
