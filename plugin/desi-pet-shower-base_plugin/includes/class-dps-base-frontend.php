@@ -613,16 +613,20 @@ class DPS_Base_Frontend {
         ob_start();
         echo '<div class="dps-base-wrapper">';
         echo '<h1 class="dps-page-title">' . esc_html__( 'Painel de Gestão DPS', 'desi-pet-shower' ) . '</h1>';
-        echo '<ul class="dps-nav">';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="agendas">' . esc_html__( 'Agendamentos', 'desi-pet-shower' ) . '</a></li>';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="clientes">' . esc_html__( 'Clientes', 'desi-pet-shower' ) . '</a></li>';
-        echo '<li><a href="#" class="dps-tab-link" data-tab="pets">' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</a></li>';
+        // Container de navegação com toggle mobile
+        echo '<nav class="dps-nav-container" aria-label="' . esc_attr__( 'Navegação do painel', 'desi-pet-shower' ) . '">';
+        echo '<button type="button" class="dps-nav-mobile-toggle" aria-expanded="false" aria-controls="dps-main-nav">' . esc_html__( 'Selecionar seção', 'desi-pet-shower' ) . '</button>';
+        echo '<ul class="dps-nav" id="dps-main-nav" role="tablist">';
+        echo '<li role="presentation"><a href="#" class="dps-tab-link" data-tab="agendas" role="tab">' . esc_html__( 'Agendamentos', 'desi-pet-shower' ) . '</a></li>';
+        echo '<li role="presentation"><a href="#" class="dps-tab-link" data-tab="clientes" role="tab">' . esc_html__( 'Clientes', 'desi-pet-shower' ) . '</a></li>';
+        echo '<li role="presentation"><a href="#" class="dps-tab-link" data-tab="pets" role="tab">' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</a></li>';
         // Permite que add-ons adicionem abas após os módulos principais
         do_action( 'dps_base_nav_tabs_after_pets', false );
-        echo '<li><a href="#" class="dps-tab-link" data-tab="historico">' . esc_html__( 'Histórico', 'desi-pet-shower' ) . '</a></li>';
+        echo '<li role="presentation"><a href="#" class="dps-tab-link" data-tab="historico" role="tab">' . esc_html__( 'Histórico', 'desi-pet-shower' ) . '</a></li>';
         // Espaço para add-ons exibirem abas após o histórico
         do_action( 'dps_base_nav_tabs_after_history', false );
         echo '</ul>';
+        echo '</nav>';
         // Seções principais na nova ordem
         echo self::section_agendas( false );
         echo self::section_clients();
