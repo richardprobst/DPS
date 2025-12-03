@@ -70,6 +70,7 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
                         $client     = $client_id ? get_post( $client_id ) : null;
                         $pet        = $pet_id ? get_post( $pet_id ) : null;
                         $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
+                        $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
                         $delete_url = wp_nonce_url(
                             add_query_arg(
                                 [
@@ -114,9 +115,11 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
                                     ?>
                                 </td>
                                 <td>
-                                    <a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html__( 'Editar', 'desi-pet-shower' ); ?></a>
+                                    <a href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_attr__( 'Editar', 'desi-pet-shower' ); ?>"><?php echo esc_html__( 'Editar', 'desi-pet-shower' ); ?></a>
                                     |
-                                    <a href="<?php echo esc_url( $delete_url ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ); ?>');">
+                                    <a href="<?php echo esc_url( $duplicate_url ); ?>" title="<?php echo esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ); ?>"><?php echo esc_html__( 'Duplicar', 'desi-pet-shower' ); ?></a>
+                                    |
+                                    <a href="<?php echo esc_url( $delete_url ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ); ?>');" title="<?php echo esc_attr__( 'Excluir', 'desi-pet-shower' ); ?>">
                                         <?php echo esc_html__( 'Excluir', 'desi-pet-shower' ); ?>
                                     </a>
                                 </td>
@@ -130,8 +133,12 @@ $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) 
     <?php endforeach; ?>
 
     <?php if ( ! $has_items ) : ?>
-        <p class="dps-appointments-empty">
-            <?php echo esc_html__( 'Nenhum agendamento encontrado.', 'desi-pet-shower' ); ?>
-        </p>
+        <div class="dps-empty-state">
+            <span class="dps-empty-state__icon">📅</span>
+            <h4 class="dps-empty-state__title"><?php echo esc_html__( 'Nenhum agendamento pendente', 'desi-pet-shower' ); ?></h4>
+            <p class="dps-empty-state__description">
+                <?php echo esc_html__( 'Todos os atendimentos foram finalizados ou não há agendamentos cadastrados. Use o formulário acima para criar um novo agendamento.', 'desi-pet-shower' ); ?>
+            </p>
+        </div>
     <?php endif; ?>
 </div>

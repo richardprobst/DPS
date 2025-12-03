@@ -93,6 +93,14 @@ final class DPS_Client_Portal {
         
         // Processa salvamento das configurações do portal
         add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
+        
+        // AJAX handlers para o chat do portal
+        add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
+        add_action( 'wp_ajax_nopriv_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
+        add_action( 'wp_ajax_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
+        add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
+        add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
     }
 
     /**
@@ -972,6 +980,13 @@ final class DPS_Client_Portal {
             return ob_get_clean();
         }
         
+        // Localiza script com dados do chat
+        wp_localize_script( 'dps-client-portal', 'dpsPortalChat', [
+            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'dps_portal_chat' ),
+            'clientId' => $client_id,
+        ] );
+        
         ob_start();
         // Filtro de mensagens de retorno
         if ( isset( $_GET['portal_msg'] ) ) {
@@ -994,7 +1009,7 @@ final class DPS_Client_Portal {
         
         // Header com título e botão de logout
         echo '<div class="dps-portal-header">';
-        echo '<h1 class="dps-portal-title">' . esc_html__( 'Bem-vindo ao Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
         
         // Botão de logout
         $session_manager = DPS_Portal_Session_Manager::get_instance();
@@ -1002,34 +1017,162 @@ final class DPS_Client_Portal {
         echo '<a href="' . esc_url( $logout_url ) . '" class="dps-portal-logout">' . esc_html__( 'Sair', 'dps-client-portal' ) . '</a>';
         echo '</div>';
         
-        // Menu de navegação interna
-        echo '<nav class="dps-portal-nav">';
-        echo '<a href="#proximos" class="dps-portal-nav__link">' . esc_html__( 'Próximos', 'dps-client-portal' ) . '</a>';
-        echo '<a href="#historico" class="dps-portal-nav__link">' . esc_html__( 'Histórico', 'dps-client-portal' ) . '</a>';
-        echo '<a href="#galeria" class="dps-portal-nav__link">' . esc_html__( 'Galeria', 'dps-client-portal' ) . '</a>';
-        echo '<a href="#mensagens" class="dps-portal-nav__link">' . esc_html__( 'Mensagens', 'dps-client-portal' ) . '</a>';
-        echo '<a href="#dados" class="dps-portal-nav__link">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</a>';
-        echo '</nav>';
-        
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
-        // Renderiza seções utilizando o ID do cliente
+        // Navegação por Tabs
+        echo '<nav class="dps-portal-tabs" role="tablist">';
+        echo '<div class="dps-portal-tabs__item">';
+        echo '<button class="dps-portal-tabs__link is-active" data-tab="inicio" role="tab" aria-selected="true" aria-controls="panel-inicio">';
+        echo '<span class="dps-portal-tabs__icon">🏠</span>';
+        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '<div class="dps-portal-tabs__item">';
+        echo '<button class="dps-portal-tabs__link" data-tab="agendamentos" role="tab" aria-selected="false" aria-controls="panel-agendamentos">';
+        echo '<span class="dps-portal-tabs__icon">📅</span>';
+        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Agendamentos', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '<div class="dps-portal-tabs__item">';
+        echo '<button class="dps-portal-tabs__link" data-tab="galeria" role="tab" aria-selected="false" aria-controls="panel-galeria">';
+        echo '<span class="dps-portal-tabs__icon">📸</span>';
+        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Galeria', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '<div class="dps-portal-tabs__item">';
+        echo '<button class="dps-portal-tabs__link" data-tab="dados" role="tab" aria-selected="false" aria-controls="panel-dados">';
+        echo '<span class="dps-portal-tabs__icon">⚙️</span>';
+        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '</nav>';
+        
+        // Container de conteúdo das tabs
+        echo '<div class="dps-portal-tab-content">';
+        
+        // Panel: Início (Próximo agendamento + Pendências + Fidelidade)
+        echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
-        $this->render_appointment_history( $client_id );
-        $this->render_pet_gallery( $client_id );
-        $this->render_message_center( $client_id );
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
+        echo '</div>';
+        
+        // Panel: Agendamentos (Histórico completo)
+        echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        $this->render_appointment_history( $client_id );
+        echo '</div>';
+        
+        // Panel: Galeria
+        echo '<div id="panel-galeria" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        $this->render_pet_gallery( $client_id );
+        echo '</div>';
+        
+        // Panel: Meus Dados
+        echo '<div id="panel-dados" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
         $this->render_update_forms( $client_id );
+        echo '</div>';
+        
+        echo '</div>'; // .dps-portal-tab-content
 
         // Hook para add-ons adicionarem conteúdo ao final do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_after_content', $client_id );
 
-        echo '</div>';
+        echo '</div>'; // .dps-client-portal
+        
+        // Widget de Chat flutuante
+        $this->render_chat_widget( $client_id );
+        
         return ob_get_clean();
+    }
+
+    /**
+     * Renderiza o widget de chat flutuante.
+     *
+     * @since 2.3.0
+     * @param int $client_id ID do cliente autenticado.
+     */
+    private function render_chat_widget( $client_id ) {
+        // Conta mensagens não lidas
+        $unread_count = $this->get_unread_messages_count( $client_id );
+        
+        echo '<div class="dps-chat-widget" data-client-id="' . esc_attr( $client_id ) . '">';
+        
+        // Botão toggle
+        echo '<button class="dps-chat-toggle" aria-label="' . esc_attr__( 'Abrir chat', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-chat-toggle__icon">💬</span>';
+        if ( $unread_count > 0 ) {
+            echo '<span class="dps-chat-badge">' . esc_html( $unread_count > 99 ? '99+' : $unread_count ) . '</span>';
+        } else {
+            echo '<span class="dps-chat-badge"></span>';
+        }
+        echo '</button>';
+        
+        // Janela do chat
+        echo '<div class="dps-chat-window" aria-hidden="true">';
+        
+        // Header
+        echo '<div class="dps-chat-header">';
+        echo '<div class="dps-chat-header__info">';
+        echo '<div class="dps-chat-header__avatar">🐾</div>';
+        echo '<div>';
+        echo '<h4 class="dps-chat-header__title">' . esc_html__( 'Chat DPS', 'dps-client-portal' ) . '</h4>';
+        echo '<div class="dps-chat-header__status">' . esc_html__( 'Online', 'dps-client-portal' ) . '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '<button class="dps-chat-header__close" aria-label="' . esc_attr__( 'Fechar chat', 'dps-client-portal' ) . '">✕</button>';
+        echo '</div>';
+        
+        // Área de mensagens
+        echo '<div class="dps-chat-messages">';
+        echo '<div class="dps-chat-loading"><div class="dps-chat-loading__spinner"></div></div>';
+        echo '</div>';
+        
+        // Input de mensagem
+        echo '<div class="dps-chat-input">';
+        echo '<form class="dps-chat-input__form">';
+        echo '<input type="text" class="dps-chat-input__field" placeholder="' . esc_attr__( 'Digite sua mensagem...', 'dps-client-portal' ) . '" maxlength="1000">';
+        echo '<button type="submit" class="dps-chat-input__send" aria-label="' . esc_attr__( 'Enviar', 'dps-client-portal' ) . '">📤</button>';
+        echo '</form>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-chat-window
+        echo '</div>'; // .dps-chat-widget
+    }
+
+    /**
+     * Conta mensagens não lidas do admin para o cliente.
+     *
+     * @since 2.3.0
+     * @param int $client_id ID do cliente.
+     * @return int Quantidade de mensagens não lidas.
+     */
+    private function get_unread_messages_count( $client_id ) {
+        $messages = get_posts( [
+            'post_type'      => 'dps_portal_message',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                'relation' => 'AND',
+                [
+                    'key'   => 'message_client_id',
+                    'value' => $client_id,
+                ],
+                [
+                    'key'   => 'message_sender',
+                    'value' => 'admin',
+                ],
+                [
+                    'key'     => 'client_read_at',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ] );
+
+        return count( $messages );
     }
 
     /**
@@ -2082,6 +2225,176 @@ final class DPS_Client_Portal {
 
         $message = sprintf( 'Portal security event: %s', $event );
         DPS_Logger::log( $level, $message, $safe_context, 'client-portal' );
+    }
+
+    /**
+     * Valida requisições AJAX do chat.
+     *
+     * Verifica nonce, client_id e autenticação. Retorna o client_id validado
+     * ou termina a requisição com erro JSON.
+     *
+     * @since 2.3.0
+     * @return int Client ID validado e autenticado.
+     */
+    private function validate_chat_request() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        }
+
+        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
+        
+        // Verifica se o cliente é válido
+        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente inválido', 'dps-client-portal' ) ] );
+        }
+
+        // Verifica autenticação
+        $authenticated_id = $this->get_authenticated_client_id();
+        if ( $authenticated_id !== $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Não autorizado', 'dps-client-portal' ) ] );
+        }
+
+        return $client_id;
+    }
+
+    /**
+     * AJAX handler para obter mensagens do chat.
+     *
+     * @since 2.3.0
+     */
+    public function ajax_get_chat_messages() {
+        $client_id = $this->validate_chat_request();
+
+        // Busca mensagens do cliente
+        $messages = get_posts( [
+            'post_type'      => 'dps_portal_message',
+            'post_status'    => 'publish',
+            'posts_per_page' => 50,
+            'orderby'        => 'date',
+            'order'          => 'ASC',
+            'meta_key'       => 'message_client_id',
+            'meta_value'     => $client_id,
+        ] );
+
+        $formatted_messages = [];
+        foreach ( $messages as $msg ) {
+            $formatted_messages[] = [
+                'id'      => $msg->ID,
+                'content' => wp_strip_all_tags( $msg->post_content ),
+                'sender'  => get_post_meta( $msg->ID, 'message_sender', true ),
+                'time'    => get_post_time( get_option( 'date_format' ) . ' H:i', false, $msg, true ),
+                'status'  => get_post_meta( $msg->ID, 'message_status', true ),
+            ];
+        }
+
+        // Conta não lidas
+        $unread_count = $this->get_unread_messages_count( $client_id );
+
+        wp_send_json_success( [
+            'messages'     => $formatted_messages,
+            'unread_count' => $unread_count,
+        ] );
+    }
+
+    /**
+     * AJAX handler para enviar mensagem do chat.
+     *
+     * @since 2.3.0
+     */
+    public function ajax_send_chat_message() {
+        $client_id = $this->validate_chat_request();
+        
+        $message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+
+        if ( empty( $message ) ) {
+            wp_send_json_error( [ 'message' => __( 'Mensagem vazia', 'dps-client-portal' ) ] );
+        }
+
+        if ( strlen( $message ) > 1000 ) {
+            wp_send_json_error( [ 'message' => __( 'Mensagem muito longa', 'dps-client-portal' ) ] );
+        }
+
+        // Rate limiting simples (máximo 10 mensagens por minuto)
+        $rate_key  = 'dps_chat_rate_' . $client_id;
+        $rate_data = get_transient( $rate_key );
+        if ( $rate_data && $rate_data >= 10 ) {
+            wp_send_json_error( [ 'message' => __( 'Muitas mensagens. Aguarde um momento.', 'dps-client-portal' ) ] );
+        }
+        set_transient( $rate_key, ( $rate_data ? $rate_data + 1 : 1 ), 60 );
+
+        // Cria a mensagem
+        $client_name = get_the_title( $client_id );
+        $title       = sprintf( __( 'Mensagem via Chat - %s', 'dps-client-portal' ), $client_name );
+
+        $message_id = wp_insert_post( [
+            'post_type'    => 'dps_portal_message',
+            'post_status'  => 'publish',
+            'post_title'   => wp_strip_all_tags( $title ),
+            'post_content' => $message,
+        ] );
+
+        if ( is_wp_error( $message_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Erro ao salvar mensagem', 'dps-client-portal' ) ] );
+        }
+
+        update_post_meta( $message_id, 'message_client_id', $client_id );
+        update_post_meta( $message_id, 'message_sender', 'client' );
+        update_post_meta( $message_id, 'message_status', 'open' );
+
+        // Notifica admin via Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $api = DPS_Communications_API::get_instance();
+            $api->send_message_from_client( $client_id, $message, [
+                'message_id' => $message_id,
+                'source'     => 'chat',
+            ] );
+        }
+
+        wp_send_json_success( [
+            'message_id' => $message_id,
+            'time'       => current_time( 'd/m H:i' ),
+        ] );
+    }
+
+    /**
+     * AJAX handler para marcar mensagens como lidas.
+     *
+     * @since 2.3.0
+     */
+    public function ajax_mark_messages_read() {
+        $client_id = $this->validate_chat_request();
+
+        // Busca mensagens não lidas do admin
+        $messages = get_posts( [
+            'post_type'      => 'dps_portal_message',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                'relation' => 'AND',
+                [
+                    'key'   => 'message_client_id',
+                    'value' => $client_id,
+                ],
+                [
+                    'key'   => 'message_sender',
+                    'value' => 'admin',
+                ],
+                [
+                    'key'     => 'client_read_at',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ] );
+
+        // Marca como lidas
+        $now = current_time( 'mysql' );
+        foreach ( $messages as $msg_id ) {
+            update_post_meta( $msg_id, 'client_read_at', $now );
+        }
+
+        wp_send_json_success( [ 'marked' => count( $messages ) ] );
     }
 }
 endif;

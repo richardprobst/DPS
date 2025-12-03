@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – Client Portal Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Portal de autoatendimento para clientes. Consulte histórico, fotos, pendências financeiras, atualize dados e efetue pagamentos.
- * Version:           1.0.0
+ * Description:       Portal de autoatendimento para clientes. Navegação por tabs, chat em tempo real, histórico, galeria de fotos, pendências financeiras e atualização de dados.
+ * Version:           2.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-client-portal
