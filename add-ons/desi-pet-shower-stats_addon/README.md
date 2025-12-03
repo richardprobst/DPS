@@ -1,18 +1,24 @@
 # Desi Pet Shower – Estatísticas Add-on
 
-Dashboard de métricas operacionais e financeiras do sistema.
+Dashboard visual de métricas operacionais e financeiras do sistema.
 
 ## Visão geral
 
-O **Estatísticas Add-on** fornece um dashboard completo com métricas de uso do sistema, incluindo atendimentos realizados, receita gerada, clientes inativos, serviços mais recorrentes e análise de distribuição de espécies/raças. Ideal para acompanhamento gerencial e tomada de decisões.
+O **Estatísticas Add-on** fornece um dashboard completo e visual com métricas de uso do sistema, incluindo atendimentos realizados, receita gerada, clientes inativos, serviços mais recorrentes e análise de distribuição de espécies/raças. Ideal para acompanhamento gerencial e tomada de decisões.
 
-Funcionalidades principais:
-- Métricas de atendimentos (total, média por período, taxa de conclusão)
-- Métricas financeiras (receita, ticket médio, inadimplência)
-- Análise de clientes inativos (sem atendimento há X dias)
-- Ranking de serviços mais realizados
-- Distribuição de espécies e raças atendidas
-- Filtros por período (dia, semana, mês, ano, customizado)
+### Funcionalidades principais (v1.1.0):
+- ✅ **Dashboard visual** com cards de métricas coloridos
+- ✅ **Comparativo de períodos** (variação % vs período anterior)
+- ✅ **Ticket médio** calculado automaticamente
+- ✅ **Taxa de cancelamento** monitorada
+- ✅ **Novos clientes** no período
+- ✅ **Gráficos Chart.js** para serviços e espécies
+- ✅ **Exportação CSV** de métricas e pets inativos
+- ✅ **Distribuição de espécies** com gráfico de pizza
+- ✅ **Top 5 raças** com barras horizontais
+- ✅ **Seções colapsáveis** para melhor organização
+- ✅ **API pública** (`DPS_Stats_API`) para integração com outros add-ons
+- ✅ **Cache otimizado** via transients
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
@@ -20,9 +26,26 @@ Funcionalidades principais:
 
 - **Diretório**: `add-ons/desi-pet-shower-stats_addon/`
 - **Slug**: `dps-stats-addon`
-- **Classe principal**: (verificar no arquivo principal)
+- **Classe principal**: `DPS_Stats_Addon`
 - **Arquivo principal**: `desi-pet-shower-stats-addon.php`
+- **API pública**: `includes/class-dps-stats-api.php`
 - **Tipo**: Add-on (depende do plugin base)
+
+## Estrutura de arquivos
+
+```
+add-ons/desi-pet-shower-stats_addon/
+├── desi-pet-shower-stats-addon.php    # Plugin principal
+├── includes/
+│   └── class-dps-stats-api.php        # API pública para métricas
+├── assets/
+│   ├── css/
+│   │   └── stats-addon.css            # Estilos do dashboard
+│   └── js/
+│       └── stats-addon.js             # Gráficos Chart.js
+├── README.md
+└── uninstall.php
+```
 
 ## Dependências e compatibilidade
 
@@ -36,8 +59,51 @@ Funcionalidades principais:
 - **Services Add-on**: para ranking de serviços mais realizados
 
 ### Versão
+- **Versão atual**: v1.1.0
 - **Introduzido em**: v0.1.0 (estimado)
 - **Compatível com plugin base**: v1.0.0+
+
+## API Pública
+
+A classe `DPS_Stats_API` fornece métodos estáticos para consumo por outros add-ons:
+
+```php
+// Contagem de atendimentos
+DPS_Stats_API::get_appointments_count( $start_date, $end_date, $status = '' );
+
+// Totais financeiros
+DPS_Stats_API::get_revenue_total( $start_date, $end_date );
+DPS_Stats_API::get_expenses_total( $start_date, $end_date );
+DPS_Stats_API::get_financial_totals( $start_date, $end_date );
+
+// Ticket médio
+DPS_Stats_API::get_ticket_average( $start_date, $end_date );
+
+// Taxa de cancelamento
+DPS_Stats_API::get_cancellation_rate( $start_date, $end_date );
+
+// Novos clientes
+DPS_Stats_API::get_new_clients_count( $start_date, $end_date );
+
+// Pets inativos
+DPS_Stats_API::get_inactive_pets( $days = 30 );
+
+// Serviços mais solicitados
+DPS_Stats_API::get_top_services( $start_date, $end_date, $limit = 5 );
+
+// Distribuição de espécies
+DPS_Stats_API::get_species_distribution( $start_date, $end_date );
+
+// Top raças
+DPS_Stats_API::get_top_breeds( $start_date, $end_date, $limit = 5 );
+
+// Comparativo de períodos
+DPS_Stats_API::get_period_comparison( $start_date, $end_date );
+
+// Exportação CSV
+DPS_Stats_API::export_metrics_csv( $start_date, $end_date );
+DPS_Stats_API::export_inactive_pets_csv( $days = 30 );
+```
 
 ## Funcionalidades principais
 
