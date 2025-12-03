@@ -7,12 +7,12 @@
   var DPS_MOBILE_BREAKPOINT = 768; // Deve corresponder ao breakpoint CSS em dps-base.css
   
   $(document).ready(function(){
-    // Controle das abas
-    var $nav = $('.dps-nav');
-    var $tabs = $('.dps-nav .dps-tab-link');
-    var $sections = $('.dps-section');
-    var $navContainer = $nav.parent('.dps-nav-container');
-    var $mobileToggle = $('.dps-nav-mobile-toggle');
+    // Controle das abas - seletores específicos para o painel de gestão
+    var $navContainer = $('.dps-base-wrapper .dps-nav-container');
+    var $nav = $navContainer.find('.dps-nav');
+    var $tabs = $nav.find('.dps-tab-link');
+    var $sections = $('.dps-base-wrapper .dps-section');
+    var $mobileToggle = $navContainer.find('.dps-nav-mobile-toggle');
     
     // Função para atualizar o texto do toggle mobile com a aba ativa
     function updateMobileToggleText() {
@@ -635,7 +635,7 @@
       // Assinaturas, Financeiro, Estatísticas, Notificações. Se algumas abas não existirem (por exemplo, senhas
       // foram removidas e notificações podem não estar presentes), elas serão ignoradas.
       var desiredOrder = ['agendas','clientes','pets','servicos','assinaturas','financeiro','estatisticas','notificacoes'];
-      var $nav = $('.dps-nav');
+      var $nav = $('.dps-base-wrapper .dps-nav-container .dps-nav');
       if ($nav.length) {
         var $items = {};
         // Armazena cada item de navegação pela sua chave data‑tab
