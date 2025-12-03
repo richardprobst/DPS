@@ -39,16 +39,16 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 | Loyalty Add-on | ✅ Bom | - | - |
 | Stock Add-on | ✅ Implementado | ~~Alta~~ | ✅ Fase 1 |
 | Registration Add-on | ✅ Implementado | ~~Alta~~ | ✅ Fase 1 |
-| Backup Add-on | ⚠️ Inline | Baixa | 2h |
-| Push Add-on | ⚠️ Inline | Baixa | 2h |
+| Backup Add-on | ✅ Melhorado | ~~Baixa~~ | ✅ Fase 3 |
+| Push Add-on | ✅ Melhorado | ~~Baixa~~ | ✅ Fase 3 |
 | Communications Add-on | ✅ Implementado | ~~Média~~ | ✅ Fase 2 |
 | Payment Add-on | ✅ Implementado | ~~Média~~ | ✅ Fase 2 |
 | AI Add-on (Portal) | ✅ Bom | - | - |
-| AI Add-on (Comm) | ⚠️ Parcial | Baixa | 2h |
+| AI Add-on (Comm) | ✅ Melhorado | ~~Baixa~~ | ✅ Fase 3 |
 
 **Legenda:**
 - ✅ Bom: CSS responsivo implementado com breakpoints adequados
-- ✅ Implementado: CSS criado como parte das Fases 1 ou 2
+- ✅ Implementado: CSS criado como parte das Fases 1, 2 ou 3
 - ✅ Melhorado: Melhorias de responsividade adicionadas
 - ⚠️ Parcial: Algumas regras responsivas, mas incompletas
 - ❌ Sem CSS: Não possui arquivo CSS dedicado ou regras responsivas
@@ -576,13 +576,27 @@ Configurações de Mercado Pago e PIX.
    - ✅ Código de URL com word-break
    - ✅ Instruções de webhook responsivas
 
-### Fase 3: Melhorias (3h)
+### Fase 3: Melhorias (3h) ✅ IMPLEMENTADO
 
-7. **Backup e Push Add-ons (2h)**
-   - Extrair CSS inline para arquivos
+7. **Backup Add-on - Melhorias (1h)** ✅
+   - ✅ CSS já estava em arquivo dedicado
+   - ✅ Transformação tabela→cards para histórico (< 640px)
+   - ✅ Modal responsivo com max-height
+   - ✅ Upload area compacta em mobile
+   - ✅ Font-size 16px para evitar zoom iOS
 
-8. **AI Communications (1h)**
-   - Ajustes no modal de preview
+8. **Push Add-on - Melhorias (1h)** ✅
+   - ✅ CSS já estava em arquivo dedicado
+   - ✅ Seções responsivas com breakpoints adicionais
+   - ✅ Botões full-width em mobile
+   - ✅ Switch de toggle responsivo
+   - ✅ Font-size 16px para inputs
+
+9. **AI Communications - Melhorias (1h)** ✅
+   - ✅ Modal com max-height e scroll
+   - ✅ Botões full-width em mobile
+   - ✅ Font-size 16px para evitar zoom iOS
+   - ✅ Breakpoints: 768px, 480px
 
 ---
 
