@@ -82,6 +82,26 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Portal do Cliente v2.3.0**: Navegação por Tabs e Widget de Chat em tempo real
+  - **Navegação por Tabs**: Interface reorganizada em 4 abas (Início, Agendamentos, Galeria, Meus Dados)
+    - Tab "Início": Próximo agendamento + pendências financeiras + programa de fidelidade
+    - Tab "Agendamentos": Histórico completo de atendimentos
+    - Tab "Galeria": Fotos dos pets
+    - Tab "Meus Dados": Formulários de atualização de dados pessoais e pets
+  - **Widget de Chat Flutuante**: Comunicação em tempo real com a equipe
+    - Botão flutuante no canto inferior direito
+    - Badge de mensagens não lidas com animação
+    - AJAX polling a cada 10 segundos para novas mensagens
+    - Rate limiting (máximo 10 mensagens/minuto por cliente)
+    - Notificação automática ao admin via Communications API
+  - **Melhorias de UX**:
+    - Acessibilidade: ARIA roles, labels e states em tabs e chat
+    - Responsividade: Tabs com scroll horizontal em mobile, chat fullscreen
+    - Animações CSS suaves em transições de tab e chat
+  - **Handlers AJAX**:
+    - `dps_chat_get_messages`: Obtém histórico de mensagens
+    - `dps_chat_send_message`: Envia nova mensagem do cliente
+    - `dps_chat_mark_read`: Marca mensagens do admin como lidas
 - **Documentação de compatibilidade**: Criado documento `docs/compatibility/COMPATIBILITY_ANALYSIS.md` com análise detalhada de compatibilidade PHP 8.3+/8.4, WordPress 6.9 e tema Astra
 - **Helper dps_get_page_by_title_compat()**: Nova função utilitária no Portal do Cliente para substituir `get_page_by_title()` deprecado
 - **Debugging Add-on (v1.0.0)**: Novo add-on para gerenciamento de debug do WordPress
