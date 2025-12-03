@@ -468,15 +468,16 @@
     }
     
     /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
-    /* Mostrar o botão toggle em mobile */
-    .dps-nav-mobile-toggle {
+    /* Mostrar o botão toggle em mobile - especificidade aumentada para garantir sobrescrita */
+    .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: block;
         margin-bottom: 0;
     }
     
     /* Ocultar abas por padrão em mobile (apenas mostrar quando toggle está aberto) */
-    .dps-nav {
-        display: none;
+    /* Especificidade aumentada para garantir que sobrescreva estilos base e de temas */
+    .dps-base-wrapper .dps-nav-container .dps-nav {
+        display: none !important;
         flex-direction: column;
         gap: 0;
         border-bottom: none;
@@ -492,21 +493,21 @@
     }
     
     /* Mostrar abas quando container está aberto */
-    .dps-nav-container.is-open .dps-nav {
-        display: flex;
+    .dps-base-wrapper .dps-nav-container.is-open .dps-nav {
+        display: flex !important;
     }
     
-    .dps-nav-container.is-open .dps-nav-mobile-toggle {
+    .dps-base-wrapper .dps-nav-container.is-open .dps-nav-mobile-toggle {
         border-radius: 4px 4px 0 0;
         border-bottom: none;
     }
     
-    .dps-nav li {
+    .dps-base-wrapper .dps-nav-container .dps-nav li {
         margin: 0;
         width: 100%;
     }
     
-    .dps-nav .dps-tab-link {
+    .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link {
         display: block;
         width: 100%;
         padding: 12px 16px;
@@ -518,17 +519,17 @@
         font-size: 15px;
     }
     
-    .dps-nav li:last-child .dps-tab-link {
+    .dps-base-wrapper .dps-nav-container .dps-nav li:last-child .dps-tab-link {
         border-bottom: none;
     }
     
-    .dps-nav .dps-tab-link:hover,
-    .dps-nav .dps-tab-link:focus {
+    .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:hover,
+    .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link:focus {
         background: #f9fafb;
         color: #0ea5e9;
     }
     
-    .dps-nav .dps-tab-link.active {
+    .dps-base-wrapper .dps-nav-container .dps-nav .dps-tab-link.active {
         background: #eff6ff;
         color: #0ea5e9;
         font-weight: 600;
