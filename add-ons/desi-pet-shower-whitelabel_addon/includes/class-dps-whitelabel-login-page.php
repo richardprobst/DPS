@@ -158,9 +158,8 @@ class DPS_WhiteLabel_Login_Page {
         
         $css = $this->generate_login_css( $login );
         
-        echo '<style id="dps-whitelabel-login">' . "\n";
-        echo $css; // Already sanitized
-        echo '</style>' . "\n";
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS is sanitized in generate_login_css()
+        echo '<style id="dps-whitelabel-login">' . "\n" . wp_strip_all_tags( $css ) . '</style>' . "\n";
     }
 
     /**

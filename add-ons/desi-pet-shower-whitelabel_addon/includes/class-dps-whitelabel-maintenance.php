@@ -159,8 +159,8 @@ class DPS_WhiteLabel_Maintenance {
             return;
         }
         
-        // Não bloquear REST API para autenticados
-        if ( defined( 'REST_REQUEST' ) && REST_REQUEST && is_user_logged_in() ) {
+        // Não bloquear REST API para usuários que podem bypassar
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $this->can_user_bypass() ) {
             return;
         }
         

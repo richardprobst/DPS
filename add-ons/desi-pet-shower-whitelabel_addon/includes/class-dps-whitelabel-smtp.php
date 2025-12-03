@@ -231,9 +231,19 @@ class DPS_WhiteLabel_SMTP {
             return '';
         }
         
-        // Usa OPENSSL para encriptação
+        // Usa OPENSSL para encriptação com IV seguro
         $key = $this->get_encryption_key();
-        $iv  = openssl_random_pseudo_bytes( 16 );
+        
+        // Usa random_bytes para gerar IV criptograficamente seguro (PHP 7+)
+        try {
+            $iv = random_bytes( 16 );
+        } catch ( Exception $e ) {
+            // Fallback para openssl se random_bytes não disponível
+            $iv = openssl_random_pseudo_bytes( 16, $strong );
+            if ( ! $strong ) {
+                return '';
+            }
+        }
         
         $encrypted = openssl_encrypt(
             $password,

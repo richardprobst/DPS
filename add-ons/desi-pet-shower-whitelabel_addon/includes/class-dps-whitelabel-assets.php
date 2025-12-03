@@ -74,7 +74,7 @@ class DPS_WhiteLabel_Assets {
         echo '  --dps-color-secondary: ' . esc_attr( $colors['secondary'] ) . ';' . "\n";
         echo '  --dps-color-accent: ' . esc_attr( $colors['accent'] ) . ';' . "\n";
         echo '  --dps-color-background: ' . esc_attr( $colors['background'] ) . ';' . "\n";
-        echo '  --dps-color-text: ' . esc_attr( $colors['color_text'] ?? $colors['text'] ) . ';' . "\n";
+        echo '  --dps-color-text: ' . esc_attr( $colors['text'] ) . ';' . "\n";
         echo '}' . "\n";
         echo '</style>' . "\n";
     }
@@ -125,7 +125,8 @@ class DPS_WhiteLabel_Assets {
      * @return string|WP_Error Caminho do arquivo ou erro.
      */
     public static function generate_css_file() {
-        $css = self::generate_custom_css();
+        $instance = new self();
+        $css      = $instance->generate_custom_css();
         
         if ( empty( $css ) ) {
             return '';
@@ -141,7 +142,13 @@ class DPS_WhiteLabel_Assets {
         }
         
         // Escreve arquivo
-        $result = file_put_contents( $css_file, $css );
+        global $wp_filesystem;
+        if ( empty( $wp_filesystem ) ) {
+            require_once ABSPATH . '/wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+        
+        $result = $wp_filesystem->put_contents( $css_file, $css, FS_CHMOD_FILE );
         
         if ( false === $result ) {
             return new WP_Error( 'write_failed', __( 'Não foi possível escrever o arquivo CSS.', 'dps-whitelabel-addon' ) );
