@@ -61,16 +61,22 @@
 .dps-agenda-nav-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.5rem;
     align-items: center;
 }
 
-/* Separador visual entre grupos de navegação */
+/* Separador visual entre grupos de navegação - oculto em mobile */
 .dps-agenda-nav-group + .dps-agenda-nav-group::before {
     content: '|';
     color: var(--dps-border);
     font-weight: 300;
     margin: 0 0.25rem;
+}
+
+@media (max-width: 1024px) {
+    .dps-agenda-nav-group + .dps-agenda-nav-group::before {
+        display: none;
+    }
 }
 
 /* === Labels e Inputs === */
@@ -460,11 +466,18 @@
 @media (max-width: 1024px) {
     .dps-agenda-nav {
         justify-content: flex-start;
+        gap: 0.75rem;
     }
     
     .dps-agenda-nav-group {
-        flex: 1 1 100%;
+        flex: 0 1 auto;
         justify-content: flex-start;
+    }
+    
+    /* Primeiro grupo (navegação de data) ocupa linha inteira */
+    .dps-agenda-nav-group:first-child {
+        flex: 1 1 100%;
+        justify-content: center;
     }
 }
 
@@ -841,6 +854,15 @@
     background: var(--dps-background);
     border-radius: 0.75rem;
     border: 1px solid var(--dps-border);
+    gap: 0.75rem;
+}
+
+.dps-calendar-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    justify-content: center;
 }
 
 .dps-calendar-title {
@@ -850,18 +872,35 @@
     color: #0f172a;
 }
 
-.dps-calendar-nav-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    color: var(--dps-muted);
+.dps-calendar-today-btn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--dps-accent);
     text-decoration: none;
-    border-radius: 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--dps-accent);
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.dps-calendar-today-btn:hover {
+    background: var(--dps-accent-soft);
+}
+
+.dps-calendar-nav-btn {
+    padding: 0.55rem 1rem;
+    font-size: 0.875rem;
+    color: var(--dps-accent);
+    text-decoration: none;
+    border-radius: 999px;
+    border: 1px solid var(--dps-accent);
     transition: background 0.2s, color 0.2s;
+    font-weight: 600;
 }
 
 .dps-calendar-nav-btn:hover {
-    background: var(--dps-border);
-    color: #0f172a;
+    background: var(--dps-accent-soft);
+    color: var(--dps-accent);
 }
 
 .dps-calendar {
@@ -1042,9 +1081,14 @@
     }
     
     .dps-calendar-header {
-        flex-direction: column;
-        gap: 0.5rem;
-        text-align: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .dps-calendar-title-group {
+        order: -1;
+        flex: 1 1 100%;
+        margin-bottom: 0.5rem;
     }
     
     .dps-calendar-nav-btn {
