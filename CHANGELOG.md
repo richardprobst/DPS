@@ -82,6 +82,8 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Documentação de compatibilidade**: Criado documento `docs/compatibility/COMPATIBILITY_ANALYSIS.md` com análise detalhada de compatibilidade PHP 8.3+/8.4, WordPress 6.9 e tema Astra
+- **Helper dps_get_page_by_title_compat()**: Nova função utilitária no Portal do Cliente para substituir `get_page_by_title()` deprecado
 - **Debugging Add-on (v1.0.0)**: Novo add-on para gerenciamento de debug do WordPress
   - **Funcionalidades principais**:
     - Configuração de constantes de debug (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, SAVEQUERIES, WP_DISABLE_FATAL_ERROR_HANDLER) diretamente via interface administrativa
@@ -293,6 +295,7 @@ Antes de criar uma nova versão oficial:
   - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
+- **Compatibilidade WordPress 6.2+**: Substituída função deprecada `get_page_by_title()` por `dps_get_page_by_title_compat()` no Portal do Cliente. A nova função usa `WP_Query` conforme recomendação oficial do WordPress, garantindo compatibilidade com WordPress 6.9+
 - **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
   - O handler de toggle de pets usava `.data('owner')` que lê do cache interno do jQuery
   - Após PR #165, `buildPetOption` passou a usar `.attr()` para definir atributos DOM

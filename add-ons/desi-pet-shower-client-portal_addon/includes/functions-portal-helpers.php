@@ -34,8 +34,8 @@ function dps_get_portal_page_url() {
         }
     }
     
-    // Fallback: busca por título (comportamento legado)
-    $portal_page = get_page_by_title( 'Portal do Cliente' );
+    // Fallback: busca por título usando WP_Query (compatível com WP 6.2+)
+    $portal_page = dps_get_page_by_title_compat( 'Portal do Cliente' );
     if ( $portal_page ) {
         return get_permalink( $portal_page->ID );
     }
@@ -60,11 +60,57 @@ function dps_get_portal_page_id() {
         return $page_id;
     }
     
-    // Fallback: busca por título (comportamento legado)
-    $portal_page = get_page_by_title( 'Portal do Cliente' );
+    // Fallback: busca por título usando WP_Query (compatível com WP 6.2+)
+    $portal_page = dps_get_page_by_title_compat( 'Portal do Cliente' );
     if ( $portal_page ) {
         return $portal_page->ID;
     }
     
     return null;
+}
+
+/**
+ * Busca uma página pelo título de forma compatível com WordPress 6.2+
+ * 
+ * Substitui a função deprecada get_page_by_title() usando WP_Query com filtro
+ * de correspondência exata de título. Esta é a forma recomendada pelo WordPress
+ * para encontrar páginas por título após a depreciação de get_page_by_title().
+ *
+ * @param string $title     Título exato da página a ser buscada.
+ * @param string $output    Tipo de retorno: OBJECT, ARRAY_A ou ARRAY_N. Padrão OBJECT.
+ * @param string $post_type Tipo de post a buscar. Padrão 'page'.
+ * @return WP_Post|array|null Post encontrado ou null se não encontrado.
+ * @since 2.2.0
+ */
+function dps_get_page_by_title_compat( $title, $output = OBJECT, $post_type = 'page' ) {
+    global $wpdb;
+
+    // Busca direta por título exato usando wpdb (mais preciso e eficiente)
+    $post_id = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = %s AND post_status = 'publish' LIMIT 1",
+            $title,
+            $post_type
+        )
+    );
+
+    if ( ! $post_id ) {
+        return null;
+    }
+
+    $page = get_post( $post_id );
+
+    if ( ! $page ) {
+        return null;
+    }
+
+    if ( OBJECT === $output ) {
+        return $page;
+    } elseif ( ARRAY_A === $output ) {
+        return get_object_vars( $page );
+    } elseif ( ARRAY_N === $output ) {
+        return array_values( get_object_vars( $page ) );
+    }
+
+    return $page;
 }
