@@ -1260,7 +1260,7 @@ class DPS_Base_Frontend {
         
         // Mensagem de duplicação
         if ( $is_duplicate && ! $visitor_only ) {
-            echo '<div class="dps-alert dps-alert--info">';
+            echo '<div class="dps-alert dps-alert--info" role="status" aria-live="polite">';
             echo '<strong>' . esc_html__( 'Duplicando agendamento', 'desi-pet-shower' ) . '</strong><br>';
             echo esc_html__( 'Os dados do agendamento anterior foram copiados. Selecione uma nova data e horário, então salve para criar o novo agendamento.', 'desi-pet-shower' );
             echo '</div>';

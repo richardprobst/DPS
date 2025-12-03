@@ -735,7 +735,7 @@ class DPS_Base_Plugin {
         }
 
         // Verifica nonce.
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_clients' ) ) {
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_clients' ) ) {
             wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
 
@@ -756,6 +756,8 @@ class DPS_Base_Plugin {
         fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
         // Cabeçalhos do CSV.
+        // Nota: Usa ponto-e-vírgula como delimitador para compatibilidade com Excel
+        // em países que usam vírgula como separador decimal (Brasil, Europa).
         fputcsv(
             $output,
             [
