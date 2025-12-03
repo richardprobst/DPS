@@ -29,7 +29,7 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 | Navegação (abas) | ✅ Bom | - | - |
 | Formulários (agendamento) | ✅ Bom | - | - |
 | Tabelas (histórico) | ✅ Bom | - | - |
-| Client Portal | ⚠️ Parcial | Alta | 8h |
+| Client Portal | ⚠️ Parcial | Alta | 6h |
 | Agenda Add-on | ✅ Bom | - | - |
 | Finance Add-on | ✅ Bom | - | - |
 | Stats Add-on | ✅ Bom | - | - |
@@ -106,7 +106,9 @@ Nenhum problema crítico encontrado.
 
 1. **🔴 CRÍTICO: Estrutura "all-in-one"**
    - Todas as seções em página única sem navegação interna
-   - Cliente rola excessivamente em mobile
+   - Cliente rola excessivamente em mobile (estimativa: 8+ telas de scroll)
+   - Afeta 100% dos usuários mobile que acessam o portal
+   - **Impacto:** Abandono precoce, dificuldade em encontrar informações
    - **Sugestão:** Implementar tabs ou accordion para mobile
 
 2. **🟡 MÉDIO: Falta de `data-label` em algumas tabelas**
@@ -611,8 +613,9 @@ Configurações de Mercado Pago e PIX.
         content: attr(data-label);
         font-weight: 600;
         color: #6b7280;
-        text-transform: uppercase;
         font-size: 12px;
+        letter-spacing: 0.05em;
+        /* Nota: text-transform: uppercase removido para acessibilidade */
     }
 }
 ```
