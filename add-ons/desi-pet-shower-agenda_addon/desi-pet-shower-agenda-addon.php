@@ -48,7 +48,15 @@ function dps_agenda_load_textdomain() {
 }
 add_action( 'init', 'dps_agenda_load_textdomain', 1 );
 
+// FASE 3: Carrega traits de refatoração
+require_once __DIR__ . '/includes/trait-dps-agenda-renderer.php';
+require_once __DIR__ . '/includes/trait-dps-agenda-query.php';
+
 class DPS_Agenda_Addon {
+    
+    // FASE 3: Usa traits para métodos auxiliares
+    use DPS_Agenda_Renderer;
+    use DPS_Agenda_Query;
     
     /**
      * Número de agendamentos por página no modo "Todos".

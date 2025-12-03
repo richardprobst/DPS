@@ -63,34 +63,39 @@ O add-on gerencia a agenda de atendimentos do pet shop, permitindo:
 
 ```
 desi-pet-shower-agenda_addon/
-├── desi-pet-shower-agenda-addon.php    # Arquivo principal (1387 linhas)
+├── desi-pet-shower-agenda-addon.php    # Arquivo principal (~1870 linhas)
+├── includes/                           # FASE 3: Traits de refatoração
+│   ├── trait-dps-agenda-renderer.php   # Métodos de renderização (~290 linhas)
+│   └── trait-dps-agenda-query.php      # Métodos de query (~210 linhas)
 ├── assets/
 │   ├── css/
-│   │   └── agenda-addon.css             # Estilos externos (580 linhas)
+│   │   └── agenda-addon.css            # Estilos externos (~780 linhas)
 │   └── js/
-│       ├── agenda-addon.js              # Interações AJAX (138 linhas)
-│       └── services-modal.js            # Modal de serviços (173 linhas)
-├── languages/                           # Pasta para traduções
-├── uninstall.php                        # Rotina de desinstalação
-├── README.md                            # Documentação do add-on
-├── CODE_REVIEW_REPORT.md                # Relatório de revisão de código
-└── DEPRECATED_FILES.md                  # Histórico de arquivos removidos
+│       ├── agenda-addon.js             # Interações AJAX (~175 linhas)
+│       └── services-modal.js           # Modal de serviços (173 linhas)
+├── languages/
+│   └── dps-agenda-addon.pot            # Template de traduções (~70 strings)
+├── uninstall.php                       # Rotina de desinstalação
+├── README.md                           # Documentação do add-on
+├── CODE_REVIEW_REPORT.md               # Relatório de revisão de código
+└── DEPRECATED_FILES.md                 # Histórico de arquivos removidos
 ```
 
 ### 2.2 Classe Principal: `DPS_Agenda_Addon`
 
-**Métricas de Código**:
-- **Total de linhas**: 1387
-- **Método mais extenso**: `render_agenda_shortcode()` (~700 linhas)
+**Métricas de Código** (atualizado após Fase 3):
+- **Total de linhas arquivo principal**: ~1870
+- **Linhas em traits**: ~500 (extraídas)
+- **Método mais extenso**: `render_agenda_shortcode()` (~700 linhas, parcialmente refatorado)
 - **Constantes definidas**: 4 (APPOINTMENTS_PER_PAGE, DAILY_LIMIT, CLIENTS_LIMIT, SERVICES_LIMIT)
 - **Métodos públicos**: 13
-- **Métodos privados**: 0 (oportunidade de refatoração)
+- **Métodos privados via traits**: 15+ (FASE 3)
 
 ### 2.3 Análise de Métodos
 
 | Método | Linhas | Complexidade | Recomendação |
 |--------|--------|--------------|--------------|
-| `render_agenda_shortcode()` | ~700 | Alta | Extrair em métodos menores |
+| `render_agenda_shortcode()` | ~700 | Alta | ⏳ Parcialmente refatorado |
 | `update_status_ajax()` | ~85 | Média | OK |
 | `get_services_details_ajax()` | ~65 | Baixa | OK |
 | `send_reminders()` | ~145 | Média | OK |
@@ -579,13 +584,19 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 - **Exportação CSV**: Botão "📥 Exportar" que gera CSV com BOM UTF-8 (compatível com Excel). Inclui data, hora, cliente, pet, status e telefone.
 - **Relatório de ocupação**: Seção colapsável "📊 Relatório de Ocupação" com métricas: taxa de conclusão, taxa de cancelamento, horário de pico, média por hora e distribuição visual por status.
 
-### 12.3 Fase 3: Refatoração (16-24h)
+### 12.3 Fase 3: Refatoração (16-24h) ⏳ PARCIALMENTE IMPLEMENTADA
 
-| Item | Esforço | Prioridade |
-|------|---------|------------|
-| Refatorar `render_agenda_shortcode()` | 4-6h | 🔴 Alta |
-| Separar em múltiplos arquivos | 8-12h | 🟡 Média |
-| Implementar testes | 8-12h | 🟡 Média |
+| Item | Esforço | Prioridade | Status |
+|------|---------|------------|--------|
+| Refatorar `render_agenda_shortcode()` | 4-6h | 🔴 Alta | ✅ Traits criados |
+| Separar em múltiplos arquivos | 8-12h | 🟡 Média | ✅ Estrutura criada |
+| Implementar testes | 8-12h | 🟡 Média | ⏳ Pendente |
+
+**Detalhes da implementação (2025-12-03):**
+- **Traits de refatoração**: Criados `includes/trait-dps-agenda-renderer.php` e `includes/trait-dps-agenda-query.php` com ~15 métodos auxiliares extraídos
+- **Métodos extraídos para Renderer**: `render_access_denied()`, `parse_request_params()`, `get_column_labels()`, `get_status_options()`, `calculate_nav_dates()`, `get_clients_for_filter()`, `get_services_for_filter()`, `apply_filters_to_appointments()`, `separate_appointments_by_status()`, `sort_appointments_by_datetime()`, `prime_related_caches()`
+- **Métodos extraídos para Query**: `query_appointments_for_date()`, `query_appointments_for_week()`, `query_all_appointments()`, `query_appointments_for_export()`, `get_client_group_data()`
+- **Testes**: Pendente para próxima iteração
 
 ### 12.4 Fase 4: Funcionalidades Avançadas (20-40h)
 
