@@ -611,6 +611,10 @@ graph TD
  * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
+ *
+ * NOTA: O requisito PHP 7.4 mantém consistência com o plugin base DPS.
+ * Recomenda-se que ambientes de produção utilizem PHP 8.1+ para melhor
+ * segurança e performance. PHP 7.4 atingiu fim de vida em novembro de 2022.
  */
 
 // Impede acesso direto
@@ -728,7 +732,8 @@ class DPS_WhiteLabel_Settings {
             return;
         }
         
-        if ( ! wp_verify_nonce( $_POST['dps_whitelabel_nonce'] ?? '', 'dps_whitelabel_settings' ) ) {
+        // Verificação segura de nonce - usa isset() para garantir que campo existe
+        if ( ! isset( $_POST['dps_whitelabel_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_whitelabel_nonce'] ) ), 'dps_whitelabel_settings' ) ) {
             wp_die( esc_html__( 'Nonce inválido.', 'dps-whitelabel-addon' ) );
         }
         
@@ -739,16 +744,16 @@ class DPS_WhiteLabel_Settings {
         $old_settings = self::get_settings();
         
         $new_settings = [
-            'brand_name'         => sanitize_text_field( $_POST['brand_name'] ?? '' ),
-            'brand_tagline'      => sanitize_text_field( $_POST['brand_tagline'] ?? '' ),
-            'brand_logo_url'     => esc_url_raw( $_POST['brand_logo_url'] ?? '' ),
-            'color_primary'      => sanitize_hex_color( $_POST['color_primary'] ?? '' ),
-            'color_secondary'    => sanitize_hex_color( $_POST['color_secondary'] ?? '' ),
-            'contact_whatsapp'   => sanitize_text_field( $_POST['contact_whatsapp'] ?? '' ),
-            'email_from_name'    => sanitize_text_field( $_POST['email_from_name'] ?? '' ),
-            'email_from_address' => sanitize_email( $_POST['email_from_address'] ?? '' ),
+            'brand_name'         => sanitize_text_field( wp_unslash( $_POST['brand_name'] ?? '' ) ),
+            'brand_tagline'      => sanitize_text_field( wp_unslash( $_POST['brand_tagline'] ?? '' ) ),
+            'brand_logo_url'     => esc_url_raw( wp_unslash( $_POST['brand_logo_url'] ?? '' ) ),
+            'color_primary'      => sanitize_hex_color( wp_unslash( $_POST['color_primary'] ?? '' ) ),
+            'color_secondary'    => sanitize_hex_color( wp_unslash( $_POST['color_secondary'] ?? '' ) ),
+            'contact_whatsapp'   => sanitize_text_field( wp_unslash( $_POST['contact_whatsapp'] ?? '' ) ),
+            'email_from_name'    => sanitize_text_field( wp_unslash( $_POST['email_from_name'] ?? '' ) ),
+            'email_from_address' => sanitize_email( wp_unslash( $_POST['email_from_address'] ?? '' ) ),
             'hide_powered_by'    => isset( $_POST['hide_powered_by'] ),
-            'custom_css'         => self::sanitize_custom_css( $_POST['custom_css'] ?? '' ),
+            'custom_css'         => self::sanitize_custom_css( wp_unslash( $_POST['custom_css'] ?? '' ) ),
         ];
         
         update_option( self::OPTION_NAME, $new_settings );
