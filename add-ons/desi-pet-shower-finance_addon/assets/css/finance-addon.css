@@ -138,6 +138,118 @@
 }
 
 /* ========================================
+   11. GRÁFICOS FINANCEIROS
+   ======================================== */
+
+.dps-finance-chart-container {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-chart-container h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-finance-chart-wrapper {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .dps-finance-chart-wrapper {
+        height: 200px;
+    }
+}
+
+/* ========================================
+   12. RELATÓRIO DRE
+   ======================================== */
+
+.dps-finance-dre {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-dre h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-dre-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-dre-table th,
+.dps-dre-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-dre-header {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px !important;
+}
+
+.dps-dre-header.dps-dre-receitas {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-dre-header.dps-dre-despesas {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dps-dre-value {
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.dps-dre-subtotal {
+    background: #f9fafb;
+}
+
+.dps-dre-subtotal td {
+    border-top: 2px solid #e5e7eb;
+}
+
+.dps-dre-resultado {
+    font-size: 15px;
+}
+
+.dps-dre-resultado td {
+    padding: 14px 12px !important;
+    border-top: 2px solid #374151;
+}
+
+.dps-dre-positivo {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.dps-dre-negativo {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* ========================================
    3. BADGES DE STATUS
    ======================================== */
 

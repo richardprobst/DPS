@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos e visualize transações.
- * Version:           1.2.0
+ * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.2.0' );
+    define( 'DPS_FINANCE_VERSION', '1.3.0' );
 }
 
 // Carrega dependências
@@ -159,11 +159,20 @@ class DPS_Finance_Addon {
                 DPS_FINANCE_VERSION
             );
 
+            // Chart.js via CDN para gráficos financeiros
+            wp_enqueue_script(
+                'chartjs',
+                'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+                [],
+                '4.4.1',
+                true
+            );
+
             // JS
             wp_enqueue_script(
                 'dps-finance-addon',
                 plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/js/finance-addon.js',
-                [ 'jquery' ],
+                [ 'jquery', 'chartjs' ],
                 DPS_FINANCE_VERSION,
                 true
             );
@@ -1101,6 +1110,12 @@ class DPS_Finance_Addon {
 
         // Dashboard de resumo financeiro (usa todos os registros, não paginados)
         $this->render_finance_summary( $all_trans );
+        
+        // Relatório DRE simplificado (mostra quando há filtro de data aplicado ou quando solicitado)
+        $show_dre = isset( $_GET['show_dre'] ) || ( $start_date && $end_date );
+        if ( $show_dre && ! empty( $all_trans ) ) {
+            $this->render_dre_report( $all_trans );
+        }
 
         // Se um ID de transação foi passado via query para registrar pagamento parcial, exibe formulário especializado
         if ( isset( $_GET['register_partial'] ) && is_numeric( $_GET['register_partial'] ) ) {
@@ -1689,11 +1704,24 @@ class DPS_Finance_Addon {
         $total_receitas  = 0;
         $total_despesas  = 0;
         $total_pendente  = 0;
+        
+        // Dados para gráfico mensal
+        $monthly_data = [];
 
         foreach ( $trans as $tr ) {
             $valor = (float) $tr->valor;
+            $month_key = date( 'Y-m', strtotime( $tr->data ) );
+            
+            if ( ! isset( $monthly_data[ $month_key ] ) ) {
+                $monthly_data[ $month_key ] = [
+                    'receitas' => 0,
+                    'despesas' => 0,
+                ];
+            }
+            
             if ( $tr->tipo === 'receita' ) {
                 $total_receitas += $valor;
+                $monthly_data[ $month_key ]['receitas'] += $valor;
                 if ( $tr->status === 'em_aberto' ) {
                     $remaining = $valor - $this->get_partial_sum( $tr->id );
                     if ( $remaining > 0 ) {
@@ -1702,6 +1730,7 @@ class DPS_Finance_Addon {
                 }
             } else {
                 $total_despesas += $valor;
+                $monthly_data[ $month_key ]['despesas'] += $valor;
             }
         }
 
@@ -1733,6 +1762,221 @@ class DPS_Finance_Addon {
         echo '<span class="dps-finance-card-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $saldo * 100 ) ) ) . '</span>';
         echo '</div>';
 
+        echo '</div>';
+        
+        // Gráfico de Receitas x Despesas Mensais
+        if ( count( $monthly_data ) > 1 ) {
+            $this->render_monthly_chart( $monthly_data );
+        }
+    }
+    
+    /**
+     * Renderiza gráfico de receitas e despesas mensais.
+     *
+     * @since 1.3.0
+     * @param array $monthly_data Dados agrupados por mês.
+     */
+    private function render_monthly_chart( $monthly_data ) {
+        // Ordena por mês
+        ksort( $monthly_data );
+        
+        // Prepara dados para Chart.js
+        $labels    = [];
+        $receitas  = [];
+        $despesas  = [];
+        
+        $month_names = [
+            '01' => __( 'Jan', 'dps-finance-addon' ),
+            '02' => __( 'Fev', 'dps-finance-addon' ),
+            '03' => __( 'Mar', 'dps-finance-addon' ),
+            '04' => __( 'Abr', 'dps-finance-addon' ),
+            '05' => __( 'Mai', 'dps-finance-addon' ),
+            '06' => __( 'Jun', 'dps-finance-addon' ),
+            '07' => __( 'Jul', 'dps-finance-addon' ),
+            '08' => __( 'Ago', 'dps-finance-addon' ),
+            '09' => __( 'Set', 'dps-finance-addon' ),
+            '10' => __( 'Out', 'dps-finance-addon' ),
+            '11' => __( 'Nov', 'dps-finance-addon' ),
+            '12' => __( 'Dez', 'dps-finance-addon' ),
+        ];
+        
+        // Limita aos últimos 6 meses para melhor visualização
+        $monthly_data = array_slice( $monthly_data, -6, 6, true );
+        
+        foreach ( $monthly_data as $month_key => $data ) {
+            $parts = explode( '-', $month_key );
+            $month_name = isset( $month_names[ $parts[1] ] ) ? $month_names[ $parts[1] ] : $parts[1];
+            $labels[]   = $month_name . '/' . substr( $parts[0], 2 );
+            $receitas[] = round( $data['receitas'], 2 );
+            $despesas[] = round( $data['despesas'], 2 );
+        }
+        
+        $chart_id = 'dps-finance-chart-' . wp_rand( 1000, 9999 );
+        
+        echo '<div class="dps-finance-chart-container">';
+        echo '<h4>' . esc_html__( 'Receitas x Despesas Mensais', 'dps-finance-addon' ) . '</h4>';
+        echo '<div class="dps-finance-chart-wrapper">';
+        echo '<canvas id="' . esc_attr( $chart_id ) . '" width="400" height="200"></canvas>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Script para inicializar o gráfico
+        ?>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded');
+                return;
+            }
+            
+            var ctx = document.getElementById('<?php echo esc_js( $chart_id ); ?>');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: <?php echo wp_json_encode( $labels ); ?>,
+                    datasets: [
+                        {
+                            label: '<?php echo esc_js( __( 'Receitas', 'dps-finance-addon' ) ); ?>',
+                            data: <?php echo wp_json_encode( $receitas ); ?>,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: '<?php echo esc_js( __( 'Despesas', 'dps-finance-addon' ) ); ?>',
+                            data: <?php echo wp_json_encode( $despesas ); ?>,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var value = context.parsed.y;
+                                    return context.dataset.label + ': R$ ' + value.toLocaleString('pt-BR', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        </script>
+        <?php
+    }
+    
+    /**
+     * Renderiza relatório DRE simplificado.
+     *
+     * @since 1.3.0
+     * @param array $trans Array de transações.
+     */
+    private function render_dre_report( $trans ) {
+        if ( empty( $trans ) ) {
+            return;
+        }
+        
+        // Agrupa por categoria e tipo
+        $receitas_por_cat = [];
+        $despesas_por_cat = [];
+        $total_receitas   = 0;
+        $total_despesas   = 0;
+        
+        foreach ( $trans as $tr ) {
+            $valor    = (float) $tr->valor;
+            $categoria = $tr->categoria ?: __( 'Sem categoria', 'dps-finance-addon' );
+            
+            if ( $tr->tipo === 'receita' ) {
+                if ( ! isset( $receitas_por_cat[ $categoria ] ) ) {
+                    $receitas_por_cat[ $categoria ] = 0;
+                }
+                $receitas_por_cat[ $categoria ] += $valor;
+                $total_receitas += $valor;
+            } else {
+                if ( ! isset( $despesas_por_cat[ $categoria ] ) ) {
+                    $despesas_por_cat[ $categoria ] = 0;
+                }
+                $despesas_por_cat[ $categoria ] += $valor;
+                $total_despesas += $valor;
+            }
+        }
+        
+        $resultado = $total_receitas - $total_despesas;
+        
+        // Ordena por valor
+        arsort( $receitas_por_cat );
+        arsort( $despesas_por_cat );
+        
+        echo '<div class="dps-finance-dre">';
+        echo '<h4>' . esc_html__( 'Demonstrativo de Resultado (DRE Simplificado)', 'dps-finance-addon' ) . '</h4>';
+        echo '<table class="dps-table dps-dre-table">';
+        
+        // Receitas
+        echo '<thead><tr><th colspan="2" class="dps-dre-header dps-dre-receitas">' . esc_html__( 'RECEITAS', 'dps-finance-addon' ) . '</th></tr></thead>';
+        echo '<tbody>';
+        foreach ( $receitas_por_cat as $cat => $valor ) {
+            echo '<tr>';
+            echo '<td>' . esc_html( $cat ) . '</td>';
+            echo '<td class="dps-dre-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ) . '</td>';
+            echo '</tr>';
+        }
+        echo '<tr class="dps-dre-subtotal">';
+        echo '<td><strong>' . esc_html__( 'Total Receitas', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $total_receitas * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tbody>';
+        
+        // Despesas
+        echo '<thead><tr><th colspan="2" class="dps-dre-header dps-dre-despesas">' . esc_html__( 'DESPESAS', 'dps-finance-addon' ) . '</th></tr></thead>';
+        echo '<tbody>';
+        foreach ( $despesas_por_cat as $cat => $valor ) {
+            echo '<tr>';
+            echo '<td>' . esc_html( $cat ) . '</td>';
+            echo '<td class="dps-dre-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ) . '</td>';
+            echo '</tr>';
+        }
+        echo '<tr class="dps-dre-subtotal">';
+        echo '<td><strong>' . esc_html__( 'Total Despesas', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $total_despesas * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tbody>';
+        
+        // Resultado
+        $resultado_class = $resultado >= 0 ? 'dps-dre-positivo' : 'dps-dre-negativo';
+        echo '<tfoot>';
+        echo '<tr class="dps-dre-resultado ' . esc_attr( $resultado_class ) . '">';
+        echo '<td><strong>' . esc_html__( 'RESULTADO DO PERÍODO', 'dps-finance-addon' ) . '</strong></td>';
+        echo '<td class="dps-dre-value"><strong>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $resultado * 100 ) ) ) . '</strong></td>';
+        echo '</tr>';
+        echo '</tfoot>';
+        
+        echo '</table>';
         echo '</div>';
     }
 
