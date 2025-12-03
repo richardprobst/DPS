@@ -184,14 +184,13 @@ class DPS_Stats_API {
 
         global $wpdb;
 
-        // Query otimizada: buscar último atendimento de cada pet em uma única query
-        $pets_table = $wpdb->posts;
-        $meta_table = $wpdb->postmeta;
+        // Limite configurável via filtro (padrão: 500 pets)
+        $pets_limit = apply_filters( 'dps_stats_inactive_pets_limit', 500 );
 
         // Obter todos os pets ativos
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
-            'posts_per_page' => 500,
+            'posts_per_page' => $pets_limit,
             'post_status'    => 'publish',
             'fields'         => 'ids',
         ] );
@@ -201,13 +200,14 @@ class DPS_Stats_API {
             return [];
         }
 
-        // Buscar último atendimento de cada pet em uma query
+        // Buscar último atendimento de cada pet em uma query otimizada
+        // Usa $wpdb->posts e $wpdb->postmeta que são seguros (propriedades do wpdb)
         $placeholders = implode( ',', array_fill( 0, count( $pets ), '%d' ) );
         $sql = $wpdb->prepare(
             "SELECT pm.meta_value AS pet_id, MAX(pm2.meta_value) AS last_date
-             FROM {$meta_table} pm
-             INNER JOIN {$meta_table} pm2 ON pm.post_id = pm2.post_id AND pm2.meta_key = 'appointment_date'
-             INNER JOIN {$pets_table} p ON p.ID = pm.post_id AND p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+             FROM {$wpdb->postmeta} pm
+             INNER JOIN {$wpdb->postmeta} pm2 ON pm.post_id = pm2.post_id AND pm2.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
              WHERE pm.meta_key = 'appointment_pet_id' AND pm.meta_value IN ({$placeholders})
              GROUP BY pm.meta_value",
             ...$pets

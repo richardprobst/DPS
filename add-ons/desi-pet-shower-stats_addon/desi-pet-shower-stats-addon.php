@@ -58,7 +58,19 @@ if ( ! function_exists( 'dps_stats_build_cache_key' ) ) {
 }
 
 if ( ! function_exists( 'dps_get_total_revenue' ) ) {
+    /**
+     * Calcula o total de receitas pagas no intervalo informado.
+     *
+     * @deprecated 1.1.0 Use DPS_Stats_API::get_revenue_total() instead.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return float
+     */
     function dps_get_total_revenue( $start_date, $end_date ) {
+        _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Stats_API::get_revenue_total()' );
+        
         if ( class_exists( 'DPS_Stats_API' ) ) {
             return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
         }
