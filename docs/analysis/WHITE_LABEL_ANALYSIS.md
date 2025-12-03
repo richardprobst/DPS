@@ -22,7 +22,39 @@ Este documento analisa a viabilidade, segurança e funcionalidades de uma implem
 |----------|-------------------|
 | Como introduzir White Label? | Via novo add-on dedicado + configurações centralizadas |
 | É seguro? | **Sim**, com implementação adequada (veja Seção 4) |
-| Quais funcionalidades? | Personalização visual, textual, técnica e de identidade (veja Seção 3) |
+| Quais funcionalidades? | Personalização visual, textual, técnica, SMTP e admin customization (veja Seção 3) |
+
+---
+
+## 1.3 Inspiração e Referências
+
+### WP Adminify - Referência Principal
+
+O plugin [WP Adminify](https://wpadminify.com/) serve como inspiração para funcionalidades avançadas de White Label. Principais funcionalidades que podemos incorporar:
+
+| Funcionalidade WP Adminify | Aplicação no DPS White Label |
+|---------------------------|------------------------------|
+| **Admin Bar Customizer** | Personalizar admin bar do WordPress |
+| **Login Page Customizer** | Página de login com marca do parceiro |
+| **Dashboard Widget Manager** | Controlar widgets exibidos no dashboard |
+| **Admin Columns** | Personalizar colunas nas listagens |
+| **Menu Editor** | Reorganizar e personalizar menu admin |
+| **Admin Notice Manager** | Controlar notificações exibidas |
+| **Quick Menu** | Acesso rápido a funcionalidades |
+| **Folder Management** | Organização de mídia com pastas |
+| **Activity Logs** | Registro de atividades no sistema |
+
+### WP Mail SMTP - Integração de E-mail
+
+O plugin WP Mail SMTP fornece funcionalidades robustas de envio de e-mail que devem ser integradas ao White Label:
+
+| Recurso SMTP | Benefício |
+|--------------|-----------|
+| **Configuração de SMTP** | Envio confiável de e-mails |
+| **Múltiplos mailers** | SMTP, SendGrid, Mailgun, Amazon SES, etc. |
+| **Logs de e-mail** | Registro e depuração de envios |
+| **Verificação de domínio** | SPF, DKIM para melhor deliverability |
+| **Fallback automático** | Se um mailer falha, usa outro |
 
 ---
 
@@ -30,32 +62,47 @@ Este documento analisa a viabilidade, segurança e funcionalidades de uma implem
 
 ### 2.1 Estrutura de Add-on Dedicado
 
-Seguindo o padrão do DPS, a funcionalidade White Label seria implementada como um add-on opcional:
+Seguindo o padrão do DPS, a funcionalidade White Label seria implementada como um add-on opcional com módulos expandidos:
 
 ```
 add-ons/desi-pet-shower-whitelabel_addon/
-├── desi-pet-shower-whitelabel-addon.php    # Arquivo principal
+├── desi-pet-shower-whitelabel-addon.php        # Arquivo principal
 ├── includes/
-│   ├── class-dps-whitelabel-settings.php   # Gerenciamento de configurações
-│   ├── class-dps-whitelabel-branding.php   # Aplicação de branding
-│   ├── class-dps-whitelabel-assets.php     # Gestão de assets personalizados
-│   └── class-dps-whitelabel-license.php    # Validação de licença (opcional)
+│   ├── class-dps-whitelabel-settings.php       # Gerenciamento de configurações gerais
+│   ├── class-dps-whitelabel-branding.php       # Aplicação de branding
+│   ├── class-dps-whitelabel-assets.php         # Gestão de assets personalizados
+│   ├── class-dps-whitelabel-license.php        # Validação de licença
+│   ├── class-dps-whitelabel-smtp.php           # Configurações SMTP (NOVO)
+│   ├── class-dps-whitelabel-login-page.php     # Personalização da página de login (NOVO)
+│   ├── class-dps-whitelabel-admin-bar.php      # Personalização da admin bar (NOVO)
+│   ├── class-dps-whitelabel-dashboard.php      # Widgets e dashboard customizado (NOVO)
+│   ├── class-dps-whitelabel-menu-editor.php    # Editor de menus (NOVO)
+│   ├── class-dps-whitelabel-activity-log.php   # Logs de atividade (NOVO)
+│   └── class-dps-whitelabel-maintenance.php    # Modo manutenção (NOVO)
 ├── assets/
 │   ├── css/
-│   │   └── whitelabel-admin.css            # Estilos da interface admin
+│   │   ├── whitelabel-admin.css                # Estilos da interface admin
+│   │   └── whitelabel-login.css                # Estilos da página de login
 │   └── js/
-│       └── whitelabel-admin.js             # Scripts da interface admin
+│       ├── whitelabel-admin.js                 # Scripts da interface admin
+│       ├── whitelabel-color-picker.js          # Seletor de cores
+│       └── whitelabel-media-uploader.js        # Upload de mídia
 ├── templates/
-│   └── admin-settings.php                  # Template da página de configurações
-└── uninstall.php                           # Limpeza na desinstalação
+│   ├── admin-settings.php                      # Template principal de configurações
+│   ├── admin-smtp.php                          # Template de configurações SMTP
+│   ├── admin-login-page.php                    # Template de personalização de login
+│   ├── admin-dashboard.php                     # Template de configurações do dashboard
+│   ├── admin-activity-log.php                  # Template de logs de atividade
+│   └── login-template.php                      # Template da página de login customizada
+└── uninstall.php                               # Limpeza na desinstalação
 ```
 
 ### 2.2 Modelo de Configurações
 
-As configurações White Label seriam armazenadas em uma única option serializada:
+As configurações White Label seriam armazenadas em múltiplas options organizadas por módulo:
 
 ```php
-// Option: dps_whitelabel_settings
+// Option: dps_whitelabel_settings (Configurações Gerais)
 [
     // Identidade Visual
     'brand_name'           => 'Minha Pet Shop Sistemas',
@@ -99,6 +146,116 @@ As configurações White Label seriam armazenadas em uma única option serializa
     'license_expires'      => '',          // Data de expiração
     'license_tier'         => 'standard',  // standard, professional, enterprise
 ]
+
+// Option: dps_whitelabel_smtp (Configurações SMTP - NOVO)
+[
+    'smtp_enabled'         => false,
+    'smtp_host'            => 'smtp.gmail.com',
+    'smtp_port'            => 587,
+    'smtp_encryption'      => 'tls',       // none, ssl, tls
+    'smtp_auth'            => true,
+    'smtp_username'        => '',
+    'smtp_password'        => '',          // Encriptado com defuse/php-encryption
+    
+    // Mailer alternativo
+    'mailer_type'          => 'smtp',      // smtp, sendgrid, mailgun, ses, postmark, sparkpost
+    'api_key'              => '',          // Para serviços API
+    'region'               => '',          // Para Amazon SES
+    
+    // Configurações avançadas
+    'return_path'          => '',
+    'force_from_email'     => false,
+    'force_from_name'      => false,
+    
+    // Logs de e-mail
+    'log_emails'           => true,
+    'log_retention_days'   => 30,
+    
+    // Teste
+    'test_email_address'   => '',
+]
+
+// Option: dps_whitelabel_login (Personalização Login - NOVO)
+[
+    'login_enabled'            => false,
+    'login_logo_url'           => '',
+    'login_logo_width'         => 320,
+    'login_logo_height'        => 80,
+    'login_background_type'    => 'color',  // color, image, gradient
+    'login_background_color'   => '#f9fafb',
+    'login_background_image'   => '',
+    'login_background_gradient' => 'linear-gradient(135deg, #0ea5e9 0%, #10b981 100%)',
+    
+    // Formulário
+    'login_form_width'         => 320,
+    'login_form_background'    => '#ffffff',
+    'login_form_border_radius' => 8,
+    'login_form_shadow'        => true,
+    
+    // Botão
+    'login_button_color'       => '#0ea5e9',
+    'login_button_text_color'  => '#ffffff',
+    
+    // Textos
+    'login_custom_css'         => '',
+    'login_custom_message'     => '',
+    'login_footer_text'        => '',
+    
+    // Links
+    'hide_register_link'       => false,
+    'hide_lost_password_link'  => false,
+    'custom_register_url'      => '',
+]
+
+// Option: dps_whitelabel_admin_bar (Admin Bar - NOVO)
+[
+    'admin_bar_enabled'        => false,
+    'hide_wp_logo'             => true,
+    'hide_updates_notice'      => false,
+    'hide_comments_menu'       => false,
+    'hide_new_content_menu'    => false,
+    'custom_logo_url'          => '',
+    'custom_logo_link'         => '',
+    'custom_menu_items'        => [],      // Array de itens customizados
+    'admin_bar_color'          => '#1d2327',
+    'admin_bar_text_color'     => '#ffffff',
+]
+
+// Option: dps_whitelabel_dashboard (Dashboard Widgets - NOVO)
+[
+    'dashboard_enabled'        => false,
+    'hide_welcome_panel'       => true,
+    'hide_quick_press'         => false,
+    'hide_activity_widget'     => false,
+    'hide_primary_widget'      => true,    // WordPress Events
+    'custom_welcome_panel'     => '',      // HTML customizado
+    'custom_widgets'           => [],      // Array de widgets customizados
+]
+
+// Option: dps_whitelabel_maintenance (Modo Manutenção - NOVO)
+[
+    'maintenance_enabled'      => false,
+    'maintenance_title'        => 'Em Manutenção',
+    'maintenance_message'      => 'Estamos realizando atualizações. Voltamos em breve!',
+    'maintenance_logo_url'     => '',
+    'maintenance_background'   => '#f9fafb',
+    'maintenance_bypass_roles' => ['administrator'],
+    'maintenance_countdown'    => '',      // Data/hora de retorno
+    'maintenance_social_links' => [],      // Links de redes sociais
+]
+
+// Option: dps_whitelabel_activity_log (Logs de Atividade - NOVO)
+[
+    'activity_log_enabled'     => true,
+    'log_user_actions'         => true,
+    'log_post_changes'         => true,
+    'log_settings_changes'     => true,
+    'log_plugin_changes'       => true,
+    'log_login_attempts'       => true,
+    'log_retention_days'       => 90,
+    'notify_admin_on_critical' => false,
+    'critical_email_address'   => '',
+]
 ```
 
 ### 2.3 Filtros e Hooks Propostos
@@ -123,6 +280,31 @@ apply_filters( 'dps_whitelabel_custom_css', $css );
 // Actions para extensibilidade
 do_action( 'dps_whitelabel_settings_saved', $old_settings, $new_settings );
 do_action( 'dps_whitelabel_after_branding_applied' );
+
+// Hooks SMTP (NOVO)
+apply_filters( 'dps_whitelabel_smtp_phpmailer', $phpmailer );
+apply_filters( 'dps_whitelabel_smtp_host', $host );
+apply_filters( 'dps_whitelabel_email_content_type', $content_type );
+do_action( 'dps_whitelabel_email_sent', $to, $subject, $result );
+do_action( 'dps_whitelabel_email_failed', $to, $subject, $error );
+
+// Hooks Login Page (NOVO)
+apply_filters( 'dps_whitelabel_login_logo_url', $logo_url );
+apply_filters( 'dps_whitelabel_login_styles', $styles );
+apply_filters( 'dps_whitelabel_login_message', $message );
+
+// Hooks Admin Bar (NOVO)
+apply_filters( 'dps_whitelabel_admin_bar_nodes', $nodes );
+do_action( 'dps_whitelabel_admin_bar_before' );
+do_action( 'dps_whitelabel_admin_bar_after' );
+
+// Hooks Activity Log (NOVO)
+do_action( 'dps_whitelabel_log_activity', $action, $object_type, $object_id, $details );
+apply_filters( 'dps_whitelabel_should_log_action', $should_log, $action );
+
+// Hooks Maintenance Mode (NOVO)
+apply_filters( 'dps_whitelabel_maintenance_template', $template_path );
+apply_filters( 'dps_whitelabel_maintenance_can_access', $can_access, $user );
 ```
 
 ---
@@ -221,7 +403,515 @@ add_filter( 'wp_mail_from_name', function( $from_name ) {
 } );
 ```
 
-### 3.3 Personalização Técnica
+### 3.3 Configuração SMTP (NOVO)
+
+O módulo SMTP permite configuração completa de envio de e-mails, inspirado no WP Mail SMTP:
+
+| Funcionalidade | Descrição | Complexidade | Prioridade |
+|----------------|-----------|--------------|------------|
+| **SMTP básico** | Host, porta, autenticação, TLS/SSL | Média | Alta |
+| **Múltiplos mailers** | SMTP, SendGrid, Mailgun, Amazon SES, Postmark | Alta | Média |
+| **Logs de e-mail** | Registro de todos os e-mails enviados | Média | Alta |
+| **Teste de e-mail** | Enviar e-mail de teste para verificar configuração | Baixa | Alta |
+| **Fallback automático** | Se SMTP falha, tenta PHP mail | Média | Média |
+
+**Implementação proposta:**
+
+```php
+/**
+ * Configura PHPMailer para usar SMTP customizado.
+ */
+class DPS_WhiteLabel_SMTP {
+    
+    public function __construct() {
+        add_action( 'phpmailer_init', [ $this, 'configure_phpmailer' ], 1000 );
+        add_action( 'wp_mail_failed', [ $this, 'log_email_failure' ] );
+        add_filter( 'wp_mail', [ $this, 'log_email_attempt' ] );
+    }
+    
+    /**
+     * Configura PHPMailer com as opções SMTP.
+     *
+     * @param PHPMailer $phpmailer Instância do PHPMailer.
+     */
+    public function configure_phpmailer( $phpmailer ) {
+        $smtp = get_option( 'dps_whitelabel_smtp', [] );
+        
+        if ( empty( $smtp['smtp_enabled'] ) ) {
+            return;
+        }
+        
+        $phpmailer->isSMTP();
+        $phpmailer->Host       = sanitize_text_field( $smtp['smtp_host'] ?? 'localhost' );
+        $phpmailer->Port       = absint( $smtp['smtp_port'] ?? 587 );
+        $phpmailer->SMTPAuth   = ! empty( $smtp['smtp_auth'] );
+        
+        if ( $phpmailer->SMTPAuth ) {
+            $phpmailer->Username = sanitize_text_field( $smtp['smtp_username'] ?? '' );
+            $phpmailer->Password = $this->decrypt_password( $smtp['smtp_password'] ?? '' );
+        }
+        
+        // Encriptação
+        $encryption = $smtp['smtp_encryption'] ?? 'tls';
+        if ( 'tls' === $encryption ) {
+            $phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } elseif ( 'ssl' === $encryption ) {
+            $phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        }
+        
+        // Return-Path personalizado
+        if ( ! empty( $smtp['return_path'] ) ) {
+            $phpmailer->Sender = sanitize_email( $smtp['return_path'] );
+        }
+        
+        // Timeout
+        $phpmailer->Timeout = 30;
+        
+        $phpmailer = apply_filters( 'dps_whitelabel_smtp_phpmailer', $phpmailer );
+    }
+    
+    /**
+     * Registra tentativa de envio de e-mail.
+     *
+     * @param array $args Argumentos do wp_mail.
+     * @return array Args inalterados.
+     */
+    public function log_email_attempt( $args ) {
+        $smtp = get_option( 'dps_whitelabel_smtp', [] );
+        
+        if ( empty( $smtp['log_emails'] ) ) {
+            return $args;
+        }
+        
+        $this->insert_email_log( [
+            'to'      => is_array( $args['to'] ) ? implode( ', ', $args['to'] ) : $args['to'],
+            'subject' => $args['subject'] ?? '',
+            'status'  => 'pending',
+            'date'    => current_time( 'mysql' ),
+        ] );
+        
+        return $args;
+    }
+    
+    /**
+     * Registra falha de envio de e-mail.
+     *
+     * @param WP_Error $error Erro do wp_mail.
+     */
+    public function log_email_failure( $error ) {
+        $this->update_last_email_log( [
+            'status' => 'failed',
+            'error'  => $error->get_error_message(),
+        ] );
+        
+        do_action( 'dps_whitelabel_email_failed', $error );
+    }
+    
+    /**
+     * Encripta senha SMTP antes de salvar.
+     *
+     * @param string $password Senha em texto plano.
+     * @return string Senha encriptada.
+     */
+    public function encrypt_password( $password ) {
+        if ( empty( $password ) ) {
+            return '';
+        }
+        
+        // Usa OPENSSL para encriptação
+        $key = wp_salt( 'auth' );
+        $iv  = openssl_random_pseudo_bytes( 16 );
+        
+        $encrypted = openssl_encrypt(
+            $password,
+            'AES-256-CBC',
+            $key,
+            0,
+            $iv
+        );
+        
+        return base64_encode( $iv . $encrypted );
+    }
+    
+    /**
+     * Decripta senha SMTP.
+     *
+     * @param string $encrypted Senha encriptada.
+     * @return string Senha em texto plano.
+     */
+    private function decrypt_password( $encrypted ) {
+        if ( empty( $encrypted ) ) {
+            return '';
+        }
+        
+        $key  = wp_salt( 'auth' );
+        $data = base64_decode( $encrypted );
+        $iv   = substr( $data, 0, 16 );
+        $enc  = substr( $data, 16 );
+        
+        return openssl_decrypt( $enc, 'AES-256-CBC', $key, 0, $iv );
+    }
+    
+    /**
+     * Envia e-mail de teste.
+     *
+     * @param string $to Endereço de destino.
+     * @return bool|WP_Error True em sucesso ou WP_Error.
+     */
+    public static function send_test_email( $to ) {
+        $settings = get_option( 'dps_whitelabel_settings', [] );
+        $brand    = $settings['brand_name'] ?? 'DPS by PRObst';
+        
+        $subject = sprintf(
+            /* translators: %s: Nome da marca */
+            __( '[%s] E-mail de Teste SMTP', 'dps-whitelabel-addon' ),
+            $brand
+        );
+        
+        $message = sprintf(
+            /* translators: %1$s: Nome da marca, %2$s: Data/hora */
+            __( 
+                "Este é um e-mail de teste enviado pelo %1\$s.\n\n" .
+                "Se você está lendo isso, a configuração SMTP está funcionando corretamente!\n\n" .
+                "Data/hora do envio: %2\$s\n" .
+                "Servidor: %3\$s",
+                'dps-whitelabel-addon'
+            ),
+            $brand,
+            current_time( 'mysql' ),
+            home_url()
+        );
+        
+        $sent = wp_mail( $to, $subject, $message );
+        
+        if ( ! $sent ) {
+            global $phpmailer;
+            return new WP_Error( 
+                'smtp_test_failed', 
+                $phpmailer->ErrorInfo ?? __( 'Falha desconhecida no envio.', 'dps-whitelabel-addon' )
+            );
+        }
+        
+        return true;
+    }
+}
+```
+
+**Tabela de logs de e-mail:**
+
+```sql
+CREATE TABLE {$wpdb->prefix}dps_email_logs (
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    to_email varchar(320) NOT NULL,
+    subject varchar(255) NOT NULL,
+    status varchar(20) NOT NULL DEFAULT 'pending',
+    error text,
+    headers text,
+    attachments text,
+    created_at datetime NOT NULL,
+    PRIMARY KEY (id),
+    KEY status (status),
+    KEY created_at (created_at)
+) {$charset_collate};
+```
+
+### 3.4 Personalização da Página de Login (NOVO)
+
+Inspirado no WP Adminify Login Customizer:
+
+| Funcionalidade | Descrição | Complexidade | Prioridade |
+|----------------|-----------|--------------|------------|
+| **Logo customizado** | Logo do parceiro na página de login | Baixa | Alta |
+| **Background** | Cor, imagem ou gradiente de fundo | Baixa | Alta |
+| **Estilo do formulário** | Cores, bordas, sombra | Média | Média |
+| **CSS customizado** | CSS adicional para login | Baixa | Média |
+| **Mensagem personalizada** | Texto abaixo do formulário | Baixa | Baixa |
+
+**Implementação proposta:**
+
+```php
+/**
+ * Personaliza a página de login do WordPress.
+ */
+class DPS_WhiteLabel_Login_Page {
+    
+    public function __construct() {
+        add_action( 'login_enqueue_scripts', [ $this, 'enqueue_login_styles' ] );
+        add_filter( 'login_headerurl', [ $this, 'filter_login_logo_url' ] );
+        add_filter( 'login_headertext', [ $this, 'filter_login_logo_text' ] );
+        add_action( 'login_footer', [ $this, 'add_login_footer' ] );
+        add_filter( 'login_message', [ $this, 'filter_login_message' ] );
+    }
+    
+    /**
+     * Enfileira estilos customizados para o login.
+     */
+    public function enqueue_login_styles() {
+        $login = get_option( 'dps_whitelabel_login', [] );
+        
+        if ( empty( $login['login_enabled'] ) ) {
+            return;
+        }
+        
+        $css = $this->generate_login_css( $login );
+        
+        wp_add_inline_style( 'login', $css );
+    }
+    
+    /**
+     * Gera CSS para a página de login.
+     *
+     * @param array $login Configurações de login.
+     * @return string CSS gerado.
+     */
+    private function generate_login_css( $login ) {
+        $css = '';
+        
+        // Background
+        $bg_type = $login['login_background_type'] ?? 'color';
+        switch ( $bg_type ) {
+            case 'color':
+                $css .= 'body.login { background-color: ' . esc_attr( $login['login_background_color'] ?? '#f9fafb' ) . '; }';
+                break;
+            case 'image':
+                $css .= 'body.login { background-image: url(' . esc_url( $login['login_background_image'] ) . '); background-size: cover; background-position: center; }';
+                break;
+            case 'gradient':
+                $css .= 'body.login { background: ' . esc_attr( $login['login_background_gradient'] ) . '; }';
+                break;
+        }
+        
+        // Logo
+        if ( ! empty( $login['login_logo_url'] ) ) {
+            $width  = absint( $login['login_logo_width'] ?? 320 );
+            $height = absint( $login['login_logo_height'] ?? 80 );
+            
+            $css .= sprintf(
+                '#login h1 a, .login h1 a {
+                    background-image: url(%s);
+                    width: %dpx;
+                    height: %dpx;
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }',
+                esc_url( $login['login_logo_url'] ),
+                $width,
+                $height
+            );
+        }
+        
+        // Formulário
+        $form_bg     = $login['login_form_background'] ?? '#ffffff';
+        $form_radius = absint( $login['login_form_border_radius'] ?? 8 );
+        $form_shadow = ! empty( $login['login_form_shadow'] );
+        
+        $css .= sprintf(
+            '.login form {
+                background: %s;
+                border-radius: %dpx;
+                %s
+            }',
+            esc_attr( $form_bg ),
+            $form_radius,
+            $form_shadow ? 'box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);' : ''
+        );
+        
+        // Botão
+        $btn_color      = $login['login_button_color'] ?? '#0ea5e9';
+        $btn_text_color = $login['login_button_text_color'] ?? '#ffffff';
+        
+        $css .= sprintf(
+            '.login .button-primary {
+                background: %s !important;
+                border-color: %s !important;
+                color: %s !important;
+            }',
+            esc_attr( $btn_color ),
+            esc_attr( $btn_color ),
+            esc_attr( $btn_text_color )
+        );
+        
+        // CSS customizado
+        if ( ! empty( $login['login_custom_css'] ) ) {
+            $css .= DPS_WhiteLabel_Settings::sanitize_custom_css( $login['login_custom_css'] );
+        }
+        
+        return $css;
+    }
+    
+    /**
+     * Altera URL do logo no login.
+     *
+     * @return string URL do site.
+     */
+    public function filter_login_logo_url() {
+        $settings = get_option( 'dps_whitelabel_settings', [] );
+        return $settings['website_url'] ?? home_url();
+    }
+    
+    /**
+     * Altera texto do logo no login.
+     *
+     * @return string Nome da marca.
+     */
+    public function filter_login_logo_text() {
+        $settings = get_option( 'dps_whitelabel_settings', [] );
+        return $settings['brand_name'] ?? get_bloginfo( 'name' );
+    }
+}
+```
+
+### 3.5 Personalização Admin Bar (NOVO)
+
+| Funcionalidade | Descrição | Complexidade | Prioridade |
+|----------------|-----------|--------------|------------|
+| **Ocultar logo WP** | Remover logo do WordPress da admin bar | Baixa | Alta |
+| **Logo customizado** | Adicionar logo do parceiro | Baixa | Alta |
+| **Itens customizados** | Adicionar links personalizados | Média | Média |
+| **Cores da admin bar** | Alterar cores de fundo e texto | Baixa | Média |
+| **Ocultar itens** | Remover itens específicos (updates, comments, etc.) | Baixa | Média |
+
+**Implementação proposta:**
+
+```php
+/**
+ * Personaliza a Admin Bar do WordPress.
+ */
+class DPS_WhiteLabel_Admin_Bar {
+    
+    public function __construct() {
+        add_action( 'admin_bar_menu', [ $this, 'customize_admin_bar' ], 999 );
+        add_action( 'wp_head', [ $this, 'add_admin_bar_styles' ] );
+        add_action( 'admin_head', [ $this, 'add_admin_bar_styles' ] );
+    }
+    
+    /**
+     * Customiza a admin bar.
+     *
+     * @param WP_Admin_Bar $wp_admin_bar Instância da admin bar.
+     */
+    public function customize_admin_bar( $wp_admin_bar ) {
+        $admin_bar = get_option( 'dps_whitelabel_admin_bar', [] );
+        
+        if ( empty( $admin_bar['admin_bar_enabled'] ) ) {
+            return;
+        }
+        
+        do_action( 'dps_whitelabel_admin_bar_before', $wp_admin_bar );
+        
+        // Remover logo do WordPress
+        if ( ! empty( $admin_bar['hide_wp_logo'] ) ) {
+            $wp_admin_bar->remove_node( 'wp-logo' );
+        }
+        
+        // Remover avisos de atualização
+        if ( ! empty( $admin_bar['hide_updates_notice'] ) ) {
+            $wp_admin_bar->remove_node( 'updates' );
+        }
+        
+        // Remover menu de comentários
+        if ( ! empty( $admin_bar['hide_comments_menu'] ) ) {
+            $wp_admin_bar->remove_node( 'comments' );
+        }
+        
+        // Remover menu "Novo"
+        if ( ! empty( $admin_bar['hide_new_content_menu'] ) ) {
+            $wp_admin_bar->remove_node( 'new-content' );
+        }
+        
+        // Adicionar logo customizado
+        if ( ! empty( $admin_bar['custom_logo_url'] ) ) {
+            $settings = get_option( 'dps_whitelabel_settings', [] );
+            $link     = $admin_bar['custom_logo_link'] ?? admin_url();
+            
+            $wp_admin_bar->add_node( [
+                'id'    => 'dps-whitelabel-logo',
+                'title' => sprintf(
+                    '<img src="%s" alt="%s" style="height: 20px; vertical-align: middle; margin-right: 5px;">',
+                    esc_url( $admin_bar['custom_logo_url'] ),
+                    esc_attr( $settings['brand_name'] ?? '' )
+                ),
+                'href'  => esc_url( $link ),
+                'meta'  => [
+                    'class' => 'dps-whitelabel-logo-node',
+                ],
+            ] );
+        }
+        
+        // Adicionar itens customizados
+        if ( ! empty( $admin_bar['custom_menu_items'] ) && is_array( $admin_bar['custom_menu_items'] ) ) {
+            foreach ( $admin_bar['custom_menu_items'] as $index => $item ) {
+                $wp_admin_bar->add_node( [
+                    'id'     => 'dps-custom-item-' . $index,
+                    'title'  => esc_html( $item['title'] ?? '' ),
+                    'href'   => esc_url( $item['url'] ?? '#' ),
+                    'parent' => $item['parent'] ?? false,
+                    'meta'   => [
+                        'target' => $item['target'] ?? '_self',
+                    ],
+                ] );
+            }
+        }
+        
+        do_action( 'dps_whitelabel_admin_bar_after', $wp_admin_bar );
+    }
+    
+    /**
+     * Adiciona estilos customizados para a admin bar.
+     */
+    public function add_admin_bar_styles() {
+        if ( ! is_admin_bar_showing() ) {
+            return;
+        }
+        
+        $admin_bar = get_option( 'dps_whitelabel_admin_bar', [] );
+        
+        if ( empty( $admin_bar['admin_bar_enabled'] ) ) {
+            return;
+        }
+        
+        $bg_color   = $admin_bar['admin_bar_color'] ?? '#1d2327';
+        $text_color = $admin_bar['admin_bar_text_color'] ?? '#ffffff';
+        
+        ?>
+        <style>
+            #wpadminbar {
+                background: <?php echo esc_attr( $bg_color ); ?> !important;
+            }
+            #wpadminbar .ab-item,
+            #wpadminbar a.ab-item,
+            #wpadminbar > #wp-toolbar span.ab-label,
+            #wpadminbar > #wp-toolbar span.noticon {
+                color: <?php echo esc_attr( $text_color ); ?> !important;
+            }
+        </style>
+        <?php
+    }
+}
+```
+
+### 3.6 Modo Manutenção (NOVO)
+
+| Funcionalidade | Descrição | Complexidade | Prioridade |
+|----------------|-----------|--------------|------------|
+| **Ativar/desativar** | Toggle simples para modo manutenção | Baixa | Alta |
+| **Página customizada** | Template visual personalizado | Média | Alta |
+| **Countdown** | Timer até retorno do sistema | Baixa | Média |
+| **Bypass por role** | Admins podem acessar normalmente | Baixa | Alta |
+| **Links sociais** | Redes sociais na página de manutenção | Baixa | Baixa |
+
+### 3.7 Logs de Atividade (NOVO)
+
+| Funcionalidade | Descrição | Complexidade | Prioridade |
+|----------------|-----------|--------------|------------|
+| **Log de logins** | Registrar tentativas de login | Baixa | Alta |
+| **Log de alterações** | Registrar mudanças em posts/settings | Média | Alta |
+| **Filtros e busca** | Pesquisar nos logs | Média | Média |
+| **Exportação** | Exportar logs em CSV | Baixa | Baixa |
+| **Alertas críticos** | Notificar admin de ações críticas | Média | Média |
+
+### 3.8 Personalização Técnica
 
 | Funcionalidade | Descrição | Complexidade | Prioridade |
 |----------------|-----------|--------------|------------|
@@ -230,15 +920,17 @@ add_filter( 'wp_mail_from_name', function( $from_name ) {
 | **Integração analytics** | Google Analytics / Meta Pixel | Média | Baixa |
 | **Webhook customizado** | Notificar sistema do parceiro | Alta | Baixa |
 
-### 3.4 Níveis de Personalização (Tiers)
+### 3.9 Níveis de Personalização (Tiers) - Atualizado
 
-Sugere-se um modelo de tiers para comercialização:
+Modelo expandido de tiers para comercialização:
 
-| Tier | Funcionalidades | Caso de Uso |
-|------|-----------------|-------------|
-| **Standard** | Logo, cores básicas, nome da marca | Freelancers e pequenas agências |
-| **Professional** | Standard + e-mails, WhatsApp, CSS customizado | Agências médias |
-| **Enterprise** | Professional + hide powered by, webhooks, multi-tenant | Grandes revendedores |
+| Tier | Funcionalidades | Caso de Uso | Preço Sugerido |
+|------|-----------------|-------------|----------------|
+| **Starter** | Logo, nome, cores básicas | Testes e avaliação | Gratuito (limitado) |
+| **Standard** | Starter + e-mails, WhatsApp, favicon | Freelancers | R$ 297/site |
+| **Professional** | Standard + SMTP, Login customizado, CSS | Agências médias | R$ 597/site |
+| **Enterprise** | Professional + Admin Bar, Dashboard, Logs, hide powered-by | Grandes revendedores | R$ 1.497/ilimitado |
+| **Agency** | Enterprise + Multi-site, API, Suporte prioritário | Agências enterprise | Sob consulta |
 
 ---
 
@@ -453,45 +1145,89 @@ Para suportar White Label completamente, algumas modificações são necessária
 
 ## 6. Plano de Implementação
 
-### 6.1 Fases de Desenvolvimento
+### 6.1 Fases de Desenvolvimento - Atualizado
 
 | Fase | Descrição | Duração | Entregáveis |
 |------|-----------|---------|-------------|
 | **Fase 1** | Estrutura base e configurações | 8h | Add-on funcional com interface admin |
-| **Fase 2** | Personalização visual | 6h | Logo, cores, CSS customizado |
+| **Fase 2** | Personalização visual | 6h | Logo, cores, CSS customizado, favicon |
 | **Fase 3** | Personalização textual | 4h | Nome, e-mails, mensagens |
-| **Fase 4** | Integrações | 6h | Communications, Portal, etc. |
-| **Fase 5** | Licenciamento (opcional) | 8h | Sistema de chaves de licença |
-| **Fase 6** | Documentação e testes | 6h | README, exemplos, testes |
+| **Fase 4** | Módulo SMTP | 10h | Configuração SMTP, logs de e-mail, teste |
+| **Fase 5** | Página de Login customizada | 6h | Background, logo, estilos do formulário |
+| **Fase 6** | Admin Bar customizada | 4h | Ocultar itens, logo, cores |
+| **Fase 7** | Dashboard e Widgets | 6h | Welcome panel, widgets customizados |
+| **Fase 8** | Modo Manutenção | 4h | Página de manutenção, bypass por role |
+| **Fase 9** | Logs de Atividade | 8h | Registro de ações, filtros, exportação |
+| **Fase 10** | Licenciamento | 8h | Sistema de chaves de licença |
+| **Fase 11** | Integrações | 6h | Communications, Portal, etc. |
+| **Fase 12** | Documentação e testes | 8h | README, exemplos, testes |
 
-**Total estimado: 30-38h**
+**Total estimado: 70-85h**
 
 ### 6.2 Priorização de Funcionalidades
 
-**MVP (Mínimo Produto Viável) - Fase 1+2:**
+**MVP (Mínimo Produto Viável) - Fases 1-3:**
 - ✅ Logo personalizado
 - ✅ Nome da marca
 - ✅ Cores primárias
 - ✅ WhatsApp da equipe
+- ✅ Remetente de e-mail básico
 
-**Versão Completa - Todas as fases:**
-- ✅ Todas as funcionalidades visuais
-- ✅ Personalização de comunicações
-- ✅ CSS customizado
+**Versão Standard - Fases 1-5:**
+- ✅ Todas as funcionalidades do MVP
+- ✅ SMTP configurável
+- ✅ Logs de e-mail
+- ✅ Página de login customizada
+
+**Versão Professional - Fases 1-8:**
+- ✅ Todas as funcionalidades Standard
+- ✅ Admin Bar customizada
+- ✅ Dashboard widgets
+- ✅ Modo Manutenção
+- ✅ CSS customizado avançado
+
+**Versão Enterprise - Todas as fases:**
+- ✅ Todas as funcionalidades Professional
+- ✅ Logs de atividade
 - ✅ Sistema de licenciamento
+- ✅ Hide "Powered by"
+- ✅ Suporte prioritário
 
-### 6.3 Dependências
+### 6.3 Dependências - Atualizado
 
 ```mermaid
 graph TD
     A[Plugin Base] --> B[White Label Add-on]
-    B --> C[Configurações]
+    B --> C[Configurações Gerais]
     C --> D[Visual]
     C --> E[Textual]
     C --> F[Técnica]
-    G[Communications Add-on] -.->|opcional| E
-    H[Portal Add-on] -.->|opcional| D
+    
+    B --> G[Módulo SMTP]
+    G --> H[Logs de E-mail]
+    
+    B --> I[Login Page]
+    B --> J[Admin Bar]
+    B --> K[Dashboard]
+    B --> L[Manutenção]
+    B --> M[Activity Logs]
+    
+    N[Communications Add-on] -.->|opcional| G
+    O[Portal Add-on] -.->|opcional| I
+    P[Backup Add-on] -.->|opcional| M
 ```
+
+### 6.4 Cronograma Sugerido
+
+| Sprint | Duração | Fases | Marco |
+|--------|---------|-------|-------|
+| Sprint 1 | 2 semanas | 1, 2, 3 | MVP funcional |
+| Sprint 2 | 2 semanas | 4, 5 | SMTP + Login |
+| Sprint 3 | 2 semanas | 6, 7, 8 | Admin completo |
+| Sprint 4 | 2 semanas | 9, 10 | Logs + Licença |
+| Sprint 5 | 1 semana | 11, 12 | Documentação e release |
+
+**Total: 9 semanas (~2 meses)**
 
 ---
 
@@ -506,13 +1242,15 @@ graph TD
 | **Por tier** | Preços diferentes por funcionalidade | Escalonável | Suporte múltiplo |
 | **OEM** | Licença para revendedores | Volume | Menor margem |
 
-### 7.2 Preços Sugeridos
+### 7.2 Preços Sugeridos - Atualizado
 
 | Tier | Preço Sugerido (BRL) | Funcionalidades |
 |------|----------------------|-----------------|
-| Standard | R$ 297/site único | Logo, cores, nome |
-| Professional | R$ 597/site único | Standard + e-mails, CSS |
-| Enterprise | R$ 1.497/ilimitado | Professional + sem "powered by", suporte |
+| Starter | Gratuito | Logo, nome (limitado, com marca DPS) |
+| Standard | R$ 297/site único | Logo, cores, nome, e-mail básico |
+| Professional | R$ 597/site único | Standard + SMTP, Login, Admin Bar |
+| Enterprise | R$ 1.497/ilimitado | Professional + Logs, hide powered-by, suporte |
+| Agency | Sob consulta | Enterprise + Multi-site, API, Suporte prioritário |
 
 ### 7.3 Considerações Jurídicas
 
@@ -824,19 +1562,146 @@ class DPS_WhiteLabel_Settings {
 | **Multi-tenant** | Múltiplos clientes compartilhando mesma instalação |
 | **Tier** | Nível de funcionalidades em modelo de preços escalonado |
 | **CSS Variables** | Propriedades CSS customizáveis via `--nome-variavel` |
+| **SMTP** | Simple Mail Transfer Protocol - protocolo para envio de e-mails |
+| **Mailer** | Serviço de envio de e-mails (SendGrid, Mailgun, etc.) |
+| **Admin Bar** | Barra administrativa do WordPress no topo do site |
+| **Activity Log** | Registro de atividades e ações no sistema |
 
 ---
 
 ## Apêndice C: Referências
 
-1. [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/)
-2. [WordPress Plugin Security](https://developer.wordpress.org/plugins/security/)
-3. [OWASP CSS Injection](https://owasp.org/www-project-web-security-testing-guide/)
-4. [DPS by PRObst - ANALYSIS.md](../ANALYSIS.md)
-5. [DPS by PRObst - AGENTS.md](../../AGENTS.md)
+### Plugins de Referência
+1. [WP Adminify](https://wpadminify.com/) - Inspiração para funcionalidades de admin customization
+2. [WP Mail SMTP](https://wordpress.org/plugins/wp-mail-smtp/) - Referência para implementação SMTP
+3. [White Label CMS](https://developer.developer.developer/) - Referência para branding
+
+### Documentação Técnica
+4. [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/)
+5. [WordPress Plugin Security](https://developer.wordpress.org/plugins/security/)
+6. [OWASP CSS Injection](https://owasp.org/www-project-web-security-testing-guide/)
+7. [PHPMailer Documentation](https://github.com/PHPMailer/PHPMailer)
+
+### Documentação DPS
+8. [DPS by PRObst - ANALYSIS.md](../ANALYSIS.md)
+9. [DPS by PRObst - AGENTS.md](../../AGENTS.md)
+10. [DPS by PRObst - API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+
+---
+
+## Apêndice D: Funcionalidades Inspiradas no WP Adminify
+
+O WP Adminify oferece diversas funcionalidades que podem ser adaptadas para o White Label DPS:
+
+| Funcionalidade WP Adminify | Status no DPS White Label | Notas |
+|---------------------------|---------------------------|-------|
+| **Admin Bar Customizer** | ✅ Incluído na Fase 6 | Personalização completa |
+| **Login Page Customizer** | ✅ Incluído na Fase 5 | Background, logo, estilos |
+| **Dashboard Widget Manager** | ✅ Incluído na Fase 7 | Ocultar/mostrar widgets |
+| **Admin Columns** | ⚠️ Futuro | Personalizar colunas nas listagens |
+| **Menu Editor** | ⚠️ Futuro | Reorganizar e personalizar menus |
+| **Admin Notice Manager** | ✅ Incluído na Fase 6 | Via Admin Bar config |
+| **Quick Menu** | ⚠️ Futuro | Acesso rápido flutuante |
+| **Folder Management** | ❌ Fora do escopo | Biblioteca de mídia específica |
+| **Activity Logs** | ✅ Incluído na Fase 9 | Registro completo |
+| **Custom CSS/JS** | ✅ Incluído na Fase 2 | CSS customizado |
+| **Maintenance Mode** | ✅ Incluído na Fase 8 | Página de manutenção |
+| **Google Fonts** | ⚠️ Futuro | Tipografia customizada |
+| **Sidebar Generator** | ❌ Fora do escopo | Específico para themes |
+
+### Funcionalidades Adicionais Propostas
+
+Além das inspirações do WP Adminify, o DPS White Label pode incluir:
+
+| Funcionalidade | Descrição | Prioridade |
+|----------------|-----------|------------|
+| **Multi-language Support** | Textos da interface em múltiplos idiomas | Média |
+| **Dark Mode Toggle** | Alternar entre tema claro e escuro | Baixa |
+| **Custom Admin Footer** | Texto e links customizados no rodapé | Alta |
+| **Role-based Visibility** | Mostrar/ocultar funcionalidades por role | Média |
+| **API REST** | Endpoints para integração externa | Baixa |
+| **Webhooks** | Notificar sistemas externos de eventos | Média |
+| **Analytics Integration** | Google Analytics, Meta Pixel | Baixa |
+| **Custom Error Pages** | 404, 500 com marca do parceiro | Baixa |
+
+---
+
+## Apêndice E: Integração com WP Mail SMTP
+
+O módulo SMTP do DPS White Label foi projetado para ser compatível com o WP Mail SMTP, permitindo:
+
+### Cenário 1: Uso Standalone
+O DPS White Label gerencia SMTP diretamente, sem necessidade de plugins externos.
+
+```php
+// Configuração básica no DPS White Label
+$smtp_settings = [
+    'smtp_enabled'    => true,
+    'smtp_host'       => 'smtp.gmail.com',
+    'smtp_port'       => 587,
+    'smtp_encryption' => 'tls',
+    'smtp_auth'       => true,
+    'smtp_username'   => 'user@gmail.com',
+    'smtp_password'   => 'encrypted_password',
+];
+```
+
+### Cenário 2: Coexistência com WP Mail SMTP
+Se o usuário já tem WP Mail SMTP instalado, o DPS White Label detecta e desativa seu próprio módulo SMTP.
+
+```php
+// Detecção de WP Mail SMTP
+if ( class_exists( 'WPMailSMTP\Core' ) ) {
+    // WP Mail SMTP está ativo - não sobrescrever
+    return;
+}
+```
+
+### Cenário 3: Migração de Configurações
+Importar configurações do WP Mail SMTP para o DPS White Label:
+
+```php
+/**
+ * Importa configurações do WP Mail SMTP.
+ *
+ * @return array Configurações importadas.
+ */
+public static function import_from_wp_mail_smtp() {
+    $wpms_options = get_option( 'wp_mail_smtp', [] );
+    
+    if ( empty( $wpms_options ) ) {
+        return [];
+    }
+    
+    return [
+        'smtp_enabled'    => true,
+        'smtp_host'       => $wpms_options['smtp']['host'] ?? '',
+        'smtp_port'       => $wpms_options['smtp']['port'] ?? 587,
+        'smtp_encryption' => $wpms_options['smtp']['encryption'] ?? 'tls',
+        'smtp_auth'       => ! empty( $wpms_options['smtp']['auth'] ),
+        'smtp_username'   => $wpms_options['smtp']['user'] ?? '',
+        // Senha não é importável por segurança
+    ];
+}
+```
+
+### Mailers Suportados
+
+| Mailer | Suporte DPS | Configuração |
+|--------|-------------|--------------|
+| **SMTP Padrão** | ✅ Completo | Host, porta, auth |
+| **Gmail** | ✅ Completo | Via SMTP ou OAuth |
+| **Outlook/Office 365** | ✅ Completo | Via SMTP |
+| **SendGrid** | ✅ API | API Key |
+| **Mailgun** | ✅ API | API Key, domínio |
+| **Amazon SES** | ✅ API | Access Key, Secret, Region |
+| **Postmark** | ⚠️ Futuro | API Token |
+| **SparkPost** | ⚠️ Futuro | API Key |
 
 ---
 
 **Documento preparado por:** PRObst  
+**Versão:** 2.0.0 (expandida)  
+**Data atualização:** 2025-12-03  
 **Revisão:** Pendente  
 **Próxima atualização:** Após aprovação do escopo
