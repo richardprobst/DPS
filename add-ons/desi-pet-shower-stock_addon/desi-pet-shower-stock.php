@@ -111,6 +111,10 @@ class DPS_Stock_Addon {
         add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_stock_tab' ], 30, 1 );
         add_action( 'dps_base_sections_after_history', [ $this, 'add_stock_section' ], 30, 1 );
 
+        // Enfileira assets CSS para responsividade
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
         // Integração com agendamentos: baixa estoque quando o atendimento é concluído.
         add_action( 'dps_base_after_save_appointment', [ $this, 'maybe_handle_appointment_completion' ], 10, 2 );
     }
@@ -123,6 +127,23 @@ class DPS_Stock_Addon {
         $self = new self();
         $self->register_stock_cpt();
         flush_rewrite_rules();
+    }
+
+    /**
+     * Enfileira CSS responsivo do add-on de estoque.
+     *
+     * @since 1.1.0
+     */
+    public function enqueue_assets() {
+        $addon_url = plugin_dir_url( __FILE__ );
+        $version   = '1.1.0';
+
+        wp_enqueue_style(
+            'dps-stock-addon',
+            $addon_url . 'assets/css/stock-addon.css',
+            [],
+            $version
+        );
     }
 
     /**

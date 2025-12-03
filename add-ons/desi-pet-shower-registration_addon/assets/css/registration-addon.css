@@ -1,0 +1,407 @@
+/**
+ * Estilos do Registration Add-on - DPS
+ * 
+ * CSS responsivo para o formulário público de cadastro de clientes e pets.
+ * Segue o padrão visual minimalista do DPS.
+ * 
+ * Breakpoints:
+ * - 1024px: Tablet grande
+ * - 768px: Tablet
+ * - 640px: Mobile
+ * - 480px: Mobile pequeno
+ * 
+ * @package Desi_Pet_Shower_Registration
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   1. Container Principal
+   ========================================================================== */
+
+.dps-registration-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dps-registration-form h4 {
+    margin: 32px 0 20px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-registration-form h4:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+/* ==========================================================================
+   2. Grid de Campos
+   ========================================================================== */
+
+.dps-client-fields,
+.dps-pet-fieldset {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dps-client-fields p,
+.dps-pet-fieldset p {
+    margin: 0;
+}
+
+/* Campos full-width */
+.dps-client-fields p.dps-field-full,
+.dps-pet-fieldset p.dps-field-full,
+.dps-client-fields p[style*="100%"],
+.dps-pet-fieldset p[style*="100%"] {
+    grid-column: 1 / -1;
+}
+
+/* ==========================================================================
+   3. Labels e Inputs
+   ========================================================================== */
+
+.dps-registration-form label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.dps-registration-form input[type="text"],
+.dps-registration-form input[type="email"],
+.dps-registration-form input[type="tel"],
+.dps-registration-form input[type="date"],
+.dps-registration-form input[type="number"],
+.dps-registration-form select,
+.dps-registration-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.dps-registration-form input:focus,
+.dps-registration-form select:focus,
+.dps-registration-form textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-registration-form input::placeholder,
+.dps-registration-form textarea::placeholder {
+    color: #9ca3af;
+}
+
+.dps-registration-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* ==========================================================================
+   4. Checkboxes
+   ========================================================================== */
+
+.dps-registration-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    accent-color: #0ea5e9;
+}
+
+.dps-registration-form label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+/* Fallback para navegadores sem suporte a :has() */
+.dps-registration-form .dps-checkbox-label {
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   5. Fieldset de Pets
+   ========================================================================== */
+
+.dps-pet-fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: #f9fafb;
+}
+
+.dps-pet-fieldset legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+    font-size: 15px;
+}
+
+#dps-pets-wrapper {
+    margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   6. Botões
+   ========================================================================== */
+
+.dps-registration-form .button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dps-registration-form .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: #ffffff;
+}
+
+.dps-registration-form .button-primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+#dps-add-pet {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+#dps-add-pet:hover {
+    background: #e5e7eb;
+}
+
+/* ==========================================================================
+   7. Mensagens de Feedback
+   ========================================================================== */
+
+.dps-registration-form .dps-message-success {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    border-left: 4px solid #10b981;
+    color: #065f46;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.dps-registration-form .dps-message-error {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   8. Container de Mapa
+   ========================================================================== */
+
+#dps-client-address {
+    min-height: 60px;
+}
+
+.dps-map-container {
+    width: 100%;
+    height: 200px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+/* Sugestões do Google Places */
+.pac-container {
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    margin-top: 4px;
+}
+
+.pac-item {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.pac-item:hover {
+    background: #f9fafb;
+}
+
+/* ==========================================================================
+   9. Honeypot (Anti-spam)
+   ========================================================================== */
+
+.dps-hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   10. Responsividade
+   ========================================================================== */
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    .dps-registration-form {
+        padding: 20px;
+        margin: 0 16px;
+    }
+    
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-registration-form h4 {
+        font-size: 16px;
+    }
+}
+
+/* Mobile (640px) */
+@media (max-width: 640px) {
+    .dps-registration-form {
+        padding: 16px;
+        margin: 0 12px;
+        border-radius: 6px;
+    }
+    
+    .dps-registration-form input[type="text"],
+    .dps-registration-form input[type="email"],
+    .dps-registration-form input[type="tel"],
+    .dps-registration-form input[type="date"],
+    .dps-registration-form input[type="number"],
+    .dps-registration-form select,
+    .dps-registration-form textarea {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 12px;
+    }
+    
+    .dps-pet-fieldset {
+        padding: 16px;
+    }
+    
+    .dps-registration-form .button {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+    }
+    
+    #dps-add-pet {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-map-container {
+        height: 180px;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media (max-width: 480px) {
+    .dps-registration-form {
+        padding: 12px;
+        margin: 0 8px;
+    }
+    
+    .dps-registration-form h4 {
+        font-size: 15px;
+        margin: 24px 0 16px;
+        padding-top: 20px;
+    }
+    
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        gap: 12px;
+    }
+    
+    .dps-registration-form label {
+        font-size: 13px;
+    }
+    
+    .dps-pet-fieldset {
+        padding: 12px;
+    }
+    
+    .dps-pet-fieldset legend {
+        font-size: 14px;
+    }
+    
+    .dps-map-container {
+        height: 150px;
+    }
+    
+    .dps-registration-form .dps-message-success,
+    .dps-registration-form .dps-message-error {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* ==========================================================================
+   11. Acessibilidade
+   ========================================================================== */
+
+.dps-registration-form input:focus-visible,
+.dps-registration-form select:focus-visible,
+.dps-registration-form textarea:focus-visible,
+.dps-registration-form .button:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+/* Indicador de campo obrigatório */
+.dps-required {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+/* Campo com erro */
+.dps-field-error input,
+.dps-field-error select,
+.dps-field-error textarea {
+    border-color: #ef4444;
+}
+
+.dps-field-error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+}

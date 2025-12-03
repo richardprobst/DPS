@@ -29,7 +29,7 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 | Navegação (abas) | ✅ Bom | - | - |
 | Formulários (agendamento) | ✅ Bom | - | - |
 | Tabelas (histórico) | ✅ Bom | - | - |
-| Client Portal | ⚠️ Parcial | Alta | 6h |
+| Client Portal | ✅ Melhorado | ~~Alta~~ | ✅ Implementado |
 | Agenda Add-on | ✅ Bom | - | - |
 | Finance Add-on | ✅ Bom | - | - |
 | Stats Add-on | ✅ Bom | - | - |
@@ -37,8 +37,8 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 | Services Add-on | ✅ Bom | - | - |
 | Subscription Add-on | ⚠️ Parcial | Média | 4h |
 | Loyalty Add-on | ✅ Bom | - | - |
-| Stock Add-on | ❌ Sem CSS | Alta | 6h |
-| Registration Add-on | ❌ Sem CSS | Alta | 6h |
+| Stock Add-on | ✅ Implementado | ~~Alta~~ | ✅ Implementado |
+| Registration Add-on | ✅ Implementado | ~~Alta~~ | ✅ Implementado |
 | Backup Add-on | ⚠️ Inline | Baixa | 2h |
 | Push Add-on | ⚠️ Inline | Baixa | 2h |
 | Communications Add-on | ⚠️ Sem CSS | Média | 3h |
@@ -48,6 +48,8 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 
 **Legenda:**
 - ✅ Bom: CSS responsivo implementado com breakpoints adequados
+- ✅ Implementado: CSS criado como parte da Fase 1
+- ✅ Melhorado: Melhorias de responsividade adicionadas
 - ⚠️ Parcial: Algumas regras responsivas, mas incompletas
 - ❌ Sem CSS: Não possui arquivo CSS dedicado ou regras responsivas
 
@@ -532,22 +534,27 @@ Configurações de Mercado Pago e PIX.
 
 ## 4. Plano de Implementação
 
-### Fase 1: Críticos (14h)
+### Fase 1: Críticos (14h) ✅ IMPLEMENTADO
 
-1. **Client Portal - Navegação Interna (6h)**
-   - Implementar tabs/accordion para mobile
-   - Navegação sticky no topo
-   - Limitar altura de galeria
+1. **Client Portal - Navegação Interna (6h)** ✅
+   - ✅ Navegação sticky no topo em mobile
+   - ✅ Limitar altura de galeria (max-height: 400px)
+   - ✅ Scrollbar estilizado para galeria
+   - ✅ Seções com padding ajustado
 
-2. **Registration Add-on - CSS Completo (4h)**
-   - Criar arquivo CSS dedicado
-   - Grid responsivo para formulário
-   - Container de mapa responsivo
+2. **Registration Add-on - CSS Completo (4h)** ✅
+   - ✅ Criar arquivo CSS dedicado (`assets/css/registration-addon.css`)
+   - ✅ Grid responsivo para formulário (2 colunas → 1 coluna)
+   - ✅ Container de mapa responsivo
+   - ✅ Font-size 16px para evitar zoom iOS
+   - ✅ Botões full-width em mobile
 
-3. **Stock Add-on - CSS Completo (4h)**
-   - Criar arquivo CSS dedicado
-   - Cards de resumo
-   - Tabela com transformação card
+3. **Stock Add-on - CSS Completo (4h)** ✅
+   - ✅ Criar arquivo CSS dedicado (`assets/css/stock-addon.css`)
+   - ✅ Cards de resumo responsivos
+   - ✅ Tabela com transformação card para mobile
+   - ✅ Alerta de estoque baixo responsivo
+   - ✅ Paginação responsiva
 
 ### Fase 2: Médios (6h)
 

@@ -60,9 +60,38 @@ class DPS_Registration_Addon {
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
 
+        // Enfileira assets CSS para responsividade
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
         // Adiciona página de configurações para API do Google Maps
         add_action( 'admin_menu', [ $this, 'add_settings_page' ], 20 );
         add_action( 'admin_init', [ $this, 'register_settings' ] );
+    }
+
+    /**
+     * Enfileira CSS responsivo do add-on de cadastro.
+     *
+     * @since 1.1.0
+     */
+    public function enqueue_assets() {
+        // Carrega apenas na página de cadastro
+        $registration_page_id = get_option( 'dps_registration_page_id' );
+        $current_post = get_post();
+        $post_content = $current_post ? $current_post->post_content : '';
+        
+        if ( ! is_page( $registration_page_id ) && ! has_shortcode( $post_content, 'dps_registration_form' ) ) {
+            return;
+        }
+
+        $addon_url = plugin_dir_url( __FILE__ );
+        $version   = '1.1.0';
+
+        wp_enqueue_style(
+            'dps-registration-addon',
+            $addon_url . 'assets/css/registration-addon.css',
+            [],
+            $version
+        );
     }
 
     /**
