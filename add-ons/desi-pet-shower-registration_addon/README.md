@@ -1,4 +1,4 @@
-# Desi Pet Shower – Cadastro Público Add-on
+# DPS by PRObst – Cadastro Público Add-on
 
 Formulário público de auto-cadastro para novos clientes e pets.
 
@@ -27,7 +27,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior (obrigatório)
+- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

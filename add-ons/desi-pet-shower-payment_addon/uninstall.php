@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Payment Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Payment Add-on
  *
  * Remove options de configuração de pagamento (tokens e chaves).
  *

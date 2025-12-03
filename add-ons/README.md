@@ -1,6 +1,9 @@
-# Add-ons do Desi Pet Shower (DPS)
+# Add-ons do DPS by PRObst
 
-Esta pasta contém os plugins complementares (add-ons) do sistema Desi Pet Shower. Cada add-on é um plugin WordPress separado que **depende do plugin núcleo** localizado em `/plugin/desi-pet-shower-base_plugin/`.
+Esta pasta contém os plugins complementares (add-ons) do sistema DPS by PRObst. Cada add-on é um plugin WordPress separado que **depende do plugin núcleo** localizado em `/plugin/desi-pet-shower-base_plugin/`.
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Estrutura Geral
 

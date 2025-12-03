@@ -1,4 +1,4 @@
-# Desi Pet Shower – Pagamentos Add-on
+# DPS by PRObst – Pagamentos Add-on
 
 Integração com Mercado Pago para geração de links de pagamento e processamento de webhooks.
 
@@ -28,7 +28,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior
+- **DPS by PRObst Base**: v1.0.0 ou superior
 - **Finance Add-on**: obrigatório para criar/atualizar transações
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior (com extensão cURL)
@@ -103,7 +103,7 @@ Este add-on NÃO cria tabelas próprias. Utiliza `dps_transacoes` do Finance Add
 ### Para administradores
 
 1. **Configurar credenciais**:
-   - Acesse **Desi Pet Shower > Pagamentos** no painel do WordPress
+   - Acesse **DPS by PRObst > Pagamentos** no painel do WordPress
    - Insira **Access Token** do Mercado Pago (obtido no painel do MP)
    - Insira **chave PIX** (se aplicável)
    - Configure **Webhook secret** - veja [guia completo de configuração](WEBHOOK_CONFIGURATION.md)

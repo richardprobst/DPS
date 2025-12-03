@@ -1,6 +1,6 @@
 # Configuração de Webhook do Mercado Pago
 
-Este guia explica como configurar o campo "Webhook secret" nas Configurações de Pagamentos do Desi Pet Shower e como configurar o webhook no painel do Mercado Pago.
+Este guia explica como configurar o campo "Webhook secret" nas Configurações de Pagamentos do DPS by PRObst e como configurar o webhook no painel do Mercado Pago.
 
 ## O que é o Webhook Secret?
 
@@ -37,7 +37,7 @@ openssl rand -base64 32
 ### 2. Configurar no DPS
 
 1. Acesse o painel administrativo do WordPress
-2. Vá em **Desi Pet Shower > Pagamentos**
+2. Vá em **DPS by PRObst > Pagamentos**
 3. No campo **"Webhook secret"**, cole a chave que você gerou no passo 1
 4. Clique em **"Salvar alterações"**
 

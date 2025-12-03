@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Cadastro Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Permite criar uma página pública para cadastro de clientes e seus pets. Ideal para enviar ao cliente e deixar que ele mesmo preencha seus dados antes do primeiro atendimento.
+ * Plugin Name:       DPS by PRObst – Cadastro Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
  * Version:           1.0.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -19,14 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_registration_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Cadastro requer o plugin base Desi Pet Shower para funcionar.', 'dps-registration-addon' );
+            echo esc_html__( 'O add-on Cadastro requer o plugin base DPS by PRObst para funcionar.', 'dps-registration-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -118,7 +118,7 @@ class DPS_Registration_Addon {
     }
 
     /**
-     * Adiciona a página de configurações no menu principal "Desi Pet Shower"
+     * Adiciona a página de configurações no menu principal "DPS by PRObst"
      */
     public function add_settings_page() {
         add_submenu_page(
@@ -150,7 +150,7 @@ class DPS_Registration_Addon {
             return;
         }
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'Configurações de Cadastro Desi Pet Shower', 'dps-registration-addon' ) . '</h1>';
+        echo '<h1>' . esc_html__( 'Configurações de Cadastro DPS by PRObst', 'dps-registration-addon' ) . '</h1>';
         echo '<form method="post" action="options.php">';
         settings_fields( 'dps_registration_settings' );
         do_settings_sections( 'dps_registration_settings' );
@@ -369,7 +369,7 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook"></label></p>';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'dps-registration-addon' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DPS by PRObst', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
@@ -561,10 +561,10 @@ class DPS_Registration_Addon {
 
         $confirmation_link = add_query_arg( 'dps_confirm_email', $token, $this->get_registration_page_url() );
 
-        $subject = __( 'Confirme seu email - Desi Pet Shower', 'desi-pet-shower' );
+        $subject = __( 'Confirme seu email - DPS by PRObst', 'desi-pet-shower' );
         $message = sprintf(
             "%s\n\n%s\n\n%s",
-            __( 'Olá! Recebemos seu cadastro no Desi Pet Shower. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ),
+            __( 'Olá! Recebemos seu cadastro no DPS by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ),
             esc_url_raw( $confirmation_link ),
             __( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' )
         );

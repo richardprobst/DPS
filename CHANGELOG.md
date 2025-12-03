@@ -1,6 +1,9 @@
-# Desi Pet Shower — CHANGELOG
+# DPS by PRObst — CHANGELOG
 
-Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do Desi Pet Shower (DPS). Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
+
+Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do DPS by PRObst. Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
 
 ## Relação com outros documentos
 
@@ -241,7 +244,7 @@ Antes de criar uma nova versão oficial:
   - Constante padrão `TEAM_PHONE = '5515991606299'` (+55 15 99160-6299)
 - **Configuração de WhatsApp**: Campo "Número do WhatsApp da Equipe" nas configurações de Comunicações
   - Option `dps_whatsapp_number` para armazenar número da equipe (padrão: +55 15 99160-6299)
-  - Número configurável centralmente em Admin → Desi Pet Shower → Comunicações
+  - Número configurável centralmente em Admin → DPS by PRObst → Comunicações
   - Suporte a filtro `dps_team_whatsapp_number` para customização programática
 - **Plugin Base**: Nova opção "Agendamento Passado" no formulário de agendamentos
   - Adicionada terceira opção de tipo de agendamento para registrar atendimentos já realizados
@@ -254,7 +257,7 @@ Antes de criar uma nova versão oficial:
   - TaxiDog e Tosa ocultados automaticamente para agendamentos passados (não aplicável)
   - **Impacto**: Permite registrar no sistema atendimentos realizados anteriormente e controlar pagamentos pendentes
 - **Client Portal Add-on (v2.2.0)**: Menu administrativo e tokens permanentes
-  - Adicionado menu "Portal do Cliente" sob "Desi Pet Shower" com dois submenus:
+  - Adicionado menu "Portal do Cliente" sob "DPS by PRObst" com dois submenus:
     - "Portal do Cliente": configurações gerais do portal
     - "Logins de Clientes": gerenciamento de tokens de acesso
   - Implementado suporte a tokens permanentes (válidos até revogação manual)
@@ -350,15 +353,15 @@ Antes de criar uma nova versão oficial:
   - Atualizada mensagem de erro de login para refletir que não apenas administradores podem acessar
   - Adicionada documentação explicando modelo de permissões: painel visível para qualquer capability DPS, mas ações protegidas individualmente
 - **Menus Administrativos**: Corrigido registro de menus em add-ons
-  - Backup Add-on: submenu agora aparece corretamente sob "Desi Pet Shower" (corrigida ordem de carregamento)
-  - Loyalty Add-on: menus agora aparecem sob "Desi Pet Shower" em vez de criar menu próprio separado
-  - Logs do Sistema: migrado de menu separado para submenu sob "Desi Pet Shower" (melhor organização)
-  - Mensagens do Portal: migrado de menu separado para submenu sob "Desi Pet Shower" (CPT com show_in_menu)
+  - Backup Add-on: submenu agora aparece corretamente sob "DPS by PRObst" (corrigida ordem de carregamento)
+  - Loyalty Add-on: menus agora aparecem sob "DPS by PRObst" em vez de criar menu próprio separado
+  - Logs do Sistema: migrado de menu separado para submenu sob "DPS by PRObst" (melhor organização)
+  - Mensagens do Portal: migrado de menu separado para submenu sob "DPS by PRObst" (CPT com show_in_menu)
   - Cadastro Público renomeado para "Formulário de Cadastro" (nome mais intuitivo)
   - Todos os add-ons com menus agora usam prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe
   - Estrutura de menus documentada em `ANALYSIS.md` na seção "Estrutura de Menus Administrativos"
   - Adicionadas diretrizes de nomenclatura para melhorar usabilidade (nomes descritivos, sem prefixos redundantes)
-  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "Desi Pet Shower" para facilitar gerenciamento
+  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "DPS by PRObst" para facilitar gerenciamento
 - **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
   - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
   - Ajustado tamanho de inputs e selects para mobile (`padding: 8px` em ≤768px, `10px 8px` em ≤480px)

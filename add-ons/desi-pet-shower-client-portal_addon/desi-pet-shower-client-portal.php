@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Client Portal Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Portal do Cliente para o sistema Desi Pet Shower. Permite que clientes consultem histórico de atendimentos, galeria de fotos, pendências financeiras, atualizem seus dados e efetuem pagamentos de forma prática.
+ * Plugin Name:       DPS by PRObst – Client Portal Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Portal de autoatendimento para clientes. Consulte histórico, fotos, pendências financeiras, atualize dados e efetue pagamentos.
  * Version:           1.0.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-client-portal
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -27,14 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_client_portal_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Portal do Cliente requer o plugin base Desi Pet Shower para funcionar.', 'dps-client-portal' );
+            echo esc_html__( 'O add-on Portal do Cliente requer o plugin base DPS by PRObst para funcionar.', 'dps-client-portal' );
             echo '</p></div>';
         } );
         return false;

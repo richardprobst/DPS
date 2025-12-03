@@ -657,7 +657,7 @@ class DPS_Base_Frontend {
         // Log de depreciação para administradores
         if ( current_user_can( 'manage_options' ) ) {
             DPS_Logger::log(
-                __( 'O shortcode [dps_configuracoes] está deprecated e será removido em versões futuras. Use o menu admin "Desi Pet Shower".', 'desi-pet-shower' ),
+                __( 'O shortcode [dps_configuracoes] está deprecated e será removido em versões futuras. Use o menu admin "DPS by PRObst".', 'desi-pet-shower' ),
                 DPS_Logger::LEVEL_WARNING,
                 'shortcode_deprecated'
             );
@@ -676,7 +676,7 @@ class DPS_Base_Frontend {
                 <?php esc_html_e( 'As configurações do sistema foram movidas para o painel administrativo do WordPress por questões de segurança e organização.', 'desi-pet-shower' ); ?>
             </p>
             <p style="font-size: 16px; color: #6b7280; margin-bottom: 32px; line-height: 1.6;">
-                <?php esc_html_e( 'Para acessar Backup, Comunicações, Notificações e outras configurações, utilize o menu "Desi Pet Shower" no painel admin.', 'desi-pet-shower' ); ?>
+                <?php esc_html_e( 'Para acessar Backup, Comunicações, Notificações e outras configurações, utilize o menu "DPS by PRObst" no painel admin.', 'desi-pet-shower' ); ?>
             </p>
             <?php if ( current_user_can( 'manage_options' ) ) : ?>
                 <a href="<?php echo esc_url( $admin_url ); ?>" class="button button-primary button-hero" style="padding: 12px 32px; height: auto; font-size: 16px;">
@@ -2890,7 +2890,7 @@ class DPS_Base_Frontend {
     private static function render_login_form( $error = '' ) {
         ob_start();
         echo '<div class="dps-login-wrapper">';
-        echo '<h3>' . esc_html__( 'Acesso ao Desi Pet Shower', 'desi-pet-shower' ) . '</h3>';
+        echo '<h3>' . esc_html__( 'Acesso ao DPS by PRObst', 'desi-pet-shower' ) . '</h3>';
         if ( $error ) {
             echo '<p class="dps-error" style="color:red;">' . esc_html( $error ) . '</p>';
         }

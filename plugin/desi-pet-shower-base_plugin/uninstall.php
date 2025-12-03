@@ -1,11 +1,11 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Base
+ * Rotina de desinstalação do plugin DPS by PRObst - Base
  *
  * Este arquivo é executado quando o plugin é desinstalado via WordPress admin.
  * Remove todos os dados criados pelo plugin, incluindo CPTs, tabelas, options, roles e capabilities.
  *
- * @package Desi_Pet_Shower
+ * @package DPS_by_PRObst
  */
 
 // Se o arquivo não for chamado pelo WordPress, aborta.

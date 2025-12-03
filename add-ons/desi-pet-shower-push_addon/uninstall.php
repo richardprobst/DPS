@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Push Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Push Add-on
  *
  * Remove cron jobs agendados e options de configuração.
  *

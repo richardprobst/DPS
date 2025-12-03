@@ -1,4 +1,4 @@
-# Desi Pet Shower – Push Notifications Add-on
+# DPS by PRObst – Push Notifications Add-on
 
 Notificações recorrentes automáticas via e-mail e Telegram para equipe administrativa.
 
@@ -27,7 +27,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior
+- **DPS by PRObst Base**: v1.0.0 ou superior
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior (com extensão cURL para Telegram)
 
@@ -55,7 +55,7 @@ Funcionalidades principais:
 
 ### Configuração
 
-Acesse **Desi Pet Shower > Notificações** para configurar:
+Acesse **DPS by PRObst > Notificações** para configurar:
 
 1. **Resumo Diário de Agendamentos**
    - Destinatários (lista de emails separados por vírgula)
@@ -138,7 +138,7 @@ Este add-on NÃO cria tabelas próprias.
 ### Para administradores
 
 1. **Configurar destinatários**:
-   - Acesse **Desi Pet Shower > Notificações**
+   - Acesse **DPS by PRObst > Notificações**
    - Configure e-mails de destinatários (separados por vírgula)
    - Defina horários de envio para cada tipo de relatório
 

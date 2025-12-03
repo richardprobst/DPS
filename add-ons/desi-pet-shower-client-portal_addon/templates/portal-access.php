@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             </div>
             
             <h1 class="dps-portal-access__title">
-                <?php echo esc_html__( 'Portal do Cliente – Desi Pet Shower', 'dps-client-portal' ); ?>
+                <?php echo esc_html__( 'Portal do Cliente – DPS by PRObst', 'dps-client-portal' ); ?>
             </h1>
             
             <p class="dps-portal-access__description">

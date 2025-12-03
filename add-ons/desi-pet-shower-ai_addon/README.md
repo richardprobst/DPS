@@ -1,8 +1,11 @@
-# Desi Pet Shower – AI Add-on
+# DPS by PRObst – AI Add-on
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Visão Geral
 
-O **AI Add-on** implementa um assistente virtual inteligente no Portal do Cliente do Desi Pet Shower, focado EXCLUSIVAMENTE em responder perguntas sobre:
+O **AI Add-on** implementa um assistente virtual inteligente no Portal do Cliente do DPS by PRObst, focado EXCLUSIVAMENTE em responder perguntas sobre:
 
 - Serviços de Banho e Tosa
 - Agendamentos e histórico de atendimentos
@@ -51,7 +54,7 @@ Ative o plugin no WordPress em **Plugins > Plugins Instalados**.
 
 ### 3. Configurar o Assistente
 
-1. No WordPress, vá em **Desi Pet Shower > Assistente de IA**
+1. No WordPress, vá em **DPS by PRObst > Assistente de IA**
 2. Marque **"Ativar Assistente de IA"**
 3. Cole a **Chave de API da OpenAI**
 4. Escolha o **Modelo GPT**:
@@ -189,7 +192,7 @@ if ( $result['success'] ) {
 
 - **WordPress**: 6.0+
 - **PHP**: 7.4+
-- **Plugin Base**: Desi Pet Shower Base Plugin ativo
+- **Plugin Base**: DPS by PRObst Base Plugin ativo
 - **Add-on**: Client Portal ativo
 - **Conta OpenAI**: Com créditos e API key válida
 
@@ -229,4 +232,4 @@ Nenhum filtro exposto atualmente. Sistema é autocontido.
 
 ## Licença
 
-Proprietário. Uso restrito ao sistema Desi Pet Shower.
+Proprietário. Uso restrito ao sistema DPS by PRObst.

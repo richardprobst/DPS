@@ -15,7 +15,7 @@ Esta implementação resolve dois problemas críticos do Client Portal Add-on:
 
 ### Solução Implementada
 
-✅ **Menu administrativo registrado** sob "Desi Pet Shower" com dois submenus  
+✅ **Menu administrativo registrado** sob "DPS by PRObst" com dois submenus  
 ✅ **Tokens permanentes** válidos por 10 anos (revogáveis manualmente)  
 ✅ **Modal de seleção** para escolher tipo de token ao gerar links  
 ✅ **Compatibilidade** mantida com navegadores antigos  
@@ -209,7 +209,7 @@ updateRadioStyles: function($modal) {
 
 ### Administrador Gera Token
 
-1. **Acessa menu**: `WP Admin → Desi Pet Shower → Logins de Clientes`
+1. **Acessa menu**: `WP Admin → DPS by PRObst → Logins de Clientes`
 2. **Clica em**: `Gerar Novo Link` (botão ao lado do cliente)
 3. **Escolhe tipo**:
    - **Temporário**: expira em 30 minutos, ideal para acesso pontual

@@ -71,7 +71,7 @@ add-ons/desi-pet-shower-backup_addon/
 
 ## 1. Visão Geral
 
-O **Backup & Restauração Add-on** permite exportar e restaurar dados completos do sistema Desi Pet Shower em formato JSON. É uma ferramenta crítica para migrações, recuperação de desastres e manutenção do sistema.
+O **Backup & Restauração Add-on** permite exportar e restaurar dados completos do sistema DPS by PRObst em formato JSON. É uma ferramenta crítica para migrações, recuperação de desastres e manutenção do sistema.
 
 ### 1.1 Propósito Principal
 
@@ -739,7 +739,7 @@ A interface atual é funcional mas minimalista:
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │ ⚠️ ATENÇÃO: Esta ação irá substituir todos os dados     │
-│ atuais do Desi Pet Shower. Esta operação não pode ser   │
+│ atuais do DPS by PRObst. Esta operação não pode ser   │
 │ desfeita.                                               │
 │                                                         │
 │ Selecione o arquivo de backup:                          │

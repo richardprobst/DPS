@@ -1,6 +1,6 @@
 # 📚 Índice - Análise de Layout da Agenda DPS
 
-Este índice organiza os documentos de análise de layout e usabilidade da **Agenda de Atendimentos** do sistema Desi Pet Shower (DPS).
+Este índice organiza os documentos de análise de layout e usabilidade da **Agenda de Atendimentos** do sistema DPS by PRObst (DPS).
 
 ---
 

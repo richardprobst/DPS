@@ -1,8 +1,11 @@
-# 🐾 Guia Completo do Sistema Desi Pet Shower (DPS)
+# 🐾 Guia Completo do Sistema DPS by PRObst
 
 <div align="center">
 
-**Sistema de Gestão para Pet Shops Especializados em Banho e Tosa**
+**Sistema de Gestão para Pet Shops**
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 *Versão 1.1 | Última atualização: Dezembro de 2024*
 
@@ -80,7 +83,7 @@
 
 ### O que é o DPS?
 
-O **Desi Pet Shower (DPS)** é um sistema completo de gestão desenvolvido especificamente para pet shops especializados em serviços de banho e tosa. Construído como uma extensão modular do WordPress, o DPS oferece todas as ferramentas necessárias para gerenciar clientes, pets, agendamentos, finanças e comunicações em um único lugar.
+O **DPS by PRObst (DPS)** é um sistema completo de gestão desenvolvido especificamente para pet shops especializados em serviços de banho e tosa. Construído como uma extensão modular do WordPress, o DPS oferece todas as ferramentas necessárias para gerenciar clientes, pets, agendamentos, finanças e comunicações em um único lugar.
 
 ### Principais Funcionalidades
 
@@ -171,7 +174,7 @@ O plugin base é **obrigatório** e deve ser instalado primeiro.
 
 **Passo 3: Verificação**
 - Acesse o painel WordPress
-- Você verá o menu **Desi Pet Shower** na barra lateral
+- Você verá o menu **DPS by PRObst** na barra lateral
 - Se aparecer, a instalação foi bem-sucedida!
 
 ### Instalação dos Add-ons
@@ -209,7 +212,7 @@ Para evitar problemas de dependência, siga esta ordem:
 
 Após instalar todos os componentes desejados:
 
-1. Acesse **Desi Pet Shower** no menu lateral
+1. Acesse **DPS by PRObst** no menu lateral
 2. Verifique se todos os submenus dos add-ons aparecem
 3. Crie uma página de teste com o shortcode `[dps_base]`
 4. Acesse a página e confirme que o painel é exibido corretamente
@@ -303,7 +306,7 @@ O sistema possui capabilities personalizadas:
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Agenda** (se disponível) ou a página de configurações
+1. Acesse **DPS by PRObst > Agenda** (se disponível) ou a página de configurações
 2. Configure:
    - **Horário de funcionamento**: início e fim do expediente
    - **Intervalo entre agendamentos**: tempo mínimo entre atendimentos
@@ -384,7 +387,7 @@ O sistema possui capabilities personalizadas:
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Pagamentos**
+1. Acesse **DPS by PRObst > Pagamentos**
 2. Configure as credenciais:
 
 | Campo | Onde Obter |
@@ -417,7 +420,7 @@ O webhook permite que pagamentos sejam confirmados automaticamente.
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Comunicações**
+1. Acesse **DPS by PRObst > Comunicações**
 2. Configure cada canal:
 
 **WhatsApp:**
@@ -470,7 +473,7 @@ Todos os envios de mensagens são processados pela `DPS_Communications_API`, gar
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Portal do Cliente**
+1. Acesse **DPS by PRObst > Portal do Cliente**
 2. Configure:
 
 | Opção | Descrição |
@@ -490,7 +493,7 @@ O portal usa "magic links" em vez de senhas:
 4. Tokens podem ser temporários (30min) ou permanentes (até revogação)
 
 **Gerenciamento de Acessos:**
-- Acesse **Desi Pet Shower > Logins de Clientes**
+- Acesse **DPS by PRObst > Logins de Clientes**
 - Gere tokens, revogue acessos, visualize histórico
 
 ---
@@ -505,7 +508,7 @@ O portal usa "magic links" em vez de senhas:
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Assistente de IA**
+1. Acesse **DPS by PRObst > Assistente de IA**
 2. Configure:
 
 | Campo | Descrição | Recomendação |
@@ -551,7 +554,7 @@ A IA responde APENAS sobre:
    [dps_registration_form]
    ```
 
-2. Configure em **Desi Pet Shower > Cadastro Público**:
+2. Configure em **DPS by PRObst > Cadastro Público**:
 
 | Opção | Descrição |
 |-------|-----------|
@@ -576,7 +579,7 @@ A IA responde APENAS sobre:
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Campanhas & Fidelidade**
+1. Acesse **DPS by PRObst > Campanhas & Fidelidade**
 2. Configure o programa de pontos:
 
 | Opção | Descrição | Exemplo |
@@ -603,7 +606,7 @@ A IA responde APENAS sobre:
 
 **Configuração:**
 
-1. Acesse **Desi Pet Shower > Notificações**
+1. Acesse **DPS by PRObst > Notificações**
 2. Configure canais:
 
 **Telegram:**
@@ -746,7 +749,7 @@ O groomer possui um portal exclusivo para acompanhar sua agenda e desempenho:
 **Funcionalidades:**
 
 **Exportação:**
-1. Acesse **Desi Pet Shower > Backup & Restauração**
+1. Acesse **DPS by PRObst > Backup & Restauração**
 2. Clique em **Exportar Dados**
 3. Sistema gera arquivo JSON com todos os dados:
    - Clientes
@@ -969,7 +972,7 @@ O sistema suporta três tipos de agendamento:
 // Exemplo de uso do DPS_WhatsApp_Helper
 $url = DPS_WhatsApp_Helper::get_link_to_client(
     $client_phone,
-    "Olá! Aqui é da Desi Pet Shower..."
+    "Olá! Aqui é da DPS by PRObst..."
 );
 ```
 
@@ -985,7 +988,7 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 3. Configure backup semanal dos arquivos
 
 **Backup Manual (DPS):**
-1. Acesse **Desi Pet Shower > Backup**
+1. Acesse **DPS by PRObst > Backup**
 2. Clique em **Exportar Todos os Dados**
 3. Salve o arquivo JSON em local seguro
 4. Faça isso ANTES de atualizações
@@ -1186,7 +1189,7 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 
 <div align="center">
 
-**Desi Pet Shower** - Sistema completo de gestão para pet shops
+**DPS by PRObst** - Sistema completo de gestão para pet shops
 
 *Desenvolvido com 💜 para facilitar o dia a dia do seu pet shop*
 

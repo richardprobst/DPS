@@ -425,11 +425,11 @@ final class DPS_Portal_Admin_Actions {
      */
     private function get_email_template( $client_name, $access_url ) {
         $subject = sprintf(
-            __( 'Seu acesso ao Portal do Cliente - Desi Pet Shower', 'dps-client-portal' )
+            __( 'Seu acesso ao Portal do Cliente - DPS by PRObst', 'dps-client-portal' )
         );
 
         $body = sprintf(
-            __( "Olá, %s!\n\nAqui está seu link de acesso ao Portal do Cliente da Desi Pet Shower.\n\nNo portal você pode:\n- Consultar seus agendamentos\n- Ver o histórico de atendimentos\n- Visualizar fotos do seu pet\n- Atualizar seus dados\n\nClique no link abaixo para acessar:\n%s\n\nO link é válido por 30 minutos.\n\nQualquer dúvida, estamos à disposição!\n\nEquipe Desi Pet Shower", 'dps-client-portal' ),
+            __( "Olá, %s!\n\nAqui está seu link de acesso ao Portal do Cliente da DPS by PRObst.\n\nNo portal você pode:\n- Consultar seus agendamentos\n- Ver o histórico de atendimentos\n- Visualizar fotos do seu pet\n- Atualizar seus dados\n\nClique no link abaixo para acessar:\n%s\n\nO link é válido por 30 minutos.\n\nQualquer dúvida, estamos à disposição!\n\nEquipe DPS by PRObst", 'dps-client-portal' ),
             $client_name,
             $access_url
         );

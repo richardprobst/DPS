@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Pagamentos Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Gera links de pagamento via Mercado Pago para atender clientes de forma prática e envia por WhatsApp. Cria a URL de checkout e adiciona ao link de cobrança para atendimentos finalizados.
+ * Plugin Name:       DPS by PRObst – Pagamentos Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Integração com Mercado Pago. Gere links de pagamento e envie por WhatsApp de forma prática.
  * Version:           1.0.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-payment-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -19,14 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_payment_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Pagamentos requer o plugin base Desi Pet Shower para funcionar.', 'dps-payment-addon' );
+            echo esc_html__( 'O add-on Pagamentos requer o plugin base DPS by PRObst para funcionar.', 'dps-payment-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -121,7 +121,7 @@ class DPS_Payment_Addon {
     }
 
     /**
-     * Adiciona uma página de configurações no menu principal "Desi Pet Shower".
+     * Adiciona uma página de configurações no menu principal "DPS by PRObst".
      */
     public function add_settings_page() {
         add_submenu_page(
@@ -240,7 +240,7 @@ class DPS_Payment_Addon {
             return;
         }
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'Configurações de Pagamentos - Desi Pet Shower', 'dps-payment-addon' ) . '</h1>';
+        echo '<h1>' . esc_html__( 'Configurações de Pagamentos - DPS by PRObst', 'dps-payment-addon' ) . '</h1>';
         echo '<form method="post" action="options.php">';
         settings_fields( 'dps_payment_options' );
         do_settings_sections( 'dps-payment-settings' );

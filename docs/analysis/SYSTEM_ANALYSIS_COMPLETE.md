@@ -1,5 +1,5 @@
 # Mapeamento Completo – Back-End e Front-End
-## Sistema Desi Pet Shower (DPS)
+## Sistema DPS by PRObst (DPS)
 
 **Data da Análise**: 2025-11-22  
 **Baseado em**: Código-fonte real (não documentação)
@@ -305,11 +305,11 @@ add-ons/desi-pet-shower-services_addon/
 **Análise**:
 ```bash
 # desi-pet-shower-services.php
-Plugin Name: Desi Pet Shower – Serviços Add-on
+Plugin Name: DPS by PRObst – Serviços Add-on
 Version: 1.1.0
 
 # dps_service/desi-pet-shower-services-addon.php
-Plugin Name: Desi Pet Shower – Serviços Add-on
+Plugin Name: DPS by PRObst – Serviços Add-on
 Version: 1.0.0
 ```
 
@@ -335,12 +335,12 @@ add-ons/desi-pet-shower-subscription_addon/
 **Análise**:
 ```bash
 # desi-pet-shower-subscription.php
-Plugin Name: Desi Pet Shower – Assinaturas Add-on
+Plugin Name: DPS by PRObst – Assinaturas Add-on
 Version: 1.0.0
 # Inclui o arquivo da subpasta
 
 # dps_subscription/desi-pet-shower-subscription-addon.php
-Plugin Name: Desi Pet Shower – Assinaturas Add-on
+Plugin Name: DPS by PRObst – Assinaturas Add-on
 Version: 1.0.0
 ```
 

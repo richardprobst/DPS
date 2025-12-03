@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Base
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Plugin básico para cadastro de clientes, pets e agendamentos de banho e tosa. Este é o núcleo que pode ser expandido por add-ons.
+ * Plugin Name:       DPS by PRObst – Base
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente. Expanda com add-ons para controle financeiro, comunicações, portal do cliente e mais.
  * Version:           1.0.1
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       desi-pet-shower
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -148,8 +148,8 @@ class DPS_Base_Plugin {
      */
     public function register_admin_menu() {
         add_menu_page(
-            __( 'Desi Pet Shower', 'desi-pet-shower' ),
-            __( 'Desi Pet Shower', 'desi-pet-shower' ),
+            __( 'DPS by PRObst', 'desi-pet-shower' ),
+            __( 'DPS by PRObst', 'desi-pet-shower' ),
             'manage_options',
             'desi-pet-shower',
             [ $this, 'render_main_settings_page' ],
@@ -171,8 +171,8 @@ class DPS_Base_Plugin {
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
             <div class="card" style="max-width: 800px; margin-top: 20px;">
-                <h2><?php esc_html_e( 'Bem-vindo ao Desi Pet Shower', 'desi-pet-shower' ); ?></h2>
-                <p><?php esc_html_e( 'Sistema completo de gestão para pet shops, incluindo cadastro de clientes, pets, agendamentos, serviços, fidelidade e muito mais.', 'desi-pet-shower' ); ?></p>
+                <h2><?php esc_html_e( 'Bem-vindo ao DPS by PRObst', 'desi-pet-shower' ); ?></h2>
+                <p><?php esc_html_e( 'Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente.', 'desi-pet-shower' ); ?></p>
                 <p><?php esc_html_e( 'Utilize o menu lateral para acessar as diferentes configurações e funcionalidades do sistema.', 'desi-pet-shower' ); ?></p>
                 
                 <h3><?php esc_html_e( 'Configurações Disponíveis', 'desi-pet-shower' ); ?></h3>

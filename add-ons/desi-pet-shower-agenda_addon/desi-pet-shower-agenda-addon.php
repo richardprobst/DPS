@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Agenda Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para o plugin Desi Pet Shower que cria automaticamente uma página com a agenda de atendimentos.
+ * Plugin Name:       DPS by PRObst – Agenda Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Cria página automática com agenda de atendimentos. Visualize e gerencie compromissos de forma prática.
  * Version:           1.0.1
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-agenda-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -19,14 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_agenda_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Agenda requer o plugin base Desi Pet Shower para funcionar.', 'dps-agenda-addon' );
+            echo esc_html__( 'O add-on Agenda requer o plugin base DPS by PRObst para funcionar.', 'dps-agenda-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -1333,7 +1333,7 @@ class DPS_Agenda_Addon {
                 $time    = $time ? $time : '';
                 $subject = sprintf( __( 'Lembrete de agendamento para %s', 'dps-agenda-addon' ), $client_name );
                 $message = sprintf(
-                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\nDesi Pet Shower', 'dps-agenda-addon' ),
+                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\nDPS by PRObst', 'dps-agenda-addon' ),
                     $client_name,
                     $pet_name ? $pet_name : __( 'seu pet', 'dps-agenda-addon' ),
                     date_i18n( 'd-m-Y', strtotime( $date ) ),

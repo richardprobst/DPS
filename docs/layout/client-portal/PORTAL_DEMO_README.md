@@ -2,7 +2,7 @@
 
 ## 📄 Sobre este arquivo
 
-`portal-cliente-demo.html` é um arquivo HTML estático que simula o Portal do Cliente do Desi Pet Shower (DPS) com dados fictícios para fins de análise de UX, layout e apresentação.
+`portal-cliente-demo.html` é um arquivo HTML estático que simula o Portal do Cliente do DPS by PRObst (DPS) com dados fictícios para fins de análise de UX, layout e apresentação.
 
 ## 🎯 Objetivo
 
@@ -250,4 +250,4 @@ Este é um arquivo de **demonstração estática**. No sistema real:
 **Criado por**: Sistema DPS  
 **Data**: Novembro 2024  
 **Versão**: 1.0.0  
-**Licença**: Uso interno - Desi Pet Shower
+**Licença**: Uso interno - DPS by PRObst

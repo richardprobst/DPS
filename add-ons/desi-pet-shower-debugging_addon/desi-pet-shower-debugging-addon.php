@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Debugging
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para gerenciamento de debug no WordPress. Permite ativar/desativar constantes de debug, visualizar e limpar o arquivo debug.log.
+ * Plugin Name:       DPS by PRObst – Debugging
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Gerenciamento de debug no WordPress. Ative/desative constantes de debug e visualize o arquivo debug.log.
  * Version:           1.0.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-debugging-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -71,8 +71,8 @@ function dps_debugging_missing_base_notice() {
                 sprintf(
                     /* translators: %1$s: Debugging add-on name, %2$s: Base plugin name */
                     __( 'O add-on %1$s requer o plugin %2$s para funcionar.', 'dps-debugging-addon' ),
-                    '<strong>Desi Pet Shower – Debugging</strong>',
-                    '<strong>Desi Pet Shower – Base</strong>'
+                    '<strong>DPS by PRObst – Debugging</strong>',
+                    '<strong>DPS by PRObst – Base</strong>'
                 ),
                 $allowed_tags
             );

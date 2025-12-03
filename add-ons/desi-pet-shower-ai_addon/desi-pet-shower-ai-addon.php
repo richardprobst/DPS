@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – AI Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Assistente virtual focado em Banho e Tosa para o Portal do Cliente do Desi Pet Shower. Responde perguntas sobre agendamentos, serviços, histórico e funcionalidades do sistema usando OpenAI. Inclui sugestões de mensagens para WhatsApp e e-mail.
+ * Plugin Name:       DPS by PRObst – AI Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Assistente virtual inteligente para o Portal do Cliente. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail.
  * Version:           1.3.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -32,14 +32,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_ai_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on AI requer o plugin base Desi Pet Shower para funcionar.', 'dps-ai' );
+            echo esc_html__( 'O add-on AI requer o plugin base DPS by PRObst para funcionar.', 'dps-ai' );
             echo '</p></div>';
         } );
         return false;
@@ -315,7 +315,7 @@ class DPS_AI_Addon {
                             <td>
                                 <textarea id="dps_ai_additional_instructions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[additional_instructions]" rows="6" class="large-text" maxlength="2000"><?php echo esc_textarea( $options['additional_instructions'] ?? '' ); ?></textarea>
                                 <p class="description">
-                                    <?php esc_html_e( 'Use este campo para adicionar regras específicas de como a IA deve se comunicar com os clientes, dentro do contexto de Banho e Tosa e do Desi Pet Shower.', 'dps-ai' ); ?>
+                                    <?php esc_html_e( 'Use este campo para adicionar regras específicas de como a IA deve se comunicar com os clientes, dentro do contexto de Banho e Tosa e do DPS by PRObst.', 'dps-ai' ); ?>
                                     <br />
                                     <strong><?php esc_html_e( 'Importante:', 'dps-ai' ); ?></strong>
                                     <?php esc_html_e( 'As regras principais de segurança e escopo do sistema já são aplicadas automaticamente. Não remova ou contradiga essas regras.', 'dps-ai' ); ?>

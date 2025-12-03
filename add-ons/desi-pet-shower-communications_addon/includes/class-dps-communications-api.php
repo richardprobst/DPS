@@ -292,7 +292,7 @@ class DPS_Communications_API {
 
         // Se não enviou por WhatsApp e tem email, tenta por email
         if ( ! $sent && ! empty( $email ) ) {
-            $subject = __( 'Lembrete de Agendamento - Desi Pet Shower', 'desi-pet-shower' );
+            $subject = __( 'Lembrete de Agendamento - DPS by PRObst', 'desi-pet-shower' );
             $sent    = $this->send_email( $email, $subject, $message, $context );
         }
 
@@ -369,7 +369,7 @@ class DPS_Communications_API {
 
         // Fallback para e-mail
         if ( ! $sent && ! empty( $email ) ) {
-            $subject = __( 'Confirmação de Pagamento - Desi Pet Shower', 'desi-pet-shower' );
+            $subject = __( 'Confirmação de Pagamento - DPS by PRObst', 'desi-pet-shower' );
             $sent    = $this->send_email( $email, $subject, $message, $context );
         }
 

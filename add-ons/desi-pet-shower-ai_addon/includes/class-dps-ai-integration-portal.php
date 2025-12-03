@@ -90,7 +90,7 @@ class DPS_AI_Integration_Portal {
 
             <div id="dps-ai-content" class="dps-ai-content" style="display: none;">
                 <div class="dps-ai-description">
-                    <p><?php esc_html_e( 'Olá! Sou o assistente virtual do Desi Pet Shower. Posso ajudar com informações sobre seus agendamentos, serviços, histórico e funcionalidades do portal.', 'dps-ai' ); ?></p>
+                    <p><?php esc_html_e( 'Olá! Sou o assistente virtual do DPS by PRObst. Posso ajudar com informações sobre seus agendamentos, serviços, histórico e funcionalidades do portal.', 'dps-ai' ); ?></p>
                 </div>
 
                 <div id="dps-ai-messages" class="dps-ai-messages">

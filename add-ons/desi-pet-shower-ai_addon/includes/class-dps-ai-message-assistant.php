@@ -87,7 +87,7 @@ class DPS_AI_Message_Assistant {
         if ( $extra_instructions !== '' ) {
             $messages[] = [
                 'role'    => 'system',
-                'content' => 'Instruções adicionais definidas pelo administrador do Desi Pet Shower: ' . $extra_instructions,
+                'content' => 'Instruções adicionais definidas pelo administrador do DPS by PRObst: ' . $extra_instructions,
             ];
         }
 
@@ -159,7 +159,7 @@ class DPS_AI_Message_Assistant {
         if ( $extra_instructions !== '' ) {
             $messages[] = [
                 'role'    => 'system',
-                'content' => 'Instruções adicionais definidas pelo administrador do Desi Pet Shower: ' . $extra_instructions,
+                'content' => 'Instruções adicionais definidas pelo administrador do DPS by PRObst: ' . $extra_instructions,
             ];
         }
 
@@ -212,7 +212,7 @@ class DPS_AI_Message_Assistant {
     private static function build_message_system_prompt( $channel, $type ) {
         $type_label = self::MESSAGE_TYPES[ $type ] ?? 'Comunicação genérica';
 
-        $prompt = "Você está ajudando a criar uma mensagem de {$type_label} para um cliente do Desi Pet Shower.\n\n";
+        $prompt = "Você está ajudando a criar uma mensagem de {$type_label} para um cliente do DPS by PRObst.\n\n";
 
         if ( 'whatsapp' === $channel ) {
             $prompt .= "IMPORTANTE SOBRE O FORMATO:\n";
@@ -368,7 +368,7 @@ class DPS_AI_Message_Assistant {
                 $body = preg_replace( '/^(CORPO|Body):\s*/i', '', $body );
             } else {
                 // Se não conseguiu dividir, usa tudo como corpo e gera assunto genérico
-                $subject = 'Mensagem do Desi Pet Shower';
+                $subject = 'Mensagem do DPS by PRObst';
                 $body    = trim( $response );
             }
         }
@@ -380,7 +380,7 @@ class DPS_AI_Message_Assistant {
 
         // Se só temos body, gera subject genérico
         if ( empty( $subject ) ) {
-            $subject = 'Comunicado do Desi Pet Shower';
+            $subject = 'Comunicado do DPS by PRObst';
         }
 
         return [

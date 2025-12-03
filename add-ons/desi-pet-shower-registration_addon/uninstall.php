@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Registration Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Registration Add-on
  *
  * Remove page de cadastro público e options de configuração.
  *

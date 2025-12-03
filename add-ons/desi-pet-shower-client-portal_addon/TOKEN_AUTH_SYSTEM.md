@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O Portal do Cliente do Desi Pet Shower (DPS) agora utiliza um sistema moderno de autenticação baseado em **links com token (magic links)**, eliminando completamente a necessidade de senhas fixas.
+O Portal do Cliente do DPS by PRObst (DPS) agora utiliza um sistema moderno de autenticação baseado em **links com token (magic links)**, eliminando completamente a necessidade de senhas fixas.
 
 ## Como Funciona
 
@@ -554,7 +554,7 @@ Para dúvidas ou problemas:
 
 ## Licença
 
-Este add-on faz parte do Desi Pet Shower (DPS) e segue a mesma licença do projeto principal.
+Este add-on faz parte do DPS by PRObst (DPS) e segue a mesma licença do projeto principal.
 
 ---
 

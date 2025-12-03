@@ -129,7 +129,7 @@
 - Admin usa "Data de nascimento", Portal usa "Data de nascimento" (consistente mas campo `date` sem contexto de idade)
 
 **Textos longos sem truncamento:**
-- Checkbox de autorização de foto tem texto muito longo (linha 737): "Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower"
+- Checkbox de autorização de foto tem texto muito longo (linha 737): "Autorizo publicação da foto do pet nas redes sociais do DPS by PRObst"
 - Em mobile, pode quebrar layout
 
 ---

@@ -140,7 +140,7 @@ $btn_text     = $edit_id ? esc_html__( 'Atualizar Cliente', 'desi-pet-shower' ) 
 		<p>
 			<label class="dps-checkbox-label">
 				<input type="checkbox" name="client_photo_auth" value="1" <?php echo $checked; ?>>
-				<span class="dps-checkbox-text"><?php echo esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do Desi Pet Shower', 'desi-pet-shower' ); ?></span>
+				<span class="dps-checkbox-text"><?php echo esc_html__( 'Autorizo publicação da foto do pet nas redes sociais', 'desi-pet-shower' ); ?></span>
 			</label>
 		</p>
 	</fieldset>

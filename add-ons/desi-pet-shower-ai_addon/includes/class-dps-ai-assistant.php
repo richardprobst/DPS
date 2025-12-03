@@ -70,7 +70,7 @@ class DPS_AI_Assistant {
 
         // Filtro preventivo: verifica se a pergunta contém palavras-chave relacionadas ao contexto
         if ( ! self::is_question_in_context( $user_question ) ) {
-            return __( 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do Desi Pet Shower. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.', 'dps-ai' );
+            return __( 'Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do DPS by PRObst. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal.', 'dps-ai' );
         }
 
         // Monta contexto do cliente e pets (com cache)
@@ -92,7 +92,7 @@ class DPS_AI_Assistant {
         if ( $extra_instructions !== '' ) {
             $messages[] = [
                 'role'    => 'system',
-                'content' => 'Instruções adicionais definidas pelo administrador do Desi Pet Shower: ' . $extra_instructions,
+                'content' => 'Instruções adicionais definidas pelo administrador do DPS by PRObst: ' . $extra_instructions,
             ];
         }
 
@@ -142,7 +142,7 @@ class DPS_AI_Assistant {
      * @return string Conteúdo do prompt base do sistema.
      */
     public static function get_base_system_prompt() {
-        $content = 'Você é um assistente virtual especializado em Banho e Tosa do sistema "Desi Pet Shower" (DPS). ' .
+        $content = 'Você é um assistente virtual especializado em Banho e Tosa do sistema "DPS by PRObst" (DPS). ' .
                    'Seu trabalho é responder SOMENTE sobre os seguintes assuntos:' . "\n\n" .
                    '- Agendamentos de banho e tosa' . "\n" .
                    '- Serviços oferecidos pelo pet shop (banho, tosa, hidratação, etc.)' . "\n" .
@@ -159,7 +159,7 @@ class DPS_AI_Assistant {
                    '- Tecnologia, programação, ciência, história, esportes ou outros assuntos não relacionados a pets/pet shop' . "\n" .
                    '- Temas sensíveis como violência, crime, conteúdo impróprio' . "\n\n" .
                    'REGRAS IMPORTANTES (PRIORIDADE MÁXIMA):' . "\n" .
-                   '- Se o usuário perguntar algo fora desse escopo, responda educadamente: "Sou um assistente focado apenas em ajudar com informações sobre o seu pet e os serviços de Banho e Tosa do Desi Pet Shower. Não consigo ajudar com esse tipo de assunto."' . "\n" .
+                   '- Se o usuário perguntar algo fora desse escopo, responda educadamente: "Sou um assistente focado apenas em ajudar com informações sobre o seu pet e os serviços de Banho e Tosa do DPS by PRObst. Não consigo ajudar com esse tipo de assunto."' . "\n" .
                    '- Se o usuário descrever um problema de saúde grave do pet, recomende SEMPRE que ele procure um veterinário.' . "\n" .
                    '- NUNCA invente descontos, promoções ou alterações de plano que não estejam explícitas nos dados fornecidos.' . "\n" .
                    '- Se não encontrar a informação nos dados fornecidos, seja honesto: "Não encontrei esse registro no sistema. Você pode falar diretamente com a equipe da unidade para confirmar."' . "\n" .
