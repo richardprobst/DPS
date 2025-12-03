@@ -445,6 +445,8 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 **Observações**:
 - Implementa `register_deactivation_hook` para limpar cron job `dps_agenda_send_reminders` ao desativar
 - **[v1.1.0]** Lógica de serviços movida para Services Add-on; Agenda delega cálculos para `DPS_Services_API`
+- **Documentação completa**: `docs/analysis/AGENDA_ADDON_ANALYSIS.md` (análise profunda de código, funcionalidades, layout e melhorias propostas)
+- **Documentação de layout**: `docs/layout/agenda/` (análise de UX, responsividade e acessibilidade)
 
 ---
 

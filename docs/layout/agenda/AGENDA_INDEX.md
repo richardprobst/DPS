@@ -4,7 +4,22 @@ Este índice organiza os documentos de análise de layout e usabilidade da **Age
 
 ---
 
-## 📄 Documentos Disponíveis
+## 🆕 Análise Completa (2025-12-03)
+
+Para uma **análise profunda e abrangente** do add-on Agenda, incluindo funcionalidades, código, segurança, performance, layout, integrações e propostas de novas funcionalidades, consulte:
+
+📖 **[AGENDA_ADDON_ANALYSIS.md](/docs/analysis/AGENDA_ADDON_ANALYSIS.md)** (docs/analysis/)
+
+Este documento consolida todas as análises anteriores e adiciona:
+- Avaliação de código e arquitetura
+- Propostas de novas funcionalidades (agrupamento por cliente, calendário mensal, relatórios)
+- Plano de refatoração em 4 fases
+- Análise de integração com outros add-ons
+- Recomendações de testes automatizados
+
+---
+
+## 📄 Documentos Disponíveis (Layout e UX)
 
 ### 1. AGENDA_EXECUTIVE_SUMMARY.md
 **Público**: Stakeholders, Product Owners, Gerentes  
