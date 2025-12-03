@@ -10,7 +10,7 @@
 
 ## Sumário Executivo
 
-O **Groomers Add-on** é um add-on do Desi Pet Shower para gestão de profissionais de banho e tosa (groomers). Permite cadastrar groomers, vincular atendimentos a profissionais específicos e gerar relatórios de produtividade.
+O **Groomers Add-on** é um add-on do DPS by PRObst para gestão de profissionais de banho e tosa (groomers). Permite cadastrar groomers, vincular atendimentos a profissionais específicos e gerar relatórios de produtividade.
 
 > **Nota:** Este documento foi criado durante a análise da versão 1.0.0 e as melhorias prioritárias foram implementadas na versão 1.1.0. Os pontos restantes servem como guia para futuras melhorias.
 

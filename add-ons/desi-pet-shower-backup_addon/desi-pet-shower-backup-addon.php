@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Backup & Restauração Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para gerar backups completos dos dados do Desi Pet Shower e restaurá-los em outro ambiente.
+ * Plugin Name:       DPS by PRObst – Backup & Restauração Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Gere backups completos dos dados do sistema e restaure em outro ambiente. Exportação e importação simplificadas.
  * Version:           1.1.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-backup-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -29,14 +29,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-exporter.p
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-comparator.php';
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_backup_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Backup & Restauração requer o plugin base Desi Pet Shower para funcionar.', 'dps-backup-addon' );
+            echo esc_html__( 'O add-on Backup & Restauração requer o plugin base DPS by PRObst para funcionar.', 'dps-backup-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -63,7 +63,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
     /**
      * Classe principal do add-on de Backup & Restauração.
      *
-     * Permite exportar e importar dados completos do sistema Desi Pet Shower
+     * Permite exportar e importar dados completos do sistema DPS by PRObst
      * em formato JSON, incluindo clientes, pets, agendamentos, transações e arquivos.
      *
      * @package    DesiPetShower
@@ -188,7 +188,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             wp_localize_script( 'dps-backup-addon', 'dpsBackupL10n', [
                 'nonce'            => wp_create_nonce( 'dps_backup_ajax' ),
-                'confirmRestore'   => __( 'ATENÇÃO: Esta ação irá substituir todos os dados do Desi Pet Shower. Deseja continuar?', 'dps-backup-addon' ),
+                'confirmRestore'   => __( 'ATENÇÃO: Esta ação irá substituir todos os dados do DPS by PRObst. Deseja continuar?', 'dps-backup-addon' ),
                 'confirmDelete'    => __( 'Tem certeza que deseja excluir este backup?', 'dps-backup-addon' ),
                 'confirmRequired'  => __( 'Você precisa confirmar que entende as consequências da restauração.', 'dps-backup-addon' ),
                 'comparing'        => __( 'Comparando...', 'dps-backup-addon' ),
@@ -230,7 +230,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             <div class="wrap dps-backup-wrap">
                 <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
                 
-                <p class="page-description"><?php esc_html_e( 'Gerencie backups completos do Desi Pet Shower: exporte, restaure, agende e compare versões.', 'dps-backup-addon' ); ?></p>
+                <p class="page-description"><?php esc_html_e( 'Gerencie backups completos do DPS by PRObst: exporte, restaure, agende e compare versões.', 'dps-backup-addon' ); ?></p>
                 
                 <?php if ( $status && $message ) : ?>
                     <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?> is-dismissible">
@@ -302,7 +302,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                             
                             <div class="dps-danger-box">
                                 <span class="dashicons dashicons-warning"></span>
-                                <p><?php esc_html_e( 'ATENÇÃO: A restauração irá substituir TODOS os dados atuais do Desi Pet Shower. Esta ação não pode ser desfeita.', 'dps-backup-addon' ); ?></p>
+                                <p><?php esc_html_e( 'ATENÇÃO: A restauração irá substituir TODOS os dados atuais do DPS by PRObst. Esta ação não pode ser desfeita.', 'dps-backup-addon' ); ?></p>
                             </div>
                             
                             <p>
@@ -834,7 +834,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function validate_import_payload( $data ) {
             if ( empty( $data['plugin'] ) || 'desi-pet-shower' !== $data['plugin'] ) {
-                return new WP_Error( 'dps_backup_plugin', __( 'O arquivo não parece ser um backup do Desi Pet Shower.', 'dps-backup-addon' ) );
+                return new WP_Error( 'dps_backup_plugin', __( 'O arquivo não parece ser um backup do DPS by PRObst.', 'dps-backup-addon' ) );
             }
 
             $schema_version = isset( $data['schema_version'] ) ? absint( $data['schema_version'] ) : 0;

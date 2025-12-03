@@ -1,7 +1,10 @@
-# Diretrizes para agentes do Desi Pet Shower (DPS)
+# Diretrizes para agentes do DPS by PRObst
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Escopo
-Estas orientações cobrem todo o repositório DPS, incluindo o plugin base em `plugin/` e os complementos em `add-ons/`. Caso exista um `AGENTS.md` mais específico em subdiretórios, ele prevalece para arquivos dentro de seu escopo.
+Estas orientações cobrem todo o repositório DPS by PRObst, incluindo o plugin base em `plugin/` e os complementos em `add-ons/`. Caso exista um `AGENTS.md` mais específico em subdiretórios, ele prevalece para arquivos dentro de seu escopo.
 
 ## Estrutura do repositório
 - **plugin/**: plugin WordPress principal (`desi-pet-shower-base_plugin`) com ponto de entrada, includes e assets compartilhados.

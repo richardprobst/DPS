@@ -1,4 +1,4 @@
-# Desi Pet Shower – Campanhas & Fidelidade Add-on
+# DPS by PRObst – Campanhas & Fidelidade Add-on
 
 Programa de pontos, indicações (Indique e Ganhe) e campanhas de marketing.
 
@@ -27,7 +27,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior (obrigatório)
+- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

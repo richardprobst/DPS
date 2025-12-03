@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Groomers Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para cadastrar groomers, vincular atendimentos e gerar relatórios por profissional. Inclui portal do groomer com acesso via token.
+ * Plugin Name:       DPS by PRObst – Groomers Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
  * Version:           1.4.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -23,14 +23,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-token-man
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-session-manager.php';
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_groomers_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Groomers requer o plugin base Desi Pet Shower para funcionar.', 'dps-groomers-addon' );
+            echo esc_html__( 'O add-on Groomers requer o plugin base DPS by PRObst para funcionar.', 'dps-groomers-addon' );
             echo '</p></div>';
         } );
         return false;

@@ -29,7 +29,7 @@ class DPS_Finance_Settings {
      * @var array
      */
     private static $defaults = [
-        'store_name'       => 'Banho e Tosa Desi Pet Shower',
+        'store_name'       => 'Banho e Tosa DPS by PRObst',
         'store_address'    => 'Rua Água Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP',
         'store_phone'      => '15 99160-6299',
         'store_email'      => 'contato@desi.pet',

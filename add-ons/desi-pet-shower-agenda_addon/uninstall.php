@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Agenda Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Agenda Add-on
  *
  * Remove pages criadas, options e cron jobs agendados.
  *

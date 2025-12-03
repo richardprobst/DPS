@@ -36,14 +36,14 @@ Este documento analisa a viabilidade e impacto de **habilitar a interface admin 
 
 ### Estrutura de Menu Atual
 
-O Loyalty Add-on já criou um menu "Desi Pet Shower" unificado:
+O Loyalty Add-on já criou um menu "DPS by PRObst" unificado:
 
 ```php
 // add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php:174
 if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
     add_menu_page(
-        __( 'Desi Pet Shower', 'desi-pet-shower' ),
-        __( 'Desi Pet Shower', 'desi-pet-shower' ),
+        __( 'DPS by PRObst', 'desi-pet-shower' ),
+        __( 'DPS by PRObst', 'desi-pet-shower' ),
         'manage_options',
         'desi-pet-shower',
         '__return_null',
@@ -64,7 +64,7 @@ Submenus existentes:
 ### Hierarquia Proposta
 
 ```
-📁 Desi Pet Shower (dashicons-pets)
+📁 DPS by PRObst (dashicons-pets)
   ├─ 📊 Dashboard (opcional - visão geral)
   ├─ 👥 Clientes (edit.php?post_type=dps_cliente)
   ├─ 🐾 Pets (edit.php?post_type=dps_pet)
@@ -223,13 +223,13 @@ add_action( 'admin_menu', [ $this, 'register_unified_menu' ], 5 ); // Prioridade
 
 // ADICIONAR novo método
 /**
- * Registra o menu principal "Desi Pet Shower" se ainda não existir.
+ * Registra o menu principal "DPS by PRObst" se ainda não existir.
  * Outros add-ons podem adicionar submenus via show_in_menu ou add_submenu_page.
  */
 public function register_unified_menu() {
     if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
         add_menu_page(
-            __( 'Desi Pet Shower', 'desi-pet-shower' ),
+            __( 'DPS by PRObst', 'desi-pet-shower' ),
             __( 'DPS', 'desi-pet-shower' ),
             'dps_manage_clients', // Capability mais básica
             'desi-pet-shower',
@@ -941,7 +941,7 @@ $args = [
 Esta seção serve como guia para futura implementação.
 
 ### Fase 1: Preparação (Baixo Risco)
-- [ ] Mover criação do menu "Desi Pet Shower" para plugin base
+- [ ] Mover criação do menu "DPS by PRObst" para plugin base
 - [ ] Atualizar Loyalty Add-on para remover criação duplicada do menu
 - [ ] Criar estrutura de arquivos admin: `includes/admin/`
 - [ ] Adicionar opção de configuração `dps_enable_admin_ui` (desabilitada por padrão)

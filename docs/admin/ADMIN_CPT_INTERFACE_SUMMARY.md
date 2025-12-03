@@ -51,7 +51,7 @@ Mudar de `show_ui => false` para:
 ### 2. Menu Unificado
 Mover criação do menu principal do Loyalty para o plugin base:
 ```
-📁 Desi Pet Shower (DPS)
+📁 DPS by PRObst (DPS)
   ├─ 👥 Clientes
   ├─ 🐾 Pets
   ├─ 📅 Agendamentos

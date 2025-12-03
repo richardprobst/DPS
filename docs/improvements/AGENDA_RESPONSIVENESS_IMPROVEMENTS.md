@@ -2,7 +2,7 @@
 
 ## Resumo
 
-Este documento detalha as melhorias implementadas para tornar a página da Agenda de Atendimentos do Desi Pet Shower (DPS) totalmente responsiva em dispositivos móveis, tablets e desktops.
+Este documento detalha as melhorias implementadas para tornar a página da Agenda de Atendimentos do DPS by PRObst (DPS) totalmente responsiva em dispositivos móveis, tablets e desktops.
 
 ## Problema Identificado
 

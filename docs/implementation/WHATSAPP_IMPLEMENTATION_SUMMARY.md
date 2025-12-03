@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento resume a implementação do sistema centralizado de comunicação via WhatsApp no Desi Pet Shower (DPS), garantindo que todos os botões WhatsApp usem o número correto da equipe (+55 15 99160-6299) e números personalizados dos clientes.
+Este documento resume a implementação do sistema centralizado de comunicação via WhatsApp no DPS by PRObst (DPS), garantindo que todos os botões WhatsApp usem o número correto da equipe (+55 15 99160-6299) e números personalizados dos clientes.
 
 ## Helper Centralizado: DPS_WhatsApp_Helper
 
@@ -38,7 +38,7 @@ Helper inclui métodos para mensagens contextualizadas:
 
 ## Configuração
 
-### Admin → Desi Pet Shower → Comunicações
+### Admin → DPS by PRObst → Comunicações
 
 Campo adicionado: **"Número do WhatsApp da Equipe"**
 - Option: `dps_whatsapp_number`
@@ -109,7 +109,7 @@ Campo adicionado: **"Número do WhatsApp da Equipe"**
 3. Se não autenticado, renderiza `portal-access.php`
 4. Template exibe:
    - Logo 🐾
-   - Título "Portal do Cliente – Desi Pet Shower"
+   - Título "Portal do Cliente – DPS by PRObst"
    - Descrição explicativa
    - **Mensagens de erro** (se token inválido/expirado):
      - `token_error=invalid`: "Esse link não é mais válido"

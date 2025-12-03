@@ -9,7 +9,7 @@
 
 ## 1. Sumário Executivo
 
-Este documento apresenta uma análise completa de responsividade de todo o sistema Desi Pet Shower (DPS), incluindo o plugin base e todos os 15 add-ons complementares. O objetivo é identificar problemas, bugs e oportunidades de melhoria para garantir uma experiência de usuário consistente em PC, Tablet e Celular.
+Este documento apresenta uma análise completa de responsividade de todo o sistema DPS by PRObst (DPS), incluindo o plugin base e todos os 15 add-ons complementares. O objetivo é identificar problemas, bugs e oportunidades de melhoria para garantir uma experiência de usuário consistente em PC, Tablet e Celular.
 
 ### ✅ Resultado Final: Sistema 100% Responsivo
 

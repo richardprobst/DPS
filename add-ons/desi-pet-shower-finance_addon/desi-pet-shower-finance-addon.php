@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Financeiro Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para o plugin base Desi Pet Shower que cria uma aba de controle financeiro. Permite registrar receitas e despesas, marcar pagamentos e listar todas as transações.
+ * Plugin Name:       DPS by PRObst – Financeiro Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos e visualize transações.
  * Version:           1.2.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -19,14 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_finance_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Financeiro requer o plugin base Desi Pet Shower para funcionar.', 'dps-finance-addon' );
+            echo esc_html__( 'O add-on Financeiro requer o plugin base DPS by PRObst para funcionar.', 'dps-finance-addon' );
             echo '</p></div>';
         } );
         return false;

@@ -1,10 +1,10 @@
-# Desi Pet Shower – Agenda Add-on
+# DPS by PRObst – Agenda Add-on
 
 Gerenciamento de agenda de atendimentos e lembretes automáticos para clientes.
 
 ## Visão geral
 
-O **Agenda Add-on** é uma extensão do Desi Pet Shower Base que fornece uma interface dedicada para visualizar e gerenciar a agenda de atendimentos do dia. Este add-on permite aos recepcionistas e administradores acompanhar agendamentos em tempo real, atualizar status via AJAX e enviar lembretes automáticos diários aos clientes.
+O **Agenda Add-on** é uma extensão do DPS by PRObst Base que fornece uma interface dedicada para visualizar e gerenciar a agenda de atendimentos do dia. Este add-on permite aos recepcionistas e administradores acompanhar agendamentos em tempo real, atualizar status via AJAX e enviar lembretes automáticos diários aos clientes.
 
 Funcionalidades principais:
 - Visualização de agenda diária com filtros de data
@@ -26,7 +26,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior (obrigatório)
+- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

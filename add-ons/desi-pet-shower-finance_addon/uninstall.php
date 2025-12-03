@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Finance Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Finance Add-on
  *
  * Remove tabelas customizadas, options e dados relacionados.
  *

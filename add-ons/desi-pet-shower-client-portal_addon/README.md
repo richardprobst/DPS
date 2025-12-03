@@ -1,4 +1,4 @@
-# Desi Pet Shower – Portal do Cliente Add-on
+# DPS by PRObst – Portal do Cliente Add-on
 
 Área autenticada para clientes consultarem histórico, atualizarem dados e efetuarem pagamentos.
 
@@ -29,7 +29,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **Desi Pet Shower Base**: v1.0.0 ou superior (obrigatório)
+- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

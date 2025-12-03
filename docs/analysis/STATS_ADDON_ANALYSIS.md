@@ -10,7 +10,7 @@
 
 ## Sumário Executivo
 
-O **Stats Add-on** é um componente do Desi Pet Shower que fornece um dashboard de métricas operacionais e financeiras do sistema. Exibe estatísticas de atendimentos, receita, despesas, lucro, serviços mais solicitados, clientes/pets inativos e métricas de assinaturas.
+O **Stats Add-on** é um componente do DPS by PRObst que fornece um dashboard de métricas operacionais e financeiras do sistema. Exibe estatísticas de atendimentos, receita, despesas, lucro, serviços mais solicitados, clientes/pets inativos e métricas de assinaturas.
 
 > **Nota v1.1.0**: As melhorias de alta prioridade foram implementadas nesta versão. Veja abaixo os itens marcados com ✅ IMPLEMENTADO.
 

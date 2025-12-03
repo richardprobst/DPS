@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Página administrativa para visualização de logs do DPS.
+ * Página administrativa para visualização de logs do DPS by PRObst.
  */
 class DPS_Logs_Admin_Page {
 
@@ -15,7 +15,7 @@ class DPS_Logs_Admin_Page {
     }
 
     /**
-     * Registra a página de Logs do sistema como submenu de "Desi Pet Shower".
+     * Registra a página de Logs do sistema como submenu de "DPS by PRObst".
      */
     public function register_page() {
         add_submenu_page(

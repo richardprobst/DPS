@@ -1,4 +1,4 @@
-# Guia de sanitização e escaping (Desi Pet Shower – Base)
+# Guia de sanitização e escaping (DPS by PRObst – Base)
 
 Este guia resume o padrão obrigatório de sanitização de entradas (`$_POST`, `$_GET`) e escaping de saídas em todos os formulários e shortcodes do plugin-base. Use sempre o *text domain* `desi-pet-shower` nos textos.
 

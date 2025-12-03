@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Stock Add-on
+ * Rotina de desinstalação do plugin DPS by PRObst - Stock Add-on
  *
  * Remove CPT de estoque, capability customizada e options.
  *

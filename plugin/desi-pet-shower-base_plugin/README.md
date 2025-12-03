@@ -1,10 +1,13 @@
-# Desi Pet Shower – Base
+# DPS by PRObst – Base
 
-Plugin núcleo do sistema de gestão para pet shops especializados em banho e tosa.
+Plugin núcleo do sistema de gestão para pet shops.
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Visão geral
 
-O **Desi Pet Shower Base** é o plugin principal que fornece a infraestrutura completa para cadastro de clientes, pets e agendamentos de serviços de banho e tosa. Ele serve como fundação para todo o ecossistema DPS, expondo pontos de extensão (hooks) que permitem aos add-ons complementares adicionar funcionalidades como financeiro, comunicações, portal do cliente, entre outros.
+O **DPS by PRObst Base** é o plugin principal que fornece a infraestrutura completa para cadastro de clientes, pets e agendamentos. Ele serve como fundação para todo o ecossistema DPS, expondo pontos de extensão (hooks) que permitem aos add-ons complementares adicionar funcionalidades como financeiro, comunicações, portal do cliente, entre outros.
 
 Este plugin oferece:
 - Sistema de cadastro de clientes e pets com relacionamento 1:N

@@ -5,7 +5,7 @@
  * Centraliza a criação de URLs do WhatsApp com mensagens personalizadas
  * para diferentes contextos do sistema (cliente para equipe, equipe para cliente).
  *
- * @package DesiPetShower
+ * @package DPSbyPRObst
  * @since 1.3.0
  */
 
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_WhatsApp_Helper {
 
     /**
-     * Número padrão da equipe Desi Pet Shower
+     * Número padrão da equipe DPS by PRObst
      * +55 15 99160-6299
      */
     const TEAM_PHONE = '5515991606299';

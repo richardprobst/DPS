@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin Desi Pet Shower - Backup Add-on.
+ * Rotina de desinstalação do plugin DPS by PRObst - Backup Add-on.
  *
  * Remove options de configuração, histórico e transients criados pelo add-on.
  * Arquivos de backup NÃO são removidos por segurança.

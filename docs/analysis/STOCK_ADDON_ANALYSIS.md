@@ -92,7 +92,7 @@ Aba "Serviços" → Formulário de Cadastro:
 
 Feito na interface administrativa do WordPress (fora do shortcode):
 
-**Caminho**: Admin WP → Desi Pet Shower → (interface de itens de estoque via CPT)
+**Caminho**: Admin WP → DPS by PRObst → (interface de itens de estoque via CPT)
 
 Cada item possui:
 
@@ -191,7 +191,7 @@ A seção "Consumo de estoque" aparece dentro do formulário de Serviços porque
 
 ### Passo 1: Cadastrar Itens de Estoque
 
-**Onde**: Admin WP → Desi Pet Shower → Itens de Estoque
+**Onde**: Admin WP → DPS by PRObst → Itens de Estoque
 
 1. Clique em "Adicionar Novo"
 2. Preencha: Nome, Unidade, Quantidade atual, Quantidade mínima

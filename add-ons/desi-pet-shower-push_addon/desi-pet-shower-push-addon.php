@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Push Notifications Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Envia notificações diárias às 08:00 com o resumo dos agendamentos do dia. Pode ser adaptado para serviços de push externos.
+ * Plugin Name:       DPS by PRObst – Push Notifications Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Notificações push diárias com resumo de agendamentos. Mantenha-se informado sobre os atendimentos do dia.
  * Version:           1.1.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -24,14 +24,14 @@ define( 'DPS_PUSH_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_PUSH_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_push_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Push Notifications requer o plugin base Desi Pet Shower para funcionar.', 'dps-push-addon' );
+            echo esc_html__( 'O add-on Push Notifications requer o plugin base DPS by PRObst para funcionar.', 'dps-push-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -810,7 +810,7 @@ class DPS_Push_Notifications_Addon {
                     <tr>
                         <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                Enviado automaticamente pelo DPS by PRObst<br>
                                 ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
                             </p>
                         </td>
@@ -1093,7 +1093,7 @@ class DPS_Push_Notifications_Addon {
                     <tr>
                         <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                Enviado automaticamente pelo DPS by PRObst<br>
                                 ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
                             </p>
                         </td>
@@ -1487,7 +1487,7 @@ class DPS_Push_Notifications_Addon {
                     <tr>
                         <td style="padding: 20px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                Enviado automaticamente pelo Desi Pet Shower<br>
+                                Enviado automaticamente pelo DPS by PRObst<br>
                                 ' . esc_html( date_i18n( 'd/m/Y \à\s H:i', current_time( 'timestamp' ) ) ) . '
                             </p>
                         </td>
@@ -1632,7 +1632,7 @@ class DPS_Push_Notifications_Addon {
         $test_msg = wp_remote_post( $test_url, [
             'body' => [
                 'chat_id'    => $chat_id,
-                'text'       => '✅ Conexão com Desi Pet Shower testada com sucesso!',
+                'text'       => '✅ Conexão com DPS by PRObst testada com sucesso!',
                 'parse_mode' => 'HTML',
             ],
             'timeout' => 10,

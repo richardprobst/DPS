@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Desi Pet Shower – Estatísticas Add-on
- * Plugin URI:        https://probst.pro/desi-pet-shower
- * Description:       Add-on para o plugin base do Desi Pet Shower que adiciona uma aba de estatísticas com dashboard visual, métricas financeiras, comparativo de períodos, exportação CSV e análise de pets inativos.
+ * Plugin Name:       DPS by PRObst – Estatísticas Add-on
+ * Plugin URI:        https://www.probst.pro
+ * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
  * Version:           1.1.0
  * Author:            PRObst
- * Author URI:        https://probst.pro
+ * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
  * Domain Path:       /languages
  * Requires at least: 6.0
@@ -24,13 +24,13 @@ define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Verifica se o plugin base Desi Pet Shower está ativo.
+ * Verifica se o plugin base DPS by PRObst está ativo.
  */
 function dps_stats_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Estatísticas requer o plugin base Desi Pet Shower para funcionar.', 'dps-stats-addon' );
+            echo esc_html__( 'O add-on Estatísticas requer o plugin base DPS by PRObst para funcionar.', 'dps-stats-addon' );
             echo '</p></div>';
         } );
         return false;

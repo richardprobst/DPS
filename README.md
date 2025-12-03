@@ -1,6 +1,9 @@
-# Desi Pet Shower (DPS) – Sistema de Gestão para Banho e Tosa
+# DPS by PRObst – Sistema de Gestão para Pet Shops
 
-Sistema completo de gestão para pet shops especializados em banho e tosa, desenvolvido como monorepo contendo o plugin WordPress principal e diversos add-ons complementares.
+Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente. Desenvolvido como monorepo contendo o plugin WordPress principal e diversos add-ons complementares.
+
+**Autor:** PRObst  
+**Site:** [www.probst.pro](https://www.probst.pro)
 
 ## 📂 Estrutura do Repositório
 
@@ -12,7 +15,7 @@ DPS/
 │   ├── desi-pet-shower-agenda_addon/
 │   ├── desi-pet-shower-finance_addon/
 │   ├── desi-pet-shower-client-portal_addon/
-│   └── ... (14 add-ons no total)
+│   └── ... (16 add-ons no total)
 ├── docs/                                # Documentação detalhada
 │   ├── layout/                         # Análises de layout (admin, agenda, portal, forms)
 │   ├── forms/                          # Docs do formulário de agendamento
@@ -23,14 +26,12 @@ DPS/
 ├── AGENTS.md                           # Regras para contribuidores (humanos e IAs)
 ├── ANALYSIS.md                         # Visão geral de arquitetura
 ├── CHANGELOG.md                        # Histórico de versões
-├── SYSTEM_ANALYSIS_COMPLETE.md        # Análise profunda do sistema (back + front)
-├── SYSTEM_ANALYSIS_SUMMARY.md         # Resumo executivo da análise
 └── README.md                           # Este arquivo
 ```
 
 ## 🎯 Visão Geral
 
-O **Desi Pet Shower** é um sistema modular composto por:
+O **DPS by PRObst** é um sistema modular composto por:
 
 ### Plugin Núcleo (`/plugin/desi-pet-shower-base_plugin`)
 
@@ -209,4 +210,6 @@ Software proprietário - todos os direitos reservados.
 
 ---
 
-**Desi Pet Shower** - Sistema completo de gestão para pet shops especializados em banho e tosa.
+**DPS by PRObst** - Sistema completo de gestão para pet shops.
+
+*Desenvolvido por [PRObst](https://www.probst.pro)*

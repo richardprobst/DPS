@@ -1,4 +1,4 @@
-# Análise funcional do Desi Pet Shower
+# Análise funcional do DPS by PRObst
 
 ## Plugin base (`plugin/desi-pet-shower-base_plugin`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
@@ -171,7 +171,7 @@ echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
 ```
 
 **Configuração**:
-- Número da equipe configurável em: Admin → Desi Pet Shower → Comunicações
+- Número da equipe configurável em: Admin → DPS by PRObst → Comunicações
 - Option: `dps_whatsapp_number` (padrão: +55 15 99160-6299)
 - Fallback automático para constante `TEAM_PHONE` se option não existir
 - Filtro disponível: `dps_team_whatsapp_number` para customização programática
@@ -341,7 +341,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 
 ### Estrutura de Menus Administrativos
 
-Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu principal **"Desi Pet Shower"** (slug: `desi-pet-shower`) para manter a interface administrativa organizada e unificada.
+Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu principal **"DPS by PRObst"** (slug: `desi-pet-shower`) para manter a interface administrativa organizada e unificada.
 
 **Menu Principal** (criado pelo plugin base):
 - Slug: `desi-pet-shower`
@@ -365,7 +365,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **Nomenclatura de Menus - Diretrizes de Usabilidade**:
 - Use nomes curtos e descritivos que indiquem claramente a função
-- Evite prefixos redundantes como "DPS" ou "Desi Pet Shower" nos nomes de submenu
+- Evite prefixos redundantes como "DPS" ou "DPS by PRObst" nos nomes de submenu
 - Use verbos ou substantivos que descrevam a ação/entidade gerenciada
 - Exemplos de nomes descritivos:
   - ✅ "Logs do Sistema" (indica claramente que são logs técnicos)
@@ -392,9 +392,9 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
 
 **Histórico de correções**:
-- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do Desi Pet Shower (CPT com show_in_menu)
+- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do DPS by PRObst (CPT com show_in_menu)
 - **2025-12-01**: Cadastro Público renomeado para "Formulário de Cadastro" (mais intuitivo)
-- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do Desi Pet Shower
+- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do DPS by PRObst
 - **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
 - **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
@@ -469,7 +469,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Options de histórico (planejado): `dps_backup_history`, `dps_backup_settings`
 
 **Hooks consumidos**:
-- `admin_menu` (prioridade 20): registra submenu sob "Desi Pet Shower"
+- `admin_menu` (prioridade 20): registra submenu sob "DPS by PRObst"
 - `admin_post_dps_backup_export`: processa exportação de backup
 - `admin_post_dps_backup_import`: processa importação de backup
 
@@ -807,7 +807,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Logs de erro apenas no server (error_log, não expostos ao cliente)
 
 **Interface Administrativa**:
-- Menu: **Desi Pet Shower > Assistente de IA**
+- Menu: **DPS by PRObst > Assistente de IA**
 - Configurações: ativar/desativar IA, API key, modelo GPT, temperatura, timeout, max_tokens
 - Documentação inline sobre comportamento do assistente
 
@@ -1265,7 +1265,7 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 - Option `dps_debugging_restore_state`: salva estado original das constantes para restauração na desativação
 
 **Hooks consumidos**:
-- `admin_menu` (prioridade 20): registra submenu sob "Desi Pet Shower"
+- `admin_menu` (prioridade 20): registra submenu sob "DPS by PRObst"
 - `admin_init`: processa salvamento de configurações e ações de log
 - `admin_bar_menu` (prioridade 999): adiciona menu de debug na admin bar
 - `admin_enqueue_scripts`: carrega estilos na página de configurações
@@ -1756,7 +1756,7 @@ Gera sugestão de e-mail via AJAX.
 {
     success: true,
     data: {
-        subject: 'Lembrete de Agendamento - Desi Pet Shower',
+        subject: 'Lembrete de Agendamento - DPS by PRObst',
         body: 'Olá João,\n\nEste é um lembrete...'
     }
 }

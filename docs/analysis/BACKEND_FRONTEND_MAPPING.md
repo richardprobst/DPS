@@ -1,5 +1,5 @@
 # Mapeamento de Funcionalidades – BACK-END vs FRONT-END
-## Desi Pet Shower (DPS)
+## DPS by PRObst (DPS)
 
 **Data de análise**: 2025-11-22  
 **Base de análise**: Código-fonte em `/plugin` e `/add-ons`
@@ -20,7 +20,7 @@
 #### 1.1.2 Campanhas & Fidelidade - Configurações (Loyalty Add-on)
 - **Tipo**: CONFIG
 - **Local**: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
-- **Acesso**: Menu principal "Desi Pet Shower" + Submenu "Campanhas & Fidelidade" (linhas 175-192)
+- **Acesso**: Menu principal "DPS by PRObst" + Submenu "Campanhas & Fidelidade" (linhas 175-192)
 - **Funcionalidade**: 
   - Definir valor por ponto (R$/ponto)
   - Gerenciar programa "Indique e Ganhe"
@@ -223,9 +223,9 @@
 ### 3.1 ALTA PRIORIDADE - Segurança e Segregação de Configurações
 
 #### Ação 1: Criar menu admin unificado "DPS → Configurações"
-- **O que fazer**: Mover menu "Desi Pet Shower" do Loyalty para o plugin base
+- **O que fazer**: Mover menu "DPS by PRObst" do Loyalty para o plugin base
 - **Como**: 
-  1. Plugin base cria `add_menu_page('Desi Pet Shower', ..., 'desi-pet-shower', ...)`
+  1. Plugin base cria `add_menu_page('DPS by PRObst', ..., 'desi-pet-shower', ...)`
   2. Loyalty add-on usa `add_submenu_page('desi-pet-shower', ...)` em vez de criar menu próprio
 - **Arquivo**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
 - **Benefício**: Centraliza todos os menus/submenus DPS em um único local
@@ -369,7 +369,7 @@
 
 - **Total de menus admin**: 5
   - DPS Logs (Base): 1
-  - Desi Pet Shower (Loyalty): 1 + 2 submenus
+  - DPS by PRObst (Loyalty): 1 + 2 submenus
   - DPS Pagamentos (Payment): 1 submenu em Configurações
   - DPS Cadastro (Registration): 1 submenu em Configurações
 
