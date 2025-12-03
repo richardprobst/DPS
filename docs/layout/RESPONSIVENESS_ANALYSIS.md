@@ -29,26 +29,26 @@ Este documento apresenta uma análise completa de responsividade de todo o siste
 | Navegação (abas) | ✅ Bom | - | - |
 | Formulários (agendamento) | ✅ Bom | - | - |
 | Tabelas (histórico) | ✅ Bom | - | - |
-| Client Portal | ✅ Melhorado | ~~Alta~~ | ✅ Implementado |
+| Client Portal | ✅ Melhorado | ~~Alta~~ | ✅ Fase 1 |
 | Agenda Add-on | ✅ Bom | - | - |
 | Finance Add-on | ✅ Bom | - | - |
 | Stats Add-on | ✅ Bom | - | - |
 | Groomers Add-on | ✅ Bom | - | - |
 | Services Add-on | ✅ Bom | - | - |
-| Subscription Add-on | ⚠️ Parcial | Média | 4h |
+| Subscription Add-on | ✅ Melhorado | ~~Média~~ | ✅ Fase 2 |
 | Loyalty Add-on | ✅ Bom | - | - |
-| Stock Add-on | ✅ Implementado | ~~Alta~~ | ✅ Implementado |
-| Registration Add-on | ✅ Implementado | ~~Alta~~ | ✅ Implementado |
+| Stock Add-on | ✅ Implementado | ~~Alta~~ | ✅ Fase 1 |
+| Registration Add-on | ✅ Implementado | ~~Alta~~ | ✅ Fase 1 |
 | Backup Add-on | ⚠️ Inline | Baixa | 2h |
 | Push Add-on | ⚠️ Inline | Baixa | 2h |
-| Communications Add-on | ⚠️ Sem CSS | Média | 3h |
-| Payment Add-on | ⚠️ Sem CSS | Média | 3h |
+| Communications Add-on | ✅ Implementado | ~~Média~~ | ✅ Fase 2 |
+| Payment Add-on | ✅ Implementado | ~~Média~~ | ✅ Fase 2 |
 | AI Add-on (Portal) | ✅ Bom | - | - |
 | AI Add-on (Comm) | ⚠️ Parcial | Baixa | 2h |
 
 **Legenda:**
 - ✅ Bom: CSS responsivo implementado com breakpoints adequados
-- ✅ Implementado: CSS criado como parte da Fase 1
+- ✅ Implementado: CSS criado como parte das Fases 1 ou 2
 - ✅ Melhorado: Melhorias de responsividade adicionadas
 - ⚠️ Parcial: Algumas regras responsivas, mas incompletas
 - ❌ Sem CSS: Não possui arquivo CSS dedicado ou regras responsivas
@@ -556,18 +556,25 @@ Configurações de Mercado Pago e PIX.
    - ✅ Alerta de estoque baixo responsivo
    - ✅ Paginação responsiva
 
-### Fase 2: Médios (6h)
+### Fase 2: Médios (6h) ✅ IMPLEMENTADO
 
-4. **Subscription Add-on - Tabela Cards (2h)**
-   - Adicionar transformação tabela→cards
-   - Atributos `data-label` no HTML
+4. **Subscription Add-on - Tabela Cards (2h)** ✅
+   - ✅ Transformação tabela→cards em mobile (< 640px)
+   - ✅ Bordas coloridas por status de pagamento
+   - ✅ Ações responsivas (botões full-width)
+   - ✅ Barra de progresso responsiva
 
-5. **Communications Add-on - Estilos (2h)**
-   - CSS para seção de configurações
-   - Textareas responsivos
+5. **Communications Add-on - Estilos (2h)** ✅
+   - ✅ Criar arquivo CSS dedicado (`assets/css/communications-addon.css`)
+   - ✅ Tabela de formulário responsiva (blocos em mobile)
+   - ✅ Textareas responsivos com font-size 16px
+   - ✅ Seções de configuração bem organizadas
 
-6. **Payment Add-on - Estilos (2h)**
-   - CSS para formulário de credenciais
+6. **Payment Add-on - Estilos (2h)** ✅
+   - ✅ Criar arquivo CSS dedicado (`assets/css/payment-addon.css`)
+   - ✅ Formulário de credenciais responsivo
+   - ✅ Código de URL com word-break
+   - ✅ Instruções de webhook responsivas
 
 ### Fase 3: Melhorias (3h)
 

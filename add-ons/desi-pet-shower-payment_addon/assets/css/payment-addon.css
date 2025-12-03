@@ -1,0 +1,292 @@
+/**
+ * Estilos do Payment Add-on - DPS
+ * 
+ * CSS responsivo para a página de configurações de pagamentos.
+ * Segue o padrão visual minimalista do DPS.
+ * 
+ * Breakpoints:
+ * - 1024px: Tablet grande
+ * - 768px: Tablet
+ * - 640px: Mobile
+ * - 480px: Mobile pequeno
+ * 
+ * @package Desi_Pet_Shower_Payment
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   1. Container Principal
+   ========================================================================== */
+
+.dps-payment-wrap {
+    max-width: 800px;
+}
+
+.dps-payment-wrap h1 {
+    margin-bottom: 24px;
+    color: #374151;
+}
+
+/* ==========================================================================
+   2. Seções de Configuração
+   ========================================================================== */
+
+.dps-payment-wrap h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin: 32px 0 16px;
+    padding: 16px 0;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* ==========================================================================
+   3. Tabela de Formulário
+   ========================================================================== */
+
+.dps-payment-wrap .form-table {
+    margin-top: 0;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.dps-payment-wrap .form-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-payment-wrap .form-table td {
+    padding: 15px 0;
+}
+
+/* ==========================================================================
+   4. Campos de Input
+   ========================================================================== */
+
+.dps-payment-wrap .form-table input[type="text"],
+.dps-payment-wrap .form-table input[type="password"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-payment-wrap .form-table input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Campo de token/senha com máscara */
+.dps-payment-wrap .form-table input[type="password"] {
+    font-family: 'Consolas', 'Monaco', monospace;
+    letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   5. Descrições e Ajuda
+   ========================================================================== */
+
+.dps-payment-wrap .description {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.dps-payment-wrap .description code {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+    display: inline-block;
+    margin: 4px 0;
+    word-break: break-all;
+}
+
+.dps-payment-wrap .description strong {
+    color: #374151;
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.dps-payment-wrap .description a {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-payment-wrap .description a:hover {
+    text-decoration: underline;
+}
+
+/* Lista de instruções */
+.dps-payment-wrap .description br + br {
+    display: none;
+}
+
+/* ==========================================================================
+   6. Botão de Envio
+   ========================================================================== */
+
+.dps-payment-wrap .submit {
+    margin-top: 24px;
+}
+
+.dps-payment-wrap .submit .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    padding: 10px 28px;
+    height: auto;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.dps-payment-wrap .submit .button-primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+/* ==========================================================================
+   7. Notices
+   ========================================================================== */
+
+.dps-payment-wrap .notice {
+    margin: 16px 0;
+    padding: 12px 16px;
+    border-radius: 6px;
+}
+
+.dps-payment-wrap .notice-success {
+    background: #d1fae5;
+    border-left: 4px solid #10b981;
+}
+
+.dps-payment-wrap .notice-warning {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-payment-wrap .notice-error {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+}
+
+/* ==========================================================================
+   8. Indicador de Status de Configuração
+   ========================================================================== */
+
+.dps-payment-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dps-payment-status--configured {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-payment-status--pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* ==========================================================================
+   9. Responsividade
+   ========================================================================== */
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    .dps-payment-wrap .form-table {
+        padding: 16px;
+    }
+    
+    .dps-payment-wrap .form-table,
+    .dps-payment-wrap .form-table tbody,
+    .dps-payment-wrap .form-table tr,
+    .dps-payment-wrap .form-table th,
+    .dps-payment-wrap .form-table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .dps-payment-wrap .form-table th {
+        padding: 12px 0 6px;
+    }
+    
+    .dps-payment-wrap .form-table td {
+        padding: 0 0 20px;
+    }
+    
+    .dps-payment-wrap .form-table input[type="text"],
+    .dps-payment-wrap .form-table input[type="password"] {
+        max-width: 100%;
+    }
+    
+    .dps-payment-wrap h2 {
+        font-size: 16px;
+    }
+}
+
+/* Mobile (640px) */
+@media (max-width: 640px) {
+    .dps-payment-wrap .form-table input[type="text"],
+    .dps-payment-wrap .form-table input[type="password"] {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 12px;
+    }
+    
+    .dps-payment-wrap .description {
+        font-size: 12px;
+    }
+    
+    .dps-payment-wrap .description code {
+        font-size: 11px;
+        padding: 6px 8px;
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .dps-payment-wrap .submit .button-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media (max-width: 480px) {
+    .dps-payment-wrap {
+        padding: 0 8px;
+    }
+    
+    .dps-payment-wrap h1 {
+        font-size: 20px;
+    }
+    
+    .dps-payment-wrap .form-table {
+        padding: 12px;
+    }
+    
+    .dps-payment-wrap .form-table th {
+        font-size: 14px;
+    }
+}

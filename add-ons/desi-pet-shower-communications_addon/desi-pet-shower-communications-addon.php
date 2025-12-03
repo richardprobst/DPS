@@ -58,9 +58,35 @@ class DPS_Communications_Addon {
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
 
+        // Enfileira assets CSS para responsividade
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
         add_action( 'dps_base_after_save_appointment', [ $this, 'handle_after_save_appointment' ], 10, 2 );
         add_action( 'dps_comm_send_appointment_reminder', [ $this, 'send_appointment_reminder' ], 10, 1 );
         add_action( 'dps_comm_send_post_service', [ $this, 'send_post_service_message' ], 10, 1 );
+    }
+
+    /**
+     * Enfileira CSS responsivo do add-on na página de configurações.
+     *
+     * @since 1.0.0
+     * @param string $hook Hook da página atual.
+     */
+    public function enqueue_admin_assets( $hook ) {
+        // Carrega apenas na página de configurações de comunicações
+        if ( 'desi-pet-shower_page_dps-communications' !== $hook ) {
+            return;
+        }
+
+        $addon_url = plugin_dir_url( __FILE__ );
+        $version   = '1.0.0';
+
+        wp_enqueue_style(
+            'dps-communications-addon',
+            $addon_url . 'assets/css/communications-addon.css',
+            [],
+            $version
+        );
     }
 
     /**

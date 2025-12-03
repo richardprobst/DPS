@@ -142,16 +142,36 @@ table.dps-table tr.pay-status-em_atraso {
 
 .dps-subscription-actions {
     margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .dps-subscription-actions .button {
-    margin-right: 8px;
+    margin-right: 0;
 }
 
 /* Ícones de ação */
 .dps-action-icon {
     display: inline-block;
     margin-right: 4px;
+}
+
+/* ==========================================================================
+   Wrapper de Tabela
+   ========================================================================== */
+
+.dps-subscription-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-subscription-table-wrapper table.dps-table {
+    margin-bottom: 0;
+    border: none;
 }
 
 /* ==========================================================================
@@ -167,10 +187,110 @@ table.dps-table tr.pay-status-em_atraso {
         grid-template-columns: 1fr;
     }
     
-    /* Wrapper para tabela com scroll horizontal */
+    .dps-subscription-actions {
+        flex-direction: column;
+    }
+    
+    .dps-subscription-actions .button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Mobile (640px) - Tabela vira cards */
+@media (max-width: 640px) {
     .dps-subscription-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        border: none;
+        overflow: visible;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table {
+        min-width: 0;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table thead {
+        display: none;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: #ffffff;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody tr.pay-status-pendente {
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody tr.pay-status-pago {
+        border-left: 4px solid #10b981;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody tr.pay-status-em_atraso {
+        border-left: 4px solid #ef4444;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td:last-child {
+        border-bottom: none;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 12px;
+        letter-spacing: 0.03em;
+    }
+    
+    /* Barra de progresso em mobile */
+    .dps-subscription-table-wrapper .dps-progress-bar {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    /* Ações em mobile */
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions {
+        grid-template-columns: 1fr;
+        padding-top: 12px;
+        margin-top: 4px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions::before {
+        display: none;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions a,
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions .button {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions a:last-child,
+    .dps-subscription-table-wrapper table.dps-table tbody td.dps-col-actions .button:last-child {
+        margin-bottom: 0;
     }
 }
 
@@ -185,5 +305,18 @@ table.dps-table tr.pay-status-em_atraso {
     
     .dps-stat-number {
         font-size: 24px;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td {
+        grid-template-columns: 100px 1fr;
+        font-size: 13px;
+    }
+    
+    .dps-subscription-table-wrapper table.dps-table tbody td::before {
+        font-size: 11px;
+    }
+    
+    .dps-progress-text {
+        font-size: 11px;
     }
 }
