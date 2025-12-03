@@ -1,0 +1,408 @@
+/**
+ * Estilos do Stock Add-on - DPS
+ * 
+ * CSS responsivo para o módulo de estoque de insumos.
+ * Segue o padrão visual minimalista do DPS.
+ * 
+ * Breakpoints:
+ * - 1024px: Tablet grande
+ * - 768px: Tablet
+ * - 640px: Mobile
+ * - 480px: Mobile pequeno
+ * 
+ * @package Desi_Pet_Shower_Stock
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   1. Layout Principal
+   ========================================================================== */
+
+#dps-section-estoque {
+    padding: 20px 0;
+}
+
+#dps-section-estoque h2 {
+    margin-bottom: 20px;
+    color: #374151;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   2. Barra de Ações
+   ========================================================================== */
+
+.dps-stock-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dps-stock-actions .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-stock-actions .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/* ==========================================================================
+   3. Cards de Resumo
+   ========================================================================== */
+
+.dps-stock-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-stock-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.dps-stock-card--warning {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.dps-stock-card--success {
+    border-left: 4px solid #10b981;
+}
+
+.dps-stock-card--info {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-stock-card__value {
+    display: block;
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+}
+
+.dps-stock-card--warning .dps-stock-card__value {
+    color: #f59e0b;
+}
+
+.dps-stock-card--success .dps-stock-card__value {
+    color: #10b981;
+}
+
+.dps-stock-card__label {
+    display: block;
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   4. Alerta de Estoque Baixo
+   ========================================================================== */
+
+.dps-stock-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    color: #92400e;
+    font-weight: 600;
+}
+
+.dps-stock-alert .dashicons {
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   5. Tabela de Estoque
+   ========================================================================== */
+
+.dps-stock-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.dps-stock-table thead {
+    background: #f9fafb;
+}
+
+.dps-stock-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: #6b7280;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.dps-stock-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.dps-stock-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-stock-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-stock-table tr.dps-stock-row--low {
+    background: #fffbeb;
+}
+
+.dps-stock-table tr.dps-stock-row--low:hover {
+    background: #fef3c7;
+}
+
+/* Status Badge */
+.dps-stock-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dps-stock-status--ok {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-stock-status--low {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Quantidade baixa */
+.dps-stock-qty--low {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   6. Estado Vazio
+   ========================================================================== */
+
+.dps-stock-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.dps-stock-empty .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #d1d5db;
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.dps-stock-empty p {
+    margin: 0 0 16px;
+}
+
+/* ==========================================================================
+   7. Paginação
+   ========================================================================== */
+
+.dps-stock-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-stock-pagination-info {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   8. Responsividade
+   ========================================================================== */
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    .dps-stock-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-stock-card__value {
+        font-size: 24px;
+    }
+    
+    .dps-stock-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-stock-actions .button {
+        justify-content: center;
+    }
+    
+    /* Ocultar colunas menos importantes */
+    .dps-stock-table th.dps-col-unit,
+    .dps-stock-table td.dps-col-unit {
+        display: none;
+    }
+}
+
+/* Mobile (640px) - Tabela vira cards */
+@media (max-width: 640px) {
+    .dps-stock-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-stock-table-wrapper {
+        border: none;
+        overflow: visible;
+    }
+    
+    .dps-stock-table {
+        min-width: 0;
+    }
+    
+    .dps-stock-table thead {
+        display: none;
+    }
+    
+    .dps-stock-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .dps-stock-table tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: #ffffff;
+    }
+    
+    .dps-stock-table tr.dps-stock-row--low {
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .dps-stock-table td {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .dps-stock-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .dps-stock-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 12px;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Mostrar colunas ocultas no mobile como dados nos cards */
+    .dps-stock-table td.dps-col-unit {
+        display: grid;
+    }
+    
+    .dps-stock-table td.dps-col-actions {
+        grid-template-columns: 1fr;
+        padding-top: 12px;
+        margin-top: 4px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .dps-stock-table td.dps-col-actions::before {
+        display: none;
+    }
+    
+    .dps-stock-table td.dps-col-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Alerta mais compacto */
+    .dps-stock-alert {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .dps-stock-pagination {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media (max-width: 480px) {
+    #dps-section-estoque {
+        padding: 16px 0;
+    }
+    
+    #dps-section-estoque h2 {
+        font-size: 18px;
+    }
+    
+    .dps-stock-card {
+        padding: 16px;
+    }
+    
+    .dps-stock-card__value {
+        font-size: 22px;
+    }
+    
+    .dps-stock-table td {
+        grid-template-columns: 100px 1fr;
+        font-size: 13px;
+    }
+    
+    .dps-stock-table td::before {
+        font-size: 11px;
+    }
+}

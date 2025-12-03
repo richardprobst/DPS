@@ -72,6 +72,9 @@ class DPS_Payment_Addon {
         // Adiciona página de configurações no painel para definir o Access Token do Mercado Pago
         add_action( 'admin_menu', [ $this, 'add_settings_page' ], 20 );
 
+        // Enfileira assets CSS para responsividade
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
         // Registra seção e campos das configurações. Também registra o manipulador do webhook
         add_action( 'admin_init', [ $this, 'register_settings_fields' ] );
 
@@ -81,6 +84,29 @@ class DPS_Payment_Addon {
         // Usamos prioridade 1 para executar antes de outros handlers que possam
         // consumir a requisição.
         add_action( 'init', [ $this, 'maybe_handle_mp_notification' ], 1 );
+    }
+
+    /**
+     * Enfileira CSS responsivo do add-on na página de configurações.
+     *
+     * @since 1.0.0
+     * @param string $hook Hook da página atual.
+     */
+    public function enqueue_admin_assets( $hook ) {
+        // Carrega apenas na página de configurações de pagamentos
+        if ( 'desi-pet-shower_page_dps-payment-settings' !== $hook ) {
+            return;
+        }
+
+        $addon_url = plugin_dir_url( __FILE__ );
+        $version   = '1.0.0';
+
+        wp_enqueue_style(
+            'dps-payment-addon',
+            $addon_url . 'assets/css/payment-addon.css',
+            [],
+            $version
+        );
     }
 
     /**

@@ -549,9 +549,116 @@
         display: block;
         overflow-x: auto;
     }
+    
+    .dps-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .dps-upload-area {
+        padding: 20px;
+    }
+    
+    .dps-upload-area .dashicons {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* Mobile (640px) - Tabela vira cards */
+@media (max-width: 640px) {
+    .dps-history-table {
+        display: block;
+        overflow: visible;
+    }
+    
+    .dps-history-table thead {
+        display: none;
+    }
+    
+    .dps-history-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .dps-history-table tr {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    
+    .dps-history-table tr:hover {
+        background: #fff;
+    }
+    
+    .dps-history-table td {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .dps-history-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .dps-history-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 12px;
+        letter-spacing: 0.03em;
+    }
+    
+    .dps-history-table td.actions {
+        grid-template-columns: 1fr;
+        padding-top: 12px;
+        margin-top: 4px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .dps-history-table td.actions::before {
+        display: none;
+    }
+    
+    .dps-history-table td.actions a,
+    .dps-history-table td.actions .button {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    
+    .dps-history-table td.actions a:last-child,
+    .dps-history-table td.actions .button:last-child {
+        margin-bottom: 0;
+    }
+    
+    .dps-modal-footer {
+        flex-direction: column;
+    }
+    
+    .dps-modal-footer .button {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 @media (max-width: 480px) {
+    .dps-backup-wrap {
+        margin: 10px;
+    }
+    
+    .dps-backup-wrap h1 {
+        font-size: 20px;
+    }
+
     .dps-backup-dashboard {
         grid-template-columns: 1fr;
     }
@@ -562,5 +669,19 @@
 
     .dps-stat-card .stat-value {
         font-size: 24px;
+    }
+    
+    .dps-schedule-field input,
+    .dps-schedule-field select {
+        font-size: 16px; /* Evita zoom automático no iOS */
+    }
+    
+    .dps-history-table td {
+        grid-template-columns: 80px 1fr;
+        font-size: 13px;
+    }
+    
+    .dps-history-table td::before {
+        font-size: 11px;
     }
 }

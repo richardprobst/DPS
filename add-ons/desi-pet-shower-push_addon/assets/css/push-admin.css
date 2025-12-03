@@ -316,4 +316,75 @@
         flex-direction: column;
         align-items: flex-start;
     }
+    
+    .dps-push-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-push-actions .button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .dps-push-status-card {
+        padding: 16px;
+    }
+    
+    .dps-push-status-card h3 {
+        font-size: 15px;
+    }
+    
+    .dps-push-status-item {
+        padding: 10px;
+    }
+    
+    .dps-push-section-body {
+        padding: 16px;
+    }
+    
+    .dps-push-section-header {
+        padding: 12px 16px;
+    }
+    
+    .dps-push-section-header h2 {
+        font-size: 15px;
+    }
+    
+    .dps-telegram-status {
+        margin-left: 0;
+        margin-top: 8px;
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-push-section .form-table input[type="text"],
+    .dps-push-section .form-table input[type="number"],
+    .dps-push-section .form-table input[type="email"],
+    .dps-push-section .form-table select {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        width: 100%;
+    }
+    
+    .dps-push-switch input[type="checkbox"] {
+        width: 40px;
+        height: 22px;
+    }
+    
+    .dps-push-switch input[type="checkbox"]::before {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .dps-push-switch input[type="checkbox"]:checked::before {
+        left: 20px;
+    }
+    
+    .dps-push-test-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

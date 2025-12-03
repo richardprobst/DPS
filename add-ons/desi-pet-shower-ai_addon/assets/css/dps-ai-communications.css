@@ -139,5 +139,55 @@
     .dps-ai-modal-content {
         margin: 20px;
         max-width: calc(100% - 40px);
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+    
+    .dps-ai-modal-header h2 {
+        font-size: 18px;
+    }
+    
+    .dps-ai-modal-footer {
+        flex-direction: column;
+    }
+    
+    .dps-ai-modal-footer button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-ai-modal-content {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+    }
+    
+    .dps-ai-modal-header,
+    .dps-ai-modal-body,
+    .dps-ai-modal-footer {
+        padding: 16px;
+    }
+    
+    .dps-ai-modal-header h2 {
+        font-size: 16px;
+    }
+    
+    .dps-ai-form-field input[type="text"],
+    .dps-ai-form-field textarea {
+        font-size: 16px; /* Evita zoom automático no iOS */
+    }
+    
+    .dps-ai-form-field textarea {
+        min-height: 120px;
+    }
+    
+    .dps-ai-suggest-whatsapp,
+    .dps-ai-suggest-email {
+        margin-left: 0;
+        margin-top: 8px;
+        display: flex;
+        width: 100%;
+        justify-content: center;
     }
 }

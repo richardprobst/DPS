@@ -1,0 +1,255 @@
+/**
+ * Estilos do Communications Add-on - DPS
+ * 
+ * CSS responsivo para a página de configurações de comunicações.
+ * Segue o padrão visual minimalista do DPS.
+ * 
+ * Breakpoints:
+ * - 1024px: Tablet grande
+ * - 768px: Tablet
+ * - 640px: Mobile
+ * - 480px: Mobile pequeno
+ * 
+ * @package Desi_Pet_Shower_Communications
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   1. Container Principal
+   ========================================================================== */
+
+.dps-communications-wrap {
+    max-width: 900px;
+}
+
+.dps-communications-wrap h1 {
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.dps-communications-wrap > p {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   2. Seções de Configuração
+   ========================================================================== */
+
+.dps-communications-wrap h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin: 32px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-communications-wrap h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+/* ==========================================================================
+   3. Tabela de Formulário
+   ========================================================================== */
+
+.dps-communications-wrap .form-table {
+    margin-top: 0;
+}
+
+.dps-communications-wrap .form-table th {
+    width: 250px;
+    padding: 20px 10px 20px 0;
+    vertical-align: top;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dps-communications-wrap .form-table td {
+    padding: 15px 0;
+}
+
+.dps-communications-wrap .form-table input[type="text"],
+.dps-communications-wrap .form-table input[type="email"],
+.dps-communications-wrap .form-table input[type="url"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-communications-wrap .form-table input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* ==========================================================================
+   4. Textareas de Templates
+   ========================================================================== */
+
+.dps-communications-wrap .form-table textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    color: #374151;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-communications-wrap .form-table textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* ==========================================================================
+   5. Descrições e Ajuda
+   ========================================================================== */
+
+.dps-communications-wrap .description {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Variáveis de template destacadas */
+.dps-communications-wrap .description code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+}
+
+/* ==========================================================================
+   6. Botão de Envio
+   ========================================================================== */
+
+.dps-communications-wrap .submit {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-communications-wrap .submit .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    padding: 8px 24px;
+    height: auto;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.dps-communications-wrap .submit .button-primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+/* ==========================================================================
+   7. Notices
+   ========================================================================== */
+
+.dps-communications-wrap .notice {
+    margin: 16px 0;
+    padding: 12px 16px;
+    border-radius: 6px;
+}
+
+.dps-communications-wrap .notice-success {
+    background: #d1fae5;
+    border-left: 4px solid #10b981;
+}
+
+.dps-communications-wrap .notice-error {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+}
+
+/* ==========================================================================
+   8. Responsividade
+   ========================================================================== */
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    .dps-communications-wrap .form-table,
+    .dps-communications-wrap .form-table tbody,
+    .dps-communications-wrap .form-table tr,
+    .dps-communications-wrap .form-table th,
+    .dps-communications-wrap .form-table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .dps-communications-wrap .form-table th {
+        padding: 12px 0 6px;
+        font-weight: 600;
+    }
+    
+    .dps-communications-wrap .form-table td {
+        padding: 0 0 16px;
+    }
+    
+    .dps-communications-wrap .form-table input[type="text"],
+    .dps-communications-wrap .form-table input[type="email"],
+    .dps-communications-wrap .form-table input[type="url"] {
+        max-width: 100%;
+    }
+    
+    .dps-communications-wrap h2 {
+        font-size: 16px;
+        margin: 24px 0 12px;
+        padding-top: 20px;
+    }
+}
+
+/* Mobile (640px) */
+@media (max-width: 640px) {
+    .dps-communications-wrap .form-table input[type="text"],
+    .dps-communications-wrap .form-table input[type="email"],
+    .dps-communications-wrap .form-table input[type="url"],
+    .dps-communications-wrap .form-table textarea {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 12px;
+    }
+    
+    .dps-communications-wrap .form-table textarea {
+        min-height: 100px;
+    }
+    
+    .dps-communications-wrap .submit .button-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media (max-width: 480px) {
+    .dps-communications-wrap {
+        padding: 0 8px;
+    }
+    
+    .dps-communications-wrap h1 {
+        font-size: 20px;
+    }
+    
+    .dps-communications-wrap h2 {
+        font-size: 15px;
+    }
+    
+    .dps-communications-wrap .description {
+        font-size: 12px;
+    }
+}
