@@ -118,16 +118,23 @@
         if ($statusFilter.length) {
             $statusFilter.on('change', function() {
                 var status = $(this).val();
-                var currentUrl = new URL(window.location.href);
+                var currentUrl = window.location.href;
                 
+                // Compatibilidade com navegadores mais antigos (sem URL constructor)
                 if (status) {
-                    currentUrl.searchParams.set('ref_status', status);
+                    if (currentUrl.indexOf('ref_status=') !== -1) {
+                        currentUrl = currentUrl.replace(/ref_status=[^&]*/, 'ref_status=' + encodeURIComponent(status));
+                    } else {
+                        currentUrl += (currentUrl.indexOf('?') !== -1 ? '&' : '?') + 'ref_status=' + encodeURIComponent(status);
+                    }
                 } else {
-                    currentUrl.searchParams.delete('ref_status');
+                    currentUrl = currentUrl.replace(/[?&]ref_status=[^&]*/g, '').replace(/\?$/, '');
                 }
                 
-                currentUrl.searchParams.delete('ref_page'); // Reset pagination
-                window.location.href = currentUrl.toString();
+                // Remove parâmetro de página para resetar paginação
+                currentUrl = currentUrl.replace(/[?&]ref_page=[^&]*/g, '').replace(/\?$/, '');
+                
+                window.location.href = currentUrl;
             });
         }
     };

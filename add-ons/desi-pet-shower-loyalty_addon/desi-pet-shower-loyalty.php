@@ -87,7 +87,16 @@ class DPS_Loyalty_Addon {
      */
     public function enqueue_admin_assets( $hook ) {
         // Carrega apenas nas páginas relevantes
-        if ( strpos( $hook, 'dps-loyalty' ) === false && get_post_type() !== 'dps_campaign' ) {
+        $is_loyalty_page = strpos( $hook, 'dps-loyalty' ) !== false;
+        $is_campaign_edit = false;
+        
+        // Verifica se estamos editando uma campanha
+        if ( function_exists( 'get_current_screen' ) ) {
+            $screen = get_current_screen();
+            $is_campaign_edit = $screen && $screen->post_type === 'dps_campaign';
+        }
+        
+        if ( ! $is_loyalty_page && ! $is_campaign_edit ) {
             return;
         }
 

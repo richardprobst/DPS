@@ -110,10 +110,8 @@ class DPS_Loyalty_API {
         }
 
         // Tenta usar página de cadastro configurada ou fallback para home
-        $registration_url = home_url( '/cadastro/' );
-        
         // Filtro para customizar URL base de indicação
-        $registration_url = apply_filters( 'dps_loyalty_referral_base_url', $registration_url );
+        $registration_url = apply_filters( 'dps_loyalty_referral_base_url', home_url( '/' ) );
         
         return add_query_arg( 'ref', $code, $registration_url );
     }
@@ -233,9 +231,22 @@ class DPS_Loyalty_API {
     /**
      * Obtém métricas globais de fidelidade.
      *
+     * Utiliza cache via transient para melhor performance.
+     *
+     * @param bool $force_refresh Forçar atualização do cache.
      * @return array Métricas do programa.
      */
-    public static function get_global_metrics() {
+    public static function get_global_metrics( $force_refresh = false ) {
+        $cache_key = 'dps_loyalty_global_metrics';
+        
+        // Tenta obter do cache
+        if ( ! $force_refresh ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
         global $wpdb;
 
         // Total de clientes com pontos
@@ -255,7 +266,7 @@ class DPS_Loyalty_API {
 
         // Indicações do mês
         $referrals_table = $wpdb->prefix . 'dps_referrals';
-        $first_day_of_month = date( 'Y-m-01 00:00:00' );
+        $first_day_of_month = gmdate( 'Y-m-01 00:00:00' );
         
         $referrals_this_month = $wpdb->get_var( $wpdb->prepare( "
             SELECT COUNT(*) FROM {$referrals_table} 
@@ -276,13 +287,18 @@ class DPS_Loyalty_API {
             WHERE meta_key = '_dps_credit_balance'
         " );
 
-        return [
+        $metrics = [
             'clients_with_points'  => (int) $clients_with_points,
             'total_points'         => (int) $total_points,
             'referrals_this_month' => (int) $referrals_this_month,
             'rewarded_this_month'  => (int) $rewarded_this_month,
             'total_credits'        => (int) $total_credits,
         ];
+
+        // Armazena no cache por 5 minutos
+        set_transient( $cache_key, $metrics, 5 * MINUTE_IN_SECONDS );
+
+        return $metrics;
     }
 
     /**
