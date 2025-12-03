@@ -566,13 +566,18 @@ class Test_DPS_Agenda_Addon extends WP_UnitTestCase {
 - **ARIA labels**: Adicionados `aria-label` nos selects de filtros (cliente, status, serviço) e no select de alteração de status na tabela.
 - **Arquivo .pot**: Criado `languages/dps-agenda-addon.pot` com ~70 strings traduzíveis.
 
-### 12.2 Fase 2: Funcionalidades Novas (12-20h)
+### 12.2 Fase 2: Funcionalidades Novas (12-20h) ✅ IMPLEMENTADA
 
-| Item | Esforço | Prioridade |
-|------|---------|------------|
-| Agrupamento por cliente | 4-6h | 🔴 Alta |
-| Exportação PDF/Excel | 4-6h | 🟡 Média |
-| Relatório de ocupação | 6-8h | 🟡 Média |
+| Item | Esforço | Prioridade | Status |
+|------|---------|------------|--------|
+| Agrupamento por cliente | 4-6h | 🔴 Alta | ✅ Implementado |
+| Exportação CSV/Excel | 4-6h | 🟡 Média | ✅ Implementado |
+| Relatório de ocupação | 6-8h | 🟡 Média | ✅ Implementado |
+
+**Detalhes da implementação (2025-12-03):**
+- **Agrupamento por cliente**: Botão "👥 Agrupar" na navegação que alterna para visualização agrupada por cliente. Cada cliente tem um grupo colapsável com seus agendamentos em lista compacta, link direto para WhatsApp e contador de pendentes.
+- **Exportação CSV**: Botão "📥 Exportar" que gera CSV com BOM UTF-8 (compatível com Excel). Inclui data, hora, cliente, pet, status e telefone.
+- **Relatório de ocupação**: Seção colapsável "📊 Relatório de Ocupação" com métricas: taxa de conclusão, taxa de cancelamento, horário de pico, média por hora e distribuição visual por status.
 
 ### 12.3 Fase 3: Refatoração (16-24h)
 
