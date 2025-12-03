@@ -198,6 +198,10 @@ class DPS_Finance_Addon {
                     'confirmDeletePartial' => __( 'Tem certeza que deseja excluir este pagamento?', 'dps-finance-addon' ),
                     'noPartials'           => __( 'Nenhum pagamento registrado.', 'dps-finance-addon' ),
                     'history'              => __( 'Histórico', 'dps-finance-addon' ),
+                    // Validação de formulário
+                    'valueRequired'        => __( 'O valor deve ser maior que zero.', 'dps-finance-addon' ),
+                    'dateRequired'         => __( 'A data é obrigatória.', 'dps-finance-addon' ),
+                    'categoryRequired'     => __( 'A categoria é obrigatória.', 'dps-finance-addon' ),
                 ],
             ] );
         }
@@ -1017,6 +1021,8 @@ class DPS_Finance_Addon {
         $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : '';
         // Filtro de categoria
         $cat_filter = isset( $_GET['fin_cat'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_cat'] ) ) : '';
+        // Filtro por status
+        $status_filter = isset( $_GET['fin_status'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_status'] ) ) : '';
         // Intervalos rápidos: últimos 7/30 dias
         $range      = isset( $_GET['fin_range'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_range'] ) ) : '';
         if ( $range === '7' || $range === '30' ) {
@@ -1039,6 +1045,11 @@ class DPS_Finance_Addon {
         if ( $cat_filter !== '' ) {
             $where  .= ' AND categoria = %s';
             $params[] = $cat_filter;
+        }
+        // Filtro por status
+        if ( $status_filter !== '' && in_array( $status_filter, [ 'em_aberto', 'pago', 'cancelado' ], true ) ) {
+            $where  .= ' AND status = %s';
+            $params[] = $status_filter;
         }
 
         // Paginação - configuração
@@ -1116,40 +1127,95 @@ class DPS_Finance_Addon {
                 echo '</div>';
             }
         }
-        // Formulário de nova transação
-        echo '<h4>' . esc_html__( 'Registrar transação', 'dps-finance-addon' ) . '</h4>';
-        echo '<form method="post" class="dps-form">';
+        // Formulário de nova transação com fieldsets semânticos
+        echo '<form method="post" class="dps-form dps-finance-new-form" id="dps-finance-new-form">';
         echo '<input type="hidden" name="dps_finance_action" value="save_trans">';
         wp_nonce_field( 'dps_finance_action', 'dps_finance_nonce' );
-        echo '<p><label>' . esc_html__( 'Data', 'dps-finance-addon' ) . '<br><input type="date" name="finance_date" value="' . esc_attr( date( 'Y-m-d' ) ) . '" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="finance_value" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Categoria', 'dps-finance-addon' ) . '<br><input type="text" name="finance_category" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Tipo', 'dps-finance-addon' ) . '<br><select name="finance_type">';
+        
+        // Fieldset: Dados Básicos
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Dados Básicos', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_date">' . esc_html__( 'Data', 'dps-finance-addon' ) . ' *</label>';
+        echo '<input type="date" id="finance_date" name="finance_date" value="' . esc_attr( date( 'Y-m-d' ) ) . '" required>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_value">' . esc_html__( 'Valor', 'dps-finance-addon' ) . ' *</label>';
+        echo '<div class="dps-input-money-wrapper">';
+        echo '<span class="dps-input-prefix">R$</span>';
+        echo '<input type="text" id="finance_value" name="finance_value" class="dps-input-money" placeholder="0,00" required>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_desc">' . esc_html__( 'Descrição', 'dps-finance-addon' ) . '</label>';
+        echo '<input type="text" id="finance_desc" name="finance_desc" placeholder="' . esc_attr__( 'Ex: Pagamento de serviço', 'dps-finance-addon' ) . '">';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        // Fieldset: Classificação
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Classificação', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_category">' . esc_html__( 'Categoria', 'dps-finance-addon' ) . ' *</label>';
+        echo '<input type="text" id="finance_category" name="finance_category" list="finance_categories" required placeholder="' . esc_attr__( 'Ex: Serviço, Produto, Aluguel...', 'dps-finance-addon' ) . '">';
+        // Datalist com categorias existentes
+        echo '<datalist id="finance_categories">';
+        if ( $cats ) {
+            foreach ( $cats as $cat ) {
+                echo '<option value="' . esc_attr( $cat ) . '">';
+            }
+        }
+        echo '</datalist>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_type">' . esc_html__( 'Tipo', 'dps-finance-addon' ) . ' *</label>';
+        echo '<select id="finance_type" name="finance_type" required>';
         echo '<option value="receita">' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
         echo '<option value="despesa">' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
-        echo '</select></label></p>';
-        echo '<p><label>' . esc_html__( 'Status', 'dps-finance-addon' ) . '<br><select name="finance_status">';
+        echo '</select>';
+        echo '</div>';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_status">' . esc_html__( 'Status', 'dps-finance-addon' ) . ' *</label>';
+        echo '<select id="finance_status" name="finance_status" required>';
         echo '<option value="em_aberto">' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
         echo '<option value="pago">' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
-        echo '</select></label></p>';
-        // Cliente opcional
-        echo '<p><label>' . esc_html__( 'Cliente (opcional)', 'dps-finance-addon' ) . '<br><select name="finance_client_id">';
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        // Fieldset: Vínculo (opcional)
+        echo '<fieldset class="dps-finance-fieldset">';
+        echo '<legend>' . esc_html__( 'Vínculo (opcional)', 'dps-finance-addon' ) . '</legend>';
+        echo '<div class="dps-finance-form-grid">';
+        echo '<div class="dps-field">';
+        echo '<label for="finance_client_id">' . esc_html__( 'Cliente', 'dps-finance-addon' ) . '</label>';
+        echo '<select id="finance_client_id" name="finance_client_id">';
         echo '<option value="">' . esc_html__( 'Nenhum', 'dps-finance-addon' ) . '</option>';
         foreach ( $clients as $cli ) {
             echo '<option value="' . esc_attr( $cli->ID ) . '">' . esc_html( $cli->post_title ) . '</option>';
         }
-        echo '</select></label></p>';
-        echo '<p><label>' . esc_html__( 'Descrição', 'dps-finance-addon' ) . '<br><input type="text" name="finance_desc"></label></p>';
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button></p>';
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+        
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Transação', 'dps-finance-addon' ) . '</button>';
+        echo '</div>';
         echo '</form>';
+        
         // Lista de transações
         echo '<h4>' . esc_html__( 'Transações Registradas', 'dps-finance-addon' ) . '</h4>';
         // Formulário de filtro por data e categoria
-        echo '<form method="get" class="dps-finance-date-filter" style="margin-bottom:10px;">';
-        // Mantém parâmetros existentes (exceto filtros de data, intervalo e categoria)
+        echo '<form method="get" class="dps-finance-date-filter dps-finance-filters" style="margin-bottom:10px;">';
+        // Mantém parâmetros existentes (exceto filtros de data, intervalo, categoria e status)
         // SEGURANÇA: Sanitiza valores de $_GET antes de usar
         foreach ( $_GET as $k => $v ) {
-            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat' ], true ) ) {
+            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status' ], true ) ) {
                 continue;
             }
             $safe_key = sanitize_key( $k );
@@ -1171,28 +1237,40 @@ class DPS_Finance_Addon {
             }
         }
         echo '</select></label> ';
+        // Dropdown de status
+        echo '<label>' . esc_html__( 'Status', 'dps-finance-addon' ) . ' <select name="fin_status">';
+        echo '<option value="">' . esc_html__( 'Todos', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="em_aberto"' . selected( $status_filter, 'em_aberto', false ) . '>' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="pago"' . selected( $status_filter, 'pago', false ) . '>' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="cancelado"' . selected( $status_filter, 'cancelado', false ) . '>' . esc_html__( 'Cancelado', 'dps-finance-addon' ) . '</option>';
+        echo '</select></label> ';
+        echo '<div class="dps-finance-filter-buttons">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button> ';
-        // Links rápidos: preserva categoria
+        // Links rápidos: preserva categoria e status
         $quick_params = $_GET;
         unset( $quick_params['fin_start'], $quick_params['fin_end'], $quick_params['fin_range'] );
-        // Garante manter a categoria selecionada
+        // Garante manter a categoria e status selecionados
         if ( $cat_filter !== '' ) {
             $quick_params['fin_cat'] = $cat_filter;
         }
+        if ( $status_filter !== '' ) {
+            $quick_params['fin_status'] = $status_filter;
+        }
         $link7  = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '7' ] ), get_permalink() ) . '#financeiro';
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $link7 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
-        echo '<a href="' . esc_url( $link30 ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
-        // Link de limpar filtros: remove todos os filtros inclusive categoria
+        echo '<a href="' . esc_url( $link7 ) . '" class="button">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
+        echo '<a href="' . esc_url( $link30 ) . '" class="button">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
+        // Link de limpar filtros: remove todos os filtros inclusive categoria e status
         $clear_params = $quick_params;
-        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'] );
+        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'] );
         $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $clear_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
         $export_link = add_query_arg( $export_params, get_permalink() ) . '#financeiro';
-        echo '<a href="' . esc_url( $export_link ) . '" class="button" style="margin-left:5px;">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '<a href="' . esc_url( $export_link ) . '" class="button">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
+        echo '</div>';
         echo '</form>';
         if ( $trans ) {
             // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas

@@ -19,6 +19,31 @@
     }
 
     /**
+     * Parse Brazilian currency format to float
+     * @param {string} value - Value in Brazilian format (ex: 1.234,56)
+     * @returns {number} Float value
+     */
+    function parseBrazilianCurrency(value) {
+        if (!value) return 0;
+        // Remove thousand separators and replace decimal comma with dot
+        var cleaned = value.replace(/\./g, '').replace(',', '.');
+        return parseFloat(cleaned) || 0;
+    }
+
+    /**
+     * Format number to Brazilian currency format
+     * @param {number} value - Numeric value
+     * @returns {string} Formatted string (ex: 1.234,56)
+     */
+    function formatToBrazilianCurrency(value) {
+        if (isNaN(value)) return '0,00';
+        return value.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    /**
      * Initialize Finance Add-on functionality
      */
     function init() {
@@ -26,6 +51,117 @@
         initDeleteConfirmation();
         initStatusChangeConfirmation();
         initPartialHistory();
+        initMoneyMask();
+        initFormValidation();
+    }
+
+    /**
+     * Initialize money mask for currency inputs
+     */
+    function initMoneyMask() {
+        $(document).on('input', '.dps-input-money', function() {
+            var $input = $(this);
+            var value = $input.val();
+            
+            // Remove non-numeric characters except comma and dot
+            value = value.replace(/[^\d,]/g, '');
+            
+            // If there's a comma, only keep last 2 digits after it
+            if (value.indexOf(',') !== -1) {
+                var parts = value.split(',');
+                var intPart = parts[0];
+                var decPart = parts[1] || '';
+                // Limit decimal to 2 digits
+                decPart = decPart.substring(0, 2);
+                value = intPart + ',' + decPart;
+            }
+            
+            $input.val(value);
+        });
+        
+        // Format on blur
+        $(document).on('blur', '.dps-input-money', function() {
+            var $input = $(this);
+            var value = $input.val();
+            
+            if (value) {
+                var numValue = parseBrazilianCurrency(value);
+                if (numValue > 0) {
+                    $input.val(formatToBrazilianCurrency(numValue));
+                }
+            }
+        });
+        
+        // Parse before form submission
+        $(document).on('submit', '#dps-finance-new-form', function() {
+            var $valueInput = $(this).find('.dps-input-money');
+            var brValue = $valueInput.val();
+            var numValue = parseBrazilianCurrency(brValue);
+            
+            // Create a hidden input with the numeric value for form submission
+            $(this).find('input[name="finance_value_numeric"]').remove();
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'finance_value_numeric',
+                value: numValue
+            }).appendTo($(this));
+        });
+    }
+
+    /**
+     * Initialize form validation
+     */
+    function initFormValidation() {
+        $(document).on('submit', '#dps-finance-new-form', function(e) {
+            var $form = $(this);
+            var isValid = true;
+            var errorMessages = [];
+            
+            // Validate value > 0
+            var $valueInput = $form.find('.dps-input-money');
+            var value = parseBrazilianCurrency($valueInput.val());
+            if (value <= 0) {
+                isValid = false;
+                errorMessages.push(dpsFinance.i18n.valueRequired || 'O valor deve ser maior que zero.');
+                $valueInput.addClass('dps-input-error');
+            } else {
+                $valueInput.removeClass('dps-input-error');
+            }
+            
+            // Validate date is not in the future (optional - allow future dates for planned transactions)
+            var $dateInput = $form.find('input[name="finance_date"]');
+            var dateValue = $dateInput.val();
+            if (!dateValue) {
+                isValid = false;
+                errorMessages.push(dpsFinance.i18n.dateRequired || 'A data é obrigatória.');
+                $dateInput.addClass('dps-input-error');
+            } else {
+                $dateInput.removeClass('dps-input-error');
+            }
+            
+            // Validate category is not empty
+            var $categoryInput = $form.find('input[name="finance_category"]');
+            if (!$categoryInput.val().trim()) {
+                isValid = false;
+                errorMessages.push(dpsFinance.i18n.categoryRequired || 'A categoria é obrigatória.');
+                $categoryInput.addClass('dps-input-error');
+            } else {
+                $categoryInput.removeClass('dps-input-error');
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                showMessage(errorMessages.join(' '), 'error');
+                return false;
+            }
+            
+            return true;
+        });
+        
+        // Remove error class on input
+        $(document).on('input change', '.dps-input-error', function() {
+            $(this).removeClass('dps-input-error');
+        });
     }
 
     /**
