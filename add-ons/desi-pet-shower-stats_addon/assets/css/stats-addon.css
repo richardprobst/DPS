@@ -1,0 +1,449 @@
+/**
+ * Stats Add-on - Estilos do Dashboard
+ *
+ * Segue o padrão visual minimalista do DPS.
+ * Cores: #0ea5e9 (azul primário), #10b981 (verde sucesso), #ef4444 (vermelho erro), #f59e0b (amarelo aviso)
+ *
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   Cards de Métricas
+   ========================================================================== */
+
+.dps-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-stats-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.dps-stats-card--primary {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-stats-card--success {
+    border-left: 4px solid #10b981;
+}
+
+.dps-stats-card--warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-stats-card--danger {
+    border-left: 4px solid #ef4444;
+}
+
+.dps-stats-card__icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.dps-stats-card__value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+}
+
+.dps-stats-card__label {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.dps-stats-card__trend {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.dps-stats-card__trend--up {
+    color: #10b981;
+    background: #d1fae5;
+}
+
+.dps-stats-card__trend--down {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.dps-stats-card__trend--neutral {
+    color: #6b7280;
+    background: #f3f4f6;
+}
+
+/* ==========================================================================
+   Filtro de Datas
+   ========================================================================== */
+
+.dps-stats-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.dps-stats-filter label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-stats-filter input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dps-stats-filter input[type="date"]:focus {
+    border-color: #0ea5e9;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-stats-filter .button {
+    margin-left: auto;
+}
+
+.dps-stats-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* ==========================================================================
+   Seções Colapsáveis
+   ========================================================================== */
+
+.dps-stats-section {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.dps-stats-section summary {
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    list-style: none;
+}
+
+.dps-stats-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.dps-stats-section summary::before {
+    content: "▶";
+    font-size: 10px;
+    transition: transform 0.2s;
+}
+
+.dps-stats-section[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.dps-stats-section__content {
+    padding: 0 20px 20px;
+}
+
+.dps-stats-section__icon {
+    font-size: 18px;
+}
+
+/* ==========================================================================
+   Gráficos
+   ========================================================================== */
+
+.dps-stats-chart-container {
+    max-width: 600px;
+    margin: 20px 0;
+}
+
+.dps-stats-chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin: 20px 0;
+}
+
+.dps-stats-chart-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.dps-stats-chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   Tabela de Pets Inativos
+   ========================================================================== */
+
+.dps-stats-table-wrapper {
+    overflow-x: auto;
+    margin: 16px 0;
+}
+
+.dps-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.dps-stats-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 16px;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+}
+
+.dps-stats-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+.dps-stats-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-stats-table .dps-action-link {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-stats-table .dps-action-link:hover {
+    text-decoration: underline;
+}
+
+.dps-stats-table .dps-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-stats-table .dps-whatsapp-link:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Lista de Métricas Simples
+   ========================================================================== */
+
+.dps-stats-metrics-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.dps-stats-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+.dps-stats-metric__value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-stats-metric__label {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* ==========================================================================
+   Distribuição (barras horizontais)
+   ========================================================================== */
+
+.dps-stats-distribution {
+    margin: 16px 0;
+}
+
+.dps-stats-distribution-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.dps-stats-distribution-label {
+    min-width: 100px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-stats-distribution-bar {
+    flex: 1;
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.dps-stats-distribution-fill {
+    height: 100%;
+    background: #0ea5e9;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.dps-stats-distribution-fill--dog {
+    background: #f59e0b;
+}
+
+.dps-stats-distribution-fill--cat {
+    background: #10b981;
+}
+
+.dps-stats-distribution-fill--other {
+    background: #6b7280;
+}
+
+.dps-stats-distribution-value {
+    min-width: 60px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* ==========================================================================
+   Exportação
+   ========================================================================== */
+
+.dps-stats-export-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 16px;
+}
+
+.dps-stats-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.dps-stats-export-btn:hover {
+    background: #f9fafb;
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .dps-stats-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dps-stats-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-stats-filter label {
+        width: 100%;
+    }
+
+    .dps-stats-filter input[type="date"] {
+        width: 100%;
+    }
+
+    .dps-stats-actions {
+        flex-direction: column;
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .dps-stats-actions .button {
+        width: 100%;
+    }
+
+    .dps-stats-table th:nth-child(3),
+    .dps-stats-table td:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-stats-card__value {
+        font-size: 24px;
+    }
+
+    .dps-stats-section summary {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+
+    .dps-stats-section__content {
+        padding: 0 16px 16px;
+    }
+}

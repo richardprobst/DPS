@@ -1063,32 +1063,52 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 **Diretório**: `add-ons/desi-pet-shower-stats_addon`
 
 **Propósito e funcionalidades principais**:
-- Exibir métricas de uso do sistema (atendimentos, receita, clientes inativos)
-- Listar serviços mais recorrentes
-- Filtrar estatísticas por período
-- Analisar distribuição de espécies e raças
+- Exibir métricas de uso do sistema (atendimentos, receita, despesas, lucro)
+- Listar serviços mais recorrentes com gráfico de barras (Chart.js)
+- Filtrar estatísticas por período personalizado
+- Exibir pets inativos com link de reengajamento via WhatsApp
+- Métricas de assinaturas (ativas, pendentes, receita, valor em aberto)
+- Sistema de cache via transients (1h para financeiros, 24h para inativos)
 
 **Shortcodes expostos**: Nenhum
 
 **CPTs, tabelas e opções**:
 - Não cria CPTs ou tabelas próprias
 - Consulta `dps_transacoes` para métricas financeiras
-- Consulta CPTs do núcleo para métricas operacionais
+- Consulta CPTs do núcleo: `dps_agendamento`, `dps_cliente`, `dps_pet`, `dps_subscription`, `dps_service`
+- Transients criados: `dps_stats_total_revenue_*`, `dps_stats_financial_*`, `dps_stats_appointments_*`, `dps_stats_inactive_*`
 
 **Hooks consumidos**:
-- `dps_base_nav_tabs_after_history`: adiciona aba "Estatísticas"
-- `dps_base_sections_after_history`: renderiza gráficos e listas
+- `dps_base_nav_tabs_after_history` (prioridade 20): adiciona aba "Estatísticas"
+- `dps_base_sections_after_history` (prioridade 20): renderiza dashboard de estatísticas
+- `admin_post_dps_clear_stats_cache`: processa limpeza de cache
 
 **Hooks disparados**: Nenhum
 
+**Funções globais expostas**:
+- `dps_get_total_revenue( $start_date, $end_date )`: retorna receita total paga no período
+- `dps_stats_build_cache_key( $prefix, $start, $end )`: gera chave de cache única
+- `dps_stats_clear_cache()`: limpa todos os transients de estatísticas (requer capability `manage_options`)
+
 **Dependências**:
-- Depende do plugin base para CPTs
-- Depende do add-on Financeiro para métricas de receita
+- **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
+- **Recomendada**: Finance Add-on (para tabela `dps_transacoes` e métricas financeiras)
+- **Opcional**: Services Add-on (para títulos de serviços no ranking)
+- **Opcional**: Subscription Add-on (para métricas de assinaturas)
+- **Opcional**: DPS_WhatsApp_Helper (para links de reengajamento)
 
 **Introduzido em**: v0.1.0 (estimado)
 
+**Versão atual**: 1.0.0
+
 **Observações**:
-- Arquivo único de 538 linhas; candidato a refatoração futura
+- Arquivo único de ~600 linhas; candidato a refatoração modular futura
+- Usa Chart.js (CDN) para gráfico de barras de serviços
+- Cache de 1 hora para métricas financeiras, 24 horas para entidades inativas
+- Limites de segurança: 500 clientes e 1000 agendamentos por consulta
+- Coleta dados de espécies/raças/média por cliente mas não exibe (oportunidade de melhoria)
+
+**Análise completa**: Consulte `docs/analysis/STATS_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades, segurança, performance, UX e melhorias propostas (38-58h de esforço estimado)
 
 ---
 

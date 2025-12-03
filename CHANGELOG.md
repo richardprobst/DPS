@@ -79,6 +79,60 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Stats Add-on (v1.1.0)**: Refatoração completa com novas funcionalidades
+  - **Estrutura modular**:
+    - Nova pasta `includes/` com `class-dps-stats-api.php` (API pública)
+    - Nova pasta `assets/css/` com `stats-addon.css` (estilos externos)
+    - Nova pasta `assets/js/` com `stats-addon.js` (gráficos Chart.js)
+    - Plugin principal refatorado com métodos menores e especializados
+  - **API pública DPS_Stats_API**:
+    - `get_appointments_count()` - contagem de atendimentos
+    - `get_revenue_total()` / `get_expenses_total()` - totais financeiros
+    - `get_financial_totals()` - receita e despesas com integração Finance API
+    - `get_ticket_average()` - ticket médio calculado
+    - `get_cancellation_rate()` - taxa de cancelamento
+    - `get_new_clients_count()` - novos clientes no período
+    - `get_inactive_pets()` - pets inativos com query SQL otimizada
+    - `get_top_services()` - serviços mais solicitados
+    - `get_species_distribution()` - distribuição por espécie
+    - `get_top_breeds()` - raças mais atendidas
+    - `get_period_comparison()` - comparativo com período anterior (%)
+    - `export_metrics_csv()` / `export_inactive_pets_csv()` - exportação CSV
+  - **Dashboard visual**:
+    - Cards de métricas coloridos com ícones
+    - Variação percentual vs período anterior (verde/vermelho)
+    - Seções colapsáveis com `<details>` para organização
+    - Gráfico de barras para top serviços (Chart.js)
+    - Gráfico de pizza para distribuição de espécies (Chart.js)
+    - Barras horizontais para top raças
+    - Grid responsivo com media queries
+  - **Novas métricas**:
+    - Ticket médio (receita ÷ atendimentos)
+    - Taxa de cancelamento (%)
+    - Novos clientes cadastrados no período
+    - Comparativo automático com período anterior
+  - **Exportação CSV**:
+    - Botão "Exportar Métricas CSV" com todas as métricas
+    - Botão "Exportar Inativos CSV" com lista de pets
+    - BOM UTF-8 para compatibilidade com Excel
+    - Nonces para segurança
+  - **Otimizações**:
+    - Query SQL otimizada para pets inativos (GROUP BY em vez de N+1)
+    - Integração com Finance API (quando disponível)
+    - Cache via transients mantido
+    - Assets carregados via wp_enqueue_* padrão WordPress
+  - **Impacto**: Dashboard visual moderno, API para integração, performance melhorada
+- **Stats Add-on**: Documento de análise completa do add-on
+  - `docs/analysis/STATS_ADDON_ANALYSIS.md` com ~850 linhas de análise detalhada
+  - Avaliação de funcionalidade, código, segurança, performance e UX (notas 5-8/10)
+  - Identificação de 7 problemas de código (método muito grande, queries N+1, dados não exibidos, etc.)
+  - Boas práticas já implementadas (cache, nonces, sanitização, escape, capabilities)
+  - Propostas de melhorias: modularização, API pública, otimização de queries, UX visual
+  - Mockup de interface melhorada com cards, gráficos e tabelas responsivas
+  - Plano de refatoração em 5 fases com estimativa de 38-58h de esforço
+  - Sugestão de novas funcionalidades: comparativo de períodos, exportação CSV, ticket médio, taxa de retenção
+  - **Impacto**: Documentação técnica completa para orientar desenvolvimento futuro do dashboard de estatísticas
+- **ANALYSIS.md**: Seção do Stats Add-on expandida com detalhes de hooks, funções globais, dependências e transients
 - **Services Add-on (v1.3.0)**: Novas funcionalidades de pacotes, histórico e catálogo
   - **Pacotes promocionais com desconto**:
     - Combinar múltiplos serviços em um pacote
