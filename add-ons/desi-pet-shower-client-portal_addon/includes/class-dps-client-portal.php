@@ -2228,28 +2228,43 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * AJAX handler para obter mensagens do chat.
+     * Valida requisições AJAX do chat.
+     *
+     * Verifica nonce, client_id e autenticação. Retorna o client_id validado
+     * ou termina a requisição com erro JSON.
      *
      * @since 2.3.0
+     * @return int Client ID validado e autenticado.
      */
-    public function ajax_get_chat_messages() {
+    private function validate_chat_request() {
         // Verifica nonce
         if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => 'Nonce inválido' ] );
+            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
         }
 
         $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
         
         // Verifica se o cliente é válido
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_send_json_error( [ 'message' => 'Cliente inválido' ] );
+            wp_send_json_error( [ 'message' => __( 'Cliente inválido', 'dps-client-portal' ) ] );
         }
 
         // Verifica autenticação
         $authenticated_id = $this->get_authenticated_client_id();
         if ( $authenticated_id !== $client_id ) {
-            wp_send_json_error( [ 'message' => 'Não autorizado' ] );
+            wp_send_json_error( [ 'message' => __( 'Não autorizado', 'dps-client-portal' ) ] );
         }
+
+        return $client_id;
+    }
+
+    /**
+     * AJAX handler para obter mensagens do chat.
+     *
+     * @since 2.3.0
+     */
+    public function ajax_get_chat_messages() {
+        $client_id = $this->validate_chat_request();
 
         // Busca mensagens do cliente
         $messages = get_posts( [
@@ -2268,7 +2283,7 @@ final class DPS_Client_Portal {
                 'id'      => $msg->ID,
                 'content' => wp_strip_all_tags( $msg->post_content ),
                 'sender'  => get_post_meta( $msg->ID, 'message_sender', true ),
-                'time'    => get_post_time( 'd/m H:i', false, $msg, true ),
+                'time'    => get_post_time( get_option( 'date_format' ) . ' H:i', false, $msg, true ),
                 'status'  => get_post_meta( $msg->ID, 'message_status', true ),
             ];
         }
@@ -2288,38 +2303,23 @@ final class DPS_Client_Portal {
      * @since 2.3.0
      */
     public function ajax_send_chat_message() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => 'Nonce inválido' ] );
-        }
-
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
-        $message   = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+        $client_id = $this->validate_chat_request();
         
-        // Validações
-        if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_send_json_error( [ 'message' => 'Cliente inválido' ] );
-        }
+        $message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
         if ( empty( $message ) ) {
-            wp_send_json_error( [ 'message' => 'Mensagem vazia' ] );
+            wp_send_json_error( [ 'message' => __( 'Mensagem vazia', 'dps-client-portal' ) ] );
         }
 
         if ( strlen( $message ) > 1000 ) {
-            wp_send_json_error( [ 'message' => 'Mensagem muito longa' ] );
-        }
-
-        // Verifica autenticação
-        $authenticated_id = $this->get_authenticated_client_id();
-        if ( $authenticated_id !== $client_id ) {
-            wp_send_json_error( [ 'message' => 'Não autorizado' ] );
+            wp_send_json_error( [ 'message' => __( 'Mensagem muito longa', 'dps-client-portal' ) ] );
         }
 
         // Rate limiting simples (máximo 10 mensagens por minuto)
         $rate_key  = 'dps_chat_rate_' . $client_id;
         $rate_data = get_transient( $rate_key );
         if ( $rate_data && $rate_data >= 10 ) {
-            wp_send_json_error( [ 'message' => 'Muitas mensagens. Aguarde um momento.' ] );
+            wp_send_json_error( [ 'message' => __( 'Muitas mensagens. Aguarde um momento.', 'dps-client-portal' ) ] );
         }
         set_transient( $rate_key, ( $rate_data ? $rate_data + 1 : 1 ), 60 );
 
@@ -2335,7 +2335,7 @@ final class DPS_Client_Portal {
         ] );
 
         if ( is_wp_error( $message_id ) ) {
-            wp_send_json_error( [ 'message' => 'Erro ao salvar mensagem' ] );
+            wp_send_json_error( [ 'message' => __( 'Erro ao salvar mensagem', 'dps-client-portal' ) ] );
         }
 
         update_post_meta( $message_id, 'message_client_id', $client_id );
@@ -2363,22 +2363,7 @@ final class DPS_Client_Portal {
      * @since 2.3.0
      */
     public function ajax_mark_messages_read() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => 'Nonce inválido' ] );
-        }
-
-        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
-        
-        if ( ! $client_id ) {
-            wp_send_json_error( [ 'message' => 'Cliente inválido' ] );
-        }
-
-        // Verifica autenticação
-        $authenticated_id = $this->get_authenticated_client_id();
-        if ( $authenticated_id !== $client_id ) {
-            wp_send_json_error( [ 'message' => 'Não autorizado' ] );
-        }
+        $client_id = $this->validate_chat_request();
 
         // Busca mensagens não lidas do admin
         $messages = get_posts( [
