@@ -85,6 +85,9 @@ class DPS_Base_Plugin {
         // AJAX handlers para funcionalidades do formulário de agendamento
         add_action( 'wp_ajax_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
         add_action( 'wp_ajax_nopriv_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
+        
+        // Handler para exportação de clientes
+        add_action( 'admin_post_dps_export_clients', [ $this, 'export_clients_csv' ] );
     }
 
     /**
@@ -713,6 +716,81 @@ class DPS_Base_Plugin {
         if ( isset( $_GET['dps_delete'] ) && isset( $_GET['id'] ) ) {
             DPS_Base_Frontend::handle_delete();
         }
+    }
+
+    /**
+     * Exporta lista de clientes para arquivo CSV.
+     *
+     * Gera um arquivo CSV com todos os clientes cadastrados, incluindo
+     * nome, telefone, email, CPF e cidade. O arquivo é baixado diretamente
+     * pelo navegador.
+     *
+     * @since 1.0.3
+     * @return void
+     */
+    public function export_clients_csv() {
+        // Verifica permissões.
+        if ( ! current_user_can( 'dps_manage_clients' ) && ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar clientes.', 'desi-pet-shower' ) );
+        }
+
+        // Verifica nonce.
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_clients' ) ) {
+            wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ) );
+        }
+
+        // Obtém todos os clientes.
+        $clients = DPS_Query_Helper::get_all_posts_by_type( 'dps_cliente' );
+
+        // Define headers para download do CSV.
+        $filename = 'clientes-dps-' . wp_date( 'Y-m-d' ) . '.csv';
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename=' . $filename );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+
+        // Abre stream de saída.
+        $output = fopen( 'php://output', 'w' );
+
+        // Adiciona BOM para Excel reconhecer UTF-8.
+        fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
+
+        // Cabeçalhos do CSV.
+        fputcsv(
+            $output,
+            [
+                __( 'Nome', 'desi-pet-shower' ),
+                __( 'Telefone', 'desi-pet-shower' ),
+                __( 'Email', 'desi-pet-shower' ),
+                __( 'CPF', 'desi-pet-shower' ),
+                __( 'Cidade', 'desi-pet-shower' ),
+                __( 'Endereço', 'desi-pet-shower' ),
+                __( 'Data de Nascimento', 'desi-pet-shower' ),
+                __( 'Instagram', 'desi-pet-shower' ),
+            ],
+            ';'
+        );
+
+        // Dados dos clientes.
+        foreach ( $clients as $client ) {
+            fputcsv(
+                $output,
+                [
+                    $client->post_title,
+                    get_post_meta( $client->ID, 'client_phone', true ),
+                    get_post_meta( $client->ID, 'client_email', true ),
+                    get_post_meta( $client->ID, 'client_cpf', true ),
+                    get_post_meta( $client->ID, 'client_city', true ),
+                    get_post_meta( $client->ID, 'client_address', true ),
+                    get_post_meta( $client->ID, 'client_birth', true ),
+                    get_post_meta( $client->ID, 'client_instagram', true ),
+                ],
+                ';'
+            );
+        }
+
+        fclose( $output );
+        exit;
     }
 }
 

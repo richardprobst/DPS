@@ -21,7 +21,21 @@ $base_url = isset( $base_url ) ? $base_url : '';
 	<?php echo esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ); ?>
 </h3>
 
-<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>">
+<div class="dps-clients-toolbar" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px;">
+	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>" style="flex: 1; min-width: 200px;">
+	
+	<?php if ( ! empty( $clients ) && ( current_user_can( 'dps_manage_clients' ) || current_user_can( 'manage_options' ) ) ) : ?>
+		<?php
+		$export_url = wp_nonce_url(
+			admin_url( 'admin-post.php?action=dps_export_clients' ),
+			'dps_export_clients'
+		);
+		?>
+		<a href="<?php echo esc_url( $export_url ); ?>" class="button button-secondary" title="<?php echo esc_attr__( 'Exportar lista de clientes para CSV', 'desi-pet-shower' ); ?>">
+			<?php echo esc_html__( 'Exportar CSV', 'desi-pet-shower' ); ?>
+		</a>
+	<?php endif; ?>
+</div>
 
 <?php if ( ! empty( $clients ) ) : ?>
 	<div class="dps-table-wrapper">
@@ -77,5 +91,11 @@ $base_url = isset( $base_url ) ? $base_url : '';
 	</table>
 	</div>
 <?php else : ?>
-	<p><?php echo esc_html__( 'Nenhum cliente cadastrado.', 'desi-pet-shower' ); ?></p>
+	<div class="dps-empty-state">
+		<span class="dps-empty-state__icon">👤</span>
+		<h4 class="dps-empty-state__title"><?php echo esc_html__( 'Nenhum cliente cadastrado', 'desi-pet-shower' ); ?></h4>
+		<p class="dps-empty-state__description">
+			<?php echo esc_html__( 'Comece cadastrando seu primeiro cliente usando o formulário acima. Após o cadastro, você poderá adicionar pets e agendar serviços.', 'desi-pet-shower' ); ?>
+		</p>
+	</div>
 <?php endif; ?>

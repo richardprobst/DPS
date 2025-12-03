@@ -1088,7 +1088,11 @@ class DPS_Base_Frontend {
                 }
             }
         } else {
-            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'desi-pet-shower' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<span class="dps-empty-state__icon">🐾</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado', 'desi-pet-shower' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Cadastre pets vinculados aos seus clientes usando o formulário acima. Selecione primeiro o cliente (tutor) e preencha os dados do pet.', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
         }
         echo '</div>';
         return ob_get_clean();
@@ -1125,6 +1129,7 @@ class DPS_Base_Frontend {
      * de uma refatoração gradual para melhorar a organização do código.
      *
      * @since 1.0.2
+     * @since 1.0.3 Adicionado suporte a duplicação de agendamentos.
      * @param bool $visitor_only Se true, não prepara dados do formulário.
      * @return array {
      *     Dados estruturados para renderização.
@@ -1139,6 +1144,7 @@ class DPS_Base_Frontend {
      *     @type int         $pref_pet     Pet pré-selecionado via URL.
      *     @type string      $base_url     URL base da página atual.
      *     @type string      $current_url  URL completa atual.
+     *     @type bool        $is_duplicate Se true, está duplicando um agendamento.
      * }
      */
     private static function prepare_appointments_section_data( $visitor_only = false ) {
@@ -1152,31 +1158,47 @@ class DPS_Base_Frontend {
             ? intval( $_GET['id'] )
             : 0;
 
+        // Detecta duplicação de agendamento.
+        $duplicate_id = ( isset( $_GET['dps_duplicate'] ) && 'appointment' === $_GET['dps_duplicate'] && isset( $_GET['id'] ) )
+            ? intval( $_GET['id'] )
+            : 0;
+
+        $is_duplicate = false;
         $editing = null;
         $meta    = [];
 
-        if ( $edit_id ) {
-            $editing = get_post( $edit_id );
+        // Se está editando OU duplicando, carrega os metadados.
+        $source_id = $edit_id ?: $duplicate_id;
+        if ( $source_id ) {
+            $editing = get_post( $source_id );
             if ( $editing ) {
                 $meta = [
-                    'client_id'                      => get_post_meta( $edit_id, 'appointment_client_id', true ),
-                    'pet_id'                         => get_post_meta( $edit_id, 'appointment_pet_id', true ),
-                    'date'                           => get_post_meta( $edit_id, 'appointment_date', true ),
-                    'time'                           => get_post_meta( $edit_id, 'appointment_time', true ),
-                    'notes'                          => get_post_meta( $edit_id, 'appointment_notes', true ),
-                    'appointment_type'               => get_post_meta( $edit_id, 'appointment_type', true ),
-                    'tosa'                           => get_post_meta( $edit_id, 'appointment_tosa', true ),
-                    'tosa_price'                     => get_post_meta( $edit_id, 'appointment_tosa_price', true ),
-                    'tosa_occurrence'                => get_post_meta( $edit_id, 'appointment_tosa_occurrence', true ),
-                    'taxidog'                        => get_post_meta( $edit_id, 'appointment_taxidog', true ),
-                    'taxidog_price'                  => get_post_meta( $edit_id, 'appointment_taxidog_price', true ),
-                    'extra_description'              => get_post_meta( $edit_id, 'appointment_extra_description', true ),
-                    'extra_value'                    => get_post_meta( $edit_id, 'appointment_extra_value', true ),
-                    'subscription_base_value'        => get_post_meta( $edit_id, 'subscription_base_value', true ),
-                    'subscription_total_value'       => get_post_meta( $edit_id, 'subscription_total_value', true ),
-                    'subscription_extra_description' => get_post_meta( $edit_id, 'subscription_extra_description', true ),
-                    'subscription_extra_value'       => get_post_meta( $edit_id, 'subscription_extra_value', true ),
+                    'client_id'                      => get_post_meta( $source_id, 'appointment_client_id', true ),
+                    'pet_id'                         => get_post_meta( $source_id, 'appointment_pet_id', true ),
+                    'date'                           => get_post_meta( $source_id, 'appointment_date', true ),
+                    'time'                           => get_post_meta( $source_id, 'appointment_time', true ),
+                    'notes'                          => get_post_meta( $source_id, 'appointment_notes', true ),
+                    'appointment_type'               => get_post_meta( $source_id, 'appointment_type', true ),
+                    'tosa'                           => get_post_meta( $source_id, 'appointment_tosa', true ),
+                    'tosa_price'                     => get_post_meta( $source_id, 'appointment_tosa_price', true ),
+                    'tosa_occurrence'                => get_post_meta( $source_id, 'appointment_tosa_occurrence', true ),
+                    'taxidog'                        => get_post_meta( $source_id, 'appointment_taxidog', true ),
+                    'taxidog_price'                  => get_post_meta( $source_id, 'appointment_taxidog_price', true ),
+                    'extra_description'              => get_post_meta( $source_id, 'appointment_extra_description', true ),
+                    'extra_value'                    => get_post_meta( $source_id, 'appointment_extra_value', true ),
+                    'subscription_base_value'        => get_post_meta( $source_id, 'subscription_base_value', true ),
+                    'subscription_total_value'       => get_post_meta( $source_id, 'subscription_total_value', true ),
+                    'subscription_extra_description' => get_post_meta( $source_id, 'subscription_extra_description', true ),
+                    'subscription_extra_value'       => get_post_meta( $source_id, 'subscription_extra_value', true ),
                 ];
+
+                // Se está duplicando, limpa a data para forçar nova seleção.
+                if ( $duplicate_id ) {
+                    $is_duplicate = true;
+                    $meta['date'] = ''; // Limpa data para que usuário escolha nova data
+                    $editing = null;    // Não é edição, é criação
+                    $edit_id = 0;       // Garante que não vai atualizar o agendamento original
+                }
             }
         }
 
@@ -1184,17 +1206,23 @@ class DPS_Base_Frontend {
         $pref_client = isset( $_GET['pref_client'] ) ? intval( $_GET['pref_client'] ) : 0;
         $pref_pet    = isset( $_GET['pref_pet'] ) ? intval( $_GET['pref_pet'] ) : 0;
 
+        // Se está duplicando, usa o cliente do agendamento original como preferência.
+        if ( $is_duplicate && ! empty( $meta['client_id'] ) ) {
+            $pref_client = intval( $meta['client_id'] );
+        }
+
         return [
-            'clients'     => $clients,
-            'pets'        => $pets,
-            'pet_pages'   => $pet_pages,
-            'edit_id'     => $edit_id,
-            'editing'     => $editing,
-            'meta'        => $meta,
-            'pref_client' => $pref_client,
-            'pref_pet'    => $pref_pet,
-            'base_url'    => get_permalink(),
-            'current_url' => self::get_current_page_url(),
+            'clients'      => $clients,
+            'pets'         => $pets,
+            'pet_pages'    => $pet_pages,
+            'edit_id'      => $edit_id,
+            'editing'      => $editing,
+            'meta'         => $meta,
+            'pref_client'  => $pref_client,
+            'pref_pet'     => $pref_pet,
+            'base_url'     => get_permalink(),
+            'current_url'  => self::get_current_page_url(),
+            'is_duplicate' => $is_duplicate,
         ];
     }
 
@@ -1216,18 +1244,28 @@ class DPS_Base_Frontend {
      */
     private static function render_appointments_section( array $data, $visitor_only = false ) {
         // Extrai variáveis do array de dados.
-        $clients     = $data['clients'];
-        $pets        = $data['pets'];
-        $pet_pages   = $data['pet_pages'];
-        $edit_id     = $data['edit_id'];
-        $editing     = $data['editing'];
-        $meta        = $data['meta'];
-        $pref_client = $data['pref_client'];
-        $pref_pet    = $data['pref_pet'];
+        $clients      = $data['clients'];
+        $pets         = $data['pets'];
+        $pet_pages    = $data['pet_pages'];
+        $edit_id      = $data['edit_id'];
+        $editing      = $data['editing'];
+        $meta         = $data['meta'];
+        $pref_client  = $data['pref_client'];
+        $pref_pet     = $data['pref_pet'];
+        $is_duplicate = isset( $data['is_duplicate'] ) ? $data['is_duplicate'] : false;
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-agendas">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h2>';
+        
+        // Mensagem de duplicação
+        if ( $is_duplicate && ! $visitor_only ) {
+            echo '<div class="dps-alert dps-alert--info">';
+            echo '<strong>' . esc_html__( 'Duplicando agendamento', 'desi-pet-shower' ) . '</strong><br>';
+            echo esc_html__( 'Os dados do agendamento anterior foram copiados. Selecione uma nova data e horário, então salve para criar o novo agendamento.', 'desi-pet-shower' );
+            echo '</div>';
+        }
+        
         if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] && ! $visitor_only ) {
             $notice_key  = 'dps_pending_notice_' . get_current_user_id();
             $notice_data = get_transient( $notice_key );
@@ -1885,8 +1923,9 @@ class DPS_Base_Frontend {
                 echo '<td>' . esc_html( $status_label ) . '</td>';
                 echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
+                $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
+                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
@@ -3132,7 +3171,7 @@ class DPS_Base_Frontend {
             }
             echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'desi-pet-shower' ) . '</p>';
+            echo '<p style="color: #6b7280; font-style: italic;">' . esc_html__( 'Este cliente ainda não possui pets cadastrados.', 'desi-pet-shower' ) . '</p>';
         }
         // Link para gerar PDF/relatório do histórico
         $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
