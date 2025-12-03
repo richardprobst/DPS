@@ -874,6 +874,7 @@ O Finance Add-on está em excelente estado para a versão 1.2.0, com várias mel
 3. **Performance de Carregamento de Dados**:
    - Loop `get_post()` para cada transação (linhas 1219-1287)
    - Oportunidade: usar `_prime_post_caches()` para pré-carregar clientes e pets
+   - **Nota**: `_prime_post_caches()` é uma função interna do WordPress que pré-carrega posts em cache, evitando queries individuais durante o loop
 
 4. **Formulário de Nova Transação (linhas 1119-1144)**:
    - Falta agrupamento em fieldsets semânticos
@@ -886,8 +887,8 @@ O Finance Add-on está em excelente estado para a versão 1.2.0, com várias mel
 
 | Funcionalidade | Descrição | Esforço | Benefício |
 |----------------|-----------|---------|-----------|
-| **Gráficos Financeiros** | Gráfico de receitas/despesas por mês usando Chart.js (código já parcialmente presente mas removido - linhas 1345-1383) | 4h | Visualização rápida de tendências |
-| **Máscara de Moeda** | Usar biblioteca como IMask ou jQuery Mask para campos de valor | 2h | Melhor UX ao inserir valores |
+| **Gráficos Financeiros** | Gráfico de receitas/despesas mensais usando Chart.js (código já parcialmente presente mas removido - linhas 1345-1383) | 4h | Visualização rápida de tendências |
+| **Máscara de Moeda** | Usar biblioteca IMask.js para campos de valor (leve, sem jQuery) | 2h | Melhor UX ao inserir valores |
 | **Filtro por Status** | Adicionar dropdown para filtrar por status (em_aberto, pago, cancelado) | 2h | Agiliza busca de pendências |
 | **Aba de Configurações Integrada** | Mover configurações de loja para aba nas configurações do DPS Base | 4h | Centraliza configurações |
 
@@ -1015,11 +1016,7 @@ O Finance Add-on está em excelente estado para a versão 1.2.0, com várias mel
     border-top: 1px solid #e5e7eb;
 }
 
-/* Indicador de campo obrigatório */
-.dps-field label::after {
-    content: '';
-}
-
+/* Indicador de campo obrigatório - aplica apenas a campos com classe .required */
 .dps-field.required label::after {
     content: ' *';
     color: #ef4444;
@@ -1066,21 +1063,40 @@ Para o arquivo principal que tem ~2000 linhas, sugere-se a seguinte reorganizaç
 
 #### Quick Wins (1-2 dias)
 - [ ] Adicionar máscara de moeda brasileira no campo de valor
+  - Usar biblioteca `IMask.js` (CDN: `https://unpkg.com/imask`)
+  - Configurar padrão brasileiro: separador de milhares `.`, decimal `,`
 - [ ] Adicionar filtro por status na listagem
+  - Novo `<select>` com opções: Todos, Em aberto, Pago, Cancelado
+  - Adicionar parâmetro `fin_status` no GET
 - [ ] Implementar fieldsets no formulário de nova transação
+  - Agrupar campos: Dados Básicos, Classificação, Vínculo (opcional)
 - [ ] Adicionar validação JavaScript básica no formulário
+  - Validar valor > 0, data não futura, categoria obrigatória
+  - Usar `HTMLFormElement.reportValidity()` nativo
 
 #### Melhorias de Código (3-5 dias)
 - [ ] Extrair `section_financeiro()` em métodos menores
+  - Criar: `render_partial_form()`, `render_transaction_form()`, `render_transactions_table()`, `render_pending_summary()`
 - [ ] Implementar pré-carregamento de posts com `_prime_post_caches()`
+  - Coletar IDs de clientes e pets antes do loop principal
+  - Chamar `_prime_post_caches($ids, false, false)` uma única vez
 - [ ] Migrar completamente para `valor_cents` (usar helper de conversão)
+  - Atualizar queries para usar `valor_cents`
+  - Manter `valor` apenas para leitura em dados antigos
 - [ ] Adicionar mais testes unitários para API e ações
+  - Testar `DPS_Finance_API::create_or_update_charge()`
+  - Testar `DPS_Finance_API::mark_as_paid()` e hooks disparados
 
 #### Novas Funcionalidades (5-10 dias)
 - [ ] Reativar gráficos financeiros (código já existe parcialmente)
+  - Descomentar/reimplementar seção de gráficos (linhas 1345-1383)
+  - Adicionar Chart.js via CDN ou `wp_enqueue_script`
 - [ ] Implementar aba de configurações nas configurações do DPS Base
+  - Hook `dps_settings_nav_tabs` e `dps_settings_sections`
 - [ ] Adicionar relatório DRE simplificado
+  - Template: Receitas Brutas - Deduções = Receita Líquida - Despesas = Resultado
 - [ ] Implementar categorias configuráveis
+  - CPT `dps_finance_category` ou taxonomy em transações
 
 ### 13.6 Integrações Potenciais
 
