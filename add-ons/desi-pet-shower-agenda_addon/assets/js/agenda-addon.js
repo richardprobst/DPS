@@ -135,4 +135,42 @@
     }
     return fallback;
   }
+
+  // FASE 2: Exportação CSV
+  $(document).on('click', '.dps-export-csv-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var date = btn.data('date');
+    var view = btn.data('view');
+    
+    btn.prop('disabled', true).text('⏳ Exportando...');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_export_csv',
+      nonce: DPS_AG_Addon.nonce_export,
+      date: date,
+      view: view
+    }, function(resp){
+      if ( resp && resp.success ) {
+        // Decodificar base64 e criar download
+        var content = atob(resp.data.content);
+        var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = resp.data.filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        btn.text('✅ Exportado!');
+        setTimeout(function(){
+          btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+        }, 2000);
+      } else {
+        alert(resp.data ? resp.data.message : 'Erro ao exportar.');
+        btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+      }
+    }).fail(function(){
+      alert('Erro ao exportar agenda.');
+      btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
+    });
+  });
 })(jQuery);
