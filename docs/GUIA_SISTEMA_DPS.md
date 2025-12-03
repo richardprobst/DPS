@@ -7,7 +7,7 @@
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
-*Versão 1.1 | Última atualização: Dezembro de 2024*
+*Versão 1.2 | Última atualização: Dezembro de 2025*
 
 ---
 
@@ -52,6 +52,8 @@
    - [Estoque](#13-estoque-addon)
    - [Assinaturas](#14-assinaturas-addon)
    - [Backup & Restauração](#15-backup--restauração-addon)
+   - [Debugging](#16-debugging-addon)
+   - [White Label](#17-white-label-addon)
 
 5. [Uso do Sistema](#-uso-do-sistema)
    - [Painel Principal](#painel-principal)
@@ -103,7 +105,7 @@ O **DPS by PRObst (DPS)** é um sistema completo de gestão desenvolvido especif
 
 ### Arquitetura Modular
 
-O sistema é composto por um **plugin base** e **15 add-ons opcionais**:
+O sistema é composto por um **plugin base** e **17 add-ons opcionais**:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -120,7 +122,9 @@ O sistema é composto por um **plugin base** e **15 add-ons opcionais**:
 │  Portal   │    IA     │ Cadastro  │Fidelidade │  Push   │
 ├───────────┼───────────┼───────────┼───────────┼─────────┤
 │   Stats   │ Groomers  │  Estoque  │Assinatura │ Backup  │
-└───────────┴───────────┴───────────┴───────────┴─────────┘
+├───────────┼───────────┼───────────┴───────────┴─────────┤
+│ Debugging │WhiteLabel │                                 │
+└───────────┴───────────┴─────────────────────────────────┘
 ```
 
 **Vantagens da arquitetura modular:**
@@ -133,8 +137,8 @@ O sistema é composto por um **plugin base** e **15 add-ons opcionais**:
 
 | Requisito | Versão Mínima | Recomendado |
 |-----------|---------------|-------------|
-| WordPress | 6.0+ | 6.4+ |
-| PHP | 7.4+ | 8.0+ |
+| WordPress | 6.0+ | 6.9+ |
+| PHP | 7.4+ | 8.3+ |
 | MySQL | 5.7+ | 8.0+ |
 | MariaDB | 10.2+ | 10.6+ |
 
@@ -142,6 +146,7 @@ O sistema é composto por um **plugin base** e **15 add-ons opcionais**:
 - cURL (para integrações externas)
 - JSON (para manipulação de dados)
 - mbstring (para caracteres especiais)
+- OpenSSL (para criptografia de senhas SMTP no White Label)
 
 ---
 
@@ -207,6 +212,8 @@ Para evitar problemas de dependência, siga esta ordem:
 | 14º | Estoque | Base |
 | 15º | Assinaturas | Base, Financeiro, Pagamentos |
 | 16º | Backup | Base |
+| 17º | Debugging | Base |
+| 18º | White Label | Base |
 
 ### Verificação da Instalação
 
@@ -771,6 +778,103 @@ O groomer possui um portal exclusivo para acompanhar sua agenda e desempenho:
 
 ---
 
+### 16. Debugging Add-on
+
+**Propósito:** Gerenciar constantes de debug do WordPress e visualizar logs de erro
+
+Este add-on é essencial para desenvolvedores e administradores que precisam diagnosticar problemas no sistema. Ele permite ativar/desativar constantes de debug do WordPress diretamente pela interface administrativa.
+
+**Configuração:**
+
+1. Acesse **DPS by PRObst > Debugging**
+2. Configure as constantes de debug:
+
+| Constante | Descrição | Padrão |
+|-----------|-----------|--------|
+| `WP_DEBUG` | Ativa modo debug do WordPress | Desabilitado |
+| `WP_DEBUG_LOG` | Salva erros em debug.log | Desabilitado |
+| `WP_DEBUG_DISPLAY` | Exibe erros na tela | Desabilitado |
+| `SCRIPT_DEBUG` | Carrega versões não minificadas de JS/CSS | Desabilitado |
+| `SAVEQUERIES` | Salva queries do banco para análise | Desabilitado |
+| `WP_DISABLE_FATAL_ERROR_HANDLER` | Desabilita tratador de erros fatais | Desabilitado |
+
+**Funcionalidades:**
+
+- **Visualizador de Logs**: Exibe o arquivo debug.log com formatação inteligente
+  - Destaque visual por tipo de erro (Fatal, Warning, Notice, Deprecated)
+  - Formatação de stack traces como lista
+  - Pretty-print de JSON encontrado nas entradas
+  - Ordenação mais recente primeiro
+- **Limpeza de Logs**: Botão para limpar o arquivo debug.log
+- **Admin Bar**: Status das constantes e contador de entradas de log na barra administrativa
+
+**⚠️ Importante:**
+- Desative o debug em produção para melhor performance e segurança
+- Logs podem conter informações sensíveis
+- Apenas administradores podem acessar
+
+---
+
+### 17. White Label Add-on
+
+**Propósito:** Personalizar o sistema DPS com sua própria marca, cores e identidade visual
+
+Este add-on permite que parceiros e revendedores personalizem completamente o sistema, substituindo a marca "DPS by PRObst" pela marca do cliente ou empresa.
+
+**Configuração:**
+
+1. Acesse **DPS by PRObst > White Label**
+2. Configure a identidade visual:
+
+| Campo | Descrição |
+|-------|-----------|
+| Nome da Marca | Substitui "DPS by PRObst" em todo o sistema |
+| Tagline/Slogan | Texto de apresentação personalizado |
+| Logo | URL do logo personalizado (usa biblioteca de mídia) |
+| Favicon | Ícone personalizado para abas do navegador |
+
+3. Configure as cores do tema:
+
+| Cor | Descrição | Padrão |
+|-----|-----------|--------|
+| Primária | Cor principal do sistema | #0ea5e9 (azul) |
+| Secundária | Cor de destaque | #10b981 (verde) |
+| Fundo | Cor de fundo | #f9fafb (cinza claro) |
+| Texto | Cor do texto principal | #374151 (cinza escuro) |
+
+4. Configure informações de contato:
+
+| Campo | Descrição |
+|-------|-----------|
+| E-mail de Suporte | E-mail para contato do cliente |
+| WhatsApp | Número do WhatsApp da empresa |
+| URL de Suporte | Link para página de suporte |
+
+**Módulos Adicionais:**
+
+| Módulo | Descrição |
+|--------|-----------|
+| **SMTP** | Configuração de servidor de e-mail personalizado |
+| **Página de Login** | Personalização visual da tela de login do WordPress |
+| **Admin Bar** | Customização da barra administrativa |
+| **Dashboard** | Controle de widgets no dashboard WordPress |
+| **Modo Manutenção** | Página de manutenção personalizada |
+| **Logs de Atividade** | Registro de ações no sistema |
+
+**Funcionalidades:**
+- Substituição completa da marca em todo o sistema
+- CSS customizado adicional
+- Personalização de e-mails (remetente, rodapé)
+- Personalização de mensagens WhatsApp
+- Opção para ocultar "Powered by DPS"
+
+**⚠️ Importante:**
+- Apenas administradores podem configurar
+- Requer licença válida para funcionalidades avançadas
+- Para documentação completa, consulte `docs/analysis/WHITE_LABEL_ANALYSIS.md`
+
+---
+
 ## 📖 Uso do Sistema
 
 ### Painel Principal
@@ -1138,6 +1242,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `wp_dps_referrals` | Fidelidade | Indicações de clientes |
 | `wp_dps_portal_tokens` | Portal | Tokens de acesso de clientes |
 | `wp_dps_groomer_tokens` | Groomers | Tokens de acesso de groomers |
+| `wp_dps_email_logs` | White Label | Logs de e-mails enviados |
+| `wp_dps_activity_logs` | White Label | Logs de atividade no sistema |
 
 ---
 
@@ -1174,6 +1280,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 - [AGENTS.md](../AGENTS.md) - Diretrizes para desenvolvedores
 - [CHANGELOG.md](../CHANGELOG.md) - Histórico de versões
 - [Guia Visual](visual/VISUAL_STYLE_GUIDE.md) - Padrões de design
+- [Análise White Label](analysis/WHITE_LABEL_ANALYSIS.md) - Documentação completa do White Label Add-on
+- [Análise de Compatibilidade](compatibility/COMPATIBILITY_ANALYSIS.md) - Compatibilidade PHP/WordPress/Astra
 
 ### Configuração de Integrações
 - [Configuração de Webhook](../add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md)
