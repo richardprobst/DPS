@@ -100,6 +100,9 @@ Melhorias gerais do sistema.
 
 Documentação de layout e UX, organizada em subpastas:
 
+**Arquivos na raiz:**
+- `RESPONSIVENESS_ANALYSIS.md` - **🆕** Análise completa de responsividade de todo o sistema (plugin base + 15 add-ons)
+
 #### `/docs/layout/admin`
 - `ADMIN_LAYOUT_ANALYSIS.md` - Análise detalhada do layout das telas administrativas
 
