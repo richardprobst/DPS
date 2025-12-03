@@ -1,0 +1,179 @@
+/**
+ * Estilos da interface administrativa do White Label Add-on.
+ *
+ * @package DPS_WhiteLabel_Addon
+ * @since 1.0.0
+ */
+
+/* Container principal */
+.dps-whitelabel-wrap {
+    max-width: 1200px;
+}
+
+/* Tabs */
+.dps-whitelabel-tabs {
+    margin-bottom: 20px;
+}
+
+.dps-whitelabel-tabs .nav-tab {
+    position: relative;
+}
+
+.dps-whitelabel-tabs .dps-badge-warning {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #f59e0b;
+    color: #fff;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 16px;
+    text-align: center;
+}
+
+/* Cards */
+.dps-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dps-card h2 {
+    margin-top: 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Form table */
+.dps-card .form-table th {
+    padding-left: 0;
+    font-weight: 500;
+}
+
+.dps-card .form-table td {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.dps-card .form-table tr:last-child td,
+.dps-card .form-table tr:last-child th {
+    border-bottom: none;
+}
+
+/* Media uploader */
+.dps-media-uploader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-media-uploader .regular-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.dps-media-preview {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.dps-media-preview img {
+    max-width: 200px;
+    max-height: 80px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 5px;
+    background: #f9fafb;
+}
+
+/* Color picker */
+.wp-picker-container {
+    display: inline-block;
+}
+
+/* Notices inline */
+.dps-card .notice.inline {
+    margin: 0 0 20px;
+}
+
+/* Buttons */
+.dps-whitelabel-wrap .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.dps-whitelabel-wrap .button-primary:hover,
+.dps-whitelabel-wrap .button-primary:focus {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+/* Test email result */
+#test-email-result {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+#test-email-result.success {
+    background: #d1fae5;
+    color: #059669;
+}
+
+#test-email-result.error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+#test-email-result.loading {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Code textarea */
+textarea.code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 4px;
+}
+
+/* Checkbox groups */
+.dps-card label {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .dps-media-uploader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-media-uploader .regular-text {
+        width: 100%;
+    }
+    
+    .dps-whitelabel-tabs .nav-tab {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+/* Specific sections */
+.login-bg-color,
+.login-bg-image,
+.login-bg-gradient {
+    transition: opacity 0.2s;
+}

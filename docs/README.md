@@ -39,9 +39,10 @@ Análises arquiteturais e de sistema.
 - `ADDONS_DETAILED_ANALYSIS.md` - Análise detalhada de todos os 15 add-ons
 - `BACKEND_FRONTEND_MAPPING.md` - Mapeamento completo BACK-END vs FRONT-END
 - `STOCK_ADDON_ANALYSIS.md` - Análise profunda do Add-on Estoque (funcionalidade, integração com Serviços, fluxo de uso)
-- `SUBSCRIPTION_ADDON_ANALYSIS.md` - **🆕** Análise profunda do Add-on Assinaturas (código, funcionalidades, layout, melhorias propostas)
+- `SUBSCRIPTION_ADDON_ANALYSIS.md` - Análise profunda do Add-on Assinaturas (código, funcionalidades, layout, melhorias propostas)
 - `SYSTEM_ANALYSIS_COMPLETE.md` - Análise profunda do sistema
 - `SYSTEM_ANALYSIS_SUMMARY.md` - Resumo executivo da análise de sistema
+- `WHITE_LABEL_ANALYSIS.md` - **🆕** Análise completa de implementação White Label (segurança, funcionalidades, arquitetura proposta)
 
 ### 📁 /docs/compatibility
 
@@ -206,9 +207,10 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 4. **Para ver o histórico de mudanças**: consulte `CHANGELOG.md` na raiz
 5. **Para análise de sistema**: veja `docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md`
 6. **Para mapeamento BACK-END vs FRONT-END**: veja `docs/analysis/BACKEND_FRONTEND_MAPPING.md`
-7. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
-8. **Para planos de refatoração**: consulte `/docs/refactoring`
-9. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
+7. **Para implementação White Label**: veja `docs/analysis/WHITE_LABEL_ANALYSIS.md`
+8. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
+9. **Para planos de refatoração**: consulte `/docs/refactoring`
+10. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ## Navegação Rápida
 
