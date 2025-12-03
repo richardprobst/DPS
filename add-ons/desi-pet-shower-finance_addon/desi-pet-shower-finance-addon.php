@@ -1288,6 +1288,42 @@ class DPS_Finance_Addon {
         echo '</div>';
         echo '</form>';
         if ( $trans ) {
+            // PRÉ-CARREGA POSTS PARA PERFORMANCE
+            // Coleta IDs de clientes, pets e agendamentos para pré-carregar em uma única query
+            $client_ids = [];
+            $appt_ids   = [];
+            foreach ( $trans as $tr ) {
+                if ( $tr->cliente_id ) {
+                    $client_ids[] = (int) $tr->cliente_id;
+                }
+                if ( $tr->agendamento_id ) {
+                    $appt_ids[] = (int) $tr->agendamento_id;
+                }
+            }
+            
+            // Pré-carrega posts de clientes
+            if ( ! empty( $client_ids ) ) {
+                _prime_post_caches( array_unique( $client_ids ), false, false );
+            }
+            
+            // Pré-carrega posts de agendamentos e obtém IDs de pets
+            $pet_ids = [];
+            if ( ! empty( $appt_ids ) ) {
+                _prime_post_caches( array_unique( $appt_ids ), true, false );
+                // Agora coleta IDs de pets dos metadados
+                foreach ( $appt_ids as $appt_id ) {
+                    $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
+                    if ( $pet_id ) {
+                        $pet_ids[] = (int) $pet_id;
+                    }
+                }
+            }
+            
+            // Pré-carrega posts de pets
+            if ( ! empty( $pet_ids ) ) {
+                _prime_post_caches( array_unique( $pet_ids ), false, false );
+            }
+            
             // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas
             // e linhas com status pago ficam esverdeadas, facilitando a identificação rápida.
             echo '<style>
@@ -1310,7 +1346,7 @@ class DPS_Finance_Addon {
             echo '<th>' . esc_html__( 'Ações', 'dps-finance-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $trans as $tr ) {
-                // Cliente
+                // Cliente (já pré-carregado)
                 $client_name = '';
                 if ( $tr->cliente_id ) {
                     $cpost = get_post( $tr->cliente_id );
@@ -1318,7 +1354,7 @@ class DPS_Finance_Addon {
                         $client_name = $cpost->post_title;
                     }
                 }
-                // Pet atendido (se agendamento vinculado)
+                // Pet atendido (se agendamento vinculado) - já pré-carregado
                 $pet_name = '-';
                 if ( $tr->agendamento_id ) {
                     $pet_id = get_post_meta( $tr->agendamento_id, 'appointment_pet_id', true );

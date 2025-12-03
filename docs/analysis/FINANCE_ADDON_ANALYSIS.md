@@ -1,20 +1,33 @@
 # Análise Profunda do Add-on Financeiro (DPS Finance)
 
 **Data da Análise**: 03/12/2025 (atualizado)  
-**Versão Analisada**: 1.2.0  
-**Arquivo Principal**: `desi-pet-shower-finance-addon.php` (2012 linhas)  
+**Versão Analisada**: 1.3.0  
+**Arquivo Principal**: `desi-pet-shower-finance-addon.php` (~2400 linhas)  
 **Arquivos Auxiliares**: 
 - `includes/class-dps-finance-api.php` (562 linhas) - API centralizada
 - `includes/class-dps-finance-revenue-query.php` (55 linhas) - Consultas de faturamento
 - `includes/class-dps-finance-settings.php` (177 linhas) - Configurações  
 
 **Assets**: 
-- `assets/css/finance-addon.css` (379 linhas) - Estilos responsivos
-- `assets/js/finance-addon.js` (375 linhas) - Modais e interações AJAX
+- `assets/css/finance-addon.css` (~520 linhas) - Estilos responsivos + gráficos + DRE
+- `assets/js/finance-addon.js` (~500 linhas) - Modais, validação, máscara de moeda
 
 ---
 
 ## ✅ Melhorias Implementadas
+
+### v1.3.0 - Novas Funcionalidades e Melhorias
+
+#### Melhorias de UX
+- ✅ **Filtro por status** - Novo dropdown para filtrar transações por status (em_aberto, pago, cancelado)
+- ✅ **Fieldsets semânticos** - Formulário de nova transação organizado em fieldsets (Dados Básicos, Classificação, Vínculo)
+- ✅ **Máscara de moeda brasileira** - Campo de valor com formato R$ 1.234,56 e validação
+- ✅ **Validação JavaScript** - Validação de formulário no frontend (valor > 0, data obrigatória, categoria obrigatória)
+
+#### Novas Funcionalidades
+- ✅ **Gráficos financeiros** - Gráfico de barras (Chart.js) com receitas x despesas mensais
+- ✅ **Relatório DRE simplificado** - Demonstrativo de resultado por categoria com resultado do período
+- ✅ **Pré-carregamento de posts** - Otimização de performance usando `_prime_post_caches()`
 
 ### v1.1.0 - Fase 1 e 2
 
@@ -1061,25 +1074,26 @@ Para o arquivo principal que tem ~2000 linhas, sugere-se a seguinte reorganizaç
 
 ### 13.5 Checklist de Implementação
 
-#### Quick Wins (1-2 dias)
-- [ ] Adicionar máscara de moeda brasileira no campo de valor
-  - Usar biblioteca `IMask.js` (CDN: `https://unpkg.com/imask`)
-  - Configurar padrão brasileiro: separador de milhares `.`, decimal `,`
-- [ ] Adicionar filtro por status na listagem
+#### Quick Wins (1-2 dias) - ✅ IMPLEMENTADO em v1.3.0
+- [x] Adicionar máscara de moeda brasileira no campo de valor
+  - Implementado com JavaScript nativo (sem dependência externa)
+  - Configurado padrão brasileiro: separador de milhares `.`, decimal `,`
+- [x] Adicionar filtro por status na listagem
   - Novo `<select>` com opções: Todos, Em aberto, Pago, Cancelado
-  - Adicionar parâmetro `fin_status` no GET
-- [ ] Implementar fieldsets no formulário de nova transação
-  - Agrupar campos: Dados Básicos, Classificação, Vínculo (opcional)
-- [ ] Adicionar validação JavaScript básica no formulário
-  - Validar valor > 0, data não futura, categoria obrigatória
-  - Usar `HTMLFormElement.reportValidity()` nativo
+  - Parâmetro `fin_status` no GET com validação de valores permitidos
+- [x] Implementar fieldsets no formulário de nova transação
+  - Agrupado em 3 fieldsets: Dados Básicos, Classificação, Vínculo (opcional)
+  - Layout em grid responsivo
+- [x] Adicionar validação JavaScript básica no formulário
+  - Validação de valor > 0, data obrigatória, categoria obrigatória
+  - Feedback visual com classe de erro e mensagens
 
-#### Melhorias de Código (3-5 dias)
+#### Melhorias de Código (3-5 dias) - PARCIALMENTE IMPLEMENTADO
 - [ ] Extrair `section_financeiro()` em métodos menores
   - Criar: `render_partial_form()`, `render_transaction_form()`, `render_transactions_table()`, `render_pending_summary()`
-- [ ] Implementar pré-carregamento de posts com `_prime_post_caches()`
-  - Coletar IDs de clientes e pets antes do loop principal
-  - Chamar `_prime_post_caches($ids, false, false)` uma única vez
+- [x] Implementar pré-carregamento de posts com `_prime_post_caches()`
+  - Coleta IDs de clientes, agendamentos e pets antes do loop principal
+  - Chama `_prime_post_caches()` uma única vez por tipo
 - [ ] Migrar completamente para `valor_cents` (usar helper de conversão)
   - Atualizar queries para usar `valor_cents`
   - Manter `valor` apenas para leitura em dados antigos
@@ -1087,14 +1101,17 @@ Para o arquivo principal que tem ~2000 linhas, sugere-se a seguinte reorganizaç
   - Testar `DPS_Finance_API::create_or_update_charge()`
   - Testar `DPS_Finance_API::mark_as_paid()` e hooks disparados
 
-#### Novas Funcionalidades (5-10 dias)
-- [ ] Reativar gráficos financeiros (código já existe parcialmente)
-  - Descomentar/reimplementar seção de gráficos (linhas 1345-1383)
-  - Adicionar Chart.js via CDN ou `wp_enqueue_script`
+#### Novas Funcionalidades (5-10 dias) - ✅ IMPLEMENTADO em v1.3.0
+- [x] Gráficos financeiros com Chart.js
+  - Gráfico de barras com receitas x despesas mensais
+  - Chart.js via CDN (v4.4.1)
+  - Exibido quando há dados de múltiplos meses
 - [ ] Implementar aba de configurações nas configurações do DPS Base
   - Hook `dps_settings_nav_tabs` e `dps_settings_sections`
-- [ ] Adicionar relatório DRE simplificado
-  - Template: Receitas Brutas - Deduções = Receita Líquida - Despesas = Resultado
+- [x] Adicionar relatório DRE simplificado
+  - Demonstrativo de resultado por categoria
+  - Exibido automaticamente quando há filtro de data aplicado
+  - Resultado positivo/negativo com destaque visual
 - [ ] Implementar categorias configuráveis
   - CPT `dps_finance_category` ou taxonomy em transações
 
