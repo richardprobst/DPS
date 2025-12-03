@@ -1,0 +1,485 @@
+/**
+ * Estilos do Loyalty Add-on
+ *
+ * @package Desi_Pet_Shower_Loyalty
+ * @since   1.1.0
+ */
+
+/* ==========================================================================
+   Dashboard de Métricas
+   ========================================================================== */
+
+.dps-loyalty-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-loyalty-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-loyalty-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dps-loyalty-card-icon {
+    display: block;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.dps-loyalty-card-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+}
+
+.dps-loyalty-card-label {
+    display: block;
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.dps-loyalty-card--success .dps-loyalty-card-value {
+    color: #10b981;
+}
+
+.dps-loyalty-card--warning .dps-loyalty-card-value {
+    color: #f59e0b;
+}
+
+.dps-loyalty-card--danger .dps-loyalty-card-value {
+    color: #ef4444;
+}
+
+.dps-loyalty-card--info .dps-loyalty-card-value {
+    color: #0ea5e9;
+}
+
+/* ==========================================================================
+   Tabela de Indicações
+   ========================================================================== */
+
+.dps-referrals-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 16px 0;
+}
+
+.dps-referrals-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.dps-referrals-table th,
+.dps-referrals-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-referrals-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.dps-referrals-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-referrals-table code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+/* Status badges */
+.dps-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dps-status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-rewarded {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* ==========================================================================
+   Formulário de Configurações
+   ========================================================================== */
+
+.dps-loyalty-settings-form {
+    max-width: 800px;
+}
+
+.dps-loyalty-settings-form fieldset {
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.dps-loyalty-settings-form legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+}
+
+.dps-loyalty-settings-form .form-table th {
+    width: 250px;
+    padding: 15px 10px 15px 0;
+}
+
+/* ==========================================================================
+   Barra de Progresso de Pontos
+   ========================================================================== */
+
+.dps-points-progress-wrapper {
+    margin: 16px 0;
+    max-width: 400px;
+}
+
+.dps-points-progress {
+    background: #e5e7eb;
+    border-radius: 8px;
+    height: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.dps-points-progress-fill {
+    background: linear-gradient(90deg, #10b981, #059669);
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 8px;
+}
+
+.dps-points-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+/* Níveis de fidelidade */
+.dps-tier-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.dps-tier-current,
+.dps-tier-next {
+    text-align: center;
+    min-width: 60px;
+}
+
+.dps-tier-icon {
+    display: block;
+    font-size: 24px;
+}
+
+.dps-tier-name {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.dps-tier-progress .dps-progress-container {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Seção de Indicações no Portal
+   ========================================================================== */
+
+.dps-portal-referral-section {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    margin: 24px 0;
+}
+
+.dps-portal-referral-section h3 {
+    margin-top: 0;
+    color: #374151;
+}
+
+.dps-referral-code-box {
+    background: #fff;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0;
+}
+
+.dps-referral-code {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f4f6;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.dps-referral-code code {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 2px;
+}
+
+.dps-referral-code button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.dps-referral-code button:hover {
+    opacity: 1;
+}
+
+.dps-referral-link-box {
+    margin: 16px 0;
+}
+
+.dps-referral-link-box input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.dps-referral-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dps-btn-copy,
+.dps-btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+
+.dps-btn-copy {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.dps-btn-copy:hover {
+    background: #e5e7eb;
+}
+
+.dps-btn-whatsapp {
+    background: #25d366;
+    color: #fff;
+}
+
+.dps-btn-whatsapp:hover {
+    background: #1da851;
+    color: #fff;
+}
+
+/* Estatísticas de indicação */
+.dps-referral-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.dps-referral-stat {
+    text-align: center;
+}
+
+.dps-referral-stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-referral-stat-label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ==========================================================================
+   Filtros
+   ========================================================================== */
+
+.dps-referrals-filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.dps-referrals-filters select,
+.dps-referrals-filters input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Histórico de Pontos
+   ========================================================================== */
+
+.dps-points-history {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dps-points-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dps-points-history-item:last-child {
+    border-bottom: none;
+}
+
+.dps-points-history-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-points-history-context {
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-points-history-date {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dps-points-history-value {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.dps-points-history-value.add {
+    color: #10b981;
+}
+
+.dps-points-history-value.add::before {
+    content: '+';
+}
+
+.dps-points-history-value.redeem {
+    color: #ef4444;
+}
+
+.dps-points-history-value.redeem::before {
+    content: '-';
+}
+
+/* ==========================================================================
+   Paginação
+   ========================================================================== */
+
+.dps-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.dps-pagination .button {
+    min-width: 36px;
+    text-align: center;
+}
+
+.dps-pagination-info {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .dps-loyalty-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dps-loyalty-card-value {
+        font-size: 22px;
+    }
+
+    .dps-tier-progress {
+        flex-direction: column;
+    }
+
+    .dps-referral-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-loyalty-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-referral-actions {
+        flex-direction: column;
+    }
+
+    .dps-btn-copy,
+    .dps-btn-whatsapp {
+        justify-content: center;
+    }
+}
