@@ -89,34 +89,49 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Cache para configuração de status.
+     *
+     * @since 1.3.1
+     * @var array|null
+     */
+    private $status_config_cache = null;
+
+    /**
      * Obtém opções de status para o filtro.
+     * Usa constantes centralizadas da classe principal.
      *
      * @since 1.3.0
+     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
      * @return array Opções de status.
      */
     private function get_status_options() {
-        return [
-            ''                => __( 'Todos os status', 'dps-agenda-addon' ),
-            'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
-            'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
-            'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
-        ];
+        if ( null === $this->status_config_cache ) {
+            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
+        }
+        $options = [ '' => __( 'Todos os status', 'dps-agenda-addon' ) ];
+        foreach ( $this->status_config_cache as $key => $data ) {
+            $options[ $key ] = $data['label'];
+        }
+        return $options;
     }
 
     /**
      * Obtém opções de status para o dropdown na tabela.
+     * Usa constantes centralizadas da classe principal.
      *
      * @since 1.3.0
+     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
      * @return array Opções de status.
      */
     private function get_table_status_options() {
-        return [
-            'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
-            'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
-            'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
-        ];
+        if ( null === $this->status_config_cache ) {
+            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
+        }
+        $options = [];
+        foreach ( $this->status_config_cache as $key => $data ) {
+            $options[ $key ] = $data['label'];
+        }
+        return $options;
     }
 
     /**

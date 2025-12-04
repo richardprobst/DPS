@@ -82,6 +82,65 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Push Notifications Add-on (v1.0.0)**: Notificações push nativas do navegador
+  - **Web Push API**: Implementação nativa sem dependência de serviços externos
+    - Chaves VAPID geradas automaticamente na ativação
+    - Service Worker para receber notificações em segundo plano
+    - Suporte multi-dispositivo por usuário
+  - **Eventos notificados**:
+    - Novos agendamentos (`dps_base_after_save_appointment`)
+    - Mudanças de status (`dps_appointment_status_changed`)
+    - Reagendamentos (`dps_appointment_rescheduled`)
+  - **Interface administrativa**:
+    - Página de configurações em DPS by PRObst > Push Notifications
+    - Indicador de status com cores (inscrito/não inscrito/negado)
+    - Botão para ativar notificações no navegador atual
+    - Botão para enviar notificação de teste
+    - Checkboxes para selecionar eventos a notificar
+  - **API pública**:
+    - `DPS_Push_API::send_to_user($user_id, $payload)` - Envia para usuário específico
+    - `DPS_Push_API::send_to_all_admins($payload, $exclude_ids)` - Envia para todos os admins
+    - `DPS_Push_API::generate_vapid_keys()` - Gera novo par de chaves VAPID
+  - **Segurança**:
+    - Nonces em todas as ações AJAX
+    - Verificação de capability `manage_options`
+    - Chaves VAPID únicas por instalação
+    - Remoção automática de inscrições expiradas
+  - **Arquivos**:
+    - `desi-pet-shower-push-addon.php` - Plugin principal
+    - `includes/class-dps-push-api.php` - API de envio
+    - `assets/js/push-addon.js` - JavaScript do admin
+    - `assets/js/push-sw.js` - Service Worker
+    - `assets/css/push-addon.css` - Estilos da interface
+  - **Requisitos**: HTTPS obrigatório, PHP 7.4+, navegadores modernos
+- **Agenda Add-on (v1.3.2)**: Funcionalidades administrativas avançadas
+  - **Dashboard de KPIs**: Cards de métricas no topo da agenda
+    - Agendamentos pendentes/finalizados do dia
+    - Faturamento estimado baseado em serviços
+    - Taxa de cancelamento semanal
+    - Média de atendimentos diários (últimos 7 dias)
+  - **Ações em Lote**: Atualização de múltiplos agendamentos de uma só vez
+    - Checkbox de seleção em cada linha da tabela
+    - Checkbox "selecionar todos" no header
+    - Barra de ações flutuante (sticky) com botões:
+      - Finalizar selecionados
+      - Marcar como pago
+      - Cancelar selecionados
+    - Handler AJAX `dps_bulk_update_status` com validação de nonce
+  - **Reagendamento Rápido**: Modal simplificado para alterar data/hora
+    - Botão "📅 Reagendar" em cada linha da tabela
+    - Modal com apenas campos de data e hora
+    - Handler AJAX `dps_quick_reschedule`
+    - Hook `dps_appointment_rescheduled` para notificações
+  - **Histórico de Alterações**: Registro de todas as mudanças em agendamentos
+    - Metadado `_dps_appointment_history` com até 50 entradas
+    - Registra: criação, alteração de status, reagendamento
+    - Indicador visual "📜" quando há histórico
+    - Handler AJAX `dps_get_appointment_history`
+    - Integração com hook `dps_appointment_status_changed`
+  - **API de KPIs**: Handler AJAX `dps_get_admin_kpis` para consulta programática
+  - **CSS**: Novos estilos para dashboard, barra de lote, modal de reagendamento
+  - **JavaScript**: Lógica para seleção em lote, modal de reagendamento, histórico
 - **Constante `DPS_DISABLE_CACHE`**: Nova constante para desabilitar completamente o cache do sistema
   - Útil para desenvolvimento, testes e debug de problemas relacionados a dados em cache
   - Afeta todos os transients de cache de dados (pets, clientes, serviços, estatísticas, métricas, contexto de IA)
@@ -303,6 +362,12 @@ Antes de criar uma nova versão oficial:
 - **Groomers Add-on**: Tabela de groomers e relatórios com classes CSS customizadas
 - **Lista de Clientes**: Atualizada para usar `DPS_WhatsApp_Helper::get_link_to_client()`
 - **Add-on de Agenda**: Botões de confirmação e cobrança (individual e conjunta) usam helper centralizado
+- **Add-on de Agenda (v1.3.1)**: Centralização de constantes de status
+  - Adicionadas constantes `STATUS_PENDING`, `STATUS_FINISHED`, `STATUS_PAID`, `STATUS_CANCELED`
+  - Novo método estático `get_status_config()` retorna configuração completa (label, cor, ícone)
+  - Novo método estático `get_status_label()` para obter label traduzida de um status
+  - Traits refatorados para usar métodos centralizados ao invés de strings hardcoded
+  - Documentação de melhorias administrativas em `docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md`
 - **Add-on de Assinaturas**: Botão de cobrança de renovação usa helper centralizado
 - **Add-on de Finance**: Botão de cobrança em pendências financeiras usa helper centralizado
 - **Add-on de Stats**: Link de reengajamento para clientes inativos usa helper centralizado
