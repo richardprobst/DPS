@@ -1153,3 +1153,489 @@
         background: #f1f5f9;
     }
 }
+
+/* ================================================
+   PÁGINA DE DETALHES DO CLIENTE
+   ================================================ */
+
+/* Container principal */
+.dps-client-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* Header com navegação e ações */
+.dps-client-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-client-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.dps-client-header__back:hover {
+    color: #0ea5e9;
+}
+
+.dps-client-header__title {
+    flex: 1;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-client-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Cards de resumo/métricas */
+.dps-client-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-summary-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-summary-card--highlight {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-summary-card--warning {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.dps-summary-card--success {
+    border-left: 4px solid #10b981;
+}
+
+.dps-summary-card__icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dps-summary-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-summary-card__label {
+    font-size: 13px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Seções de informações */
+.dps-client-section {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.dps-client-section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-client-section__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-client-section__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.dps-client-section__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-client-section__content {
+    padding: 20px;
+}
+
+/* Grid de informações do cliente */
+.dps-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.dps-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-info-item__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.dps-info-item__value {
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-info-item__value a {
+    color: #0ea5e9;
+    text-decoration: none;
+}
+
+.dps-info-item__value a:hover {
+    text-decoration: underline;
+}
+
+.dps-info-item--empty .dps-info-item__value {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Cards de pets */
+.dps-pet-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.dps-pet-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-pet-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dps-pet-card--aggressive {
+    border-left: 4px solid #ef4444;
+}
+
+.dps-pet-card__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-pet-card__photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #e5e7eb;
+    flex-shrink: 0;
+}
+
+.dps-pet-card__photo--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #9ca3af;
+}
+
+.dps-pet-card__title {
+    flex: 1;
+}
+
+.dps-pet-card__name {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-pet-card__subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-pet-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #fef2f2;
+    color: #ef4444;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dps-pet-card__body {
+    padding: 16px;
+}
+
+.dps-pet-card__info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.dps-pet-card__info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-pet-card__info-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+}
+
+.dps-pet-card__info-value {
+    font-size: 13px;
+    color: #374151;
+}
+
+.dps-pet-card__notes {
+    padding: 12px;
+    background: #fffbeb;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 16px;
+}
+
+.dps-pet-card__notes::before {
+    content: '📋 ';
+}
+
+.dps-pet-card__actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-pet-card__actions .button {
+    flex: 1;
+    text-align: center;
+}
+
+/* Tabela de atendimentos melhorada */
+.dps-client-section .dps-table-wrapper {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+.dps-client-section .dps-table th,
+.dps-client-section .dps-table td {
+    padding: 12px 16px;
+}
+
+/* Status badges em atendimentos */
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dps-status-badge--paid {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-status-badge--pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-badge--cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-status-badge--scheduled {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Ações na tabela de atendimentos */
+.dps-table .dps-actions-cell {
+    white-space: nowrap;
+}
+
+.dps-table .dps-actions-cell a {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.dps-table .dps-actions-cell a:hover {
+    color: #0ea5e9;
+}
+
+/* Botões de ação no header */
+.dps-btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-btn-action:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.dps-btn-action--primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: #ffffff;
+}
+
+.dps-btn-action--primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #ffffff;
+}
+
+/* Responsividade da página de detalhes */
+@media (max-width: 768px) {
+    .dps-client-detail {
+        padding: 0 12px;
+    }
+    
+    .dps-client-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dps-client-header__title {
+        order: -1;
+        width: 100%;
+    }
+    
+    .dps-client-header__actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .dps-client-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-pet-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-client-section__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .dps-client-section__actions {
+        width: 100%;
+    }
+    
+    .dps-client-section__actions .button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-client-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-summary-card {
+        padding: 12px;
+    }
+    
+    .dps-pet-card__info {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-pet-card__actions {
+        flex-direction: column;
+    }
+    
+    .dps-btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
