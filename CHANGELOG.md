@@ -82,6 +82,37 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Push Notifications Add-on (v1.0.0)**: Notificações push nativas do navegador
+  - **Web Push API**: Implementação nativa sem dependência de serviços externos
+    - Chaves VAPID geradas automaticamente na ativação
+    - Service Worker para receber notificações em segundo plano
+    - Suporte multi-dispositivo por usuário
+  - **Eventos notificados**:
+    - Novos agendamentos (`dps_base_after_save_appointment`)
+    - Mudanças de status (`dps_appointment_status_changed`)
+    - Reagendamentos (`dps_appointment_rescheduled`)
+  - **Interface administrativa**:
+    - Página de configurações em DPS by PRObst > Push Notifications
+    - Indicador de status com cores (inscrito/não inscrito/negado)
+    - Botão para ativar notificações no navegador atual
+    - Botão para enviar notificação de teste
+    - Checkboxes para selecionar eventos a notificar
+  - **API pública**:
+    - `DPS_Push_API::send_to_user($user_id, $payload)` - Envia para usuário específico
+    - `DPS_Push_API::send_to_all_admins($payload, $exclude_ids)` - Envia para todos os admins
+    - `DPS_Push_API::generate_vapid_keys()` - Gera novo par de chaves VAPID
+  - **Segurança**:
+    - Nonces em todas as ações AJAX
+    - Verificação de capability `manage_options`
+    - Chaves VAPID únicas por instalação
+    - Remoção automática de inscrições expiradas
+  - **Arquivos**:
+    - `desi-pet-shower-push-addon.php` - Plugin principal
+    - `includes/class-dps-push-api.php` - API de envio
+    - `assets/js/push-addon.js` - JavaScript do admin
+    - `assets/js/push-sw.js` - Service Worker
+    - `assets/css/push-addon.css` - Estilos da interface
+  - **Requisitos**: HTTPS obrigatório, PHP 7.4+, navegadores modernos
 - **Agenda Add-on (v1.3.2)**: Funcionalidades administrativas avançadas
   - **Dashboard de KPIs**: Cards de métricas no topo da agenda
     - Agendamentos pendentes/finalizados do dia

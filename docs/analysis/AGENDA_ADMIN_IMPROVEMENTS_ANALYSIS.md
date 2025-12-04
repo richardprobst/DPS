@@ -43,6 +43,7 @@ Esta análise complementa a documentação existente (`AGENDA_ADDON_ANALYSIS.md`
 | **Ações em lote** | ✅ **NOVO** | Barra flutuante + checkboxes |
 | **Reagendamento rápido** | ✅ **NOVO** | Botão "📅 Reagendar" |
 | **Histórico de alterações** | ✅ **NOVO** | Indicador "📜" na tabela |
+| **Notificações push** | ✅ **NOVO** | Push Notifications Add-on |
 
 ### 2.2 Gaps Identificados para Administração (Atualizado)
 
@@ -52,9 +53,9 @@ Esta análise complementa a documentação existente (`AGENDA_ADDON_ANALYSIS.md`
 | ~~Dashboard de KPIs~~ | Alto | 🔴 Alta | ✅ Implementado |
 | ~~Reagendamento rápido~~ | Médio | 🟡 Média | ✅ Implementado |
 | ~~Histórico de alterações~~ | Médio | 🟡 Média | ✅ Implementado |
+| ~~Notificações push~~ | Baixo | 🟢 Baixa | ✅ Implementado |
 | Gestão de slots/horários | Médio | 🟡 Média | ⏳ Pendente |
 | Impressão de agenda | Baixo | 🟢 Baixa | ⏳ Pendente |
-| Notificações push | Baixo | 🟢 Baixa | ⏳ Pendente |
 
 ---
 

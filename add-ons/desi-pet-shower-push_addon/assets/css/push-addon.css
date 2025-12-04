@@ -1,0 +1,259 @@
+/**
+ * Push Notifications Add-on - Estilos
+ *
+ * @package DPS_Push_Addon
+ * @since 1.0.0
+ */
+
+/* === Container Principal === */
+.dps-push-settings {
+    max-width: 1200px;
+}
+
+.dps-push-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* === Cards === */
+.dps-push-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.dps-push-card h2 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* === Status Card === */
+.dps-push-status-card {
+    border-left: 4px solid #3b82f6;
+}
+
+.dps-push-status {
+    margin-bottom: 1.5rem;
+}
+
+.dps-push-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.dps-push-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dps-push-status-text {
+    font-weight: 500;
+}
+
+/* Status: Verificando */
+.dps-push-checking {
+    background: #f1f5f9;
+}
+
+.dps-push-checking .dps-push-dot {
+    background: #64748b;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Status: Inscrito */
+.dps-push-subscribed {
+    background: #dcfce7;
+}
+
+.dps-push-subscribed .dps-push-dot {
+    background: #22c55e;
+}
+
+.dps-push-subscribed .dps-push-status-text {
+    color: #166534;
+}
+
+/* Status: Não inscrito */
+.dps-push-not-subscribed {
+    background: #fef3c7;
+}
+
+.dps-push-not-subscribed .dps-push-dot {
+    background: #f59e0b;
+}
+
+.dps-push-not-subscribed .dps-push-status-text {
+    color: #92400e;
+}
+
+/* Status: Negado */
+.dps-push-denied {
+    background: #fee2e2;
+}
+
+.dps-push-denied .dps-push-dot {
+    background: #ef4444;
+}
+
+.dps-push-denied .dps-push-status-text {
+    color: #991b1b;
+}
+
+/* Status: Não suportado */
+.dps-push-unsupported {
+    background: #f1f5f9;
+}
+
+.dps-push-unsupported .dps-push-dot {
+    background: #94a3b8;
+}
+
+.dps-push-unsupported .dps-push-status-text {
+    color: #475569;
+}
+
+/* Status: Erro */
+.dps-push-error {
+    background: #fee2e2;
+}
+
+.dps-push-error .dps-push-dot {
+    background: #ef4444;
+}
+
+.dps-push-error .dps-push-status-text {
+    color: #991b1b;
+}
+
+/* Animação de pulso */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* Texto de dispositivos */
+.dps-push-devices {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* Ações */
+.dps-push-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dps-push-actions .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* === Info Card === */
+.dps-push-info-card {
+    background: #f8fafc;
+}
+
+.dps-push-info-card ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #374151;
+}
+
+.dps-push-info-card li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.dps-push-info-card li:last-child {
+    margin-bottom: 0;
+}
+
+.dps-push-info-card .description {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* === Form Table === */
+.dps-push-card .form-table {
+    margin-top: 0;
+}
+
+.dps-push-card .form-table th {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    width: auto;
+}
+
+.dps-push-card .form-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.dps-push-card fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.dps-push-card fieldset label:last-child {
+    margin-bottom: 0;
+}
+
+.dps-push-card fieldset input[type="checkbox"] {
+    margin: 0;
+}
+
+/* === Responsividade === */
+@media (max-width: 782px) {
+    .dps-push-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-push-card {
+        padding: 1rem;
+    }
+    
+    .dps-push-actions {
+        flex-direction: column;
+    }
+    
+    .dps-push-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-push-card .form-table th,
+    .dps-push-card .form-table td {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0;
+    }
+}
