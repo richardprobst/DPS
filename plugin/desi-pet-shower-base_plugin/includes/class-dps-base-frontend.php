@@ -1822,6 +1822,20 @@ class DPS_Base_Frontend {
             $client_options[ $client->ID ] = $client->post_title;
         }
 
+        // Coletar lista de pets para o filtro (limitado para performance)
+        $pets_limit = (int) apply_filters( 'dps_history_pets_filter_limit', 200 );
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'posts_per_page' => $pets_limit,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+        $pet_options = [];
+        foreach ( $pets as $pet ) {
+            $pet_options[ $pet->ID ] = $pet->post_title;
+        }
+
         $status_filters = [
             'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
             'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
@@ -1837,10 +1851,25 @@ class DPS_Base_Frontend {
         echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'desi-pet-shower' ) . '</p>';
 
         echo '<div class="dps-history-toolbar">';
+
+        // Botões de período rápido
+        echo '<div class="dps-history-quick-filters">';
+        echo '<span class="dps-history-quick-label">' . esc_html__( 'Período:', 'desi-pet-shower' ) . '</span>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="today">' . esc_html__( 'Hoje', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="7days">' . esc_html__( '7 dias', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="30days">' . esc_html__( '30 dias', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="month">' . esc_html__( 'Este mês', 'desi-pet-shower' ) . '</button>';
+        echo '</div>';
+
         echo '<div class="dps-history-filters">';
         echo '<div class="dps-history-filter"><label>' . esc_html__( 'Buscar', 'desi-pet-shower' ) . '<br><input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'desi-pet-shower' ) . '"></label></div>';
         echo '<div class="dps-history-filter"><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $client_options as $id => $name ) {
+            echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
+        }
+        echo '</select></label></div>';
+        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '<br><select id="dps-history-pet"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
+        foreach ( $pet_options as $id => $name ) {
             echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
         }
         echo '</select></label></div>';
@@ -1871,14 +1900,14 @@ class DPS_Base_Frontend {
 
         if ( $appointments ) {
             echo '<div class="dps-table-wrapper">';
-            echo '<table class="dps-table" id="dps-history-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</th>';
+            echo '<table class="dps-table dps-table-sortable" id="dps-history-table"><thead><tr>';
+            echo '<th class="dps-sortable" data-sort="date">' . esc_html__( 'Data', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
+            echo '<th class="dps-sortable" data-sort="time">' . esc_html__( 'Horário', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
+            echo '<th class="dps-sortable" data-sort="client">' . esc_html__( 'Cliente', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
             echo '<th>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</th>';
             echo '<th class="hide-mobile">' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="dps-sortable" data-sort="value">' . esc_html__( 'Valor', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
+            echo '<th class="dps-sortable" data-sort="status">' . esc_html__( 'Status', 'desi-pet-shower' ) . ' <span class="dps-sort-icon">⇅</span></th>';
             echo '<th class="hide-mobile">' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
@@ -1905,9 +1934,12 @@ class DPS_Base_Frontend {
                 }
                 $status_label = self::get_status_label( $status_meta );
                 $pet_display  = '-';
+                $pet_ids_attr = '';
                 $group_data   = self::get_multi_pet_charge_data( $appt->ID );
                 if ( $group_data ) {
                     $pet_display = implode( ', ', $group_data['pet_names'] );
+                    // Para múltiplos pets, armazena IDs separados por vírgula
+                    $pet_ids_attr = isset( $group_data['pet_ids'] ) ? implode( ',', $group_data['pet_ids'] ) : '';
                 } else {
                     $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                     if ( $pet_id && ! array_key_exists( $pet_id, $pets_cache ) ) {
@@ -1915,6 +1947,7 @@ class DPS_Base_Frontend {
                     }
                     if ( $pet_id && isset( $pets_cache[ $pet_id ] ) ) {
                         $pet_display = $pets_cache[ $pet_id ]->post_title;
+                        $pet_ids_attr = $pet_id;
                     }
                 }
 
@@ -1939,7 +1972,7 @@ class DPS_Base_Frontend {
                 $total_display = $total_val > 0 ? 'R$ ' . number_format_i18n( $total_val, 2 ) : '—';
                 $paid_flag = ( 'finalizado' === $status_key ) ? '0' : '1';
                 $date_attr = $date ? $date : '';
-                echo '<tr data-date="' . esc_attr( $date_attr ) . '" data-status="' . esc_attr( $status_key ) . '" data-client="' . esc_attr( $client_id ) . '" data-total="' . esc_attr( $total_val ) . '" data-paid="' . esc_attr( $paid_flag ) . '">';
+                echo '<tr data-date="' . esc_attr( $date_attr ) . '" data-status="' . esc_attr( $status_key ) . '" data-client="' . esc_attr( $client_id ) . '" data-pet="' . esc_attr( $pet_ids_attr ) . '" data-total="' . esc_attr( $total_val ) . '" data-paid="' . esc_attr( $paid_flag ) . '">';
                 $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
                 echo '<td>' . esc_html( $time ) . '</td>';
@@ -3737,6 +3770,7 @@ class DPS_Base_Frontend {
         echo '<span class="dps-client-section__count">' . esc_html( $appt_count ) . '</span>';
         echo '</h3>';
         echo '<div class="dps-client-section__actions">';
+        echo '<button type="button" class="button button-secondary" id="dps-client-export-csv">' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
         echo '<a href="' . esc_url( $history_link ) . '" class="button button-secondary">' . esc_html__( 'Gerar Relatório', 'desi-pet-shower' ) . '</a>';
         echo '<a href="#" class="button button-secondary dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar por Email', 'desi-pet-shower' ) . '</a>';
         echo '</div>';
@@ -3745,19 +3779,22 @@ class DPS_Base_Frontend {
 
         if ( $appointments ) {
             echo '<div class="dps-table-wrapper">';
-            echo '<table class="dps-table">';
+            echo '<table class="dps-table" id="dps-client-history-table">';
             echo '<thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Serviços', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="hide-mobile">' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th>';
+            echo '<th class="dps-no-export">' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead>';
             echo '<tbody>';
 
-            // Cache de pets para evitar múltiplas queries
-            $pet_cache = [];
+            // Caches para evitar múltiplas queries
+            $pet_cache      = [];
+            $services_cache = [];
 
             foreach ( $appointments as $appt ) {
                 $date        = get_post_meta( $appt->ID, 'appointment_date', true );
@@ -3766,6 +3803,7 @@ class DPS_Base_Frontend {
                 $notes       = get_post_meta( $appt->ID, 'appointment_notes', true );
                 $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
                 $total_value = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+                $services    = get_post_meta( $appt->ID, 'appointment_services', true );
 
                 // Obter nome do pet (com cache)
                 $pet_name = '-';
@@ -3777,6 +3815,24 @@ class DPS_Base_Frontend {
                     $pet_name = $pet_cache[ $pet_id ];
                 }
 
+                // Obter nomes dos serviços (com cache)
+                $services_text = '-';
+                if ( is_array( $services ) && ! empty( $services ) ) {
+                    $names = [];
+                    foreach ( $services as $srv_id ) {
+                        if ( ! array_key_exists( $srv_id, $services_cache ) ) {
+                            $srv = get_post( $srv_id );
+                            $services_cache[ $srv_id ] = $srv ? $srv->post_title : '';
+                        }
+                        if ( ! empty( $services_cache[ $srv_id ] ) ) {
+                            $names[] = $services_cache[ $srv_id ];
+                        }
+                    }
+                    if ( $names ) {
+                        $services_text = implode( ', ', $names );
+                    }
+                }
+
                 // Status badge
                 $status_info = self::get_appointment_status_info( $status_meta );
 
@@ -3785,13 +3841,23 @@ class DPS_Base_Frontend {
                 // Limite de palavras para observações na tabela
                 $notes_word_limit = apply_filters( 'dps_client_history_notes_word_limit', 10 );
 
+                // URLs de ação
+                $edit_url      = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
+                $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
+
                 echo '<tr>';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
                 echo '<td>' . esc_html( $time ?: '-' ) . '</td>';
                 echo '<td>' . esc_html( $pet_name ) . '</td>';
+                echo '<td class="hide-mobile">' . esc_html( $services_text ) . '</td>';
                 echo '<td>R$ ' . esc_html( number_format_i18n( $total_value, 2 ) ) . '</td>';
                 echo '<td><span class="dps-status-badge ' . esc_attr( $status_info['class'] ) . '">' . esc_html( $status_info['label'] ) . '</span></td>';
-                echo '<td>' . esc_html( $notes ? wp_trim_words( $notes, $notes_word_limit, '...' ) : '-' ) . '</td>';
+                echo '<td class="hide-mobile">' . esc_html( $notes ? wp_trim_words( $notes, $notes_word_limit, '...' ) : '-' ) . '</td>';
+                echo '<td class="dps-actions-cell dps-no-export">';
+                echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+                echo '<span class="dps-action-separator" aria-hidden="true"> | </span>';
+                echo '<a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a>';
+                echo '</td>';
                 echo '</tr>';
             }
 
@@ -3832,6 +3898,41 @@ class DPS_Base_Frontend {
                     url += '&to_email=' + encodeURIComponent(email);
                 }
                 window.location.href = url;
+            });
+
+            // Exportar CSV do histórico do cliente
+            $(document).on('click', '#dps-client-export-csv', function(e){
+                e.preventDefault();
+                var $table = $('#dps-client-history-table');
+                if (!$table.length) {
+                    alert('<?php echo esc_js( __( 'Nenhum atendimento para exportar.', 'desi-pet-shower' ) ); ?>');
+                    return;
+                }
+                var headers = [];
+                $table.find('thead th:not(.dps-no-export)').each(function(){
+                    headers.push($(this).text().trim());
+                });
+                var csvLines = [];
+                csvLines.push(headers.map(function(text){
+                    return '"' + text.replace(/"/g, '""') + '"';
+                }).join(';'));
+                $table.find('tbody tr').each(function(){
+                    var columns = [];
+                    $(this).find('td:not(.dps-no-export)').each(function(){
+                        var value = $(this).text().replace(/\s+/g, ' ').trim();
+                        columns.push('"' + value.replace(/"/g, '""') + '"');
+                    });
+                    csvLines.push(columns.join(';'));
+                });
+                var blob = new Blob(['\ufeff' + csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+                var url = URL.createObjectURL(blob);
+                var anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = 'historico-cliente-' + new Date().toISOString().split('T')[0] + '.csv';
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+                URL.revokeObjectURL(url);
             });
         })(jQuery);
         </script>
