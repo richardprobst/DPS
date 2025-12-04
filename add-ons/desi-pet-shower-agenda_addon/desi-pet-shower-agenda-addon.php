@@ -238,14 +238,20 @@ class DPS_Agenda_Addon {
     public function enqueue_assets() {
         $agenda_page_id  = get_option( 'dps_agenda_page_id' );
         $charges_page_id = get_option( 'dps_charges_page_id' );
+
+        $current_post            = is_singular() ? get_post() : null;
+        $has_agenda_shortcode    = $current_post ? has_shortcode( $current_post->post_content, 'dps_agenda_page' ) : false;
+        $has_charges_shortcode   = $current_post ? has_shortcode( $current_post->post_content, 'dps_charges_notes' ) : false;
+        $is_agenda_target_page   = $agenda_page_id && is_page( $agenda_page_id );
+        $is_charges_target_page  = $charges_page_id && is_page( $charges_page_id );
         
         // Agenda page: carrega CSS e scripts da agenda
-        if ( $agenda_page_id && is_page( $agenda_page_id ) ) {
+        if ( $is_agenda_target_page || $has_agenda_shortcode ) {
             // CSS da agenda (extraído do inline para arquivo dedicado)
-            wp_enqueue_style( 
-                'dps-agenda-addon-css', 
-                plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css', 
-                [], 
+            wp_enqueue_style(
+                'dps-agenda-addon-css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/agenda-addon.css',
+                [],
                 '1.1.0' 
             );
             
@@ -288,9 +294,9 @@ class DPS_Agenda_Addon {
                 'reloadDelay'  => 700,
             ] );
         }
-        
+
         // Charges/notes page: pode precisar de estilos extras
-        if ( $charges_page_id && is_page( $charges_page_id ) ) {
+        if ( $is_charges_target_page || $has_charges_shortcode ) {
             // carregue CSS para tabelas se necessário; podemos reutilizar estilos de dps-table se o tema os define.
         }
     }
