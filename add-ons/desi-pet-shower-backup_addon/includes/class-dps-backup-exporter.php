@@ -334,8 +334,12 @@ class DPS_Backup_Exporter {
     public function export_options() {
         global $wpdb;
         $options_table = $wpdb->options;
+        $like = $wpdb->esc_like( 'dps_' ) . '%';
         $options = $wpdb->get_results(
-            "SELECT option_name, option_value, autoload FROM {$options_table} WHERE option_name LIKE 'dps\\_%' ESCAPE '\\' ORDER BY option_name",
+            $wpdb->prepare(
+                "SELECT option_name, option_value, autoload FROM {$options_table} WHERE option_name LIKE %s ORDER BY option_name",
+                $like
+            ),
             ARRAY_A
         );
         return is_array( $options ) ? $options : [];
@@ -585,8 +589,12 @@ class DPS_Backup_Exporter {
         }
 
         // Options
+        $like_options = $wpdb->esc_like( 'dps_' ) . '%';
         $counts['options'] = (int) $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'dps\\_%' ESCAPE '\\'"
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $like_options
+            )
         );
 
         // Tabelas customizadas
@@ -626,8 +634,12 @@ class DPS_Backup_Exporter {
      */
     private function export_all_dps_posts() {
         global $wpdb;
+        $like = $wpdb->esc_like( 'dps_' ) . '%';
         $posts = $wpdb->get_results(
-            "SELECT * FROM {$wpdb->posts} WHERE post_type LIKE 'dps\\_%' ESCAPE '\\' ORDER BY ID ASC",
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->posts} WHERE post_type LIKE %s ORDER BY ID ASC",
+                $like
+            ),
             ARRAY_A
         );
         return is_array( $posts ) ? $posts : [];
@@ -642,8 +654,12 @@ class DPS_Backup_Exporter {
     private function export_all_dps_postmeta() {
         global $wpdb;
 
+        $like = $wpdb->esc_like( 'dps_' ) . '%';
         $posts = $wpdb->get_col(
-            "SELECT ID FROM {$wpdb->posts} WHERE post_type LIKE 'dps\\_%' ESCAPE '\\'"
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type LIKE %s",
+                $like
+            )
         );
 
         if ( empty( $posts ) ) {
