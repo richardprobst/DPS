@@ -472,6 +472,7 @@ class DPS_Base_Frontend {
         
         // Verifica nonce
         if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ), 'dps_action' ) ) {
+            self::handle_invalid_nonce( $action );
             return;
         }
         
@@ -505,6 +506,27 @@ class DPS_Base_Frontend {
             default:
                 break;
         }
+    }
+
+    /**
+     * Adiciona mensagem de erro e redireciona quando a verificação de nonce falha.
+     *
+     * @param string $action Ação submetida pelo formulário.
+     */
+    private static function handle_invalid_nonce( $action ) {
+        $tabs = [
+            'save_client'               => 'clientes',
+            'save_pet'                  => 'pets',
+            'save_appointment'          => 'agendas',
+            'update_appointment_status' => 'agendas',
+            'save_passwords'            => 'senhas',
+        ];
+
+        DPS_Message_Helper::add_error( __( 'Não foi possível validar sua sessão. Atualize a página e tente novamente.', 'desi-pet-shower' ) );
+
+        $redirect_tab = isset( $tabs[ $action ] ) ? $tabs[ $action ] : '';
+        wp_safe_redirect( self::get_redirect_url( $redirect_tab ) );
+        exit;
     }
 
     /**
