@@ -338,9 +338,11 @@ class DPS_Base_Plugin {
 
         // CSS
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], DPS_BASE_VERSION );
+        wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], DPS_BASE_VERSION );
         // JS
         wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], DPS_BASE_VERSION, true );
         wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], DPS_BASE_VERSION, true );
+        wp_enqueue_script( 'dps-form-validation', DPS_BASE_URL . 'assets/js/dps-form-validation.js', [], DPS_BASE_VERSION, true );
         
         // Localização para o script de agendamento
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
@@ -386,6 +388,30 @@ class DPS_Base_Plugin {
             'savingText'            => __( 'Salvando...', 'desi-pet-shower' ),
             'selectedSingle'        => __( 'selecionado', 'desi-pet-shower' ),
             'selectedMultiple'      => __( 'selecionados', 'desi-pet-shower' ),
+        ] );
+        wp_localize_script( 'dps-form-validation', 'dpsFormL10n', [
+            'generic'     => [
+                'formErrorsTitle' => __( 'Por favor, corrija os campos destacados:', 'desi-pet-shower' ),
+            ],
+            'client'      => [
+                'nameRequired'  => __( 'O campo Nome é obrigatório.', 'desi-pet-shower' ),
+                'phoneRequired' => __( 'O campo Telefone / WhatsApp é obrigatório.', 'desi-pet-shower' ),
+            ],
+            'pet'         => [
+                'nameRequired'    => __( 'Informe o nome do pet.', 'desi-pet-shower' ),
+                'ownerRequired'   => __( 'Selecione o cliente (tutor) do pet.', 'desi-pet-shower' ),
+                'speciesRequired' => __( 'Selecione a espécie do pet.', 'desi-pet-shower' ),
+                'sexRequired'     => __( 'Selecione o sexo do pet.', 'desi-pet-shower' ),
+                'sizeRequired'    => __( 'Selecione o porte do pet.', 'desi-pet-shower' ),
+            ],
+            'appointment' => [
+                'clientRequired'    => __( 'Selecione um cliente para o agendamento.', 'desi-pet-shower' ),
+                'petRequired'       => __( 'Selecione pelo menos um pet.', 'desi-pet-shower' ),
+                'dateRequired'      => __( 'Selecione uma data para o agendamento.', 'desi-pet-shower' ),
+                'timeRequired'      => __( 'Selecione um horário para o agendamento.', 'desi-pet-shower' ),
+                'frequencyRequired' => __( 'Selecione a frequência da assinatura.', 'desi-pet-shower' ),
+                'errorTitle'        => __( 'Corrija os erros para continuar.', 'desi-pet-shower' ),
+            ],
         ] );
     }
 
