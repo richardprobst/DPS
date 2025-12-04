@@ -2593,8 +2593,10 @@ class DPS_Agenda_Addon {
             'post_status'    => 'publish',
             'meta_query'     => [
                 [
-                    'key'   => 'appointment_date',
-                    'value' => $date,
+                    'key'     => 'appointment_date',
+                    'value'   => $date,
+                    'compare' => '=',
+                    'type'    => 'DATE',
                 ],
             ],
             'no_found_rows'  => true,
