@@ -229,7 +229,7 @@ class DPS_Base_Plugin {
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,
-            'show_in_menu'       => true,
+            'show_in_menu'       => false,
             'capability_type'    => 'dps_client',
             'map_meta_cap'       => false,
             'capabilities'       => [
@@ -270,7 +270,7 @@ class DPS_Base_Plugin {
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,
-            'show_in_menu'       => true,
+            'show_in_menu'       => false,
             'capability_type'    => 'dps_pet',
             'map_meta_cap'       => false,
             'capabilities'       => [
@@ -310,7 +310,7 @@ class DPS_Base_Plugin {
             'labels'             => $labels,
             'public'             => false,
             'show_ui'            => true,
-            'show_in_menu'       => true,
+            'show_in_menu'       => false,
             'capability_type'    => 'dps_appointment',
             'map_meta_cap'       => false,
             'capabilities'       => [
