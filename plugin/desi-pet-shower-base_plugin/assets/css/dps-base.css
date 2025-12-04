@@ -295,6 +295,30 @@
     border-radius: 6px;
     margin-bottom: 12px;
 }
+/* Estilos para ordenação de tabelas */
+.dps-table-sortable .dps-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+.dps-table-sortable .dps-sortable:hover {
+    background-color: #e5e7eb;
+}
+.dps-sort-icon {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-left: 4px;
+}
+.dps-sortable.asc .dps-sort-icon::after {
+    content: '↑';
+}
+.dps-sortable.desc .dps-sort-icon::after {
+    content: '↓';
+}
+.dps-sortable.asc .dps-sort-icon,
+.dps-sortable.desc .dps-sort-icon {
+    color: #0ea5e9;
+}
 .dps-pet-picker {
     border: 1px solid #e2e2e2;
     background: #fafafa;

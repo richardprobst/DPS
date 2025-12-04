@@ -304,7 +304,7 @@ private static function normalize_status_key( $status ) {
 - [x] Adicionar coluna de serviços no histórico do cliente ✅ (Implementado)
 - [x] Adicionar coluna de ações no histórico do cliente ✅ (Implementado)
 - [x] Adicionar filtro de período rápido (Hoje/7d/30d/Este mês) ✅ (Implementado)
-- [ ] Adicionar filtro por pet (2h)
+- [x] Adicionar filtro por pet ✅ (Implementado)
 
 ### Fase 2: Performance (8-12h)
 - [ ] Implementar paginação server-side com AJAX (6h)
@@ -313,13 +313,13 @@ private static function normalize_status_key( $status ) {
 
 ### Fase 3: Funcionalidades Avançadas (10-16h)
 - [ ] Implementar ações em lote (4h)
-- [ ] Ordenação clicável por coluna (3h)
+- [x] Ordenação clicável por coluna ✅ (Implementado)
 - [ ] Exportar PDF do histórico (4h)
 - [ ] Gráfico de tendência (5h)
 
 ### Fase 4: Histórico do Cliente (6-10h)
 - [ ] Adicionar filtros locais na página do cliente (2h)
-- [ ] Exportar CSV individual do cliente (2h)
+- [x] Exportar CSV individual do cliente ✅ (Implementado)
 - [ ] Timeline visual opcional (6h)
 
 ---
@@ -329,14 +329,14 @@ private static function normalize_status_key( $status ) {
 A aba HISTÓRICO e o histórico do cliente estão funcionalmente operacionais e seguem o guia de estilo visual do DPS. As principais oportunidades de melhoria são:
 
 ### Prioridades Imediatas
-1. **Adicionar colunas no histórico do cliente** (serviços e ações)
-2. **Filtro de período rápido** (hoje, 7 dias, 30 dias)
-3. **Filtro por pet** na aba HISTÓRICO
+- [x] **Adicionar colunas no histórico do cliente** (serviços e ações) ✅
+- [x] **Filtro de período rápido** (hoje, 7 dias, 30 dias) ✅
+- [x] **Filtro por pet** na aba HISTÓRICO ✅
 
 ### Prioridades Médias
 1. **Paginação server-side** para melhor performance em grandes volumes
 2. **Ações em lote** para gerenciamento eficiente
-3. **Ordenação por coluna** para flexibilidade de visualização
+3. ~~**Ordenação por coluna** para flexibilidade de visualização~~ ✅ Implementado
 
 ### Prioridades Baixas
 1. Exportação PDF

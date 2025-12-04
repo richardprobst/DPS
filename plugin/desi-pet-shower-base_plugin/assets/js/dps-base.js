@@ -495,6 +495,7 @@
       var $rows      = $historyTable.find('tbody tr');
       var $search    = $('#dps-history-search');
       var $client    = $('#dps-history-client');
+      var $pet       = $('#dps-history-pet');
       var $status    = $('#dps-history-status');
       var $start     = $('#dps-history-start');
       var $end       = $('#dps-history-end');
@@ -511,6 +512,7 @@
       function applyHistoryFilters(){
         var searchTerm  = ($search.val() || '').toLowerCase();
         var clientVal   = $client.val();
+        var petVal      = $pet.val();
         var statusVal   = $status.val();
         var startVal    = $start.val();
         var endVal      = $end.val();
@@ -524,6 +526,9 @@
           var matchesSearch = !searchTerm || rowText.indexOf(searchTerm) !== -1;
           var rowClient = String($row.data('client') || '');
           var matchesClient = !clientVal || rowClient === String(clientVal);
+          // Filtro por pet - suporta múltiplos pets (separados por vírgula) com match exato
+          var rowPets = String($row.data('pet') || '');
+          var matchesPet = !petVal || rowPets.split(',').map(function(id) { return id.trim(); }).indexOf(String(petVal)) !== -1;
           var rowStatus = String($row.data('status') || '');
           var matchesStatus = !statusVal || rowStatus === statusVal;
           var rowDate = $row.data('date');
@@ -538,7 +543,7 @@
           if (pendingOnly && rowPaid !== '0') {
             matchesDate = false;
           }
-          var show = matchesSearch && matchesClient && matchesStatus && matchesDate;
+          var show = matchesSearch && matchesClient && matchesPet && matchesStatus && matchesDate;
           $row.toggle(show);
           if (show) {
             visibleCount++;
@@ -595,6 +600,7 @@
       function clearHistoryFilters(){
         $search.val('');
         $client.val('');
+        $pet.val('');
         $status.val('');
         $start.val('');
         $end.val('');
@@ -648,6 +654,7 @@
       // Eventos de filtros
       $search.on('input', applyHistoryFilters);
       $client.on('change', applyHistoryFilters);
+      $pet.on('change', applyHistoryFilters);
       $status.on('change', applyHistoryFilters);
       $start.on('change', function() {
         $('.dps-history-quick-btn').removeClass('active');
@@ -675,6 +682,74 @@
       });
 
       applyHistoryFilters();
+
+      // Funcionalidade de ordenação por coluna
+      var currentSort = { column: null, direction: 'asc' };
+
+      function sortTable(column) {
+        var $tbody = $historyTable.find('tbody');
+        var rows = $tbody.find('tr').toArray();
+
+        // Toggle direction se mesma coluna
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+
+        // Atualizar indicadores visuais
+        $historyTable.find('.dps-sortable').removeClass('asc desc');
+        $historyTable.find('.dps-sortable[data-sort="' + column + '"]').addClass(currentSort.direction);
+
+        rows.sort(function(a, b) {
+          var aVal, bVal;
+
+          switch(column) {
+            case 'date':
+              aVal = $(a).data('date') || '';
+              bVal = $(b).data('date') || '';
+              break;
+            case 'time':
+              aVal = $(a).find('td').eq(1).text().trim();
+              bVal = $(b).find('td').eq(1).text().trim();
+              break;
+            case 'client':
+              aVal = $(a).find('td').eq(2).text().trim().toLowerCase();
+              bVal = $(b).find('td').eq(2).text().trim().toLowerCase();
+              break;
+            case 'value':
+              aVal = parseFloat($(a).data('total')) || 0;
+              bVal = parseFloat($(b).data('total')) || 0;
+              break;
+            case 'status':
+              aVal = $(a).data('status') || '';
+              bVal = $(b).data('status') || '';
+              break;
+            default:
+              return 0;
+          }
+
+          var result = 0;
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            result = aVal - bVal;
+          } else {
+            result = String(aVal).localeCompare(String(bVal), 'pt-BR');
+          }
+
+          return currentSort.direction === 'asc' ? result : -result;
+        });
+
+        $tbody.empty().append(rows);
+      }
+
+      // Evento de clique nas colunas ordenáveis
+      $(document).on('click', '#dps-history-table .dps-sortable', function() {
+        var column = $(this).data('sort');
+        if (column) {
+          sortTable(column);
+        }
+      });
     })();
 
     /*
