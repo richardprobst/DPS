@@ -91,6 +91,16 @@
     gap: 20px;
 }
 
+/* Aviso de segurança para exportação */
+.dps-debugging-export-warning {
+    border-left-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.dps-debugging-export-warning p {
+    margin: 0;
+}
+
 .dps-debugging-log-actions {
     display: flex;
     flex-wrap: wrap;

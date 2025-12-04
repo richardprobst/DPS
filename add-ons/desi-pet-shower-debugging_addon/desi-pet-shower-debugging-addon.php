@@ -431,6 +431,9 @@ class DPS_Debugging_Addon {
             $log_viewer = new DPS_Debugging_Log_Viewer();
             $result     = $log_viewer->purge_log();
 
+            // Invalida cache da admin bar
+            delete_transient( 'dps_debugging_adminbar_stats' );
+
             if ( $result ) {
                 add_settings_error(
                     'dps_debugging',
@@ -686,6 +689,15 @@ class DPS_Debugging_Addon {
                     <?php endif; ?>
                 </div>
             </div>
+
+            <?php if ( $log_exists ) : ?>
+                <div class="notice notice-info inline dps-debugging-export-warning">
+                    <p>
+                        <strong>⚠️ <?php esc_html_e( 'Aviso de segurança:', 'dps-debugging-addon' ); ?></strong>
+                        <?php esc_html_e( 'O arquivo de debug pode conter informações sensíveis (caminhos, queries SQL, dados de sessão). Revise o conteúdo antes de compartilhar.', 'dps-debugging-addon' ); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <?php if ( ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) : ?>
                 <div class="notice notice-warning inline">

@@ -71,10 +71,23 @@ class DPS_Debugging_Admin_Bar {
         $debug_active = defined( 'WP_DEBUG' ) && WP_DEBUG;
         $log_viewer   = new DPS_Debugging_Log_Viewer();
         $log_exists   = $log_viewer->log_exists();
-        $entry_count  = $log_exists ? $log_viewer->get_entry_count() : 0;
-        $stats        = $log_exists ? $log_viewer->get_entry_stats() : [];
-        $fatal_count  = isset( $stats['by_type']['fatal'] ) ? $stats['by_type']['fatal'] : 0;
-        $fatal_count  += isset( $stats['by_type']['parse'] ) ? $stats['by_type']['parse'] : 0;
+        
+        // Usa cache transient para estatísticas (5 minutos) para evitar overhead
+        $stats_cache_key = 'dps_debugging_adminbar_stats';
+        $cached_data     = get_transient( $stats_cache_key );
+        
+        if ( false === $cached_data && $log_exists ) {
+            $cached_data = [
+                'entry_count' => $log_viewer->get_entry_count(),
+                'stats'       => $log_viewer->get_entry_stats(),
+            ];
+            set_transient( $stats_cache_key, $cached_data, 5 * MINUTE_IN_SECONDS );
+        }
+        
+        $entry_count = $log_exists && isset( $cached_data['entry_count'] ) ? $cached_data['entry_count'] : 0;
+        $stats       = $log_exists && isset( $cached_data['stats'] ) ? $cached_data['stats'] : [];
+        $fatal_count = isset( $stats['by_type']['fatal'] ) ? $stats['by_type']['fatal'] : 0;
+        $fatal_count += isset( $stats['by_type']['parse'] ) ? $stats['by_type']['parse'] : 0;
 
         // Menu principal
         $title = __( 'Debug', 'dps-debugging-addon' );

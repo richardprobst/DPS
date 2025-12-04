@@ -56,6 +56,13 @@ class DPS_Debugging_Log_Viewer {
     private $parsed_entries = null;
 
     /**
+     * Cache de tipos de entrada (entry => type).
+     *
+     * @var array
+     */
+    private $entry_types = [];
+
+    /**
      * Construtor.
      */
     public function __construct() {
@@ -369,18 +376,29 @@ class DPS_Debugging_Log_Viewer {
     }
 
     /**
-     * Detecta o tipo de entrada de log.
+     * Detecta o tipo de entrada de log (com cache).
      *
      * @param string $entry Entrada de log.
      * @return string|null Tipo de entrada ou null.
      */
     private function detect_entry_type( $entry ) {
-        foreach ( $this->error_types as $type => $marker ) {
+        // Usa hash como chave para cache (entradas podem ser muito grandes)
+        $entry_hash = md5( $entry );
+        
+        if ( isset( $this->entry_types[ $entry_hash ] ) ) {
+            return $this->entry_types[ $entry_hash ];
+        }
+
+        $type = null;
+        foreach ( $this->error_types as $error_type => $marker ) {
             if ( false !== strpos( $entry, $marker ) ) {
-                return $type;
+                $type = $error_type;
+                break;
             }
         }
-        return null;
+
+        $this->entry_types[ $entry_hash ] = $type;
+        return $type;
     }
 
     /**

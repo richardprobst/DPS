@@ -104,14 +104,15 @@
         var $entries = $('.dps-debugging-log-entry');
         $entries.show();
         
-        // Remove highlights
-        $('.dps-debugging-highlight').each(function() {
+        // Remove highlights apenas dentro das entradas (escopo correto)
+        $entries.find('.dps-debugging-highlight').each(function() {
             $(this).replaceWith($(this).text());
         });
     }
 
     /**
      * Destaca o texto encontrado nas entradas.
+     * Usa abordagem baseada em texto para evitar quebrar HTML.
      *
      * @param {jQuery} $entry Elemento da entrada.
      * @param {string} searchTerm Termo de busca.
@@ -128,11 +129,55 @@
             $(this).replaceWith($(this).text());
         });
 
-        // Aplica novo highlight
-        var html = $content.html();
-        var regex = new RegExp('(' + escapeRegex(searchTerm) + ')', 'gi');
-        html = html.replace(regex, '<mark class="dps-debugging-highlight">$1</mark>');
-        $content.html(html);
+        // Aplica highlight apenas em nós de texto para evitar quebrar HTML
+        highlightTextNodes($content[0], searchTerm);
+    }
+
+    /**
+     * Percorre nós de texto e aplica highlight de forma segura.
+     *
+     * @param {Node} node Nó DOM para processar.
+     * @param {string} searchTerm Termo de busca.
+     */
+    function highlightTextNodes(node, searchTerm) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            var text = node.textContent;
+            var lowerText = text.toLowerCase();
+            var lowerTerm = searchTerm.toLowerCase();
+            var index = lowerText.indexOf(lowerTerm);
+            
+            if (index !== -1) {
+                var before = text.substring(0, index);
+                var match = text.substring(index, index + searchTerm.length);
+                var after = text.substring(index + searchTerm.length);
+                
+                var span = document.createElement('span');
+                
+                if (before) {
+                    span.appendChild(document.createTextNode(before));
+                }
+                
+                var mark = document.createElement('mark');
+                mark.className = 'dps-debugging-highlight';
+                mark.textContent = match;
+                span.appendChild(mark);
+                
+                if (after) {
+                    span.appendChild(document.createTextNode(after));
+                }
+                
+                node.parentNode.replaceChild(span, node);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE && 
+                   node.tagName !== 'MARK' && 
+                   node.tagName !== 'SCRIPT' && 
+                   node.tagName !== 'STYLE') {
+            // Processa filhos (cópia do array para evitar problemas com modificação)
+            var children = Array.prototype.slice.call(node.childNodes);
+            for (var i = 0; i < children.length; i++) {
+                highlightTextNodes(children[i], searchTerm);
+            }
+        }
     }
 
     /**
