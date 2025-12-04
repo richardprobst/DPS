@@ -177,7 +177,8 @@
    Test Buttons
    ========================================== */
 
-.dps-push-test-btn {
+.dps-push-test-btn,
+.dps-push-telegram-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -191,23 +192,27 @@
     transition: all 0.2s ease;
 }
 
-.dps-push-test-btn:hover {
+.dps-push-test-btn:hover,
+.dps-push-telegram-btn:hover {
     background: #e5e7eb;
     border-color: #9ca3af;
 }
 
-.dps-push-test-btn:disabled {
+.dps-push-test-btn:disabled,
+.dps-push-telegram-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.dps-push-test-btn .dashicons {
+.dps-push-test-btn .dashicons,
+.dps-push-telegram-btn .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
 }
 
-.dps-push-test-btn.loading .dashicons {
+.dps-push-test-btn.loading .dashicons,
+.dps-push-telegram-btn.loading .dashicons {
     animation: dps-push-spin 1s linear infinite;
 }
 
@@ -383,7 +388,8 @@
         left: 20px;
     }
     
-    .dps-push-test-btn {
+    .dps-push-test-btn,
+    .dps-push-telegram-btn {
         width: 100%;
         justify-content: center;
     }

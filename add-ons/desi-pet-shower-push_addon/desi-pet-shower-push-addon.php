@@ -461,7 +461,7 @@ class DPS_Push_Notifications_Addon {
                             </tbody>
                         </table>
                         <div class="dps-push-actions">
-                            <button type="button" class="dps-push-test-btn" id="dps-test-telegram">
+                            <button type="button" class="dps-push-telegram-btn" id="dps-test-telegram">
                                 <span class="dashicons dashicons-controls-play"></span>
                                 <?php esc_html_e( 'Testar Conexão', 'dps-push-addon' ); ?>
                             </button>
