@@ -2098,37 +2098,43 @@ class DPS_Base_Frontend {
         $client_id = isset( $_POST['client_id'] ) ? intval( wp_unslash( $_POST['client_id'] ) ) : 0;
         if ( $client_id ) {
             // Atualiza
-            wp_update_post( [
+            $client_id = wp_update_post( [
                 'ID'         => $client_id,
                 'post_title' => $name,
-            ] );
+            ], true );
         } else {
             $client_id = wp_insert_post( [
                 'post_type'   => 'dps_cliente',
                 'post_title'  => $name,
                 'post_status' => 'publish',
-            ] );
+            ], true );
         }
-        if ( $client_id ) {
-            update_post_meta( $client_id, 'client_cpf', $cpf );
-            update_post_meta( $client_id, 'client_phone', $phone );
-            update_post_meta( $client_id, 'client_email', $email );
-            update_post_meta( $client_id, 'client_birth', $birth );
-            update_post_meta( $client_id, 'client_instagram', $insta );
-            update_post_meta( $client_id, 'client_facebook', $facebook );
-            update_post_meta( $client_id, 'client_photo_auth', $photo_auth );
-            update_post_meta( $client_id, 'client_address', $address );
-            update_post_meta( $client_id, 'client_referral', $referral );
-            // Salva coordenadas se fornecidas
-            if ( $lat !== '' && $lng !== '' ) {
-                update_post_meta( $client_id, 'client_lat', $lat );
-                update_post_meta( $client_id, 'client_lng', $lng );
+
+        if ( is_wp_error( $client_id ) || ! $client_id ) {
+            DPS_Message_Helper::add_error( __( 'Não foi possível salvar o cliente. Tente novamente.', 'desi-pet-shower' ) );
+            if ( is_wp_error( $client_id ) ) {
+                DPS_Message_Helper::add_error( $client_id->get_error_message() );
             }
+            wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
+            exit;
         }
-        // Adiciona mensagem de sucesso
-        if ( $client_id ) {
-            DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
+
+        update_post_meta( $client_id, 'client_cpf', $cpf );
+        update_post_meta( $client_id, 'client_phone', $phone );
+        update_post_meta( $client_id, 'client_email', $email );
+        update_post_meta( $client_id, 'client_birth', $birth );
+        update_post_meta( $client_id, 'client_instagram', $insta );
+        update_post_meta( $client_id, 'client_facebook', $facebook );
+        update_post_meta( $client_id, 'client_photo_auth', $photo_auth );
+        update_post_meta( $client_id, 'client_address', $address );
+        update_post_meta( $client_id, 'client_referral', $referral );
+        // Salva coordenadas se fornecidas
+        if ( $lat !== '' && $lng !== '' ) {
+            update_post_meta( $client_id, 'client_lat', $lat );
+            update_post_meta( $client_id, 'client_lng', $lng );
         }
+
+        DPS_Message_Helper::add_success( __( 'Cliente salvo com sucesso!', 'desi-pet-shower' ) );
         // Redireciona para a aba de clientes
         wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
         exit;
@@ -2186,33 +2192,41 @@ class DPS_Base_Frontend {
         $pet_id = isset( $_POST['pet_id'] ) ? intval( wp_unslash( $_POST['pet_id'] ) ) : 0;
         if ( $pet_id ) {
             // Update
-            wp_update_post( [
+            $pet_id = wp_update_post( [
                 'ID'         => $pet_id,
                 'post_title' => $name,
-            ] );
+            ], true );
         } else {
             $pet_id = wp_insert_post( [
                 'post_type'   => 'dps_pet',
                 'post_title'  => $name,
                 'post_status' => 'publish',
-            ] );
+            ], true );
         }
-        if ( $pet_id ) {
-            update_post_meta( $pet_id, 'owner_id', $owner_id );
-            update_post_meta( $pet_id, 'pet_species', $species );
-            update_post_meta( $pet_id, 'pet_breed', $breed );
-            update_post_meta( $pet_id, 'pet_size', $size );
-            update_post_meta( $pet_id, 'pet_weight', $weight );
-            update_post_meta( $pet_id, 'pet_coat', $coat );
-            update_post_meta( $pet_id, 'pet_color', $color );
-            update_post_meta( $pet_id, 'pet_birth', $birth );
-            update_post_meta( $pet_id, 'pet_sex', $sex );
-            update_post_meta( $pet_id, 'pet_care', $care );
-            update_post_meta( $pet_id, 'pet_aggressive', $aggressive );
-            update_post_meta( $pet_id, 'pet_vaccinations', $vaccinations );
-            update_post_meta( $pet_id, 'pet_allergies', $allergies );
-            update_post_meta( $pet_id, 'pet_behavior', $behavior );
+
+        if ( is_wp_error( $pet_id ) || ! $pet_id ) {
+            DPS_Message_Helper::add_error( __( 'Não foi possível salvar o pet. Tente novamente.', 'desi-pet-shower' ) );
+            if ( is_wp_error( $pet_id ) ) {
+                DPS_Message_Helper::add_error( $pet_id->get_error_message() );
+            }
+            wp_safe_redirect( self::get_redirect_url( 'pets' ) );
+            exit;
         }
+
+        update_post_meta( $pet_id, 'owner_id', $owner_id );
+        update_post_meta( $pet_id, 'pet_species', $species );
+        update_post_meta( $pet_id, 'pet_breed', $breed );
+        update_post_meta( $pet_id, 'pet_size', $size );
+        update_post_meta( $pet_id, 'pet_weight', $weight );
+        update_post_meta( $pet_id, 'pet_coat', $coat );
+        update_post_meta( $pet_id, 'pet_color', $color );
+        update_post_meta( $pet_id, 'pet_birth', $birth );
+        update_post_meta( $pet_id, 'pet_sex', $sex );
+        update_post_meta( $pet_id, 'pet_care', $care );
+        update_post_meta( $pet_id, 'pet_aggressive', $aggressive );
+        update_post_meta( $pet_id, 'pet_vaccinations', $vaccinations );
+        update_post_meta( $pet_id, 'pet_allergies', $allergies );
+        update_post_meta( $pet_id, 'pet_behavior', $behavior );
         // Lida com upload da foto do pet, se houver
         if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
             $file = $_FILES['pet_photo'];
