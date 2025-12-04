@@ -631,9 +631,9 @@ class DPS_Push_Notifications_Addon {
     /**
      * Envia a notificação diária com o resumo da agenda
      */
-    public function send_agenda_notification() {
+    public function send_agenda_notification( $force = false ) {
         // Verifica se está habilitado
-        if ( ! get_option( 'dps_push_agenda_enabled', true ) ) {
+        if ( ! $force && ! get_option( 'dps_push_agenda_enabled', true ) ) {
             return;
         }
         
@@ -656,14 +656,6 @@ class DPS_Push_Notifications_Addon {
             'order'          => 'ASC',
         ] );
         
-        // Não envia mensagem se não houver atendimentos agendados
-        if ( empty( $appointments ) ) {
-            $this->log( 'info', 'Agenda diária não enviada - sem agendamentos', [
-                'date' => $today,
-            ] );
-            return;
-        }
-        
         // Constrói o resumo
         $lines = [];
         foreach ( $appointments as $appt ) {
@@ -675,13 +667,34 @@ class DPS_Push_Notifications_Addon {
             $client    = $client_id ? get_post( $client_id ) : null;
             $pet_name    = $pet ? $pet->post_title : '-';
             $client_name = $client ? $client->post_title : '-';
-            
+
             $lines[] = [
                 'time'    => $time ?: '--:--',
                 'pet'     => $pet_name,
                 'client'  => $client_name,
                 'service' => $service ?: '',
             ];
+        }
+
+        // Se for teste forçado e não houver agendamentos, cria uma linha fictícia para validar o envio
+        if ( $force && empty( $lines ) ) {
+            $lines = [
+                [
+                    'time'    => date_i18n( 'H:i', current_time( 'timestamp' ) ),
+                    'pet'     => __( 'Pet de Teste', 'dps-push-addon' ),
+                    'client'  => __( 'Cliente de Teste', 'dps-push-addon' ),
+                    'service' => __( 'Envio de teste de notificações', 'dps-push-addon' ),
+                ],
+            ];
+        }
+
+        // Não envia mensagem se não houver atendimentos agendados
+        if ( empty( $lines ) ) {
+            $this->log( 'info', 'Agenda diária não enviada - sem agendamentos', [
+                'date'  => $today,
+                'force' => $force,
+            ] );
+            return;
         }
         
         // Conteúdo texto para Telegram
@@ -828,9 +841,9 @@ class DPS_Push_Notifications_Addon {
     /**
      * Envia um relatório diário às 19:00 contendo resumo de atendimentos e dados financeiros.
      */
-    public function send_daily_report() {
+    public function send_daily_report( $force = false ) {
         // Verifica se está habilitado
-        if ( ! get_option( 'dps_push_report_enabled', true ) ) {
+        if ( ! $force && ! get_option( 'dps_push_report_enabled', true ) ) {
             return;
         }
         
@@ -894,10 +907,29 @@ class DPS_Push_Notifications_Addon {
         
         // Não envia se não houver atendimentos nem transações
         if ( empty( $appointments ) && empty( $trans ) ) {
-            $this->log( 'info', 'Relatório financeiro não enviado - sem dados', [
-                'date' => $today,
-            ] );
-            return;
+            if ( $force ) {
+                $ap_lines[] = [
+                    'time'    => date_i18n( 'H:i', current_time( 'timestamp' ) ),
+                    'pet'     => __( 'Pet de Teste', 'dps-push-addon' ),
+                    'client'  => __( 'Cliente de Teste', 'dps-push-addon' ),
+                    'service' => __( 'Envio de teste de notificações', 'dps-push-addon' ),
+                ];
+
+                $trans[] = (object) [
+                    'descricao' => __( 'Transação de teste', 'dps-push-addon' ),
+                    'valor'     => 123.45,
+                    'status'    => 'pago',
+                    'data'      => current_time( 'mysql' ),
+                ];
+
+                $total_pago = 123.45;
+            } else {
+                $this->log( 'info', 'Relatório financeiro não enviado - sem dados', [
+                    'date'  => $today,
+                    'force' => $force,
+                ] );
+                return;
+            }
         }
         
         // Monta conteúdo texto para Telegram
@@ -1250,9 +1282,9 @@ class DPS_Push_Notifications_Addon {
     /**
      * Envia relatório semanal de pets inativos (sem agendamentos nos últimos X dias)
      */
-    public function send_weekly_inactive_report() {
+    public function send_weekly_inactive_report( $force = false ) {
         // Verifica se está habilitado
-        if ( ! get_option( 'dps_push_weekly_enabled', true ) ) {
+        if ( ! $force && ! get_option( 'dps_push_weekly_enabled', true ) ) {
             return;
         }
         
@@ -1319,10 +1351,21 @@ class DPS_Push_Notifications_Addon {
         
         // Não envia se não houver pets inativos
         if ( empty( $inactive ) ) {
-            $this->log( 'info', 'Relatório semanal não enviado - sem pets inativos', [
-                'threshold' => $inactive_days,
-            ] );
-            return;
+            if ( $force ) {
+                $inactive[] = [
+                    'pet_name'   => __( 'Pet de Teste', 'dps-push-addon' ),
+                    'owner_name' => __( 'Cliente de Teste', 'dps-push-addon' ),
+                    'phone'      => '',
+                    'last_date'  => date_i18n( 'd/m/Y', current_time( 'timestamp' ) ),
+                    'days_since' => 90,
+                ];
+            } else {
+                $this->log( 'info', 'Relatório semanal não enviado - sem pets inativos', [
+                    'threshold' => $inactive_days,
+                    'force'     => $force,
+                ] );
+                return;
+            }
         }
         
         // Ordena por dias desde o último atendimento (pets que nunca vieram primeiro, depois maior tempo sem vir)
@@ -1564,19 +1607,19 @@ class DPS_Push_Notifications_Addon {
 
         switch ( $type ) {
             case 'agenda':
-                $this->send_agenda_notification();
+                $this->send_agenda_notification( true );
                 $message = __( 'Teste de agenda diária enviado com sucesso!', 'dps-push-addon' );
                 break;
 
             case 'report':
-                $this->send_daily_report();
+                $this->send_daily_report( true );
                 $message = __( 'Teste de relatório financeiro enviado com sucesso!', 'dps-push-addon' );
                 break;
 
             case 'weekly':
                 // Temporariamente habilita para enviar teste
                 add_filter( 'dps_push_weekly_test_mode', '__return_true' );
-                $this->send_weekly_inactive_report();
+                $this->send_weekly_inactive_report( true );
                 remove_filter( 'dps_push_weekly_test_mode', '__return_true' );
                 $message = __( 'Teste de pets inativos enviado com sucesso!', 'dps-push-addon' );
                 break;
