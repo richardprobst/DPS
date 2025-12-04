@@ -5,7 +5,7 @@
  * incluindo envio de perguntas, exibição de respostas e
  * controle de estado do widget.
  *
- * v1.3.0 - Melhorias de UX: textarea auto-resize, animações, histórico local
+ * v1.4.0 - Interface modernizada, histórico persistente, UX aprimorada
  */
 
 (function($) {
