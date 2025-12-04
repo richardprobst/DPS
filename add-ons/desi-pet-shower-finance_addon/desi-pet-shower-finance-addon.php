@@ -1030,6 +1030,10 @@ class DPS_Finance_Addon {
     private function section_financeiro() {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Busca categorias distintas na base para uso no datalist e dropdown
+        $cats = $wpdb->get_col( "SELECT DISTINCT categoria FROM $table ORDER BY categoria" );
+        
         // Filtros de datas - SEGURANÇA: Sanitiza com wp_unslash()
         $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_start'] ) ) : '';
         $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : '';
@@ -1244,11 +1248,7 @@ class DPS_Finance_Addon {
         }
         echo '<label>' . esc_html__( 'De', 'dps-finance-addon' ) . ' <input type="date" name="fin_start" value="' . esc_attr( $start_date ) . '"></label> ';
         echo '<label>' . esc_html__( 'Até', 'dps-finance-addon' ) . ' <input type="date" name="fin_end" value="' . esc_attr( $end_date ) . '"></label> ';
-        // Dropdown de categorias
-        // Busca categorias distintas na base
-        global $wpdb;
-        $cat_table = $wpdb->prefix . 'dps_transacoes';
-        $cats = $wpdb->get_col( "SELECT DISTINCT categoria FROM $cat_table ORDER BY categoria" );
+        // Dropdown de categorias (usa $cats definido no início do método)
         echo '<label>' . esc_html__( 'Categoria', 'dps-finance-addon' ) . ' <select name="fin_cat"><option value="">' . esc_html__( 'Todas', 'dps-finance-addon' ) . '</option>';
         if ( $cats ) {
             foreach ( $cats as $cat ) {

@@ -98,7 +98,7 @@ class DPS_Stock_Addon {
                     'show_in_menu'    => false,
                     'supports'        => [ 'title' ],
                     'capability_type' => 'post',
-                    'map_meta_cap'    => true,
+                    'map_meta_cap'    => false,
                     'capabilities'    => $stock_capabilities,
                 ]
             );
