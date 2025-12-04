@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Assistente virtual inteligente para o Portal do Cliente. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
@@ -20,6 +20,9 @@
  *
  * O assistente NÃO responde sobre assuntos aleatórios fora desse contexto
  * (política, religião, finanças pessoais, etc.).
+ *
+ * NOVO v1.4.0: Interface modernizada, modelos GPT atualizados, teste de conexão,
+ * histórico de conversas persistente na sessão.
  *
  * NOVO v1.2.0: Assistente de comunicações - gera sugestões de mensagens para
  * WhatsApp e e-mail. NUNCA envia automaticamente. Apenas sugere textos que
@@ -62,7 +65,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.3.0' );
+    define( 'DPS_AI_VERSION', '1.4.0' );
 }
 
 /**
@@ -178,6 +181,7 @@ class DPS_AI_Addon {
         // Registra handlers AJAX para sugestões de mensagens
         add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
         add_action( 'wp_ajax_dps_ai_suggest_email_message', [ $this, 'ajax_suggest_email_message' ] );
+        add_action( 'wp_ajax_dps_ai_test_connection', [ $this, 'ajax_test_connection' ] );
 
         // Registra assets admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -260,6 +264,10 @@ class DPS_AI_Addon {
                             </th>
                             <td>
                                 <input type="password" id="dps_ai_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[api_key]" value="<?php echo esc_attr( $options['api_key'] ?? '' ); ?>" class="regular-text" />
+                                <button type="button" id="dps_ai_test_connection" class="button" style="margin-left: 10px;">
+                                    <?php esc_html_e( 'Testar Conexão', 'dps-ai' ); ?>
+                                </button>
+                                <span id="dps_ai_test_result" style="margin-left: 10px; display: none;"></span>
                                 <p class="description"><?php esc_html_e( 'Token de autenticação da API da OpenAI (sk-...). Mantenha em segredo.', 'dps-ai' ); ?></p>
                             </td>
                         </tr>
@@ -270,11 +278,12 @@ class DPS_AI_Addon {
                             </th>
                             <td>
                                 <select id="dps_ai_model" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[model]">
-                                    <option value="gpt-3.5-turbo" <?php selected( $options['model'] ?? 'gpt-3.5-turbo', 'gpt-3.5-turbo' ); ?>>GPT-3.5 Turbo (Mais rápido e econômico)</option>
-                                    <option value="gpt-4" <?php selected( $options['model'] ?? '', 'gpt-4' ); ?>>GPT-4 (Mais preciso, mais caro)</option>
-                                    <option value="gpt-4-turbo-preview" <?php selected( $options['model'] ?? '', 'gpt-4-turbo-preview' ); ?>>GPT-4 Turbo (Balanceado)</option>
+                                    <option value="gpt-4o-mini" <?php selected( $options['model'] ?? 'gpt-4o-mini', 'gpt-4o-mini' ); ?>>GPT-4o Mini (Recomendado - Rápido e econômico)</option>
+                                    <option value="gpt-4o" <?php selected( $options['model'] ?? '', 'gpt-4o' ); ?>>GPT-4o (Mais preciso, custo médio)</option>
+                                    <option value="gpt-4-turbo" <?php selected( $options['model'] ?? '', 'gpt-4-turbo' ); ?>>GPT-4 Turbo (Alta precisão)</option>
+                                    <option value="gpt-3.5-turbo" <?php selected( $options['model'] ?? '', 'gpt-3.5-turbo' ); ?>>GPT-3.5 Turbo (Legado - Mais barato)</option>
                                 </select>
-                                <p class="description"><?php esc_html_e( 'Modelo de linguagem a ser utilizado. GPT-3.5 é recomendado para custo/benefício.', 'dps-ai' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Modelo de linguagem a ser utilizado. GPT-4o Mini é recomendado para melhor custo/benefício em 2024+.', 'dps-ai' ); ?></p>
                             </td>
                         </tr>
 
@@ -362,7 +371,80 @@ class DPS_AI_Addon {
                 <li><?php esc_html_e( 'Cuidados gerais e básicos com pets (de forma genérica e responsável)', 'dps-ai' ); ?></li>
             </ul>
             <p><?php esc_html_e( 'Perguntas fora desse contexto (política, religião, finanças, tecnologia, etc.) serão educadamente recusadas.', 'dps-ai' ); ?></p>
+
+            <hr />
+
+            <h2><?php esc_html_e( 'Custos Estimados (OpenAI)', 'dps-ai' ); ?></h2>
+            <table class="widefat" style="max-width: 600px;">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'Modelo', 'dps-ai' ); ?></th>
+                        <th><?php esc_html_e( 'Custo Aprox. por Pergunta', 'dps-ai' ); ?></th>
+                        <th><?php esc_html_e( 'Recomendação', 'dps-ai' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GPT-4o Mini</td>
+                        <td>~$0.0003</td>
+                        <td><strong><?php esc_html_e( 'Recomendado', 'dps-ai' ); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <td>GPT-4o</td>
+                        <td>~$0.005</td>
+                        <td><?php esc_html_e( 'Alta precisão', 'dps-ai' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td>GPT-4 Turbo</td>
+                        <td>~$0.01</td>
+                        <td><?php esc_html_e( 'Máxima precisão', 'dps-ai' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td>GPT-3.5 Turbo</td>
+                        <td>~$0.001</td>
+                        <td><?php esc_html_e( 'Legado', 'dps-ai' ); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="description"><?php esc_html_e( 'Valores estimados baseados em ~1000 tokens por pergunta. Consulte a documentação da OpenAI para preços atualizados.', 'dps-ai' ); ?></p>
         </div>
+
+        <script>
+        (function($) {
+            $('#dps_ai_test_connection').on('click', function(e) {
+                e.preventDefault();
+                
+                var $button = $(this);
+                var $result = $('#dps_ai_test_result');
+                var originalText = $button.text();
+                
+                $button.prop('disabled', true).text('<?php echo esc_js( __( 'Testando...', 'dps-ai' ) ); ?>');
+                $result.hide();
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'dps_ai_test_connection',
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_test_nonce' ) ); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $result.html('<span style="color: #10b981;">✓ ' + response.data.message + '</span>').show();
+                        } else {
+                            $result.html('<span style="color: #ef4444;">✗ ' + response.data.message + '</span>').show();
+                        }
+                    },
+                    error: function() {
+                        $result.html('<span style="color: #ef4444;">✗ <?php echo esc_js( __( 'Erro de rede ao testar conexão.', 'dps-ai' ) ); ?></span>').show();
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+        })(jQuery);
+        </script>
         <?php
     }
 
@@ -555,6 +637,40 @@ class DPS_AI_Addon {
         }
 
         return $context;
+    }
+
+    /**
+     * Handler AJAX para testar conexão com a API da OpenAI.
+     *
+     * Verifica se a API key está configurada e testa a conexão.
+     */
+    public function ajax_test_connection() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_test_nonce' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
+            ] );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
+            ] );
+        }
+
+        // Testa conexão
+        $result = DPS_AI_Client::test_connection();
+
+        if ( $result['success'] ) {
+            wp_send_json_success( [
+                'message' => $result['message'],
+            ] );
+        } else {
+            wp_send_json_error( [
+                'message' => $result['message'],
+            ] );
+        }
     }
 
     /**

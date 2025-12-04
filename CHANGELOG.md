@@ -82,6 +82,32 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.4.0)**: Melhorias de interface e funcionalidades
+  - **Modelos GPT Atualizados**: Adicionados GPT-4o Mini (recomendado), GPT-4o e GPT-4 Turbo
+    - GPT-4o Mini como modelo padrão recomendado para melhor custo/benefício em 2024+
+    - Mantido GPT-3.5 Turbo como opção legada
+  - **Teste de Conexão**: Botão para validar API key diretamente na página de configurações
+    - Handler AJAX `dps_ai_test_connection` com verificação de nonce e permissões
+    - Feedback visual de sucesso/erro em tempo real
+  - **Tabela de Custos**: Informações de custo estimado por modelo na página admin
+  - **Interface do Widget Modernizada**:
+    - Novo design com header azul gradiente e ícone de robô
+    - Badge de status "Online" com animação de pulse
+    - Clique no header inteiro para expandir/recolher
+    - Botão de envio circular com ícone de seta
+    - Mensagens com estilo de chat moderno (bolhas coloridas)
+    - Textarea com auto-resize dinâmico
+    - Scrollbar estilizada no container de mensagens
+    - Layout horizontal de input em desktop, vertical em mobile
+  - **Histórico de Conversas**: Persistência via sessionStorage
+    - Mensagens mantidas durante a sessão do navegador
+    - Função `dpsAIClearHistory()` para limpar manualmente
+  - **UX Aprimorada**:
+    - Envio com Enter (sem Shift) além de Ctrl+Enter
+    - Dica de atalho de teclado visível
+    - Animações suaves de slide para toggle
+    - Foco automático no textarea ao expandir
+
 - **Push Notifications Add-on (v1.0.0)**: Notificações push nativas do navegador
   - **Web Push API**: Implementação nativa sem dependência de serviços externos
     - Chaves VAPID geradas automaticamente na ativação

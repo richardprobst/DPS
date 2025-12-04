@@ -4,6 +4,8 @@
  * Gerencia interações do usuário com o assistente virtual,
  * incluindo envio de perguntas, exibição de respostas e
  * controle de estado do widget.
+ *
+ * v1.3.0 - Melhorias de UX: textarea auto-resize, animações, histórico local
  */
 
 (function($) {
@@ -12,6 +14,7 @@
     // Aguarda o DOM estar pronto
     $(document).ready(function() {
         const $widget = $('#dps-ai-widget');
+        const $header = $('#dps-ai-header');
         const $toggle = $('#dps-ai-toggle');
         const $content = $('#dps-ai-content');
         const $messages = $('#dps-ai-messages');
@@ -24,22 +27,92 @@
             return;
         }
 
-        // Toggle do widget (expandir/recolher)
-        $toggle.on('click', function() {
+        // Chave para armazenar mensagens no sessionStorage
+        const STORAGE_KEY = 'dps_ai_messages';
+
+        /**
+         * Restaura mensagens do sessionStorage (se houver)
+         */
+        function restoreMessages() {
+            try {
+                const stored = sessionStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const messages = JSON.parse(stored);
+                    messages.forEach(function(msg) {
+                        addMessageToDOM(msg.type, msg.content, msg.label, false);
+                    });
+                }
+            } catch (e) {
+                // Ignora erros de parsing
+            }
+        }
+
+        /**
+         * Salva mensagens no sessionStorage
+         */
+        function saveMessages() {
+            try {
+                const messages = [];
+                $messages.find('.dps-ai-message').each(function() {
+                    const $msg = $(this);
+                    let type = 'assistant';
+                    if ($msg.hasClass('dps-ai-message-user')) type = 'user';
+                    if ($msg.hasClass('dps-ai-message-error')) type = 'error';
+                    
+                    messages.push({
+                        type: type,
+                        content: $msg.find('.dps-ai-message-content').text(),
+                        label: $msg.find('.dps-ai-message-label').text()
+                    });
+                });
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+            } catch (e) {
+                // Ignora erros de storage
+            }
+        }
+
+        // Restaura mensagens ao carregar
+        restoreMessages();
+
+        // Toggle do widget - clique no header inteiro
+        $header.on('click', function(e) {
+            // Evita duplo clique no botão
+            if ($(e.target).closest('.dps-ai-toggle').length) {
+                return;
+            }
+            toggleWidget();
+        });
+
+        $toggle.on('click', function(e) {
+            e.stopPropagation();
+            toggleWidget();
+        });
+
+        function toggleWidget() {
             const isVisible = $content.is(':visible');
             
             if (isVisible) {
-                $content.slideUp(300);
-                $toggle.find('.dashicons').removeClass('dashicons-arrow-up-alt2').addClass('dashicons-arrow-down-alt2');
+                $content.slideUp(250);
+                $widget.removeClass('is-expanded');
+                $toggle.attr('aria-expanded', 'false');
             } else {
-                $content.slideDown(300);
-                $toggle.find('.dashicons').removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-up-alt2');
+                $content.slideDown(250, function() {
+                    $question.focus();
+                });
+                $widget.addClass('is-expanded');
+                $toggle.attr('aria-expanded', 'true');
             }
+        }
+
+        // Auto-resize do textarea
+        $question.on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        // Enviar pergunta ao pressionar Ctrl+Enter no textarea
+        // Enviar pergunta ao pressionar Ctrl+Enter ou Enter (sem shift)
         $question.on('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
+            if ((e.ctrlKey && e.key === 'Enter') || (e.key === 'Enter' && !e.shiftKey)) {
                 e.preventDefault();
                 submitQuestion();
             }
@@ -59,20 +132,21 @@
 
             // Valida se há pergunta
             if (!question) {
-                addMessage('error', dpsAI.i18n.pleaseEnterQuestion, 'system');
+                addMessage('error', dpsAI.i18n.pleaseEnterQuestion, 'Sistema');
                 return;
             }
 
             // Desabilita inputs durante o processamento
             $question.prop('disabled', true);
             $submit.prop('disabled', true);
-            $loading.show();
+            $loading.slideDown(150);
 
             // Adiciona mensagem do usuário ao chat
             addMessage('user', question, dpsAI.i18n.you);
 
-            // Limpa o textarea
+            // Limpa o textarea e reseta altura
             $question.val('');
+            $question[0].style.height = 'auto';
 
             // Envia requisição AJAX
             $.ajax({
@@ -93,18 +167,18 @@
                         const errorMsg = response.data && response.data.message 
                             ? response.data.message 
                             : dpsAI.i18n.errorGeneric;
-                        addMessage('error', errorMsg, 'system');
+                        addMessage('error', errorMsg, 'Sistema');
                     }
                 },
                 error: function() {
                     // Erro de rede ou servidor
-                    addMessage('error', dpsAI.i18n.errorGeneric, 'system');
+                    addMessage('error', dpsAI.i18n.errorGeneric, 'Sistema');
                 },
                 complete: function() {
                     // Reabilita inputs
                     $question.prop('disabled', false);
                     $submit.prop('disabled', false);
-                    $loading.hide();
+                    $loading.slideUp(150);
                     $question.focus();
                 }
             });
@@ -118,9 +192,21 @@
          * @param {string} label   Rótulo do remetente
          */
         function addMessage(type, content, label) {
+            addMessageToDOM(type, content, label, true);
+            saveMessages();
+        }
+
+        /**
+         * Adiciona mensagem ao DOM sem salvar.
+         */
+        function addMessageToDOM(type, content, label, animate) {
             const $message = $('<div>', {
                 class: 'dps-ai-message dps-ai-message-' + type
             });
+
+            if (!animate) {
+                $message.css('animation', 'none');
+            }
 
             const $label = $('<div>', {
                 class: 'dps-ai-message-label',
@@ -152,6 +238,14 @@
             // Converte quebras de linha em <br>
             return escaped.replace(/\n/g, '<br>');
         }
+
+        /**
+         * Limpa o histórico de mensagens
+         */
+        window.dpsAIClearHistory = function() {
+            $messages.empty();
+            sessionStorage.removeItem(STORAGE_KEY);
+        };
     });
 
 })(jQuery);

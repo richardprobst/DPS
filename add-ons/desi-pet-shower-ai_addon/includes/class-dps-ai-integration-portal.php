@@ -81,16 +81,17 @@ class DPS_AI_Integration_Portal {
 
         ?>
         <div id="dps-ai-widget" class="dps-ai-widget">
-            <div class="dps-ai-header">
+            <div class="dps-ai-header" id="dps-ai-header">
                 <h3><?php esc_html_e( 'Assistente Virtual', 'dps-ai' ); ?></h3>
-                <button id="dps-ai-toggle" class="dps-ai-toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>">
+                <span class="dps-ai-status-badge"><?php esc_html_e( 'Online', 'dps-ai' ); ?></span>
+                <button id="dps-ai-toggle" class="dps-ai-toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="false">
                     <span class="dashicons dashicons-arrow-down-alt2"></span>
                 </button>
             </div>
 
             <div id="dps-ai-content" class="dps-ai-content" style="display: none;">
                 <div class="dps-ai-description">
-                    <p><?php esc_html_e( 'Olá! Sou o assistente virtual do DPS by PRObst. Posso ajudar com informações sobre seus agendamentos, serviços, histórico e funcionalidades do portal.', 'dps-ai' ); ?></p>
+                    <p><?php esc_html_e( 'Olá! Sou o assistente virtual do DPS. Posso ajudar com agendamentos, serviços, histórico e dúvidas sobre o portal.', 'dps-ai' ); ?></p>
                 </div>
 
                 <div id="dps-ai-messages" class="dps-ai-messages">
@@ -101,13 +102,13 @@ class DPS_AI_Integration_Portal {
                     <textarea
                         id="dps-ai-question"
                         class="dps-ai-question"
-                        placeholder="<?php esc_attr_e( 'Faça uma pergunta sobre seus agendamentos, serviços ou histórico...', 'dps-ai' ); ?>"
-                        rows="3"
+                        placeholder="<?php esc_attr_e( 'Digite sua pergunta...', 'dps-ai' ); ?>"
+                        rows="1"
                     ></textarea>
-                    <button id="dps-ai-submit" class="dps-ai-submit">
-                        <?php esc_html_e( 'Perguntar', 'dps-ai' ); ?>
+                    <button id="dps-ai-submit" class="dps-ai-submit" aria-label="<?php esc_attr_e( 'Enviar pergunta', 'dps-ai' ); ?>">
                     </button>
                 </div>
+                <p class="dps-ai-shortcut-hint"><?php esc_html_e( 'Pressione Ctrl+Enter para enviar', 'dps-ai' ); ?></p>
 
                 <div id="dps-ai-loading" class="dps-ai-loading" style="display: none;">
                     <span class="spinner"></span>
