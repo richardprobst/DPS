@@ -1114,3 +1114,368 @@
         font-size: 0.7rem;
     }
 }
+
+/* === FASE 5: Dashboard de KPIs Administrativos === */
+.dps-admin-dashboard {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+}
+
+.dps-dashboard-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.dps-kpi-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: var(--dps-background);
+    border-radius: 0.65rem;
+    text-align: center;
+    border-left: 3px solid var(--dps-border);
+    transition: border-color 0.2s ease;
+}
+
+.dps-kpi-card:hover {
+    border-left-color: var(--dps-accent);
+}
+
+.dps-kpi-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.dps-kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.dps-kpi-label {
+    font-size: 0.75rem;
+    color: var(--dps-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-top: 0.25rem;
+}
+
+.dps-kpi-pending { border-left-color: #f59e0b; }
+.dps-kpi-finished { border-left-color: #22c55e; }
+.dps-kpi-revenue { border-left-color: #0ea5e9; }
+.dps-kpi-cancel { border-left-color: #ef4444; }
+.dps-kpi-avg { border-left-color: #8b5cf6; }
+
+/* === FASE 5: Barra de Ações em Lote === */
+.dps-bulk-actions {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border-radius: 0.75rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+}
+
+.dps-bulk-actions.is-visible {
+    display: flex;
+}
+
+.dps-bulk-count {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-bulk-count::before {
+    content: '☑️';
+}
+
+.dps-bulk-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.dps-bulk-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dps-bulk-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dps-bulk-btn--danger {
+    background: rgba(239, 68, 68, 0.8);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.dps-bulk-btn--danger:hover {
+    background: rgba(239, 68, 68, 1);
+}
+
+.dps-bulk-close {
+    margin-left: auto;
+    padding: 0.35rem 0.75rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.dps-bulk-close:hover {
+    color: white;
+}
+
+/* === FASE 5: Checkbox de Seleção na Tabela === */
+.dps-select-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--dps-accent);
+}
+
+.dps-select-all-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* === FASE 5: Modal de Reagendamento Rápido === */
+.dps-reschedule-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 1rem;
+}
+
+.dps-reschedule-content {
+    background: white;
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
+    border: 1px solid var(--dps-border);
+}
+
+.dps-reschedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--dps-border);
+    background: var(--dps-background);
+}
+
+.dps-reschedule-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-reschedule-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--dps-muted);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.dps-reschedule-close:hover {
+    color: #0f172a;
+}
+
+.dps-reschedule-body {
+    padding: 1.25rem;
+}
+
+.dps-reschedule-field {
+    margin-bottom: 1rem;
+}
+
+.dps-reschedule-field:last-child {
+    margin-bottom: 0;
+}
+
+.dps-reschedule-field label {
+    display: block;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+}
+
+.dps-reschedule-field input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.dps-reschedule-field input:focus {
+    outline: none;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.dps-reschedule-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--dps-border);
+    background: var(--dps-background);
+}
+
+.dps-reschedule-btn {
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.dps-reschedule-btn--cancel {
+    background: transparent;
+    border: 1px solid var(--dps-border);
+    color: var(--dps-muted);
+}
+
+.dps-reschedule-btn--cancel:hover {
+    background: var(--dps-background);
+    color: #0f172a;
+}
+
+.dps-reschedule-btn--save {
+    background: var(--dps-accent);
+    border: 1px solid var(--dps-accent);
+    color: white;
+}
+
+.dps-reschedule-btn--save:hover {
+    background: var(--dps-accent-strong);
+}
+
+.dps-reschedule-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === FASE 5: Botão de Ação Rápida === */
+.dps-quick-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--dps-accent);
+    text-decoration: none;
+    border-radius: 0.35rem;
+    transition: background 0.2s ease;
+}
+
+.dps-quick-action:hover {
+    background: var(--dps-accent-soft);
+}
+
+/* === FASE 5: Indicador de Histórico === */
+.dps-history-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--dps-muted);
+    background: var(--dps-background);
+    border-radius: 0.35rem;
+    cursor: pointer;
+}
+
+.dps-history-indicator:hover {
+    color: var(--dps-accent);
+    background: var(--dps-accent-soft);
+}
+
+/* === Responsividade FASE 5 === */
+@media (max-width: 768px) {
+    .dps-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-bulk-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .dps-bulk-count {
+        text-align: center;
+    }
+    
+    .dps-bulk-close {
+        margin-left: 0;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .dps-kpi-value {
+        font-size: 1.25rem;
+    }
+    
+    .dps-kpi-card {
+        padding: 0.75rem;
+    }
+}

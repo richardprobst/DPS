@@ -39,19 +39,22 @@ Esta análise complementa a documentação existente (`AGENDA_ADDON_ANALYSIS.md`
 | Envio de lembretes automáticos | ✅ | Cron job diário |
 | Cobrança via WhatsApp | ✅ | Links de ação |
 | Confirmação via WhatsApp | ✅ | Links de ação |
+| **Dashboard de KPIs** | ✅ **NOVO** | `render_admin_dashboard()` |
+| **Ações em lote** | ✅ **NOVO** | Barra flutuante + checkboxes |
+| **Reagendamento rápido** | ✅ **NOVO** | Botão "📅 Reagendar" |
+| **Histórico de alterações** | ✅ **NOVO** | Indicador "📜" na tabela |
 
-### 2.2 Gaps Identificados para Administração
+### 2.2 Gaps Identificados para Administração (Atualizado)
 
-| Funcionalidade Ausente | Impacto | Prioridade |
-|------------------------|---------|------------|
-| Ações em lote (multi-seleção) | Alto | 🔴 Alta |
-| Estatísticas de produtividade | Alto | 🔴 Alta |
-| Gestão de slots/horários | Médio | 🟡 Média |
-| Dashboard de KPIs | Médio | 🟡 Média |
-| Histórico de alterações | Médio | 🟡 Média |
-| Reagendamento rápido | Médio | 🟡 Média |
-| Impressão de agenda | Baixo | 🟢 Baixa |
-| Notificações push | Baixo | 🟢 Baixa |
+| Funcionalidade | Impacto | Prioridade | Status |
+|----------------|---------|------------|--------|
+| ~~Ações em lote (multi-seleção)~~ | Alto | 🔴 Alta | ✅ Implementado |
+| ~~Dashboard de KPIs~~ | Alto | 🔴 Alta | ✅ Implementado |
+| ~~Reagendamento rápido~~ | Médio | 🟡 Média | ✅ Implementado |
+| ~~Histórico de alterações~~ | Médio | 🟡 Média | ✅ Implementado |
+| Gestão de slots/horários | Médio | 🟡 Média | ⏳ Pendente |
+| Impressão de agenda | Baixo | 🟢 Baixa | ⏳ Pendente |
+| Notificações push | Baixo | 🟢 Baixa | ⏳ Pendente |
 
 ---
 

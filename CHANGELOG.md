@@ -82,6 +82,34 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Agenda Add-on (v1.3.2)**: Funcionalidades administrativas avançadas
+  - **Dashboard de KPIs**: Cards de métricas no topo da agenda
+    - Agendamentos pendentes/finalizados do dia
+    - Faturamento estimado baseado em serviços
+    - Taxa de cancelamento semanal
+    - Média de atendimentos diários (últimos 7 dias)
+  - **Ações em Lote**: Atualização de múltiplos agendamentos de uma só vez
+    - Checkbox de seleção em cada linha da tabela
+    - Checkbox "selecionar todos" no header
+    - Barra de ações flutuante (sticky) com botões:
+      - Finalizar selecionados
+      - Marcar como pago
+      - Cancelar selecionados
+    - Handler AJAX `dps_bulk_update_status` com validação de nonce
+  - **Reagendamento Rápido**: Modal simplificado para alterar data/hora
+    - Botão "📅 Reagendar" em cada linha da tabela
+    - Modal com apenas campos de data e hora
+    - Handler AJAX `dps_quick_reschedule`
+    - Hook `dps_appointment_rescheduled` para notificações
+  - **Histórico de Alterações**: Registro de todas as mudanças em agendamentos
+    - Metadado `_dps_appointment_history` com até 50 entradas
+    - Registra: criação, alteração de status, reagendamento
+    - Indicador visual "📜" quando há histórico
+    - Handler AJAX `dps_get_appointment_history`
+    - Integração com hook `dps_appointment_status_changed`
+  - **API de KPIs**: Handler AJAX `dps_get_admin_kpis` para consulta programática
+  - **CSS**: Novos estilos para dashboard, barra de lote, modal de reagendamento
+  - **JavaScript**: Lógica para seleção em lote, modal de reagendamento, histórico
 - **Constante `DPS_DISABLE_CACHE`**: Nova constante para desabilitar completamente o cache do sistema
   - Útil para desenvolvimento, testes e debug de problemas relacionados a dados em cache
   - Afeta todos os transients de cache de dados (pets, clientes, serviços, estatísticas, métricas, contexto de IA)

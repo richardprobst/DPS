@@ -173,4 +173,249 @@
       btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
     });
   });
+
+  // =========================================================================
+  // FASE 5: Ações em Lote
+  // =========================================================================
+  
+  var selectedAppointments = [];
+  
+  // Selecionar/desmarcar checkbox individual
+  $(document).on('change', '.dps-select-checkbox', function(){
+    var checkbox = $(this);
+    var apptId = checkbox.data('appt-id');
+    
+    if ( checkbox.is(':checked') ) {
+      if ( selectedAppointments.indexOf(apptId) === -1 ) {
+        selectedAppointments.push(apptId);
+      }
+    } else {
+      selectedAppointments = selectedAppointments.filter(function(id){ return id !== apptId; });
+    }
+    
+    updateBulkActionsBar();
+  });
+  
+  // Selecionar/desmarcar todos
+  $(document).on('change', '.dps-select-all', function(){
+    var isChecked = $(this).is(':checked');
+    
+    $('.dps-select-checkbox').each(function(){
+      $(this).prop('checked', isChecked);
+      var apptId = $(this).data('appt-id');
+      
+      if ( isChecked ) {
+        if ( selectedAppointments.indexOf(apptId) === -1 ) {
+          selectedAppointments.push(apptId);
+        }
+      } else {
+        selectedAppointments = selectedAppointments.filter(function(id){ return id !== apptId; });
+      }
+    });
+    
+    updateBulkActionsBar();
+  });
+  
+  // Atualiza barra de ações em lote
+  function updateBulkActionsBar(){
+    var bar = $('.dps-bulk-actions');
+    var count = selectedAppointments.length;
+    
+    if ( count > 0 ) {
+      bar.addClass('is-visible');
+      bar.find('.dps-bulk-count').text(count + ' ' + (count === 1 ? getMessage('selected_singular', 'selecionado') : getMessage('selected_plural', 'selecionados')));
+    } else {
+      bar.removeClass('is-visible');
+    }
+  }
+  
+  // Fechar barra de ações em lote
+  $(document).on('click', '.dps-bulk-close', function(){
+    selectedAppointments = [];
+    $('.dps-select-checkbox, .dps-select-all').prop('checked', false);
+    updateBulkActionsBar();
+  });
+  
+  // Ação em lote: atualizar status
+  $(document).on('click', '.dps-bulk-btn[data-action]', function(){
+    var btn = $(this);
+    var action = btn.data('action');
+    var status = btn.data('status');
+    
+    if ( selectedAppointments.length === 0 ) {
+      return;
+    }
+    
+    if ( action === 'update_status' && status ) {
+      var confirmMsg = getMessage('bulk_confirm', 'Deseja alterar o status de ' + selectedAppointments.length + ' agendamento(s)?');
+      if ( ! confirm(confirmMsg) ) {
+        return;
+      }
+      
+      btn.prop('disabled', true);
+      
+      $.post(DPS_AG_Addon.ajax, {
+        action: 'dps_bulk_update_status',
+        nonce: DPS_AG_Addon.nonce_bulk,
+        ids: selectedAppointments,
+        status: status
+      }, function(resp){
+        if ( resp && resp.success ) {
+          alert(resp.data.message);
+          location.reload();
+        } else {
+          alert(resp.data ? resp.data.message : getMessage('error', 'Erro ao processar.'));
+          btn.prop('disabled', false);
+        }
+      }).fail(function(){
+        alert(getMessage('error', 'Erro ao processar.'));
+        btn.prop('disabled', false);
+      });
+    }
+  });
+
+  // =========================================================================
+  // FASE 5: Reagendamento Rápido
+  // =========================================================================
+  
+  // Abrir modal de reagendamento
+  $(document).on('click', '.dps-quick-reschedule', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var currentDate = btn.data('date');
+    var currentTime = btn.data('time');
+    
+    var modal = $('<div class="dps-reschedule-modal">' +
+      '<div class="dps-reschedule-content">' +
+        '<div class="dps-reschedule-header">' +
+          '<h3 class="dps-reschedule-title">📅 ' + getMessage('reschedule_title', 'Reagendar') + '</h3>' +
+          '<button type="button" class="dps-reschedule-close">&times;</button>' +
+        '</div>' +
+        '<div class="dps-reschedule-body">' +
+          '<div class="dps-reschedule-field">' +
+            '<label>' + getMessage('new_date', 'Nova data') + '</label>' +
+            '<input type="date" id="dps-reschedule-date" value="' + currentDate + '" required>' +
+          '</div>' +
+          '<div class="dps-reschedule-field">' +
+            '<label>' + getMessage('new_time', 'Novo horário') + '</label>' +
+            '<input type="time" id="dps-reschedule-time" value="' + currentTime + '" required>' +
+          '</div>' +
+        '</div>' +
+        '<div class="dps-reschedule-footer">' +
+          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--cancel">' + getMessage('cancel', 'Cancelar') + '</button>' +
+          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + apptId + '">' + getMessage('save', 'Salvar') + '</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>');
+    
+    $('body').append(modal);
+    modal.find('#dps-reschedule-date').focus();
+  });
+  
+  // Fechar modal de reagendamento
+  $(document).on('click', '.dps-reschedule-close, .dps-reschedule-btn--cancel', function(){
+    $('.dps-reschedule-modal').remove();
+  });
+  
+  // Fechar ao clicar fora do modal
+  $(document).on('click', '.dps-reschedule-modal', function(e){
+    if ( $(e.target).hasClass('dps-reschedule-modal') ) {
+      $(this).remove();
+    }
+  });
+  
+  // Salvar reagendamento
+  $(document).on('click', '.dps-reschedule-btn--save', function(){
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var newDate = $('#dps-reschedule-date').val();
+    var newTime = $('#dps-reschedule-time').val();
+    
+    if ( ! newDate || ! newTime ) {
+      alert(getMessage('fill_all_fields', 'Preencha todos os campos.'));
+      return;
+    }
+    
+    btn.prop('disabled', true).text(getMessage('saving', 'Salvando...'));
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_quick_reschedule',
+      nonce: DPS_AG_Addon.nonce_reschedule,
+      id: apptId,
+      date: newDate,
+      time: newTime
+    }, function(resp){
+      if ( resp && resp.success ) {
+        alert(resp.data.message);
+        location.reload();
+      } else {
+        alert(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'));
+        btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
+      }
+    }).fail(function(){
+      alert(getMessage('error', 'Erro ao reagendar.'));
+      btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
+    });
+  });
+  
+  // Tecla ESC fecha modal
+  $(document).on('keydown', function(e){
+    if ( e.key === 'Escape' && $('.dps-reschedule-modal').length ) {
+      $('.dps-reschedule-modal').remove();
+    }
+  });
+
+  // =========================================================================
+  // FASE 5: Histórico de Alterações
+  // =========================================================================
+  
+  $(document).on('click', '.dps-history-indicator', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_get_appointment_history',
+      nonce: DPS_AG_Addon.nonce_history,
+      id: apptId
+    }, function(resp){
+      if ( resp && resp.success ) {
+        var history = resp.data.history || [];
+        if ( history.length === 0 ) {
+          alert(getMessage('no_history', 'Sem histórico de alterações.'));
+          return;
+        }
+        
+        var content = getMessage('history_title', 'Histórico de Alterações') + ':\n\n';
+        history.forEach(function(entry){
+          var actionLabel = getActionLabel(entry.action);
+          content += '• ' + entry.date + ' - ' + actionLabel + ' (' + entry.user + ')\n';
+          if ( entry.details ) {
+            if ( entry.details.old_status && entry.details.new_status ) {
+              content += '  De: ' + entry.details.old_status + ' → Para: ' + entry.details.new_status + '\n';
+            }
+            if ( entry.details.old_date && entry.details.new_date ) {
+              content += '  De: ' + entry.details.old_date + ' ' + entry.details.old_time + '\n';
+              content += '  Para: ' + entry.details.new_date + ' ' + entry.details.new_time + '\n';
+            }
+          }
+        });
+        
+        alert(content);
+      } else {
+        alert(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'));
+      }
+    });
+  });
+  
+  function getActionLabel(action){
+    var labels = {
+      'created': getMessage('action_created', 'Criado'),
+      'status_change': getMessage('action_status_change', 'Status alterado'),
+      'rescheduled': getMessage('action_rescheduled', 'Reagendado')
+    };
+    return labels[action] || action;
+  }
+
 })(jQuery);
