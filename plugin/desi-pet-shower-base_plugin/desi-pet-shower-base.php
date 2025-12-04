@@ -23,6 +23,21 @@ define( 'DPS_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 define( 'DPS_BASE_PETS_PER_PAGE', 20 );
 
+/**
+ * Verifica se o cache do DPS está desabilitado.
+ * 
+ * Para desabilitar o cache, defina a constante DPS_DISABLE_CACHE como true
+ * no wp-config.php:
+ * 
+ *     define( 'DPS_DISABLE_CACHE', true );
+ * 
+ * @since 1.0.2
+ * @return bool True se o cache está desabilitado, false caso contrário.
+ */
+function dps_is_cache_disabled() {
+    return defined( 'DPS_DISABLE_CACHE' ) && DPS_DISABLE_CACHE;
+}
+
 // Funções auxiliares de template
 require_once DPS_BASE_DIR . 'includes/template-functions.php';
 // Helper para registro de CPTs
@@ -465,10 +480,13 @@ class DPS_Base_Plugin {
             'owner'  => $owner_id,
         ];
         $cache_key  = $this->build_pets_cache_key( $cache_args );
-        $cached     = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return rest_ensure_response( $cached );
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return rest_ensure_response( $cached );
+            }
         }
 
         $query_args = [
@@ -518,8 +536,11 @@ class DPS_Base_Plugin {
             'total'       => (int) $pets_query->found_posts,
         ];
 
-        set_transient( $cache_key, $response, 15 * MINUTE_IN_SECONDS );
-        $this->remember_pets_cache_key( $cache_key );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $response, 15 * MINUTE_IN_SECONDS );
+            $this->remember_pets_cache_key( $cache_key );
+        }
 
         return rest_ensure_response( $response );
     }

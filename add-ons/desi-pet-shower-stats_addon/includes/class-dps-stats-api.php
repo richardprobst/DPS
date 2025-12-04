@@ -49,9 +49,12 @@ class DPS_Stats_API {
             $cache_key .= '_' . sanitize_key( $status );
         }
         
-        $cached = get_transient( $cache_key );
-        if ( false !== $cached ) {
-            return (int) $cached;
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return (int) $cached;
+            }
         }
 
         $meta_query = [
@@ -72,7 +75,10 @@ class DPS_Stats_API {
             'fields'         => 'ids',
         ] ))->found_posts;
 
-        set_transient( $cache_key, $count, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $count, HOUR_IN_SECONDS );
+        }
 
         return $count;
     }
@@ -122,10 +128,13 @@ class DPS_Stats_API {
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_financial', $start_date, $end_date );
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         // Tenta usar Finance API se disponível
@@ -154,7 +163,10 @@ class DPS_Stats_API {
             ];
         }
 
-        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        }
 
         return $result;
     }
@@ -176,10 +188,13 @@ class DPS_Stats_API {
 
         $cutoff_date = date( 'Y-m-d', current_time( 'timestamp' ) - ( $days * DAY_IN_SECONDS ) );
         $cache_key   = dps_stats_build_cache_key( 'dps_stats_inactive_pets', $cutoff_date );
-        $cached      = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         global $wpdb;
@@ -196,7 +211,9 @@ class DPS_Stats_API {
         ] );
 
         if ( empty( $pets ) ) {
-            set_transient( $cache_key, [], DAY_IN_SECONDS );
+            if ( ! dps_is_cache_disabled() ) {
+                set_transient( $cache_key, [], DAY_IN_SECONDS );
+            }
             return [];
         }
 
@@ -240,7 +257,10 @@ class DPS_Stats_API {
             }
         }
 
-        set_transient( $cache_key, $inactive_pets, DAY_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $inactive_pets, DAY_IN_SECONDS );
+        }
 
         return $inactive_pets;
     }
@@ -262,10 +282,13 @@ class DPS_Stats_API {
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_services', $start_date, $end_date ) . '_' . $limit;
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         $appointments = get_posts( [
@@ -305,7 +328,10 @@ class DPS_Stats_API {
             ];
         }
 
-        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        }
 
         return $result;
     }
@@ -325,10 +351,13 @@ class DPS_Stats_API {
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_comparison', $start_date, $end_date );
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         // Calcular período anterior com mesma duração
@@ -381,7 +410,10 @@ class DPS_Stats_API {
             ],
         ];
 
-        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        }
 
         return $result;
     }
@@ -454,10 +486,13 @@ class DPS_Stats_API {
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_new_clients', $start_date, $end_date );
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return (int) $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return (int) $cached;
+            }
         }
 
         $count = (new WP_Query( [
@@ -474,7 +509,10 @@ class DPS_Stats_API {
             'fields' => 'ids',
         ] ))->found_posts;
 
-        set_transient( $cache_key, $count, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $count, HOUR_IN_SECONDS );
+        }
 
         return $count;
     }
@@ -494,10 +532,13 @@ class DPS_Stats_API {
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_species', $start_date, $end_date );
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         $appointments = get_posts( [
@@ -540,7 +581,10 @@ class DPS_Stats_API {
             ];
         }
 
-        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        }
 
         return $result;
     }
@@ -562,10 +606,13 @@ class DPS_Stats_API {
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_breeds', $start_date, $end_date ) . '_' . $limit;
-        $cached = get_transient( $cache_key );
-
-        if ( false !== $cached ) {
-            return $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
         }
 
         $appointments = get_posts( [
@@ -604,7 +651,10 @@ class DPS_Stats_API {
             ];
         }
 
-        set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+        }
 
         return $result;
     }

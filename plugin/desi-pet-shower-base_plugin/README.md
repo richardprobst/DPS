@@ -98,6 +98,40 @@ Este é o plugin base; todos os add-ons do DPS dependem dele para funcionar.
 - Pré-carregamento de metadados com `update_meta_cache()`
 - Queries otimizadas com `fields => 'ids'` quando apropriado
 
+#### Desabilitando o cache
+
+O DPS utiliza transients do WordPress para cache de dados em vários pontos do sistema, melhorando a performance. Em situações de desenvolvimento ou debug, pode ser útil desabilitar o cache temporariamente.
+
+Para desabilitar todo o cache do DPS, adicione a seguinte constante no arquivo `wp-config.php`:
+
+```php
+define( 'DPS_DISABLE_CACHE', true );
+```
+
+**⚠️ Atenção**: Desabilitar o cache pode impactar significativamente a performance do sistema. Recomenda-se usar esta opção apenas para:
+- Desenvolvimento e testes
+- Debug de problemas relacionados a dados em cache
+- Ambientes de staging temporariamente
+
+Para reabilitar o cache, remova a constante ou defina como `false`:
+
+```php
+define( 'DPS_DISABLE_CACHE', false );
+```
+
+**Caches afetados por esta configuração**:
+- Listagem de pets na API REST (15 minutos)
+- Lista de clientes na agenda (1 hora)
+- Lista de serviços na agenda (1 hora)
+- Estatísticas de atendimentos e receita (1 hora)
+- Métricas do programa de fidelidade (5 minutos)
+- Contexto de IA para mensagens (30 minutos)
+
+**Caches NÃO afetados** (por questões de segurança):
+- Tokens de login do portal do cliente
+- Rate limiting de requisições
+- Tentativas de login
+
 ## Shortcodes, widgets e endpoints
 
 ### Shortcodes

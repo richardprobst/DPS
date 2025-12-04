@@ -78,14 +78,24 @@ if ( ! function_exists( 'dps_get_total_revenue' ) ) {
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
         $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
-        $cached = get_transient( $cache_key );
-        if ( false !== $cached ) return (float) $cached;
+        
+        // Verifica cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached ) return (float) $cached;
+        }
+        
         $table = $wpdb->prefix . 'dps_transacoes';
         $total = (float) $wpdb->get_var( $wpdb->prepare(
             "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
             $start_date, $end_date
         ) );
-        set_transient( $cache_key, $total, HOUR_IN_SECONDS );
+        
+        // Armazena cache apenas se não estiver desabilitado
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $total, HOUR_IN_SECONDS );
+        }
+        
         return $total;
     }
 }
