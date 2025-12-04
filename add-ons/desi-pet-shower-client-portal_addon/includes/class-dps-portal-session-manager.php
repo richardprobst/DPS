@@ -113,6 +113,9 @@ final class DPS_Portal_Session_Manager {
             return false;
         }
 
+        // Garante que a sessão está iniciada antes de autenticar
+        $this->maybe_start_session();
+
         // Regenera ID da sessão por segurança (proteção contra session fixation)
         if ( session_id() ) {
             session_regenerate_id( true );
@@ -131,6 +134,9 @@ final class DPS_Portal_Session_Manager {
      * @return int ID do cliente ou 0 se não autenticado
      */
     public function get_authenticated_client_id() {
+        // Garante que a sessão está iniciada antes de verificar
+        $this->maybe_start_session();
+
         if ( ! isset( $_SESSION[ self::SESSION_KEY ] ) ) {
             return 0;
         }
@@ -160,6 +166,9 @@ final class DPS_Portal_Session_Manager {
      * Remove sessões expiradas ou inválidas
      */
     public function validate_session() {
+        // Garante que a sessão está iniciada antes de validar
+        $this->maybe_start_session();
+
         if ( ! isset( $_SESSION[ self::SESSION_KEY ] ) ) {
             return;
         }
@@ -214,6 +223,8 @@ final class DPS_Portal_Session_Manager {
             return;
         }
 
+        // Garante que a sessão está iniciada antes de fazer logout
+        $this->maybe_start_session();
         $this->logout();
 
         // Redireciona para a tela de acesso
