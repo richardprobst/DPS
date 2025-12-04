@@ -216,7 +216,7 @@ class DPS_Base_Plugin {
             'show_ui'            => true,
             'show_in_menu'       => true,
             'capability_type'    => 'dps_client',
-            'map_meta_cap'       => true,
+            'map_meta_cap'       => false,
             'capabilities'       => [
                 'edit_post'              => 'dps_manage_clients',
                 'read_post'              => 'dps_manage_clients',
@@ -257,7 +257,7 @@ class DPS_Base_Plugin {
             'show_ui'            => true,
             'show_in_menu'       => true,
             'capability_type'    => 'dps_pet',
-            'map_meta_cap'       => true,
+            'map_meta_cap'       => false,
             'capabilities'       => [
                 'edit_post'              => 'dps_manage_pets',
                 'read_post'              => 'dps_manage_pets',
@@ -297,7 +297,7 @@ class DPS_Base_Plugin {
             'show_ui'            => true,
             'show_in_menu'       => true,
             'capability_type'    => 'dps_appointment',
-            'map_meta_cap'       => true,
+            'map_meta_cap'       => false,
             'capabilities'       => [
                 'edit_post'              => 'dps_manage_appointments',
                 'read_post'              => 'dps_manage_appointments',
