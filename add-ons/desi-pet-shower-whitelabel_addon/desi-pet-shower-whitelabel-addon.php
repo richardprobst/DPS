@@ -313,6 +313,13 @@ function dps_whitelabel() {
  * Hook de ativação do plugin.
  */
 function dps_whitelabel_activate() {
+    // Carrega classes necessárias para o hook de ativação
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-settings.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-smtp.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-login-page.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-admin-bar.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-maintenance.php';
+
     // Cria opções padrão se não existirem
     if ( false === get_option( 'dps_whitelabel_settings' ) ) {
         add_option( 'dps_whitelabel_settings', DPS_WhiteLabel_Settings::get_defaults() );
