@@ -169,6 +169,36 @@ Antes de criar uma nova versão oficial:
     - `dps_chat_mark_read`: Marca mensagens do admin como lidas
 - **Documentação de compatibilidade**: Criado documento `docs/compatibility/COMPATIBILITY_ANALYSIS.md` com análise detalhada de compatibilidade PHP 8.3+/8.4, WordPress 6.9 e tema Astra
 - **Helper dps_get_page_by_title_compat()**: Nova função utilitária no Portal do Cliente para substituir `get_page_by_title()` deprecado
+- **Debugging Add-on (v1.1.0)**: Melhorias significativas de funcionalidade, código e UX
+  - **Novas funcionalidades**:
+    - Busca client-side com highlight de termos encontrados
+    - Filtros por tipo de erro (Fatal, Warning, Notice, Deprecated, Parse, DB Error, Exception)
+    - Cards de estatísticas com contagem por tipo de erro
+    - Exportação/download do arquivo de log
+    - Botão de cópia rápida do log para área de transferência
+    - Alerta visual na admin bar quando há erros fatais (badge vermelho com animação pulse)
+    - Sincronização automática de opções com estado real do wp-config.php
+  - **Melhorias de código**:
+    - Novo método `sync_options_with_config()` para manter interface consistente com arquivo
+    - Método `get_entry_stats()` para estatísticas de entradas do log
+    - Método `get_formatted_content()` agora suporta filtro por tipo
+    - Cache de entradas parseadas para performance
+    - Suporte a tipos adicionais de erro: Exception, Catchable
+  - **Melhorias de UX**:
+    - Interface com duas abas (Configurações e Visualizador de Log)
+    - Dashboard de estatísticas no topo do visualizador
+    - Barra de filtros com botões coloridos por tipo de erro
+    - Campo de busca com debounce e limpar
+    - Feedback visual de sucesso/erro ao copiar
+  - **Novos assets**:
+    - `assets/js/debugging-admin.js` - busca, filtros e cópia de logs
+    - CSS expandido com estilos para stats, filtros e busca
+  - **Admin bar melhorada**:
+    - Contador diferenciado para erros fatais (badge vermelho)
+    - Animação pulse para alertar sobre fatais
+    - Link direto para visualizar erros fatais
+    - Background visual quando há erros fatais
+  - **Impacto**: Experiência de debugging muito mais produtiva com busca, filtros e alertas visuais
 - **Debugging Add-on (v1.0.0)**: Novo add-on para gerenciamento de debug do WordPress
   - **Funcionalidades principais**:
     - Configuração de constantes de debug (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, SAVEQUERIES, WP_DISABLE_FATAL_ERROR_HANDLER) diretamente via interface administrativa
