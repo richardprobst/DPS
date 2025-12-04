@@ -1,0 +1,48 @@
+.dps-form-errors {
+    display: none;
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border: 1px solid #dc2626;
+    border-radius: 6px;
+    background: #fef2f2;
+    color: #7f1d1d;
+}
+
+.dps-form-errors__title {
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+
+.dps-form-errors ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.dps-form-errors li {
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.dps-inline-error {
+    display: block;
+    margin-top: 6px;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.dps-field-error,
+.dps-field-error:focus,
+.dps-field-error:active {
+    outline: 2px solid #ef4444;
+    outline-offset: 1px;
+    border-color: #ef4444 !important;
+}
+
+.dps-alert--danger {
+    scroll-margin-top: 24px;
+}
+
+.dps-form .dps-field-error label,
+.dps-form .dps-field-error .dps-pet-option {
+    color: #b91c1c;
+}

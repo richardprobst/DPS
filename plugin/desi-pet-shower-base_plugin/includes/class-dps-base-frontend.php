@@ -2279,12 +2279,24 @@ class DPS_Base_Frontend {
         if ( ! current_user_can( 'dps_manage_appointments' ) ) {
             wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
-        $appt_id = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
-        $status  = isset( $_POST['appointment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_status'] ) ) : '';
-        $valid   = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
-        if ( ! $appt_id || ! in_array( $status, $valid, true ) ) {
-            return;
+
+        $redirect_url = isset( $_POST['dps_redirect_url'] ) ? esc_url_raw( wp_unslash( $_POST['dps_redirect_url'] ) ) : '';
+        $appt_id      = isset( $_POST['appointment_id'] ) ? intval( wp_unslash( $_POST['appointment_id'] ) ) : 0;
+        $status       = isset( $_POST['appointment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_status'] ) ) : '';
+        $valid        = [ 'pendente', 'finalizado', 'finalizado_pago', 'cancelado' ];
+
+        if ( ! $appt_id ) {
+            DPS_Message_Helper::add_error( __( 'Agendamento inválido. Selecione um registro para atualizar.', 'desi-pet-shower' ) );
+            wp_safe_redirect( $redirect_url ? $redirect_url : self::get_redirect_url( 'agendamentos' ) );
+            exit;
         }
+
+        if ( ! in_array( $status, $valid, true ) ) {
+            DPS_Message_Helper::add_error( __( 'Selecione um status válido para o agendamento.', 'desi-pet-shower' ) );
+            wp_safe_redirect( $redirect_url ? $redirect_url : self::get_redirect_url( 'agendamentos' ) );
+            exit;
+        }
+
         update_post_meta( $appt_id, 'appointment_status', $status );
         $appt_type = get_post_meta( $appt_id, 'appointment_type', true );
         if ( ! $appt_type ) {
@@ -2995,20 +3007,51 @@ class DPS_Base_Frontend {
      * em handle_request).
      */
     private static function save_passwords() {
-        // Recebe dados
-        $base_pass   = isset( $_POST['base_password'] ) ? sanitize_text_field( wp_unslash( $_POST['base_password'] ) ) : '';
-        $agenda_pass = isset( $_POST['agenda_password'] ) ? sanitize_text_field( wp_unslash( $_POST['agenda_password'] ) ) : '';
-        // Atualiza opções apenas se valores não vazios
-        if ( $base_pass ) {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+        }
+
+        $base_pass     = isset( $_POST['base_password'] ) ? sanitize_text_field( wp_unslash( $_POST['base_password'] ) ) : '';
+        $agenda_pass   = isset( $_POST['agenda_password'] ) ? sanitize_text_field( wp_unslash( $_POST['agenda_password'] ) ) : '';
+        $redirect_url  = self::get_redirect_url( 'senhas' );
+        $provided_base = '' !== $base_pass;
+        $provided_agenda = '' !== $agenda_pass;
+
+        if ( ! $provided_base && ! $provided_agenda ) {
+            DPS_Message_Helper::add_error( __( 'Informe pelo menos uma senha para salvar.', 'desi-pet-shower' ) );
+            wp_safe_redirect( $redirect_url );
+            exit;
+        }
+
+        $errors   = [];
+        $min_size = 4;
+
+        if ( $provided_base && strlen( $base_pass ) < $min_size ) {
+            $errors[] = sprintf( __( 'A senha do painel principal deve ter pelo menos %d caracteres.', 'desi-pet-shower' ), $min_size );
+        }
+
+        if ( $provided_agenda && strlen( $agenda_pass ) < $min_size ) {
+            $errors[] = sprintf( __( 'A senha da agenda pública deve ter pelo menos %d caracteres.', 'desi-pet-shower' ), $min_size );
+        }
+
+        if ( ! empty( $errors ) ) {
+            foreach ( $errors as $error ) {
+                DPS_Message_Helper::add_error( $error );
+            }
+            wp_safe_redirect( $redirect_url );
+            exit;
+        }
+
+        if ( $provided_base ) {
             update_option( 'dps_base_password', $base_pass );
         }
-        if ( $agenda_pass ) {
+        if ( $provided_agenda ) {
             update_option( 'dps_agenda_password', $agenda_pass );
         }
-        // Gancho para outras senhas de add‑ons (a função pode ser estendida)
+
         do_action( 'dps_base_save_passwords', wp_unslash( $_POST ) );
-        // Redireciona para aba de senhas
-        wp_safe_redirect( self::get_redirect_url( 'senhas' ) );
+        DPS_Message_Helper::add_success( __( 'Senhas salvas com sucesso.', 'desi-pet-shower' ) );
+        wp_safe_redirect( $redirect_url );
         exit;
     }
 
