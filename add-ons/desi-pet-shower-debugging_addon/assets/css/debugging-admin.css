@@ -311,6 +311,279 @@
 }
 
 /* ==========================================================================
+   Estatísticas de Log
+   ========================================================================== */
+
+.dps-debugging-log-stats {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-stat-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-debugging-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    min-width: 80px;
+}
+
+.dps-debugging-stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.dps-debugging-stat-label {
+    font-size: 12px;
+    color: #646970;
+    text-transform: uppercase;
+}
+
+.dps-debugging-stat-total {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+.dps-debugging-stat-total .dps-debugging-stat-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.dps-debugging-stat-fatal {
+    border-left: 4px solid #dc3232;
+}
+
+.dps-debugging-stat-fatal .dps-debugging-stat-value {
+    color: #dc3232;
+}
+
+.dps-debugging-stat-warning {
+    border-left: 4px solid #ffb900;
+}
+
+.dps-debugging-stat-warning .dps-debugging-stat-value {
+    color: #996800;
+}
+
+.dps-debugging-stat-notice {
+    border-left: 4px solid #00a0d2;
+}
+
+.dps-debugging-stat-notice .dps-debugging-stat-value {
+    color: #00a0d2;
+}
+
+.dps-debugging-stat-deprecated {
+    border-left: 4px solid #9664c8;
+}
+
+.dps-debugging-stat-deprecated .dps-debugging-stat-value {
+    color: #9664c8;
+}
+
+.dps-debugging-stat-parse,
+.dps-debugging-stat-exception {
+    border-left: 4px solid #dc3232;
+}
+
+.dps-debugging-stat-parse .dps-debugging-stat-value,
+.dps-debugging-stat-exception .dps-debugging-stat-value {
+    color: #dc3232;
+}
+
+.dps-debugging-stat-wordpress-db {
+    border-left: 4px solid #3232ff;
+}
+
+.dps-debugging-stat-wordpress-db .dps-debugging-stat-value {
+    color: #3232ff;
+}
+
+.dps-debugging-stat-other {
+    border-left: 4px solid #646970;
+}
+
+.dps-debugging-stat-other .dps-debugging-stat-value {
+    color: #646970;
+}
+
+/* ==========================================================================
+   Filtros e Busca
+   ========================================================================== */
+
+.dps-debugging-log-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f6f7f7;
+    border-radius: 4px;
+}
+
+.dps-debugging-search-box {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.dps-debugging-search-input {
+    flex: 1;
+    max-width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dps-debugging-search-input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.dps-debugging-filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-debugging-filter-count {
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+.dps-debugging-filter-fatal {
+    border-color: #dc3232;
+    color: #dc3232;
+}
+
+.dps-debugging-filter-fatal:hover,
+.dps-debugging-filter-fatal.button-primary {
+    background: #dc3232;
+    border-color: #dc3232;
+    color: #fff;
+}
+
+.dps-debugging-filter-warning {
+    border-color: #ffb900;
+    color: #996800;
+}
+
+.dps-debugging-filter-warning:hover,
+.dps-debugging-filter-warning.button-primary {
+    background: #ffb900;
+    border-color: #ffb900;
+    color: #1e1e1e;
+}
+
+.dps-debugging-filter-notice {
+    border-color: #00a0d2;
+    color: #00a0d2;
+}
+
+.dps-debugging-filter-notice:hover,
+.dps-debugging-filter-notice.button-primary {
+    background: #00a0d2;
+    border-color: #00a0d2;
+    color: #fff;
+}
+
+.dps-debugging-filter-deprecated {
+    border-color: #9664c8;
+    color: #9664c8;
+}
+
+.dps-debugging-filter-deprecated:hover,
+.dps-debugging-filter-deprecated.button-primary {
+    background: #9664c8;
+    border-color: #9664c8;
+    color: #fff;
+}
+
+.dps-debugging-filter-parse {
+    border-color: #dc3232;
+    color: #dc3232;
+}
+
+.dps-debugging-filter-parse:hover,
+.dps-debugging-filter-parse.button-primary {
+    background: #dc3232;
+    border-color: #dc3232;
+    color: #fff;
+}
+
+.dps-debugging-filter-wordpress-db {
+    border-color: #3232ff;
+    color: #3232ff;
+}
+
+.dps-debugging-filter-wordpress-db:hover,
+.dps-debugging-filter-wordpress-db.button-primary {
+    background: #3232ff;
+    border-color: #3232ff;
+    color: #fff;
+}
+
+/* Resultados da busca */
+.dps-debugging-search-results {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background: #f0f6fc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dps-debugging-no-results {
+    color: #dc3232;
+}
+
+.dps-debugging-found {
+    color: #00a32a;
+}
+
+/* Highlight de busca */
+.dps-debugging-highlight {
+    background: #ffeb3b;
+    color: #1e1e1e;
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+/* Botões de ação */
+.dps-debugging-purge-btn {
+    color: #d63638 !important;
+    border-color: #d63638 !important;
+}
+
+.dps-debugging-purge-btn:hover {
+    background: #d63638 !important;
+    color: #fff !important;
+}
+
+.dps-debugging-copy-success {
+    background: #00a32a !important;
+    border-color: #00a32a !important;
+    color: #fff !important;
+}
+
+.dps-debugging-copy-error {
+    background: #d63638 !important;
+    border-color: #d63638 !important;
+    color: #fff !important;
+}
+
+/* ==========================================================================
    Responsividade
    ========================================================================== */
 
@@ -338,6 +611,37 @@
     .dps-debugging-log-buttons .button {
         flex: 1;
         text-align: center;
+        min-width: calc(50% - 5px);
+    }
+
+    .dps-debugging-stat-cards {
+        justify-content: center;
+    }
+
+    .dps-debugging-stat-card {
+        min-width: 70px;
+        padding: 10px 15px;
+    }
+
+    .dps-debugging-stat-value {
+        font-size: 20px;
+    }
+
+    .dps-debugging-log-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-debugging-search-box {
+        width: 100%;
+    }
+
+    .dps-debugging-search-input {
+        max-width: none;
+    }
+
+    .dps-debugging-filter-buttons {
+        justify-content: center;
     }
 }
 
@@ -353,5 +657,22 @@
     .dps-debugging-log-raw {
         font-size: 11px;
         padding: 15px;
+    }
+
+    .dps-debugging-stat-card {
+        min-width: 60px;
+        padding: 8px 12px;
+    }
+
+    .dps-debugging-stat-value {
+        font-size: 18px;
+    }
+
+    .dps-debugging-stat-label {
+        font-size: 10px;
+    }
+
+    .dps-debugging-log-buttons .button {
+        min-width: 100%;
     }
 }

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Classe DPS_Debugging_Log_Viewer
  * 
- * Gerencia visualização e limpeza do arquivo debug.log.
+ * Gerencia visualização, estatísticas e limpeza do arquivo debug.log.
  */
 class DPS_Debugging_Log_Viewer {
 
@@ -44,7 +44,16 @@ class DPS_Debugging_Log_Viewer {
         'parse'        => 'PHP Parse error:',
         'wordpress-db' => 'WordPress database error',
         'stack-trace'  => 'Stack trace:',
+        'exception'    => 'Uncaught Exception',
+        'catchable'    => 'PHP Catchable fatal error:',
     ];
+
+    /**
+     * Cache de entradas parseadas.
+     *
+     * @var array|null
+     */
+    private $parsed_entries = null;
 
     /**
      * Construtor.
@@ -124,35 +133,111 @@ class DPS_Debugging_Log_Viewer {
     }
 
     /**
+     * Obtém estatísticas das entradas do log.
+     *
+     * @return array Estatísticas com total e contagem por tipo.
+     */
+    public function get_entry_stats() {
+        if ( ! $this->log_exists() ) {
+            return [ 'total' => 0, 'by_type' => [] ];
+        }
+
+        $entries = $this->get_parsed_entries();
+        $stats   = [
+            'total'   => count( $entries ),
+            'by_type' => [
+                'fatal'        => 0,
+                'warning'      => 0,
+                'notice'       => 0,
+                'deprecated'   => 0,
+                'parse'        => 0,
+                'wordpress-db' => 0,
+                'exception'    => 0,
+                'other'        => 0,
+            ],
+        ];
+
+        foreach ( $entries as $entry ) {
+            $type = $this->detect_entry_type( $entry );
+            if ( $type && isset( $stats['by_type'][ $type ] ) ) {
+                $stats['by_type'][ $type ]++;
+            } else {
+                $stats['by_type']['other']++;
+            }
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Obtém entradas parseadas (com cache).
+     *
+     * @return array Entradas parseadas.
+     */
+    private function get_parsed_entries() {
+        if ( null === $this->parsed_entries ) {
+            $lines = $this->read_log_lines();
+            $this->parsed_entries = $this->parse_log_entries( $lines );
+        }
+        return $this->parsed_entries;
+    }
+
+    /**
      * Obtém o conteúdo formatado do arquivo de log.
      *
+     * @param string $filter_type Tipo de erro para filtrar (opcional).
      * @return string HTML formatado.
      */
-    public function get_formatted_content() {
+    public function get_formatted_content( $filter_type = '' ) {
         if ( ! $this->log_exists() ) {
             return '<p class="dps-debugging-log-empty">' . esc_html__( 'O arquivo de log está vazio.', 'dps-debugging-addon' ) . '</p>';
         }
 
-        $lines  = $this->read_log_lines();
-        $parsed = $this->parse_log_entries( $lines );
+        $parsed = $this->get_parsed_entries();
+
+        // Aplica filtro por tipo se especificado
+        if ( ! empty( $filter_type ) ) {
+            $parsed = array_filter( $parsed, function( $entry ) use ( $filter_type ) {
+                return $this->detect_entry_type( $entry ) === $filter_type;
+            } );
+        }
 
         // Inverte para mostrar mais recentes primeiro
         $parsed = array_reverse( $parsed );
 
+        $total_entries = count( $parsed );
+
         $output = '<div class="dps-debugging-log-intro">';
         $output .= '<p class="dps-debugging-log-count">';
-        $output .= sprintf(
-            /* translators: %d: Number of log entries */
-            esc_html__( 'Total de entradas: %d', 'dps-debugging-addon' ),
-            count( $parsed )
-        );
+        
+        if ( ! empty( $filter_type ) ) {
+            $output .= sprintf(
+                /* translators: %1$d: Number of filtered entries, %2$s: Filter type */
+                esc_html__( 'Exibindo %1$d entradas do tipo "%2$s"', 'dps-debugging-addon' ),
+                $total_entries,
+                esc_html( $filter_type )
+            );
+        } else {
+            $output .= sprintf(
+                /* translators: %d: Number of log entries */
+                esc_html__( 'Total de entradas: %d', 'dps-debugging-addon' ),
+                $total_entries
+            );
+        }
+        
         $output .= '</p>';
         $output .= '</div>';
 
         $output .= '<div class="dps-debugging-log-entries">';
 
-        foreach ( $parsed as $entry ) {
-            $output .= $this->format_entry( $entry );
+        if ( empty( $parsed ) ) {
+            $output .= '<div class="dps-debugging-log-empty">';
+            $output .= '<p>' . esc_html__( 'Nenhuma entrada encontrada para o filtro selecionado.', 'dps-debugging-addon' ) . '</p>';
+            $output .= '</div>';
+        } else {
+            foreach ( $parsed as $entry ) {
+                $output .= $this->format_entry( $entry );
+            }
         }
 
         $output .= '</div>';

@@ -72,10 +72,15 @@ class DPS_Debugging_Admin_Bar {
         $log_viewer   = new DPS_Debugging_Log_Viewer();
         $log_exists   = $log_viewer->log_exists();
         $entry_count  = $log_exists ? $log_viewer->get_entry_count() : 0;
+        $stats        = $log_exists ? $log_viewer->get_entry_stats() : [];
+        $fatal_count  = isset( $stats['by_type']['fatal'] ) ? $stats['by_type']['fatal'] : 0;
+        $fatal_count  += isset( $stats['by_type']['parse'] ) ? $stats['by_type']['parse'] : 0;
 
         // Menu principal
         $title = __( 'Debug', 'dps-debugging-addon' );
-        if ( $entry_count > 0 ) {
+        if ( $fatal_count > 0 ) {
+            $title .= ' <span class="dps-debug-count dps-debug-fatal-count">' . number_format_i18n( $fatal_count ) . '</span>';
+        } elseif ( $entry_count > 0 ) {
             $title .= ' <span class="dps-debug-count">' . number_format_i18n( $entry_count ) . '</span>';
         }
 
@@ -83,7 +88,9 @@ class DPS_Debugging_Admin_Bar {
         if ( $debug_active ) {
             $menu_class .= ' dps-debug-active';
         }
-        if ( $entry_count > 0 ) {
+        if ( $fatal_count > 0 ) {
+            $menu_class .= ' dps-debug-has-fatals';
+        } elseif ( $entry_count > 0 ) {
             $menu_class .= ' dps-debug-has-entries';
         }
 
@@ -96,6 +103,24 @@ class DPS_Debugging_Admin_Bar {
                 'title' => __( 'DPS Debugging', 'dps-debugging-addon' ),
             ],
         ] );
+
+        // Alerta de erros fatais
+        if ( $fatal_count > 0 ) {
+            $wp_admin_bar->add_node( [
+                'id'     => 'dps-debugging-fatal-alert',
+                'parent' => 'dps-debugging',
+                'title'  => '<span class="dps-debug-fatal-alert">⚠️ ' . 
+                    sprintf(
+                        /* translators: %d: Number of fatal errors */
+                        _n( '%d erro fatal detectado!', '%d erros fatais detectados!', $fatal_count, 'dps-debugging-addon' ),
+                        $fatal_count
+                    ) . '</span>',
+                'href'   => admin_url( 'admin.php?page=dps-debugging&tab=log-viewer&type=fatal' ),
+                'meta'   => [
+                    'class' => 'dps-debugging-fatal-item',
+                ],
+            ] );
+        }
 
         // Verificação de constante WP_DEBUG_LOG
         if ( ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) {
@@ -229,8 +254,24 @@ class DPS_Debugging_Admin_Bar {
                 line-height: 18px;
                 text-align: center;
                 color: #fff;
-                background: #d63638;
+                background: #72aee6;
                 border-radius: 9px;
+            }
+
+            /* Contador de erros fatais */
+            #wpadminbar .dps-debug-fatal-count {
+                background: #d63638;
+                animation: dps-debug-pulse 2s infinite;
+            }
+
+            @keyframes dps-debug-pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+
+            /* Menu com erros fatais */
+            #wpadminbar .dps-debug-has-fatals > .ab-item {
+                background: rgba(214, 54, 56, 0.1);
             }
 
             /* Debug ativo */
@@ -250,6 +291,16 @@ class DPS_Debugging_Admin_Bar {
             #wpadminbar .dps-debug-warning {
                 color: #dba617;
                 font-weight: 600;
+            }
+
+            /* Alerta de erros fatais */
+            #wpadminbar .dps-debug-fatal-alert {
+                color: #d63638;
+                font-weight: 600;
+            }
+
+            #wpadminbar .dps-debugging-fatal-item .ab-item {
+                background: rgba(214, 54, 56, 0.1) !important;
             }
 
             /* Submenu de purge */

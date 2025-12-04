@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – Debugging
  * Plugin URI:        https://www.probst.pro
- * Description:       Gerenciamento de debug no WordPress. Ative/desative constantes de debug e visualize o arquivo debug.log.
- * Version:           1.0.0
+ * Description:       Gerenciamento de debug no WordPress. Ative/desative constantes de debug e visualize o arquivo debug.log com busca, filtros, estatísticas e exportação.
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-debugging-addon
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do add-on
-define( 'DPS_DEBUGGING_VERSION', '1.0.0' );
+define( 'DPS_DEBUGGING_VERSION', '1.1.0' );
 define( 'DPS_DEBUGGING_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_DEBUGGING_URL', plugin_dir_url( __FILE__ ) );
 
@@ -119,8 +119,8 @@ class DPS_Debugging_Addon {
      * Construtor.
      */
     public function __construct() {
-        $this->options     = get_option( 'dps_debugging_options', $this->get_default_options() );
         $this->config_path = $this->get_config_path();
+        $this->options     = $this->sync_options_with_config();
 
         // Hooks de admin
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
@@ -135,6 +135,38 @@ class DPS_Debugging_Addon {
         // Hooks de ativação e desativação
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
         register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
+    }
+
+    /**
+     * Sincroniza opções salvas com estado real das constantes.
+     * 
+     * Isso garante que a interface reflita o estado atual do wp-config.php,
+     * mesmo que o arquivo tenha sido modificado externamente.
+     *
+     * @return array Opções sincronizadas.
+     */
+    private function sync_options_with_config() {
+        $saved_options = get_option( 'dps_debugging_options', $this->get_default_options() );
+        $synced_options = [];
+
+        foreach ( $this->debug_constants as $constant ) {
+            $const_name = strtoupper( $constant );
+            
+            if ( defined( $const_name ) ) {
+                $value = constant( $const_name );
+                
+                // Para WP_DEBUG_DISPLAY, a checkbox indica "ocultar erros" (valor false)
+                if ( 'wp_debug_display' === $constant ) {
+                    $synced_options[ $constant ] = ! $value; // Invertido: checkbox marcada = false
+                } else {
+                    $synced_options[ $constant ] = (bool) $value;
+                }
+            } else {
+                $synced_options[ $constant ] = isset( $saved_options[ $constant ] ) ? $saved_options[ $constant ] : false;
+            }
+        }
+
+        return $synced_options;
     }
 
     /**
@@ -287,6 +319,26 @@ class DPS_Debugging_Addon {
             [],
             DPS_DEBUGGING_VERSION
         );
+
+        wp_enqueue_script(
+            'dps-debugging-admin',
+            DPS_DEBUGGING_URL . 'assets/js/debugging-admin.js',
+            [ 'jquery' ],
+            DPS_DEBUGGING_VERSION,
+            true
+        );
+
+        wp_localize_script(
+            'dps-debugging-admin',
+            'dpsDebugging',
+            [
+                'copySuccess' => __( 'Copiado para a área de transferência!', 'dps-debugging-addon' ),
+                'copyError'   => __( 'Erro ao copiar. Selecione manualmente.', 'dps-debugging-addon' ),
+                'noResults'   => __( 'Nenhum resultado encontrado para:', 'dps-debugging-addon' ),
+                'showAll'     => __( 'Mostrar todos', 'dps-debugging-addon' ),
+                'filtered'    => __( 'entradas encontradas', 'dps-debugging-addon' ),
+            ]
+        );
     }
 
     /**
@@ -363,7 +415,7 @@ class DPS_Debugging_Addon {
     }
 
     /**
-     * Processa ações do log (visualização e limpeza).
+     * Processa ações do log (visualização, limpeza e exportação).
      */
     public function handle_log_actions() {
         if ( ! current_user_can( 'manage_options' ) ) {
@@ -397,6 +449,31 @@ class DPS_Debugging_Addon {
 
             // Redireciona para remover query string
             wp_safe_redirect( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer&purged=1' ) );
+            exit;
+        }
+
+        // Exportação do log
+        if ( isset( $_GET['dps_debug_action'] ) && 'export' === $_GET['dps_debug_action'] ) {
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_debugging_export' ) ) {
+                return;
+            }
+
+            $log_viewer = new DPS_Debugging_Log_Viewer();
+            if ( ! $log_viewer->log_exists() ) {
+                return;
+            }
+
+            $content  = $log_viewer->get_raw_content();
+            $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.log';
+
+            header( 'Content-Type: text/plain; charset=utf-8' );
+            header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+            header( 'Content-Length: ' . strlen( $content ) );
+            header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+            header( 'Pragma: no-cache' );
+            header( 'Expires: 0' );
+
+            echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo raw do log
             exit;
         }
     }
@@ -564,10 +641,15 @@ class DPS_Debugging_Addon {
         $log_viewer = new DPS_Debugging_Log_Viewer();
         $log_file   = $log_viewer->get_debug_log_path();
         $log_exists = $log_viewer->log_exists();
+        $stats      = $log_exists ? $log_viewer->get_entry_stats() : [];
 
         // Modo de visualização (formatado ou raw)
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $view_mode = isset( $_GET['mode'] ) && 'raw' === $_GET['mode'] ? 'raw' : 'formatted';
+
+        // Filtro por tipo
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $filter_type = isset( $_GET['type'] ) ? sanitize_key( $_GET['type'] ) : '';
 
         ?>
         <div class="dps-debugging-log-viewer-tab">
@@ -589,8 +671,15 @@ class DPS_Debugging_Addon {
                            class="button">
                             <?php echo 'raw' === $view_mode ? esc_html__( 'Visualizar Formatado', 'dps-debugging-addon' ) : esc_html__( 'Visualizar Raw', 'dps-debugging-addon' ); ?>
                         </a>
+                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer&dps_debug_action=export' ), 'dps_debugging_export' ) ); ?>" 
+                           class="button">
+                            <?php esc_html_e( 'Exportar Log', 'dps-debugging-addon' ); ?>
+                        </a>
+                        <button type="button" class="button dps-debugging-copy-log" data-target=".dps-debugging-log-entries, .dps-debugging-log-raw">
+                            <?php esc_html_e( 'Copiar Log', 'dps-debugging-addon' ); ?>
+                        </button>
                         <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer&dps_debug_action=purge' ), 'dps_debugging_purge' ) ); ?>" 
-                           class="button button-secondary"
+                           class="button button-secondary dps-debugging-purge-btn"
                            onclick="return confirm('<?php echo esc_js( __( 'Tem certeza que deseja limpar o arquivo de debug? Esta ação não pode ser desfeita.', 'dps-debugging-addon' ) ); ?>');">
                             <?php esc_html_e( 'Limpar Log', 'dps-debugging-addon' ); ?>
                         </a>
@@ -606,6 +695,11 @@ class DPS_Debugging_Addon {
                 </div>
             <?php endif; ?>
 
+            <?php if ( $log_exists && 'formatted' === $view_mode ) : ?>
+                <?php $this->render_log_stats( $stats ); ?>
+                <?php $this->render_log_filters( $stats, $filter_type ); ?>
+            <?php endif; ?>
+
             <div class="dps-debugging-log-content">
                 <?php if ( ! $log_exists ) : ?>
                     <div class="dps-debugging-log-empty">
@@ -614,10 +708,98 @@ class DPS_Debugging_Addon {
                 <?php elseif ( 'raw' === $view_mode ) : ?>
                     <pre class="dps-debugging-log-raw"><?php echo esc_html( $log_viewer->get_raw_content() ); ?></pre>
                 <?php else : ?>
-                    <?php echo $log_viewer->get_formatted_content(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo já sanitizado internamente ?>
+                    <?php echo $log_viewer->get_formatted_content( $filter_type ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo já sanitizado internamente ?>
                 <?php endif; ?>
             </div>
         </div>
+        <?php
+    }
+
+    /**
+     * Renderiza estatísticas de erros no log.
+     *
+     * @param array $stats Estatísticas de entradas.
+     */
+    private function render_log_stats( $stats ) {
+        if ( empty( $stats ) ) {
+            return;
+        }
+
+        $type_labels = [
+            'fatal'        => __( 'Fatal', 'dps-debugging-addon' ),
+            'warning'      => __( 'Warning', 'dps-debugging-addon' ),
+            'notice'       => __( 'Notice', 'dps-debugging-addon' ),
+            'deprecated'   => __( 'Deprecated', 'dps-debugging-addon' ),
+            'parse'        => __( 'Parse Error', 'dps-debugging-addon' ),
+            'wordpress-db' => __( 'DB Error', 'dps-debugging-addon' ),
+            'other'        => __( 'Outros', 'dps-debugging-addon' ),
+        ];
+
+        ?>
+        <div class="dps-debugging-log-stats">
+            <div class="dps-debugging-stat-cards">
+                <div class="dps-debugging-stat-card dps-debugging-stat-total">
+                    <span class="dps-debugging-stat-value"><?php echo esc_html( number_format_i18n( $stats['total'] ) ); ?></span>
+                    <span class="dps-debugging-stat-label"><?php esc_html_e( 'Total', 'dps-debugging-addon' ); ?></span>
+                </div>
+                <?php foreach ( $stats['by_type'] as $type => $count ) : ?>
+                    <?php if ( $count > 0 ) : ?>
+                        <div class="dps-debugging-stat-card dps-debugging-stat-<?php echo esc_attr( $type ); ?>">
+                            <span class="dps-debugging-stat-value"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
+                            <span class="dps-debugging-stat-label"><?php echo esc_html( isset( $type_labels[ $type ] ) ? $type_labels[ $type ] : $type ); ?></span>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Renderiza filtros e busca para o log.
+     *
+     * @param array  $stats       Estatísticas de entradas.
+     * @param string $filter_type Tipo de filtro ativo.
+     */
+    private function render_log_filters( $stats, $filter_type ) {
+        $type_labels = [
+            'fatal'        => __( 'Fatal', 'dps-debugging-addon' ),
+            'warning'      => __( 'Warning', 'dps-debugging-addon' ),
+            'notice'       => __( 'Notice', 'dps-debugging-addon' ),
+            'deprecated'   => __( 'Deprecated', 'dps-debugging-addon' ),
+            'parse'        => __( 'Parse Error', 'dps-debugging-addon' ),
+            'wordpress-db' => __( 'DB Error', 'dps-debugging-addon' ),
+        ];
+
+        ?>
+        <div class="dps-debugging-log-filters">
+            <div class="dps-debugging-search-box">
+                <input type="text" 
+                       id="dps-debugging-search" 
+                       class="dps-debugging-search-input" 
+                       placeholder="<?php esc_attr_e( 'Buscar no log...', 'dps-debugging-addon' ); ?>">
+                <button type="button" class="button dps-debugging-search-clear" style="display:none;">
+                    <?php esc_html_e( 'Limpar', 'dps-debugging-addon' ); ?>
+                </button>
+            </div>
+            
+            <div class="dps-debugging-filter-buttons">
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer' ) ); ?>" 
+                   class="button <?php echo empty( $filter_type ) ? 'button-primary' : ''; ?>">
+                    <?php esc_html_e( 'Todos', 'dps-debugging-addon' ); ?>
+                </a>
+                <?php foreach ( $type_labels as $type => $label ) : ?>
+                    <?php if ( isset( $stats['by_type'][ $type ] ) && $stats['by_type'][ $type ] > 0 ) : ?>
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer&type=' . $type ) ); ?>" 
+                           class="button dps-debugging-filter-<?php echo esc_attr( $type ); ?> <?php echo $filter_type === $type ? 'button-primary' : ''; ?>">
+                            <?php echo esc_html( $label ); ?>
+                            <span class="dps-debugging-filter-count">(<?php echo esc_html( $stats['by_type'][ $type ] ); ?>)</span>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div id="dps-debugging-search-results" class="dps-debugging-search-results" style="display:none;"></div>
         <?php
     }
 }

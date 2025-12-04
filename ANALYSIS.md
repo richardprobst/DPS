@@ -1252,14 +1252,21 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 **Propósito e funcionalidades principais**:
 - Gerenciar constantes de debug do WordPress (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY, SCRIPT_DEBUG, SAVEQUERIES, WP_DISABLE_FATAL_ERROR_HANDLER)
 - Modificar wp-config.php de forma segura para ativar/desativar constantes
+- Sincronização automática de opções com estado real do wp-config.php
 - Visualizar o arquivo debug.log com formatação inteligente (destaque de erros, warnings, stack traces, JSON)
+- Busca e filtro de entradas por tipo de erro
+- Estatísticas de log com contagem por tipo (Fatal, Warning, Notice, Deprecated, Parse, DB Error, Exception)
+- Exportação do arquivo de log (download)
+- Cópia rápida do log para área de transferência
 - Limpar (purge) o arquivo debug.log
-- Acesso rápido via admin bar com status das constantes e contador de entradas de log
+- Acesso rápido via admin bar com status das constantes, contador de entradas e alerta de erros fatais
 
 **Shortcodes expostos**: Nenhum
 
 **Menus administrativos**:
-- **Debugging** (`dps-debugging`): interface completa de configuração e visualização de logs
+- **Debugging** (`dps-debugging`): interface completa de configuração e visualização de logs com duas abas:
+  - Configurações: ativar/desativar constantes de debug
+  - Visualizador de Log: busca, filtros, estatísticas, exportação e visualização formatada
 
 **CPTs, tabelas e opções**:
 - Não cria CPTs ou tabelas próprias
@@ -1268,9 +1275,9 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 **Hooks consumidos**:
 - `admin_menu` (prioridade 20): registra submenu sob "DPS by PRObst"
-- `admin_init`: processa salvamento de configurações e ações de log
+- `admin_init`: processa salvamento de configurações e ações de log (purge, export)
 - `admin_bar_menu` (prioridade 999): adiciona menu de debug na admin bar
-- `admin_enqueue_scripts`: carrega estilos na página de configurações
+- `admin_enqueue_scripts`: carrega estilos e scripts na página de configurações
 - `wp_head` / `admin_head`: adiciona estilos da admin bar
 
 **Hooks disparados (Filters)**:
@@ -1283,15 +1290,23 @@ add-ons/desi-pet-shower-debugging_addon/
 ├── desi-pet-shower-debugging-addon.php    # Arquivo principal com classe DPS_Debugging_Addon
 ├── includes/
 │   ├── class-dps-debugging-config-transformer.php  # Leitura/escrita do wp-config.php
-│   ├── class-dps-debugging-log-viewer.php          # Visualização e parsing do debug.log
-│   └── class-dps-debugging-admin-bar.php           # Integração com admin bar
+│   ├── class-dps-debugging-log-viewer.php          # Visualização, estatísticas e parsing do debug.log
+│   └── class-dps-debugging-admin-bar.php           # Integração com admin bar (com alerta de fatais)
 ├── assets/
-│   └── css/
-│       └── debugging-admin.css                      # Estilos da interface
-└── uninstall.php                                    # Limpeza na desinstalação
+│   ├── css/
+│   │   └── debugging-admin.css                     # Estilos da interface (stats, filtros, busca)
+│   └── js/
+│       └── debugging-admin.js                      # Busca, filtros e cópia de logs
+└── uninstall.php                                   # Limpeza na desinstalação
 ```
 
 **Classes principais**:
+
+#### DPS_Debugging_Addon
+- `sync_options_with_config()`: sincroniza opções salvas com estado real das constantes
+- `handle_log_actions()`: processa ações de log (purge e export)
+- `render_log_stats()`: renderiza cards de estatísticas por tipo de erro
+- `render_log_filters()`: renderiza filtros por tipo e campo de busca
 
 #### DPS_Debugging_Config_Transformer
 - `is_writable()`: verifica se wp-config.php é gravável
@@ -1305,17 +1320,18 @@ add-ons/desi-pet-shower-debugging_addon/
 - `log_exists()`: verifica se log existe e não está vazio
 - `get_log_size_formatted()`: tamanho do arquivo formatado (KB, MB)
 - `get_raw_content()`: conteúdo sem formatação
-- `get_formatted_content()`: conteúdo com formatação HTML (data, labels, stack traces, JSON)
+- `get_formatted_content( $filter_type )`: conteúdo com formatação HTML (suporta filtro por tipo)
+- `get_entry_stats()`: estatísticas de entradas (total e contagem por tipo)
 - `purge_log()`: limpa o arquivo de log
 - `get_entry_count()`: contagem de entradas
 
 #### DPS_Debugging_Admin_Bar
 - `init()`: inicializa hooks da admin bar
-- `add_admin_bar_menu( $wp_admin_bar )`: adiciona menu com submenus (View, Raw, Purge, Settings, Status)
-- `add_admin_bar_styles()`: estilos inline para a admin bar
+- `add_admin_bar_menu( $wp_admin_bar )`: adiciona menu com submenus e alerta de erros fatais
+- `add_admin_bar_styles()`: estilos inline para a admin bar (com animação de pulse para fatais)
 
 **Segurança implementada**:
-- ✅ Nonces em todas as ações (configurações e purge)
+- ✅ Nonces em todas as ações (configurações, purge e export)
 - ✅ Verificação de capability `manage_options`
 - ✅ Validação de wp-config.php gravável antes de modificar
 - ✅ Confirmação JavaScript antes de purge
@@ -1324,12 +1340,25 @@ add-ons/desi-pet-shower-debugging_addon/
 
 **Funcionalidades de visualização de log**:
 - Agrupamento de linhas por entrada (data/hora como delimitador)
-- Destaque visual por tipo: Fatal (vermelho), Warning (amarelo), Notice (azul), Deprecated (roxo), Parse (vermelho), DB Error (azul escuro)
+- Destaque visual por tipo: Fatal (vermelho), Warning (amarelo), Notice (azul), Deprecated (roxo), Parse (vermelho), DB Error (azul escuro), Exception (vermelho)
 - Formatação de stack traces como lista
 - Pretty-print de JSON encontrado nas entradas
 - Ordenação mais recente primeiro
 - Limite de 1000 linhas para performance
 - Modo raw para visualização sem formatação
+- **[v1.1.0]** Busca client-side com highlight de resultados
+- **[v1.1.0]** Filtros por tipo de erro com contagem
+- **[v1.1.0]** Cards de estatísticas no topo
+- **[v1.1.0]** Exportação do log (download)
+- **[v1.1.0]** Botão de cópia rápida
+
+**Admin Bar**:
+- Contador de entradas de log (badge azul)
+- **[v1.1.0]** Contador específico de erros fatais (badge vermelho com animação pulse)
+- **[v1.1.0]** Alerta visual quando há erros fatais no log
+- Status de cada constante de debug (✓ ativo, ✗ inativo)
+- Aviso quando WP_DEBUG_LOG não está ativo
+- Links rápidos: Visualizar Log, Visualizar Raw, Limpar Log, Configurações
 
 **Dependências**:
 - **Obrigatória**: Plugin base DPS (verifica `DPS_Base_Plugin`)
@@ -1337,14 +1366,14 @@ add-ons/desi-pet-shower-debugging_addon/
 
 **Introduzido em**: v1.0.0
 
-**Versão atual**: 1.0.0
+**Versão atual**: 1.1.0
 
 **Observações**:
 - Inspirado no plugin WP Debugging de Andy Fragen e Debug Quick Look de Andrew Norcross
 - Estrutura modular desde o início com separação de responsabilidades
 - Restaura constantes originais na desativação do add-on
-- Admin bar exibe contador de entradas e status visual de cada constante
 - CSS tema escuro para visualização de logs (inspirado em IDEs modernas)
+- **[v1.1.0]** Melhorias significativas de UX: busca, filtros, estatísticas, exportação e alertas visuais
 
 ---
 
