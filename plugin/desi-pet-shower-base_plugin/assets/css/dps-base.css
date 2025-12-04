@@ -90,6 +90,13 @@
     color: #0ea5e9;
     font-weight: 600;
 }
+
+/* Reforçar ocultação do toggle em telas grandes para evitar overrides de temas */
+@media (min-width: 769px) {
+    .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
+        display: none !important;
+    }
+}
 .dps-section {
     display: none;
     border: 1px solid #ccc;
@@ -509,7 +516,7 @@
     /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
     /* Mostrar o botão toggle em mobile - especificidade aumentada para garantir sobrescrita */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
-        display: block;
+        display: block !important;
         margin-bottom: 0;
     }
     
