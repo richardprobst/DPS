@@ -303,6 +303,12 @@ Antes de criar uma nova versão oficial:
 - **Groomers Add-on**: Tabela de groomers e relatórios com classes CSS customizadas
 - **Lista de Clientes**: Atualizada para usar `DPS_WhatsApp_Helper::get_link_to_client()`
 - **Add-on de Agenda**: Botões de confirmação e cobrança (individual e conjunta) usam helper centralizado
+- **Add-on de Agenda (v1.3.1)**: Centralização de constantes de status
+  - Adicionadas constantes `STATUS_PENDING`, `STATUS_FINISHED`, `STATUS_PAID`, `STATUS_CANCELED`
+  - Novo método estático `get_status_config()` retorna configuração completa (label, cor, ícone)
+  - Novo método estático `get_status_label()` para obter label traduzida de um status
+  - Traits refatorados para usar métodos centralizados ao invés de strings hardcoded
+  - Documentação de melhorias administrativas em `docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md`
 - **Add-on de Assinaturas**: Botão de cobrança de renovação usa helper centralizado
 - **Add-on de Finance**: Botão de cobrança em pendências financeiras usa helper centralizado
 - **Add-on de Stats**: Link de reengajamento para clientes inativos usa helper centralizado

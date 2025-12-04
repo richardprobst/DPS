@@ -89,6 +89,64 @@ class DPS_Agenda_Addon {
      */
     const SERVICES_LIST_LIMIT = 200;
     
+    /**
+     * Constantes de status de agendamento.
+     * Centralizadas para evitar strings hardcoded.
+     * 
+     * @since 1.3.1
+     */
+    const STATUS_PENDING = 'pendente';
+    const STATUS_FINISHED = 'finalizado';
+    const STATUS_PAID = 'finalizado_pago';
+    const STATUS_CANCELED = 'cancelado';
+    
+    /**
+     * Retorna configuração de status com labels, cores e ícones.
+     *
+     * @since 1.3.1
+     * @return array Configuração completa de status.
+     */
+    public static function get_status_config() {
+        return [
+            self::STATUS_PENDING => [
+                'label' => __( 'Pendente', 'dps-agenda-addon' ),
+                'color' => '#f59e0b',
+                'bg'    => '#fffbeb',
+                'icon'  => '⏳',
+            ],
+            self::STATUS_FINISHED => [
+                'label' => __( 'Finalizado', 'dps-agenda-addon' ),
+                'color' => '#0ea5e9',
+                'bg'    => '#f0f9ff',
+                'icon'  => '✓',
+            ],
+            self::STATUS_PAID => [
+                'label' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
+                'color' => '#22c55e',
+                'bg'    => '#f0fdf4',
+                'icon'  => '💰',
+            ],
+            self::STATUS_CANCELED => [
+                'label' => __( 'Cancelado', 'dps-agenda-addon' ),
+                'color' => '#ef4444',
+                'bg'    => '#fef2f2',
+                'icon'  => '❌',
+            ],
+        ];
+    }
+    
+    /**
+     * Retorna label traduzida para um status.
+     *
+     * @since 1.3.1
+     * @param string $status Código do status.
+     * @return string Label traduzida ou o próprio código se não encontrado.
+     */
+    public static function get_status_label( $status ) {
+        $config = self::get_status_config();
+        return isset( $config[ $status ]['label'] ) ? $config[ $status ]['label'] : $status;
+    }
+    
     public function __construct() {
         // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
         add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );

@@ -4,7 +4,7 @@ Este índice organiza os documentos de análise de layout e usabilidade da **Age
 
 ---
 
-## 🆕 Análise Completa (2025-12-03)
+## 🆕 Análise Completa (Atualizado: 2025-12-04)
 
 Para uma **análise profunda e abrangente** do add-on Agenda, incluindo funcionalidades, código, segurança, performance, layout, integrações e propostas de novas funcionalidades, consulte:
 
@@ -16,6 +16,21 @@ Este documento consolida todas as análises anteriores e adiciona:
 - Plano de refatoração em 4 fases
 - Análise de integração com outros add-ons
 - Recomendações de testes automatizados
+
+---
+
+## 🆕 Melhorias Administrativas (2025-12-04)
+
+Para análise específica de **funcionalidades de gerenciamento administrativo**, consulte:
+
+📖 **[AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md](/docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md)** (docs/analysis/)
+
+Este documento foca em:
+- Gaps identificados para administração (ações em lote, KPIs, gestão de slots)
+- Propostas de melhorias administrativas com estimativas de esforço
+- Melhorias de código (centralização de constantes, otimização de queries)
+- Melhorias de layout para produtividade do administrador
+- Plano de implementação em 4 fases
 
 ---
 
