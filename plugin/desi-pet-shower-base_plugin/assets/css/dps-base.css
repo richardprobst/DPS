@@ -11,8 +11,8 @@
     margin-bottom: 0;
 }
 
-/* Seletor mobile (dropdown) - oculto por padrão em desktop */
-/* Especificidade aumentada para evitar sobrescrita por temas ou plugins */
+/* Toggle mobile: oculto por padrão em desktop (display: block via media query < 768px).
+   Especificidade aumentada (.dps-base-wrapper .dps-nav-container) para evitar sobrescrita por temas. */
 .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
     display: none;
     width: 100%;
