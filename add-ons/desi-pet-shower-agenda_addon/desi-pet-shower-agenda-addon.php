@@ -350,8 +350,6 @@ class DPS_Agenda_Addon {
         // Não propagamos show_all em links de navegação padrão
         $nav_args = $current_args;
         unset( $nav_args['show_all'] );
-        echo '<div class="dps-agenda-nav">';
-        echo '<div class="dps-agenda-nav-group">';
         // Botões anterior e seguinte com filtros
         // Ao gerar links, não propague show_all (nav_args não contém show_all)
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
