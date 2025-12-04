@@ -600,14 +600,63 @@
         $end.val('');
         $pending.prop('checked', false);
         $summary.find('strong').text(baseText);
+        $('.dps-history-quick-btn').removeClass('active');
         applyHistoryFilters();
       }
 
+      // Funções auxiliares para datas
+      function formatDateYMD(date) {
+        var yyyy = date.getFullYear();
+        var mm   = String(date.getMonth() + 1).padStart(2, '0');
+        var dd   = String(date.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
+      }
+
+      function setQuickPeriod(period) {
+        var today = new Date();
+        var start = new Date();
+        var end   = new Date();
+
+        switch(period) {
+          case 'today':
+            start = today;
+            end   = today;
+            break;
+          case '7days':
+            start.setDate(today.getDate() - 6);
+            end = today;
+            break;
+          case '30days':
+            start.setDate(today.getDate() - 29);
+            end = today;
+            break;
+          case 'month':
+            start = new Date(today.getFullYear(), today.getMonth(), 1);
+            end   = today;
+            break;
+          default:
+            return;
+        }
+
+        $start.val(formatDateYMD(start));
+        $end.val(formatDateYMD(end));
+        $('.dps-history-quick-btn').removeClass('active');
+        $('.dps-history-quick-btn[data-period="' + period + '"]').addClass('active');
+        applyHistoryFilters();
+      }
+
+      // Eventos de filtros
       $search.on('input', applyHistoryFilters);
       $client.on('change', applyHistoryFilters);
       $status.on('change', applyHistoryFilters);
-      $start.on('change', applyHistoryFilters);
-      $end.on('change', applyHistoryFilters);
+      $start.on('change', function() {
+        $('.dps-history-quick-btn').removeClass('active');
+        applyHistoryFilters();
+      });
+      $end.on('change', function() {
+        $('.dps-history-quick-btn').removeClass('active');
+        applyHistoryFilters();
+      });
       $pending.on('change', applyHistoryFilters);
       $clearBtn.on('click', function(e){
         e.preventDefault();
@@ -616,6 +665,13 @@
       $exportBtn.on('click', function(e){
         e.preventDefault();
         exportHistory();
+      });
+
+      // Eventos dos botões de período rápido
+      $(document).on('click', '.dps-history-quick-btn', function(e) {
+        e.preventDefault();
+        var period = $(this).data('period');
+        setQuickPeriod(period);
       });
 
       applyHistoryFilters();
