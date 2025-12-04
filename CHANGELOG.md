@@ -82,6 +82,12 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Constante `DPS_DISABLE_CACHE`**: Nova constante para desabilitar completamente o cache do sistema
+  - Útil para desenvolvimento, testes e debug de problemas relacionados a dados em cache
+  - Afeta todos os transients de cache de dados (pets, clientes, serviços, estatísticas, métricas, contexto de IA)
+  - Não afeta caches de segurança (tokens de login, rate limiting, tentativas de login)
+  - Para desabilitar, adicione `define( 'DPS_DISABLE_CACHE', true );` no wp-config.php
+  - Documentação completa no README do plugin base
 - **Portal do Cliente v2.3.0**: Navegação por Tabs e Widget de Chat em tempo real
   - **Navegação por Tabs**: Interface reorganizada em 4 abas (Início, Agendamentos, Galeria, Meus Dados)
     - Tab "Início": Próximo agendamento + pendências financeiras + programa de fidelidade

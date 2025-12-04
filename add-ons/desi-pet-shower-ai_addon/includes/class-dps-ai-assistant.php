@@ -186,18 +186,21 @@ class DPS_AI_Assistant {
         $pets_string = implode( ',', array_map( 'absint', $pet_ids ) );
         $cache_key   = 'dps_ai_ctx_' . absint( $client_id ) . '_' . substr( wp_hash( $pets_string ), 0, 12 );
 
-        // Tenta obter do cache
-        $cached_context = get_transient( $cache_key );
-
-        if ( false !== $cached_context ) {
-            return $cached_context;
+        // Tenta obter do cache (se não estiver desabilitado)
+        if ( ! dps_is_cache_disabled() ) {
+            $cached_context = get_transient( $cache_key );
+            if ( false !== $cached_context ) {
+                return $cached_context;
+            }
         }
 
         // Cache miss: reconstrói contexto
         $context = self::build_client_context( $client_id, $pet_ids );
 
-        // Salva no cache
-        set_transient( $cache_key, $context, self::CONTEXT_CACHE_EXPIRATION );
+        // Salva no cache (se não estiver desabilitado)
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $context, self::CONTEXT_CACHE_EXPIRATION );
+        }
 
         return $context;
     }

@@ -239,8 +239,8 @@ class DPS_Loyalty_API {
     public static function get_global_metrics( $force_refresh = false ) {
         $cache_key = 'dps_loyalty_global_metrics';
         
-        // Tenta obter do cache
-        if ( ! $force_refresh ) {
+        // Tenta obter do cache (se não estiver desabilitado)
+        if ( ! $force_refresh && ! dps_is_cache_disabled() ) {
             $cached = get_transient( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
@@ -295,8 +295,10 @@ class DPS_Loyalty_API {
             'total_credits'        => (int) $total_credits,
         ];
 
-        // Armazena no cache por 5 minutos
-        set_transient( $cache_key, $metrics, 5 * MINUTE_IN_SECONDS );
+        // Armazena no cache por 5 minutos (se não estiver desabilitado)
+        if ( ! dps_is_cache_disabled() ) {
+            set_transient( $cache_key, $metrics, 5 * MINUTE_IN_SECONDS );
+        }
 
         return $metrics;
     }

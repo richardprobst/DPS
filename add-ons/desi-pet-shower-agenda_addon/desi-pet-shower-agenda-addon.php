@@ -508,8 +508,12 @@ class DPS_Agenda_Addon {
         $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
         
         // PERFORMANCE: Lista de clientes com cache transient (1 hora)
+        // Cache pode ser desabilitado via constante DPS_DISABLE_CACHE
         $clients_cache_key = 'dps_agenda_clients_list';
-        $clients = get_transient( $clients_cache_key );
+        $clients = false;
+        if ( ! dps_is_cache_disabled() ) {
+            $clients = get_transient( $clients_cache_key );
+        }
         if ( false === $clients ) {
             $clients = get_posts( [
                 'post_type'      => 'dps_cliente',
@@ -519,12 +523,18 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
                 'no_found_rows'  => true, // Otimização: não conta total
             ] );
-            set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
+            if ( ! dps_is_cache_disabled() ) {
+                set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
+            }
         }
         
         // PERFORMANCE: Lista de serviços com cache transient (1 hora)
+        // Cache pode ser desabilitado via constante DPS_DISABLE_CACHE
         $services_cache_key = 'dps_agenda_services_list';
-        $services = get_transient( $services_cache_key );
+        $services = false;
+        if ( ! dps_is_cache_disabled() ) {
+            $services = get_transient( $services_cache_key );
+        }
         if ( false === $services ) {
             $services = get_posts( [
                 'post_type'      => 'dps_service',
@@ -534,7 +544,9 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
                 'no_found_rows'  => true, // Otimização: não conta total
             ] );
-            set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
+            if ( ! dps_is_cache_disabled() ) {
+                set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
+            }
         }
         
         $status_options = [
