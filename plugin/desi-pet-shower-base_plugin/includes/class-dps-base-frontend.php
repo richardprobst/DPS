@@ -3081,27 +3081,75 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Exibe a página de detalhes de um cliente e seu histórico de agendamentos
-     * @param int $client_id ID do cliente
-     * @return string HTML
+     * Exibe a página de detalhes de um cliente com layout melhorado e ações de gerenciamento.
+     *
+     * Esta página mostra:
+     * - Cards de resumo com métricas do cliente
+     * - Dados pessoais organizados em seções
+     * - Lista de pets em formato de cards
+     * - Histórico de atendimentos com status e ações
+     * - Botões de ação para gerenciamento rápido
+     *
+     * @since 1.0.0
+     * @param int $client_id ID do cliente.
+     * @return string HTML da página.
      */
     private static function render_client_page( $client_id ) {
         $client = get_post( $client_id );
-        if ( ! $client || $client->post_type !== 'dps_cliente' ) {
+        if ( ! $client || 'dps_cliente' !== $client->post_type ) {
             return '<p>' . esc_html__( 'Cliente não encontrado.', 'desi-pet-shower' ) . '</p>';
         }
 
-        // Mostra aviso se um histórico foi gerado e disponível para download
-        if ( isset( $_GET['history_file'] ) ) {
-            $file = sanitize_file_name( wp_unslash( $_GET['history_file'] ) );
-            $uploads = wp_upload_dir();
-            $url  = trailingslashit( $uploads['baseurl'] ) . 'dps_docs/' . $file;
-            echo '<div class="notice notice-success" style="padding:10px;margin-bottom:15px;border:1px solid #d4edda;background:#d4edda;color:#155724;">' . sprintf( esc_html__( 'Histórico gerado com sucesso. %sClique aqui para abrir%s.', 'desi-pet-shower' ), '<a href="' . esc_url( $url ) . '" target="_blank" style="font-weight:bold;">', '</a>' ) . '</div>';
-        }
+        // Processar ações antes de renderizar
+        self::handle_client_page_actions( $client_id );
 
-        // Antes de montar a página, trata requisições de geração, envio e exclusão de documentos.
-        // 1. Gerar histórico: dps_client_history=1 cria um documento HTML do histórico. Se send_email=1,
-        // ele será enviado ao email especificado (parâmetro to_email) ou ao email cadastrado do cliente.
+        // Coletar dados do cliente
+        $data = self::prepare_client_page_data( $client_id, $client );
+
+        ob_start();
+
+        // Mensagens de feedback
+        self::render_client_page_notices( $client_id );
+
+        echo '<div class="dps-client-detail">';
+
+        // Header com título e ações
+        self::render_client_page_header( $client, $data['base_url'], $client_id );
+
+        // Cards de resumo/métricas
+        self::render_client_summary_cards( $data['appointments'], $data['pending_amount'] );
+
+        // Seção: Dados Pessoais
+        self::render_client_personal_section( $data['meta'] );
+
+        // Seção: Contato e Redes
+        self::render_client_contact_section( $data['meta'] );
+
+        // Seção: Endereço
+        self::render_client_address_section( $data['meta'] );
+
+        // Seção: Pets
+        self::render_client_pets_section( $data['pets'], $data['base_url'], $client_id );
+
+        // Seção: Histórico de Atendimentos
+        self::render_client_appointments_section( $data['appointments'], $data['base_url'], $client_id );
+
+        echo '</div>';
+
+        // Script para envio de histórico por email
+        self::render_client_page_scripts();
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Processa ações da página de detalhes do cliente (gerar histórico, enviar email, etc).
+     *
+     * @since 1.0.0
+     * @param int $client_id ID do cliente.
+     */
+    private static function handle_client_page_actions( $client_id ) {
+        // 1. Gerar histórico HTML
         if ( isset( $_GET['dps_client_history'] ) && '1' === $_GET['dps_client_history'] ) {
             $doc_url = self::generate_client_history_doc( $client_id );
             if ( $doc_url ) {
@@ -3109,40 +3157,50 @@ class DPS_Base_Frontend {
                 if ( isset( $_GET['send_email'] ) && '1' === $_GET['send_email'] ) {
                     $to_email = isset( $_GET['to_email'] ) && is_email( sanitize_email( $_GET['to_email'] ) ) ? sanitize_email( $_GET['to_email'] ) : '';
                     self::send_client_history_email( $client_id, $doc_url, $to_email );
-                    // Redireciona de volta com indicador de sucesso
                     $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'sent' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'sent' ] ) );
                     wp_redirect( $redirect );
                     exit;
                 }
-                // Caso contrário, redireciona para a própria página com parâmetro history_file para exibir aviso
                 $file_name = basename( $doc_url );
                 $redirect  = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'history_file' => $file_name ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'history_file' ] ) );
                 wp_redirect( $redirect );
                 exit;
             }
         }
-        // 2. Exclusão de documentos: dps_delete_doc=1 com parâmetro file remove o arquivo específico.
+
+        // 2. Exclusão de documentos
         if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) ) {
             $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             self::delete_document( $file );
-            // Redireciona sem os parâmetros
             $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file' ] ) );
             wp_redirect( $redirect );
             exit;
         }
-        // Obter metadados
+    }
+
+    /**
+     * Prepara todos os dados necessários para a página de detalhes do cliente.
+     *
+     * @since 1.0.0
+     * @param int     $client_id ID do cliente.
+     * @param WP_Post $client    Post do cliente.
+     * @return array Dados preparados.
+     */
+    private static function prepare_client_page_data( $client_id, $client ) {
+        // Metadados do cliente
         $meta = [
-            'cpf'       => get_post_meta( $client_id, 'client_cpf', true ),
-            'phone'     => get_post_meta( $client_id, 'client_phone', true ),
-            'email'     => get_post_meta( $client_id, 'client_email', true ),
-            'birth'     => get_post_meta( $client_id, 'client_birth', true ),
-            'instagram' => get_post_meta( $client_id, 'client_instagram', true ),
-            'facebook'  => get_post_meta( $client_id, 'client_facebook', true ),
-            'photo_auth'=> get_post_meta( $client_id, 'client_photo_auth', true ),
-            'address'   => get_post_meta( $client_id, 'client_address', true ),
-            'referral'  => get_post_meta( $client_id, 'client_referral', true ),
+            'cpf'        => get_post_meta( $client_id, 'client_cpf', true ),
+            'phone'      => get_post_meta( $client_id, 'client_phone', true ),
+            'email'      => get_post_meta( $client_id, 'client_email', true ),
+            'birth'      => get_post_meta( $client_id, 'client_birth', true ),
+            'instagram'  => get_post_meta( $client_id, 'client_instagram', true ),
+            'facebook'   => get_post_meta( $client_id, 'client_facebook', true ),
+            'photo_auth' => get_post_meta( $client_id, 'client_photo_auth', true ),
+            'address'    => get_post_meta( $client_id, 'client_address', true ),
+            'referral'   => get_post_meta( $client_id, 'client_referral', true ),
         ];
-        // Lista de pets deste cliente
+
+        // Lista de pets
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
             'posts_per_page' => -1,
@@ -3150,214 +3208,702 @@ class DPS_Base_Frontend {
             'meta_key'       => 'owner_id',
             'meta_value'     => $client_id,
         ] );
-        // Lista de agendamentos deste cliente, ordenado por data e hora
+
+        // Pré-carregar metadados dos pets
+        if ( $pets ) {
+            $pet_ids = wp_list_pluck( $pets, 'ID' );
+            update_meta_cache( 'post', $pet_ids );
+        }
+
+        // Lista de agendamentos ordenada por data (mais recente primeiro para exibição)
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'meta_key'       => 'appointment_date',
             'orderby'        => 'meta_value',
-            'order'          => 'ASC',
+            'order'          => 'DESC',
             'meta_query'     => [
                 [ 'key' => 'appointment_client_id', 'value' => $client_id, 'compare' => '=' ],
             ],
         ] );
-        $base_url = get_permalink();
-        ob_start();
-        // Exibe mensagem de sucesso se enviada via email
+
+        // Pré-carregar metadados dos agendamentos
+        if ( $appointments ) {
+            $appt_ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $appt_ids );
+        }
+
+        // Calcular pendências financeiras
+        $pending_amount = self::calculate_client_pending_amount( $client_id );
+
+        return [
+            'meta'           => $meta,
+            'pets'           => $pets,
+            'appointments'   => $appointments,
+            'pending_amount' => $pending_amount,
+            'base_url'       => get_permalink(),
+        ];
+    }
+
+    /**
+     * Calcula o valor total de pendências financeiras do cliente.
+     *
+     * @since 1.0.0
+     * @param int $client_id ID do cliente.
+     * @return float Valor total pendente.
+     */
+    private static function calculate_client_pending_amount( $client_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+
+        // Verifica se a tabela existe
+        $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( $exists !== $table ) {
+            return 0.0;
+        }
+
+        $pending = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE cliente_id = %d AND status = %s",
+                $client_id,
+                'em_aberto'
+            )
+        );
+
+        return $pending ? (float) $pending : 0.0;
+    }
+
+    /**
+     * Renderiza mensagens de feedback na página de detalhes do cliente.
+     *
+     * @since 1.0.0
+     * @param int $client_id ID do cliente.
+     */
+    private static function render_client_page_notices( $client_id ) {
+        // Histórico gerado com sucesso
+        if ( isset( $_GET['history_file'] ) ) {
+            $file    = sanitize_file_name( wp_unslash( $_GET['history_file'] ) );
+            $uploads = wp_upload_dir();
+            $url     = trailingslashit( $uploads['baseurl'] ) . 'dps_docs/' . $file;
+            echo '<div class="dps-alert dps-alert--success">';
+            echo '<strong>' . esc_html__( 'Histórico gerado com sucesso!', 'desi-pet-shower' ) . '</strong> ';
+            echo '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html__( 'Clique aqui para abrir', 'desi-pet-shower' ) . '</a>';
+            echo '</div>';
+        }
+
+        // Histórico enviado por email
         if ( isset( $_GET['sent'] ) && '1' === $_GET['sent'] ) {
-            echo '<div class="dps-notice" style="padding:10px;background:#dff0d8;border:1px solid #d6e9c6;margin-bottom:10px;">' . esc_html__( 'Histórico enviado por email com sucesso.', 'desi-pet-shower' ) . '</div>';
+            echo '<div class="dps-alert dps-alert--success">';
+            echo esc_html__( 'Histórico enviado por email com sucesso.', 'desi-pet-shower' );
+            echo '</div>';
         }
-        echo '<div class="dps-client-detail">';
-        echo '<p><a href="' . esc_url( remove_query_arg( [ 'dps_view', 'id', 'tab' ] ) ) . '">' . esc_html__( '← Voltar', 'desi-pet-shower' ) . '</a></p>';
-        echo '<h3>' . esc_html( $client->post_title ) . '</h3>';
-        echo '<ul class="dps-client-info">';
+    }
+
+    /**
+     * Renderiza o header da página de detalhes do cliente.
+     *
+     * @since 1.0.0
+     * @param WP_Post $client    Post do cliente.
+     * @param string  $base_url  URL base da página.
+     * @param int     $client_id ID do cliente.
+     */
+    private static function render_client_page_header( $client, $base_url, $client_id ) {
+        $back_url     = remove_query_arg( [ 'dps_view', 'id', 'tab' ] );
+        $edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client_id ], $base_url );
+        $schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client_id ], $base_url );
+
+        echo '<div class="dps-client-header">';
+        echo '<a href="' . esc_url( $back_url ) . '" class="dps-client-header__back">← ' . esc_html__( 'Voltar', 'desi-pet-shower' ) . '</a>';
+        echo '<h2 class="dps-client-header__title">' . esc_html( $client->post_title ) . '</h2>';
+        echo '<div class="dps-client-header__actions">';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-btn-action">';
+        echo '✏️ ' . esc_html__( 'Editar', 'desi-pet-shower' );
+        echo '</a>';
+        echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-btn-action dps-btn-action--primary">';
+        echo '📅 ' . esc_html__( 'Novo Agendamento', 'desi-pet-shower' );
+        echo '</a>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza os cards de resumo/métricas do cliente.
+     *
+     * @since 1.0.0
+     * @param array $appointments    Lista de agendamentos.
+     * @param float $pending_amount  Valor pendente.
+     */
+    private static function render_client_summary_cards( $appointments, $pending_amount ) {
+        $total_appointments = count( $appointments );
+        $last_appointment   = '';
+        $total_spent        = 0.0;
+
+        foreach ( $appointments as $appt ) {
+            $status = get_post_meta( $appt->ID, 'appointment_status', true );
+            $value  = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+
+            // Soma apenas atendimentos finalizados e pagos
+            if ( in_array( $status, [ 'finalizado_pago', 'finalizado e pago' ], true ) ) {
+                $total_spent += $value;
+            }
+
+            // Pega a data do último atendimento (primeiro da lista que está ordenada DESC)
+            if ( empty( $last_appointment ) ) {
+                $date = get_post_meta( $appt->ID, 'appointment_date', true );
+                if ( $date ) {
+                    $last_appointment = date_i18n( 'd/m/Y', strtotime( $date ) );
+                }
+            }
+        }
+
+        echo '<div class="dps-client-summary">';
+
+        // Total de atendimentos
+        echo '<div class="dps-summary-card dps-summary-card--highlight">';
+        echo '<span class="dps-summary-card__icon">📋</span>';
+        echo '<span class="dps-summary-card__value">' . esc_html( $total_appointments ) . '</span>';
+        echo '<span class="dps-summary-card__label">' . esc_html__( 'Total de Atendimentos', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+
+        // Total gasto
+        echo '<div class="dps-summary-card dps-summary-card--success">';
+        echo '<span class="dps-summary-card__icon">💰</span>';
+        echo '<span class="dps-summary-card__value">R$ ' . esc_html( number_format_i18n( $total_spent, 2 ) ) . '</span>';
+        echo '<span class="dps-summary-card__label">' . esc_html__( 'Total Gasto', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+
+        // Último atendimento
+        echo '<div class="dps-summary-card">';
+        echo '<span class="dps-summary-card__icon">📅</span>';
+        echo '<span class="dps-summary-card__value">' . esc_html( $last_appointment ?: '-' ) . '</span>';
+        echo '<span class="dps-summary-card__label">' . esc_html__( 'Último Atendimento', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+
+        // Pendências
+        $pending_class = $pending_amount > 0 ? 'dps-summary-card--warning' : '';
+        echo '<div class="dps-summary-card ' . esc_attr( $pending_class ) . '">';
+        echo '<span class="dps-summary-card__icon">' . ( $pending_amount > 0 ? '⚠️' : '✅' ) . '</span>';
+        echo '<span class="dps-summary-card__value">R$ ' . esc_html( number_format_i18n( $pending_amount, 2 ) ) . '</span>';
+        echo '<span class="dps-summary-card__label">' . esc_html__( 'Pendências', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de dados pessoais do cliente.
+     *
+     * @since 1.0.0
+     * @param array $meta Metadados do cliente.
+     */
+    private static function render_client_personal_section( $meta ) {
+        echo '<div class="dps-client-section">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">👤 ' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</h3>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+        echo '<div class="dps-info-grid">';
+
         // CPF
-        echo '<li><strong>' . esc_html__( 'CPF:', 'desi-pet-shower' ) . '</strong> ' . ( $meta['cpf'] ? esc_html( $meta['cpf'] ) : '-' ) . '</li>';
-        // Telefone/WhatsApp
-        if ( $meta['phone'] ) {
-            $phone_digits = preg_replace( '/\D+/', '', $meta['phone'] );
-            $wa_url       = 'https://wa.me/' . $phone_digits;
-            echo '<li><strong>' . esc_html__( 'Telefone:', 'desi-pet-shower' ) . '</strong> <a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $meta['phone'] ) . '</a></li>';
-        } else {
-            echo '<li><strong>' . esc_html__( 'Telefone:', 'desi-pet-shower' ) . '</strong> -</li>';
-        }
-        // Email
-        echo '<li><strong>Email:</strong> ' . ( $meta['email'] ? esc_html( $meta['email'] ) : '-' ) . '</li>';
+        $has_cpf = ! empty( $meta['cpf'] );
+        echo '<div class="dps-info-item' . ( $has_cpf ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'CPF', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $has_cpf ? $meta['cpf'] : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
+
         // Data de nascimento
-        if ( $meta['birth'] ) {
-            $birth_fmt = date_i18n( 'd-m-Y', strtotime( $meta['birth'] ) );
-            echo '<li><strong>' . esc_html__( 'Nascimento:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $birth_fmt ) . '</li>';
+        $has_birth = ! empty( $meta['birth'] );
+        $birth_fmt = $has_birth ? date_i18n( 'd/m/Y', strtotime( $meta['birth'] ) ) : '';
+        echo '<div class="dps-info-item' . ( $has_birth ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Data de Nascimento', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $has_birth ? $birth_fmt : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
+
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de contato e redes sociais do cliente.
+     *
+     * @since 1.0.0
+     * @param array $meta Metadados do cliente.
+     */
+    private static function render_client_contact_section( $meta ) {
+        echo '<div class="dps-client-section">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">📞 ' . esc_html__( 'Contato e Redes Sociais', 'desi-pet-shower' ) . '</h3>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+        echo '<div class="dps-info-grid">';
+
+        // Telefone/WhatsApp
+        $has_phone = ! empty( $meta['phone'] );
+        echo '<div class="dps-info-item' . ( $has_phone ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . '</span>';
+        if ( $has_phone ) {
+            $wa_url = class_exists( 'DPS_WhatsApp_Helper' )
+                ? DPS_WhatsApp_Helper::get_link_to_client( $meta['phone'] )
+                : 'https://wa.me/' . preg_replace( '/\D+/', '', $meta['phone'] );
+            echo '<span class="dps-info-item__value"><a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $meta['phone'] ) . ' 📱</a></span>';
         } else {
-            echo '<li><strong>' . esc_html__( 'Nascimento:', 'desi-pet-shower' ) . '</strong> -</li>';
+            echo '<span class="dps-info-item__value">' . esc_html__( 'Não informado', 'desi-pet-shower' ) . '</span>';
         }
+        echo '</div>';
+
+        // Email
+        $has_email = ! empty( $meta['email'] );
+        echo '<div class="dps-info-item' . ( $has_email ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Email', 'desi-pet-shower' ) . '</span>';
+        if ( $has_email ) {
+            echo '<span class="dps-info-item__value"><a href="mailto:' . esc_attr( $meta['email'] ) . '">' . esc_html( $meta['email'] ) . '</a></span>';
+        } else {
+            echo '<span class="dps-info-item__value">' . esc_html__( 'Não informado', 'desi-pet-shower' ) . '</span>';
+        }
+        echo '</div>';
+
         // Instagram
-        echo '<li><strong>Instagram:</strong> ' . ( $meta['instagram'] ? esc_html( $meta['instagram'] ) : '-' ) . '</li>';
+        $has_instagram = ! empty( $meta['instagram'] );
+        echo '<div class="dps-info-item' . ( $has_instagram ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">Instagram</span>';
+        if ( $has_instagram ) {
+            $ig_handle = ltrim( $meta['instagram'], '@' );
+            echo '<span class="dps-info-item__value"><a href="https://instagram.com/' . esc_attr( $ig_handle ) . '" target="_blank">@' . esc_html( $ig_handle ) . '</a></span>';
+        } else {
+            echo '<span class="dps-info-item__value">' . esc_html__( 'Não informado', 'desi-pet-shower' ) . '</span>';
+        }
+        echo '</div>';
+
         // Facebook
-        echo '<li><strong>Facebook:</strong> ' . ( $meta['facebook'] ? esc_html( $meta['facebook'] ) : '-' ) . '</li>';
-        // Autorização de publicação nas redes sociais
+        $has_facebook = ! empty( $meta['facebook'] );
+        echo '<div class="dps-info-item' . ( $has_facebook ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">Facebook</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $has_facebook ? $meta['facebook'] : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
+
+        // Autorização de fotos
         $photo_auth_val = $meta['photo_auth'];
         $photo_label    = '';
         if ( '' !== $photo_auth_val && null !== $photo_auth_val ) {
             $photo_label = $photo_auth_val ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' );
         }
-        echo '<li><strong>' . esc_html__( 'Autorização de publicação nas redes sociais:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $photo_label !== '' ? $photo_label : '-' ) . '</li>';
-        // Endereço completo
-        echo '<li><strong>' . esc_html__( 'Endereço:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $meta['address'] ? $meta['address'] : '-' ) . '</li>';
-        // Como nos conheceu
-        echo '<li><strong>' . esc_html__( 'Como nos conheceu:', 'desi-pet-shower' ) . '</strong> ' . esc_html( $meta['referral'] ? $meta['referral'] : '-' ) . '</li>';
-        echo '</ul>';
-        // Pets do cliente
-        echo '<h4>' . esc_html__( 'Pets', 'desi-pet-shower' ) . '</h4>';
-        if ( $pets ) {
-            // Pré-carrega metadados de todos os pets para evitar múltiplas queries no loop
-            $pet_ids = wp_list_pluck( $pets, 'ID' );
-            update_meta_cache( 'post', $pet_ids );
+        echo '<div class="dps-info-item' . ( $photo_label ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Autorização para Fotos', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $photo_label ?: __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
 
-            // Tabela de pets com detalhes
-            echo '<table class="dps-table"><thead><tr>';
-            echo '<th>' . esc_html__( 'Foto', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Porte', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Peso', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Pelagem', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cor', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Nascimento', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Cuidados', 'desi-pet-shower' ) . '</th>';
-            echo '<th>' . esc_html__( 'Agressivo', 'desi-pet-shower' ) . '</th>';
-            echo '</tr></thead><tbody>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de endereço do cliente.
+     *
+     * @since 1.0.0
+     * @param array $meta Metadados do cliente.
+     */
+    private static function render_client_address_section( $meta ) {
+        echo '<div class="dps-client-section">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">📍 ' . esc_html__( 'Endereço e Indicação', 'desi-pet-shower' ) . '</h3>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+        echo '<div class="dps-info-grid">';
+
+        // Endereço
+        $has_address = ! empty( $meta['address'] );
+        echo '<div class="dps-info-item' . ( $has_address ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Endereço Completo', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $has_address ? $meta['address'] : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
+
+        // Como nos conheceu
+        $has_referral = ! empty( $meta['referral'] );
+        echo '<div class="dps-info-item' . ( $has_referral ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<span class="dps-info-item__label">' . esc_html__( 'Como nos Conheceu', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-info-item__value">' . esc_html( $has_referral ? $meta['referral'] : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        echo '</div>';
+
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de pets do cliente.
+     *
+     * @since 1.0.0
+     * @param array  $pets      Lista de pets.
+     * @param string $base_url  URL base da página.
+     * @param int    $client_id ID do cliente.
+     */
+    private static function render_client_pets_section( $pets, $base_url, $client_id ) {
+        $pet_count   = count( $pets );
+        $add_pet_url = add_query_arg( [ 'tab' => 'pets', 'pref_owner' => $client_id ], $base_url );
+
+        echo '<div class="dps-client-section">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">';
+        echo '🐾 ' . esc_html__( 'Pets', 'desi-pet-shower' );
+        echo '<span class="dps-client-section__count">' . esc_html( $pet_count ) . '</span>';
+        echo '</h3>';
+        echo '<div class="dps-client-section__actions">';
+        echo '<a href="' . esc_url( $add_pet_url ) . '" class="button button-secondary">+ ' . esc_html__( 'Adicionar Pet', 'desi-pet-shower' ) . '</a>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+
+        if ( $pets ) {
+            echo '<div class="dps-pet-cards">';
+
             foreach ( $pets as $pet ) {
-                // Foto do pet
-                $photo_id  = get_post_meta( $pet->ID, 'pet_photo_id', true );
-                $photo_html = '';
-                if ( $photo_id ) {
-                    // Obtém a URL da imagem em miniatura
-                    $img_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
-                    if ( $img_url ) {
-                        $photo_html = '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" style="max-width:60px;height:auto;" />';
-                    }
-                }
-                $species  = get_post_meta( $pet->ID, 'pet_species', true );
-                $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
-                $size     = get_post_meta( $pet->ID, 'pet_size', true );
-                $weight   = get_post_meta( $pet->ID, 'pet_weight', true );
-                $coat     = get_post_meta( $pet->ID, 'pet_coat', true );
-                $color    = get_post_meta( $pet->ID, 'pet_color', true );
-                $birth    = get_post_meta( $pet->ID, 'pet_birth', true );
-                $sex      = get_post_meta( $pet->ID, 'pet_sex', true );
-                $care     = get_post_meta( $pet->ID, 'pet_care', true );
-                $aggr     = get_post_meta( $pet->ID, 'pet_aggressive', true );
-                // Translate codes
-                switch ( $species ) {
-                    case 'cao':
-                        $species_label = __( 'Cachorro', 'desi-pet-shower' );
-                        break;
-                    case 'gato':
-                        $species_label = __( 'Gato', 'desi-pet-shower' );
-                        break;
-                    case 'outro':
-                        $species_label = __( 'Outro', 'desi-pet-shower' );
-                        break;
-                    default:
-                        $species_label = $species;
-                        break;
-                }
-                switch ( $size ) {
-                    case 'pequeno':
-                        $size_label = __( 'Pequeno', 'desi-pet-shower' );
-                        break;
-                    case 'medio':
-                        $size_label = __( 'Médio', 'desi-pet-shower' );
-                        break;
-                    case 'grande':
-                        $size_label = __( 'Grande', 'desi-pet-shower' );
-                        break;
-                    default:
-                        $size_label = $size;
-                        break;
-                }
-                switch ( $sex ) {
-                    case 'macho':
-                        $sex_label = __( 'Macho', 'desi-pet-shower' );
-                        break;
-                    case 'femea':
-                        $sex_label = __( 'Fêmea', 'desi-pet-shower' );
-                        break;
-                    default:
-                        $sex_label = $sex;
-                        break;
-                }
-                $birth_formatted = $birth ? date_i18n( 'd-m-Y', strtotime( $birth ) ) : '';
-                $aggr_label = $aggr ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' );
-                echo '<tr>';
-                // Exibe foto ou marcador vazio
-                echo '<td>' . ( $photo_html ? $photo_html : '-' ) . '</td>';
-                echo '<td>' . esc_html( $pet->post_title ) . '</td>';
-                echo '<td>' . esc_html( $species_label ) . '</td>';
-                echo '<td>' . esc_html( $breed ) . '</td>';
-                echo '<td>' . esc_html( $size_label ) . '</td>';
-                echo '<td>' . esc_html( $weight ) . '</td>';
-                echo '<td>' . esc_html( $coat ) . '</td>';
-                echo '<td>' . esc_html( $color ) . '</td>';
-                echo '<td>' . esc_html( $birth_formatted ) . '</td>';
-                echo '<td>' . esc_html( $sex_label ) . '</td>';
-                echo '<td>' . esc_html( $care ) . '</td>';
-                echo '<td>' . esc_html( $aggr_label ) . '</td>';
-                echo '</tr>';
+                self::render_pet_card( $pet, $base_url, $client_id );
             }
-            echo '</tbody></table>';
+
+            echo '</div>';
         } else {
-            echo '<p style="color: #6b7280; font-style: italic;">' . esc_html__( 'Este cliente ainda não possui pets cadastrados.', 'desi-pet-shower' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<span class="dps-empty-state__icon">🐕</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado', 'desi-pet-shower' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Este cliente ainda não possui pets cadastrados. Clique no botão acima para adicionar.', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
         }
-        // Link para gerar PDF/relatório do histórico
-        $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
-        $email_base   = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', 'send_email' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
-        echo '<p style="margin-top:15px;"><a href="' . esc_url( $history_link ) . '" class="button">' . esc_html__( 'Gerar histórico', 'desi-pet-shower' ) . '</a> ';
-        // Botão de envio com prompt para email personalizado
-        echo '<a href="#" class="button dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar histórico por email', 'desi-pet-shower' ) . '</a></p>';
-        // Script para solicitar email e redirecionar
-        echo '<script>(function($){$(document).on("click", ".dps-send-history-email", function(e){e.preventDefault();var base=$(this).data("base");var email=prompt("' . esc_js( __( 'Para qual email deseja enviar? Deixe em branco para usar o email cadastrado.', 'desi-pet-shower' ) ) . '");if(email===null){return;}email=email.trim();var url=base; if(email){url += "&to_email=" + encodeURIComponent(email);} window.location.href=url;});})(jQuery);</script>';
-        // Histórico de agendamentos
-        echo '<h4>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h4>';
-        if ( $appointments ) {
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Pagamento', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
-            foreach ( $appointments as $appt ) {
-                $date  = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time  = get_post_meta( $appt->ID, 'appointment_time', true );
-                $pet_id= get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $pet   = $pet_id ? get_post( $pet_id ) : null;
-                $notes = get_post_meta( $appt->ID, 'appointment_notes', true );
-                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-                // Determina status: pago ou pendente
-                $status_label = '';
-                if ( $status_meta === 'finalizado_pago' || $status_meta === 'finalizado e pago' ) {
-                    $status_label = __( 'Pago', 'desi-pet-shower' );
-                } elseif ( $status_meta === 'finalizado' ) {
-                    $status_label = __( 'Pendente', 'desi-pet-shower' );
-                } elseif ( $status_meta === 'cancelado' ) {
-                    $status_label = __( 'Cancelado', 'desi-pet-shower' );
-                } else {
-                    // default
-                    $status_label = __( 'Pendente', 'desi-pet-shower' );
-                }
-                $date_fmt = $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '';
-                echo '<tr>';
-                echo '<td>' . esc_html( $date_fmt ) . '</td>';
-                echo '<td>' . esc_html( $time ) . '</td>';
-                echo '<td>' . esc_html( $pet ? $pet->post_title : '-' ) . '</td>';
-                echo '<td>' . esc_html( $status_label ) . '</td>';
-                echo '<td>' . esc_html( $notes ) . '</td>';
-                echo '</tr>';
+
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza um card individual de pet.
+     *
+     * @since 1.0.0
+     * @param WP_Post $pet       Post do pet.
+     * @param string  $base_url  URL base da página.
+     * @param int     $client_id ID do cliente.
+     */
+    private static function render_pet_card( $pet, $base_url, $client_id ) {
+        // Metadados do pet
+        $photo_id   = get_post_meta( $pet->ID, 'pet_photo_id', true );
+        $species    = get_post_meta( $pet->ID, 'pet_species', true );
+        $breed      = get_post_meta( $pet->ID, 'pet_breed', true );
+        $size       = get_post_meta( $pet->ID, 'pet_size', true );
+        $weight     = get_post_meta( $pet->ID, 'pet_weight', true );
+        $coat       = get_post_meta( $pet->ID, 'pet_coat', true );
+        $color      = get_post_meta( $pet->ID, 'pet_color', true );
+        $birth      = get_post_meta( $pet->ID, 'pet_birth', true );
+        $sex        = get_post_meta( $pet->ID, 'pet_sex', true );
+        $care       = get_post_meta( $pet->ID, 'pet_care', true );
+        $aggressive = get_post_meta( $pet->ID, 'pet_aggressive', true );
+
+        // Traduzir labels
+        $species_label = self::get_pet_species_label( $species );
+        $size_label    = self::get_pet_size_label( $size );
+        $sex_label     = self::get_pet_sex_label( $sex );
+
+        // URLs de ação
+        $edit_url     = add_query_arg( [ 'tab' => 'pets', 'dps_edit' => 'pet', 'id' => $pet->ID ], $base_url );
+        $schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client_id, 'pref_pet' => $pet->ID ], $base_url );
+
+        // Classes do card
+        $card_class = 'dps-pet-card';
+        if ( $aggressive ) {
+            $card_class .= ' dps-pet-card--aggressive';
+        }
+
+        // Ícone da espécie
+        $species_icon = '🐾';
+        if ( 'cao' === $species ) {
+            $species_icon = '🐕';
+        } elseif ( 'gato' === $species ) {
+            $species_icon = '🐈';
+        }
+
+        echo '<div class="' . esc_attr( $card_class ) . '">';
+
+        // Header do card
+        echo '<div class="dps-pet-card__header">';
+        if ( $photo_id ) {
+            $img_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
+            if ( $img_url ) {
+                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" class="dps-pet-card__photo">';
+            } else {
+                echo '<div class="dps-pet-card__photo dps-pet-card__photo--placeholder">' . $species_icon . '</div>';
             }
-            echo '</tbody></table>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum atendimento encontrado.', 'desi-pet-shower' ) . '</p>';
+            echo '<div class="dps-pet-card__photo dps-pet-card__photo--placeholder">' . $species_icon . '</div>';
+        }
+        echo '<div class="dps-pet-card__title">';
+        echo '<h4 class="dps-pet-card__name">' . esc_html( $pet->post_title ) . '</h4>';
+        echo '<p class="dps-pet-card__subtitle">' . esc_html( $species_label ) . ( $breed ? ' • ' . esc_html( $breed ) : '' ) . '</p>';
+        echo '</div>';
+        if ( $aggressive ) {
+            echo '<span class="dps-pet-card__badge">⚠️ ' . esc_html__( 'Agressivo', 'desi-pet-shower' ) . '</span>';
         }
         echo '</div>';
-        return ob_get_clean();
+
+        // Body do card
+        echo '<div class="dps-pet-card__body">';
+        echo '<div class="dps-pet-card__info">';
+
+        // Porte
+        echo '<div class="dps-pet-card__info-item">';
+        echo '<span class="dps-pet-card__info-label">' . esc_html__( 'Porte', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-pet-card__info-value">' . esc_html( $size_label ?: '-' ) . '</span>';
+        echo '</div>';
+
+        // Peso
+        echo '<div class="dps-pet-card__info-item">';
+        echo '<span class="dps-pet-card__info-label">' . esc_html__( 'Peso', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-pet-card__info-value">' . ( $weight ? esc_html( $weight ) . ' kg' : '-' ) . '</span>';
+        echo '</div>';
+
+        // Sexo
+        echo '<div class="dps-pet-card__info-item">';
+        echo '<span class="dps-pet-card__info-label">' . esc_html__( 'Sexo', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-pet-card__info-value">' . esc_html( $sex_label ?: '-' ) . '</span>';
+        echo '</div>';
+
+        // Nascimento
+        echo '<div class="dps-pet-card__info-item">';
+        echo '<span class="dps-pet-card__info-label">' . esc_html__( 'Nascimento', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-pet-card__info-value">' . ( $birth ? esc_html( date_i18n( 'd/m/Y', strtotime( $birth ) ) ) : '-' ) . '</span>';
+        echo '</div>';
+
+        // Pelagem
+        if ( $coat || $color ) {
+            echo '<div class="dps-pet-card__info-item">';
+            echo '<span class="dps-pet-card__info-label">' . esc_html__( 'Pelagem', 'desi-pet-shower' ) . '</span>';
+            $pelagem = [];
+            if ( $coat ) {
+                $pelagem[] = $coat;
+            }
+            if ( $color ) {
+                $pelagem[] = $color;
+            }
+            echo '<span class="dps-pet-card__info-value">' . esc_html( implode( ', ', $pelagem ) ) . '</span>';
+            echo '</div>';
+        }
+
+        echo '</div>';
+
+        // Cuidados especiais (se houver)
+        if ( $care ) {
+            echo '<div class="dps-pet-card__notes">' . esc_html( $care ) . '</div>';
+        }
+
+        // Ações
+        echo '<div class="dps-pet-card__actions">';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="button button-secondary">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="' . esc_url( $schedule_url ) . '" class="button button-primary">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a>';
+        echo '</div>';
+
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de histórico de atendimentos do cliente.
+     *
+     * @since 1.0.0
+     * @param array  $appointments Lista de agendamentos.
+     * @param string $base_url     URL base da página.
+     * @param int    $client_id    ID do cliente.
+     */
+    private static function render_client_appointments_section( $appointments, $base_url, $client_id ) {
+        $appt_count   = count( $appointments );
+        $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
+        $email_base   = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', 'send_email' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
+
+        echo '<div class="dps-client-section">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">';
+        echo '📋 ' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' );
+        echo '<span class="dps-client-section__count">' . esc_html( $appt_count ) . '</span>';
+        echo '</h3>';
+        echo '<div class="dps-client-section__actions">';
+        echo '<a href="' . esc_url( $history_link ) . '" class="button button-secondary">' . esc_html__( 'Gerar Relatório', 'desi-pet-shower' ) . '</a>';
+        echo '<a href="#" class="button button-secondary dps-send-history-email" data-base="' . esc_url( $email_base ) . '">' . esc_html__( 'Enviar por Email', 'desi-pet-shower' ) . '</a>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+
+        if ( $appointments ) {
+            echo '<div class="dps-table-wrapper">';
+            echo '<table class="dps-table">';
+            echo '<thead><tr>';
+            echo '<th>' . esc_html__( 'Data', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Horário', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Valor', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status', 'desi-pet-shower' ) . '</th>';
+            echo '<th>' . esc_html__( 'Observações', 'desi-pet-shower' ) . '</th>';
+            echo '</tr></thead>';
+            echo '<tbody>';
+
+            // Cache de pets para evitar múltiplas queries
+            $pet_cache = [];
+
+            foreach ( $appointments as $appt ) {
+                $date        = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time        = get_post_meta( $appt->ID, 'appointment_time', true );
+                $pet_id      = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                $notes       = get_post_meta( $appt->ID, 'appointment_notes', true );
+                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+                $total_value = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+
+                // Obter nome do pet (com cache)
+                $pet_name = '-';
+                if ( $pet_id ) {
+                    if ( ! isset( $pet_cache[ $pet_id ] ) ) {
+                        $pet = get_post( $pet_id );
+                        $pet_cache[ $pet_id ] = $pet ? $pet->post_title : '-';
+                    }
+                    $pet_name = $pet_cache[ $pet_id ];
+                }
+
+                // Status badge
+                $status_info = self::get_appointment_status_info( $status_meta );
+
+                $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '-';
+
+                echo '<tr>';
+                echo '<td>' . esc_html( $date_fmt ) . '</td>';
+                echo '<td>' . esc_html( $time ?: '-' ) . '</td>';
+                echo '<td>' . esc_html( $pet_name ) . '</td>';
+                echo '<td>R$ ' . esc_html( number_format_i18n( $total_value, 2 ) ) . '</td>';
+                echo '<td><span class="dps-status-badge ' . esc_attr( $status_info['class'] ) . '">' . esc_html( $status_info['label'] ) . '</span></td>';
+                echo '<td>' . esc_html( $notes ? wp_trim_words( $notes, 10, '...' ) : '-' ) . '</td>';
+                echo '</tr>';
+            }
+
+            echo '</tbody>';
+            echo '</table>';
+            echo '</div>';
+        } else {
+            echo '<div class="dps-empty-state">';
+            echo '<span class="dps-empty-state__icon">📅</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum atendimento encontrado', 'desi-pet-shower' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Este cliente ainda não possui atendimentos registrados.', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+        }
+
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza scripts JavaScript da página de detalhes do cliente.
+     *
+     * @since 1.0.0
+     */
+    private static function render_client_page_scripts() {
+        ?>
+        <script>
+        (function($){
+            $(document).on('click', '.dps-send-history-email', function(e){
+                e.preventDefault();
+                var base = $(this).data('base');
+                var email = prompt('<?php echo esc_js( __( 'Para qual email deseja enviar? Deixe em branco para usar o email cadastrado.', 'desi-pet-shower' ) ); ?>');
+                if (email === null) {
+                    return;
+                }
+                email = email.trim();
+                var url = base;
+                if (email) {
+                    url += '&to_email=' + encodeURIComponent(email);
+                }
+                window.location.href = url;
+            });
+        })(jQuery);
+        </script>
+        <?php
+    }
+
+    /**
+     * Retorna o label traduzido para a espécie do pet.
+     *
+     * @since 1.0.0
+     * @param string $species Código da espécie.
+     * @return string Label traduzido.
+     */
+    private static function get_pet_species_label( $species ) {
+        $labels = [
+            'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
+            'gato'  => __( 'Gato', 'desi-pet-shower' ),
+            'outro' => __( 'Outro', 'desi-pet-shower' ),
+        ];
+
+        return isset( $labels[ $species ] ) ? $labels[ $species ] : $species;
+    }
+
+    /**
+     * Retorna o label traduzido para o tamanho do pet.
+     *
+     * @since 1.0.0
+     * @param string $size Código do tamanho.
+     * @return string Label traduzido.
+     */
+    private static function get_pet_size_label( $size ) {
+        $labels = [
+            'pequeno' => __( 'Pequeno', 'desi-pet-shower' ),
+            'medio'   => __( 'Médio', 'desi-pet-shower' ),
+            'grande'  => __( 'Grande', 'desi-pet-shower' ),
+        ];
+
+        return isset( $labels[ $size ] ) ? $labels[ $size ] : $size;
+    }
+
+    /**
+     * Retorna o label traduzido para o sexo do pet.
+     *
+     * @since 1.0.0
+     * @param string $sex Código do sexo.
+     * @return string Label traduzido.
+     */
+    private static function get_pet_sex_label( $sex ) {
+        $labels = [
+            'macho' => __( 'Macho', 'desi-pet-shower' ),
+            'femea' => __( 'Fêmea', 'desi-pet-shower' ),
+        ];
+
+        return isset( $labels[ $sex ] ) ? $labels[ $sex ] : $sex;
+    }
+
+    /**
+     * Retorna informações de status do agendamento (label e classe CSS).
+     *
+     * @since 1.0.0
+     * @param string $status Status bruto do agendamento.
+     * @return array Array com 'label' e 'class'.
+     */
+    private static function get_appointment_status_info( $status ) {
+        switch ( $status ) {
+            case 'finalizado_pago':
+            case 'finalizado e pago':
+                return [
+                    'label' => __( 'Pago', 'desi-pet-shower' ),
+                    'class' => 'dps-status-badge--paid',
+                ];
+            case 'finalizado':
+                return [
+                    'label' => __( 'Finalizado', 'desi-pet-shower' ),
+                    'class' => 'dps-status-badge--pending',
+                ];
+            case 'cancelado':
+                return [
+                    'label' => __( 'Cancelado', 'desi-pet-shower' ),
+                    'class' => 'dps-status-badge--cancelled',
+                ];
+            case 'pendente':
+            default:
+                return [
+                    'label' => __( 'Agendado', 'desi-pet-shower' ),
+                    'class' => 'dps-status-badge--scheduled',
+                ];
+        }
     }
 
     /**
