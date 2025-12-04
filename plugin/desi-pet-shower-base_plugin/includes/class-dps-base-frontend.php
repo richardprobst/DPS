@@ -613,6 +613,11 @@ class DPS_Base_Frontend {
         ob_start();
         echo '<div class="dps-base-wrapper">';
         echo '<h1 class="dps-page-title">' . esc_html__( 'Painel de Gestão DPS', 'desi-pet-shower' ) . '</h1>';
+        
+        // Exibe mensagens de feedback (sucesso, erro, aviso)
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in DPS_Message_Helper
+        echo DPS_Message_Helper::display_messages();
+        
         // Container de navegação com toggle mobile
         echo '<nav class="dps-nav-container" aria-label="' . esc_attr__( 'Navegação do painel', 'desi-pet-shower' ) . '">';
         echo '<button type="button" class="dps-nav-mobile-toggle" aria-expanded="false" aria-controls="dps-main-nav">' . esc_html__( 'Selecionar seção', 'desi-pet-shower' ) . '</button>';
@@ -2051,8 +2056,22 @@ class DPS_Base_Frontend {
         // Coordenadas (podem estar vazias se não selecionadas)
         $lat       = isset( $_POST['client_lat'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lat'] ) ) : '';
         $lng       = isset( $_POST['client_lng'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lng'] ) ) : '';
+        
+        // Validação de campos obrigatórios
+        $errors = [];
         if ( empty( $name ) ) {
-            return;
+            $errors[] = __( 'O campo Nome é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $phone ) ) {
+            $errors[] = __( 'O campo Telefone é obrigatório.', 'desi-pet-shower' );
+        }
+        
+        if ( ! empty( $errors ) ) {
+            foreach ( $errors as $error ) {
+                DPS_Message_Helper::add_error( $error );
+            }
+            wp_safe_redirect( self::get_redirect_url( 'clientes' ) );
+            exit;
         }
         $client_id = isset( $_POST['client_id'] ) ? intval( wp_unslash( $_POST['client_id'] ) ) : 0;
         if ( $client_id ) {
@@ -2116,8 +2135,31 @@ class DPS_Base_Frontend {
         $vaccinations = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
         $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
         $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
-        if ( empty( $owner_id ) || empty( $name ) ) {
-            return;
+        
+        // Validação de campos obrigatórios
+        $errors = [];
+        if ( empty( $name ) ) {
+            $errors[] = __( 'O campo Nome do Pet é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $owner_id ) ) {
+            $errors[] = __( 'O campo Cliente (Tutor) é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $species ) ) {
+            $errors[] = __( 'O campo Espécie é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $size ) ) {
+            $errors[] = __( 'O campo Tamanho é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $sex ) ) {
+            $errors[] = __( 'O campo Sexo é obrigatório.', 'desi-pet-shower' );
+        }
+        
+        if ( ! empty( $errors ) ) {
+            foreach ( $errors as $error ) {
+                DPS_Message_Helper::add_error( $error );
+            }
+            wp_safe_redirect( self::get_redirect_url( 'pets' ) );
+            exit;
         }
         $pet_id = isset( $_POST['pet_id'] ) ? intval( wp_unslash( $_POST['pet_id'] ) ) : 0;
         if ( $pet_id ) {
@@ -2243,7 +2285,9 @@ class DPS_Base_Frontend {
         // Passo 1: Validar e sanitizar dados do formulário.
         $data = self::validate_and_sanitize_appointment_data();
         if ( null === $data ) {
-            return;
+            // Redireciona para exibir mensagens de erro
+            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
+            exit;
         }
 
         $appt_type = $data['appt_type'];
@@ -2359,8 +2403,22 @@ class DPS_Base_Frontend {
             $subscription_extra_value = 0;
         }
 
-        // Validação de campos obrigatórios.
-        if ( empty( $client_id ) || empty( $pet_ids ) || empty( $date ) || empty( $time ) ) {
+        // Validação de campos obrigatórios com mensagens específicas.
+        $errors = [];
+        if ( empty( $client_id ) ) {
+            $errors[] = __( 'O campo Cliente é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $pet_ids ) ) {
+            $errors[] = __( 'Selecione pelo menos um pet para o agendamento.', 'desi-pet-shower' );
+        }
+        if ( empty( $date ) ) {
+            $errors[] = __( 'O campo Data é obrigatório.', 'desi-pet-shower' );
+        }
+        if ( empty( $time ) ) {
+            $errors[] = __( 'O campo Horário é obrigatório.', 'desi-pet-shower' );
+        }
+        
+        if ( ! empty( $errors ) ) {
             DPS_Logger::warning(
                 __( 'Tentativa de salvar agendamento com dados incompletos', 'desi-pet-shower' ),
                 [
@@ -2372,7 +2430,9 @@ class DPS_Base_Frontend {
                 ],
                 'appointments'
             );
-            DPS_Message_Helper::add_error( __( 'Por favor, preencha todos os campos obrigatórios.', 'desi-pet-shower' ) );
+            foreach ( $errors as $error ) {
+                DPS_Message_Helper::add_error( $error );
+            }
             return null;
         }
 
