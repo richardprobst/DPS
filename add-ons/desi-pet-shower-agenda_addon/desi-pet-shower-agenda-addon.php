@@ -103,8 +103,23 @@ class DPS_Agenda_Addon {
     /**
      * Retorna configuração de status com labels, cores e ícones.
      *
+     * Use este método para obter a configuração completa de todos os status
+     * disponíveis. Cada status contém label traduzida, cor de destaque,
+     * cor de fundo e ícone.
+     *
+     * Exemplo de uso:
+     * ```php
+     * $config = DPS_Agenda_Addon::get_status_config();
+     * $pending_color = $config[ DPS_Agenda_Addon::STATUS_PENDING ]['color'];
+     * $pending_label = $config[ DPS_Agenda_Addon::STATUS_PENDING ]['label'];
+     * ```
+     *
      * @since 1.3.1
-     * @return array Configuração completa de status.
+     * @return array Configuração completa de status. Cada item contém:
+     *               - 'label' (string) Label traduzida
+     *               - 'color' (string) Cor hex para borda/destaque
+     *               - 'bg'    (string) Cor hex para fundo
+     *               - 'icon'  (string) Emoji/ícone
      */
     public static function get_status_config() {
         return [

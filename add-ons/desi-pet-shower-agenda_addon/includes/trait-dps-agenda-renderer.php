@@ -89,17 +89,27 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Cache para configuração de status.
+     *
+     * @since 1.3.1
+     * @var array|null
+     */
+    private $status_config_cache = null;
+
+    /**
      * Obtém opções de status para o filtro.
      * Usa constantes centralizadas da classe principal.
      *
      * @since 1.3.0
-     * @since 1.3.1 Refatorado para usar constantes centralizadas.
+     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
      * @return array Opções de status.
      */
     private function get_status_options() {
-        $config = DPS_Agenda_Addon::get_status_config();
+        if ( null === $this->status_config_cache ) {
+            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
+        }
         $options = [ '' => __( 'Todos os status', 'dps-agenda-addon' ) ];
-        foreach ( $config as $key => $data ) {
+        foreach ( $this->status_config_cache as $key => $data ) {
             $options[ $key ] = $data['label'];
         }
         return $options;
@@ -110,13 +120,15 @@ trait DPS_Agenda_Renderer {
      * Usa constantes centralizadas da classe principal.
      *
      * @since 1.3.0
-     * @since 1.3.1 Refatorado para usar constantes centralizadas.
+     * @since 1.3.1 Refatorado para usar constantes centralizadas com cache.
      * @return array Opções de status.
      */
     private function get_table_status_options() {
-        $config = DPS_Agenda_Addon::get_status_config();
+        if ( null === $this->status_config_cache ) {
+            $this->status_config_cache = DPS_Agenda_Addon::get_status_config();
+        }
         $options = [];
-        foreach ( $config as $key => $data ) {
+        foreach ( $this->status_config_cache as $key => $data ) {
             $options[ $key ] = $data['label'];
         }
         return $options;
