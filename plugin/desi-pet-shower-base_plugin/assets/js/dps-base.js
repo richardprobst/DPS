@@ -657,44 +657,141 @@
 
     /*
      * Melhorias de UX para formulários de cadastro
+     * - Validação básica de campos obrigatórios (clientes/pets)
      * - Desabilita botão de submit durante envio
      * - Preview de upload de foto
      */
     (function(){
-      // Desabilita botão durante submit
-      $('.dps-form').on('submit', function(){
+      function ensureErrorBlock($form) {
+        var $block = $form.find('.dps-form-error');
+        if (!$block.length) {
+          $block = $('<div class="dps-form-error" role="alert" aria-live="assertive" hidden></div>');
+          $form.prepend($block);
+        }
+        return $block;
+      }
+
+      function getFormErrors($form) {
+        var errors = [];
+
+        if ($form.find('[name="client_name"]').length) {
+          var clientName = $.trim($form.find('[name="client_name"]').val());
+          var clientPhone = $.trim($form.find('[name="client_phone"]').val());
+
+          if (!clientName) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.clientNameRequired) || 'O campo Nome é obrigatório.');
+          }
+          if (!clientPhone) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.clientPhoneRequired) || 'O campo Telefone é obrigatório.');
+          }
+        }
+
+        if ($form.find('[name="pet_name"]').length) {
+          var petName = $.trim($form.find('[name="pet_name"]').val());
+          var ownerId = $.trim($form.find('[name="owner_id"]').val());
+          var species = $.trim($form.find('[name="pet_species"]').val());
+          var petSex = $.trim($form.find('[name="pet_sex"]').val());
+          var petSize = $.trim($form.find('[name="pet_size"]').val());
+
+          if (!petName) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.petNameRequired) || 'O campo Nome do Pet é obrigatório.');
+          }
+          if (!ownerId) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.petOwnerRequired) || 'Selecione um cliente (tutor) para o pet.');
+          }
+          if (!species) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.petSpeciesRequired) || 'Selecione a espécie do pet.');
+          }
+          if (!petSex) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.petSexRequired) || 'Selecione o sexo do pet.');
+          }
+          if (!petSize) {
+            errors.push((window.dpsBaseL10n && dpsBaseL10n.petSizeRequired) || 'Selecione o porte do pet.');
+          }
+        }
+
+        return errors;
+      }
+
+      function showErrors($form, errors) {
+        var $block = ensureErrorBlock($form);
+        var html = '<strong>' + ((window.dpsBaseL10n && dpsBaseL10n.formErrorsTitle) || 'Por favor, corrija os seguintes erros:') + '</strong><ul>';
+
+        errors.forEach(function(error){
+          html += '<li>' + error + '</li>';
+        });
+
+        html += '</ul>';
+
+        $block.html(html).removeAttr('hidden');
+      }
+
+      function restoreButton($btn) {
+        if (!$btn.length) {
+          return;
+        }
+
+        var originalText = $btn.data('original-text') || $btn.text();
+        $btn.prop('disabled', false);
+        $btn.text(originalText);
+        $btn.removeData('submitting');
+      }
+
+      // Validação + proteção contra múltiplos envios
+      $('.dps-form').on('submit', function(event){
         var $form = $(this);
         var $btn  = $form.find('.dps-submit-btn, button[type="submit"]');
-        
+        var isAppointmentForm = $form.find('input[name="appointment_type"]').length > 0;
+
+        if (!isAppointmentForm) {
+          var errors = getFormErrors($form);
+
+          if (errors.length) {
+            event.preventDefault();
+            showErrors($form, errors);
+            restoreButton($btn);
+
+            $('html, body').animate({
+              scrollTop: $form.offset().top - 20
+            }, 300);
+
+            return false;
+          }
+        }
+
         if ($btn.data('submitting')) {
+          event.preventDefault();
           return false;
         }
-        
+
+        var originalText = $btn.text();
+        if (!$btn.data('original-text')) {
+          $btn.data('original-text', originalText);
+        }
+
         $btn.data('submitting', true);
         $btn.prop('disabled', true);
-        
-        var originalText = $btn.text();
-        $btn.text(dpsBaseL10n.savingText || 'Salvando...');
-        
+
+        var savingText = (window.dpsBaseL10n && dpsBaseL10n.savingText) ? dpsBaseL10n.savingText : 'Salvando...';
+        $btn.text(savingText);
+
         // Restaura após 5 segundos caso falhe
         setTimeout(function(){
-          $btn.prop('disabled', false);
-          $btn.text(originalText);
-          $btn.removeData('submitting');
+          restoreButton($btn);
         }, 5000);
       });
-      
+
       // Preview de upload de foto
       $('.dps-file-upload__input').on('change', function(){
         var $input   = $(this);
         var $preview = $input.closest('.dps-file-upload').find('.dps-file-upload__preview');
         var file     = this.files[0];
-        
+
         if (!file || !file.type.match('image.*')) {
           $preview.empty();
           return;
         }
-        
+
         var reader = new FileReader();
         reader.onload = function(e){
           $preview.html('<img src="' + e.target.result + '" alt="Preview">');
