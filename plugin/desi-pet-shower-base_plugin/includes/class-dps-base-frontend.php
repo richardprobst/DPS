@@ -3257,12 +3257,16 @@ class DPS_Base_Frontend {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
 
-        // Verifica se a tabela existe
-        $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-        if ( $exists !== $table ) {
+        // Verifica se a tabela existe (usa cache estático para evitar verificação repetida)
+        static $table_exists = null;
+        if ( null === $table_exists ) {
+            $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+        }
+        if ( ! $table_exists ) {
             return 0.0;
         }
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is prefixed and safe
         $pending = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT SUM(valor) FROM {$table} WHERE cliente_id = %d AND status = %s",
@@ -3444,9 +3448,18 @@ class DPS_Base_Frontend {
         echo '<div class="dps-info-item' . ( $has_phone ? '' : ' dps-info-item--empty' ) . '">';
         echo '<span class="dps-info-item__label">' . esc_html__( 'Telefone / WhatsApp', 'desi-pet-shower' ) . '</span>';
         if ( $has_phone ) {
-            $wa_url = class_exists( 'DPS_WhatsApp_Helper' )
-                ? DPS_WhatsApp_Helper::get_link_to_client( $meta['phone'] )
-                : 'https://wa.me/' . preg_replace( '/\D+/', '', $meta['phone'] );
+            // Usa helper centralizado se disponível, senão faz fallback com código do Brasil
+            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $meta['phone'] );
+            } else {
+                // Fallback: remove não-dígitos e adiciona código do Brasil se necessário
+                $phone_digits = preg_replace( '/\D+/', '', $meta['phone'] );
+                // Adiciona código do Brasil (55) se o número não começar com ele
+                if ( strlen( $phone_digits ) <= 11 && '55' !== substr( $phone_digits, 0, 2 ) ) {
+                    $phone_digits = '55' . $phone_digits;
+                }
+                $wa_url = 'https://wa.me/' . $phone_digits;
+            }
             echo '<span class="dps-info-item__value"><a href="' . esc_url( $wa_url ) . '" target="_blank">' . esc_html( $meta['phone'] ) . ' 📱</a></span>';
         } else {
             echo '<span class="dps-info-item__value">' . esc_html__( 'Não informado', 'desi-pet-shower' ) . '</span>';
@@ -3769,13 +3782,16 @@ class DPS_Base_Frontend {
 
                 $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '-';
 
+                // Limite de palavras para observações na tabela
+                $notes_word_limit = apply_filters( 'dps_client_history_notes_word_limit', 10 );
+
                 echo '<tr>';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
                 echo '<td>' . esc_html( $time ?: '-' ) . '</td>';
                 echo '<td>' . esc_html( $pet_name ) . '</td>';
                 echo '<td>R$ ' . esc_html( number_format_i18n( $total_value, 2 ) ) . '</td>';
                 echo '<td><span class="dps-status-badge ' . esc_attr( $status_info['class'] ) . '">' . esc_html( $status_info['label'] ) . '</span></td>';
-                echo '<td>' . esc_html( $notes ? wp_trim_words( $notes, 10, '...' ) : '-' ) . '</td>';
+                echo '<td>' . esc_html( $notes ? wp_trim_words( $notes, $notes_word_limit, '...' ) : '-' ) . '</td>';
                 echo '</tr>';
             }
 
