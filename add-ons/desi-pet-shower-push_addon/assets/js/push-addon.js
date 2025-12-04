@@ -99,8 +99,8 @@
 
             $btn.prop('disabled', true).text(DPS_Push.messages.subscribing);
 
-            // Registrar Service Worker
-            navigator.serviceWorker.register(DPS_Push.sw_url, { scope: '/' })
+            // Registrar Service Worker (usa scope padrão do diretório do SW)
+            navigator.serviceWorker.register(DPS_Push.sw_url)
                 .then(function(registration) {
                     console.log('Service Worker registrado:', registration);
                     return registration.pushManager.subscribe({
