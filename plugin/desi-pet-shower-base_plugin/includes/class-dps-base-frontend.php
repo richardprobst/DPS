@@ -3829,7 +3829,11 @@ class DPS_Base_Frontend {
                 echo '<td>R$ ' . esc_html( number_format_i18n( $total_value, 2 ) ) . '</td>';
                 echo '<td><span class="dps-status-badge ' . esc_attr( $status_info['class'] ) . '">' . esc_html( $status_info['label'] ) . '</span></td>';
                 echo '<td class="hide-mobile">' . esc_html( $notes ? wp_trim_words( $notes, $notes_word_limit, '...' ) : '-' ) . '</td>';
-                echo '<td class="dps-actions-cell"><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a></td>';
+                echo '<td class="dps-actions-cell">';
+                echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a>';
+                echo '<span class="dps-action-separator" aria-hidden="true"> | </span>';
+                echo '<a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a>';
+                echo '</td>';
                 echo '</tr>';
             }
 
