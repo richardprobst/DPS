@@ -49,6 +49,8 @@ Análises arquiteturais e de sistema.
 Documentação de compatibilidade com temas e page builders.
 
 **Arquivos:**
+- `COMPATIBILITY_ANALYSIS.md` - Análise geral de compatibilidade
+- `EDITOR_SHORTCODE_GUIDE.md` - **🆕** Guia de como inserir shortcodes no editor WordPress (solução para problema comum)
 - `RESOLUTION_SUMMARY.md` - Resumo de resoluções de compatibilidade
 - `YOOTHEME_COMPATIBILITY.md` - Guia de compatibilidade com YooTheme PRO
 - `YOOTHEME_RESPOSTA_RAPIDA.md` - Resposta rápida para problemas YooTheme
