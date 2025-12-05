@@ -125,7 +125,18 @@ class DPS_AI_Knowledge_Base {
 
         register_taxonomy( self::TAXONOMY, self::POST_TYPE, $args );
 
-        // Registra termos padrão
+        // Registra termos padrão apenas se a flag não estiver setada (evita verificação em todo page load)
+        if ( ! get_option( 'dps_ai_kb_terms_created' ) ) {
+            self::create_default_terms();
+            update_option( 'dps_ai_kb_terms_created', true );
+        }
+    }
+
+    /**
+     * Cria termos padrão da taxonomia.
+     * Chamado apenas uma vez durante a primeira inicialização.
+     */
+    private static function create_default_terms() {
         $default_terms = [
             'servicos'     => __( 'Serviços', 'dps-ai' ),
             'agendamento'  => __( 'Agendamento', 'dps-ai' ),

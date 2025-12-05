@@ -90,6 +90,15 @@ function dps_ai_load_textdomain() {
 }
 add_action( 'init', 'dps_ai_load_textdomain', 1 );
 
+// Inclui as classes principais ANTES dos hooks de ativação/desativação.
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
+
 /**
  * Ativação do plugin: adiciona capabilities e cria tabelas.
  */
@@ -135,15 +144,6 @@ function dps_ai_deactivate() {
     }
 }
 register_deactivation_hook( __FILE__, 'dps_ai_deactivate' );
-
-// Inclui as classes principais.
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
-require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 
 /**
  * Classe principal do add-on de IA.

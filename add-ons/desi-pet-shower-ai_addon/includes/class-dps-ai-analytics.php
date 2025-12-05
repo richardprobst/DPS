@@ -337,17 +337,32 @@ class DPS_AI_Analytics {
 
         $table_name = $wpdb->prefix . self::FEEDBACK_TABLE_NAME;
 
-        $where_clause = '';
+        // Usa prepared statement para o where clause
         if ( 'positive' === $type ) {
-            $where_clause = "WHERE feedback = 'positive'";
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            return $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d",
+                    'positive',
+                    $limit
+                )
+            );
         } elseif ( 'negative' === $type ) {
-            $where_clause = "WHERE feedback = 'negative'";
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            return $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d",
+                    'negative',
+                    $limit
+                )
+            );
         }
 
+        // Todos os feedbacks
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} {$where_clause} ORDER BY created_at DESC LIMIT %d",
+                "SELECT * FROM {$table_name} ORDER BY created_at DESC LIMIT %d",
                 $limit
             )
         );
@@ -363,10 +378,10 @@ class DPS_AI_Analytics {
      * @return float Custo estimado em USD.
      */
     public static function estimate_cost( $tokens_input, $tokens_output, $model = 'gpt-4o-mini' ) {
-        // Preços por 1M tokens (maio 2024)
+        // Preços por 1M tokens (dezembro 2024) - verificar periodicamente em https://openai.com/pricing
         $prices = [
             'gpt-4o-mini'   => [ 'input' => 0.15, 'output' => 0.60 ],
-            'gpt-4o'        => [ 'input' => 5.00, 'output' => 15.00 ],
+            'gpt-4o'        => [ 'input' => 2.50, 'output' => 10.00 ],
             'gpt-4-turbo'   => [ 'input' => 10.00, 'output' => 30.00 ],
             'gpt-3.5-turbo' => [ 'input' => 0.50, 'output' => 1.50 ],
         ];
