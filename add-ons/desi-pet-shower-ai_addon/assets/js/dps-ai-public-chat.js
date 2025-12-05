@@ -10,6 +10,9 @@
 (function($) {
     'use strict';
 
+    // Constantes
+    var HISTORY_EXPIRATION_MINUTES = 30;
+
     // Variáveis globais
     var $widget = null;
     var $messages = null;
@@ -349,10 +352,10 @@
             if (stored) {
                 conversationHistory = JSON.parse(stored);
                 
-                // Restaura mensagens (exceto mensagens antigas demais - mais de 30 min)
-                var thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+                // Restaura mensagens (exceto mensagens antigas demais)
+                var expirationTime = Date.now() - (HISTORY_EXPIRATION_MINUTES * 60 * 1000);
                 conversationHistory = conversationHistory.filter(function(msg) {
-                    return msg.timestamp > thirtyMinutesAgo;
+                    return msg.timestamp > expirationTime;
                 });
 
                 conversationHistory.forEach(function(msg) {

@@ -132,12 +132,22 @@ class DPS_AI_Public_Chat {
         // Inicia output buffer
         ob_start();
         ?>
+        <?php
+        // Valida cor primária customizada
+        $primary_color = '';
+        if ( ! empty( $atts['primary_color'] ) ) {
+            $validated_color = sanitize_hex_color( $atts['primary_color'] );
+            if ( $validated_color ) {
+                $primary_color = $validated_color;
+            }
+        }
+        ?>
         <div 
             id="dps-ai-public-chat" 
             class="dps-ai-public-chat dps-ai-public-chat--<?php echo esc_attr( $widget_mode ); ?> dps-ai-public-chat--<?php echo esc_attr( $theme ); ?> <?php echo 'floating' === $widget_mode ? 'dps-ai-public-chat--' . esc_attr( $position ) : ''; ?>"
             data-nonce="<?php echo esc_attr( $nonce ); ?>"
-            <?php if ( ! empty( $atts['primary_color'] ) ) : ?>
-                style="--dps-ai-primary: <?php echo esc_attr( sanitize_hex_color( $atts['primary_color'] ) ); ?>;"
+            <?php if ( $primary_color ) : ?>
+                style="--dps-ai-primary: <?php echo esc_attr( $primary_color ); ?>;"
             <?php endif; ?>
         >
             <?php if ( 'floating' === $widget_mode ) : ?>
@@ -583,9 +593,12 @@ class DPS_AI_Public_Chat {
             }
         }
 
-        // Valida IP
+        // Valida IP - usa hash único baseado na sessão se IP inválido
         if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-            $ip = '127.0.0.1';
+            // Gera um identificador único baseado em características do navegador
+            $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+            $accept_lang = isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) : '';
+            $ip = 'unknown_' . substr( md5( $user_agent . $accept_lang . gmdate( 'Y-m-d' ) ), 0, 16 );
         }
 
         return $ip;
