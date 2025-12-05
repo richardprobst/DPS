@@ -28,8 +28,6 @@ O shortcode foi inserido no bloco **"Código"** (Code block), que é projetado p
 3. Selecione o bloco **Shortcode** (ícone de colchetes `[ ]`)
 4. Cole o shortcode, por exemplo: `[dps_base]`
 
-![Bloco Shortcode](https://developer.wordpress.org/files/2023/10/shortcode-block-1.png)
-
 #### Opção 2: Bloco "Parágrafo" (Alternativa Simples)
 
 1. Simplesmente digite ou cole o shortcode em um bloco de parágrafo normal
@@ -44,9 +42,9 @@ O bloco **Código** (`</> Code`) serve para exibir snippets de código como exem
 | Shortcode | `[ ]` | Inserir e executar shortcodes | ✅ SIM |
 | Parágrafo | ¶ | Texto comum | ✅ SIM |
 | Código | `</>` | Exibir código literalmente | ❌ NÃO |
-| HTML | `<>` | Código HTML customizado | ⚠️ Parcial* |
+| HTML | `<>` | Código HTML customizado | ⚠️ Parcial¹ |
 
-*O bloco HTML pode funcionar, mas não é recomendado para shortcodes simples.
+> ¹ O bloco HTML pode funcionar, mas não é recomendado para shortcodes simples.
 
 ---
 
@@ -106,7 +104,7 @@ Se o shortcode ainda não funciona após usar o bloco correto, verifique:
 2. **Digitação correta**: O shortcode está exatamente como documentado?
 3. **Permissões**: Você tem as capabilities necessárias?
 4. **Conflito de cache**: Limpe o cache do site/navegador
-5. **Page builder**: Veja [Compatibilidade com YooTheme](./YOOTHEME_COMPATIBILITY.md)
+5. **Page builder**: Veja os guias de compatibilidade em [docs/compatibility/](./)
 
 ---
 
