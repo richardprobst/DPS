@@ -70,6 +70,24 @@
    Tabela de Indicações
    ========================================================================== */
 
+/* Referrals header with title and export button */
+.dps-referrals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dps-referrals-header h2 {
+    margin: 0;
+}
+
+.dps-referrals-count {
+    margin-left: 12px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
 .dps-referrals-table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -234,6 +252,15 @@
     color: #374151;
 }
 
+/* Admin Referral Section */
+.dps-referral-section {
+    margin: 20px 0;
+    padding: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
 .dps-referral-code-box {
     background: #fff;
     border: 2px dashed #e5e7eb;
@@ -250,6 +277,7 @@
     background: #f3f4f6;
     padding: 8px 16px;
     border-radius: 4px;
+    margin-bottom: 12px;
 }
 
 .dps-referral-code code {
@@ -286,10 +314,26 @@
     margin-bottom: 8px;
 }
 
+/* Referral Actions Container */
 .dps-referral-actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.dps-referral-actions .dps-referral-link-input {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 13px;
+    background: #f9fafb;
+    color: #6b7280;
 }
 
 .dps-btn-copy,

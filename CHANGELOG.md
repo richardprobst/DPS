@@ -82,6 +82,32 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Loyalty Add-on (v1.2.0)**: Multiplicador de nível, compartilhamento e exportação
+  - **Multiplicador de Nível Ativo**: Pontos agora são multiplicados por nível de fidelidade
+    - Bronze: 1x (padrão)
+    - Prata: 1.5x (a partir de 500 pontos)
+    - Ouro: 2x (a partir de 1000 pontos)
+  - **Compartilhamento via WhatsApp**: Botão para compartilhar código de indicação
+    - Mensagem pré-formatada com código e link
+    - Abre WhatsApp Web ou app mobile
+  - **Exportação CSV de Indicações**: Botão para baixar relatório
+    - Inclui indicador, indicado, código, data, status e recompensas
+    - Formato CSV com BOM UTF-8 para compatibilidade com Excel
+  - **Novos Métodos na API `DPS_Loyalty_API`**:
+    - `calculate_points_for_amount($amount, $client_id)`: preview de pontos antes de conceder
+    - `get_top_clients($limit)`: ranking de clientes por pontos
+    - `get_clients_by_tier()`: contagem de clientes por nível
+    - `export_referrals_csv($args)`: exportação de indicações
+  - **Novos Hooks**:
+    - `dps_loyalty_points_awarded_appointment`: disparado após conceder pontos por atendimento
+    - `dps_loyalty_tier_bonus_applied`: disparado quando bônus de nível é aplicado
+  - **UX Melhorada**:
+    - Labels de contexto traduzidos no histórico de pontos
+    - Datas formatadas em dd/mm/yyyy HH:mm
+    - Seção de indicação redesenhada com box, link e botões de ação
+    - Contador de indicações na aba
+  - **Documentação**: Análise profunda atualizada em `docs/analysis/LOYALTY_ADDON_ANALYSIS.md`
+
 - **AI Add-on (v1.5.0)**: Nova versão com 8 funcionalidades principais
   - **1. Sugestões de Perguntas Frequentes (FAQs)**:
     - Botões clicáveis exibidos no widget para perguntas comuns

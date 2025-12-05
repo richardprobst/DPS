@@ -229,6 +229,140 @@ class DPS_Loyalty_API {
     }
 
     /**
+     * Calculates the number of points for a given monetary amount.
+     *
+     * Applies the client's tier multiplier if a client_id is provided.
+     * Useful for displaying expected points before completing a transaction.
+     *
+     * Note: This method is intentionally separate from the private method
+     * `DPS_Loyalty_Addon::calculate_points_from_value()` which handles the actual
+     * point awarding with hooks. This API method provides a preview/calculation
+     * without side effects.
+     *
+     * @since 1.2.0
+     *
+     * @param float $amount    The monetary amount in BRL.
+     * @param int   $client_id Optional. Client ID to apply tier multiplier. Default 0.
+     * @return array {
+     *     @type int   $base_points   Points before multiplier.
+     *     @type int   $total_points  Points after multiplier.
+     *     @type int   $bonus_points  Bonus points from multiplier.
+     *     @type float $multiplier    The multiplier applied.
+     *     @type string $tier_label   The client's tier label.
+     * }
+     */
+    public static function calculate_points_for_amount( $amount, $client_id = 0 ) {
+        $settings = get_option( 'dps_loyalty_settings', [] );
+        $brl_per_point = isset( $settings['brl_per_point'] ) && $settings['brl_per_point'] > 0 
+            ? (float) $settings['brl_per_point'] 
+            : 10.0;
+
+        $base_points = $amount > 0 ? (int) floor( $amount / $brl_per_point ) : 0;
+        $multiplier = 1.0;
+        $tier_label = __( 'Bronze', 'dps-loyalty-addon' );
+
+        if ( $client_id > 0 ) {
+            $tier_info = self::get_loyalty_tier( $client_id );
+            $multiplier = isset( $tier_info['multiplier'] ) ? (float) $tier_info['multiplier'] : 1.0;
+            $tier_label = isset( $tier_info['label'] ) ? $tier_info['label'] : $tier_label;
+        }
+
+        $total_points = (int) floor( $base_points * $multiplier );
+        $bonus_points = $total_points - $base_points;
+
+        return [
+            'base_points'  => $base_points,
+            'total_points' => $total_points,
+            'bonus_points' => $bonus_points,
+            'multiplier'   => $multiplier,
+            'tier_label'   => $tier_label,
+        ];
+    }
+
+    /**
+     * Gets top clients by loyalty points.
+     *
+     * @since 1.2.0
+     *
+     * @param int $limit Number of clients to return. Default 10.
+     * @return array List of clients with ID, name and points.
+     */
+    public static function get_top_clients( $limit = 10 ) {
+        global $wpdb;
+        
+        $results = $wpdb->get_results( $wpdb->prepare( "
+            SELECT p.ID, p.post_title as name, CAST(pm.meta_value AS UNSIGNED) as points
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'dps_cliente'
+            AND p.post_status = 'publish'
+            AND pm.meta_key = 'dps_loyalty_points'
+            AND pm.meta_value > 0
+            ORDER BY CAST(pm.meta_value AS UNSIGNED) DESC
+            LIMIT %d
+        ", $limit ) );
+
+        $clients = [];
+        foreach ( $results as $row ) {
+            $tier_info = self::get_loyalty_tier( $row->ID );
+            $clients[] = [
+                'id'         => (int) $row->ID,
+                'name'       => $row->name,
+                'points'     => (int) $row->points,
+                'tier'       => $tier_info['current'],
+                'tier_label' => $tier_info['label'],
+                'tier_icon'  => $tier_info['icon'],
+            ];
+        }
+
+        return $clients;
+    }
+
+    /**
+     * Gets clients grouped by loyalty tier.
+     *
+     * @since 1.2.0
+     *
+     * @return array Associative array with tier keys and client counts.
+     */
+    public static function get_clients_by_tier() {
+        global $wpdb;
+        $tiers = self::get_default_tiers();
+        
+        // Get all clients with points
+        $results = $wpdb->get_results( "
+            SELECT CAST(pm.meta_value AS UNSIGNED) as points
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'dps_cliente'
+            AND p.post_status = 'publish'
+            AND pm.meta_key = 'dps_loyalty_points'
+        " );
+
+        // Initialize counts
+        $counts = [];
+        foreach ( array_keys( $tiers ) as $tier_key ) {
+            $counts[ $tier_key ] = 0;
+        }
+
+        // Count clients per tier
+        foreach ( $results as $row ) {
+            $points = (int) $row->points;
+            $client_tier = 'bronze';
+            
+            foreach ( $tiers as $key => $tier ) {
+                if ( $points >= $tier['min_points'] ) {
+                    $client_tier = $key;
+                }
+            }
+            
+            $counts[ $client_tier ]++;
+        }
+
+        return $counts;
+    }
+
+    /**
      * Obtém métricas globais de fidelidade.
      *
      * Utiliza cache via transient para melhor performance.
@@ -355,5 +489,89 @@ class DPS_Loyalty_API {
             'total' => (int) $total,
             'pages' => ceil( (int) $total / $args['per_page'] ),
         ];
+    }
+
+    /**
+     * Exports referrals data to CSV format.
+     *
+     * @since 1.2.0
+     *
+     * @param array $args Optional. Filter arguments (same as get_referrals).
+     * @return string CSV content.
+     */
+    public static function export_referrals_csv( $args = [] ) {
+        // Get all referrals (no pagination)
+        $args['per_page'] = 9999;
+        $args['page'] = 1;
+        $data = self::get_referrals( $args );
+        $referrals = $data['items'];
+
+        // CSV header with BOM for Excel UTF-8 compatibility
+        $csv = "\xEF\xBB\xBF";
+        
+        // Headers
+        $headers = [
+            __( 'ID', 'dps-loyalty-addon' ),
+            __( 'Indicador', 'dps-loyalty-addon' ),
+            __( 'Indicado', 'dps-loyalty-addon' ),
+            __( 'Código', 'dps-loyalty-addon' ),
+            __( 'Data', 'dps-loyalty-addon' ),
+            __( 'Status', 'dps-loyalty-addon' ),
+            __( 'Recompensa Indicador', 'dps-loyalty-addon' ),
+            __( 'Recompensa Indicado', 'dps-loyalty-addon' ),
+        ];
+        $csv .= implode( ';', $headers ) . "\n";
+
+        // Rows
+        foreach ( $referrals as $ref ) {
+            $referrer = get_post( $ref->referrer_client_id );
+            $referee = get_post( $ref->referee_client_id );
+            
+            $referrer_reward = self::format_reward_for_export( $ref->reward_type_referrer, $ref->reward_value_referrer );
+            $referee_reward = self::format_reward_for_export( $ref->reward_type_referee, $ref->reward_value_referee );
+
+            $row = [
+                $ref->id,
+                $referrer ? $referrer->post_title : '-',
+                $referee ? $referee->post_title : '-',
+                $ref->referral_code,
+                date_i18n( 'd/m/Y H:i', strtotime( $ref->created_at ) ),
+                $ref->status === 'rewarded' ? __( 'Recompensada', 'dps-loyalty-addon' ) : __( 'Pendente', 'dps-loyalty-addon' ),
+                $referrer_reward,
+                $referee_reward,
+            ];
+            $csv .= implode( ';', $row ) . "\n";
+        }
+
+        return $csv;
+    }
+
+    /**
+     * Formats reward value for export.
+     *
+     * @since 1.2.0
+     *
+     * @param string $type  Reward type.
+     * @param mixed  $value Reward value.
+     * @return string Formatted reward.
+     */
+    private static function format_reward_for_export( $type, $value ) {
+        if ( empty( $type ) || 'none' === $type ) {
+            return '-';
+        }
+
+        switch ( $type ) {
+            case 'points':
+                return sprintf( '%d pts', (int) $value );
+            case 'fixed':
+                if ( class_exists( 'DPS_Money_Helper' ) ) {
+                    return 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) $value );
+                }
+                return 'R$ ' . number_format( (int) $value / 100, 2, ',', '.' );
+            case 'percent':
+                return $value . '%';
+            default:
+                return '-';
+        }
     }
 }
