@@ -136,6 +136,13 @@ define( 'DPS_DISABLE_CACHE', false );
 
 ### Shortcodes
 
+> ⚠️ **Como inserir shortcodes corretamente no editor WordPress (Gutenberg)**
+>
+> Use o bloco **"Shortcode"** ou **"Parágrafo"** para inserir shortcodes.
+>
+> **NÃO use o bloco "Código"** (Code) — ele exibe texto literalmente e não executa shortcodes.
+> Se você inserir `[dps_base]` no bloco Código, o texto aparecerá como está em vez de renderizar o painel.
+
 #### `[dps_base]`
 Renderiza o painel principal do sistema com navegação por abas.
 

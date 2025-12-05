@@ -255,16 +255,27 @@ Usuários > Adicionar Novo
 
 ### Criação das Páginas do Sistema
 
+> ⚠️ **IMPORTANTE: Como inserir shortcodes corretamente**
+>
+> Use o bloco **"Shortcode"** ou **"Parágrafo"** (texto simples) para inserir shortcodes.
+>
+> **NÃO use o bloco "Código"** — ele é para exibir código literalmente, não para executá-lo. Shortcodes inseridos no bloco Código aparecerão como texto `[dps_base]` em vez de renderizar o painel.
+
 **Página: Painel DPS (Administrativo)**
 
 1. Vá em **Páginas > Adicionar Nova**
 2. Título: "Painel DPS" (ou nome de sua preferência)
-3. Adicione o bloco de Shortcode ou texto:
+3. Clique no botão **"+"** para adicionar bloco e escolha:
+   - **Opção recomendada**: Busque por "Shortcode" e selecione o bloco **Shortcode**
+   - **Opção alternativa**: Use o bloco **Parágrafo** (texto comum)
+4. Digite ou cole o shortcode:
    ```
    [dps_base]
    ```
-4. **Publicar** como página privada ou protegida
-5. Copie a URL para acesso rápido
+5. **Publicar** como página privada ou protegida
+6. Copie a URL para acesso rápido
+
+> 💡 **Dica**: Se você não encontrar o bloco "Shortcode", pode simplesmente digitar `[dps_base]` em um bloco de parágrafo comum — o WordPress reconhecerá e executará o shortcode automaticamente.
 
 **Página: Configurações DPS**
 
@@ -1141,14 +1152,22 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 **Problema: Shortcode não funciona**
 
 *Possíveis causas:*
-1. Plugin base desativado
-2. Shortcode digitado incorretamente
-3. Conflito com page builder
+1. **Bloco incorreto no editor** (mais comum)
+2. Plugin base desativado
+3. Shortcode digitado incorretamente
+4. Conflito com page builder
 
 *Soluções:*
-1. Verifique se plugin base está ativo
-2. Copie shortcode exato: `[dps_base]`
-3. Consulte guia de compatibilidade com YooTheme/Elementor
+1. ⚠️ **Verifique o tipo de bloco usado**: Use o bloco **"Shortcode"** ou **"Parágrafo"**, **nunca** o bloco "Código" (Code)
+2. Verifique se plugin base está ativo
+3. Copie shortcode exato: `[dps_base]`
+4. Consulte guia de compatibilidade com YooTheme/Elementor
+
+> 💡 **Por que o bloco "Código" não funciona?**
+>
+> O bloco "Código" (Code) do editor Gutenberg foi projetado para **exibir** código como texto formatado, não para executá-lo. Quando você insere `[dps_base]` nesse bloco, o WordPress entende que você quer mostrar esse texto literalmente aos visitantes, então ele aparece como texto `[dps_base]` em vez de renderizar o painel.
+>
+> **Solução**: Mude o bloco para "Shortcode" ou "Parágrafo" (clique no bloco > clique no ícone do bloco na toolbar > Transformar em).
 
 ---
 
@@ -1183,6 +1202,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 ## 📚 Referência Técnica
 
 ### Shortcodes Disponíveis
+
+> ⚠️ **Lembrete**: Insira shortcodes usando o bloco **"Shortcode"** ou **"Parágrafo"** do editor. **Não use o bloco "Código"** — ele exibe texto literalmente e não executa shortcodes.
 
 | Shortcode | Add-on | Descrição |
 |-----------|--------|-----------|
