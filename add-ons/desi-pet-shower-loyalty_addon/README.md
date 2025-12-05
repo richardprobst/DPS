@@ -8,6 +8,7 @@ O **Campanhas & Fidelidade Add-on** oferece três módulos integrados para engaj
 
 Funcionalidades principais:
 - **Programa de Pontos**: acumular pontos baseados em faturamento e resgatar benefícios
+- **Níveis de Fidelidade**: Bronze, Prata e Ouro com multiplicadores de pontos
 - **Indique e Ganhe**: códigos únicos por cliente, bonificações na primeira compra do indicado
 - **Campanhas**: criação de ações promocionais com público-alvo segmentado
 - Integração com Finance Add-on para bonificações automáticas
@@ -38,8 +39,20 @@ Funcionalidades principais:
 
 ### Versão
 - **Introduzido em**: v0.2.0
-- **Versão atual**: v0.1.0 (verificar header do plugin)
+- **Versão atual**: v1.2.0
 - **Compatível com plugin base**: v1.0.0+
+
+## Novidades da versão 1.2.0
+
+- **Multiplicador de nível aplicado**: clientes Prata ganham 1.5x pontos, Ouro ganham 2x
+- **Compartilhamento via WhatsApp**: botão para compartilhar código de indicação
+- **Exportação CSV de indicações**: baixar relatório completo das indicações
+- **Labels de contexto traduzidos**: histórico de pontos com descrições legíveis
+- **Novos métodos na API**:
+  - `calculate_points_for_amount()`: calcula pontos antes de conceder
+  - `get_top_clients()`: ranking dos melhores clientes
+  - `get_clients_by_tier()`: contagem por nível de fidelidade
+  - `export_referrals_csv()`: exportação de indicações
 
 ## Funcionalidades principais
 

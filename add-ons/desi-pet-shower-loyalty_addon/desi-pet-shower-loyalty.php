@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-loyalty-addon
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_LOYALTY_VERSION', '1.1.0' );
+define( 'DPS_LOYALTY_VERSION', '1.2.0' );
 define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -72,6 +72,7 @@ class DPS_Loyalty_Addon {
         add_action( 'save_post_dps_campaign', [ $this, 'save_campaign_meta' ] );
         add_action( 'admin_menu', [ $this, 'register_menu' ], 20 );
         add_action( 'admin_post_dps_loyalty_run_audit', [ $this, 'handle_campaign_audit' ] );
+        add_action( 'admin_post_dps_loyalty_export_referrals', [ $this, 'handle_export_referrals' ] );
         add_action( 'updated_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         add_action( 'added_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         
@@ -431,8 +432,25 @@ class DPS_Loyalty_Addon {
 
         $referrals = $referrals_data['items'];
         $total_pages = $referrals_data['pages'];
+        $total_referrals = $referrals_data['total'];
+        
+        // URL para exportação CSV
+        $export_url = wp_nonce_url(
+            add_query_arg( [
+                'action' => 'dps_loyalty_export_referrals',
+                'status' => $status_filter,
+            ], admin_url( 'admin-post.php' ) ),
+            'dps_export_referrals'
+        );
         ?>
-        <h2><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></h2>
+        <div class="dps-referrals-header">
+            <h2><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></h2>
+            <?php if ( $total_referrals > 0 ) : ?>
+                <a href="<?php echo esc_url( $export_url ); ?>" class="button">
+                    📥 <?php esc_html_e( 'Exportar CSV', 'dps-loyalty-addon' ); ?>
+                </a>
+            <?php endif; ?>
+        </div>
 
         <!-- Filtros -->
         <div class="dps-referrals-filters">
@@ -441,6 +459,12 @@ class DPS_Loyalty_Addon {
                 <option value="pending" <?php selected( $status_filter, 'pending' ); ?>><?php esc_html_e( 'Pendentes', 'dps-loyalty-addon' ); ?></option>
                 <option value="rewarded" <?php selected( $status_filter, 'rewarded' ); ?>><?php esc_html_e( 'Recompensadas', 'dps-loyalty-addon' ); ?></option>
             </select>
+            <span class="dps-referrals-count">
+                <?php 
+                /* translators: %d: number of referrals */
+                echo esc_html( sprintf( _n( '%d indicação', '%d indicações', $total_referrals, 'dps-loyalty-addon' ), $total_referrals ) ); 
+                ?>
+            </span>
         </div>
 
         <!-- Tabela de Indicações -->
@@ -722,24 +746,49 @@ class DPS_Loyalty_Addon {
             <?php endif; ?>
 
             <!-- Código de indicação -->
-            <div style="margin: 20px 0; padding: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+            <div class="dps-referral-section">
                 <p><strong><?php esc_html_e( 'Código de indicação:', 'dps-loyalty-addon' ); ?></strong></p>
-                <div class="dps-referral-code">
-                    <code style="font-size: 16px; letter-spacing: 2px;"><?php echo esc_html( $referral_code ); ?></code>
-                    <button type="button" class="button dps-copy-referral-code" data-code="<?php echo esc_attr( $referral_code ); ?>">
-                        📋 <?php esc_html_e( 'Copiar', 'dps-loyalty-addon' ); ?>
-                    </button>
+                <div class="dps-referral-code-box">
+                    <div class="dps-referral-code">
+                        <code><?php echo esc_html( $referral_code ); ?></code>
+                        <button type="button" class="button dps-copy-referral-code" data-code="<?php echo esc_attr( $referral_code ); ?>">
+                            📋 <?php esc_html_e( 'Copiar', 'dps-loyalty-addon' ); ?>
+                        </button>
+                    </div>
+                    <?php 
+                    // Gerar link de indicação e botão WhatsApp
+                    $referral_url = DPS_Loyalty_API::get_referral_url( $selected_id );
+                    $share_message = sprintf(
+                        /* translators: 1: referral code, 2: referral URL */
+                        __( 'Use meu código %1$s e ganhe benefícios no seu primeiro atendimento! Cadastre-se aqui: %2$s', 'dps-loyalty-addon' ),
+                        $referral_code,
+                        $referral_url
+                    );
+                    $whatsapp_url = 'https://wa.me/?text=' . rawurlencode( $share_message );
+                    ?>
+                    <div class="dps-referral-actions">
+                        <input type="text" value="<?php echo esc_attr( $referral_url ); ?>" readonly class="dps-referral-link-input" />
+                        <button type="button" class="button dps-copy-referral-link" data-link="<?php echo esc_attr( $referral_url ); ?>">
+                            🔗 <?php esc_html_e( 'Copiar Link', 'dps-loyalty-addon' ); ?>
+                        </button>
+                        <a href="<?php echo esc_url( $whatsapp_url ); ?>" target="_blank" class="button dps-btn-whatsapp">
+                            📲 <?php esc_html_e( 'Compartilhar via WhatsApp', 'dps-loyalty-addon' ); ?>
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <?php if ( ! empty( $logs ) ) : ?>
                 <h3><?php esc_html_e( 'Histórico recente', 'dps-loyalty-addon' ); ?></h3>
                 <ul class="dps-points-history">
-                    <?php foreach ( $logs as $entry ) : ?>
+                    <?php foreach ( $logs as $entry ) : 
+                        $context_label = $this->get_context_label( $entry['context'] );
+                        $formatted_date = date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) );
+                    ?>
                         <li class="dps-points-history-item">
                             <div class="dps-points-history-info">
-                                <span class="dps-points-history-context"><?php echo esc_html( $entry['context'] ); ?></span>
-                                <span class="dps-points-history-date"><?php echo esc_html( $entry['date'] ); ?></span>
+                                <span class="dps-points-history-context"><?php echo esc_html( $context_label ); ?></span>
+                                <span class="dps-points-history-date"><?php echo esc_html( $formatted_date ); ?></span>
                             </div>
                             <span class="dps-points-history-value <?php echo esc_attr( $entry['action'] ); ?>">
                                 <?php echo esc_html( $entry['points'] ); ?>
@@ -752,6 +801,28 @@ class DPS_Loyalty_Addon {
             <?php endif; ?>
         <?php endif; ?>
         <?php
+    }
+
+    /**
+     * Translates context codes to human-readable labels.
+     *
+     * @since 1.2.0
+     *
+     * @param string $context The context code.
+     * @return string The translated label.
+     */
+    private function get_context_label( $context ) {
+        $labels = [
+            'appointment_payment' => __( 'Pagamento de atendimento', 'dps-loyalty-addon' ),
+            'referral_reward'     => __( 'Recompensa de indicação', 'dps-loyalty-addon' ),
+            'credit_add'          => __( 'Crédito adicionado', 'dps-loyalty-addon' ),
+            'credit_use'          => __( 'Crédito utilizado', 'dps-loyalty-addon' ),
+            'manual_adjustment'   => __( 'Ajuste manual', 'dps-loyalty-addon' ),
+            'points_expired'      => __( 'Pontos expirados', 'dps-loyalty-addon' ),
+            'redeem'              => __( 'Resgate de pontos', 'dps-loyalty-addon' ),
+        ];
+
+        return isset( $labels[ $context ] ) ? $labels[ $context ] : $context;
     }
 
     public function handle_campaign_audit() {
@@ -777,6 +848,35 @@ class DPS_Loyalty_Addon {
         }
 
         wp_safe_redirect( add_query_arg( [ 'page' => 'dps-loyalty', 'audit' => 'done' ], admin_url( 'admin.php' ) ) );
+        exit;
+    }
+
+    /**
+     * Handles the CSV export of referrals.
+     *
+     * @since 1.2.0
+     */
+    public function handle_export_referrals() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
+        }
+
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_referrals' ) ) {
+            wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+        }
+
+        $status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+        
+        $csv = DPS_Loyalty_API::export_referrals_csv( [ 'status' => $status ] );
+        
+        $filename = 'indicacoes-' . gmdate( 'Y-m-d' ) . '.csv';
+        
+        header( 'Content-Type: text/csv; charset=UTF-8' );
+        header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+        
+        echo $csv;
         exit;
     }
 
@@ -1025,17 +1125,63 @@ class DPS_Loyalty_Addon {
             $total_value = $this->get_transaction_total_for_appointment( $object_id );
         }
 
-        $points = $this->calculate_points_from_value( $total_value );
+        $points = $this->calculate_points_from_value( $total_value, $client_id );
         if ( $points > 0 ) {
             dps_loyalty_add_points( $client_id, $points, 'appointment_payment' );
             update_post_meta( $object_id, 'dps_loyalty_points_awarded', 1 );
+
+            /**
+             * Fires after loyalty points are awarded for an appointment.
+             *
+             * @since 1.2.0
+             * @param int   $client_id    The client ID.
+             * @param int   $points       Points awarded.
+             * @param int   $object_id    The appointment ID.
+             * @param float $total_value  The appointment total value.
+             */
+            do_action( 'dps_loyalty_points_awarded_appointment', $client_id, $points, $object_id, $total_value );
         }
     }
 
-    private function calculate_points_from_value( $value ) {
+    /**
+     * Calculates loyalty points from a monetary value, applying tier multiplier.
+     *
+     * @since 1.2.0 Added tier multiplier support.
+     *
+     * @param float $value     The monetary value to convert.
+     * @param int   $client_id Optional. Client ID to apply tier multiplier. Default 0.
+     * @return int Number of points.
+     */
+    private function calculate_points_from_value( $value, $client_id = 0 ) {
         $settings     = get_option( self::OPTION_KEY, [] );
         $brl_per_pt   = isset( $settings['brl_per_point'] ) && $settings['brl_per_point'] > 0 ? (float) $settings['brl_per_point'] : 10.0;
         $points_float = $value > 0 ? floor( $value / $brl_per_pt ) : 0;
+
+        // Apply tier multiplier if client_id is provided
+        if ( $client_id > 0 && class_exists( 'DPS_Loyalty_API' ) ) {
+            $tier_info = DPS_Loyalty_API::get_loyalty_tier( $client_id );
+            $multiplier = isset( $tier_info['multiplier'] ) ? (float) $tier_info['multiplier'] : 1.0;
+            
+            if ( $multiplier > 1.0 ) {
+                $base_points = (int) $points_float;
+                $points_float = floor( $points_float * $multiplier );
+                
+                // Log the bonus points separately for transparency
+                $bonus = (int) $points_float - $base_points;
+                if ( $bonus > 0 ) {
+                    /**
+                     * Fires when bonus points are applied due to tier multiplier.
+                     *
+                     * @since 1.2.0
+                     * @param int   $client_id   The client ID.
+                     * @param int   $bonus       Bonus points from multiplier.
+                     * @param float $multiplier  The tier multiplier applied.
+                     */
+                    do_action( 'dps_loyalty_tier_bonus_applied', $client_id, $bonus, $multiplier );
+                }
+            }
+        }
+
         return (int) $points_float;
     }
 
