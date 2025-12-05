@@ -91,10 +91,17 @@
     font-weight: 600;
 }
 
-/* Reforçar ocultação do toggle em telas grandes para evitar overrides de temas */
+/* === NAVEGAÇÃO RESPONSIVA - DESKTOP (min-width: 769px) === */
+/* Garantir que em desktop: toggle oculto, abas visíveis */
 @media (min-width: 769px) {
+    /* Ocultar toggle em desktop - !important para evitar overrides de temas WordPress */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: none !important;
+    }
+    
+    /* Garantir que abas estejam visíveis em desktop */
+    .dps-base-wrapper .dps-nav-container .dps-nav {
+        display: flex !important;
     }
 }
 .dps-section {
@@ -576,14 +583,14 @@
     }
     
     /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
-    /* Mostrar o botão toggle em mobile - especificidade aumentada para garantir sobrescrita */
+    /* Mostrar o botão toggle em mobile - !important para garantir sobrescrita de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav-mobile-toggle {
         display: block !important;
         margin-bottom: 0;
     }
     
     /* Ocultar abas por padrão em mobile (apenas mostrar quando toggle está aberto) */
-    /* Especificidade aumentada para garantir que sobrescreva estilos base e de temas */
+    /* !important para garantir que sobrescreva estilos base e de temas */
     .dps-base-wrapper .dps-nav-container .dps-nav {
         display: none !important;
         flex-direction: column;
