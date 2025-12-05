@@ -82,6 +82,76 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.5.0)**: Nova versão com 8 funcionalidades principais
+  - **1. Sugestões de Perguntas Frequentes (FAQs)**:
+    - Botões clicáveis exibidos no widget para perguntas comuns
+    - FAQs personalizáveis na página de configurações
+    - FAQs padrão incluídas (horário, preços, agendamento, etc.)
+  - **2. Feedback Positivo/Negativo**:
+    - Botões 👍/👎 após cada resposta da IA
+    - Registro de feedback em tabela customizada `dps_ai_feedback`
+    - Handler AJAX `dps_ai_submit_feedback` para salvar feedback
+  - **3. Métricas de Uso**:
+    - Tabela `dps_ai_metrics` para registro de uso diário
+    - Contabilização de perguntas, tokens, erros, tempo de resposta
+    - Registro por cliente e por dia
+  - **4. Base de Conhecimento**:
+    - CPT `dps_ai_knowledge` para FAQs/artigos personalizados
+    - Taxonomia para categorizar artigos
+    - Palavras-chave para ativação automática no contexto
+    - Interface admin para gerenciar conhecimento
+  - **5. Widget Flutuante Alternativo**:
+    - Modo "chat bubble" no canto da tela
+    - Opção de posição (inferior direito/esquerdo)
+    - Animação de abertura/fechamento suave
+    - Toggle entre modos na configuração
+  - **6. Suporte a Múltiplos Idiomas**:
+    - Opções: Português (Brasil), English, Español, Automático
+    - Instrução de idioma enviada ao modelo GPT
+    - Interface traduzível via text domain
+  - **7. Agendamento via Chat**:
+    - Verificação de disponibilidade por data
+    - Dois modos: solicitar confirmação ou agendamento direto
+    - Handlers AJAX para disponibilidade e solicitação
+    - Notificação por e-mail para admins (modo solicitação)
+    - Criação automática de agendamentos (modo direto)
+  - **8. Dashboard de Analytics**:
+    - Página admin com métricas visuais em cards
+    - Filtro por período (data início/fim)
+    - Métricas: perguntas, tokens, custos, tempo de resposta
+    - Tabela de feedback recente
+    - Uso diário com histórico
+  - **Classes Novas**:
+    - `DPS_AI_Analytics`: métricas, feedback, custos
+    - `DPS_AI_Knowledge_Base`: CPT, taxonomia, artigos
+    - `DPS_AI_Scheduler`: agendamento via chat
+
+- **AI Add-on (v1.4.0)**: Melhorias de interface e funcionalidades
+  - **Modelos GPT Atualizados**: Adicionados GPT-4o Mini (recomendado), GPT-4o e GPT-4 Turbo
+    - GPT-4o Mini como modelo padrão recomendado para melhor custo/benefício em 2024+
+    - Mantido GPT-3.5 Turbo como opção legada
+  - **Teste de Conexão**: Botão para validar API key diretamente na página de configurações
+    - Handler AJAX `dps_ai_test_connection` com verificação de nonce e permissões
+    - Feedback visual de sucesso/erro em tempo real
+  - **Tabela de Custos**: Informações de custo estimado por modelo na página admin
+  - **Interface do Widget Modernizada**:
+    - Novo design com header azul gradiente e ícone de robô
+    - Badge de status "Online" com animação de pulse
+    - Clique no header inteiro para expandir/recolher
+    - Botão de envio circular com ícone de seta
+    - Mensagens com estilo de chat moderno (bolhas coloridas)
+    - Textarea com auto-resize dinâmico
+    - Scrollbar estilizada no container de mensagens
+    - Layout horizontal de input em desktop, vertical em mobile
+  - **Histórico de Conversas**: Persistência via sessionStorage
+    - Mensagens mantidas durante a sessão do navegador
+    - Função `dpsAIClearHistory()` para limpar manualmente
+  - **UX Aprimorada**:
+    - Envio com Enter (sem Shift) além de Ctrl+Enter
+    - Dica de atalho de teclado visível
+    - Animações suaves de slide para toggle
+    - Foco automático no textarea ao expandir
+
 - **Push Notifications Add-on (v1.0.0)**: Notificações push nativas do navegador
   - **Web Push API**: Implementação nativa sem dependência de serviços externos
     - Chaves VAPID geradas automaticamente na ativação
