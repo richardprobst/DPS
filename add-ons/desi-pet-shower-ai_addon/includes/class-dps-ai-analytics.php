@@ -237,6 +237,45 @@ class DPS_AI_Analytics {
     }
 
     /**
+     * Registra feedback para o chat público ou portal.
+     *
+     * @param int    $client_id ID do cliente (0 para visitantes).
+     * @param string $question  Pergunta feita.
+     * @param string $feedback  Tipo de feedback (positive/negative).
+     */
+    public static function record_feedback( $client_id, $question, $feedback ) {
+        self::save_feedback( $client_id, $question, '', $feedback );
+    }
+
+    /**
+     * Registra uma interação do chat público.
+     *
+     * @param string $question      Pergunta feita.
+     * @param string $answer        Resposta da IA.
+     * @param int    $response_time Tempo de resposta em ms.
+     * @param string $ip_address    Endereço IP do visitante.
+     */
+    public static function record_public_chat_interaction( $question, $answer, $response_time = 0, $ip_address = '' ) {
+        // Obtém configurações
+        $settings = get_option( 'dps_ai_settings', [] );
+        $model    = $settings['model'] ?? 'gpt-4o-mini';
+
+        // Estima tokens (aproximação simples)
+        $tokens_input  = mb_strlen( $question ) / 4;
+        $tokens_output = mb_strlen( $answer ) / 4;
+
+        // Registra a interação com client_id = 0 (visitante)
+        self::log_interaction(
+            0, // client_id = 0 para visitantes do chat público
+            (int) $tokens_input,
+            (int) $tokens_output,
+            $response_time / 1000, // Converte de ms para segundos
+            $model,
+            false
+        );
+    }
+
+    /**
      * Obtém estatísticas gerais para o dashboard.
      *
      * @param string $start_date Data de início (Y-m-d).

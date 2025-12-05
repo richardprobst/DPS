@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Assistente virtual inteligente para o Portal do Cliente. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics e agendamento via chat.
- * Version:           1.5.0
+ * Description:       Assistente virtual inteligente para o Portal do Cliente e chat público para visitantes. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics, agendamento via chat e chat público via shortcode.
+ * Version:           1.6.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
@@ -20,6 +20,11 @@
  *
  * O assistente NÃO responde sobre assuntos aleatórios fora desse contexto
  * (política, religião, finanças pessoais, etc.).
+ *
+ * NOVO v1.6.0: Chat público para visitantes via shortcode [dps_ai_public_chat].
+ * Permite que visitantes tirem dúvidas sobre serviços, preços e funcionamento
+ * sem necessidade de login. Inclui rate limiting, temas claro/escuro, modo
+ * inline e flutuante, FAQs customizáveis e integração com base de conhecimento.
  *
  * NOVO v1.5.0: FAQs sugeridas, feedback positivo/negativo, métricas de uso,
  * base de conhecimento, widget flutuante, multi-idiomas, agendamento via chat
@@ -69,7 +74,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.5.0' );
+    define( 'DPS_AI_VERSION', '1.6.0' );
 }
 
 /**
@@ -98,6 +103,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 
 /**
  * Ativação do plugin: adiciona capabilities e cria tabelas.
@@ -228,6 +234,11 @@ class DPS_AI_Addon {
         // Agendamento via chat
         if ( class_exists( 'DPS_AI_Scheduler' ) ) {
             DPS_AI_Scheduler::get_instance();
+        }
+
+        // Chat público para visitantes (v1.6.0+)
+        if ( class_exists( 'DPS_AI_Public_Chat' ) ) {
+            DPS_AI_Public_Chat::get_instance();
         }
     }
 
@@ -495,6 +506,80 @@ class DPS_AI_Addon {
                         </tr>
                     </tbody>
                 </table>
+
+                <h2><?php esc_html_e( 'Chat Público para Visitantes (v1.6.0)', 'dps-ai' ); ?></h2>
+                <p><?php esc_html_e( 'Configure o chat de IA aberto para visitantes do site. Diferente do chat do Portal, este não requer login e é focado em informações gerais sobre os serviços.', 'dps-ai' ); ?></p>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_enabled]" value="1" <?php checked( ! empty( $options['public_chat_enabled'] ) ); ?> />
+                                    <?php esc_html_e( 'Habilitar Chat Público', 'dps-ai' ); ?>
+                                </label>
+                            </th>
+                            <td>
+                                <p class="description"><?php esc_html_e( 'Permite que visitantes não logados usem o assistente via shortcode [dps_ai_public_chat].', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_faqs"><?php echo esc_html__( 'Perguntas Frequentes (FAQs)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_public_chat_faqs" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_faqs]" rows="4" class="large-text"><?php echo esc_textarea( $options['public_chat_faqs'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Uma pergunta por linha. Serão exibidas como botões clicáveis no chat público.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Deixe em branco para usar as perguntas padrão.', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_business_info"><?php echo esc_html__( 'Informações do Negócio', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_public_chat_business_info" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_business_info]" rows="6" class="large-text" maxlength="2000"><?php echo esc_textarea( $options['public_chat_business_info'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Informações sobre seu negócio que a IA pode usar para responder (horários, endereço, formas de pagamento, diferenciais, etc.).', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Exemplo: "Funcionamos de segunda a sábado, das 8h às 18h. Aceitamos PIX, cartão e dinheiro. Temos estacionamento próprio."', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_instructions"><?php echo esc_html__( 'Instruções Adicionais', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_public_chat_instructions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_instructions]" rows="4" class="large-text" maxlength="1000"><?php echo esc_textarea( $options['public_chat_instructions'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Instruções adicionais para o comportamento do chat público (tom de voz, estilo de atendimento, etc.).', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Máximo: 1000 caracteres.', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 20px 0;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #0284c7;"><?php esc_html_e( 'Como usar o Chat Público', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0 0 10px 0;"><?php esc_html_e( 'Adicione o shortcode em qualquer página do seu site:', 'dps-ai' ); ?></p>
+                    <code style="background: #fff; padding: 8px 12px; border-radius: 4px; display: inline-block;">[dps_ai_public_chat]</code>
+                    <p style="margin: 15px 0 0 0; font-size: 13px; color: #6b7280;">
+                        <strong><?php esc_html_e( 'Opções disponíveis:', 'dps-ai' ); ?></strong><br>
+                        <code>mode="inline"</code> <?php esc_html_e( 'ou', 'dps-ai' ); ?> <code>mode="floating"</code> - <?php esc_html_e( 'Modo de exibição', 'dps-ai' ); ?><br>
+                        <code>theme="light"</code> <?php esc_html_e( 'ou', 'dps-ai' ); ?> <code>theme="dark"</code> - <?php esc_html_e( 'Tema visual', 'dps-ai' ); ?><br>
+                        <code>position="bottom-right"</code> <?php esc_html_e( 'ou', 'dps-ai' ); ?> <code>position="bottom-left"</code> - <?php esc_html_e( 'Posição (modo flutuante)', 'dps-ai' ); ?><br>
+                        <code>title="Seu título"</code> - <?php esc_html_e( 'Título personalizado', 'dps-ai' ); ?><br>
+                        <code>show_faqs="true"</code> <?php esc_html_e( 'ou', 'dps-ai' ); ?> <code>show_faqs="false"</code> - <?php esc_html_e( 'Mostrar FAQs', 'dps-ai' ); ?>
+                    </p>
+                </div>
 
                 <?php submit_button( __( 'Salvar Configurações', 'dps-ai' ) ); ?>
             </form>
@@ -766,22 +851,45 @@ class DPS_AI_Addon {
             }
         }
 
+        // Processa instruções do chat público com limite de 1000 caracteres
+        $public_chat_instructions = '';
+        if ( ! empty( $raw_settings['public_chat_instructions'] ) ) {
+            $public_chat_instructions = sanitize_textarea_field( $raw_settings['public_chat_instructions'] );
+            if ( mb_strlen( $public_chat_instructions ) > 1000 ) {
+                $public_chat_instructions = mb_substr( $public_chat_instructions, 0, 1000 );
+            }
+        }
+
+        // Processa informações do negócio com limite de 2000 caracteres
+        $public_chat_business_info = '';
+        if ( ! empty( $raw_settings['public_chat_business_info'] ) ) {
+            $public_chat_business_info = sanitize_textarea_field( $raw_settings['public_chat_business_info'] );
+            if ( mb_strlen( $public_chat_business_info ) > 2000 ) {
+                $public_chat_business_info = mb_substr( $public_chat_business_info, 0, 2000 );
+            }
+        }
+
         $settings = [
-            'enabled'                 => ! empty( $raw_settings['enabled'] ),
-            'api_key'                 => isset( $raw_settings['api_key'] ) ? sanitize_text_field( $raw_settings['api_key'] ) : '',
-            'model'                   => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-4o-mini',
-            'temperature'             => isset( $raw_settings['temperature'] ) ? floatval( $raw_settings['temperature'] ) : 0.4,
-            'timeout'                 => isset( $raw_settings['timeout'] ) ? absint( $raw_settings['timeout'] ) : 10,
-            'max_tokens'              => isset( $raw_settings['max_tokens'] ) ? absint( $raw_settings['max_tokens'] ) : 500,
-            'additional_instructions' => $additional_instructions,
+            'enabled'                    => ! empty( $raw_settings['enabled'] ),
+            'api_key'                    => isset( $raw_settings['api_key'] ) ? sanitize_text_field( $raw_settings['api_key'] ) : '',
+            'model'                      => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-4o-mini',
+            'temperature'                => isset( $raw_settings['temperature'] ) ? floatval( $raw_settings['temperature'] ) : 0.4,
+            'timeout'                    => isset( $raw_settings['timeout'] ) ? absint( $raw_settings['timeout'] ) : 10,
+            'max_tokens'                 => isset( $raw_settings['max_tokens'] ) ? absint( $raw_settings['max_tokens'] ) : 500,
+            'additional_instructions'    => $additional_instructions,
             // v1.5.0 settings
-            'widget_mode'             => isset( $raw_settings['widget_mode'] ) ? sanitize_text_field( $raw_settings['widget_mode'] ) : 'inline',
-            'floating_position'       => isset( $raw_settings['floating_position'] ) ? sanitize_text_field( $raw_settings['floating_position'] ) : 'bottom-right',
-            'scheduling_mode'         => isset( $raw_settings['scheduling_mode'] ) ? sanitize_text_field( $raw_settings['scheduling_mode'] ) : 'disabled',
-            'language'                => isset( $raw_settings['language'] ) ? sanitize_text_field( $raw_settings['language'] ) : 'pt_BR',
-            'faq_suggestions'         => isset( $raw_settings['faq_suggestions'] ) ? sanitize_textarea_field( $raw_settings['faq_suggestions'] ) : '',
-            'enable_feedback'         => ! empty( $raw_settings['enable_feedback'] ),
-            'enable_analytics'        => isset( $raw_settings['enable_analytics'] ) ? ! empty( $raw_settings['enable_analytics'] ) : true,
+            'widget_mode'                => isset( $raw_settings['widget_mode'] ) ? sanitize_text_field( $raw_settings['widget_mode'] ) : 'inline',
+            'floating_position'          => isset( $raw_settings['floating_position'] ) ? sanitize_text_field( $raw_settings['floating_position'] ) : 'bottom-right',
+            'scheduling_mode'            => isset( $raw_settings['scheduling_mode'] ) ? sanitize_text_field( $raw_settings['scheduling_mode'] ) : 'disabled',
+            'language'                   => isset( $raw_settings['language'] ) ? sanitize_text_field( $raw_settings['language'] ) : 'pt_BR',
+            'faq_suggestions'            => isset( $raw_settings['faq_suggestions'] ) ? sanitize_textarea_field( $raw_settings['faq_suggestions'] ) : '',
+            'enable_feedback'            => ! empty( $raw_settings['enable_feedback'] ),
+            'enable_analytics'           => isset( $raw_settings['enable_analytics'] ) ? ! empty( $raw_settings['enable_analytics'] ) : true,
+            // v1.6.0 settings - Chat Público
+            'public_chat_enabled'        => ! empty( $raw_settings['public_chat_enabled'] ),
+            'public_chat_faqs'           => isset( $raw_settings['public_chat_faqs'] ) ? sanitize_textarea_field( $raw_settings['public_chat_faqs'] ) : '',
+            'public_chat_business_info'  => $public_chat_business_info,
+            'public_chat_instructions'   => $public_chat_instructions,
         ];
 
         update_option( self::OPTION_KEY, $settings );
