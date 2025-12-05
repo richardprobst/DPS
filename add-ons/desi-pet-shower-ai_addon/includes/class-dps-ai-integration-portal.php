@@ -79,40 +79,77 @@ class DPS_AI_Integration_Portal {
             return;
         }
 
+        // Configurações de widget
+        $widget_mode       = $settings['widget_mode'] ?? 'inline';
+        $floating_position = $settings['floating_position'] ?? 'bottom-right';
+        $enable_feedback   = ! empty( $settings['enable_feedback'] );
+
+        // FAQs sugeridas
+        $faq_suggestions = DPS_AI_Knowledge_Base::get_faq_suggestions( 4 );
+
+        // Classes do widget
+        $widget_classes = 'dps-ai-widget';
+        if ( 'floating' === $widget_mode ) {
+            $widget_classes .= ' dps-ai-widget--floating dps-ai-widget--' . $floating_position;
+        }
+
         ?>
-        <div id="dps-ai-widget" class="dps-ai-widget">
-            <div class="dps-ai-header" id="dps-ai-header">
-                <h3><?php esc_html_e( 'Assistente Virtual', 'dps-ai' ); ?></h3>
-                <span class="dps-ai-status-badge"><?php esc_html_e( 'Online', 'dps-ai' ); ?></span>
-                <button id="dps-ai-toggle" class="dps-ai-toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="false">
-                    <span class="dashicons dashicons-arrow-down-alt2"></span>
+        <div id="dps-ai-widget" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo $enable_feedback ? 'true' : 'false'; ?>">
+            <?php if ( 'floating' === $widget_mode ) : ?>
+                <!-- Botão flutuante -->
+                <button id="dps-ai-fab" class="dps-ai-fab" aria-label="<?php esc_attr_e( 'Abrir assistente', 'dps-ai' ); ?>">
+                    <span class="dps-ai-fab-icon">🤖</span>
+                    <span class="dps-ai-fab-close">✕</span>
                 </button>
-            </div>
+            <?php endif; ?>
 
-            <div id="dps-ai-content" class="dps-ai-content" style="display: none;">
-                <div class="dps-ai-description">
-                    <p><?php esc_html_e( 'Olá! Sou o assistente virtual do DPS. Posso ajudar com agendamentos, serviços, histórico e dúvidas sobre o portal.', 'dps-ai' ); ?></p>
-                </div>
-
-                <div id="dps-ai-messages" class="dps-ai-messages">
-                    <!-- Mensagens aparecerão aqui -->
-                </div>
-
-                <div class="dps-ai-input-wrapper">
-                    <textarea
-                        id="dps-ai-question"
-                        class="dps-ai-question"
-                        placeholder="<?php esc_attr_e( 'Digite sua pergunta...', 'dps-ai' ); ?>"
-                        rows="1"
-                    ></textarea>
-                    <button id="dps-ai-submit" class="dps-ai-submit" aria-label="<?php esc_attr_e( 'Enviar pergunta', 'dps-ai' ); ?>">
+            <div class="dps-ai-panel <?php echo 'floating' === $widget_mode ? 'dps-ai-panel--floating' : ''; ?>">
+                <div class="dps-ai-header" id="dps-ai-header">
+                    <h3><?php esc_html_e( 'Assistente Virtual', 'dps-ai' ); ?></h3>
+                    <span class="dps-ai-status-badge"><?php esc_html_e( 'Online', 'dps-ai' ); ?></span>
+                    <button id="dps-ai-toggle" class="dps-ai-toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="false">
+                        <span class="dashicons dashicons-arrow-down-alt2"></span>
                     </button>
                 </div>
-                <p class="dps-ai-shortcut-hint"><?php esc_html_e( 'Pressione Ctrl+Enter para enviar', 'dps-ai' ); ?></p>
 
-                <div id="dps-ai-loading" class="dps-ai-loading" style="display: none;">
-                    <span class="spinner"></span>
-                    <span><?php esc_html_e( 'Pensando...', 'dps-ai' ); ?></span>
+                <div id="dps-ai-content" class="dps-ai-content" style="<?php echo 'floating' === $widget_mode ? '' : 'display: none;'; ?>">
+                    <div class="dps-ai-description">
+                        <p><?php esc_html_e( 'Olá! Sou o assistente virtual do DPS. Posso ajudar com agendamentos, serviços, histórico e dúvidas sobre o portal.', 'dps-ai' ); ?></p>
+                    </div>
+
+                    <?php if ( ! empty( $faq_suggestions ) ) : ?>
+                        <div class="dps-ai-faqs">
+                            <p class="dps-ai-faqs-label"><?php esc_html_e( 'Perguntas frequentes:', 'dps-ai' ); ?></p>
+                            <div class="dps-ai-faqs-list">
+                                <?php foreach ( $faq_suggestions as $faq ) : ?>
+                                    <button type="button" class="dps-ai-faq-btn" data-question="<?php echo esc_attr( $faq ); ?>">
+                                        <?php echo esc_html( $faq ); ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <div id="dps-ai-messages" class="dps-ai-messages">
+                        <!-- Mensagens aparecerão aqui -->
+                    </div>
+
+                    <div class="dps-ai-input-wrapper">
+                        <textarea
+                            id="dps-ai-question"
+                            class="dps-ai-question"
+                            placeholder="<?php esc_attr_e( 'Digite sua pergunta...', 'dps-ai' ); ?>"
+                            rows="1"
+                        ></textarea>
+                        <button id="dps-ai-submit" class="dps-ai-submit" aria-label="<?php esc_attr_e( 'Enviar pergunta', 'dps-ai' ); ?>">
+                        </button>
+                    </div>
+                    <p class="dps-ai-shortcut-hint"><?php esc_html_e( 'Pressione Ctrl+Enter para enviar', 'dps-ai' ); ?></p>
+
+                    <div id="dps-ai-loading" class="dps-ai-loading" style="display: none;">
+                        <span class="spinner"></span>
+                        <span><?php esc_html_e( 'Pensando...', 'dps-ai' ); ?></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,13 +244,19 @@ class DPS_AI_Integration_Portal {
 
         // Localiza script com dados necessários
         wp_localize_script( 'dps-ai-portal', 'dpsAI', [
-            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'dps_ai_ask' ),
-            'i18n'    => [
+            'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+            'nonce'          => wp_create_nonce( 'dps_ai_ask' ),
+            'feedbackNonce'  => wp_create_nonce( 'dps_ai_feedback' ),
+            'schedulerNonce' => wp_create_nonce( 'dps_ai_scheduler' ),
+            'enableFeedback' => ! empty( $settings['enable_feedback'] ),
+            'widgetMode'     => $settings['widget_mode'] ?? 'inline',
+            'i18n'           => [
                 'errorGeneric'        => __( 'Ocorreu um erro ao processar sua pergunta. Tente novamente.', 'dps-ai' ),
                 'you'                 => __( 'Você', 'dps-ai' ),
                 'assistant'           => __( 'Assistente', 'dps-ai' ),
                 'pleaseEnterQuestion' => __( 'Por favor, digite uma pergunta.', 'dps-ai' ),
+                'feedbackThanks'      => __( 'Obrigado pelo feedback!', 'dps-ai' ),
+                'wasHelpful'          => __( 'Esta resposta foi útil?', 'dps-ai' ),
             ],
         ] );
     }

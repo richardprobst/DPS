@@ -82,6 +82,50 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.5.0)**: Nova versão com 8 funcionalidades principais
+  - **1. Sugestões de Perguntas Frequentes (FAQs)**:
+    - Botões clicáveis exibidos no widget para perguntas comuns
+    - FAQs personalizáveis na página de configurações
+    - FAQs padrão incluídas (horário, preços, agendamento, etc.)
+  - **2. Feedback Positivo/Negativo**:
+    - Botões 👍/👎 após cada resposta da IA
+    - Registro de feedback em tabela customizada `dps_ai_feedback`
+    - Handler AJAX `dps_ai_submit_feedback` para salvar feedback
+  - **3. Métricas de Uso**:
+    - Tabela `dps_ai_metrics` para registro de uso diário
+    - Contabilização de perguntas, tokens, erros, tempo de resposta
+    - Registro por cliente e por dia
+  - **4. Base de Conhecimento**:
+    - CPT `dps_ai_knowledge` para FAQs/artigos personalizados
+    - Taxonomia para categorizar artigos
+    - Palavras-chave para ativação automática no contexto
+    - Interface admin para gerenciar conhecimento
+  - **5. Widget Flutuante Alternativo**:
+    - Modo "chat bubble" no canto da tela
+    - Opção de posição (inferior direito/esquerdo)
+    - Animação de abertura/fechamento suave
+    - Toggle entre modos na configuração
+  - **6. Suporte a Múltiplos Idiomas**:
+    - Opções: Português (Brasil), English, Español, Automático
+    - Instrução de idioma enviada ao modelo GPT
+    - Interface traduzível via text domain
+  - **7. Agendamento via Chat**:
+    - Verificação de disponibilidade por data
+    - Dois modos: solicitar confirmação ou agendamento direto
+    - Handlers AJAX para disponibilidade e solicitação
+    - Notificação por e-mail para admins (modo solicitação)
+    - Criação automática de agendamentos (modo direto)
+  - **8. Dashboard de Analytics**:
+    - Página admin com métricas visuais em cards
+    - Filtro por período (data início/fim)
+    - Métricas: perguntas, tokens, custos, tempo de resposta
+    - Tabela de feedback recente
+    - Uso diário com histórico
+  - **Classes Novas**:
+    - `DPS_AI_Analytics`: métricas, feedback, custos
+    - `DPS_AI_Knowledge_Base`: CPT, taxonomia, artigos
+    - `DPS_AI_Scheduler`: agendamento via chat
+
 - **AI Add-on (v1.4.0)**: Melhorias de interface e funcionalidades
   - **Modelos GPT Atualizados**: Adicionados GPT-4o Mini (recomendado), GPT-4o e GPT-4 Turbo
     - GPT-4o Mini como modelo padrão recomendado para melhor custo/benefício em 2024+

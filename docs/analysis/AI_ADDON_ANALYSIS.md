@@ -1,8 +1,8 @@
-# Análise Profunda do AI Add-on v1.4.0
+# Análise Profunda do AI Add-on v1.5.0
 
 **Autor:** PRObst  
 **Data:** Dezembro 2024  
-**Versão Analisada:** 1.4.0
+**Versão Analisada:** 1.5.0
 
 ---
 
@@ -14,6 +14,8 @@ O **AI Add-on** é um componente do DPS by PRObst que implementa um assistente v
 
 - **Assistente no Portal**: Responder perguntas dos clientes sobre agendamentos, serviços, histórico e funcionalidades do sistema
 - **Gerador de Mensagens**: Sugerir textos para comunicações (lembretes, confirmações, cobranças, etc.)
+- **Agendamento via Chat**: Verificar disponibilidade e solicitar/criar agendamentos
+- **Analytics**: Métricas de uso, feedback e custos
 
 ### 1.2 Limitações de Escopo
 
@@ -30,24 +32,27 @@ O assistente **NÃO responde** sobre política, religião, finanças pessoais, t
 
 ## 2. Arquitetura
 
-### 2.1 Estrutura de Arquivos
+### 2.1 Estrutura de Arquivos (v1.5.0)
 
 ```
 desi-pet-shower-ai_addon/
-├── desi-pet-shower-ai-addon.php          # Plugin principal (720+ linhas)
+├── desi-pet-shower-ai-addon.php          # Plugin principal (900+ linhas)
 ├── includes/
-│   ├── class-dps-ai-client.php           # Cliente da API OpenAI (145 linhas)
-│   ├── class-dps-ai-assistant.php        # Lógica do assistente (585 linhas)
-│   ├── class-dps-ai-integration-portal.php # Integração com Portal (296 linhas)
-│   ├── class-dps-ai-message-assistant.php  # Gerador de mensagens (391 linhas)
-│   └── ai-communications-examples.php     # Exemplos de uso (397 linhas)
+│   ├── class-dps-ai-client.php           # Cliente da API OpenAI
+│   ├── class-dps-ai-assistant.php        # Lógica do assistente
+│   ├── class-dps-ai-integration-portal.php # Integração com Portal
+│   ├── class-dps-ai-message-assistant.php  # Gerador de mensagens
+│   ├── class-dps-ai-analytics.php         # [NOVO] Métricas e feedback
+│   ├── class-dps-ai-knowledge-base.php    # [NOVO] Base de conhecimento
+│   ├── class-dps-ai-scheduler.php         # [NOVO] Agendamento via chat
+│   └── ai-communications-examples.php     # Exemplos de uso
 ├── assets/
 │   ├── css/
-│   │   ├── dps-ai-portal.css             # Estilos do widget (340+ linhas)
-│   │   └── dps-ai-communications.css     # Estilos do modal (190+ linhas)
+│   │   ├── dps-ai-portal.css             # Estilos do widget (650+ linhas)
+│   │   └── dps-ai-communications.css     # Estilos do modal
 │   └── js/
-│       ├── dps-ai-portal.js              # JavaScript do widget (230+ linhas)
-│       └── dps-ai-communications.js      # JavaScript do modal (285+ linhas)
+│       ├── dps-ai-portal.js              # JavaScript do widget (280+ linhas)
+│       └── dps-ai-communications.js      # JavaScript do modal
 ├── uninstall.php                          # Limpeza na desinstalação
 ├── README.md                              # Documentação principal
 ├── AI_COMMUNICATIONS.md                   # Manual de comunicações
@@ -55,15 +60,18 @@ desi-pet-shower-ai_addon/
 └── REVIEW_REPORT.md                       # Relatório de revisão técnica
 ```
 
-### 2.2 Classes Principais
+### 2.2 Classes Principais (v1.5.0)
 
 | Classe | Responsabilidade |
 |--------|-----------------|
-| `DPS_AI_Addon` | Orquestração, configurações, handlers AJAX, menu admin |
+| `DPS_AI_Addon` | Orquestração, configurações, handlers AJAX, menu admin, analytics page |
 | `DPS_AI_Client` | Comunicação HTTP com API da OpenAI via `wp_remote_post()` |
 | `DPS_AI_Assistant` | Regras de negócio, system prompt, montagem de contexto |
-| `DPS_AI_Integration_Portal` | Widget no Portal do Cliente, handlers AJAX |
+| `DPS_AI_Integration_Portal` | Widget no Portal do Cliente, handlers AJAX, FAQs, feedback |
 | `DPS_AI_Message_Assistant` | Geração de sugestões de mensagens WhatsApp/E-mail |
+| `DPS_AI_Analytics` | **[NOVO]** Métricas de uso, feedback, custos estimados, dashboard |
+| `DPS_AI_Knowledge_Base` | **[NOVO]** CPT para artigos, palavras-chave, contexto dinâmico |
+| `DPS_AI_Scheduler` | **[NOVO]** Verificação de disponibilidade, agendamento via chat |
 
 ### 2.3 Fluxo de Dados
 

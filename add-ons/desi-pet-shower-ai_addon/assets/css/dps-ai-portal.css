@@ -454,3 +454,234 @@
         padding: 10px 12px;
     }
 }
+
+/* =====================================================
+   v1.5.0 - FAQs, Feedback, Widget Flutuante
+   ===================================================== */
+
+/* FAQs sugeridas */
+.dps-ai-faqs {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.dps-ai-faqs-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-ai-faqs-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-ai-faq-btn {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-ai-faq-btn:hover {
+    background: #0ea5e9;
+    color: #ffffff;
+    border-color: #0ea5e9;
+}
+
+/* Botões de Feedback */
+.dps-ai-feedback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-ai-feedback-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dps-ai-feedback-btn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-ai-feedback-btn:hover {
+    background: #f3f4f6;
+}
+
+.dps-ai-feedback-btn.active {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.dps-ai-feedback-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.dps-ai-feedback-thanks {
+    font-size: 12px;
+    color: #10b981;
+    font-weight: 500;
+}
+
+/* Widget Flutuante */
+.dps-ai-widget--floating {
+    position: fixed;
+    z-index: 9999;
+    margin: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.dps-ai-widget--floating:hover {
+    box-shadow: none;
+}
+
+.dps-ai-widget--bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.dps-ai-widget--bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+/* FAB Button */
+.dps-ai-fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.dps-ai-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+}
+
+.dps-ai-fab-icon,
+.dps-ai-fab-close {
+    font-size: 24px;
+    transition: all 0.3s ease;
+    position: absolute;
+}
+
+.dps-ai-fab-close {
+    opacity: 0;
+    transform: rotate(-90deg);
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.dps-ai-widget--floating.is-open .dps-ai-fab-icon {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.dps-ai-widget--floating.is-open .dps-ai-fab-close {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+/* Painel Flutuante */
+.dps-ai-panel--floating {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 360px;
+    max-height: 500px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.dps-ai-widget--floating.is-open .dps-ai-panel--floating {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dps-ai-widget--bottom-left .dps-ai-panel--floating {
+    right: auto;
+    left: 0;
+}
+
+.dps-ai-panel--floating .dps-ai-header {
+    cursor: default;
+}
+
+.dps-ai-panel--floating .dps-ai-toggle {
+    display: none;
+}
+
+.dps-ai-panel--floating .dps-ai-content {
+    display: block !important;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Responsividade para widget flutuante */
+@media screen and (max-width: 480px) {
+    .dps-ai-widget--floating {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .dps-ai-widget--bottom-left {
+        left: 10px;
+    }
+
+    .dps-ai-panel--floating {
+        width: calc(100vw - 20px);
+        max-width: 360px;
+        bottom: 75px;
+    }
+
+    .dps-ai-fab {
+        width: 56px;
+        height: 56px;
+    }
+
+    .dps-ai-fab-icon {
+        font-size: 22px;
+    }
+}

@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Assistente virtual inteligente para o Portal do Cliente. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail.
- * Version:           1.4.0
+ * Description:       Assistente virtual inteligente para o Portal do Cliente. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics e agendamento via chat.
+ * Version:           1.5.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
@@ -20,6 +20,10 @@
  *
  * O assistente NÃO responde sobre assuntos aleatórios fora desse contexto
  * (política, religião, finanças pessoais, etc.).
+ *
+ * NOVO v1.5.0: FAQs sugeridas, feedback positivo/negativo, métricas de uso,
+ * base de conhecimento, widget flutuante, multi-idiomas, agendamento via chat
+ * e dashboard de analytics.
  *
  * NOVO v1.4.0: Interface modernizada, modelos GPT atualizados, teste de conexão,
  * histórico de conversas persistente na sessão.
@@ -65,7 +69,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.4.0' );
+    define( 'DPS_AI_VERSION', '1.5.0' );
 }
 
 /**
@@ -87,7 +91,7 @@ function dps_ai_load_textdomain() {
 add_action( 'init', 'dps_ai_load_textdomain', 1 );
 
 /**
- * Ativação do plugin: adiciona capabilities.
+ * Ativação do plugin: adiciona capabilities e cria tabelas.
  */
 function dps_ai_activate() {
     // Adiciona capability aos roles que podem editar posts
@@ -98,6 +102,11 @@ function dps_ai_activate() {
         if ( $role ) {
             $role->add_cap( DPS_AI_CAPABILITY );
         }
+    }
+
+    // Cria tabelas de analytics
+    if ( class_exists( 'DPS_AI_Analytics' ) ) {
+        DPS_AI_Analytics::maybe_create_tables();
     }
 
     // Limpa rewrite rules
@@ -132,6 +141,9 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 
 /**
  * Classe principal do add-on de IA.
@@ -178,6 +190,9 @@ class DPS_AI_Addon {
         // Inicializa integração com Portal do Cliente
         add_action( 'plugins_loaded', [ $this, 'init_portal_integration' ], 20 );
 
+        // Inicializa componentes v1.5.0
+        add_action( 'plugins_loaded', [ $this, 'init_components' ], 21 );
+
         // Registra handlers AJAX para sugestões de mensagens
         add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
         add_action( 'wp_ajax_dps_ai_suggest_email_message', [ $this, 'ajax_suggest_email_message' ] );
@@ -197,6 +212,26 @@ class DPS_AI_Addon {
     }
 
     /**
+     * Inicializa componentes adicionais (v1.5.0+).
+     */
+    public function init_components() {
+        // Analytics e métricas
+        if ( class_exists( 'DPS_AI_Analytics' ) ) {
+            DPS_AI_Analytics::get_instance();
+        }
+
+        // Base de conhecimento
+        if ( class_exists( 'DPS_AI_Knowledge_Base' ) ) {
+            DPS_AI_Knowledge_Base::get_instance();
+        }
+
+        // Agendamento via chat
+        if ( class_exists( 'DPS_AI_Scheduler' ) ) {
+            DPS_AI_Scheduler::get_instance();
+        }
+    }
+
+    /**
      * Registra submenu admin para configurações de IA.
      */
     public function register_admin_menu() {
@@ -207,6 +242,16 @@ class DPS_AI_Addon {
             'manage_options',
             'dps-ai-settings',
             [ $this, 'render_admin_page' ]
+        );
+
+        // Página de Analytics
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Analytics de IA', 'dps-ai' ),
+            __( 'Analytics de IA', 'dps-ai' ),
+            'manage_options',
+            'dps-ai-analytics',
+            [ $this, 'render_analytics_page' ]
         );
     }
 
@@ -356,6 +401,101 @@ class DPS_AI_Addon {
                     </tbody>
                 </table>
 
+                <h2><?php esc_html_e( 'Configurações Avançadas (v1.5.0)', 'dps-ai' ); ?></h2>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_widget_mode"><?php echo esc_html__( 'Modo do Widget', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <select id="dps_ai_widget_mode" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[widget_mode]">
+                                    <option value="inline" <?php selected( $options['widget_mode'] ?? 'inline', 'inline' ); ?>><?php esc_html_e( 'Integrado (no topo do portal)', 'dps-ai' ); ?></option>
+                                    <option value="floating" <?php selected( $options['widget_mode'] ?? '', 'floating' ); ?>><?php esc_html_e( 'Flutuante (botão no canto)', 'dps-ai' ); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_floating_position"><?php echo esc_html__( 'Posição do Widget Flutuante', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <select id="dps_ai_floating_position" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[floating_position]">
+                                    <option value="bottom-right" <?php selected( $options['floating_position'] ?? 'bottom-right', 'bottom-right' ); ?>><?php esc_html_e( 'Inferior direito', 'dps-ai' ); ?></option>
+                                    <option value="bottom-left" <?php selected( $options['floating_position'] ?? '', 'bottom-left' ); ?>><?php esc_html_e( 'Inferior esquerdo', 'dps-ai' ); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_scheduling_mode"><?php echo esc_html__( 'Modo de Agendamento via Chat', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <select id="dps_ai_scheduling_mode" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[scheduling_mode]">
+                                    <option value="disabled" <?php selected( $options['scheduling_mode'] ?? 'disabled', 'disabled' ); ?>><?php esc_html_e( 'Desabilitado', 'dps-ai' ); ?></option>
+                                    <option value="request" <?php selected( $options['scheduling_mode'] ?? '', 'request' ); ?>><?php esc_html_e( 'Solicitar confirmação (equipe confirma)', 'dps-ai' ); ?></option>
+                                    <option value="direct" <?php selected( $options['scheduling_mode'] ?? '', 'direct' ); ?>><?php esc_html_e( 'Agendamento direto (confirmação automática)', 'dps-ai' ); ?></option>
+                                </select>
+                                <p class="description"><?php esc_html_e( 'Define como os agendamentos solicitados via chat são processados.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_language"><?php echo esc_html__( 'Idioma das Respostas', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <select id="dps_ai_language" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[language]">
+                                    <option value="pt_BR" <?php selected( $options['language'] ?? 'pt_BR', 'pt_BR' ); ?>><?php esc_html_e( 'Português (Brasil)', 'dps-ai' ); ?></option>
+                                    <option value="en_US" <?php selected( $options['language'] ?? '', 'en_US' ); ?>><?php esc_html_e( 'English (US)', 'dps-ai' ); ?></option>
+                                    <option value="es_ES" <?php selected( $options['language'] ?? '', 'es_ES' ); ?>><?php esc_html_e( 'Español', 'dps-ai' ); ?></option>
+                                    <option value="auto" <?php selected( $options['language'] ?? '', 'auto' ); ?>><?php esc_html_e( 'Automático (detectar)', 'dps-ai' ); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_faq_suggestions"><?php echo esc_html__( 'Sugestões de Perguntas (FAQs)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_faq_suggestions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[faq_suggestions]" rows="5" class="large-text"><?php echo esc_textarea( $options['faq_suggestions'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Uma pergunta por linha. Estas serão exibidas como botões clicáveis no widget.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Deixe em branco para usar as perguntas padrão.', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_feedback]" value="1" <?php checked( ! empty( $options['enable_feedback'] ) ); ?> />
+                                    <?php esc_html_e( 'Habilitar feedback (👍/👎)', 'dps-ai' ); ?>
+                                </label>
+                            </th>
+                            <td>
+                                <p class="description"><?php esc_html_e( 'Permite que clientes avaliem as respostas da IA.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_analytics]" value="1" <?php checked( $options['enable_analytics'] ?? '1', '1' ); ?> />
+                                    <?php esc_html_e( 'Habilitar coleta de métricas', 'dps-ai' ); ?>
+                                </label>
+                            </th>
+                            <td>
+                                <p class="description"><?php esc_html_e( 'Registra uso da IA para análise no dashboard de analytics.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <?php submit_button( __( 'Salvar Configurações', 'dps-ai' ) ); ?>
             </form>
 
@@ -449,6 +589,152 @@ class DPS_AI_Addon {
     }
 
     /**
+     * Renderiza a página de Analytics.
+     */
+    public function render_analytics_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-ai' ) );
+        }
+
+        // Obtém período dos parâmetros GET ou usa últimos 30 dias
+        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : current_time( 'Y-m-d' );
+
+        // Obtém estatísticas
+        $stats = DPS_AI_Analytics::get_stats( $start_date, $end_date );
+
+        // Calcula custo estimado
+        $settings = get_option( self::OPTION_KEY, [] );
+        $model    = $settings['model'] ?? 'gpt-4o-mini';
+        $cost     = DPS_AI_Analytics::estimate_cost(
+            $stats['summary']['total_tokens_input'],
+            $stats['summary']['total_tokens_output'],
+            $model
+        );
+
+        // Obtém feedback recente
+        $recent_feedback = DPS_AI_Analytics::get_recent_feedback( 10, 'all' );
+
+        ?>
+        <div class="wrap">
+            <h1><?php esc_html_e( 'Analytics de IA', 'dps-ai' ); ?></h1>
+
+            <!-- Filtro de período -->
+            <form method="get" style="margin-bottom: 20px;">
+                <input type="hidden" name="page" value="dps-ai-analytics" />
+                <label>
+                    <?php esc_html_e( 'De:', 'dps-ai' ); ?>
+                    <input type="date" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+                </label>
+                <label style="margin-left: 10px;">
+                    <?php esc_html_e( 'Até:', 'dps-ai' ); ?>
+                    <input type="date" name="end_date" value="<?php echo esc_attr( $end_date ); ?>" />
+                </label>
+                <button type="submit" class="button" style="margin-left: 10px;"><?php esc_html_e( 'Filtrar', 'dps-ai' ); ?></button>
+            </form>
+
+            <!-- Cards de resumo -->
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Total de Perguntas', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #0ea5e9;"><?php echo esc_html( number_format( $stats['summary']['total_questions'] ) ); ?></p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Clientes Únicos', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #10b981;"><?php echo esc_html( number_format( $stats['summary']['unique_clients'] ) ); ?></p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Tokens Consumidos', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #f59e0b;">
+                        <?php echo esc_html( number_format( $stats['summary']['total_tokens_input'] + $stats['summary']['total_tokens_output'] ) ); ?>
+                    </p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Custo Estimado', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;">$<?php echo esc_html( number_format( $cost, 4 ) ); ?></p>
+                </div>
+            </div>
+
+            <!-- Segunda linha de cards -->
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Tempo Médio de Resposta', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #8b5cf6;"><?php echo esc_html( $stats['summary']['avg_response_time'] ); ?>s</p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Erros', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;"><?php echo esc_html( number_format( $stats['summary']['total_errors'] ) ); ?></p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Feedback Positivo', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #10b981;">👍 <?php echo esc_html( number_format( $stats['summary']['positive_feedback'] ) ); ?></p>
+                </div>
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Feedback Negativo', 'dps-ai' ); ?></h3>
+                    <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;">👎 <?php echo esc_html( number_format( $stats['summary']['negative_feedback'] ) ); ?></p>
+                </div>
+            </div>
+
+            <!-- Feedback Recente -->
+            <h2><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
+            <?php if ( empty( $recent_feedback ) ) : ?>
+                <p><?php esc_html_e( 'Nenhum feedback registrado ainda.', 'dps-ai' ); ?></p>
+            <?php else : ?>
+                <table class="widefat striped">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Data', 'dps-ai' ); ?></th>
+                            <th><?php esc_html_e( 'Pergunta', 'dps-ai' ); ?></th>
+                            <th><?php esc_html_e( 'Feedback', 'dps-ai' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $recent_feedback as $fb ) : ?>
+                            <tr>
+                                <td><?php echo esc_html( gmdate( 'd/m/Y H:i', strtotime( $fb->created_at ) ) ); ?></td>
+                                <td><?php echo esc_html( mb_substr( $fb->question, 0, 100 ) ); ?><?php echo mb_strlen( $fb->question ) > 100 ? '...' : ''; ?></td>
+                                <td>
+                                    <?php if ( 'positive' === $fb->feedback ) : ?>
+                                        <span style="color: #10b981;">👍 <?php esc_html_e( 'Positivo', 'dps-ai' ); ?></span>
+                                    <?php else : ?>
+                                        <span style="color: #ef4444;">👎 <?php esc_html_e( 'Negativo', 'dps-ai' ); ?></span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+
+            <!-- Uso Diário -->
+            <?php if ( ! empty( $stats['daily'] ) ) : ?>
+                <h2 style="margin-top: 30px;"><?php esc_html_e( 'Uso Diário', 'dps-ai' ); ?></h2>
+                <table class="widefat striped">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Data', 'dps-ai' ); ?></th>
+                            <th><?php esc_html_e( 'Perguntas', 'dps-ai' ); ?></th>
+                            <th><?php esc_html_e( 'Tokens', 'dps-ai' ); ?></th>
+                            <th><?php esc_html_e( 'Erros', 'dps-ai' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( array_reverse( $stats['daily'] ) as $day ) : ?>
+                            <tr>
+                                <td><?php echo esc_html( gmdate( 'd/m/Y', strtotime( $day->date ) ) ); ?></td>
+                                <td><?php echo esc_html( number_format( $day->questions ) ); ?></td>
+                                <td><?php echo esc_html( number_format( $day->tokens ) ); ?></td>
+                                <td><?php echo esc_html( number_format( $day->errors ) ); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    /**
      * Processa o salvamento das configurações.
      */
     public function maybe_handle_save() {
@@ -483,11 +769,19 @@ class DPS_AI_Addon {
         $settings = [
             'enabled'                 => ! empty( $raw_settings['enabled'] ),
             'api_key'                 => isset( $raw_settings['api_key'] ) ? sanitize_text_field( $raw_settings['api_key'] ) : '',
-            'model'                   => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-3.5-turbo',
+            'model'                   => isset( $raw_settings['model'] ) ? sanitize_text_field( $raw_settings['model'] ) : 'gpt-4o-mini',
             'temperature'             => isset( $raw_settings['temperature'] ) ? floatval( $raw_settings['temperature'] ) : 0.4,
             'timeout'                 => isset( $raw_settings['timeout'] ) ? absint( $raw_settings['timeout'] ) : 10,
             'max_tokens'              => isset( $raw_settings['max_tokens'] ) ? absint( $raw_settings['max_tokens'] ) : 500,
             'additional_instructions' => $additional_instructions,
+            // v1.5.0 settings
+            'widget_mode'             => isset( $raw_settings['widget_mode'] ) ? sanitize_text_field( $raw_settings['widget_mode'] ) : 'inline',
+            'floating_position'       => isset( $raw_settings['floating_position'] ) ? sanitize_text_field( $raw_settings['floating_position'] ) : 'bottom-right',
+            'scheduling_mode'         => isset( $raw_settings['scheduling_mode'] ) ? sanitize_text_field( $raw_settings['scheduling_mode'] ) : 'disabled',
+            'language'                => isset( $raw_settings['language'] ) ? sanitize_text_field( $raw_settings['language'] ) : 'pt_BR',
+            'faq_suggestions'         => isset( $raw_settings['faq_suggestions'] ) ? sanitize_textarea_field( $raw_settings['faq_suggestions'] ) : '',
+            'enable_feedback'         => ! empty( $raw_settings['enable_feedback'] ),
+            'enable_analytics'        => isset( $raw_settings['enable_analytics'] ) ? ! empty( $raw_settings['enable_analytics'] ) : true,
         ];
 
         update_option( self::OPTION_KEY, $settings );
