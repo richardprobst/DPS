@@ -234,6 +234,11 @@ class DPS_Loyalty_API {
      * Applies the client's tier multiplier if a client_id is provided.
      * Useful for displaying expected points before completing a transaction.
      *
+     * Note: This method is intentionally separate from the private method
+     * `DPS_Loyalty_Addon::calculate_points_from_value()` which handles the actual
+     * point awarding with hooks. This API method provides a preview/calculation
+     * without side effects.
+     *
      * @since 1.2.0
      *
      * @param float $amount    The monetary amount in BRL.

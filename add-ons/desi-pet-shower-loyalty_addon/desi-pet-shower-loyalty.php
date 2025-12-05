@@ -869,7 +869,8 @@ class DPS_Loyalty_Addon {
         
         $csv = DPS_Loyalty_API::export_referrals_csv( [ 'status' => $status ] );
         
-        $filename = 'indicacoes-' . gmdate( 'Y-m-d' ) . '.csv';
+        // Sanitize filename to prevent header injection
+        $filename = sanitize_file_name( 'indicacoes-' . gmdate( 'Y-m-d' ) . '.csv' );
         
         header( 'Content-Type: text/csv; charset=UTF-8' );
         header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
