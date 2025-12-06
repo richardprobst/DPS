@@ -549,6 +549,25 @@ Antes de criar uma nova versão oficial:
   - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
+- **Finance Add-on (v1.3.1)**: Corrigida página de Documentos Financeiros em branco e vulnerabilidade CSRF
+  - **Bug #1 - Página sem shortcode**: Quando página "Documentos Financeiros" já existia com slug `dps-documentos-financeiros`, o método `activate()` apenas atualizava option mas não verificava/atualizava conteúdo da página
+    - **Sintoma**: Página aparecia em branco se foi criada manualmente ou teve conteúdo removido
+    - **Solução**: Adicionada verificação em `activate()` para garantir que página existente sempre tenha shortcode `[dps_fin_docs]`
+    - **Impacto**: Página de documentos sempre funcional mesmo após modificações manuais
+  - **Bug #2 - Falta de controle de acesso**: Shortcode `render_fin_docs_shortcode()` não verificava permissões
+    - **Sintoma**: Qualquer visitante poderia acessar lista de documentos financeiros sensíveis
+    - **Solução**: Adicionada verificação `current_user_can('manage_options')` com filtro `dps_finance_docs_allow_public` para flexibilidade
+    - **Impacto**: Documentos agora requerem autenticação e permissão administrativa por padrão
+  - **Bug #3 - CSRF em ações de documentos (CRÍTICO)**: Ações `dps_send_doc` e `dps_delete_doc` não verificavam nonce
+    - **Vulnerabilidade**: CSRF permitindo atacante forçar usuário autenticado a enviar/deletar documentos
+    - **Solução**: Adicionada verificação de nonce em ambas as ações; links atualizados para usar `wp_nonce_url()` com nonces únicos por arquivo
+    - **Impacto**: Eliminada vulnerabilidade CSRF crítica; ações de documentos agora protegidas contra ataques
+  - **Melhoria de UX**: Listagem de documentos convertida de `<ul>` para tabela estruturada
+    - Novas colunas: Documento, Cliente, Data, Valor, Ações
+    - Informações extraídas automaticamente da transação vinculada
+    - Formatação adequada de datas e valores monetários
+    - **Impacto**: Interface mais profissional e informativa; documentos identificáveis sem precisar abri-los
+  - **Análise completa**: Documento detalhado criado em `docs/review/finance-addon-analysis-2025-12-06.md` com 10 sugestões de melhorias futuras
 - **AI Add-on (v1.6.0)**: Corrigido shortcode `[dps_ai_public_chat]` aparecendo como texto plano
   - **Problema**: Shortcode estava sendo registrado durante `plugins_loaded` com prioridade 21, muito tarde no ciclo de vida do WordPress
   - **Causa**: `add_shortcode()` era chamado diretamente no construtor de `DPS_AI_Public_Chat`, que era instanciado em `plugins_loaded`
@@ -641,6 +660,15 @@ Antes de criar uma nova versão oficial:
   - **Impacto**: Mensagens de feedback (sucesso/erro) agora são exibidas corretamente na seção financeira sem causar erros
 
 #### Security (Segurança)
+- **Finance Add-on (v1.3.1)**: Corrigida vulnerabilidade CSRF crítica em ações de documentos
+  - **Vulnerabilidade**: Ações `dps_send_doc` e `dps_delete_doc` não verificavam nonce, permitindo CSRF
+  - **Impacto potencial**: Atacante poderia forçar administrador autenticado a:
+    - Enviar documentos financeiros sensíveis para emails maliciosos
+    - Deletar documentos importantes sem autorização
+    - Executar ações não autorizadas em documentos
+  - **Solução**: Adicionada verificação de nonce única por arquivo em ambas as ações
+  - **Proteção adicional**: Controle de acesso via `current_user_can('manage_options')` no shortcode
+  - **Severidade**: CRÍTICA - eliminada completamente com as correções implementadas
 - **Services Add-on**: Corrigidas vulnerabilidades CSRF críticas
   - Adicionada verificação de nonce em exclusão de serviço (`dps_delete_service_{id}`)
   - Adicionada verificação de nonce em toggle de status (`dps_toggle_service_{id}`)
