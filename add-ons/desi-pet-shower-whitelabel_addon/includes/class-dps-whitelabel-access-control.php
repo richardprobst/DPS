@@ -167,13 +167,23 @@ class DPS_WhiteLabel_Access_Control {
 
 			// Suporte a wildcard
 			if ( strpos( $exception, '*' ) !== false ) {
-				$pattern = str_replace( '*', '.*', preg_quote( $exception, '/' ) );
-				if ( preg_match( '/^' . $pattern . '$/i', $current_url ) ) {
+				// Substituir * por .* e escapar o resto
+				$pattern = str_replace( '\*', '.*', preg_quote( $exception, '/' ) );
+				if ( preg_match( '/^' . $pattern . '/i', $current_url ) ) {
 					return true;
 				}
 			} else {
-				// Comparação exata ou início de caminho
-				if ( $current_url === $exception || strpos( $current_url, rtrim( $exception, '/' ) . '/' ) === 0 ) {
+				// Comparação exata OU se a URL atual começa com a exceção seguida de /
+				// Exemplo: exceção "/contact/" match "/contact/" e "/contact/form/"
+				// Mas exceção "/" só match "/" exatamente
+				if ( $exception === '/' ) {
+					// Caso especial: "/" só match raiz exata
+					if ( $current_url === '/' || $current_url === '' ) {
+						return true;
+					}
+				} elseif ( $current_url === $exception || 
+				           $current_url === rtrim( $exception, '/' ) ||
+				           strpos( $current_url, rtrim( $exception, '/' ) . '/' ) === 0 ) {
 					return true;
 				}
 			}
@@ -225,7 +235,16 @@ class DPS_WhiteLabel_Access_Control {
 			case 'wp_login':
 				return wp_login_url();
 			case 'custom_url':
-				return ! empty( $settings['redirect_url'] ) ? $settings['redirect_url'] : wp_login_url();
+				$custom_url = ! empty( $settings['redirect_url'] ) ? $settings['redirect_url'] : '';
+				// Validar para prevenir open redirect - deve ser URL interna
+				if ( ! empty( $custom_url ) ) {
+					$parsed = parse_url( $custom_url );
+					// Permitir apenas URLs relativas ou do mesmo domínio
+					if ( ! isset( $parsed['host'] ) || $parsed['host'] === $_SERVER['HTTP_HOST'] ) {
+						return $custom_url;
+					}
+				}
+				return wp_login_url();
 			case 'custom_login':
 			default:
 				// Usar página de login customizada se houver
@@ -350,12 +369,29 @@ class DPS_WhiteLabel_Access_Control {
 			}
 		}
 
+		// Validar e sanitizar redirect URL customizada
+		$redirect_url = '';
+		if ( ! empty( $_POST['redirect_url'] ) ) {
+			$redirect_url = esc_url_raw( wp_unslash( $_POST['redirect_url'] ) );
+			// Validar para prevenir open redirect
+			$parsed = parse_url( $redirect_url );
+			if ( isset( $parsed['host'] ) && $parsed['host'] !== $_SERVER['HTTP_HOST'] ) {
+				add_settings_error(
+					'dps_whitelabel',
+					'invalid_redirect_url',
+					__( 'Aviso: A URL de redirecionamento customizada aponta para um domínio externo. Por segurança, apenas URLs internas são permitidas.', 'dps-whitelabel-addon' ),
+					'warning'
+				);
+				$redirect_url = '';
+			}
+		}
+
 		$new_settings = [
 			'access_enabled'  => isset( $_POST['access_enabled'] ),
 			'allowed_roles'   => $allowed_roles,
 			'exception_urls'  => $exception_urls,
 			'redirect_type'   => sanitize_key( $_POST['redirect_type'] ?? 'custom_login' ),
-			'redirect_url'    => esc_url_raw( wp_unslash( $_POST['redirect_url'] ?? '' ) ),
+			'redirect_url'    => $redirect_url,
 			'redirect_back'   => isset( $_POST['redirect_back'] ),
 			'allow_rest_api'  => isset( $_POST['allow_rest_api'] ),
 			'allow_ajax'      => isset( $_POST['allow_ajax'] ),
