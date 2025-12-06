@@ -122,6 +122,30 @@ Antes de criar uma nova versão oficial:
     - Método `clear_cache()` limpa cache ao salvar configurações
     - Método `get_settings()` aceita parâmetro `$force_refresh` para invalidação explícita
 
+#### Changed (Alterado)
+- **White Label Add-on (v1.2.0)**: Melhorias de UX Básicas
+  - **Validação de URLs em Tempo Real**: `whitelabel-admin.js`
+    - Validação JavaScript ao sair do campo (evento `blur`)
+    - Feedback visual imediato com ícones ✓/✗ e cores verde/vermelho
+    - Valida formatos de URLs para logos, website, suporte, documentação, termos e privacidade
+  - **Paletas de Cores Pré-definidas**: `admin-settings.php`, `whitelabel-admin.js`
+    - 5 paletas harmonizadas: Padrão DPS, Oceano, Floresta, Pôr do Sol, Moderno
+    - Aplicação com um clique via JavaScript
+    - Integração com WordPress Color Picker
+    - Feedback visual quando paleta é aplicada
+  - **Indicadores de Campos Recomendados**: `admin-settings.php`
+    - Asterisco laranja (*) em "Nome da Marca" e "Logo"
+    - Tooltip explicativo ao passar mouse
+    - Melhora orientação do usuário sobre campos importantes
+  - **Scroll Automático para Mensagens**: `whitelabel-admin.js`
+    - Scroll suave para mensagens de sucesso/erro após salvar
+    - Garante que usuário veja feedback mesmo em telas pequenas
+  - **Responsividade Melhorada**: `whitelabel-admin.css`
+    - Novo breakpoint em 480px para tablets/mobiles em portrait
+    - Form tables adaptam layout em colunas verticais
+    - Botões e presets ocupam largura total em mobile
+    - Melhora usabilidade em dispositivos pequenos
+
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
   - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados

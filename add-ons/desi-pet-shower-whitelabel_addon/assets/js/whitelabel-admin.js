@@ -14,6 +14,9 @@
         initMediaUploaders();
         initLoginBackgroundToggle();
         initTestEmail();
+        initUrlValidation();
+        initColorPresets();
+        initSaveScrollBehavior();
     });
 
     /**
@@ -193,6 +196,134 @@
     function isValidEmail(email) {
         var pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return pattern.test(email);
+    }
+
+    /**
+     * Valida URLs em tempo real.
+     */
+    function initUrlValidation() {
+        var $urlInputs = $(
+            'input[name="brand_logo_url"], ' +
+            'input[name="brand_logo_dark_url"], ' +
+            'input[name="brand_favicon_url"], ' +
+            'input[name="website_url"], ' +
+            'input[name="support_url"], ' +
+            'input[name="redirect_url"], ' +
+            'input[name="docs_url"], ' +
+            'input[name="terms_url"], ' +
+            'input[name="privacy_url"]'
+        );
+        
+        $urlInputs.on('blur', function() {
+            var $input = $(this);
+            var url = $input.val().trim();
+            var $feedback = $input.next('.url-validation-feedback');
+            
+            // Remove feedback anterior
+            $feedback.remove();
+            $input.removeClass('url-valid url-invalid');
+            
+            if ( ! url ) {
+                return; // Campo vazio é válido (opcional)
+            }
+            
+            // Valida formato básico de URL
+            var urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+            
+            if ( urlPattern.test( url ) ) {
+                $input.addClass('url-valid');
+                $input.after('<span class="url-validation-feedback valid">✓ URL válida</span>');
+            } else {
+                $input.addClass('url-invalid');
+                $input.after('<span class="url-validation-feedback invalid">✗ URL inválida</span>');
+            }
+        });
+    }
+
+    /**
+     * Paletas de cores pré-definidas.
+     */
+    function initColorPresets() {
+        var presets = {
+            'default': {
+                primary: '#0ea5e9',
+                secondary: '#10b981',
+                accent: '#f59e0b',
+                background: '#f9fafb',
+                text: '#374151'
+            },
+            'ocean': {
+                primary: '#0891b2',
+                secondary: '#06b6d4',
+                accent: '#6366f1',
+                background: '#f0f9ff',
+                text: '#0c4a6e'
+            },
+            'forest': {
+                primary: '#059669',
+                secondary: '#10b981',
+                accent: '#84cc16',
+                background: '#f0fdf4',
+                text: '#14532d'
+            },
+            'sunset': {
+                primary: '#f97316',
+                secondary: '#fb923c',
+                accent: '#fbbf24',
+                background: '#fff7ed',
+                text: '#7c2d12'
+            },
+            'modern': {
+                primary: '#8b5cf6',
+                secondary: '#a78bfa',
+                accent: '#ec4899',
+                background: '#faf5ff',
+                text: '#581c87'
+            }
+        };
+        
+        $('.dps-preset-btn').on('click', function(e) {
+            e.preventDefault();
+            
+            var presetName = $(this).data('preset');
+            var colors = presets[presetName];
+            
+            if ( ! colors ) {
+                return;
+            }
+            
+            // Aplica cores nos inputs
+            $('#color_primary').val(colors.primary).wpColorPicker('color', colors.primary);
+            $('#color_secondary').val(colors.secondary).wpColorPicker('color', colors.secondary);
+            $('#color_accent').val(colors.accent).wpColorPicker('color', colors.accent);
+            $('#color_background').val(colors.background).wpColorPicker('color', colors.background);
+            $('#color_text').val(colors.text).wpColorPicker('color', colors.text);
+            
+            // Feedback visual
+            $('.dps-preset-btn').removeClass('preset-applied');
+            $(this).addClass('preset-applied');
+            setTimeout(function() {
+                $('.dps-preset-btn').removeClass('preset-applied');
+            }, 1000);
+        });
+    }
+
+    /**
+     * Scroll automático para mensagens de sucesso/erro.
+     */
+    function initSaveScrollBehavior() {
+        var $form = $('.dps-whitelabel-wrap form');
+        
+        if ( ! $form.length ) {
+            return;
+        }
+        
+        // Após carregar página, verifica se há mensagens e scroll para elas
+        if ( $('.notice, .dps-alert, .settings-error').length ) {
+            $('html, body').animate({
+                scrollTop: $('.dps-whitelabel-wrap').offset().top - 50
+            }, 300);
+        }
     }
 
 })(jQuery);
