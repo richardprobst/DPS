@@ -196,8 +196,8 @@ class DPS_AI_Addon {
         // Inicializa integração com Portal do Cliente
         add_action( 'plugins_loaded', [ $this, 'init_portal_integration' ], 20 );
 
-        // Inicializa componentes v1.5.0
-        add_action( 'plugins_loaded', [ $this, 'init_components' ], 21 );
+        // Inicializa componentes v1.5.0 (mudado para 'init' para permitir registro de shortcodes)
+        add_action( 'init', [ $this, 'init_components' ], 10 );
 
         // Registra handlers AJAX para sugestões de mensagens
         add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
