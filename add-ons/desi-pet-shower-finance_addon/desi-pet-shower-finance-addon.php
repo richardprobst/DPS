@@ -369,8 +369,17 @@ class DPS_Finance_Addon {
                     update_option( 'dps_fin_docs_page_id', $new_page_id );
                 }
             } else {
-                // Página já existe com o slug, apenas atualiza a option
+                // Página já existe: atualiza option e garante que tenha o shortcode
                 update_option( 'dps_fin_docs_page_id', $page->ID );
+                
+                // BUGFIX: Verifica se o conteúdo da página contém o shortcode
+                // Se não contiver, atualiza para incluí-lo
+                if ( strpos( $page->post_content, '[dps_fin_docs]' ) === false ) {
+                    wp_update_post( [
+                        'ID'           => $page->ID,
+                        'post_content' => '[dps_fin_docs]',
+                    ] );
+                }
             }
         }
     }
@@ -917,9 +926,24 @@ class DPS_Finance_Addon {
      * Lista todos os documentos gerados (arquivos .html) no diretório de uploads/dps_docs. A lista
      * é apresentada como uma lista simples de links. Este método é usado pelo shortcode [dps_fin_docs].
      *
+     * SEGURANÇA: Requer que o usuário esteja logado e tenha permissão manage_options
+     * ou que a visualização pública esteja habilitada via filtro.
+     *
      * @return string HTML renderizado
      */
     public function render_fin_docs_shortcode() {
+        // SEGURANÇA: Verifica permissões antes de listar documentos
+        // Permite filtro para habilitar visualização pública se necessário
+        $allow_public_view = apply_filters( 'dps_finance_docs_allow_public', false );
+        
+        if ( ! $allow_public_view && ! current_user_can( 'manage_options' ) ) {
+            ob_start();
+            echo '<div class="dps-fin-docs">';
+            echo '<p>' . esc_html__( 'Você não tem permissão para visualizar documentos financeiros.', 'dps-finance-addon' ) . '</p>';
+            echo '</div>';
+            return ob_get_clean();
+        }
+        
         $upload_dir = wp_upload_dir();
         $doc_dir    = trailingslashit( $upload_dir['basedir'] ) . 'dps_docs';
         $doc_urlbase= trailingslashit( $upload_dir['baseurl'] ) . 'dps_docs/';
@@ -974,7 +998,15 @@ class DPS_Finance_Addon {
                     continue;
                 }
                 echo '<h4>' . esc_html( $title ) . '</h4>';
-                echo '<ul class="dps-fin-docs-list">';
+                echo '<table class="dps-table dps-fin-docs-table">';
+                echo '<thead><tr>';
+                echo '<th>' . esc_html__( 'Documento', 'dps-finance-addon' ) . '</th>';
+                echo '<th>' . esc_html__( 'Cliente', 'dps-finance-addon' ) . '</th>';
+                echo '<th>' . esc_html__( 'Data', 'dps-finance-addon' ) . '</th>';
+                echo '<th>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '</th>';
+                echo '<th>' . esc_html__( 'Ações', 'dps-finance-addon' ) . '</th>';
+                echo '</tr></thead><tbody>';
+                
                 foreach ( $categorized[ $key ] as $doc ) {
                     $url = $doc_urlbase . $doc;
                     // Tenta encontrar trans_id correspondente ao doc
@@ -982,6 +1014,42 @@ class DPS_Finance_Addon {
                     if ( isset( $doc_map[ $url ] ) ) {
                         $trans_id = $doc_map[ $url ];
                     }
+                    
+                    // Busca informações da transação para exibir na listagem
+                    $client_name = '-';
+                    $trans_date = '-';
+                    $trans_value = '-';
+                    
+                    if ( $trans_id ) {
+                        $table = $wpdb->prefix . 'dps_transacoes';
+                        $trans = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE id = %d", $trans_id ) );
+                        if ( $trans ) {
+                            // Data formatada
+                            if ( $trans->data ) {
+                                $trans_date = date_i18n( get_option( 'date_format' ), strtotime( $trans->data ) );
+                            }
+                            // Valor formatado
+                            if ( $trans->valor ) {
+                                $trans_value = 'R$ ' . DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans->valor * 100 ) );
+                            }
+                            // Nome do cliente
+                            if ( $trans->cliente_id ) {
+                                $client_post = get_post( $trans->cliente_id );
+                                if ( $client_post ) {
+                                    $client_name = $client_post->post_title;
+                                }
+                            } elseif ( $trans->agendamento_id ) {
+                                $client_id = get_post_meta( $trans->agendamento_id, 'appointment_client_id', true );
+                                if ( $client_id ) {
+                                    $client_post = get_post( $client_id );
+                                    if ( $client_post ) {
+                                        $client_name = $client_post->post_title;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     // Define URL base atual removendo parâmetros de ação
                     $current_url = home_url( add_query_arg( null, null ) );
                     $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file' ], $current_url );
@@ -992,13 +1060,19 @@ class DPS_Finance_Addon {
                     }
                     // Link para exclusão
                     $del_link  = add_query_arg( [ 'dps_delete_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean );
-                    echo '<li>';
-                    echo '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $doc ) . '</a> ';
-                    echo '<a href="#" class="dps-fin-doc-email" data-base="' . esc_attr( $send_link ) . '">' . esc_html__( 'Enviar por email', 'dps-finance-addon' ) . '</a> ';
-                    echo '<a href="' . esc_url( $del_link ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja excluir este documento?', 'dps-finance-addon' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-finance-addon' ) . '</a>';
-                    echo '</li>';
+                    
+                    echo '<tr>';
+                    echo '<td data-label="' . esc_attr__( 'Documento', 'dps-finance-addon' ) . '"><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $doc ) . '</a></td>';
+                    echo '<td data-label="' . esc_attr__( 'Cliente', 'dps-finance-addon' ) . '">' . esc_html( $client_name ) . '</td>';
+                    echo '<td data-label="' . esc_attr__( 'Data', 'dps-finance-addon' ) . '">' . esc_html( $trans_date ) . '</td>';
+                    echo '<td data-label="' . esc_attr__( 'Valor', 'dps-finance-addon' ) . '">' . esc_html( $trans_value ) . '</td>';
+                    echo '<td data-label="' . esc_attr__( 'Ações', 'dps-finance-addon' ) . '">';
+                    echo '<a href="#" class="dps-fin-doc-email" data-base="' . esc_attr( $send_link ) . '">' . esc_html__( 'Enviar email', 'dps-finance-addon' ) . '</a> | ';
+                    echo '<a href="' . esc_url( $del_link ) . '" class="dps-action-link-danger" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja excluir este documento?', 'dps-finance-addon' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-finance-addon' ) . '</a>';
+                    echo '</td>';
+                    echo '</tr>';
                 }
-                echo '</ul>';
+                echo '</tbody></table>';
             }
             // Script para prompt de email
             echo '<script>(function($){$(document).on("click", ".dps-fin-doc-email", function(e){e.preventDefault();var base=$(this).data("base");var email=prompt("Para qual email deseja enviar? Deixe em branco para usar o email padrão.");if(email===null){return;}email=email.trim();var url=base; if(email){url += (url.indexOf("?")===-1 ? "?" : "&") + "to_email=" + encodeURIComponent(email);} window.location.href=url;});})(jQuery);</script>';
