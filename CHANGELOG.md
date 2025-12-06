@@ -634,6 +634,11 @@ Antes de criar uma nova versão oficial:
     - Labels strong: `min-width: 100px` (era 140px) em ≤480px
     - Font-size reduzido para 13px (itens) e 16px (título H3)
   - Reduzido tamanho da legend em telas muito pequenas (15px em ≤480px)
+- **Finance Add-on**: Corrigido fatal error ao renderizar mensagens de feedback
+  - **Problema**: Chamada a método inexistente `DPS_Message_Helper::render()` causava fatal error na linha 1725
+  - **Causa**: Finance add-on tentava usar método `render()` que não existe na classe `DPS_Message_Helper`
+  - **Solução**: Substituída chamada por renderização inline usando a mesma estrutura HTML do método `display_messages()`
+  - **Impacto**: Mensagens de feedback (sucesso/erro) agora são exibidas corretamente na seção financeira sem causar erros
 
 #### Security (Segurança)
 - **Services Add-on**: Corrigidas vulnerabilidades CSRF críticas
