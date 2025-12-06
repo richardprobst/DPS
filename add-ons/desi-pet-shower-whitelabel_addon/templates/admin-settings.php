@@ -12,11 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Variáveis disponíveis: $active_tab
-$settings    = DPS_WhiteLabel_Settings::get_settings();
-$smtp        = DPS_WhiteLabel_SMTP::get_settings();
-$login       = DPS_WhiteLabel_Login_Page::get_settings();
-$admin_bar   = DPS_WhiteLabel_Admin_Bar::get_settings();
-$maintenance = DPS_WhiteLabel_Maintenance::get_settings();
+$settings       = DPS_WhiteLabel_Settings::get_settings();
+$smtp           = DPS_WhiteLabel_SMTP::get_settings();
+$login          = DPS_WhiteLabel_Login_Page::get_settings();
+$admin_bar      = DPS_WhiteLabel_Admin_Bar::get_settings();
+$maintenance    = DPS_WhiteLabel_Maintenance::get_settings();
+$access_control = DPS_WhiteLabel_Access_Control::get_settings();
 ?>
 <div class="wrap dps-whitelabel-wrap">
     <h1><?php esc_html_e( 'White Label', 'dps-whitelabel-addon' ); ?></h1>
@@ -44,6 +45,13 @@ $maintenance = DPS_WhiteLabel_Maintenance::get_settings();
            class="nav-tab <?php echo 'maintenance' === $active_tab ? 'nav-tab-active' : ''; ?>">
             <?php esc_html_e( 'Manutenção', 'dps-whitelabel-addon' ); ?>
             <?php if ( DPS_WhiteLabel_Maintenance::is_active() ) : ?>
+                <span class="dps-badge-warning">!</span>
+            <?php endif; ?>
+        </a>
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-whitelabel&tab=access-control' ) ); ?>" 
+           class="nav-tab <?php echo 'access-control' === $active_tab ? 'nav-tab-active' : ''; ?>">
+            <?php esc_html_e( 'Acesso ao Site', 'dps-whitelabel-addon' ); ?>
+            <?php if ( DPS_WhiteLabel_Access_Control::is_active() ) : ?>
                 <span class="dps-badge-warning">!</span>
             <?php endif; ?>
         </a>
@@ -666,6 +674,183 @@ $maintenance = DPS_WhiteLabel_Maintenance::get_settings();
                 
                 <p class="submit">
                     <button type="submit" name="dps_whitelabel_save_maintenance" class="button button-primary">
+                        <?php esc_html_e( 'Salvar Configurações', 'dps-whitelabel-addon' ); ?>
+                    </button>
+                </p>
+            </form>
+        <?php endif; ?>
+        
+        <!-- Aba Acesso ao Site -->
+        <?php if ( 'access-control' === $active_tab ) : ?>
+            <form method="post" action="">
+                <?php wp_nonce_field( 'dps_whitelabel_settings', 'dps_whitelabel_nonce' ); ?>
+                
+                <h2><?php esc_html_e( 'Controle de Acesso ao Site', 'dps-whitelabel-addon' ); ?></h2>
+                <p class="description">
+                    <?php esc_html_e( 'Configure quem pode acessar seu site e quais páginas ficam públicas.', 'dps-whitelabel-addon' ); ?>
+                </p>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <?php esc_html_e( 'Status', 'dps-whitelabel-addon' ); ?>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="access_enabled" value="1" <?php checked( $access_control['access_enabled'] ); ?>>
+                                <?php esc_html_e( 'Restringir acesso ao site', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e( 'Quando ativo, visitantes não autenticados serão redirecionados para a página de login.', 'dps-whitelabel-addon' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <?php esc_html_e( 'Quem pode acessar o site?', 'dps-whitelabel-addon' ); ?>
+                        </th>
+                        <td>
+                            <?php
+                            $wp_roles = wp_roles();
+                            foreach ( $wp_roles->get_names() as $role_slug => $role_name ) :
+                                $checked  = in_array( $role_slug, $access_control['allowed_roles'], true );
+                                $disabled = 'administrator' === $role_slug;
+                                ?>
+                                <label style="display: block; margin-bottom: 5px;">
+                                    <input 
+                                        type="checkbox" 
+                                        name="allowed_roles[]" 
+                                        value="<?php echo esc_attr( $role_slug ); ?>"
+                                        <?php checked( $checked ); ?>
+                                        <?php disabled( $disabled ); ?>
+                                    >
+                                    <?php echo esc_html( translate_user_role( $role_name ) ); ?>
+                                    <?php if ( $disabled ) : ?>
+                                        <em>(<?php esc_html_e( 'sempre ativo', 'dps-whitelabel-addon' ); ?>)</em>
+                                    <?php endif; ?>
+                                </label>
+                            <?php endforeach; ?>
+                            <input type="hidden" name="allowed_roles[]" value="administrator">
+                            <p class="description">
+                                <?php esc_html_e( 'Usuários com as roles selecionadas terão acesso total ao site.', 'dps-whitelabel-addon' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <?php esc_html_e( 'Páginas Públicas (Exceções)', 'dps-whitelabel-addon' ); ?>
+                        </th>
+                        <td>
+                            <p class="description">
+                                <?php esc_html_e( 'Digite uma URL por linha. Use * para incluir subpáginas.', 'dps-whitelabel-addon' ); ?>
+                                <br>
+                                <?php esc_html_e( 'Exemplos: / (home), /contato/ (página específica), /blog/* (blog e posts)', 'dps-whitelabel-addon' ); ?>
+                            </p>
+                            <textarea 
+                                name="exception_urls" 
+                                rows="10" 
+                                class="large-text code"
+                                style="font-family: monospace;"
+                                placeholder="<?php esc_attr_e( "/\n/contato/\n/servicos/\n/blog/*", 'dps-whitelabel-addon' ); ?>"
+                            ><?php echo esc_textarea( implode( "\n", $access_control['exception_urls'] ) ); ?></textarea>
+                            <p class="description">
+                                <?php esc_html_e( 'Áreas do WordPress (/wp-admin/, /wp-login.php) são sempre acessíveis.', 'dps-whitelabel-addon' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <?php esc_html_e( 'Redirecionamento', 'dps-whitelabel-addon' ); ?>
+                        </th>
+                        <td>
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input 
+                                    type="radio" 
+                                    name="redirect_type" 
+                                    value="wp_login"
+                                    <?php checked( $access_control['redirect_type'], 'wp_login' ); ?>
+                                >
+                                <?php esc_html_e( 'Página de login padrão do WordPress (/wp-login.php)', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input 
+                                    type="radio" 
+                                    name="redirect_type" 
+                                    value="custom_login"
+                                    <?php checked( $access_control['redirect_type'], 'custom_login' ); ?>
+                                >
+                                <?php esc_html_e( 'Página de login customizada (configurada na aba Login)', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input 
+                                    type="radio" 
+                                    name="redirect_type" 
+                                    value="custom_url"
+                                    <?php checked( $access_control['redirect_type'], 'custom_url' ); ?>
+                                >
+                                <?php esc_html_e( 'URL customizada:', 'dps-whitelabel-addon' ); ?>
+                                <input 
+                                    type="url" 
+                                    name="redirect_url" 
+                                    value="<?php echo esc_attr( $access_control['redirect_url'] ); ?>"
+                                    class="regular-text"
+                                    placeholder="https://"
+                                    style="margin-left: 10px;"
+                                >
+                            </label>
+                            
+                            <br>
+                            <label>
+                                <input type="checkbox" name="redirect_back" value="1" <?php checked( $access_control['redirect_back'] ); ?>>
+                                <?php esc_html_e( 'Redirecionar de volta após login', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e( 'Após autenticar, leva o usuário para a página que ele estava tentando acessar.', 'dps-whitelabel-addon' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <?php esc_html_e( 'Opções Avançadas', 'dps-whitelabel-addon' ); ?>
+                        </th>
+                        <td>
+                            <label style="display: block; margin-bottom: 5px;">
+                                <input type="checkbox" name="allow_rest_api" value="1" <?php checked( $access_control['allow_rest_api'] ); ?>>
+                                <?php esc_html_e( 'Permitir REST API para usuários autenticados', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            
+                            <label style="display: block; margin-bottom: 5px;">
+                                <input type="checkbox" name="allow_ajax" value="1" <?php checked( $access_control['allow_ajax'] ); ?>>
+                                <?php esc_html_e( 'Permitir requisições AJAX', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            
+                            <label style="display: block; margin-bottom: 5px;">
+                                <input type="checkbox" name="allow_media" value="1" <?php checked( $access_control['allow_media'] ); ?>>
+                                <?php esc_html_e( 'Permitir acesso a arquivos de mídia (imagens, PDFs)', 'dps-whitelabel-addon' ); ?>
+                            </label>
+                            
+                            <br><br>
+                            <label>
+                                <strong><?php esc_html_e( 'Mensagem de bloqueio (se não redirecionar):', 'dps-whitelabel-addon' ); ?></strong>
+                                <br>
+                                <textarea 
+                                    name="blocked_message" 
+                                    rows="3" 
+                                    class="large-text"
+                                ><?php echo esc_textarea( $access_control['blocked_message'] ); ?></textarea>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p class="submit">
+                    <button type="submit" name="dps_whitelabel_save_access_control" class="button button-primary">
                         <?php esc_html_e( 'Salvar Configurações', 'dps-whitelabel-addon' ); ?>
                     </button>
                 </p>

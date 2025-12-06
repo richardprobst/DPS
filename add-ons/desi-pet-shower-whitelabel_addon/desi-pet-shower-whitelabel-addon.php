@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do add-on
-define( 'DPS_WHITELABEL_VERSION', '1.0.0' );
+define( 'DPS_WHITELABEL_VERSION', '1.1.0' );
 define( 'DPS_WHITELABEL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_WHITELABEL_URL', plugin_dir_url( __FILE__ ) );
 define( 'DPS_WHITELABEL_BASENAME', plugin_basename( __FILE__ ) );
@@ -52,6 +52,7 @@ function dps_whitelabel_init() {
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-login-page.php';
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-admin-bar.php';
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-maintenance.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-access-control.php';
 
     // Inicializa a classe principal
     new DPS_WhiteLabel_Addon();
@@ -143,17 +144,25 @@ class DPS_WhiteLabel_Addon {
     private $maintenance;
 
     /**
+     * Instância de Access Control.
+     *
+     * @var DPS_WhiteLabel_Access_Control
+     */
+    private $access_control;
+
+    /**
      * Construtor da classe.
      */
     public function __construct() {
         // Inicializa módulos
-        $this->settings    = new DPS_WhiteLabel_Settings();
-        $this->branding    = new DPS_WhiteLabel_Branding();
-        $this->assets      = new DPS_WhiteLabel_Assets();
-        $this->smtp        = new DPS_WhiteLabel_SMTP();
-        $this->login_page  = new DPS_WhiteLabel_Login_Page();
-        $this->admin_bar   = new DPS_WhiteLabel_Admin_Bar();
-        $this->maintenance = new DPS_WhiteLabel_Maintenance();
+        $this->settings       = new DPS_WhiteLabel_Settings();
+        $this->branding       = new DPS_WhiteLabel_Branding();
+        $this->assets         = new DPS_WhiteLabel_Assets();
+        $this->smtp           = new DPS_WhiteLabel_SMTP();
+        $this->login_page     = new DPS_WhiteLabel_Login_Page();
+        $this->admin_bar      = new DPS_WhiteLabel_Admin_Bar();
+        $this->maintenance    = new DPS_WhiteLabel_Maintenance();
+        $this->access_control = new DPS_WhiteLabel_Access_Control();
 
         // Registra menu admin
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
@@ -189,7 +198,7 @@ class DPS_WhiteLabel_Addon {
 
         // Determina a aba ativa
         $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'branding';
-        $allowed_tabs = [ 'branding', 'smtp', 'login', 'admin-bar', 'maintenance' ];
+        $allowed_tabs = [ 'branding', 'smtp', 'login', 'admin-bar', 'maintenance', 'access-control' ];
         
         if ( ! in_array( $active_tab, $allowed_tabs, true ) ) {
             $active_tab = 'branding';
@@ -319,6 +328,7 @@ function dps_whitelabel_activate() {
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-login-page.php';
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-admin-bar.php';
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-maintenance.php';
+    require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-access-control.php';
 
     // Cria opções padrão se não existirem
     if ( false === get_option( 'dps_whitelabel_settings' ) ) {
@@ -335,6 +345,9 @@ function dps_whitelabel_activate() {
     }
     if ( false === get_option( 'dps_whitelabel_maintenance' ) ) {
         add_option( 'dps_whitelabel_maintenance', DPS_WhiteLabel_Maintenance::get_defaults() );
+    }
+    if ( false === get_option( 'dps_whitelabel_access_control' ) ) {
+        add_option( 'dps_whitelabel_access_control', DPS_WhiteLabel_Access_Control::get_defaults() );
     }
 
     // Limpa cache de rewrite rules
