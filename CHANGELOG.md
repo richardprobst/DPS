@@ -81,6 +81,26 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Security (Segurança)
+- **White Label Add-on (v1.1.1)**: Correções Críticas de Segurança
+  - **Validação de Open Redirect Reforçada**: `class-dps-whitelabel-access-control.php`
+    - Validação redundante no método `get_login_url()` além da validação no salvamento
+    - Sanitização com `esc_url_raw()` antes de retornar URL customizada
+    - Log de tentativas suspeitas via `DPS_Logger` quando domínio externo é detectado
+    - Proteção contra manipulação direta no banco de dados
+  - **Sanitização Robusta de CSS Customizado**: `class-dps-whitelabel-settings.php`
+    - Proteção contra bypass via encoding hexadecimal/octal (ex: `\74` = 't')
+    - Bloqueio de URLs com encoding suspeito em `url()`
+    - Validação adicional via `preg_replace_callback` para detectar caracteres codificados
+    - Mantém bloqueio de `javascript:`, `expression()`, `behavior:`, `vbscript:`, `data:` e `@import`
+    - Adicionado hook `dps_whitelabel_sanitize_custom_css` para customização
+  - **Validação de URLs de Logo Implementada**: `class-dps-whitelabel-settings.php`
+    - Método `validate_logo_url()` agora é chamado em `handle_settings_save()`
+    - Valida formatos permitidos: JPG, PNG, GIF, SVG, WebP, ICO
+    - Verifica MIME type via Media Library para attachments do WordPress
+    - Valida extensão para URLs externas
+    - Exibe mensagem de aviso e define campo vazio quando URL inválida
+
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
   - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados

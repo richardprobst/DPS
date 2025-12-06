@@ -236,14 +236,34 @@ class DPS_WhiteLabel_Access_Control {
 				return wp_login_url();
 			case 'custom_url':
 				$custom_url = ! empty( $settings['redirect_url'] ) ? $settings['redirect_url'] : '';
-				// Validar para prevenir open redirect - deve ser URL interna
+				
 				if ( ! empty( $custom_url ) ) {
+					// Validação robusta contra open redirect
 					$parsed = parse_url( $custom_url );
-					// Permitir apenas URLs relativas ou do mesmo domínio
-					if ( ! isset( $parsed['host'] ) || $parsed['host'] === $_SERVER['HTTP_HOST'] ) {
-						return $custom_url;
+					$current_host = isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '';
+					
+					// Permitir apenas:
+					// 1. URLs relativas (sem host)
+					// 2. URLs do mesmo domínio
+					if ( ! isset( $parsed['host'] ) || $parsed['host'] === $current_host ) {
+						// Sanitizar URL antes de retornar
+						return esc_url_raw( $custom_url );
+					}
+					
+					// Log de tentativa suspeita
+					if ( class_exists( 'DPS_Logger' ) ) {
+						DPS_Logger::warning(
+							sprintf(
+								'Tentativa de open redirect bloqueada. URL: %s, Host esperado: %s',
+								$custom_url,
+								$current_host
+							),
+							'whitelabel-security'
+						);
 					}
 				}
+				
+				// Fallback seguro
 				return wp_login_url();
 			case 'custom_login':
 			default:

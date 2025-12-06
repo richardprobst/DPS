@@ -153,6 +153,28 @@ class DPS_WhiteLabel_Settings {
             'custom_footer_text'   => sanitize_textarea_field( wp_unslash( $_POST['custom_footer_text'] ?? '' ) ),
             'custom_css'           => self::sanitize_custom_css( wp_unslash( $_POST['custom_css'] ?? '' ) ),
         ];
+        
+        // Validar URLs de logo
+        $logo_fields = [ 'brand_logo_url', 'brand_logo_dark_url', 'brand_favicon_url' ];
+        
+        foreach ( $logo_fields as $field ) {
+            if ( ! empty( $new_settings[ $field ] ) ) {
+                if ( ! self::validate_logo_url( $new_settings[ $field ] ) ) {
+                    add_settings_error(
+                        'dps_whitelabel',
+                        'invalid_' . $field,
+                        sprintf(
+                            /* translators: %s: nome do campo */
+                            __( 'URL de %s inválida. Formatos permitidos: JPG, PNG, GIF, SVG, WebP, ICO.', 'dps-whitelabel-addon' ),
+                            str_replace( '_', ' ', $field )
+                        ),
+                        'warning'
+                    );
+                    // Define como vazio ao invés de salvar URL inválida
+                    $new_settings[ $field ] = '';
+                }
+            }
+        }
 
         // Salva configurações
         update_option( self::OPTION_NAME, $new_settings );
@@ -176,20 +198,47 @@ class DPS_WhiteLabel_Settings {
      * @return string CSS sanitizado.
      */
     public static function sanitize_custom_css( $css ) {
-        // Remove tags HTML
+        if ( empty( $css ) ) {
+            return '';
+        }
+        
+        // Remove tags HTML primeiro
         $css = wp_strip_all_tags( $css );
         
-        // Remove expressões JavaScript
-        $css = preg_replace( '/javascript\s*:/i', '', $css );
-        $css = preg_replace( '/expression\s*\(/i', '', $css );
-        $css = preg_replace( '/behavior\s*:/i', '', $css );
-        $css = preg_replace( '/-moz-binding\s*:/i', '', $css );
+        // Remove comentários
+        $css = preg_replace( '/\/\*.*?\*\//s', '', $css );
         
-        // Remove URLs data: (podem conter código)
-        $css = preg_replace( '/url\s*\(\s*["\']?\s*data:/i', 'url(blocked:', $css );
+        // Lista de propriedades/valores perigosos
+        $dangerous_patterns = [
+            '/javascript\s*:/i',
+            '/expression\s*\(/i',
+            '/behavior\s*:/i',
+            '/-moz-binding\s*:/i',
+            '/vbscript\s*:/i',
+            '/@import/i',
+            '/url\s*\(\s*["\']?\s*data:/i', // Bloqueia data URIs
+        ];
         
-        // Remove @import (pode carregar CSS externo malicioso)
-        $css = preg_replace( '/@import/i', '/* @import blocked */', $css );
+        foreach ( $dangerous_patterns as $pattern ) {
+            $css = preg_replace( $pattern, '/* BLOCKED */', $css );
+        }
+        
+        // Validação adicional: remove qualquer octal/hex encoding suspeito em URLs
+        $css = preg_replace_callback(
+            '/url\s*\([^)]*\)/i',
+            function( $matches ) {
+                $url = $matches[0];
+                // Remove encoding hexadecimal/octal que pode contornar filtros
+                if ( preg_match( '/\\\\[0-9a-f]{2,4}/i', $url ) ) {
+                    return '/* BLOCKED - encoded chars */';
+                }
+                return $url;
+            },
+            $css
+        );
+        
+        // Aplicar filtro para permitir customização
+        $css = apply_filters( 'dps_whitelabel_sanitize_custom_css', $css );
         
         return $css;
     }
