@@ -605,19 +605,26 @@ class DPS_Finance_Addon {
         /**
          * Envio ou exclusão de documentos financeiros
          *
-         * Para enviar um documento: usar dps_send_doc=1, file={nome do arquivo}
+         * Para enviar um documento: usar dps_send_doc=1, file={nome do arquivo}, _wpnonce
          * Opcional: to_email={email personalizado} e trans_id={id da transação}
          *
-         * Para excluir um documento: usar dps_delete_doc=1, file={nome do arquivo}
+         * Para excluir um documento: usar dps_delete_doc=1, file={nome do arquivo}, _wpnonce
+         * 
+         * SEGURANÇA: Adicionada verificação de nonce em 2025-12-06
          */
         // Excluir documento
-        if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) ) {
+        if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) && isset( $_GET['_wpnonce'] ) ) {
+            $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
+            
+            // Verifica nonce
+            if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_doc_' . $file ) ) {
+                wp_die( esc_html__( 'Ação de segurança inválida.', 'dps-finance-addon' ) );
+            }
+            
             // Verifica permissão
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
             }
-            
-            $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             if ( $file ) {
                 $uploads = wp_upload_dir();
                 $doc_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
@@ -654,13 +661,18 @@ class DPS_Finance_Addon {
         }
 
         // Enviar documento por email
-        if ( isset( $_GET['dps_send_doc'] ) && '1' === $_GET['dps_send_doc'] && isset( $_GET['file'] ) ) {
+        if ( isset( $_GET['dps_send_doc'] ) && '1' === $_GET['dps_send_doc'] && isset( $_GET['file'] ) && isset( $_GET['_wpnonce'] ) ) {
+            $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
+            
+            // Verifica nonce
+            if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_send_doc_' . $file ) ) {
+                wp_die( esc_html__( 'Ação de segurança inválida.', 'dps-finance-addon' ) );
+            }
+            
             // Verifica permissão
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
             }
-            
-            $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             $to_email = '';
             if ( isset( $_GET['to_email'] ) ) {
                 $to_email = sanitize_email( wp_unslash( $_GET['to_email'] ) );
@@ -1052,14 +1064,22 @@ class DPS_Finance_Addon {
                     
                     // Define URL base atual removendo parâmetros de ação
                     $current_url = home_url( add_query_arg( null, null ) );
-                    $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file' ], $current_url );
-                    // Link para envio por email
-                    $send_link = add_query_arg( [ 'dps_send_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean );
+                    $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file', '_wpnonce' ], $current_url );
+                    
+                    // Link para envio por email (com nonce)
+                    $send_link = wp_nonce_url(
+                        add_query_arg( [ 'dps_send_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean ),
+                        'dps_send_doc_' . $doc
+                    );
                     if ( $trans_id ) {
                         $send_link = add_query_arg( [ 'trans_id' => $trans_id ], $send_link );
                     }
-                    // Link para exclusão
-                    $del_link  = add_query_arg( [ 'dps_delete_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean );
+                    
+                    // Link para exclusão (com nonce)
+                    $del_link = wp_nonce_url(
+                        add_query_arg( [ 'dps_delete_doc' => '1', 'file' => rawurlencode( $doc ) ], $base_clean ),
+                        'dps_delete_doc_' . $doc
+                    );
                     
                     echo '<tr>';
                     echo '<td data-label="' . esc_attr__( 'Documento', 'dps-finance-addon' ) . '"><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $doc ) . '</a></td>';
