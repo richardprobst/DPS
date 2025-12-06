@@ -93,6 +93,7 @@ Se você usa o editor clássico (TinyMCE):
 | `[dps_groomer_agenda]` | Groomers | Agenda semanal |
 | `[dps_groomer_review]` | Groomers | Formulário de avaliação |
 | `[dps_groomer_reviews]` | Groomers | Lista de avaliações |
+| `[dps_ai_public_chat]` | AI | Chat público para visitantes |
 
 ---
 
