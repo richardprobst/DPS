@@ -194,9 +194,11 @@ class DPS_AI_Addon {
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
 
         // Inicializa integração com Portal do Cliente
+        // Prioridade 20: executa após text domain (prioridade 1) e addon init (prioridade 5)
         add_action( 'init', [ $this, 'init_portal_integration' ], 20 );
 
         // Inicializa componentes v1.5.0
+        // Prioridade 21: executa após portal integration para garantir ordem de inicialização
         add_action( 'init', [ $this, 'init_components' ], 21 );
 
         // Registra handlers AJAX para sugestões de mensagens

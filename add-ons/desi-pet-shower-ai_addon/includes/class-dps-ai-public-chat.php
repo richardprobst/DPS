@@ -68,7 +68,8 @@ class DPS_AI_Public_Chat {
      * Construtor privado.
      */
     private function __construct() {
-        // Registra shortcode diretamente (a classe é instanciada no hook 'init')
+        // Registra shortcode diretamente (a classe é instanciada no hook 'init' prioridade 21)
+        // Como 'init' já está executando, não faz sentido registrar outro action para 'init'
         add_shortcode( self::SHORTCODE, [ $this, 'render_shortcode' ] );
 
         // Handler AJAX para visitantes (nopriv) e usuários logados
