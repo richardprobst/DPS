@@ -68,8 +68,9 @@ class DPS_AI_Public_Chat {
      * Construtor privado.
      */
     private function __construct() {
-        // Registra shortcode no hook 'init' (necessário para funcionamento correto)
-        add_action( 'init', [ $this, 'register_shortcode' ] );
+        // Registra shortcode diretamente (a classe é instanciada no hook 'init' prioridade 21)
+        // Como 'init' já está executando, não faz sentido registrar outro action para 'init'
+        add_shortcode( self::SHORTCODE, [ $this, 'render_shortcode' ] );
 
         // Handler AJAX para visitantes (nopriv) e usuários logados
         add_action( 'wp_ajax_dps_ai_public_ask', [ $this, 'handle_ajax_ask' ] );
@@ -81,16 +82,6 @@ class DPS_AI_Public_Chat {
 
         // Registra assets
         add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_assets' ] );
-    }
-
-    /**
-     * Registra o shortcode do chat público.
-     *
-     * Este método é chamado no hook 'init' para garantir que o shortcode
-     * seja registrado no momento correto do ciclo de vida do WordPress.
-     */
-    public function register_shortcode() {
-        add_shortcode( self::SHORTCODE, [ $this, 'render_shortcode' ] );
     }
 
     /**

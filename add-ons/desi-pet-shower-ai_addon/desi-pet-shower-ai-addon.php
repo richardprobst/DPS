@@ -194,10 +194,12 @@ class DPS_AI_Addon {
         add_action( 'init', [ $this, 'maybe_handle_save' ] );
 
         // Inicializa integração com Portal do Cliente
-        add_action( 'plugins_loaded', [ $this, 'init_portal_integration' ], 20 );
+        // Prioridade 20: executa após text domain (prioridade 1) e addon init (prioridade 5)
+        add_action( 'init', [ $this, 'init_portal_integration' ], 20 );
 
         // Inicializa componentes v1.5.0
-        add_action( 'plugins_loaded', [ $this, 'init_components' ], 21 );
+        // Prioridade 21: executa após portal integration para garantir ordem de inicialização
+        add_action( 'init', [ $this, 'init_components' ], 21 );
 
         // Registra handlers AJAX para sugestões de mensagens
         add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
