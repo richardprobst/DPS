@@ -152,6 +152,13 @@ Antes de criar uma nova versão oficial:
     - Filtra `the_author_posts_link` e `author_link` do WordPress
     - Remove links de autor em posts quando opção ativada
     - Útil para white label completo sem referência a autores WordPress
+  - **Teste de Conectividade SMTP**: `class-dps-whitelabel-smtp.php`, `whitelabel-admin.js`
+    - Novo método `test_smtp_connection()` para testar apenas conectividade (sem enviar e-mail)
+    - Verifica host, porta, credenciais e autenticação SMTP
+    - Timeout de 10 segundos para evitar espera longa
+    - Botão "Testar Conexão SMTP" na aba de configurações SMTP
+    - Feedback visual (✓ sucesso / ✗ erro) via AJAX
+    - Útil para diagnosticar problemas de configuração antes de enviar e-mails
 
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site

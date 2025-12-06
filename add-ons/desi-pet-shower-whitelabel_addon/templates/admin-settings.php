@@ -392,6 +392,18 @@ $access_control = DPS_WhiteLabel_Access_Control::get_settings();
                     
                     <table class="form-table">
                         <tr>
+                            <th scope="row"><?php esc_html_e( 'Teste de Conectividade', 'dps-whitelabel-addon' ); ?></th>
+                            <td>
+                                <button type="button" id="dps-test-smtp-connection" class="button">
+                                    <?php esc_html_e( 'Testar Conexão SMTP', 'dps-whitelabel-addon' ); ?>
+                                </button>
+                                <span id="test-smtp-connection-result"></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Testa apenas a conectividade com o servidor SMTP, sem enviar e-mail.', 'dps-whitelabel-addon' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
                             <th scope="row">
                                 <label for="test_email"><?php esc_html_e( 'E-mail de Teste', 'dps-whitelabel-addon' ); ?></label>
                             </th>

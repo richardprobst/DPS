@@ -14,6 +14,7 @@
         initMediaUploaders();
         initLoginBackgroundToggle();
         initTestEmail();
+        initTestSmtpConnection();
         initUrlValidation();
         initColorPresets();
         initSaveScrollBehavior();
@@ -182,6 +183,61 @@
                         .removeClass('loading success')
                         .addClass('error')
                         .text(dpsWhiteLabelL10n.testEmailError || 'Erro na requisição.');
+                }
+            });
+        });
+    }
+
+    /**
+     * Teste de conectividade SMTP.
+     */
+    function initTestSmtpConnection() {
+        var $button = $('#dps-test-smtp-connection');
+        var $result = $('#test-smtp-connection-result');
+        
+        if ( ! $button.length ) {
+            return;
+        }
+        
+        $button.on('click', function(e) {
+            e.preventDefault();
+            
+            // Estado de loading
+            $button.prop('disabled', true);
+            $result
+                .removeClass('success error')
+                .addClass('loading')
+                .text( 'Testando conexão...' );
+            
+            // Requisição AJAX
+            $.ajax({
+                url: dpsWhiteLabelL10n.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'dps_whitelabel_test_smtp_connection',
+                    nonce: dpsWhiteLabelL10n.nonce
+                },
+                success: function(response) {
+                    $button.prop('disabled', false);
+                    
+                    if (response.success) {
+                        $result
+                            .removeClass('loading error')
+                            .addClass('success')
+                            .text(response.data.message || 'Conexão bem-sucedida!');
+                    } else {
+                        $result
+                            .removeClass('loading success')
+                            .addClass('error')
+                            .text(response.data.message || 'Falha na conexão.');
+                    }
+                },
+                error: function() {
+                    $button.prop('disabled', false);
+                    $result
+                        .removeClass('loading success')
+                        .addClass('error')
+                        .text('Erro na requisição.');
                 }
             });
         });
