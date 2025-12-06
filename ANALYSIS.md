@@ -314,6 +314,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - `dps-stats-addon` - Estatísticas e relatórios
 - `dps-stock-addon` - Controle de estoque
 - `dps-subscription-addon` - Assinaturas e recorrência
+- `dps-whitelabel-addon` - White Label (personalização de marca e acesso)
 
 **Boas práticas de i18n**:
 - Use sempre `__()`, `_e()`, `esc_html__()`, `esc_attr__()` ou `esc_html_e()` para strings exibidas ao usuário
@@ -362,6 +363,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **Notificações** (`dps-notifications`) - Push Add-on (agenda, relatórios, Telegram)
 - **Pagamentos** (`dps-payment-settings`) - Payment Add-on (Mercado Pago, PIX)
 - **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configurações do portal)
+- **White Label** (`dps-whitelabel`) - White Label Add-on (branding, login customizado, modo de manutenção)
 
 **Nomenclatura de Menus - Diretrizes de Usabilidade**:
 - Use nomes curtos e descritivos que indiquem claramente a função
@@ -1639,6 +1641,234 @@ public function exemplo_metodo( $param1, $param2, $args = [] ) {
 - Reutilizar classes helper quando disponíveis (`DPS_CPT_Helper`, `DPS_Money_Helper`, etc.)
 - Seguir contratos de hooks existentes sem modificar assinaturas
 - Documentar novos hooks expostos com exemplos de uso
+
+---
+
+## Add-on: White Label (Personalização de Marca)
+
+**Diretório**: `add-ons/desi-pet-shower-whitelabel_addon/`
+
+**Versão**: 1.0.0
+
+**Propósito**: Personalize o sistema DPS com sua própria marca, cores, logo, SMTP customizado e controles de acesso. Ideal para agências e revendedores que desejam oferecer o DPS sob sua própria identidade visual.
+
+### Funcionalidades Principais
+
+1. **Branding e Identidade Visual**
+   - Logo customizada (versões clara e escura)
+   - Favicon personalizado
+   - Paleta de cores (primária, secundária, accent, background, texto)
+   - Nome da marca e tagline
+   - Informações de contato (email, telefone, WhatsApp, URL de suporte)
+   - URLs customizadas (website, documentação, termos de uso, privacidade)
+   - Footer customizado
+   - CSS customizado para ajustes visuais finos
+   - Opção de ocultar links "Powered by" e links do autor
+
+2. **Página de Login Personalizada**
+   - Logo customizada com dimensões configuráveis
+   - Background (cor sólida, imagem ou gradiente)
+   - Formulário de login com largura, cor de fundo e bordas customizáveis
+   - Botão de login com cores personalizadas
+   - Mensagem customizada acima do formulário
+   - Footer text customizado
+   - CSS adicional para ajustes finos
+   - Opção de ocultar links de registro e recuperação de senha
+
+3. **Modo de Manutenção**
+   - Bloqueia acesso ao site para visitantes (HTTP 503)
+   - Bypass configurável por roles WordPress (padrão: administrator)
+   - Página de manutenção customizada com logo, título e mensagem
+   - Background e cores de texto configuráveis
+   - Countdown timer opcional para previsão de retorno
+   - Indicador visual na admin bar quando modo manutenção está ativo
+   - Preserva acesso a wp-admin, wp-login e AJAX
+
+4. **Personalização da Admin Bar**
+   - Ocultar itens específicos da admin bar
+   - Customizar logo e links
+   - Remover menus do WordPress que não sejam relevantes
+
+5. **SMTP Customizado**
+   - Configuração de servidor SMTP próprio
+   - Autenticação segura
+   - Teste de envio de e-mail
+   - Suporte a TLS/SSL
+
+6. **Assets e Estilos**
+   - Carregamento condicional de assets apenas nas páginas relevantes
+   - WordPress Color Picker integrado
+   - WordPress Media Uploader para upload de logos
+   - Interface responsiva e intuitiva
+
+### Estrutura de Arquivos
+
+```
+desi-pet-shower-whitelabel_addon/
+├── desi-pet-shower-whitelabel-addon.php (orquestração principal)
+├── includes/
+│   ├── class-dps-whitelabel-settings.php (branding e configurações gerais)
+│   ├── class-dps-whitelabel-branding.php (aplicação de branding no site)
+│   ├── class-dps-whitelabel-assets.php (gerenciamento de assets CSS/JS)
+│   ├── class-dps-whitelabel-smtp.php (SMTP customizado)
+│   ├── class-dps-whitelabel-login-page.php (página de login personalizada)
+│   ├── class-dps-whitelabel-admin-bar.php (personalização da admin bar)
+│   └── class-dps-whitelabel-maintenance.php (modo de manutenção)
+├── assets/
+│   ├── css/
+│   │   └── whitelabel-admin.css (estilos da interface admin)
+│   └── js/
+│       └── whitelabel-admin.js (JavaScript para color picker, media uploader)
+├── templates/
+│   ├── admin-settings.php (interface de configuração com abas)
+│   └── maintenance.php (template da página de manutenção)
+├── languages/ (arquivos de tradução pt_BR)
+└── uninstall.php (limpeza ao desinstalar)
+```
+
+### Hooks Utilizados
+
+**Do WordPress:**
+- `init` (prioridade 1) - Carrega text domain
+- `init` (prioridade 5) - Inicializa classes do add-on
+- `admin_menu` (prioridade 20) - Registra menu admin
+- `admin_enqueue_scripts` - Carrega assets admin
+- `template_redirect` (prioridade 1) - Intercepta requisições para modo manutenção
+- `login_enqueue_scripts` - Aplica estilos customizados na página de login
+- `login_headerurl` - Customiza URL do logo de login
+- `login_headertext` - Customiza texto alternativo do logo
+- `login_footer` - Adiciona footer customizado no login
+- `login_message` - Adiciona mensagem customizada no login
+- `admin_bar_menu` (prioridade 100) - Adiciona indicadores visuais na admin bar
+
+**Hooks Expostos (futuros):**
+```php
+// Permitir bypass customizado do modo manutenção
+apply_filters( 'dps_whitelabel_maintenance_can_access', false, WP_User $user );
+
+// Customizar template da página de manutenção
+apply_filters( 'dps_whitelabel_maintenance_template', string $template_path );
+
+// Disparado após salvar configurações
+do_action( 'dps_whitelabel_settings_saved', array $settings );
+```
+
+### Tabelas de Banco de Dados
+
+Nenhuma tabela própria. Todas as configurações são armazenadas como options do WordPress:
+
+**Options criadas:**
+- `dps_whitelabel_settings` - Configurações de branding e identidade visual
+- `dps_whitelabel_smtp` - Configurações de servidor SMTP
+- `dps_whitelabel_login` - Configurações da página de login
+- `dps_whitelabel_admin_bar` - Configurações da admin bar
+- `dps_whitelabel_maintenance` - Configurações do modo de manutenção
+
+### Interface Administrativa
+
+**Menu Principal:** DPS by PRObst → White Label
+
+**Abas de Configuração:**
+1. **Branding** - Logo, cores, nome da marca, contatos
+2. **SMTP** - Servidor de e-mail customizado
+3. **Login** - Personalização da página de login
+4. **Admin Bar** - Customização da barra administrativa
+5. **Manutenção** - Modo de manutenção e mensagens
+
+**Recursos de UX:**
+- Interface com abas para organização clara
+- Color pickers para seleção visual de cores
+- Media uploader integrado para upload de logos e imagens
+- Preview ao vivo de alterações (em desenvolvimento)
+- Botão de restaurar padrões
+- Mensagens de sucesso/erro após salvamento
+- Validação de campos (URLs, cores hexadecimais)
+
+### Segurança
+
+**Validações Implementadas:**
+- ✅ Nonce verification em todos os formulários
+- ✅ Capability check (`manage_options`) em todas as ações
+- ✅ Sanitização rigorosa de inputs:
+  - `sanitize_text_field()` para textos
+  - `esc_url_raw()` para URLs
+  - `sanitize_hex_color()` para cores
+  - `sanitize_email()` para e-mails
+  - `wp_kses_post()` para HTML permitido
+- ✅ Escape de outputs:
+  - `esc_html()`, `esc_attr()`, `esc_url()` conforme contexto
+- ✅ CSS customizado sanitizado (remove JavaScript, expressions, @import)
+- ✅ Administrator sempre incluído nas roles de bypass (não pode ser removido)
+- ✅ Validação de extensões de imagem (logo, favicon)
+
+### Compatibilidade
+
+**WordPress:**
+- Versão mínima: 6.0
+- PHP: 7.4+
+
+**DPS:**
+- Requer: Plugin base (`DPS_Base_Plugin`)
+- Compatível com todos os add-ons existentes
+
+**Plugins de Terceiros:**
+- Compatível com WP Mail SMTP (prioriza configuração do White Label)
+- Compatível com temas page builders (YooTheme, Elementor)
+- Não conflita com plugins de cache (assets condicionais)
+
+### Análise Detalhada de Novas Funcionalidades
+
+Para análise completa sobre a implementação de **Controle de Acesso ao Site**, incluindo:
+- Bloqueio de acesso para visitantes não autenticados
+- Lista de exceções de páginas públicas
+- Redirecionamento para login customizado
+- Controle por role WordPress
+- Funcionalidades adicionais sugeridas (controle por CPT, horário, IP, logs)
+
+Consulte: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
+
+### Limitações Conhecidas
+
+- Modo de manutenção bloqueia TODO o site (não permite exceções por página)
+- Não há controle granular de acesso (apenas modo manutenção "tudo ou nada")
+- CSS customizado não tem preview ao vivo (requer salvamento para visualizar)
+- Assets admin carregados mesmo fora da página de configurações (otimização pendente)
+- Falta integração com plugins de two-factor authentication
+
+### Próximos Passos Recomendados (Roadmap)
+
+**v1.1.0 - Controle de Acesso ao Site** (ALTA PRIORIDADE)
+- Implementar classe `DPS_WhiteLabel_Access_Control`
+- Permitir bloqueio de acesso para visitantes não autenticados
+- Lista de exceções de URLs (com suporte a wildcards)
+- Redirecionamento inteligente para login com preservação de URL original
+- Controle por role WordPress
+- Indicador visual na admin bar quando ativo
+
+**v1.2.0 - Melhorias de Interface** (MÉDIA PRIORIDADE)
+- Preview ao vivo de alterações de cores
+- Editor visual de CSS com syntax highlighting
+- Upload de múltiplos logos para diferentes contextos
+- Galeria de presets de cores e layouts
+
+**v1.3.0 - Recursos Avançados** (BAIXA PRIORIDADE)
+- Logs de acesso e auditoria
+- Controle de acesso por CPT
+- Redirecionamento baseado em role
+- Integração com 2FA
+- Rate limiting anti-bot
+
+### Changelog
+
+**v1.0.0** - 2025-12-06 - Lançamento Inicial
+- Branding completo (logo, cores, nome da marca)
+- Página de login personalizada
+- Modo de manutenção com bypass por roles
+- Personalização da admin bar
+- SMTP customizado
+- Interface administrativa com abas
+- Suporte a i18n (pt_BR)
+- Documentação completa
 
 ---
 
