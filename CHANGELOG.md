@@ -549,6 +549,11 @@ Antes de criar uma nova versão oficial:
   - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
+- **AI Add-on (v1.6.0)**: Corrigido shortcode `[dps_ai_public_chat]` aparecendo como texto plano
+  - **Problema**: Shortcode estava sendo registrado durante `plugins_loaded` com prioridade 21, muito tarde no ciclo de vida do WordPress
+  - **Causa**: `add_shortcode()` era chamado diretamente no construtor de `DPS_AI_Public_Chat`, que era instanciado em `plugins_loaded`
+  - **Solução**: Movido registro do shortcode para método `register_shortcode()` registrado no hook `init`
+  - **Impacto**: Shortcode agora renderiza corretamente o chat público quando inserido em páginas/posts
 - **Compatibilidade WordPress 6.2+**: Substituída função deprecada `get_page_by_title()` por `dps_get_page_by_title_compat()` no Portal do Cliente. A nova função usa `WP_Query` conforme recomendação oficial do WordPress, garantindo compatibilidade com WordPress 6.9+
 - **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
   - O handler de toggle de pets usava `.data('owner')` que lê do cache interno do jQuery
