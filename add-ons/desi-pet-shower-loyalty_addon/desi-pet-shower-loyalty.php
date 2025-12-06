@@ -575,6 +575,14 @@ class DPS_Loyalty_Addon {
      * @param float $brl_per_pt Valor atual de BRL por ponto.
      */
     private function render_settings_tab( $brl_per_pt ) {
+        $settings = get_option( self::OPTION_KEY, [] );
+        $referral_page_id = isset( $settings['referral_page_id'] ) ? (int) $settings['referral_page_id'] : 0;
+        
+        // Busca todas as páginas publicadas para o dropdown
+        $pages = get_pages( [
+            'post_status' => 'publish',
+            'sort_column' => 'post_title',
+        ] );
         ?>
         <form method="post" action="options.php" class="dps-loyalty-settings-form">
             <?php
@@ -592,6 +600,42 @@ class DPS_Loyalty_Addon {
                                 <input type="number" step="0.01" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[brl_per_point]" value="<?php echo esc_attr( $brl_per_pt ); ?>" />
                                 <?php esc_html_e( 'reais faturados', 'dps-loyalty-addon' ); ?>
                             </label>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+            
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Link de Indicação', 'dps-loyalty-addon' ); ?></legend>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row">
+                            <label for="dps_referral_page_id"><?php esc_html_e( 'Página de cadastro para indicações', 'dps-loyalty-addon' ); ?></label>
+                        </th>
+                        <td>
+                            <select name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referral_page_id]" id="dps_referral_page_id">
+                                <option value="0"><?php esc_html_e( '— Usar página de cadastro padrão —', 'dps-loyalty-addon' ); ?></option>
+                                <?php foreach ( $pages as $page ) : ?>
+                                    <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $referral_page_id, $page->ID ); ?>>
+                                        <?php echo esc_html( $page->post_title ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description">
+                                <?php esc_html_e( 'Escolha a página para onde o link de indicação irá direcionar novos clientes. Se não configurar, será usada a página do add-on "Cadastro".', 'dps-loyalty-addon' ); ?>
+                            </p>
+                            <?php 
+                            // Mostra preview da URL atual
+                            $preview_url = DPS_Loyalty_API::get_referral_url( 0 );
+                            // Remove o ?ref= já que não temos um cliente real
+                            $preview_base = remove_query_arg( 'ref', $preview_url );
+                            if ( $preview_base ) :
+                            ?>
+                            <p class="description" style="margin-top: 8px;">
+                                <strong><?php esc_html_e( 'URL base atual:', 'dps-loyalty-addon' ); ?></strong> 
+                                <code><?php echo esc_html( $preview_base ); ?></code>
+                            </p>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 </table>
@@ -993,6 +1037,7 @@ class DPS_Loyalty_Addon {
     public function sanitize_settings( $input ) {
         $output                               = [];
         $output['brl_per_point']              = isset( $input['brl_per_point'] ) ? (float) $input['brl_per_point'] : 10.0;
+        $output['referral_page_id']           = isset( $input['referral_page_id'] ) ? absint( $input['referral_page_id'] ) : 0;
         $output['referrals_enabled']          = ! empty( $input['referrals_enabled'] ) ? 1 : 0;
         $output['referrer_reward_type']       = isset( $input['referrer_reward_type'] ) ? sanitize_text_field( $input['referrer_reward_type'] ) : 'none';
         $output['referrer_reward_value']      = isset( $input['referrer_reward_value'] ) ? $this->sanitize_reward_value( $input['referrer_reward_value'], $output['referrer_reward_type'] ) : 0;
