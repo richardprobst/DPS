@@ -42,6 +42,10 @@ class DPS_WhiteLabel_Branding {
         add_filter( 'dps_footer_text', [ $this, 'filter_footer_text' ] );
         add_filter( 'dps_show_powered_by', [ $this, 'filter_show_powered_by' ] );
         
+        // Ocultar links de autor se configurado
+        add_filter( 'the_author_posts_link', [ $this, 'maybe_hide_author_link' ] );
+        add_filter( 'author_link', [ $this, 'maybe_hide_author_link' ] );
+        
         // Adiciona favicon customizado
         add_action( 'wp_head', [ $this, 'add_custom_favicon' ], 1 );
         add_action( 'admin_head', [ $this, 'add_custom_favicon' ], 1 );
@@ -278,5 +282,21 @@ class DPS_WhiteLabel_Branding {
             'background' => DPS_WhiteLabel_Settings::get( 'color_background', '#f9fafb' ),
             'text'       => DPS_WhiteLabel_Settings::get( 'color_text', '#374151' ),
         ];
+    }
+
+    /**
+     * Oculta links de autor se configurado.
+     *
+     * @param string $link Link original.
+     * @return string Link ou vazio.
+     */
+    public function maybe_hide_author_link( $link ) {
+        $hide = DPS_WhiteLabel_Settings::get( 'hide_author_links' );
+        
+        if ( $hide ) {
+            return '';
+        }
+        
+        return $link;
     }
 }

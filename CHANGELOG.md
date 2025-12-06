@@ -146,6 +146,13 @@ Antes de criar uma nova versão oficial:
     - Botões e presets ocupam largura total em mobile
     - Melhora usabilidade em dispositivos pequenos
 
+- **White Label Add-on (v1.2.1)**: Funcionalidades Essenciais (Parcial)
+  - **Hide Author Links Implementado**: `class-dps-whitelabel-branding.php`
+    - Opção `hide_author_links` agora funcional (estava salva mas não aplicada)
+    - Filtra `the_author_posts_link` e `author_link` do WordPress
+    - Remove links de autor em posts quando opção ativada
+    - Útil para white label completo sem referência a autores WordPress
+
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
   - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados
