@@ -50,8 +50,30 @@ class DPS_WhiteLabel_Assets {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_custom_styles( $hook ) {
-        // Aplica apenas em páginas DPS
-        if ( strpos( $hook, 'dps' ) === false && strpos( $hook, 'desi-pet-shower' ) === false ) {
+        // Lista whitelist de hooks DPS
+        $allowed_hooks = [
+            'toplevel_page_desi-pet-shower',
+            'desi-pet-shower_page_dps-agenda',
+            'desi-pet-shower_page_dps-finance',
+            'desi-pet-shower_page_dps-loyalty',
+            'desi-pet-shower_page_dps-whitelabel',
+            'desi-pet-shower_page_dps-ai',
+            'desi-pet-shower_page_dps-debugging',
+        ];
+        
+        // Permitir filtro para adicionar hooks customizados
+        $allowed_hooks = apply_filters( 'dps_whitelabel_admin_hooks', $allowed_hooks );
+        
+        // Verifica se hook atual está na lista permitida
+        $is_dps_page = false;
+        foreach ( $allowed_hooks as $allowed_hook ) {
+            if ( $hook === $allowed_hook || strpos( $hook, $allowed_hook ) === 0 ) {
+                $is_dps_page = true;
+                break;
+            }
+        }
+        
+        if ( ! $is_dps_page ) {
             return;
         }
 
@@ -80,11 +102,20 @@ class DPS_WhiteLabel_Assets {
     }
 
     /**
-     * Gera CSS customizado baseado nas configurações.
+     * Gera CSS customizado baseado nas configurações (com cache).
      *
      * @return string CSS gerado.
      */
     private function generate_custom_css() {
+        // Tenta obter do cache
+        $cache_key = 'dps_whitelabel_custom_css';
+        $cached_css = get_transient( $cache_key );
+        
+        if ( false !== $cached_css ) {
+            return $cached_css;
+        }
+        
+        // Se não há cache, gera CSS
         $settings = DPS_WhiteLabel_Settings::get_settings();
         $css      = '';
         
@@ -116,7 +147,17 @@ class DPS_WhiteLabel_Assets {
             $css .= "\n/* Custom CSS */\n" . $custom_css . "\n";
         }
         
+        // Armazena no cache por 24 horas
+        set_transient( $cache_key, $css, DAY_IN_SECONDS );
+        
         return $css;
+    }
+
+    /**
+     * Invalida cache de CSS ao salvar configurações.
+     */
+    public static function invalidate_css_cache() {
+        delete_transient( 'dps_whitelabel_custom_css' );
     }
 
     /**

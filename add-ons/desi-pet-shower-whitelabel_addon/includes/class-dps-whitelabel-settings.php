@@ -24,6 +24,13 @@ class DPS_WhiteLabel_Settings {
     const OPTION_NAME = 'dps_whitelabel_settings';
 
     /**
+     * Cache estático de settings.
+     *
+     * @var array|null
+     */
+    private static $settings_cache = null;
+
+    /**
      * Construtor da classe.
      */
     public function __construct() {
@@ -72,13 +79,25 @@ class DPS_WhiteLabel_Settings {
     }
 
     /**
-     * Obtém configurações atuais.
+     * Obtém configurações atuais (com cache).
      *
+     * @param bool $force_refresh Forçar recarregamento do cache.
      * @return array Configurações mescladas com padrões.
      */
-    public static function get_settings() {
-        $saved = get_option( self::OPTION_NAME, [] );
-        return wp_parse_args( $saved, self::get_defaults() );
+    public static function get_settings( $force_refresh = false ) {
+        if ( null === self::$settings_cache || $force_refresh ) {
+            $saved = get_option( self::OPTION_NAME, [] );
+            self::$settings_cache = wp_parse_args( $saved, self::get_defaults() );
+        }
+        
+        return self::$settings_cache;
+    }
+
+    /**
+     * Limpa cache de settings.
+     */
+    public static function clear_cache() {
+        self::$settings_cache = null;
     }
 
     /**
@@ -178,9 +197,15 @@ class DPS_WhiteLabel_Settings {
 
         // Salva configurações
         update_option( self::OPTION_NAME, $new_settings );
+        
+        // Limpa cache de settings
+        self::clear_cache();
 
         // Dispara ação para outros módulos
         do_action( 'dps_whitelabel_settings_saved', $new_settings );
+        
+        // Invalida cache de CSS customizado
+        DPS_WhiteLabel_Assets::invalidate_css_cache();
 
         // Adiciona mensagem de sucesso
         add_settings_error(

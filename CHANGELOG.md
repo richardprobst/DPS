@@ -101,6 +101,27 @@ Antes de criar uma nova versão oficial:
     - Valida extensão para URLs externas
     - Exibe mensagem de aviso e define campo vazio quando URL inválida
 
+#### Refactoring (Interno)
+- **White Label Add-on (v1.1.2)**: Otimizações de Performance
+  - **Cache de CSS Customizado**: `class-dps-whitelabel-assets.php`
+    - Implementado cache via transient (24 horas) para CSS gerado dinamicamente
+    - Método `invalidate_css_cache()` limpa cache ao salvar configurações
+    - Reduz processamento em cada pageload (regeneração somente quando necessário)
+  - **Verificação Otimizada de Hooks Admin**: `class-dps-whitelabel-assets.php`
+    - Substituído `strpos()` genérico por whitelist de hooks específicos
+    - Previne carregamento de CSS em páginas não-DPS
+    - Adicionado filtro `dps_whitelabel_admin_hooks` para extensibilidade
+  - **Cache Estático de Settings em Memória**: Aplicado em 6 classes
+    - `class-dps-whitelabel-settings.php`
+    - `class-dps-whitelabel-smtp.php`
+    - `class-dps-whitelabel-login-page.php`
+    - `class-dps-whitelabel-admin-bar.php`
+    - `class-dps-whitelabel-maintenance.php`
+    - `class-dps-whitelabel-access-control.php`
+    - Cache estático evita múltiplas chamadas `get_option()` e `wp_parse_args()` por requisição
+    - Método `clear_cache()` limpa cache ao salvar configurações
+    - Método `get_settings()` aceita parâmetro `$force_refresh` para invalidação explícita
+
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
   - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados
