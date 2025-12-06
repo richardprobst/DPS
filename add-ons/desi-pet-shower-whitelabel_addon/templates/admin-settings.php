@@ -69,7 +69,10 @@ $access_control = DPS_WhiteLabel_Access_Control::get_settings();
                     <table class="form-table">
                         <tr>
                             <th scope="row">
-                                <label for="brand_name"><?php esc_html_e( 'Nome da Marca', 'dps-whitelabel-addon' ); ?></label>
+                                <label for="brand_name">
+                                    <?php esc_html_e( 'Nome da Marca', 'dps-whitelabel-addon' ); ?>
+                                    <span class="dps-field-recommended" title="<?php esc_attr_e( 'Campo recomendado', 'dps-whitelabel-addon' ); ?>">*</span>
+                                </label>
                             </th>
                             <td>
                                 <input type="text" id="brand_name" name="brand_name" 
@@ -92,7 +95,10 @@ $access_control = DPS_WhiteLabel_Access_Control::get_settings();
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="brand_logo_url"><?php esc_html_e( 'Logo (Claro)', 'dps-whitelabel-addon' ); ?></label>
+                                <label for="brand_logo_url">
+                                    <?php esc_html_e( 'Logo (Claro)', 'dps-whitelabel-addon' ); ?>
+                                    <span class="dps-field-recommended" title="<?php esc_attr_e( 'Campo recomendado', 'dps-whitelabel-addon' ); ?>">*</span>
+                                </label>
                             </th>
                             <td>
                                 <div class="dps-media-uploader">
@@ -152,6 +158,33 @@ $access_control = DPS_WhiteLabel_Access_Control::get_settings();
                                 <input type="text" name="color_accent" 
                                        value="<?php echo esc_attr( $settings['color_accent'] ); ?>" 
                                        class="dps-color-picker" data-default-color="#f59e0b">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <?php esc_html_e( 'Paletas Pré-definidas', 'dps-whitelabel-addon' ); ?>
+                            </th>
+                            <td>
+                                <div class="dps-color-presets">
+                                    <button type="button" class="button dps-preset-btn" data-preset="default">
+                                        <?php esc_html_e( 'Padrão DPS', 'dps-whitelabel-addon' ); ?>
+                                    </button>
+                                    <button type="button" class="button dps-preset-btn" data-preset="ocean">
+                                        <?php esc_html_e( 'Oceano', 'dps-whitelabel-addon' ); ?>
+                                    </button>
+                                    <button type="button" class="button dps-preset-btn" data-preset="forest">
+                                        <?php esc_html_e( 'Floresta', 'dps-whitelabel-addon' ); ?>
+                                    </button>
+                                    <button type="button" class="button dps-preset-btn" data-preset="sunset">
+                                        <?php esc_html_e( 'Pôr do Sol', 'dps-whitelabel-addon' ); ?>
+                                    </button>
+                                    <button type="button" class="button dps-preset-btn" data-preset="modern">
+                                        <?php esc_html_e( 'Moderno', 'dps-whitelabel-addon' ); ?>
+                                    </button>
+                                </div>
+                                <p class="description">
+                                    <?php esc_html_e( 'Clique em uma paleta para aplicar cores harmonizadas automaticamente.', 'dps-whitelabel-addon' ); ?>
+                                </p>
                             </td>
                         </tr>
                     </table>
@@ -358,6 +391,18 @@ $access_control = DPS_WhiteLabel_Access_Control::get_settings();
                     <h2><?php esc_html_e( 'Teste de E-mail', 'dps-whitelabel-addon' ); ?></h2>
                     
                     <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Teste de Conectividade', 'dps-whitelabel-addon' ); ?></th>
+                            <td>
+                                <button type="button" id="dps-test-smtp-connection" class="button">
+                                    <?php esc_html_e( 'Testar Conexão SMTP', 'dps-whitelabel-addon' ); ?>
+                                </button>
+                                <span id="test-smtp-connection-result"></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Testa apenas a conectividade com o servidor SMTP, sem enviar e-mail.', 'dps-whitelabel-addon' ); ?>
+                                </p>
+                            </td>
+                        </tr>
                         <tr>
                             <th scope="row">
                                 <label for="test_email"><?php esc_html_e( 'E-mail de Teste', 'dps-whitelabel-addon' ); ?></label>

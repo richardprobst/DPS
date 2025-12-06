@@ -24,6 +24,13 @@ class DPS_WhiteLabel_Admin_Bar {
     const OPTION_NAME = 'dps_whitelabel_admin_bar';
 
     /**
+     * Cache estático de settings.
+     *
+     * @var array|null
+     */
+    private static $settings_cache = null;
+
+    /**
      * Construtor da classe.
      */
     public function __construct() {
@@ -53,13 +60,25 @@ class DPS_WhiteLabel_Admin_Bar {
     }
 
     /**
-     * Obtém configurações atuais.
+     * Obtém configurações atuais (com cache).
      *
+     * @param bool $force_refresh Forçar recarregamento do cache.
      * @return array Configurações mescladas com padrões.
      */
-    public static function get_settings() {
-        $saved = get_option( self::OPTION_NAME, [] );
-        return wp_parse_args( $saved, self::get_defaults() );
+    public static function get_settings( $force_refresh = false ) {
+        if ( null === self::$settings_cache || $force_refresh ) {
+            $saved = get_option( self::OPTION_NAME, [] );
+            self::$settings_cache = wp_parse_args( $saved, self::get_defaults() );
+        }
+        
+        return self::$settings_cache;
+    }
+
+    /**
+     * Limpa cache de settings.
+     */
+    public static function clear_cache() {
+        self::$settings_cache = null;
     }
 
     /**
@@ -115,6 +134,9 @@ class DPS_WhiteLabel_Admin_Bar {
         ];
 
         update_option( self::OPTION_NAME, $new_settings );
+        
+        // Limpa cache de settings
+        self::clear_cache();
 
         add_settings_error(
             'dps_whitelabel',

@@ -24,6 +24,13 @@ class DPS_WhiteLabel_SMTP {
     const OPTION_NAME = 'dps_whitelabel_smtp';
 
     /**
+     * Cache estático de settings.
+     *
+     * @var array|null
+     */
+    private static $settings_cache = null;
+
+    /**
      * Construtor da classe.
      */
     public function __construct() {
@@ -33,6 +40,9 @@ class DPS_WhiteLabel_SMTP {
         
         // AJAX para teste de e-mail
         add_action( 'wp_ajax_dps_whitelabel_test_email', [ $this, 'ajax_test_email' ] );
+        
+        // AJAX para teste de conectividade SMTP
+        add_action( 'wp_ajax_dps_whitelabel_test_smtp_connection', [ $this, 'ajax_test_smtp_connection' ] );
     }
 
     /**
@@ -57,13 +67,25 @@ class DPS_WhiteLabel_SMTP {
     }
 
     /**
-     * Obtém configurações atuais.
+     * Obtém configurações atuais (com cache).
      *
+     * @param bool $force_refresh Forçar recarregamento do cache.
      * @return array Configurações mescladas com padrões.
      */
-    public static function get_settings() {
-        $saved = get_option( self::OPTION_NAME, [] );
-        return wp_parse_args( $saved, self::get_defaults() );
+    public static function get_settings( $force_refresh = false ) {
+        if ( null === self::$settings_cache || $force_refresh ) {
+            $saved = get_option( self::OPTION_NAME, [] );
+            self::$settings_cache = wp_parse_args( $saved, self::get_defaults() );
+        }
+        
+        return self::$settings_cache;
+    }
+
+    /**
+     * Limpa cache de settings.
+     */
+    public static function clear_cache() {
+        self::$settings_cache = null;
     }
 
     /**
@@ -131,6 +153,9 @@ class DPS_WhiteLabel_SMTP {
         ];
 
         update_option( self::OPTION_NAME, $new_settings );
+        
+        // Limpa cache de settings
+        self::clear_cache();
 
         add_settings_error(
             'dps_whitelabel',
@@ -376,6 +401,84 @@ class DPS_WhiteLabel_SMTP {
         }
         
         return true;
+    }
+
+    /**
+     * Testa conectividade com servidor SMTP.
+     *
+     * @param array $settings Configurações SMTP a testar (opcional).
+     * @return bool|WP_Error True em sucesso ou WP_Error.
+     */
+    public static function test_smtp_connection( $settings = null ) {
+        if ( null === $settings ) {
+            $settings = self::get_settings();
+        }
+        
+        if ( empty( $settings['smtp_host'] ) ) {
+            return new WP_Error( 'missing_host', __( 'Host SMTP não configurado.', 'dps-whitelabel-addon' ) );
+        }
+        
+        require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+        require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+        require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+        
+        $smtp = new PHPMailer\PHPMailer\PHPMailer( true );
+        
+        try {
+            $smtp->isSMTP();
+            $smtp->Host = sanitize_text_field( $settings['smtp_host'] );
+            $smtp->Port = absint( $settings['smtp_port'] );
+            $smtp->SMTPAuth = ! empty( $settings['smtp_auth'] );
+            
+            if ( $smtp->SMTPAuth ) {
+                $helper = new self();
+                $smtp->Username = sanitize_text_field( $settings['smtp_username'] );
+                $smtp->Password = $helper->decrypt_password( $settings['smtp_password'] );
+            }
+            
+            $encryption = $settings['smtp_encryption'] ?? 'tls';
+            if ( 'tls' === $encryption ) {
+                $smtp->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            } elseif ( 'ssl' === $encryption ) {
+                $smtp->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            }
+            
+            $smtp->Timeout = 10;
+            $smtp->SMTPDebug = 0;
+            
+            // Tenta conectar
+            if ( ! $smtp->smtpConnect() ) {
+                return new WP_Error(
+                    'connection_failed',
+                    __( 'Não foi possível conectar ao servidor SMTP. Verifique host, porta e credenciais.', 'dps-whitelabel-addon' )
+                );
+            }
+            
+            $smtp->smtpClose();
+            return true;
+            
+        } catch ( Exception $e ) {
+            return new WP_Error( 'smtp_exception', $e->getMessage() );
+        }
+    }
+
+    /**
+     * AJAX: Testa conectividade SMTP.
+     */
+    public function ajax_test_smtp_connection() {
+        check_ajax_referer( 'dps_whitelabel_ajax', 'nonce' );
+        
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-whitelabel-addon' ) ] );
+        }
+        
+        $result = self::test_smtp_connection();
+        
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+        
+        wp_send_json_success( [ 'message' => __( 'Conexão SMTP bem-sucedida! ✓', 'dps-whitelabel-addon' ) ] );
     }
 
     /**

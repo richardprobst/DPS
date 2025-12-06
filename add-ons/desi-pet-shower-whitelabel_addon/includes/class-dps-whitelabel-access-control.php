@@ -23,6 +23,13 @@ class DPS_WhiteLabel_Access_Control {
 	 */
 	const OPTION_NAME = 'dps_whitelabel_access_control';
 
+/**
+ * Cache estático de settings.
+ *
+ * @var array|null
+ */
+private static $settings_cache = null;
+
 	/**
 	 * Construtor da classe.
 	 */
@@ -54,13 +61,25 @@ class DPS_WhiteLabel_Access_Control {
 	}
 
 	/**
-	 * Obtém configurações atuais.
+	 * Obtém configurações atuais (com cache).
 	 *
+	 * @param bool $force_refresh Forçar recarregamento do cache.
 	 * @return array Configurações mescladas com padrões.
 	 */
-	public static function get_settings() {
-		$saved = get_option( self::OPTION_NAME, [] );
-		return wp_parse_args( $saved, self::get_defaults() );
+	public static function get_settings( $force_refresh = false ) {
+		if ( null === self::$settings_cache || $force_refresh ) {
+			$saved = get_option( self::OPTION_NAME, [] );
+			self::$settings_cache = wp_parse_args( $saved, self::get_defaults() );
+		}
+		
+		return self::$settings_cache;
+	}
+
+	/**
+	 * Limpa cache de settings.
+	 */
+	public static function clear_cache() {
+		self::$settings_cache = null;
 	}
 
 	/**
@@ -236,14 +255,34 @@ class DPS_WhiteLabel_Access_Control {
 				return wp_login_url();
 			case 'custom_url':
 				$custom_url = ! empty( $settings['redirect_url'] ) ? $settings['redirect_url'] : '';
-				// Validar para prevenir open redirect - deve ser URL interna
+				
 				if ( ! empty( $custom_url ) ) {
+					// Validação robusta contra open redirect
 					$parsed = parse_url( $custom_url );
-					// Permitir apenas URLs relativas ou do mesmo domínio
-					if ( ! isset( $parsed['host'] ) || $parsed['host'] === $_SERVER['HTTP_HOST'] ) {
-						return $custom_url;
+					$current_host = isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '';
+					
+					// Permitir apenas:
+					// 1. URLs relativas (sem host)
+					// 2. URLs do mesmo domínio
+					if ( ! isset( $parsed['host'] ) || $parsed['host'] === $current_host ) {
+						// Sanitizar URL antes de retornar
+						return esc_url_raw( $custom_url );
+					}
+					
+					// Log de tentativa suspeita
+					if ( class_exists( 'DPS_Logger' ) ) {
+						DPS_Logger::warning(
+							sprintf(
+								'Tentativa de open redirect bloqueada. URL: %s, Host esperado: %s',
+								$custom_url,
+								$current_host
+							),
+							'whitelabel-security'
+						);
 					}
 				}
+				
+				// Fallback seguro
 				return wp_login_url();
 			case 'custom_login':
 			default:
@@ -400,6 +439,9 @@ class DPS_WhiteLabel_Access_Control {
 		];
 
 		update_option( self::OPTION_NAME, $new_settings );
+		
+		// Limpa cache de settings
+		self::clear_cache();
 
 		// Disparar ação após salvar
 		do_action( 'dps_whitelabel_access_settings_saved', $new_settings );

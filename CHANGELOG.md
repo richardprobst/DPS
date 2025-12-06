@@ -81,6 +81,85 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Security (Segurança)
+- **White Label Add-on (v1.1.1)**: Correções Críticas de Segurança
+  - **Validação de Open Redirect Reforçada**: `class-dps-whitelabel-access-control.php`
+    - Validação redundante no método `get_login_url()` além da validação no salvamento
+    - Sanitização com `esc_url_raw()` antes de retornar URL customizada
+    - Log de tentativas suspeitas via `DPS_Logger` quando domínio externo é detectado
+    - Proteção contra manipulação direta no banco de dados
+  - **Sanitização Robusta de CSS Customizado**: `class-dps-whitelabel-settings.php`
+    - Proteção contra bypass via encoding hexadecimal/octal (ex: `\74` = 't')
+    - Bloqueio de URLs com encoding suspeito em `url()`
+    - Validação adicional via `preg_replace_callback` para detectar caracteres codificados
+    - Mantém bloqueio de `javascript:`, `expression()`, `behavior:`, `vbscript:`, `data:` e `@import`
+    - Adicionado hook `dps_whitelabel_sanitize_custom_css` para customização
+  - **Validação de URLs de Logo Implementada**: `class-dps-whitelabel-settings.php`
+    - Método `validate_logo_url()` agora é chamado em `handle_settings_save()`
+    - Valida formatos permitidos: JPG, PNG, GIF, SVG, WebP, ICO
+    - Verifica MIME type via Media Library para attachments do WordPress
+    - Valida extensão para URLs externas
+    - Exibe mensagem de aviso e define campo vazio quando URL inválida
+
+#### Refactoring (Interno)
+- **White Label Add-on (v1.1.2)**: Otimizações de Performance
+  - **Cache de CSS Customizado**: `class-dps-whitelabel-assets.php`
+    - Implementado cache via transient (24 horas) para CSS gerado dinamicamente
+    - Método `invalidate_css_cache()` limpa cache ao salvar configurações
+    - Reduz processamento em cada pageload (regeneração somente quando necessário)
+  - **Verificação Otimizada de Hooks Admin**: `class-dps-whitelabel-assets.php`
+    - Substituído `strpos()` genérico por whitelist de hooks específicos
+    - Previne carregamento de CSS em páginas não-DPS
+    - Adicionado filtro `dps_whitelabel_admin_hooks` para extensibilidade
+  - **Cache Estático de Settings em Memória**: Aplicado em 6 classes
+    - `class-dps-whitelabel-settings.php`
+    - `class-dps-whitelabel-smtp.php`
+    - `class-dps-whitelabel-login-page.php`
+    - `class-dps-whitelabel-admin-bar.php`
+    - `class-dps-whitelabel-maintenance.php`
+    - `class-dps-whitelabel-access-control.php`
+    - Cache estático evita múltiplas chamadas `get_option()` e `wp_parse_args()` por requisição
+    - Método `clear_cache()` limpa cache ao salvar configurações
+    - Método `get_settings()` aceita parâmetro `$force_refresh` para invalidação explícita
+
+#### Changed (Alterado)
+- **White Label Add-on (v1.2.0)**: Melhorias de UX Básicas
+  - **Validação de URLs em Tempo Real**: `whitelabel-admin.js`
+    - Validação JavaScript ao sair do campo (evento `blur`)
+    - Feedback visual imediato com ícones ✓/✗ e cores verde/vermelho
+    - Valida formatos de URLs para logos, website, suporte, documentação, termos e privacidade
+  - **Paletas de Cores Pré-definidas**: `admin-settings.php`, `whitelabel-admin.js`
+    - 5 paletas harmonizadas: Padrão DPS, Oceano, Floresta, Pôr do Sol, Moderno
+    - Aplicação com um clique via JavaScript
+    - Integração com WordPress Color Picker
+    - Feedback visual quando paleta é aplicada
+  - **Indicadores de Campos Recomendados**: `admin-settings.php`
+    - Asterisco laranja (*) em "Nome da Marca" e "Logo"
+    - Tooltip explicativo ao passar mouse
+    - Melhora orientação do usuário sobre campos importantes
+  - **Scroll Automático para Mensagens**: `whitelabel-admin.js`
+    - Scroll suave para mensagens de sucesso/erro após salvar
+    - Garante que usuário veja feedback mesmo em telas pequenas
+  - **Responsividade Melhorada**: `whitelabel-admin.css`
+    - Novo breakpoint em 480px para tablets/mobiles em portrait
+    - Form tables adaptam layout em colunas verticais
+    - Botões e presets ocupam largura total em mobile
+    - Melhora usabilidade em dispositivos pequenos
+
+- **White Label Add-on (v1.2.1)**: Funcionalidades Essenciais (Parcial)
+  - **Hide Author Links Implementado**: `class-dps-whitelabel-branding.php`
+    - Opção `hide_author_links` agora funcional (estava salva mas não aplicada)
+    - Filtra `the_author_posts_link` e `author_link` do WordPress
+    - Remove links de autor em posts quando opção ativada
+    - Útil para white label completo sem referência a autores WordPress
+  - **Teste de Conectividade SMTP**: `class-dps-whitelabel-smtp.php`, `whitelabel-admin.js`
+    - Novo método `test_smtp_connection()` para testar apenas conectividade (sem enviar e-mail)
+    - Verifica host, porta, credenciais e autenticação SMTP
+    - Timeout de 10 segundos para evitar espera longa
+    - Botão "Testar Conexão SMTP" na aba de configurações SMTP
+    - Feedback visual (✓ sucesso / ✗ erro) via AJAX
+    - Útil para diagnosticar problemas de configuração antes de enviar e-mails
+
 #### Added (Adicionado)
 - **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
   - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados

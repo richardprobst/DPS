@@ -177,3 +177,96 @@ textarea.code {
 .login-bg-gradient {
     transition: opacity 0.2s;
 }
+
+/* URL Validation Feedback (Fase 3) */
+input.url-valid {
+    border-color: #10b981 !important;
+}
+
+input.url-invalid {
+    border-color: #ef4444 !important;
+}
+
+.url-validation-feedback {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.url-validation-feedback.valid {
+    color: #10b981;
+}
+
+.url-validation-feedback.invalid {
+    color: #ef4444;
+}
+
+/* Color Presets (Fase 3) */
+.dps-color-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dps-preset-btn {
+    min-width: 100px;
+    transition: all 0.2s;
+}
+
+.dps-preset-btn.preset-applied {
+    background: #10b981;
+    border-color: #10b981;
+    color: #fff;
+}
+
+/* Required Field Indicator (Fase 3) */
+.dps-field-recommended {
+    color: #f59e0b;
+    font-weight: 700;
+    margin-left: 3px;
+    cursor: help;
+}
+
+/* Mobile Portrait - Breakpoint 480px (Fase 3) */
+@media screen and (max-width: 480px) {
+    .dps-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .dps-card h2 {
+        font-size: 1.125rem;
+    }
+    
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .form-table th {
+        padding-bottom: 5px;
+    }
+    
+    .form-table td {
+        padding-top: 5px;
+        padding-bottom: 20px;
+    }
+    
+    .dps-media-uploader .regular-text,
+    .regular-text {
+        width: 100% !important;
+    }
+    
+    .dps-color-presets {
+        flex-direction: column;
+    }
+    
+    .dps-preset-btn {
+        width: 100%;
+    }
+}
