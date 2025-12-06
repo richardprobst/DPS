@@ -569,9 +569,11 @@ Antes de criar uma nova versão oficial:
     - **Impacto**: Interface mais profissional e informativa; documentos identificáveis sem precisar abri-los
   - **Análise completa**: Documento detalhado criado em `docs/review/finance-addon-analysis-2025-12-06.md` com 10 sugestões de melhorias futuras
 - **AI Add-on (v1.6.0)**: Corrigido shortcode `[dps_ai_public_chat]` aparecendo como texto plano
-  - **Problema**: Shortcode estava sendo registrado durante `plugins_loaded` com prioridade 21, muito tarde no ciclo de vida do WordPress
-  - **Causa**: `add_shortcode()` era chamado diretamente no construtor de `DPS_AI_Public_Chat`, que era instanciado em `plugins_loaded`
-  - **Solução**: Movido registro do shortcode para método `register_shortcode()` registrado no hook `init`
+  - **Problema**: Shortcode nunca era registrado, aparecendo como texto plano nas páginas
+  - **Causa**: `init_components()` estava registrado no hook `plugins_loaded` (prioridade 21), mas `DPS_AI_Addon` só era inicializado no hook `init` (prioridade 5). Como `plugins_loaded` executa ANTES de `init`, o hook nunca era chamado.
+  - **Solução**: 
+    1. Alterado hook de `init_components()` e `init_portal_integration()` de `plugins_loaded` para `init`
+    2. Removido método intermediário `register_shortcode()` e chamado `add_shortcode()` diretamente no construtor
   - **Impacto**: Shortcode agora renderiza corretamente o chat público quando inserido em páginas/posts
 - **Compatibilidade WordPress 6.2+**: Substituída função deprecada `get_page_by_title()` por `dps_get_page_by_title_compat()` no Portal do Cliente. A nova função usa `WP_Query` conforme recomendação oficial do WordPress, garantindo compatibilidade com WordPress 6.9+
 - **Plugin Base**: Corrigido botões "Selecionar todos" e "Desmarcar todos" na seleção de pets
