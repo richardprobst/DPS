@@ -1550,10 +1550,16 @@ final class DPS_Client_Portal {
             return;
         }
 
-        $base_url  = '';
-        $page_id   = (int) get_option( 'dps_registration_page_id', 0 );
-        $base_url  = $page_id ? get_permalink( $page_id ) : site_url( '/cadastro/' );
-        $share_url = add_query_arg( 'ref', rawurlencode( $code ), $base_url );
+        // Usa a API centralizada para obter a URL de indicação
+        $share_url = '';
+        if ( class_exists( 'DPS_Loyalty_API' ) ) {
+            $share_url = DPS_Loyalty_API::get_referral_url( $client_id );
+        } else {
+            // Fallback se a API não estiver disponível
+            $page_id  = (int) get_option( 'dps_registration_page_id', 0 );
+            $base_url = $page_id ? get_permalink( $page_id ) : site_url( '/cadastro/' );
+            $share_url = add_query_arg( 'ref', rawurlencode( $code ), $base_url );
+        }
 
         global $wpdb;
         $table        = $wpdb->prefix . 'dps_referrals';

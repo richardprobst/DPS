@@ -109,11 +109,35 @@ class DPS_Loyalty_API {
             return '';
         }
 
-        // Tenta usar página de cadastro configurada ou fallback para home
+        // Obtém URL base da configuração de fidelidade ou da página de cadastro
+        $settings = get_option( 'dps_loyalty_settings', [] );
+        $base_url = '';
+
+        // 1. Verifica se há página configurada nas configurações de fidelidade
+        if ( ! empty( $settings['referral_page_id'] ) ) {
+            $page_id = (int) $settings['referral_page_id'];
+            if ( $page_id > 0 ) {
+                $base_url = get_permalink( $page_id );
+            }
+        }
+
+        // 2. Fallback: tenta usar a página de cadastro do Registration Add-on
+        if ( empty( $base_url ) ) {
+            $registration_page_id = (int) get_option( 'dps_registration_page_id', 0 );
+            if ( $registration_page_id > 0 ) {
+                $base_url = get_permalink( $registration_page_id );
+            }
+        }
+
+        // 3. Fallback final: usa home com /cadastro/ como convenção
+        if ( empty( $base_url ) ) {
+            $base_url = site_url( '/cadastro/' );
+        }
+
         // Filtro para customizar URL base de indicação
-        $registration_url = apply_filters( 'dps_loyalty_referral_base_url', home_url( '/' ) );
+        $base_url = apply_filters( 'dps_loyalty_referral_base_url', $base_url );
         
-        return add_query_arg( 'ref', $code, $registration_url );
+        return add_query_arg( 'ref', $code, $base_url );
     }
 
     /**
