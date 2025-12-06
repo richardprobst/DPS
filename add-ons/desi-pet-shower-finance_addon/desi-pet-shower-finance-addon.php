@@ -1720,13 +1720,24 @@ class DPS_Finance_Addon {
 
         list( $type, $text ) = $messages[ $msg_key ];
 
-        // Usa DPS_Message_Helper se disponível, senão mostra mensagem simples
-        if ( class_exists( 'DPS_Message_Helper' ) ) {
-            echo DPS_Message_Helper::render( $text, $type );
-        } else {
-            $class = $type === 'success' ? 'notice-success' : 'notice-info';
-            echo '<div class="dps-finance-messages"><div class="notice ' . esc_attr( $class ) . '" style="padding: 10px; margin: 10px 0;"><p>' . esc_html( $text ) . '</p></div></div>';
+        // Renderiza mensagem usando estrutura HTML consistente com DPS_Message_Helper
+        $class = 'dps-alert';
+        
+        if ( $type === 'error' ) {
+            $class .= ' dps-alert--danger';
+        } elseif ( $type === 'success' ) {
+            $class .= ' dps-alert--success';
+        } elseif ( $type === 'warning' ) {
+            $class .= ' dps-alert--pending';
         }
+        
+        // Define atributos de acessibilidade conforme o tipo de mensagem
+        $role      = ( $type === 'error' ) ? 'alert' : 'status';
+        $aria_live = ( $type === 'error' ) ? 'assertive' : 'polite';
+        
+        echo '<div class="' . esc_attr( $class ) . '" role="' . esc_attr( $role ) . '" aria-live="' . esc_attr( $aria_live ) . '">';
+        echo esc_html( $text );
+        echo '</div>';
     }
 
     /**
