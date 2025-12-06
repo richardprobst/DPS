@@ -656,7 +656,7 @@ class DPS_Finance_Addon {
             }
             // Redireciona de volta à aba Financeiro
             $base_url = get_permalink();
-            $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_delete_doc', 'file', 'to_email', 'trans_id' ], $base_url ) );
+            $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_delete_doc', 'file', 'to_email', 'trans_id', '_wpnonce' ], $base_url ) );
             wp_redirect( $redir );
             exit;
         }
@@ -682,7 +682,7 @@ class DPS_Finance_Addon {
             $this->send_finance_doc_email( $file, $trans_id, $to_email );
             // Redireciona de volta à aba Financeiro
             $base_url = get_permalink();
-            $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_send_doc', 'file', 'to_email', 'trans_id' ], $base_url ) );
+            $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_send_doc', 'file', 'to_email', 'trans_id', '_wpnonce' ], $base_url ) );
             wp_redirect( $redir );
             exit;
         }
@@ -1012,6 +1012,8 @@ class DPS_Finance_Addon {
             $transactions_data = [];
             if ( ! empty( $trans_ids ) ) {
                 $table = $wpdb->prefix . 'dps_transacoes';
+                // SEGURANÇA: Garante que todos os IDs são inteiros para prevenir SQL injection
+                $trans_ids = array_map( 'intval', $trans_ids );
                 $ids_placeholder = implode( ',', array_fill( 0, count( $trans_ids ), '%d' ) );
                 $trans_results = $wpdb->get_results( 
                     $wpdb->prepare( "SELECT * FROM $table WHERE id IN ($ids_placeholder)", ...$trans_ids ) 
