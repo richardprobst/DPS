@@ -373,11 +373,12 @@ class DPS_Finance_Addon {
                 update_option( 'dps_fin_docs_page_id', $page->ID );
                 
                 // BUGFIX: Verifica se o conteúdo da página contém o shortcode
-                // Se não contiver, atualiza para incluí-lo
-                if ( strpos( $page->post_content, '[dps_fin_docs]' ) === false ) {
+                // Se não contiver, adiciona ao final do conteúdo existente (ou cria conteúdo se vazio)
+                if ( ! has_shortcode( $page->post_content, 'dps_fin_docs' ) ) {
+                    $new_content = $page->post_content ? $page->post_content . "\n\n[dps_fin_docs]" : '[dps_fin_docs]';
                     wp_update_post( [
                         'ID'           => $page->ID,
-                        'post_content' => '[dps_fin_docs]',
+                        'post_content' => $new_content,
                     ] );
                 }
             }
@@ -1005,6 +1006,23 @@ class DPS_Finance_Addon {
                     $categorized['historico'][] = $doc; // fallback
                 }
             }
+            
+            // PERFORMANCE: Busca todas as transações vinculadas de uma vez para evitar N+1 queries
+            $trans_ids = array_filter( array_values( $doc_map ) );
+            $transactions_data = [];
+            if ( ! empty( $trans_ids ) ) {
+                $table = $wpdb->prefix . 'dps_transacoes';
+                $ids_placeholder = implode( ',', array_fill( 0, count( $trans_ids ), '%d' ) );
+                $trans_results = $wpdb->get_results( 
+                    $wpdb->prepare( "SELECT * FROM $table WHERE id IN ($ids_placeholder)", ...$trans_ids ) 
+                );
+                if ( $trans_results ) {
+                    foreach ( $trans_results as $trans ) {
+                        $transactions_data[ $trans->id ] = $trans;
+                    }
+                }
+            }
+            
             foreach ( [ 'cobranca' => __( 'Cobranças', 'dps-finance-addon' ), 'nota' => __( 'Notas', 'dps-finance-addon' ), 'historico' => __( 'Históricos', 'dps-finance-addon' ) ] as $key => $title ) {
                 if ( empty( $categorized[ $key ] ) ) {
                     continue;
@@ -1027,14 +1045,13 @@ class DPS_Finance_Addon {
                         $trans_id = $doc_map[ $url ];
                     }
                     
-                    // Busca informações da transação para exibir na listagem
+                    // Busca informações da transação na array pré-carregada
                     $client_name = '-';
                     $trans_date = '-';
                     $trans_value = '-';
                     
-                    if ( $trans_id ) {
-                        $table = $wpdb->prefix . 'dps_transacoes';
-                        $trans = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE id = %d", $trans_id ) );
+                    if ( $trans_id && isset( $transactions_data[ $trans_id ] ) ) {
+                        $trans = $transactions_data[ $trans_id ];
                         if ( $trans ) {
                             // Data formatada
                             if ( $trans->data ) {
