@@ -82,6 +82,43 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.0)**: Chat Público para Visitantes do Site
+  - **Novo Shortcode `[dps_ai_public_chat]`**: Chat de IA aberto para visitantes não logados
+    - Permite que visitantes tirem dúvidas sobre serviços de Banho e Tosa
+    - Não requer autenticação (diferente do chat do Portal do Cliente)
+    - Foco em informações gerais: preços, horários, serviços, formas de pagamento
+  - **Modos de Exibição**:
+    - `mode="inline"`: Widget integrado na página
+    - `mode="floating"`: Botão flutuante no canto da tela
+  - **Temas Visuais**:
+    - `theme="light"`: Tema claro (padrão)
+    - `theme="dark"`: Tema escuro
+    - `primary_color="#hex"`: Cor principal customizável
+  - **FAQs Personalizáveis**:
+    - Botões clicáveis com perguntas frequentes
+    - Configurável via painel administrativo
+    - FAQs padrão incluídas
+  - **Rate Limiting por IP**:
+    - Limite de 10 perguntas por minuto
+    - Limite de 60 perguntas por hora
+    - Proteção contra abuso por visitantes
+  - **Configurações Administrativas**:
+    - Seção dedicada "Chat Público para Visitantes"
+    - Campo para informações do negócio (horários, endereço, pagamentos)
+    - Instruções adicionais para personalização do comportamento
+  - **Integração com Métricas**:
+    - Registro de interações (perguntas, tempo de resposta)
+    - Registro de feedback (👍/👎)
+    - Métricas agregadas no dashboard de Analytics
+  - **System Prompt Específico**:
+    - Prompt otimizado para visitantes
+    - Foco em informações públicas (sem dados de clientes)
+    - Tom amigável com uso de emojis 🐶🐱
+  - **Novos Arquivos**:
+    - `includes/class-dps-ai-public-chat.php`: Classe principal
+    - `assets/css/dps-ai-public-chat.css`: Estilos responsivos
+    - `assets/js/dps-ai-public-chat.js`: Interatividade do chat
+
 - **Loyalty Add-on (v1.2.0)**: Multiplicador de nível, compartilhamento e exportação
   - **Multiplicador de Nível Ativo**: Pontos agora são multiplicados por nível de fidelidade
     - Bronze: 1x (padrão)

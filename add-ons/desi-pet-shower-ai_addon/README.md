@@ -201,6 +201,79 @@ if ( $result['success'] ) {
 - **Obrigatório**: Client Portal (fornece shortcode `[dps_client_portal]` e autenticação)
 - **Opcional**: Finance, Loyalty, Services (melhoram contexto disponível)
 
+## Chat Público para Visitantes
+
+### Descrição
+
+O Chat Público é uma funcionalidade que permite visitantes do site (não logados) tirarem dúvidas sobre os serviços de Banho e Tosa através de um assistente de IA.
+
+**Diferenças do chat do Portal do Cliente:**
+
+| Característica | Chat do Portal | Chat Público |
+|----------------|----------------|--------------|
+| Requer login | Sim | Não |
+| Acessa dados do cliente | Sim | Não |
+| Contexto personalizado | Sim (dados pessoais, pets, histórico) | Não (informações gerais) |
+| Público alvo | Clientes cadastrados | Visitantes interessados |
+| Rate limiting | Por cliente | Por IP |
+
+### Uso do Shortcode
+
+```
+[dps_ai_public_chat]
+```
+
+### Atributos Disponíveis
+
+| Atributo | Valores | Padrão | Descrição |
+|----------|---------|--------|-----------|
+| `mode` | `inline`, `floating` | `inline` | Modo de exibição |
+| `theme` | `light`, `dark` | `light` | Tema visual |
+| `position` | `bottom-right`, `bottom-left` | `bottom-right` | Posição (modo flutuante) |
+| `title` | Texto | "Tire suas dúvidas" | Título personalizado |
+| `subtitle` | Texto | Descrição padrão | Subtítulo personalizado |
+| `placeholder` | Texto | "Digite sua pergunta..." | Placeholder do input |
+| `show_faqs` | `true`, `false` | `true` | Mostrar botões de FAQs |
+| `primary_color` | Cor hexadecimal | `#0ea5e9` | Cor principal customizada |
+
+### Exemplos
+
+**Chat inline padrão:**
+```
+[dps_ai_public_chat]
+```
+
+**Chat flutuante no canto inferior esquerdo:**
+```
+[dps_ai_public_chat mode="floating" position="bottom-left"]
+```
+
+**Chat com tema escuro e cor customizada:**
+```
+[dps_ai_public_chat theme="dark" primary_color="#8b5cf6"]
+```
+
+**Chat com título e FAQs ocultos:**
+```
+[dps_ai_public_chat title="Fale conosco" show_faqs="false"]
+```
+
+### Configuração
+
+1. Acesse **DPS by PRObst > Assistente de IA**
+2. Na seção **"Chat Público para Visitantes"**, marque "Habilitar Chat Público"
+3. Configure as FAQs personalizadas (uma por linha)
+4. Adicione informações do seu negócio (horários, endereço, formas de pagamento)
+5. Opcionalmente, adicione instruções adicionais para o comportamento da IA
+6. Clique em **Salvar Configurações**
+
+### Segurança
+
+- **Rate Limiting**: Limite de 10 perguntas/minuto e 60 perguntas/hora por IP
+- **Validação de contexto**: Perguntas fora do escopo são recusadas educadamente
+- **Nonces**: Todas as requisições AJAX são protegidas
+- **Sanitização**: Todas as entradas são sanitizadas
+
 ## Hooks Disponíveis
 
 ### Actions
@@ -212,6 +285,21 @@ if ( $result['success'] ) {
 Nenhum filtro exposto atualmente. Sistema é autocontido.
 
 ## Changelog
+
+### [1.6.0] - 2024-12-05
+
+#### Added
+- **Chat Público para Visitantes**: Novo shortcode `[dps_ai_public_chat]`
+  - Permite visitantes não logados tirarem dúvidas sobre serviços
+  - Modo inline e flutuante
+  - Temas claro e escuro
+  - FAQs personalizáveis
+  - Rate limiting por IP (10/min, 60/hora)
+  - Cores customizáveis via atributo do shortcode
+  - Integração com base de conhecimento
+  - Registro de métricas e feedback
+- Configurações administrativas para o chat público
+- CSS e JavaScript dedicados para o chat público
 
 ### [1.0.0] - 2024-11-22
 
