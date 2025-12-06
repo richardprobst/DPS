@@ -746,11 +746,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - NÃO responder sobre assuntos aleatórios fora do contexto (política, religião, tecnologia, etc.)
 - Integrar-se com OpenAI via API Chat Completions (GPT-3.5 Turbo / GPT-4)
 
-**Shortcodes expostos**: Nenhum (integra-se diretamente ao Portal via hook)
+**Shortcodes expostos**: 
+- `[dps_ai_public_chat]` (v1.6.0+) - Chat público para visitantes não logados
 
 **CPTs, tabelas e opções**:
-- Não cria CPTs ou tabelas próprias
-- Option: `dps_ai_settings` (armazena configurações: enabled, api_key, model, temperature, timeout, max_tokens)
+- Tabelas: `dps_ai_metrics`, `dps_ai_feedback` (v1.5.0+)
+- CPT: `dps_ai_knowledge` (v1.5.0+ - base de conhecimento)
+- Option: `dps_ai_settings` (armazena configurações: enabled, api_key, model, temperature, timeout, max_tokens, public_chat_enabled, etc.)
 
 **Hooks consumidos**:
 - `dps_client_portal_before_content`: renderiza widget de chat no topo do portal (após navegação, antes das seções)
@@ -759,21 +761,37 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Endpoints AJAX**:
 - `dps_ai_portal_ask` (wp_ajax e wp_ajax_nopriv): processa perguntas do cliente e retorna respostas da IA
+- `dps_ai_public_ask` (wp_ajax e wp_ajax_nopriv, v1.6.0+): processa perguntas do chat público
+- `dps_ai_public_feedback` (wp_ajax e wp_ajax_nopriv, v1.6.0+): registra feedback do chat público
+- `dps_ai_submit_feedback` (wp_ajax, v1.5.0+): registra feedback do Portal do Cliente
+- `dps_ai_suggest_whatsapp_message` (wp_ajax, v1.2.0+): gera sugestões de mensagens WhatsApp
+- `dps_ai_suggest_email_message` (wp_ajax, v1.2.0+): gera sugestões de e-mail
+- `dps_ai_test_connection` (wp_ajax): testa conexão com API OpenAI
 
 **Dependências**:
-- **Obrigatório**: Client Portal (fornece autenticação e shortcode `[dps_client_portal]`)
+- **Obrigatório (Portal do Cliente)**: Client Portal (fornece autenticação e shortcode `[dps_client_portal]`)
+- **Obrigatório (Chat Público)**: Nenhuma (funciona de forma independente)
 - **Opcional**: Finance, Loyalty, Services (enriquecem contexto disponível para a IA)
 
-**Introduzido em**: v1.0.0
+**Introduzido em**: v1.0.0 (Portal) | v1.6.0 (Chat Público)
 
 **Assets**:
 - `assets/js/dps-ai-portal.js`: gerencia widget de chat e envio de perguntas via AJAX
 - `assets/css/dps-ai-portal.css`: estilos minimalistas seguindo paleta visual DPS
+- `assets/js/dps-ai-public-chat.js` (v1.6.0+): gerencia chat público para visitantes
+- `assets/css/dps-ai-public-chat.css` (v1.6.0+): estilos do chat público (temas light/dark, modos inline/floating)
+- `assets/js/dps-ai-communications.js` (v1.2.0+): sugestões de mensagens WhatsApp/Email
+- `assets/css/dps-ai-communications.css` (v1.2.0+): estilos dos botões de sugestão
 
 **Arquitetura interna**:
 - `includes/class-dps-ai-client.php`: cliente da API OpenAI com tratamento de erros e timeouts
 - `includes/class-dps-ai-assistant.php`: lógica do assistente (system prompt restritivo, montagem de contexto, filtro de palavras-chave)
 - `includes/class-dps-ai-integration-portal.php`: integração com Portal do Cliente (widget, AJAX handlers)
+- `includes/class-dps-ai-public-chat.php` (v1.6.0+): chat público para visitantes (shortcode, rate limiting, FAQs)
+- `includes/class-dps-ai-message-assistant.php` (v1.2.0+): sugestões de mensagens WhatsApp e e-mail
+- `includes/class-dps-ai-analytics.php` (v1.5.0+): métricas de uso e feedback
+- `includes/class-dps-ai-knowledge-base.php` (v1.5.0+): base de conhecimento customizável
+- `includes/class-dps-ai-scheduler.php` (v1.5.0+): agendamento via chat
 
 **System Prompt e Regras**:
 - Prompt restritivo define domínio permitido (banho/tosa, pet shop, sistema DPS)
@@ -800,11 +818,33 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - **IA desabilitada ou sem API key**: Widget não aparece; Portal funciona normalmente
 - **Falha na API**: Mensagem amigável exibida; Portal continua funcional
 
+**Chat Público (v1.6.0+)**:
+- **Shortcode**: `[dps_ai_public_chat]` - pode ser inserido em qualquer página/post do WordPress
+- **Atributos disponíveis**:
+  - `mode="inline"` ou `mode="floating"` - modo de exibição (padrão: inline)
+  - `theme="light"` ou `theme="dark"` - tema visual (padrão: light)
+  - `position="bottom-right"` ou `position="bottom-left"` - posição do widget flutuante (padrão: bottom-right)
+  - `title="..."` - título customizado (padrão: "Tire suas dúvidas")
+  - `subtitle="..."` - subtítulo customizado
+  - `placeholder="..."` - placeholder do campo de texto
+  - `primary_color="#RRGGBB"` - cor primária customizada (hex)
+  - `show_faqs="true"` ou `show_faqs="false"` - exibir FAQs sugeridas (padrão: true)
+- **Configurações admin** (DPS by PRObst > Assistente de IA):
+  - Habilitar/desabilitar chat público
+  - FAQs customizadas (uma por linha)
+  - Informações do negócio (horários, endereço, formas de pagamento, etc.)
+  - Instruções adicionais para comportamento do chat
+- **Rate Limiting**: 10 requisições/minuto e 60 requisições/hora por IP
+- **Contexto fornecido**: Informações gerais sobre serviços, preços e funcionamento (NÃO acessa dados de clientes)
+- **Diferenças do Portal**: Não requer autenticação, foco em informações públicas, rate limiting mais agressivo
+- **IMPORTANTE - Registro de Shortcode**: O shortcode é registrado no hook `init` (prioridade 10) para garantir que esteja disponível quando o WordPress processar o conteúdo. Versões anteriores à correção registravam no hook `plugins_loaded` (prioridade 21), causando o problema de o shortcode aparecer como texto plano na página.
+
 **Segurança**:
 - API key NUNCA exposta no JavaScript (chamadas server-side only)
 - Nonces em todas as requisições AJAX
 - Sanitização de entrada do usuário
-- Validação de cliente logado antes de processar pergunta
+- Validação de cliente logado antes de processar pergunta (Portal) ou rate limiting por IP (Chat Público)
+- Rate limiting no chat público: 10 req/min e 60 req/hora por IP
 - Timeout configurável para evitar requisições travadas
 - Logs de erro apenas no server (error_log, não expostos ao cliente)
 

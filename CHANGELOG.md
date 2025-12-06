@@ -1006,6 +1006,12 @@ Antes de criar uma nova versão oficial:
   - Benefícios: separação de responsabilidades, cache do navegador, minificação possível, manutenibilidade melhorada
 
 #### Fixed (Corrigido)
+- **AI Add-on**: Corrigido registro do shortcode `[dps_ai_public_chat]`
+  - **Problema**: Shortcode aparecia como texto plano `[dps_ai_public_chat]` quando inserido em páginas
+  - **Causa**: Shortcode sendo registrado muito tarde (hook `plugins_loaded` prioridade 21)
+  - **Solução**: Movida inicialização dos componentes do AI Add-on para hook `init` prioridade 10
+  - **Impacto**: Shortcode agora funciona corretamente quando inserido em qualquer página/post do WordPress
+  - **Arquivos alterados**: `add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php` (linha 200)
 - **Groomers Add-on**: Corrigido erro fatal "Call to undefined function settings_errors()" no front-end ao usar shortcode [dps_base]
   - **Problema**: `settings_errors()` é função exclusiva do WordPress admin, não disponível no front-end
   - **Impacto**: Fatal error na seção Groomers do Painel de Gestão DPS (shortcode)
