@@ -42,7 +42,9 @@ Análises arquiteturais e de sistema.
 - `SUBSCRIPTION_ADDON_ANALYSIS.md` - Análise profunda do Add-on Assinaturas (código, funcionalidades, layout, melhorias propostas)
 - `SYSTEM_ANALYSIS_COMPLETE.md` - Análise profunda do sistema
 - `SYSTEM_ANALYSIS_SUMMARY.md` - Resumo executivo da análise de sistema
-- `WHITE_LABEL_ANALYSIS.md` - **🆕** Análise completa de implementação White Label (segurança, funcionalidades, arquitetura proposta)
+- `WHITE_LABEL_ANALYSIS.md` - Análise completa de implementação White Label (segurança, funcionalidades, arquitetura proposta)
+- `WHITELABEL_ACCESS_CONTROL_ANALYSIS.md` - **🆕** Análise completa de controle de acesso ao site (v1.1.0)
+- `WHITELABEL_ACCESS_CONTROL_SUMMARY.md` - **🆕** Resumo executivo da análise de controle de acesso
 
 ### 📁 /docs/compatibility
 
@@ -91,6 +93,8 @@ Resumos de implementação de features.
 - `SERVICES_AGENDA_INTEGRATION_SUMMARY.md` - Integração Services ⇄ Agenda
 - `UI_UX_IMPROVEMENTS_SUMMARY.md` - Resumo de melhorias de UI/UX
 - `WHATSAPP_IMPLEMENTATION_SUMMARY.md` - Implementação de integração WhatsApp
+- `WHITELABEL_ACCESS_CONTROL_IMPLEMENTATION.md` - **🆕** Guia de implementação de controle de acesso (White Label v1.1.0)
+- `WHITELABEL_ACCESS_CONTROL_USER_GUIDE.md` - **🆕** Guia do usuário final para controle de acesso
 
 ### 📁 /docs/improvements
 
@@ -210,9 +214,14 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 5. **Para análise de sistema**: veja `docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md`
 6. **Para mapeamento BACK-END vs FRONT-END**: veja `docs/analysis/BACKEND_FRONTEND_MAPPING.md`
 7. **Para implementação White Label**: veja `docs/analysis/WHITE_LABEL_ANALYSIS.md`
-8. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
-9. **Para planos de refatoração**: consulte `/docs/refactoring`
-10. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
+8. **🆕 Para controle de acesso (White Label v1.1.0)**: 
+   - **Resumo executivo**: `docs/analysis/WHITELABEL_ACCESS_CONTROL_SUMMARY.md`
+   - **Análise completa**: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
+   - **Guia de implementação**: `docs/implementation/WHITELABEL_ACCESS_CONTROL_IMPLEMENTATION.md`
+   - **Guia do usuário**: `docs/implementation/WHITELABEL_ACCESS_CONTROL_USER_GUIDE.md`
+9. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
+10. **Para planos de refatoração**: consulte `/docs/refactoring`
+11. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
 
 ## Navegação Rápida
 
