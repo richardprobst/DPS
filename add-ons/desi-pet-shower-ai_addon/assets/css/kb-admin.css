@@ -1,0 +1,153 @@
+/**
+ * Estilos para página administrativa da Base de Conhecimento.
+ *
+ * @package DPS_AI_Addon
+ * @since 1.6.2
+ */
+
+/* Container de filtros */
+.dps-ai-kb-filters {
+	background: #fff;
+	padding: 15px;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+
+/* Badges de prioridade */
+.dps-ai-badge {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.dps-ai-badge-high {
+	background: #d1fae5;
+	color: #065f46;
+	border: 1px solid #10b981;
+}
+
+.dps-ai-badge-medium {
+	background: #fef3c7;
+	color: #92400e;
+	border: 1px solid #f59e0b;
+}
+
+.dps-ai-badge-low {
+	background: #f3f4f6;
+	color: #374151;
+	border: 1px solid #9ca3af;
+}
+
+.dps-ai-badge-active {
+	background: #dbeafe;
+	color: #1e40af;
+	border: 1px solid #3b82f6;
+}
+
+.dps-ai-badge-inactive {
+	background: #fee2e2;
+	color: #991b1b;
+	border: 1px solid #ef4444;
+}
+
+/* Badges de status */
+.dps-ai-status-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.dps-ai-status-publish {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.dps-ai-status-draft {
+	background: #f3f4f6;
+	color: #374151;
+}
+
+.dps-ai-status-pending {
+	background: #fef3c7;
+	color: #92400e;
+}
+
+/* Células da tabela */
+.dps-ai-kb-keywords-cell code {
+	background: #f3f4f6;
+	padding: 4px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	color: #374151;
+	display: inline-block;
+	max-width: 100%;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.dps-ai-kb-priority-cell strong {
+	font-size: 18px;
+	color: #374151;
+}
+
+/* Modo de edição */
+.dps-ai-kb-edit textarea,
+.dps-ai-kb-edit input[type="number"] {
+	margin-bottom: 5px;
+}
+
+.dps-ai-kb-edit .description {
+	margin: 0;
+	font-size: 11px;
+	color: #6b7280;
+}
+
+/* Botões */
+.dps-ai-kb-edit-btn,
+.dps-ai-kb-save-btn,
+.dps-ai-kb-cancel-btn {
+	margin-right: 5px;
+}
+
+/* Estados de loading */
+.dps-ai-kb-saving {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.dps-ai-kb-success {
+	background: #d1fae5 !important;
+	transition: background 0.3s ease;
+}
+
+/* Animação de feedback */
+@keyframes dps-ai-flash {
+	0%, 100% { background: transparent; }
+	50% { background: #d1fae5; }
+}
+
+.dps-ai-kb-flash {
+	animation: dps-ai-flash 0.6s ease;
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+	.dps-ai-kb-filters > form > div {
+		flex-direction: column;
+		align-items: stretch !important;
+	}
+	
+	.dps-ai-kb-filters input,
+	.dps-ai-kb-filters select {
+		width: 100% !important;
+		margin-bottom: 10px;
+	}
+}
