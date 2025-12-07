@@ -58,7 +58,7 @@ class DPS_AI_Message_Assistant {
     public static function suggest_whatsapp_message( array $context ) {
         // Valida contexto mínimo
         if ( empty( $context['type'] ) ) {
-            error_log( 'DPS AI Message Assistant: Tipo de mensagem não especificado' );
+            dps_ai_log_error( 'Message Assistant: Tipo de mensagem não especificado' );
             return null;
         }
 
@@ -67,7 +67,7 @@ class DPS_AI_Message_Assistant {
         $user_prompt   = self::build_user_prompt_from_context( $context );
 
         if ( empty( $system_prompt ) || empty( $user_prompt ) ) {
-            error_log( 'DPS AI Message Assistant: Erro ao montar prompts' );
+            dps_ai_log_error( 'Message Assistant: Erro ao montar prompts' );
             return null;
         }
 
@@ -130,7 +130,7 @@ class DPS_AI_Message_Assistant {
     public static function suggest_email_message( array $context ) {
         // Valida contexto mínimo
         if ( empty( $context['type'] ) ) {
-            error_log( 'DPS AI Message Assistant: Tipo de mensagem não especificado' );
+            dps_ai_log_error( 'Message Assistant: Tipo de mensagem não especificado' );
             return null;
         }
 
@@ -139,7 +139,7 @@ class DPS_AI_Message_Assistant {
         $user_prompt   = self::build_user_prompt_from_context( $context );
 
         if ( empty( $system_prompt ) || empty( $user_prompt ) ) {
-            error_log( 'DPS AI Message Assistant: Erro ao montar prompts' );
+            dps_ai_log_error( 'Message Assistant: Erro ao montar prompts' );
             return null;
         }
 
@@ -189,20 +189,38 @@ class DPS_AI_Message_Assistant {
             return null;
         }
 
-        // Parse da resposta para separar assunto e corpo
-        // Esperamos formato: "ASSUNTO: texto\n\nCORPO: texto"
-        $parsed = self::parse_email_response( $response );
+        // Parse da resposta usando parser robusto
+        // NOVO: Usa DPS_AI_Email_Parser para parsing defensivo
+        $parsed = DPS_AI_Email_Parser::parse(
+            $response,
+            [
+                'default_subject'    => 'Comunicado do DPS by PRObst',
+                'max_subject_length' => 200,
+                'strip_html'         => false,
+                'format_hint'        => 'labeled', // IA deve retornar com rótulos
+            ]
+        );
 
         if ( null === $parsed ) {
-            error_log( 'DPS AI Message Assistant: Erro ao fazer parse da resposta de e-mail' );
+            dps_ai_log_error( 'Message Assistant: Erro crítico ao fazer parse da resposta de e-mail' );
             return null;
         }
 
-        return $parsed;
+        // Log de estatísticas do parse para monitoramento
+        $stats = DPS_AI_Email_Parser::get_parse_stats( $parsed );
+        dps_ai_log_info( 'Message Assistant: Email parsed successfully', $stats );
+
+        return [
+            'subject' => $parsed['subject'],
+            'body'    => $parsed['body'],
+        ];
     }
 
     /**
      * Monta o system prompt específico para comunicações.
+     *
+     * IMPORTANTE: Agora utiliza DPS_AI_Prompts::get() como base e adiciona
+     * instruções específicas do tipo de mensagem.
      *
      * @param string $channel Canal de comunicação ('whatsapp' ou 'email').
      * @param string $type    Tipo de mensagem.
@@ -210,27 +228,14 @@ class DPS_AI_Message_Assistant {
      * @return string System prompt.
      */
     private static function build_message_system_prompt( $channel, $type ) {
+        // Carrega o prompt base do contexto (whatsapp ou email)
+        $base_prompt = DPS_AI_Prompts::get( $channel, [ 'type' => $type ] );
+        
         $type_label = self::MESSAGE_TYPES[ $type ] ?? 'Comunicação genérica';
 
-        $prompt = "Você está ajudando a criar uma mensagem de {$type_label} para um cliente do DPS by PRObst.\n\n";
-
-        if ( 'whatsapp' === $channel ) {
-            $prompt .= "IMPORTANTE SOBRE O FORMATO:\n";
-            $prompt .= "- Gere APENAS o texto da mensagem, sem remetente, cabeçalho ou rodapé.\n";
-            $prompt .= "- Seja objetivo, amigável e direto.\n";
-            $prompt .= "- Use emojis com moderação (1-2 no máximo, se apropriado).\n";
-            $prompt .= "- Máximo de 2-3 parágrafos curtos.\n";
-            $prompt .= "- Evite saudações muito formais.\n";
-            $prompt .= "- Use tom conversacional adequado para WhatsApp.\n\n";
-        } else {
-            $prompt .= "IMPORTANTE SOBRE O FORMATO:\n";
-            $prompt .= "- Gere o e-mail no formato: ASSUNTO: [texto do assunto]\n\nCORPO: [texto do corpo]\n";
-            $prompt .= "- O assunto deve ser curto e objetivo (máximo 60 caracteres).\n";
-            $prompt .= "- O corpo pode ter mais detalhes, mas seja conciso.\n";
-            $prompt .= "- Use tom profissional mas amigável.\n";
-            $prompt .= "- Inclua saudação inicial e despedida.\n";
-            $prompt .= "- Não use emojis no e-mail.\n\n";
-        }
+        $prompt = $base_prompt . "\n\n";
+        $prompt .= "CONTEXTO ATUAL:\n";
+        $prompt .= "Você está ajudando a criar uma mensagem de {$type_label} para um cliente.\n\n";
 
         // Orientações específicas por tipo de mensagem
         switch ( $type ) {
@@ -335,57 +340,25 @@ class DPS_AI_Message_Assistant {
     /**
      * Faz parse da resposta de e-mail para extrair assunto e corpo.
      *
+     * @deprecated 1.6.1 Use DPS_AI_Email_Parser::parse() em vez disso.
      * @param string $response Resposta da IA.
      *
      * @return array|null Array com ['subject' => '...', 'body' => '...'] ou null.
      */
     private static function parse_email_response( $response ) {
-        // Tenta fazer parse no formato esperado: "ASSUNTO: ...\n\nCORPO: ..."
-        $subject = '';
-        $body    = '';
+        // DEPRECATED: Mantido apenas para retrocompatibilidade
+        // Redireciona para o novo parser robusto
+        dps_ai_log_warning( 'Message Assistant: Usando método parse_email_response() depreciado. Use DPS_AI_Email_Parser::parse()' );
 
-        // Pattern 1: ASSUNTO: ... CORPO: ...
-        if ( preg_match( '/ASSUNTO:\s*(.+?)[\r\n]+.*?CORPO:\s*(.+)/is', $response, $matches ) ) {
-            $subject = trim( $matches[1] );
-            $body    = trim( $matches[2] );
-        }
-        // Pattern 2: Subject: ... Body: ... (inglês)
-        elseif ( preg_match( '/Subject:\s*(.+?)[\r\n]+.*?Body:\s*(.+)/is', $response, $matches ) ) {
-            $subject = trim( $matches[1] );
-            $body    = trim( $matches[2] );
-        }
-        // Fallback: se não encontrou o formato esperado, tenta dividir por linhas vazias
-        else {
-            $lines = preg_split( '/\r?\n\r?\n/', $response, 2 );
-            if ( count( $lines ) >= 2 ) {
-                // Primeira linha/parágrafo como assunto
-                $subject = trim( strip_tags( $lines[0] ) );
-                // Remove "ASSUNTO:" ou "Subject:" se estiver lá
-                $subject = preg_replace( '/^(ASSUNTO|Subject):\s*/i', '', $subject );
-                // Resto como corpo
-                $body = trim( $lines[1] );
-                // Remove "CORPO:" ou "Body:" se estiver lá
-                $body = preg_replace( '/^(CORPO|Body):\s*/i', '', $body );
-            } else {
-                // Se não conseguiu dividir, usa tudo como corpo e gera assunto genérico
-                $subject = 'Mensagem do DPS by PRObst';
-                $body    = trim( $response );
-            }
-        }
+        $parsed = DPS_AI_Email_Parser::parse( $response );
 
-        // Valida que temos conteúdo
-        if ( empty( $subject ) && empty( $body ) ) {
+        if ( null === $parsed ) {
             return null;
         }
 
-        // Se só temos body, gera subject genérico
-        if ( empty( $subject ) ) {
-            $subject = 'Comunicado do DPS by PRObst';
-        }
-
         return [
-            'subject' => $subject,
-            'body'    => $body,
+            'subject' => $parsed['subject'],
+            'body'    => $parsed['body'],
         ];
     }
 }

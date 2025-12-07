@@ -1,0 +1,67 @@
+name: PHPUnit Tests - AI Add-on
+
+on:
+  push:
+    branches: [ main, develop, 'copilot/**' ]
+    paths:
+      - 'add-ons/desi-pet-shower-ai_addon/**'
+      - '.github/workflows/phpunit.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'add-ons/desi-pet-shower-ai_addon/**'
+      - '.github/workflows/phpunit.yml'
+
+jobs:
+  phpunit:
+    name: PHPUnit Tests (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.0', '8.1', '8.2']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug
+          tools: composer:v2
+      
+      - name: Validate composer.json
+        run: composer validate --strict
+        working-directory: add-ons/desi-pet-shower-ai_addon
+      
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: add-ons/desi-pet-shower-ai_addon/vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('add-ons/desi-pet-shower-ai_addon/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
+      
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+        working-directory: add-ons/desi-pet-shower-ai_addon
+      
+      - name: Run PHPUnit tests
+        run: composer test
+        working-directory: add-ons/desi-pet-shower-ai_addon
+      
+      - name: Generate coverage report
+        if: matrix.php-version == '8.1'
+        run: composer test:coverage
+        working-directory: add-ons/desi-pet-shower-ai_addon
+      
+      - name: Upload coverage to artifacts
+        if: matrix.php-version == '8.1'
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: add-ons/desi-pet-shower-ai_addon/coverage/
+          retention-days: 7

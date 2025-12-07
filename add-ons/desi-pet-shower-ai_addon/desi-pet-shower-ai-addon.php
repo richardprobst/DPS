@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Assistente virtual inteligente para o Portal do Cliente e chat público para visitantes. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics, agendamento via chat e chat público via shortcode.
- * Version:           1.6.0
+ * Version:           1.6.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
@@ -74,7 +74,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.6.0' );
+    define( 'DPS_AI_VERSION', '1.6.1' );
 }
 
 /**
@@ -113,6 +113,9 @@ function dps_ai_load_textdomain() {
 add_action( 'init', 'dps_ai_load_textdomain', 1 );
 
 // Inclui as classes principais ANTES dos hooks de ativação/desativação.
+require_once DPS_AI_ADDON_DIR . 'includes/dps-ai-logger.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-prompts.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-email-parser.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
@@ -121,6 +124,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -208,9 +212,14 @@ function dps_ai_activate() {
 register_activation_hook( __FILE__, 'dps_ai_activate' );
 
 /**
- * Desativação do plugin: limpa transients temporários.
+ * Desativação do plugin: limpa transients temporários e desagenda cron jobs.
  */
 function dps_ai_deactivate() {
+    // Desagenda evento de limpeza automática
+    if ( class_exists( 'DPS_AI_Maintenance' ) ) {
+        DPS_AI_Maintenance::unschedule_cleanup();
+    }
+    
     // Limpa transients de contexto (são temporários, não precisam persistir)
     global $wpdb;
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Necessário para limpeza de transients na desativação
@@ -286,6 +295,10 @@ class DPS_AI_Addon {
 
         // Registra assets admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+        // Registra handlers de exportação CSV
+        add_action( 'admin_post_dps_ai_export_metrics', [ $this, 'handle_export_metrics' ] );
+        add_action( 'admin_post_dps_ai_export_feedback', [ $this, 'handle_export_feedback' ] );
     }
 
     /**
@@ -319,6 +332,11 @@ class DPS_AI_Addon {
         // Chat público para visitantes (v1.6.0+)
         if ( class_exists( 'DPS_AI_Public_Chat' ) ) {
             DPS_AI_Public_Chat::get_instance();
+        }
+
+        // Manutenção automática (v1.6.1+)
+        if ( class_exists( 'DPS_AI_Maintenance' ) ) {
+            DPS_AI_Maintenance::get_instance();
         }
     }
 
@@ -399,11 +417,18 @@ class DPS_AI_Addon {
                                 <label for="dps_ai_api_key"><?php echo esc_html__( 'Chave de API da OpenAI', 'dps-ai' ); ?></label>
                             </th>
                             <td>
-                                <input type="password" id="dps_ai_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[api_key]" value="<?php echo esc_attr( $options['api_key'] ?? '' ); ?>" class="regular-text" />
-                                <button type="button" id="dps_ai_test_connection" class="button" style="margin-left: 10px;">
-                                    <?php esc_html_e( 'Testar Conexão', 'dps-ai' ); ?>
-                                </button>
-                                <span id="dps_ai_test_result" style="margin-left: 10px; display: none;"></span>
+                                <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <div style="position: relative; display: inline-block;">
+                                        <input type="password" id="dps_ai_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[api_key]" value="<?php echo esc_attr( $options['api_key'] ?? '' ); ?>" class="regular-text" style="padding-right: 40px;" />
+                                        <button type="button" id="dps_ai_toggle_api_key" class="button" style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); padding: 0; width: 32px; height: 28px; border: none; background: transparent; cursor: pointer;" title="<?php esc_attr_e( 'Mostrar/Ocultar API Key', 'dps-ai' ); ?>">
+                                            <span class="dashicons dashicons-visibility" style="line-height: 28px; width: 32px; height: 28px; font-size: 18px; color: #666;"></span>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="dps_ai_test_connection" class="button">
+                                        <?php esc_html_e( 'Testar Conexão', 'dps-ai' ); ?>
+                                    </button>
+                                    <span id="dps_ai_test_result" style="display: none;"></span>
+                                </div>
                                 <p class="description"><?php esc_html_e( 'Token de autenticação da API da OpenAI (sk-...). Mantenha em segredo.', 'dps-ai' ); ?></p>
                             </td>
                         </tr>
@@ -647,6 +672,111 @@ class DPS_AI_Addon {
                     </tbody>
                 </table>
 
+                <!-- Seção: Manutenção e Logs (v1.6.1+) -->
+                <h2><?php esc_html_e( 'Manutenção e Logs', 'dps-ai' ); ?></h2>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_data_retention_days"><?php echo esc_html__( 'Período de Retenção de Dados', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="dps_ai_data_retention_days" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[data_retention_days]" value="<?php echo esc_attr( $options['data_retention_days'] ?? '365' ); ?>" min="30" max="3650" step="1" class="small-text" />
+                                <span><?php esc_html_e( 'dias', 'dps-ai' ); ?></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Dados de métricas e feedback mais antigos que este período serão automaticamente deletados.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Padrão: 365 dias (1 ano). Mínimo: 30 dias. Máximo: 3650 dias (10 anos).', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_debug_logging"><?php echo esc_html__( 'Habilitar Logs Detalhados', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="dps_ai_debug_logging" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[debug_logging]" value="1" <?php checked( ! empty( $options['debug_logging'] ) ); ?> />
+                                    <?php esc_html_e( 'Ativar logging detalhado em ambiente de produção', 'dps-ai' ); ?>
+                                </label>
+                                <p class="description">
+                                    <?php esc_html_e( 'Quando desativado, apenas erros críticos são registrados em produção (WP_DEBUG desabilitado).', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Habilite temporariamente para diagnosticar problemas. Logs excessivos podem consumir espaço em disco.', 'dps-ai' ); ?>
+                                    <?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
+                                        <br />
+                                        <strong style="color: #d97706;"><?php esc_html_e( 'WP_DEBUG está habilitado. Logs detalhados sempre estarão ativos.', 'dps-ai' ); ?></strong>
+                                    <?php endif; ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_usd_to_brl"><?php echo esc_html__( 'Taxa de Conversão USD → BRL', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="dps_ai_usd_to_brl" 
+                                       name="<?php echo esc_attr( self::OPTION_KEY ); ?>[usd_to_brl_rate]" 
+                                       value="<?php echo esc_attr( $options['usd_to_brl_rate'] ?? '' ); ?>" 
+                                       min="0.01" 
+                                       max="100" 
+                                       step="0.01" 
+                                       class="small-text" 
+                                       placeholder="5.00" />
+                                <p class="description">
+                                    <?php esc_html_e( 'Taxa para converter custos de USD para BRL no dashboard de analytics.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Exemplo: Se 1 USD = 5.20 BRL, insira "5.20". Se não configurado, apenas valores em USD serão exibidos.', 'dps-ai' ); ?>
+                                    <br />
+                                    <span style="color: #6b7280; font-size: 12px;">
+                                        <?php 
+                                        if ( ! empty( $options['usd_to_brl_rate'] ) ) {
+                                            printf(
+                                                /* translators: %s: taxa atual */
+                                                esc_html__( 'Taxa atual: 1 USD = %s BRL', 'dps-ai' ),
+                                                '<strong>' . esc_html( number_format( (float) $options['usd_to_brl_rate'], 2, ',', '.' ) ) . '</strong>'
+                                            );
+                                        } else {
+                                            esc_html_e( 'Nenhuma taxa configurada. Defina uma taxa para ver custos em BRL.', 'dps-ai' );
+                                        }
+                                        ?>
+                                    </span>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <?php echo esc_html__( 'Limpeza Manual', 'dps-ai' ); ?>
+                            </th>
+                            <td>
+                                <button type="button" id="dps_ai_manual_cleanup" class="button">
+                                    <?php esc_html_e( 'Executar Limpeza Agora', 'dps-ai' ); ?>
+                                </button>
+                                <span id="dps_ai_cleanup_result" style="margin-left: 10px; display: none;"></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Remove dados antigos, transients expirados e otimiza o banco de dados.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php
+                                    $stats = DPS_AI_Maintenance::get_storage_stats();
+                                    printf(
+                                        /* translators: 1: número de métricas, 2: número de feedbacks, 3: data mais antiga métrica, 4: data mais antiga feedback */
+                                        esc_html__( 'Atualmente: %1$s métricas, %2$s feedbacks. Dados mais antigos: %3$s (métricas), %4$s (feedback).', 'dps-ai' ),
+                                        '<strong>' . esc_html( number_format_i18n( $stats['metrics_count'] ) ) . '</strong>',
+                                        '<strong>' . esc_html( number_format_i18n( $stats['feedback_count'] ) ) . '</strong>',
+                                        '<strong>' . esc_html( $stats['oldest_metric'] ) . '</strong>',
+                                        '<strong>' . esc_html( $stats['oldest_feedback'] ) . '</strong>'
+                                    );
+                                    ?>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 20px 0;">
                     <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #0284c7;"><?php esc_html_e( 'Como usar o Chat Público', 'dps-ai' ); ?></h3>
                     <p style="margin: 0 0 10px 0;"><?php esc_html_e( 'Adicione o shortcode em qualquer página do seu site:', 'dps-ai' ); ?></p>
@@ -680,34 +810,71 @@ class DPS_AI_Addon {
             <hr />
 
             <h2><?php esc_html_e( 'Custos Estimados (OpenAI)', 'dps-ai' ); ?></h2>
-            <table class="widefat" style="max-width: 600px;">
+            <?php
+            // Obtém o modelo atualmente selecionado
+            $selected_model = $options['model'] ?? 'gpt-4o-mini';
+            ?>
+            <table class="widefat" style="max-width: 700px;">
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'Modelo', 'dps-ai' ); ?></th>
                         <th><?php esc_html_e( 'Custo Aprox. por Pergunta', 'dps-ai' ); ?></th>
                         <th><?php esc_html_e( 'Recomendação', 'dps-ai' ); ?></th>
+                        <th><?php esc_html_e( 'Status', 'dps-ai' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>GPT-4o Mini</td>
+                    <tr<?php echo ( 'gpt-4o-mini' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4o Mini</strong></td>
                         <td>~$0.0003</td>
                         <td><strong><?php esc_html_e( 'Recomendado', 'dps-ai' ); ?></strong></td>
+                        <td>
+                            <?php if ( 'gpt-4o-mini' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-4o</td>
+                    <tr<?php echo ( 'gpt-4o' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4o</strong></td>
                         <td>~$0.005</td>
                         <td><?php esc_html_e( 'Alta precisão', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-4o' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-4 Turbo</td>
+                    <tr<?php echo ( 'gpt-4-turbo' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4 Turbo</strong></td>
                         <td>~$0.01</td>
                         <td><?php esc_html_e( 'Máxima precisão', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-4-turbo' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-3.5 Turbo</td>
+                    <tr<?php echo ( 'gpt-3.5-turbo' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-3.5 Turbo</strong></td>
                         <td>~$0.001</td>
                         <td><?php esc_html_e( 'Legado', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-3.5-turbo' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -716,6 +883,25 @@ class DPS_AI_Addon {
 
         <script>
         (function($) {
+            // Toggle API Key visibility
+            $('#dps_ai_toggle_api_key').on('click', function(e) {
+                e.preventDefault();
+                
+                var $input = $('#dps_ai_api_key');
+                var $icon = $(this).find('.dashicons');
+                
+                if ($input.attr('type') === 'password') {
+                    $input.attr('type', 'text');
+                    $icon.removeClass('dashicons-visibility').addClass('dashicons-hidden');
+                    $(this).attr('title', '<?php echo esc_js( __( 'Ocultar API Key', 'dps-ai' ) ); ?>');
+                } else {
+                    $input.attr('type', 'password');
+                    $icon.removeClass('dashicons-hidden').addClass('dashicons-visibility');
+                    $(this).attr('title', '<?php echo esc_js( __( 'Mostrar API Key', 'dps-ai' ) ); ?>');
+                }
+            });
+
+            // Test connection button
             $('#dps_ai_test_connection').on('click', function(e) {
                 e.preventDefault();
                 
@@ -742,6 +928,47 @@ class DPS_AI_Addon {
                     },
                     error: function() {
                         $result.html('<span style="color: #ef4444;">✗ <?php echo esc_js( __( 'Erro de rede ao testar conexão.', 'dps-ai' ) ); ?></span>').show();
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+
+            $('#dps_ai_manual_cleanup').on('click', function(e) {
+                e.preventDefault();
+                
+                if (!confirm('<?php echo esc_js( __( 'Tem certeza que deseja executar a limpeza de dados antigos? Esta ação não pode ser desfeita.', 'dps-ai' ) ); ?>')) {
+                    return;
+                }
+                
+                var $button = $(this);
+                var $result = $('#dps_ai_cleanup_result');
+                var originalText = $button.text();
+                
+                $button.prop('disabled', true).text('<?php echo esc_js( __( 'Limpando...', 'dps-ai' ) ); ?>');
+                $result.hide();
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'dps_ai_manual_cleanup',
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_manual_cleanup' ) ); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $result.html('<span style="color: #10b981;">✓ ' + response.data.message + '</span>').show();
+                            // Recarrega a página após 2 segundos para atualizar estatísticas
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            $result.html('<span style="color: #ef4444;">✗ ' + response.data.message + '</span>').show();
+                        }
+                    },
+                    error: function() {
+                        $result.html('<span style="color: #ef4444;">✗ <?php echo esc_js( __( 'Erro de rede ao executar limpeza.', 'dps-ai' ) ); ?></span>').show();
                     },
                     complete: function() {
                         $button.prop('disabled', false).text(originalText);
@@ -777,12 +1004,48 @@ class DPS_AI_Addon {
             $model
         );
 
-        // Obtém feedback recente
-        $recent_feedback = DPS_AI_Analytics::get_recent_feedback( 10, 'all' );
+        // Obtém feedback recente com paginação
+        $per_page = 20; // Número de feedbacks por página
+        $feedback_paged = isset( $_GET['feedback_paged'] ) ? max( 1, absint( $_GET['feedback_paged'] ) ) : 1;
+        $feedback_offset = ( $feedback_paged - 1 ) * $per_page;
+        $recent_feedback = DPS_AI_Analytics::get_recent_feedback( $per_page, 'all', $feedback_offset );
+        $total_feedback = DPS_AI_Analytics::count_feedback( 'all' );
+        $total_pages = ceil( $total_feedback / $per_page );
 
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Analytics de IA', 'dps-ai' ); ?></h1>
+
+            <!-- Aviso de taxa de conversão -->
+            <?php if ( ! empty( $settings['usd_to_brl_rate'] ) ) : ?>
+                <div style="background: #dbeafe; padding: 12px 16px; border-radius: 6px; border-left: 4px solid #0ea5e9; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #0c4a6e; font-size: 13px;">
+                        <strong><?php esc_html_e( 'Taxa de conversão:', 'dps-ai' ); ?></strong>
+                        <?php 
+                        printf(
+                            /* translators: %s: taxa de conversão */
+                            esc_html__( '1 USD = %s BRL', 'dps-ai' ),
+                            '<strong>' . esc_html( number_format( floatval( $settings['usd_to_brl_rate'] ), 2, ',', '.' ) ) . '</strong>'
+                        );
+                        ?>
+                        &nbsp;•&nbsp;
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-ai-settings' ) ); ?>" style="color: #0ea5e9; text-decoration: none;">
+                            <?php esc_html_e( 'Alterar nas configurações', 'dps-ai' ); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php elseif ( $cost > 0 ) : ?>
+                <div style="background: #fef3c7; padding: 12px 16px; border-radius: 6px; border-left: 4px solid #f59e0b; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #78350f; font-size: 13px;">
+                        <strong><?php esc_html_e( 'Dica:', 'dps-ai' ); ?></strong>
+                        <?php esc_html_e( 'Configure a taxa de conversão USD → BRL nas configurações para ver custos em reais.', 'dps-ai' ); ?>
+                        &nbsp;
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-ai-settings' ) ); ?>" style="color: #f59e0b; text-decoration: none;">
+                            <?php esc_html_e( 'Configurar agora', 'dps-ai' ); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <!-- Filtro de período -->
             <form method="get" style="margin-bottom: 20px;">
@@ -797,6 +1060,20 @@ class DPS_AI_Addon {
                 </label>
                 <button type="submit" class="button" style="margin-left: 10px;"><?php esc_html_e( 'Filtrar', 'dps-ai' ); ?></button>
             </form>
+
+            <!-- Botão de exportação CSV -->
+            <div style="margin-bottom: 20px;">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display: inline;">
+                    <input type="hidden" name="action" value="dps_ai_export_metrics" />
+                    <input type="hidden" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+                    <input type="hidden" name="end_date" value="<?php echo esc_attr( $end_date ); ?>" />
+                    <?php wp_nonce_field( 'dps_ai_export_metrics', 'dps_ai_export_metrics_nonce' ); ?>
+                    <button type="submit" class="button button-secondary">
+                        <span class="dashicons dashicons-chart-bar" style="vertical-align: middle; margin-right: 5px;"></span>
+                        <?php esc_html_e( 'Exportar CSV', 'dps-ai' ); ?>
+                    </button>
+                </form>
+            </div>
 
             <!-- Cards de resumo -->
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
@@ -817,6 +1094,15 @@ class DPS_AI_Addon {
                 <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
                     <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Custo Estimado', 'dps-ai' ); ?></h3>
                     <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;">$<?php echo esc_html( number_format( $cost, 4 ) ); ?></p>
+                    <?php
+                    // Exibe valor em BRL se taxa configurada
+                    if ( ! empty( $settings['usd_to_brl_rate'] ) ) {
+                        $cost_brl = $cost * floatval( $settings['usd_to_brl_rate'] );
+                        ?>
+                        <p style="margin: 5px 0 0 0; font-size: 16px; color: #6b7280;">
+                            (~R$ <?php echo esc_html( number_format( $cost_brl, 2, ',', '.' ) ); ?>)
+                        </p>
+                    <?php } ?>
                 </div>
             </div>
 
@@ -840,8 +1126,48 @@ class DPS_AI_Addon {
                 </div>
             </div>
 
+            <!-- Gráficos com Chart.js -->
+            <?php if ( ! empty( $stats['daily'] ) ) : ?>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Gráfico de Uso de Tokens -->
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;"><?php esc_html_e( 'Uso de Tokens ao Longo do Tempo', 'dps-ai' ); ?></h3>
+                        <canvas id="tokensChart" style="max-height: 300px;"></canvas>
+                    </div>
+
+                    <!-- Gráfico de Requisições -->
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;"><?php esc_html_e( 'Requisições por Dia', 'dps-ai' ); ?></h3>
+                        <canvas id="requestsChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Custo Acumulado -->
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 30px;">
+                    <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;">
+                        <?php esc_html_e( 'Custo Acumulado no Período', 'dps-ai' ); ?>
+                        <?php if ( ! empty( $settings['usd_to_brl_rate'] ) ) : ?>
+                            <span style="font-size: 13px; color: #6b7280; font-weight: normal;">
+                                (<?php esc_html_e( 'USD e BRL', 'dps-ai' ); ?>)
+                            </span>
+                        <?php endif; ?>
+                    </h3>
+                    <canvas id="costChart" style="max-height: 300px;"></canvas>
+                </div>
+            <?php endif; ?>
+
             <!-- Feedback Recente -->
-            <h2><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;"><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin: 0;">
+                    <input type="hidden" name="action" value="dps_ai_export_feedback" />
+                    <?php wp_nonce_field( 'dps_ai_export_feedback', 'dps_ai_export_feedback_nonce' ); ?>
+                    <button type="submit" class="button button-secondary">
+                        <span class="dashicons dashicons-format-chat" style="vertical-align: middle; margin-right: 5px;"></span>
+                        <?php esc_html_e( 'Exportar Feedbacks CSV', 'dps-ai' ); ?>
+                    </button>
+                </form>
+            </div>
             <?php if ( empty( $recent_feedback ) ) : ?>
                 <p><?php esc_html_e( 'Nenhum feedback registrado ainda.', 'dps-ai' ); ?></p>
             <?php else : ?>
@@ -869,6 +1195,125 @@ class DPS_AI_Addon {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+
+                <!-- Paginação -->
+                <?php if ( $total_pages > 1 ) : ?>
+                    <div class="tablenav bottom">
+                        <div class="tablenav-pages">
+                            <span class="displaying-num">
+                                <?php
+                                printf(
+                                    /* translators: %s: número total de feedbacks */
+                                    esc_html( _n( '%s item', '%s itens', $total_feedback, 'dps-ai' ) ),
+                                    '<strong>' . number_format_i18n( $total_feedback ) . '</strong>'
+                                );
+                                ?>
+                            </span>
+                            <span class="pagination-links">
+                                <?php
+                                $base_url = add_query_arg(
+                                    array(
+                                        'page'       => 'dps-ai-analytics',
+                                        'start_date' => $start_date,
+                                        'end_date'   => $end_date,
+                                    ),
+                                    admin_url( 'admin.php' )
+                                );
+
+                                // Botão "Primeira página"
+                                if ( $feedback_paged > 1 ) {
+                                    printf(
+                                        '<a class="first-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', 1, $base_url ) ),
+                                        esc_html__( 'Primeira página', 'dps-ai' ),
+                                        '&laquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&laquo;'
+                                    );
+                                }
+
+                                // Botão "Página anterior"
+                                if ( $feedback_paged > 1 ) {
+                                    printf(
+                                        '<a class="prev-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', $feedback_paged - 1, $base_url ) ),
+                                        esc_html__( 'Página anterior', 'dps-ai' ),
+                                        '&lsaquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&lsaquo;'
+                                    );
+                                }
+
+                                // Números de página
+                                printf(
+                                    '<span class="paging-input"><label for="current-page-selector-feedback" class="screen-reader-text">%s</label><input class="current-page" id="current-page-selector-feedback" type="text" name="paged" value="%s" size="3" aria-describedby="table-paging-feedback" /><span class="tablenav-paging-text"> %s <span class="total-pages">%s</span></span></span> ',
+                                    esc_html__( 'Página atual', 'dps-ai' ),
+                                    esc_attr( $feedback_paged ),
+                                    esc_html__( 'de', 'dps-ai' ),
+                                    number_format_i18n( $total_pages )
+                                );
+
+                                // Botão "Próxima página"
+                                if ( $feedback_paged < $total_pages ) {
+                                    printf(
+                                        '<a class="next-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', $feedback_paged + 1, $base_url ) ),
+                                        esc_html__( 'Próxima página', 'dps-ai' ),
+                                        '&rsaquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&rsaquo;'
+                                    );
+                                }
+
+                                // Botão "Última página"
+                                if ( $feedback_paged < $total_pages ) {
+                                    printf(
+                                        '<a class="last-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a>',
+                                        esc_url( add_query_arg( 'feedback_paged', $total_pages, $base_url ) ),
+                                        esc_html__( 'Última página', 'dps-ai' ),
+                                        '&raquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span>',
+                                        '&raquo;'
+                                    );
+                                }
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- JavaScript para navegação por input de página -->
+                    <script type="text/javascript">
+                    jQuery(document).ready(function($) {
+                        $('#current-page-selector-feedback').on('keypress', function(e) {
+                            if (e.which === 13) { // Enter
+                                e.preventDefault();
+                                var page = parseInt($(this).val());
+                                var maxPages = <?php echo (int) $total_pages; ?>;
+                                
+                                if (page >= 1 && page <= maxPages) {
+                                    var url = '<?php echo esc_js( $base_url ); ?>&feedback_paged=' + page;
+                                    window.location.href = url;
+                                } else {
+                                    alert('<?php echo esc_js( __( 'Número de página inválido.', 'dps-ai' ) ); ?>');
+                                    $(this).val(<?php echo (int) $feedback_paged; ?>);
+                                }
+                            }
+                        });
+                    });
+                    </script>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- Uso Diário -->
@@ -896,7 +1341,412 @@ class DPS_AI_Addon {
                 </table>
             <?php endif; ?>
         </div>
+
         <?php
+        // Enfileira Chart.js e script de inicialização
+        if ( ! empty( $stats['daily'] ) ) {
+            $this->enqueue_charts_scripts( $stats, $model, $settings );
+        }
+        ?>
+        <?php
+    }
+
+    /**
+     * Enfileira Chart.js e inicializa gráficos do analytics.
+     *
+     * @param array  $stats    Estatísticas do analytics.
+     * @param string $model    Modelo GPT usado.
+     * @param array  $settings Configurações do plugin.
+     */
+    private function enqueue_charts_scripts( $stats, $model, $settings ) {
+        // Enfileira Chart.js via CDN
+        wp_enqueue_script(
+            'chartjs',
+            'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+            [],
+            '4.4.0',
+            true
+        );
+
+        // Prepara dados para os gráficos
+        $labels = [];
+        $tokens_data = [];
+        $requests_data = [];
+        $cost_usd_data = [];
+        $cost_brl_data = [];
+        $cumulative_cost_usd = 0;
+        $cumulative_cost_brl = 0;
+
+        foreach ( $stats['daily'] as $day ) {
+            $labels[] = gmdate( 'd/m', strtotime( $day->date ) );
+            $tokens_data[] = intval( $day->tokens );
+            $requests_data[] = intval( $day->questions );
+            
+            // Calcula custo do dia
+            $daily_cost = DPS_AI_Analytics::estimate_cost(
+                intval( $day->tokens ) / 2, // Aproximação: metade input
+                intval( $day->tokens ) / 2, // Aproximação: metade output
+                $model
+            );
+            
+            $cumulative_cost_usd += $daily_cost;
+            $cost_usd_data[] = round( $cumulative_cost_usd, 4 );
+            
+            // Se tem taxa BRL, calcula também
+            if ( ! empty( $settings['usd_to_brl_rate'] ) ) {
+                $cumulative_cost_brl += $daily_cost * floatval( $settings['usd_to_brl_rate'] );
+                $cost_brl_data[] = round( $cumulative_cost_brl, 2 );
+            }
+        }
+
+        // Localiza dados para JavaScript
+        wp_localize_script(
+            'chartjs',
+            'dpsAIChartsData',
+            [
+                'labels'       => $labels,
+                'tokens'       => $tokens_data,
+                'requests'     => $requests_data,
+                'costUSD'      => $cost_usd_data,
+                'costBRL'      => $cost_brl_data,
+                'hasBRLRate'   => ! empty( $settings['usd_to_brl_rate'] ),
+                'i18n'         => [
+                    'tokens'       => __( 'Tokens', 'dps-ai' ),
+                    'requests'     => __( 'Requisições', 'dps-ai' ),
+                    'costUSD'      => __( 'Custo (USD)', 'dps-ai' ),
+                    'costBRL'      => __( 'Custo (BRL)', 'dps-ai' ),
+                ],
+            ]
+        );
+
+        // Script inline para inicializar gráficos
+        wp_add_inline_script(
+            'chartjs',
+            "
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof Chart === 'undefined' || !window.dpsAIChartsData) return;
+
+                const data = window.dpsAIChartsData;
+                
+                // Configuração comum
+                const commonOptions = {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                };
+
+                // Gráfico de Tokens (Linha)
+                const tokensCtx = document.getElementById('tokensChart');
+                if (tokensCtx) {
+                    new Chart(tokensCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.i18n.tokens,
+                                data: data.tokens,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: commonOptions
+                    });
+                }
+
+                // Gráfico de Requisições (Barras)
+                const requestsCtx = document.getElementById('requestsChart');
+                if (requestsCtx) {
+                    new Chart(requestsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.i18n.requests,
+                                data: data.requests,
+                                backgroundColor: '#0ea5e9',
+                                borderColor: '#0284c7',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: commonOptions
+                    });
+                }
+
+                // Gráfico de Custo Acumulado (Área)
+                const costCtx = document.getElementById('costChart');
+                if (costCtx) {
+                    const datasets = [
+                        {
+                            label: data.i18n.costUSD,
+                            data: data.costUSD,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yUSD'
+                        }
+                    ];
+
+                    // Se tem taxa BRL, adiciona segunda linha
+                    if (data.hasBRLRate) {
+                        datasets.push({
+                            label: data.i18n.costBRL,
+                            data: data.costBRL,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yBRL'
+                        });
+                    }
+
+                    const scales = {
+                        yUSD: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'USD ($)'
+                            }
+                        }
+                    };
+
+                    // Se tem BRL, adiciona eixo Y secundário
+                    if (data.hasBRLRate) {
+                        scales.yBRL = {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'BRL (R$)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        };
+                    }
+
+                    new Chart(costCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: scales
+                        }
+                    });
+                }
+            });
+            "
+        );
+    }
+
+    /**
+     * Handler para exportação de métricas em CSV.
+     * 
+     * Endpoint: admin-post.php?action=dps_ai_export_metrics
+     * Segurança: Requer capability manage_options + nonce
+     */
+    public function handle_export_metrics() {
+        // Verifica permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
+        }
+
+        // Verifica nonce
+        if ( ! isset( $_POST['dps_ai_export_metrics_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_metrics_nonce'] ) ), 'dps_ai_export_metrics' ) ) {
+            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        }
+
+        // Obtém período
+        $start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+        $end_date   = isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : current_time( 'Y-m-d' );
+
+        // Obtém estatísticas do período
+        $stats = DPS_AI_Analytics::get_stats( $start_date, $end_date );
+
+        if ( empty( $stats['daily'] ) ) {
+            wp_die( esc_html__( 'Nenhum dado disponível para exportação.', 'dps-ai' ) );
+        }
+
+        // Obtém configurações para calcular custo
+        $settings       = get_option( self::OPTION_KEY, [] );
+        $model          = $settings['model'] ?? 'gpt-4o-mini';
+        $exchange_rate  = ! empty( $settings['usd_to_brl_rate'] ) ? floatval( $settings['usd_to_brl_rate'] ) : 0;
+
+        // Prepara dados para CSV
+        $headers = [
+            'Data',
+            'Perguntas',
+            'Tokens Entrada',
+            'Tokens Saída',
+            'Total Tokens',
+            'Custo USD',
+        ];
+
+        if ( $exchange_rate > 0 ) {
+            $headers[] = 'Custo BRL';
+        }
+
+        $headers[] = 'Tempo Médio (s)';
+        $headers[] = 'Erros';
+        $headers[] = 'Modelo';
+
+        $rows = [];
+        foreach ( $stats['daily'] as $day ) {
+            $total_tokens = intval( $day->tokens_input ) + intval( $day->tokens_output );
+            $cost_usd     = DPS_AI_Analytics::estimate_cost( intval( $day->tokens_input ), intval( $day->tokens_output ), $model );
+
+            $row = [
+                gmdate( 'd/m/Y', strtotime( $day->date ) ),
+                $day->questions_count,
+                $day->tokens_input,
+                $day->tokens_output,
+                $total_tokens,
+                '$' . number_format( $cost_usd, 4 ),
+            ];
+
+            if ( $exchange_rate > 0 ) {
+                $cost_brl = $cost_usd * $exchange_rate;
+                $row[]    = 'R$ ' . number_format( $cost_brl, 2, ',', '.' );
+            }
+
+            $row[] = number_format( floatval( $day->avg_response_time ), 2 );
+            $row[] = $day->errors_count;
+            $row[] = ! empty( $day->model ) ? $day->model : $model;
+
+            $rows[] = $row;
+        }
+
+        // Gera e envia CSV
+        $filename = 'ai-metrics-' . gmdate( 'Y-m-d' ) . '.csv';
+        $this->generate_csv( $filename, $headers, $rows );
+    }
+
+    /**
+     * Handler para exportação de feedbacks em CSV.
+     * 
+     * Endpoint: admin-post.php?action=dps_ai_export_feedback
+     * Segurança: Requer capability manage_options + nonce
+     */
+    public function handle_export_feedback() {
+        // Verifica permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
+        }
+
+        // Verifica nonce
+        if ( ! isset( $_POST['dps_ai_export_feedback_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_feedback_nonce'] ) ), 'dps_ai_export_feedback' ) ) {
+            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        }
+
+        // Obtém feedbacks (últimos 1000)
+        $feedbacks = DPS_AI_Analytics::get_recent_feedback( 1000, 'all' );
+
+        if ( empty( $feedbacks ) ) {
+            wp_die( esc_html__( 'Nenhum feedback disponível para exportação.', 'dps-ai' ) );
+        }
+
+        // Prepara dados para CSV
+        $headers = [
+            'Data/Hora',
+            'Cliente ID',
+            'Pergunta',
+            'Resposta',
+            'Feedback',
+            'Comentário',
+            'Modelo',
+        ];
+
+        $rows = [];
+        foreach ( $feedbacks as $fb ) {
+            $feedback_type = ( 'positive' === $fb->feedback ) ? 'Positivo' : 'Negativo';
+
+            // Trunca resposta para CSV (max 200 caracteres)
+            $answer = ! empty( $fb->answer ) ? mb_substr( $fb->answer, 0, 200 ) : '';
+            if ( mb_strlen( $fb->answer ) > 200 ) {
+                $answer .= '...';
+            }
+
+            $rows[] = [
+                gmdate( 'd/m/Y H:i', strtotime( $fb->created_at ) ),
+                $fb->client_id,
+                $fb->question,
+                $answer,
+                $feedback_type,
+                ! empty( $fb->comment ) ? $fb->comment : '',
+                '', // Modelo não está disponível diretamente no feedback, deixar vazio
+            ];
+        }
+
+        // Gera e envia CSV
+        $filename = 'ai-feedback-' . gmdate( 'Y-m-d' ) . '.csv';
+        $this->generate_csv( $filename, $headers, $rows );
+    }
+
+    /**
+     * Gera arquivo CSV e envia para download.
+     *
+     * @param string $filename Nome do arquivo CSV.
+     * @param array  $headers  Array com cabeçalhos das colunas.
+     * @param array  $rows     Array bidimensional com linhas de dados.
+     */
+    private function generate_csv( $filename, $headers, $rows ) {
+        // Limpa qualquer output anterior
+        if ( ob_get_level() ) {
+            ob_end_clean();
+        }
+
+        // Headers HTTP para download
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '"' );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+
+        // Abre output stream
+        $output = fopen( 'php://output', 'w' );
+
+        // UTF-8 BOM para Excel reconhecer acentos
+        fprintf( $output, chr(0xEF) . chr(0xBB) . chr(0xBF) );
+
+        // Escreve cabeçalho
+        fputcsv( $output, $headers, ';' );
+
+        // Escreve linhas de dados
+        foreach ( $rows as $row ) {
+            // Remove quebras de linha dos valores para evitar quebra de CSV
+            $cleaned_row = array_map( function( $value ) {
+                return str_replace( [ "\r", "\n" ], ' ', $value );
+            }, $row );
+
+            fputcsv( $output, $cleaned_row, ';' );
+        }
+
+        fclose( $output );
+        exit;
     }
 
     /**
@@ -970,6 +1820,10 @@ class DPS_AI_Addon {
             'public_chat_faqs'           => isset( $raw_settings['public_chat_faqs'] ) ? sanitize_textarea_field( $raw_settings['public_chat_faqs'] ) : '',
             'public_chat_business_info'  => $public_chat_business_info,
             'public_chat_instructions'   => $public_chat_instructions,
+            // v1.6.1 settings - Manutenção, Logs e Analytics
+            'data_retention_days'        => isset( $raw_settings['data_retention_days'] ) ? max( 30, min( 3650, absint( $raw_settings['data_retention_days'] ) ) ) : 365,
+            'debug_logging'              => ! empty( $raw_settings['debug_logging'] ),
+            'usd_to_brl_rate'            => isset( $raw_settings['usd_to_brl_rate'] ) && ! empty( $raw_settings['usd_to_brl_rate'] ) ? max( 0.01, min( 100, floatval( $raw_settings['usd_to_brl_rate'] ) ) ) : '',
         ];
 
         update_option( self::OPTION_KEY, $settings );

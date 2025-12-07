@@ -81,6 +81,133 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+- **AI Add-on (v1.6.1)**: Limpeza Automática de Dados Antigos
+  - Implementada rotina de limpeza automática via WP-Cron para deletar métricas e feedback com mais de 365 dias (configurável)
+  - Criada classe `DPS_AI_Maintenance` em `includes/class-dps-ai-maintenance.php`
+  - Adicionada limpeza automática de transients expirados relacionados à IA
+  - Evento agendado para rodar diariamente às 03:00 (horário do servidor)
+  - Nova configuração "Período de Retenção de Dados" na página de settings (padrão: 365 dias, mínimo: 30, máximo: 3650)
+  - Botão de limpeza manual na página de settings com estatísticas de dados armazenados
+  - Função `DPS_AI_Maintenance::get_storage_stats()` para exibir volume de dados e registros mais antigos
+- **AI Add-on (v1.6.1)**: Logger Condicional Respeitando WP_DEBUG
+  - Criado sistema de logging condicional em `includes/dps-ai-logger.php`
+  - Funções helper: `dps_ai_log()`, `dps_ai_log_debug()`, `dps_ai_log_info()`, `dps_ai_log_warning()`, `dps_ai_log_error()`
+  - Logs detalhados (debug/info/warning) são registrados apenas quando `WP_DEBUG` está habilitado OU quando a opção "Enable debug logging" está ativa
+  - Em produção (debug desabilitado), apenas erros críticos são registrados
+  - Nova configuração "Habilitar Logs Detalhados" na página de settings
+  - Indicador visual quando `WP_DEBUG` está ativo nas configurações
+- **AI Add-on (v1.6.1)**: Melhorias de UX na Página de Configurações
+  - Toggle de visibilidade da API Key com ícone de olho (dashicons) para mostrar/ocultar chave
+  - Destaque visual do modelo GPT atualmente selecionado na tabela de custos
+  - Nova coluna "Status" na tabela de custos mostrando badge "Modelo Ativo" para o modelo em uso
+  - Background azul claro e borda lateral azul destacando a linha do modelo ativo
+  - Melhor acessibilidade com texto explícito além de indicadores visuais
+- **AI Add-on (v1.6.1)**: Melhorias de UX no Widget de Chat
+  - Autoscroll inteligente para a última mensagem (apenas se usuário não estiver lendo mensagens antigas)
+  - Textarea auto-expansível até 6 linhas (~120px) com overflow interno após o limite
+  - Implementado tanto no chat do portal (`dps-ai-portal.js`) quanto no chat público (`dps-ai-public-chat.js`)
+  - Detecção automática de posição de scroll: não interrompe leitura de mensagens anteriores
+- **AI Add-on (v1.6.1)**: Dashboard de Analytics com Gráficos e Conversão de Moeda
+  - Integração com Chart.js 4.4.0 via CDN para visualização de dados
+  - Gráfico de linhas: uso de tokens ao longo do tempo
+  - Gráfico de barras: número de requisições por dia
+  - Gráfico de área: custo acumulado no período (USD e BRL com eixos duplos)
+  - Nova configuração "Taxa de Conversão USD → BRL" nas settings (validação 0.01-100)
+  - Exibição automática de custos em BRL nos cards do dashboard quando taxa configurada
+  - Aviso visual indicando taxa atual ou sugerindo configuração
+  - Link direto para configurar taxa a partir do analytics
+- **AI Add-on (v1.6.1)**: Exportação CSV de Métricas e Feedbacks
+  - Botão "Exportar CSV" na página de analytics para exportar métricas do período filtrado
+  - Botão "Exportar Feedbacks CSV" para exportar últimos 1000 feedbacks
+  - CSV de métricas inclui: data, perguntas, tokens (entrada/saída/total), custo (USD/BRL), tempo médio, erros, modelo
+  - CSV de feedbacks inclui: data/hora, cliente ID, pergunta, resposta, tipo de feedback, comentário
+  - Encoding UTF-8 com BOM para compatibilidade com Excel
+  - Separador ponto-e-vírgula (`;`) para melhor compatibilidade com Excel Brasil
+  - Tratamento de caracteres especiais (acentos, vírgulas, quebras de linha)
+  - Endpoints seguros: `admin-post.php?action=dps_ai_export_metrics` e `admin-post.php?action=dps_ai_export_feedback`
+  - Verificação de capability `manage_options` e nonces obrigatórios
+  - Função helper centralizada `generate_csv()` para reuso de código
+- **AI Add-on (v1.6.1)**: Paginação na Listagem de Feedbacks Recentes
+  - Implementada paginação de 20 feedbacks por página no dashboard de analytics
+  - Controles de navegação padrão do WordPress: Primeira, Anterior, Próxima, Última
+  - Input para navegar diretamente a uma página específica (com validação JavaScript)
+  - Exibição do total de feedbacks e página atual
+  - URL mantém filtros de data ao navegar entre páginas
+  - Controles exibidos apenas quando há mais de uma página
+  - Parâmetro `?feedback_paged=N` na URL para controlar página atual
+  - Nova função `DPS_AI_Analytics::count_feedback()` para contar total de registros
+  - Adicionado parâmetro `$offset` na função `get_recent_feedback()` para suportar paginação
+- **AI Add-on (v1.6.1)**: Sistema de Prompts Centralizado e Customizável
+  - Criado diretório `/prompts` com arquivos de system prompts separados por contexto
+  - 4 contextos disponíveis: `portal`, `public`, `whatsapp`, `email`
+  - Nova classe `DPS_AI_Prompts` em `includes/class-dps-ai-prompts.php` gerencia carregamento e filtros
+  - Arquivos de prompt:
+    - `prompts/system-portal.txt` - Chat do Portal do Cliente
+    - `prompts/system-public.txt` - Chat Público para visitantes
+    - `prompts/system-whatsapp.txt` - Mensagens via WhatsApp
+    - `prompts/system-email.txt` - Conteúdo de e-mails
+  - Filtros do WordPress para customização:
+    - `dps_ai_system_prompt` - Filtro global para todos os contextos
+    - `dps_ai_system_prompt_{contexto}` - Filtro específico por contexto (ex: `dps_ai_system_prompt_portal`)
+  - API simplificada: `DPS_AI_Prompts::get('contexto')` retorna prompt com filtros aplicados
+  - Retrocompatibilidade: métodos `get_base_system_prompt()` e `get_public_system_prompt()` agora usam a nova classe internamente
+  - Funções auxiliares: `is_valid_context()`, `get_available_contexts()`, `clear_cache()`
+  - Cache interno para evitar releituras de arquivos
+- **AI Add-on (v1.6.1)**: Estrutura de Testes Unitários e CI
+  - Configurado PHPUnit para testes automatizados do add-on
+  - Criado `composer.json` com PHPUnit 9.5+ como dependência de desenvolvimento
+  - Arquivo `phpunit.xml` com configuração de test suite e coverage
+  - Bootstrap de testes (`tests/bootstrap.php`) com mocks de funções WordPress
+  - **Testes implementados** (24 testes no total):
+    - `Test_DPS_AI_Email_Parser` - 8 testes para parsing de e-mails (JSON, labeled, separated, plain, malicioso, vazio, text_to_html, stats)
+    - `Test_DPS_AI_Prompts` - 9 testes para sistema de prompts (4 contextos, validação, cache, clear_cache)
+    - `Test_DPS_AI_Analytics` - 7 testes para cálculo de custos (GPT-4o-mini, GPT-4o, GPT-4-turbo, zero tokens, modelo desconhecido, conversão USD→BRL, tokens fracionários)
+  - **GitHub Actions CI** (`.github/workflows/phpunit.yml`):
+    - Executa testes em push/PR para branches `main`, `develop`, `copilot/**`
+    - Testa em múltiplas versões do PHP (8.0, 8.1, 8.2)
+    - Gera relatório de cobertura para PHP 8.1
+    - Cache de dependências Composer para build mais rápido
+  - Scripts Composer: `composer test` e `composer test:coverage`
+  - Documentação completa em `tests/README.md` com instruções de uso e troubleshooting
+  - Arquivo `.gitignore` para excluir `vendor/`, `coverage/` e arquivos de cache
+
+#### Changed (Alterado)
+- **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
+  - Refatorada classe `DPS_AI_Client::chat()` com tratamento avançado de erros
+  - Validação de array de mensagens antes de enviar requisição
+  - Tratamento específico para diferentes códigos HTTP de erro (400, 401, 429, 500, 502, 503)
+  - Adicionado try/catch para capturar exceções inesperadas
+  - Logs contextualizados com detalhes técnicos (timeout, response_time, status code, tokens_used)
+  - Validação de resposta vazia e JSON inválido antes de processar
+  - Mensagens de erro amigáveis sem expor dados sensíveis (API key, payloads, etc.)
+- **AI Add-on (v1.6.1)**: Refatoração de Logging em Todas as Classes
+  - Substituídos 7 chamadas `error_log()` por funções do novo logger condicional
+  - Afetados: `class-dps-ai-message-assistant.php` (4 ocorrências)
+  - Todos os logs agora respeitam configurações de debug do plugin
+- **AI Add-on (v1.6.1)**: Dashboard de Analytics Aprimorado
+  - Método `enqueue_charts_scripts()` para carregar Chart.js e preparar dados
+  - Dados agregados por dia incluem cálculo de custo acumulado
+  - Gráficos responsivos adaptam-se ao tamanho da tela
+  - Layout em grid para gráficos (mínimo 400px por coluna)
+- **AI Add-on (v1.6.1)**: Refatoração de System Prompts (BREAKING para customizações diretas)
+  - `DPS_AI_Assistant::get_base_system_prompt()` agora usa `DPS_AI_Prompts::get('portal')` internamente
+  - `DPS_AI_Public_Chat::get_public_system_prompt()` agora usa `DPS_AI_Prompts::get('public')` internamente
+  - `DPS_AI_Message_Assistant::build_message_system_prompt()` agora carrega prompts base de arquivos antes de adicionar instruções específicas
+  - **IMPORTANTE**: Se você estava sobrescrevendo métodos de prompt diretamente, migre para os filtros `dps_ai_system_prompt` ou `dps_ai_system_prompt_{contexto}`
+- **AI Add-on (v1.6.1)**: Parser Robusto de Respostas de E-mail da IA
+  - Criada classe `DPS_AI_Email_Parser` em `includes/class-dps-ai-email-parser.php` para parsing defensivo e robusto de e-mails
+  - Suporta múltiplos formatos de resposta: JSON estruturado, formato com rótulos (ASSUNTO:/CORPO:), separado por linha vazia e texto plano
+  - Implementados fallbacks inteligentes quando formato esperado não é encontrado
+  - Validação e sanitização automática com `wp_kses_post()`, `sanitize_text_field()`, `strip_tags()`
+  - Proteção contra scripts maliciosos e conteúdo perigoso injetado pela IA
+  - Limite configurável para tamanho do assunto (padrão: 200 caracteres)
+  - Logging detalhado do processo de parsing para diagnóstico (formato usado, tamanho de subject/body, estatísticas)
+  - Método `DPS_AI_Email_Parser::text_to_html()` para converter texto plano em HTML básico
+  - Método `DPS_AI_Email_Parser::get_parse_stats()` para obter estatísticas sobre qualidade do parse
+  - Classe `DPS_AI_Message_Assistant` refatorada para usar o novo parser robusto
+  - Método `parse_email_response()` depreciado mas mantido para retrocompatibilidade
+
 #### Fixed (Corrigido)
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
   - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido

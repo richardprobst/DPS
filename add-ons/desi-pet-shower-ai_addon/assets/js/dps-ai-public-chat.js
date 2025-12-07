@@ -189,7 +189,9 @@
         '</div>';
 
         $messages.append(html);
-        scrollToBottom();
+        
+        // Autoscroll inteligente
+        smartScrollToBottom();
 
         // Salva no histórico
         if (type !== 'error') {
@@ -242,7 +244,7 @@
      */
     function showTyping() {
         $typing.show();
-        scrollToBottom();
+        smartScrollToBottom();
     }
 
     /**
@@ -276,7 +278,7 @@
     }
 
     /**
-     * Rola para o final das mensagens.
+     * Rola para o final das mensagens (versão básica - compatibilidade).
      */
     function scrollToBottom() {
         var $body = $('.dps-ai-public-body');
@@ -286,13 +288,49 @@
     }
 
     /**
-     * Auto-resize do textarea.
+     * Rola para o final de forma inteligente.
+     * Só faz scroll se o usuário já estava perto do final (não está lendo mensagens antigas).
+     */
+    function smartScrollToBottom() {
+        var $body = $('.dps-ai-public-body');
+        if (!$body.length) return;
+        
+        var container = $body[0];
+        var scrollTop = container.scrollTop;
+        var scrollHeight = container.scrollHeight;
+        var clientHeight = container.clientHeight;
+        
+        // Considera "perto do final" se estiver a menos de 100px do fim
+        var isNearBottom = (scrollHeight - scrollTop - clientHeight) < 100;
+        
+        // Sempre rola se for a primeira mensagem OU se usuário está perto do final
+        if (isNearBottom || scrollHeight <= clientHeight) {
+            $body.animate({
+                scrollTop: scrollHeight
+            }, 300);
+        }
+    }
+
+    /**
+     * Auto-resize do textarea (expansível até 6 linhas ~120px).
      *
      * @param {HTMLElement} textarea Elemento textarea.
      */
     function autoResizeTextarea(textarea) {
+        // Reset para calcular altura real
         textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        
+        // Define altura baseada no conteúdo, limitando a ~6 linhas (120px)
+        var maxHeight = 120;
+        var newHeight = Math.min(textarea.scrollHeight, maxHeight);
+        textarea.style.height = newHeight + 'px';
+        
+        // Se passou do limite, habilita overflow interno
+        if (textarea.scrollHeight > maxHeight) {
+            textarea.style.overflowY = 'auto';
+        } else {
+            textarea.style.overflowY = 'hidden';
+        }
     }
 
     /**
