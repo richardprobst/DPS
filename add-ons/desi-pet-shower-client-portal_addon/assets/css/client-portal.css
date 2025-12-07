@@ -625,19 +625,30 @@ html {
 }
 
 /* Seções do portal */
+/* ================================================
+   SEÇÕES DO PORTAL
+   Hierarquia visual clara e espaçamento adequado
+   ================================================ */
 .dps-portal-section {
     background: #fff;
     border: 1px solid var(--dps-border-color);
-    border-radius: 4px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .dps-portal-section h2 {
     margin-top: 0;
     margin-bottom: 20px;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--dps-gray-700);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .dps-portal-section h3 {
@@ -648,66 +659,108 @@ html {
     color: var(--dps-gray-700);
 }
 
+/* Ícones nos títulos de seção */
+.dps-portal-section h2::before {
+    font-size: 24px;
+    line-height: 1;
+}
+
+/* Seções com destaque especial */
+.dps-portal-section.dps-portal-next {
+    border-color: #0ea5e9;
+    border-width: 2px;
+    background: linear-gradient(to bottom, #ffffff 0%, #f0f9ff 100%);
+}
+
+.dps-portal-section.dps-portal-finances {
+    border-color: var(--dps-warning);
+    border-width: 2px;
+}
+
 /* Feedback visual - Notices */
 .dps-portal-notice {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+    padding: 16px 20px;
+    margin-bottom: 20px;
     border-left: 4px solid;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #fff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+    font-weight: 500;
 }
 
 .dps-portal-notice--success {
-    border-left-color: #10b981;
-    background: #d1fae5;
+    border-left-color: var(--dps-success);
+    background: var(--dps-success-bg);
     color: #047857;
 }
 
 .dps-portal-notice--error {
-    border-left-color: #ef4444;
-    background: #fee2e2;
+    border-left-color: var(--dps-danger);
+    background: var(--dps-danger-bg);
     color: #991b1b;
 }
 
 .dps-portal-notice--info {
-    border-left-color: #0ea5e9;
+    border-left-color: var(--dps-primary);
     background: #e0f2fe;
     color: #075985;
 }
 
 /* Alerts */
+/* ================================================
+   ALERTS E AVISOS
+   Com melhor destaque visual e acessibilidade
+   ================================================ */
 .dps-alert {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+    padding: 16px 20px;
+    margin-bottom: 24px;
     border-left: 4px solid;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #fff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 .dps-alert__content {
     font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
 }
 
+/* Alert de Warning com mais destaque */
 .dps-alert--warning {
-    border-left-color: #f59e0b;
-    background: #fef3c7;
+    border-left-color: var(--dps-warning);
+    background: var(--dps-warning-bg);
     color: var(--dps-warning-text);
 }
 
+.dps-alert--warning .dps-alert__content {
+    font-weight: 600;
+}
+
+/* Alert de Success */
 .dps-alert--success {
-    border-left-color: #10b981;
-    background: #d1fae5;
+    border-left-color: var(--dps-success);
+    background: var(--dps-success-bg);
     color: #047857;
 }
 
-/* Card de próximo agendamento */
+/* ================================================
+   CARD DE PRÓXIMO AGENDAMENTO
+   Destaque visual para informação importante
+   ================================================ */
 .dps-appointment-card {
     display: flex;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: #f9fafb;
-    border: 1px solid var(--dps-border-color);
-    border-radius: 4px;
+    gap: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.1);
+    margin-bottom: 24px;
 }
 
 .dps-appointment-card__date {
@@ -715,31 +768,36 @@ html {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
-    padding: 1rem;
-    background: #0ea5e9;
+    min-width: 90px;
+    height: 90px;
+    padding: 16px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     color: #fff;
-    border-radius: 4px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
 }
 
 .dps-appointment-card__day {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
     line-height: 1;
 }
 
 .dps-appointment-card__month {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     text-transform: uppercase;
     margin-top: 4px;
+    letter-spacing: 0.05em;
+    opacity: 0.95;
 }
 
 .dps-appointment-card__details {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 8px;
+    justify-content: center;
 }
 
 .dps-appointment-card__time,
@@ -747,64 +805,95 @@ html {
 .dps-appointment-card__services {
     font-size: 16px;
     color: var(--dps-gray-700);
+    line-height: 1.5;
+}
+
+.dps-appointment-card__time {
+    font-weight: 600;
+    color: var(--dps-gray-800);
+    font-size: 17px;
 }
 
 .dps-appointment-card__status {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: #e5e7eb;
+    padding: 6px 12px;
+    background: var(--dps-gray-100);
     color: var(--dps-gray-700);
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     align-self: flex-start;
 }
 
 .dps-appointment-card__action {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #0ea5e9;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 16px;
+    background: var(--dps-primary);
     color: #fff;
-    border-radius: 4px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 15px;
     align-self: flex-start;
+    transition: all 0.2s ease;
 }
 
 .dps-appointment-card__action:hover {
-    background: #0284c7;
+    background: var(--dps-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
 }
 
-/* Estado vazio */
+/* ================================================
+   ESTADO VAZIO
+   Mensagens amigáveis e orientativas
+   ================================================ */
 .dps-empty-state {
     text-align: center;
-    padding: 2rem;
+    padding: 40px 20px;
+    background: var(--dps-gray-50);
+    border-radius: 12px;
+    border: 2px dashed var(--dps-gray-300);
 }
 
 .dps-empty-state__icon {
-    font-size: 64px;
-    margin-bottom: 1rem;
+    font-size: 72px;
+    margin-bottom: 16px;
+    opacity: 0.8;
 }
 
 .dps-empty-state__message {
-    font-size: 16px;
-    color: var(--dps-gray-500);
-    margin-bottom: 1.5rem;
+    font-size: 17px;
+    color: var(--dps-gray-600);
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-weight: 500;
 }
 
 .dps-empty-state__action {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: #10b981;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--dps-success);
     color: #fff;
-    border-radius: 4px;
+    border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    min-height: 48px;
 }
 
 .dps-empty-state__action:hover {
     background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Tabelas */
@@ -1058,6 +1147,10 @@ html {
    ======================================== */
 
 /* Tabelas responsivas em mobile */
+/* ================================================
+   RESPONSIVE MOBILE (640px e abaixo)
+   Otimizado para telas pequenas com foco em UX
+   ================================================ */
 @media (max-width: 640px) {
     /* Tabs em mobile - scroll horizontal */
     .dps-portal-tabs {
@@ -1079,6 +1172,7 @@ html {
     .dps-portal-tabs__link {
         padding: 12px 16px;
         font-size: 13px;
+        min-height: 48px; /* Mínimo para tocabilidade */
     }
     
     .dps-portal-tabs__text {
@@ -1086,12 +1180,22 @@ html {
     }
     
     .dps-portal-tabs__icon {
-        font-size: 20px;
+        font-size: 22px; /* Maior para melhor visibilidade */
     }
     
     .dps-portal-tab-content {
         padding: 16px;
         border-radius: 0 0 4px 4px;
+    }
+    
+    /* Seções do portal com espaçamento adequado */
+    .dps-portal-section {
+        margin-bottom: 24px; /* Mais espaço entre seções */
+    }
+    
+    .dps-portal-section h2 {
+        font-size: 20px; /* Título menor mas legível */
+        margin-bottom: 16px;
     }
     
     /* Chat widget em mobile */
@@ -1108,8 +1212,8 @@ html {
     }
     
     .dps-chat-toggle {
-        width: 54px;
-        height: 54px;
+        width: 56px; /* Maior para melhor tocabilidade */
+        height: 56px;
         bottom: 16px;
         right: 16px;
     }
@@ -1134,8 +1238,9 @@ html {
     
     .dps-portal-nav__link {
         text-align: center;
-        padding: 10px 16px;
-        font-size: 14px;
+        padding: 12px 16px; /* Aumentado para tocabilidade */
+        font-size: 15px;
+        min-height: 48px;
     }
     
     /* Container do portal ajustado para navegação sticky */
@@ -1149,67 +1254,151 @@ html {
         grid-template-columns: 1fr;
     }
     
-    /* Botões 100% largura em mobile */
-    .dps-submit-btn {
+    /* Botões 100% largura em mobile com altura mínima para tocabilidade */
+    .dps-submit-btn,
+    .button {
         width: 100%;
+        min-height: 48px;
+        font-size: 16px;
     }
     
-    /* Card de agendamento em mobile */
+    /* Card de agendamento em mobile - mais visual */
     .dps-appointment-card {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+        flex-direction: row; /* Horizontal é melhor que vertical */
+        align-items: flex-start;
+        text-align: left;
+        padding: 16px;
+        gap: 16px;
     }
     
     .dps-appointment-card__date {
-        width: 100%;
-        max-width: 120px;
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+    }
+    
+    .dps-appointment-card__day {
+        font-size: 32px;
+    }
+    
+    .dps-appointment-card__month {
+        font-size: 14px;
     }
     
     .dps-appointment-card__details {
-        align-items: center;
+        flex: 1;
+        align-items: flex-start;
     }
     
-    /* Tabelas viram cards */
+    .dps-appointment-card__time,
+    .dps-appointment-card__pet,
+    .dps-appointment-card__services {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+    
+    /* ================================================
+       TABELAS → CARDS EM MOBILE
+       Layout card-based para melhor legibilidade
+       ================================================ */
+    
+    /* Esconde o cabeçalho da tabela */
     .dps-table thead {
-        display: none;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
     }
     
+    /* Remove border da tbody */
+    .dps-table tbody {
+        border: none;
+    }
+    
+    /* Cada linha vira um card */
     .dps-table tr {
         display: block;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: #f9fafb;
+        margin-bottom: 16px;
+        padding: 16px;
+        background: var(--dps-white);
         border: 1px solid var(--dps-border-color);
-        border-radius: 4px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
     
+    /* Células em layout grid com label */
     .dps-table td {
         display: grid;
-        grid-template-columns: 120px 1fr;
-        gap: 0.5rem;
+        grid-template-columns: minmax(100px, 0.4fr) 1fr;
+        gap: 12px;
+        align-items: start;
         border: none;
-        padding: 0.5rem 0;
+        padding: 10px 0;
         text-align: left;
+        font-size: 15px;
     }
     
+    /* Linha divisória entre campos */
+    .dps-table td:not(:last-child) {
+        border-bottom: 1px solid var(--dps-gray-100);
+    }
+    
+    /* Label dinâmico via data-label */
     .dps-table td::before {
         content: attr(data-label);
         font-weight: 600;
-        color: var(--dps-gray-700);
-        font-size: 13px; /* Mínimo 13px para acessibilidade mobile */
-        letter-spacing: 0.03em;
+        color: var(--dps-gray-600);
+        font-size: 14px;
+        letter-spacing: 0.02em;
     }
     
-    /* Botão de pagamento em mobile */
+    /* Valor da célula com contraste adequado */
+    .dps-table td {
+        color: var(--dps-gray-800);
+        font-weight: 500;
+    }
+    
+    /* Botão de ação ocupa linha inteira */
     .dps-table td form {
         grid-column: 1 / -1;
         display: block !important;
-        margin-top: 0.5rem;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--dps-gray-100);
     }
     
-    .dps-table td button {
+    /* Botões em mobile - largura total e tocáveis */
+    .dps-table td button,
+    .dps-table td .button {
         width: 100%;
+        min-height: 48px;
+        font-size: 16px;
+        padding: 12px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    /* Ações de tabela em cards mobile */
+    .dps-table-actions {
+        grid-column: 1 / -1 !important;
+        display: flex !important;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--dps-gray-100);
+    }
+    
+    .dps-table-actions .dps-btn {
+        flex: 1;
+        min-height: 44px;
+        font-size: 14px;
     }
     
     /* Galeria em mobile - limitar altura */

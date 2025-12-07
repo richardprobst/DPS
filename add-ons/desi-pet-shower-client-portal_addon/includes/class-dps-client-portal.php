@@ -1249,7 +1249,7 @@ final class DPS_Client_Portal {
      */
     private function render_next_appointment( $client_id ) {
         echo '<section id="proximos" class="dps-portal-section dps-portal-next">';
-        echo '<h2>' . esc_html__( 'Próximo Agendamento', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '📅 Seu Próximo Horário', 'dps-client-portal' ) . '</h2>';
         $today     = current_time( 'Y-m-d' );
         $args      = [
             'post_type'      => 'dps_agendamento',
@@ -1349,7 +1349,7 @@ final class DPS_Client_Portal {
         // Busca transações com status em aberto
         $pendings = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')", $client_id ) );
         echo '<section id="pendencias" class="dps-portal-section dps-portal-finances">';
-        echo '<h2>' . esc_html__( 'Pendências Financeiras', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '💳 Pagamentos Pendentes', 'dps-client-portal' ) . '</h2>';
         
         if ( $pendings ) {
             // Calcula total de pendências
@@ -1460,7 +1460,7 @@ final class DPS_Client_Portal {
         }
         
         echo '<section id="historico" class="dps-portal-section dps-portal-history">';
-        echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '📋 Histórico de Serviços', 'dps-client-portal' ) . '</h2>';
         if ( $appointments ) {
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
