@@ -186,10 +186,8 @@ final class DPS_Portal_Token_Manager {
         $now        = current_time( 'mysql' );
         $expires_at = date( 'Y-m-d H:i:s', strtotime( $now ) + ( $expiration_minutes * 60 ) );
         
-        // Captura IP e User Agent
-        $ip_address = isset( $_SERVER['REMOTE_ADDR'] ) 
-            ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) 
-            : '';
+        // Captura IP e User Agent (com suporte a proxy e IPv6)
+        $ip_address = $this->get_client_ip_with_proxy_support();
         $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) 
             ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) 
             : '';
@@ -228,6 +226,11 @@ final class DPS_Portal_Token_Manager {
     /**
      * Valida um token e retorna os dados se válido
      *
+     * Implementa rate limiting para prevenir brute force:
+     * - 5 tentativas por hora por IP
+     * - Cache negativo de tokens inválidos (5 min)
+     * - Logging de tentativas inválidas
+     *
      * @param string $token_plain Token em texto plano
      * @return array|false Dados do token se válido, false se inválido
      */
@@ -235,6 +238,30 @@ final class DPS_Portal_Token_Manager {
         global $wpdb;
 
         if ( empty( $token_plain ) || ! is_string( $token_plain ) ) {
+            return false;
+        }
+
+        // SECURITY: Rate limiting (5 tentativas/hora por IP)
+        $ip = $this->get_client_ip_with_proxy_support();
+        $rate_limit_key = 'dps_token_attempts_' . md5( $ip );
+        $attempts = get_transient( $rate_limit_key );
+        
+        if ( false === $attempts ) {
+            $attempts = 0;
+        }
+        
+        // Bloqueia se excedeu o limite
+        if ( $attempts >= 5 ) {
+            // Log da tentativa bloqueada
+            do_action( 'dps_portal_rate_limit_exceeded', $ip, $token_plain );
+            return false;
+        }
+        
+        // SECURITY: Cache negativo para tokens claramente inválidos
+        $token_cache_key = 'dps_invalid_token_' . md5( $token_plain );
+        if ( get_transient( $token_cache_key ) ) {
+            // Token já foi validado e é inválido, não tentar novamente
+            $this->increment_rate_limit( $rate_limit_key, $attempts );
             return false;
         }
 
@@ -254,18 +281,105 @@ final class DPS_Portal_Token_Manager {
         $tokens = $wpdb->get_results( $query, ARRAY_A );
 
         if ( empty( $tokens ) ) {
+            // Nenhum token ativo encontrado
+            $this->log_invalid_attempt( $token_plain, $ip, 'no_active_tokens' );
+            $this->increment_rate_limit( $rate_limit_key, $attempts );
+            set_transient( $token_cache_key, 1, 5 * MINUTE_IN_SECONDS );
             return false;
         }
 
         // Verifica cada token com password_verify
         foreach ( $tokens as $token_data ) {
             if ( password_verify( $token_plain, $token_data['token_hash'] ) ) {
-                // Token válido encontrado
+                // Token válido encontrado - reseta contador de rate limit
+                delete_transient( $rate_limit_key );
+                delete_transient( $token_cache_key );
                 return $token_data;
             }
         }
 
+        // Token não encontrado
+        $this->log_invalid_attempt( $token_plain, $ip, 'token_not_found' );
+        $this->increment_rate_limit( $rate_limit_key, $attempts );
+        set_transient( $token_cache_key, 1, 5 * MINUTE_IN_SECONDS );
         return false;
+    }
+    
+    /**
+     * Incrementa o contador de rate limiting
+     *
+     * @param string $key Chave do transient
+     * @param int    $current_attempts Tentativas atuais
+     */
+    private function increment_rate_limit( $key, $current_attempts ) {
+        set_transient( $key, $current_attempts + 1, HOUR_IN_SECONDS );
+    }
+    
+    /**
+     * Registra tentativa inválida de acesso com token
+     *
+     * @param string $token_plain Token tentado
+     * @param string $ip          IP do cliente
+     * @param string $reason      Razão da falha
+     */
+    private function log_invalid_attempt( $token_plain, $ip, $reason ) {
+        $log_data = [
+            'ip'           => $ip,
+            'token_prefix' => substr( $token_plain, 0, 8 ) . '...',
+            'reason'       => $reason,
+            'timestamp'    => current_time( 'mysql' ),
+            'user_agent'   => isset( $_SERVER['HTTP_USER_AGENT'] ) 
+                ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) 
+                : '',
+        ];
+        
+        // Hook para extensibilidade (pode salvar em CPT, enviar alertas, etc)
+        do_action( 'dps_portal_invalid_token_attempt', $log_data );
+        
+        // Salva log em transient (retenção de 30 dias)
+        $log_key = 'dps_token_invalid_log_' . md5( $ip . $token_plain );
+        set_transient( $log_key, $log_data, 30 * DAY_IN_SECONDS );
+    }
+    
+    /**
+     * Obtém o IP do cliente com suporte a proxies e IPv6
+     *
+     * Verifica headers de proxy (Cloudflare, AWS, Nginx) e valida IPv4/IPv6
+     *
+     * @return string IP do cliente ou string vazia
+     */
+    private function get_client_ip_with_proxy_support() {
+        // Headers a verificar, em ordem de prioridade
+        $headers = [
+            'HTTP_CF_CONNECTING_IP', // Cloudflare
+            'HTTP_X_REAL_IP',        // Nginx proxy
+            'HTTP_X_FORWARDED_FOR',  // Proxy padrão
+            'REMOTE_ADDR',           // Direto
+        ];
+        
+        foreach ( $headers as $header ) {
+            if ( ! empty( $_SERVER[ $header ] ) ) {
+                $ip_list = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
+                
+                // X-Forwarded-For pode ter múltiplos IPs (client, proxy1, proxy2)
+                // Pega o primeiro (cliente real)
+                if ( strpos( $ip_list, ',' ) !== false ) {
+                    $ips = explode( ',', $ip_list );
+                    $ip_list = trim( $ips[0] );
+                }
+                
+                // Valida IPv4 ou IPv6
+                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+                    return $ip_list;
+                }
+                
+                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+                    return $ip_list;
+                }
+            }
+        }
+        
+        return '';
     }
 
     /**
