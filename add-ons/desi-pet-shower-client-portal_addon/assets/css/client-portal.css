@@ -1513,3 +1513,137 @@ html {
         padding: 12px 16px;
     }
 }
+
+/* ========================================
+   TOAST NOTIFICATIONS (Fase 1.5)
+   Sistema de notificações não-intrusivas
+   ======================================== */
+
+.dps-toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.dps-toast {
+    background: var(--dps-white);
+    border-left: 4px solid var(--dps-primary);
+    border-radius: var(--dps-border-radius);
+    box-shadow: var(--dps-shadow-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: auto;
+    max-width: 100%;
+}
+
+.dps-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.dps-toast.hide {
+    opacity: 0;
+    transform: translateX(400px);
+}
+
+.dps-toast__icon {
+    font-size: 24px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-toast__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-toast__title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--dps-gray-900);
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.dps-toast__message {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.dps-toast__close {
+    background: none;
+    border: none;
+    color: var(--dps-gray-400);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.dps-toast__close:hover {
+    color: var(--dps-gray-700);
+}
+
+/* Tipos de toast */
+.dps-toast--success {
+    border-left-color: var(--dps-success);
+}
+
+.dps-toast--success .dps-toast__icon {
+    color: var(--dps-success);
+}
+
+.dps-toast--error {
+    border-left-color: var(--dps-danger);
+}
+
+.dps-toast--error .dps-toast__icon {
+    color: var(--dps-danger);
+}
+
+.dps-toast--warning {
+    border-left-color: var(--dps-warning);
+}
+
+.dps-toast--warning .dps-toast__icon {
+    color: var(--dps-warning);
+}
+
+.dps-toast--info {
+    border-left-color: var(--dps-info);
+}
+
+.dps-toast--info .dps-toast__icon {
+    color: var(--dps-info);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-toast-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .dps-toast {
+        max-width: 100%;
+    }
+}

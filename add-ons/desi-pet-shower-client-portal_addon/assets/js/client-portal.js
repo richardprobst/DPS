@@ -488,3 +488,227 @@
     }
 
 })();
+
+/* ========================================
+   TOAST NOTIFICATIONS (Fase 1.5)
+   Sistema global de notificações
+   ======================================== */
+
+/**
+ * DPS Toast - Sistema de notificações toast
+ * 
+ * Uso:
+ * DPSToast.success('Dados salvos com sucesso!');
+ * DPSToast.error('Erro ao processar solicitação');
+ * DPSToast.warning('Atenção: link expira em 5 minutos');
+ * DPSToast.info('Nova mensagem recebida');
+ * DPSToast.show('Título', 'Mensagem', 'success', 5000);
+ */
+window.DPSToast = (function() {
+    'use strict';
+    
+    var container = null;
+    var toastCount = 0;
+    
+    /**
+     * Inicializa o container de toasts
+     */
+    function initContainer() {
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'dps-toast-container';
+            container.setAttribute('role', 'status');
+            container.setAttribute('aria-live', 'polite');
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+    
+    /**
+     * Obtém ícone para tipo de toast
+     */
+    function getIcon(type) {
+        var icons = {
+            'success': '✓',
+            'error': '✕',
+            'warning': '⚠',
+            'info': 'ℹ'
+        };
+        return icons[type] || icons.info;
+    }
+    
+    /**
+     * Mostra um toast
+     * 
+     * @param {string} title - Título do toast
+     * @param {string} message - Mensagem do toast
+     * @param {string} type - Tipo: success, error, warning, info
+     * @param {number} duration - Duração em ms (0 = não fecha automaticamente)
+     */
+    function show(title, message, type, duration) {
+        type = type || 'info';
+        duration = duration !== undefined ? duration : 5000;
+        
+        var cont = initContainer();
+        var id = 'dps-toast-' + (++toastCount);
+        
+        // Cria elemento do toast
+        var toast = document.createElement('div');
+        toast.id = id;
+        toast.className = 'dps-toast dps-toast--' + type;
+        toast.setAttribute('role', 'alert');
+        
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'dps-toast__icon';
+        iconSpan.setAttribute('aria-hidden', 'true');
+        iconSpan.textContent = getIcon(type);
+        
+        var contentDiv = document.createElement('div');
+        contentDiv.className = 'dps-toast__content';
+        
+        if (title) {
+            var titleP = document.createElement('p');
+            titleP.className = 'dps-toast__title';
+            titleP.textContent = title;
+            contentDiv.appendChild(titleP);
+        }
+        
+        if (message) {
+            var messageP = document.createElement('p');
+            messageP.className = 'dps-toast__message';
+            messageP.textContent = message;
+            contentDiv.appendChild(messageP);
+        }
+        
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'dps-toast__close';
+        closeBtn.setAttribute('type', 'button');
+        closeBtn.setAttribute('aria-label', 'Fechar notificação');
+        closeBtn.textContent = '×';
+        closeBtn.onclick = function() {
+            hide(id);
+        };
+        
+        toast.appendChild(iconSpan);
+        toast.appendChild(contentDiv);
+        toast.appendChild(closeBtn);
+        
+        cont.appendChild(toast);
+        
+        // Anima entrada
+        setTimeout(function() {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Auto-fecha se duration > 0
+        if (duration > 0) {
+            setTimeout(function() {
+                hide(id);
+            }, duration);
+        }
+        
+        return id;
+    }
+    
+    /**
+     * Esconde um toast
+     */
+    function hide(id) {
+        var toast = document.getElementById(id);
+        if (toast) {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            setTimeout(function() {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+    }
+    
+    /**
+     * Atalhos para tipos comuns
+     */
+    function success(message, duration) {
+        return show('Sucesso', message, 'success', duration);
+    }
+    
+    function error(message, duration) {
+        return show('Erro', message, 'error', duration);
+    }
+    
+    function warning(message, duration) {
+        return show('Atenção', message, 'warning', duration);
+    }
+    
+    function info(message, duration) {
+        return show('', message, 'info', duration);
+    }
+    
+    // API pública
+    return {
+        show: show,
+        hide: hide,
+        success: success,
+        error: error,
+        warning: warning,
+        info: info
+    };
+})();
+
+/**
+ * Substitui alertas padrão de mensagens por toasts
+ * Converte <div class="dps-alert"> em toasts
+ */
+(function() {
+    'use strict';
+    
+    function convertAlertsToToasts() {
+        var alerts = document.querySelectorAll('.dps-alert, .dps-portal-notice');
+        
+        alerts.forEach(function(alert) {
+            var message = alert.textContent.trim();
+            var type = 'info';
+            
+            if (alert.classList.contains('dps-alert--success') || alert.classList.contains('dps-portal-notice--success')) {
+                type = 'success';
+            } else if (alert.classList.contains('dps-alert--danger') || alert.classList.contains('dps-portal-notice--error')) {
+                type = 'error';
+            } else if (alert.classList.contains('dps-alert--pending') || alert.classList.contains('dps-portal-notice--warning')) {
+                type = 'warning';
+            }
+            
+            if (message) {
+                DPSToast.show('', message, type, 6000);
+            }
+            
+            // Remove alert original
+            alert.style.display = 'none';
+        });
+    }
+    
+    // Converte alerts existentes quando página carregar
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', convertAlertsToToasts);
+    } else {
+        convertAlertsToToasts();
+    }
+    
+    // Observer para alerts adicionados dinamicamente
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1 && (node.classList.contains('dps-alert') || node.classList.contains('dps-portal-notice'))) {
+                        setTimeout(convertAlertsToToasts, 100);
+                    }
+                });
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+})();
