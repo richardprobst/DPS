@@ -123,6 +123,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-message-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base-admin.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base-tester.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
@@ -328,6 +329,11 @@ class DPS_AI_Addon {
         // Interface administrativa da base de conhecimento (v1.6.2+)
         if ( class_exists( 'DPS_AI_Knowledge_Base_Admin' ) ) {
             DPS_AI_Knowledge_Base_Admin::get_instance();
+        }
+
+        // Tester da base de conhecimento (v1.6.2+)
+        if ( class_exists( 'DPS_AI_Knowledge_Base_Tester' ) ) {
+            DPS_AI_Knowledge_Base_Tester::get_instance();
         }
 
         // Agendamento via chat
