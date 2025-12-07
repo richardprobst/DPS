@@ -1058,44 +1058,65 @@ final class DPS_Client_Portal {
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
+        // Breadcrumb simples para contexto
+        echo '<nav class="dps-portal-breadcrumb" aria-label="' . esc_attr__( 'Navegação', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-portal-breadcrumb__item">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-portal-breadcrumb__separator">›</span>';
+        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        echo '</nav>';
+        
         // Define tabs padrão (Fase 2.3)
         $default_tabs = [
             'inicio' => [
                 'icon'  => '🏠',
                 'label' => __( 'Início', 'dps-client-portal' ),
                 'active' => true,
+                'badge' => 0,
             ],
             'agendamentos' => [
                 'icon'  => '📅',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => $this->count_upcoming_appointments( $client_id ),
             ],
             'galeria' => [
                 'icon'  => '📸',
                 'label' => __( 'Galeria', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => 0,
             ],
             'dados' => [
                 'icon'  => '⚙️',
                 'label' => __( 'Meus Dados', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => 0,
             ],
         ];
         
         // Filtro: Permite add-ons modificarem tabs (Fase 2.3)
         $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
         
-        // Navegação por Tabs
+        // Navegação por Tabs com badges
         echo '<nav class="dps-portal-tabs" role="tablist">';
         foreach ( $tabs as $tab_id => $tab ) {
             $is_active = isset( $tab['active'] ) && $tab['active'];
             $class = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' );
+            $badge_count = isset( $tab['badge'] ) ? absint( $tab['badge'] ) : 0;
+            
             echo '<div class="dps-portal-tabs__item">';
             echo '<button class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '">';
             if ( isset( $tab['icon'] ) ) {
                 echo '<span class="dps-portal-tabs__icon">' . esc_html( $tab['icon'] ) . '</span>';
             }
             echo '<span class="dps-portal-tabs__text">' . esc_html( $tab['label'] ) . '</span>';
+            
+            // Badge de notificação
+            if ( $badge_count > 0 ) {
+                echo '<span class="dps-portal-tabs__badge" aria-label="' . esc_attr( sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count ) ) . '">';
+                echo esc_html( $badge_count > 9 ? '9+' : $badge_count );
+                echo '</span>';
+            }
+            
             echo '</button>';
             echo '</div>';
         }
@@ -1240,6 +1261,68 @@ final class DPS_Client_Portal {
         ] );
 
         return count( $messages );
+    }
+
+    /**
+     * Conta agendamentos futuros do cliente (para badge da tab)
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de agendamentos futuros.
+     * @since 2.4.0
+     */
+    private function count_upcoming_appointments( $client_id ) {
+        $today = current_time( 'Y-m-d' );
+        $args  = [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_client_id',
+                    'value'   => $client_id,
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $today,
+                    'compare' => '>=',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ];
+        
+        $appointments = get_posts( $args );
+        $count = 0;
+        
+        // Filtra por status válidos
+        foreach ( $appointments as $appt_id ) {
+            $status = get_post_meta( $appt_id, 'appointment_status', true );
+            if ( ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+                $count++;
+            }
+        }
+        
+        return $count;
+    }
+
+    /**
+     * Conta pendências financeiras do cliente (para badge da tab)
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de pendências.
+     * @since 2.4.0
+     */
+    private function count_financial_pending( $client_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        $count = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')",
+            $client_id
+        ) );
+        
+        return absint( $count );
     }
 
     /**

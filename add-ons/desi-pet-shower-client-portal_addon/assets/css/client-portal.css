@@ -198,7 +198,37 @@
 }
 
 /* ========================================
+   BREADCRUMB / NAVEGAÇÃO
+   Contexto de onde o cliente está
+   ======================================== */
+
+.dps-portal-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+.dps-portal-breadcrumb__item {
+    color: var(--dps-gray-600);
+}
+
+.dps-portal-breadcrumb__item--active {
+    color: var(--dps-gray-800);
+    font-weight: 600;
+}
+
+.dps-portal-breadcrumb__separator {
+    color: var(--dps-gray-400);
+    user-select: none;
+}
+
+/* ========================================
    NAVEGAÇÃO POR TABS
+   Com badges de notificação
    ======================================== */
 
 .dps-portal-tabs {
@@ -220,6 +250,7 @@
 }
 
 .dps-portal-tabs__link {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -235,6 +266,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    width: 100%;
 }
 
 .dps-portal-tabs__link:hover {
@@ -256,6 +288,27 @@
 
 .dps-portal-tabs__text {
     display: inline;
+}
+
+/* Badge de notificação nas tabs */
+.dps-portal-tabs__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--dps-danger);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    margin-left: 4px;
+}
+
+.dps-portal-tabs__link.is-active .dps-portal-tabs__badge {
+    background: var(--dps-primary);
 }
 
 /* Container de conteúdo das tabs */
@@ -1152,6 +1205,13 @@ html {
    Otimizado para telas pequenas com foco em UX
    ================================================ */
 @media (max-width: 640px) {
+    /* Breadcrumb mais compacto em mobile */
+    .dps-portal-breadcrumb {
+        font-size: 13px;
+        padding: 8px 0;
+        margin-bottom: 12px;
+    }
+    
     /* Tabs em mobile - scroll horizontal */
     .dps-portal-tabs {
         overflow-x: auto;
