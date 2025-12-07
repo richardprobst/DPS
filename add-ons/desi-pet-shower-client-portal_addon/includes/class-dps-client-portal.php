@@ -408,6 +408,9 @@ final class DPS_Client_Portal {
                 update_post_meta( $client_id, 'client_email', $email );
             }
 
+            // Hook: Após atualizar dados do cliente (Fase 2.3)
+            do_action( 'dps_portal_after_update_client', $client_id, $_POST );
+            
             $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
         } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
             $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
@@ -961,21 +964,33 @@ final class DPS_Client_Portal {
      * @return string Conteúdo HTML renderizado.
      */
     public function render_portal_shortcode() {
+        // Hook: Antes de renderizar o portal (Fase 2.3)
+        do_action( 'dps_portal_before_render' );
+        
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
         // Verifica autenticação pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
         
+        // Hook: Após verificar autenticação (Fase 2.3)
+        do_action( 'dps_portal_after_auth_check', $client_id );
+        
         // Se não autenticado, exibe tela de acesso
         if ( ! $client_id ) {
+            // Hook: Antes de renderizar tela de login (Fase 2.3)
+            do_action( 'dps_portal_before_login_screen' );
+            
             // Carrega template de acesso
             $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
             
             if ( file_exists( $template_path ) ) {
                 ob_start();
                 include $template_path;
-                return ob_get_clean();
+                $output = ob_get_clean();
+                
+                // Filtro: Permite modificar tela de login (Fase 2.3)
+                return apply_filters( 'dps_portal_login_screen', $output );
             }
             
             // Fallback se template não existir
@@ -986,6 +1001,9 @@ final class DPS_Client_Portal {
             echo '</div>';
             return ob_get_clean();
         }
+        
+        // Hook: Cliente autenticado (Fase 2.3)
+        do_action( 'dps_portal_client_authenticated', $client_id );
         
         // Localiza script com dados do chat
         wp_localize_script( 'dps-client-portal', 'dpsPortalChat', [
@@ -1027,60 +1045,89 @@ final class DPS_Client_Portal {
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
+        // Define tabs padrão (Fase 2.3)
+        $default_tabs = [
+            'inicio' => [
+                'icon'  => '🏠',
+                'label' => __( 'Início', 'dps-client-portal' ),
+                'active' => true,
+            ],
+            'agendamentos' => [
+                'icon'  => '📅',
+                'label' => __( 'Agendamentos', 'dps-client-portal' ),
+                'active' => false,
+            ],
+            'galeria' => [
+                'icon'  => '📸',
+                'label' => __( 'Galeria', 'dps-client-portal' ),
+                'active' => false,
+            ],
+            'dados' => [
+                'icon'  => '⚙️',
+                'label' => __( 'Meus Dados', 'dps-client-portal' ),
+                'active' => false,
+            ],
+        ];
+        
+        // Filtro: Permite add-ons modificarem tabs (Fase 2.3)
+        $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
+        
         // Navegação por Tabs
         echo '<nav class="dps-portal-tabs" role="tablist">';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link is-active" data-tab="inicio" role="tab" aria-selected="true" aria-controls="panel-inicio">';
-        echo '<span class="dps-portal-tabs__icon">🏠</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="agendamentos" role="tab" aria-selected="false" aria-controls="panel-agendamentos">';
-        echo '<span class="dps-portal-tabs__icon">📅</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Agendamentos', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="galeria" role="tab" aria-selected="false" aria-controls="panel-galeria">';
-        echo '<span class="dps-portal-tabs__icon">📸</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Galeria', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="dados" role="tab" aria-selected="false" aria-controls="panel-dados">';
-        echo '<span class="dps-portal-tabs__icon">⚙️</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
+        foreach ( $tabs as $tab_id => $tab ) {
+            $is_active = isset( $tab['active'] ) && $tab['active'];
+            $class = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' );
+            echo '<div class="dps-portal-tabs__item">';
+            echo '<button class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '">';
+            if ( isset( $tab['icon'] ) ) {
+                echo '<span class="dps-portal-tabs__icon">' . esc_html( $tab['icon'] ) . '</span>';
+            }
+            echo '<span class="dps-portal-tabs__text">' . esc_html( $tab['label'] ) . '</span>';
+            echo '</button>';
+            echo '</div>';
+        }
         echo '</nav>';
+        
+        // Hook: Antes de renderizar conteúdo das tabs (Fase 2.3)
+        do_action( 'dps_portal_before_tab_content', $client_id );
         
         // Container de conteúdo das tabs
         echo '<div class="dps-portal-tab-content">';
         
         // Panel: Início (Próximo agendamento + Pendências + Fidelidade)
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
+        do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
+        do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Agendamentos (Histórico completo)
         echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         $this->render_appointment_history( $client_id );
+        do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Galeria
         echo '<div id="panel-galeria" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_galeria_content', $client_id ); // Fase 2.3
         $this->render_pet_gallery( $client_id );
+        do_action( 'dps_portal_after_galeria_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Meus Dados
         echo '<div id="panel-dados" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_dados_content', $client_id ); // Fase 2.3
         $this->render_update_forms( $client_id );
+        do_action( 'dps_portal_after_dados_content', $client_id ); // Fase 2.3
         echo '</div>';
+        
+        // Hook: Permite add-ons renderizarem panels customizados (Fase 2.3)
+        do_action( 'dps_portal_custom_tab_panels', $client_id, $tabs );
         
         echo '</div>'; // .dps-portal-tab-content
 
