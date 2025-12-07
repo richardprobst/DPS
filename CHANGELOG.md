@@ -82,6 +82,20 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.2)**: Integração Real da Base de Conhecimento com Matching por Keywords
+  - Implementada busca automática de artigos relevantes baseada em keywords nas perguntas dos clientes
+  - Método `DPS_AI_Knowledge_Base::get_relevant_articles()` agora é chamado automaticamente em `answer_portal_question()` e `get_ai_response()` (chat público)
+  - Até 5 artigos mais relevantes são incluídos no contexto da IA, ordenados por prioridade (1-10)
+  - Artigos são formatados com cabeçalho "INFORMAÇÕES DA BASE DE CONHECIMENTO:" para clareza no contexto
+  - Infraestrutura de metaboxes de keywords (`_dps_ai_keywords`) e prioridade (`_dps_ai_priority`) já existia, apenas conectada ao fluxo de respostas
+  - Documentação completa em `docs/implementation/AI_KNOWLEDGE_BASE_MULTILINGUAL_IMPLEMENTATION.md`
+- **AI Add-on (v1.6.2)**: Suporte Real a Multiidioma com Instruções Explícitas
+  - Implementado método `get_base_system_prompt_with_language($language)` que adiciona instrução explícita de idioma ao system prompt
+  - Suporte a 4 idiomas: pt_BR (Português Brasil), en_US (English US), es_ES (Español), auto (detectar automaticamente)
+  - Instrução orienta a IA a SEMPRE responder no idioma configurado, mesmo que artigos da base estejam em outro idioma
+  - Configuração de idioma (`dps_ai_settings['language']`) já existia, agora é efetivamente utilizada nas instruções
+  - Aplicado em todos os contextos: chat do portal, chat público e assistente de mensagens (WhatsApp/Email)
+  - Método similar `get_public_system_prompt_with_language()` criado para chat público
 - **AI Add-on (v1.6.1)**: Limpeza Automática de Dados Antigos
   - Implementada rotina de limpeza automática via WP-Cron para deletar métricas e feedback com mais de 365 dias (configurável)
   - Criada classe `DPS_AI_Maintenance` em `includes/class-dps-ai-maintenance.php`
@@ -173,6 +187,17 @@ Antes de criar uma nova versão oficial:
   - Arquivo `.gitignore` para excluir `vendor/`, `coverage/` e arquivos de cache
 
 #### Changed (Alterado)
+- **AI Add-on (v1.6.2)**: Integração da Base de Conhecimento nos Fluxos de Resposta
+  - Modificado `DPS_AI_Assistant::answer_portal_question()` para buscar e incluir artigos relevantes via `get_relevant_articles()`
+  - Modificado `DPS_AI_Public_Chat::get_ai_response()` para buscar e incluir artigos relevantes no chat público
+  - Contexto da base de conhecimento é adicionado após contexto do cliente/negócio e antes da pergunta do usuário
+  - Artigos são formatados com cabeçalho claro "INFORMAÇÕES DA BASE DE CONHECIMENTO:" para melhor compreensão da IA
+- **AI Add-on (v1.6.2)**: Aplicação Real do Idioma Configurado em Todos os Contextos
+  - Modificado `DPS_AI_Assistant::answer_portal_question()` para usar `get_base_system_prompt_with_language()` ao invés de `get_base_system_prompt()`
+  - Modificado `DPS_AI_Public_Chat::get_ai_response()` para usar `get_public_system_prompt_with_language()`
+  - Modificado `DPS_AI_Message_Assistant::suggest_whatsapp_message()` e `suggest_email_message()` para usar prompt com idioma
+  - System prompt agora inclui instrução explícita: "IMPORTANTE: Você DEVE responder SEMPRE em [IDIOMA]"
+  - Configuração `dps_ai_settings['language']` que já existia agora é efetivamente utilizada
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
   - Refatorada classe `DPS_AI_Client::chat()` com tratamento avançado de erros
   - Validação de array de mensagens antes de enviar requisição
