@@ -82,6 +82,19 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
+  - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido
+  - **Causa Raiz**: Sintaxe incorreta do `setcookie()` com array associativo (incompatível com PHP 7.3+)
+  - **Correção Aplicada** em `class-dps-portal-session-manager.php`:
+    - Substituída sintaxe `setcookie($name, $value, $options_array)` por parâmetros individuais
+    - Adicionado `header()` separado para `SameSite=Strict` (compatibilidade PHP <7.3)
+    - Corrigida prioridade do hook `validate_session` de 5 para 10 (executa APÓS autenticação por token)
+    - Removidas chamadas deprecadas a `maybe_start_session()` que não faziam nada
+  - **Impacto**: Clientes agora conseguem acessar o portal via magic link sem serem redirecionados para login
+  - **Arquivos Alterados**:
+    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-session-manager.php`
+    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+  - **Commit**: Corrigir sintaxe setcookie() e ordem de execução de hooks
 - **AI Add-on (v1.6.1)**: Tabelas de Banco de Dados Não Criadas em Atualizações
   - **Problema**: Usuários que atualizaram de v1.4.0 para v1.5.0+ sem desativar/reativar o plugin não tinham as tabelas `wp_dps_ai_metrics` e `wp_dps_ai_feedback` criadas, causando erros na página de analytics
   - **Causa Raiz**: Tabelas eram criadas apenas no hook de ativação (`register_activation_hook`), que não executa durante atualizações de plugin

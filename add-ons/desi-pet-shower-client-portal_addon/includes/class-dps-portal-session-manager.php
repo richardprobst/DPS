@@ -68,7 +68,9 @@ final class DPS_Portal_Session_Manager {
      */
     private function __construct() {
         // Valida sessão em cada requisição
-        add_action( 'init', [ $this, 'validate_session' ], 5 );
+        // IMPORTANTE: Prioridade 10 para executar APÓS handle_token_authentication (prioridade 5)
+        // Isso garante que o cookie esteja definido antes da validação
+        add_action( 'init', [ $this, 'validate_session' ], 10 );
     }
 
     /**
@@ -103,16 +105,41 @@ final class DPS_Portal_Session_Manager {
         );
         
         // Define cookie seguro no navegador do cliente
-        $cookie_options = [
-            'expires'  => time() + self::SESSION_LIFETIME,
-            'path'     => COOKIEPATH,
-            'domain'   => COOKIE_DOMAIN,
-            'secure'   => is_ssl(),
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ];
+        $expires  = time() + self::SESSION_LIFETIME;
+        $path     = COOKIEPATH;
+        $domain   = COOKIE_DOMAIN;
+        $secure   = is_ssl();
+        $httponly = true;
         
-        setcookie( self::COOKIE_NAME, $session_token, $cookie_options );
+        // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
+        // Nota: setcookie() com array associativo só funciona a partir do PHP 7.3.0
+        // Para máxima compatibilidade com versões anteriores, usamos parâmetros individuais
+        setcookie( 
+            self::COOKIE_NAME, 
+            $session_token,
+            $expires,
+            $path,
+            $domain,
+            $secure,
+            $httponly
+        );
+        
+        // SameSite=Strict via header (PHP <7.3 compatibility)
+        if ( ! headers_sent() ) {
+            header( 
+                sprintf(
+                    'Set-Cookie: %s=%s; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
+                    self::COOKIE_NAME,
+                    $session_token,
+                    gmdate( 'D, d M Y H:i:s T', $expires ),
+                    $path,
+                    $domain,
+                    $secure ? '; Secure' : '',
+                    $httponly ? '; HttpOnly' : ''
+                ),
+                false
+            );
+        }
 
         return true;
     }
@@ -195,14 +222,38 @@ final class DPS_Portal_Session_Manager {
         
         // Remove cookie do navegador
         if ( isset( $_SERVER['HTTP_HOST'] ) ) {
-            setcookie( self::COOKIE_NAME, '', [
-                'expires'  => time() - 3600,
-                'path'     => COOKIEPATH,
-                'domain'   => COOKIE_DOMAIN,
-                'secure'   => is_ssl(),
-                'httponly' => true,
-                'samesite' => 'Strict',
-            ] );
+            $expires  = time() - 3600;
+            $path     = COOKIEPATH;
+            $domain   = COOKIE_DOMAIN;
+            $secure   = is_ssl();
+            $httponly = true;
+            
+            // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
+            setcookie( 
+                self::COOKIE_NAME, 
+                '',
+                $expires,
+                $path,
+                $domain,
+                $secure,
+                $httponly
+            );
+            
+            // SameSite=Strict via header (PHP <7.3 compatibility)
+            if ( ! headers_sent() ) {
+                header( 
+                    sprintf(
+                        'Set-Cookie: %s=; Expires=%s; Path=%s; Domain=%s%s%s; SameSite=Strict',
+                        self::COOKIE_NAME,
+                        gmdate( 'D, d M Y H:i:s T', $expires ),
+                        $path,
+                        $domain,
+                        $secure ? '; Secure' : '',
+                        $httponly ? '; HttpOnly' : ''
+                    ),
+                    false
+                );
+            }
         }
     }
 
