@@ -133,6 +133,8 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-admin.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-connector.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-webhook.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-proactive-scheduler.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-insights-dashboard.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-specialist-mode.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -381,6 +383,16 @@ class DPS_AI_Addon {
         // Webhook WhatsApp (v1.7.0+)
         if ( class_exists( 'DPS_AI_WhatsApp_Webhook' ) ) {
             DPS_AI_WhatsApp_Webhook::get_instance();
+        }
+
+        // Dashboard de Insights (v1.7.0+)
+        if ( class_exists( 'DPS_AI_Insights_Dashboard' ) ) {
+            DPS_AI_Insights_Dashboard::get_instance();
+        }
+
+        // Modo Especialista (v1.7.0+)
+        if ( class_exists( 'DPS_AI_Specialist_Mode' ) ) {
+            DPS_AI_Specialist_Mode::get_instance();
         }
     }
 

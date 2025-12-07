@@ -82,6 +82,83 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Dashboard de Insights (Fase 6)
+  - Nova página administrativa "IA – Insights" com métricas consolidadas
+  - Criada classe `DPS_AI_Insights_Dashboard` em `includes/class-dps-ai-insights-dashboard.php`
+  - KPIs principais exibidos em cards destacados:
+    - Total de conversas no período selecionado
+    - Total de mensagens trocadas
+    - Taxa de resolução baseada em feedback positivo
+    - Custo estimado de tokens consumidos
+  - Top 10 Perguntas mais frequentes:
+    - Análise automática de mensagens de usuários
+    - Exibição em tabela ordenada por frequência
+    - Útil para identificar dúvidas recorrentes e oportunidades de FAQ
+  - Horários de pico de uso (gráfico de barras):
+    - Distribuição de mensagens por hora do dia (0-23h)
+    - Identifica períodos de maior demanda
+    - Auxilia no planejamento de atendimento
+  - Dias da semana com mais conversas (gráfico de barras):
+    - Análise de volume de conversas por dia
+    - Identifica padrões semanais de uso
+  - Top 10 Clientes mais engajados:
+    - Lista ordenada por número de conversas e mensagens
+    - Identifica clientes com maior interação com a IA
+  - Estatísticas por canal (gráfico de pizza):
+    - Distribuição de conversas entre web_chat, portal, whatsapp e admin_specialist
+    - Visualiza participação de cada canal no total
+  - Filtros de período:
+    - Últimos 7 dias
+    - Últimos 30 dias
+    - Período customizado (seleção de data inicial e final)
+  - Visualizações com Chart.js:
+    - Reutiliza biblioteca já implementada na Fase 2
+    - Gráficos responsivos e interativos
+  - Performance otimizada:
+    - Queries com índices apropriados
+    - Agregações eficientes no MySQL
+    - Paginação e limites para evitar carga excessiva
+  - Arquivos criados:
+    - `includes/class-dps-ai-insights-dashboard.php`: Lógica de cálculo e renderização
+    - `assets/css/dps-ai-insights-dashboard.css`: Estilos responsivos para dashboard
+  - Arquivos modificados:
+    - `desi-pet-shower-ai-addon.php`: Include e inicialização da classe
+- **AI Add-on (v1.7.0)**: Modo Especialista (Fase 6)
+  - Nova página administrativa "IA – Modo Especialista" para equipe interna
+  - Criada classe `DPS_AI_Specialist_Mode` em `includes/class-dps-ai-specialist-mode.php`
+  - Chat interno restrito a admins (capability `manage_options`):
+    - Interface similar ao chat público, mas com recursos avançados
+    - Acesso a dados completos do sistema
+    - System prompt técnico para equipe interna
+  - Comandos especiais tipo "/" para buscar dados:
+    - `/buscar_cliente [nome]`: Busca cliente por nome/email/login
+    - `/historico [cliente_id]`: Exibe últimas 10 conversas de um cliente
+    - `/metricas [dias]`: Mostra métricas consolidadas dos últimos N dias
+    - `/conversas [canal]`: Lista últimas 10 conversas de um canal específico
+  - Respostas formatadas com contexto técnico:
+    - Exibe IDs, timestamps, contadores detalhados
+    - Informações estruturadas para análise rápida
+    - Formato markdown com negrito, código e listas
+  - Consultas em linguagem natural:
+    - Processa perguntas que não são comandos usando IA
+    - System prompt especializado para tom técnico e profissional
+    - Fornece insights baseados em dados do sistema
+    - Sugere ações práticas quando relevante
+  - Histórico persistente:
+    - Conversas do modo especialista gravadas com `channel='admin_specialist'`
+    - Visível na página "Conversas IA" para auditoria
+    - Rastreamento completo de consultas da equipe interna
+  - Interface intuitiva:
+    - Mensagem de boas-vindas com exemplos de comandos
+    - Feedback visual durante processamento
+    - Histórico de conversas na mesma sessão
+    - Auto-scroll para última mensagem
+  - Arquivos criados:
+    - `includes/class-dps-ai-specialist-mode.php`: Lógica de comandos e integração com IA
+    - `assets/css/dps-ai-specialist-mode.css`: Estilos do chat especialista
+    - `assets/js/dps-ai-specialist-mode.js`: Lógica AJAX e formatação de mensagens
+  - Arquivos modificados:
+    - `desi-pet-shower-ai-addon.php`: Include e inicialização da classe
 - **AI Add-on (v1.7.0)**: Sugestões Proativas de Agendamento (Fase 6)
   - Sistema inteligente que sugere agendamentos automaticamente durante conversas
   - Criada classe `DPS_AI_Proactive_Scheduler` em `includes/class-dps-ai-proactive-scheduler.php`
