@@ -142,7 +142,17 @@ class DPS_AI_Maintenance {
     public function cleanup_old_metrics( $retention_days ) {
         global $wpdb;
         
+        // Valida nome da tabela para prevenir SQL injection via prefixo malicioso
         $table_name = $wpdb->prefix . DPS_AI_Analytics::TABLE_NAME;
+        
+        // WordPress $wpdb->prefix já é validado pelo core, mas adicionamos validação extra
+        if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $table_name ) ) {
+            dps_ai_log_error( 'Nome de tabela inválido detectado durante limpeza de métricas', [
+                'table_name' => $table_name,
+            ] );
+            return 0;
+        }
+        
         $cutoff_date = gmdate( 'Y-m-d', strtotime( "-{$retention_days} days" ) );
         
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -175,7 +185,17 @@ class DPS_AI_Maintenance {
     public function cleanup_old_feedback( $retention_days ) {
         global $wpdb;
         
+        // Valida nome da tabela para prevenir SQL injection via prefixo malicioso
         $table_name = $wpdb->prefix . DPS_AI_Analytics::FEEDBACK_TABLE_NAME;
+        
+        // WordPress $wpdb->prefix já é validado pelo core, mas adicionamos validação extra
+        if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $table_name ) ) {
+            dps_ai_log_error( 'Nome de tabela inválido detectado durante limpeza de feedback', [
+                'table_name' => $table_name,
+            ] );
+            return 0;
+        }
+        
         $cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$retention_days} days" ) );
         
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching

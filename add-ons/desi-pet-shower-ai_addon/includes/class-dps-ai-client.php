@@ -205,9 +205,12 @@ class DPS_AI_Client {
         } catch ( Exception $e ) {
             // Captura qualquer exceção inesperada
             // Sanitiza caminho do arquivo para não expor estrutura em produção
+            // Inclui nome da classe se disponível para facilitar debug
             $file_path = basename( $e->getFile() );
+            $class_name = get_class( $e );
             
             dps_ai_log_error( 'Exceção inesperada ao chamar API da OpenAI', [
+                'exception_class' => $class_name,
                 'exception' => $e->getMessage(),
                 'file'      => $file_path,
                 'line'      => $e->getLine(),

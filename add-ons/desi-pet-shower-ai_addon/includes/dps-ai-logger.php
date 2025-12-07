@@ -54,7 +54,17 @@ function dps_ai_log( $message, $level = 'info', $context = [] ) {
     
     // Adiciona contexto se fornecido
     if ( ! empty( $context ) ) {
-        $formatted_message .= ' | Context: ' . wp_json_encode( $context );
+        $json_context = wp_json_encode( $context );
+        
+        // Trata falha de encoding (ex: dados não serializáveis)
+        if ( false === $json_context ) {
+            $json_context = wp_json_encode( [
+                'error' => 'Failed to encode context',
+                'context_keys' => array_keys( $context ),
+            ] );
+        }
+        
+        $formatted_message .= ' | Context: ' . $json_context;
     }
     
     // Registra usando error_log do PHP
