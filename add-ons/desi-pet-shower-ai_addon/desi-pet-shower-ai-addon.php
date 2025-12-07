@@ -87,6 +87,16 @@ if ( ! defined( 'DPS_AI_CAPABILITY' ) ) {
 }
 
 /**
+ * Versão do schema de banco de dados do AI Add-on.
+ * Incrementar quando houver mudanças nas tabelas.
+ *
+ * @var string
+ */
+if ( ! defined( 'DPS_AI_DB_VERSION' ) ) {
+    define( 'DPS_AI_DB_VERSION', '1.5.0' );
+}
+
+/**
  * Carrega o text domain do AI Add-on.
  * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
  */
@@ -106,6 +116,48 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 
 /**
+ * Verifica e atualiza o schema do banco de dados quando necessário.
+ * 
+ * Esta função roda em 'plugins_loaded' para garantir que as tabelas sejam criadas
+ * mesmo quando o plugin é atualizado (não apenas na ativação).
+ * 
+ * HISTÓRICO:
+ * - v1.5.0: Introduzidas tabelas dps_ai_metrics e dps_ai_feedback
+ * - Fix: Usuários que atualizaram de v1.4.0 para v1.5.0+ sem desativar/reativar
+ *   não tinham as tabelas criadas, causando erros na página de analytics.
+ *
+ * @since 1.6.1
+ */
+function dps_ai_maybe_upgrade_database() {
+    // Verifica versão instalada do schema
+    $installed_version = get_option( 'dps_ai_db_version', '0' );
+    
+    // Se já está na versão mais recente, não faz nada
+    if ( version_compare( $installed_version, DPS_AI_DB_VERSION, '>=' ) ) {
+        return;
+    }
+    
+    // Cria ou atualiza tabelas quando necessário
+    if ( version_compare( $installed_version, '1.5.0', '<' ) ) {
+        // v1.5.0: Criar tabelas de analytics e feedback
+        if ( class_exists( 'DPS_AI_Analytics' ) ) {
+            DPS_AI_Analytics::maybe_create_tables();
+        }
+        
+        // Atualiza versão do schema
+        update_option( 'dps_ai_db_version', '1.5.0' );
+    }
+    
+    // Futuras migrações devem ser adicionadas aqui com version_compare
+}
+
+/**
+ * Hook para executar upgrade do banco de dados.
+ * Prioridade 10: executa depois da verificação do plugin base (prioridade 1).
+ */
+add_action( 'plugins_loaded', 'dps_ai_maybe_upgrade_database', 10 );
+
+/**
  * Ativação do plugin: adiciona capabilities e cria tabelas.
  */
 function dps_ai_activate() {
@@ -123,6 +175,9 @@ function dps_ai_activate() {
     if ( class_exists( 'DPS_AI_Analytics' ) ) {
         DPS_AI_Analytics::maybe_create_tables();
     }
+    
+    // Define versão do schema após criar tabelas
+    update_option( 'dps_ai_db_version', DPS_AI_DB_VERSION );
 
     // Limpa rewrite rules
     flush_rewrite_rules();
