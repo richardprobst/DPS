@@ -164,6 +164,9 @@ final class DPS_Client_Portal {
         // sem depender de cookies que só estarão disponíveis na próxima requisição
         $this->current_request_client_id = $token_data['client_id'];
 
+        // Envia notificação de acesso ao cliente (Fase 1.3 - Segurança)
+        $this->send_access_notification( $token_data['client_id'], $ip_address );
+
         // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
         // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
     }
@@ -2064,109 +2067,61 @@ final class DPS_Client_Portal {
      *
      * @return string Conteúdo HTML renderizado.
      */
+    /**
+     * Renderiza shortcode de login (DEPRECIADO)
+     * 
+     * ESTE SHORTCODE FOI DESCONTINUADO EM FAVOR DO LOGIN EXCLUSIVO POR TOKEN (MAGIC LINK)
+     * 
+     * O login por usuário/senha do Cliente Portal foi removido por questões de segurança
+     * e usabilidade. O sistema agora utiliza EXCLUSIVAMENTE autenticação por token via
+     * link único (magic link) enviado por WhatsApp ou e-mail.
+     * 
+     * Para obter acesso ao portal, o cliente deve:
+     * 1. Acessar a página do portal
+     * 2. Clicar em "Quero acesso ao meu portal"
+     * 3. Aguardar a equipe enviar o link de acesso
+     * 4. Clicar no link recebido para autenticar
+     * 
+     * @deprecated 2.4.0 Use apenas autenticação por token via [dps_client_portal]
+     * @return string Mensagem de depreciação
+     */
     public function render_login_shortcode() {
-        if ( is_user_logged_in() ) {
-            $redirect_url = dps_get_portal_page_url();
-            wp_safe_redirect( $redirect_url );
-            exit;
-        }
-
-        $feedback    = '';
-        $ip_address  = $this->get_client_ip();
-        $attempt_key = $ip_address && 'unknown' !== $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
-        $attempts    = 0;
-        if ( $attempt_key ) {
-            $stored_attempts = get_transient( $attempt_key );
-            $attempts        = false !== $stored_attempts ? absint( $stored_attempts ) : 0;
-        }
-        $max_attempt = 5;
-        $lock_time   = 15 * MINUTE_IN_SECONDS;
-
-        if ( $attempts >= $max_attempt ) {
-            $feedback = esc_html__( 'Muitas tentativas de login. Tente novamente em alguns minutos.', 'dps-client-portal' );
-            // Registra bloqueio por excesso de tentativas
-            $this->log_security_event( 'login_blocked', [
-                'ip'       => $ip_address,
-                'attempts' => $attempts,
-            ] );
-        }
-
-        if ( isset( $_POST['dps_client_login_action'] ) && ! $feedback ) {
-            $nonce = isset( $_POST['_dps_client_login_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_client_login_nonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_client_login_action' ) ) {
-                $feedback = esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' );
-                $this->log_security_event( 'login_nonce_failed', [
-                    'ip' => $ip_address,
-                ] );
-            } else {
-                $login    = isset( $_POST['dps_client_login'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_client_login'] ) ) : '';
-                // Senha não é sanitizada mas é validada (mínimo 1 caractere)
-                $password = isset( $_POST['dps_client_password'] ) ? wp_unslash( $_POST['dps_client_password'] ) : '';
-                
-                // Validação básica de senha
-                if ( empty( $password ) || strlen( $password ) < 1 ) {
-                    $feedback = esc_html__( 'Por favor, informe uma senha válida.', 'dps-client-portal' );
-                } elseif ( empty( $login ) ) {
-                    $feedback = esc_html__( 'Por favor, informe o usuário ou e-mail.', 'dps-client-portal' );
-                } else {
-                    $creds = [
-                        'user_login'    => $login,
-                        'user_password' => $password,
-                        'remember'      => true,
-                    ];
-
-                    $user = wp_signon( $creds, false );
-
-                    if ( is_wp_error( $user ) ) {
-                        $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
-
-                        if ( $attempt_key ) {
-                            $attempts++;
-                            set_transient( $attempt_key, $attempts, $lock_time );
-                        }
-                        
-                        // Registra tentativa de login falha (não expõe senha)
-                        $this->log_security_event( 'login_failed', [
-                            'ip'       => $ip_address,
-                            'attempts' => $attempts,
-                        ] );
-                    } else {
-                        if ( $attempt_key ) {
-                            delete_transient( $attempt_key );
-                        }
-
-                        wp_set_current_user( $user->ID );
-                        wp_set_auth_cookie( $user->ID, true );
-                        
-                        // Registra login bem-sucedido
-                        $this->log_security_event( 'login_success', [
-                            'user_id' => $user->ID,
-                            'ip'      => $ip_address,
-                        ], DPS_Logger::LEVEL_INFO );
-
-                        $redirect_url = dps_get_portal_page_url();
-                        wp_safe_redirect( $redirect_url );
-                        exit;
-                    }
-                }
-            }
-        }
-
+        // Log de uso do shortcode depreciado
+        $this->log_security_event( 'deprecated_login_shortcode_used', [
+            'ip'  => $this->get_client_ip(),
+            'url' => isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '',
+        ] );
+        
         ob_start();
-
-        if ( $feedback ) {
-            echo '<div class="notice notice-error"><p>' . esc_html( $feedback ) . '</p></div>';
-        }
-
-        echo '<form method="post" class="dps-client-login-form">';
-        wp_nonce_field( 'dps_client_login_action', '_dps_client_login_nonce' );
-        echo '<p><label>' . esc_html__( 'Usuário ou e-mail', 'dps-client-portal' ) . '<br />';
-        echo '<input type="text" name="dps_client_login" value="" autocomplete="username" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Senha', 'dps-client-portal' ) . '<br />';
-        echo '<input type="password" name="dps_client_password" value="" autocomplete="current-password" required></label></p>';
-        echo '<p><button type="submit" name="dps_client_login_action" class="button button-primary">' . esc_html__( 'Entrar', 'dps-client-portal' ) . '</button></p>';
-        echo '</form>';
-
+        ?>
+        <div class="dps-deprecated-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #856404;">
+                <?php esc_html_e( 'Método de Login Descontinuado', 'dps-client-portal' ); ?>
+            </h3>
+            <p style="margin-bottom: 15px;">
+                <?php esc_html_e( 'O login por usuário e senha não está mais disponível no Portal do Cliente.', 'dps-client-portal' ); ?>
+            </p>
+            <p style="margin-bottom: 15px;">
+                <strong><?php esc_html_e( 'Como acessar o portal agora:', 'dps-client-portal' ); ?></strong>
+            </p>
+            <ol style="margin-left: 20px;">
+                <li><?php esc_html_e( 'Acesse a página do Portal do Cliente', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Clique no botão "Quero acesso ao meu portal"', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Aguarde nossa equipe enviar seu link exclusivo de acesso', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Clique no link recebido para acessar automaticamente', 'dps-client-portal' ); ?></li>
+            </ol>
+            <?php 
+            $portal_url = dps_get_portal_page_url();
+            if ( $portal_url ) : 
+            ?>
+                <p style="margin-top: 20px;">
+                    <a href="<?php echo esc_url( $portal_url ); ?>" class="button button-primary">
+                        <?php esc_html_e( 'Ir para o Portal do Cliente', 'dps-client-portal' ); ?>
+                    </a>
+                </p>
+            <?php endif; ?>
+        </div>
+        <?php
         return ob_get_clean();
     }
     
@@ -2270,6 +2225,10 @@ final class DPS_Client_Portal {
             update_option( 'dps_portal_page_id', $page_id );
         }
         
+        // Salva configuração de notificação de acesso (Fase 1.3)
+        $access_notification = isset( $_POST['dps_portal_access_notification_enabled'] ) ? 1 : 0;
+        update_option( 'dps_portal_access_notification_enabled', $access_notification );
+        
         // Redireciona com mensagem de sucesso
         $redirect_url = add_query_arg( [
             'tab'                       => 'portal',
@@ -2359,6 +2318,119 @@ final class DPS_Client_Portal {
 
         $message = sprintf( 'Portal security event: %s', $event );
         DPS_Logger::log( $level, $message, $safe_context, 'client-portal' );
+    }
+
+    /**
+     * Envia notificação de acesso ao portal para o cliente
+     * 
+     * Notifica o cliente via e-mail quando ocorre um acesso bem-sucedido ao portal.
+     * Aumenta a segurança e transparência, permitindo que o cliente identifique
+     * acessos não autorizados.
+     * 
+     * CONFIGURAÇÃO:
+     * A notificação pode ser ativada/desativada via option 'dps_portal_access_notification_enabled'
+     * 
+     * CONTEÚDO DO E-MAIL:
+     * - Data e hora do acesso
+     * - Endereço IP (primeiros 3 octetos ofuscados para privacidade)
+     * - Mensagem de segurança: "Se não foi você, entre em contato imediatamente"
+     * 
+     * @param int    $client_id  ID do cliente que acessou o portal
+     * @param string $ip_address IP do acesso
+     * @return void
+     * 
+     * @since 2.4.0
+     */
+    private function send_access_notification( $client_id, $ip_address ) {
+        // Verifica se notificações estão habilitadas
+        $notifications_enabled = get_option( 'dps_portal_access_notification_enabled', false );
+        
+        // Permite filtro para controle por add-ons
+        $notifications_enabled = apply_filters( 'dps_portal_access_notification_enabled', $notifications_enabled, $client_id );
+        
+        if ( ! $notifications_enabled ) {
+            return;
+        }
+        
+        // Obtém dados do cliente
+        $client_email = get_post_meta( $client_id, 'client_email', true );
+        $client_name  = get_the_title( $client_id );
+        
+        if ( empty( $client_email ) || ! is_email( $client_email ) ) {
+            DPS_Logger::log( 'warning', 'Portal: notificação de acesso não enviada - e-mail inválido', [
+                'client_id' => $client_id,
+            ] );
+            return;
+        }
+        
+        // Formata data/hora do acesso
+        $access_time = current_time( 'mysql' );
+        $access_date = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $access_time ) );
+        
+        // Ofusca IP parcialmente para privacidade (mantém apenas primeiros 2 octetos)
+        $ip_parts      = explode( '.', $ip_address );
+        $ip_obfuscated = isset( $ip_parts[0], $ip_parts[1] ) 
+            ? $ip_parts[0] . '.' . $ip_parts[1] . '.***' 
+            : 'desconhecido';
+        
+        // Monta o corpo do e-mail
+        $subject = sprintf(
+            /* translators: %s: Nome do cliente */
+            __( 'Acesso ao Portal - %s', 'dps-client-portal' ),
+            get_bloginfo( 'name' )
+        );
+        
+        $body = sprintf(
+            /* translators: 1: Nome do cliente, 2: Data/hora do acesso, 3: IP ofuscado */
+            __( 'Olá %1$s,
+
+Detectamos um acesso ao seu Portal do Cliente.
+
+Data/Hora: %2$s
+IP: %3$s
+
+Se você reconhece este acesso, pode ignorar esta mensagem. Ela é apenas uma notificação de segurança para mantê-lo informado.
+
+⚠️ IMPORTANTE: Se você NÃO realizou este acesso, entre em contato com nossa equipe IMEDIATAMENTE. Pode ser que alguém tenha obtido seu link de acesso indevidamente.
+
+Atenciosamente,
+Equipe %4$s', 'dps-client-portal' ),
+            $client_name,
+            $access_date,
+            $ip_obfuscated,
+            get_bloginfo( 'name' )
+        );
+        
+        // Permite filtrar assunto e corpo
+        $subject = apply_filters( 'dps_portal_access_notification_subject', $subject, $client_id );
+        $body    = apply_filters( 'dps_portal_access_notification_body', $body, $client_id, $access_date, $ip_obfuscated );
+        
+        // Tenta usar Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $comm_api = DPS_Communications_API::get_instance();
+            $sent     = $comm_api->send_email( 
+                $client_email, 
+                $subject, 
+                $body, 
+                [
+                    'client_id' => $client_id,
+                    'type'      => 'portal_access_notification',
+                ] 
+            );
+        } else {
+            // Fallback para wp_mail
+            $sent = wp_mail( $client_email, $subject, $body );
+        }
+        
+        if ( ! $sent ) {
+            DPS_Logger::log( 'error', 'Portal: falha ao enviar notificação de acesso', [
+                'client_id' => $client_id,
+                'email'     => $client_email,
+            ] );
+        }
+        
+        // Hook para extensões (ex: enviar também via WhatsApp)
+        do_action( 'dps_portal_access_notification_sent', $client_id, $sent, $access_date, $ip_address );
     }
 
     /**

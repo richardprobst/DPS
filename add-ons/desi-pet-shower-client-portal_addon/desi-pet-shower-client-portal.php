@@ -173,9 +173,8 @@ function dps_client_portal_handle_ics_download() {
             wp_die( esc_html__( 'Você precisa estar autenticado para baixar este arquivo.', 'dps-client-portal' ) );
         }
 
-        // Verifica se o agendamento pertence ao cliente
-        $appt_client_id = get_post_meta( $appointment_id, 'appointment_client_id', true );
-        if ( absint( $appt_client_id ) !== $client_id ) {
+        // Usa helper centralizado de validação de ownership (Fase 1.4)
+        if ( ! dps_portal_assert_client_owns_resource( $client_id, $appointment_id, 'appointment' ) ) {
             wp_die( esc_html__( 'Você não tem permissão para baixar este arquivo.', 'dps-client-portal' ) );
         }
     }

@@ -82,6 +82,24 @@ echo '</div>';
 
 echo '</fieldset>';
 
+// Seção: Notificações de Segurança (Fase 1.3)
+echo '<fieldset class="dps-fieldset">';
+echo '<legend>' . esc_html__( 'Notificações de Segurança', 'dps-client-portal' ) . '</legend>';
+
+$access_notification_enabled = get_option( 'dps_portal_access_notification_enabled', false );
+
+echo '<div class="dps-form-field">';
+echo '<label>';
+echo '<input type="checkbox" name="dps_portal_access_notification_enabled" id="dps_portal_access_notification_enabled" value="1" ' . checked( $access_notification_enabled, 1, false ) . ' />';
+echo ' ' . esc_html__( 'Enviar e-mail ao cliente quando o portal for acessado', 'dps-client-portal' );
+echo '</label>';
+echo '<p class="dps-field-description">';
+echo esc_html__( 'Quando ativado, o cliente receberá um e-mail sempre que alguém acessar o portal usando seu link. O e-mail inclui data/hora do acesso e endereço IP (parcialmente ofuscado). Isso aumenta a segurança, permitindo que o cliente identifique acessos não autorizados.', 'dps-client-portal' );
+echo '</p>';
+echo '</div>';
+
+echo '</fieldset>';
+
 // Seção: Instruções
 echo '<fieldset class="dps-fieldset">';
 echo '<legend>' . esc_html__( 'Como Usar', 'dps-client-portal' ) . '</legend>';
