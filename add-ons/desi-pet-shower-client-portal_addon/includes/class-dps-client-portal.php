@@ -1083,6 +1083,12 @@ final class DPS_Client_Portal {
                 'active' => true,
                 'badge' => 0,
             ],
+            'mensagens' => [
+                'icon'  => '💬',
+                'label' => __( 'Mensagens', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => $this->get_unread_messages_count( $client_id ),
+            ],
             'agendamentos' => [
                 'icon'  => '📅',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
@@ -1155,6 +1161,13 @@ final class DPS_Client_Portal {
             $this->render_referrals_summary( $client_id );
         }
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
+        echo '</div>';
+        
+        // Panel: Mensagens (Fase 4 - continuação)
+        echo '<div id="panel-mensagens" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_mensagens_content', $client_id );
+        $this->render_message_center( $client_id );
+        do_action( 'dps_portal_after_mensagens_content', $client_id );
         echo '</div>';
         
         // Panel: Agendamentos (Histórico completo)
@@ -1833,19 +1846,21 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza o centro de mensagens entre cliente e administração.
+     * Fase 4 - continuação: melhorias na central de mensagens
      *
      * @param int $client_id ID do cliente.
      */
     private function render_message_center( $client_id ) {
         echo '<section id="mensagens" class="dps-portal-section dps-portal-messages">';
-        echo '<h2>' . esc_html__( 'Mensagens com a equipe', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>💬 ' . esc_html__( 'Central de Mensagens', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-portal-section__description">' . esc_html__( 'Comunicação direta com a equipe do Banho e Tosa', 'dps-client-portal' ) . '</p>';
 
         $messages = get_posts( [
             'post_type'      => 'dps_portal_message',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'orderby'        => 'date',
-            'order'          => 'ASC',
+            'order'          => 'DESC', // Mais recentes primeiro
             'meta_key'       => 'message_client_id',
             'meta_value'     => $client_id,
         ] );
@@ -1853,15 +1868,28 @@ final class DPS_Client_Portal {
         if ( $messages ) {
             echo '<div class="dps-portal-messages__list">';
             foreach ( $messages as $message ) {
-                $sender  = get_post_meta( $message->ID, 'message_sender', true );
-                $status  = get_post_meta( $message->ID, 'message_status', true );
+                $sender     = get_post_meta( $message->ID, 'message_sender', true );
+                $status     = get_post_meta( $message->ID, 'message_status', true );
+                $msg_type   = get_post_meta( $message->ID, 'message_type', true );
+                $is_unread  = ( 'admin' === $sender && ! get_post_meta( $message->ID, 'client_read_at', true ) );
+                $appt_id    = get_post_meta( $message->ID, 'related_appointment_id', true );
+                
                 $classes = [ 'dps-portal-message' ];
                 $classes[] = ( 'client' === $sender ) ? 'dps-portal-message--client' : 'dps-portal-message--admin';
+                if ( $is_unread ) {
+                    $classes[] = 'dps-portal-message--unread';
+                }
+                
                 echo '<article class="' . esc_attr( implode( ' ', $classes ) ) . '">';
+
+                // Badge de não lida
+                if ( $is_unread ) {
+                    echo '<span class="dps-portal-message__unread-badge">' . esc_html__( 'Nova', 'dps-client-portal' ) . '</span>';
+                }
 
                 $author_label = ( 'client' === $sender )
                     ? esc_html__( 'Você', 'dps-client-portal' )
-                    : esc_html__( 'Equipe DPS by PRObst', 'dps-client-portal' );
+                    : esc_html__( 'Equipe do Banho e Tosa', 'dps-client-portal' );
                 $date_display = get_post_time( 'd/m/Y H:i', false, $message, true );
 
                 echo '<div class="dps-portal-message__meta">';
@@ -1869,21 +1897,51 @@ final class DPS_Client_Portal {
                 echo '<span class="dps-portal-message__date">' . esc_html( $date_display ) . '</span>';
                 echo '</div>';
 
-                if ( $status ) {
-                    echo '<div class="dps-portal-message__status">' . esc_html( $this->get_message_status_label( $status ) ) . '</div>';
+                // Tipo de mensagem
+                if ( $msg_type ) {
+                    $type_labels = [
+                        'appointment_confirmation' => __( 'Confirmação de Agendamento', 'dps-client-portal' ),
+                        'appointment_reminder'     => __( 'Lembrete de Agendamento', 'dps-client-portal' ),
+                        'appointment_change'       => __( 'Mudança de Agendamento', 'dps-client-portal' ),
+                        'general'                  => __( 'Mensagem Geral', 'dps-client-portal' ),
+                    ];
+                    $type_label = isset( $type_labels[ $msg_type ] ) ? $type_labels[ $msg_type ] : '';
+                    if ( $type_label ) {
+                        echo '<div class="dps-portal-message__type">' . esc_html( $type_label ) . '</div>';
+                    }
+                }
+
+                // Título da mensagem
+                if ( $message->post_title ) {
+                    echo '<h3 class="dps-portal-message__title">' . esc_html( $message->post_title ) . '</h3>';
                 }
 
                 $content = $message->post_content ? wpautop( esc_html( $message->post_content ) ) : '';
                 echo '<div class="dps-portal-message__content">' . $content . '</div>';
+                
+                // Link para agendamento relacionado
+                if ( $appt_id && get_post_status( $appt_id ) ) {
+                    echo '<div class="dps-portal-message__action">';
+                    echo '<a href="#" class="dps-portal-message__link" data-tab="agendamentos">';
+                    echo '📅 ' . esc_html__( 'Ver detalhes do agendamento', 'dps-client-portal' );
+                    echo '</a>';
+                    echo '</div>';
+                }
+                
                 echo '</article>';
 
-                if ( 'admin' === $sender && ! get_post_meta( $message->ID, 'client_read_at', true ) ) {
+                // Marcar como lida
+                if ( $is_unread ) {
                     update_post_meta( $message->ID, 'client_read_at', current_time( 'mysql' ) );
                 }
             }
             echo '</div>';
         } else {
-            echo '<p>' . esc_html__( 'Ainda não há mensagens no seu histórico.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<div class="dps-empty-state__icon">💬</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Ainda não há mensagens no seu histórico.', 'dps-client-portal' ) . '</div>';
+            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Aqui você receberá confirmações de agendamento, lembretes e mensagens da equipe.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
         }
 
         echo '<div class="dps-portal-messages__form">';
@@ -1891,9 +1949,15 @@ final class DPS_Client_Portal {
         echo '<form method="post" class="dps-portal-form">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
         echo '<input type="hidden" name="dps_client_portal_action" value="send_message">';
-        echo '<p><label>' . esc_html__( 'Assunto (opcional)', 'dps-client-portal' ) . '<br><input type="text" name="message_subject"></label></p>';
-        echo '<p><label>' . esc_html__( 'Mensagem', 'dps-client-portal' ) . '<br><textarea name="message_body" required></textarea></label></p>';
-        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . esc_html__( 'Enviar para a equipe', 'dps-client-portal' ) . '</button></p>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="message_subject">' . esc_html__( 'Assunto (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" id="message_subject" name="message_subject" class="dps-form-control">';
+        echo '</div>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="message_body">' . esc_html__( 'Mensagem', 'dps-client-portal' ) . ' <span class="required">*</span></label>';
+        echo '<textarea id="message_body" name="message_body" class="dps-form-control" rows="5" required></textarea>';
+        echo '</div>';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Enviar para a equipe', 'dps-client-portal' ) . '</button>';
         echo '</form>';
         echo '</div>';
 
