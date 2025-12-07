@@ -1088,6 +1088,12 @@ final class DPS_Client_Portal {
                 'active' => false,
                 'badge' => $this->count_upcoming_appointments( $client_id ),
             ],
+            'historico-pets' => [
+                'icon'  => '🐾',
+                'label' => __( 'Histórico dos Pets', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => 0,
+            ],
             'galeria' => [
                 'icon'  => '📸',
                 'label' => __( 'Galeria', 'dps-client-portal' ),
@@ -1141,6 +1147,7 @@ final class DPS_Client_Portal {
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
+        $this->render_recent_requests( $client_id ); // Fase 4: Solicitações recentes
         $this->render_financial_pending( $client_id );
         $this->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
@@ -1154,6 +1161,13 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         $this->render_appointment_history( $client_id );
         do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
+        echo '</div>';
+        
+        // Panel: Histórico dos Pets (Fase 4)
+        echo '<div id="panel-historico-pets" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_pet_history_content', $client_id );
+        $this->render_pets_timeline( $client_id );
+        do_action( 'dps_portal_after_pet_history_content', $client_id );
         echo '</div>';
         
         // Panel: Galeria
@@ -2942,6 +2956,46 @@ Equipe %4$s', 'dps-client-portal' ),
         wp_send_json_success( [ 
             'message' => __( 'Sua solicitação foi registrada! Nossa equipe entrará em contato em breve.', 'dps-client-portal' ) 
         ] );
+    }
+
+    /**
+     * Renderiza seção de solicitações recentes.
+     * Fase 4: Dashboard de Solicitações
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_recent_requests( $client_id ) {
+        $renderer = DPS_Portal_Renderer::get_instance();
+        $renderer->render_recent_requests( $client_id );
+    }
+
+    /**
+     * Renderiza timeline de serviços por pet.
+     * Fase 4: Timeline de Serviços
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_pets_timeline( $client_id ) {
+        $pet_repo = DPS_Pet_Repository::get_instance();
+        $pets     = $pet_repo->get_pets_by_client( $client_id );
+
+        if ( empty( $pets ) ) {
+            echo '<section class="dps-portal-section">';
+            echo '<div class="dps-empty-state">';
+            echo '<div class="dps-empty-state__icon">🐾</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhum pet cadastrado ainda.', 'dps-client-portal' ) . '</div>';
+            echo '</div>';
+            echo '</section>';
+            return;
+        }
+
+        $renderer = DPS_Portal_Renderer::get_instance();
+
+        foreach ( $pets as $pet ) {
+            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10 );
+        }
     }
 }
 endif;

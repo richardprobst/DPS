@@ -69,6 +69,8 @@ class DPS_Portal_AJAX_Handler {
         add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
+        add_action( 'wp_ajax_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4
+        add_action( 'wp_ajax_nopriv_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4
     }
 
     /**
@@ -357,6 +359,81 @@ class DPS_Portal_AJAX_Handler {
                 'message_sender'    => 'system',
                 'message_type'      => 'access_request',
             ],
+        ] );
+    }
+
+    /**
+     * AJAX handler para criar pedido de agendamento (Fase 4).
+     *
+     * @since 2.4.0
+     */
+    public function ajax_create_appointment_request() {
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_portal_appointment_request' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        }
+
+        // Obtém client_id da sessão
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $client_id       = $session_manager->get_authenticated_client_id();
+
+        if ( ! $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente não autenticado', 'dps-client-portal' ) ] );
+        }
+
+        // Extrai dados do formulário
+        $request_type            = isset( $_POST['request_type'] ) ? sanitize_key( $_POST['request_type'] ) : 'new';
+        $pet_id                  = isset( $_POST['pet_id'] ) ? absint( $_POST['pet_id'] ) : 0;
+        $desired_date            = isset( $_POST['desired_date'] ) ? sanitize_text_field( $_POST['desired_date'] ) : '';
+        $desired_period          = isset( $_POST['desired_period'] ) ? sanitize_key( $_POST['desired_period'] ) : '';
+        $services                = isset( $_POST['services'] ) && is_array( $_POST['services'] ) ? array_map( 'sanitize_text_field', $_POST['services'] ) : [];
+        $original_appointment_id = isset( $_POST['original_appointment_id'] ) ? absint( $_POST['original_appointment_id'] ) : 0;
+        $notes                   = isset( $_POST['notes'] ) ? sanitize_textarea_field( $_POST['notes'] ) : '';
+
+        // Validações básicas
+        if ( empty( $desired_date ) || empty( $desired_period ) ) {
+            wp_send_json_error( [ 'message' => __( 'Data e período são obrigatórios', 'dps-client-portal' ) ] );
+        }
+
+        // Valida propriedade do pet
+        if ( $pet_id ) {
+            $pet_repo  = DPS_Pet_Repository::get_instance();
+            $is_owner  = $pet_repo->pet_belongs_to_client( $pet_id, $client_id );
+            if ( ! $is_owner ) {
+                wp_send_json_error( [ 'message' => __( 'Pet inválido', 'dps-client-portal' ) ] );
+            }
+        }
+
+        // Cria pedido
+        $request_repo = DPS_Appointment_Request_Repository::get_instance();
+        $request_id   = $request_repo->create_request( [
+            'client_id'               => $client_id,
+            'pet_id'                  => $pet_id,
+            'request_type'            => $request_type,
+            'desired_date'            => $desired_date,
+            'desired_period'          => $desired_period,
+            'services'                => $services,
+            'original_appointment_id' => $original_appointment_id,
+            'notes'                   => $notes,
+        ] );
+
+        if ( ! $request_id ) {
+            wp_send_json_error( [ 'message' => __( 'Erro ao criar pedido', 'dps-client-portal' ) ] );
+        }
+
+        // Mensagem de sucesso diferente por tipo
+        $success_messages = [
+            'new'        => __( 'Sua solicitação de agendamento foi enviada! A equipe do Banho e Tosa irá confirmar o horário com você em breve.', 'dps-client-portal' ),
+            'reschedule' => __( 'Sua solicitação de reagendamento foi enviada! A equipe do Banho e Tosa irá confirmar o novo horário com você.', 'dps-client-portal' ),
+            'cancel'     => __( 'Sua solicitação de cancelamento foi enviada! A equipe do Banho e Tosa pode entrar em contato caso necessário.', 'dps-client-portal' ),
+        ];
+
+        $message = isset( $success_messages[ $request_type ] ) ? $success_messages[ $request_type ] : $success_messages['new'];
+
+        wp_send_json_success( [ 
+            'message'    => $message,
+            'request_id' => $request_id,
         ] );
     }
 }

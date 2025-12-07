@@ -1005,4 +1005,249 @@ window.DPSSkeleton = (function() {
             }, 500);
         }
     });
+
+    /**
+     * Fase 4: Handlers para pedidos de agendamento
+     */
+    
+    // Handler para botões de reagendamento
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.dps-btn-reschedule')) {
+            e.preventDefault();
+            var btn = e.target.closest('.dps-btn-reschedule');
+            var appointmentId = btn.dataset.appointmentId;
+            showRescheduleModal(appointmentId);
+        }
+    });
+
+    // Handler para botões de cancelamento
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.dps-btn-cancel')) {
+            e.preventDefault();
+            var btn = e.target.closest('.dps-btn-cancel');
+            var appointmentId = btn.dataset.appointmentId;
+            showCancelModal(appointmentId);
+        }
+    });
+
+    // Handler para botões "Repetir serviço"
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.dps-btn-repeat-service')) {
+            e.preventDefault();
+            var btn = e.target.closest('.dps-btn-repeat-service');
+            var appointmentId = btn.dataset.appointmentId;
+            var petId = btn.dataset.petId;
+            var services = JSON.parse(btn.dataset.services || '[]');
+            showRepeatServiceModal(appointmentId, petId, services);
+        }
+    });
+
+    /**
+     * Mostra modal de reagendamento
+     */
+    function showRescheduleModal(appointmentId) {
+        var modal = createRequestModal('reschedule', appointmentId);
+        document.body.appendChild(modal);
+        modal.classList.add('is-active');
+    }
+
+    /**
+     * Mostra modal de cancelamento
+     */
+    function showCancelModal(appointmentId) {
+        if (!confirm('Tem certeza que deseja solicitar o cancelamento deste agendamento?\n\nA equipe do Banho e Tosa pode entrar em contato para confirmar.')) {
+            return;
+        }
+        
+        // Envia direto a solicitação de cancelamento
+        submitAppointmentRequest({
+            request_type: 'cancel',
+            original_appointment_id: appointmentId,
+            desired_date: '',
+            desired_period: '',
+            notes: 'Cliente solicitou cancelamento via portal'
+        });
+    }
+
+    /**
+     * Mostra modal para repetir serviço
+     */
+    function showRepeatServiceModal(appointmentId, petId, services) {
+        var modal = createRequestModal('new', appointmentId, petId, services);
+        document.body.appendChild(modal);
+        modal.classList.add('is-active');
+    }
+
+    /**
+     * Cria modal de pedido de agendamento
+     */
+    function createRequestModal(type, appointmentId, petId, services) {
+        var modal = document.createElement('div');
+        modal.className = 'dps-modal dps-appointment-request-modal';
+        
+        var titles = {
+            reschedule: 'Solicitar Reagendamento',
+            new: 'Repetir Serviço'
+        };
+        
+        var title = titles[type] || 'Solicitar Agendamento';
+        
+        var html = '<div class="dps-modal__overlay"></div>';
+        html += '<div class="dps-modal__content">';
+        html += '<div class="dps-modal__header">';
+        html += '<h3>' + title + '</h3>';
+        html += '<button class="dps-modal__close" aria-label="Fechar">×</button>';
+        html += '</div>';
+        html += '<div class="dps-modal__body">';
+        html += '<p class="dps-modal__notice"><strong>⚠️ Importante:</strong> Este é um <strong>pedido de agendamento</strong>. A equipe do Banho e Tosa irá confirmar o horário final com você.</p>';
+        html += '<form class="dps-request-form" id="dps-request-form">';
+        html += '<input type="hidden" name="request_type" value="' + type + '">';
+        html += '<input type="hidden" name="original_appointment_id" value="' + (appointmentId || '') + '">';
+        if (petId) {
+            html += '<input type="hidden" name="pet_id" value="' + petId + '">';
+        }
+        html += '<div class="dps-form-field">';
+        html += '<label for="desired_date">Data Desejada <span class="required">*</span></label>';
+        html += '<input type="date" id="desired_date" name="desired_date" required min="' + getTomorrowDate() + '">';
+        html += '</div>';
+        html += '<div class="dps-form-field">';
+        html += '<label for="desired_period">Período Desejado <span class="required">*</span></label>';
+        html += '<select id="desired_period" name="desired_period" required>';
+        html += '<option value="">Selecione...</option>';
+        html += '<option value="morning">Manhã</option>';
+        html += '<option value="afternoon">Tarde</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '<div class="dps-form-field">';
+        html += '<label for="notes">Observações (opcional)</label>';
+        html += '<textarea id="notes" name="notes" rows="3" placeholder="Alguma preferência ou observação?"></textarea>';
+        html += '</div>';
+        html += '<div class="dps-form-actions">';
+        html += '<button type="button" class="button dps-modal-cancel">Cancelar</button>';
+        html += '<button type="submit" class="button button-primary">Enviar Solicitação</button>';
+        html += '</div>';
+        html += '</form>';
+        html += '</div>';
+        html += '</div>';
+        
+        modal.innerHTML = html;
+        
+        // Event listeners
+        modal.querySelector('.dps-modal__close').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        
+        modal.querySelector('.dps-modal__overlay').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        
+        modal.querySelector('.dps-modal-cancel').addEventListener('click', function() {
+            closeModal(modal);
+        });
+        
+        modal.querySelector('#dps-request-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(e.target);
+            var data = {
+                request_type: formData.get('request_type'),
+                original_appointment_id: formData.get('original_appointment_id'),
+                pet_id: formData.get('pet_id') || petId || '',
+                desired_date: formData.get('desired_date'),
+                desired_period: formData.get('desired_period'),
+                notes: formData.get('notes'),
+                services: services || []
+            };
+            
+            submitAppointmentRequest(data);
+            closeModal(modal);
+        });
+        
+        return modal;
+    }
+
+    /**
+     * Fecha modal
+     */
+    function closeModal(modal) {
+        modal.classList.remove('is-active');
+        setTimeout(function() {
+            modal.remove();
+        }, 300);
+    }
+
+    /**
+     * Retorna data de amanhã no formato YYYY-MM-DD
+     */
+    function getTomorrowDate() {
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return tomorrow.toISOString().split('T')[0];
+    }
+
+    /**
+     * Envia pedido de agendamento via AJAX
+     */
+    function submitAppointmentRequest(data) {
+        var submitBtn = document.querySelector('.dps-appointment-request-modal button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+        }
+        
+        // Cria nonce específico para appointment requests
+        var requestNonce = btoa(Date.now() + '_appointment_request').substring(0, 10);
+        
+        fetch(dpsPortalChat.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'dps_create_appointment_request',
+                nonce: dpsPortalChat.nonce,
+                ...data
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            if (result.success) {
+                showNotification(result.data.message, 'success');
+                // Recarrega a página após 2 segundos para mostrar o pedido
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
+            } else {
+                showNotification(result.data.message || 'Erro ao enviar solicitação', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enviar Solicitação';
+                }
+            }
+        })
+        .catch(function(error) {
+            showNotification('Erro ao enviar solicitação. Tente novamente.', 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Solicitação';
+            }
+        });
+    }
+
+    /**
+     * Mostra notificação na tela
+     */
+    function showNotification(message, type) {
+        var notification = document.createElement('div');
+        notification.className = 'dps-portal-notice dps-portal-notice--' + type;
+        notification.textContent = message;
+        notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; max-width: 400px;';
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(function() {
+            notification.remove();
+        }, 5000);
+    }
 })();

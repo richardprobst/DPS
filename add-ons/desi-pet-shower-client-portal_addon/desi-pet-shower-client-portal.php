@@ -85,6 +85,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-appointment-repository.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-finance-repository.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-message-repository.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-appointment-request-repository.php'; // Fase 4
 
 // Inclui classes refatoradas (Fase 3 - v3.0.0)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-data-provider.php';
@@ -92,6 +93,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-por
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-actions-handler.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-ajax-handler.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-admin.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-pet-history.php'; // Fase 4
 
 // Inclui classe principal (coordenador)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
@@ -205,6 +207,45 @@ function dps_client_portal_handle_ics_download() {
     }
 }
 add_action( 'init', 'dps_client_portal_handle_ics_download', 1 );
+
+/**
+ * Registra CPT para pedidos de agendamento (Fase 4)
+ * 
+ * @since 2.4.0
+ */
+function dps_client_portal_register_appointment_request_cpt() {
+    $labels = [
+        'name'               => __( 'Pedidos de Agendamento', 'dps-client-portal' ),
+        'singular_name'      => __( 'Pedido de Agendamento', 'dps-client-portal' ),
+        'menu_name'          => __( 'Pedidos Portal', 'dps-client-portal' ),
+        'add_new'            => __( 'Adicionar Novo', 'dps-client-portal' ),
+        'add_new_item'       => __( 'Adicionar Novo Pedido', 'dps-client-portal' ),
+        'edit_item'          => __( 'Editar Pedido', 'dps-client-portal' ),
+        'new_item'           => __( 'Novo Pedido', 'dps-client-portal' ),
+        'view_item'          => __( 'Ver Pedido', 'dps-client-portal' ),
+        'search_items'       => __( 'Buscar Pedidos', 'dps-client-portal' ),
+        'not_found'          => __( 'Nenhum pedido encontrado', 'dps-client-portal' ),
+        'not_found_in_trash' => __( 'Nenhum pedido na lixeira', 'dps-client-portal' ),
+    ];
+
+    $args = [
+        'labels'              => $labels,
+        'public'              => false,
+        'publicly_queryable'  => false,
+        'show_ui'             => true,
+        'show_in_menu'        => 'dps_configuracoes',
+        'query_var'           => false,
+        'capability_type'     => 'post',
+        'has_archive'         => false,
+        'hierarchical'        => false,
+        'menu_position'       => null,
+        'supports'            => [ 'title' ],
+        'menu_icon'           => 'dashicons-calendar-alt',
+    ];
+
+    register_post_type( 'dps_appt_request', $args );
+}
+add_action( 'init', 'dps_client_portal_register_appointment_request_cpt' );
 
 // Hook de ativação para criar tabela de tokens
 register_activation_hook( __FILE__, function() {
