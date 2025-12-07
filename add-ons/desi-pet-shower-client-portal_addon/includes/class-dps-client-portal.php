@@ -1089,10 +1089,43 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.', 'dps-client-portal' ) . '</div>';
             }
         }
-        echo '<div class="dps-client-portal">';
+        
+        // Fase 4 - Branding: buscar configurações
+        $logo_id       = get_option( 'dps_portal_logo_id', '' );
+        $primary_color = get_option( 'dps_portal_primary_color', '#0ea5e9' );
+        $hero_id       = get_option( 'dps_portal_hero_id', '' );
+        
+        // Aplica classe de branding se houver customizações
+        $portal_classes = [ 'dps-client-portal' ];
+        if ( $logo_id || $primary_color !== '#0ea5e9' || $hero_id ) {
+            $portal_classes[] = 'dps-portal-branded';
+        }
+        
+        // Inline CSS para cor primária customizada
+        if ( $primary_color && $primary_color !== '#0ea5e9' ) {
+            echo '<style>.dps-portal-branded { --dps-custom-primary: ' . esc_attr( $primary_color ) . '; --dps-custom-primary-hover: ' . esc_attr( $this->adjust_brightness( $primary_color, -20 ) ) . '; }</style>';
+        }
+        
+        echo '<div class="' . esc_attr( implode( ' ', $portal_classes ) ) . '">';
         
         // Header com título e botão de logout
-        echo '<div class="dps-portal-header">';
+        echo '<div class="dps-portal-header dps-portal-header--branded">';
+        
+        // Imagem hero (se configurada)
+        if ( $hero_id ) {
+            $hero_url = wp_get_attachment_image_url( $hero_id, 'full' );
+            if ( $hero_url ) {
+                echo '<div class="dps-portal-hero" style="background-image: url(' . esc_url( $hero_url ) . ');"></div>';
+            }
+        }
+        
+        // Logo (se configurado)
+        if ( $logo_id ) {
+            $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
+            if ( $logo_url ) {
+                echo '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" class="dps-portal-logo">';
+            }
+        }
         
         // Saudação personalizada com nome do cliente
         $client_name = get_the_title( $client_id );
@@ -1415,34 +1448,6 @@ final class DPS_Client_Portal {
      * @param int $client_id ID do cliente.
      * @return int Número de mensagens não lidas.
      */
-    private function get_unread_messages_count( $client_id ) {
-        $messages = get_posts( [
-            'post_type'      => 'dps_portal_message',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [
-                    'key'     => 'message_client_id',
-                    'value'   => $client_id,
-                    'compare' => '=',
-                ],
-                [
-                    'key'     => 'message_sender',
-                    'value'   => 'admin',
-                    'compare' => '=',
-                ],
-                [
-                    'key'     => 'client_read_at',
-                    'compare' => 'NOT EXISTS',
-                ],
-            ],
-        ] );
-
-        return count( $messages );
-    }
-
     /**
      * Renderiza seção do próximo agendamento.
      *
@@ -3224,6 +3229,34 @@ Equipe %4$s', 'dps-client-portal' ),
         foreach ( $pets as $pet ) {
             $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10 );
         }
+    }
+
+    /**
+     * Ajusta o brilho de uma cor hexadecimal.
+     * Fase 4 - Branding: Helper para cores
+     *
+     * @param string $hex   Cor hexadecimal (#RRGGBB).
+     * @param int    $steps Quantidade de brilho a ajustar (negativo escurece, positivo clareia).
+     * @return string Cor ajustada em hexadecimal.
+     */
+    private function adjust_brightness( $hex, $steps ) {
+        // Converte hex para RGB
+        $hex = str_replace( '#', '', $hex );
+        if ( strlen( $hex ) === 3 ) {
+            $hex = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );
+        }
+        
+        $r = hexdec( substr( $hex, 0, 2 ) );
+        $g = hexdec( substr( $hex, 2, 2 ) );
+        $b = hexdec( substr( $hex, 4, 2 ) );
+        
+        // Ajusta
+        $r = max( 0, min( 255, $r + $steps ) );
+        $g = max( 0, min( 255, $g + $steps ) );
+        $b = max( 0, min( 255, $b + $steps ) );
+        
+        // Converte de volta para hex
+        return '#' . str_pad( dechex( $r ), 2, '0', STR_PAD_LEFT ) . str_pad( dechex( $g ), 2, '0', STR_PAD_LEFT ) . str_pad( dechex( $b ), 2, '0', STR_PAD_LEFT );
     }
 }
 endif;
