@@ -28,6 +28,29 @@ class DPS_AI_Client {
     const API_BASE_URL = 'https://api.openai.com/v1/chat/completions';
 
     /**
+     * Último erro ocorrido durante chamada à API.
+     *
+     * @var array|null
+     */
+    private static $last_error = null;
+
+    /**
+     * Retorna informações sobre o último erro ocorrido.
+     *
+     * @return array|null Array com 'type' e 'message', ou null se não houve erro.
+     */
+    public static function get_last_error() {
+        return self::$last_error;
+    }
+
+    /**
+     * Limpa o último erro armazenado.
+     */
+    public static function clear_last_error() {
+        self::$last_error = null;
+    }
+
+    /**
      * Realiza uma chamada à API Chat Completions da OpenAI.
      *
      * Com tratamento robusto de erros incluindo:
@@ -43,6 +66,8 @@ class DPS_AI_Client {
      * @return string|null Conteúdo da resposta ou null em caso de erro.
      */
     public static function chat( array $messages, array $options = [] ) {
+        // Limpa erro anterior
+        self::$last_error = null;
         try {
             // Carrega configurações
             $settings = get_option( 'dps_ai_settings', [] );
@@ -118,11 +143,13 @@ class DPS_AI_Client {
                         'timeout'       => $timeout,
                         'response_time' => round( $response_time, 2 ),
                     ] );
+                    self::$last_error = [ 'type' => 'network_error', 'message' => $error_message ];
                 } else {
                     dps_ai_log_error( 'Erro WP ao chamar API da OpenAI', [
                         'code'  => $error_code,
                         'error' => $error_message,
                     ] );
+                    self::$last_error = [ 'type' => 'request_failed', 'message' => $error_message ];
                 }
                 
                 return null;
@@ -148,20 +175,25 @@ class DPS_AI_Client {
                 switch ( $status_code ) {
                     case 400:
                         dps_ai_log_error( 'Requisição inválida para API da OpenAI (Bad Request)', $error_context );
+                        self::$last_error = [ 'type' => 'bad_request', 'message' => $api_error ];
                         break;
                     case 401:
                         dps_ai_log_error( 'API key inválida ou expirada (Unauthorized)', $error_context );
+                        self::$last_error = [ 'type' => 'unauthorized', 'message' => $api_error ];
                         break;
                     case 429:
                         dps_ai_log_warning( 'Rate limit excedido na API da OpenAI (Too Many Requests)', $error_context );
+                        self::$last_error = [ 'type' => 'rate_limit', 'message' => $api_error ];
                         break;
                     case 500:
                     case 502:
                     case 503:
                         dps_ai_log_warning( 'Erro no servidor da OpenAI (Server Error)', $error_context );
+                        self::$last_error = [ 'type' => 'server_error', 'message' => $api_error ];
                         break;
                     default:
                         dps_ai_log_error( 'API da OpenAI retornou código de erro', $error_context );
+                        self::$last_error = [ 'type' => 'api_error', 'message' => $api_error ];
                 }
                 
                 return null;

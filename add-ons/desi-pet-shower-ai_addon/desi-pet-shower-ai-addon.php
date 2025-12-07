@@ -124,6 +124,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base-admin.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base-tester.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-color-contrast.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
@@ -294,6 +295,7 @@ class DPS_AI_Addon {
         add_action( 'wp_ajax_dps_ai_suggest_whatsapp_message', [ $this, 'ajax_suggest_whatsapp_message' ] );
         add_action( 'wp_ajax_dps_ai_suggest_email_message', [ $this, 'ajax_suggest_email_message' ] );
         add_action( 'wp_ajax_dps_ai_test_connection', [ $this, 'ajax_test_connection' ] );
+        add_action( 'wp_ajax_dps_ai_validate_contrast', [ $this, 'ajax_validate_contrast' ] );
 
         // Registra assets admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -681,8 +683,114 @@ class DPS_AI_Addon {
                                 </p>
                             </td>
                         </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_primary_color"><?php echo esc_html__( 'Cor Primária do Chat', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_public_chat_primary_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_primary_color]" value="<?php echo esc_attr( $options['public_chat_primary_color'] ?? '#2271b1' ); ?>" class="dps-ai-color-picker" data-default-color="#2271b1" />
+                                <p class="description">
+                                    <?php esc_html_e( 'Cor usada em botões e destaques do chat público. Pode ser substituída via atributo do shortcode.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Padrão: #2271b1 (azul WordPress).', 'dps-ai' ); ?>
+                                </p>
+                                <div id="dps-ai-contrast-warning-primary" class="notice notice-warning inline" style="display: none; margin-top: 10px;">
+                                    <p></p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_text_color"><?php echo esc_html__( 'Cor do Texto', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_public_chat_text_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_text_color]" value="<?php echo esc_attr( $options['public_chat_text_color'] ?? '#1d2327' ); ?>" class="dps-ai-color-picker" data-default-color="#1d2327" />
+                                <p class="description">
+                                    <?php esc_html_e( 'Cor do texto nas mensagens do chat.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Padrão: #1d2327 (quase preto).', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_public_chat_bg_color"><?php echo esc_html__( 'Cor de Fundo', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_public_chat_bg_color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[public_chat_bg_color]" value="<?php echo esc_attr( $options['public_chat_bg_color'] ?? '#ffffff' ); ?>" class="dps-ai-color-picker" data-default-color="#ffffff" />
+                                <p class="description">
+                                    <?php esc_html_e( 'Cor de fundo das mensagens do chat.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Padrão: #ffffff (branco).', 'dps-ai' ); ?>
+                                </p>
+                                <div id="dps-ai-contrast-warning-text" class="notice notice-warning inline" style="display: none; margin-top: 10px;">
+                                    <p></p>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+
+                <script>
+                (function($) {
+                    // Inicializa WordPress color picker
+                    if ($.fn.wpColorPicker) {
+                        $('.dps-ai-color-picker').wpColorPicker({
+                            change: function() {
+                                validateContrast();
+                            },
+                            clear: function() {
+                                setTimeout(validateContrast, 50);
+                            }
+                        });
+                    }
+
+                    // Validação de contraste em tempo real
+                    function validateContrast() {
+                        var primaryColor = $('#dps_ai_public_chat_primary_color').val();
+                        var textColor = $('#dps_ai_public_chat_text_color').val();
+                        var bgColor = $('#dps_ai_public_chat_bg_color').val();
+                        
+                        // Valida contraste entre texto e fundo
+                        $.post(ajaxurl, {
+                            action: 'dps_ai_validate_contrast',
+                            nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_validate_contrast' ) ); ?>',
+                            foreground: textColor,
+                            background: bgColor,
+                            is_large: false
+                        }, function(response) {
+                            if (response.success && response.data.warning) {
+                                $('#dps-ai-contrast-warning-text p').text(response.data.warning);
+                                $('#dps-ai-contrast-warning-text').show();
+                            } else {
+                                $('#dps-ai-contrast-warning-text').hide();
+                            }
+                        });
+
+                        // Valida contraste entre branco (texto em botão) e cor primária
+                        $.post(ajaxurl, {
+                            action: 'dps_ai_validate_contrast',
+                            nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_validate_contrast' ) ); ?>',
+                            foreground: '#ffffff',
+                            background: primaryColor,
+                            is_large: false
+                        }, function(response) {
+                            if (response.success && response.data.warning) {
+                                $('#dps-ai-contrast-warning-primary p').text(response.data.warning.replace('combinação de cores', 'cor primária com texto branco'));
+                                $('#dps-ai-contrast-warning-primary').show();
+                            } else {
+                                $('#dps-ai-contrast-warning-primary').hide();
+                            }
+                        });
+                    }
+
+                    // Valida ao carregar
+                    $(document).ready(validateContrast);
+                })(jQuery);
+                </script>
 
                 <!-- Seção: Manutenção e Logs (v1.6.1+) -->
                 <h2><?php esc_html_e( 'Manutenção e Logs', 'dps-ai' ); ?></h2>
@@ -1832,6 +1940,10 @@ class DPS_AI_Addon {
             'public_chat_faqs'           => isset( $raw_settings['public_chat_faqs'] ) ? sanitize_textarea_field( $raw_settings['public_chat_faqs'] ) : '',
             'public_chat_business_info'  => $public_chat_business_info,
             'public_chat_instructions'   => $public_chat_instructions,
+            // v1.6.2 settings - Cores do Chat Público
+            'public_chat_primary_color'  => isset( $raw_settings['public_chat_primary_color'] ) ? sanitize_hex_color( $raw_settings['public_chat_primary_color'] ) : '#2271b1',
+            'public_chat_text_color'     => isset( $raw_settings['public_chat_text_color'] ) ? sanitize_hex_color( $raw_settings['public_chat_text_color'] ) : '#1d2327',
+            'public_chat_bg_color'       => isset( $raw_settings['public_chat_bg_color'] ) ? sanitize_hex_color( $raw_settings['public_chat_bg_color'] ) : '#ffffff',
             // v1.6.1 settings - Manutenção, Logs e Analytics
             'data_retention_days'        => isset( $raw_settings['data_retention_days'] ) ? max( 30, min( 3650, absint( $raw_settings['data_retention_days'] ) ) ) : 365,
             'debug_logging'              => ! empty( $raw_settings['debug_logging'] ),
@@ -2022,6 +2134,46 @@ class DPS_AI_Addon {
     }
 
     /**
+     * Handler AJAX para validação de contraste de cores.
+     */
+    public function ajax_validate_contrast() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_validate_contrast' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
+            ] );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
+            ] );
+        }
+
+        // Obtém cores
+        $foreground = isset( $_POST['foreground'] ) ? sanitize_text_field( wp_unslash( $_POST['foreground'] ) ) : '';
+        $background = isset( $_POST['background'] ) ? sanitize_text_field( wp_unslash( $_POST['background'] ) ) : '';
+        $is_large   = isset( $_POST['is_large'] ) && 'true' === $_POST['is_large'];
+
+        if ( empty( $foreground ) || empty( $background ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Cores inválidas.', 'dps-ai' ),
+            ] );
+        }
+
+        // Valida contraste
+        $validation = DPS_AI_Color_Contrast::validate_contrast( $foreground, $background, $is_large );
+        $warning    = DPS_AI_Color_Contrast::get_warning_message( $validation );
+
+        wp_send_json_success( [
+            'passes'  => $validation['passes'],
+            'ratio'   => $validation['ratio'],
+            'warning' => $warning,
+        ] );
+    }
+
+    /**
      * Verifica se o usuário atual pode usar o assistente de IA.
      *
      * Usa a capability específica DPS_AI_CAPABILITY com fallback para
@@ -2090,6 +2242,12 @@ class DPS_AI_Addon {
 
         if ( ! $is_dps_post_type && ! $is_dps_page ) {
             return;
+        }
+
+        // Enfileira wp-color-picker para a página de configurações
+        if ( 'desi-pet-shower_page_dps-ai-settings' === $hook ) {
+            wp_enqueue_style( 'wp-color-picker' );
+            wp_enqueue_script( 'wp-color-picker' );
         }
 
         // Enfileira CSS

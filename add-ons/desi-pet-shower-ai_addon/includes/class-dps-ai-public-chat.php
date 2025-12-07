@@ -284,10 +284,22 @@ class DPS_AI_Public_Chat {
         $answer     = $this->get_ai_response( $question );
         $end_time   = microtime( true );
 
-        // Se falhou
+        // Se falhou, verifica o tipo de erro
         if ( null === $answer ) {
+            $last_error = DPS_AI_Client::get_last_error();
+            
+            // Diferencia rate limit de outros erros
+            if ( $last_error && 'rate_limit' === $last_error['type'] ) {
+                wp_send_json_error( [
+                    'message'    => __( 'Muitas solicitações em sequência. Aguarde alguns segundos antes de tentar novamente.', 'dps-ai' ),
+                    'error_type' => 'rate_limit',
+                ] );
+            }
+            
+            // Erro genérico para outros casos
             wp_send_json_error( [
-                'message' => __( 'Desculpe, não consegui processar sua pergunta no momento. Por favor, tente novamente ou entre em contato conosco diretamente.', 'dps-ai' ),
+                'message'    => __( 'Desculpe, não consegui processar sua pergunta no momento. Por favor, tente novamente ou entre em contato conosco diretamente.', 'dps-ai' ),
+                'error_type' => 'generic',
             ] );
         }
 
