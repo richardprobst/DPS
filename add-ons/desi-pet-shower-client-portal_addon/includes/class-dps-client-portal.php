@@ -164,6 +164,9 @@ final class DPS_Client_Portal {
         // sem depender de cookies que só estarão disponíveis na próxima requisição
         $this->current_request_client_id = $token_data['client_id'];
 
+        // Envia notificação de acesso ao cliente (Fase 1.3 - Segurança)
+        $this->send_access_notification( $token_data['client_id'], $ip_address );
+
         // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
         // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
     }
@@ -419,94 +422,99 @@ final class DPS_Client_Portal {
             $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
         } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
             $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
-            $owner_id = absint( get_post_meta( $pet_id, 'owner_id', true ) );
+            
+            // Validação de ownership usando helper centralizado (Fase 1.4)
+            if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
+                // Log de tentativa de acesso indevido já feito pelo helper
+                $redirect_url = add_query_arg( 'portal_msg', 'error', $redirect_url );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
 
-            if ( $owner_id === $client_id ) {
-                $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
-                $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
-                $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
-                $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
-                $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
-                $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
-                $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
-                $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
-                $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
-                $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
-                $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
-                $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+            $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
+            $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
+            $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
+            $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
+            $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
+            $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
+            $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
+            $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
+            $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
+            $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
+            $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
+            $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
 
-                if ( $pet_name ) {
-                    wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
+            if ( $pet_name ) {
+                wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
+            }
+
+            update_post_meta( $pet_id, 'pet_species', $species );
+            update_post_meta( $pet_id, 'pet_breed', $breed );
+            update_post_meta( $pet_id, 'pet_size', $size );
+            update_post_meta( $pet_id, 'pet_weight', $weight );
+            update_post_meta( $pet_id, 'pet_coat', $coat );
+            update_post_meta( $pet_id, 'pet_color', $color );
+            update_post_meta( $pet_id, 'pet_birth', $birth );
+            update_post_meta( $pet_id, 'pet_sex', $sex );
+            update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
+            update_post_meta( $pet_id, 'pet_allergies', $allergies );
+            update_post_meta( $pet_id, 'pet_behavior', $behavior );
+
+            if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
+                $file = $_FILES['pet_photo'];
+                
+                // Valida tipos MIME permitidos para imagens
+                $allowed_mimes = [
+                    'jpg|jpeg|jpe' => 'image/jpeg',
+                    'gif'          => 'image/gif',
+                    'png'          => 'image/png',
+                    'webp'         => 'image/webp',
+                ];
+                
+                // Extrai extensões permitidas dos MIME types (single source of truth)
+                $allowed_exts = [];
+                foreach ( array_keys( $allowed_mimes ) as $ext_pattern ) {
+                    $exts = explode( '|', $ext_pattern );
+                    $allowed_exts = array_merge( $allowed_exts, $exts );
                 }
-
-                update_post_meta( $pet_id, 'pet_species', $species );
-                update_post_meta( $pet_id, 'pet_breed', $breed );
-                update_post_meta( $pet_id, 'pet_size', $size );
-                update_post_meta( $pet_id, 'pet_weight', $weight );
-                update_post_meta( $pet_id, 'pet_coat', $coat );
-                update_post_meta( $pet_id, 'pet_color', $color );
-                update_post_meta( $pet_id, 'pet_birth', $birth );
-                update_post_meta( $pet_id, 'pet_sex', $sex );
-                update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
-                update_post_meta( $pet_id, 'pet_allergies', $allergies );
-                update_post_meta( $pet_id, 'pet_behavior', $behavior );
-
-                if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
-                    $file = $_FILES['pet_photo'];
-                    
-                    // Valida tipos MIME permitidos para imagens
-                    $allowed_mimes = [
-                        'jpg|jpeg|jpe' => 'image/jpeg',
-                        'gif'          => 'image/gif',
-                        'png'          => 'image/png',
-                        'webp'         => 'image/webp',
-                    ];
-                    
-                    // Extrai extensões permitidas dos MIME types (single source of truth)
-                    $allowed_exts = [];
-                    foreach ( array_keys( $allowed_mimes ) as $ext_pattern ) {
-                        $exts = explode( '|', $ext_pattern );
-                        $allowed_exts = array_merge( $allowed_exts, $exts );
-                    }
-                    
-                    // Verifica extensão do arquivo
-                    $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
-                    
-                    if ( ! in_array( $file_ext, $allowed_exts, true ) ) {
-                        // Extensão não permitida, não processa upload
-                        $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+                
+                // Verifica extensão do arquivo
+                $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
+                
+                if ( ! in_array( $file_ext, $allowed_exts, true ) ) {
+                    // Extensão não permitida, não processa upload
+                    $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+                } else {
+                    // Usa limite de upload do WordPress (respeita configuração do servidor)
+                    $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
+                    if ( $file['size'] > $max_size ) {
+                        $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
                     } else {
-                        // Usa limite de upload do WordPress (respeita configuração do servidor)
-                        $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
-                        if ( $file['size'] > $max_size ) {
-                            $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
-                        } else {
-                            require_once ABSPATH . 'wp-admin/includes/file.php';
-                            require_once ABSPATH . 'wp-admin/includes/image.php';
+                        require_once ABSPATH . 'wp-admin/includes/file.php';
+                        require_once ABSPATH . 'wp-admin/includes/image.php';
 
-                            $upload = wp_handle_upload( $file, [ 
-                                'test_form' => false,
-                                'mimes'     => $allowed_mimes,
-                            ] );
+                        $upload = wp_handle_upload( $file, [ 
+                            'test_form' => false,
+                            'mimes'     => $allowed_mimes,
+                        ] );
+                        
+                        if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                            $file_path  = $upload['file'];
+                            $file_name  = basename( $file_path );
+                            $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
                             
-                            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                                $file_path  = $upload['file'];
-                                $file_name  = basename( $file_path );
-                                $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
-                                
-                                // Valida MIME type real do arquivo
-                                if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
-                                    $attachment = [
-                                        'post_title'     => sanitize_file_name( $file_name ),
-                                        'post_mime_type' => $file_type['type'],
-                                        'post_status'    => 'inherit',
-                                    ];
-                                    $attach_id = wp_insert_attachment( $attachment, $file_path );
-                                    if ( ! is_wp_error( $attach_id ) ) {
-                                        $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
-                                        wp_update_attachment_metadata( $attach_id, $attach_data );
-                                        update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
-                                    }
+                            // Valida MIME type real do arquivo
+                            if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
+                                $attachment = [
+                                    'post_title'     => sanitize_file_name( $file_name ),
+                                    'post_mime_type' => $file_type['type'],
+                                    'post_status'    => 'inherit',
+                                ];
+                                $attach_id = wp_insert_attachment( $attachment, $file_path );
+                                if ( ! is_wp_error( $attach_id ) ) {
+                                    $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+                                    wp_update_attachment_metadata( $attach_id, $attach_data );
+                                    update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
                                 }
                             }
                         }
@@ -514,7 +522,7 @@ final class DPS_Client_Portal {
                 }
             }
 
-            $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
+            $redirect_url = add_query_arg( 'portal_msg', 'pet_updated', $redirect_url );
         } elseif ( 'send_message' === $action ) {
             $subject = isset( $_POST['message_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['message_subject'] ) ) : '';
             $content = isset( $_POST['message_body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message_body'] ) ) : '';
@@ -1039,7 +1047,16 @@ final class DPS_Client_Portal {
         
         // Header com título e botão de logout
         echo '<div class="dps-portal-header">';
-        echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        
+        // Saudação personalizada com nome do cliente
+        $client_name = get_the_title( $client_id );
+        if ( $client_name ) {
+            echo '<h1 class="dps-portal-title">';
+            echo esc_html( sprintf( __( 'Olá, %s 👋', 'dps-client-portal' ), $client_name ) );
+            echo '</h1>';
+        } else {
+            echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        }
         
         // Botão de logout
         $session_manager = DPS_Portal_Session_Manager::get_instance();
@@ -1050,44 +1067,65 @@ final class DPS_Client_Portal {
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
+        // Breadcrumb simples para contexto
+        echo '<nav class="dps-portal-breadcrumb" aria-label="' . esc_attr__( 'Navegação', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-portal-breadcrumb__item">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-portal-breadcrumb__separator">›</span>';
+        echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        echo '</nav>';
+        
         // Define tabs padrão (Fase 2.3)
         $default_tabs = [
             'inicio' => [
                 'icon'  => '🏠',
                 'label' => __( 'Início', 'dps-client-portal' ),
                 'active' => true,
+                'badge' => 0,
             ],
             'agendamentos' => [
                 'icon'  => '📅',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => $this->count_upcoming_appointments( $client_id ),
             ],
             'galeria' => [
                 'icon'  => '📸',
                 'label' => __( 'Galeria', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => 0,
             ],
             'dados' => [
                 'icon'  => '⚙️',
                 'label' => __( 'Meus Dados', 'dps-client-portal' ),
                 'active' => false,
+                'badge' => 0,
             ],
         ];
         
         // Filtro: Permite add-ons modificarem tabs (Fase 2.3)
         $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
         
-        // Navegação por Tabs
+        // Navegação por Tabs com badges
         echo '<nav class="dps-portal-tabs" role="tablist">';
         foreach ( $tabs as $tab_id => $tab ) {
             $is_active = isset( $tab['active'] ) && $tab['active'];
             $class = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' );
+            $badge_count = isset( $tab['badge'] ) ? absint( $tab['badge'] ) : 0;
+            
             echo '<div class="dps-portal-tabs__item">';
             echo '<button class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '">';
             if ( isset( $tab['icon'] ) ) {
                 echo '<span class="dps-portal-tabs__icon">' . esc_html( $tab['icon'] ) . '</span>';
             }
             echo '<span class="dps-portal-tabs__text">' . esc_html( $tab['label'] ) . '</span>';
+            
+            // Badge de notificação
+            if ( $badge_count > 0 ) {
+                echo '<span class="dps-portal-tabs__badge" aria-label="' . esc_attr( sprintf( _n( '%d item', '%d itens', $badge_count, 'dps-client-portal' ), $badge_count ) ) . '">';
+                echo esc_html( $badge_count > 9 ? '9+' : $badge_count );
+                echo '</span>';
+            }
+            
             echo '</button>';
             echo '</div>';
         }
@@ -1104,6 +1142,7 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
+        $this->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
@@ -1235,13 +1274,75 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Conta agendamentos futuros do cliente (para badge da tab)
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de agendamentos futuros.
+     * @since 2.4.0
+     */
+    private function count_upcoming_appointments( $client_id ) {
+        $today = current_time( 'Y-m-d' );
+        $args  = [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_client_id',
+                    'value'   => $client_id,
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $today,
+                    'compare' => '>=',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ];
+        
+        $appointments = get_posts( $args );
+        $count = 0;
+        
+        // Filtra por status válidos
+        foreach ( $appointments as $appt_id ) {
+            $status = get_post_meta( $appt_id, 'appointment_status', true );
+            if ( ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+                $count++;
+            }
+        }
+        
+        return $count;
+    }
+
+    /**
+     * Conta pendências financeiras do cliente (para badge da tab)
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de pendências.
+     * @since 2.4.0
+     */
+    private function count_financial_pending( $client_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        $count = $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')",
+            $client_id
+        ) );
+        
+        return absint( $count );
+    }
+
+    /**
      * Renderiza seção do próximo agendamento.
      *
      * @param int $client_id ID do cliente.
      */
     private function render_next_appointment( $client_id ) {
         echo '<section id="proximos" class="dps-portal-section dps-portal-next">';
-        echo '<h2>' . esc_html__( 'Próximo Agendamento', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '📅 Seu Próximo Horário', 'dps-client-portal' ) . '</h2>';
         $today     = current_time( 'Y-m-d' );
         $args      = [
             'post_type'      => 'dps_agendamento',
@@ -1341,7 +1442,7 @@ final class DPS_Client_Portal {
         // Busca transações com status em aberto
         $pendings = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')", $client_id ) );
         echo '<section id="pendencias" class="dps-portal-section dps-portal-finances">';
-        echo '<h2>' . esc_html__( 'Pendências Financeiras', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '💳 Pagamentos Pendentes', 'dps-client-portal' ) . '</h2>';
         
         if ( $pendings ) {
             // Calcula total de pendências
@@ -1350,17 +1451,25 @@ final class DPS_Client_Portal {
                 $total += (float) $trans->valor;
             }
             
-            // Alert de pendências
-            echo '<div class="dps-alert dps-alert--warning">';
-            echo '<div class="dps-alert__content">';
-            echo '⚠️ ' . esc_html( sprintf( 
-                _n( 'Você tem %d pendência totalizando R$ %s.', 'Você tem %d pendências totalizando R$ %s.', count( $pendings ), 'dps-client-portal' ),
-                count( $pendings ),
-                number_format( $total, 2, ',', '.' )
-            ) );
+            // Card de resumo de pendências com destaque
+            echo '<div class="dps-financial-summary">';
+            echo '<div class="dps-financial-summary__icon">⚠️</div>';
+            echo '<div class="dps-financial-summary__content">';
+            echo '<div class="dps-financial-summary__title">' . esc_html( sprintf( 
+                _n( '%d Pendência', '%d Pendências', count( $pendings ), 'dps-client-portal' ),
+                count( $pendings )
+            ) ) . '</div>';
+            echo '<div class="dps-financial-summary__amount">R$ ' . esc_html( number_format( $total, 2, ',', '.' ) ) . '</div>';
+            echo '</div>';
+            echo '<div class="dps-financial-summary__action">';
+            echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
+            echo esc_html__( 'Ver Detalhes', 'dps-client-portal' );
+            echo '</button>';
             echo '</div>';
             echo '</div>';
             
+            // Tabela de detalhes (inicialmente oculta em mobile)
+            echo '<div id="financial-details" class="dps-financial-details">';
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Descrição', 'dps-client-portal' ) . '</th>';
@@ -1381,21 +1490,150 @@ final class DPS_Client_Portal {
                 wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
                 echo '<input type="hidden" name="dps_client_portal_action" value="pay_transaction">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $trans->id ) . '">';
-                echo '<button type="submit" class="button button-secondary dps-btn-pay">' . esc_html__( 'Pagar', 'dps-client-portal' ) . '</button>';
+                echo '<button type="submit" class="button button-secondary dps-btn-pay">' . esc_html__( 'Pagar Agora', 'dps-client-portal' ) . '</button>';
                 echo '</form>';
                 echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
+            echo '</div>'; // .dps-financial-details
         } else {
-            // Estado vazio positivo
-            echo '<div class="dps-alert dps-alert--success">';
-            echo '<div class="dps-alert__content">';
-            echo '✅ ' . esc_html__( 'Parabéns! Você está em dia com seus pagamentos.', 'dps-client-portal' );
+            // Estado "em dia" positivo
+            echo '<div class="dps-financial-summary dps-financial-summary--positive">';
+            echo '<div class="dps-financial-summary__icon">😊</div>';
+            echo '<div class="dps-financial-summary__content">';
+            echo '<div class="dps-financial-summary__title">' . esc_html__( 'Tudo em Dia!', 'dps-client-portal' ) . '</div>';
+            echo '<div class="dps-financial-summary__message">' . esc_html__( 'Você não tem pagamentos pendentes', 'dps-client-portal' ) . '</div>';
             echo '</div>';
             echo '</div>';
         }
         echo '</section>';
+    }
+
+    /**
+     * Renderiza sugestões contextuais baseadas no histórico do cliente.
+     * Fase 2: Personalização da experiência
+     *
+     * @param int $client_id ID do cliente.
+     * @since 2.4.0
+     */
+    private function render_contextual_suggestions( $client_id ) {
+        // Busca pets do cliente
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_key'       => 'owner_id',
+            'meta_value'     => $client_id,
+            'fields'         => 'ids',
+        ] );
+        
+        if ( empty( $pets ) ) {
+            return; // Sem pets, sem sugestões
+        }
+        
+        // Busca último agendamento de cada pet
+        $suggestions = [];
+        $today = current_time( 'Y-m-d' );
+        
+        foreach ( $pets as $pet_id ) {
+            $last_appointment = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'appointment_client_id',
+                        'value'   => $client_id,
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => 'appointment_pet_id',
+                        'value'   => $pet_id,
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => 'appointment_status',
+                        'value'   => ['finalizado', 'finalizado e pago', 'finalizado_pago'],
+                        'compare' => 'IN',
+                    ],
+                ],
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_date',
+                'order'          => 'DESC',
+            ] );
+            
+            if ( ! empty( $last_appointment ) ) {
+                $appt_id = $last_appointment[0]->ID;
+                $appt_date = get_post_meta( $appt_id, 'appointment_date', true );
+                $services = get_post_meta( $appt_id, 'appointment_services', true );
+                
+                if ( $appt_date ) {
+                    $days_since = floor( ( strtotime( $today ) - strtotime( $appt_date ) ) / DAY_IN_SECONDS );
+                    
+                    // Sugestão se faz mais de 30 dias
+                    if ( $days_since >= 30 ) {
+                        $pet_name = get_the_title( $pet_id );
+                        $service_name = is_array( $services ) && ! empty( $services ) ? $services[0] : __( 'banho', 'dps-client-portal' );
+                        
+                        $suggestions[] = [
+                            'pet_name'     => $pet_name,
+                            'days_since'   => $days_since,
+                            'service_name' => $service_name,
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Renderiza sugestões se houver
+        if ( ! empty( $suggestions ) ) {
+            echo '<section class="dps-portal-section dps-portal-suggestions">';
+            echo '<h2>💡 ' . esc_html__( 'Sugestões para Você', 'dps-client-portal' ) . '</h2>';
+            
+            foreach ( $suggestions as $suggestion ) {
+                echo '<div class="dps-suggestion-card">';
+                echo '<div class="dps-suggestion-card__icon">🐾</div>';
+                echo '<div class="dps-suggestion-card__content">';
+                echo '<p class="dps-suggestion-card__message">';
+                echo esc_html( sprintf(
+                    _n( 
+                        'Já faz %d dia desde o último %s do %s.',
+                        'Já faz %d dias desde o último %s do %s.',
+                        $suggestion['days_since'],
+                        'dps-client-portal'
+                    ),
+                    $suggestion['days_since'],
+                    $suggestion['service_name'],
+                    $suggestion['pet_name']
+                ) );
+                echo '</p>';
+                echo '<p class="dps-suggestion-card__cta">';
+                
+                // Link para agendar via WhatsApp
+                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                    $message = sprintf( __( 'Olá! Gostaria de agendar %s para o %s.', 'dps-client-portal' ), $suggestion['service_name'], $suggestion['pet_name'] );
+                    $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $message );
+                } else {
+                    $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+                    if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                        $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                    }
+                    $message_text = urlencode( sprintf( 'Olá! Gostaria de agendar %s para o %s.', $suggestion['service_name'], $suggestion['pet_name'] ) );
+                    $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $message_text;
+                }
+                
+                echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-suggestion-card__button">';
+                echo '📅 ' . esc_html__( 'Agendar Agora', 'dps-client-portal' );
+                echo '</a>';
+                echo '</p>';
+                echo '</div>';
+                echo '</div>';
+            }
+            
+            echo '</section>';
+        }
     }
 
     /**
@@ -1452,7 +1690,7 @@ final class DPS_Client_Portal {
         }
         
         echo '<section id="historico" class="dps-portal-section dps-portal-history">';
-        echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>' . esc_html__( '📋 Histórico de Serviços', 'dps-client-portal' ) . '</h2>';
         if ( $appointments ) {
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
@@ -2064,109 +2302,61 @@ final class DPS_Client_Portal {
      *
      * @return string Conteúdo HTML renderizado.
      */
+    /**
+     * Renderiza shortcode de login (DEPRECIADO)
+     * 
+     * ESTE SHORTCODE FOI DESCONTINUADO EM FAVOR DO LOGIN EXCLUSIVO POR TOKEN (MAGIC LINK)
+     * 
+     * O login por usuário/senha do Cliente Portal foi removido por questões de segurança
+     * e usabilidade. O sistema agora utiliza EXCLUSIVAMENTE autenticação por token via
+     * link único (magic link) enviado por WhatsApp ou e-mail.
+     * 
+     * Para obter acesso ao portal, o cliente deve:
+     * 1. Acessar a página do portal
+     * 2. Clicar em "Quero acesso ao meu portal"
+     * 3. Aguardar a equipe enviar o link de acesso
+     * 4. Clicar no link recebido para autenticar
+     * 
+     * @deprecated 2.4.0 Use apenas autenticação por token via [dps_client_portal]
+     * @return string Mensagem de depreciação
+     */
     public function render_login_shortcode() {
-        if ( is_user_logged_in() ) {
-            $redirect_url = dps_get_portal_page_url();
-            wp_safe_redirect( $redirect_url );
-            exit;
-        }
-
-        $feedback    = '';
-        $ip_address  = $this->get_client_ip();
-        $attempt_key = $ip_address && 'unknown' !== $ip_address ? 'dps_client_login_attempts_' . md5( $ip_address ) : '';
-        $attempts    = 0;
-        if ( $attempt_key ) {
-            $stored_attempts = get_transient( $attempt_key );
-            $attempts        = false !== $stored_attempts ? absint( $stored_attempts ) : 0;
-        }
-        $max_attempt = 5;
-        $lock_time   = 15 * MINUTE_IN_SECONDS;
-
-        if ( $attempts >= $max_attempt ) {
-            $feedback = esc_html__( 'Muitas tentativas de login. Tente novamente em alguns minutos.', 'dps-client-portal' );
-            // Registra bloqueio por excesso de tentativas
-            $this->log_security_event( 'login_blocked', [
-                'ip'       => $ip_address,
-                'attempts' => $attempts,
-            ] );
-        }
-
-        if ( isset( $_POST['dps_client_login_action'] ) && ! $feedback ) {
-            $nonce = isset( $_POST['_dps_client_login_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_client_login_nonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_client_login_action' ) ) {
-                $feedback = esc_html__( 'Falha na verificação do formulário.', 'dps-client-portal' );
-                $this->log_security_event( 'login_nonce_failed', [
-                    'ip' => $ip_address,
-                ] );
-            } else {
-                $login    = isset( $_POST['dps_client_login'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_client_login'] ) ) : '';
-                // Senha não é sanitizada mas é validada (mínimo 1 caractere)
-                $password = isset( $_POST['dps_client_password'] ) ? wp_unslash( $_POST['dps_client_password'] ) : '';
-                
-                // Validação básica de senha
-                if ( empty( $password ) || strlen( $password ) < 1 ) {
-                    $feedback = esc_html__( 'Por favor, informe uma senha válida.', 'dps-client-portal' );
-                } elseif ( empty( $login ) ) {
-                    $feedback = esc_html__( 'Por favor, informe o usuário ou e-mail.', 'dps-client-portal' );
-                } else {
-                    $creds = [
-                        'user_login'    => $login,
-                        'user_password' => $password,
-                        'remember'      => true,
-                    ];
-
-                    $user = wp_signon( $creds, false );
-
-                    if ( is_wp_error( $user ) ) {
-                        $feedback = esc_html__( 'Não foi possível acessar. Verifique seus dados e tente novamente.', 'dps-client-portal' );
-
-                        if ( $attempt_key ) {
-                            $attempts++;
-                            set_transient( $attempt_key, $attempts, $lock_time );
-                        }
-                        
-                        // Registra tentativa de login falha (não expõe senha)
-                        $this->log_security_event( 'login_failed', [
-                            'ip'       => $ip_address,
-                            'attempts' => $attempts,
-                        ] );
-                    } else {
-                        if ( $attempt_key ) {
-                            delete_transient( $attempt_key );
-                        }
-
-                        wp_set_current_user( $user->ID );
-                        wp_set_auth_cookie( $user->ID, true );
-                        
-                        // Registra login bem-sucedido
-                        $this->log_security_event( 'login_success', [
-                            'user_id' => $user->ID,
-                            'ip'      => $ip_address,
-                        ], DPS_Logger::LEVEL_INFO );
-
-                        $redirect_url = dps_get_portal_page_url();
-                        wp_safe_redirect( $redirect_url );
-                        exit;
-                    }
-                }
-            }
-        }
-
+        // Log de uso do shortcode depreciado
+        $this->log_security_event( 'deprecated_login_shortcode_used', [
+            'ip'  => $this->get_client_ip(),
+            'url' => isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '',
+        ] );
+        
         ob_start();
-
-        if ( $feedback ) {
-            echo '<div class="notice notice-error"><p>' . esc_html( $feedback ) . '</p></div>';
-        }
-
-        echo '<form method="post" class="dps-client-login-form">';
-        wp_nonce_field( 'dps_client_login_action', '_dps_client_login_nonce' );
-        echo '<p><label>' . esc_html__( 'Usuário ou e-mail', 'dps-client-portal' ) . '<br />';
-        echo '<input type="text" name="dps_client_login" value="" autocomplete="username" required></label></p>';
-        echo '<p><label>' . esc_html__( 'Senha', 'dps-client-portal' ) . '<br />';
-        echo '<input type="password" name="dps_client_password" value="" autocomplete="current-password" required></label></p>';
-        echo '<p><button type="submit" name="dps_client_login_action" class="button button-primary">' . esc_html__( 'Entrar', 'dps-client-portal' ) . '</button></p>';
-        echo '</form>';
-
+        ?>
+        <div class="dps-deprecated-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #856404;">
+                <?php esc_html_e( 'Método de Login Descontinuado', 'dps-client-portal' ); ?>
+            </h3>
+            <p style="margin-bottom: 15px;">
+                <?php esc_html_e( 'O login por usuário e senha não está mais disponível no Portal do Cliente.', 'dps-client-portal' ); ?>
+            </p>
+            <p style="margin-bottom: 15px;">
+                <strong><?php esc_html_e( 'Como acessar o portal agora:', 'dps-client-portal' ); ?></strong>
+            </p>
+            <ol style="margin-left: 20px;">
+                <li><?php esc_html_e( 'Acesse a página do Portal do Cliente', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Clique no botão "Quero acesso ao meu portal"', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Aguarde nossa equipe enviar seu link exclusivo de acesso', 'dps-client-portal' ); ?></li>
+                <li><?php esc_html_e( 'Clique no link recebido para acessar automaticamente', 'dps-client-portal' ); ?></li>
+            </ol>
+            <?php 
+            $portal_url = dps_get_portal_page_url();
+            if ( $portal_url ) : 
+            ?>
+                <p style="margin-top: 20px;">
+                    <a href="<?php echo esc_url( $portal_url ); ?>" class="button button-primary">
+                        <?php esc_html_e( 'Ir para o Portal do Cliente', 'dps-client-portal' ); ?>
+                    </a>
+                </p>
+            <?php endif; ?>
+        </div>
+        <?php
         return ob_get_clean();
     }
     
@@ -2270,6 +2460,10 @@ final class DPS_Client_Portal {
             update_option( 'dps_portal_page_id', $page_id );
         }
         
+        // Salva configuração de notificação de acesso (Fase 1.3)
+        $access_notification = isset( $_POST['dps_portal_access_notification_enabled'] ) ? 1 : 0;
+        update_option( 'dps_portal_access_notification_enabled', $access_notification );
+        
         // Redireciona com mensagem de sucesso
         $redirect_url = add_query_arg( [
             'tab'                       => 'portal',
@@ -2359,6 +2553,120 @@ final class DPS_Client_Portal {
 
         $message = sprintf( 'Portal security event: %s', $event );
         DPS_Logger::log( $level, $message, $safe_context, 'client-portal' );
+    }
+
+    /**
+     * Envia notificação de acesso ao portal para o cliente
+     * 
+     * Notifica o cliente via e-mail quando ocorre um acesso bem-sucedido ao portal.
+     * Aumenta a segurança e transparência, permitindo que o cliente identifique
+     * acessos não autorizados.
+     * 
+     * CONFIGURAÇÃO:
+     * A notificação pode ser ativada/desativada via option 'dps_portal_access_notification_enabled'
+     * 
+     * CONTEÚDO DO E-MAIL:
+     * - Data e hora do acesso
+     * - Endereço IP (primeiros 3 octetos ofuscados para privacidade)
+     * - Mensagem de segurança: "Se não foi você, entre em contato imediatamente"
+     * 
+     * @param int    $client_id  ID do cliente que acessou o portal
+     * @param string $ip_address IP do acesso
+     * @return void
+     * 
+     * @since 2.4.0
+     */
+    private function send_access_notification( $client_id, $ip_address ) {
+        // Verifica se notificações estão habilitadas
+        $notifications_enabled = get_option( 'dps_portal_access_notification_enabled', false );
+        
+        // Permite filtro para controle por add-ons
+        $notifications_enabled = apply_filters( 'dps_portal_access_notification_enabled', $notifications_enabled, $client_id );
+        
+        if ( ! $notifications_enabled ) {
+            return;
+        }
+        
+        // Obtém dados do cliente
+        $client_email = get_post_meta( $client_id, 'client_email', true );
+        $client_name  = get_the_title( $client_id );
+        
+        if ( empty( $client_email ) || ! is_email( $client_email ) ) {
+            DPS_Logger::log( 'warning', 'Portal: notificação de acesso não enviada - e-mail inválido', [
+                'client_id' => $client_id,
+            ] );
+            return;
+        }
+        
+        // Formata data/hora do acesso
+        $access_time = current_time( 'mysql' );
+        $access_date = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $access_time ) );
+        
+        // Ofusca IP parcialmente para privacidade (mantém apenas primeiros 2 octetos)
+        // Nota: Implementação atual suporta apenas IPv4
+        $ip_parts      = explode( '.', $ip_address );
+        $ip_obfuscated = isset( $ip_parts[0], $ip_parts[1] ) && count( $ip_parts ) === 4
+            ? $ip_parts[0] . '.' . $ip_parts[1] . '.***' 
+            : 'desconhecido';
+        
+        // Monta o corpo do e-mail
+        $subject = sprintf(
+            /* translators: %s: Nome do site */
+            __( 'Acesso ao Portal - %s', 'dps-client-portal' ),
+            get_bloginfo( 'name' )
+        );
+        
+        $body = sprintf(
+            /* translators: 1: Nome do cliente, 2: Data/hora do acesso, 3: IP ofuscado */
+            __( 'Olá %1$s,
+
+Detectamos um acesso ao seu Portal do Cliente.
+
+Data/Hora: %2$s
+IP: %3$s
+
+Se você reconhece este acesso, pode ignorar esta mensagem. Ela é apenas uma notificação de segurança para mantê-lo informado.
+
+⚠️ IMPORTANTE: Se você NÃO realizou este acesso, entre em contato com nossa equipe IMEDIATAMENTE. Pode ser que alguém tenha obtido seu link de acesso indevidamente.
+
+Atenciosamente,
+Equipe %4$s', 'dps-client-portal' ),
+            $client_name,
+            $access_date,
+            $ip_obfuscated,
+            get_bloginfo( 'name' )
+        );
+        
+        // Permite filtrar assunto e corpo
+        $subject = apply_filters( 'dps_portal_access_notification_subject', $subject, $client_id );
+        $body    = apply_filters( 'dps_portal_access_notification_body', $body, $client_id, $access_date, $ip_obfuscated );
+        
+        // Tenta usar Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $comm_api = DPS_Communications_API::get_instance();
+            $sent     = $comm_api->send_email( 
+                $client_email, 
+                $subject, 
+                $body, 
+                [
+                    'client_id' => $client_id,
+                    'type'      => 'portal_access_notification',
+                ] 
+            );
+        } else {
+            // Fallback para wp_mail
+            $sent = wp_mail( $client_email, $subject, $body );
+        }
+        
+        if ( ! $sent ) {
+            DPS_Logger::log( 'error', 'Portal: falha ao enviar notificação de acesso', [
+                'client_id' => $client_id,
+                'email'     => $client_email,
+            ] );
+        }
+        
+        // Hook para extensões (ex: enviar também via WhatsApp)
+        do_action( 'dps_portal_access_notification_sent', $client_id, $sent, $access_date, $ip_address );
     }
 
     /**

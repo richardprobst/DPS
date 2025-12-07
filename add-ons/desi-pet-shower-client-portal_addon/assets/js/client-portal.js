@@ -29,6 +29,8 @@
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
+        handleToggleDetails(); // Phase 2: toggle for financial details
+        handlePortalMessages(); // Phase 2: feedback for actions
         initChatWidget();
     }
 
@@ -532,6 +534,91 @@
                 }
             });
         });
+    }
+
+    /**
+     * Gerencia toggle de detalhes (ex: detalhes financeiros)
+     * Phase 2: melhor UX em mobile com collapse/expand
+     */
+    function handleToggleDetails() {
+        var toggleButtons = document.querySelectorAll('.dps-btn-toggle-details');
+        
+        toggleButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                var targetId = this.getAttribute('data-target');
+                var target = document.getElementById(targetId);
+                
+                if (target) {
+                    // Toggle visibility
+                    if (target.style.display === 'none') {
+                        target.style.display = 'block';
+                        this.textContent = 'Ocultar Detalhes';
+                    } else {
+                        target.style.display = 'none';
+                        this.textContent = 'Ver Detalhes';
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Exibe toasts baseados em mensagens da URL (após ações do cliente)
+     * Phase 2: Feedback de ações
+     */
+    function handlePortalMessages() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var message = urlParams.get('portal_msg');
+        
+        if (!message) {
+            return;
+        }
+        
+        // Remove o parâmetro da URL
+        if (window.history && window.history.replaceState) {
+            var cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+        
+        // Mapeia mensagens para toasts
+        var messages = {
+            'updated': {
+                type: 'success',
+                title: 'Sucesso!',
+                message: 'Seus dados foram atualizados com sucesso.'
+            },
+            'pet_updated': {
+                type: 'success',
+                title: 'Sucesso!',
+                message: 'Dados do pet atualizados com sucesso.'
+            },
+            'message_sent': {
+                type: 'success',
+                title: 'Mensagem Enviada',
+                message: 'Sua mensagem foi enviada para a equipe.'
+            },
+            'error': {
+                type: 'error',
+                title: 'Erro',
+                message: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.'
+            },
+            'unauthorized': {
+                type: 'error',
+                title: 'Acesso Negado',
+                message: 'Você não tem permissão para acessar este recurso.'
+            }
+        };
+        
+        var toastData = messages[message] || messages.error;
+        
+        // Aguarda DPSToast estar disponível
+        setTimeout(function() {
+            if (window.DPSToast) {
+                window.DPSToast.show(toastData.title, toastData.message, toastData.type, 5000);
+            }
+        }, 500);
     }
 
     // Inicializa quando DOM estiver pronto
