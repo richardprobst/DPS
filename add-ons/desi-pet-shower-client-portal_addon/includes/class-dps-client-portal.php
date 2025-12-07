@@ -1365,6 +1365,37 @@ final class DPS_Client_Portal {
             'order'          => 'DESC',
         ];
         $appointments = get_posts( $args );
+        
+        // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
+        if ( $appointments ) {
+            $appt_ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $appt_ids );
+            
+            // OTIMIZAÇÃO: Batch load de pets para evitar queries individuais
+            $pet_ids = [];
+            foreach ( $appointments as $appt ) {
+                $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $pet_ids[] = $pet_id;
+                }
+            }
+            
+            $pets_cache = [];
+            if ( ! empty( $pet_ids ) ) {
+                $pets = get_posts( [
+                    'post_type'      => 'dps_pet',
+                    'post__in'       => array_unique( $pet_ids ),
+                    'posts_per_page' => -1,
+                    'fields'         => 'ids', // Apenas IDs, mais eficiente
+                ] );
+                
+                // Cria cache de nomes de pets
+                foreach ( $pets as $pet_id ) {
+                    $pets_cache[ $pet_id ] = get_the_title( $pet_id );
+                }
+            }
+        }
+        
         echo '<section id="historico" class="dps-portal-section dps-portal-history">';
         echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'dps-client-portal' ) . '</h2>';
         if ( $appointments ) {
@@ -1376,12 +1407,16 @@ final class DPS_Client_Portal {
             echo '<th>' . esc_html__( 'Status', 'dps-client-portal' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $appointments as $appt ) {
-                $date   = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time   = get_post_meta( $appt->ID, 'appointment_time', true );
-                $status = get_post_meta( $appt->ID, 'appointment_status', true );
-                $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $pet_name = $pet_id ? get_the_title( $pet_id ) : '';
+                // Meta já em cache, sem queries adicionais
+                $date     = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time     = get_post_meta( $appt->ID, 'appointment_time', true );
+                $status   = get_post_meta( $appt->ID, 'appointment_status', true );
+                $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                 $services = get_post_meta( $appt->ID, 'appointment_services', true );
+                
+                // Usa cache de pets ao invés de get_the_title()
+                $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+                
                 if ( is_array( $services ) ) {
                     $services = implode( ', ', array_map( 'esc_html', $services ) );
                 } else {
@@ -1416,11 +1451,19 @@ final class DPS_Client_Portal {
             'meta_key'       => 'owner_id',
             'meta_value'     => $client_id,
         ] );
+        
+        // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
+        if ( $pets ) {
+            $pet_ids = wp_list_pluck( $pets, 'ID' );
+            update_meta_cache( 'post', $pet_ids );
+        }
+        
         echo '<section id="galeria" class="dps-portal-section dps-portal-gallery">';
         echo '<h2>' . esc_html__( 'Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
         if ( $pets ) {
             echo '<div class="dps-portal-gallery-grid">';
             foreach ( $pets as $pet ) {
+                // Meta já em cache, sem queries adicionais
                 $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
                 $pet_name = $pet->post_title;
                 echo '<div class="dps-portal-photo-item">';
