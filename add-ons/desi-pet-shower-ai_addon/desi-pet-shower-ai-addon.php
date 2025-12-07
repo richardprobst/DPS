@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Assistente virtual inteligente para o Portal do Cliente e chat público para visitantes. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics, agendamento via chat e chat público via shortcode.
- * Version:           1.6.0
+ * Version:           1.6.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
@@ -74,7 +74,7 @@ if ( ! defined( 'DPS_AI_ADDON_URL' ) ) {
 }
 
 if ( ! defined( 'DPS_AI_VERSION' ) ) {
-    define( 'DPS_AI_VERSION', '1.6.0' );
+    define( 'DPS_AI_VERSION', '1.6.1' );
 }
 
 /**
@@ -113,6 +113,7 @@ function dps_ai_load_textdomain() {
 add_action( 'init', 'dps_ai_load_textdomain', 1 );
 
 // Inclui as classes principais ANTES dos hooks de ativação/desativação.
+require_once DPS_AI_ADDON_DIR . 'includes/dps-ai-logger.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';
@@ -121,6 +122,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-analytics.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-knowledge-base.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -208,9 +210,14 @@ function dps_ai_activate() {
 register_activation_hook( __FILE__, 'dps_ai_activate' );
 
 /**
- * Desativação do plugin: limpa transients temporários.
+ * Desativação do plugin: limpa transients temporários e desagenda cron jobs.
  */
 function dps_ai_deactivate() {
+    // Desagenda evento de limpeza automática
+    if ( class_exists( 'DPS_AI_Maintenance' ) ) {
+        DPS_AI_Maintenance::unschedule_cleanup();
+    }
+    
     // Limpa transients de contexto (são temporários, não precisam persistir)
     global $wpdb;
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Necessário para limpeza de transients na desativação
@@ -319,6 +326,11 @@ class DPS_AI_Addon {
         // Chat público para visitantes (v1.6.0+)
         if ( class_exists( 'DPS_AI_Public_Chat' ) ) {
             DPS_AI_Public_Chat::get_instance();
+        }
+
+        // Manutenção automática (v1.6.1+)
+        if ( class_exists( 'DPS_AI_Maintenance' ) ) {
+            DPS_AI_Maintenance::get_instance();
         }
     }
 
@@ -647,6 +659,75 @@ class DPS_AI_Addon {
                     </tbody>
                 </table>
 
+                <!-- Seção: Manutenção e Logs (v1.6.1+) -->
+                <h2><?php esc_html_e( 'Manutenção e Logs', 'dps-ai' ); ?></h2>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_data_retention_days"><?php echo esc_html__( 'Período de Retenção de Dados', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="dps_ai_data_retention_days" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[data_retention_days]" value="<?php echo esc_attr( $options['data_retention_days'] ?? '365' ); ?>" min="30" max="3650" step="1" class="small-text" />
+                                <span><?php esc_html_e( 'dias', 'dps-ai' ); ?></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Dados de métricas e feedback mais antigos que este período serão automaticamente deletados.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Padrão: 365 dias (1 ano). Mínimo: 30 dias. Máximo: 3650 dias (10 anos).', 'dps-ai' ); ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_debug_logging"><?php echo esc_html__( 'Habilitar Logs Detalhados', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="dps_ai_debug_logging" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[debug_logging]" value="1" <?php checked( ! empty( $options['debug_logging'] ) ); ?> />
+                                    <?php esc_html_e( 'Ativar logging detalhado em ambiente de produção', 'dps-ai' ); ?>
+                                </label>
+                                <p class="description">
+                                    <?php esc_html_e( 'Quando desativado, apenas erros críticos são registrados em produção (WP_DEBUG desabilitado).', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Habilite temporariamente para diagnosticar problemas. Logs excessivos podem consumir espaço em disco.', 'dps-ai' ); ?>
+                                    <?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
+                                        <br />
+                                        <strong style="color: #d97706;"><?php esc_html_e( 'WP_DEBUG está habilitado. Logs detalhados sempre estarão ativos.', 'dps-ai' ); ?></strong>
+                                    <?php endif; ?>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <?php echo esc_html__( 'Limpeza Manual', 'dps-ai' ); ?>
+                            </th>
+                            <td>
+                                <button type="button" id="dps_ai_manual_cleanup" class="button">
+                                    <?php esc_html_e( 'Executar Limpeza Agora', 'dps-ai' ); ?>
+                                </button>
+                                <span id="dps_ai_cleanup_result" style="margin-left: 10px; display: none;"></span>
+                                <p class="description">
+                                    <?php esc_html_e( 'Remove dados antigos, transients expirados e otimiza o banco de dados.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php
+                                    $stats = DPS_AI_Maintenance::get_storage_stats();
+                                    printf(
+                                        /* translators: 1: número de métricas, 2: número de feedbacks, 3: data mais antiga métrica, 4: data mais antiga feedback */
+                                        esc_html__( 'Atualmente: %1$s métricas, %2$s feedbacks. Dados mais antigos: %3$s (métricas), %4$s (feedback).', 'dps-ai' ),
+                                        '<strong>' . esc_html( number_format_i18n( $stats['metrics_count'] ) ) . '</strong>',
+                                        '<strong>' . esc_html( number_format_i18n( $stats['feedback_count'] ) ) . '</strong>',
+                                        '<strong>' . esc_html( $stats['oldest_metric'] ) . '</strong>',
+                                        '<strong>' . esc_html( $stats['oldest_feedback'] ) . '</strong>'
+                                    );
+                                    ?>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 20px 0;">
                     <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #0284c7;"><?php esc_html_e( 'Como usar o Chat Público', 'dps-ai' ); ?></h3>
                     <p style="margin: 0 0 10px 0;"><?php esc_html_e( 'Adicione o shortcode em qualquer página do seu site:', 'dps-ai' ); ?></p>
@@ -742,6 +823,47 @@ class DPS_AI_Addon {
                     },
                     error: function() {
                         $result.html('<span style="color: #ef4444;">✗ <?php echo esc_js( __( 'Erro de rede ao testar conexão.', 'dps-ai' ) ); ?></span>').show();
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+
+            $('#dps_ai_manual_cleanup').on('click', function(e) {
+                e.preventDefault();
+                
+                if (!confirm('<?php echo esc_js( __( 'Tem certeza que deseja executar a limpeza de dados antigos? Esta ação não pode ser desfeita.', 'dps-ai' ) ); ?>')) {
+                    return;
+                }
+                
+                var $button = $(this);
+                var $result = $('#dps_ai_cleanup_result');
+                var originalText = $button.text();
+                
+                $button.prop('disabled', true).text('<?php echo esc_js( __( 'Limpando...', 'dps-ai' ) ); ?>');
+                $result.hide();
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'dps_ai_manual_cleanup',
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_manual_cleanup' ) ); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $result.html('<span style="color: #10b981;">✓ ' + response.data.message + '</span>').show();
+                            // Recarrega a página após 2 segundos para atualizar estatísticas
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            $result.html('<span style="color: #ef4444;">✗ ' + response.data.message + '</span>').show();
+                        }
+                    },
+                    error: function() {
+                        $result.html('<span style="color: #ef4444;">✗ <?php echo esc_js( __( 'Erro de rede ao executar limpeza.', 'dps-ai' ) ); ?></span>').show();
                     },
                     complete: function() {
                         $button.prop('disabled', false).text(originalText);

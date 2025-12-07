@@ -58,7 +58,7 @@ class DPS_AI_Message_Assistant {
     public static function suggest_whatsapp_message( array $context ) {
         // Valida contexto mínimo
         if ( empty( $context['type'] ) ) {
-            error_log( 'DPS AI Message Assistant: Tipo de mensagem não especificado' );
+            dps_ai_log_error( 'Message Assistant: Tipo de mensagem não especificado' );
             return null;
         }
 
@@ -67,7 +67,7 @@ class DPS_AI_Message_Assistant {
         $user_prompt   = self::build_user_prompt_from_context( $context );
 
         if ( empty( $system_prompt ) || empty( $user_prompt ) ) {
-            error_log( 'DPS AI Message Assistant: Erro ao montar prompts' );
+            dps_ai_log_error( 'Message Assistant: Erro ao montar prompts' );
             return null;
         }
 
@@ -130,7 +130,7 @@ class DPS_AI_Message_Assistant {
     public static function suggest_email_message( array $context ) {
         // Valida contexto mínimo
         if ( empty( $context['type'] ) ) {
-            error_log( 'DPS AI Message Assistant: Tipo de mensagem não especificado' );
+            dps_ai_log_error( 'Message Assistant: Tipo de mensagem não especificado' );
             return null;
         }
 
@@ -139,7 +139,7 @@ class DPS_AI_Message_Assistant {
         $user_prompt   = self::build_user_prompt_from_context( $context );
 
         if ( empty( $system_prompt ) || empty( $user_prompt ) ) {
-            error_log( 'DPS AI Message Assistant: Erro ao montar prompts' );
+            dps_ai_log_error( 'Message Assistant: Erro ao montar prompts' );
             return null;
         }
 
@@ -194,7 +194,7 @@ class DPS_AI_Message_Assistant {
         $parsed = self::parse_email_response( $response );
 
         if ( null === $parsed ) {
-            error_log( 'DPS AI Message Assistant: Erro ao fazer parse da resposta de e-mail' );
+            dps_ai_log_error( 'Message Assistant: Erro ao fazer parse da resposta de e-mail' );
             return null;
         }
 

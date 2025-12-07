@@ -81,6 +81,37 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+- **AI Add-on (v1.6.1)**: Limpeza Automática de Dados Antigos
+  - Implementada rotina de limpeza automática via WP-Cron para deletar métricas e feedback com mais de 365 dias (configurável)
+  - Criada classe `DPS_AI_Maintenance` em `includes/class-dps-ai-maintenance.php`
+  - Adicionada limpeza automática de transients expirados relacionados à IA
+  - Evento agendado para rodar diariamente às 03:00 (horário do servidor)
+  - Nova configuração "Período de Retenção de Dados" na página de settings (padrão: 365 dias, mínimo: 30, máximo: 3650)
+  - Botão de limpeza manual na página de settings com estatísticas de dados armazenados
+  - Função `DPS_AI_Maintenance::get_storage_stats()` para exibir volume de dados e registros mais antigos
+- **AI Add-on (v1.6.1)**: Logger Condicional Respeitando WP_DEBUG
+  - Criado sistema de logging condicional em `includes/dps-ai-logger.php`
+  - Funções helper: `dps_ai_log()`, `dps_ai_log_debug()`, `dps_ai_log_info()`, `dps_ai_log_warning()`, `dps_ai_log_error()`
+  - Logs detalhados (debug/info/warning) são registrados apenas quando `WP_DEBUG` está habilitado OU quando a opção "Enable debug logging" está ativa
+  - Em produção (debug desabilitado), apenas erros críticos são registrados
+  - Nova configuração "Habilitar Logs Detalhados" na página de settings
+  - Indicador visual quando `WP_DEBUG` está ativo nas configurações
+
+#### Changed (Alterado)
+- **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
+  - Refatorada classe `DPS_AI_Client::chat()` com tratamento avançado de erros
+  - Validação de array de mensagens antes de enviar requisição
+  - Tratamento específico para diferentes códigos HTTP de erro (400, 401, 429, 500, 502, 503)
+  - Adicionado try/catch para capturar exceções inesperadas
+  - Logs contextualizados com detalhes técnicos (timeout, response_time, status code, tokens_used)
+  - Validação de resposta vazia e JSON inválido antes de processar
+  - Mensagens de erro amigáveis sem expor dados sensíveis (API key, payloads, etc.)
+- **AI Add-on (v1.6.1)**: Refatoração de Logging em Todas as Classes
+  - Substituídos 7 chamadas `error_log()` por funções do novo logger condicional
+  - Afetados: `class-dps-ai-message-assistant.php` (4 ocorrências)
+  - Todos os logs agora respeitam configurações de debug do plugin
+
 #### Fixed (Corrigido)
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
   - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido
