@@ -1018,17 +1018,12 @@ final class DPS_Client_Portal {
         // Hook: Cliente autenticado (Fase 2.3)
         do_action( 'dps_portal_client_authenticated', $client_id );
         
-        // Localiza script com dados do chat
-        wp_localize_script( 'dps-client-portal', 'dpsPortalChat', [
+        // Localiza script com dados do chat e appointment requests (Fase 4)
+        wp_localize_script( 'dps-client-portal', 'dpsPortal', [
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-            'nonce'    => wp_create_nonce( 'dps_portal_chat' ),
+            'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
+            'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
             'clientId' => $client_id,
-        ] );
-        
-        // Localiza script com dados para appointment requests (Fase 4)
-        wp_localize_script( 'dps-client-portal', 'dpsPortalRequests', [
-            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-            'nonce'    => wp_create_nonce( 'dps_portal_appointment_request' ),
         ] );
         
         ob_start();

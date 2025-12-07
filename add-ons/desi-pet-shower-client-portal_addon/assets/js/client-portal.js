@@ -9,6 +9,14 @@
 (function() {
     'use strict';
 
+    // Compatibilidade: mapeia dpsPortalChat para dpsPortal para código legado
+    window.dpsPortalChat = window.dpsPortal || {};
+    if (window.dpsPortal && !window.dpsPortalChat.nonce) {
+        window.dpsPortalChat.nonce = window.dpsPortal.chatNonce;
+        window.dpsPortalChat.ajaxUrl = window.dpsPortal.ajaxUrl;
+        window.dpsPortalChat.clientId = window.dpsPortal.clientId;
+    }
+
     /**
      * Configuração do chat
      */
@@ -1194,14 +1202,14 @@ window.DPSSkeleton = (function() {
             submitBtn.textContent = 'Enviando...';
         }
         
-        fetch(dpsPortalRequests.ajaxUrl, {
+        fetch(dpsPortal.ajaxUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
                 action: 'dps_create_appointment_request',
-                nonce: dpsPortalRequests.nonce,
+                nonce: dpsPortal.requestNonce,
                 ...data
             })
         })
