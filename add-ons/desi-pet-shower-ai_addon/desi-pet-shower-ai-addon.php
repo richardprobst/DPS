@@ -115,6 +115,7 @@ add_action( 'init', 'dps_ai_load_textdomain', 1 );
 // Inclui as classes principais ANTES dos hooks de ativação/desativação.
 require_once DPS_AI_ADDON_DIR . 'includes/dps-ai-logger.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-prompts.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-email-parser.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-client.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-assistant.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-integration-portal.php';

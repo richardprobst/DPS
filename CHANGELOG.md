@@ -178,6 +178,18 @@ Antes de criar uma nova versão oficial:
   - `DPS_AI_Public_Chat::get_public_system_prompt()` agora usa `DPS_AI_Prompts::get('public')` internamente
   - `DPS_AI_Message_Assistant::build_message_system_prompt()` agora carrega prompts base de arquivos antes de adicionar instruções específicas
   - **IMPORTANTE**: Se você estava sobrescrevendo métodos de prompt diretamente, migre para os filtros `dps_ai_system_prompt` ou `dps_ai_system_prompt_{contexto}`
+- **AI Add-on (v1.6.1)**: Parser Robusto de Respostas de E-mail da IA
+  - Criada classe `DPS_AI_Email_Parser` em `includes/class-dps-ai-email-parser.php` para parsing defensivo e robusto de e-mails
+  - Suporta múltiplos formatos de resposta: JSON estruturado, formato com rótulos (ASSUNTO:/CORPO:), separado por linha vazia e texto plano
+  - Implementados fallbacks inteligentes quando formato esperado não é encontrado
+  - Validação e sanitização automática com `wp_kses_post()`, `sanitize_text_field()`, `strip_tags()`
+  - Proteção contra scripts maliciosos e conteúdo perigoso injetado pela IA
+  - Limite configurável para tamanho do assunto (padrão: 200 caracteres)
+  - Logging detalhado do processo de parsing para diagnóstico (formato usado, tamanho de subject/body, estatísticas)
+  - Método `DPS_AI_Email_Parser::text_to_html()` para converter texto plano em HTML básico
+  - Método `DPS_AI_Email_Parser::get_parse_stats()` para obter estatísticas sobre qualidade do parse
+  - Classe `DPS_AI_Message_Assistant` refatorada para usar o novo parser robusto
+  - Método `parse_email_response()` depreciado mas mantido para retrocompatibilidade
 
 #### Fixed (Corrigido)
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
