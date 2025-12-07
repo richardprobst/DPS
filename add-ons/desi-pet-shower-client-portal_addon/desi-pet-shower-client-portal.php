@@ -68,12 +68,32 @@ add_action( 'init', 'dps_client_portal_load_textdomain', 1 );
 // Inclui funções auxiliares
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/functions-portal-helpers.php';
 
-// Inclui classes principais
+// Inclui interfaces (Fase 3.1 - Dependency Injection)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/interfaces/interface-dps-portal-session-manager.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/interfaces/interface-dps-portal-token-manager.php';
+
+// Inclui classes principais (legacy)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
+
+// Inclui repositórios (Fase 3.1 - Repository Pattern)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-client-repository.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-pet-repository.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-appointment-repository.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-finance-repository.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-message-repository.php';
+
+// Inclui classes refatoradas (Fase 3 - v3.0.0)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-data-provider.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-renderer.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-actions-handler.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-ajax-handler.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-admin.php';
+
+// Inclui classe principal (coordenador)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
 /**

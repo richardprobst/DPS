@@ -18,8 +18,10 @@ if ( ! class_exists( 'DPS_Portal_Token_Manager' ) ) :
 
 /**
  * Classe responsável pelo gerenciamento de tokens do portal
+ * 
+ * @since 3.0.0 Implementa DPS_Portal_Token_Manager_Interface
  */
-final class DPS_Portal_Token_Manager {
+final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interface {
 
     /**
      * Nome da tabela de tokens (sem prefixo)

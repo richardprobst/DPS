@@ -20,8 +20,10 @@ if ( ! class_exists( 'DPS_Portal_Session_Manager' ) ) :
  * 
  * Versão 2.4.0: Migrado de $_SESSION para transients + cookies
  * para compatibilidade com ambientes multi-servidor e cloud.
+ * 
+ * @since 3.0.0 Implementa DPS_Portal_Session_Manager_Interface
  */
-final class DPS_Portal_Session_Manager {
+final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Interface {
 
     /**
      * Nome do cookie de sessão
