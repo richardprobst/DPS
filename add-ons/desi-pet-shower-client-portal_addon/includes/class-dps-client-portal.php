@@ -137,9 +137,7 @@ final class DPS_Client_Portal {
         }
 
         // Token válido - autentica o cliente
-        // Garante que a sessão está iniciada antes de autenticar
         $session_manager = DPS_Portal_Session_Manager::get_instance();
-        $session_manager->maybe_start_session();
         $authenticated   = $session_manager->authenticate_client( $token_data['client_id'] );
 
         if ( ! $authenticated ) {
@@ -212,8 +210,6 @@ final class DPS_Client_Portal {
 
         // PRIORITY 2: Tenta obter do sistema novo de sessão (cookies + transients)
         $session_manager = DPS_Portal_Session_Manager::get_instance();
-        // Garante que a sessão está iniciada antes de verificar autenticação
-        $session_manager->maybe_start_session();
         $client_id       = $session_manager->get_authenticated_client_id();
 
         if ( $client_id > 0 ) {
