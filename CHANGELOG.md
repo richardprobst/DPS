@@ -95,6 +95,19 @@ Antes de criar uma nova versão oficial:
     - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-session-manager.php`
     - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
   - **Commit**: Corrigir sintaxe setcookie() e ordem de execução de hooks
+- **AI Add-on (v1.6.1)**: Tabelas de Banco de Dados Não Criadas em Atualizações
+  - **Problema**: Usuários que atualizaram de v1.4.0 para v1.5.0+ sem desativar/reativar o plugin não tinham as tabelas `wp_dps_ai_metrics` e `wp_dps_ai_feedback` criadas, causando erros na página de analytics
+  - **Causa Raiz**: Tabelas eram criadas apenas no hook de ativação (`register_activation_hook`), que não executa durante atualizações de plugin
+  - **Solução Implementada**:
+    - Adicionado rastreamento de versão do schema via opção `dps_ai_db_version`
+    - Criada função `dps_ai_maybe_upgrade_database()` que executa em `plugins_loaded` (prioridade 10)
+    - Verifica versão instalada e cria tabelas automaticamente se necessário
+    - Segue mesmo padrão de versionamento usado em outros add-ons
+  - **Correção de SQL para dbDelta()**:
+    - Corrigido espaçamento após `PRIMARY KEY` (deve ter 2 espaços conforme requisito do WordPress)
+    - Tabelas agora são criadas corretamente em todas as instalações
+  - **Impacto**: Analytics funcionará corretamente para todos os usuários, incluindo aqueles que atualizaram sem reativar o plugin
+  - Arquivos alterados: `desi-pet-shower-ai-addon.php`, `includes/class-dps-ai-analytics.php`
 
 #### Security (Segurança)
 - **White Label Add-on (v1.1.1)**: Correções Críticas de Segurança
