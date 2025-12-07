@@ -89,6 +89,13 @@ if ( ! defined( 'DPS_AI_CAPABILITY' ) ) {
 /**
  * Versão do schema de banco de dados do AI Add-on.
  * Incrementar quando houver mudanças nas tabelas.
+ * 
+ * IMPORTANTE: Esta versão rastreia o schema do banco de dados, não a versão do plugin.
+ * - Plugin version (DPS_AI_VERSION): rastreia releases de funcionalidades (ex: 1.6.0)
+ * - DB schema version (DPS_AI_DB_VERSION): rastreia mudanças de estrutura de dados (ex: 1.5.0)
+ * 
+ * O schema DB pode permanecer estável por várias versões de plugin se não houver
+ * mudanças nas tabelas. Use versão semântica: MAJOR.MINOR.PATCH.
  *
  * @var string
  */
@@ -146,7 +153,10 @@ function dps_ai_maybe_upgrade_database() {
             DPS_AI_Analytics::maybe_create_tables();
         }
         
-        // Atualiza versão do schema para a versão atual
+        // IMPORTANTE: Atualiza versão do schema dentro do bloco de migração.
+        // Isso garante que a versão seja atualizada apenas se essa migração específica for executada.
+        // Se houver múltiplas migrações, cada uma atualiza a versão incrementalmente.
+        // A última migração executada define a versão final.
         update_option( 'dps_ai_db_version', DPS_AI_DB_VERSION );
     }
     

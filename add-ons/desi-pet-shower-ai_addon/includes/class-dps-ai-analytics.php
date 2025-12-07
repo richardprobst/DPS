@@ -74,6 +74,12 @@ class DPS_AI_Analytics {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
+        // IMPORTANTE: dbDelta() do WordPress tem requisitos estritos de formatação SQL:
+        // - Exatamente 2 espaços entre 'PRIMARY KEY' e '(' (não 1)
+        // - Usar 'KEY' em vez de 'INDEX' para índices secundários
+        // - Um espaço após cada vírgula na definição de colunas
+        // Ref: https://codex.wordpress.org/Creating_Tables_with_Plugins#Creating_or_Updating_the_Table
+
         // Tabela de métricas diárias
         $sql_metrics = "CREATE TABLE IF NOT EXISTS {$metrics_table} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
