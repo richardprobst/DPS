@@ -2373,14 +2373,15 @@ final class DPS_Client_Portal {
         $access_date = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $access_time ) );
         
         // Ofusca IP parcialmente para privacidade (mantém apenas primeiros 2 octetos)
+        // Nota: Implementação atual suporta apenas IPv4
         $ip_parts      = explode( '.', $ip_address );
-        $ip_obfuscated = isset( $ip_parts[0], $ip_parts[1] ) 
+        $ip_obfuscated = isset( $ip_parts[0], $ip_parts[1] ) && count( $ip_parts ) === 4
             ? $ip_parts[0] . '.' . $ip_parts[1] . '.***' 
             : 'desconhecido';
         
         // Monta o corpo do e-mail
         $subject = sprintf(
-            /* translators: %s: Nome do cliente */
+            /* translators: %s: Nome do site */
             __( 'Acesso ao Portal - %s', 'dps-client-portal' ),
             get_bloginfo( 'name' )
         );
