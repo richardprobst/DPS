@@ -138,14 +138,16 @@ function dps_ai_maybe_upgrade_database() {
     }
     
     // Cria ou atualiza tabelas quando necessário
+    // Nota: Cada migração verifica contra a versão onde foi introduzida (não DPS_AI_DB_VERSION)
+    // para permitir múltiplas migrações em sequência quando necessário.
     if ( version_compare( $installed_version, '1.5.0', '<' ) ) {
         // v1.5.0: Criar tabelas de analytics e feedback
         if ( class_exists( 'DPS_AI_Analytics' ) ) {
             DPS_AI_Analytics::maybe_create_tables();
         }
         
-        // Atualiza versão do schema
-        update_option( 'dps_ai_db_version', '1.5.0' );
+        // Atualiza versão do schema para a versão atual
+        update_option( 'dps_ai_db_version', DPS_AI_DB_VERSION );
     }
     
     // Futuras migrações devem ser adicionadas aqui com version_compare
