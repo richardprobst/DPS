@@ -128,6 +128,16 @@ Antes de criar uma nova versão oficial:
   - Endpoints seguros: `admin-post.php?action=dps_ai_export_metrics` e `admin-post.php?action=dps_ai_export_feedback`
   - Verificação de capability `manage_options` e nonces obrigatórios
   - Função helper centralizada `generate_csv()` para reuso de código
+- **AI Add-on (v1.6.1)**: Paginação na Listagem de Feedbacks Recentes
+  - Implementada paginação de 20 feedbacks por página no dashboard de analytics
+  - Controles de navegação padrão do WordPress: Primeira, Anterior, Próxima, Última
+  - Input para navegar diretamente a uma página específica (com validação JavaScript)
+  - Exibição do total de feedbacks e página atual
+  - URL mantém filtros de data ao navegar entre páginas
+  - Controles exibidos apenas quando há mais de uma página
+  - Parâmetro `?feedback_paged=N` na URL para controlar página atual
+  - Nova função `DPS_AI_Analytics::count_feedback()` para contar total de registros
+  - Adicionado parâmetro `$offset` na função `get_recent_feedback()` para suportar paginação
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP

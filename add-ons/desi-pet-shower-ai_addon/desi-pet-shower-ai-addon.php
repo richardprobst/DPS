@@ -1002,8 +1002,13 @@ class DPS_AI_Addon {
             $model
         );
 
-        // Obtém feedback recente
-        $recent_feedback = DPS_AI_Analytics::get_recent_feedback( 10, 'all' );
+        // Obtém feedback recente com paginação
+        $per_page = 20; // Número de feedbacks por página
+        $feedback_paged = isset( $_GET['feedback_paged'] ) ? max( 1, absint( $_GET['feedback_paged'] ) ) : 1;
+        $feedback_offset = ( $feedback_paged - 1 ) * $per_page;
+        $recent_feedback = DPS_AI_Analytics::get_recent_feedback( $per_page, 'all', $feedback_offset );
+        $total_feedback = DPS_AI_Analytics::count_feedback( 'all' );
+        $total_pages = ceil( $total_feedback / $per_page );
 
         ?>
         <div class="wrap">
@@ -1188,6 +1193,125 @@ class DPS_AI_Addon {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+
+                <!-- Paginação -->
+                <?php if ( $total_pages > 1 ) : ?>
+                    <div class="tablenav bottom">
+                        <div class="tablenav-pages">
+                            <span class="displaying-num">
+                                <?php
+                                printf(
+                                    /* translators: %s: número total de feedbacks */
+                                    esc_html( _n( '%s item', '%s itens', $total_feedback, 'dps-ai' ) ),
+                                    '<strong>' . number_format_i18n( $total_feedback ) . '</strong>'
+                                );
+                                ?>
+                            </span>
+                            <span class="pagination-links">
+                                <?php
+                                $base_url = add_query_arg(
+                                    array(
+                                        'page'       => 'dps-ai-analytics',
+                                        'start_date' => $start_date,
+                                        'end_date'   => $end_date,
+                                    ),
+                                    admin_url( 'admin.php' )
+                                );
+
+                                // Botão "Primeira página"
+                                if ( $feedback_paged > 1 ) {
+                                    printf(
+                                        '<a class="first-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', 1, $base_url ) ),
+                                        esc_html__( 'Primeira página', 'dps-ai' ),
+                                        '&laquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&laquo;'
+                                    );
+                                }
+
+                                // Botão "Página anterior"
+                                if ( $feedback_paged > 1 ) {
+                                    printf(
+                                        '<a class="prev-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', $feedback_paged - 1, $base_url ) ),
+                                        esc_html__( 'Página anterior', 'dps-ai' ),
+                                        '&lsaquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&lsaquo;'
+                                    );
+                                }
+
+                                // Números de página
+                                printf(
+                                    '<span class="paging-input"><label for="current-page-selector-feedback" class="screen-reader-text">%s</label><input class="current-page" id="current-page-selector-feedback" type="text" name="paged" value="%s" size="3" aria-describedby="table-paging-feedback" /><span class="tablenav-paging-text"> %s <span class="total-pages">%s</span></span></span> ',
+                                    esc_html__( 'Página atual', 'dps-ai' ),
+                                    esc_attr( $feedback_paged ),
+                                    esc_html__( 'de', 'dps-ai' ),
+                                    number_format_i18n( $total_pages )
+                                );
+
+                                // Botão "Próxima página"
+                                if ( $feedback_paged < $total_pages ) {
+                                    printf(
+                                        '<a class="next-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a> ',
+                                        esc_url( add_query_arg( 'feedback_paged', $feedback_paged + 1, $base_url ) ),
+                                        esc_html__( 'Próxima página', 'dps-ai' ),
+                                        '&rsaquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span> ',
+                                        '&rsaquo;'
+                                    );
+                                }
+
+                                // Botão "Última página"
+                                if ( $feedback_paged < $total_pages ) {
+                                    printf(
+                                        '<a class="last-page button" href="%s"><span class="screen-reader-text">%s</span><span aria-hidden="true">%s</span></a>',
+                                        esc_url( add_query_arg( 'feedback_paged', $total_pages, $base_url ) ),
+                                        esc_html__( 'Última página', 'dps-ai' ),
+                                        '&raquo;'
+                                    );
+                                } else {
+                                    printf(
+                                        '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">%s</span>',
+                                        '&raquo;'
+                                    );
+                                }
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- JavaScript para navegação por input de página -->
+                    <script type="text/javascript">
+                    jQuery(document).ready(function($) {
+                        $('#current-page-selector-feedback').on('keypress', function(e) {
+                            if (e.which === 13) { // Enter
+                                e.preventDefault();
+                                var page = parseInt($(this).val());
+                                var maxPages = <?php echo (int) $total_pages; ?>;
+                                
+                                if (page >= 1 && page <= maxPages) {
+                                    var url = '<?php echo esc_js( $base_url ); ?>&feedback_paged=' + page;
+                                    window.location.href = url;
+                                } else {
+                                    alert('<?php echo esc_js( __( 'Número de página inválido.', 'dps-ai' ) ); ?>');
+                                    $(this).val(<?php echo (int) $feedback_paged; ?>);
+                                }
+                            }
+                        });
+                    });
+                    </script>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- Uso Diário -->

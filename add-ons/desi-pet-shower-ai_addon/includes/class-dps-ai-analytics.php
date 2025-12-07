@@ -374,10 +374,11 @@ class DPS_AI_Analytics {
      *
      * @param int    $limit  Número de registros.
      * @param string $type   Tipo de feedback (positive/negative/all).
+     * @param int    $offset Offset para paginação.
      *
      * @return array Lista de feedbacks.
      */
-    public static function get_recent_feedback( $limit = 20, $type = 'all' ) {
+    public static function get_recent_feedback( $limit = 20, $type = 'all', $offset = 0 ) {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::FEEDBACK_TABLE_NAME;
@@ -387,18 +388,20 @@ class DPS_AI_Analytics {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             return $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d",
+                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
                     'positive',
-                    $limit
+                    $limit,
+                    $offset
                 )
             );
         } elseif ( 'negative' === $type ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             return $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d",
+                    "SELECT * FROM {$table_name} WHERE feedback = %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
                     'negative',
-                    $limit
+                    $limit,
+                    $offset
                 )
             );
         }
@@ -407,10 +410,46 @@ class DPS_AI_Analytics {
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} ORDER BY created_at DESC LIMIT %d",
-                $limit
+                "SELECT * FROM {$table_name} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                $limit,
+                $offset
             )
         );
+    }
+
+    /**
+     * Conta total de feedbacks.
+     *
+     * @param string $type Tipo de feedback (positive/negative/all).
+     *
+     * @return int Total de feedbacks.
+     */
+    public static function count_feedback( $type = 'all' ) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . self::FEEDBACK_TABLE_NAME;
+
+        if ( 'positive' === $type ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            return (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$table_name} WHERE feedback = %s",
+                    'positive'
+                )
+            );
+        } elseif ( 'negative' === $type ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            return (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$table_name} WHERE feedback = %s",
+                    'negative'
+                )
+            );
+        }
+
+        // Todos os feedbacks
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
     }
 
     /**
