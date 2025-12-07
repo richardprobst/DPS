@@ -154,6 +154,23 @@ Antes de criar uma nova versão oficial:
   - Retrocompatibilidade: métodos `get_base_system_prompt()` e `get_public_system_prompt()` agora usam a nova classe internamente
   - Funções auxiliares: `is_valid_context()`, `get_available_contexts()`, `clear_cache()`
   - Cache interno para evitar releituras de arquivos
+- **AI Add-on (v1.6.1)**: Estrutura de Testes Unitários e CI
+  - Configurado PHPUnit para testes automatizados do add-on
+  - Criado `composer.json` com PHPUnit 9.5+ como dependência de desenvolvimento
+  - Arquivo `phpunit.xml` com configuração de test suite e coverage
+  - Bootstrap de testes (`tests/bootstrap.php`) com mocks de funções WordPress
+  - **Testes implementados** (24 testes no total):
+    - `Test_DPS_AI_Email_Parser` - 8 testes para parsing de e-mails (JSON, labeled, separated, plain, malicioso, vazio, text_to_html, stats)
+    - `Test_DPS_AI_Prompts` - 9 testes para sistema de prompts (4 contextos, validação, cache, clear_cache)
+    - `Test_DPS_AI_Analytics` - 7 testes para cálculo de custos (GPT-4o-mini, GPT-4o, GPT-4-turbo, zero tokens, modelo desconhecido, conversão USD→BRL, tokens fracionários)
+  - **GitHub Actions CI** (`.github/workflows/phpunit.yml`):
+    - Executa testes em push/PR para branches `main`, `develop`, `copilot/**`
+    - Testa em múltiplas versões do PHP (8.0, 8.1, 8.2)
+    - Gera relatório de cobertura para PHP 8.1
+    - Cache de dependências Composer para build mais rápido
+  - Scripts Composer: `composer test` e `composer test:coverage`
+  - Documentação completa em `tests/README.md` com instruções de uso e troubleshooting
+  - Arquivo `.gitignore` para excluir `vendor/`, `coverage/` e arquivos de cache
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
