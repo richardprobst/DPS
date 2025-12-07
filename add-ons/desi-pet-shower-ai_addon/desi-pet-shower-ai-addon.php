@@ -293,6 +293,10 @@ class DPS_AI_Addon {
 
         // Registra assets admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+        // Registra handlers de exportação CSV
+        add_action( 'admin_post_dps_ai_export_metrics', [ $this, 'handle_export_metrics' ] );
+        add_action( 'admin_post_dps_ai_export_feedback', [ $this, 'handle_export_feedback' ] );
     }
 
     /**
@@ -1050,6 +1054,20 @@ class DPS_AI_Addon {
                 <button type="submit" class="button" style="margin-left: 10px;"><?php esc_html_e( 'Filtrar', 'dps-ai' ); ?></button>
             </form>
 
+            <!-- Botão de exportação CSV -->
+            <div style="margin-bottom: 20px;">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display: inline;">
+                    <input type="hidden" name="action" value="dps_ai_export_metrics" />
+                    <input type="hidden" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+                    <input type="hidden" name="end_date" value="<?php echo esc_attr( $end_date ); ?>" />
+                    <?php wp_nonce_field( 'dps_ai_export_metrics', 'dps_ai_export_metrics_nonce' ); ?>
+                    <button type="submit" class="button button-secondary">
+                        <span class="dashicons dashicons-chart-bar" style="vertical-align: middle; margin-right: 5px;"></span>
+                        <?php esc_html_e( 'Exportar CSV', 'dps-ai' ); ?>
+                    </button>
+                </form>
+            </div>
+
             <!-- Cards de resumo -->
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
                 <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
@@ -1132,7 +1150,17 @@ class DPS_AI_Addon {
             <?php endif; ?>
 
             <!-- Feedback Recente -->
-            <h2><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;"><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin: 0;">
+                    <input type="hidden" name="action" value="dps_ai_export_feedback" />
+                    <?php wp_nonce_field( 'dps_ai_export_feedback', 'dps_ai_export_feedback_nonce' ); ?>
+                    <button type="submit" class="button button-secondary">
+                        <span class="dashicons dashicons-format-chat" style="vertical-align: middle; margin-right: 5px;"></span>
+                        <?php esc_html_e( 'Exportar Feedbacks CSV', 'dps-ai' ); ?>
+                    </button>
+                </form>
+            </div>
             <?php if ( empty( $recent_feedback ) ) : ?>
                 <p><?php esc_html_e( 'Nenhum feedback registrado ainda.', 'dps-ai' ); ?></p>
             <?php else : ?>
@@ -1408,6 +1436,191 @@ class DPS_AI_Addon {
             });
             "
         );
+    }
+
+    /**
+     * Handler para exportação de métricas em CSV.
+     * 
+     * Endpoint: admin-post.php?action=dps_ai_export_metrics
+     * Segurança: Requer capability manage_options + nonce
+     */
+    public function handle_export_metrics() {
+        // Verifica permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
+        }
+
+        // Verifica nonce
+        if ( ! isset( $_POST['dps_ai_export_metrics_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_metrics_nonce'] ) ), 'dps_ai_export_metrics' ) ) {
+            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        }
+
+        // Obtém período
+        $start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+        $end_date   = isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : current_time( 'Y-m-d' );
+
+        // Obtém estatísticas do período
+        $stats = DPS_AI_Analytics::get_stats( $start_date, $end_date );
+
+        if ( empty( $stats['daily'] ) ) {
+            wp_die( esc_html__( 'Nenhum dado disponível para exportação.', 'dps-ai' ) );
+        }
+
+        // Obtém configurações para calcular custo
+        $settings       = get_option( self::OPTION_KEY, [] );
+        $model          = $settings['model'] ?? 'gpt-4o-mini';
+        $exchange_rate  = ! empty( $settings['usd_to_brl_rate'] ) ? floatval( $settings['usd_to_brl_rate'] ) : 0;
+
+        // Prepara dados para CSV
+        $headers = [
+            'Data',
+            'Perguntas',
+            'Tokens Entrada',
+            'Tokens Saída',
+            'Total Tokens',
+            'Custo USD',
+        ];
+
+        if ( $exchange_rate > 0 ) {
+            $headers[] = 'Custo BRL';
+        }
+
+        $headers[] = 'Tempo Médio (s)';
+        $headers[] = 'Erros';
+        $headers[] = 'Modelo';
+
+        $rows = [];
+        foreach ( $stats['daily'] as $day ) {
+            $total_tokens = intval( $day->tokens_input ) + intval( $day->tokens_output );
+            $cost_usd     = DPS_AI_Analytics::estimate_cost( intval( $day->tokens_input ), intval( $day->tokens_output ), $model );
+
+            $row = [
+                gmdate( 'd/m/Y', strtotime( $day->date ) ),
+                $day->questions_count,
+                $day->tokens_input,
+                $day->tokens_output,
+                $total_tokens,
+                '$' . number_format( $cost_usd, 4 ),
+            ];
+
+            if ( $exchange_rate > 0 ) {
+                $cost_brl = $cost_usd * $exchange_rate;
+                $row[]    = 'R$ ' . number_format( $cost_brl, 2, ',', '.' );
+            }
+
+            $row[] = number_format( floatval( $day->avg_response_time ), 2 );
+            $row[] = $day->errors_count;
+            $row[] = ! empty( $day->model ) ? $day->model : $model;
+
+            $rows[] = $row;
+        }
+
+        // Gera e envia CSV
+        $filename = 'ai-metrics-' . gmdate( 'Y-m-d' ) . '.csv';
+        $this->generate_csv( $filename, $headers, $rows );
+    }
+
+    /**
+     * Handler para exportação de feedbacks em CSV.
+     * 
+     * Endpoint: admin-post.php?action=dps_ai_export_feedback
+     * Segurança: Requer capability manage_options + nonce
+     */
+    public function handle_export_feedback() {
+        // Verifica permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
+        }
+
+        // Verifica nonce
+        if ( ! isset( $_POST['dps_ai_export_feedback_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_feedback_nonce'] ) ), 'dps_ai_export_feedback' ) ) {
+            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        }
+
+        // Obtém feedbacks (últimos 1000)
+        $feedbacks = DPS_AI_Analytics::get_recent_feedback( 1000, 'all' );
+
+        if ( empty( $feedbacks ) ) {
+            wp_die( esc_html__( 'Nenhum feedback disponível para exportação.', 'dps-ai' ) );
+        }
+
+        // Prepara dados para CSV
+        $headers = [
+            'Data/Hora',
+            'Cliente ID',
+            'Pergunta',
+            'Resposta',
+            'Feedback',
+            'Comentário',
+            'Modelo',
+        ];
+
+        $rows = [];
+        foreach ( $feedbacks as $fb ) {
+            $feedback_type = ( 'positive' === $fb->feedback ) ? 'Positivo' : 'Negativo';
+
+            // Trunca resposta para CSV (max 200 caracteres)
+            $answer = ! empty( $fb->answer ) ? mb_substr( $fb->answer, 0, 200 ) : '';
+            if ( mb_strlen( $fb->answer ) > 200 ) {
+                $answer .= '...';
+            }
+
+            $rows[] = [
+                gmdate( 'd/m/Y H:i', strtotime( $fb->created_at ) ),
+                $fb->client_id,
+                $fb->question,
+                $answer,
+                $feedback_type,
+                ! empty( $fb->comment ) ? $fb->comment : '',
+                '', // Modelo não está disponível diretamente no feedback, deixar vazio
+            ];
+        }
+
+        // Gera e envia CSV
+        $filename = 'ai-feedback-' . gmdate( 'Y-m-d' ) . '.csv';
+        $this->generate_csv( $filename, $headers, $rows );
+    }
+
+    /**
+     * Gera arquivo CSV e envia para download.
+     *
+     * @param string $filename Nome do arquivo CSV.
+     * @param array  $headers  Array com cabeçalhos das colunas.
+     * @param array  $rows     Array bidimensional com linhas de dados.
+     */
+    private function generate_csv( $filename, $headers, $rows ) {
+        // Limpa qualquer output anterior
+        if ( ob_get_level() ) {
+            ob_end_clean();
+        }
+
+        // Headers HTTP para download
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '"' );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+
+        // Abre output stream
+        $output = fopen( 'php://output', 'w' );
+
+        // UTF-8 BOM para Excel reconhecer acentos
+        fprintf( $output, chr(0xEF) . chr(0xBB) . chr(0xBF) );
+
+        // Escreve cabeçalho
+        fputcsv( $output, $headers, ';' );
+
+        // Escreve linhas de dados
+        foreach ( $rows as $row ) {
+            // Remove quebras de linha dos valores para evitar quebra de CSV
+            $cleaned_row = array_map( function( $value ) {
+                return str_replace( [ "\r", "\n" ], ' ', $value );
+            }, $row );
+
+            fputcsv( $output, $cleaned_row, ';' );
+        }
+
+        fclose( $output );
+        exit;
     }
 
     /**

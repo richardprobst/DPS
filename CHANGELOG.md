@@ -117,6 +117,17 @@ Antes de criar uma nova versão oficial:
   - Exibição automática de custos em BRL nos cards do dashboard quando taxa configurada
   - Aviso visual indicando taxa atual ou sugerindo configuração
   - Link direto para configurar taxa a partir do analytics
+- **AI Add-on (v1.6.1)**: Exportação CSV de Métricas e Feedbacks
+  - Botão "Exportar CSV" na página de analytics para exportar métricas do período filtrado
+  - Botão "Exportar Feedbacks CSV" para exportar últimos 1000 feedbacks
+  - CSV de métricas inclui: data, perguntas, tokens (entrada/saída/total), custo (USD/BRL), tempo médio, erros, modelo
+  - CSV de feedbacks inclui: data/hora, cliente ID, pergunta, resposta, tipo de feedback, comentário
+  - Encoding UTF-8 com BOM para compatibilidade com Excel
+  - Separador ponto-e-vírgula (`;`) para melhor compatibilidade com Excel Brasil
+  - Tratamento de caracteres especiais (acentos, vírgulas, quebras de linha)
+  - Endpoints seguros: `admin-post.php?action=dps_ai_export_metrics` e `admin-post.php?action=dps_ai_export_feedback`
+  - Verificação de capability `manage_options` e nonces obrigatórios
+  - Função helper centralizada `generate_csv()` para reuso de código
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
