@@ -82,6 +82,39 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Histórico de Conversas Persistente (Fase 6)
+  - Criada nova estrutura de banco de dados para armazenar conversas e mensagens de IA:
+    - Tabela `dps_ai_conversations`: id, customer_id, channel, session_identifier, started_at, last_activity_at, status
+    - Tabela `dps_ai_messages`: id, conversation_id, sender_type, sender_identifier, message_text, message_metadata, created_at
+  - Criada classe `DPS_AI_Conversations_Repository` em `includes/class-dps-ai-conversations-repository.php` para CRUD de conversas
+    - Métodos: `create_conversation()`, `add_message()`, `get_conversation()`, `get_messages()`, `list_conversations()`, `count_conversations()`
+    - Suporta múltiplos canais: `web_chat` (chat público), `portal`, `whatsapp` (futuro), `admin_specialist` (futuro)
+    - Suporta visitantes não identificados via `session_identifier` (hash de IP para chat público)
+    - Metadata JSON para armazenar informações adicionais (tokens, custo, tempo de resposta, etc.)
+  - Integração automática com chat do portal do cliente (`DPS_AI_Integration_Portal`)
+    - Cria/recupera conversa por `customer_id` e canal `portal`
+    - Reutiliza conversa se última atividade foi nas últimas 24 horas
+    - Registra mensagem do usuário antes de processar
+    - Registra resposta da IA após processar
+  - Integração automática com chat público (`DPS_AI_Public_Chat`)
+    - Cria/recupera conversa por hash de IP e canal `web_chat`
+    - Reutiliza conversa se última atividade foi nas últimas 2 horas
+    - Registra IP do visitante como `sender_identifier`
+    - Armazena metadados de performance (response_time_ms, ip_address)
+  - Criada interface administrativa `DPS_AI_Conversations_Admin` em `includes/class-dps-ai-conversations-admin.php`
+    - Nova página admin "Conversas IA" (submenu no menu DPS)
+    - Slug da página: `dps-ai-conversations`
+    - Lista conversas com filtros: canal, status (aberta/fechada), período de datas
+    - Paginação (20 conversas por página)
+    - Exibe: ID, Cliente/Visitante, Canal, Data de Início, Última Atividade, Status, Ações
+    - Página de detalhes da conversa com histórico completo de mensagens
+    - Mensagens exibidas cronologicamente com tipo (usuário/assistente/sistema), data/hora, texto
+    - Metadados JSON expansíveis para visualizar informações técnicas
+    - Diferenciação visual por tipo de remetente (cores de borda e fundo)
+    - Controle de permissões: apenas `manage_options`
+  - Incrementado `DPS_AI_DB_VERSION` para `1.6.0`
+  - Migração automática via `dps_ai_maybe_upgrade_database()` para criar tabelas em atualizações
+  - Preparado para futuros canais (WhatsApp, Modo Especialista) sem alterações de schema
 - **AI Add-on (v1.6.2)**: Validação de Contraste de Cores para Chat Público (Acessibilidade WCAG AA)
   - Criada classe `DPS_AI_Color_Contrast` em `includes/class-dps-ai-color-contrast.php` para validação de contraste segundo padrões WCAG 2.0
   - Novos campos de configuração na página de settings: Cor Primária, Cor do Texto e Cor de Fundo do chat público

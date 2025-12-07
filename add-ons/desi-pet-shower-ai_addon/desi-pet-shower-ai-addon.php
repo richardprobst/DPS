@@ -100,7 +100,7 @@ if ( ! defined( 'DPS_AI_CAPABILITY' ) ) {
  * @var string
  */
 if ( ! defined( 'DPS_AI_DB_VERSION' ) ) {
-    define( 'DPS_AI_DB_VERSION', '1.5.0' );
+    define( 'DPS_AI_DB_VERSION', '1.6.0' );
 }
 
 /**
@@ -128,6 +128,8 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-color-contrast.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-repository.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-admin.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -178,6 +180,16 @@ function dps_ai_maybe_upgrade_database() {
         update_option( 'dps_ai_db_version', '1.5.0' );
     }
     
+    if ( version_compare( $installed_version, '1.6.0', '<' ) ) {
+        // v1.6.0: Criar tabelas de conversas e mensagens (histórico persistente)
+        if ( class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            DPS_AI_Conversations_Repository::maybe_create_tables();
+        }
+        
+        // Atualiza para versão 1.6.0 especificamente
+        update_option( 'dps_ai_db_version', '1.6.0' );
+    }
+    
     // Futuras migrações devem ser adicionadas aqui com version_compare seguindo o padrão acima
 }
 
@@ -204,6 +216,11 @@ function dps_ai_activate() {
     // Cria tabelas de analytics
     if ( class_exists( 'DPS_AI_Analytics' ) ) {
         DPS_AI_Analytics::maybe_create_tables();
+    }
+    
+    // Cria tabelas de conversas (v1.6.0+)
+    if ( class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+        DPS_AI_Conversations_Repository::maybe_create_tables();
     }
     
     // Define versão do schema após criar tabelas
@@ -351,6 +368,11 @@ class DPS_AI_Addon {
         // Manutenção automática (v1.6.1+)
         if ( class_exists( 'DPS_AI_Maintenance' ) ) {
             DPS_AI_Maintenance::get_instance();
+        }
+
+        // Interface administrativa de conversas (v1.7.0+)
+        if ( class_exists( 'DPS_AI_Conversations_Admin' ) ) {
+            DPS_AI_Conversations_Admin::get_instance();
         }
     }
 

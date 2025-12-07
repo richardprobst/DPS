@@ -190,6 +190,19 @@ class DPS_AI_Integration_Portal {
             ] );
         }
 
+        // Obtém ou cria conversa ativa para este cliente
+        $conversation_id = $this->get_or_create_conversation( $client_id );
+
+        // Salva mensagem do usuário
+        if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            $repo = DPS_AI_Conversations_Repository::get_instance();
+            $repo->add_message( $conversation_id, [
+                'sender_type'       => 'user',
+                'sender_identifier' => (string) $client_id,
+                'message_text'      => $question,
+            ] );
+        }
+
         // Busca pets do cliente
         $pet_ids = $this->get_client_pet_ids( $client_id );
 
@@ -203,10 +216,66 @@ class DPS_AI_Integration_Portal {
             ] );
         }
 
+        // Salva resposta da IA
+        if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            $repo = DPS_AI_Conversations_Repository::get_instance();
+            
+            // Extrai metadados da resposta se disponível
+            $metadata = [];
+            if ( is_array( $answer ) && isset( $answer['text'] ) ) {
+                $metadata = $answer;
+                $answer = $answer['text'];
+            }
+            
+            $repo->add_message( $conversation_id, [
+                'sender_type'       => 'assistant',
+                'sender_identifier' => 'ai',
+                'message_text'      => is_string( $answer ) ? $answer : ( isset( $answer['text'] ) ? $answer['text'] : '' ),
+                'metadata'          => ! empty( $metadata ) ? $metadata : null,
+            ] );
+        }
+
         // Retorna a resposta com sucesso
         wp_send_json_success( [
-            'answer' => $answer,
+            'answer' => is_string( $answer ) ? $answer : ( isset( $answer['text'] ) ? $answer['text'] : $answer ),
         ] );
+    }
+
+    /**
+     * Obtém ou cria conversa ativa para o cliente no portal.
+     *
+     * @param int $client_id ID do cliente.
+     *
+     * @return int|false ID da conversa ou false em caso de erro.
+     */
+    private function get_or_create_conversation( $client_id ) {
+        if ( ! class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            return false;
+        }
+
+        $repo = DPS_AI_Conversations_Repository::get_instance();
+
+        // Busca conversa aberta recente do cliente no portal (últimas 24 horas)
+        $conversations = $repo->get_conversations_by_customer( $client_id, 'portal', 1 );
+
+        if ( ! empty( $conversations ) ) {
+            $conversation = $conversations[0];
+            
+            // Se a última atividade foi há menos de 24 horas, reutiliza
+            $last_activity = strtotime( $conversation->last_activity_at );
+            if ( ( current_time( 'timestamp' ) - $last_activity ) < DAY_IN_SECONDS ) {
+                return (int) $conversation->id;
+            }
+        }
+
+        // Cria nova conversa
+        $conversation_id = $repo->create_conversation( [
+            'customer_id' => $client_id,
+            'channel'     => 'portal',
+            'status'      => 'open',
+        ] );
+
+        return $conversation_id;
     }
 
     /**

@@ -279,6 +279,19 @@ class DPS_AI_Public_Chat {
         // Registra a requisição no rate limiting
         $this->record_request( $ip_address );
 
+        // Obtém ou cria conversa para este visitante
+        $conversation_id = $this->get_or_create_public_conversation( $ip_address );
+
+        // Salva mensagem do usuário
+        if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            $repo = DPS_AI_Conversations_Repository::get_instance();
+            $repo->add_message( $conversation_id, [
+                'sender_type'       => 'user',
+                'sender_identifier' => $ip_address,
+                'message_text'      => $question,
+            ] );
+        }
+
         // Obtém resposta da IA
         $start_time = microtime( true );
         $answer     = $this->get_ai_response( $question );
@@ -303,6 +316,20 @@ class DPS_AI_Public_Chat {
             ] );
         }
 
+        // Salva resposta da IA
+        if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            $repo = DPS_AI_Conversations_Repository::get_instance();
+            $repo->add_message( $conversation_id, [
+                'sender_type'       => 'assistant',
+                'sender_identifier' => 'ai',
+                'message_text'      => $answer,
+                'metadata'          => [
+                    'response_time_ms' => round( ( $end_time - $start_time ) * 1000 ),
+                    'ip_address'       => $ip_address,
+                ],
+            ] );
+        }
+
         // Registra métricas se analytics estiver habilitado
         if ( class_exists( 'DPS_AI_Analytics' ) && ! empty( $settings['enable_analytics'] ) ) {
             DPS_AI_Analytics::record_public_chat_interaction(
@@ -320,6 +347,45 @@ class DPS_AI_Public_Chat {
             'answer'     => $answer,
             'message_id' => $message_id,
         ] );
+    }
+
+    /**
+     * Obtém ou cria conversa ativa para visitante não logado.
+     *
+     * @param string $ip_address IP do visitante.
+     *
+     * @return int|false ID da conversa ou false em caso de erro.
+     */
+    private function get_or_create_public_conversation( $ip_address ) {
+        if ( ! class_exists( 'DPS_AI_Conversations_Repository' ) ) {
+            return false;
+        }
+
+        $repo = DPS_AI_Conversations_Repository::get_instance();
+
+        // Usa hash do IP como identificador de sessão
+        $session_id = 'public_' . md5( $ip_address );
+
+        // Busca conversa aberta recente (últimas 2 horas)
+        $conversation = $repo->get_active_conversation_by_session( $session_id, 'web_chat' );
+
+        if ( $conversation ) {
+            // Se a última atividade foi há menos de 2 horas, reutiliza
+            $last_activity = strtotime( $conversation->last_activity_at );
+            if ( ( current_time( 'timestamp' ) - $last_activity ) < ( 2 * HOUR_IN_SECONDS ) ) {
+                return (int) $conversation->id;
+            }
+        }
+
+        // Cria nova conversa
+        $conversation_id = $repo->create_conversation( [
+            'customer_id'        => null, // Visitante não identificado
+            'channel'            => 'web_chat',
+            'session_identifier' => $session_id,
+            'status'             => 'open',
+        ] );
+
+        return $conversation_id;
     }
 
     /**
