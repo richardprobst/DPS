@@ -82,6 +82,31 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Entrada por Voz no Chat Público (Fase 6)
+  - Botão de microfone adicionado ao chat público para entrada por voz
+  - Integração com Web Speech API (navegadores compatíveis)
+  - Detecção automática de suporte do navegador
+    - Botão exibido apenas se API estiver disponível
+    - Funciona em Chrome, Edge, Safari e navegadores baseados em Chromium
+  - Feedback visual durante reconhecimento de voz:
+    - Animação de pulso com cor vermelha indicando "ouvindo"
+    - Tooltip informativo ("Ouvindo... Clique para parar")
+    - Ícone animado durante captura de áudio
+  - UX otimizada:
+    - Texto reconhecido preenche o textarea automaticamente
+    - Permite edição do texto antes de enviar
+    - Adiciona ao texto existente ou substitui se vazio
+    - Não envia automaticamente (usuário revisa e clica "Enviar")
+    - Auto-resize do textarea após transcrição
+  - Tratamento de erros discreto:
+    - Log no console para debugging
+    - Mensagens específicas por tipo de erro (no-speech, not-allowed, network)
+    - Não quebra a funcionalidade do chat em caso de erro
+  - Reconhecimento em português do Brasil (pt-BR)
+  - Arquivos modificados:
+    - `includes/class-dps-ai-public-chat.php`: Botão HTML de microfone
+    - `assets/css/dps-ai-public-chat.css`: Estilos e animações do botão de voz
+    - `assets/js/dps-ai-public-chat.js`: Lógica de reconhecimento de voz
 - **AI Add-on (v1.7.0)**: Integração WhatsApp Business (Fase 6)
   - Criada classe `DPS_AI_WhatsApp_Connector` em `includes/class-dps-ai-whatsapp-connector.php`
     - Normaliza mensagens recebidas de diferentes providers (Meta, Twilio, Custom)

@@ -220,6 +220,9 @@ class DPS_AI_Public_Chat {
                             rows="1"
                             maxlength="500"
                         ></textarea>
+                        <button id="dps-ai-public-voice" class="dps-ai-public-voice" aria-label="<?php esc_attr_e( 'Usar entrada por voz', 'dps-ai' ); ?>" title="<?php esc_attr_e( 'Falar ao invés de digitar', 'dps-ai' ); ?>" style="display: none;">
+                            <span class="dps-ai-public-voice-icon">🎤</span>
+                        </button>
                         <button id="dps-ai-public-submit" class="dps-ai-public-submit" aria-label="<?php esc_attr_e( 'Enviar pergunta', 'dps-ai' ); ?>">
                             <span class="dps-ai-public-submit-icon">➤</span>
                         </button>
