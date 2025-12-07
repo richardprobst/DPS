@@ -1,154 +1,194 @@
-# DPS AI Add-on - Tests
+# Guia de Testes - DPS AI Add-on
 
-Este diretório contém os testes unitários para o AI Add-on do DPS by PRObst.
+Este documento descreve a estrutura de testes do AI Add-on e como executá-los.
 
 ## Estrutura de Testes
 
 ```
 tests/
-├── bootstrap.php                    # Bootstrap para ambiente de testes
-├── Test_DPS_AI_Email_Parser.php     # Testes do parser de e-mails
-├── Test_DPS_AI_Prompts.php          # Testes do sistema de prompts
-└── Test_DPS_AI_Analytics.php        # Testes de cálculo de custos
+├── bootstrap.php           # Configuração inicial dos testes (mocks WordPress)
+├── unit/                   # Testes unitários (lógica pura, sem DB)
+│   ├── Test_DPS_AI_Analytics.php
+│   ├── Test_DPS_AI_Assistant_Context.php
+│   ├── Test_DPS_AI_Conversations_Repository.php
+│   ├── Test_DPS_AI_Email_Parser.php
+│   ├── Test_DPS_AI_Knowledge_Base.php
+│   ├── Test_DPS_AI_Maintenance.php
+│   └── Test_DPS_AI_Prompts.php
+└── integration/            # Testes de integração (requerem ambiente WordPress)
+    └── (futuros testes de integração)
 ```
 
-## Requisitos
+## Áreas Cobertas
 
-- PHP >= 7.4
-- Composer
+### 1. Parsing e Tratamento de Respostas
+- **Test_DPS_AI_Email_Parser**: Testes de parsing de e-mails em vários formatos (JSON, labeled, separated, plain text)
+- Sanitização e remoção de código malicioso
+- Conversão de texto para HTML
+- Estatísticas de parsing
 
-## Instalação
+### 2. Lógica de Contexto
+- **Test_DPS_AI_Assistant_Context**: Verificação de perguntas dentro/fora do contexto
+- Matching de keywords relacionadas a pets, banho, tosa, agendamentos
+- Suporte a caracteres acentuados
+- Case-insensitive matching
 
+### 3. Base de Conhecimento
+- **Test_DPS_AI_Knowledge_Base**: Matching de artigos por keywords
+- Ordenação por prioridade
+- Suporte a múltiplos idiomas (pt-BR, en-US)
+- Cenários sem resultados
+
+### 4. Métricas e Custos
+- **Test_DPS_AI_Analytics**: Cálculo de custos por modelo (GPT-4o, GPT-4o-mini, GPT-4-turbo)
+- Conversão USD → BRL
+- Arredondamento e valores extremos
+- Tokens fracionários
+
+### 5. Manutenção (Fase 1)
+- **Test_DPS_AI_Maintenance**: Limpeza de métricas antigas
+- Limpeza de feedback
+- Limpeza de transients expirados
+- Período de retenção configurável
+
+### 6. Histórico de Conversas
+- **Test_DPS_AI_Conversations_Repository**: Criação de conversas
+- Adição de mensagens
+- Recuperação de histórico por ID
+- Suporte a múltiplos canais (web_chat, portal, whatsapp, admin_specialist)
+
+### 7. Sistema de Prompts
+- **Test_DPS_AI_Prompts**: Carregamento de prompts por contexto
+- Cache de prompts
+- Validação de contextos
+- Fallback para contextos inválidos
+
+## Como Executar os Testes
+
+### Localmente
+
+#### Pré-requisitos
+- PHP 8.0 ou superior
+- Composer instalado
+
+#### Instalação de Dependências
 ```bash
 cd add-ons/desi-pet-shower-ai_addon
 composer install
 ```
 
-## Executando os Testes
-
-### Todos os testes
-
+#### Executar Todos os Testes
 ```bash
 composer test
-```
-
-Ou diretamente com PHPUnit:
-
-```bash
+# ou
 vendor/bin/phpunit
 ```
 
-### Com coverage report
+#### Executar Apenas Testes Unitários
+```bash
+vendor/bin/phpunit --testsuite "Unit Tests"
+```
 
+#### Executar Apenas Testes de Integração
+```bash
+vendor/bin/phpunit --testsuite "Integration Tests"
+```
+
+#### Executar Teste Específico
+```bash
+vendor/bin/phpunit tests/unit/Test_DPS_AI_Email_Parser.php
+```
+
+#### Executar com Cobertura de Código
 ```bash
 composer test:coverage
+# Abre: coverage/index.html
 ```
 
-O relatório será gerado em `coverage/index.html`.
+### No GitHub Actions
 
-### Teste específico
+Os testes executam automaticamente em:
+- Push para branches `main`, `develop`, ou `copilot/**`
+- Pull Requests contra `main` ou `develop`
 
-```bash
-vendor/bin/phpunit tests/Test_DPS_AI_Email_Parser.php
-```
+Workflow: `.github/workflows/phpunit.yml`
 
-## CI/CD
-
-Os testes são executados automaticamente via GitHub Actions em:
-- Push para branches `main`, `develop`, `copilot/**`
-- Pull requests para `main` e `develop`
-
-O workflow testa em múltiplas versões do PHP:
+Testado em múltiplas versões PHP:
 - PHP 8.0
 - PHP 8.1
 - PHP 8.2
 
-## Cobertura de Testes
-
-Classes testadas:
-- ✅ `DPS_AI_Email_Parser` - Parser robusto de respostas de e-mail
-- ✅ `DPS_AI_Prompts` - Sistema centralizado de prompts
-- ✅ `DPS_AI_Analytics` - Cálculo de custos de tokens
-
-### Email Parser (8 testes)
-
-- Parsing de formato JSON estruturado
-- Parsing de formato com rótulos (ASSUNTO:/CORPO:)
-- Parsing de formato separado (primeira linha = subject)
-- Fallback para texto plano
-- Sanitização remove scripts maliciosos
-- Resposta vazia retorna null
-- Conversão texto→HTML
-- Estatísticas de parsing
-
-### Prompts System (9 testes)
-
-- Carregamento de prompts por contexto (portal, public, whatsapp, email)
-- Validação de contextos
-- Lista de contextos disponíveis
-- Cache de prompts
-- Limpeza de cache
-
-### Analytics (7 testes)
-
-- Cálculo de custo para GPT-4o-mini
-- Cálculo de custo para GPT-4o
-- Cálculo de custo para GPT-4-turbo
-- Custo zero para zero tokens
-- Fallback para modelo desconhecido
-- Conversão USD→BRL
-- Cálculo com tokens fracionários
-
-## Adicionando Novos Testes
-
-1. Crie um arquivo `Test_NomeDaClasse.php` em `tests/`
-2. Estenda `PHPUnit\Framework\TestCase`
-3. Nomeie os métodos de teste com prefixo `test_`
-4. Execute `composer test` para validar
-
-Exemplo:
+## Estrutura de um Teste
 
 ```php
 <?php
 use PHPUnit\Framework\TestCase;
 
-class Test_MinhaClasse extends TestCase {
-    public function test_meu_metodo() {
-        $resultado = MinhaClasse::meu_metodo();
-        $this->assertEquals('esperado', $resultado);
+class Test_Exemplo extends TestCase {
+    
+    protected function setUp(): void {
+        parent::setUp();
+        // Configuração antes de cada teste
+    }
+    
+    public function test_exemplo_basico() {
+        // Arrange (preparar)
+        $input = 'valor';
+        
+        // Act (executar)
+        $result = funcao_a_testar($input);
+        
+        // Assert (verificar)
+        $this->assertEquals('esperado', $result);
     }
 }
 ```
 
-## Mocks do WordPress
+## Convenções
+
+1. **Nomes de Arquivos**: `Test_Classe_Testada.php`
+2. **Nomes de Métodos**: `test_descricao_do_comportamento()`
+3. **Organização**: Um arquivo de teste por classe testada
+4. **Assertions**: Use o assertion mais específico possível
+   - `assertSame()` para igualdade estrita
+   - `assertEquals()` para igualdade de valor
+   - `assertStringContainsString()` para strings
+   - `assertIsArray()`, `assertIsString()`, etc. para tipos
+
+## Testes Marcados como Skipped/Incomplete
+
+Alguns testes estão marcados com:
+- `$this->markTestSkipped()`: Requer ambiente WordPress completo (DB, funções)
+- `$this->markTestIncomplete()`: Aguardando refatoração de código para ser testável
+
+Estes testes documentam o comportamento esperado e serão implementados conforme o código for refatorado para melhor testabilidade.
+
+## Mocks e Fixtures
 
 O arquivo `bootstrap.php` fornece mocks básicos de funções WordPress:
 - `esc_html()`, `esc_attr()`, `esc_js()`
-- `sanitize_text_field()`
-- `wp_kses_post()`
-- `apply_filters()`, `add_filter()`
-- `dps_ai_log_*()` (logger)
+- `sanitize_text_field()`, `sanitize_textarea_field()`
+- `get_option()`, `update_option()`
+- `get_transient()`, `set_transient()`, `delete_transient()`
+- Funções de log: `dps_ai_log_*`
 
-Para testes mais complexos que requerem banco de dados ou hooks completos do WordPress, considere usar [WP_Mock](https://github.com/10up/wp_mock) ou a [WordPress Test Suite](https://make.wordpress.org/core/handbook/testing/automated-testing/phpunit/).
+## Adicionando Novos Testes
 
-## Troubleshooting
+1. Crie arquivo em `tests/unit/` ou `tests/integration/`
+2. Siga o padrão `Test_Nome_Classe.php`
+3. Extenda `PHPUnit\Framework\TestCase`
+4. Adicione testes com prefixo `test_`
+5. Execute localmente para validar
+6. Commit e push - CI executará automaticamente
 
-### Erro: "Class 'DPS_AI_Email_Parser' not found"
+## Referências
 
-Certifique-se de que o `bootstrap.php` está carregando as classes corretamente. Verifique os caminhos em `require_once`.
+- [Documentação PHPUnit 9](https://phpunit.readthedocs.io/en/9.6/)
+- [WordPress Plugin Testing](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/)
+- [AGENTS.md - Diretrizes de Teste](../../AGENTS.md)
 
-### Erro: "Call to undefined function wp_kses_post()"
+---
 
-O mock dessa função pode estar faltando no `bootstrap.php`. Adicione-o ou verifique se o arquivo está sendo carregado.
-
-### Testes lentos
-
-Se os testes estiverem lentos, considere:
-- Usar `@group` annotations para separar testes rápidos/lentos
-- Executar apenas grupos específicos: `vendor/bin/phpunit --group=fast`
-
-## Recursos
-
-- [PHPUnit Documentation](https://phpunit.de/documentation.html)
-- [WordPress Plugin Unit Tests](https://make.wordpress.org/core/handbook/testing/automated-testing/phpunit/)
-- [WP_Mock](https://github.com/10up/wp_mock) - Framework de mocking para WordPress
+**Última Atualização**: 07/12/2024  
+**Versão do PHPUnit**: 9.6  
+**Cobertura Atual**: ~40% (somente classes puras sem dependências WordPress)

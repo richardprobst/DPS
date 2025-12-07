@@ -48,6 +48,14 @@ if (!function_exists('sanitize_text_field')) {
     }
 }
 
+if (!function_exists('sanitize_key')) {
+    function sanitize_key($key) {
+        $key = strtolower($key);
+        $key = preg_replace('/[^a-z0-9_\-]/', '', $key);
+        return $key;
+    }
+}
+
 if (!function_exists('wp_kses_post')) {
     function wp_kses_post($data) {
         // Simplified version - remove dangerous tags
@@ -100,7 +108,97 @@ if (!function_exists('dps_ai_log_error')) {
     }
 }
 
-// Load classes to test
+// Mock WordPress database functions
+if (!function_exists('absint')) {
+    function absint($maybeint) {
+        return abs(intval($maybeint));
+    }
+}
+
+if (!function_exists('sanitize_textarea_field')) {
+    function sanitize_textarea_field($str) {
+        return trim(strip_tags($str));
+    }
+}
+
+if (!function_exists('wp_unslash')) {
+    function wp_unslash($value) {
+        return stripslashes_deep($value);
+    }
+}
+
+if (!function_exists('stripslashes_deep')) {
+    function stripslashes_deep($value) {
+        return is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);
+    }
+}
+
+if (!function_exists('wp_parse_args')) {
+    function wp_parse_args($args, $defaults = []) {
+        if (is_object($args)) {
+            $parsed_args = get_object_vars($args);
+        } elseif (is_array($args)) {
+            $parsed_args = &$args;
+        } else {
+            parse_str($args, $parsed_args);
+        }
+
+        if (is_array($defaults) && $defaults) {
+            return array_merge($defaults, $parsed_args);
+        }
+        return $parsed_args;
+    }
+}
+
+// Mock get_option for tests
+if (!function_exists('get_option')) {
+    function get_option($option, $default = false) {
+        global $_test_options;
+        return isset($_test_options[$option]) ? $_test_options[$option] : $default;
+    }
+}
+
+// Mock update_option for tests
+if (!function_exists('update_option')) {
+    function update_option($option, $value, $autoload = null) {
+        global $_test_options;
+        $_test_options[$option] = $value;
+        return true;
+    }
+}
+
+// Mock get_transient for tests
+if (!function_exists('get_transient')) {
+    function get_transient($transient) {
+        global $_test_transients;
+        return isset($_test_transients[$transient]) ? $_test_transients[$transient] : false;
+    }
+}
+
+// Mock set_transient for tests
+if (!function_exists('set_transient')) {
+    function set_transient($transient, $value, $expiration = 0) {
+        global $_test_transients;
+        $_test_transients[$transient] = $value;
+        return true;
+    }
+}
+
+// Mock delete_transient for tests
+if (!function_exists('delete_transient')) {
+    function delete_transient($transient) {
+        global $_test_transients;
+        unset($_test_transients[$transient]);
+        return true;
+    }
+}
+
+// Initialize global storage for mocks
+global $_test_options, $_test_transients;
+$_test_options = [];
+$_test_transients = [];
+
+// Load classes to test (only pure classes without WordPress dependencies)
 require_once dirname(__DIR__) . '/includes/class-dps-ai-email-parser.php';
 require_once dirname(__DIR__) . '/includes/class-dps-ai-prompts.php';
 require_once dirname(__DIR__) . '/includes/class-dps-ai-analytics.php';

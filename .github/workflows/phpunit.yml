@@ -24,7 +24,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,7 +38,7 @@ jobs:
         working-directory: add-ons/desi-pet-shower-ai_addon
       
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: add-ons/desi-pet-shower-ai_addon/vendor
           key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('add-ons/desi-pet-shower-ai_addon/composer.lock') }}
@@ -60,7 +60,7 @@ jobs:
       
       - name: Upload coverage to artifacts
         if: matrix.php-version == '8.1'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: add-ons/desi-pet-shower-ai_addon/coverage/

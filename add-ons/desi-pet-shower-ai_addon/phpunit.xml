@@ -9,8 +9,13 @@
          stopOnFailure="false"
          verbose="true">
     <testsuites>
-        <testsuite name="DPS AI Add-on Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Unit Tests">
+            <directory suffix="Test.php">tests/unit</directory>
+            <directory suffix=".php">tests/unit</directory>
+        </testsuite>
+        <testsuite name="Integration Tests">
+            <directory suffix="Test.php">tests/integration</directory>
+            <directory suffix=".php">tests/integration</directory>
         </testsuite>
     </testsuites>
     <coverage>

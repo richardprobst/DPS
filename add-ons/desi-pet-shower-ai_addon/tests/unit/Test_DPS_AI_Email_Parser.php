@@ -101,7 +101,11 @@ class Test_DPS_AI_Email_Parser extends TestCase {
         $html = DPS_AI_Email_Parser::text_to_html($text);
         
         $this->assertStringContainsString('<p>', $html);
-        $this->assertStringContainsString('<br>', $html);
+        // Check for <br> or <br /> (WordPress uses <br /> with wpautop)
+        $this->assertTrue(
+            strpos($html, '<br>') !== false || strpos($html, '<br />') !== false,
+            'HTML should contain line breaks'
+        );
     }
 
     /**
