@@ -82,6 +82,35 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Integração WhatsApp Business (Fase 6)
+  - Criada classe `DPS_AI_WhatsApp_Connector` em `includes/class-dps-ai-whatsapp-connector.php`
+    - Normaliza mensagens recebidas de diferentes providers (Meta, Twilio, Custom)
+    - Envia mensagens de resposta via HTTP para WhatsApp
+    - Suporta múltiplos providers com lógica isolada e reutilizável
+  - Criada classe `DPS_AI_WhatsApp_Webhook` em `includes/class-dps-ai-whatsapp-webhook.php`
+    - Endpoint REST API: `/wp-json/dps-ai/v1/whatsapp-webhook`
+    - Recebe mensagens via webhook (POST)
+    - Verificação do webhook para Meta WhatsApp (GET)
+    - Validação de assinaturas (Meta: X-Hub-Signature-256, Custom: Bearer token)
+    - Cria/recupera conversa com `channel='whatsapp'` e `session_identifier` baseado em hash seguro do telefone
+    - Registra mensagem do usuário e resposta da IA no histórico
+    - Reutiliza conversas abertas das últimas 24 horas
+    - Envia resposta automaticamente de volta para WhatsApp
+  - Nova seção "Integração WhatsApp Business" nas configurações de IA
+    - Ativar/desativar canal WhatsApp
+    - Seleção de provider (Meta, Twilio, Custom)
+    - Campos de configuração específicos por provider:
+      - **Meta**: Phone Number ID, Access Token, App Secret
+      - **Twilio**: Account SID, Auth Token, From Number
+      - **Custom**: Webhook URL, API Key
+    - Token de verificação para webhook
+    - Instruções customizadas para WhatsApp (opcional)
+    - Exibição da URL do webhook para configurar no provider
+  - JavaScript para toggle de campos específicos por provider selecionado
+  - Reutiliza mesma lógica de IA já existente para geração de respostas
+  - Context prompt adaptado para WhatsApp (respostas curtas, sem HTML)
+  - Tratamento de erros com logging apropriado
+  - Conversas WhatsApp aparecem na interface admin "Conversas IA" com filtro por canal
 - **AI Add-on (v1.7.0)**: Histórico de Conversas Persistente (Fase 6)
   - Criada nova estrutura de banco de dados para armazenar conversas e mensagens de IA:
     - Tabela `dps_ai_conversations`: id, customer_id, channel, session_identifier, started_at, last_activity_at, status

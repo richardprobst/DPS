@@ -130,6 +130,8 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-public-chat.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-maintenance.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-repository.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-admin.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-connector.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-webhook.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -373,6 +375,11 @@ class DPS_AI_Addon {
         // Interface administrativa de conversas (v1.7.0+)
         if ( class_exists( 'DPS_AI_Conversations_Admin' ) ) {
             DPS_AI_Conversations_Admin::get_instance();
+        }
+
+        // Webhook WhatsApp (v1.7.0+)
+        if ( class_exists( 'DPS_AI_WhatsApp_Webhook' ) ) {
+            DPS_AI_WhatsApp_Webhook::get_instance();
         }
     }
 
@@ -916,6 +923,158 @@ class DPS_AI_Addon {
                                 </p>
                             </td>
                         </tr>
+
+                        <!-- WhatsApp Business Integration -->
+                        <tr>
+                            <th colspan="2" style="padding: 20px 0 10px 0;">
+                                <h2 style="margin: 0; font-size: 18px; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px;">
+                                    <?php esc_html_e( 'Integração WhatsApp Business', 'dps-ai' ); ?>
+                                </h2>
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_enabled"><?php echo esc_html__( 'Ativar WhatsApp', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="dps_ai_whatsapp_enabled" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_enabled]" value="1" <?php checked( ! empty( $options['whatsapp_enabled'] ) ); ?> />
+                                    <?php esc_html_e( 'Habilitar atendimento via WhatsApp Business', 'dps-ai' ); ?>
+                                </label>
+                                <p class="description"><?php esc_html_e( 'Permite receber e responder mensagens automaticamente via WhatsApp.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_provider"><?php echo esc_html__( 'Provider', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <select id="dps_ai_whatsapp_provider" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_provider]">
+                                    <option value="meta" <?php selected( $options['whatsapp_provider'] ?? 'meta', 'meta' ); ?>><?php esc_html_e( 'Meta (Facebook) WhatsApp Business API', 'dps-ai' ); ?></option>
+                                    <option value="twilio" <?php selected( $options['whatsapp_provider'] ?? '', 'twilio' ); ?>><?php esc_html_e( 'Twilio WhatsApp API', 'dps-ai' ); ?></option>
+                                    <option value="custom" <?php selected( $options['whatsapp_provider'] ?? '', 'custom' ); ?>><?php esc_html_e( 'Provider Customizado', 'dps-ai' ); ?></option>
+                                </select>
+                                <p class="description"><?php esc_html_e( 'Selecione o provider de WhatsApp Business que você está usando.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_verify_token"><?php echo esc_html__( 'Token de Verificação', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_whatsapp_verify_token" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_verify_token]" value="<?php echo esc_attr( $options['whatsapp_verify_token'] ?? '' ); ?>" class="regular-text" />
+                                <p class="description"><?php esc_html_e( 'Token para verificação do webhook. Use o mesmo valor configurado no painel do provider.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <!-- Meta WhatsApp Settings -->
+                        <tr class="dps-whatsapp-meta-settings">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_meta_phone_id"><?php echo esc_html__( 'Phone Number ID (Meta)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_whatsapp_meta_phone_id" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_meta_phone_id]" value="<?php echo esc_attr( $options['whatsapp_meta_phone_id'] ?? '' ); ?>" class="regular-text" />
+                                <p class="description"><?php esc_html_e( 'ID do número de telefone no Meta Business Manager.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr class="dps-whatsapp-meta-settings">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_meta_token"><?php echo esc_html__( 'Access Token (Meta)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="dps_ai_whatsapp_meta_token" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_meta_token]" value="<?php echo esc_attr( $options['whatsapp_meta_token'] ?? '' ); ?>" class="regular-text" />
+                                <p class="description"><?php esc_html_e( 'Token de acesso permanente da WhatsApp Business API.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr class="dps-whatsapp-meta-settings">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_meta_app_secret"><?php echo esc_html__( 'App Secret (Meta)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="dps_ai_whatsapp_meta_app_secret" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_meta_app_secret]" value="<?php echo esc_attr( $options['whatsapp_meta_app_secret'] ?? '' ); ?>" class="regular-text" />
+                                <p class="description"><?php esc_html_e( 'App Secret para validação de assinatura do webhook.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <!-- Twilio WhatsApp Settings -->
+                        <tr class="dps-whatsapp-twilio-settings" style="display: none;">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_twilio_account_sid"><?php echo esc_html__( 'Account SID (Twilio)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_whatsapp_twilio_account_sid" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_twilio_account_sid]" value="<?php echo esc_attr( $options['whatsapp_twilio_account_sid'] ?? '' ); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+
+                        <tr class="dps-whatsapp-twilio-settings" style="display: none;">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_twilio_auth_token"><?php echo esc_html__( 'Auth Token (Twilio)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="dps_ai_whatsapp_twilio_auth_token" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_twilio_auth_token]" value="<?php echo esc_attr( $options['whatsapp_twilio_auth_token'] ?? '' ); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+
+                        <tr class="dps-whatsapp-twilio-settings" style="display: none;">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_twilio_from"><?php echo esc_html__( 'From Number (Twilio)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="dps_ai_whatsapp_twilio_from" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_twilio_from]" value="<?php echo esc_attr( $options['whatsapp_twilio_from'] ?? '' ); ?>" class="regular-text" placeholder="+5511999999999" />
+                            </td>
+                        </tr>
+
+                        <!-- Custom Provider Settings -->
+                        <tr class="dps-whatsapp-custom-settings" style="display: none;">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_custom_webhook_url"><?php echo esc_html__( 'Webhook URL (Custom)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" id="dps_ai_whatsapp_custom_webhook_url" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_custom_webhook_url]" value="<?php echo esc_attr( $options['whatsapp_custom_webhook_url'] ?? '' ); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+
+                        <tr class="dps-whatsapp-custom-settings" style="display: none;">
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_custom_api_key"><?php echo esc_html__( 'API Key (Custom)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="dps_ai_whatsapp_custom_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_custom_api_key]" value="<?php echo esc_attr( $options['whatsapp_custom_api_key'] ?? '' ); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_whatsapp_instructions"><?php echo esc_html__( 'Instruções Customizadas (WhatsApp)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_whatsapp_instructions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_instructions]" rows="4" class="large-text"><?php echo esc_textarea( $options['whatsapp_instructions'] ?? '' ); ?></textarea>
+                                <p class="description"><?php esc_html_e( 'Instruções específicas para o WhatsApp (opcional). Se vazio, usa instruções padrão otimizadas para mensagens curtas.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <?php echo esc_html__( 'URL do Webhook', 'dps-ai' ); ?>
+                            </th>
+                            <td>
+                                <code style="background: #f0f0f0; padding: 8px 12px; border-radius: 4px; display: inline-block; font-size: 13px;">
+                                    <?php echo esc_html( rest_url( 'dps-ai/v1/whatsapp-webhook' ) ); ?>
+                                </code>
+                                <p class="description">
+                                    <?php esc_html_e( 'Configure esta URL no painel do seu provider WhatsApp (Meta, Twilio, etc.) para receber mensagens.', 'dps-ai' ); ?>
+                                    <br>
+                                    <strong><?php esc_html_e( 'Método:', 'dps-ai' ); ?></strong> POST
+                                    <br>
+                                    <strong><?php esc_html_e( 'Verificação (Meta):', 'dps-ai' ); ?></strong> GET (usa o Token de Verificação configurado acima)
+                                </p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -1117,6 +1276,31 @@ class DPS_AI_Addon {
                     }
                 });
             });
+
+            // WhatsApp provider settings toggle
+            function toggleWhatsAppProviderSettings() {
+                var provider = $('#dps_ai_whatsapp_provider').val();
+                
+                // Hide all provider-specific settings
+                $('.dps-whatsapp-meta-settings').hide();
+                $('.dps-whatsapp-twilio-settings').hide();
+                $('.dps-whatsapp-custom-settings').hide();
+                
+                // Show selected provider settings
+                if (provider === 'meta') {
+                    $('.dps-whatsapp-meta-settings').show();
+                } else if (provider === 'twilio') {
+                    $('.dps-whatsapp-twilio-settings').show();
+                } else if (provider === 'custom') {
+                    $('.dps-whatsapp-custom-settings').show();
+                }
+            }
+            
+            // Initialize on page load
+            toggleWhatsAppProviderSettings();
+            
+            // Toggle on provider change
+            $('#dps_ai_whatsapp_provider').on('change', toggleWhatsAppProviderSettings);
         })(jQuery);
         </script>
         <?php
