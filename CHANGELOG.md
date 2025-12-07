@@ -82,6 +82,31 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.2)**: Validação de Contraste de Cores para Chat Público (Acessibilidade WCAG AA)
+  - Criada classe `DPS_AI_Color_Contrast` em `includes/class-dps-ai-color-contrast.php` para validação de contraste segundo padrões WCAG 2.0
+  - Novos campos de configuração na página de settings: Cor Primária, Cor do Texto e Cor de Fundo do chat público
+  - Validação em tempo real de contraste usando WordPress Color Picker nativo
+  - Calcula luminância relativa e ratio de contraste (fórmula WCAG: (L1 + 0.05) / (L2 + 0.05))
+  - Exibe avisos visuais se contraste insuficiente (<4.5:1 para texto normal, <3.0:1 para texto grande)
+  - Avisos não bloqueiam salvamento, apenas alertam admin sobre possível dificuldade de leitura
+  - Endpoint AJAX `dps_ai_validate_contrast` para validação assíncrona com nonce e capability check (`manage_options`)
+  - Mensagens específicas com ratio calculado (exemplo: "contraste 3.2:1, mínimo recomendado 4.5:1")
+  - Valida tanto contraste Texto/Fundo quanto Branco/Cor Primária (para legibilidade em botões)
+  - Configurações salvas com `sanitize_hex_color()` e padrões: primária=#2271b1, texto=#1d2327, fundo=#ffffff
+- **AI Add-on (v1.6.2)**: Indicador de Rate Limit no Chat Público (UX)
+  - Modificado `DPS_AI_Client` para armazenar tipo de erro em propriedade estática `$last_error`
+  - Novos métodos `get_last_error()` e `clear_last_error()` para recuperar informações de erro
+  - Diferenciação de erros HTTP por tipo: `rate_limit` (429), `bad_request` (400), `unauthorized` (401), `server_error` (500-503), `network_error`, `generic`
+  - Backend (`DPS_AI_Public_Chat::handle_ajax_ask()`) detecta rate limit via `get_last_error()` e retorna `error_type` específico no JSON
+  - Frontend JavaScript detecta `error_type === 'rate_limit'` e exibe UX diferenciada:
+    - Mensagem específica: "Muitas solicitações em sequência. Aguarde alguns segundos antes de tentar novamente."
+    - Ícone especial ⏱️ (em vez de ⚠️ genérico)
+    - Botão de enviar desabilitado temporariamente por 5 segundos
+    - Contagem regressiva visual no botão (5, 4, 3, 2, 1) para feedback ao usuário
+    - Classe CSS adicional `dps-ai-public-message--rate-limit` para estilização
+  - Função JavaScript `disableSubmitTemporarily(seconds)` gerencia contagem regressiva e reabilitação automática
+  - Erros genéricos (rede, servidor, etc.) mantêm comportamento original sem alterações
+  - 100% retrocompatível, não afeta fluxo de produção existente
 - **AI Add-on (v1.6.2)**: Interface de Teste e Validação da Base de Conhecimento
   - Criada nova página admin "Testar Base de Conhecimento" (submenu no menu DPS)
   - Slug da página: `dps-ai-kb-tester`
