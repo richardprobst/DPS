@@ -91,10 +91,46 @@ if ( ! defined( 'ABSPATH' ) ) {
             
             <a href="<?php echo esc_url( $whatsapp_url ); ?>" 
                class="dps-portal-access__button" 
+               id="dps-request-access-btn"
                target="_blank" 
                rel="noopener noreferrer">
                 <?php echo esc_html__( 'Quero acesso ao meu portal', 'dps-client-portal' ); ?>
             </a>
+            
+            <div id="dps-access-request-feedback" class="dps-portal-access__feedback" style="display:none;"></div>
+            
+            <script>
+            // Fase 1.4: Notifica admin quando cliente solicita acesso
+            (function() {
+                var btn = document.getElementById('dps-request-access-btn');
+                var feedback = document.getElementById('dps-access-request-feedback');
+                
+                if (btn && feedback) {
+                    btn.addEventListener('click', function(e) {
+                        // Envia notificação em background (não bloqueia WhatsApp)
+                        fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'action=dps_request_portal_access'
+                        })
+                        .then(function(response) { return response.json(); })
+                        .then(function(data) {
+                            if (data.success && data.data && data.data.message) {
+                                feedback.textContent = data.data.message;
+                                feedback.style.display = 'block';
+                                feedback.style.color = '#10b981';
+                            }
+                        })
+                        .catch(function(error) {
+                            // Silenciosamente ignora erros para não atrapalhar a experiência
+                            console.log('Access request notification failed:', error);
+                        });
+                    });
+                }
+            })();
+            </script>
             
             <?php else : ?>
             

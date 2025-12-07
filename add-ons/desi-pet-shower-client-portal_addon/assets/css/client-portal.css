@@ -3,6 +3,62 @@
    ======================================== */
 
 /* ========================================
+   CSS VARIABLES (Custom Properties)
+   Facilita white-label e customização
+   ======================================== */
+:root {
+    /* Cores Primárias */
+    --dps-primary: #0ea5e9;
+    --dps-primary-hover: #0284c7;
+    --dps-primary-active: #0369a1;
+    --dps-primary-light: #7dd3fc;
+    
+    /* Cores de Estado */
+    --dps-success: #10b981;
+    --dps-success-bg: #d1fae5;
+    --dps-warning: #f59e0b;
+    --dps-warning-bg: #fef3c7;
+    --dps-warning-text: #92400e;
+    --dps-danger: #ef4444;
+    --dps-danger-bg: #fee2e2;
+    --dps-info: #3b82f6;
+    
+    /* Cores Neutras */
+    --dps-white: #ffffff;
+    --dps-gray-50: #f9fafb;
+    --dps-gray-100: #f3f4f6;
+    --dps-gray-200: #e5e7eb;
+    --dps-gray-300: #d1d5db;
+    --dps-gray-400: #9ca3af;
+    --dps-gray-500: #6b7280;
+    --dps-gray-600: #4b5563;
+    --dps-gray-700: #374151;
+    --dps-gray-800: #1f2937;
+    --dps-gray-900: #111827;
+    
+    /* Espaçamentos */
+    --dps-space-xs: 0.5rem;    /* 8px */
+    --dps-space-sm: 1rem;      /* 16px */
+    --dps-space-md: 1.5rem;    /* 24px */
+    --dps-space-lg: 2rem;      /* 32px */
+    --dps-space-xl: 2.5rem;    /* 40px */
+    
+    /* Bordas */
+    --dps-border-radius: var(--dps-border-radius);
+    --dps-border-color: var(--dps-gray-200);
+    
+    /* Sombras */
+    --dps-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --dps-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    --dps-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --dps-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* Tipografia */
+    --dps-font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --dps-font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+}
+
+/* ========================================
    TELA DE ACESSO (Portal Access Screen)
    ======================================== */
 
@@ -17,9 +73,9 @@
 }
 
 .dps-portal-access__card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: var(--dps-border-radius);
     padding: 32px;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
@@ -33,7 +89,7 @@
 .dps-portal-access__title {
     font-size: 24px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
     text-align: center;
     margin-bottom: 16px;
     line-height: 1.3;
@@ -41,14 +97,14 @@
 
 .dps-portal-access__description {
     font-size: 16px;
-    color: #6b7280;
+    color: var(--dps-gray-500);
     line-height: 1.6;
     text-align: center;
     margin-bottom: 24px;
 }
 
 .dps-portal-access__error {
-    background-color: #fef3c7;
+    background-color: var(--dps-warning-bg);
     border: 1px solid #f59e0b;
     border-left: 4px solid #f59e0b;
     border-radius: 4px;
@@ -58,7 +114,7 @@
 
 .dps-portal-access__error p {
     font-size: 14px;
-    color: #92400e;
+    color: var(--dps-warning-text);
     line-height: 1.5;
     margin: 0;
 }
@@ -66,7 +122,7 @@
 .dps-portal-access__button {
     display: block;
     width: 100%;
-    background-color: #0ea5e9;
+    background-color: var(--dps-primary);
     color: #ffffff;
     font-size: 16px;
     font-weight: 600;
@@ -80,27 +136,27 @@
 }
 
 .dps-portal-access__button:hover {
-    background-color: #0284c7;
+    background-color: var(--dps-primary-hover);
     color: #ffffff;
 }
 
 .dps-portal-access__button:active {
-    background-color: #0369a1;
+    background-color: var(--dps-primary-active);
 }
 
 .dps-portal-access__button--disabled {
-    background-color: #e5e7eb;
-    color: #9ca3af;
+    background-color: var(--dps-gray-200);
+    color: var(--dps-gray-400);
     cursor: not-allowed;
 }
 
 .dps-portal-access__button--disabled:hover {
-    background-color: #e5e7eb;
+    background-color: var(--dps-gray-200);
 }
 
 .dps-portal-access__note {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--dps-gray-500);
     text-align: center;
     margin-top: 16px;
     line-height: 1.5;
@@ -108,6 +164,18 @@
 
 .dps-portal-access__note--error {
     color: #dc2626;
+}
+
+/* Feedback de solicitação de acesso (Fase 1.4) */
+.dps-portal-access__feedback {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: var(--dps-border-radius);
+    background-color: var(--dps-success-bg);
+    color: var(--dps-success);
+    line-height: 1.5;
 }
 
 /* ========================================
@@ -126,7 +194,7 @@
     margin: 0 0 1.5rem 0;
     font-size: 24px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
 }
 
 /* ========================================
@@ -140,7 +208,7 @@
     padding: 0;
     margin-bottom: 0;
     background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
     list-style: none;
@@ -160,7 +228,7 @@
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
-    color: #6b7280;
+    color: var(--dps-gray-500);
     text-decoration: none;
     font-weight: 500;
     font-size: 14px;
@@ -193,7 +261,7 @@
 /* Container de conteúdo das tabs */
 .dps-portal-tab-content {
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-top: none;
     border-radius: 0 0 8px 8px;
     padding: 24px;
@@ -221,7 +289,7 @@
     gap: 0.5rem;
     padding: 1rem;
     background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
     margin-bottom: 1rem;
 }
@@ -229,9 +297,9 @@
 .dps-portal-nav__link {
     padding: 0.5rem 1rem;
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
-    color: #374151;
+    color: var(--dps-gray-700);
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -442,10 +510,10 @@ html {
 
 .dps-chat-message--admin {
     background: #fff;
-    color: #374151;
+    color: var(--dps-gray-700);
     align-self: flex-start;
     border-bottom-left-radius: 4px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
 }
 
 .dps-chat-message__time {
@@ -468,7 +536,7 @@ html {
     justify-content: center;
     padding: 24px;
     text-align: center;
-    color: #6b7280;
+    color: var(--dps-gray-500);
 }
 
 .dps-chat-empty__icon {
@@ -496,7 +564,7 @@ html {
 .dps-chat-input__field {
     flex: 1;
     padding: 12px 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 24px;
     font-size: 14px;
     outline: none;
@@ -508,7 +576,7 @@ html {
 }
 
 .dps-chat-input__field::placeholder {
-    color: #9ca3af;
+    color: var(--dps-gray-400);
 }
 
 .dps-chat-input__send {
@@ -559,7 +627,7 @@ html {
 /* Seções do portal */
 .dps-portal-section {
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
     padding: 20px;
 }
@@ -569,7 +637,7 @@ html {
     margin-bottom: 20px;
     font-size: 20px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
 }
 
 .dps-portal-section h3 {
@@ -577,7 +645,7 @@ html {
     margin-bottom: 16px;
     font-size: 18px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
 }
 
 /* Feedback visual - Notices */
@@ -623,7 +691,7 @@ html {
 .dps-alert--warning {
     border-left-color: #f59e0b;
     background: #fef3c7;
-    color: #92400e;
+    color: var(--dps-warning-text);
 }
 
 .dps-alert--success {
@@ -638,7 +706,7 @@ html {
     gap: 1.5rem;
     padding: 1.5rem;
     background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
 }
 
@@ -678,14 +746,14 @@ html {
 .dps-appointment-card__pet,
 .dps-appointment-card__services {
     font-size: 16px;
-    color: #374151;
+    color: var(--dps-gray-700);
 }
 
 .dps-appointment-card__status {
     display: inline-block;
     padding: 0.25rem 0.75rem;
     background: #e5e7eb;
-    color: #374151;
+    color: var(--dps-gray-700);
     border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
@@ -721,7 +789,7 @@ html {
 
 .dps-empty-state__message {
     font-size: 16px;
-    color: #6b7280;
+    color: var(--dps-gray-500);
     margin-bottom: 1.5rem;
 }
 
@@ -759,14 +827,14 @@ html {
 
 .dps-table th {
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .dps-table td {
-    color: #374151;
+    color: var(--dps-gray-700);
 }
 
 /* Botão de pagamento */
@@ -783,7 +851,7 @@ html {
 
 /* Fieldsets */
 .dps-fieldset {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 1.5rem;
@@ -791,7 +859,7 @@ html {
 
 .dps-fieldset__legend {
     font-weight: 600;
-    color: #374151;
+    color: var(--dps-gray-700);
     font-size: 16px;
     padding: 0 8px;
 }
@@ -805,7 +873,7 @@ html {
 .dps-portal-form textarea {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
     font-size: 16px;
 }
@@ -900,7 +968,7 @@ html {
     max-width: 100%;
     height: auto;
     border-radius: 4px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
 }
 
 /* Galeria de fotos */
@@ -912,7 +980,7 @@ html {
 
 .dps-portal-photo-item {
     background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
     border-radius: 4px;
     padding: 0.75rem;
     text-align: center;
@@ -952,7 +1020,7 @@ html {
     background: #f9fafb;
     border-radius: 4px;
     padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--dps-border-color);
 }
 
 .dps-portal-message--admin {
@@ -968,7 +1036,7 @@ html {
     justify-content: space-between;
     align-items: baseline;
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--dps-gray-500);
     margin-bottom: 0.5rem;
 }
 
@@ -1052,7 +1120,7 @@ html {
         top: 0;
         z-index: 100;
         flex-direction: column;
-        background: #ffffff;
+        background: var(--dps-white);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         margin-left: -16px;
         margin-right: -16px;
@@ -1112,7 +1180,7 @@ html {
         margin-bottom: 1rem;
         padding: 1rem;
         background: #f9fafb;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--dps-border-color);
         border-radius: 4px;
     }
     
@@ -1128,7 +1196,7 @@ html {
     .dps-table td::before {
         content: attr(data-label);
         font-weight: 600;
-        color: #374151;
+        color: var(--dps-gray-700);
         font-size: 13px; /* Mínimo 13px para acessibilidade mobile */
         letter-spacing: 0.03em;
     }
@@ -1258,7 +1326,7 @@ html {
     padding: 1rem;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: var(--dps-border-radius);
 }
 
 .dps-client-logins__field {
@@ -1375,7 +1443,7 @@ html {
     padding: 1.25rem;
     background: #f8fafc;
     border: 1px dashed #cbd5f5;
-    border-radius: 8px;
+    border-radius: var(--dps-border-radius);
     color: #475569;
     text-align: center;
     font-weight: 500;
@@ -1385,7 +1453,7 @@ html {
     padding: 1.5rem;
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: var(--dps-border-radius);
     color: #475569;
     text-align: center;
 }
@@ -1398,7 +1466,7 @@ html {
     .dps-client-logins__table tr {
         display: block;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        border-radius: var(--dps-border-radius);
         padding: 0.75rem;
         margin-bottom: 0.75rem;
         background: #fff;
@@ -1443,5 +1511,301 @@ html {
     .dps-portal-access__button {
         font-size: 15px;
         padding: 12px 16px;
+    }
+}
+
+/* ========================================
+   TOAST NOTIFICATIONS (Fase 1.5)
+   Sistema de notificações não-intrusivas
+   ======================================== */
+
+.dps-toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.dps-toast {
+    background: var(--dps-white);
+    border-left: 4px solid var(--dps-primary);
+    border-radius: var(--dps-border-radius);
+    box-shadow: var(--dps-shadow-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: auto;
+    max-width: 100%;
+}
+
+.dps-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.dps-toast.hide {
+    opacity: 0;
+    transform: translateX(400px);
+}
+
+.dps-toast__icon {
+    font-size: 24px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-toast__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-toast__title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--dps-gray-900);
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.dps-toast__message {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.dps-toast__close {
+    background: none;
+    border: none;
+    color: var(--dps-gray-400);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.dps-toast__close:hover {
+    color: var(--dps-gray-700);
+}
+
+/* Tipos de toast */
+.dps-toast--success {
+    border-left-color: var(--dps-success);
+}
+
+.dps-toast--success .dps-toast__icon {
+    color: var(--dps-success);
+}
+
+.dps-toast--error {
+    border-left-color: var(--dps-danger);
+}
+
+.dps-toast--error .dps-toast__icon {
+    color: var(--dps-danger);
+}
+
+.dps-toast--warning {
+    border-left-color: var(--dps-warning);
+}
+
+.dps-toast--warning .dps-toast__icon {
+    color: var(--dps-warning);
+}
+
+.dps-toast--info {
+    border-left-color: var(--dps-info);
+}
+
+.dps-toast--info .dps-toast__icon {
+    color: var(--dps-info);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-toast-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .dps-toast {
+        max-width: 100%;
+    }
+}
+
+/* ========================================
+   SKELETON LOADERS (Fase 2.7)
+   Melhora percepção de velocidade
+   ======================================== */
+
+.dps-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--dps-gray-200) 25%,
+        var(--dps-gray-100) 50%,
+        var(--dps-gray-200) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Skeleton variants */
+.dps-skeleton--text {
+    height: 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--text:last-child {
+    width: 80%;
+}
+
+.dps-skeleton--title {
+    height: 24px;
+    width: 40%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--card {
+    height: 120px;
+    margin-bottom: 16px;
+    border-radius: var(--dps-border-radius);
+}
+
+.dps-skeleton--table-row {
+    height: 48px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.dps-skeleton--button {
+    height: 40px;
+    width: 120px;
+    border-radius: 6px;
+}
+
+/* Skeleton container para múltiplos elementos */
+.dps-skeleton-container {
+    padding: 20px;
+}
+
+/* Specific loaders para seções do portal */
+.dps-portal-skeleton-history {
+    padding: 20px;
+}
+
+.dps-portal-skeleton-history .dps-skeleton--title {
+    width: 200px;
+    margin-bottom: 24px;
+}
+
+.dps-portal-skeleton-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.dps-portal-skeleton-gallery .dps-skeleton--card {
+    height: 200px;
+}
+
+/* Hide skeleton quando conteúdo carregar */
+.dps-content-loaded .dps-skeleton {
+    display: none;
+}
+
+/* Acessibilidade */
+.dps-skeleton[aria-hidden="true"] {
+    pointer-events: none;
+}
+
+/* ========================================
+   CALENDAR INTEGRATION (Fase 2.8)
+   Botões de ação na tabela de histórico
+   ======================================== */
+
+.dps-table-actions {
+    white-space: nowrap;
+}
+
+.dps-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.dps-btn:hover {
+    background-color: var(--dps-primary-hover);
+    color: var(--dps-white);
+}
+
+.dps-btn--small {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.dps-btn--secondary {
+    background-color: var(--dps-gray-200);
+    color: var(--dps-gray-700);
+}
+
+.dps-btn--secondary:hover {
+    background-color: var(--dps-gray-300);
+    color: var(--dps-gray-800);
+}
+
+/* Responsividade para ações */
+@media (max-width: 768px) {
+    .dps-table-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .dps-btn--small {
+        width: 100%;
+        text-align: center;
     }
 }

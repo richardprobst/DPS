@@ -38,19 +38,9 @@ final class DPS_Client_Portal {
      * Construtor. Registra ganchos necessários para o funcionamento do portal.
      */
     private function __construct() {
-        // Inicia sessão para autenticar clientes sem utilizar o sistema de usuários do WordPress
-        add_action( 'init', function() {
-            // Evita avisos de cabeçalho já enviado e não interfere em requisições AJAX/REST.
-            if ( headers_sent() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
-                return;
-            }
-
-            if ( ! session_id() ) {
-                // Start PHP session so we can track logged‑in clients independent of WP users.
-                session_start();
-            }
-        }, 1 );
-
+        // REMOVED: session_start() deprecated - Now using transients + cookies (DPS_Portal_Session_Manager)
+        // Migration completed in Phase 1 (commit ab6deda)
+        
         // Processa autenticação por token
         add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
         
@@ -101,6 +91,9 @@ final class DPS_Client_Portal {
         add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
         add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        
+        // AJAX handler para notificação de solicitação de acesso (Fase 1.4)
+        add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
     }
 
     /**
@@ -405,6 +398,9 @@ final class DPS_Client_Portal {
                 update_post_meta( $client_id, 'client_email', $email );
             }
 
+            // Hook: Após atualizar dados do cliente (Fase 2.3)
+            do_action( 'dps_portal_after_update_client', $client_id, $_POST );
+            
             $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
         } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
             $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
@@ -958,21 +954,33 @@ final class DPS_Client_Portal {
      * @return string Conteúdo HTML renderizado.
      */
     public function render_portal_shortcode() {
+        // Hook: Antes de renderizar o portal (Fase 2.3)
+        do_action( 'dps_portal_before_render' );
+        
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
         // Verifica autenticação pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
         
+        // Hook: Após verificar autenticação (Fase 2.3)
+        do_action( 'dps_portal_after_auth_check', $client_id );
+        
         // Se não autenticado, exibe tela de acesso
         if ( ! $client_id ) {
+            // Hook: Antes de renderizar tela de login (Fase 2.3)
+            do_action( 'dps_portal_before_login_screen' );
+            
             // Carrega template de acesso
             $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-access.php';
             
             if ( file_exists( $template_path ) ) {
                 ob_start();
                 include $template_path;
-                return ob_get_clean();
+                $output = ob_get_clean();
+                
+                // Filtro: Permite modificar tela de login (Fase 2.3)
+                return apply_filters( 'dps_portal_login_screen', $output );
             }
             
             // Fallback se template não existir
@@ -983,6 +991,9 @@ final class DPS_Client_Portal {
             echo '</div>';
             return ob_get_clean();
         }
+        
+        // Hook: Cliente autenticado (Fase 2.3)
+        do_action( 'dps_portal_client_authenticated', $client_id );
         
         // Localiza script com dados do chat
         wp_localize_script( 'dps-client-portal', 'dpsPortalChat', [
@@ -1024,60 +1035,89 @@ final class DPS_Client_Portal {
         // Hook para add-ons adicionarem conteúdo no topo do portal (ex: AI Assistant)
         do_action( 'dps_client_portal_before_content', $client_id );
         
+        // Define tabs padrão (Fase 2.3)
+        $default_tabs = [
+            'inicio' => [
+                'icon'  => '🏠',
+                'label' => __( 'Início', 'dps-client-portal' ),
+                'active' => true,
+            ],
+            'agendamentos' => [
+                'icon'  => '📅',
+                'label' => __( 'Agendamentos', 'dps-client-portal' ),
+                'active' => false,
+            ],
+            'galeria' => [
+                'icon'  => '📸',
+                'label' => __( 'Galeria', 'dps-client-portal' ),
+                'active' => false,
+            ],
+            'dados' => [
+                'icon'  => '⚙️',
+                'label' => __( 'Meus Dados', 'dps-client-portal' ),
+                'active' => false,
+            ],
+        ];
+        
+        // Filtro: Permite add-ons modificarem tabs (Fase 2.3)
+        $tabs = apply_filters( 'dps_portal_tabs', $default_tabs, $client_id );
+        
         // Navegação por Tabs
         echo '<nav class="dps-portal-tabs" role="tablist">';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link is-active" data-tab="inicio" role="tab" aria-selected="true" aria-controls="panel-inicio">';
-        echo '<span class="dps-portal-tabs__icon">🏠</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="agendamentos" role="tab" aria-selected="false" aria-controls="panel-agendamentos">';
-        echo '<span class="dps-portal-tabs__icon">📅</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Agendamentos', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="galeria" role="tab" aria-selected="false" aria-controls="panel-galeria">';
-        echo '<span class="dps-portal-tabs__icon">📸</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Galeria', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
-        echo '<div class="dps-portal-tabs__item">';
-        echo '<button class="dps-portal-tabs__link" data-tab="dados" role="tab" aria-selected="false" aria-controls="panel-dados">';
-        echo '<span class="dps-portal-tabs__icon">⚙️</span>';
-        echo '<span class="dps-portal-tabs__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
-        echo '</button>';
-        echo '</div>';
+        foreach ( $tabs as $tab_id => $tab ) {
+            $is_active = isset( $tab['active'] ) && $tab['active'];
+            $class = 'dps-portal-tabs__link' . ( $is_active ? ' is-active' : '' );
+            echo '<div class="dps-portal-tabs__item">';
+            echo '<button class="' . esc_attr( $class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="panel-' . esc_attr( $tab_id ) . '">';
+            if ( isset( $tab['icon'] ) ) {
+                echo '<span class="dps-portal-tabs__icon">' . esc_html( $tab['icon'] ) . '</span>';
+            }
+            echo '<span class="dps-portal-tabs__text">' . esc_html( $tab['label'] ) . '</span>';
+            echo '</button>';
+            echo '</div>';
+        }
         echo '</nav>';
+        
+        // Hook: Antes de renderizar conteúdo das tabs (Fase 2.3)
+        do_action( 'dps_portal_before_tab_content', $client_id );
         
         // Container de conteúdo das tabs
         echo '<div class="dps-portal-tab-content">';
         
         // Panel: Início (Próximo agendamento + Pendências + Fidelidade)
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
+        do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
+        do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Agendamentos (Histórico completo)
         echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         $this->render_appointment_history( $client_id );
+        do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Galeria
         echo '<div id="panel-galeria" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_galeria_content', $client_id ); // Fase 2.3
         $this->render_pet_gallery( $client_id );
+        do_action( 'dps_portal_after_galeria_content', $client_id ); // Fase 2.3
         echo '</div>';
         
         // Panel: Meus Dados
         echo '<div id="panel-dados" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_dados_content', $client_id ); // Fase 2.3
         $this->render_update_forms( $client_id );
+        do_action( 'dps_portal_after_dados_content', $client_id ); // Fase 2.3
         echo '</div>';
+        
+        // Hook: Permite add-ons renderizarem panels customizados (Fase 2.3)
+        do_action( 'dps_portal_custom_tab_panels', $client_id, $tabs );
         
         echo '</div>'; // .dps-portal-tab-content
 
@@ -1365,6 +1405,37 @@ final class DPS_Client_Portal {
             'order'          => 'DESC',
         ];
         $appointments = get_posts( $args );
+        
+        // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
+        if ( $appointments ) {
+            $appt_ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $appt_ids );
+            
+            // OTIMIZAÇÃO: Batch load de pets para evitar queries individuais
+            $pet_ids = [];
+            foreach ( $appointments as $appt ) {
+                $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $pet_ids[] = $pet_id;
+                }
+            }
+            
+            $pets_cache = [];
+            if ( ! empty( $pet_ids ) ) {
+                $pets = get_posts( [
+                    'post_type'      => 'dps_pet',
+                    'post__in'       => array_unique( $pet_ids ),
+                    'posts_per_page' => -1,
+                    'fields'         => 'ids', // Apenas IDs, mais eficiente
+                ] );
+                
+                // Cria cache de nomes de pets
+                foreach ( $pets as $pet_id ) {
+                    $pets_cache[ $pet_id ] = get_the_title( $pet_id );
+                }
+            }
+        }
+        
         echo '<section id="historico" class="dps-portal-section dps-portal-history">';
         echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'dps-client-portal' ) . '</h2>';
         if ( $appointments ) {
@@ -1374,14 +1445,19 @@ final class DPS_Client_Portal {
             echo '<th>' . esc_html__( 'Pet', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Serviços', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'dps-client-portal' ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>'; // Fase 2.8
             echo '</tr></thead><tbody>';
             foreach ( $appointments as $appt ) {
-                $date   = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time   = get_post_meta( $appt->ID, 'appointment_time', true );
-                $status = get_post_meta( $appt->ID, 'appointment_status', true );
-                $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $pet_name = $pet_id ? get_the_title( $pet_id ) : '';
+                // Meta já em cache, sem queries adicionais
+                $date     = get_post_meta( $appt->ID, 'appointment_date', true );
+                $time     = get_post_meta( $appt->ID, 'appointment_time', true );
+                $status   = get_post_meta( $appt->ID, 'appointment_status', true );
+                $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                 $services = get_post_meta( $appt->ID, 'appointment_services', true );
+                
+                // Usa cache de pets ao invés de get_the_title()
+                $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+                
                 if ( is_array( $services ) ) {
                     $services = implode( ', ', array_map( 'esc_html', $services ) );
                 } else {
@@ -1393,6 +1469,31 @@ final class DPS_Client_Portal {
                 echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '">' . esc_html( ucfirst( $status ) ) . '</td>';
+                
+                // Ações - Adicionar ao Calendário (Fase 2.8)
+                echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '" class="dps-table-actions">';
+                
+                // Link para download .ics
+                $ics_url = wp_nonce_url(
+                    add_query_arg( 'dps_download_ics', $appt->ID, home_url( '/' ) ),
+                    'dps_download_ics_' . $appt->ID
+                );
+                
+                echo '<a href="' . esc_url( $ics_url ) . '" class="dps-btn dps-btn--small" title="' . esc_attr__( 'Baixar arquivo .ics', 'dps-client-portal' ) . '">';
+                echo '📅 ' . esc_html__( '.ics', 'dps-client-portal' );
+                echo '</a> ';
+                
+                // Link para Google Calendar
+                if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+                    $google_url = DPS_Calendar_Helper::get_google_calendar_url( $appt->ID );
+                    if ( $google_url ) {
+                        echo '<a href="' . esc_url( $google_url ) . '" class="dps-btn dps-btn--small" target="_blank" rel="noopener" title="' . esc_attr__( 'Adicionar ao Google Calendar', 'dps-client-portal' ) . '">';
+                        echo '📆 ' . esc_html__( 'Google', 'dps-client-portal' );
+                        echo '</a>';
+                    }
+                }
+                
+                echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
@@ -1416,11 +1517,19 @@ final class DPS_Client_Portal {
             'meta_key'       => 'owner_id',
             'meta_value'     => $client_id,
         ] );
+        
+        // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
+        if ( $pets ) {
+            $pet_ids = wp_list_pluck( $pets, 'ID' );
+            update_meta_cache( 'post', $pet_ids );
+        }
+        
         echo '<section id="galeria" class="dps-portal-section dps-portal-gallery">';
         echo '<h2>' . esc_html__( 'Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
         if ( $pets ) {
             echo '<div class="dps-portal-gallery-grid">';
             foreach ( $pets as $pet ) {
+                // Meta já em cache, sem queries adicionais
                 $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
                 $pet_name = $pet->post_title;
                 echo '<div class="dps-portal-photo-item">';
@@ -2405,6 +2514,111 @@ final class DPS_Client_Portal {
         }
 
         wp_send_json_success( [ 'marked' => count( $messages ) ] );
+    }
+
+    /**
+     * AJAX handler para notificação de solicitação de acesso ao portal (Fase 1.4)
+     * 
+     * Quando cliente clica em "Quero acesso ao meu portal", registra solicitação
+     * e notifica admin via Communications API se disponível.
+     * 
+     * Rate limiting: 5 solicitações por hora por IP
+     * 
+     * @since 2.4.0
+     */
+    public function ajax_request_portal_access() {
+        // Valida IP para rate limiting
+        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+        $rate_key = 'dps_access_request_' . md5( $ip );
+        
+        // Verifica se já solicitou recentemente (rate limiting: 5 solicitações por hora)
+        $request_count = get_transient( $rate_key );
+        if ( false === $request_count ) {
+            $request_count = 0;
+        }
+        
+        if ( $request_count >= 5 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou acesso várias vezes. Aguarde um momento antes de solicitar novamente.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Incrementa contador
+        set_transient( $rate_key, $request_count + 1, HOUR_IN_SECONDS );
+        
+        // Captura dados do cliente (opcional, pode vir do formulário)
+        $client_name = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
+        $client_phone = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
+        
+        // Tenta encontrar cliente por telefone se fornecido
+        $client_id = 0;
+        if ( $client_phone ) {
+            $clients = get_posts( [
+                'post_type'      => 'dps_cliente',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'meta_query'     => [
+                    [
+                        'key'     => 'client_phone',
+                        'value'   => $client_phone,
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ] );
+            
+            if ( ! empty( $clients ) ) {
+                $client_id = $clients[0];
+                if ( empty( $client_name ) ) {
+                    $client_name = get_the_title( $client_id );
+                }
+            }
+        }
+        
+        // Registra solicitação em log
+        if ( function_exists( 'dps_log' ) ) {
+            dps_log( 'Portal access requested', [
+                'client_id'   => $client_id,
+                'client_name' => $client_name,
+                'client_phone' => $client_phone,
+                'ip'          => $ip,
+            ], 'info', 'client-portal' );
+        }
+        
+        // Notifica admin via Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) && method_exists( 'DPS_Communications_API', 'notify_admin_portal_access_requested' ) ) {
+            DPS_Communications_API::notify_admin_portal_access_requested( $client_id, $client_name, $client_phone );
+        } else {
+            // Fallback: cria uma mensagem no portal para o admin ver
+            $message_title = sprintf(
+                __( 'Solicitação de Acesso ao Portal - %s', 'dps-client-portal' ),
+                $client_name ? $client_name : __( 'Cliente não identificado', 'dps-client-portal' )
+            );
+            
+            $message_content = sprintf(
+                __( "Nova solicitação de acesso ao portal:\n\nNome: %s\nTelefone: %s\nIP: %s\nData: %s", 'dps-client-portal' ),
+                $client_name ? $client_name : __( 'Não informado', 'dps-client-portal' ),
+                $client_phone ? $client_phone : __( 'Não informado', 'dps-client-portal' ),
+                $ip,
+                current_time( 'mysql' )
+            );
+            
+            // Cria post de notificação para admin
+            wp_insert_post( [
+                'post_type'    => 'dps_portal_message',
+                'post_title'   => $message_title,
+                'post_content' => $message_content,
+                'post_status'  => 'publish',
+                'meta_input'   => [
+                    'message_client_id' => $client_id ? $client_id : 0,
+                    'message_sender'    => 'system',
+                    'message_type'      => 'access_request',
+                ],
+            ] );
+        }
+        
+        wp_send_json_success( [ 
+            'message' => __( 'Sua solicitação foi registrada! Nossa equipe entrará em contato em breve.', 'dps-client-portal' ) 
+        ] );
     }
 }
 endif;
