@@ -82,6 +82,40 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Sugestões Proativas de Agendamento (Fase 6)
+  - Sistema inteligente que sugere agendamentos automaticamente durante conversas
+  - Criada classe `DPS_AI_Proactive_Scheduler` em `includes/class-dps-ai-proactive-scheduler.php`
+  - Detecção automática de oportunidades de agendamento:
+    - Analisa último agendamento do cliente via CPT `dps_agendamento`
+    - Calcula há quantos dias/semanas foi o último serviço
+    - Compara com intervalo configurável (padrão: 28 dias / 4 semanas)
+  - Integração com portal do cliente:
+    - Sugestões aparecem automaticamente após resposta da IA
+    - Contexto personalizado por cliente (nome do pet, tipo de serviço, tempo decorrido)
+    - Não interfere na funcionalidade existente do chat
+  - Controle de frequência para evitar ser invasivo:
+    - Cooldown configurável entre sugestões (padrão: 7 dias)
+    - Armazena última sugestão em user meta `_dps_ai_last_scheduling_suggestion`
+    - Máximo 1 sugestão a cada X dias por cliente
+  - Configurações admin completas:
+    - Ativar/desativar sugestões proativas
+    - Intervalo de dias sem serviço para sugerir (7-90 dias)
+    - Intervalo mínimo entre sugestões (1-30 dias)
+    - Mensagem customizável para clientes novos (sem histórico)
+    - Mensagem customizável para clientes recorrentes com variáveis dinâmicas:
+      - `{pet_name}`: Nome do pet
+      - `{weeks}`: Semanas desde último serviço
+      - `{service}`: Tipo de serviço anterior
+  - Mensagens padrão inteligentes:
+    - Clientes novos: "Que tal agendar um horário para o banho e tosa do seu pet?"
+    - Clientes recorrentes: "Observei que já faz X semanas desde o último serviço do [pet]. Gostaria que eu te ajudasse a agendar?"
+  - Query otimizada:
+    - Usa `fields => 'ids'` para performance
+    - Meta query com índice em `appointment_client_id`
+    - Ordenação por `appointment_date` DESC
+  - Arquivos modificados:
+    - `includes/class-dps-ai-integration-portal.php`: Integração com fluxo de resposta
+    - `desi-pet-shower-ai-addon.php`: Include da nova classe e configurações admin
 - **AI Add-on (v1.7.0)**: Entrada por Voz no Chat Público (Fase 6)
   - Botão de microfone adicionado ao chat público para entrada por voz
   - Integração com Web Speech API (navegadores compatíveis)

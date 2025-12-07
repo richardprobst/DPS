@@ -132,6 +132,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-repository.
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-conversations-admin.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-connector.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-webhook.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-proactive-scheduler.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -1072,6 +1073,73 @@ class DPS_AI_Addon {
                                     <strong><?php esc_html_e( 'Método:', 'dps-ai' ); ?></strong> POST
                                     <br>
                                     <strong><?php esc_html_e( 'Verificação (Meta):', 'dps-ai' ); ?></strong> GET (usa o Token de Verificação configurado acima)
+                                </p>
+                            </td>
+                        </tr>
+
+                        <!-- Sugestões Proativas de Agendamento -->
+                        <tr>
+                            <th colspan="2" style="padding: 20px 0 10px 0;">
+                                <h2 style="margin: 0; font-size: 18px; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px;">
+                                    <?php esc_html_e( 'Sugestões Proativas de Agendamento', 'dps-ai' ); ?>
+                                </h2>
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_proactive_scheduling_enabled"><?php echo esc_html__( 'Ativar Sugestões Proativas', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="dps_ai_proactive_scheduling_enabled" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[proactive_scheduling_enabled]" value="1" <?php checked( ! empty( $options['proactive_scheduling_enabled'] ) ); ?> />
+                                    <?php esc_html_e( 'Sugerir agendamentos automaticamente durante conversas', 'dps-ai' ); ?>
+                                </label>
+                                <p class="description"><?php esc_html_e( 'A IA sugerirá agendar um horário quando o cliente estiver há muito tempo sem serviço.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_proactive_scheduling_interval"><?php echo esc_html__( 'Intervalo para Sugestão (dias)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="dps_ai_proactive_scheduling_interval" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[proactive_scheduling_interval]" value="<?php echo esc_attr( $options['proactive_scheduling_interval'] ?? '28' ); ?>" min="7" max="90" class="small-text" />
+                                <p class="description"><?php esc_html_e( 'Número de dias sem serviço para sugerir agendamento (padrão: 28 dias / 4 semanas).', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_proactive_scheduling_cooldown"><?php echo esc_html__( 'Intervalo Mínimo entre Sugestões (dias)', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="dps_ai_proactive_scheduling_cooldown" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[proactive_scheduling_cooldown]" value="<?php echo esc_attr( $options['proactive_scheduling_cooldown'] ?? '7' ); ?>" min="1" max="30" class="small-text" />
+                                <p class="description"><?php esc_html_e( 'Intervalo mínimo em dias antes de sugerir novamente ao mesmo cliente (evita ser invasivo).', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_proactive_scheduling_first_time_message"><?php echo esc_html__( 'Mensagem para Clientes Novos', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_proactive_scheduling_first_time_message" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[proactive_scheduling_first_time_message]" rows="3" class="large-text"><?php echo esc_textarea( $options['proactive_scheduling_first_time_message'] ?? '' ); ?></textarea>
+                                <p class="description"><?php esc_html_e( 'Mensagem exibida para clientes sem histórico de agendamentos. Deixe vazio para usar padrão.', 'dps-ai' ); ?></p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
+                                <label for="dps_ai_proactive_scheduling_recurring_message"><?php echo esc_html__( 'Mensagem para Clientes Recorrentes', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="dps_ai_proactive_scheduling_recurring_message" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[proactive_scheduling_recurring_message]" rows="3" class="large-text"><?php echo esc_textarea( $options['proactive_scheduling_recurring_message'] ?? '' ); ?></textarea>
+                                <p class="description">
+                                    <?php esc_html_e( 'Mensagem para clientes com agendamentos anteriores. Deixe vazio para usar padrão.', 'dps-ai' ); ?>
+                                    <br>
+                                    <strong><?php esc_html_e( 'Variáveis disponíveis:', 'dps-ai' ); ?></strong> 
+                                    <code>{pet_name}</code>, <code>{weeks}</code>, <code>{service}</code>
                                 </p>
                             </td>
                         </tr>

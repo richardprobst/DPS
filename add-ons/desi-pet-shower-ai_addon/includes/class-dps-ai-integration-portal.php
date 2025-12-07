@@ -216,24 +216,33 @@ class DPS_AI_Integration_Portal {
             ] );
         }
 
-        // Salva resposta da IA
+        // Extrai texto da resposta para processamento
+        $answer_text = $this->extract_answer_text( $answer );
+
+        // Adiciona sugestão proativa de agendamento se aplicável
+        if ( class_exists( 'DPS_AI_Proactive_Scheduler' ) ) {
+            $scheduler = DPS_AI_Proactive_Scheduler::get_instance();
+            $answer_text = $scheduler->append_suggestion_to_response( $answer_text, $client_id, 'portal' );
+        }
+
+        // Salva resposta da IA (com sugestão, se aplicável)
         if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
             $repo = DPS_AI_Conversations_Repository::get_instance();
             
-            // Extrai metadados e texto da resposta
+            // Extrai metadados da resposta original
             $answer_data = $this->extract_answer_data( $answer );
             
             $repo->add_message( $conversation_id, [
                 'sender_type'       => 'assistant',
                 'sender_identifier' => 'ai',
-                'message_text'      => $answer_data['text'],
+                'message_text'      => $answer_text, // Usa texto com sugestão
                 'metadata'          => $answer_data['metadata'],
             ] );
         }
 
         // Retorna a resposta com sucesso
         wp_send_json_success( [
-            'answer' => $this->extract_answer_text( $answer ),
+            'answer' => $answer_text, // Retorna texto com sugestão
         ] );
     }
 
