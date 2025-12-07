@@ -166,6 +166,18 @@
     color: #dc2626;
 }
 
+/* Feedback de solicitação de acesso (Fase 1.4) */
+.dps-portal-access__feedback {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: var(--dps-border-radius);
+    background-color: var(--dps-success-bg);
+    color: var(--dps-success);
+    line-height: 1.5;
+}
+
 /* ========================================
    PORTAL PRINCIPAL
    ======================================== */

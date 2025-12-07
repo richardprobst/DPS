@@ -101,6 +101,9 @@ final class DPS_Client_Portal {
         add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
         add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        
+        // AJAX handler para notificação de solicitação de acesso (Fase 1.4)
+        add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
     }
 
     /**
@@ -2448,6 +2451,111 @@ final class DPS_Client_Portal {
         }
 
         wp_send_json_success( [ 'marked' => count( $messages ) ] );
+    }
+
+    /**
+     * AJAX handler para notificação de solicitação de acesso ao portal (Fase 1.4)
+     * 
+     * Quando cliente clica em "Quero acesso ao meu portal", registra solicitação
+     * e notifica admin via Communications API se disponível.
+     * 
+     * Rate limiting: 5 solicitações por hora por IP
+     * 
+     * @since 2.4.0
+     */
+    public function ajax_request_portal_access() {
+        // Valida IP para rate limiting
+        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+        $rate_key = 'dps_access_request_' . md5( $ip );
+        
+        // Verifica se já solicitou recentemente (rate limiting: 5 solicitações por hora)
+        $request_count = get_transient( $rate_key );
+        if ( false === $request_count ) {
+            $request_count = 0;
+        }
+        
+        if ( $request_count >= 5 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou acesso várias vezes. Aguarde um momento antes de solicitar novamente.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Incrementa contador
+        set_transient( $rate_key, $request_count + 1, HOUR_IN_SECONDS );
+        
+        // Captura dados do cliente (opcional, pode vir do formulário)
+        $client_name = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
+        $client_phone = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
+        
+        // Tenta encontrar cliente por telefone se fornecido
+        $client_id = 0;
+        if ( $client_phone ) {
+            $clients = get_posts( [
+                'post_type'      => 'dps_cliente',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'meta_query'     => [
+                    [
+                        'key'     => 'client_phone',
+                        'value'   => $client_phone,
+                        'compare' => 'LIKE',
+                    ],
+                ],
+            ] );
+            
+            if ( ! empty( $clients ) ) {
+                $client_id = $clients[0];
+                if ( empty( $client_name ) ) {
+                    $client_name = get_the_title( $client_id );
+                }
+            }
+        }
+        
+        // Registra solicitação em log
+        if ( function_exists( 'dps_log' ) ) {
+            dps_log( 'Portal access requested', [
+                'client_id'   => $client_id,
+                'client_name' => $client_name,
+                'client_phone' => $client_phone,
+                'ip'          => $ip,
+            ], 'info', 'client-portal' );
+        }
+        
+        // Notifica admin via Communications API se disponível
+        if ( class_exists( 'DPS_Communications_API' ) && method_exists( 'DPS_Communications_API', 'notify_admin_portal_access_requested' ) ) {
+            DPS_Communications_API::notify_admin_portal_access_requested( $client_id, $client_name, $client_phone );
+        } else {
+            // Fallback: cria uma mensagem no portal para o admin ver
+            $message_title = sprintf(
+                __( 'Solicitação de Acesso ao Portal - %s', 'dps-client-portal' ),
+                $client_name ? $client_name : __( 'Cliente não identificado', 'dps-client-portal' )
+            );
+            
+            $message_content = sprintf(
+                __( "Nova solicitação de acesso ao portal:\n\nNome: %s\nTelefone: %s\nIP: %s\nData: %s", 'dps-client-portal' ),
+                $client_name ? $client_name : __( 'Não informado', 'dps-client-portal' ),
+                $client_phone ? $client_phone : __( 'Não informado', 'dps-client-portal' ),
+                $ip,
+                current_time( 'mysql' )
+            );
+            
+            // Cria post de notificação para admin
+            wp_insert_post( [
+                'post_type'    => 'dps_portal_message',
+                'post_title'   => $message_title,
+                'post_content' => $message_content,
+                'post_status'  => 'publish',
+                'meta_input'   => [
+                    'message_client_id' => $client_id ? $client_id : 0,
+                    'message_sender'    => 'system',
+                    'message_type'      => 'access_request',
+                ],
+            ] );
+        }
+        
+        wp_send_json_success( [ 
+            'message' => __( 'Sua solicitação foi registrada! Nossa equipe entrará em contato em breve.', 'dps-client-portal' ) 
+        ] );
     }
 }
 endif;
