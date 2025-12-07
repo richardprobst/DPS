@@ -103,6 +103,11 @@ Antes de criar uma nova versão oficial:
   - Nova coluna "Status" na tabela de custos mostrando badge "Modelo Ativo" para o modelo em uso
   - Background azul claro e borda lateral azul destacando a linha do modelo ativo
   - Melhor acessibilidade com texto explícito além de indicadores visuais
+- **AI Add-on (v1.6.1)**: Melhorias de UX no Widget de Chat
+  - Autoscroll inteligente para a última mensagem (apenas se usuário não estiver lendo mensagens antigas)
+  - Textarea auto-expansível até 6 linhas (~120px) com overflow interno após o limite
+  - Implementado tanto no chat do portal (`dps-ai-portal.js`) quanto no chat público (`dps-ai-public-chat.js`)
+  - Detecção automática de posição de scroll: não interrompe leitura de mensagens anteriores
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP

@@ -134,10 +134,9 @@
             }
         });
 
-        // Auto-resize do textarea
+        // Auto-resize do textarea (expansível até 6 linhas)
         $question.on('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            autoResizeTextarea(this);
         });
 
         // Enviar pergunta ao pressionar Ctrl+Enter ou Enter (sem shift)
@@ -260,7 +259,52 @@
             }
 
             $messages.append($message);
-            $messages.scrollTop($messages[0].scrollHeight);
+            
+            // Autoscroll inteligente: apenas se o usuário não estiver rolando manualmente
+            smartScrollToBottom();
+        }
+
+        /**
+         * Rola para o final do chat de forma inteligente.
+         * Só faz scroll se o usuário já estava perto do final (não está lendo mensagens antigas).
+         */
+        function smartScrollToBottom() {
+            const container = $messages[0];
+            if (!container) return;
+            
+            const scrollTop = container.scrollTop;
+            const scrollHeight = container.scrollHeight;
+            const clientHeight = container.clientHeight;
+            
+            // Considera "perto do final" se estiver a menos de 100px do fim
+            const isNearBottom = (scrollHeight - scrollTop - clientHeight) < 100;
+            
+            // Sempre rola se for a primeira mensagem OU se usuário está perto do final
+            if (isNearBottom || scrollHeight <= clientHeight) {
+                $messages.animate({
+                    scrollTop: scrollHeight
+                }, 300);
+            }
+        }
+
+        /**
+         * Auto-resize do textarea (expansível até 6 linhas ~120px).
+         */
+        function autoResizeTextarea(textarea) {
+            // Reset para calcular altura real
+            textarea.style.height = 'auto';
+            
+            // Define altura baseada no conteúdo, limitando a ~6 linhas (120px)
+            const maxHeight = 120;
+            const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+            textarea.style.height = newHeight + 'px';
+            
+            // Se passou do limite, habilita overflow interno
+            if (textarea.scrollHeight > maxHeight) {
+                textarea.style.overflowY = 'auto';
+            } else {
+                textarea.style.overflowY = 'hidden';
+            }
         }
 
         // Handler para botões de feedback
