@@ -108,6 +108,15 @@ Antes de criar uma nova versão oficial:
   - Textarea auto-expansível até 6 linhas (~120px) com overflow interno após o limite
   - Implementado tanto no chat do portal (`dps-ai-portal.js`) quanto no chat público (`dps-ai-public-chat.js`)
   - Detecção automática de posição de scroll: não interrompe leitura de mensagens anteriores
+- **AI Add-on (v1.6.1)**: Dashboard de Analytics com Gráficos e Conversão de Moeda
+  - Integração com Chart.js 4.4.0 via CDN para visualização de dados
+  - Gráfico de linhas: uso de tokens ao longo do tempo
+  - Gráfico de barras: número de requisições por dia
+  - Gráfico de área: custo acumulado no período (USD e BRL com eixos duplos)
+  - Nova configuração "Taxa de Conversão USD → BRL" nas settings (validação 0.01-100)
+  - Exibição automática de custos em BRL nos cards do dashboard quando taxa configurada
+  - Aviso visual indicando taxa atual ou sugerindo configuração
+  - Link direto para configurar taxa a partir do analytics
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
@@ -122,6 +131,11 @@ Antes de criar uma nova versão oficial:
   - Substituídos 7 chamadas `error_log()` por funções do novo logger condicional
   - Afetados: `class-dps-ai-message-assistant.php` (4 ocorrências)
   - Todos os logs agora respeitam configurações de debug do plugin
+- **AI Add-on (v1.6.1)**: Dashboard de Analytics Aprimorado
+  - Método `enqueue_charts_scripts()` para carregar Chart.js e preparar dados
+  - Dados agregados por dia incluem cálculo de custo acumulado
+  - Gráficos responsivos adaptam-se ao tamanho da tela
+  - Layout em grid para gráficos (mínimo 400px por coluna)
 
 #### Fixed (Corrigido)
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token

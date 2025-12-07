@@ -708,6 +708,42 @@ class DPS_AI_Addon {
 
                         <tr>
                             <th scope="row">
+                                <label for="dps_ai_usd_to_brl"><?php echo esc_html__( 'Taxa de Conversão USD → BRL', 'dps-ai' ); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="dps_ai_usd_to_brl" 
+                                       name="<?php echo esc_attr( self::OPTION_KEY ); ?>[usd_to_brl_rate]" 
+                                       value="<?php echo esc_attr( $options['usd_to_brl_rate'] ?? '' ); ?>" 
+                                       min="0.01" 
+                                       max="100" 
+                                       step="0.01" 
+                                       class="small-text" 
+                                       placeholder="5.00" />
+                                <p class="description">
+                                    <?php esc_html_e( 'Taxa para converter custos de USD para BRL no dashboard de analytics.', 'dps-ai' ); ?>
+                                    <br />
+                                    <?php esc_html_e( 'Exemplo: Se 1 USD = 5.20 BRL, insira "5.20". Se não configurado, apenas valores em USD serão exibidos.', 'dps-ai' ); ?>
+                                    <br />
+                                    <span style="color: #6b7280; font-size: 12px;">
+                                        <?php 
+                                        if ( ! empty( $options['usd_to_brl_rate'] ) ) {
+                                            printf(
+                                                /* translators: %s: taxa atual */
+                                                esc_html__( 'Taxa atual: 1 USD = %s BRL', 'dps-ai' ),
+                                                '<strong>' . esc_html( number_format( (float) $options['usd_to_brl_rate'], 2, ',', '.' ) ) . '</strong>'
+                                            );
+                                        } else {
+                                            esc_html_e( 'Nenhuma taxa configurada. Defina uma taxa para ver custos em BRL.', 'dps-ai' );
+                                        }
+                                        ?>
+                                    </span>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">
                                 <?php echo esc_html__( 'Limpeza Manual', 'dps-ai' ); ?>
                             </th>
                             <td>
@@ -969,6 +1005,37 @@ class DPS_AI_Addon {
         <div class="wrap">
             <h1><?php esc_html_e( 'Analytics de IA', 'dps-ai' ); ?></h1>
 
+            <!-- Aviso de taxa de conversão -->
+            <?php if ( ! empty( $settings['usd_to_brl_rate'] ) ) : ?>
+                <div style="background: #dbeafe; padding: 12px 16px; border-radius: 6px; border-left: 4px solid #0ea5e9; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #0c4a6e; font-size: 13px;">
+                        <strong><?php esc_html_e( 'Taxa de conversão:', 'dps-ai' ); ?></strong>
+                        <?php 
+                        printf(
+                            /* translators: %s: taxa de conversão */
+                            esc_html__( '1 USD = %s BRL', 'dps-ai' ),
+                            '<strong>' . esc_html( number_format( floatval( $settings['usd_to_brl_rate'] ), 2, ',', '.' ) ) . '</strong>'
+                        );
+                        ?>
+                        &nbsp;•&nbsp;
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-ai-settings' ) ); ?>" style="color: #0ea5e9; text-decoration: none;">
+                            <?php esc_html_e( 'Alterar nas configurações', 'dps-ai' ); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php elseif ( $cost > 0 ) : ?>
+                <div style="background: #fef3c7; padding: 12px 16px; border-radius: 6px; border-left: 4px solid #f59e0b; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #78350f; font-size: 13px;">
+                        <strong><?php esc_html_e( 'Dica:', 'dps-ai' ); ?></strong>
+                        <?php esc_html_e( 'Configure a taxa de conversão USD → BRL nas configurações para ver custos em reais.', 'dps-ai' ); ?>
+                        &nbsp;
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-ai-settings' ) ); ?>" style="color: #f59e0b; text-decoration: none;">
+                            <?php esc_html_e( 'Configurar agora', 'dps-ai' ); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php endif; ?>
+
             <!-- Filtro de período -->
             <form method="get" style="margin-bottom: 20px;">
                 <input type="hidden" name="page" value="dps-ai-analytics" />
@@ -1002,6 +1069,15 @@ class DPS_AI_Addon {
                 <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; flex: 1; min-width: 200px;">
                     <h3 style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;"><?php esc_html_e( 'Custo Estimado', 'dps-ai' ); ?></h3>
                     <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;">$<?php echo esc_html( number_format( $cost, 4 ) ); ?></p>
+                    <?php
+                    // Exibe valor em BRL se taxa configurada
+                    if ( ! empty( $settings['usd_to_brl_rate'] ) ) {
+                        $cost_brl = $cost * floatval( $settings['usd_to_brl_rate'] );
+                        ?>
+                        <p style="margin: 5px 0 0 0; font-size: 16px; color: #6b7280;">
+                            (~R$ <?php echo esc_html( number_format( $cost_brl, 2, ',', '.' ) ); ?>)
+                        </p>
+                    <?php } ?>
                 </div>
             </div>
 
@@ -1024,6 +1100,36 @@ class DPS_AI_Addon {
                     <p style="margin: 0; font-size: 32px; font-weight: 700; color: #ef4444;">👎 <?php echo esc_html( number_format( $stats['summary']['negative_feedback'] ) ); ?></p>
                 </div>
             </div>
+
+            <!-- Gráficos com Chart.js -->
+            <?php if ( ! empty( $stats['daily'] ) ) : ?>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Gráfico de Uso de Tokens -->
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;"><?php esc_html_e( 'Uso de Tokens ao Longo do Tempo', 'dps-ai' ); ?></h3>
+                        <canvas id="tokensChart" style="max-height: 300px;"></canvas>
+                    </div>
+
+                    <!-- Gráfico de Requisições -->
+                    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;"><?php esc_html_e( 'Requisições por Dia', 'dps-ai' ); ?></h3>
+                        <canvas id="requestsChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Custo Acumulado -->
+                <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 30px;">
+                    <h3 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;">
+                        <?php esc_html_e( 'Custo Acumulado no Período', 'dps-ai' ); ?>
+                        <?php if ( ! empty( $settings['usd_to_brl_rate'] ) ) : ?>
+                            <span style="font-size: 13px; color: #6b7280; font-weight: normal;">
+                                (<?php esc_html_e( 'USD e BRL', 'dps-ai' ); ?>)
+                            </span>
+                        <?php endif; ?>
+                    </h3>
+                    <canvas id="costChart" style="max-height: 300px;"></canvas>
+                </div>
+            <?php endif; ?>
 
             <!-- Feedback Recente -->
             <h2><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
@@ -1081,7 +1187,227 @@ class DPS_AI_Addon {
                 </table>
             <?php endif; ?>
         </div>
+
         <?php
+        // Enfileira Chart.js e script de inicialização
+        if ( ! empty( $stats['daily'] ) ) {
+            $this->enqueue_charts_scripts( $stats, $model, $settings );
+        }
+        ?>
+        <?php
+    }
+
+    /**
+     * Enfileira Chart.js e inicializa gráficos do analytics.
+     *
+     * @param array  $stats    Estatísticas do analytics.
+     * @param string $model    Modelo GPT usado.
+     * @param array  $settings Configurações do plugin.
+     */
+    private function enqueue_charts_scripts( $stats, $model, $settings ) {
+        // Enfileira Chart.js via CDN
+        wp_enqueue_script(
+            'chartjs',
+            'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+            [],
+            '4.4.0',
+            true
+        );
+
+        // Prepara dados para os gráficos
+        $labels = [];
+        $tokens_data = [];
+        $requests_data = [];
+        $cost_usd_data = [];
+        $cost_brl_data = [];
+        $cumulative_cost_usd = 0;
+        $cumulative_cost_brl = 0;
+
+        foreach ( $stats['daily'] as $day ) {
+            $labels[] = gmdate( 'd/m', strtotime( $day->date ) );
+            $tokens_data[] = intval( $day->tokens );
+            $requests_data[] = intval( $day->questions );
+            
+            // Calcula custo do dia
+            $daily_cost = DPS_AI_Analytics::estimate_cost(
+                intval( $day->tokens ) / 2, // Aproximação: metade input
+                intval( $day->tokens ) / 2, // Aproximação: metade output
+                $model
+            );
+            
+            $cumulative_cost_usd += $daily_cost;
+            $cost_usd_data[] = round( $cumulative_cost_usd, 4 );
+            
+            // Se tem taxa BRL, calcula também
+            if ( ! empty( $settings['usd_to_brl_rate'] ) ) {
+                $cumulative_cost_brl += $daily_cost * floatval( $settings['usd_to_brl_rate'] );
+                $cost_brl_data[] = round( $cumulative_cost_brl, 2 );
+            }
+        }
+
+        // Localiza dados para JavaScript
+        wp_localize_script(
+            'chartjs',
+            'dpsAIChartsData',
+            [
+                'labels'       => $labels,
+                'tokens'       => $tokens_data,
+                'requests'     => $requests_data,
+                'costUSD'      => $cost_usd_data,
+                'costBRL'      => $cost_brl_data,
+                'hasBRLRate'   => ! empty( $settings['usd_to_brl_rate'] ),
+                'i18n'         => [
+                    'tokens'       => __( 'Tokens', 'dps-ai' ),
+                    'requests'     => __( 'Requisições', 'dps-ai' ),
+                    'costUSD'      => __( 'Custo (USD)', 'dps-ai' ),
+                    'costBRL'      => __( 'Custo (BRL)', 'dps-ai' ),
+                ],
+            ]
+        );
+
+        // Script inline para inicializar gráficos
+        wp_add_inline_script(
+            'chartjs',
+            "
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof Chart === 'undefined' || !window.dpsAIChartsData) return;
+
+                const data = window.dpsAIChartsData;
+                
+                // Configuração comum
+                const commonOptions = {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                };
+
+                // Gráfico de Tokens (Linha)
+                const tokensCtx = document.getElementById('tokensChart');
+                if (tokensCtx) {
+                    new Chart(tokensCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.i18n.tokens,
+                                data: data.tokens,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: commonOptions
+                    });
+                }
+
+                // Gráfico de Requisições (Barras)
+                const requestsCtx = document.getElementById('requestsChart');
+                if (requestsCtx) {
+                    new Chart(requestsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.i18n.requests,
+                                data: data.requests,
+                                backgroundColor: '#0ea5e9',
+                                borderColor: '#0284c7',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: commonOptions
+                    });
+                }
+
+                // Gráfico de Custo Acumulado (Área)
+                const costCtx = document.getElementById('costChart');
+                if (costCtx) {
+                    const datasets = [
+                        {
+                            label: data.i18n.costUSD,
+                            data: data.costUSD,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yUSD'
+                        }
+                    ];
+
+                    // Se tem taxa BRL, adiciona segunda linha
+                    if (data.hasBRLRate) {
+                        datasets.push({
+                            label: data.i18n.costBRL,
+                            data: data.costBRL,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yBRL'
+                        });
+                    }
+
+                    const scales = {
+                        yUSD: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'USD ($)'
+                            }
+                        }
+                    };
+
+                    // Se tem BRL, adiciona eixo Y secundário
+                    if (data.hasBRLRate) {
+                        scales.yBRL = {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'BRL (R$)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        };
+                    }
+
+                    new Chart(costCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: scales
+                        }
+                    });
+                }
+            });
+            "
+        );
     }
 
     /**
@@ -1155,6 +1481,10 @@ class DPS_AI_Addon {
             'public_chat_faqs'           => isset( $raw_settings['public_chat_faqs'] ) ? sanitize_textarea_field( $raw_settings['public_chat_faqs'] ) : '',
             'public_chat_business_info'  => $public_chat_business_info,
             'public_chat_instructions'   => $public_chat_instructions,
+            // v1.6.1 settings - Manutenção, Logs e Analytics
+            'data_retention_days'        => isset( $raw_settings['data_retention_days'] ) ? max( 30, min( 3650, absint( $raw_settings['data_retention_days'] ) ) ) : 365,
+            'debug_logging'              => ! empty( $raw_settings['debug_logging'] ),
+            'usd_to_brl_rate'            => isset( $raw_settings['usd_to_brl_rate'] ) && ! empty( $raw_settings['usd_to_brl_rate'] ) ? max( 0.01, min( 100, floatval( $raw_settings['usd_to_brl_rate'] ) ) ) : '',
         ];
 
         update_option( self::OPTION_KEY, $settings );
