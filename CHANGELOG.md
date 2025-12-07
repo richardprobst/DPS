@@ -628,6 +628,18 @@ Antes de criar uma nova versão oficial:
   - Estilos CSS expandidos (~100 linhas adicionadas) para formulário e tabela
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on (v2.3.1)**: Corrigido link de token não autenticando cliente imediatamente
+  - **Problema**: Quando cliente clicava no link com token (`?dps_token=...`), permanecia na tela de solicitação de login em vez de acessar o portal
+  - **Causa raiz**: Cookie de sessão criado com `setcookie()` não estava disponível em `$_COOKIE` na requisição atual, apenas na próxima requisição. O redirecionamento após autenticação causava perda do contexto de autenticação
+  - **Solução implementada**:
+    - Adicionada propriedade `$current_request_client_id` em `DPS_Client_Portal` para armazenar autenticação da requisição atual
+    - Modificado `get_authenticated_client_id()` para priorizar: autenticação atual → cookies → fallback WP user
+    - Removido redirecionamento em `handle_token_authentication()` - portal agora carrega imediatamente com cliente autenticado
+    - Adicionada função JavaScript `cleanTokenFromURL()` que remove token da URL via `history.replaceState()` por segurança
+  - **Impacto**: Links de token agora funcionam imediatamente, sem necessidade de segundo clique ou refresh
+  - **Arquivos modificados**:
+    - `includes/class-dps-client-portal.php` - lógica de autenticação
+    - `assets/js/client-portal.js` - limpeza de URL
 - **Finance Add-on (v1.3.1)**: Corrigida página de Documentos Financeiros em branco e vulnerabilidade CSRF
   - **Bug #1 - Página sem shortcode**: Quando página "Documentos Financeiros" já existia com slug `dps-documentos-financeiros`, o método `activate()` apenas atualizava option mas não verificava/atualizava conteúdo da página
     - **Sintoma**: Página aparecia em branco se foi criada manualmente ou teve conteúdo removido
