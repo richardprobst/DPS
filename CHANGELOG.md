@@ -97,6 +97,12 @@ Antes de criar uma nova versão oficial:
   - Em produção (debug desabilitado), apenas erros críticos são registrados
   - Nova configuração "Habilitar Logs Detalhados" na página de settings
   - Indicador visual quando `WP_DEBUG` está ativo nas configurações
+- **AI Add-on (v1.6.1)**: Melhorias de UX na Página de Configurações
+  - Toggle de visibilidade da API Key com ícone de olho (dashicons) para mostrar/ocultar chave
+  - Destaque visual do modelo GPT atualmente selecionado na tabela de custos
+  - Nova coluna "Status" na tabela de custos mostrando badge "Modelo Ativo" para o modelo em uso
+  - Background azul claro e borda lateral azul destacando a linha do modelo ativo
+  - Melhor acessibilidade com texto explícito além de indicadores visuais
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP

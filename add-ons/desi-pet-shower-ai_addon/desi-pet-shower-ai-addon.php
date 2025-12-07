@@ -411,11 +411,18 @@ class DPS_AI_Addon {
                                 <label for="dps_ai_api_key"><?php echo esc_html__( 'Chave de API da OpenAI', 'dps-ai' ); ?></label>
                             </th>
                             <td>
-                                <input type="password" id="dps_ai_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[api_key]" value="<?php echo esc_attr( $options['api_key'] ?? '' ); ?>" class="regular-text" />
-                                <button type="button" id="dps_ai_test_connection" class="button" style="margin-left: 10px;">
-                                    <?php esc_html_e( 'Testar Conexão', 'dps-ai' ); ?>
-                                </button>
-                                <span id="dps_ai_test_result" style="margin-left: 10px; display: none;"></span>
+                                <div style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <div style="position: relative; display: inline-block;">
+                                        <input type="password" id="dps_ai_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[api_key]" value="<?php echo esc_attr( $options['api_key'] ?? '' ); ?>" class="regular-text" style="padding-right: 40px;" />
+                                        <button type="button" id="dps_ai_toggle_api_key" class="button" style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); padding: 0; width: 32px; height: 28px; border: none; background: transparent; cursor: pointer;" title="<?php esc_attr_e( 'Mostrar/Ocultar API Key', 'dps-ai' ); ?>">
+                                            <span class="dashicons dashicons-visibility" style="line-height: 28px; width: 32px; height: 28px; font-size: 18px; color: #666;"></span>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="dps_ai_test_connection" class="button">
+                                        <?php esc_html_e( 'Testar Conexão', 'dps-ai' ); ?>
+                                    </button>
+                                    <span id="dps_ai_test_result" style="display: none;"></span>
+                                </div>
                                 <p class="description"><?php esc_html_e( 'Token de autenticação da API da OpenAI (sk-...). Mantenha em segredo.', 'dps-ai' ); ?></p>
                             </td>
                         </tr>
@@ -761,34 +768,71 @@ class DPS_AI_Addon {
             <hr />
 
             <h2><?php esc_html_e( 'Custos Estimados (OpenAI)', 'dps-ai' ); ?></h2>
-            <table class="widefat" style="max-width: 600px;">
+            <?php
+            // Obtém o modelo atualmente selecionado
+            $selected_model = $options['model'] ?? 'gpt-4o-mini';
+            ?>
+            <table class="widefat" style="max-width: 700px;">
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'Modelo', 'dps-ai' ); ?></th>
                         <th><?php esc_html_e( 'Custo Aprox. por Pergunta', 'dps-ai' ); ?></th>
                         <th><?php esc_html_e( 'Recomendação', 'dps-ai' ); ?></th>
+                        <th><?php esc_html_e( 'Status', 'dps-ai' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>GPT-4o Mini</td>
+                    <tr<?php echo ( 'gpt-4o-mini' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4o Mini</strong></td>
                         <td>~$0.0003</td>
                         <td><strong><?php esc_html_e( 'Recomendado', 'dps-ai' ); ?></strong></td>
+                        <td>
+                            <?php if ( 'gpt-4o-mini' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-4o</td>
+                    <tr<?php echo ( 'gpt-4o' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4o</strong></td>
                         <td>~$0.005</td>
                         <td><?php esc_html_e( 'Alta precisão', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-4o' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-4 Turbo</td>
+                    <tr<?php echo ( 'gpt-4-turbo' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-4 Turbo</strong></td>
                         <td>~$0.01</td>
                         <td><?php esc_html_e( 'Máxima precisão', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-4-turbo' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>GPT-3.5 Turbo</td>
+                    <tr<?php echo ( 'gpt-3.5-turbo' === $selected_model ) ? ' style="background-color: #e0f2fe; border-left: 4px solid #0ea5e9;"' : ''; ?>>
+                        <td><strong>GPT-3.5 Turbo</strong></td>
                         <td>~$0.001</td>
                         <td><?php esc_html_e( 'Legado', 'dps-ai' ); ?></td>
+                        <td>
+                            <?php if ( 'gpt-3.5-turbo' === $selected_model ) : ?>
+                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #0ea5e9; color: #fff; border-radius: 3px; font-size: 11px; font-weight: 600;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                    <?php esc_html_e( 'Modelo Ativo', 'dps-ai' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -797,6 +841,25 @@ class DPS_AI_Addon {
 
         <script>
         (function($) {
+            // Toggle API Key visibility
+            $('#dps_ai_toggle_api_key').on('click', function(e) {
+                e.preventDefault();
+                
+                var $input = $('#dps_ai_api_key');
+                var $icon = $(this).find('.dashicons');
+                
+                if ($input.attr('type') === 'password') {
+                    $input.attr('type', 'text');
+                    $icon.removeClass('dashicons-visibility').addClass('dashicons-hidden');
+                    $(this).attr('title', '<?php echo esc_js( __( 'Ocultar API Key', 'dps-ai' ) ); ?>');
+                } else {
+                    $input.attr('type', 'password');
+                    $icon.removeClass('dashicons-hidden').addClass('dashicons-visibility');
+                    $(this).attr('title', '<?php echo esc_js( __( 'Mostrar API Key', 'dps-ai' ) ); ?>');
+                }
+            });
+
+            // Test connection button
             $('#dps_ai_test_connection').on('click', function(e) {
                 e.preventDefault();
                 
