@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da Base de Conhecimento - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f0f0f1;
+            padding: 20px;
+        }
+        .wrap {
+            background: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.13);
+        }
+        h1 {
+            font-size: 23px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #1d2327;
+        }
+        .description {
+            color: #646970;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .test-form {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #c3c4c7;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .test-form h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        .button-primary {
+            background: #2271b1;
+            border-color: #2271b1;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .test-results {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #c3c4c7;
+            border-radius: 4px;
+        }
+        .test-results h2 {
+            font-size: 18px;
+            border-bottom: 1px solid #dcdcde;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .test-summary {
+            background: #f6f7f7;
+            padding: 15px;
+            border-left: 4px solid #2271b1;
+            margin-bottom: 20px;
+        }
+        .test-summary h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .summary-stat {
+            text-align: center;
+        }
+        .summary-stat .label {
+            display: block;
+            font-size: 11px;
+            color: #646970;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .summary-stat .value {
+            display: block;
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d2327;
+        }
+        .test-article {
+            background: #fff;
+            border: 1px solid #dcdcde;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f1;
+        }
+        .article-title h3 {
+            font-size: 16px;
+            color: #2271b1;
+            margin: 0;
+        }
+        .article-badges {
+            display: flex;
+            gap: 8px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-priority-high {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .badge-priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .badge-size-short {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .badge-size-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-size-long {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .article-row {
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .article-row strong {
+            display: inline-block;
+            min-width: 140px;
+        }
+        .article-keywords {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .keyword {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        .keyword.matched {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .article-excerpt {
+            background: #f6f7f7;
+            padding: 10px;
+            border-left: 3px solid #2271b1;
+            margin-top: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Teste da Base de Conhecimento</h1>
+        
+        <p class="description">
+            Digite uma pergunta para testar quais artigos da base de conhecimento seriam selecionados para responder. Isso usa a mesma lógica de matching usada em produção.
+        </p>
+
+        <!-- Formulário de teste -->
+        <div class="test-form">
+            <h2>Pergunta de Teste</h2>
+            
+            <textarea rows="4" readonly>Quanto custa um banho?</textarea>
+            
+            <div style="margin-top: 10px;">
+                <label>
+                    Limite de artigos:
+                    <input type="number" value="5" min="1" max="10" style="width: 60px; padding: 4px; border: 1px solid #8c8f94; border-radius: 4px;">
+                </label>
+                
+                <button type="button" class="button-primary">
+                    Testar Matching
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="test-results">
+            <h2>Artigos Selecionados</h2>
+            
+            <!-- Resumo -->
+            <div class="test-summary">
+                <h3>Resumo</h3>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <span class="label">Artigos Encontrados</span>
+                        <span class="value">3</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="label">Total de Caracteres</span>
+                        <span class="value">3.450</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="label">Tokens Estimados</span>
+                        <span class="value">~862</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artigo 1 -->
+            <div class="test-article">
+                <div class="article-header">
+                    <div class="article-title">
+                        <h3>1. Preços de Banho</h3>
+                    </div>
+                    <div class="article-badges">
+                        <span class="badge badge-priority-high">Prioridade: Alta</span>
+                        <span class="badge badge-size-medium">Tamanho: Médio</span>
+                    </div>
+                </div>
+                
+                <div class="article-content">
+                    <div class="article-row">
+                        <strong>Prioridade:</strong> 9/10
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Keywords:</strong>
+                        <div class="article-keywords">
+                            <span class="keyword matched">banho</span>
+                            <span class="keyword matched">preço</span>
+                            <span class="keyword matched">valor</span>
+                            <span class="keyword matched">quanto custa</span>
+                        </div>
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Tamanho:</strong> 1.234 caracteres, 234 palavras, ~308 tokens
+                    </div>
+                    
+                    <div class="article-excerpt">
+                        <strong>Trecho:</strong><br>
+                        Nossos banhos são categorizados em três níveis de serviço. O banho básico custa R$ 50 e inclui shampoo, secagem e perfume. O banho especial custa R$ 80 e adiciona condicionador e hidratação. O banho premium custa R$ 120 e oferece...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artigo 2 -->
+            <div class="test-article">
+                <div class="article-header">
+                    <div class="article-title">
+                        <h3>2. Serviços Disponíveis</h3>
+                    </div>
+                    <div class="article-badges">
+                        <span class="badge badge-priority-medium">Prioridade: Média</span>
+                        <span class="badge badge-size-short">Tamanho: Curto</span>
+                    </div>
+                </div>
+                
+                <div class="article-content">
+                    <div class="article-row">
+                        <strong>Prioridade:</strong> 6/10
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Keywords:</strong>
+                        <div class="article-keywords">
+                            <span class="keyword">tosa</span>
+                            <span class="keyword">corte</span>
+                            <span class="keyword matched">banho</span>
+                            <span class="keyword">hidratação</span>
+                        </div>
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Tamanho:</strong> 456 caracteres, 78 palavras, ~114 tokens
+                    </div>
+                    
+                    <div class="article-excerpt">
+                        <strong>Trecho:</strong><br>
+                        Oferecemos serviços completos para seu pet: banho, tosa higiênica, tosa completa, hidratação, corte de unhas e limpeza de ouvidos...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artigo 3 -->
+            <div class="test-article">
+                <div class="article-header">
+                    <div class="article-title">
+                        <h3>3. Horário de Funcionamento</h3>
+                    </div>
+                    <div class="article-badges">
+                        <span class="badge badge-priority-high">Prioridade: Alta</span>
+                        <span class="badge badge-size-long">Tamanho: Longo</span>
+                    </div>
+                </div>
+                
+                <div class="article-content">
+                    <div class="article-row">
+                        <strong>Prioridade:</strong> 8/10
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Keywords:</strong>
+                        <div class="article-keywords">
+                            <span class="keyword">horário</span>
+                            <span class="keyword">funcionamento</span>
+                            <span class="keyword matched">quanto</span>
+                            <span class="keyword">tempo</span>
+                        </div>
+                    </div>
+                    
+                    <div class="article-row">
+                        <strong>Tamanho:</strong> 2.760 caracteres, 456 palavras, ~440 tokens
+                    </div>
+                    
+                    <div class="article-excerpt">
+                        <strong>Trecho:</strong><br>
+                        Funcionamos de segunda a sexta das 8h às 18h e aos sábados das 8h às 14h. Domingos e feriados estamos fechados. Recomendamos agendar com antecedência, especialmente aos sábados quando há maior demanda...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

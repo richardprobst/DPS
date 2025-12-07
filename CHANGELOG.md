@@ -82,6 +82,24 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.2)**: Interface de Teste e Validação da Base de Conhecimento
+  - Criada nova página admin "Testar Base de Conhecimento" (submenu no menu DPS)
+  - Slug da página: `dps-ai-kb-tester`
+  - Classe `DPS_AI_Knowledge_Base_Tester` em `includes/class-dps-ai-knowledge-base-tester.php`
+  - **Preview de Artigos Selecionados:** Permite testar quais artigos seriam selecionados para uma pergunta de teste
+  - Campo de texto para digitar pergunta de teste + botão "Testar Matching" (suporta Ctrl+Enter)
+  - Configuração de limite de artigos (1-10, padrão: 5)
+  - Usa mesma lógica de matching de produção (`get_relevant_articles_with_details()` reusa `get_relevant_articles()`)
+  - Exibe artigos que seriam incluídos no contexto com: título (link para edição), prioridade (badge colorido), keywords (destacando em azul as que fizeram match), tamanho (chars/words/tokens), trecho do conteúdo (200 chars)
+  - Resumo com 3 cards estatísticos: Artigos Encontrados, Total de Caracteres, Tokens Estimados
+  - **Validação de Tamanho de Artigos:** Função `estimate_article_size($content)` para estimar tamanho baseado em caracteres, palavras e aproximação de tokens (1 token ≈ 4 chars para português)
+  - Classificação de tamanho: Curto (<500 chars), Médio (500-2000 chars), Longo (>2000 chars)
+  - Metabox "Validação de Tamanho" na tela de edição do CPT mostrando classificação com badge colorido (verde/amarelo/vermelho), estatísticas detalhadas e aviso se artigo muito longo
+  - Sugestão automática para resumir ou dividir artigos longos (>2000 chars)
+  - Badges de tamanho exibidos tanto no teste quanto na listagem de artigos
+  - Assets: `assets/css/kb-tester.css` (4.4KB, estilos para cards, badges, grid responsivo) e `assets/js/kb-tester.js` (7KB, AJAX, renderização dinâmica, destaque de keywords)
+  - Endpoint AJAX: `wp_ajax_dps_ai_kb_test_matching` com segurança (nonce, capability `edit_posts`)
+  - Interface responsiva com grid adaptativo para mobile
 - **AI Add-on (v1.6.2)**: Interface Administrativa para Gerenciar Base de Conhecimento
   - Criada nova página admin "Base de Conhecimento" (submenu no menu DPS)
   - Slug da página: `dps-ai-knowledge-base`
