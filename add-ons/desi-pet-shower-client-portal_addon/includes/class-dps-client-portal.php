@@ -422,94 +422,99 @@ final class DPS_Client_Portal {
             $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
         } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
             $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
-            $owner_id = absint( get_post_meta( $pet_id, 'owner_id', true ) );
+            
+            // Validação de ownership usando helper centralizado (Fase 1.4)
+            if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
+                // Log de tentativa de acesso indevido já feito pelo helper
+                $redirect_url = add_query_arg( 'portal_msg', 'error', $redirect_url );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
 
-            if ( $owner_id === $client_id ) {
-                $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
-                $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
-                $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
-                $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
-                $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
-                $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
-                $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
-                $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
-                $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
-                $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
-                $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
-                $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+            $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
+            $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
+            $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
+            $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
+            $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
+            $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
+            $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
+            $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
+            $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
+            $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
+            $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
+            $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
 
-                if ( $pet_name ) {
-                    wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
+            if ( $pet_name ) {
+                wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
+            }
+
+            update_post_meta( $pet_id, 'pet_species', $species );
+            update_post_meta( $pet_id, 'pet_breed', $breed );
+            update_post_meta( $pet_id, 'pet_size', $size );
+            update_post_meta( $pet_id, 'pet_weight', $weight );
+            update_post_meta( $pet_id, 'pet_coat', $coat );
+            update_post_meta( $pet_id, 'pet_color', $color );
+            update_post_meta( $pet_id, 'pet_birth', $birth );
+            update_post_meta( $pet_id, 'pet_sex', $sex );
+            update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
+            update_post_meta( $pet_id, 'pet_allergies', $allergies );
+            update_post_meta( $pet_id, 'pet_behavior', $behavior );
+
+            if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
+                $file = $_FILES['pet_photo'];
+                
+                // Valida tipos MIME permitidos para imagens
+                $allowed_mimes = [
+                    'jpg|jpeg|jpe' => 'image/jpeg',
+                    'gif'          => 'image/gif',
+                    'png'          => 'image/png',
+                    'webp'         => 'image/webp',
+                ];
+                
+                // Extrai extensões permitidas dos MIME types (single source of truth)
+                $allowed_exts = [];
+                foreach ( array_keys( $allowed_mimes ) as $ext_pattern ) {
+                    $exts = explode( '|', $ext_pattern );
+                    $allowed_exts = array_merge( $allowed_exts, $exts );
                 }
-
-                update_post_meta( $pet_id, 'pet_species', $species );
-                update_post_meta( $pet_id, 'pet_breed', $breed );
-                update_post_meta( $pet_id, 'pet_size', $size );
-                update_post_meta( $pet_id, 'pet_weight', $weight );
-                update_post_meta( $pet_id, 'pet_coat', $coat );
-                update_post_meta( $pet_id, 'pet_color', $color );
-                update_post_meta( $pet_id, 'pet_birth', $birth );
-                update_post_meta( $pet_id, 'pet_sex', $sex );
-                update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
-                update_post_meta( $pet_id, 'pet_allergies', $allergies );
-                update_post_meta( $pet_id, 'pet_behavior', $behavior );
-
-                if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
-                    $file = $_FILES['pet_photo'];
-                    
-                    // Valida tipos MIME permitidos para imagens
-                    $allowed_mimes = [
-                        'jpg|jpeg|jpe' => 'image/jpeg',
-                        'gif'          => 'image/gif',
-                        'png'          => 'image/png',
-                        'webp'         => 'image/webp',
-                    ];
-                    
-                    // Extrai extensões permitidas dos MIME types (single source of truth)
-                    $allowed_exts = [];
-                    foreach ( array_keys( $allowed_mimes ) as $ext_pattern ) {
-                        $exts = explode( '|', $ext_pattern );
-                        $allowed_exts = array_merge( $allowed_exts, $exts );
-                    }
-                    
-                    // Verifica extensão do arquivo
-                    $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
-                    
-                    if ( ! in_array( $file_ext, $allowed_exts, true ) ) {
-                        // Extensão não permitida, não processa upload
-                        $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+                
+                // Verifica extensão do arquivo
+                $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
+                
+                if ( ! in_array( $file_ext, $allowed_exts, true ) ) {
+                    // Extensão não permitida, não processa upload
+                    $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+                } else {
+                    // Usa limite de upload do WordPress (respeita configuração do servidor)
+                    $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
+                    if ( $file['size'] > $max_size ) {
+                        $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
                     } else {
-                        // Usa limite de upload do WordPress (respeita configuração do servidor)
-                        $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
-                        if ( $file['size'] > $max_size ) {
-                            $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
-                        } else {
-                            require_once ABSPATH . 'wp-admin/includes/file.php';
-                            require_once ABSPATH . 'wp-admin/includes/image.php';
+                        require_once ABSPATH . 'wp-admin/includes/file.php';
+                        require_once ABSPATH . 'wp-admin/includes/image.php';
 
-                            $upload = wp_handle_upload( $file, [ 
-                                'test_form' => false,
-                                'mimes'     => $allowed_mimes,
-                            ] );
+                        $upload = wp_handle_upload( $file, [ 
+                            'test_form' => false,
+                            'mimes'     => $allowed_mimes,
+                        ] );
+                        
+                        if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                            $file_path  = $upload['file'];
+                            $file_name  = basename( $file_path );
+                            $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
                             
-                            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                                $file_path  = $upload['file'];
-                                $file_name  = basename( $file_path );
-                                $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
-                                
-                                // Valida MIME type real do arquivo
-                                if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
-                                    $attachment = [
-                                        'post_title'     => sanitize_file_name( $file_name ),
-                                        'post_mime_type' => $file_type['type'],
-                                        'post_status'    => 'inherit',
-                                    ];
-                                    $attach_id = wp_insert_attachment( $attachment, $file_path );
-                                    if ( ! is_wp_error( $attach_id ) ) {
-                                        $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
-                                        wp_update_attachment_metadata( $attach_id, $attach_data );
-                                        update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
-                                    }
+                            // Valida MIME type real do arquivo
+                            if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
+                                $attachment = [
+                                    'post_title'     => sanitize_file_name( $file_name ),
+                                    'post_mime_type' => $file_type['type'],
+                                    'post_status'    => 'inherit',
+                                ];
+                                $attach_id = wp_insert_attachment( $attachment, $file_path );
+                                if ( ! is_wp_error( $attach_id ) ) {
+                                    $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+                                    wp_update_attachment_metadata( $attach_id, $attach_data );
+                                    update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
                                 }
                             }
                         }

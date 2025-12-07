@@ -82,6 +82,19 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Client Portal (v2.4.0)**: Sistema de notificação de acesso ao portal (Fase 1.3)
+  - Nova opção nas configurações do portal para ativar/desativar notificações de acesso
+  - E-mail automático enviado ao cliente quando o portal é acessado via token
+  - Notificação inclui data/hora do acesso e IP (parcialmente ofuscado para privacidade)
+  - Integração com DPS_Communications_API quando disponível, com fallback para wp_mail
+  - Mensagem de segurança alertando cliente para reportar acessos não reconhecidos
+  - Hook `dps_portal_access_notification_sent` para extensões
+- **Client Portal (v2.4.0)**: Helper centralizado de validação de ownership (Fase 1.4)
+  - Função global `dps_portal_assert_client_owns_resource()` para validar propriedade de recursos
+  - Suporta tipos: appointment, pet, message, transaction, client
+  - Logs automáticos de tentativas de acesso indevido
+  - Extensível via filtros `dps_portal_pre_ownership_check` e `dps_portal_ownership_validated`
+  - Aplicado em download de .ics, atualização de dados de pets
 - **AI Add-on (v1.7.0)**: Dashboard de Insights (Fase 6)
   - Nova página administrativa "IA – Insights" com métricas consolidadas
   - Criada classe `DPS_AI_Insights_Dashboard` em `includes/class-dps-ai-insights-dashboard.php`
@@ -450,6 +463,14 @@ Antes de criar uma nova versão oficial:
   - Modificado `DPS_AI_Assistant::answer_portal_question()` para buscar e incluir artigos relevantes via `get_relevant_articles()`
   - Modificado `DPS_AI_Public_Chat::get_ai_response()` para buscar e incluir artigos relevantes no chat público
   - Contexto da base de conhecimento é adicionado após contexto do cliente/negócio e antes da pergunta do usuário
+
+#### Deprecated (Depreciado)
+- **Client Portal (v2.4.0)**: Shortcode `[dps_client_login]` descontinuado (Fase 1.1)
+  - Shortcode agora exibe mensagem de depreciação ao invés de formulário de login
+  - Sistema de login por usuário/senha removido em favor de autenticação exclusiva por token (magic link)
+  - Remoção completa prevista para v3.0.0
+  - Migração: clientes devem usar apenas `[dps_client_portal]` e solicitar links de acesso
+  - Documentação atualizada em `TOKEN_AUTH_SYSTEM.md` com guia de migração
   - Artigos são formatados com cabeçalho claro "INFORMAÇÕES DA BASE DE CONHECIMENTO:" para melhor compreensão da IA
 - **AI Add-on (v1.6.2)**: Aplicação Real do Idioma Configurado em Todos os Contextos
   - Modificado `DPS_AI_Assistant::answer_portal_question()` para usar `get_base_system_prompt_with_language()` ao invés de `get_base_system_prompt()`
