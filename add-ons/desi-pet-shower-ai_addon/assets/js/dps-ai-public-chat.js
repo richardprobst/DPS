@@ -18,10 +18,13 @@
     var $messages = null;
     var $input = null;
     var $submit = null;
+    var $voiceBtn = null;
     var $typing = null;
     var nonce = '';
     var isFloating = false;
     var conversationHistory = [];
+    var recognition = null;
+    var isListening = false;
 
     /**
      * Inicializa o chat público.
@@ -37,9 +40,13 @@
         $messages = $('#dps-ai-public-messages');
         $input = $('#dps-ai-public-input');
         $submit = $('#dps-ai-public-submit');
+        $voiceBtn = $('#dps-ai-public-voice');
         $typing = $('#dps-ai-public-typing');
         nonce = $widget.data('nonce');
         isFloating = $widget.hasClass('dps-ai-public-chat--floating');
+
+        // Inicializa reconhecimento de voz
+        initVoiceRecognition();
 
         // Restaura histórico da sessão
         restoreHistory();
@@ -67,6 +74,11 @@
         $input.on('input', function() {
             autoResizeTextarea(this);
         });
+
+        // Botão de voz
+        if ($voiceBtn.length) {
+            $voiceBtn.on('click', handleVoiceClick);
+        }
 
         // FAQs
         $widget.on('click', '.dps-ai-public-faq-btn', function() {
@@ -478,6 +490,122 @@
             // Ignore
         }
     };
+
+    /**
+     * Inicializa reconhecimento de voz (Web Speech API).
+     */
+    function initVoiceRecognition() {
+        // Verifica suporte do navegador
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            // API não suportada - deixa botão oculto
+            console.info('Web Speech API não suportada neste navegador');
+            return;
+        }
+
+        // Exibe botão de voz
+        $voiceBtn.show();
+
+        // Cria instância de reconhecimento
+        recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR'; // Português do Brasil
+        recognition.continuous = false; // Para após uma frase
+        recognition.interimResults = false; // Apenas resultados finais
+
+        // Evento: resultado do reconhecimento
+        recognition.onresult = function(event) {
+            var transcript = event.results[0][0].transcript;
+            
+            // Preenche textarea com o texto reconhecido
+            var currentText = $input.val().trim();
+            if (currentText) {
+                // Adiciona ao texto existente
+                $input.val(currentText + ' ' + transcript);
+            } else {
+                // Substitui texto vazio
+                $input.val(transcript);
+            }
+            
+            // Auto-resize
+            autoResizeTextarea($input[0]);
+            
+            // Foca no input para permitir edição
+            $input.focus();
+        };
+
+        // Evento: fim do reconhecimento
+        recognition.onend = function() {
+            stopListening();
+        };
+
+        // Evento: erro no reconhecimento
+        recognition.onerror = function(event) {
+            console.error('Erro no reconhecimento de voz:', event.error);
+            stopListening();
+            
+            // Mensagens de erro discretas
+            if (event.error === 'no-speech') {
+                console.info('Nenhuma fala detectada. Tente novamente.');
+            } else if (event.error === 'not-allowed') {
+                console.warn('Permissão de microfone negada. Habilite o microfone nas configurações do navegador.');
+            } else if (event.error === 'network') {
+                console.error('Erro de rede ao processar voz.');
+            }
+        };
+    }
+
+    /**
+     * Handler do clique no botão de voz.
+     */
+    function handleVoiceClick(e) {
+        e.preventDefault();
+        
+        if (!recognition) {
+            return;
+        }
+
+        if (isListening) {
+            // Para reconhecimento
+            recognition.stop();
+        } else {
+            // Inicia reconhecimento
+            startListening();
+        }
+    }
+
+    /**
+     * Inicia o reconhecimento de voz.
+     */
+    function startListening() {
+        if (!recognition || isListening) {
+            return;
+        }
+
+        try {
+            recognition.start();
+            isListening = true;
+            
+            // Feedback visual
+            $voiceBtn.addClass('dps-ai-public-voice--listening');
+            $voiceBtn.attr('title', 'Ouvindo... Clique para parar');
+            
+        } catch (e) {
+            console.error('Erro ao iniciar reconhecimento de voz:', e);
+            stopListening();
+        }
+    }
+
+    /**
+     * Para o reconhecimento de voz.
+     */
+    function stopListening() {
+        isListening = false;
+        
+        // Remove feedback visual
+        $voiceBtn.removeClass('dps-ai-public-voice--listening');
+        $voiceBtn.attr('title', 'Falar ao invés de digitar');
+    }
 
     // Inicializa quando DOM estiver pronto
     $(document).ready(init);

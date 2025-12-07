@@ -82,6 +82,204 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.7.0)**: Dashboard de Insights (Fase 6)
+  - Nova página administrativa "IA – Insights" com métricas consolidadas
+  - Criada classe `DPS_AI_Insights_Dashboard` em `includes/class-dps-ai-insights-dashboard.php`
+  - KPIs principais exibidos em cards destacados:
+    - Total de conversas no período selecionado
+    - Total de mensagens trocadas
+    - Taxa de resolução baseada em feedback positivo
+    - Custo estimado de tokens consumidos
+  - Top 10 Perguntas mais frequentes:
+    - Análise automática de mensagens de usuários
+    - Exibição em tabela ordenada por frequência
+    - Útil para identificar dúvidas recorrentes e oportunidades de FAQ
+  - Horários de pico de uso (gráfico de barras):
+    - Distribuição de mensagens por hora do dia (0-23h)
+    - Identifica períodos de maior demanda
+    - Auxilia no planejamento de atendimento
+  - Dias da semana com mais conversas (gráfico de barras):
+    - Análise de volume de conversas por dia
+    - Identifica padrões semanais de uso
+  - Top 10 Clientes mais engajados:
+    - Lista ordenada por número de conversas e mensagens
+    - Identifica clientes com maior interação com a IA
+  - Estatísticas por canal (gráfico de pizza):
+    - Distribuição de conversas entre web_chat, portal, whatsapp e admin_specialist
+    - Visualiza participação de cada canal no total
+  - Filtros de período:
+    - Últimos 7 dias
+    - Últimos 30 dias
+    - Período customizado (seleção de data inicial e final)
+  - Visualizações com Chart.js:
+    - Reutiliza biblioteca já implementada na Fase 2
+    - Gráficos responsivos e interativos
+  - Performance otimizada:
+    - Queries com índices apropriados
+    - Agregações eficientes no MySQL
+    - Paginação e limites para evitar carga excessiva
+  - Arquivos criados:
+    - `includes/class-dps-ai-insights-dashboard.php`: Lógica de cálculo e renderização
+    - `assets/css/dps-ai-insights-dashboard.css`: Estilos responsivos para dashboard
+  - Arquivos modificados:
+    - `desi-pet-shower-ai-addon.php`: Include e inicialização da classe
+- **AI Add-on (v1.7.0)**: Modo Especialista (Fase 6)
+  - Nova página administrativa "IA – Modo Especialista" para equipe interna
+  - Criada classe `DPS_AI_Specialist_Mode` em `includes/class-dps-ai-specialist-mode.php`
+  - Chat interno restrito a admins (capability `manage_options`):
+    - Interface similar ao chat público, mas com recursos avançados
+    - Acesso a dados completos do sistema
+    - System prompt técnico para equipe interna
+  - Comandos especiais tipo "/" para buscar dados:
+    - `/buscar_cliente [nome]`: Busca cliente por nome/email/login
+    - `/historico [cliente_id]`: Exibe últimas 10 conversas de um cliente
+    - `/metricas [dias]`: Mostra métricas consolidadas dos últimos N dias
+    - `/conversas [canal]`: Lista últimas 10 conversas de um canal específico
+  - Respostas formatadas com contexto técnico:
+    - Exibe IDs, timestamps, contadores detalhados
+    - Informações estruturadas para análise rápida
+    - Formato markdown com negrito, código e listas
+  - Consultas em linguagem natural:
+    - Processa perguntas que não são comandos usando IA
+    - System prompt especializado para tom técnico e profissional
+    - Fornece insights baseados em dados do sistema
+    - Sugere ações práticas quando relevante
+  - Histórico persistente:
+    - Conversas do modo especialista gravadas com `channel='admin_specialist'`
+    - Visível na página "Conversas IA" para auditoria
+    - Rastreamento completo de consultas da equipe interna
+  - Interface intuitiva:
+    - Mensagem de boas-vindas com exemplos de comandos
+    - Feedback visual durante processamento
+    - Histórico de conversas na mesma sessão
+    - Auto-scroll para última mensagem
+  - Arquivos criados:
+    - `includes/class-dps-ai-specialist-mode.php`: Lógica de comandos e integração com IA
+    - `assets/css/dps-ai-specialist-mode.css`: Estilos do chat especialista
+    - `assets/js/dps-ai-specialist-mode.js`: Lógica AJAX e formatação de mensagens
+  - Arquivos modificados:
+    - `desi-pet-shower-ai-addon.php`: Include e inicialização da classe
+- **AI Add-on (v1.7.0)**: Sugestões Proativas de Agendamento (Fase 6)
+  - Sistema inteligente que sugere agendamentos automaticamente durante conversas
+  - Criada classe `DPS_AI_Proactive_Scheduler` em `includes/class-dps-ai-proactive-scheduler.php`
+  - Detecção automática de oportunidades de agendamento:
+    - Analisa último agendamento do cliente via CPT `dps_agendamento`
+    - Calcula há quantos dias/semanas foi o último serviço
+    - Compara com intervalo configurável (padrão: 28 dias / 4 semanas)
+  - Integração com portal do cliente:
+    - Sugestões aparecem automaticamente após resposta da IA
+    - Contexto personalizado por cliente (nome do pet, tipo de serviço, tempo decorrido)
+    - Não interfere na funcionalidade existente do chat
+  - Controle de frequência para evitar ser invasivo:
+    - Cooldown configurável entre sugestões (padrão: 7 dias)
+    - Armazena última sugestão em user meta `_dps_ai_last_scheduling_suggestion`
+    - Máximo 1 sugestão a cada X dias por cliente
+  - Configurações admin completas:
+    - Ativar/desativar sugestões proativas
+    - Intervalo de dias sem serviço para sugerir (7-90 dias)
+    - Intervalo mínimo entre sugestões (1-30 dias)
+    - Mensagem customizável para clientes novos (sem histórico)
+    - Mensagem customizável para clientes recorrentes com variáveis dinâmicas:
+      - `{pet_name}`: Nome do pet
+      - `{weeks}`: Semanas desde último serviço
+      - `{service}`: Tipo de serviço anterior
+  - Mensagens padrão inteligentes:
+    - Clientes novos: "Que tal agendar um horário para o banho e tosa do seu pet?"
+    - Clientes recorrentes: "Observei que já faz X semanas desde o último serviço do [pet]. Gostaria que eu te ajudasse a agendar?"
+  - Query otimizada:
+    - Usa `fields => 'ids'` para performance
+    - Meta query com índice em `appointment_client_id`
+    - Ordenação por `appointment_date` DESC
+  - Arquivos modificados:
+    - `includes/class-dps-ai-integration-portal.php`: Integração com fluxo de resposta
+    - `desi-pet-shower-ai-addon.php`: Include da nova classe e configurações admin
+- **AI Add-on (v1.7.0)**: Entrada por Voz no Chat Público (Fase 6)
+  - Botão de microfone adicionado ao chat público para entrada por voz
+  - Integração com Web Speech API (navegadores compatíveis)
+  - Detecção automática de suporte do navegador
+    - Botão exibido apenas se API estiver disponível
+    - Funciona em Chrome, Edge, Safari e navegadores baseados em Chromium
+  - Feedback visual durante reconhecimento de voz:
+    - Animação de pulso com cor vermelha indicando "ouvindo"
+    - Tooltip informativo ("Ouvindo... Clique para parar")
+    - Ícone animado durante captura de áudio
+  - UX otimizada:
+    - Texto reconhecido preenche o textarea automaticamente
+    - Permite edição do texto antes de enviar
+    - Adiciona ao texto existente ou substitui se vazio
+    - Não envia automaticamente (usuário revisa e clica "Enviar")
+    - Auto-resize do textarea após transcrição
+  - Tratamento de erros discreto:
+    - Log no console para debugging
+    - Mensagens específicas por tipo de erro (no-speech, not-allowed, network)
+    - Não quebra a funcionalidade do chat em caso de erro
+  - Reconhecimento em português do Brasil (pt-BR)
+  - Arquivos modificados:
+    - `includes/class-dps-ai-public-chat.php`: Botão HTML de microfone
+    - `assets/css/dps-ai-public-chat.css`: Estilos e animações do botão de voz
+    - `assets/js/dps-ai-public-chat.js`: Lógica de reconhecimento de voz
+- **AI Add-on (v1.7.0)**: Integração WhatsApp Business (Fase 6)
+  - Criada classe `DPS_AI_WhatsApp_Connector` em `includes/class-dps-ai-whatsapp-connector.php`
+    - Normaliza mensagens recebidas de diferentes providers (Meta, Twilio, Custom)
+    - Envia mensagens de resposta via HTTP para WhatsApp
+    - Suporta múltiplos providers com lógica isolada e reutilizável
+  - Criada classe `DPS_AI_WhatsApp_Webhook` em `includes/class-dps-ai-whatsapp-webhook.php`
+    - Endpoint REST API: `/wp-json/dps-ai/v1/whatsapp-webhook`
+    - Recebe mensagens via webhook (POST)
+    - Verificação do webhook para Meta WhatsApp (GET)
+    - Validação de assinaturas (Meta: X-Hub-Signature-256, Custom: Bearer token)
+    - Cria/recupera conversa com `channel='whatsapp'` e `session_identifier` baseado em hash seguro do telefone
+    - Registra mensagem do usuário e resposta da IA no histórico
+    - Reutiliza conversas abertas das últimas 24 horas
+    - Envia resposta automaticamente de volta para WhatsApp
+  - Nova seção "Integração WhatsApp Business" nas configurações de IA
+    - Ativar/desativar canal WhatsApp
+    - Seleção de provider (Meta, Twilio, Custom)
+    - Campos de configuração específicos por provider:
+      - **Meta**: Phone Number ID, Access Token, App Secret
+      - **Twilio**: Account SID, Auth Token, From Number
+      - **Custom**: Webhook URL, API Key
+    - Token de verificação para webhook
+    - Instruções customizadas para WhatsApp (opcional)
+    - Exibição da URL do webhook para configurar no provider
+  - JavaScript para toggle de campos específicos por provider selecionado
+  - Reutiliza mesma lógica de IA já existente para geração de respostas
+  - Context prompt adaptado para WhatsApp (respostas curtas, sem HTML)
+  - Tratamento de erros com logging apropriado
+  - Conversas WhatsApp aparecem na interface admin "Conversas IA" com filtro por canal
+- **AI Add-on (v1.7.0)**: Histórico de Conversas Persistente (Fase 6)
+  - Criada nova estrutura de banco de dados para armazenar conversas e mensagens de IA:
+    - Tabela `dps_ai_conversations`: id, customer_id, channel, session_identifier, started_at, last_activity_at, status
+    - Tabela `dps_ai_messages`: id, conversation_id, sender_type, sender_identifier, message_text, message_metadata, created_at
+  - Criada classe `DPS_AI_Conversations_Repository` em `includes/class-dps-ai-conversations-repository.php` para CRUD de conversas
+    - Métodos: `create_conversation()`, `add_message()`, `get_conversation()`, `get_messages()`, `list_conversations()`, `count_conversations()`
+    - Suporta múltiplos canais: `web_chat` (chat público), `portal`, `whatsapp` (futuro), `admin_specialist` (futuro)
+    - Suporta visitantes não identificados via `session_identifier` (hash de IP para chat público)
+    - Metadata JSON para armazenar informações adicionais (tokens, custo, tempo de resposta, etc.)
+  - Integração automática com chat do portal do cliente (`DPS_AI_Integration_Portal`)
+    - Cria/recupera conversa por `customer_id` e canal `portal`
+    - Reutiliza conversa se última atividade foi nas últimas 24 horas
+    - Registra mensagem do usuário antes de processar
+    - Registra resposta da IA após processar
+  - Integração automática com chat público (`DPS_AI_Public_Chat`)
+    - Cria/recupera conversa por hash de IP e canal `web_chat`
+    - Reutiliza conversa se última atividade foi nas últimas 2 horas
+    - Registra IP do visitante como `sender_identifier`
+    - Armazena metadados de performance (response_time_ms, ip_address)
+  - Criada interface administrativa `DPS_AI_Conversations_Admin` em `includes/class-dps-ai-conversations-admin.php`
+    - Nova página admin "Conversas IA" (submenu no menu DPS)
+    - Slug da página: `dps-ai-conversations`
+    - Lista conversas com filtros: canal, status (aberta/fechada), período de datas
+    - Paginação (20 conversas por página)
+    - Exibe: ID, Cliente/Visitante, Canal, Data de Início, Última Atividade, Status, Ações
+    - Página de detalhes da conversa com histórico completo de mensagens
+    - Mensagens exibidas cronologicamente com tipo (usuário/assistente/sistema), data/hora, texto
+    - Metadados JSON expansíveis para visualizar informações técnicas
+    - Diferenciação visual por tipo de remetente (cores de borda e fundo)
+    - Controle de permissões: apenas `manage_options`
+  - Incrementado `DPS_AI_DB_VERSION` para `1.6.0`
+  - Migração automática via `dps_ai_maybe_upgrade_database()` para criar tabelas em atualizações
+  - Preparado para futuros canais (WhatsApp, Modo Especialista) sem alterações de schema
 - **AI Add-on (v1.6.2)**: Validação de Contraste de Cores para Chat Público (Acessibilidade WCAG AA)
   - Criada classe `DPS_AI_Color_Contrast` em `includes/class-dps-ai-color-contrast.php` para validação de contraste segundo padrões WCAG 2.0
   - Novos campos de configuração na página de settings: Cor Primária, Cor do Texto e Cor de Fundo do chat público

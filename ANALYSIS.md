@@ -2166,7 +2166,77 @@ $message = apply_filters( 'dps_ai_comm_whatsapp_message', $message, $context );
 
 ### Tabelas de Banco de Dados
 
-**Desde v1.5.0**, o AI Add-on mantém 2 tabelas customizadas para analytics e feedback:
+**Desde v1.5.0**, o AI Add-on mantém 2 tabelas customizadas para analytics e feedback.
+**Desde v1.7.0**, foram adicionadas 2 tabelas para histórico de conversas persistente.
+
+#### `wp_dps_ai_conversations` (desde v1.7.0)
+
+Armazena metadados de conversas com o assistente de IA em múltiplos canais.
+
+**Estrutura:**
+```sql
+CREATE TABLE wp_dps_ai_conversations (
+    id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    customer_id BIGINT(20) UNSIGNED DEFAULT NULL,
+    channel VARCHAR(50) NOT NULL DEFAULT 'web_chat',
+    session_identifier VARCHAR(255) DEFAULT NULL,
+    started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_activity_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'open',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY customer_idx (customer_id),
+    KEY channel_idx (channel),
+    KEY session_idx (session_identifier),
+    KEY status_idx (status),
+    KEY last_activity_idx (last_activity_at)
+);
+```
+
+**Propósito:**
+- Rastrear conversas em múltiplos canais: `web_chat` (público), `portal`, `whatsapp`, `admin_specialist`
+- Identificar usuários logados via `customer_id` ou visitantes via `session_identifier`
+- Agrupar mensagens relacionadas em conversas contextuais
+- Analisar padrões de uso por canal
+- Suportar histórico de conversas para futuras funcionalidades (ex: "rever conversas anteriores")
+
+#### `wp_dps_ai_messages` (desde v1.7.0)
+
+Armazena mensagens individuais de conversas.
+
+**Estrutura:**
+```sql
+CREATE TABLE wp_dps_ai_messages (
+    id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    conversation_id BIGINT(20) UNSIGNED NOT NULL,
+    sender_type VARCHAR(20) NOT NULL,
+    sender_identifier VARCHAR(255) DEFAULT NULL,
+    message_text TEXT NOT NULL,
+    message_metadata TEXT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY conversation_idx (conversation_id),
+    KEY sender_type_idx (sender_type),
+    KEY created_at_idx (created_at)
+);
+```
+
+**Campos:**
+- `sender_type`: 'user' (cliente/visitante), 'assistant' (IA), 'system' (mensagens do sistema)
+- `sender_identifier`: ID do usuário, telefone, IP, etc (opcional)
+- `message_metadata`: JSON com dados adicionais (tokens, custo, tempo de resposta, etc)
+
+**Propósito:**
+- Histórico completo de interações em ordem cronológica
+- Análise de padrões de perguntas e respostas
+- Compliance (LGPD/GDPR - exportação de dados pessoais)
+- Debugging de problemas de IA
+- Base para melhorias futuras (ex: sugestões baseadas em histórico)
+
+**Classe de Acesso:**
+- `DPS_AI_Conversations_Repository` em `includes/class-dps-ai-conversations-repository.php`
+- Métodos: `create_conversation()`, `add_message()`, `get_conversation()`, `get_messages()`, `list_conversations()`
 
 #### `wp_dps_ai_metrics`
 
@@ -2229,7 +2299,8 @@ CREATE TABLE wp_dps_ai_feedback (
 **Versionamento de Schema:**
 - Versão do schema rastreada em opção `dps_ai_db_version`
 - Upgrade automático via `dps_ai_maybe_upgrade_database()` em `plugins_loaded`
-- Tabelas criadas via `dbDelta()` se versão instalada < 1.5.0
+- v1.5.0: Tabelas `dps_ai_metrics` e `dps_ai_feedback` criadas via `dbDelta()`
+- v1.6.0: Tabelas `dps_ai_conversations` e `dps_ai_messages` criadas via `dbDelta()`
 - Idempotente: seguro executar múltiplas vezes
 
 **Configurações em `wp_options`:**
