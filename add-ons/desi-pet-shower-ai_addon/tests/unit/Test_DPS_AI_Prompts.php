@@ -91,10 +91,11 @@ class Test_DPS_AI_Prompts extends TestCase {
         
         $this->assertIsArray($contexts);
         $this->assertCount(4, $contexts);
-        $this->assertContains('portal', $contexts);
-        $this->assertContains('public', $contexts);
-        $this->assertContains('whatsapp', $contexts);
-        $this->assertContains('email', $contexts);
+        // get_available_contexts returns associative array with keys
+        $this->assertArrayHasKey('portal', $contexts);
+        $this->assertArrayHasKey('public', $contexts);
+        $this->assertArrayHasKey('whatsapp', $contexts);
+        $this->assertArrayHasKey('email', $contexts);
     }
 
     /**
