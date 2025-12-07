@@ -111,9 +111,9 @@ final class DPS_Portal_Session_Manager {
         $secure   = is_ssl();
         $httponly = true;
         
-        // Usa sintaxe compatível com PHP 7.3+
-        // Nota: setcookie() com array associativo só funciona em PHP 7.3+
-        // Para máxima compatibilidade, usamos parâmetros individuais
+        // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
+        // Nota: setcookie() com array associativo só funciona a partir do PHP 7.3.0
+        // Para máxima compatibilidade com versões anteriores, usamos parâmetros individuais
         setcookie( 
             self::COOKIE_NAME, 
             $session_token,
@@ -228,7 +228,7 @@ final class DPS_Portal_Session_Manager {
             $secure   = is_ssl();
             $httponly = true;
             
-            // Usa sintaxe compatível com PHP 7.3+
+            // Usa sintaxe de parâmetros individuais para compatibilidade com PHP <7.3
             setcookie( 
                 self::COOKIE_NAME, 
                 '',
