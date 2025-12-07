@@ -26,6 +26,7 @@ final class DPS_Client_Portal {
      * ID do cliente autenticado na requisição atual via token.
      * Usado para disponibilizar autenticação imediatamente sem depender de cookies.
      *
+     * @since 2.3.1
      * @var int
      */
     private $current_request_client_id = 0;

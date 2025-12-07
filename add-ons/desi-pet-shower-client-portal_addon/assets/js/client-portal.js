@@ -45,14 +45,42 @@
         // Remove o parâmetro dps_token da URL usando History API
         if (window.history && window.history.replaceState) {
             try {
-                var url = new URL(window.location.href);
-                url.searchParams.delete('dps_token');
-                
-                // Substitui a URL sem recarregar a página
-                window.history.replaceState({}, document.title, url.toString());
+                // Método moderno com URL API (navegadores atuais)
+                if (typeof URL !== 'undefined') {
+                    var url = new URL(window.location.href);
+                    url.searchParams.delete('dps_token');
+                    window.history.replaceState({}, document.title, url.toString());
+                } else {
+                    // Fallback para navegadores antigos (IE)
+                    var currentUrl = window.location.href;
+                    var cleanUrl = currentUrl.replace(/([?&])dps_token=[^&]+(&|$)/, function(match, prefix, suffix) {
+                        // Se era o único parâmetro (?dps_token=...), remove o ?
+                        if (prefix === '?' && suffix === '') {
+                            return '';
+                        }
+                        // Se era o primeiro parâmetro (?dps_token=...&), mantém o ?
+                        if (prefix === '?' && suffix === '&') {
+                            return '?';
+                        }
+                        // Se era um parâmetro intermediário (&dps_token=...&), remove completamente
+                        if (prefix === '&' && suffix === '&') {
+                            return '&';
+                        }
+                        // Se era o último parâmetro (&dps_token=...), remove o &
+                        return '';
+                    });
+                    
+                    // Remove & duplicados e & no final da query string
+                    cleanUrl = cleanUrl.replace(/&&+/g, '&').replace(/[?&]$/, '');
+                    
+                    window.history.replaceState({}, document.title, cleanUrl);
+                }
             } catch (e) {
-                // Fallback para navegadores antigos
-                console.warn('Não foi possível limpar token da URL:', e);
+                // Em caso de erro, apenas loga sem quebrar a página
+                // O token ficará visível na URL mas a autenticação já foi feita
+                if (console && console.warn) {
+                    console.warn('Não foi possível limpar token da URL:', e);
+                }
             }
         }
     }
