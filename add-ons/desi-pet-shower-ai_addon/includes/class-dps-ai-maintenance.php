@@ -74,9 +74,19 @@ class DPS_AI_Maintenance {
      */
     public function schedule_cleanup() {
         if ( ! wp_next_scheduled( self::CLEANUP_HOOK ) ) {
-            // Agenda para rodar diariamente às 3h da manhã (horário do servidor)
-            wp_schedule_event( strtotime( 'tomorrow 03:00' ), 'daily', self::CLEANUP_HOOK );
-            dps_ai_log_info( 'Evento de limpeza automática agendado para rodar diariamente às 03:00' );
+            // Calcula o próximo 03:00 (sempre no futuro)
+            $current_time = current_time( 'timestamp' );
+            $today_3am = strtotime( 'today 03:00', $current_time );
+            
+            // Se já passou das 03:00 hoje, agenda para amanhã
+            if ( $current_time >= $today_3am ) {
+                $next_run = strtotime( 'tomorrow 03:00', $current_time );
+            } else {
+                $next_run = $today_3am;
+            }
+            
+            wp_schedule_event( $next_run, 'daily', self::CLEANUP_HOOK );
+            dps_ai_log_info( 'Evento de limpeza automática agendado para ' . gmdate( 'd/m/Y H:i:s', $next_run ) );
         }
     }
 
