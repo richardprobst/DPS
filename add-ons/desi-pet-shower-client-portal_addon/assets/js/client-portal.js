@@ -24,11 +24,37 @@
      * Inicializa os handlers do portal
      */
     function init() {
+        cleanTokenFromURL();
         handleTabNavigation();
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
         initChatWidget();
+    }
+
+    /**
+     * Remove token de autenticação da URL por segurança
+     * Chamado após autenticação bem-sucedida para limpar o dps_token da URL
+     */
+    function cleanTokenFromURL() {
+        // Verifica se há dps_token na URL
+        if (window.location.search.indexOf('dps_token=') === -1) {
+            return;
+        }
+
+        // Remove o parâmetro dps_token da URL usando History API
+        if (window.history && window.history.replaceState) {
+            try {
+                var url = new URL(window.location.href);
+                url.searchParams.delete('dps_token');
+                
+                // Substitui a URL sem recarregar a página
+                window.history.replaceState({}, document.title, url.toString());
+            } catch (e) {
+                // Fallback para navegadores antigos
+                console.warn('Não foi possível limpar token da URL:', e);
+            }
+        }
     }
 
     /**

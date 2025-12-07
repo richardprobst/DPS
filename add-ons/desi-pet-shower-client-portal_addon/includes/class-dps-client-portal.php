@@ -23,6 +23,14 @@ final class DPS_Client_Portal {
     private static $instance = null;
 
     /**
+     * ID do cliente autenticado na requisição atual via token.
+     * Usado para disponibilizar autenticação imediatamente sem depender de cookies.
+     *
+     * @var int
+     */
+    private $current_request_client_id = 0;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Client_Portal
@@ -153,11 +161,12 @@ final class DPS_Client_Portal {
             'ip'        => $ip_address,
         ], DPS_Logger::LEVEL_INFO );
 
-        // Redireciona para o portal (remove o token da URL)
-        $redirect_url = dps_get_portal_page_url();
+        // Armazena client_id para disponibilizar autenticação imediatamente
+        // sem depender de cookies que só estarão disponíveis na próxima requisição
+        $this->current_request_client_id = $token_data['client_id'];
 
-        wp_safe_redirect( $redirect_url );
-        exit;
+        // NÃO redireciona - permite que a página atual carregue com o cliente autenticado
+        // O JavaScript limpará o token da URL por segurança (ver assets/js/client-portal.js)
     }
 
     /**
@@ -193,7 +202,14 @@ final class DPS_Client_Portal {
      * @return int
      */
     private function get_authenticated_client_id() {
-        // Tenta obter do sistema novo de sessão
+        // PRIORITY 1: Cliente autenticado na requisição atual via token
+        // Isso permite autenticação imediata sem depender de cookies que só estarão
+        // disponíveis na próxima requisição
+        if ( $this->current_request_client_id > 0 ) {
+            return $this->current_request_client_id;
+        }
+
+        // PRIORITY 2: Tenta obter do sistema novo de sessão (cookies + transients)
         $session_manager = DPS_Portal_Session_Manager::get_instance();
         // Garante que a sessão está iniciada antes de verificar autenticação
         $session_manager->maybe_start_session();
@@ -203,7 +219,7 @@ final class DPS_Client_Portal {
             return $client_id;
         }
 
-        // Fallback: tenta obter do sistema antigo de usuários WP
+        // PRIORITY 3: Fallback para o sistema antigo de usuários WP
         return $this->get_client_id_for_current_user();
     }
 
