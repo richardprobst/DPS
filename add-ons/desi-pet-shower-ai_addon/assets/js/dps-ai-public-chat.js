@@ -144,7 +144,19 @@
                 if (response.success) {
                     addMessage(response.data.answer, 'assistant', response.data.message_id, question);
                 } else {
-                    addMessage(response.data.message || dpsAIPublicChat.i18n.errorGeneric, 'error');
+                    // Verifica se é erro de rate limit
+                    var errorType = response.data.error_type || 'generic';
+                    var errorMessage = response.data.message || dpsAIPublicChat.i18n.errorGeneric;
+                    
+                    if (errorType === 'rate_limit') {
+                        // Exibe mensagem específica de rate limit
+                        addMessage(errorMessage, 'rate-limit');
+                        // Desabilita botão temporariamente (5 segundos)
+                        disableSubmitTemporarily(5);
+                    } else {
+                        // Erro genérico
+                        addMessage(errorMessage, 'error');
+                    }
                 }
             },
             error: function() {
@@ -159,16 +171,23 @@
      * Adiciona uma mensagem ao chat.
      *
      * @param {string} content Conteúdo da mensagem.
-     * @param {string} type Tipo: 'user', 'assistant' ou 'error'.
+     * @param {string} type Tipo: 'user', 'assistant', 'error', ou 'rate-limit'.
      * @param {string} messageId ID único da mensagem (para feedback).
      * @param {string} question Pergunta original (para feedback).
      */
     function addMessage(content, type, messageId, question) {
         var messageClass = 'dps-ai-public-message dps-ai-public-message--' + type;
-        var avatar = type === 'user' ? '👤' : '🐾';
+        var avatar = '🐾';
         
-        if (type === 'error') {
+        // Define avatar baseado no tipo
+        if (type === 'user') {
+            avatar = '👤';
+        } else if (type === 'error') {
             avatar = '⚠️';
+        } else if (type === 'rate-limit') {
+            avatar = '⏱️';
+            // Trata como erro mas com ícone diferente
+            messageClass = 'dps-ai-public-message dps-ai-public-message--error dps-ai-public-message--rate-limit';
         }
 
         var feedbackHtml = '';
@@ -262,6 +281,30 @@
     function setLoading(loading) {
         $input.prop('disabled', loading);
         $submit.prop('disabled', loading);
+    }
+
+    /**
+     * Desabilita botão de enviar temporariamente com contagem regressiva.
+     *
+     * @param {number} seconds Número de segundos para desabilitar.
+     */
+    function disableSubmitTemporarily(seconds) {
+        var originalText = $submit.find('.dps-ai-public-submit-icon').text();
+        var countdown = seconds;
+        
+        $submit.prop('disabled', true);
+        $submit.find('.dps-ai-public-submit-icon').text(countdown);
+        
+        var interval = setInterval(function() {
+            countdown--;
+            if (countdown > 0) {
+                $submit.find('.dps-ai-public-submit-icon').text(countdown);
+            } else {
+                clearInterval(interval);
+                $submit.prop('disabled', false);
+                $submit.find('.dps-ai-public-submit-icon').text(originalText);
+            }
+        }, 1000);
     }
 
     /**

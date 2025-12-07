@@ -1,0 +1,263 @@
+/**
+ * Estilos para página de teste da Base de Conhecimento.
+ *
+ * @package DPS_AI_Addon
+ * @since 1.6.2
+ */
+
+/* Container principal */
+.dps-ai-kb-test-container {
+	max-width: 1200px;
+	margin-top: 20px;
+}
+
+/* Formulário de teste */
+.dps-ai-kb-test-form {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+
+.dps-ai-kb-test-form h2 {
+	margin-top: 0;
+	font-size: 18px;
+}
+
+/* Resultados */
+.dps-ai-kb-test-results {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.dps-ai-kb-test-results h2 {
+	margin-top: 0;
+	font-size: 18px;
+	border-bottom: 1px solid #dcdcde;
+	padding-bottom: 10px;
+}
+
+/* Estatísticas de resumo */
+.dps-ai-test-summary {
+	background: #f6f7f7;
+	padding: 15px;
+	border-left: 4px solid #2271b1;
+	margin-bottom: 20px;
+	border-radius: 3px;
+}
+
+.dps-ai-test-summary h3 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+}
+
+.dps-ai-test-summary-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 15px;
+}
+
+.dps-ai-test-summary-stat {
+	text-align: center;
+}
+
+.dps-ai-test-summary-stat .label {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 5px;
+}
+
+.dps-ai-test-summary-stat .value {
+	display: block;
+	font-size: 24px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Artigo individual */
+.dps-ai-test-article {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 15px;
+	margin-bottom: 15px;
+	transition: all 0.2s ease;
+}
+
+.dps-ai-test-article:hover {
+	border-color: #2271b1;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dps-ai-test-article-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.dps-ai-test-article-title {
+	flex: 1;
+}
+
+.dps-ai-test-article-title h3 {
+	margin: 0;
+	font-size: 16px;
+	color: #1d2327;
+}
+
+.dps-ai-test-article-title a {
+	color: #2271b1;
+	text-decoration: none;
+}
+
+.dps-ai-test-article-title a:hover {
+	color: #135e96;
+	text-decoration: underline;
+}
+
+.dps-ai-test-article-badges {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* Badges */
+.dps-ai-test-badge {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.dps-ai-test-badge-priority-high {
+	background: #d1fae5;
+	color: #065f46;
+	border: 1px solid #10b981;
+}
+
+.dps-ai-test-badge-priority-medium {
+	background: #fef3c7;
+	color: #92400e;
+	border: 1px solid #f59e0b;
+}
+
+.dps-ai-test-badge-priority-low {
+	background: #f3f4f6;
+	color: #374151;
+	border: 1px solid #9ca3af;
+}
+
+.dps-ai-test-badge-size-short {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.dps-ai-test-badge-size-medium {
+	background: #fef3c7;
+	color: #92400e;
+}
+
+.dps-ai-test-badge-size-long {
+	background: #fee2e2;
+	color: #991b1b;
+}
+
+/* Conteúdo do artigo */
+.dps-ai-test-article-content {
+	margin: 10px 0;
+}
+
+.dps-ai-test-article-row {
+	margin-bottom: 8px;
+	font-size: 13px;
+}
+
+.dps-ai-test-article-row strong {
+	display: inline-block;
+	min-width: 140px;
+	color: #1d2327;
+}
+
+.dps-ai-test-article-keywords {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
+
+.dps-ai-test-article-keyword {
+	background: #f3f4f6;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-family: 'Courier New', monospace;
+	color: #374151;
+}
+
+.dps-ai-test-article-keyword.matched {
+	background: #dbeafe;
+	color: #1e40af;
+	font-weight: 600;
+}
+
+.dps-ai-test-article-excerpt {
+	background: #f6f7f7;
+	padding: 10px;
+	border-left: 3px solid #2271b1;
+	border-radius: 3px;
+	margin-top: 10px;
+	font-size: 13px;
+	line-height: 1.6;
+	color: #1d2327;
+}
+
+/* Mensagem de sem resultados */
+.dps-ai-test-no-results {
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 4px;
+	padding: 15px;
+	text-align: center;
+}
+
+.dps-ai-test-no-results p {
+	margin: 0;
+	color: #856404;
+}
+
+/* Loading state */
+.dps-ai-test-loading {
+	text-align: center;
+	padding: 40px;
+}
+
+.dps-ai-test-loading .spinner {
+	float: none;
+	margin: 0 auto 10px auto;
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+	.dps-ai-test-summary-stats {
+		grid-template-columns: 1fr;
+	}
+	
+	.dps-ai-test-article-header {
+		flex-direction: column;
+	}
+	
+	.dps-ai-test-article-badges {
+		margin-top: 10px;
+	}
+}

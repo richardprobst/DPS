@@ -284,10 +284,22 @@ class DPS_AI_Public_Chat {
         $answer     = $this->get_ai_response( $question );
         $end_time   = microtime( true );
 
-        // Se falhou
+        // Se falhou, verifica o tipo de erro
         if ( null === $answer ) {
+            $last_error = DPS_AI_Client::get_last_error();
+            
+            // Diferencia rate limit de outros erros
+            if ( $last_error && 'rate_limit' === $last_error['type'] ) {
+                wp_send_json_error( [
+                    'message'    => __( 'Muitas solicitações em sequência. Aguarde alguns segundos antes de tentar novamente.', 'dps-ai' ),
+                    'error_type' => 'rate_limit',
+                ] );
+            }
+            
+            // Erro genérico para outros casos
             wp_send_json_error( [
-                'message' => __( 'Desculpe, não consegui processar sua pergunta no momento. Por favor, tente novamente ou entre em contato conosco diretamente.', 'dps-ai' ),
+                'message'    => __( 'Desculpe, não consegui processar sua pergunta no momento. Por favor, tente novamente ou entre em contato conosco diretamente.', 'dps-ai' ),
+                'error_type' => 'generic',
             ] );
         }
 
@@ -361,13 +373,24 @@ class DPS_AI_Public_Chat {
         // Monta o contexto do negócio
         $business_context = $this->get_business_context();
 
+        // Busca artigos relevantes da base de conhecimento
+        $kb_context = '';
+        if ( class_exists( 'DPS_AI_Knowledge_Base' ) ) {
+            $relevant_articles = DPS_AI_Knowledge_Base::get_relevant_articles( $question, 5 );
+            $kb_context = DPS_AI_Knowledge_Base::format_articles_for_context( $relevant_articles );
+        }
+
         // Array de mensagens
         $messages = [];
 
-        // 1. System prompt específico para chat público
+        // Obtém configurações incluindo idioma
+        $settings = get_option( 'dps_ai_settings', [] );
+        $language = ! empty( $settings['language'] ) ? $settings['language'] : 'pt_BR';
+
+        // 1. System prompt específico para chat público com instrução de idioma
         $messages[] = [
             'role'    => 'system',
-            'content' => $this->get_public_system_prompt(),
+            'content' => $this->get_public_system_prompt_with_language( $language ),
         ];
 
         // 2. Contexto do negócio (se disponível)
@@ -379,7 +402,6 @@ class DPS_AI_Public_Chat {
         }
 
         // 3. Instruções adicionais do administrador
-        $settings           = get_option( 'dps_ai_settings', [] );
         $extra_instructions = ! empty( $settings['public_chat_instructions'] ) ? trim( $settings['public_chat_instructions'] ) : '';
         if ( ! empty( $extra_instructions ) ) {
             $messages[] = [
@@ -388,10 +410,15 @@ class DPS_AI_Public_Chat {
             ];
         }
 
-        // 4. Pergunta do visitante
+        // 4. Pergunta do visitante com contexto da base de conhecimento
+        $user_content = $question;
+        if ( ! empty( $kb_context ) ) {
+            $user_content = $kb_context . "\n\nPergunta do visitante: " . $question;
+        }
+        
         $messages[] = [
             'role'    => 'user',
-            'content' => $question,
+            'content' => $user_content,
         ];
 
         // Chama a API
@@ -409,6 +436,33 @@ class DPS_AI_Public_Chat {
     private function get_public_system_prompt() {
         // Usa a nova classe centralizada de prompts
         return DPS_AI_Prompts::get( 'public' );
+    }
+
+    /**
+     * Retorna o system prompt específico para o chat público com instrução de idioma.
+     * 
+     * Adiciona instrução explícita para que a IA responda no idioma configurado.
+     *
+     * @param string $language Código do idioma (pt_BR, en_US, es_ES, auto).
+     * 
+     * @return string Conteúdo do prompt com instrução de idioma.
+     */
+    private function get_public_system_prompt_with_language( $language = 'pt_BR' ) {
+        $base_prompt = $this->get_public_system_prompt();
+        
+        // Mapeia códigos de idioma para instruções claras
+        $language_instructions = [
+            'pt_BR' => 'IMPORTANTE: Você DEVE responder SEMPRE em Português do Brasil, mesmo que os artigos da base de conhecimento estejam em outro idioma. Adapte e traduza o conteúdo conforme necessário.',
+            'en_US' => 'IMPORTANT: You MUST ALWAYS respond in English (US), even if the knowledge base articles are in another language. Adapt and translate the content as needed.',
+            'es_ES' => 'IMPORTANTE: Usted DEBE responder SIEMPRE en Español, incluso si los artículos de la base de conocimiento están en otro idioma. Adapte y traduzca el contenido según sea necesario.',
+            'auto'  => 'IMPORTANTE: Detecte automaticamente o idioma da pergunta do usuário e responda no mesmo idioma. Se artigos da base de conhecimento estiverem em outro idioma, traduza e adapte o conteúdo.',
+        ];
+        
+        $instruction = isset( $language_instructions[ $language ] ) 
+            ? $language_instructions[ $language ] 
+            : $language_instructions['pt_BR'];
+        
+        return $base_prompt . "\n\n" . $instruction;
     }
 
     /**

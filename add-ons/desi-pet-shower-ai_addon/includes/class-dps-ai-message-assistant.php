@@ -74,14 +74,17 @@ class DPS_AI_Message_Assistant {
         // Monta array de mensagens
         $messages = [];
 
-        // 1. System prompt base (regras de segurança e escopo)
+        // Obtém configurações incluindo idioma
+        $settings = get_option( 'dps_ai_settings', [] );
+        $language = ! empty( $settings['language'] ) ? $settings['language'] : 'pt_BR';
+
+        // 1. System prompt base com instrução de idioma (regras de segurança e escopo)
         $messages[] = [
             'role'    => 'system',
-            'content' => DPS_AI_Assistant::get_base_system_prompt(),
+            'content' => DPS_AI_Assistant::get_base_system_prompt_with_language( $language ),
         ];
 
         // 2. Instruções adicionais do admin (se houver)
-        $settings           = get_option( 'dps_ai_settings', [] );
         $extra_instructions = ! empty( $settings['additional_instructions'] ) ? trim( $settings['additional_instructions'] ) : '';
 
         if ( $extra_instructions !== '' ) {
@@ -146,14 +149,17 @@ class DPS_AI_Message_Assistant {
         // Monta array de mensagens
         $messages = [];
 
-        // 1. System prompt base
+        // Obtém configurações incluindo idioma
+        $settings = get_option( 'dps_ai_settings', [] );
+        $language = ! empty( $settings['language'] ) ? $settings['language'] : 'pt_BR';
+
+        // 1. System prompt base com instrução de idioma
         $messages[] = [
             'role'    => 'system',
-            'content' => DPS_AI_Assistant::get_base_system_prompt(),
+            'content' => DPS_AI_Assistant::get_base_system_prompt_with_language( $language ),
         ];
 
         // 2. Instruções adicionais do admin (se houver)
-        $settings           = get_option( 'dps_ai_settings', [] );
         $extra_instructions = ! empty( $settings['additional_instructions'] ) ? trim( $settings['additional_instructions'] ) : '';
 
         if ( $extra_instructions !== '' ) {

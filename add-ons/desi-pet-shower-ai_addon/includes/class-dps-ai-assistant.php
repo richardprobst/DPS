@@ -76,17 +76,26 @@ class DPS_AI_Assistant {
         // Monta contexto do cliente e pets (com cache)
         $context = self::get_cached_client_context( $client_id, $pet_ids );
 
+        // Busca artigos relevantes da base de conhecimento
+        $kb_context = '';
+        if ( class_exists( 'DPS_AI_Knowledge_Base' ) ) {
+            $relevant_articles = DPS_AI_Knowledge_Base::get_relevant_articles( $user_question, 5 );
+            $kb_context = DPS_AI_Knowledge_Base::format_articles_for_context( $relevant_articles );
+        }
+
         // Array de mensagens - começa com o prompt base
         $messages = [];
         
-        // 1. Adiciona o system prompt base (sempre primeiro)
+        // 1. Adiciona o system prompt base com instrução de idioma (sempre primeiro)
+        $settings = get_option( 'dps_ai_settings', [] );
+        $language = ! empty( $settings['language'] ) ? $settings['language'] : 'pt_BR';
+        
         $messages[] = [
             'role'    => 'system',
-            'content' => self::get_base_system_prompt(),
+            'content' => self::get_base_system_prompt_with_language( $language ),
         ];
 
         // 2. Verifica se há instruções adicionais configuradas
-        $settings = get_option( 'dps_ai_settings', [] );
         $extra_instructions = ! empty( $settings['additional_instructions'] ) ? trim( $settings['additional_instructions'] ) : '';
         
         if ( $extra_instructions !== '' ) {
@@ -96,10 +105,16 @@ class DPS_AI_Assistant {
             ];
         }
 
-        // 3. Adiciona a pergunta do usuário com contexto
+        // 3. Adiciona a pergunta do usuário com contexto do cliente e base de conhecimento
+        $user_content = $context;
+        if ( ! empty( $kb_context ) ) {
+            $user_content .= $kb_context;
+        }
+        $user_content .= "\n\nPergunta do cliente: " . $user_question;
+        
         $messages[] = [
             'role'    => 'user',
-            'content' => $context . "\n\nPergunta do cliente: " . $user_question,
+            'content' => $user_content,
         ];
 
         // Chama a API da OpenAI
@@ -146,6 +161,33 @@ class DPS_AI_Assistant {
         // Usa a nova classe centralizada de prompts
         // Contexto 'portal' porque este método é usado principalmente no chat do portal
         return DPS_AI_Prompts::get( 'portal' );
+    }
+
+    /**
+     * Retorna o prompt base do sistema com instrução de idioma.
+     * 
+     * Adiciona instrução explícita para que a IA responda no idioma configurado.
+     *
+     * @param string $language Código do idioma (pt_BR, en_US, es_ES, auto).
+     * 
+     * @return string Conteúdo do prompt base do sistema com instrução de idioma.
+     */
+    public static function get_base_system_prompt_with_language( $language = 'pt_BR' ) {
+        $base_prompt = self::get_base_system_prompt();
+        
+        // Mapeia códigos de idioma para instruções claras
+        $language_instructions = [
+            'pt_BR' => 'IMPORTANTE: Você DEVE responder SEMPRE em Português do Brasil, mesmo que os artigos da base de conhecimento estejam em outro idioma. Adapte e traduza o conteúdo conforme necessário.',
+            'en_US' => 'IMPORTANT: You MUST ALWAYS respond in English (US), even if the knowledge base articles are in another language. Adapt and translate the content as needed.',
+            'es_ES' => 'IMPORTANTE: Usted DEBE responder SIEMPRE en Español, incluso si los artículos de la base de conocimiento están en otro idioma. Adapte y traduzca el contenido según sea necesario.',
+            'auto'  => 'IMPORTANTE: Detecte automaticamente o idioma da pergunta do usuário e responda no mesmo idioma. Se artigos da base de conhecimento estiverem em outro idioma, traduza e adapte o conteúdo.',
+        ];
+        
+        $instruction = isset( $language_instructions[ $language ] ) 
+            ? $language_instructions[ $language ] 
+            : $language_instructions['pt_BR'];
+        
+        return $base_prompt . "\n\n" . $instruction;
     }
 
     /**

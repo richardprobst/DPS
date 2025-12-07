@@ -82,6 +82,81 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.2)**: Validação de Contraste de Cores para Chat Público (Acessibilidade WCAG AA)
+  - Criada classe `DPS_AI_Color_Contrast` em `includes/class-dps-ai-color-contrast.php` para validação de contraste segundo padrões WCAG 2.0
+  - Novos campos de configuração na página de settings: Cor Primária, Cor do Texto e Cor de Fundo do chat público
+  - Validação em tempo real de contraste usando WordPress Color Picker nativo
+  - Calcula luminância relativa e ratio de contraste (fórmula WCAG: (L1 + 0.05) / (L2 + 0.05))
+  - Exibe avisos visuais se contraste insuficiente (<4.5:1 para texto normal, <3.0:1 para texto grande)
+  - Avisos não bloqueiam salvamento, apenas alertam admin sobre possível dificuldade de leitura
+  - Endpoint AJAX `dps_ai_validate_contrast` para validação assíncrona com nonce e capability check (`manage_options`)
+  - Mensagens específicas com ratio calculado (exemplo: "contraste 3.2:1, mínimo recomendado 4.5:1")
+  - Valida tanto contraste Texto/Fundo quanto Branco/Cor Primária (para legibilidade em botões)
+  - Configurações salvas com `sanitize_hex_color()` e padrões: primária=#2271b1, texto=#1d2327, fundo=#ffffff
+- **AI Add-on (v1.6.2)**: Indicador de Rate Limit no Chat Público (UX)
+  - Modificado `DPS_AI_Client` para armazenar tipo de erro em propriedade estática `$last_error`
+  - Novos métodos `get_last_error()` e `clear_last_error()` para recuperar informações de erro
+  - Diferenciação de erros HTTP por tipo: `rate_limit` (429), `bad_request` (400), `unauthorized` (401), `server_error` (500-503), `network_error`, `generic`
+  - Backend (`DPS_AI_Public_Chat::handle_ajax_ask()`) detecta rate limit via `get_last_error()` e retorna `error_type` específico no JSON
+  - Frontend JavaScript detecta `error_type === 'rate_limit'` e exibe UX diferenciada:
+    - Mensagem específica: "Muitas solicitações em sequência. Aguarde alguns segundos antes de tentar novamente."
+    - Ícone especial ⏱️ (em vez de ⚠️ genérico)
+    - Botão de enviar desabilitado temporariamente por 5 segundos
+    - Contagem regressiva visual no botão (5, 4, 3, 2, 1) para feedback ao usuário
+    - Classe CSS adicional `dps-ai-public-message--rate-limit` para estilização
+  - Função JavaScript `disableSubmitTemporarily(seconds)` gerencia contagem regressiva e reabilitação automática
+  - Erros genéricos (rede, servidor, etc.) mantêm comportamento original sem alterações
+  - 100% retrocompatível, não afeta fluxo de produção existente
+- **AI Add-on (v1.6.2)**: Interface de Teste e Validação da Base de Conhecimento
+  - Criada nova página admin "Testar Base de Conhecimento" (submenu no menu DPS)
+  - Slug da página: `dps-ai-kb-tester`
+  - Classe `DPS_AI_Knowledge_Base_Tester` em `includes/class-dps-ai-knowledge-base-tester.php`
+  - **Preview de Artigos Selecionados:** Permite testar quais artigos seriam selecionados para uma pergunta de teste
+  - Campo de texto para digitar pergunta de teste + botão "Testar Matching" (suporta Ctrl+Enter)
+  - Configuração de limite de artigos (1-10, padrão: 5)
+  - Usa mesma lógica de matching de produção (`get_relevant_articles_with_details()` reusa `get_relevant_articles()`)
+  - Exibe artigos que seriam incluídos no contexto com: título (link para edição), prioridade (badge colorido), keywords (destacando em azul as que fizeram match), tamanho (chars/words/tokens), trecho do conteúdo (200 chars)
+  - Resumo com 3 cards estatísticos: Artigos Encontrados, Total de Caracteres, Tokens Estimados
+  - **Validação de Tamanho de Artigos:** Função `estimate_article_size($content)` para estimar tamanho baseado em caracteres, palavras e aproximação de tokens (1 token ≈ 4 chars para português)
+  - Classificação de tamanho: Curto (<500 chars), Médio (500-2000 chars), Longo (>2000 chars)
+  - Metabox "Validação de Tamanho" na tela de edição do CPT mostrando classificação com badge colorido (verde/amarelo/vermelho), estatísticas detalhadas e aviso se artigo muito longo
+  - Sugestão automática para resumir ou dividir artigos longos (>2000 chars)
+  - Badges de tamanho exibidos tanto no teste quanto na listagem de artigos
+  - Assets: `assets/css/kb-tester.css` (4.4KB, estilos para cards, badges, grid responsivo) e `assets/js/kb-tester.js` (7KB, AJAX, renderização dinâmica, destaque de keywords)
+  - Endpoint AJAX: `wp_ajax_dps_ai_kb_test_matching` com segurança (nonce, capability `edit_posts`)
+  - Interface responsiva com grid adaptativo para mobile
+- **AI Add-on (v1.6.2)**: Interface Administrativa para Gerenciar Base de Conhecimento
+  - Criada nova página admin "Base de Conhecimento" (submenu no menu DPS)
+  - Slug da página: `dps-ai-knowledge-base`
+  - Classe `DPS_AI_Knowledge_Base_Admin` em `includes/class-dps-ai-knowledge-base-admin.php`
+  - Listagem completa dos artigos do CPT `dps_ai_knowledge` com colunas: Título, Keywords, Prioridade, Status, Ações
+  - **Edição Rápida Inline:** Permite editar keywords e prioridade diretamente na listagem sem entrar em cada post
+  - Botão "Editar Rápido" por linha abre formulário inline com textarea (keywords) e input numérico (prioridade 1-10)
+  - Salvamento via AJAX com validação de nonce e capability (`edit_posts`)
+  - Feedback visual de sucesso (linha pisca em verde) e notice temporária
+  - Botões Salvar (verde primário) e Cancelar
+  - **Filtros e Ordenação:** Busca por texto (título), filtro por prioridade (Alta 8-10/Média 4-7/Baixa 1-3), ordenação por Título ou Prioridade (ASC/DESC)
+  - Botão "Limpar Filtros" quando filtros estão ativos
+  - Badges coloridos para prioridade (verde=alta, amarelo=média, cinza=baixa) e status (publicado/rascunho/ativo/inativo)
+  - Link para edição completa do post em cada linha
+  - Contador de total de artigos exibido
+  - Assets: `assets/css/kb-admin.css` (estilos, badges, animações) e `assets/js/kb-admin.js` (AJAX, edição inline, validação)
+  - Endpoint AJAX: `wp_ajax_dps_ai_kb_quick_edit` com segurança (nonce, capability, sanitização, escapagem)
+  - Visual consistente com padrões do admin WordPress (tabelas, classes, botões)
+- **AI Add-on (v1.6.2)**: Integração Real da Base de Conhecimento com Matching por Keywords
+  - Implementada busca automática de artigos relevantes baseada em keywords nas perguntas dos clientes
+  - Método `DPS_AI_Knowledge_Base::get_relevant_articles()` agora é chamado automaticamente em `answer_portal_question()` e `get_ai_response()` (chat público)
+  - Até 5 artigos mais relevantes são incluídos no contexto da IA, ordenados por prioridade (1-10)
+  - Artigos são formatados com cabeçalho "INFORMAÇÕES DA BASE DE CONHECIMENTO:" para clareza no contexto
+  - Infraestrutura de metaboxes de keywords (`_dps_ai_keywords`) e prioridade (`_dps_ai_priority`) já existia, apenas conectada ao fluxo de respostas
+  - Documentação completa em `docs/implementation/AI_KNOWLEDGE_BASE_MULTILINGUAL_IMPLEMENTATION.md`
+- **AI Add-on (v1.6.2)**: Suporte Real a Multiidioma com Instruções Explícitas
+  - Implementado método `get_base_system_prompt_with_language($language)` que adiciona instrução explícita de idioma ao system prompt
+  - Suporte a 4 idiomas: pt_BR (Português Brasil), en_US (English US), es_ES (Español), auto (detectar automaticamente)
+  - Instrução orienta a IA a SEMPRE responder no idioma configurado, mesmo que artigos da base estejam em outro idioma
+  - Configuração de idioma (`dps_ai_settings['language']`) já existia, agora é efetivamente utilizada nas instruções
+  - Aplicado em todos os contextos: chat do portal, chat público e assistente de mensagens (WhatsApp/Email)
+  - Método similar `get_public_system_prompt_with_language()` criado para chat público
 - **AI Add-on (v1.6.1)**: Limpeza Automática de Dados Antigos
   - Implementada rotina de limpeza automática via WP-Cron para deletar métricas e feedback com mais de 365 dias (configurável)
   - Criada classe `DPS_AI_Maintenance` em `includes/class-dps-ai-maintenance.php`
@@ -173,6 +248,17 @@ Antes de criar uma nova versão oficial:
   - Arquivo `.gitignore` para excluir `vendor/`, `coverage/` e arquivos de cache
 
 #### Changed (Alterado)
+- **AI Add-on (v1.6.2)**: Integração da Base de Conhecimento nos Fluxos de Resposta
+  - Modificado `DPS_AI_Assistant::answer_portal_question()` para buscar e incluir artigos relevantes via `get_relevant_articles()`
+  - Modificado `DPS_AI_Public_Chat::get_ai_response()` para buscar e incluir artigos relevantes no chat público
+  - Contexto da base de conhecimento é adicionado após contexto do cliente/negócio e antes da pergunta do usuário
+  - Artigos são formatados com cabeçalho claro "INFORMAÇÕES DA BASE DE CONHECIMENTO:" para melhor compreensão da IA
+- **AI Add-on (v1.6.2)**: Aplicação Real do Idioma Configurado em Todos os Contextos
+  - Modificado `DPS_AI_Assistant::answer_portal_question()` para usar `get_base_system_prompt_with_language()` ao invés de `get_base_system_prompt()`
+  - Modificado `DPS_AI_Public_Chat::get_ai_response()` para usar `get_public_system_prompt_with_language()`
+  - Modificado `DPS_AI_Message_Assistant::suggest_whatsapp_message()` e `suggest_email_message()` para usar prompt com idioma
+  - System prompt agora inclui instrução explícita: "IMPORTANTE: Você DEVE responder SEMPRE em [IDIOMA]"
+  - Configuração `dps_ai_settings['language']` que já existia agora é efetivamente utilizada
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
   - Refatorada classe `DPS_AI_Client::chat()` com tratamento avançado de erros
   - Validação de array de mensagens antes de enviar requisição
