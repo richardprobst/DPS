@@ -142,8 +142,10 @@ final class DPS_Client_Portal {
             return;
         }
 
-        // Marca token como usado
-        $token_manager->mark_as_used( $token_data['id'] );
+        // Marca token como usado apenas para tokens temporários
+        if ( ! isset( $token_data['type'] ) || 'permanent' !== $token_data['type'] ) {
+            $token_manager->mark_as_used( $token_data['id'] );
+        }
 
         // Registra acesso bem-sucedido
         $this->log_security_event( 'token_auth_success', [
