@@ -949,6 +949,92 @@ html {
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
+/* ================================================
+   RESUMO FINANCEIRO
+   Card destacado para pendências ou status positivo
+   ================================================ */
+.dps-financial-summary {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+    border: 2px solid var(--dps-warning);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+}
+
+.dps-financial-summary--positive {
+    background: linear-gradient(135deg, #d1fae5 0%, #ffffff 100%);
+    border-color: var(--dps-success);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.dps-financial-summary__icon {
+    font-size: 48px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-financial-summary__content {
+    flex: 1;
+}
+
+.dps-financial-summary__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    margin-bottom: 4px;
+}
+
+.dps-financial-summary__amount {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dps-warning);
+    line-height: 1.2;
+}
+
+.dps-financial-summary--positive .dps-financial-summary__amount {
+    color: var(--dps-success);
+}
+
+.dps-financial-summary__message {
+    font-size: 15px;
+    color: var(--dps-gray-600);
+    margin-top: 4px;
+}
+
+.dps-financial-summary__action .button {
+    min-height: 48px;
+    padding: 12px 24px;
+    font-weight: 600;
+}
+
+/* Detalhes financeiros (toggle) */
+.dps-financial-details {
+    margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+    .dps-financial-summary {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .dps-financial-summary__icon {
+        font-size: 64px;
+    }
+    
+    .dps-financial-summary__action {
+        width: 100%;
+    }
+    
+    .dps-financial-summary__action .button {
+        width: 100%;
+    }
+}
+
 /* Tabelas */
 .dps-table {
     width: 100%;

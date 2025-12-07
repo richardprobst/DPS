@@ -1441,17 +1441,25 @@ final class DPS_Client_Portal {
                 $total += (float) $trans->valor;
             }
             
-            // Alert de pendências
-            echo '<div class="dps-alert dps-alert--warning">';
-            echo '<div class="dps-alert__content">';
-            echo '⚠️ ' . esc_html( sprintf( 
-                _n( 'Você tem %d pendência totalizando R$ %s.', 'Você tem %d pendências totalizando R$ %s.', count( $pendings ), 'dps-client-portal' ),
-                count( $pendings ),
-                number_format( $total, 2, ',', '.' )
-            ) );
+            // Card de resumo de pendências com destaque
+            echo '<div class="dps-financial-summary">';
+            echo '<div class="dps-financial-summary__icon">⚠️</div>';
+            echo '<div class="dps-financial-summary__content">';
+            echo '<div class="dps-financial-summary__title">' . esc_html( sprintf( 
+                _n( '%d Pendência', '%d Pendências', count( $pendings ), 'dps-client-portal' ),
+                count( $pendings )
+            ) ) . '</div>';
+            echo '<div class="dps-financial-summary__amount">R$ ' . esc_html( number_format( $total, 2, ',', '.' ) ) . '</div>';
+            echo '</div>';
+            echo '<div class="dps-financial-summary__action">';
+            echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
+            echo esc_html__( 'Ver Detalhes', 'dps-client-portal' );
+            echo '</button>';
             echo '</div>';
             echo '</div>';
             
+            // Tabela de detalhes (inicialmente oculta em mobile)
+            echo '<div id="financial-details" class="dps-financial-details">';
             echo '<table class="dps-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Descrição', 'dps-client-portal' ) . '</th>';
@@ -1472,17 +1480,20 @@ final class DPS_Client_Portal {
                 wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
                 echo '<input type="hidden" name="dps_client_portal_action" value="pay_transaction">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $trans->id ) . '">';
-                echo '<button type="submit" class="button button-secondary dps-btn-pay">' . esc_html__( 'Pagar', 'dps-client-portal' ) . '</button>';
+                echo '<button type="submit" class="button button-secondary dps-btn-pay">' . esc_html__( 'Pagar Agora', 'dps-client-portal' ) . '</button>';
                 echo '</form>';
                 echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
+            echo '</div>'; // .dps-financial-details
         } else {
-            // Estado vazio positivo
-            echo '<div class="dps-alert dps-alert--success">';
-            echo '<div class="dps-alert__content">';
-            echo '✅ ' . esc_html__( 'Parabéns! Você está em dia com seus pagamentos.', 'dps-client-portal' );
+            // Estado "em dia" positivo
+            echo '<div class="dps-financial-summary dps-financial-summary--positive">';
+            echo '<div class="dps-financial-summary__icon">😊</div>';
+            echo '<div class="dps-financial-summary__content">';
+            echo '<div class="dps-financial-summary__title">' . esc_html__( 'Tudo em Dia!', 'dps-client-portal' ) . '</div>';
+            echo '<div class="dps-financial-summary__message">' . esc_html__( 'Você não tem pagamentos pendentes', 'dps-client-portal' ) . '</div>';
             echo '</div>';
             echo '</div>';
         }

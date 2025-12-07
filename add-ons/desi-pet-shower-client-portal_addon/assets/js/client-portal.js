@@ -29,6 +29,7 @@
         handleFormSubmits();
         handleFileUploadPreview();
         handleSmoothScroll();
+        handleToggleDetails(); // Phase 2: toggle for financial details
         initChatWidget();
     }
 
@@ -528,6 +529,34 @@
                         if (history.pushState) {
                             history.pushState(null, null, href);
                         }
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Gerencia toggle de detalhes (ex: detalhes financeiros)
+     * Phase 2: melhor UX em mobile com collapse/expand
+     */
+    function handleToggleDetails() {
+        var toggleButtons = document.querySelectorAll('.dps-btn-toggle-details');
+        
+        toggleButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                var targetId = this.getAttribute('data-target');
+                var target = document.getElementById(targetId);
+                
+                if (target) {
+                    // Toggle visibility
+                    if (target.style.display === 'none') {
+                        target.style.display = 'block';
+                        this.textContent = 'Ocultar Detalhes';
+                    } else {
+                        target.style.display = 'none';
+                        this.textContent = 'Ver Detalhes';
                     }
                 }
             });
