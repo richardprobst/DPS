@@ -443,6 +443,11 @@ final class DPS_Client_Portal {
             $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
             $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
             $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+            
+            // Fase 4 - continuação: Preferências do pet
+            $behavior_notes    = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
+            $grooming_pref     = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
+            $product_notes     = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
 
             if ( $pet_name ) {
                 wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
@@ -459,6 +464,11 @@ final class DPS_Client_Portal {
             update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
             update_post_meta( $pet_id, 'pet_allergies', $allergies );
             update_post_meta( $pet_id, 'pet_behavior', $behavior );
+            
+            // Salva preferências (Fase 4 - continuação)
+            update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
+            update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
+            update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
 
             if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                 $file = $_FILES['pet_photo'];
@@ -580,6 +590,41 @@ final class DPS_Client_Portal {
             } else {
                 $redirect_url = add_query_arg( 'portal_msg', 'message_error', $redirect_url );
             }
+        } elseif ( 'update_client_preferences' === $action ) {
+            // Fase 4 - continuação: Handler de preferências do cliente
+            $contact_pref = isset( $_POST['contact_preference'] ) ? sanitize_key( wp_unslash( $_POST['contact_preference'] ) ) : '';
+            $period_pref  = isset( $_POST['period_preference'] ) ? sanitize_key( wp_unslash( $_POST['period_preference'] ) ) : '';
+            
+            update_post_meta( $client_id, 'client_contact_preference', $contact_pref );
+            update_post_meta( $client_id, 'client_period_preference', $period_pref );
+            
+            // Hook: Após atualizar preferências
+            do_action( 'dps_portal_after_update_preferences', $client_id, $_POST );
+            
+            $redirect_url = add_query_arg( 'portal_msg', 'preferences_updated', $redirect_url );
+        } elseif ( 'update_pet_preferences' === $action && isset( $_POST['pet_id'] ) ) {
+            // Fase 4 - continuação: Handler de preferências do pet
+            $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
+            
+            // Validação de ownership
+            if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
+                $redirect_url = add_query_arg( 'portal_msg', 'error', $redirect_url );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
+            
+            $behavior_notes = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
+            $grooming_pref  = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
+            $product_notes  = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
+            
+            update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
+            update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
+            update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
+            
+            // Hook: Após atualizar preferências do pet
+            do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, $_POST );
+            
+            $redirect_url = add_query_arg( 'portal_msg', 'pet_preferences_updated', $redirect_url );
         }
 
         wp_redirect( $redirect_url );
@@ -1364,6 +1409,41 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Conta mensagens não lidas do cliente.
+     * Fase 4 - continuação: Central de mensagens
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de mensagens não lidas.
+     */
+    private function get_unread_messages_count( $client_id ) {
+        $messages = get_posts( [
+            'post_type'      => 'dps_portal_message',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                'relation' => 'AND',
+                [
+                    'key'     => 'message_client_id',
+                    'value'   => $client_id,
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => 'message_sender',
+                    'value'   => 'admin',
+                    'compare' => '=',
+                ],
+                [
+                    'key'     => 'client_read_at',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
+        ] );
+
+        return count( $messages );
+    }
+
+    /**
      * Renderiza seção do próximo agendamento.
      *
      * @param int $client_id ID do cliente.
@@ -2072,6 +2152,9 @@ final class DPS_Client_Portal {
         echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . esc_html__( 'Salvar Dados', 'dps-client-portal' ) . '</button></p>';
         echo '</form>';
         
+        // Seção de Preferências do Cliente (Fase 4 - continuação)
+        $this->render_client_preferences( $client_id );
+        
         // Lista pets para edição
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
@@ -2140,6 +2223,25 @@ final class DPS_Client_Portal {
                 echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'dps-client-portal' ) . '<br><textarea name="pet_vaccinations" rows="2" placeholder="Liste vacinas e condições de saúde..." style="font-size: 16px;">' . esc_textarea( $meta_pet['vaccinations'] ) . '</textarea></label></p>';
                 echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'dps-client-portal' ) . '<br><textarea name="pet_allergies" rows="2" placeholder="Alergias a alimentos, medicamentos..." style="font-size: 16px;">' . esc_textarea( $meta_pet['allergies'] ) . '</textarea></label></p>';
                 echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'dps-client-portal' ) . '<br><textarea name="pet_behavior" rows="2" placeholder="Como o pet costuma se comportar?" style="font-size: 16px;">' . esc_textarea( $meta_pet['behavior'] ) . '</textarea></label></p>';
+                echo '</fieldset>';
+                
+                // Fieldset: Preferências e Cuidados (Fase 4 - continuação)
+                $behavior_notes     = get_post_meta( $pet_id, 'pet_behavior_notes', true );
+                $grooming_pref      = get_post_meta( $pet_id, 'pet_grooming_preference', true );
+                $product_notes      = get_post_meta( $pet_id, 'pet_product_notes', true );
+                
+                echo '<fieldset class="dps-fieldset">';
+                echo '<legend class="dps-fieldset__legend">🌟 ' . esc_html__( 'Preferências de Banho e Tosa', 'dps-client-portal' ) . '</legend>';
+                echo '<p class="dps-fieldset__description">' . esc_html__( 'Informe cuidados especiais para o banho e tosa do seu pet', 'dps-client-portal' ) . '</p>';
+                
+                echo '<p><label>' . esc_html__( 'Observações de Comportamento', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_behavior_notes" rows="2" placeholder="Ex: tem medo de secador, não gosta de orelhas sendo tocadas..." style="font-size: 16px;">' . esc_textarea( $behavior_notes ) . '</textarea></label></p>';
+                
+                echo '<p><label>' . esc_html__( 'Preferências de Corte/Tosa', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_grooming_preference" rows="2" placeholder="Ex: tosa na tesoura, padrão raça específica..." style="font-size: 16px;">' . esc_textarea( $grooming_pref ) . '</textarea></label></p>';
+                
+                echo '<p><label>' . esc_html__( 'Produtos Especiais / Alergias', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_product_notes" rows="2" placeholder="Ex: usar shampoo hipoalergênico, alergia a perfumes..." style="font-size: 16px;">' . esc_textarea( $product_notes ) . '</textarea></label></p>';
                 echo '</fieldset>';
                 
                 // Foto do Pet
@@ -3034,6 +3136,67 @@ Equipe %4$s', 'dps-client-portal' ),
         $renderer = DPS_Portal_Renderer::get_instance();
         $renderer->render_recent_requests( $client_id );
     }
+
+    /**
+     * Renderiza seção de preferências do cliente.
+     * Fase 4 - continuação: Preferências
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_client_preferences( $client_id ) {
+        // Busca preferências salvas
+        $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
+        $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
+
+        echo '<div class="dps-preferences-section">';
+        echo '<h3>⚙️ ' . esc_html__( 'Minhas Preferências', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-preferences-section__description">' . esc_html__( 'Personalize sua experiência no Banho e Tosa', 'dps-client-portal' ) . '</p>';
+        
+        echo '<form method="post" class="dps-portal-form">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="update_client_preferences">';
+        
+        echo '<div class="dps-preferences-grid">';
+        
+        // Canal de contato preferido
+        echo '<div class="dps-preference-item">';
+        echo '<label class="dps-preference-item__label" for="contact_preference">';
+        echo esc_html__( 'Como prefere ser contatado?', 'dps-client-portal' );
+        echo '</label>';
+        echo '<select id="contact_preference" name="contact_preference" class="dps-form-control">';
+        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
+        echo '<option value="whatsapp"' . selected( $contact_preference, 'whatsapp', false ) . '>' . esc_html__( 'WhatsApp', 'dps-client-portal' ) . '</option>';
+        echo '<option value="phone"' . selected( $contact_preference, 'phone', false ) . '>' . esc_html__( 'Telefone', 'dps-client-portal' ) . '</option>';
+        echo '<option value="email"' . selected( $contact_preference, 'email', false ) . '>' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        // Período preferido
+        echo '<div class="dps-preference-item">';
+        echo '<label class="dps-preference-item__label" for="period_preference">';
+        echo esc_html__( 'Período preferido para banho/tosa', 'dps-client-portal' );
+        echo '</label>';
+        echo '<select id="period_preference" name="period_preference" class="dps-form-control">';
+        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
+        echo '<option value="morning"' . selected( $period_preference, 'morning', false ) . '>' . esc_html__( 'Manhã', 'dps-client-portal' ) . '</option>';
+        echo '<option value="afternoon"' . selected( $period_preference, 'afternoon', false ) . '>' . esc_html__( 'Tarde', 'dps-client-portal' ) . '</option>';
+        echo '<option value="flexible"' . selected( $period_preference, 'flexible', false ) . '>' . esc_html__( 'Indiferente', 'dps-client-portal' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-preferences-grid
+        
+        echo '<div class="dps-preferences-actions">';
+        echo '<button type="submit" class="button button-primary">';
+        echo esc_html__( 'Salvar Preferências', 'dps-client-portal' );
+        echo '</button>';
+        echo '</div>';
+        
+        echo '</form>';
+        echo '</div>'; // .dps-preferences-section
+    }
+
 
     /**
      * Renderiza timeline de serviços por pet.
