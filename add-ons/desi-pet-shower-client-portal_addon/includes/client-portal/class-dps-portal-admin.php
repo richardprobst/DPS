@@ -24,6 +24,13 @@ class DPS_Portal_Admin {
     private static $instance = null;
 
     /**
+     * Repositório de clientes.
+     *
+     * @var DPS_Client_Repository
+     */
+    private $client_repository;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Portal_Admin
@@ -39,6 +46,8 @@ class DPS_Portal_Admin {
      * Construtor privado (singleton).
      */
     private function __construct() {
+        $this->client_repository = DPS_Client_Repository::get_instance();
+        
         // Registra hooks administrativos
         add_action( 'init', [ $this, 'register_message_post_type' ] );
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
@@ -170,13 +179,8 @@ class DPS_Portal_Admin {
         $sender    = get_post_meta( $post->ID, 'message_sender', true );
         $status    = get_post_meta( $post->ID, 'message_status', true );
 
-        $clients = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
+        // Usa repositório para buscar clientes
+        $clients = $this->client_repository->get_clients();
 
         echo '<p><label for="dps_portal_message_client">' . esc_html__( 'Cliente vinculado', 'dps-client-portal' ) . '</label><br />';
         echo '<select name="dps_portal_message_client" id="dps_portal_message_client" style="max-width:100%;">';
@@ -514,36 +518,22 @@ class DPS_Portal_Admin {
      * @return array Array de clientes com dados.
      */
     private function get_clients_with_token_stats( $search = '' ) {
-        $query_args = [
-            'post_type'      => 'dps_cliente',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ];
-
-        if ( $search ) {
-            $query_args['s'] = $search;
-        }
-
-        $clients_query = new WP_Query( $query_args );
+        // Usa repositório para buscar clientes
+        $clients_posts = $this->client_repository->get_clients( [
+            'search' => $search,
+        ] );
+        
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $clients       = [];
 
-        if ( $clients_query->have_posts() ) {
-            while ( $clients_query->have_posts() ) {
-                $clients_query->the_post();
-                $client_id = get_the_ID();
-
-                $clients[] = [
-                    'id'          => $client_id,
-                    'name'        => get_the_title(),
-                    'phone'       => get_post_meta( $client_id, 'client_phone', true ),
-                    'email'       => get_post_meta( $client_id, 'client_email', true ),
-                    'token_stats' => $token_manager->get_client_stats( $client_id ),
-                ];
-            }
-            wp_reset_postdata();
+        foreach ( $clients_posts as $client ) {
+            $clients[] = [
+                'id'          => $client->ID,
+                'name'        => get_the_title( $client->ID ),
+                'phone'       => get_post_meta( $client->ID, 'client_phone', true ),
+                'email'       => get_post_meta( $client->ID, 'client_email', true ),
+                'token_stats' => $token_manager->get_client_stats( $client->ID ),
+            ];
         }
 
         return $clients;

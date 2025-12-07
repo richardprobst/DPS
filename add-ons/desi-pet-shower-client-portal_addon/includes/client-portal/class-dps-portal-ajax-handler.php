@@ -21,6 +21,27 @@ class DPS_Portal_AJAX_Handler {
     private static $instance = null;
 
     /**
+     * Repositório de mensagens.
+     *
+     * @var DPS_Message_Repository
+     */
+    private $message_repository;
+
+    /**
+     * Repositório de clientes.
+     *
+     * @var DPS_Client_Repository
+     */
+    private $client_repository;
+
+    /**
+     * Provedor de dados.
+     *
+     * @var DPS_Portal_Data_Provider
+     */
+    private $data_provider;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Portal_AJAX_Handler
@@ -36,6 +57,10 @@ class DPS_Portal_AJAX_Handler {
      * Construtor privado (singleton).
      */
     private function __construct() {
+        $this->message_repository = DPS_Message_Repository::get_instance();
+        $this->client_repository  = DPS_Client_Repository::get_instance();
+        $this->data_provider      = DPS_Portal_Data_Provider::get_instance();
+        
         // Registra handlers AJAX
         add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
         add_action( 'wp_ajax_nopriv_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
@@ -77,16 +102,8 @@ class DPS_Portal_AJAX_Handler {
     public function ajax_get_chat_messages() {
         $client_id = $this->validate_chat_request();
 
-        // Busca mensagens do cliente
-        $messages = get_posts( [
-            'post_type'      => 'dps_portal_message',
-            'post_status'    => 'publish',
-            'posts_per_page' => 50,
-            'orderby'        => 'date',
-            'order'          => 'ASC',
-            'meta_key'       => 'message_client_id',
-            'meta_value'     => $client_id,
-        ] );
+        // Busca mensagens usando repositório
+        $messages = $this->message_repository->get_messages_by_client( $client_id );
 
         $formatted_messages = [];
         foreach ( $messages as $msg ) {
@@ -99,9 +116,8 @@ class DPS_Portal_AJAX_Handler {
             ];
         }
 
-        // Conta não lidas
-        $data_provider = DPS_Portal_Data_Provider::get_instance();
-        $unread_count = $data_provider->get_unread_messages_count( $client_id );
+        // Conta não lidas usando data provider
+        $unread_count = $this->data_provider->get_unread_messages_count( $client_id );
 
         wp_send_json_success( [
             'messages'     => $formatted_messages,
@@ -174,28 +190,8 @@ class DPS_Portal_AJAX_Handler {
     public function ajax_mark_messages_read() {
         $client_id = $this->validate_chat_request();
 
-        // Busca mensagens não lidas do admin
-        $messages = get_posts( [
-            'post_type'      => 'dps_portal_message',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [
-                    'key'   => 'message_client_id',
-                    'value' => $client_id,
-                ],
-                [
-                    'key'   => 'message_sender',
-                    'value' => 'admin',
-                ],
-                [
-                    'key'     => 'client_read_at',
-                    'compare' => 'NOT EXISTS',
-                ],
-            ],
-        ] );
+        // Busca mensagens não lidas usando repositório
+        $messages = $this->message_repository->get_unread_message_ids( $client_id );
 
         // Marca como lidas
         $now = current_time( 'mysql' );
@@ -288,20 +284,8 @@ class DPS_Portal_AJAX_Handler {
             return 0;
         }
         
-        $clients = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'client_phone',
-                    'value'   => $phone,
-                    'compare' => 'LIKE',
-                ],
-            ],
-        ] );
-        
-        return ! empty( $clients ) ? $clients[0] : 0;
+        $client = $this->client_repository->get_client_by_phone( $phone );
+        return $client ? $client->ID : 0;
     }
 
     /**

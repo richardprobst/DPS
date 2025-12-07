@@ -21,6 +21,13 @@ class DPS_Portal_Actions_Handler {
     private static $instance = null;
 
     /**
+     * Repositório de finanças.
+     *
+     * @var DPS_Finance_Repository
+     */
+    private $finance_repository;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Portal_Actions_Handler
@@ -36,7 +43,7 @@ class DPS_Portal_Actions_Handler {
      * Construtor privado (singleton).
      */
     private function __construct() {
-        // Nada a inicializar por enquanto
+        $this->finance_repository = DPS_Finance_Repository::get_instance();
     }
 
     /**
@@ -314,10 +321,7 @@ class DPS_Portal_Actions_Handler {
      * @return bool
      */
     private function transaction_belongs_to_client( $trans_id, $client_id ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $owner = $wpdb->get_var( $wpdb->prepare( "SELECT cliente_id FROM {$table} WHERE id = %d", $trans_id ) );
-        return absint( $owner ) === absint( $client_id );
+        return $this->finance_repository->transaction_belongs_to_client( $trans_id, $client_id );
     }
 
     /**
@@ -327,9 +331,7 @@ class DPS_Portal_Actions_Handler {
      * @return string|false URL do link de pagamento ou false em caso de erro.
      */
     private function generate_payment_link_for_transaction( $trans_id ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $trans = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $trans_id ) );
+        $trans = $this->finance_repository->get_transaction( $trans_id );
         
         if ( ! $trans ) {
             return false;

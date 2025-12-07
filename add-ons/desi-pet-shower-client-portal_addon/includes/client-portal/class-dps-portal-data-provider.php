@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Provedor de dados para o portal do cliente.
  * 
  * Esta classe é responsável por buscar e agregar dados necessários
- * para exibição no portal, otimizando queries e evitando N+1.
+ * para exibição no portal, utilizando repositórios para acesso a dados.
  * 
  * @since 3.0.0
  */
@@ -19,6 +19,34 @@ class DPS_Portal_Data_Provider {
      * @var DPS_Portal_Data_Provider|null
      */
     private static $instance = null;
+
+    /**
+     * Repositório de mensagens.
+     *
+     * @var DPS_Message_Repository
+     */
+    private $message_repository;
+
+    /**
+     * Repositório de agendamentos.
+     *
+     * @var DPS_Appointment_Repository
+     */
+    private $appointment_repository;
+
+    /**
+     * Repositório de finanças.
+     *
+     * @var DPS_Finance_Repository
+     */
+    private $finance_repository;
+
+    /**
+     * Repositório de pets.
+     *
+     * @var DPS_Pet_Repository
+     */
+    private $pet_repository;
 
     /**
      * Recupera a instância única (singleton).
@@ -36,7 +64,10 @@ class DPS_Portal_Data_Provider {
      * Construtor privado (singleton).
      */
     private function __construct() {
-        // Nada a inicializar por enquanto
+        $this->message_repository     = DPS_Message_Repository::get_instance();
+        $this->appointment_repository = DPS_Appointment_Repository::get_instance();
+        $this->finance_repository     = DPS_Finance_Repository::get_instance();
+        $this->pet_repository         = DPS_Pet_Repository::get_instance();
     }
 
     /**
@@ -47,29 +78,7 @@ class DPS_Portal_Data_Provider {
      * @return int Quantidade de mensagens não lidas.
      */
     public function get_unread_messages_count( $client_id ) {
-        $messages = get_posts( [
-            'post_type'      => 'dps_portal_message',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [
-                    'key'   => 'message_client_id',
-                    'value' => $client_id,
-                ],
-                [
-                    'key'   => 'message_sender',
-                    'value' => 'admin',
-                ],
-                [
-                    'key'     => 'client_read_at',
-                    'compare' => 'NOT EXISTS',
-                ],
-            ],
-        ] );
-
-        return count( $messages );
+        return $this->message_repository->count_unread_messages( $client_id );
     }
 
     /**
@@ -80,39 +89,7 @@ class DPS_Portal_Data_Provider {
      * @since 2.4.0
      */
     public function count_upcoming_appointments( $client_id ) {
-        $today = current_time( 'Y-m-d' );
-        $args  = [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_client_id',
-                    'value'   => $client_id,
-                    'compare' => '=',
-                ],
-                [
-                    'key'     => 'appointment_date',
-                    'value'   => $today,
-                    'compare' => '>=',
-                    'type'    => 'DATE',
-                ],
-            ],
-        ];
-        
-        $appointments = get_posts( $args );
-        $count = 0;
-        
-        // Filtra por status válidos
-        foreach ( $appointments as $appt_id ) {
-            $status = get_post_meta( $appt_id, 'appointment_status', true );
-            if ( ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                $count++;
-            }
-        }
-        
-        return $count;
+        return $this->appointment_repository->count_upcoming_appointments( $client_id );
     }
 
     /**
@@ -123,15 +100,7 @@ class DPS_Portal_Data_Provider {
      * @since 2.4.0
      */
     public function count_financial_pending( $client_id ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        
-        $count = $wpdb->get_var( $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')",
-            $client_id
-        ) );
-        
-        return absint( $count );
+        return $this->finance_repository->count_pending_transactions( $client_id );
     }
 
     /**
@@ -141,15 +110,8 @@ class DPS_Portal_Data_Provider {
      * @return array Array de sugestões.
      */
     public function get_scheduling_suggestions( $client_id ) {
-        // Busca pets do cliente
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_key'       => 'owner_id',
-            'meta_value'     => $client_id,
-            'fields'         => 'ids',
-        ] );
+        // Busca pets do cliente usando repositório
+        $pets = $this->pet_repository->get_pets_by_client( $client_id );
         
         if ( empty( $pets ) ) {
             return []; // Sem pets, sem sugestões
@@ -159,53 +121,32 @@ class DPS_Portal_Data_Provider {
         $suggestions = [];
         $today = current_time( 'Y-m-d' );
         
-        foreach ( $pets as $pet_id ) {
-            $last_appointment = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'post_status'    => 'publish',
-                'posts_per_page' => 1,
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [
-                        'key'     => 'appointment_client_id',
-                        'value'   => $client_id,
-                        'compare' => '=',
-                    ],
-                    [
-                        'key'     => 'appointment_pet_id',
-                        'value'   => $pet_id,
-                        'compare' => '=',
-                    ],
-                    [
-                        'key'     => 'appointment_status',
-                        'value'   => ['finalizado', 'finalizado e pago', 'finalizado_pago'],
-                        'compare' => 'IN',
-                    ],
-                ],
-                'orderby'        => 'meta_value',
-                'meta_key'       => 'appointment_date',
-                'order'          => 'DESC',
-            ] );
+        foreach ( $pets as $pet ) {
+            $last_appointment = $this->appointment_repository->get_last_finished_appointment_for_pet( 
+                $client_id, 
+                $pet->ID 
+            );
             
-            if ( ! empty( $last_appointment ) ) {
-                $appt_id = $last_appointment[0]->ID;
-                $appt_date = get_post_meta( $appt_id, 'appointment_date', true );
-                $services = get_post_meta( $appt_id, 'appointment_services', true );
+            if ( ! $last_appointment ) {
+                continue;
+            }
+            
+            $appt_date = get_post_meta( $last_appointment->ID, 'appointment_date', true );
+            $services = get_post_meta( $last_appointment->ID, 'appointment_services', true );
+            
+            if ( $appt_date ) {
+                $days_since = floor( ( strtotime( $today ) - strtotime( $appt_date ) ) / DAY_IN_SECONDS );
                 
-                if ( $appt_date ) {
-                    $days_since = floor( ( strtotime( $today ) - strtotime( $appt_date ) ) / DAY_IN_SECONDS );
+                // Sugestão se faz mais de 30 dias
+                if ( $days_since >= 30 ) {
+                    $pet_name = get_the_title( $pet->ID );
+                    $service_name = is_array( $services ) && ! empty( $services ) ? $services[0] : __( 'banho', 'dps-client-portal' );
                     
-                    // Sugestão se faz mais de 30 dias
-                    if ( $days_since >= 30 ) {
-                        $pet_name = get_the_title( $pet_id );
-                        $service_name = is_array( $services ) && ! empty( $services ) ? $services[0] : __( 'banho', 'dps-client-portal' );
-                        
-                        $suggestions[] = [
-                            'pet_name'     => $pet_name,
-                            'days_since'   => $days_since,
-                            'service_name' => $service_name,
-                        ];
-                    }
+                    $suggestions[] = [
+                        'pet_name'     => $pet_name,
+                        'days_since'   => $days_since,
+                        'service_name' => $service_name,
+                    ];
                 }
             }
         }

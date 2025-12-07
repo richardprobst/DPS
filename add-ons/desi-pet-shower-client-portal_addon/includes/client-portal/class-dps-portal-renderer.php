@@ -28,6 +28,27 @@ class DPS_Portal_Renderer {
     private $data_provider;
 
     /**
+     * Repositório de agendamentos.
+     *
+     * @var DPS_Appointment_Repository
+     */
+    private $appointment_repository;
+
+    /**
+     * Repositório de finanças.
+     *
+     * @var DPS_Finance_Repository
+     */
+    private $finance_repository;
+
+    /**
+     * Repositório de pets.
+     *
+     * @var DPS_Pet_Repository
+     */
+    private $pet_repository;
+
+    /**
      * Recupera a instância única (singleton).
      *
      * @return DPS_Portal_Renderer
@@ -43,7 +64,10 @@ class DPS_Portal_Renderer {
      * Construtor privado (singleton).
      */
     private function __construct() {
-        $this->data_provider = DPS_Portal_Data_Provider::get_instance();
+        $this->data_provider          = DPS_Portal_Data_Provider::get_instance();
+        $this->appointment_repository = DPS_Appointment_Repository::get_instance();
+        $this->finance_repository     = DPS_Finance_Repository::get_instance();
+        $this->pet_repository         = DPS_Pet_Repository::get_instance();
     }
 
     /**
@@ -108,35 +132,10 @@ class DPS_Portal_Renderer {
     public function render_next_appointment( $client_id ) {
         echo '<section id="proximos" class="dps-portal-section dps-portal-next">';
         echo '<h2>' . esc_html__( '📅 Seu Próximo Horário', 'dps-client-portal' ) . '</h2>';
-        $today     = current_time( 'Y-m-d' );
-        $args      = [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_client_id',
-                    'value'   => $client_id,
-                    'compare' => '=',
-                ],
-            ],
-            'orderby'        => 'meta_value',
-            'meta_key'       => 'appointment_date',
-            'order'          => 'ASC',
-        ];
-        $appointments = get_posts( $args );
-        $next         = null;
-        if ( $appointments ) {
-            foreach ( $appointments as $appt ) {
-                $date   = get_post_meta( $appt->ID, 'appointment_date', true );
-                $status = get_post_meta( $appt->ID, 'appointment_status', true );
-                // Considera apenas status pendentes e datas futuras ou hoje
-                if ( $date && strtotime( $date ) >= strtotime( $today ) && ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
-                    $next = $appt;
-                    break;
-                }
-            }
-        }
+        
+        // Usa repositório para buscar próximo agendamento
+        $next = $this->appointment_repository->get_next_appointment_for_client( $client_id );
+        
         if ( $next ) {
             $this->render_next_appointment_card( $next, $client_id );
         } else {
@@ -218,10 +217,9 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     public function render_financial_pending( $client_id ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        // Busca transações com status em aberto
-        $pendings = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE cliente_id = %d AND status IN ('em_aberto', 'pendente')", $client_id ) );
+        // Usa repositório para buscar pendências
+        $pendings = $this->finance_repository->get_pending_transactions_for_client( $client_id );
+        
         echo '<section id="pendencias" class="dps-portal-section dps-portal-finances">';
         echo '<h2>' . esc_html__( '💳 Pagamentos Pendentes', 'dps-client-portal' ) . '</h2>';
         
@@ -389,22 +387,8 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     public function render_appointment_history( $client_id ) {
-        $args = [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_client_id',
-                    'value'   => $client_id,
-                    'compare' => '=',
-                ],
-            ],
-            'orderby'        => 'meta_value',
-            'meta_key'       => 'appointment_date',
-            'order'          => 'DESC',
-        ];
-        $appointments = get_posts( $args );
+        // Usa repositório para buscar histórico
+        $appointments = $this->appointment_repository->get_past_appointments_for_client( $client_id );
         
         echo '<section class="dps-portal-section dps-portal-history">';
         echo '<h2>' . esc_html__( '📋 Histórico de Agendamentos', 'dps-client-portal' ) . '</h2>';
@@ -482,13 +466,8 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     public function render_pet_gallery( $client_id ) {
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_key'       => 'owner_id',
-            'meta_value'     => $client_id,
-        ] );
+        // Usa repositório para buscar pets
+        $pets = $this->pet_repository->get_pets_by_client( $client_id );
         
         echo '<section class="dps-portal-section dps-portal-gallery">';
         echo '<h2>' . esc_html__( '📸 Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
@@ -648,13 +627,8 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     private function render_pets_forms( $client_id ) {
-        $pets = get_posts( [
-            'post_type'      => 'dps_pet',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_key'       => 'owner_id',
-            'meta_value'     => $client_id,
-        ] );
+        // Usa repositório para buscar pets
+        $pets = $this->pet_repository->get_pets_by_client( $client_id );
         
         if ( empty( $pets ) ) {
             return;
