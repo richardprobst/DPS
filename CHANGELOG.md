@@ -138,6 +138,22 @@ Antes de criar uma nova versão oficial:
   - Parâmetro `?feedback_paged=N` na URL para controlar página atual
   - Nova função `DPS_AI_Analytics::count_feedback()` para contar total de registros
   - Adicionado parâmetro `$offset` na função `get_recent_feedback()` para suportar paginação
+- **AI Add-on (v1.6.1)**: Sistema de Prompts Centralizado e Customizável
+  - Criado diretório `/prompts` com arquivos de system prompts separados por contexto
+  - 4 contextos disponíveis: `portal`, `public`, `whatsapp`, `email`
+  - Nova classe `DPS_AI_Prompts` em `includes/class-dps-ai-prompts.php` gerencia carregamento e filtros
+  - Arquivos de prompt:
+    - `prompts/system-portal.txt` - Chat do Portal do Cliente
+    - `prompts/system-public.txt` - Chat Público para visitantes
+    - `prompts/system-whatsapp.txt` - Mensagens via WhatsApp
+    - `prompts/system-email.txt` - Conteúdo de e-mails
+  - Filtros do WordPress para customização:
+    - `dps_ai_system_prompt` - Filtro global para todos os contextos
+    - `dps_ai_system_prompt_{contexto}` - Filtro específico por contexto (ex: `dps_ai_system_prompt_portal`)
+  - API simplificada: `DPS_AI_Prompts::get('contexto')` retorna prompt com filtros aplicados
+  - Retrocompatibilidade: métodos `get_base_system_prompt()` e `get_public_system_prompt()` agora usam a nova classe internamente
+  - Funções auxiliares: `is_valid_context()`, `get_available_contexts()`, `clear_cache()`
+  - Cache interno para evitar releituras de arquivos
 
 #### Changed (Alterado)
 - **AI Add-on (v1.6.1)**: Tratamento Robusto de Erros nas Chamadas HTTP
@@ -157,6 +173,11 @@ Antes de criar uma nova versão oficial:
   - Dados agregados por dia incluem cálculo de custo acumulado
   - Gráficos responsivos adaptam-se ao tamanho da tela
   - Layout em grid para gráficos (mínimo 400px por coluna)
+- **AI Add-on (v1.6.1)**: Refatoração de System Prompts (BREAKING para customizações diretas)
+  - `DPS_AI_Assistant::get_base_system_prompt()` agora usa `DPS_AI_Prompts::get('portal')` internamente
+  - `DPS_AI_Public_Chat::get_public_system_prompt()` agora usa `DPS_AI_Prompts::get('public')` internamente
+  - `DPS_AI_Message_Assistant::build_message_system_prompt()` agora carrega prompts base de arquivos antes de adicionar instruções específicas
+  - **IMPORTANTE**: Se você estava sobrescrevendo métodos de prompt diretamente, migre para os filtros `dps_ai_system_prompt` ou `dps_ai_system_prompt_{contexto}`
 
 #### Fixed (Corrigido)
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token

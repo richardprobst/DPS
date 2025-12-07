@@ -204,33 +204,23 @@ class DPS_AI_Message_Assistant {
     /**
      * Monta o system prompt específico para comunicações.
      *
+     * IMPORTANTE: Agora utiliza DPS_AI_Prompts::get() como base e adiciona
+     * instruções específicas do tipo de mensagem.
+     *
      * @param string $channel Canal de comunicação ('whatsapp' ou 'email').
      * @param string $type    Tipo de mensagem.
      *
      * @return string System prompt.
      */
     private static function build_message_system_prompt( $channel, $type ) {
+        // Carrega o prompt base do contexto (whatsapp ou email)
+        $base_prompt = DPS_AI_Prompts::get( $channel, [ 'type' => $type ] );
+        
         $type_label = self::MESSAGE_TYPES[ $type ] ?? 'Comunicação genérica';
 
-        $prompt = "Você está ajudando a criar uma mensagem de {$type_label} para um cliente do DPS by PRObst.\n\n";
-
-        if ( 'whatsapp' === $channel ) {
-            $prompt .= "IMPORTANTE SOBRE O FORMATO:\n";
-            $prompt .= "- Gere APENAS o texto da mensagem, sem remetente, cabeçalho ou rodapé.\n";
-            $prompt .= "- Seja objetivo, amigável e direto.\n";
-            $prompt .= "- Use emojis com moderação (1-2 no máximo, se apropriado).\n";
-            $prompt .= "- Máximo de 2-3 parágrafos curtos.\n";
-            $prompt .= "- Evite saudações muito formais.\n";
-            $prompt .= "- Use tom conversacional adequado para WhatsApp.\n\n";
-        } else {
-            $prompt .= "IMPORTANTE SOBRE O FORMATO:\n";
-            $prompt .= "- Gere o e-mail no formato: ASSUNTO: [texto do assunto]\n\nCORPO: [texto do corpo]\n";
-            $prompt .= "- O assunto deve ser curto e objetivo (máximo 60 caracteres).\n";
-            $prompt .= "- O corpo pode ter mais detalhes, mas seja conciso.\n";
-            $prompt .= "- Use tom profissional mas amigável.\n";
-            $prompt .= "- Inclua saudação inicial e despedida.\n";
-            $prompt .= "- Não use emojis no e-mail.\n\n";
-        }
+        $prompt = $base_prompt . "\n\n";
+        $prompt .= "CONTEXTO ATUAL:\n";
+        $prompt .= "Você está ajudando a criar uma mensagem de {$type_label} para um cliente.\n\n";
 
         // Orientações específicas por tipo de mensagem
         switch ( $type ) {
