@@ -73,6 +73,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-mana
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
 /**
@@ -142,6 +143,49 @@ function dps_client_portal_setup_cache_invalidation() {
     }, 10, 2 );
 }
 add_action( 'init', 'dps_client_portal_setup_cache_invalidation', 20 );
+
+/**
+ * Handler para download de arquivos .ics (Fase 2.8)
+ * 
+ * Permite clientes exportarem agendamentos para calendários
+ * 
+ * @since 2.5.0
+ */
+function dps_client_portal_handle_ics_download() {
+    if ( ! isset( $_GET['dps_download_ics'] ) ) {
+        return;
+    }
+
+    $appointment_id = absint( $_GET['dps_download_ics'] );
+    
+    // Verifica nonce
+    $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+    if ( ! wp_verify_nonce( $nonce, 'dps_download_ics_' . $appointment_id ) ) {
+        wp_die( esc_html__( 'Link inválido ou expirado.', 'dps-client-portal' ) );
+    }
+
+    // Verifica se cliente está autenticado e se o agendamento pertence a ele
+    if ( class_exists( 'DPS_Portal_Session_Manager' ) ) {
+        $session    = DPS_Portal_Session_Manager::get_instance();
+        $client_id  = $session->get_authenticated_client_id();
+        
+        if ( ! $client_id ) {
+            wp_die( esc_html__( 'Você precisa estar autenticado para baixar este arquivo.', 'dps-client-portal' ) );
+        }
+
+        // Verifica se o agendamento pertence ao cliente
+        $appt_client_id = get_post_meta( $appointment_id, 'appointment_client_id', true );
+        if ( absint( $appt_client_id ) !== $client_id ) {
+            wp_die( esc_html__( 'Você não tem permissão para baixar este arquivo.', 'dps-client-portal' ) );
+        }
+    }
+
+    // Gera e envia arquivo .ics
+    if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+        DPS_Calendar_Helper::download_ics( $appointment_id );
+    }
+}
+add_action( 'init', 'dps_client_portal_handle_ics_download', 1 );
 
 // Hook de ativação para criar tabela de tokens
 register_activation_hook( __FILE__, function() {

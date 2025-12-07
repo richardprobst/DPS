@@ -1751,3 +1751,61 @@ html {
 .dps-skeleton[aria-hidden="true"] {
     pointer-events: none;
 }
+
+/* ========================================
+   CALENDAR INTEGRATION (Fase 2.8)
+   Botões de ação na tabela de histórico
+   ======================================== */
+
+.dps-table-actions {
+    white-space: nowrap;
+}
+
+.dps-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.dps-btn:hover {
+    background-color: var(--dps-primary-hover);
+    color: var(--dps-white);
+}
+
+.dps-btn--small {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.dps-btn--secondary {
+    background-color: var(--dps-gray-200);
+    color: var(--dps-gray-700);
+}
+
+.dps-btn--secondary:hover {
+    background-color: var(--dps-gray-300);
+    color: var(--dps-gray-800);
+}
+
+/* Responsividade para ações */
+@media (max-width: 768px) {
+    .dps-table-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .dps-btn--small {
+        width: 100%;
+        text-align: center;
+    }
+}

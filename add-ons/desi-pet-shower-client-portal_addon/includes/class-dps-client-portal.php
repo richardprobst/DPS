@@ -1455,6 +1455,7 @@ final class DPS_Client_Portal {
             echo '<th>' . esc_html__( 'Pet', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Serviços', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'dps-client-portal' ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>'; // Fase 2.8
             echo '</tr></thead><tbody>';
             foreach ( $appointments as $appt ) {
                 // Meta já em cache, sem queries adicionais
@@ -1478,6 +1479,31 @@ final class DPS_Client_Portal {
                 echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '">' . esc_html( ucfirst( $status ) ) . '</td>';
+                
+                // Ações - Adicionar ao Calendário (Fase 2.8)
+                echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '" class="dps-table-actions">';
+                
+                // Link para download .ics
+                $ics_url = wp_nonce_url(
+                    add_query_arg( 'dps_download_ics', $appt->ID, home_url( '/' ) ),
+                    'dps_download_ics_' . $appt->ID
+                );
+                
+                echo '<a href="' . esc_url( $ics_url ) . '" class="dps-btn dps-btn--small" title="' . esc_attr__( 'Baixar arquivo .ics', 'dps-client-portal' ) . '">';
+                echo '📅 ' . esc_html__( '.ics', 'dps-client-portal' );
+                echo '</a> ';
+                
+                // Link para Google Calendar
+                if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+                    $google_url = DPS_Calendar_Helper::get_google_calendar_url( $appt->ID );
+                    if ( $google_url ) {
+                        echo '<a href="' . esc_url( $google_url ) . '" class="dps-btn dps-btn--small" target="_blank" rel="noopener" title="' . esc_attr__( 'Adicionar ao Google Calendar', 'dps-client-portal' ) . '">';
+                        echo '📆 ' . esc_html__( 'Google', 'dps-client-portal' );
+                        echo '</a>';
+                    }
+                }
+                
+                echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
