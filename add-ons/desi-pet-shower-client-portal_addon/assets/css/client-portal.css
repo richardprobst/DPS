@@ -1035,6 +1035,89 @@ html {
     }
 }
 
+/* ================================================
+   SUGESTÕES CONTEXTUAIS
+   Cards com dicas baseadas no histórico do cliente
+   ================================================ */
+.dps-portal-suggestions {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border-left: 4px solid var(--dps-primary);
+}
+
+.dps-suggestion-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.dps-suggestion-card:last-child {
+    margin-bottom: 0;
+}
+
+.dps-suggestion-card__icon {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-suggestion-card__content {
+    flex: 1;
+}
+
+.dps-suggestion-card__message {
+    font-size: 15px;
+    color: var(--dps-gray-700);
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+}
+
+.dps-suggestion-card__cta {
+    margin: 0;
+}
+
+.dps-suggestion-card__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--dps-primary);
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
+
+.dps-suggestion-card__button:hover {
+    background: var(--dps-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
+}
+
+@media (max-width: 640px) {
+    .dps-suggestion-card {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    
+    .dps-suggestion-card__icon {
+        font-size: 48px;
+    }
+    
+    .dps-suggestion-card__button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 /* Tabelas */
 .dps-table {
     width: 100%;

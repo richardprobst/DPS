@@ -522,7 +522,7 @@ final class DPS_Client_Portal {
                 }
             }
 
-            $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
+            $redirect_url = add_query_arg( 'portal_msg', 'pet_updated', $redirect_url );
         } elseif ( 'send_message' === $action ) {
             $subject = isset( $_POST['message_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['message_subject'] ) ) : '';
             $content = isset( $_POST['message_body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message_body'] ) ) : '';
@@ -1047,7 +1047,16 @@ final class DPS_Client_Portal {
         
         // Header com título e botão de logout
         echo '<div class="dps-portal-header">';
-        echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        
+        // Saudação personalizada com nome do cliente
+        $client_name = get_the_title( $client_id );
+        if ( $client_name ) {
+            echo '<h1 class="dps-portal-title">';
+            echo esc_html( sprintf( __( 'Olá, %s 👋', 'dps-client-portal' ), $client_name ) );
+            echo '</h1>';
+        } else {
+            echo '<h1 class="dps-portal-title">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</h1>';
+        }
         
         // Botão de logout
         $session_manager = DPS_Portal_Session_Manager::get_instance();
@@ -1133,6 +1142,7 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
         $this->render_financial_pending( $client_id );
+        $this->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
@@ -1498,6 +1508,132 @@ final class DPS_Client_Portal {
             echo '</div>';
         }
         echo '</section>';
+    }
+
+    /**
+     * Renderiza sugestões contextuais baseadas no histórico do cliente.
+     * Fase 2: Personalização da experiência
+     *
+     * @param int $client_id ID do cliente.
+     * @since 2.4.0
+     */
+    private function render_contextual_suggestions( $client_id ) {
+        // Busca pets do cliente
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_key'       => 'owner_id',
+            'meta_value'     => $client_id,
+            'fields'         => 'ids',
+        ] );
+        
+        if ( empty( $pets ) ) {
+            return; // Sem pets, sem sugestões
+        }
+        
+        // Busca último agendamento de cada pet
+        $suggestions = [];
+        $today = current_time( 'Y-m-d' );
+        
+        foreach ( $pets as $pet_id ) {
+            $last_appointment = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'appointment_client_id',
+                        'value'   => $client_id,
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => 'appointment_pet_id',
+                        'value'   => $pet_id,
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => 'appointment_status',
+                        'value'   => ['finalizado', 'finalizado e pago', 'finalizado_pago'],
+                        'compare' => 'IN',
+                    ],
+                ],
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_date',
+                'order'          => 'DESC',
+            ] );
+            
+            if ( ! empty( $last_appointment ) ) {
+                $appt_id = $last_appointment[0]->ID;
+                $appt_date = get_post_meta( $appt_id, 'appointment_date', true );
+                $services = get_post_meta( $appt_id, 'appointment_services', true );
+                
+                if ( $appt_date ) {
+                    $days_since = floor( ( strtotime( $today ) - strtotime( $appt_date ) ) / DAY_IN_SECONDS );
+                    
+                    // Sugestão se faz mais de 30 dias
+                    if ( $days_since >= 30 ) {
+                        $pet_name = get_the_title( $pet_id );
+                        $service_name = is_array( $services ) && ! empty( $services ) ? $services[0] : __( 'banho', 'dps-client-portal' );
+                        
+                        $suggestions[] = [
+                            'pet_name'     => $pet_name,
+                            'days_since'   => $days_since,
+                            'service_name' => $service_name,
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Renderiza sugestões se houver
+        if ( ! empty( $suggestions ) ) {
+            echo '<section class="dps-portal-section dps-portal-suggestions">';
+            echo '<h2>💡 ' . esc_html__( 'Sugestões para Você', 'dps-client-portal' ) . '</h2>';
+            
+            foreach ( $suggestions as $suggestion ) {
+                echo '<div class="dps-suggestion-card">';
+                echo '<div class="dps-suggestion-card__icon">🐾</div>';
+                echo '<div class="dps-suggestion-card__content">';
+                echo '<p class="dps-suggestion-card__message">';
+                echo esc_html( sprintf(
+                    _n( 
+                        'Já faz %d dia desde o último %s do %s.',
+                        'Já faz %d dias desde o último %s do %s.',
+                        $suggestion['days_since'],
+                        'dps-client-portal'
+                    ),
+                    $suggestion['days_since'],
+                    $suggestion['service_name'],
+                    $suggestion['pet_name']
+                ) );
+                echo '</p>';
+                echo '<p class="dps-suggestion-card__cta">';
+                
+                // Link para agendar via WhatsApp
+                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                    $message = sprintf( __( 'Olá! Gostaria de agendar %s para o %s.', 'dps-client-portal' ), $suggestion['service_name'], $suggestion['pet_name'] );
+                    $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $message );
+                } else {
+                    $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+                    if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                        $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                    }
+                    $message_text = urlencode( sprintf( 'Olá! Gostaria de agendar %s para o %s.', $suggestion['service_name'], $suggestion['pet_name'] ) );
+                    $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $message_text;
+                }
+                
+                echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-suggestion-card__button">';
+                echo '📅 ' . esc_html__( 'Agendar Agora', 'dps-client-portal' );
+                echo '</a>';
+                echo '</p>';
+                echo '</div>';
+                echo '</div>';
+            }
+            
+            echo '</section>';
+        }
     }
 
     /**
