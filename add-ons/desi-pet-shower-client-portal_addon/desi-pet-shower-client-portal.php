@@ -72,6 +72,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/functions-portal-helpers.ph
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-token-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-manager.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
 /**
@@ -99,6 +100,48 @@ function dps_client_portal_init_addon() {
     }
 }
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
+
+/**
+ * Invalidação automática de cache (Fase 2.2)
+ * 
+ * Invalida cache quando dados relevantes são atualizados
+ * 
+ * @since 2.5.0
+ */
+function dps_client_portal_setup_cache_invalidation() {
+    if ( ! class_exists( 'DPS_Portal_Cache_Helper' ) ) {
+        return;
+    }
+
+    // Invalida cache ao salvar cliente
+    add_action( 'save_post_dps_cliente', function( $post_id ) {
+        DPS_Portal_Cache_Helper::invalidate_client_cache( $post_id );
+    }, 10, 1 );
+
+    // Invalida cache ao salvar pet
+    add_action( 'save_post_dps_pet', function( $post_id ) {
+        $owner_id = get_post_meta( $post_id, 'owner_id', true );
+        if ( $owner_id ) {
+            DPS_Portal_Cache_Helper::invalidate_client_cache( $owner_id, [ 'pets', 'gallery' ] );
+        }
+    }, 10, 1 );
+
+    // Invalida cache ao salvar agendamento
+    add_action( 'save_post_dps_agendamento', function( $post_id ) {
+        $client_id = get_post_meta( $post_id, 'appointment_client_id', true );
+        if ( $client_id ) {
+            DPS_Portal_Cache_Helper::invalidate_client_cache( $client_id, [ 'next_appt', 'history' ] );
+        }
+    }, 10, 1 );
+
+    // Invalida cache ao salvar transação (Finance Add-on)
+    add_action( 'dps_finance_transaction_saved', function( $transaction_id, $client_id ) {
+        if ( $client_id ) {
+            DPS_Portal_Cache_Helper::invalidate_client_cache( $client_id, [ 'pending' ] );
+        }
+    }, 10, 2 );
+}
+add_action( 'init', 'dps_client_portal_setup_cache_invalidation', 20 );
 
 // Hook de ativação para criar tabela de tokens
 register_activation_hook( __FILE__, function() {
