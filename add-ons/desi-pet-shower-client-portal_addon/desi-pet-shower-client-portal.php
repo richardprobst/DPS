@@ -121,6 +121,11 @@ function dps_client_portal_init_addon() {
     if ( class_exists( 'DPS_Portal_Admin_Actions' ) ) {
         DPS_Portal_Admin_Actions::get_instance();
     }
+    
+    // Inicializa handler AJAX (Fase 3)
+    if ( class_exists( 'DPS_Portal_AJAX_Handler' ) ) {
+        DPS_Portal_AJAX_Handler::get_instance();
+    }
 }
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
 
