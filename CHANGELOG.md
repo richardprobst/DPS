@@ -82,6 +82,24 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AI Add-on (v1.6.2)**: Interface Administrativa para Gerenciar Base de Conhecimento
+  - Criada nova página admin "Base de Conhecimento" (submenu no menu DPS)
+  - Slug da página: `dps-ai-knowledge-base`
+  - Classe `DPS_AI_Knowledge_Base_Admin` em `includes/class-dps-ai-knowledge-base-admin.php`
+  - Listagem completa dos artigos do CPT `dps_ai_knowledge` com colunas: Título, Keywords, Prioridade, Status, Ações
+  - **Edição Rápida Inline:** Permite editar keywords e prioridade diretamente na listagem sem entrar em cada post
+  - Botão "Editar Rápido" por linha abre formulário inline com textarea (keywords) e input numérico (prioridade 1-10)
+  - Salvamento via AJAX com validação de nonce e capability (`edit_posts`)
+  - Feedback visual de sucesso (linha pisca em verde) e notice temporária
+  - Botões Salvar (verde primário) e Cancelar
+  - **Filtros e Ordenação:** Busca por texto (título), filtro por prioridade (Alta 8-10/Média 4-7/Baixa 1-3), ordenação por Título ou Prioridade (ASC/DESC)
+  - Botão "Limpar Filtros" quando filtros estão ativos
+  - Badges coloridos para prioridade (verde=alta, amarelo=média, cinza=baixa) e status (publicado/rascunho/ativo/inativo)
+  - Link para edição completa do post em cada linha
+  - Contador de total de artigos exibido
+  - Assets: `assets/css/kb-admin.css` (estilos, badges, animações) e `assets/js/kb-admin.js` (AJAX, edição inline, validação)
+  - Endpoint AJAX: `wp_ajax_dps_ai_kb_quick_edit` com segurança (nonce, capability, sanitização, escapagem)
+  - Visual consistente com padrões do admin WordPress (tabelas, classes, botões)
 - **AI Add-on (v1.6.2)**: Integração Real da Base de Conhecimento com Matching por Keywords
   - Implementada busca automática de artigos relevantes baseada em keywords nas perguntas dos clientes
   - Método `DPS_AI_Knowledge_Base::get_relevant_articles()` agora é chamado automaticamente em `answer_portal_question()` e `get_ai_response()` (chat público)

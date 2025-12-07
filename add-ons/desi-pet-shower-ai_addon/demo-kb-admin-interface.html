@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Conhecimento IA - Interface Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f0f0f1;
+            padding: 20px;
+        }
+        .wrap {
+            background: #fff;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.13);
+        }
+        h1 {
+            font-size: 23px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #1d2327;
+        }
+        .description {
+            color: #646970;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .filters {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #c3c4c7;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .filters-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        input[type="search"], select {
+            padding: 6px 8px;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        input[type="search"] {
+            width: 300px;
+        }
+        select {
+            background: #fff;
+        }
+        .button {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 13px;
+            line-height: 2.15384615;
+            border: 1px solid #2271b1;
+            background: #2271b1;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .button:hover {
+            background: #135e96;
+            border-color: #135e96;
+        }
+        .button-secondary {
+            background: #f6f7f7;
+            border-color: #2271b1;
+            color: #2271b1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #f6f7f7;
+            border-bottom: 1px solid #c3c4c7;
+            font-weight: 600;
+            font-size: 13px;
+            color: #1d2327;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dcdcde;
+            font-size: 13px;
+        }
+        tr:hover {
+            background: #f6f7f7;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-high {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .badge-low {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #9ca3af;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-publish {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-draft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .badge-active {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        code {
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #374151;
+            font-family: 'Courier New', monospace;
+        }
+        .button-small {
+            padding: 2px 8px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        strong {
+            font-size: 18px;
+            color: #374151;
+        }
+        em {
+            color: #646970;
+        }
+        a {
+            color: #2271b1;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #135e96;
+        }
+        .total {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #646970;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Gerenciar Base de Conhecimento</h1>
+        
+        <p class="description">
+            Gerencie keywords e prioridades dos artigos da base de conhecimento. As keywords são usadas para fazer matching com perguntas dos clientes, e a prioridade determina a ordem de relevância.
+        </p>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-row">
+                <input type="search" placeholder="Buscar por título ou keywords..." value="">
+                
+                <select>
+                    <option>Todas prioridades</option>
+                    <option>Alta (8-10)</option>
+                    <option>Média (4-7)</option>
+                    <option>Baixa (1-3)</option>
+                </select>
+                
+                <select>
+                    <option>Ordenar por Prioridade</option>
+                    <option>Ordenar por Título</option>
+                </select>
+                
+                <select>
+                    <option>DESC</option>
+                    <option>ASC</option>
+                </select>
+                
+                <button class="button">Filtrar</button>
+            </div>
+        </div>
+
+        <!-- Tabela de artigos -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Título</th>
+                    <th style="width: 35%;">Keywords</th>
+                    <th style="width: 10%;">Prioridade</th>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 15%;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong><a href="#">Preços de Banho</a></strong>
+                    </td>
+                    <td>
+                        <code>banho, preço, valor, quanto custa</code>
+                    </td>
+                    <td>
+                        <strong>8</strong><br>
+                        <span class="badge badge-high">Alta</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-publish">Publicado</span><br>
+                        <span class="badge badge-active">Ativo</span>
+                    </td>
+                    <td>
+                        <button class="button button-small">Editar Rápido</button><br>
+                        <a href="#" class="button button-small" style="margin-top: 5px;">Editar Post</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <strong><a href="#">Horário de Funcionamento</a></strong>
+                    </td>
+                    <td>
+                        <code>horário, funcionamento, abre, fecha</code>
+                    </td>
+                    <td>
+                        <strong>9</strong><br>
+                        <span class="badge badge-high">Alta</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-publish">Publicado</span><br>
+                        <span class="badge badge-active">Ativo</span>
+                    </td>
+                    <td>
+                        <button class="button button-small">Editar Rápido</button><br>
+                        <a href="#" class="button button-small" style="margin-top: 5px;">Editar Post</a>
+                    </td>
+                </tr>
+                
+                <tr style="background: #f6f7f7;">
+                    <td>
+                        <strong><a href="#">Serviços Disponíveis</a></strong>
+                    </td>
+                    <td>
+                        <!-- Modo de edição -->
+                        <textarea style="width: 100%; padding: 6px; border: 1px solid #8c8f94; border-radius: 4px; font-family: inherit; font-size: 13px;" rows="2">tosa, corte, hidratação, limpeza</textarea>
+                        <p class="description" style="margin-top: 5px; font-size: 11px; color: #646970;">Separe por vírgula</p>
+                    </td>
+                    <td>
+                        <input type="number" min="1" max="10" value="6" style="width: 60px; padding: 4px; border: 1px solid #8c8f94; border-radius: 4px; font-size: 13px;">
+                        <p class="description" style="margin-top: 5px; font-size: 11px; color: #646970;">1-10</p>
+                    </td>
+                    <td>
+                        <span class="status-badge status-draft">Rascunho</span><br>
+                        <span class="badge badge-active">Ativo</span>
+                    </td>
+                    <td>
+                        <button class="button button-small" style="background: #00a32a; border-color: #00a32a;">Salvar</button>
+                        <button class="button button-small button-secondary">Cancelar</button><br>
+                        <a href="#" class="button button-small" style="margin-top: 5px;">Editar Post</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <strong><a href="#">Cuidados Pós-Banho</a></strong>
+                    </td>
+                    <td>
+                        <code>cuidados, pós-banho, dicas</code>
+                    </td>
+                    <td>
+                        <strong>5</strong><br>
+                        <span class="badge badge-medium">Média</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-publish">Publicado</span><br>
+                        <span class="badge badge-active">Ativo</span>
+                    </td>
+                    <td>
+                        <button class="button button-small">Editar Rápido</button><br>
+                        <a href="#" class="button button-small" style="margin-top: 5px;">Editar Post</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <strong><a href="#">Política de Cancelamento</a></strong>
+                    </td>
+                    <td>
+                        <em>Nenhuma keyword definida</em>
+                    </td>
+                    <td>
+                        <strong>3</strong><br>
+                        <span class="badge badge-low">Baixa</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-publish">Publicado</span><br>
+                        <span class="badge badge-active">Ativo</span>
+                    </td>
+                    <td>
+                        <button class="button button-small">Editar Rápido</button><br>
+                        <a href="#" class="button button-small" style="margin-top: 5px;">Editar Post</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">
+            <p><strong>Total de artigos:</strong> 5</p>
+        </div>
+    </div>
+</body>
+</html>
