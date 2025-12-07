@@ -1647,3 +1647,107 @@ html {
         max-width: 100%;
     }
 }
+
+/* ========================================
+   SKELETON LOADERS (Fase 2.7)
+   Melhora percepção de velocidade
+   ======================================== */
+
+.dps-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--dps-gray-200) 25%,
+        var(--dps-gray-100) 50%,
+        var(--dps-gray-200) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Skeleton variants */
+.dps-skeleton--text {
+    height: 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--text:last-child {
+    width: 80%;
+}
+
+.dps-skeleton--title {
+    height: 24px;
+    width: 40%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--card {
+    height: 120px;
+    margin-bottom: 16px;
+    border-radius: var(--dps-border-radius);
+}
+
+.dps-skeleton--table-row {
+    height: 48px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.dps-skeleton--avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.dps-skeleton--button {
+    height: 40px;
+    width: 120px;
+    border-radius: 6px;
+}
+
+/* Skeleton container para múltiplos elementos */
+.dps-skeleton-container {
+    padding: 20px;
+}
+
+/* Specific loaders para seções do portal */
+.dps-portal-skeleton-history {
+    padding: 20px;
+}
+
+.dps-portal-skeleton-history .dps-skeleton--title {
+    width: 200px;
+    margin-bottom: 24px;
+}
+
+.dps-portal-skeleton-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.dps-portal-skeleton-gallery .dps-skeleton--card {
+    height: 200px;
+}
+
+/* Hide skeleton quando conteúdo carregar */
+.dps-content-loaded .dps-skeleton {
+    display: none;
+}
+
+/* Acessibilidade */
+.dps-skeleton[aria-hidden="true"] {
+    pointer-events: none;
+}

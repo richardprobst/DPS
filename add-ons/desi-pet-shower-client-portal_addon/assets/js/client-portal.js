@@ -712,3 +712,156 @@ window.DPSToast = (function() {
         subtree: true
     });
 })();
+
+/* ========================================
+   SKELETON LOADERS (Fase 2.7)
+   Exibe placeholders durante carregamento
+   ======================================== */
+
+/**
+ * DPS Skeleton - Sistema de skeleton loaders
+ * Melhora a percepção de velocidade mostrando placeholders
+ */
+window.DPSSkeleton = (function() {
+    'use strict';
+    
+    /**
+     * Cria skeleton para histórico
+     */
+    function createHistorySkeleton() {
+        return `
+            <div class="dps-portal-skeleton-history" aria-hidden="true">
+                <div class="dps-skeleton dps-skeleton--title"></div>
+                <div class="dps-skeleton dps-skeleton--table-row"></div>
+                <div class="dps-skeleton dps-skeleton--table-row"></div>
+                <div class="dps-skeleton dps-skeleton--table-row"></div>
+                <div class="dps-skeleton dps-skeleton--table-row"></div>
+                <div class="dps-skeleton dps-skeleton--table-row"></div>
+            </div>
+        `;
+    }
+    
+    /**
+     * Cria skeleton para galeria
+     */
+    function createGallerySkeleton() {
+        return `
+            <div class="dps-portal-skeleton-gallery" aria-hidden="true">
+                <div class="dps-skeleton dps-skeleton--card"></div>
+                <div class="dps-skeleton dps-skeleton--card"></div>
+                <div class="dps-skeleton dps-skeleton--card"></div>
+                <div class="dps-skeleton dps-skeleton--card"></div>
+            </div>
+        `;
+    }
+    
+    /**
+     * Cria skeleton genérico com múltiplas linhas de texto
+     */
+    function createTextSkeleton(lines) {
+        lines = lines || 3;
+        var html = '<div class="dps-skeleton-container" aria-hidden="true">';
+        html += '<div class="dps-skeleton dps-skeleton--title"></div>';
+        for (var i = 0; i < lines; i++) {
+            html += '<div class="dps-skeleton dps-skeleton--text"></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    
+    /**
+     * Mostra skeleton em um container
+     */
+    function show(container, type) {
+        if (typeof container === 'string') {
+            container = document.querySelector(container);
+        }
+        
+        if (!container) return;
+        
+        var skeleton;
+        switch (type) {
+            case 'history':
+                skeleton = createHistorySkeleton();
+                break;
+            case 'gallery':
+                skeleton = createGallerySkeleton();
+                break;
+            case 'text':
+            default:
+                skeleton = createTextSkeleton();
+                break;
+        }
+        
+        container.innerHTML = skeleton;
+        container.classList.remove('dps-content-loaded');
+    }
+    
+    /**
+     * Remove skeleton e marca como loaded
+     */
+    function hide(container) {
+        if (typeof container === 'string') {
+            container = document.querySelector(container);
+        }
+        
+        if (!container) return;
+        
+        container.classList.add('dps-content-loaded');
+        
+        // Remove skeletons após animação
+        setTimeout(function() {
+            var skeletons = container.querySelectorAll('.dps-skeleton, .dps-portal-skeleton-history, .dps-portal-skeleton-gallery, .dps-skeleton-container');
+            skeletons.forEach(function(el) {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+        }, 300);
+    }
+    
+    // API pública
+    return {
+        show: show,
+        hide: hide,
+        createHistorySkeleton: createHistorySkeleton,
+        createGallerySkeleton: createGallerySkeleton,
+        createTextSkeleton: createTextSkeleton
+    };
+})();
+
+/**
+ * Auto-aplica skeletons em tab panels durante navegação
+ */
+(function() {
+    'use strict';
+    
+    // Aguarda navegação entre tabs
+    document.addEventListener('click', function(e) {
+        var tabLink = e.target.closest('.dps-portal-tabs__link');
+        if (!tabLink) return;
+        
+        var tabId = tabLink.getAttribute('data-tab');
+        if (!tabId) return;
+        
+        var panel = document.getElementById('panel-' + tabId);
+        if (!panel || panel.classList.contains('is-active')) return;
+        
+        // Mostra skeleton se painel estiver vazio ou muito simples
+        var hasContent = panel.querySelector('.dps-portal-section');
+        if (!hasContent && !panel.classList.contains('dps-content-loaded')) {
+            if (tabId === 'agendamentos') {
+                DPSSkeleton.show(panel, 'history');
+            } else if (tabId === 'galeria') {
+                DPSSkeleton.show(panel, 'gallery');
+            } else {
+                DPSSkeleton.show(panel, 'text');
+            }
+            
+            // Remove skeleton após delay (simula carregamento)
+            setTimeout(function() {
+                DPSSkeleton.hide(panel);
+            }, 500);
+        }
+    });
+})();
