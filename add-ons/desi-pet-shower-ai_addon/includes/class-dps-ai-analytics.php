@@ -74,6 +74,12 @@ class DPS_AI_Analytics {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
+        // IMPORTANTE: dbDelta() do WordPress tem requisitos estritos de formatação SQL:
+        // - Exatamente 2 espaços entre 'PRIMARY KEY' e '(' (não 1)
+        // - Usar 'KEY' em vez de 'INDEX' para índices secundários
+        // - Um espaço após cada vírgula na definição de colunas
+        // Ref: https://developer.wordpress.org/reference/functions/dbdelta/
+
         // Tabela de métricas diárias
         $sql_metrics = "CREATE TABLE IF NOT EXISTS {$metrics_table} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -87,7 +93,7 @@ class DPS_AI_Analytics {
             model VARCHAR(50) DEFAULT '',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
+            PRIMARY KEY  (id),
             UNIQUE KEY date_client (date, client_id),
             KEY date_idx (date),
             KEY client_idx (client_id)
@@ -102,7 +108,7 @@ class DPS_AI_Analytics {
             feedback ENUM('positive', 'negative') NOT NULL,
             comment TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
+            PRIMARY KEY  (id),
             KEY client_idx (client_id),
             KEY feedback_idx (feedback),
             KEY created_at_idx (created_at)
