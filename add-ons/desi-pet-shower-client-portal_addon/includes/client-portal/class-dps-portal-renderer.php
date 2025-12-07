@@ -820,7 +820,7 @@ class DPS_Portal_Renderer {
         
         // Botão "Repetir este serviço"
         echo '<div class="dps-timeline-actions">';
-        echo '<button class="button button-secondary dps-btn-repeat-service" data-appointment-id="' . esc_attr( $service['appointment_id'] ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" data-services=\'' . esc_attr( wp_json_encode( $service['services_array'] ) ) . '\'>';
+        echo '<button class="button button-secondary dps-btn-repeat-service" data-appointment-id="' . esc_attr( $service['appointment_id'] ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" data-services="' . esc_attr( wp_json_encode( $service['services_array'] ) ) . '">';
         echo '🔄 ' . esc_html__( 'Repetir este Serviço', 'dps-client-portal' );
         echo '</button>';
         echo '</div>';

@@ -1194,17 +1194,14 @@ window.DPSSkeleton = (function() {
             submitBtn.textContent = 'Enviando...';
         }
         
-        // Cria nonce específico para appointment requests
-        var requestNonce = btoa(Date.now() + '_appointment_request').substring(0, 10);
-        
-        fetch(dpsPortalChat.ajaxUrl, {
+        fetch(dpsPortalRequests.ajaxUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
                 action: 'dps_create_appointment_request',
-                nonce: dpsPortalChat.nonce,
+                nonce: dpsPortalRequests.nonce,
                 ...data
             })
         })

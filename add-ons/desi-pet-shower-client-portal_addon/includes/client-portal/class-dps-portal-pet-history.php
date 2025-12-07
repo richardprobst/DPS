@@ -49,38 +49,76 @@ class DPS_Portal_Pet_History {
      * @return array Array de arrays com dados dos serviços.
      */
     public function get_pet_service_history( $pet_id, $limit = -1 ) {
-        $appointments = get_posts( [
+        // Busca por pet único (appointment_pet_id)
+        $single_pet_appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
-            'posts_per_page' => $limit,
-            'orderby'        => 'meta_value',
-            'meta_key'       => 'appointment_date',
-            'order'          => 'DESC',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
             'meta_query'     => [
-                'relation' => 'OR',
                 [
                     'key'     => 'appointment_pet_id',
                     'value'   => $pet_id,
                     'compare' => '=',
                 ],
+            ],
+        ] );
+
+        // Busca por múltiplos pets (appointment_pet_ids)
+        // Nota: LIKE com serialização é potencialmente impreciso, mas é o método
+        // padrão do WordPress quando não há tabela separada de relacionamento
+        $multi_pet_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
                 [
                     'key'     => 'appointment_pet_ids',
-                    'value'   => sprintf( ':"%d";', $pet_id ),
+                    'value'   => sprintf( ':%d;', $pet_id ), // Formato serializado mais específico
                     'compare' => 'LIKE',
                 ],
             ],
         ] );
 
-        if ( empty( $appointments ) ) {
+        // Combina e remove duplicatas
+        $all_appointment_ids = array_unique( array_merge( $single_pet_appointments, $multi_pet_appointments ) );
+
+        if ( empty( $all_appointment_ids ) ) {
             return [];
         }
 
+        // Busca posts completos com ordenação
+        $appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'post__in'       => $all_appointment_ids,
+            'orderby'        => 'meta_value',
+            'meta_key'       => 'appointment_date',
+            'order'          => 'DESC',
+        ] );
+
         $history = [];
+        $count   = 0;
+
         foreach ( $appointments as $appt ) {
+            // Aplica limite se especificado
+            if ( $limit > 0 && $count >= $limit ) {
+                break;
+            }
+
             $status = get_post_meta( $appt->ID, 'appointment_status', true );
             
             // Inclui apenas serviços finalizados
             if ( ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago' ], true ) ) {
+                continue;
+            }
+
+            // Validação extra: verifica se o pet realmente está no agendamento
+            $pet_ids_meta = get_post_meta( $appt->ID, 'appointment_pet_ids', true );
+            if ( is_array( $pet_ids_meta ) && ! in_array( $pet_id, $pet_ids_meta, true ) ) {
+                // Pet não está na lista, pula
                 continue;
             }
 
@@ -103,6 +141,8 @@ class DPS_Portal_Pet_History {
                 'professional'   => $professional,
                 'status'         => $status,
             ];
+
+            $count++;
         }
 
         return $history;

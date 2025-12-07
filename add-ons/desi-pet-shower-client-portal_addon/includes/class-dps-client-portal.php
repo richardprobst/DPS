@@ -1025,6 +1025,12 @@ final class DPS_Client_Portal {
             'clientId' => $client_id,
         ] );
         
+        // Localiza script com dados para appointment requests (Fase 4)
+        wp_localize_script( 'dps-client-portal', 'dpsPortalRequests', [
+            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'dps_portal_appointment_request' ),
+        ] );
+        
         ob_start();
         // Filtro de mensagens de retorno
         if ( isset( $_GET['portal_msg'] ) ) {
