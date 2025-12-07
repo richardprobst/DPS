@@ -220,25 +220,64 @@ class DPS_AI_Integration_Portal {
         if ( $conversation_id && class_exists( 'DPS_AI_Conversations_Repository' ) ) {
             $repo = DPS_AI_Conversations_Repository::get_instance();
             
-            // Extrai metadados da resposta se disponível
-            $metadata = [];
-            if ( is_array( $answer ) && isset( $answer['text'] ) ) {
-                $metadata = $answer;
-                $answer = $answer['text'];
-            }
+            // Extrai metadados e texto da resposta
+            $answer_data = $this->extract_answer_data( $answer );
             
             $repo->add_message( $conversation_id, [
                 'sender_type'       => 'assistant',
                 'sender_identifier' => 'ai',
-                'message_text'      => is_string( $answer ) ? $answer : ( isset( $answer['text'] ) ? $answer['text'] : '' ),
-                'metadata'          => ! empty( $metadata ) ? $metadata : null,
+                'message_text'      => $answer_data['text'],
+                'metadata'          => $answer_data['metadata'],
             ] );
         }
 
         // Retorna a resposta com sucesso
         wp_send_json_success( [
-            'answer' => is_string( $answer ) ? $answer : ( isset( $answer['text'] ) ? $answer['text'] : $answer ),
+            'answer' => $this->extract_answer_text( $answer ),
         ] );
+    }
+
+    /**
+     * Extrai texto e metadados de uma resposta de IA.
+     *
+     * @param mixed $answer Resposta da IA (string ou array).
+     *
+     * @return array Array com 'text' e 'metadata'.
+     */
+    private function extract_answer_data( $answer ) {
+        $text     = '';
+        $metadata = null;
+
+        if ( is_array( $answer ) && isset( $answer['text'] ) ) {
+            $text     = $answer['text'];
+            $metadata = $answer;
+        } elseif ( is_string( $answer ) ) {
+            $text = $answer;
+        }
+
+        return [
+            'text'     => $text,
+            'metadata' => $metadata,
+        ];
+    }
+
+    /**
+     * Extrai apenas o texto de uma resposta de IA.
+     *
+     * @param mixed $answer Resposta da IA (string ou array).
+     *
+     * @return string Texto da resposta.
+     */
+    private function extract_answer_text( $answer ) {
+        if ( is_string( $answer ) ) {
+            return $answer;
+        }
+
+        if ( is_array( $answer ) && isset( $answer['text'] ) ) {
+            return $answer['text'];
+        }
+
+        return '';
     }
 
     /**

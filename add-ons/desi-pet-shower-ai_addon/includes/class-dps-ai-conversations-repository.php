@@ -105,7 +105,7 @@ class DPS_AI_Conversations_Repository {
         // Ref: https://developer.wordpress.org/reference/functions/dbdelta/
 
         // Tabela de conversas
-        $sql_conversations = "CREATE TABLE IF NOT EXISTS {$conversations_table} (
+        $sql_conversations = "CREATE TABLE {$conversations_table} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             customer_id BIGINT(20) UNSIGNED DEFAULT NULL COMMENT 'ID do cliente (NULL para visitantes não identificados)',
             channel VARCHAR(50) NOT NULL DEFAULT 'web_chat' COMMENT 'Canal da conversa: web_chat, portal, whatsapp, admin_specialist',
@@ -124,7 +124,7 @@ class DPS_AI_Conversations_Repository {
         ) {$charset_collate};";
 
         // Tabela de mensagens
-        $sql_messages = "CREATE TABLE IF NOT EXISTS {$messages_table} (
+        $sql_messages = "CREATE TABLE {$messages_table} (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             conversation_id BIGINT(20) UNSIGNED NOT NULL,
             sender_type VARCHAR(20) NOT NULL COMMENT 'Tipo: user, assistant, system',
@@ -428,17 +428,20 @@ class DPS_AI_Conversations_Repository {
             return [];
         }
 
-        $sql = $wpdb->prepare(
-            "SELECT * FROM {$messages_table} WHERE conversation_id = %d ORDER BY created_at {$order}",
-            $conversation_id
-        );
+        $sql = "SELECT * FROM {$messages_table} WHERE conversation_id = %d ORDER BY created_at {$order}";
 
         if ( $limit > 0 ) {
-            $sql .= $wpdb->prepare( ' LIMIT %d', $limit );
+            $sql .= ' LIMIT %d';
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+            $messages = $wpdb->get_results(
+                $wpdb->prepare( $sql, $conversation_id, $limit )
+            );
+        } else {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+            $messages = $wpdb->get_results(
+                $wpdb->prepare( $sql, $conversation_id )
+            );
         }
-
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-        $messages = $wpdb->get_results( $sql );
 
         // Decodifica metadata JSON em cada mensagem
         foreach ( $messages as &$message ) {
@@ -511,16 +514,15 @@ class DPS_AI_Conversations_Repository {
 
         $where_clause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-        $sql = "SELECT * FROM {$table_name} {$where_clause} ORDER BY last_activity_at DESC";
+        $sql = "SELECT * FROM {$table_name} {$where_clause} ORDER BY last_activity_at DESC LIMIT %d OFFSET %d";
 
-        // Adiciona limite e offset
+        // Adiciona limite e offset aos args de prepare
         $prepare_args[] = absint( $args['limit'] );
         $prepare_args[] = absint( $args['offset'] );
-        $sql .= ' LIMIT %d OFFSET %d';
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
         $conversations = $wpdb->get_results(
-            empty( $prepare_args ) ? $sql : $wpdb->prepare( $sql, $prepare_args )
+            $wpdb->prepare( $sql, $prepare_args )
         );
 
         return $conversations;
@@ -570,9 +572,9 @@ class DPS_AI_Conversations_Repository {
         $sql = "SELECT COUNT(*) FROM {$table_name} {$where_clause}";
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-        $total = $wpdb->get_var(
-            empty( $prepare_args ) ? $sql : $wpdb->prepare( $sql, $prepare_args )
-        );
+        $total = empty( $prepare_args ) 
+            ? $wpdb->get_var( $sql ) 
+            : $wpdb->get_var( $wpdb->prepare( $sql, $prepare_args ) );
 
         return (int) $total;
     }

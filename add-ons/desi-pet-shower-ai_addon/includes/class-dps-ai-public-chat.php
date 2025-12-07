@@ -363,8 +363,8 @@ class DPS_AI_Public_Chat {
 
         $repo = DPS_AI_Conversations_Repository::get_instance();
 
-        // Usa hash do IP como identificador de sessão
-        $session_id = 'public_' . md5( $ip_address );
+        // Usa hash seguro do IP como identificador de sessão
+        $session_id = 'public_' . wp_hash( $ip_address, 'nonce' );
 
         // Busca conversa aberta recente (últimas 2 horas)
         $conversation = $repo->get_active_conversation_by_session( $session_id, 'web_chat' );

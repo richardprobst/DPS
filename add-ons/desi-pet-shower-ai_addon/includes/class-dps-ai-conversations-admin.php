@@ -75,11 +75,27 @@ class DPS_AI_Conversations_Admin {
             return;
         }
 
-        // Obtém filtros
+        // Obtém filtros com validação
         $channel    = isset( $_GET['channel'] ) ? sanitize_text_field( wp_unslash( $_GET['channel'] ) ) : '';
+        if ( $channel && ! in_array( $channel, DPS_AI_Conversations_Repository::VALID_CHANNELS, true ) ) {
+            $channel = '';
+        }
+
         $status     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+        if ( $status && ! in_array( $status, [ 'open', 'closed' ], true ) ) {
+            $status = '';
+        }
+
+        // Valida e sanitiza datas
         $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+        if ( $start_date && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start_date ) ) {
+            $start_date = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+        }
+
         $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : current_time( 'Y-m-d' );
+        if ( $end_date && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end_date ) ) {
+            $end_date = current_time( 'Y-m-d' );
+        }
 
         // Paginação
         $per_page = 20;
