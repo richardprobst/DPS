@@ -1876,9 +1876,9 @@ Consulte: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
 
 **Diretório**: `add-ons/desi-pet-shower-ai_addon/`
 
-**Versão**: 1.2.0
+**Versão**: 1.6.0 (schema DB: 1.5.0)
 
-**Propósito**: Assistente virtual inteligente para o Portal do Cliente e para geração de sugestões de comunicações (WhatsApp e e-mail).
+**Propósito**: Assistente virtual inteligente para o Portal do Cliente, chat público para visitantes, e geração de sugestões de comunicações (WhatsApp e e-mail). Inclui analytics e base de conhecimento.
 
 ### Funcionalidades Principais
 
@@ -1887,10 +1887,27 @@ Consulte: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
    - Respostas contextualizadas baseadas em dados reais do cliente e pets
    - Escopo restrito a assuntos relacionados a Banho e Tosa
 
-2. **Assistente de Comunicações** (v1.2.0+)
+2. **Chat Público** (v1.6.0+)
+   - Shortcode `[dps_ai_public_chat]` para visitantes não autenticados
+   - Modos inline e floating, temas light/dark
+   - FAQs customizáveis, rate limiting por IP
+   - Integração com base de conhecimento
+
+3. **Assistente de Comunicações** (v1.2.0+)
    - Gera sugestões de mensagens para WhatsApp
    - Gera sugestões de e-mail (assunto e corpo)
    - **NUNCA envia automaticamente** - apenas sugere textos para revisão humana
+
+4. **Analytics e Feedback** (v1.5.0+)
+   - Métricas de uso (perguntas, tokens, erros, tempo de resposta)
+   - Feedback positivo/negativo com comentários
+   - Dashboard administrativo de analytics
+   - Base de conhecimento (CPT `dps_ai_knowledge`)
+
+5. **Agendamento via Chat** (v1.5.0+)
+   - Integração com Agenda Add-on
+   - Sugestão de horários disponíveis
+   - Modos: request (solicita agendamento) e direct (agenda diretamente)
 
 ### Classes Principais
 
@@ -2149,7 +2166,75 @@ $message = apply_filters( 'dps_ai_comm_whatsapp_message', $message, $context );
 
 ### Tabelas de Banco de Dados
 
-Nenhuma tabela própria. Usa apenas configurações em `wp_options`.
+**Desde v1.5.0**, o AI Add-on mantém 2 tabelas customizadas para analytics e feedback:
+
+#### `wp_dps_ai_metrics`
+
+Armazena métricas agregadas de uso da IA por dia e cliente.
+
+**Estrutura:**
+```sql
+CREATE TABLE wp_dps_ai_metrics (
+    id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    date DATE NOT NULL,
+    client_id BIGINT(20) UNSIGNED DEFAULT 0,
+    questions_count INT(11) UNSIGNED DEFAULT 0,
+    tokens_input INT(11) UNSIGNED DEFAULT 0,
+    tokens_output INT(11) UNSIGNED DEFAULT 0,
+    errors_count INT(11) UNSIGNED DEFAULT 0,
+    avg_response_time FLOAT DEFAULT 0,
+    model VARCHAR(50) DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY date_client (date, client_id),
+    KEY date_idx (date),
+    KEY client_idx (client_id)
+);
+```
+
+**Propósito:**
+- Rastrear uso diário da IA (quantidade de perguntas, tokens consumidos)
+- Monitorar performance (tempo médio de resposta, taxa de erros)
+- Análise de custos e utilização por cliente
+- Dados para dashboard de analytics
+
+#### `wp_dps_ai_feedback`
+
+Armazena feedback individual (👍/👎) de cada resposta da IA.
+
+**Estrutura:**
+```sql
+CREATE TABLE wp_dps_ai_feedback (
+    id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    client_id BIGINT(20) UNSIGNED DEFAULT 0,
+    question TEXT,
+    answer TEXT,
+    feedback ENUM('positive', 'negative') NOT NULL,
+    comment TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY client_idx (client_id),
+    KEY feedback_idx (feedback),
+    KEY created_at_idx (created_at)
+);
+```
+
+**Propósito:**
+- Coletar feedback de usuários sobre qualidade das respostas
+- Identificar padrões de respostas problemáticas
+- Melhorar prompts e treinamento da IA
+- Análise de satisfação
+
+**Versionamento de Schema:**
+- Versão do schema rastreada em opção `dps_ai_db_version`
+- Upgrade automático via `dps_ai_maybe_upgrade_database()` em `plugins_loaded`
+- Tabelas criadas via `dbDelta()` se versão instalada < 1.5.0
+- Idempotente: seguro executar múltiplas vezes
+
+**Configurações em `wp_options`:**
+- `dps_ai_settings` - Configurações gerais (API key, modelo, temperatura, etc.)
+- `dps_ai_db_version` - Versão do schema (desde v1.6.1)
 
 ### Limitações Conhecidas
 
