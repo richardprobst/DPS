@@ -1619,7 +1619,7 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Observações do Atendimento', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Observações do Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Endereço', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Mapa/GPS', 'dps-agenda-addon' ) . '</th>';
+                echo '<th>' . esc_html__( 'Mapa', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
                     echo $this->render_appointment_row_tab3( $appt, $column_labels );

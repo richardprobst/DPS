@@ -1146,23 +1146,22 @@ trait DPS_Agenda_Renderer {
         echo ! empty( $client_address ) ? esc_html( $client_address ) : '–';
         echo '</td>';
         
-        // Mapa + GPS
-        echo '<td data-label="' . esc_attr__( 'Mapa/GPS', 'dps-agenda-addon' ) . '">';
+        // Mapa (apenas rota quando TaxiDog solicitado)
+        echo '<td data-label="' . esc_attr__( 'Mapa', 'dps-agenda-addon' ) . '">';
         
-        $map_link = DPS_Agenda_GPS_Helper::render_map_link( $appt->ID );
-        if ( ! empty( $map_link ) ) {
-            echo $map_link;
-        }
+        // Verifica se TaxiDog foi solicitado
+        $taxidog_status = DPS_Agenda_TaxiDog_Helper::get_taxidog_status( $appt->ID );
+        $has_taxidog = ( $taxidog_status !== 'none' );
         
-        $route_button = DPS_Agenda_GPS_Helper::render_route_button( $appt->ID );
-        if ( ! empty( $route_button ) ) {
-            if ( ! empty( $map_link ) ) {
-                echo '<br>';
+        if ( $has_taxidog ) {
+            // Mostra apenas o botão de rota quando TaxiDog foi solicitado
+            $route_button = DPS_Agenda_GPS_Helper::render_route_button( $appt->ID );
+            if ( ! empty( $route_button ) ) {
+                echo $route_button;
+            } else {
+                echo '–';
             }
-            echo $route_button;
-        }
-        
-        if ( empty( $map_link ) && empty( $route_button ) ) {
+        } else {
             echo '–';
         }
         
