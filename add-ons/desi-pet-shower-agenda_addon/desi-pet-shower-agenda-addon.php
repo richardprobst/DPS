@@ -178,6 +178,9 @@ class DPS_Agenda_Addon {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // AJAX para atualizar status de agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_update_status', [ $this, 'update_status_ajax' ] );
+        
+        // UX-1: AJAX para ações rápidas de status
+        add_action( 'wp_ajax_dps_agenda_quick_action', [ $this, 'quick_action_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -360,6 +363,8 @@ class DPS_Agenda_Addon {
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
                 'nonce_services'=> wp_create_nonce( 'dps_get_services_details' ),
                 'nonce_export'  => wp_create_nonce( 'dps_agenda_export_csv' ),
+                // UX-1: Nonce para ações rápidas
+                'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -951,263 +956,8 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
-                    $date  = get_post_meta( $appt->ID, 'appointment_date', true );
-                    $time  = get_post_meta( $appt->ID, 'appointment_time', true );
-                    $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                    $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    $client_post = $client_id ? get_post( $client_id ) : null;
-                    $pet_post    = $pet_id ? get_post( $pet_id ) : null;
-                    $status = get_post_meta( $appt->ID, 'appointment_status', true );
-                    if ( ! $status ) { $status = 'pendente'; }
-                    $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
-                    if ( $appt_version < 1 ) {
-                        $appt_version = 1;
-                        update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
-                    }
-                    // Cada linha recebe classes de status e um data attribute para permitir manipulação via JS.
-                    echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="status-' . esc_attr( $status ) . '">';
-                    // FASE 5: Checkbox para seleção em lote
-                    echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
-                    // Mostra a data no formato dia-mês-ano
-                    echo '<td data-label="' . esc_attr( $column_labels['date'] ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
-                    echo '<td data-label="' . esc_attr( $column_labels['time'] ) . '">' . esc_html( $time ) . '</td>';
-                    // Nome do pet e cliente com flag de agressividade melhorada (FASE 2)
-                    $pet_name    = $pet_post ? $pet_post->post_title : '';
-                    $client_name = $client_post ? $client_post->post_title : '';
-                    $aggr_flag   = '';
-                    if ( $pet_post ) {
-                        $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
-                        if ( $aggr ) {
-                            // Flag melhorada com emoji e tooltip
-                            $aggr_flag = ' <span class="dps-aggressive-flag" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️</span>';
-                        }
-                    }
-                    echo '<td data-label="' . esc_attr( $column_labels['pet'] ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
-                    // Serviços e assinatura
-                    echo '<td data-label="' . esc_attr( $column_labels['service'] ) . '">';
-                    $sub_id_meta = get_post_meta( $appt->ID, 'subscription_id', true );
-                    if ( $sub_id_meta ) {
-                        echo '<span class="dps-subscription-flag" style="font-weight:bold; color:#0073aa;">' . esc_html__( 'Assinatura', 'dps-agenda-addon' ) . '</span> ';
-                    }
-                    $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-                    if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                        // Link com ícone para abrir modal de serviços (FASE 2)
-                        echo '<a href="#" class="dps-services-link" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver detalhes dos serviços', 'dps-agenda-addon' ) . '">';
-                        echo esc_html__( 'Ver serviços', 'dps-agenda-addon' ) . ' ↗';
-                        echo '</a>';
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // Status (editable if admin)
-                    echo '<td data-label="' . esc_attr( $column_labels['status'] ) . '">';
-                    // SEGURANÇA: Apenas usuários autenticados com capability manage_options podem editar
-                    // NUNCA confie em cookies para controle de acesso - são facilmente manipuláveis
-                    $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
-                    // Define lista de status padrão
-                    $statuses = [
-                        'pendente'   => __( 'Pendente', 'dps-agenda-addon' ),
-                        'finalizado' => __( 'Finalizado', 'dps-agenda-addon' ),
-                        'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
-                        'cancelado'  => __( 'Cancelado', 'dps-agenda-addon' ),
-                    ];
-                    // Para agendamentos de assinatura, não há necessidade de usar o status "finalizado e pago"
-                    $is_subscription = ! empty( $sub_id_meta );
-                    if ( $is_subscription ) {
-                        unset( $statuses['finalizado_pago'] );
-                        // Se o status atual for finalizado_pago, normaliza para finalizado
-                        if ( $status === 'finalizado_pago' ) {
-                            $status = 'finalizado';
-                            update_post_meta( $appt->ID, 'appointment_status', $status );
-                        }
-                    }
-                    if ( $can_edit ) {
-                        // FASE 1: Adicionado aria-label para acessibilidade
-                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '" aria-label="' . esc_attr__( 'Alterar status do agendamento', 'dps-agenda-addon' ) . '">';
-                        foreach ( $statuses as $value => $label ) {
-                            echo '<option value="' . esc_attr( $value ) . '"' . selected( $status, $value, false ) . '>' . esc_html( $label ) . '</option>';
-                        }
-                        echo '</select>';
-                    } else {
-                        echo esc_html( $statuses[ $status ] ?? $status );
-                    }
-                    echo '</td>';
-                    // Mapa
-                    echo '<td data-label="' . esc_attr( $column_labels['map'] ) . '">';
-                    $map_link = '';
-                    if ( $client_post ) {
-                        // Tenta usar o endereço em texto (rua/número) para o link do mapa, se existir.
-                        $address = get_post_meta( $client_post->ID, 'client_address', true );
-                        if ( ! empty( $address ) ) {
-                            $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . urlencode( $address );
-                            $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-                        } else {
-                            // Caso não exista endereço, utiliza as coordenadas se disponíveis
-                            $client_lat = get_post_meta( $client_post->ID, 'client_lat', true );
-                            $client_lng = get_post_meta( $client_post->ID, 'client_lng', true );
-                            if ( ! empty( $client_lat ) && ! empty( $client_lng ) ) {
-                                $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . $client_lat . ',' . $client_lng;
-                                $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-                            }
-                        }
-                    }
-                    // Identifica se há solicitação de TaxiDog
-                    $taxi_req = get_post_meta( $appt->ID, 'appointment_taxidog', true );
-                    if ( $map_link ) {
-                        if ( $taxi_req === '1' ) {
-                            echo $map_link . ' <span style="color:#0073aa; font-style:italic;">(' . esc_html__( 'TaxiDog', 'dps-agenda-addon' ) . ')</span>';
-                        } else {
-                            echo $map_link . ' <span style="color:#6c757d; font-style:italic;">(' . esc_html__( 'Cliente', 'dps-agenda-addon' ) . ')</span>';
-                        }
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // Confirmação via WhatsApp
-                    echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ) . '">';
-                    $confirmation_html = '-';
-                    if ( $status === 'pendente' && $client_post ) {
-                        $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
-                        $whatsapp  = DPS_Phone_Helper::format_for_whatsapp( $raw_phone );
-                        if ( $whatsapp ) {
-                            $client_name = $client_post->post_title;
-                            $pet_names   = [];
-                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
-                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
-                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
-                                    $pet_names = $group_data['pet_names'];
-                                }
-                            }
-                            if ( empty( $pet_names ) ) {
-                                $pet_names[] = $pet_name ? $pet_name : __( 'Pet', 'dps-agenda-addon' );
-                            }
-                            $services_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-                            $services_txt = '';
-                            if ( is_array( $services_ids ) && ! empty( $services_ids ) ) {
-                                $service_names = [];
-                                foreach ( $services_ids as $srv_id ) {
-                                    $srv_post = get_post( $srv_id );
-                                    if ( $srv_post ) {
-                                        $service_names[] = $srv_post->post_title;
-                                    }
-                                }
-                                if ( $service_names ) {
-                                    $services_txt = ' (' . implode( ', ', $service_names ) . ')';
-                                }
-                            }
-                            $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
-                            $message = sprintf(
-                                'Olá %s, tudo bem? Poderia confirmar o atendimento do(s) pet(s) %s agendado para %s às %s%s? Caso precise reagendar é só responder esta mensagem. Obrigado!',
-                                $client_name,
-                                implode( ', ', $pet_names ),
-                                $date_fmt,
-                                $time,
-                                $services_txt
-                            );
-                            $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
-                            // Link de confirmação com ícone e tooltip usando helper centralizado
-                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $whatsapp, $message );
-                            } else {
-                                // Fallback
-                                $wa_url = 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message );
-                            }
-                            $confirmation_html = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
-                        }
-                    }
-                    echo $confirmation_html;
-                    echo '</td>';
-                    // Cobrança via WhatsApp
-                    echo '<td data-label="' . esc_attr( $column_labels['charge'] ) . '">';
-                    // Mostra link de cobrança apenas para atendimentos finalizados (não assinaturas)
-                    $sub_meta = get_post_meta( $appt->ID, 'subscription_id', true );
-                    if ( $status === 'finalizado' && empty( $sub_meta ) ) {
-                        // Verifica se houve erro ao gerar link de pagamento
-                        $payment_link_status = get_post_meta( $appt->ID, '_dps_payment_link_status', true );
-                        
-                        if ( $payment_link_status === 'error' ) {
-                            // Exibe aviso de erro com tooltip
-                            echo '<span style="color: #ef4444; font-size: 14px;" title="' . esc_attr__( 'Houve erro ao gerar o link de pagamento. Tente novamente ou verifique o log.', 'dps-agenda-addon' ) . '">⚠️ ' . esc_html__( 'Erro ao gerar link', 'dps-agenda-addon' ) . '</span>';
-                            
-                            // Mostra detalhes do erro se disponíveis (somente para admins)
-                            if ( current_user_can( 'manage_options' ) ) {
-                                $last_error = get_post_meta( $appt->ID, '_dps_payment_last_error', true );
-                                if ( $last_error && is_array( $last_error ) ) {
-                                    $error_msg = isset( $last_error['message'] ) ? $last_error['message'] : __( 'Erro desconhecido', 'dps-agenda-addon' );
-                                    $error_time = isset( $last_error['timestamp'] ) ? $last_error['timestamp'] : '';
-                                    echo '<br><small style="color: #6b7280;">' . esc_html( $error_msg );
-                                    if ( $error_time ) {
-                                        echo '<br>' . esc_html( sprintf( __( 'Em: %s', 'dps-agenda-addon' ), $error_time ) );
-                                    }
-                                    echo '</small>';
-                                }
-                            }
-                        } else {
-                            // Comportamento normal: exibe links de cobrança
-                            $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
-                            $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
-                            $digits       = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
-                            if ( $digits && $total_val > 0 ) {
-                                $client_name = $client_post ? $client_post->post_title : '';
-                                $pet_names   = [];
-                                if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
-                                    $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
-                                    if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
-                                        $pet_names = $group_data['pet_names'];
-                                    }
-                                }
-                                if ( empty( $pet_names ) ) {
-                                    $pet_names[] = $pet_post ? $pet_post->post_title : '';
-                                }
-                                $valor_fmt    = number_format_i18n( $total_val, 2 );
-                                $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
-                                $default_link = 'https://link.mercadopago.com.br/desipetshower';
-                                $link_to_use  = $payment_link ? $payment_link : $default_link;
-                                $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
-                                $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
-                                $links        = [];
-                                // Link de cobrança com ícone e tooltip usando helper centralizado
-                                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                    $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
-                                } else {
-                                    // Fallback
-                                    $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
-                                }
-                                $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
-                                if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
-                                    $group_total = number_format_i18n( $group_data['total'], 2 );
-                                    $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
-                                    $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
-                                    $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
-                                    // Link de cobrança conjunta com ícone usando helper centralizado
-                                    if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                        $wa_url_group = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $group_msg );
-                                    } else {
-                                        // Fallback
-                                        $wa_url_group = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg );
-                                    }
-                                    $links[]     = '<a href="' . esc_url( $wa_url_group ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
-                                }
-                                echo implode( '<br>', $links );
-                            } else {
-                                echo '-';
-                            }
-                        }
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // FASE 5: Coluna de ações rápidas (reagendar, histórico)
-                    echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
-                    // Botão de reagendamento rápido
-                    echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
-                    // Indicador de histórico
-                    $history = get_post_meta( $appt->ID, '_dps_appointment_history', true );
-                    if ( is_array( $history ) && ! empty( $history ) ) {
-                        echo ' <span class="dps-history-indicator" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver histórico', 'dps-agenda-addon' ) . '">📜 ' . count( $history ) . '</span>';
-                    }
-                    echo '</td>';
-                    echo '</tr>';
+                    // UX-2: Usa função reutilizável para renderizar linha
+                    echo $this->render_appointment_row( $appt, $column_labels );
                 }
                 echo '</tbody></table>';
                 echo '</div>';
@@ -1663,6 +1413,125 @@ class DPS_Agenda_Addon {
                 'agenda'
             );
         }
+    }
+
+    /**
+     * UX-1: AJAX handler para ações rápidas de status.
+     * Permite mudança rápida de status em 1 clique sem modais.
+     * 
+     * Ações suportadas:
+     * - finish: muda para 'finalizado'
+     * - finish_and_paid: muda para 'finalizado_pago'
+     * - cancel: muda para 'cancelado'
+     * - mark_paid: muda de 'finalizado' para 'finalizado_pago'
+     *
+     * @since 1.1.0
+     */
+    public function quick_action_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_quick_action' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        $action  = isset( $_POST['action_type'] ) ? sanitize_text_field( $_POST['action_type'] ) : '';
+        
+        if ( ! $appt_id || ! $action ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Mapeia ação para status
+        $status_map = [
+            'finish'          => 'finalizado',
+            'finish_and_paid' => 'finalizado_pago',
+            'cancel'          => 'cancelado',
+            'mark_paid'       => 'finalizado_pago',
+        ];
+        
+        if ( ! isset( $status_map[ $action ] ) ) {
+            wp_send_json_error( [ 'message' => __( 'Ação inválida.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $new_status = $status_map[ $action ];
+        $old_status = get_post_meta( $appt_id, 'appointment_status', true );
+        if ( ! $old_status ) {
+            $old_status = 'pendente';
+        }
+        
+        // Validações de negócio
+        // Não permite marcar como pago se não estiver finalizado
+        if ( $action === 'mark_paid' && $old_status !== 'finalizado' ) {
+            wp_send_json_error( [ 'message' => __( 'Apenas atendimentos finalizados podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica se é assinatura (não deve ter status finalizado_pago)
+        $is_subscription = ! empty( get_post_meta( $appt_id, 'subscription_id', true ) );
+        if ( $is_subscription && $new_status === 'finalizado_pago' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamentos de assinatura não podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Atualiza status usando mesma lógica do update_status_ajax
+        delete_post_meta( $appt_id, 'appointment_status' );
+        add_post_meta( $appt_id, 'appointment_status', $new_status, true );
+        
+        // Incrementa versão
+        $current_version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
+        if ( $current_version < 1 ) {
+            $current_version = 1;
+        }
+        $new_version = $current_version + 1;
+        update_post_meta( $appt_id, '_dps_appointment_version', $new_version );
+        
+        // Log de auditoria
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Ação rápida "%s" (status %s → %s) por usuário #%d',
+                    $appt_id,
+                    $action,
+                    $old_status,
+                    $new_status,
+                    get_current_user_id()
+                ),
+                [
+                    'appointment_id' => $appt_id,
+                    'action'         => $action,
+                    'old_status'     => $old_status,
+                    'new_status'     => $new_status,
+                    'user_id'        => get_current_user_id(),
+                    'version'        => $new_version,
+                ],
+                'agenda'
+            );
+        }
+        
+        // Aciona hook para sincronização com outros add-ons
+        do_action( 'dps_base_after_save_appointment', $appt_id, 'simple' );
+        
+        // UX-2: Renderiza HTML da linha atualizada
+        $updated_post = get_post( $appt_id );
+        $column_labels = $this->get_column_labels();
+        $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+        
+        wp_send_json_success( [
+            'message'        => __( 'Status atualizado com sucesso!', 'dps-agenda-addon' ),
+            'row_html'       => $row_html,
+            'appointment_id' => $appt_id,
+            'new_status'     => $new_status,
+            'version'        => $new_version,
+        ] );
     }
 
     /**

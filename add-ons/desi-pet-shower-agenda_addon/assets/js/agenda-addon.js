@@ -112,6 +112,72 @@
         }
       });
     });
+    
+    // UX-1: Evento para botões de ação rápida de status
+    $(document).on('click', '.dps-quick-action-btn', function(e){
+      e.preventDefault();
+      var btn = $(this);
+      var apptId = btn.data('appt-id');
+      var actionType = btn.data('action');
+      var row = $('tr[data-appt-id="' + apptId + '"]');
+      
+      if ( ! apptId || ! actionType ) {
+        return;
+      }
+      
+      // Desabilita todos os botões de ação da linha
+      row.find('.dps-quick-action-btn').prop('disabled', true).addClass('is-loading');
+      
+      var request = $.post(DPS_AG_Addon.ajax, {
+        action: 'dps_agenda_quick_action',
+        appt_id: apptId,
+        action_type: actionType,
+        nonce: DPS_AG_Addon.nonce_quick_action
+      });
+      
+      request.done(function(resp){
+        if ( resp && resp.success ) {
+          // UX-2: Substitui a linha inteira com o HTML atualizado
+          if ( resp.data && resp.data.row_html ) {
+            var newRow = $(resp.data.row_html);
+            row.replaceWith(newRow);
+            
+            // Anima a nova linha para feedback visual
+            newRow.addClass('dps-row-updated');
+            setTimeout(function(){
+              newRow.removeClass('dps-row-updated');
+            }, 1500);
+          } else {
+            // Fallback: atualiza apenas a classe de status
+            if ( resp.data && resp.data.new_status ) {
+              updateRowStatus(apptId, resp.data.new_status);
+            }
+            // Remove estado de loading
+            row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
+          }
+        } else {
+          handleQuickActionError(resp, row);
+        }
+      }).fail(function(){
+        handleQuickActionError(null, row);
+      });
+      
+      function handleQuickActionError(response, row){
+        var message = (response && response.data && response.data.message) 
+          ? response.data.message 
+          : 'Erro ao executar ação. Tente novamente.';
+        
+        alert(message);
+        
+        // Remove estado de loading
+        row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
+        
+        // Fallback: recarrega a página em caso de erro para garantir consistência
+        setTimeout(function(){
+          location.reload();
+        }, 1000);
+      }
+    });
   });
 
   /**

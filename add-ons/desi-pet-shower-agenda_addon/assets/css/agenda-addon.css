@@ -1479,3 +1479,119 @@
         padding: 0.75rem;
     }
 }
+
+/* === UX-1: Botões de Ação Rápida === */
+.dps-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.dps-quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.375rem;
+    background: var(--dps-surface);
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-quick-action-btn:hover:not(:disabled) {
+    background: var(--dps-background);
+    border-color: #94a3b8;
+}
+
+.dps-quick-action-btn:disabled,
+.dps-quick-action-btn.is-loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Cores específicas para cada tipo de ação */
+.dps-quick-finish {
+    border-color: #10b981;
+    color: #059669;
+}
+
+.dps-quick-finish:hover:not(:disabled) {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+
+.dps-quick-paid {
+    border-color: #0ea5e9;
+    color: #0284c7;
+}
+
+.dps-quick-paid:hover:not(:disabled) {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+}
+
+.dps-quick-cancel {
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+.dps-quick-cancel:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* === UX-3: Indicador de Atendimentos Atrasados === */
+tr.is-late {
+    background: #fef3c7 !important;
+    border-left: 4px solid #f59e0b;
+}
+
+tr.is-late td:first-child {
+    padding-left: calc(1rem - 4px);
+}
+
+/* Animação sutil para chamar atenção (opcional) */
+@keyframes pulse-late {
+    0%, 100% {
+        background-color: #fef3c7;
+    }
+    50% {
+        background-color: #fde68a;
+    }
+}
+
+tr.is-late.dps-late-critical {
+    animation: pulse-late 2s ease-in-out infinite;
+}
+
+/* === UX-2: Feedback Visual de Atualização de Linha === */
+@keyframes row-updated {
+    0% {
+        background-color: #d1fae5;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+tr.dps-row-updated {
+    animation: row-updated 1.5s ease-out;
+}
+
+/* === Responsividade para Ações Rápidas === */
+@media (max-width: 768px) {
+    .dps-quick-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .dps-quick-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
