@@ -82,6 +82,14 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **AGENDA Add-on (v1.4.0)**: Sistema de 3 abas para reorganização da lista de agendamentos
+  - Aba 1 "Visão Rápida": Visualização enxuta com Horário, Pet, Tutor, Status, Confirmação (badge), TaxiDog
+  - Aba 2 "Operação": Visualização operacional completa com todas as ações (status, confirmação com botões, pagamento, ações rápidas)
+  - Aba 3 "Detalhes": Foco em informações complementares (observações do atendimento, observações do pet, endereço, mapa/GPS)
+  - Navegação entre abas sem recarregar página
+  - Preferência de aba salva em sessionStorage
+  - Aba "Visão Rápida" como padrão ao carregar
+  - Campos de identificação (Horário + Pet + Tutor) presentes em todas as abas
 - **Payment Add-on (v1.1.0)**: Suporte para credenciais via constantes wp-config.php
   - Nova classe `DPS_MercadoPago_Config` para gerenciar credenciais do Mercado Pago
   - Ordem de prioridade: constantes wp-config.php → options em banco de dados
@@ -101,6 +109,12 @@ Antes de criar uma nova versão oficial:
   - Não quebra UX existente - apenas adiciona feedback quando há erro
 
 #### Changed (Alterado)
+- **AGENDA Add-on (v1.4.0)**: Reorganização da interface de lista de agendamentos
+  - Interface anterior com tabela única substituída por sistema de 3 abas
+  - Botões de confirmação movidos para Aba 2 (Operação), removidos da Aba 1 (Visão Rápida)
+  - Coluna TaxiDog agora mostra "–" quando não há TaxiDog solicitado (antes mostrava botão vazio)
+  - Títulos de colunas ajustados para melhor correspondência com conteúdo
+  - Layout responsivo com tabs em coluna em telas mobile
 - **Payment Add-on (v1.1.0)**: Tratamento de erros aprimorado na integração Mercado Pago
   - Método `create_payment_preference()` agora valida HTTP status code
   - Verifica presença de campos obrigatórios na resposta (`init_point`)
