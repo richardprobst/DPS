@@ -60,6 +60,9 @@ require_once __DIR__ . '/includes/class-dps-agenda-gps-helper.php';
 // FASE 4: Carrega helper para Dashboard Operacional
 require_once __DIR__ . '/includes/class-dps-agenda-dashboard-service.php';
 
+// FASE 4: Carrega helper para Capacidade/Lotação
+require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
+
 class DPS_Agenda_Addon {
     
     // FASE 3: Usa traits para métodos auxiliares
@@ -197,6 +200,9 @@ class DPS_Agenda_Addon {
         
         // FASE 3: AJAX para atualização de status de TaxiDog
         add_action( 'wp_ajax_dps_agenda_update_taxidog', [ $this, 'update_taxidog_ajax' ] );
+        
+        // FASE 4: AJAX para salvar configuração de capacidade
+        add_action( 'wp_ajax_dps_agenda_save_capacity', [ $this, 'save_capacity_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -530,6 +536,68 @@ class DPS_Agenda_Addon {
                 </div>
             <?php endif; ?>
 
+            <!-- FASE 4: Capacidade/Lotação Heatmap -->
+            <div class="dps-dashboard-capacity-section">
+                <div class="dps-dashboard-capacity-header">
+                    <h3><?php esc_html_e( 'Capacidade / Lotação da Semana', 'dps-agenda-addon' ); ?></h3>
+                    
+                    <!-- Navegação de Semana -->
+                    <?php
+                    $week_dates = DPS_Agenda_Capacity_Helper::get_week_dates( $selected_date );
+                    $prev_week_date = date( 'Y-m-d', strtotime( $week_dates['start'] . ' -7 days' ) );
+                    $next_week_date = date( 'Y-m-d', strtotime( $week_dates['start'] . ' +7 days' ) );
+                    ?>
+                    <div class="dps-capacity-week-nav">
+                        <a href="?page=<?php echo esc_attr( $_GET['page'] ?? 'dps-agenda-dashboard' ); ?>&dashboard_date=<?php echo esc_attr( $prev_week_date ); ?>" class="button">
+                            ← <?php esc_html_e( 'Semana Anterior', 'dps-agenda-addon' ); ?>
+                        </a>
+                        <span class="dps-capacity-week-label">
+                            <?php
+                            echo esc_html(
+                                sprintf(
+                                    __( 'Semana de %s a %s', 'dps-agenda-addon' ),
+                                    date_i18n( 'd/m', strtotime( $week_dates['start'] ) ),
+                                    date_i18n( 'd/m/Y', strtotime( $week_dates['end'] ) )
+                                )
+                            );
+                            ?>
+                        </span>
+                        <a href="?page=<?php echo esc_attr( $_GET['page'] ?? 'dps-agenda-dashboard' ); ?>&dashboard_date=<?php echo esc_attr( $next_week_date ); ?>" class="button">
+                            <?php esc_html_e( 'Próxima Semana', 'dps-agenda-addon' ); ?> →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Configuração de Capacidade -->
+                <div class="dps-capacity-config">
+                    <h4><?php esc_html_e( 'Configuração de Capacidade Máxima', 'dps-agenda-addon' ); ?></h4>
+                    <?php $capacity_config = DPS_Agenda_Capacity_Helper::get_capacity_config(); ?>
+                    <form id="dps-capacity-config-form" class="dps-capacity-form">
+                        <div class="dps-capacity-inputs">
+                            <div class="dps-capacity-input-group">
+                                <label for="capacity_morning"><?php esc_html_e( 'Manhã (08:00-11:59):', 'dps-agenda-addon' ); ?></label>
+                                <input type="number" id="capacity_morning" name="morning" value="<?php echo esc_attr( $capacity_config['morning'] ); ?>" min="1" max="100">
+                                <span class="description"><?php esc_html_e( 'atendimentos', 'dps-agenda-addon' ); ?></span>
+                            </div>
+                            <div class="dps-capacity-input-group">
+                                <label for="capacity_afternoon"><?php esc_html_e( 'Tarde (12:00-17:59):', 'dps-agenda-addon' ); ?></label>
+                                <input type="number" id="capacity_afternoon" name="afternoon" value="<?php echo esc_attr( $capacity_config['afternoon'] ); ?>" min="1" max="100">
+                                <span class="description"><?php esc_html_e( 'atendimentos', 'dps-agenda-addon' ); ?></span>
+                            </div>
+                            <button type="submit" class="button button-primary">
+                                <?php esc_html_e( 'Salvar Capacidade', 'dps-agenda-addon' ); ?>
+                            </button>
+                        </div>
+                    </form>
+                    <p class="description">
+                        <?php esc_html_e( 'A capacidade é uma referência para ajudar a equipe a evitar overbooking. Não impede agendamentos automaticamente.', 'dps-agenda-addon' ); ?>
+                    </p>
+                </div>
+
+                <!-- Heatmap -->
+                <?php echo DPS_Agenda_Capacity_Helper::render_capacity_heatmap( $week_dates['start'], $week_dates['end'] ); ?>
+            </div>
+
             <!-- Link para Agenda Completa -->
             <div class="dps-dashboard-actions">
                 <?php
@@ -562,6 +630,39 @@ class DPS_Agenda_Addon {
                 
                 $('.dps-dashboard-date-input').val(dateStr);
                 $('.dps-dashboard-form').submit();
+            });
+
+            // FASE 4: Form de configuração de capacidade
+            $('#dps-capacity-config-form').on('submit', function(e){
+                e.preventDefault();
+                
+                var morning = $('#capacity_morning').val();
+                var afternoon = $('#capacity_afternoon').val();
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.text();
+                
+                submitBtn.prop('disabled', true).text('Salvando...');
+                
+                $.post(ajaxurl, {
+                    action: 'dps_agenda_save_capacity',
+                    nonce: DPS_AG_Addon.nonce_capacity,
+                    morning: morning,
+                    afternoon: afternoon
+                }, function(resp){
+                    if (resp && resp.success) {
+                        submitBtn.text('Salvo!');
+                        // Recarrega a página após 1 segundo para atualizar o heatmap
+                        setTimeout(function(){
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        alert(resp.data ? resp.data.message : 'Erro ao salvar configuração.');
+                        submitBtn.prop('disabled', false).text(originalText);
+                    }
+                }).fail(function(){
+                    alert('Erro de comunicação ao salvar configuração.');
+                    submitBtn.prop('disabled', false).text(originalText);
+                });
             });
         });
         </script>
@@ -690,6 +791,8 @@ class DPS_Agenda_Addon {
                 'nonce_confirmation' => wp_create_nonce( 'dps_agenda_confirmation' ),
                 // FASE 3: Nonce para TaxiDog
                 'nonce_taxidog'      => wp_create_nonce( 'dps_agenda_taxidog' ),
+                // FASE 4: Nonce para capacidade
+                'nonce_capacity'     => wp_create_nonce( 'dps_agenda_capacity' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -1981,6 +2084,43 @@ class DPS_Agenda_Addon {
             'appointment_id' => $appt_id,
             'taxidog_status' => $new_status,
         ] );
+    }
+
+    /**
+     * FASE 4: AJAX handler para salvar configuração de capacidade.
+     *
+     * @since 1.4.0
+     */
+    public function save_capacity_ajax() {
+        // Verifica permissão
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_capacity' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $morning = isset( $_POST['morning'] ) ? intval( $_POST['morning'] ) : 10;
+        $afternoon = isset( $_POST['afternoon'] ) ? intval( $_POST['afternoon'] ) : 10;
+
+        $config = [
+            'morning'   => max( 1, $morning ),
+            'afternoon' => max( 1, $afternoon ),
+        ];
+
+        $success = DPS_Agenda_Capacity_Helper::save_capacity_config( $config );
+
+        if ( $success ) {
+            wp_send_json_success( [
+                'message' => __( 'Configuração de capacidade salva com sucesso!', 'dps-agenda-addon' ),
+                'config'  => $config,
+            ] );
+        } else {
+            wp_send_json_error( [ 'message' => __( 'Erro ao salvar configuração.', 'dps-agenda-addon' ) ] );
+        }
     }
 
     /**
