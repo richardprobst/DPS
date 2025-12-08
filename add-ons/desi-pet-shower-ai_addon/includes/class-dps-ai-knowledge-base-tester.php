@@ -55,10 +55,13 @@ class DPS_AI_Knowledge_Base_Tester {
 
 	/**
 	 * Registra página administrativa.
+	 * 
+	 * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
+	 * Use o novo hub unificado em dps-ai-hub para acessar via aba "Testar Base".
 	 */
 	public function register_admin_page() {
 		add_submenu_page(
-			'desi-pet-shower',
+			null, // Oculto do menu, acessível apenas por URL direta
 			__( 'Teste da Base de Conhecimento', 'dps-ai' ),
 			__( 'Testar Base de Conhecimento', 'dps-ai' ),
 			'edit_posts',

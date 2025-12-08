@@ -135,6 +135,7 @@ require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-whatsapp-webhook.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-proactive-scheduler.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-insights-dashboard.php';
 require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-specialist-mode.php';
+require_once DPS_AI_ADDON_DIR . 'includes/class-dps-ai-hub.php';
 
 /**
  * Verifica e atualiza o schema do banco de dados quando necessário.
@@ -398,10 +399,14 @@ class DPS_AI_Addon {
 
     /**
      * Registra submenu admin para configurações de IA.
+     * 
+     * NOTA: A partir da v1.8.0, estes menus estão ocultos (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-ai-hub para acessar todas as funcionalidades via abas.
      */
     public function register_admin_menu() {
+        // Oculta do menu mas mantém a URL acessível para compatibilidade
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Parent null = não aparece no menu
             __( 'Assistente de IA', 'dps-ai' ),
             __( 'Assistente de IA', 'dps-ai' ),
             'manage_options',
@@ -409,9 +414,9 @@ class DPS_AI_Addon {
             [ $this, 'render_admin_page' ]
         );
 
-        // Página de Analytics
+        // Página de Analytics (oculta)
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Parent null = não aparece no menu
             __( 'Analytics de IA', 'dps-ai' ),
             __( 'Analytics de IA', 'dps-ai' ),
             'manage_options',
@@ -2582,6 +2587,11 @@ class DPS_AI_Addon {
 function dps_ai_init_addon() {
     if ( class_exists( 'DPS_AI_Addon' ) ) {
         DPS_AI_Addon::get_instance();
+        
+        // Inicializa o Hub centralizado de IA (Fase 2 - Reorganização de Menus)
+        if ( class_exists( 'DPS_AI_Hub' ) ) {
+            DPS_AI_Hub::get_instance();
+        }
     }
 }
 add_action( 'init', 'dps_ai_init_addon', 5 );

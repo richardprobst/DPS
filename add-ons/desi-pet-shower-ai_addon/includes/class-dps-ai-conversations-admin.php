@@ -49,10 +49,13 @@ class DPS_AI_Conversations_Admin {
 
     /**
      * Registra submenu admin para histórico de conversas.
+     * 
+     * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-ai-hub para acessar via aba "Conversas".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Histórico de Conversas IA', 'dps-ai' ),
             __( 'Conversas IA', 'dps-ai' ),
             'manage_options',
