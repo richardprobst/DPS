@@ -1,0 +1,460 @@
+/**
+ * Estilos do Dashboard Operacional da Agenda - DPS
+ * 
+ * Segue o padrão minimalista/clean do DPS:
+ * - Paleta enxuta de cores
+ * - Bordas simples
+ * - Foco em legibilidade
+ */
+
+/* === Wrapper do Dashboard === */
+.dps-dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* === Seletor de Data === */
+.dps-dashboard-date-selector {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.dps-dashboard-date-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.dps-dashboard-quick-date {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    color: #374151;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-dashboard-quick-date:hover {
+    background: #e5e7eb;
+    border-color: #3b82f6;
+}
+
+.dps-dashboard-date-input {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* === KPIs === */
+.dps-dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dps-dashboard-kpi-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dps-dashboard-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dps-dashboard-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-left-width: 4px;
+    border-radius: 6px;
+    padding: 16px 20px;
+    transition: all 0.15s ease;
+}
+
+.dps-dashboard-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dps-dashboard-card__title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.dps-dashboard-card__value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.dps-dashboard-card__subtitle {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* === Próximos Atendimentos === */
+.dps-dashboard-next-appointments {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 30px;
+}
+
+.dps-dashboard-next-appointments h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 16px 0;
+}
+
+.dps-dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-dashboard-table thead {
+    background: #f9fafb;
+}
+
+.dps-dashboard-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dps-dashboard-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.dps-dashboard-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* === Estado Vazio === */
+.dps-dashboard-empty {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.dps-dashboard-empty p {
+    color: #6b7280;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* === Ações === */
+.dps-dashboard-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.dps-dashboard-actions .button-large {
+    padding: 12px 32px;
+    font-size: 1rem;
+}
+
+/* === Responsividade === */
+@media (max-width: 768px) {
+    .dps-dashboard-wrapper {
+        padding: 15px;
+    }
+
+    .dps-dashboard-kpis {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .dps-dashboard-date-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-dashboard-quick-date,
+    .dps-dashboard-date-input,
+    .dps-dashboard-date-controls .button {
+        width: 100%;
+    }
+
+    .dps-dashboard-card__value {
+        font-size: 2rem;
+    }
+
+    .dps-dashboard-table {
+        font-size: 0.85rem;
+    }
+
+    .dps-dashboard-table th,
+    .dps-dashboard-table td {
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-dashboard-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .dps-dashboard-card__value {
+        font-size: 1.75rem;
+    }
+}
+
+/* === FASE 4: Capacidade / Lotação Heatmap === */
+.dps-dashboard-capacity-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 30px;
+}
+
+.dps-dashboard-capacity-header {
+    margin-bottom: 20px;
+}
+
+.dps-dashboard-capacity-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 16px 0;
+}
+
+.dps-capacity-week-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.dps-capacity-week-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    padding: 8px 16px;
+    background: #f9fafb;
+    border-radius: 4px;
+}
+
+/* Configuração de Capacidade */
+.dps-capacity-config {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.dps-capacity-config h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px 0;
+}
+
+.dps-capacity-inputs {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.dps-capacity-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-capacity-input-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-capacity-input-group input[type="number"] {
+    width: 100px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.dps-capacity-input-group .description {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Heatmap Table */
+.dps-capacity-heatmap {
+    margin-top: 20px;
+}
+
+.dps-heatmap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.dps-heatmap-table th {
+    padding: 12px 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-heatmap-table td {
+    padding: 16px 8px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.dps-heatmap-day-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-heatmap-day-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dps-heatmap-day-num {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.dps-heatmap-period-label {
+    text-align: left;
+    font-weight: 600;
+    background: #f9fafb;
+}
+
+.dps-heatmap-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-heatmap-ratio {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.dps-heatmap-percentage {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Legenda */
+.dps-heatmap-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+.dps-heatmap-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.dps-heatmap-legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Responsividade para Heatmap */
+@media (max-width: 768px) {
+    .dps-capacity-week-nav {
+        flex-direction: column;
+    }
+
+    .dps-capacity-inputs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-capacity-input-group {
+        width: 100%;
+    }
+
+    .dps-capacity-input-group input[type="number"] {
+        width: 100%;
+    }
+
+    .dps-heatmap-table {
+        font-size: 0.75rem;
+    }
+
+    .dps-heatmap-table th,
+    .dps-heatmap-table td {
+        padding: 8px 4px;
+    }
+
+    .dps-heatmap-ratio {
+        font-size: 0.9rem;
+    }
+
+    .dps-heatmap-percentage {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-heatmap-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .dps-heatmap-legend {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

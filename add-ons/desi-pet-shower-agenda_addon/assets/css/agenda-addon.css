@@ -1740,6 +1740,17 @@ tr.dps-row-updated {
     flex: 0 1 auto;
 }
 
+.dps-filter-field--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-filter-field--checkbox input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
 .dps-filter-label {
     font-size: 0.8125rem;
     font-weight: 600;
@@ -2024,4 +2035,245 @@ tr.dps-row-updated {
         width: 100%;
         justify-content: center;
     }
+}
+
+/* ========================================================
+   FASE 3: Payment Status, TaxiDog e GPS
+   ======================================================== */
+
+/* === Payment Badge Styles === */
+.dps-payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: help;
+    position: relative;
+}
+
+.dps-payment-badge--paid {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.dps-payment-badge--pending {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.dps-payment-badge--error {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.dps-payment-badge--none {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-payment-tooltip {
+    display: none;
+    position: absolute;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.dps-payment-tooltip__item {
+    margin-bottom: 0.5rem;
+}
+
+.dps-payment-tooltip__item:last-child {
+    margin-bottom: 0;
+}
+
+.dps-payment-tooltip strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #374151;
+}
+
+/* === Resend Payment Button === */
+.dps-resend-payment-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    margin-top: 4px;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-resend-payment-btn:hover:not(:disabled) {
+    background: #e5e7eb;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.dps-resend-payment-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === TaxiDog Badge Styles === */
+.dps-taxidog-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.dps-taxidog-badge--requested {
+    background: #fef3c7;
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.dps-taxidog-badge--on-way {
+    background: #dbeafe;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+.dps-taxidog-badge--on-board {
+    background: #ffedd5;
+    color: #f97316;
+    border: 1px solid #f97316;
+}
+
+.dps-taxidog-badge--completed {
+    background: #d1fae5;
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+/* === TaxiDog Action Buttons === */
+.dps-taxidog-actions {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dps-taxidog-action-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border: none;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.15s ease;
+}
+
+.dps-taxidog-action-btn:hover:not(:disabled) {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.dps-taxidog-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dps-taxidog-action-btn--danger {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.dps-taxidog-action-btn--danger:hover:not(:disabled) {
+    background: #fecaca;
+}
+
+/* === GPS Route Button === */
+.dps-route-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background: #3b82f6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    margin-top: 0.25rem;
+}
+
+.dps-route-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    color: #fff;
+}
+
+/* === Responsive Adjustments for Phase 3 === */
+@media (max-width: 768px) {
+    .dps-payment-badge,
+    .dps-taxidog-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .dps-taxidog-actions {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.25rem;
+    }
+
+    .dps-taxidog-action-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .dps-route-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .dps-payment-tooltip {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90vw;
+    }
+}
+
+/* === Animation for row updates === */
+@keyframes fadeIn {
+    from {
+        background-color: #d1fae5;
+    }
+    to {
+        background-color: transparent;
+    }
+}
+
+.dps-agenda-wrapper tr.updated {
+    animation: fadeIn 1s ease-in-out;
 }
