@@ -119,7 +119,7 @@ class DPS_Push_Addon {
         add_submenu_page(
             'desi-pet-shower',
             __( 'Notificações Push', 'dps-push-addon' ),
-            __( 'Push Notifications', 'dps-push-addon' ),
+            __( 'Notificações Push', 'dps-push-addon' ),
             'manage_options',
             'dps-push-notifications',
             [ $this, 'render_admin_page' ]

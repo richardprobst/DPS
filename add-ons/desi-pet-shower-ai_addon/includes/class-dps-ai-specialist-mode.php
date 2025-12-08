@@ -54,7 +54,7 @@ class DPS_AI_Specialist_Mode {
      */
     public function register_menu() {
         add_submenu_page(
-            'dps-gestao',
+            'desi-pet-shower',
             __( 'IA – Modo Especialista', 'dps-ai' ),
             __( 'IA – Modo Especialista', 'dps-ai' ),
             'manage_options',

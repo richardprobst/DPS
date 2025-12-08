@@ -55,7 +55,7 @@ class DPS_AI_Insights_Dashboard {
      */
     public function register_menu() {
         add_submenu_page(
-            'dps-gestao',
+            'desi-pet-shower',
             __( 'IA – Insights', 'dps-ai' ),
             __( 'IA – Insights', 'dps-ai' ),
             'manage_options',
