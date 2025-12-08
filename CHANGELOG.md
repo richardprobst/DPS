@@ -82,7 +82,44 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
-- **Client Portal (v2.4.0)**: Linha do tempo de serviços por pet (Fase 4)
+- **Payment Add-on (v1.1.0)**: Suporte para credenciais via constantes wp-config.php
+  - Nova classe `DPS_MercadoPago_Config` para gerenciar credenciais do Mercado Pago
+  - Ordem de prioridade: constantes wp-config.php → options em banco de dados
+  - Constantes suportadas: `DPS_MERCADOPAGO_ACCESS_TOKEN`, `DPS_MERCADOPAGO_WEBHOOK_SECRET`, `DPS_MERCADOPAGO_PUBLIC_KEY`
+  - Tela de configurações exibe campos readonly quando constante está definida
+  - Exibe apenas últimos 4 caracteres de tokens definidos via constante
+  - Recomendações de segurança na interface administrativa
+- **Payment Add-on (v1.1.0)**: Sistema de logging e flags de erro para cobranças
+  - Novo metadado `_dps_payment_link_status` nos agendamentos (values: success/error/not_requested)
+  - Novo metadado `_dps_payment_last_error` com detalhes do último erro (code, message, timestamp, context)
+  - Método `log_payment_error()` para logging centralizado de erros de cobrança
+  - Método `extract_appointment_id_from_reference()` para extrair ID de external_reference
+- **AGENDA Add-on (v1.0.2)**: Indicador visual de erro na geração de link de pagamento
+  - Exibe aviso "⚠️ Erro ao gerar link" quando `_dps_payment_link_status` = 'error'
+  - Tooltip com mensagem explicativa para o usuário
+  - Detalhes do erro para administradores (mensagem e timestamp)
+  - Não quebra UX existente - apenas adiciona feedback quando há erro
+
+#### Changed (Alterado)
+- **Payment Add-on (v1.1.0)**: Tratamento de erros aprimorado na integração Mercado Pago
+  - Método `create_payment_preference()` agora valida HTTP status code
+  - Verifica presença de campos obrigatórios na resposta (`init_point`)
+  - Loga erros de conexão, HTTP não-sucesso e campos faltantes
+  - Salva flag de status em agendamentos ao gerar links
+- **Payment Add-on (v1.1.0)**: Métodos atualizados para usar `DPS_MercadoPago_Config`
+  - `create_payment_preference()` usa config class em vez de `get_option()`
+  - `process_payment_notification()` usa config class
+  - `get_webhook_secret()` simplificado para usar config class
+  - `maybe_generate_payment_link()` salva flags de sucesso/erro
+  - `inject_payment_link_in_message()` salva flags de sucesso/erro
+
+#### Security (Segurança)
+- **Payment Add-on (v1.1.0)**: Tokens do Mercado Pago podem ser movidos para wp-config.php
+  - Recomendado definir `DPS_MERCADOPAGO_ACCESS_TOKEN` e `DPS_MERCADOPAGO_WEBHOOK_SECRET` em wp-config.php
+  - Evita armazenamento de credenciais sensíveis em texto plano no banco de dados
+  - Mantém compatibilidade com configuração via painel (útil para desenvolvimento)
+
+#### Client Portal (v2.4.0)**: Linha do tempo de serviços por pet (Fase 4)
   - Nova classe `DPS_Portal_Pet_History` para buscar histórico de serviços realizados
   - Método `get_pet_service_history()` retorna serviços por pet em ordem cronológica
   - Método `get_client_service_history()` agrupa serviços de todos os pets do cliente
