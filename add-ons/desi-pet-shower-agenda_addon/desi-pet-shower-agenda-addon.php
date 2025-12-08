@@ -1122,53 +1122,76 @@ class DPS_Agenda_Addon {
                     // Mostra link de cobrança apenas para atendimentos finalizados (não assinaturas)
                     $sub_meta = get_post_meta( $appt->ID, 'subscription_id', true );
                     if ( $status === 'finalizado' && empty( $sub_meta ) ) {
-                        $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
-                        $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
-                        $digits       = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
-                        if ( $digits && $total_val > 0 ) {
-                            $client_name = $client_post ? $client_post->post_title : '';
-                            $pet_names   = [];
-                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
-                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
-                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
-                                    $pet_names = $group_data['pet_names'];
+                        // Verifica se houve erro ao gerar link de pagamento
+                        $payment_link_status = get_post_meta( $appt->ID, '_dps_payment_link_status', true );
+                        
+                        if ( $payment_link_status === 'error' ) {
+                            // Exibe aviso de erro com tooltip
+                            echo '<span style="color: #ef4444; font-size: 14px;" title="' . esc_attr__( 'Houve erro ao gerar o link de pagamento. Tente novamente ou verifique o log.', 'dps-agenda-addon' ) . '">⚠️ ' . esc_html__( 'Erro ao gerar link', 'dps-agenda-addon' ) . '</span>';
+                            
+                            // Mostra detalhes do erro se disponíveis (somente para admins)
+                            if ( current_user_can( 'manage_options' ) ) {
+                                $last_error = get_post_meta( $appt->ID, '_dps_payment_last_error', true );
+                                if ( $last_error && is_array( $last_error ) ) {
+                                    $error_msg = isset( $last_error['message'] ) ? $last_error['message'] : __( 'Erro desconhecido', 'dps-agenda-addon' );
+                                    $error_time = isset( $last_error['timestamp'] ) ? $last_error['timestamp'] : '';
+                                    echo '<br><small style="color: #6b7280;">' . esc_html( $error_msg );
+                                    if ( $error_time ) {
+                                        echo '<br>' . esc_html( sprintf( __( 'Em: %s', 'dps-agenda-addon' ), $error_time ) );
+                                    }
+                                    echo '</small>';
                                 }
                             }
-                            if ( empty( $pet_names ) ) {
-                                $pet_names[] = $pet_post ? $pet_post->post_title : '';
-                            }
-                            $valor_fmt    = number_format_i18n( $total_val, 2 );
-                            $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
-                            $default_link = 'https://link.mercadopago.com.br/desipetshower';
-                            $link_to_use  = $payment_link ? $payment_link : $default_link;
-                            $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
-                            $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
-                            $links        = [];
-                            // Link de cobrança com ícone e tooltip usando helper centralizado
-                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
-                            } else {
-                                // Fallback
-                                $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
-                            }
-                            $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
-                            if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
-                                $group_total = number_format_i18n( $group_data['total'], 2 );
-                                $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
-                                $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
-                                $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
-                                // Link de cobrança conjunta com ícone usando helper centralizado
+                        } else {
+                            // Comportamento normal: exibe links de cobrança
+                            $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
+                            $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
+                            $digits       = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
+                            if ( $digits && $total_val > 0 ) {
+                                $client_name = $client_post ? $client_post->post_title : '';
+                                $pet_names   = [];
+                                if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
+                                    $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
+                                    if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
+                                        $pet_names = $group_data['pet_names'];
+                                    }
+                                }
+                                if ( empty( $pet_names ) ) {
+                                    $pet_names[] = $pet_post ? $pet_post->post_title : '';
+                                }
+                                $valor_fmt    = number_format_i18n( $total_val, 2 );
+                                $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
+                                $default_link = 'https://link.mercadopago.com.br/desipetshower';
+                                $link_to_use  = $payment_link ? $payment_link : $default_link;
+                                $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
+                                $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
+                                $links        = [];
+                                // Link de cobrança com ícone e tooltip usando helper centralizado
                                 if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                    $wa_url_group = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $group_msg );
+                                    $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
                                 } else {
                                     // Fallback
-                                    $wa_url_group = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg );
+                                    $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
                                 }
-                                $links[]     = '<a href="' . esc_url( $wa_url_group ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                                $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
+                                if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
+                                    $group_total = number_format_i18n( $group_data['total'], 2 );
+                                    $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
+                                    $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
+                                    $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
+                                    // Link de cobrança conjunta com ícone usando helper centralizado
+                                    if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                        $wa_url_group = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $group_msg );
+                                    } else {
+                                        // Fallback
+                                        $wa_url_group = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg );
+                                    }
+                                    $links[]     = '<a href="' . esc_url( $wa_url_group ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
+                                }
+                                echo implode( '<br>', $links );
+                            } else {
+                                echo '-';
                             }
-                            echo implode( '<br>', $links );
-                        } else {
-                            echo '-';
                         }
                     } else {
                         echo '-';
