@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Pagamentos Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Integração com Mercado Pago. Gere links de pagamento e envie por WhatsApp de forma prática.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-payment-addon
@@ -17,6 +17,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Carrega classe de configuração do Mercado Pago
+require_once __DIR__ . '/includes/class-dps-mercadopago-config.php';
 
 /**
  * Verifica se o plugin base DPS by PRObst está ativo.
@@ -180,11 +183,37 @@ class DPS_Payment_Addon {
 
     /**
      * Renderiza o campo de token de acesso.
+     *
+     * Se o token estiver definido via constante (wp-config.php), exibe
+     * o campo como readonly com apenas os últimos 4 caracteres visíveis.
+     *
+     * @since 1.1.0 Adicionado suporte para constantes.
      */
     public function render_access_token_field() {
-        $token = esc_attr( get_option( 'dps_mercadopago_access_token', '' ) );
-        echo '<input type="text" name="dps_mercadopago_access_token" value="' . $token . '" style="width: 400px;" />';
-        echo '<p class="description">' . __( 'Cole aqui o Access Token gerado em sua conta do Mercado Pago. Este valor é utilizado para criar links de pagamento automaticamente.', 'dps-payment-addon' ) . '</p>';
+        $is_from_constant = DPS_MercadoPago_Config::is_access_token_from_constant();
+        
+        if ( $is_from_constant ) {
+            // Token definido via constante: exibe apenas últimos 4 caracteres
+            $token = DPS_MercadoPago_Config::get_access_token();
+            $masked = DPS_MercadoPago_Config::get_masked_credential( $token );
+            
+            echo '<input type="text" value="' . esc_attr( $masked ) . '" style="width: 400px;" disabled />';
+            echo '<p class="description">';
+            echo '<strong style="color: #10b981;">' . esc_html__( '✓ Definido em wp-config.php', 'dps-payment-addon' ) . '</strong><br>';
+            echo esc_html__( 'O Access Token está configurado via constante DPS_MERCADOPAGO_ACCESS_TOKEN em wp-config.php. Esta é a forma recomendada para produção.', 'dps-payment-addon' );
+            echo '<br><small>' . esc_html__( 'Para alterar o token, edite o arquivo wp-config.php no servidor.', 'dps-payment-addon' ) . '</small>';
+            echo '</p>';
+        } else {
+            // Token vem do banco de dados: campo editável
+            $token = esc_attr( get_option( 'dps_mercadopago_access_token', '' ) );
+            echo '<input type="text" name="dps_mercadopago_access_token" value="' . $token . '" style="width: 400px;" />';
+            echo '<p class="description">';
+            echo esc_html__( 'Cole aqui o Access Token gerado em sua conta do Mercado Pago. Este valor é utilizado para criar links de pagamento automaticamente.', 'dps-payment-addon' );
+            echo '<br><br><strong>' . esc_html__( 'Recomendação de segurança:', 'dps-payment-addon' ) . '</strong> ';
+            echo esc_html__( 'Para ambientes de produção, é recomendado definir o token via constante no arquivo wp-config.php:', 'dps-payment-addon' );
+            echo '<br><code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">define( \'DPS_MERCADOPAGO_ACCESS_TOKEN\', \'seu-token-aqui\' );</code>';
+            echo '</p>';
+        }
     }
 
     /**
@@ -202,34 +231,59 @@ class DPS_Payment_Addon {
 
     /**
      * Renderiza o campo de secret do webhook para validar notificações.
+     *
+     * Se o secret estiver definido via constante (wp-config.php), exibe
+     * o campo como readonly com apenas os últimos 4 caracteres visíveis.
+     *
+     * @since 1.1.0 Adicionado suporte para constantes.
      */
     public function render_webhook_secret_field() {
-        $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
-        // URL de exemplo usando placeholder simples sem caracteres especiais
+        $is_from_constant = DPS_MercadoPago_Config::is_webhook_secret_from_constant();
         $site_url = home_url( '?secret=SUA_CHAVE_AQUI' );
         
-        echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
-        echo '<p class="description">';
-        echo esc_html__( 'Chave de segurança para validar notificações do Mercado Pago. Gere uma senha forte (mínimo 20 caracteres) e configure no painel do Mercado Pago.', 'dps-payment-addon' );
-        echo '<br><br>';
-        
-        // Instruções passo a passo inline
-        echo '<strong>' . esc_html__( 'Como configurar:', 'dps-payment-addon' ) . '</strong><br>';
-        echo '1. ' . esc_html__( 'Gere uma senha forte (exemplo: use um gerenciador de senhas)', 'dps-payment-addon' ) . '<br>';
-        echo '2. ' . esc_html__( 'Cole a senha neste campo e salve', 'dps-payment-addon' ) . '<br>';
-        echo '3. ' . esc_html__( 'No painel do Mercado Pago, configure a URL do webhook como:', 'dps-payment-addon' ) . '<br>';
-        echo '<code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">' . esc_html( $site_url ) . '</code><br>';
-        echo '<small>' . esc_html__( '(Substitua SUA_CHAVE_AQUI pela senha que você definiu acima)', 'dps-payment-addon' ) . '</small><br><br>';
-        
-        // Link para documentação completa - usando path relativo do plugin
-        $doc_url = plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ );
-        echo '<strong>';
-        echo '<a href="' . esc_url( $doc_url ) . '" target="_blank">';
-        echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
-        echo '</a></strong>';
-        echo ' ' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' );
-        
-        echo '</p>';
+        if ( $is_from_constant ) {
+            // Secret definido via constante: exibe apenas últimos 4 caracteres
+            $secret = DPS_MercadoPago_Config::get_webhook_secret();
+            $masked = DPS_MercadoPago_Config::get_masked_credential( $secret );
+            
+            echo '<input type="text" value="' . esc_attr( $masked ) . '" style="width: 400px;" disabled />';
+            echo '<p class="description">';
+            echo '<strong style="color: #10b981;">' . esc_html__( '✓ Definido em wp-config.php', 'dps-payment-addon' ) . '</strong><br>';
+            echo esc_html__( 'O Webhook Secret está configurado via constante DPS_MERCADOPAGO_WEBHOOK_SECRET em wp-config.php.', 'dps-payment-addon' );
+            echo '<br><small>' . esc_html__( 'Para alterar o secret, edite o arquivo wp-config.php no servidor.', 'dps-payment-addon' ) . '</small>';
+            echo '</p>';
+        } else {
+            // Secret vem do banco de dados: campo editável
+            $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
+            
+            echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
+            echo '<p class="description">';
+            echo esc_html__( 'Chave de segurança para validar notificações do Mercado Pago. Gere uma senha forte (mínimo 20 caracteres) e configure no painel do Mercado Pago.', 'dps-payment-addon' );
+            echo '<br><br>';
+            
+            // Instruções passo a passo inline
+            echo '<strong>' . esc_html__( 'Como configurar:', 'dps-payment-addon' ) . '</strong><br>';
+            echo '1. ' . esc_html__( 'Gere uma senha forte (exemplo: use um gerenciador de senhas)', 'dps-payment-addon' ) . '<br>';
+            echo '2. ' . esc_html__( 'Cole a senha neste campo e salve', 'dps-payment-addon' ) . '<br>';
+            echo '3. ' . esc_html__( 'No painel do Mercado Pago, configure a URL do webhook como:', 'dps-payment-addon' ) . '<br>';
+            echo '<code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">' . esc_html( $site_url ) . '</code><br>';
+            echo '<small>' . esc_html__( '(Substitua SUA_CHAVE_AQUI pela senha que você definiu acima)', 'dps-payment-addon' ) . '</small><br><br>';
+            
+            // Recomendação de segurança
+            echo '<strong>' . esc_html__( 'Recomendação de segurança:', 'dps-payment-addon' ) . '</strong> ';
+            echo esc_html__( 'Para ambientes de produção, é recomendado definir o secret via constante no arquivo wp-config.php:', 'dps-payment-addon' );
+            echo '<br><code style="background: #f0f0f0; padding: 4px 8px; display: inline-block; margin: 4px 0;">define( \'DPS_MERCADOPAGO_WEBHOOK_SECRET\', \'seu-secret-aqui\' );</code><br><br>';
+            
+            // Link para documentação completa - usando path relativo do plugin
+            $doc_url = plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ );
+            echo '<strong>';
+            echo '<a href="' . esc_url( $doc_url ) . '" target="_blank">';
+            echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
+            echo '</a></strong>';
+            echo ' ' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' );
+            
+            echo '</p>';
+        }
     }
 
     /**
@@ -274,7 +328,12 @@ class DPS_Payment_Addon {
                 $reference = 'dps_appointment_' . (int) $appt_id;
                 $link = $this->create_payment_preference( $total, $service_desc, $reference );
                 if ( $link ) {
+                    // Link gerado com sucesso
                     update_post_meta( $appt_id, 'dps_payment_link', esc_url_raw( $link ) );
+                    update_post_meta( $appt_id, '_dps_payment_link_status', 'success' );
+                } else {
+                    // Falha ao gerar link (erro já foi logado em create_payment_preference)
+                    update_post_meta( $appt_id, '_dps_payment_link_status', 'error' );
                 }
             }
         }
@@ -323,6 +382,9 @@ class DPS_Payment_Addon {
             if ( $generated ) {
                 $payment_link = $generated;
                 update_post_meta( $appt->ID, 'dps_payment_link', esc_url_raw( $payment_link ) );
+                update_post_meta( $appt->ID, '_dps_payment_link_status', 'success' );
+            } else {
+                update_post_meta( $appt->ID, '_dps_payment_link_status', 'error' );
             }
         }
         // Recupera dados do cliente e pet para personalizar a mensagem
@@ -373,11 +435,21 @@ class DPS_Payment_Addon {
      * @return string URL de checkout ou string vazia em caso de erro.
      */
     private function create_payment_preference( $amount, $description, $reference = '' ) {
-        $token = trim( get_option( 'dps_mercadopago_access_token' ) );
+        $token = DPS_MercadoPago_Config::get_access_token();
         if ( ! $token || ! $amount ) {
+            // Log de erro: token não configurado ou valor inválido
+            if ( ! $token ) {
+                $appt_id = $this->extract_appointment_id_from_reference( $reference );
+                $this->log_payment_error( 
+                    $appt_id, 
+                    'access_token_missing', 
+                    __( 'Access token do Mercado Pago não configurado', 'dps-payment-addon' ), 
+                    [ 'reference' => $reference ]
+                );
+            }
             return '';
         }
-        // Prepara payload de acordo com a API do Mercado Pago
+        // Prepara payload de acordo com a API do Mercado Pago
         $body = [
             'items' => [
                 [
@@ -404,14 +476,60 @@ class DPS_Payment_Addon {
             'timeout' => 20,
         ];
         $response = wp_remote_post( 'https://api.mercadopago.com/checkout/preferences', $args );
+        
         if ( is_wp_error( $response ) ) {
+            // Erro de conexão ou timeout
+            $appt_id = $this->extract_appointment_id_from_reference( $reference );
+            $this->log_payment_error(
+                $appt_id,
+                'api_connection_error',
+                sprintf( __( 'Erro ao conectar com API do Mercado Pago: %s', 'dps-payment-addon' ), $response->get_error_message() ),
+                [
+                    'reference' => $reference,
+                    'error_code' => $response->get_error_code(),
+                ]
+            );
             return '';
         }
+        
+        $http_code = wp_remote_retrieve_response_code( $response );
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
-        if ( isset( $data['init_point'] ) ) {
-            return esc_url_raw( $data['init_point'] );
+        
+        // Verifica se a resposta foi bem-sucedida
+        if ( $http_code < 200 || $http_code >= 300 ) {
+            // Erro HTTP (ex: 401, 403, 500)
+            $appt_id = $this->extract_appointment_id_from_reference( $reference );
+            $error_message = isset( $data['message'] ) ? $data['message'] : wp_remote_retrieve_response_message( $response );
+            $this->log_payment_error(
+                $appt_id,
+                'api_http_error',
+                sprintf( __( 'API do Mercado Pago retornou erro HTTP %d: %s', 'dps-payment-addon' ), $http_code, $error_message ),
+                [
+                    'reference' => $reference,
+                    'http_code' => $http_code,
+                    'response_body' => is_array( $data ) ? $data : wp_remote_retrieve_body( $response ),
+                ]
+            );
+            return '';
         }
-        return '';
+        
+        // Verifica se os campos obrigatórios estão presentes na resposta
+        if ( ! isset( $data['init_point'] ) || ! $data['init_point'] ) {
+            // Resposta sem init_point
+            $appt_id = $this->extract_appointment_id_from_reference( $reference );
+            $this->log_payment_error(
+                $appt_id,
+                'api_missing_init_point',
+                __( 'API do Mercado Pago não retornou init_point na resposta', 'dps-payment-addon' ),
+                [
+                    'reference' => $reference,
+                    'response_body' => $data,
+                ]
+            );
+            return '';
+        }
+        
+        return esc_url_raw( $data['init_point'] );
     }
 
     /**
@@ -515,7 +633,7 @@ class DPS_Payment_Addon {
      * @return array|false Dados do processamento ou falso em caso de falha.
      */
     private function process_payment_notification( $payment_id, $notification_id = '' ) {
-        $token = trim( get_option( 'dps_mercadopago_access_token' ) );
+        $token = DPS_MercadoPago_Config::get_access_token();
         if ( ! $token ) {
             $this->log_notification( 'Token do Mercado Pago ausente; não é possível processar notificação.', [] );
             return false;
@@ -874,12 +992,7 @@ class DPS_Payment_Addon {
      * @return string
      */
     private function get_webhook_secret() {
-        $secret = trim( (string) get_option( 'dps_mercadopago_webhook_secret', '' ) );
-        if ( $secret ) {
-            return $secret;
-        }
-        $token = trim( (string) get_option( 'dps_mercadopago_access_token', '' ) );
-        return $token;
+        return DPS_MercadoPago_Config::get_webhook_secret();
     }
 
     /**
@@ -1064,6 +1177,73 @@ class DPS_Payment_Addon {
             $message .= ' | ' . wp_json_encode( $context );
         }
         error_log( $prefix . $message );
+    }
+
+    /**
+     * Registra erro na criação de link de pagamento ou processamento de cobrança.
+     *
+     * Salva o erro como meta do agendamento e registra no error_log.
+     * Atualiza o status do link de pagamento para 'error'.
+     *
+     * @since 1.1.0
+     * @param int    $appt_id      ID do agendamento (0 se não identificado).
+     * @param string $error_code   Código do erro (ex: 'api_connection_error').
+     * @param string $error_message Mensagem descritiva do erro.
+     * @param array  $context      Dados adicionais para debug.
+     */
+    private function log_payment_error( $appt_id, $error_code, $error_message, $context = [] ) {
+        $prefix = '[DPS Pagamentos - ERRO] ';
+        
+        // Monta mensagem de log
+        $log_message = sprintf(
+            'Agendamento #%d | Código: %s | %s',
+            $appt_id,
+            $error_code,
+            $error_message
+        );
+        
+        if ( ! empty( $context ) ) {
+            $log_message .= ' | ' . wp_json_encode( $context );
+        }
+        
+        // Registra no error_log
+        error_log( $prefix . $log_message );
+        
+        // Se tivermos um ID de agendamento válido, salva meta com detalhes do erro
+        if ( $appt_id > 0 ) {
+            // Atualiza flag de status do link de pagamento
+            update_post_meta( $appt_id, '_dps_payment_link_status', 'error' );
+            
+            // Salva detalhes do último erro
+            $error_data = [
+                'code' => $error_code,
+                'message' => $error_message,
+                'timestamp' => current_time( 'Y-m-d H:i:s' ),
+                'context' => $context,
+            ];
+            update_post_meta( $appt_id, '_dps_payment_last_error', $error_data );
+        }
+    }
+
+    /**
+     * Extrai o ID do agendamento a partir de uma external_reference.
+     *
+     * @since 1.1.0
+     * @param string $reference Ex: 'dps_appointment_123' ou 'dps_subscription_456'.
+     * @return int ID do agendamento ou 0 se não for um appointment.
+     */
+    private function extract_appointment_id_from_reference( $reference ) {
+        if ( empty( $reference ) || ! is_string( $reference ) ) {
+            return 0;
+        }
+        
+        // Verifica se é appointment
+        if ( 0 === strpos( $reference, 'dps_appointment_' ) ) {
+            $parts = explode( '_', $reference );
+            return isset( $parts[2] ) ? intval( $parts[2] ) : 0;
+        }
+        
+        return 0;
     }
 }
 
