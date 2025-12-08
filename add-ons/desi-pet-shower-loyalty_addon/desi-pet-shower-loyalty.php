@@ -288,13 +288,14 @@ class DPS_Loyalty_Addon {
             [ $this, 'render_loyalty_page' ]
         );
 
-        add_submenu_page(
-            'desi-pet-shower',
-            __( 'Campanhas', 'dps-loyalty-addon' ),
-            __( 'Campanhas', 'dps-loyalty-addon' ),
-            'manage_options',
-            'edit.php?post_type=dps_campaign'
-        );
+        // REMOVIDO: Submenu redundante "Campanhas" - já acessível via aba interna
+        // add_submenu_page(
+        //     'desi-pet-shower',
+        //     __( 'Campanhas', 'dps-loyalty-addon' ),
+        //     __( 'Campanhas', 'dps-loyalty-addon' ),
+        //     'manage_options',
+        //     'edit.php?post_type=dps_campaign'
+        // );
     }
 
     public function render_loyalty_page() {

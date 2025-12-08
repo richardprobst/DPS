@@ -81,8 +81,8 @@ final class DPS_Client_Portal {
         add_action( 'manage_dps_portal_message_posts_custom_column', [ $this, 'render_message_column' ], 10, 2 );
         add_filter( 'manage_edit-dps_portal_message_sortable_columns', [ $this, 'make_message_columns_sortable' ] );
 
-        // Registra menu administrativo seguindo padrão DPS
-        add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
+        // Registra menu administrativo delegado para DPS_Portal_Admin (evita duplicação)
+        // add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 ); // REMOVIDO - já está em class-dps-portal-admin.php
         
         // Adiciona abas no front-end via shortcode [dps_configuracoes]
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
@@ -2345,46 +2345,31 @@ final class DPS_Client_Portal {
     }
 
     /**
-     * Registra menu administrativo seguindo padrão DPS
-     * Todos os add-ons devem usar prioridade 20 e registrar sob 'desi-pet-shower'
+     * REMOVIDO: Duplicado com class-dps-portal-admin.php
+     * Método mantido apenas para compatibilidade (não é mais chamado)
+     * 
+     * @deprecated Use DPS_Portal_Admin::register_admin_menu() instead
      */
     public function register_admin_menu() {
-        // Submenu: Portal do Cliente - Configurações
-        add_submenu_page(
-            'desi-pet-shower',
-            __( 'Portal do Cliente - Configurações', 'dps-client-portal' ),
-            __( 'Portal do Cliente', 'dps-client-portal' ),
-            'manage_options',
-            'dps-client-portal-settings',
-            [ $this, 'render_portal_settings_admin_page' ]
-        );
-        
-        // Submenu: Logins de Clientes
-        add_submenu_page(
-            'desi-pet-shower',
-            __( 'Portal do Cliente - Logins', 'dps-client-portal' ),
-            __( 'Logins de Clientes', 'dps-client-portal' ),
-            'manage_options',
-            'dps-client-logins',
-            [ $this, 'render_client_logins_admin_page' ]
-        );
+        // Não faz nada - menu registrado em DPS_Portal_Admin
     }
     
     /**
-     * Renderiza a página administrativa de configurações do portal
+     * REMOVIDO: Duplicado com class-dps-portal-admin.php
+     * 
+     * @deprecated Use DPS_Portal_Admin::render_portal_settings_admin_page() instead
      */
     public function render_portal_settings_admin_page() {
-        echo '<div class="wrap">';
-        $base_url = menu_page_url( 'dps-client-portal-settings', false );
-        $this->render_portal_settings_page( $base_url );
-        echo '</div>';
+        // Não faz nada - renderização delegada para DPS_Portal_Admin
     }
     
     /**
-     * Renderiza a página administrativa de logins
+     * REMOVIDO: Duplicado com class-dps-portal-admin.php
+     * 
+     * @deprecated Use DPS_Portal_Admin::render_client_logins_admin_page() instead
      */
     public function render_client_logins_admin_page() {
-        $this->render_client_logins_page( 'admin', '' );
+        // Não faz nada - renderização delegada para DPS_Portal_Admin
     }
 
     /**

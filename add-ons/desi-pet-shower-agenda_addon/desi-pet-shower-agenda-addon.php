@@ -63,6 +63,9 @@ require_once __DIR__ . '/includes/class-dps-agenda-dashboard-service.php';
 // FASE 4: Carrega helper para Capacidade/Lotação
 require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
 
+// Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
+require_once __DIR__ . '/includes/class-dps-agenda-hub.php';
+
 class DPS_Agenda_Addon {
     
     // FASE 3: Usa traits para métodos auxiliares
@@ -285,12 +288,15 @@ class DPS_Agenda_Addon {
 
     /**
      * FASE 4: Registra página de Dashboard no admin.
+     * 
+     * NOTA: A partir da v1.4.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-agenda-hub para acessar via aba "Dashboard".
      *
      * @since 1.3.0
      */
     public function register_dashboard_admin_page() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Dashboard da Agenda', 'dps-agenda-addon' ),
             __( 'Dashboard', 'dps-agenda-addon' ),
             'manage_options',
@@ -339,12 +345,15 @@ class DPS_Agenda_Addon {
 
     /**
      * FASE 5: Registra página de Configurações no admin.
+     * 
+     * NOTA: A partir da v1.4.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-agenda-hub para acessar via aba "Configurações".
      *
      * @since 1.5.0
      */
     public function register_settings_admin_page() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Configurações da Agenda', 'dps-agenda-addon' ),
             __( 'Configurações', 'dps-agenda-addon' ),
             'manage_options',
@@ -3625,6 +3634,11 @@ class DPS_Agenda_Addon {
 function dps_agenda_init_addon() {
     if ( class_exists( 'DPS_Agenda_Addon' ) ) {
         new DPS_Agenda_Addon();
+        
+        // Inicializa o Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
+        if ( class_exists( 'DPS_Agenda_Hub' ) ) {
+            DPS_Agenda_Hub::get_instance();
+        }
     }
 }
 add_action( 'init', 'dps_agenda_init_addon', 5 );

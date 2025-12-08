@@ -176,10 +176,13 @@ class DPS_WhiteLabel_Addon {
 
     /**
      * Registra o menu admin do White Label.
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-system-hub para acessar via aba "White Label".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'White Label', 'dps-whitelabel-addon' ),
             __( 'White Label', 'dps-whitelabel-addon' ),
             'manage_options',

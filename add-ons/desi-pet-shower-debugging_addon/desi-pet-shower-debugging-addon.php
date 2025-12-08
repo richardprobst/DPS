@@ -290,10 +290,13 @@ class DPS_Debugging_Addon {
 
     /**
      * Registra menu administrativo.
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-system-hub para acessar via aba "Debugging".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Debugging', 'dps-debugging-addon' ),
             __( 'Debugging', 'dps-debugging-addon' ),
             'manage_options',

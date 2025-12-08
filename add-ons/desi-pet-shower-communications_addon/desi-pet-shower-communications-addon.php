@@ -91,10 +91,13 @@ class DPS_Communications_Addon {
 
     /**
      * Registra submenu admin para comunicações.
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-integrations-hub para acessar via aba "Comunicações".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Comunicações', 'dps-communications-addon' ),
             __( 'Comunicações', 'dps-communications-addon' ),
             'manage_options',

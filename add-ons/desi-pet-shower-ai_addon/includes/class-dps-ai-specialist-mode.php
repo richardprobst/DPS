@@ -51,10 +51,13 @@ class DPS_AI_Specialist_Mode {
 
     /**
      * Registra a página de modo especialista no menu admin.
+     * 
+     * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-ai-hub para acessar via aba "Modo Especialista".
      */
     public function register_menu() {
         add_submenu_page(
-            'dps-gestao',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'IA – Modo Especialista', 'dps-ai' ),
             __( 'IA – Modo Especialista', 'dps-ai' ),
             'manage_options',

@@ -146,12 +146,15 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
         /**
          * Registra submenu admin para backup & restauração.
+         * 
+         * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+         * Use o novo hub unificado em dps-system-hub para acessar via aba "Backup".
          *
          * @since 1.0.0
          */
         public function register_admin_menu() {
             add_submenu_page(
-                'desi-pet-shower',
+                null, // Oculto do menu, acessível apenas por URL direta
                 __( 'Backup & Restauração', 'dps-backup-addon' ),
                 __( 'Backup & Restauração', 'dps-backup-addon' ),
                 'manage_options',

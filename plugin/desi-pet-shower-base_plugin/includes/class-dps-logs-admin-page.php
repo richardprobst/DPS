@@ -16,10 +16,13 @@ class DPS_Logs_Admin_Page {
 
     /**
      * Registra a página de Logs do sistema como submenu de "DPS by PRObst".
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-system-hub para acessar via aba "Logs".
      */
     public function register_page() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Logs do Sistema', 'desi-pet-shower' ),
             __( 'Logs do Sistema', 'desi-pet-shower' ),
             'manage_options',
