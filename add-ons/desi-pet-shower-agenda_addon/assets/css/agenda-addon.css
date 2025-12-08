@@ -2277,3 +2277,105 @@ tr.dps-row-updated {
 .dps-agenda-wrapper tr.updated {
     animation: fadeIn 1s ease-in-out;
 }
+
+/* === FASE 6: Sistema de Abas === */
+
+/* Wrapper das abas */
+.dps-agenda-tabs-wrapper {
+    margin-top: 1.5rem;
+}
+
+/* Navegação de abas */
+.dps-agenda-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dps-border);
+    padding-bottom: 0;
+}
+
+/* Botões de aba */
+.dps-agenda-tab-button {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dps-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    bottom: -2px;
+}
+
+.dps-agenda-tab-button:hover {
+    color: var(--dps-accent);
+    background: var(--dps-accent-soft);
+}
+
+.dps-agenda-tab-button--active {
+    color: var(--dps-accent);
+    border-bottom-color: var(--dps-accent);
+}
+
+.dps-agenda-tab-button:focus {
+    outline: 2px solid var(--dps-accent);
+    outline-offset: 2px;
+}
+
+/* Conteúdo das abas */
+.dps-tab-content {
+    display: none;
+}
+
+.dps-tab-content--active {
+    display: block;
+}
+
+/* Ajustes responsivos para abas */
+@media (max-width: 768px) {
+    .dps-agenda-tabs-nav {
+        flex-direction: column;
+        border-bottom: none;
+        gap: 0.25rem;
+    }
+    
+    .dps-agenda-tab-button {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        padding: 0.6rem 1rem;
+        text-align: left;
+        bottom: 0;
+    }
+    
+    .dps-agenda-tab-button--active {
+        border-left-color: var(--dps-accent);
+        background: var(--dps-accent-soft);
+    }
+}
+
+/* Customizações específicas por tabela de aba */
+.dps-table--tab1,
+.dps-table--tab2,
+.dps-table--tab3 {
+    /* Estilos herdados da classe base .dps-table */
+}
+
+/* Aba 1: Visão Rápida - layout mais compacto */
+.dps-table--tab1 th,
+.dps-table--tab1 td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Aba 3: Detalhes - permite mais espaço para texto */
+.dps-table--tab3 td {
+    max-width: none;
+    white-space: normal;
+}
+
+.dps-table--tab3 td[data-label*="Observ"],
+.dps-table--tab3 td[data-label*="Endereço"] {
+    min-width: 200px;
+}

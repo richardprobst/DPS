@@ -672,4 +672,43 @@
     });
   });
 
+  // FASE 6: Sistema de navegação entre abas
+  $(document).on('click', '.dps-agenda-tab-button', function(e){
+    e.preventDefault();
+    
+    var clickedButton = $(this);
+    var targetTab = clickedButton.data('tab');
+    
+    // Atualiza estado dos botões
+    $('.dps-agenda-tab-button').removeClass('dps-agenda-tab-button--active').attr('aria-selected', 'false');
+    clickedButton.addClass('dps-agenda-tab-button--active').attr('aria-selected', 'true');
+    
+    // Atualiza visibilidade dos conteúdos
+    $('.dps-tab-content').removeClass('dps-tab-content--active');
+    $('#dps-tab-content-' + targetTab).addClass('dps-tab-content--active');
+    
+    // Armazena preferência do usuário em sessionStorage
+    try {
+      sessionStorage.setItem('dps_agenda_current_tab', targetTab);
+    } catch(e) {
+      // Ignora erros de sessionStorage (modo privado, etc)
+    }
+  });
+  
+  // Restaura última aba visitada ao carregar página
+  $(document).ready(function(){
+    try {
+      var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
+      if (lastTab) {
+        var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
+        if (button.length) {
+          button.trigger('click');
+        }
+      }
+    } catch(e) {
+      // Ignora erros
+    }
+  });
+
+})(jQuery);
 })(jQuery);
