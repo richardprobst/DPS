@@ -1,0 +1,588 @@
+{
+  "meta": {
+    "generated_date": "2025-12-08",
+    "analysis_version": "1.0",
+    "total_menus": 1,
+    "total_submenus": 21,
+    "total_cpts_visible": 5
+  },
+  "main_menu": {
+    "page_title": "DPS by PRObst",
+    "menu_title": "DPS by PRObst",
+    "slug": "desi-pet-shower",
+    "parent_slug": null,
+    "capability": "manage_options",
+    "icon": "dashicons-pets",
+    "position": 56,
+    "file": "plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php",
+    "class": "DPS_Base_Plugin",
+    "method": "register_admin_menu",
+    "line": 167
+  },
+  "submenus": [
+    {
+      "addon": "Base",
+      "page_title": "Logs do Sistema",
+      "menu_title": "Logs do Sistema",
+      "slug": "dps-logs",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php",
+      "class": "DPS_Logs_Admin_Page",
+      "method": "register_page",
+      "line": 20,
+      "hook_priority": 20,
+      "issues": []
+    },
+    {
+      "addon": "Agenda",
+      "page_title": "Dashboard da Agenda",
+      "menu_title": "Dashboard",
+      "slug": "dps-agenda-dashboard",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php",
+      "class": "DPS_Agenda_Addon",
+      "method": "register_dashboard_admin_page",
+      "line": 291,
+      "issues": []
+    },
+    {
+      "addon": "Agenda",
+      "page_title": "Configurações da Agenda",
+      "menu_title": "Configurações",
+      "slug": "dps-agenda-settings",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php",
+      "class": "DPS_Agenda_Addon",
+      "method": "register_settings_admin_page",
+      "line": 345,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "Assistente de IA",
+      "menu_title": "Assistente de IA",
+      "slug": "dps-ai-settings",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php",
+      "class": "DPS_AI_Addon",
+      "method": "register_admin_menu",
+      "line": 402,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "Analytics de IA",
+      "menu_title": "Analytics de IA",
+      "slug": "dps-ai-analytics",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php",
+      "class": "DPS_AI_Addon",
+      "method": "register_admin_menu",
+      "line": 412,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "Histórico de Conversas IA",
+      "menu_title": "Conversas IA",
+      "slug": "dps-ai-conversations",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-conversations-admin.php",
+      "class": "DPS_AI_Conversations_Admin",
+      "method": "register_admin_menu",
+      "line": 53,
+      "hook_priority": 25,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "Gerenciar Base de Conhecimento",
+      "menu_title": "Base de Conhecimento",
+      "slug": "dps-ai-knowledge-base",
+      "parent_slug": "desi-pet-shower",
+      "capability": "edit_posts",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-admin.php",
+      "class": "DPS_AI_Knowledge_Base_Admin",
+      "method": "register_admin_page",
+      "line": 57,
+      "hook_priority": 25,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "Teste da Base de Conhecimento",
+      "menu_title": "Testar Base de Conhecimento",
+      "slug": "dps-ai-kb-tester",
+      "parent_slug": "desi-pet-shower",
+      "capability": "edit_posts",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-tester.php",
+      "class": "DPS_AI_Knowledge_Base_Tester",
+      "method": "register_admin_page",
+      "line": 59,
+      "hook_priority": 25,
+      "issues": []
+    },
+    {
+      "addon": "IA",
+      "page_title": "IA – Modo Especialista",
+      "menu_title": "IA – Modo Especialista",
+      "slug": "dps-ai-specialist",
+      "parent_slug": "dps-gestao",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-specialist-mode.php",
+      "class": "DPS_AI_Specialist_Mode",
+      "method": "register_menu",
+      "line": 55,
+      "hook_priority": 21,
+      "issues": [
+        {
+          "type": "orphan_menu",
+          "severity": "high",
+          "description": "Parent menu 'dps-gestao' does not exist. This menu will not appear in admin."
+        }
+      ]
+    },
+    {
+      "addon": "IA",
+      "page_title": "IA – Insights",
+      "menu_title": "IA – Insights",
+      "slug": "dps-ai-insights",
+      "parent_slug": "dps-gestao",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-insights-dashboard.php",
+      "class": "DPS_AI_Insights_Dashboard",
+      "method": "register_menu",
+      "line": 56,
+      "hook_priority": 20,
+      "issues": [
+        {
+          "type": "orphan_menu",
+          "severity": "high",
+          "description": "Parent menu 'dps-gestao' does not exist. This menu will not appear in admin."
+        }
+      ]
+    },
+    {
+      "addon": "Cliente Portal",
+      "page_title": "Portal do Cliente - Configurações",
+      "menu_title": "Portal do Cliente",
+      "slug": "dps-client-portal-settings",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php",
+      "class": "DPS_Portal_Admin",
+      "method": "register_admin_menu",
+      "line": 111,
+      "issues": [
+        {
+          "type": "duplicate_registration",
+          "severity": "medium",
+          "description": "This menu is also registered in includes/class-dps-client-portal.php line 2352"
+        }
+      ]
+    },
+    {
+      "addon": "Cliente Portal",
+      "page_title": "Portal do Cliente - Logins",
+      "menu_title": "Logins de Clientes",
+      "slug": "dps-client-logins",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php",
+      "class": "DPS_Portal_Admin",
+      "method": "register_admin_menu",
+      "line": 121,
+      "issues": [
+        {
+          "type": "duplicate_registration",
+          "severity": "medium",
+          "description": "This menu is also registered in includes/class-dps-client-portal.php line 2362"
+        }
+      ]
+    },
+    {
+      "addon": "Comunicações",
+      "page_title": "Comunicações",
+      "menu_title": "Comunicações",
+      "slug": "dps-communications",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php",
+      "class": "DPS_Communications_Addon",
+      "method": "register_admin_menu",
+      "line": 95,
+      "issues": []
+    },
+    {
+      "addon": "Pagamentos",
+      "page_title": "Pagamentos",
+      "menu_title": "Pagamentos",
+      "slug": "dps-payment-settings",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php",
+      "class": "DPS_Payment_Addon",
+      "method": "add_settings_page",
+      "line": 129,
+      "issues": []
+    },
+    {
+      "addon": "White Label",
+      "page_title": "White Label",
+      "menu_title": "White Label",
+      "slug": "dps-whitelabel",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-whitelabel_addon/desi-pet-shower-whitelabel-addon.php",
+      "class": "DPS_WhiteLabel_Addon",
+      "method": "register_admin_menu",
+      "line": 180,
+      "issues": []
+    },
+    {
+      "addon": "Campanhas & Fidelidade",
+      "page_title": "Campanhas & Fidelidade",
+      "menu_title": "Campanhas & Fidelidade",
+      "slug": "dps-loyalty",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php",
+      "class": "DPS_Loyalty_Addon",
+      "method": "register_menu",
+      "line": 282,
+      "notes": "Uses internal tabs: dashboard, settings, campaigns",
+      "issues": []
+    },
+    {
+      "addon": "Campanhas & Fidelidade",
+      "page_title": "Campanhas",
+      "menu_title": "Campanhas",
+      "slug": "edit.php?post_type=dps_campaign",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php",
+      "class": "DPS_Loyalty_Addon",
+      "method": "register_menu",
+      "line": 291,
+      "notes": "Direct link to CPT listing",
+      "issues": [
+        {
+          "type": "redundancy",
+          "severity": "low",
+          "description": "Creates duplicate access - CPT already accessible via 'Campanhas & Fidelidade' page with tabs"
+        }
+      ]
+    },
+    {
+      "addon": "Formulário de Cadastro",
+      "page_title": "Formulário de Cadastro",
+      "menu_title": "Formulário de Cadastro",
+      "slug": "dps-registration-settings",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php",
+      "class": "DPS_Registration_Addon",
+      "method": "add_settings_page",
+      "line": 123,
+      "issues": []
+    },
+    {
+      "addon": "Notificações Push",
+      "page_title": "Notificações Push",
+      "menu_title": "Push Notifications",
+      "slug": "dps-push-notifications",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-push_addon/desi-pet-shower-push-addon.php",
+      "class": "DPS_Push_Addon",
+      "method": "register_admin_menu",
+      "line": 118,
+      "issues": [
+        {
+          "type": "language_inconsistency",
+          "severity": "low",
+          "description": "Menu title in English while rest of the system uses Portuguese"
+        }
+      ]
+    },
+    {
+      "addon": "Backup & Restauração",
+      "page_title": "Backup & Restauração",
+      "menu_title": "Backup & Restauração",
+      "slug": "dps-backup",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php",
+      "class": "DPS_Backup_Addon",
+      "method": "register_admin_menu",
+      "line": 152,
+      "notes": "Uses internal tabs: manual, automatic, history",
+      "issues": []
+    },
+    {
+      "addon": "Debugging",
+      "page_title": "Debugging",
+      "menu_title": "Debugging",
+      "slug": "dps-debugging",
+      "parent_slug": "desi-pet-shower",
+      "capability": "manage_options",
+      "file": "add-ons/desi-pet-shower-debugging_addon/desi-pet-shower-debugging-addon.php",
+      "class": "DPS_Debugging_Addon",
+      "method": "register_admin_menu",
+      "line": 294,
+      "issues": []
+    }
+  ],
+  "cpts": [
+    {
+      "addon": "Base",
+      "name": "Clientes",
+      "slug": "dps_cliente",
+      "visible_in_admin": false,
+      "show_in_menu": false,
+      "capability_type": "dps_client",
+      "capability_mapped_to": "dps_manage_clients",
+      "file": "plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php",
+      "line": 253,
+      "notes": "Managed via [dps_base] shortcode in frontend"
+    },
+    {
+      "addon": "Base",
+      "name": "Pets",
+      "slug": "dps_pet",
+      "visible_in_admin": false,
+      "show_in_menu": false,
+      "capability_type": "dps_pet",
+      "capability_mapped_to": "dps_manage_pets",
+      "file": "plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php",
+      "line": 294,
+      "notes": "Managed via [dps_base] shortcode in frontend"
+    },
+    {
+      "addon": "Base",
+      "name": "Agendamentos",
+      "slug": "dps_agendamento",
+      "visible_in_admin": false,
+      "show_in_menu": false,
+      "capability_type": "dps_appointment",
+      "capability_mapped_to": "dps_manage_appointments",
+      "file": "plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php",
+      "line": 334,
+      "notes": "Managed via [dps_base] shortcode in frontend"
+    },
+    {
+      "addon": "IA",
+      "name": "Base de Conhecimento IA",
+      "slug": "dps_ai_knowledge",
+      "visible_in_admin": true,
+      "show_in_menu": "desi-pet-shower",
+      "capability_type": "post",
+      "taxonomy": "dps_ai_knowledge_cat",
+      "file": "add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base.php",
+      "line": 67,
+      "notes": "Appears under main DPS menu"
+    },
+    {
+      "addon": "Cliente Portal",
+      "name": "Mensagens do Portal",
+      "slug": "dps_portal_message",
+      "visible_in_admin": true,
+      "show_in_menu": true,
+      "capability_type": "post",
+      "file": "add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php",
+      "line": 104,
+      "issues": [
+        {
+          "type": "independent_menu",
+          "severity": "low",
+          "description": "Creates independent menu outside DPS hierarchy. Should use show_in_menu => 'desi-pet-shower'"
+        }
+      ]
+    },
+    {
+      "addon": "Campanhas & Fidelidade",
+      "name": "Campanhas",
+      "slug": "dps_campaign",
+      "visible_in_admin": false,
+      "show_in_menu": false,
+      "capability_type": "post",
+      "file": "add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php",
+      "line": 145,
+      "notes": "Accessible via submenu link edit.php?post_type=dps_campaign"
+    },
+    {
+      "addon": "Groomers",
+      "name": "Avaliações de Groomers",
+      "slug": "dps_groomer_review",
+      "visible_in_admin": true,
+      "show_in_menu": false,
+      "capability_type": "post",
+      "file": "add-ons/desi-pet-shower-groomers_addon/desi-pet-shower-groomers-addon.php",
+      "line": 717,
+      "notes": "show_ui = true but show_in_menu = false, not directly accessible in admin"
+    },
+    {
+      "addon": "Subscription",
+      "name": "Assinaturas",
+      "slug": "dps_subscription",
+      "visible_in_admin": false,
+      "show_in_menu": false,
+      "file": "add-ons/desi-pet-shower-subscription_addon/dps_subscription/desi-pet-shower-subscription-addon.php",
+      "line": 248,
+      "notes": "show_ui = false, managed programmatically"
+    }
+  ],
+  "addons_without_menu": [
+    {
+      "name": "Finance",
+      "directory": "add-ons/desi-pet-shower-finance_addon/",
+      "description": "Financial management integrated with appointments",
+      "interface": "Shortcodes and hooks",
+      "shortcodes": ["dps_fin_docs"]
+    },
+    {
+      "name": "Services",
+      "directory": "add-ons/desi-pet-shower-services_addon/",
+      "description": "Service management",
+      "interface": "Frontend integration"
+    },
+    {
+      "name": "Stock",
+      "directory": "add-ons/desi-pet-shower-stock_addon/",
+      "description": "Inventory control",
+      "interface": "Hooks integration with other modules"
+    },
+    {
+      "name": "Groomers",
+      "directory": "add-ons/desi-pet-shower-groomers_addon/",
+      "description": "Groomer management",
+      "interface": "Frontend via shortcode",
+      "cpt": "dps_groomer_review"
+    },
+    {
+      "name": "Stats",
+      "directory": "add-ons/desi-pet-shower-stats_addon/",
+      "description": "Statistics and reports",
+      "interface": "Widgets or integrated reports"
+    },
+    {
+      "name": "Subscription",
+      "directory": "add-ons/desi-pet-shower-subscription_addon/",
+      "description": "Recurring subscription/plan management",
+      "interface": "Frontend management",
+      "cpt": "dps_subscription"
+    }
+  ],
+  "issues_summary": {
+    "orphan_menus": {
+      "count": 2,
+      "severity": "high",
+      "items": [
+        "IA – Modo Especialista",
+        "IA – Insights"
+      ],
+      "recommendation": "Change parent_slug from 'dps-gestao' to 'desi-pet-shower' or create the missing parent menu"
+    },
+    "duplicate_registrations": {
+      "count": 2,
+      "severity": "medium",
+      "items": [
+        "Portal do Cliente - Configurações",
+        "Logins de Clientes"
+      ],
+      "recommendation": "Remove registration from includes/class-dps-client-portal.php, keep only in includes/client-portal/class-dps-portal-admin.php"
+    },
+    "independent_cpts": {
+      "count": 1,
+      "severity": "low",
+      "items": [
+        "Mensagens do Portal"
+      ],
+      "recommendation": "Set show_in_menu => 'desi-pet-shower' to integrate into main DPS menu"
+    },
+    "redundant_menus": {
+      "count": 1,
+      "severity": "low",
+      "items": [
+        "Campanhas (CPT link)"
+      ],
+      "recommendation": "Remove separate submenu, keep only the tab within 'Campanhas & Fidelidade'"
+    },
+    "language_inconsistency": {
+      "count": 1,
+      "severity": "low",
+      "items": [
+        "Push Notifications (English title)"
+      ],
+      "recommendation": "Change to 'Notificações Push' for consistency"
+    },
+    "lack_of_grouping": {
+      "severity": "medium",
+      "description": "21 submenu items is too many. Related functionalities from the same addon are scattered.",
+      "affected_addons": [
+        "IA (5 separate submenus)",
+        "Agenda (2 separate submenus)",
+        "Portal (2 separate submenus)"
+      ],
+      "recommendation": "Use tabbed interfaces to group related pages, reducing main menu to ~8 items"
+    }
+  },
+  "reorganization_proposal": {
+    "description": "Proposed structure to improve navigation and reduce clutter",
+    "new_structure": [
+      {
+        "title": "Painel Inicial",
+        "slug": "desi-pet-shower",
+        "type": "main_page"
+      },
+      {
+        "title": "Agenda",
+        "tabs": ["Dashboard", "Configurações", "Capacidade"],
+        "current_count": 2
+      },
+      {
+        "title": "Assistente de IA",
+        "tabs": ["Configurações", "Analytics", "Conversas", "Base de Conhecimento", "Modo Especialista", "Insights"],
+        "current_count": 5
+      },
+      {
+        "title": "Portal do Cliente",
+        "tabs": ["Configurações", "Logins", "Mensagens"],
+        "current_count": 2
+      },
+      {
+        "title": "Integrações",
+        "tabs": ["Comunicações", "Pagamentos", "WhatsApp", "Telegram"],
+        "current_count": 2
+      },
+      {
+        "title": "Fidelidade & Campanhas",
+        "tabs": ["Dashboard", "Configurações", "Campanhas"],
+        "current_count": 1,
+        "notes": "Already uses tabs"
+      },
+      {
+        "title": "Sistema",
+        "tabs": ["Backup", "Debugging", "Logs", "White Label"],
+        "current_count": 4
+      },
+      {
+        "title": "Ferramentas",
+        "tabs": ["Formulário de Cadastro", "Push Notifications"],
+        "current_count": 2
+      }
+    ],
+    "benefits": [
+      "Reduction from 21 to ~8 menu items",
+      "Logical grouping by functionality",
+      "More intuitive navigation",
+      "Easier discovery of related features"
+    ]
+  }
+}
