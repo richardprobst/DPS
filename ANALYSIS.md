@@ -866,15 +866,29 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Integrar com Mercado Pago para geração de links de pagamento
 - Processar notificações de webhook para atualização de status
 - Injetar mensagens de cobrança no WhatsApp via add-on de Agenda
+- Gerenciar credenciais do Mercado Pago de forma segura
 
 **Shortcodes expostos**: Nenhum
 
+**Classes principais**:
+- `DPS_Payment_Addon`: Classe principal do add-on (gerencia hooks e integração)
+- `DPS_MercadoPago_Config` (v1.1.0+): Gerencia credenciais do Mercado Pago com ordem de prioridade
+
 **CPTs, tabelas e opções**:
 - Options: `dps_mercadopago_access_token`, `dps_pix_key`, `dps_mercadopago_webhook_secret` (credenciais Mercado Pago)
+- **IMPORTANTE (v1.1.0+)**: Recomendado definir credenciais via constantes em `wp-config.php` para produção:
+  - `DPS_MERCADOPAGO_ACCESS_TOKEN`: Token de acesso da API Mercado Pago
+  - `DPS_MERCADOPAGO_WEBHOOK_SECRET`: Secret para validação de webhooks
+  - `DPS_MERCADOPAGO_PUBLIC_KEY`: Chave pública (opcional)
+- Ordem de prioridade: constantes wp-config.php → options em banco de dados
+- Metadados em agendamentos (v1.1.0+):
+  - `_dps_payment_link_status`: Status da geração do link ('success' | 'error' | 'not_requested')
+  - `_dps_payment_last_error`: Detalhes do último erro (array: code, message, timestamp, context)
 
 **Hooks consumidos**:
-- Processa webhooks cedo no ciclo de inicialização do WordPress
-- Integra-se com add-on Financeiro para gerar cobranças
+- `dps_base_after_save_appointment`: Gera link de pagamento quando agendamento é finalizado
+- `dps_agenda_whatsapp_message`: Injeta link de pagamento na mensagem de cobrança
+- `init` (prioridade 1): Processa webhooks cedo no ciclo de inicialização do WordPress
 
 **Hooks disparados**: Nenhum
 
@@ -884,10 +898,33 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Introduzido em**: v0.1.0 (estimado)
 
+**Versão atual**: v1.1.0
+
+**Mudanças na v1.1.0**:
+- Classe `DPS_MercadoPago_Config` para gerenciamento seguro de credenciais
+- Suporte para constantes em wp-config.php (recomendado para produção)
+- Tratamento de erros aprimorado com logging detalhado
+- Flags de status em agendamentos para rastreamento de falhas
+- Interface administrativa mostra campos readonly quando credenciais vêm de constantes
+- Validação completa de respostas da API Mercado Pago
+
+**Métodos principais**:
+- `DPS_MercadoPago_Config::get_access_token()`: Retorna access token (constante ou option)
+- `DPS_MercadoPago_Config::get_webhook_secret()`: Retorna webhook secret (constante ou option)
+- `DPS_MercadoPago_Config::is_*_from_constant()`: Verifica se credencial vem de constante
+- `DPS_MercadoPago_Config::get_masked_credential()`: Retorna últimos 4 caracteres para exibição
+- `DPS_Payment_Addon::create_payment_preference()`: Cria preferência de pagamento via API MP
+- `DPS_Payment_Addon::log_payment_error()`: Logging centralizado de erros de cobrança
+- `DPS_Payment_Addon::process_payment_notification()`: Processa notificações de webhook
+- `DPS_Payment_Addon::maybe_generate_payment_link()`: Gera link automaticamente para finalizados
+
 **Observações**:
 - Validação de webhook aplicada apenas quando requisição traz indicadores de notificação do MP
-- Requer token de acesso e chave PIX configurados nas opções
+- Requer token de acesso e chave PIX configurados (via constantes ou options)
 - **IMPORTANTE**: Configuração do webhook secret é obrigatória para processamento automático de pagamentos. Veja documentação completa em `add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md`
+- **SEGURANÇA**: Em produção, sempre defina credenciais via constantes em wp-config.php para evitar armazenamento em texto plano no banco de dados
+- Logs de erro incluem contexto completo para debugging (HTTP code, response body, timestamps)
+- Flags de status permitem rastreamento e retry de falhas na geração de links
 
 ---
 
@@ -1191,12 +1228,12 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 | `subscription_id` | int | ID da assinatura vinculada |
 | `subscription_cycle` | string | Ciclo no formato Y-m (ex: "2025-12") |
 
-**Options armazenadas**: Nenhuma (usa options do Payment Add-on para credenciais Mercado Pago)
+**Options armazenadas**: Nenhuma (usa credenciais do Payment Add-on via `DPS_MercadoPago_Config`)
 
 **Hooks consumidos**:
 - `dps_base_nav_tabs_after_pets`: Adiciona aba "Assinaturas" no painel (prioridade 20)
 - `dps_base_sections_after_pets`: Renderiza seção de assinaturas (prioridade 20)
-- Usa options `dps_mercadopago_access_token` e `dps_pix_key` do Payment Add-on
+- Usa `DPS_MercadoPago_Config::get_access_token()` do Payment Add-on v1.1.0+ (ou options legadas se v1.0.0)
 
 **Hooks disparados**:
 - `dps_subscription_payment_status` (action): Permite add-ons de pagamento atualizar status do ciclo
