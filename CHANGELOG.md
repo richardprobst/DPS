@@ -674,6 +674,17 @@ Antes de criar uma nova versão oficial:
   - Método `parse_email_response()` depreciado mas mantido para retrocompatibilidade
 
 #### Fixed (Corrigido)
+- **AGENDA Add-on (v1.4.1)**: Correção de PHP Warning - Undefined array key "payment"
+  - **Problema**: Avisos PHP "Undefined array key 'payment'" na linha 455 de `trait-dps-agenda-renderer.php`
+  - **Causa Raiz**: Funções de renderização (`render_appointment_row`, `render_appointment_row_tab1`, `render_appointment_row_tab2`) acessavam índices do array `$column_labels` sem verificar existência
+  - **Correção Aplicada**: Adicionado operador de coalescência nula (`??`) em todos os acessos a `$column_labels` com valores padrão traduzidos
+  - **Escopo da Correção**:
+    - `trait-dps-agenda-renderer.php`: 13 ocorrências corrigidas nas funções de renderização
+    - `desi-pet-shower-agenda-addon.php`: 6 ocorrências corrigidas nos cabeçalhos de tabela
+  - **Impacto**: Elimina warnings PHP nos logs e previne erros futuros caso array incompleto seja passado
+  - **Arquivos Alterados**: 
+    - `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
+    - `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
   - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido
   - **Causa Raiz**: Sintaxe incorreta do `setcookie()` com array associativo (incompatível com PHP 7.3+)
