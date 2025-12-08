@@ -179,6 +179,63 @@
       }
     });
     
+    // CONF-2: Evento para botões de confirmação
+    $(document).on('click', '.dps-confirmation-btn', function(e){
+      e.preventDefault();
+      var btn = $(this);
+      var apptId = btn.data('appt-id');
+      var confirmationStatus = btn.data('action');
+      var row = $('tr[data-appt-id="' + apptId + '"]');
+      
+      if ( ! apptId || ! confirmationStatus ) {
+        return;
+      }
+      
+      // Desabilita todos os botões de confirmação da linha
+      row.find('.dps-confirmation-btn').prop('disabled', true).addClass('is-loading');
+      
+      var request = $.post(DPS_AG_Addon.ajax, {
+        action: 'dps_agenda_update_confirmation',
+        appt_id: apptId,
+        confirmation_status: confirmationStatus,
+        nonce: DPS_AG_Addon.nonce_confirmation
+      });
+      
+      request.done(function(resp){
+        if ( resp && resp.success ) {
+          // Substitui a linha inteira com o HTML atualizado
+          if ( resp.data && resp.data.row_html ) {
+            var newRow = $(resp.data.row_html);
+            row.replaceWith(newRow);
+            
+            // Anima a nova linha para feedback visual
+            newRow.addClass('dps-row-updated');
+            setTimeout(function(){
+              newRow.removeClass('dps-row-updated');
+            }, 1500);
+          } else {
+            // Remove estado de loading
+            row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
+          }
+        } else {
+          handleConfirmationError(resp, row);
+        }
+      }).fail(function(){
+        handleConfirmationError(null, row);
+      });
+      
+      function handleConfirmationError(response, row){
+        var message = (response && response.data && response.data.message) 
+          ? response.data.message 
+          : 'Erro ao atualizar confirmação. Tente novamente.';
+        
+        alert(message);
+        
+        // Remove estado de loading
+        row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
+      }
+    });
+    
     // UX-5: Toggle de filtros avançados
     $(document).on('click', '.dps-toggle-advanced-filters', function(e){
       e.preventDefault();

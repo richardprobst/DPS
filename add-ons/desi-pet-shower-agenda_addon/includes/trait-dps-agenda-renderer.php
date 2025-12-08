@@ -482,9 +482,38 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
-        // Confirmação via WhatsApp
+        // CONF-2/CONF-3: Confirmação de atendimento (badge + botões)
         echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ) . '">';
-        $confirmation_html = '-';
+        
+        // Obtém status de confirmação
+        $confirmation_status = $this->get_confirmation_status( $appt->ID );
+        
+        // Renderiza badge de confirmação
+        echo '<div class="dps-confirmation-wrapper">';
+        echo $this->render_confirmation_badge( $confirmation_status );
+        
+        // CONF-2: Botões de confirmação (apenas para admins)
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+            echo '<div class="dps-confirmation-actions">';
+            
+            // Botão "Confirmado"
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--confirmed" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="confirmed" title="' . esc_attr__( 'Marcar como confirmado', 'dps-agenda-addon' ) . '">✅</button>';
+            
+            // Botão "Não atendeu"
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--no-answer" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="no_answer" title="' . esc_attr__( 'Não atendeu', 'dps-agenda-addon' ) . '">⚠️</button>';
+            
+            // Botão "Cancelado/Desmarcou"
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--denied" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="denied" title="' . esc_attr__( 'Cliente cancelou', 'dps-agenda-addon' ) . '">❌</button>';
+            
+            // Botão "Limpar" (reset para not_sent)
+            if ( $confirmation_status !== 'not_sent' ) {
+                echo '<button class="dps-confirmation-btn dps-confirmation-btn--clear" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="not_sent" title="' . esc_attr__( 'Limpar status', 'dps-agenda-addon' ) . '">🔄</button>';
+            }
+            
+            echo '</div>';
+        }
+        
+        // Link para WhatsApp (mantém funcionalidade existente)
         if ( $status === 'pendente' && $client_post ) {
             $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
             $whatsapp  = DPS_Phone_Helper::format_for_whatsapp( $raw_phone );
@@ -531,10 +560,13 @@ trait DPS_Agenda_Renderer {
                     // Fallback
                     $wa_url = 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message );
                 }
-                $confirmation_html = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
+                echo '<div class="dps-confirmation-whatsapp">';
+                echo '<a href="' . esc_url( $wa_url ) . '" target="_blank" class="dps-whatsapp-link" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Enviar WhatsApp', 'dps-agenda-addon' ) . '</a>';
+                echo '</div>';
             }
         }
-        echo $confirmation_html;
+        
+        echo '</div>';
         echo '</td>';
         
         // Cobrança via WhatsApp
@@ -671,5 +703,96 @@ trait DPS_Agenda_Renderer {
         $current_timestamp = current_time( 'timestamp' );
         
         return $appointment_timestamp < $current_timestamp;
+    }
+
+    /**
+     * CONF-1: Obtém o status de confirmação de um agendamento.
+     * 
+     * @since 1.2.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string Status de confirmação: 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer'.
+     */
+    private function get_confirmation_status( $appointment_id ) {
+        $status = get_post_meta( $appointment_id, 'appointment_confirmation_status', true );
+        
+        // Default para 'not_sent' se não houver valor
+        if ( empty( $status ) ) {
+            $status = 'not_sent';
+        }
+        
+        return $status;
+    }
+
+    /**
+     * CONF-1: Define o status de confirmação de um agendamento.
+     * 
+     * @since 1.2.0
+     * @param int    $appointment_id ID do agendamento.
+     * @param string $status Status: 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer'.
+     * @param int    $user_id ID do usuário que realizou a ação (opcional).
+     * @return bool True se atualizado com sucesso, false caso contrário.
+     */
+    private function set_confirmation_status( $appointment_id, $status, $user_id = 0 ) {
+        // Valida status
+        $valid_statuses = [ 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer' ];
+        if ( ! in_array( $status, $valid_statuses, true ) ) {
+            return false;
+        }
+        
+        // Atualiza status
+        update_post_meta( $appointment_id, 'appointment_confirmation_status', $status );
+        
+        // Atualiza data/hora da última alteração
+        update_post_meta( $appointment_id, 'appointment_confirmation_date', current_time( 'mysql' ) );
+        
+        // Atualiza usuário que realizou a ação
+        if ( $user_id > 0 ) {
+            update_post_meta( $appointment_id, 'appointment_confirmation_sent_by', $user_id );
+        } elseif ( is_user_logged_in() ) {
+            update_post_meta( $appointment_id, 'appointment_confirmation_sent_by', get_current_user_id() );
+        }
+        
+        return true;
+    }
+
+    /**
+     * CONF-3: Renderiza badge de confirmação para a interface.
+     * 
+     * @since 1.2.0
+     * @param string $confirmation_status Status de confirmação.
+     * @return string HTML do badge.
+     */
+    private function render_confirmation_badge( $confirmation_status ) {
+        $badges = [
+            'not_sent'  => [
+                'class' => 'status-confirmation-not-sent',
+                'text'  => __( 'Não confirmado', 'dps-agenda-addon' ),
+                'icon'  => '⚪',
+            ],
+            'sent'      => [
+                'class' => 'status-confirmation-sent',
+                'text'  => __( 'Enviado', 'dps-agenda-addon' ),
+                'icon'  => '📤',
+            ],
+            'confirmed' => [
+                'class' => 'status-confirmation-confirmed',
+                'text'  => __( 'Confirmado', 'dps-agenda-addon' ),
+                'icon'  => '✅',
+            ],
+            'denied'    => [
+                'class' => 'status-confirmation-denied',
+                'text'  => __( 'Cancelado', 'dps-agenda-addon' ),
+                'icon'  => '❌',
+            ],
+            'no_answer' => [
+                'class' => 'status-confirmation-no-answer',
+                'text'  => __( 'Não atendeu', 'dps-agenda-addon' ),
+                'icon'  => '⚠️',
+            ],
+        ];
+        
+        $badge = $badges[ $confirmation_status ] ?? $badges['not_sent'];
+        
+        return '<span class="dps-confirmation-badge ' . esc_attr( $badge['class'] ) . '" title="' . esc_attr( $badge['text'] ) . '">' . $badge['icon'] . ' ' . esc_html( $badge['text'] ) . '</span>';
     }
 }

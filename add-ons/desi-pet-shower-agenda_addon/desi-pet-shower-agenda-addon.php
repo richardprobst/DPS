@@ -181,6 +181,9 @@ class DPS_Agenda_Addon {
         
         // UX-1: AJAX para ações rápidas de status
         add_action( 'wp_ajax_dps_agenda_quick_action', [ $this, 'quick_action_ajax' ] );
+        
+        // CONF-2: AJAX para atualização de status de confirmação
+        add_action( 'wp_ajax_dps_agenda_update_confirmation', [ $this, 'update_confirmation_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -365,6 +368,8 @@ class DPS_Agenda_Addon {
                 'nonce_export'  => wp_create_nonce( 'dps_agenda_export_csv' ),
                 // UX-1: Nonce para ações rápidas
                 'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
+                // CONF-2: Nonce para confirmação
+                'nonce_confirmation' => wp_create_nonce( 'dps_agenda_confirmation' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -1529,6 +1534,81 @@ class DPS_Agenda_Addon {
             'appointment_id' => $appt_id,
             'new_status'     => $new_status,
             'version'        => $new_version,
+        ] );
+    }
+
+    /**
+     * CONF-2: AJAX handler para atualizar status de confirmação.
+     * Permite marcar confirmação de atendimento sem alterar o status principal.
+     * 
+     * @since 1.2.0
+     */
+    public function update_confirmation_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_confirmation' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        $confirmation_status = isset( $_POST['confirmation_status'] ) ? sanitize_text_field( $_POST['confirmation_status'] ) : '';
+        
+        if ( ! $appt_id || ! $confirmation_status ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida status de confirmação
+        $valid_statuses = [ 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer' ];
+        if ( ! in_array( $confirmation_status, $valid_statuses, true ) ) {
+            wp_send_json_error( [ 'message' => __( 'Status de confirmação inválido.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Atualiza status de confirmação usando helper
+        $success = $this->set_confirmation_status( $appt_id, $confirmation_status, get_current_user_id() );
+        
+        if ( ! $success ) {
+            wp_send_json_error( [ 'message' => __( 'Erro ao atualizar status de confirmação.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Log de auditoria
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Status de confirmação alterado para "%s" por usuário #%d',
+                    $appt_id,
+                    $confirmation_status,
+                    get_current_user_id()
+                ),
+                [
+                    'appointment_id'      => $appt_id,
+                    'confirmation_status' => $confirmation_status,
+                    'user_id'             => get_current_user_id(),
+                ],
+                'agenda'
+            );
+        }
+        
+        // Renderiza HTML da linha atualizada
+        $updated_post = get_post( $appt_id );
+        $column_labels = $this->get_column_labels();
+        $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+        
+        wp_send_json_success( [
+            'message'             => __( 'Confirmação atualizada com sucesso!', 'dps-agenda-addon' ),
+            'row_html'            => $row_html,
+            'appointment_id'      => $appt_id,
+            'confirmation_status' => $confirmation_status,
         ] );
     }
 
