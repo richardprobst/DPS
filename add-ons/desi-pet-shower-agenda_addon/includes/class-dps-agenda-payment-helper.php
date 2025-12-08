@@ -189,4 +189,49 @@ class DPS_Agenda_Payment_Helper {
 
         return $html;
     }
+
+    /**
+     * Renderiza botão "Reenviar link de pagamento" se aplicável.
+     *
+     * @since 1.5.0
+     * @param int $appointment_id ID do agendamento.
+     * @return string HTML do botão ou string vazia.
+     */
+    public static function render_resend_button( $appointment_id ) {
+        $payment_status = self::get_payment_status( $appointment_id );
+        
+        // Só mostra botão se tiver pagamento pendente ou com erro
+        if ( ! in_array( $payment_status, [ 'pending', 'error' ], true ) ) {
+            return '';
+        }
+        
+        // Verifica se tem link de pagamento (necessário para reenvio)
+        $payment_link = get_post_meta( $appointment_id, 'dps_payment_link', true );
+        if ( empty( $payment_link ) ) {
+            return '';
+        }
+        
+        ob_start();
+        ?>
+        <button type="button" 
+                class="dps-resend-payment-btn" 
+                data-appt-id="<?php echo esc_attr( $appointment_id ); ?>"
+                title="<?php esc_attr_e( 'Reenviar link de pagamento', 'dps-agenda-addon' ); ?>">
+            🔄 <?php esc_html_e( 'Reenviar', 'dps-agenda-addon' ); ?>
+        </button>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Verifica se um agendamento tem pagamento pendente.
+     *
+     * @since 1.5.0
+     * @param int $appointment_id ID do agendamento.
+     * @return bool True se tem pagamento pendente ou com erro.
+     */
+    public static function has_pending_payment( $appointment_id ) {
+        $status = self::get_payment_status( $appointment_id );
+        return in_array( $status, [ 'pending', 'error' ], true );
+    }
 }

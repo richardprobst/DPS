@@ -629,4 +629,47 @@
     tooltip.css('display', 'none');
   });
 
+  // FASE 5: Reenviar link de pagamento
+  $(document).on('click', '.dps-resend-payment-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var row = btn.closest('tr');
+
+    if (!confirm('Deseja realmente reenviar o link de pagamento?')) {
+      return;
+    }
+
+    // Desabilita botão
+    btn.prop('disabled', true).text('Reenviando...');
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_resend_payment',
+      appt_id: apptId,
+      nonce: DPS_AG_Addon.nonce_resend_payment
+    }, function(resp){
+      if (resp && resp.success) {
+        // Substitui a linha com HTML atualizado
+        if (resp.data.row_html) {
+          var newRow = $(resp.data.row_html);
+          row.replaceWith(newRow);
+          // Feedback visual
+          newRow.css('background-color', '#d1fae5');
+          setTimeout(function(){
+            newRow.css('background-color', '');
+          }, 1000);
+        } else {
+          location.reload();
+        }
+      } else {
+        var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao reenviar link.';
+        alert(message);
+        btn.prop('disabled', false).text('🔄 Reenviar');
+      }
+    }).fail(function(){
+      alert('Erro de comunicação ao reenviar link.');
+      btn.prop('disabled', false).text('🔄 Reenviar');
+    });
+  });
+
 })(jQuery);

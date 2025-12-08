@@ -203,6 +203,9 @@ class DPS_Agenda_Addon {
         
         // FASE 4: AJAX para salvar configuração de capacidade
         add_action( 'wp_ajax_dps_agenda_save_capacity', [ $this, 'save_capacity_ajax' ] );
+        
+        // FASE 5: AJAX para reenviar link de pagamento
+        add_action( 'wp_ajax_dps_agenda_resend_payment', [ $this, 'resend_payment_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -231,6 +234,9 @@ class DPS_Agenda_Addon {
         
         // FASE 4: Adiciona página de Dashboard no admin
         add_action( 'admin_menu', [ $this, 'register_dashboard_admin_page' ], 20 );
+        
+        // FASE 5: Adiciona página de Configurações no admin
+        add_action( 'admin_menu', [ $this, 'register_settings_admin_page' ], 21 );
         
         // FASE 4: Enfileira assets do Dashboard no admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_dashboard_assets' ] );
@@ -329,6 +335,77 @@ class DPS_Agenda_Addon {
         echo '<h1>' . esc_html__( 'Dashboard Operacional da Agenda', 'dps-agenda-addon' ) . '</h1>';
         echo $this->render_dashboard_shortcode();
         echo '</div>';
+    }
+
+    /**
+     * FASE 5: Registra página de Configurações no admin.
+     *
+     * @since 1.5.0
+     */
+    public function register_settings_admin_page() {
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Configurações da Agenda', 'dps-agenda-addon' ),
+            __( 'Configurações', 'dps-agenda-addon' ),
+            'manage_options',
+            'dps-agenda-settings',
+            [ $this, 'render_settings_admin_page' ]
+        );
+    }
+
+    /**
+     * FASE 5: Renderiza a página de Configurações no admin.
+     *
+     * @since 1.5.0
+     */
+    public function render_settings_admin_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
+        }
+
+        // Processa salvamento
+        if ( isset( $_POST['dps_save_settings'] ) && check_admin_referer( 'dps_agenda_settings' ) ) {
+            $shop_address = isset( $_POST['dps_shop_address'] ) ? sanitize_textarea_field( $_POST['dps_shop_address'] ) : '';
+            update_option( 'dps_shop_address', $shop_address );
+            
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ) . '</p></div>';
+        }
+
+        $shop_address = get_option( 'dps_shop_address', '' );
+
+        ?>
+        <div class="wrap">
+            <h1><?php esc_html_e( 'Configurações da Agenda', 'dps-agenda-addon' ); ?></h1>
+            
+            <form method="post" action="">
+                <?php wp_nonce_field( 'dps_agenda_settings' ); ?>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="dps_shop_address"><?php esc_html_e( 'Endereço do Banho e Tosa', 'dps-agenda-addon' ); ?></label>
+                        </th>
+                        <td>
+                            <textarea 
+                                name="dps_shop_address" 
+                                id="dps_shop_address" 
+                                rows="3" 
+                                class="large-text"
+                                placeholder="<?php esc_attr_e( 'Ex: Rua Exemplo, 123, Centro, São Paulo - SP, CEP 01234-567', 'dps-agenda-addon' ); ?>"
+                            ><?php echo esc_textarea( $shop_address ); ?></textarea>
+                            <p class="description">
+                                <?php esc_html_e( 'Endereço completo usado como ponto de origem nas rotas GPS. Será usado para traçar rotas do Banho e Tosa até o cliente.', 'dps-agenda-addon' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p class="submit">
+                    <input type="submit" name="dps_save_settings" class="button button-primary" value="<?php esc_attr_e( 'Salvar Configurações', 'dps-agenda-addon' ); ?>">
+                </p>
+            </form>
+        </div>
+        <?php
     }
 
     /**
@@ -793,6 +870,8 @@ class DPS_Agenda_Addon {
                 'nonce_taxidog'      => wp_create_nonce( 'dps_agenda_taxidog' ),
                 // FASE 4: Nonce para capacidade
                 'nonce_capacity'     => wp_create_nonce( 'dps_agenda_capacity' ),
+                // FASE 5: Nonce para reenvio de pagamento
+                'nonce_resend_payment' => wp_create_nonce( 'dps_agenda_resend_payment' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -1052,6 +1131,13 @@ class DPS_Agenda_Addon {
             echo '</select>';
             echo '</label>';
             
+            // FASE 5: Filtro de Pagamentos Pendentes
+            $filter_pending_payment = isset( $_GET['filter_pending_payment'] ) ? sanitize_text_field( $_GET['filter_pending_payment'] ) : '';
+            echo '<label class="dps-filter-field dps-filter-field--checkbox">';
+            echo '<input type="checkbox" name="filter_pending_payment" value="1" ' . checked( $filter_pending_payment, '1', false ) . '>';
+            echo '<span class="dps-filter-label">' . esc_html__( 'Pagamento pendente', 'dps-agenda-addon' ) . '</span>';
+            echo '</label>';
+            
             // Botão Aplicar
             echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
             
@@ -1230,6 +1316,17 @@ class DPS_Agenda_Addon {
                 'order'          => 'ASC',
                 'no_found_rows'  => true, // PERFORMANCE: não conta total
             ] );
+        }
+        
+        // FASE 5: Filtrar pagamentos pendentes (pós-query para usar helper)
+        if ( ! empty( $filter_pending_payment ) && $filter_pending_payment === '1' ) {
+            foreach ( $appointments as $date => $appts ) {
+                if ( is_array( $appts ) ) {
+                    $appointments[ $date ] = array_filter( $appts, function( $appt ) {
+                        return DPS_Agenda_Payment_Helper::has_pending_payment( $appt->ID );
+                    } );
+                }
+            }
         }
         
         // FASE 4: Renderiza calendário mensal se view=calendar
@@ -2120,6 +2217,67 @@ class DPS_Agenda_Addon {
             ] );
         } else {
             wp_send_json_error( [ 'message' => __( 'Erro ao salvar configuração.', 'dps-agenda-addon' ) ] );
+        }
+    }
+
+    /**
+     * FASE 5: AJAX handler para reenviar link de pagamento.
+     *
+     * @since 1.5.0
+     */
+    public function resend_payment_ajax() {
+        // Verifica permissão
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_resend_payment' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+
+        if ( ! $appt_id ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+
+        // Tenta reenviar via Payment Add-on se disponível
+        $success = false;
+        $message = '';
+
+        if ( class_exists( 'DPS_Payment_API' ) && method_exists( 'DPS_Payment_API', 'resend_payment_link' ) ) {
+            $result = DPS_Payment_API::resend_payment_link( $appt_id );
+            $success = $result['success'] ?? false;
+            $message = $result['message'] ?? '';
+        } else {
+            // Fallback: marca como pendente e registra tentativa
+            update_post_meta( $appt_id, '_dps_payment_link_status', 'pending' );
+            update_post_meta( $appt_id, '_dps_payment_resent_at', current_time( 'mysql' ) );
+            $success = true;
+            $message = __( 'Link marcado para reenvio. Configure o Payment Add-on para envio automático.', 'dps-agenda-addon' );
+        }
+
+        if ( $success ) {
+            // Renderiza HTML da linha atualizada
+            $updated_post = get_post( $appt_id );
+            $column_labels = $this->get_column_labels();
+            $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+
+            wp_send_json_success( [
+                'message'        => $message ?: __( 'Link de pagamento reenviado com sucesso!', 'dps-agenda-addon' ),
+                'row_html'       => $row_html,
+                'appointment_id' => $appt_id,
+            ] );
+        } else {
+            wp_send_json_error( [ 'message' => $message ?: __( 'Erro ao reenviar link de pagamento.', 'dps-agenda-addon' ) ] );
         }
     }
 

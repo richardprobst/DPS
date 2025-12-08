@@ -455,6 +455,7 @@ trait DPS_Agenda_Renderer {
         echo '<td data-label="' . esc_attr( $column_labels['payment'] ) . '">';
         echo DPS_Agenda_Payment_Helper::render_payment_badge( $appt->ID );
         echo DPS_Agenda_Payment_Helper::render_payment_tooltip( $appt->ID );
+        echo DPS_Agenda_Payment_Helper::render_resend_button( $appt->ID );
         echo '</td>';
         
         // FASE 3: Mapa + TaxiDog + GPS
