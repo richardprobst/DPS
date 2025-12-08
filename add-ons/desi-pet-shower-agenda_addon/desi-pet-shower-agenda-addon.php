@@ -189,6 +189,9 @@ class DPS_Agenda_Addon {
         
         // CONF-2: AJAX para atualização de status de confirmação
         add_action( 'wp_ajax_dps_agenda_update_confirmation', [ $this, 'update_confirmation_ajax' ] );
+        
+        // FASE 3: AJAX para atualização de status de TaxiDog
+        add_action( 'wp_ajax_dps_agenda_update_taxidog', [ $this, 'update_taxidog_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -375,6 +378,8 @@ class DPS_Agenda_Addon {
                 'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
                 // CONF-2: Nonce para confirmação
                 'nonce_confirmation' => wp_create_nonce( 'dps_agenda_confirmation' ),
+                // FASE 3: Nonce para TaxiDog
+                'nonce_taxidog'      => wp_create_nonce( 'dps_agenda_taxidog' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -1614,6 +1619,57 @@ class DPS_Agenda_Addon {
             'row_html'            => $row_html,
             'appointment_id'      => $appt_id,
             'confirmation_status' => $confirmation_status,
+        ] );
+    }
+
+    /**
+     * FASE 3: AJAX handler para atualização de status de TaxiDog.
+     * Permite mudança de status do TaxiDog via ações rápidas.
+     *
+     * @since 1.2.0
+     */
+    public function update_taxidog_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        $new_status = isset( $_POST['taxidog_status'] ) ? sanitize_text_field( $_POST['taxidog_status'] ) : '';
+        
+        if ( ! $appt_id || ! $new_status ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Atualiza status usando o helper
+        $success = DPS_Agenda_TaxiDog_Helper::update_taxidog_status( $appt_id, $new_status );
+        
+        if ( ! $success ) {
+            wp_send_json_error( [ 'message' => __( 'Status de TaxiDog inválido.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Renderiza HTML da linha atualizada
+        $updated_post = get_post( $appt_id );
+        $column_labels = $this->get_column_labels();
+        $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+        
+        wp_send_json_success( [
+            'message'        => __( 'Status de TaxiDog atualizado com sucesso!', 'dps-agenda-addon' ),
+            'row_html'       => $row_html,
+            'appointment_id' => $appt_id,
+            'taxidog_status' => $new_status,
         ] );
     }
 

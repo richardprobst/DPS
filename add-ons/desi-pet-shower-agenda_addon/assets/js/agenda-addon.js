@@ -559,4 +559,74 @@
     return labels[action] || action;
   }
 
+  // FASE 3: Ações rápidas de TaxiDog
+  $(document).on('click', '.dps-taxidog-action-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var taxidogStatus = btn.data('action');
+    var row = btn.closest('tr');
+
+    // Desabilita todos os botões da linha
+    row.find('.dps-taxidog-action-btn').prop('disabled', true).css('opacity', 0.5);
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_update_taxidog',
+      appt_id: apptId,
+      taxidog_status: taxidogStatus,
+      nonce: DPS_AG_Addon.nonce_taxidog
+    }, function(resp){
+      if ( resp && resp.success ) {
+        // UX-2: Substitui a linha inteira com HTML atualizado
+        if ( resp.data.row_html ) {
+          var newRow = $(resp.data.row_html);
+          row.replaceWith(newRow);
+          // Aplica animação de feedback visual
+          newRow.css('background-color', '#d1fae5');
+          setTimeout(function(){
+            newRow.css('background-color', '');
+          }, 1000);
+        } else {
+          // Fallback: reload
+          location.reload();
+        }
+      } else {
+        var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao atualizar TaxiDog.';
+        alert(message);
+        // Reabilita botões em caso de erro
+        row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
+      }
+    }).fail(function(){
+      alert('Erro de comunicação ao atualizar TaxiDog.');
+      // Reabilita botões em caso de erro
+      row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
+    });
+  });
+
+  // FASE 3: Tooltip de detalhes de pagamento
+  $(document).on('mouseenter', '.dps-payment-badge', function(){
+    var badge = $(this);
+    var tooltip = badge.siblings('.dps-payment-tooltip');
+    if ( tooltip.length && tooltip.html().trim() !== '' ) {
+      tooltip.css({
+        display: 'block',
+        position: 'absolute',
+        background: '#fff',
+        border: '1px solid #e2e8f0',
+        padding: '8px 12px',
+        borderRadius: '4px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        zIndex: 1000,
+        minWidth: '200px',
+        marginTop: '5px'
+      });
+    }
+  });
+
+  $(document).on('mouseleave', '.dps-payment-badge', function(){
+    var badge = $(this);
+    var tooltip = badge.siblings('.dps-payment-tooltip');
+    tooltip.css('display', 'none');
+  });
+
 })(jQuery);
