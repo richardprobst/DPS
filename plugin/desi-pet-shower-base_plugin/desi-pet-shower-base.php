@@ -54,6 +54,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-message-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-phone-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
 
 // Hubs centralizados (Fase 2 - Reorganização de Menus)
 require_once DPS_BASE_DIR . 'includes/class-dps-integrations-hub.php';
@@ -187,30 +188,8 @@ class DPS_Base_Plugin {
      * Por enquanto, exibe apenas uma mensagem de boas-vindas.
      */
     public function render_main_settings_page() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
-        }
-
-        ?>
-        <div class="wrap">
-            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-            <div class="card" style="max-width: 800px; margin-top: 20px;">
-                <h2><?php esc_html_e( 'Bem-vindo ao DPS by PRObst', 'desi-pet-shower' ); ?></h2>
-                <p><?php esc_html_e( 'Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente.', 'desi-pet-shower' ); ?></p>
-                <p><?php esc_html_e( 'Utilize o menu lateral para acessar as diferentes configurações e funcionalidades do sistema.', 'desi-pet-shower' ); ?></p>
-                
-                <h3><?php esc_html_e( 'Configurações Disponíveis', 'desi-pet-shower' ); ?></h3>
-                <ul style="list-style: disc; margin-left: 20px;">
-                    <li><?php esc_html_e( 'Backup & Restauração: Exportar e importar dados do sistema', 'desi-pet-shower' ); ?></li>
-                    <li><?php esc_html_e( 'Comunicações: Configurar WhatsApp, e-mail e templates de mensagens', 'desi-pet-shower' ); ?></li>
-                    <li><?php esc_html_e( 'Notificações: Configurar Telegram e relatórios automáticos', 'desi-pet-shower' ); ?></li>
-                    <li><?php esc_html_e( 'Logins de Clientes: Gerenciar credenciais do portal', 'desi-pet-shower' ); ?></li>
-                    <li><?php esc_html_e( 'Campanhas & Fidelidade: Configurar programa de pontos e campanhas', 'desi-pet-shower' ); ?></li>
-                    <li><?php esc_html_e( 'Pagamentos: Configurar integração com Mercado Pago', 'desi-pet-shower' ); ?></li>
-                </ul>
-            </div>
-        </div>
-        <?php
+        // Usa o novo painel central (dashboard)
+        DPS_Dashboard::render();
     }
 
     /**
