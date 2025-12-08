@@ -48,9 +48,14 @@ function dps_agenda_load_textdomain() {
 }
 add_action( 'init', 'dps_agenda_load_textdomain', 1 );
 
-// FASE 3: Carrega traits de refatoração
+// FASE 3: Carrega traits de refatoração e helpers
 require_once __DIR__ . '/includes/trait-dps-agenda-renderer.php';
 require_once __DIR__ . '/includes/trait-dps-agenda-query.php';
+
+// FASE 3: Carrega helpers para Pagamento, TaxiDog e GPS
+require_once __DIR__ . '/includes/class-dps-agenda-payment-helper.php';
+require_once __DIR__ . '/includes/class-dps-agenda-taxidog-helper.php';
+require_once __DIR__ . '/includes/class-dps-agenda-gps-helper.php';
 
 class DPS_Agenda_Addon {
     

@@ -82,6 +82,7 @@ trait DPS_Agenda_Renderer {
             'pet'          => __( 'Pet (Cliente)', 'dps-agenda-addon' ),
             'service'      => __( 'Serviço', 'dps-agenda-addon' ),
             'status'       => __( 'Status', 'dps-agenda-addon' ),
+            'payment'      => __( 'Pagamento', 'dps-agenda-addon' ),
             'map'          => __( 'Mapa', 'dps-agenda-addon' ),
             'confirmation' => __( 'Confirmação', 'dps-agenda-addon' ),
             'charge'       => __( 'Cobrança', 'dps-agenda-addon' ),
@@ -450,36 +451,46 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
-        // Mapa
+        // FASE 3: Coluna de Pagamento
+        echo '<td data-label="' . esc_attr( $column_labels['payment'] ) . '">';
+        echo DPS_Agenda_Payment_Helper::render_payment_badge( $appt->ID );
+        echo DPS_Agenda_Payment_Helper::render_payment_tooltip( $appt->ID );
+        echo '</td>';
+        
+        // FASE 3: Mapa + TaxiDog + GPS
         echo '<td data-label="' . esc_attr( $column_labels['map'] ) . '">';
-        $map_link = '';
-        if ( $client_post ) {
-            // Tenta usar o endereço em texto (rua/número) para o link do mapa, se existir.
-            $address = get_post_meta( $client_post->ID, 'client_address', true );
-            if ( ! empty( $address ) ) {
-                $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . urlencode( $address );
-                $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-            } else {
-                // Caso não exista endereço, utiliza as coordenadas se disponíveis
-                $client_lat = get_post_meta( $client_post->ID, 'client_lat', true );
-                $client_lng = get_post_meta( $client_post->ID, 'client_lng', true );
-                if ( ! empty( $client_lat ) && ! empty( $client_lng ) ) {
-                    $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . $client_lat . ',' . $client_lng;
-                    $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-                }
-            }
+        
+        // Renderiza badge de TaxiDog se aplicável
+        $taxidog_badge = DPS_Agenda_TaxiDog_Helper::render_taxidog_badge( $appt->ID );
+        if ( ! empty( $taxidog_badge ) ) {
+            echo $taxidog_badge;
+            echo '<br>';
         }
-        // Identifica se há solicitação de TaxiDog
-        $taxi_req = get_post_meta( $appt->ID, 'appointment_taxidog', true );
-        if ( $map_link ) {
-            if ( $taxi_req === '1' ) {
-                echo $map_link . ' <span style="color:#0073aa; font-style:italic;">(' . esc_html__( 'TaxiDog', 'dps-agenda-addon' ) . ')</span>';
-            } else {
-                echo $map_link . ' <span style="color:#6c757d; font-style:italic;">(' . esc_html__( 'Cliente', 'dps-agenda-addon' ) . ')</span>';
-            }
-        } else {
+        
+        // Link simples de mapa (mantém funcionalidade existente)
+        $map_link = DPS_Agenda_GPS_Helper::render_map_link( $appt->ID );
+        if ( ! empty( $map_link ) ) {
+            echo $map_link;
+        }
+        
+        // Botão "Abrir rota" (sempre Loja → Cliente)
+        $route_button = DPS_Agenda_GPS_Helper::render_route_button( $appt->ID );
+        if ( ! empty( $route_button ) ) {
+            echo '<br>';
+            echo $route_button;
+        }
+        
+        // Ações rápidas de TaxiDog
+        $taxidog_actions = DPS_Agenda_TaxiDog_Helper::render_taxidog_quick_actions( $appt->ID );
+        if ( ! empty( $taxidog_actions ) ) {
+            echo $taxidog_actions;
+        }
+        
+        // Se não tem nada para mostrar
+        if ( empty( $taxidog_badge ) && empty( $map_link ) && empty( $route_button ) ) {
             echo '-';
         }
+        
         echo '</td>';
         
         // CONF-2/CONF-3: Confirmação de atendimento (badge + botões)
