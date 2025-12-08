@@ -1204,7 +1204,7 @@ class DPS_Payment_Addon {
         
         if ( ! empty( $context ) ) {
             $context_json = wp_json_encode( $context );
-            $log_message .= ' | ' . ( $context_json !== false ? $context_json : 'Erro ao serializar contexto' );
+            $log_message .= ' | ' . ( $context_json !== false && $context_json !== null ? $context_json : 'Erro ao serializar contexto' );
         }
         
         // Registra no error_log
