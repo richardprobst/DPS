@@ -37,6 +37,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
             <?php
             // Exibe mensagem de erro se token inválido
+            $show_contact_section = true; // Default: mostrar seção de contato
+            
             if ( isset( $_GET['token_error'] ) ) :
                 $error_type = sanitize_text_field( wp_unslash( $_GET['token_error'] ) );
                 $error_message = '';
@@ -51,6 +53,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                     case 'used':
                         $error_message = __( 'Esse link já foi utilizado. Peça um novo link de acesso à nossa equipe.', 'dps-client-portal' );
                         break;
+                    case 'page_not_found':
+                        $error_message = __( 'A página do Portal do Cliente ainda não foi configurada. Entre em contato com nossa equipe.', 'dps-client-portal' );
+                        $show_contact_section = false; // Não mostrar botão de WhatsApp neste caso
+                        break;
                     default:
                         $error_message = __( 'Não foi possível validar o link. Peça um novo link de acesso à nossa equipe.', 'dps-client-portal' );
                 }
@@ -61,6 +67,9 @@ if ( ! defined( 'ABSPATH' ) ) {
             <?php endif; ?>
 
             <?php
+            // Seção de contato - exibe apenas se não houver erro de configuração
+            if ( $show_contact_section ) :
+            
             // Gera link para o cliente solicitar acesso via WhatsApp
             if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
                 $whatsapp_message = DPS_WhatsApp_Helper::get_portal_access_request_message();
@@ -142,7 +151,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <?php echo esc_html__( 'Configuração de WhatsApp não encontrada. Entre em contato com a equipe.', 'dps-client-portal' ); ?>
             </p>
             
-            <?php endif; ?>
+            <?php endif; // Fim da seção de contato ?>
+
+            <?php endif; // Fim da condicional $show_contact_section ?>
 
             <p class="dps-portal-access__note">
                 <?php echo esc_html__( 'Já tem um link de acesso? Basta clicar nele novamente para entrar.', 'dps-client-portal' ); ?>

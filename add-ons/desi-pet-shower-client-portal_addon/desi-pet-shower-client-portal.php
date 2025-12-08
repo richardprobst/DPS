@@ -56,6 +56,11 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
+// Define título padrão da página do portal (pode ser traduzido)
+if ( ! defined( 'DPS_CLIENT_PORTAL_PAGE_TITLE' ) ) {
+    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', __( 'Portal do Cliente', 'dps-client-portal' ) );
+}
+
 /**
  * Carrega o text domain do Client Portal Add-on.
  * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
@@ -172,6 +177,95 @@ function dps_client_portal_setup_cache_invalidation() {
 add_action( 'init', 'dps_client_portal_setup_cache_invalidation', 20 );
 
 /**
+ * Verifica a integridade da configuração do portal no admin.
+ * 
+ * Exibe avisos no admin se:
+ * - A página do portal não existir
+ * - A página configurada não tiver o shortcode [dps_client_portal]
+ * - A página configurada estiver em rascunho ou lixeira
+ * 
+ * @since 2.4.1
+ */
+function dps_client_portal_check_configuration() {
+    // Só executa no admin
+    if ( ! is_admin() ) {
+        return;
+    }
+    
+    // Só executa para usuários com permissão
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    
+    $page_id = get_option( 'dps_portal_page_id', 0 );
+    $messages = [];
+    
+    // Verifica se tem página configurada
+    if ( ! $page_id ) {
+        $messages[] = [
+            'type'    => 'warning',
+            'message' => sprintf(
+                /* translators: %s: link para configurações */
+                __( 'Portal do Cliente: Nenhuma página configurada. <a href="%s">Configure agora</a> ou crie uma página com o shortcode [dps_client_portal].', 'dps-client-portal' ),
+                admin_url( 'admin.php?page=dps-client-portal-settings' )
+            ),
+        ];
+    } else {
+        $page = get_post( $page_id );
+        
+        // Verifica se a página existe
+        if ( ! $page ) {
+            $messages[] = [
+                'type'    => 'error',
+                'message' => sprintf(
+                    /* translators: %s: link para configurações */
+                    __( 'Portal do Cliente: A página configurada (ID #%d) não existe mais. <a href="%s">Configure uma nova página</a>.', 'dps-client-portal' ),
+                    $page_id,
+                    admin_url( 'admin.php?page=dps-client-portal-settings' )
+                ),
+            ];
+        } else {
+            // Verifica se a página está publicada
+            if ( 'publish' !== $page->post_status ) {
+                $messages[] = [
+                    'type'    => 'warning',
+                    'message' => sprintf(
+                        /* translators: 1: título da página, 2: link para editar */
+                        __( 'Portal do Cliente: A página "%1$s" não está publicada. <a href="%2$s">Publicar agora</a>.', 'dps-client-portal' ),
+                        esc_html( $page->post_title ),
+                        get_edit_post_link( $page_id )
+                    ),
+                ];
+            }
+            
+            // Verifica se a página tem o shortcode
+            if ( ! has_shortcode( $page->post_content, 'dps_client_portal' ) ) {
+                $messages[] = [
+                    'type'    => 'error',
+                    'message' => sprintf(
+                        /* translators: 1: título da página, 2: link para editar */
+                        __( 'Portal do Cliente: A página "%1$s" não contém o shortcode [dps_client_portal]. <a href="%2$s">Adicionar shortcode agora</a>.', 'dps-client-portal' ),
+                        esc_html( $page->post_title ),
+                        get_edit_post_link( $page_id )
+                    ),
+                ];
+            }
+        }
+    }
+    
+    // Exibe avisos se houver problemas
+    if ( ! empty( $messages ) ) {
+        add_action( 'admin_notices', function() use ( $messages ) {
+            foreach ( $messages as $msg ) {
+                $class = 'notice notice-' . esc_attr( $msg['type'] ) . ' is-dismissible';
+                printf( '<div class="%s"><p>%s</p></div>', $class, $msg['message'] );
+            }
+        } );
+    }
+}
+add_action( 'admin_init', 'dps_client_portal_check_configuration' );
+
+/**
  * Handler para download de arquivos .ics (Fase 2.8)
  * 
  * Permite clientes exportarem agendamentos para calendários
@@ -252,13 +346,111 @@ function dps_client_portal_register_appointment_request_cpt() {
 }
 add_action( 'init', 'dps_client_portal_register_appointment_request_cpt' );
 
-// Hook de ativação para criar tabela de tokens
-register_activation_hook( __FILE__, function() {
+/**
+ * Hook de ativação para criar tabela de tokens e página do portal.
+ *
+ * @since 2.0.0
+ * @since 2.4.1 Adicionada criação automática da página do portal
+ */
+function dps_client_portal_activate() {
+    // Cria tabela de tokens
     if ( class_exists( 'DPS_Portal_Token_Manager' ) ) {
         $token_manager = DPS_Portal_Token_Manager::get_instance();
         $token_manager->maybe_create_table();
     }
-} );
+    
+    // Cria página do portal se não existir
+    dps_client_portal_maybe_create_page();
+}
+register_activation_hook( __FILE__, 'dps_client_portal_activate' );
+
+/**
+ * Cria a página do Portal do Cliente automaticamente se não existir.
+ * 
+ * Esta função verifica se já existe uma página configurada ou com o título
+ * "Portal do Cliente". Se não existir, cria uma nova página com:
+ * - Título: "Portal do Cliente"
+ * - Slug: "portal-do-cliente"
+ * - Conteúdo: shortcode [dps_client_portal]
+ * - Status: publicada
+ * 
+ * Após criar a página, armazena o ID em dps_portal_page_id para referência futura.
+ * 
+ * @since 2.4.1
+ * @return int|false ID da página criada ou existente, ou false em caso de erro
+ */
+function dps_client_portal_maybe_create_page() {
+    // Verifica se já existe uma página configurada
+    $existing_page_id = get_option( 'dps_portal_page_id', 0 );
+    if ( $existing_page_id && get_post_status( $existing_page_id ) === 'publish' ) {
+        // Verifica se a página tem o shortcode
+        $page = get_post( $existing_page_id );
+        if ( $page && has_shortcode( $page->post_content, 'dps_client_portal' ) ) {
+            return $existing_page_id;
+        }
+        
+        // Página existe mas não tem o shortcode - adiciona o shortcode
+        if ( $page ) {
+            wp_update_post( [
+                'ID'           => $existing_page_id,
+                'post_content' => $page->post_content . "\n\n[dps_client_portal]",
+            ] );
+            return $existing_page_id;
+        }
+    }
+    
+    // Busca página existente por título
+    $page_title = DPS_CLIENT_PORTAL_PAGE_TITLE;
+    
+    if ( function_exists( 'dps_get_page_by_title_compat' ) ) {
+        $portal_page = dps_get_page_by_title_compat( $page_title );
+    } else {
+        // Fallback se helper não estiver carregado ainda
+        global $wpdb;
+        $post_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'page' AND post_status = 'publish' LIMIT 1",
+                $page_title
+            )
+        );
+        $portal_page = $post_id ? get_post( $post_id ) : null;
+    }
+    
+    if ( $portal_page ) {
+        // Página existe - verifica se tem o shortcode
+        if ( ! has_shortcode( $portal_page->post_content, 'dps_client_portal' ) ) {
+            // Adiciona o shortcode ao conteúdo existente
+            wp_update_post( [
+                'ID'           => $portal_page->ID,
+                'post_content' => $portal_page->post_content . "\n\n[dps_client_portal]",
+            ] );
+        }
+        
+        // Armazena o ID da página
+        update_option( 'dps_portal_page_id', $portal_page->ID );
+        return $portal_page->ID;
+    }
+    
+    // Nenhuma página encontrada - cria uma nova
+    $page_id = wp_insert_post( [
+        'post_title'     => $page_title,
+        'post_name'      => 'portal-do-cliente',
+        'post_content'   => '[dps_client_portal]',
+        'post_status'    => 'publish',
+        'post_type'      => 'page',
+        'post_author'    => 1,
+        'comment_status' => 'closed',
+        'ping_status'    => 'closed',
+    ] );
+    
+    if ( ! is_wp_error( $page_id ) && $page_id > 0 ) {
+        // Armazena o ID da página criada
+        update_option( 'dps_portal_page_id', $page_id );
+        return $page_id;
+    }
+    
+    return false;
+}
 
 /**
  * Hook de desativação para limpar cron jobs.
