@@ -186,6 +186,16 @@ Documentação de segurança e auditoria.
 - `EXEMPLOS_ANTES_DEPOIS_SEGURANCA.md` - Exemplos antes/depois de correções de segurança
 - `SECURITY_FIXES_FINANCE_SUMMARY.md` - Resumo de correções de segurança do Finance Add-on
 
+### 📁 /docs/screenshots
+
+**🆕 Documentação visual e capturas de tela do sistema.**
+
+**Arquivos:**
+- `README.md` - Índice da pasta de screenshots
+- `PORTAL_CLIENTE_SCREENSHOTS.md` - **📸 Documentação visual completa do Portal do Cliente** com descrição de todos os componentes, layouts, funcionalidades e guia de visualização
+
+> Para visualizar o portal em ação, veja também: `docs/layout/client-portal/portal-cliente-demo.html`
+
 ### 📁 /docs/visual
 
 Guia de estilo visual (cores, tipografia, componentes).
