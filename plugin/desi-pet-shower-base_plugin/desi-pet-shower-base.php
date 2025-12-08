@@ -55,6 +55,10 @@ require_once DPS_BASE_DIR . 'includes/class-dps-phone-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
 
+// Hubs centralizados (Fase 2 - Reorganização de Menus)
+require_once DPS_BASE_DIR . 'includes/class-dps-integrations-hub.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-system-hub.php';
+
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
@@ -862,3 +866,13 @@ register_deactivation_hook( __FILE__, [ 'DPS_Base_Plugin', 'deactivate' ] );
 
 // Instancia o plugin
 new DPS_Base_Plugin();
+
+// Inicializa os hubs centralizados (Fase 2 - Reorganização de Menus)
+add_action( 'init', function() {
+    if ( class_exists( 'DPS_Integrations_Hub' ) ) {
+        DPS_Integrations_Hub::get_instance();
+    }
+    if ( class_exists( 'DPS_System_Hub' ) ) {
+        DPS_System_Hub::get_instance();
+    }
+}, 5 );
