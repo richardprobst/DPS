@@ -57,6 +57,9 @@ require_once __DIR__ . '/includes/class-dps-agenda-payment-helper.php';
 require_once __DIR__ . '/includes/class-dps-agenda-taxidog-helper.php';
 require_once __DIR__ . '/includes/class-dps-agenda-gps-helper.php';
 
+// FASE 4: Carrega helper para Dashboard Operacional
+require_once __DIR__ . '/includes/class-dps-agenda-dashboard-service.php';
+
 class DPS_Agenda_Addon {
     
     // FASE 3: Usa traits para métodos auxiliares
@@ -177,6 +180,8 @@ class DPS_Agenda_Addon {
         register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
         // Registra shortcodes
         add_shortcode( 'dps_agenda_page', [ $this, 'render_agenda_shortcode' ] );
+        // FASE 4: Shortcode para Dashboard Operacional
+        add_shortcode( 'dps_agenda_dashboard', [ $this, 'render_dashboard_shortcode' ] );
         // Shortcode dps_charges_notes deprecated - redireciona para Finance
         add_shortcode( 'dps_charges_notes', [ $this, 'render_charges_notes_shortcode_deprecated' ] );
         // Enfileira scripts e estilos somente quando páginas específicas forem exibidas
@@ -217,6 +222,12 @@ class DPS_Agenda_Addon {
         // Agenda: agendamento de envio de lembretes diários
         add_action( 'init', [ $this, 'maybe_schedule_reminders' ] );
         add_action( 'dps_agenda_send_reminders', [ $this, 'send_reminders' ] );
+        
+        // FASE 4: Adiciona página de Dashboard no admin
+        add_action( 'admin_menu', [ $this, 'register_dashboard_admin_page' ], 20 );
+        
+        // FASE 4: Enfileira assets do Dashboard no admin
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_dashboard_assets' ] );
     }
 
     /**
@@ -258,6 +269,305 @@ class DPS_Agenda_Addon {
         } else {
             update_option( 'dps_agenda_page_id', $page->ID );
         }
+    }
+
+    /**
+     * FASE 4: Registra página de Dashboard no admin.
+     *
+     * @since 1.3.0
+     */
+    public function register_dashboard_admin_page() {
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Dashboard da Agenda', 'dps-agenda-addon' ),
+            __( 'Dashboard', 'dps-agenda-addon' ),
+            'manage_options',
+            'dps-agenda-dashboard',
+            [ $this, 'render_dashboard_admin_page' ]
+        );
+    }
+
+    /**
+     * FASE 4: Enfileira assets do Dashboard no admin.
+     *
+     * @since 1.3.0
+     */
+    public function enqueue_dashboard_assets( $hook ) {
+        // Carrega apenas na página do dashboard
+        if ( 'desi-pet-shower_page_dps-agenda-dashboard' !== $hook ) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'dps-dashboard-css',
+            plugin_dir_url( __FILE__ ) . 'assets/css/dashboard.css',
+            [],
+            '1.3.0'
+        );
+
+        // jQuery já está enfileirado no admin
+        wp_enqueue_script( 'jquery' );
+    }
+
+    /**
+     * FASE 4: Renderiza a página de Dashboard no admin.
+     *
+     * @since 1.3.0
+     */
+    public function render_dashboard_admin_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-agenda-addon' ) );
+        }
+
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__( 'Dashboard Operacional da Agenda', 'dps-agenda-addon' ) . '</h1>';
+        echo $this->render_dashboard_shortcode();
+        echo '</div>';
+    }
+
+    /**
+     * FASE 4: Renderiza o Dashboard Operacional via shortcode.
+     *
+     * @since 1.3.0
+     * @return string HTML do dashboard.
+     */
+    public function render_dashboard_shortcode() {
+        // Verifica permissão
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return '<p>' . esc_html__( 'Acesso negado.', 'dps-agenda-addon' ) . '</p>';
+        }
+
+        // Obtém data selecionada (default: hoje)
+        $selected_date = isset( $_GET['dashboard_date'] ) ? sanitize_text_field( $_GET['dashboard_date'] ) : current_time( 'Y-m-d' );
+
+        // Valida formato de data
+        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $selected_date ) ) {
+            $selected_date = current_time( 'Y-m-d' );
+        }
+
+        // Obtém KPIs do dia
+        $kpis = DPS_Agenda_Dashboard_Service::get_daily_kpis( $selected_date );
+
+        // Obtém próximos atendimentos
+        $next_appointments = DPS_Agenda_Dashboard_Service::get_next_appointments( $selected_date, 10 );
+
+        ob_start();
+        ?>
+        <div class="dps-dashboard-wrapper">
+            
+            <!-- Seletor de Data -->
+            <div class="dps-dashboard-date-selector">
+                <form method="get" class="dps-dashboard-form">
+                    <?php
+                    // Preserva parâmetros da URL
+                    if ( isset( $_GET['page'] ) ) {
+                        echo '<input type="hidden" name="page" value="' . esc_attr( $_GET['page'] ) . '">';
+                    }
+                    ?>
+                    
+                    <div class="dps-dashboard-date-controls">
+                        <button type="button" class="dps-dashboard-quick-date" data-days="-1">
+                            <?php esc_html_e( '← Ontem', 'dps-agenda-addon' ); ?>
+                        </button>
+                        
+                        <button type="button" class="dps-dashboard-quick-date" data-days="0">
+                            <?php esc_html_e( 'Hoje', 'dps-agenda-addon' ); ?>
+                        </button>
+                        
+                        <button type="button" class="dps-dashboard-quick-date" data-days="1">
+                            <?php esc_html_e( 'Amanhã →', 'dps-agenda-addon' ); ?>
+                        </button>
+                        
+                        <input type="date" 
+                               name="dashboard_date" 
+                               value="<?php echo esc_attr( $selected_date ); ?>" 
+                               class="dps-dashboard-date-input">
+                        
+                        <button type="submit" class="button button-primary">
+                            <?php esc_html_e( 'Atualizar', 'dps-agenda-addon' ); ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="dps-dashboard-kpis">
+                
+                <!-- Card 1: Atendimentos de Hoje -->
+                <div class="dps-dashboard-kpi-section">
+                    <h3><?php esc_html_e( 'Atendimentos', 'dps-agenda-addon' ); ?></h3>
+                    <div class="dps-dashboard-cards">
+                        <?php
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Total', 'dps-agenda-addon' ),
+                            $kpis['total_counts']['total'],
+                            sprintf(
+                                __( 'Manhã: %d | Tarde: %d', 'dps-agenda-addon' ),
+                                $kpis['total_counts']['morning'],
+                                $kpis['total_counts']['afternoon']
+                            ),
+                            '#3b82f6'
+                        );
+                        ?>
+                    </div>
+                </div>
+
+                <!-- Card 2: Confirmação -->
+                <div class="dps-dashboard-kpi-section">
+                    <h3><?php esc_html_e( 'Confirmação', 'dps-agenda-addon' ); ?></h3>
+                    <div class="dps-dashboard-cards">
+                        <?php
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Confirmados', 'dps-agenda-addon' ),
+                            $kpis['confirmation_stats']['confirmed'],
+                            '',
+                            '#10b981'
+                        );
+                        
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Não Confirmados', 'dps-agenda-addon' ),
+                            $kpis['confirmation_stats']['not_confirmed'],
+                            '',
+                            '#f59e0b'
+                        );
+                        ?>
+                    </div>
+                </div>
+
+                <!-- Card 3: Status de Execução -->
+                <div class="dps-dashboard-kpi-section">
+                    <h3><?php esc_html_e( 'Execução', 'dps-agenda-addon' ); ?></h3>
+                    <div class="dps-dashboard-cards">
+                        <?php
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Concluídos', 'dps-agenda-addon' ),
+                            $kpis['execution_stats']['completed'],
+                            '',
+                            '#10b981'
+                        );
+                        
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Cancelados', 'dps-agenda-addon' ),
+                            $kpis['execution_stats']['canceled'],
+                            '',
+                            '#ef4444'
+                        );
+                        
+                        if ( $kpis['execution_stats']['late'] > 0 ) {
+                            echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                                __( 'Atrasados', 'dps-agenda-addon' ),
+                                $kpis['execution_stats']['late'],
+                                __( 'Pendentes após horário', 'dps-agenda-addon' ),
+                                '#f59e0b'
+                            );
+                        }
+                        ?>
+                    </div>
+                </div>
+
+                <!-- Card 4: Especiais -->
+                <div class="dps-dashboard-kpi-section">
+                    <h3><?php esc_html_e( 'Especiais', 'dps-agenda-addon' ); ?></h3>
+                    <div class="dps-dashboard-cards">
+                        <?php
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'TaxiDog', 'dps-agenda-addon' ),
+                            $kpis['special_stats']['with_taxidog'],
+                            '',
+                            '#3b82f6'
+                        );
+                        
+                        echo DPS_Agenda_Dashboard_Service::render_kpi_card(
+                            __( 'Cobrança Pendente', 'dps-agenda-addon' ),
+                            $kpis['special_stats']['pending_payment'],
+                            '',
+                            '#f59e0b'
+                        );
+                        ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Próximos Atendimentos -->
+            <?php if ( ! empty( $next_appointments ) ) : ?>
+                <div class="dps-dashboard-next-appointments">
+                    <h3><?php esc_html_e( 'Próximos Atendimentos', 'dps-agenda-addon' ); ?></h3>
+                    
+                    <table class="dps-dashboard-table">
+                        <thead>
+                            <tr>
+                                <th><?php esc_html_e( 'Hora', 'dps-agenda-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Pet', 'dps-agenda-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Tutor', 'dps-agenda-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Serviços', 'dps-agenda-addon' ); ?></th>
+                                <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ( $next_appointments as $appt ) : ?>
+                                <tr>
+                                    <td><strong><?php echo esc_html( $appt['time'] ); ?></strong></td>
+                                    <td><?php echo esc_html( $appt['pet_name'] ); ?></td>
+                                    <td><?php echo esc_html( $appt['client_name'] ); ?></td>
+                                    <td><?php echo esc_html( $appt['services'] ?: '-' ); ?></td>
+                                    <td>
+                                        <?php
+                                        $status_config = DPS_Agenda_Addon::get_status_config();
+                                        $status_label = isset( $status_config[ $appt['status'] ]['label'] ) 
+                                            ? $status_config[ $appt['status'] ]['label'] 
+                                            : $appt['status'];
+                                        echo esc_html( $status_label );
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else : ?>
+                <div class="dps-dashboard-empty">
+                    <p><?php esc_html_e( 'Nenhum atendimento próximo encontrado para esta data.', 'dps-agenda-addon' ); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <!-- Link para Agenda Completa -->
+            <div class="dps-dashboard-actions">
+                <?php
+                $agenda_page_id = get_option( 'dps_agenda_page_id' );
+                if ( $agenda_page_id ) {
+                    $agenda_url = add_query_arg( 'dps_date', $selected_date, get_permalink( $agenda_page_id ) );
+                    ?>
+                    <a href="<?php echo esc_url( $agenda_url ); ?>" class="button button-primary button-large">
+                        <?php esc_html_e( 'Ver Agenda Completa', 'dps-agenda-addon' ); ?>
+                    </a>
+                    <?php
+                }
+                ?>
+            </div>
+
+        </div>
+
+        <script>
+        jQuery(document).ready(function($){
+            // Botões de data rápida
+            $('.dps-dashboard-quick-date').on('click', function(){
+                var days = parseInt($(this).data('days'), 10);
+                var today = new Date();
+                today.setDate(today.getDate() + days);
+                
+                var year = today.getFullYear();
+                var month = String(today.getMonth() + 1).padStart(2, '0');
+                var day = String(today.getDate()).padStart(2, '0');
+                var dateStr = year + '-' + month + '-' + day;
+                
+                $('.dps-dashboard-date-input').val(dateStr);
+                $('.dps-dashboard-form').submit();
+            });
+        });
+        </script>
+
+        <?php
+        return ob_get_clean();
     }
 
     /**
