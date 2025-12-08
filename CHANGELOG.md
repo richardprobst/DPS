@@ -82,6 +82,15 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Client Portal Add-on (v2.4.1)**: Criação automática da página do portal na ativação do add-on
+  - Função `dps_client_portal_maybe_create_page()` cria página "Portal do Cliente" se não existir
+  - Verifica se página configurada tem o shortcode `[dps_client_portal]` e adiciona se necessário
+  - Armazena ID da página em `dps_portal_page_id` automaticamente
+  - Previne erros de "página não encontrada" ao acessar links de autenticação
+- **Client Portal Add-on (v2.4.1)**: Verificação contínua da configuração do portal no painel administrativo
+  - Sistema de avisos que alerta se a página do portal não existe, está em rascunho ou sem shortcode
+  - Avisos contextualizados com links diretos para corrigir problemas
+  - Executa automaticamente em `admin_init` para administradores
 - **AGENDA Add-on (v1.4.0)**: Sistema de 3 abas para reorganização da lista de agendamentos
   - Aba 1 "Visão Rápida": Visualização enxuta com Horário, Pet, Tutor, Status, Confirmação (badge), TaxiDog
   - Aba 2 "Operação": Visualização operacional completa com todas as ações (status, confirmação com botões, pagamento, ações rápidas)

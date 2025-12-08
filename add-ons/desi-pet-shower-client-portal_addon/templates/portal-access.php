@@ -40,6 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             if ( isset( $_GET['token_error'] ) ) :
                 $error_type = sanitize_text_field( wp_unslash( $_GET['token_error'] ) );
                 $error_message = '';
+                $show_contact = true;
                 
                 switch ( $error_type ) {
                     case 'invalid':
@@ -51,6 +52,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                     case 'used':
                         $error_message = __( 'Esse link já foi utilizado. Peça um novo link de acesso à nossa equipe.', 'dps-client-portal' );
                         break;
+                    case 'page_not_found':
+                        $error_message = __( 'A página do Portal do Cliente ainda não foi configurada. Entre em contato com nossa equipe.', 'dps-client-portal' );
+                        $show_contact = false; // Não mostrar botão de WhatsApp neste caso
+                        break;
                     default:
                         $error_message = __( 'Não foi possível validar o link. Peça um novo link de acesso à nossa equipe.', 'dps-client-portal' );
                 }
@@ -58,7 +63,12 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="dps-portal-access__error">
                     <p><?php echo esc_html( $error_message ); ?></p>
                 </div>
-            <?php endif; ?>
+            <?php 
+            // Se o erro é de configuração, não mostra botão de solicitar acesso
+            if ( isset( $show_contact ) && ! $show_contact ) :
+                return;
+            endif;
+            endif; ?>
 
             <?php
             // Gera link para o cliente solicitar acesso via WhatsApp
