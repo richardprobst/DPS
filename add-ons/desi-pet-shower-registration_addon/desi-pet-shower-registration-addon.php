@@ -119,10 +119,13 @@ class DPS_Registration_Addon {
 
     /**
      * Adiciona a página de configurações no menu principal "DPS by PRObst"
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-tools-hub para acessar via aba "Formulário de Cadastro".
      */
     public function add_settings_page() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Formulário de Cadastro', 'dps-registration-addon' ),
             __( 'Formulário de Cadastro', 'dps-registration-addon' ),
             'manage_options',
