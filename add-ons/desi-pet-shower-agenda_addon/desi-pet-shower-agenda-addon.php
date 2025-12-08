@@ -1496,8 +1496,8 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['status'] ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['confirmation'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>TaxiDog</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
@@ -1555,10 +1555,10 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['service'] ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['status'] ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['confirmation'] ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['payment'] ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviço', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>TaxiDog</th>';
                 echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
