@@ -1203,7 +1203,8 @@ class DPS_Payment_Addon {
         );
         
         if ( ! empty( $context ) ) {
-            $log_message .= ' | ' . wp_json_encode( $context );
+            $context_json = wp_json_encode( $context );
+            $log_message .= ' | ' . ( $context_json !== false ? $context_json : 'Erro ao serializar contexto' );
         }
         
         // Registra no error_log
@@ -1230,7 +1231,7 @@ class DPS_Payment_Addon {
      *
      * @since 1.1.0
      * @param string $reference Ex: 'dps_appointment_123' ou 'dps_subscription_456'.
-     * @return int ID do agendamento ou 0 se não for um appointment.
+     * @return int ID do agendamento ou 0 se não for um appointment válido.
      */
     private function extract_appointment_id_from_reference( $reference ) {
         if ( empty( $reference ) || ! is_string( $reference ) ) {
@@ -1240,7 +1241,12 @@ class DPS_Payment_Addon {
         // Verifica se é appointment
         if ( 0 === strpos( $reference, 'dps_appointment_' ) ) {
             $parts = explode( '_', $reference );
-            return isset( $parts[2] ) ? intval( $parts[2] ) : 0;
+            // Valida que temos a parte do ID e que é numérica
+            if ( isset( $parts[2] ) && is_numeric( $parts[2] ) ) {
+                $id = intval( $parts[2] );
+                // Retorna apenas se for um ID positivo válido
+                return $id > 0 ? $id : 0;
+            }
         }
         
         return 0;

@@ -138,11 +138,11 @@ class DPS_MercadoPago_Config {
      *
      * @since 1.1.0
      * @param string $credential Credencial completa.
-     * @return string Últimos 4 caracteres ou string vazia.
+     * @return string Últimos 4 caracteres ou máscara padrão se vazia.
      */
     public static function get_masked_credential( $credential ) {
         if ( ! $credential || strlen( $credential ) < 4 ) {
-            return '****';
+            return '••••';
         }
         return '••••' . substr( $credential, -4 );
     }
