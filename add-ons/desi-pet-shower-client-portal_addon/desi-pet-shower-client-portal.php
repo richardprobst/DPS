@@ -56,6 +56,11 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
+// Define título padrão da página do portal (pode ser traduzido)
+if ( ! defined( 'DPS_CLIENT_PORTAL_PAGE_TITLE' ) ) {
+    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', __( 'Portal do Cliente', 'dps-client-portal' ) );
+}
+
 /**
  * Carrega o text domain do Client Portal Add-on.
  * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
@@ -395,15 +400,17 @@ function dps_client_portal_maybe_create_page() {
     }
     
     // Busca página existente por título
+    $page_title = DPS_CLIENT_PORTAL_PAGE_TITLE;
+    
     if ( function_exists( 'dps_get_page_by_title_compat' ) ) {
-        $portal_page = dps_get_page_by_title_compat( 'Portal do Cliente' );
+        $portal_page = dps_get_page_by_title_compat( $page_title );
     } else {
         // Fallback se helper não estiver carregado ainda
         global $wpdb;
         $post_id = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'page' AND post_status = 'publish' LIMIT 1",
-                'Portal do Cliente'
+                $page_title
             )
         );
         $portal_page = $post_id ? get_post( $post_id ) : null;
@@ -426,12 +433,12 @@ function dps_client_portal_maybe_create_page() {
     
     // Nenhuma página encontrada - cria uma nova
     $page_id = wp_insert_post( [
-        'post_title'   => __( 'Portal do Cliente', 'dps-client-portal' ),
-        'post_name'    => 'portal-do-cliente',
-        'post_content' => '[dps_client_portal]',
-        'post_status'  => 'publish',
-        'post_type'    => 'page',
-        'post_author'  => 1,
+        'post_title'     => $page_title,
+        'post_name'      => 'portal-do-cliente',
+        'post_content'   => '[dps_client_portal]',
+        'post_status'    => 'publish',
+        'post_type'      => 'page',
+        'post_author'    => 1,
         'comment_status' => 'closed',
         'ping_status'    => 'closed',
     ] );
