@@ -443,6 +443,11 @@ final class DPS_Client_Portal {
             $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
             $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
             $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+            
+            // Fase 4 - continuação: Preferências do pet
+            $behavior_notes    = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
+            $grooming_pref     = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
+            $product_notes     = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
 
             if ( $pet_name ) {
                 wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
@@ -459,6 +464,11 @@ final class DPS_Client_Portal {
             update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
             update_post_meta( $pet_id, 'pet_allergies', $allergies );
             update_post_meta( $pet_id, 'pet_behavior', $behavior );
+            
+            // Salva preferências (Fase 4 - continuação)
+            update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
+            update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
+            update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
 
             if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                 $file = $_FILES['pet_photo'];
@@ -580,6 +590,41 @@ final class DPS_Client_Portal {
             } else {
                 $redirect_url = add_query_arg( 'portal_msg', 'message_error', $redirect_url );
             }
+        } elseif ( 'update_client_preferences' === $action ) {
+            // Fase 4 - continuação: Handler de preferências do cliente
+            $contact_pref = isset( $_POST['contact_preference'] ) ? sanitize_key( wp_unslash( $_POST['contact_preference'] ) ) : '';
+            $period_pref  = isset( $_POST['period_preference'] ) ? sanitize_key( wp_unslash( $_POST['period_preference'] ) ) : '';
+            
+            update_post_meta( $client_id, 'client_contact_preference', $contact_pref );
+            update_post_meta( $client_id, 'client_period_preference', $period_pref );
+            
+            // Hook: Após atualizar preferências
+            do_action( 'dps_portal_after_update_preferences', $client_id, $_POST );
+            
+            $redirect_url = add_query_arg( 'portal_msg', 'preferences_updated', $redirect_url );
+        } elseif ( 'update_pet_preferences' === $action && isset( $_POST['pet_id'] ) ) {
+            // Fase 4 - continuação: Handler de preferências do pet
+            $pet_id = absint( wp_unslash( $_POST['pet_id'] ) );
+            
+            // Validação de ownership
+            if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
+                $redirect_url = add_query_arg( 'portal_msg', 'error', $redirect_url );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
+            
+            $behavior_notes = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
+            $grooming_pref  = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
+            $product_notes  = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
+            
+            update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
+            update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
+            update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
+            
+            // Hook: Após atualizar preferências do pet
+            do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, $_POST );
+            
+            $redirect_url = add_query_arg( 'portal_msg', 'pet_preferences_updated', $redirect_url );
         }
 
         wp_redirect( $redirect_url );
@@ -1018,10 +1063,11 @@ final class DPS_Client_Portal {
         // Hook: Cliente autenticado (Fase 2.3)
         do_action( 'dps_portal_client_authenticated', $client_id );
         
-        // Localiza script com dados do chat
-        wp_localize_script( 'dps-client-portal', 'dpsPortalChat', [
+        // Localiza script com dados do chat e appointment requests (Fase 4)
+        wp_localize_script( 'dps-client-portal', 'dpsPortal', [
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-            'nonce'    => wp_create_nonce( 'dps_portal_chat' ),
+            'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
+            'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
             'clientId' => $client_id,
         ] );
         
@@ -1043,10 +1089,43 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.', 'dps-client-portal' ) . '</div>';
             }
         }
-        echo '<div class="dps-client-portal">';
+        
+        // Fase 4 - Branding: buscar configurações
+        $logo_id       = get_option( 'dps_portal_logo_id', '' );
+        $primary_color = get_option( 'dps_portal_primary_color', '#0ea5e9' );
+        $hero_id       = get_option( 'dps_portal_hero_id', '' );
+        
+        // Aplica classe de branding se houver customizações
+        $portal_classes = [ 'dps-client-portal' ];
+        if ( $logo_id || $primary_color !== '#0ea5e9' || $hero_id ) {
+            $portal_classes[] = 'dps-portal-branded';
+        }
+        
+        // Inline CSS para cor primária customizada
+        if ( $primary_color && $primary_color !== '#0ea5e9' ) {
+            echo '<style>.dps-portal-branded { --dps-custom-primary: ' . esc_attr( $primary_color ) . '; --dps-custom-primary-hover: ' . esc_attr( $this->adjust_brightness( $primary_color, -20 ) ) . '; }</style>';
+        }
+        
+        echo '<div class="' . esc_attr( implode( ' ', $portal_classes ) ) . '">';
         
         // Header com título e botão de logout
-        echo '<div class="dps-portal-header">';
+        echo '<div class="dps-portal-header dps-portal-header--branded">';
+        
+        // Imagem hero (se configurada)
+        if ( $hero_id ) {
+            $hero_url = wp_get_attachment_image_url( $hero_id, 'full' );
+            if ( $hero_url ) {
+                echo '<div class="dps-portal-hero" style="background-image: url(' . esc_url( $hero_url ) . ');"></div>';
+            }
+        }
+        
+        // Logo (se configurado)
+        if ( $logo_id ) {
+            $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
+            if ( $logo_url ) {
+                echo '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" class="dps-portal-logo">';
+            }
+        }
         
         // Saudação personalizada com nome do cliente
         $client_name = get_the_title( $client_id );
@@ -1082,11 +1161,23 @@ final class DPS_Client_Portal {
                 'active' => true,
                 'badge' => 0,
             ],
+            'mensagens' => [
+                'icon'  => '💬',
+                'label' => __( 'Mensagens', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => $this->get_unread_messages_count( $client_id ),
+            ],
             'agendamentos' => [
                 'icon'  => '📅',
                 'label' => __( 'Agendamentos', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => $this->count_upcoming_appointments( $client_id ),
+            ],
+            'historico-pets' => [
+                'icon'  => '🐾',
+                'label' => __( 'Histórico dos Pets', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => 0,
             ],
             'galeria' => [
                 'icon'  => '📸',
@@ -1141,6 +1232,7 @@ final class DPS_Client_Portal {
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
         $this->render_next_appointment( $client_id );
+        $this->render_recent_requests( $client_id ); // Fase 4: Solicitações recentes
         $this->render_financial_pending( $client_id );
         $this->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
@@ -1149,11 +1241,25 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
         echo '</div>';
         
+        // Panel: Mensagens (Fase 4 - continuação)
+        echo '<div id="panel-mensagens" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_mensagens_content', $client_id );
+        $this->render_message_center( $client_id );
+        do_action( 'dps_portal_after_mensagens_content', $client_id );
+        echo '</div>';
+        
         // Panel: Agendamentos (Histórico completo)
         echo '<div id="panel-agendamentos" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
         do_action( 'dps_portal_before_agendamentos_content', $client_id ); // Fase 2.3
         $this->render_appointment_history( $client_id );
         do_action( 'dps_portal_after_agendamentos_content', $client_id ); // Fase 2.3
+        echo '</div>';
+        
+        // Panel: Histórico dos Pets (Fase 4)
+        echo '<div id="panel-historico-pets" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_pet_history_content', $client_id );
+        $this->render_pets_timeline( $client_id );
+        do_action( 'dps_portal_after_pet_history_content', $client_id );
         echo '</div>';
         
         // Panel: Galeria
@@ -1335,6 +1441,13 @@ final class DPS_Client_Portal {
         return absint( $count );
     }
 
+    /**
+     * Conta mensagens não lidas do cliente.
+     * Fase 4 - continuação: Central de mensagens
+     *
+     * @param int $client_id ID do cliente.
+     * @return int Número de mensagens não lidas.
+     */
     /**
      * Renderiza seção do próximo agendamento.
      *
@@ -1818,19 +1931,21 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza o centro de mensagens entre cliente e administração.
+     * Fase 4 - continuação: melhorias na central de mensagens
      *
      * @param int $client_id ID do cliente.
      */
     private function render_message_center( $client_id ) {
         echo '<section id="mensagens" class="dps-portal-section dps-portal-messages">';
-        echo '<h2>' . esc_html__( 'Mensagens com a equipe', 'dps-client-portal' ) . '</h2>';
+        echo '<h2>💬 ' . esc_html__( 'Central de Mensagens', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-portal-section__description">' . esc_html__( 'Comunicação direta com a equipe do Banho e Tosa', 'dps-client-portal' ) . '</p>';
 
         $messages = get_posts( [
             'post_type'      => 'dps_portal_message',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
             'orderby'        => 'date',
-            'order'          => 'ASC',
+            'order'          => 'DESC', // Mais recentes primeiro
             'meta_key'       => 'message_client_id',
             'meta_value'     => $client_id,
         ] );
@@ -1838,15 +1953,28 @@ final class DPS_Client_Portal {
         if ( $messages ) {
             echo '<div class="dps-portal-messages__list">';
             foreach ( $messages as $message ) {
-                $sender  = get_post_meta( $message->ID, 'message_sender', true );
-                $status  = get_post_meta( $message->ID, 'message_status', true );
+                $sender     = get_post_meta( $message->ID, 'message_sender', true );
+                $status     = get_post_meta( $message->ID, 'message_status', true );
+                $msg_type   = get_post_meta( $message->ID, 'message_type', true );
+                $is_unread  = ( 'admin' === $sender && ! get_post_meta( $message->ID, 'client_read_at', true ) );
+                $appt_id    = get_post_meta( $message->ID, 'related_appointment_id', true );
+                
                 $classes = [ 'dps-portal-message' ];
                 $classes[] = ( 'client' === $sender ) ? 'dps-portal-message--client' : 'dps-portal-message--admin';
+                if ( $is_unread ) {
+                    $classes[] = 'dps-portal-message--unread';
+                }
+                
                 echo '<article class="' . esc_attr( implode( ' ', $classes ) ) . '">';
+
+                // Badge de não lida
+                if ( $is_unread ) {
+                    echo '<span class="dps-portal-message__unread-badge">' . esc_html__( 'Nova', 'dps-client-portal' ) . '</span>';
+                }
 
                 $author_label = ( 'client' === $sender )
                     ? esc_html__( 'Você', 'dps-client-portal' )
-                    : esc_html__( 'Equipe DPS by PRObst', 'dps-client-portal' );
+                    : esc_html__( 'Equipe do Banho e Tosa', 'dps-client-portal' );
                 $date_display = get_post_time( 'd/m/Y H:i', false, $message, true );
 
                 echo '<div class="dps-portal-message__meta">';
@@ -1854,21 +1982,51 @@ final class DPS_Client_Portal {
                 echo '<span class="dps-portal-message__date">' . esc_html( $date_display ) . '</span>';
                 echo '</div>';
 
-                if ( $status ) {
-                    echo '<div class="dps-portal-message__status">' . esc_html( $this->get_message_status_label( $status ) ) . '</div>';
+                // Tipo de mensagem
+                if ( $msg_type ) {
+                    $type_labels = [
+                        'appointment_confirmation' => __( 'Confirmação de Agendamento', 'dps-client-portal' ),
+                        'appointment_reminder'     => __( 'Lembrete de Agendamento', 'dps-client-portal' ),
+                        'appointment_change'       => __( 'Mudança de Agendamento', 'dps-client-portal' ),
+                        'general'                  => __( 'Mensagem Geral', 'dps-client-portal' ),
+                    ];
+                    $type_label = isset( $type_labels[ $msg_type ] ) ? $type_labels[ $msg_type ] : '';
+                    if ( $type_label ) {
+                        echo '<div class="dps-portal-message__type">' . esc_html( $type_label ) . '</div>';
+                    }
+                }
+
+                // Título da mensagem
+                if ( $message->post_title ) {
+                    echo '<h3 class="dps-portal-message__title">' . esc_html( $message->post_title ) . '</h3>';
                 }
 
                 $content = $message->post_content ? wpautop( esc_html( $message->post_content ) ) : '';
                 echo '<div class="dps-portal-message__content">' . $content . '</div>';
+                
+                // Link para agendamento relacionado
+                if ( $appt_id && get_post_status( $appt_id ) ) {
+                    echo '<div class="dps-portal-message__action">';
+                    echo '<a href="#" class="dps-portal-message__link" data-tab="agendamentos">';
+                    echo '📅 ' . esc_html__( 'Ver detalhes do agendamento', 'dps-client-portal' );
+                    echo '</a>';
+                    echo '</div>';
+                }
+                
                 echo '</article>';
 
-                if ( 'admin' === $sender && ! get_post_meta( $message->ID, 'client_read_at', true ) ) {
+                // Marcar como lida
+                if ( $is_unread ) {
                     update_post_meta( $message->ID, 'client_read_at', current_time( 'mysql' ) );
                 }
             }
             echo '</div>';
         } else {
-            echo '<p>' . esc_html__( 'Ainda não há mensagens no seu histórico.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<div class="dps-empty-state__icon">💬</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Ainda não há mensagens no seu histórico.', 'dps-client-portal' ) . '</div>';
+            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Aqui você receberá confirmações de agendamento, lembretes e mensagens da equipe.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
         }
 
         echo '<div class="dps-portal-messages__form">';
@@ -1876,9 +2034,15 @@ final class DPS_Client_Portal {
         echo '<form method="post" class="dps-portal-form">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
         echo '<input type="hidden" name="dps_client_portal_action" value="send_message">';
-        echo '<p><label>' . esc_html__( 'Assunto (opcional)', 'dps-client-portal' ) . '<br><input type="text" name="message_subject"></label></p>';
-        echo '<p><label>' . esc_html__( 'Mensagem', 'dps-client-portal' ) . '<br><textarea name="message_body" required></textarea></label></p>';
-        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . esc_html__( 'Enviar para a equipe', 'dps-client-portal' ) . '</button></p>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="message_subject">' . esc_html__( 'Assunto (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" id="message_subject" name="message_subject" class="dps-form-control">';
+        echo '</div>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="message_body">' . esc_html__( 'Mensagem', 'dps-client-portal' ) . ' <span class="required">*</span></label>';
+        echo '<textarea id="message_body" name="message_body" class="dps-form-control" rows="5" required></textarea>';
+        echo '</div>';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Enviar para a equipe', 'dps-client-portal' ) . '</button>';
         echo '</form>';
         echo '</div>';
 
@@ -1993,6 +2157,9 @@ final class DPS_Client_Portal {
         echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . esc_html__( 'Salvar Dados', 'dps-client-portal' ) . '</button></p>';
         echo '</form>';
         
+        // Seção de Preferências do Cliente (Fase 4 - continuação)
+        $this->render_client_preferences( $client_id );
+        
         // Lista pets para edição
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
@@ -2061,6 +2228,25 @@ final class DPS_Client_Portal {
                 echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'dps-client-portal' ) . '<br><textarea name="pet_vaccinations" rows="2" placeholder="Liste vacinas e condições de saúde..." style="font-size: 16px;">' . esc_textarea( $meta_pet['vaccinations'] ) . '</textarea></label></p>';
                 echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'dps-client-portal' ) . '<br><textarea name="pet_allergies" rows="2" placeholder="Alergias a alimentos, medicamentos..." style="font-size: 16px;">' . esc_textarea( $meta_pet['allergies'] ) . '</textarea></label></p>';
                 echo '<p><label>' . esc_html__( 'Notas de Comportamento', 'dps-client-portal' ) . '<br><textarea name="pet_behavior" rows="2" placeholder="Como o pet costuma se comportar?" style="font-size: 16px;">' . esc_textarea( $meta_pet['behavior'] ) . '</textarea></label></p>';
+                echo '</fieldset>';
+                
+                // Fieldset: Preferências e Cuidados (Fase 4 - continuação)
+                $behavior_notes     = get_post_meta( $pet_id, 'pet_behavior_notes', true );
+                $grooming_pref      = get_post_meta( $pet_id, 'pet_grooming_preference', true );
+                $product_notes      = get_post_meta( $pet_id, 'pet_product_notes', true );
+                
+                echo '<fieldset class="dps-fieldset">';
+                echo '<legend class="dps-fieldset__legend">🌟 ' . esc_html__( 'Preferências de Banho e Tosa', 'dps-client-portal' ) . '</legend>';
+                echo '<p class="dps-fieldset__description">' . esc_html__( 'Informe cuidados especiais para o banho e tosa do seu pet', 'dps-client-portal' ) . '</p>';
+                
+                echo '<p><label>' . esc_html__( 'Observações de Comportamento', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_behavior_notes" rows="2" placeholder="Ex: tem medo de secador, não gosta de orelhas sendo tocadas..." style="font-size: 16px;">' . esc_textarea( $behavior_notes ) . '</textarea></label></p>';
+                
+                echo '<p><label>' . esc_html__( 'Preferências de Corte/Tosa', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_grooming_preference" rows="2" placeholder="Ex: tosa na tesoura, padrão raça específica..." style="font-size: 16px;">' . esc_textarea( $grooming_pref ) . '</textarea></label></p>';
+                
+                echo '<p><label>' . esc_html__( 'Produtos Especiais / Alergias', 'dps-client-portal' ) . '<br>';
+                echo '<textarea name="pet_product_notes" rows="2" placeholder="Ex: usar shampoo hipoalergênico, alergia a perfumes..." style="font-size: 16px;">' . esc_textarea( $product_notes ) . '</textarea></label></p>';
                 echo '</fieldset>';
                 
                 // Foto do Pet
@@ -2942,6 +3128,135 @@ Equipe %4$s', 'dps-client-portal' ),
         wp_send_json_success( [ 
             'message' => __( 'Sua solicitação foi registrada! Nossa equipe entrará em contato em breve.', 'dps-client-portal' ) 
         ] );
+    }
+
+    /**
+     * Renderiza seção de solicitações recentes.
+     * Fase 4: Dashboard de Solicitações
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_recent_requests( $client_id ) {
+        $renderer = DPS_Portal_Renderer::get_instance();
+        $renderer->render_recent_requests( $client_id );
+    }
+
+    /**
+     * Renderiza seção de preferências do cliente.
+     * Fase 4 - continuação: Preferências
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_client_preferences( $client_id ) {
+        // Busca preferências salvas
+        $contact_preference = get_post_meta( $client_id, 'client_contact_preference', true );
+        $period_preference  = get_post_meta( $client_id, 'client_period_preference', true );
+
+        echo '<div class="dps-preferences-section">';
+        echo '<h3>⚙️ ' . esc_html__( 'Minhas Preferências', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-preferences-section__description">' . esc_html__( 'Personalize sua experiência no Banho e Tosa', 'dps-client-portal' ) . '</p>';
+        
+        echo '<form method="post" class="dps-portal-form">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="update_client_preferences">';
+        
+        echo '<div class="dps-preferences-grid">';
+        
+        // Canal de contato preferido
+        echo '<div class="dps-preference-item">';
+        echo '<label class="dps-preference-item__label" for="contact_preference">';
+        echo esc_html__( 'Como prefere ser contatado?', 'dps-client-portal' );
+        echo '</label>';
+        echo '<select id="contact_preference" name="contact_preference" class="dps-form-control">';
+        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
+        echo '<option value="whatsapp"' . selected( $contact_preference, 'whatsapp', false ) . '>' . esc_html__( 'WhatsApp', 'dps-client-portal' ) . '</option>';
+        echo '<option value="phone"' . selected( $contact_preference, 'phone', false ) . '>' . esc_html__( 'Telefone', 'dps-client-portal' ) . '</option>';
+        echo '<option value="email"' . selected( $contact_preference, 'email', false ) . '>' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        // Período preferido
+        echo '<div class="dps-preference-item">';
+        echo '<label class="dps-preference-item__label" for="period_preference">';
+        echo esc_html__( 'Período preferido para banho/tosa', 'dps-client-portal' );
+        echo '</label>';
+        echo '<select id="period_preference" name="period_preference" class="dps-form-control">';
+        echo '<option value="">' . esc_html__( 'Sem preferência', 'dps-client-portal' ) . '</option>';
+        echo '<option value="morning"' . selected( $period_preference, 'morning', false ) . '>' . esc_html__( 'Manhã', 'dps-client-portal' ) . '</option>';
+        echo '<option value="afternoon"' . selected( $period_preference, 'afternoon', false ) . '>' . esc_html__( 'Tarde', 'dps-client-portal' ) . '</option>';
+        echo '<option value="flexible"' . selected( $period_preference, 'flexible', false ) . '>' . esc_html__( 'Indiferente', 'dps-client-portal' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-preferences-grid
+        
+        echo '<div class="dps-preferences-actions">';
+        echo '<button type="submit" class="button button-primary">';
+        echo esc_html__( 'Salvar Preferências', 'dps-client-portal' );
+        echo '</button>';
+        echo '</div>';
+        
+        echo '</form>';
+        echo '</div>'; // .dps-preferences-section
+    }
+
+
+    /**
+     * Renderiza timeline de serviços por pet.
+     * Fase 4: Timeline de Serviços
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_pets_timeline( $client_id ) {
+        $pet_repo = DPS_Pet_Repository::get_instance();
+        $pets     = $pet_repo->get_pets_by_client( $client_id );
+
+        if ( empty( $pets ) ) {
+            echo '<section class="dps-portal-section">';
+            echo '<div class="dps-empty-state">';
+            echo '<div class="dps-empty-state__icon">🐾</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhum pet cadastrado ainda.', 'dps-client-portal' ) . '</div>';
+            echo '</div>';
+            echo '</section>';
+            return;
+        }
+
+        $renderer = DPS_Portal_Renderer::get_instance();
+
+        foreach ( $pets as $pet ) {
+            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10 );
+        }
+    }
+
+    /**
+     * Ajusta o brilho de uma cor hexadecimal.
+     * Fase 4 - Branding: Helper para cores
+     *
+     * @param string $hex   Cor hexadecimal (#RRGGBB).
+     * @param int    $steps Quantidade de brilho a ajustar (negativo escurece, positivo clareia).
+     * @return string Cor ajustada em hexadecimal.
+     */
+    private function adjust_brightness( $hex, $steps ) {
+        // Converte hex para RGB
+        $hex = str_replace( '#', '', $hex );
+        if ( strlen( $hex ) === 3 ) {
+            $hex = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );
+        }
+        
+        $r = hexdec( substr( $hex, 0, 2 ) );
+        $g = hexdec( substr( $hex, 2, 2 ) );
+        $b = hexdec( substr( $hex, 4, 2 ) );
+        
+        // Ajusta
+        $r = max( 0, min( 255, $r + $steps ) );
+        $g = max( 0, min( 255, $g + $steps ) );
+        $b = max( 0, min( 255, $b + $steps ) );
+        
+        // Converte de volta para hex
+        return '#' . str_pad( dechex( $r ), 2, '0', STR_PAD_LEFT ) . str_pad( dechex( $g ), 2, '0', STR_PAD_LEFT ) . str_pad( dechex( $b ), 2, '0', STR_PAD_LEFT );
     }
 }
 endif;

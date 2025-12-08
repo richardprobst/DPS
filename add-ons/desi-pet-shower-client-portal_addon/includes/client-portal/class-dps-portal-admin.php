@@ -65,6 +65,8 @@ class DPS_Portal_Admin {
         add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+        add_action( 'dps_settings_nav_tabs', [ $this, 'render_branding_tab' ], 25, 1 ); // Fase 4 - branding
+        add_action( 'dps_settings_sections', [ $this, 'render_branding_section' ], 25, 1 ); // Fase 4 - branding
     }
 
     /**
@@ -617,5 +619,177 @@ class DPS_Portal_Admin {
         } else {
             echo '<p>' . esc_html__( 'Template não encontrado.', 'dps-client-portal' ) . '</p>';
         }
+    }
+
+    /**
+     * Renderiza aba de Branding na navegação (Fase 4 - continuação).
+     *
+     * @param bool $visitor_only Se deve exibir apenas para visitantes.
+     */
+    public function render_branding_tab( $visitor_only = false ) {
+        if ( $visitor_only ) {
+            return;
+        }
+        echo '<li><a href="#" class="dps-tab-link" data-tab="branding">🎨 ' . esc_html__( 'Branding', 'dps-client-portal' ) . '</a></li>';
+    }
+
+    /**
+     * Renderiza seção de Branding (Fase 4 - continuação).
+     *
+     * @param bool $visitor_only Se deve exibir apenas para visitantes.
+     */
+    public function render_branding_section( $visitor_only = false ) {
+        if ( $visitor_only || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        
+        // Processa salvamento se houver POST
+        if ( isset( $_POST['dps_branding_save'] ) && check_admin_referer( 'dps_branding_settings', 'dps_branding_nonce' ) ) {
+            $this->save_branding_settings();
+        }
+        
+        // Busca configurações atuais
+        $logo_id       = get_option( 'dps_portal_logo_id', '' );
+        $primary_color = get_option( 'dps_portal_primary_color', '#0ea5e9' );
+        $hero_id       = get_option( 'dps_portal_hero_id', '' );
+        
+        echo '<div class="dps-section" id="dps-section-branding">';
+        echo '<h2>🎨 ' . esc_html__( 'Personalização Visual do Portal', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-section__description">' . esc_html__( 'Customize a aparência do Portal do Cliente com a identidade visual do seu Banho e Tosa', 'dps-client-portal' ) . '</p>';
+        
+        echo '<form method="post" enctype="multipart/form-data" class="dps-branding-form">';
+        wp_nonce_field( 'dps_branding_settings', 'dps_branding_nonce' );
+        
+        // Logo
+        echo '<div class="dps-form-field">';
+        echo '<label class="dps-form-label"><strong>' . esc_html__( 'Logo do Banho e Tosa', 'dps-client-portal' ) . '</strong></label>';
+        echo '<p class="description">' . esc_html__( 'Aparecerá no cabeçalho do portal. Tamanho recomendado: 200x80px', 'dps-client-portal' ) . '</p>';
+        
+        if ( $logo_id ) {
+            $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
+            if ( $logo_url ) {
+                echo '<div class="dps-branding-preview">';
+                echo '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr__( 'Logo atual', 'dps-client-portal' ) . '" style="max-width: 200px; height: auto;">';
+                echo '</div>';
+            }
+        }
+        
+        echo '<input type="file" name="portal_logo" id="portal_logo" accept="image/*">';
+        if ( $logo_id ) {
+            echo '<br><label><input type="checkbox" name="remove_logo" value="1"> ' . esc_html__( 'Remover logo', 'dps-client-portal' ) . '</label>';
+        }
+        echo '</div>';
+        
+        // Cor primária
+        echo '<div class="dps-form-field">';
+        echo '<label class="dps-form-label" for="primary_color"><strong>' . esc_html__( 'Cor Primária', 'dps-client-portal' ) . '</strong></label>';
+        echo '<p class="description">' . esc_html__( 'Cor usada em botões, links e destaques. Certifique-se de que tenha bom contraste com branco.', 'dps-client-portal' ) . '</p>';
+        echo '<input type="color" name="primary_color" id="primary_color" value="' . esc_attr( $primary_color ) . '">';
+        echo '<span class="dps-color-preview" style="background-color: ' . esc_attr( $primary_color ) . '; display: inline-block; width: 40px; height: 40px; border: 1px solid #ddd; margin-left: 10px; vertical-align: middle;"></span>';
+        echo '</div>';
+        
+        // Imagem hero
+        echo '<div class="dps-form-field">';
+        echo '<label class="dps-form-label"><strong>' . esc_html__( 'Imagem de Destaque (opcional)', 'dps-client-portal' ) . '</strong></label>';
+        echo '<p class="description">' . esc_html__( 'Imagem de fundo exibida no topo do portal. Tamanho recomendado: 1200x200px', 'dps-client-portal' ) . '</p>';
+        
+        if ( $hero_id ) {
+            $hero_url = wp_get_attachment_image_url( $hero_id, 'large' );
+            if ( $hero_url ) {
+                echo '<div class="dps-branding-preview">';
+                echo '<img src="' . esc_url( $hero_url ) . '" alt="' . esc_attr__( 'Hero atual', 'dps-client-portal' ) . '" style="max-width: 100%; height: auto;">';
+                echo '</div>';
+            }
+        }
+        
+        echo '<input type="file" name="portal_hero" id="portal_hero" accept="image/*">';
+        if ( $hero_id ) {
+            echo '<br><label><input type="checkbox" name="remove_hero" value="1"> ' . esc_html__( 'Remover imagem de destaque', 'dps-client-portal' ) . '</label>';
+        }
+        echo '</div>';
+        
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" name="dps_branding_save" class="button button-primary">' . esc_html__( 'Salvar Configurações de Branding', 'dps-client-portal' ) . '</button>';
+        echo '</div>';
+        
+        echo '</form>';
+        echo '</div>';
+    }
+
+    /**
+     * Salva configurações de branding.
+     * Fase 4 - continuação
+     *
+     * @since 2.4.0
+     */
+    private function save_branding_settings() {
+        // Cor primária
+        if ( isset( $_POST['primary_color'] ) ) {
+            $color = sanitize_hex_color( $_POST['primary_color'] );
+            if ( $color ) {
+                update_option( 'dps_portal_primary_color', $color );
+            }
+        }
+        
+        // Remover logo
+        if ( isset( $_POST['remove_logo'] ) ) {
+            delete_option( 'dps_portal_logo_id' );
+        }
+        
+        // Upload de logo
+        if ( ! empty( $_FILES['portal_logo']['name'] ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            
+            $upload = wp_handle_upload( $_FILES['portal_logo'], [ 'test_form' => false ] );
+            
+            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                $attachment = [
+                    'post_title'     => 'Portal Logo',
+                    'post_mime_type' => $upload['type'],
+                    'post_status'    => 'inherit',
+                ];
+                $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
+                if ( ! is_wp_error( $attach_id ) ) {
+                    $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
+                    wp_update_attachment_metadata( $attach_id, $attach_data );
+                    update_option( 'dps_portal_logo_id', $attach_id );
+                }
+            }
+        }
+        
+        // Remover hero
+        if ( isset( $_POST['remove_hero'] ) ) {
+            delete_option( 'dps_portal_hero_id' );
+        }
+        
+        // Upload de hero
+        if ( ! empty( $_FILES['portal_hero']['name'] ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            
+            $upload = wp_handle_upload( $_FILES['portal_hero'], [ 'test_form' => false ] );
+            
+            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                $attachment = [
+                    'post_title'     => 'Portal Hero Image',
+                    'post_mime_type' => $upload['type'],
+                    'post_status'    => 'inherit',
+                ];
+                $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
+                if ( ! is_wp_error( $attach_id ) ) {
+                    $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
+                    wp_update_attachment_metadata( $attach_id, $attach_data );
+                    update_option( 'dps_portal_hero_id', $attach_id );
+                }
+            }
+        }
+        
+        // Mensagem de sucesso
+        add_action( 'admin_notices', function() {
+            echo '<div class="notice notice-success is-dismissible">';
+            echo '<p>' . esc_html__( 'Configurações de branding salvas com sucesso!', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+        } );
     }
 }

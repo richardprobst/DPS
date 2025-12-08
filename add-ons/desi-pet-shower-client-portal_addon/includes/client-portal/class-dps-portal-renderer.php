@@ -183,6 +183,10 @@ class DPS_Portal_Renderer {
             $url   = 'https://www.google.com/maps/search/?api=1&query=' . $query;
             echo '<a href="' . esc_url( $url ) . '" target="_blank" class="dps-appointment-card__action">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
         }
+        
+        // Ações rápidas (Fase 4)
+        $this->render_appointment_quick_actions( $appointment, $client_id );
+        
         echo '</div>';
         echo '</div>';
     }
@@ -693,5 +697,279 @@ class DPS_Portal_Renderer {
         echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Dados do Pet', 'dps-client-portal' ) . '</button>';
         echo '</form>';
         echo '</div>';
+    }
+
+    /**
+     * Renderiza linha do tempo de serviços para um pet específico.
+     * Fase 4: Timeline de Serviços
+     *
+     * @since 2.4.0
+     * @param int    $pet_id    ID do pet.
+     * @param int    $client_id ID do cliente (para validação).
+     * @param int    $limit     Limite de serviços (padrão: 10).
+     */
+    public function render_pet_service_timeline( $pet_id, $client_id, $limit = 10 ) {
+        $pet_history = DPS_Portal_Pet_History::get_instance();
+        $services    = $pet_history->get_pet_service_history( $pet_id, $limit );
+        $pet_name    = get_the_title( $pet_id );
+
+        echo '<section class="dps-portal-section dps-portal-pet-timeline">';
+        echo '<h3 class="dps-timeline-title">';
+        echo '🐾 ' . esc_html( sprintf( __( 'Histórico de Serviços - %s', 'dps-client-portal' ), $pet_name ) );
+        echo '</h3>';
+
+        if ( empty( $services ) ) {
+            $this->render_pet_timeline_empty_state( $pet_name );
+        } else {
+            $this->render_timeline_items( $services, $client_id, $pet_id );
+        }
+
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza estado vazio da timeline.
+     *
+     * @param string $pet_name Nome do pet.
+     */
+    private function render_pet_timeline_empty_state( $pet_name ) {
+        echo '<div class="dps-empty-state">';
+        echo '<div class="dps-empty-state__icon">📅</div>';
+        echo '<div class="dps-empty-state__message">';
+        echo esc_html( sprintf( 
+            __( 'O %s ainda não fez nenhum serviço de banho e tosa aqui.', 'dps-client-portal' ),
+            $pet_name
+        ) );
+        echo '</div>';
+        
+        // CTA para agendar
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $message      = sprintf( __( 'Olá! Gostaria de agendar o primeiro banho/tosa para o %s.', 'dps-client-portal' ), $pet_name );
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $message );
+        } else {
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+            if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            }
+            $message_text = urlencode( sprintf( 'Olá! Gostaria de agendar o primeiro banho/tosa para o %s.', $pet_name ) );
+            $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $message_text;
+        }
+        
+        echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action button button-primary">';
+        echo '📅 ' . esc_html__( 'Agendar Primeiro Banho/Tosa', 'dps-client-portal' );
+        echo '</a>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza itens da timeline.
+     *
+     * @param array $services   Array de serviços.
+     * @param int   $client_id  ID do cliente.
+     * @param int   $pet_id     ID do pet.
+     */
+    private function render_timeline_items( $services, $client_id, $pet_id ) {
+        echo '<div class="dps-timeline">';
+        
+        foreach ( $services as $service ) {
+            $this->render_timeline_item( $service, $client_id, $pet_id );
+        }
+        
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza um item individual da timeline.
+     *
+     * @param array $service   Dados do serviço.
+     * @param int   $client_id ID do cliente.
+     * @param int   $pet_id    ID do pet.
+     */
+    private function render_timeline_item( $service, $client_id, $pet_id ) {
+        $date_formatted = date_i18n( 'd/m/Y', strtotime( $service['date'] ) );
+        $time_info      = ! empty( $service['time'] ) ? ' - ' . $service['time'] : '';
+        
+        echo '<div class="dps-timeline-item">';
+        echo '<div class="dps-timeline-marker"></div>';
+        echo '<div class="dps-timeline-content">';
+        
+        // Data em destaque
+        echo '<div class="dps-timeline-date">';
+        echo esc_html( $date_formatted . $time_info );
+        echo '</div>';
+        
+        // Tipo de serviço
+        echo '<div class="dps-timeline-service">';
+        echo '✂️ ' . esc_html( $service['services'] );
+        echo '</div>';
+        
+        // Observações (se houver)
+        if ( ! empty( $service['observations'] ) ) {
+            echo '<div class="dps-timeline-notes">';
+            echo '<strong>' . esc_html__( 'Observações:', 'dps-client-portal' ) . '</strong> ';
+            echo esc_html( $service['observations'] );
+            echo '</div>';
+        }
+        
+        // Profissional (se disponível)
+        if ( ! empty( $service['professional'] ) ) {
+            echo '<div class="dps-timeline-professional">';
+            echo '👤 ' . esc_html( $service['professional'] );
+            echo '</div>';
+        }
+        
+        // Botão "Repetir este serviço"
+        echo '<div class="dps-timeline-actions">';
+        echo '<button class="button button-secondary dps-btn-repeat-service" data-appointment-id="' . esc_attr( $service['appointment_id'] ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" data-services="' . esc_attr( wp_json_encode( $service['services_array'] ) ) . '">';
+        echo '🔄 ' . esc_html__( 'Repetir este Serviço', 'dps-client-portal' );
+        echo '</button>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-timeline-content
+        echo '</div>'; // .dps-timeline-item
+    }
+
+    /**
+     * Renderiza ações rápidas no card de próximo agendamento.
+     * Fase 4: Quick Actions
+     *
+     * @since 2.4.0
+     * @param WP_Post $appointment Objeto do agendamento.
+     * @param int     $client_id   ID do cliente.
+     */
+    public function render_appointment_quick_actions( $appointment, $client_id ) {
+        echo '<div class="dps-appointment-actions">';
+        
+        // Botão de reagendar
+        echo '<button class="button button-secondary dps-btn-reschedule" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
+        echo '📅 ' . esc_html__( 'Solicitar Reagendamento', 'dps-client-portal' );
+        echo '</button>';
+        
+        // Botão de cancelar
+        echo '<button class="button button-secondary dps-btn-cancel" data-appointment-id="' . esc_attr( $appointment->ID ) . '">';
+        echo '❌ ' . esc_html__( 'Solicitar Cancelamento', 'dps-client-portal' );
+        echo '</button>';
+        
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza seção de solicitações recentes do cliente.
+     * Fase 4: Dashboard de Solicitações
+     *
+     * @since 2.4.0
+     * @param int $client_id ID do cliente.
+     */
+    public function render_recent_requests( $client_id ) {
+        $request_repo = DPS_Appointment_Request_Repository::get_instance();
+        $requests     = $request_repo->get_requests_by_client( $client_id, '', 5 );
+
+        if ( empty( $requests ) ) {
+            return;
+        }
+
+        echo '<section class="dps-portal-section dps-portal-requests">';
+        echo '<h2>📋 ' . esc_html__( 'Suas Solicitações Recentes', 'dps-client-portal' ) . '</h2>';
+        
+        echo '<div class="dps-requests-list">';
+        foreach ( $requests as $request ) {
+            $this->render_request_card( $request );
+        }
+        echo '</div>';
+        
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza card individual de solicitação.
+     *
+     * @param WP_Post $request Post da solicitação.
+     */
+    private function render_request_card( $request ) {
+        $data = DPS_Appointment_Request_Repository::get_instance()->get_request_data( $request->ID );
+        
+        if ( ! $data ) {
+            return;
+        }
+
+        $status_labels = [
+            'pending'   => __( 'Aguardando Confirmação', 'dps-client-portal' ),
+            'confirmed' => __( 'Confirmado', 'dps-client-portal' ),
+            'rejected'  => __( 'Não Aprovado', 'dps-client-portal' ),
+            'adjusted'  => __( 'Ajustado', 'dps-client-portal' ),
+        ];
+
+        $status_classes = [
+            'pending'   => 'status-pending',
+            'confirmed' => 'status-confirmed',
+            'rejected'  => 'status-rejected',
+            'adjusted'  => 'status-adjusted',
+        ];
+
+        $type_labels = [
+            'new'        => __( 'Novo Agendamento', 'dps-client-portal' ),
+            'reschedule' => __( 'Reagendamento', 'dps-client-portal' ),
+            'cancel'     => __( 'Cancelamento', 'dps-client-portal' ),
+        ];
+
+        $status       = $data['status'];
+        $status_label = isset( $status_labels[ $status ] ) ? $status_labels[ $status ] : $status;
+        $status_class = isset( $status_classes[ $status ] ) ? $status_classes[ $status ] : '';
+        $type_label   = isset( $type_labels[ $data['type'] ] ) ? $type_labels[ $data['type'] ] : $data['type'];
+
+        echo '<div class="dps-request-card ' . esc_attr( $status_class ) . '">';
+        
+        // Header com tipo e status
+        echo '<div class="dps-request-card__header">';
+        echo '<span class="dps-request-card__type">' . esc_html( $type_label ) . '</span>';
+        echo '<span class="dps-request-card__status">' . esc_html( $status_label ) . '</span>';
+        echo '</div>';
+        
+        // Conteúdo
+        echo '<div class="dps-request-card__content">';
+        
+        // Pet
+        if ( $data['pet_id'] ) {
+            $pet_name = get_the_title( $data['pet_id'] );
+            echo '<div class="dps-request-card__pet">🐾 ' . esc_html( $pet_name ) . '</div>';
+        }
+        
+        // Data desejada
+        if ( ! empty( $data['desired_date'] ) ) {
+            $period_labels = [
+                'morning'   => __( 'manhã', 'dps-client-portal' ),
+                'afternoon' => __( 'tarde', 'dps-client-portal' ),
+            ];
+            $period_label = isset( $period_labels[ $data['desired_period'] ] ) ? $period_labels[ $data['desired_period'] ] : '';
+            
+            echo '<div class="dps-request-card__date">';
+            echo '📅 ' . esc_html( date_i18n( 'd/m/Y', strtotime( $data['desired_date'] ) ) );
+            if ( $period_label ) {
+                echo ' - ' . esc_html( $period_label );
+            }
+            echo '</div>';
+        }
+        
+        // Data confirmada (se status = confirmed)
+        if ( 'confirmed' === $status && ! empty( $data['confirmed_date'] ) ) {
+            echo '<div class="dps-request-card__confirmed">';
+            echo '<strong>' . esc_html__( 'Confirmado para:', 'dps-client-portal' ) . '</strong> ';
+            echo esc_html( date_i18n( 'd/m/Y', strtotime( $data['confirmed_date'] ) ) );
+            if ( ! empty( $data['confirmed_time'] ) ) {
+                echo ' às ' . esc_html( $data['confirmed_time'] );
+            }
+            echo '</div>';
+        }
+        
+        // Observações
+        if ( ! empty( $data['notes'] ) ) {
+            echo '<div class="dps-request-card__notes">';
+            echo esc_html( $data['notes'] );
+            echo '</div>';
+        }
+        
+        echo '</div>'; // .dps-request-card__content
+        
+        echo '</div>'; // .dps-request-card
     }
 }

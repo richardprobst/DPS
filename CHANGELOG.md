@@ -82,6 +82,106 @@ Antes de criar uma nova versão oficial:
 ### [Unreleased]
 
 #### Added (Adicionado)
+- **Client Portal (v2.4.0)**: Linha do tempo de serviços por pet (Fase 4)
+  - Nova classe `DPS_Portal_Pet_History` para buscar histórico de serviços realizados
+  - Método `get_pet_service_history()` retorna serviços por pet em ordem cronológica
+  - Método `get_client_service_history()` agrupa serviços de todos os pets do cliente
+  - Nova aba "Histórico dos Pets" no portal com timeline visual de serviços
+  - Timeline mostra: data, tipo de serviço, observações e profissional
+  - Botão "Repetir este Serviço" em cada item da timeline
+  - Estado vazio amigável quando pet não tem histórico
+  - Design responsivo para mobile com cards empilháveis
+- **Client Portal (v2.4.0)**: Sistema de pedidos de agendamento (Fase 4)
+  - Novo CPT `dps_appt_request` para armazenar pedidos de agendamento
+  - Classe `DPS_Appointment_Request_Repository` para gerenciar pedidos
+  - Campos: cliente, pet, tipo (novo/reagendar/cancelar), dia desejado, período (manhã/tarde), status
+  - Status possíveis: pending, confirmed, rejected, adjusted
+  - NUNCA confirma automaticamente - sempre requer aprovação da equipe
+  - Método `create_request()` para criar novos pedidos
+  - Método `get_requests_by_client()` para listar pedidos do cliente
+  - Método `update_request_status()` para equipe atualizar status
+- **Client Portal (v2.4.0)**: Ações rápidas no dashboard (Fase 4)
+  - Botão "Solicitar Reagendamento" no card de próximo agendamento
+  - Botão "Solicitar Cancelamento" no card de próximo agendamento
+  - Modal interativo para escolher dia e período (manhã/tarde) desejados
+  - Textos claros informando que é PEDIDO, não confirmação automática
+  - Mensagem: "Este é um pedido de agendamento. O Banho e Tosa irá confirmar o horário final"
+  - Fluxo de reagendamento: cliente escolhe data + período → status "pendente"
+  - Fluxo de cancelamento: confirmação → status "cancelamento solicitado"
+- **Client Portal (v2.4.0)**: Dashboard de solicitações recentes (Fase 4)
+  - Nova seção "Suas Solicitações Recentes" no painel inicial
+  - Renderiza últimos 5 pedidos do cliente com cards visuais
+  - Indicadores de status: Aguardando Confirmação (amarelo), Confirmado (verde), Não Aprovado (vermelho)
+  - Exibe data desejada, período, pet e observações
+  - Mostra data/hora confirmadas quando status = "confirmed"
+  - Método `render_recent_requests()` na classe renderer
+- **Client Portal (v2.4.0)**: Handlers AJAX para pedidos (Fase 4)
+  - Endpoint AJAX `dps_create_appointment_request`
+  - Validação de nonce e autenticação de sessão
+  - Validação de ownership de pet
+  - Sanitização completa de todos os inputs
+  - Mensagens de sucesso diferenciadas por tipo de pedido
+  - Resposta JSON com ID do pedido criado
+- **Client Portal (v2.4.0)**: Interface JavaScript para modais (Fase 4)
+  - Handlers para botões `.dps-btn-reschedule`, `.dps-btn-cancel`, `.dps-btn-repeat-service`
+  - Função `createRequestModal()` para criar modais dinamicamente
+  - Função `submitAppointmentRequest()` para envio via AJAX
+  - Validação de formulário com data mínima (amanhã)
+  - Notificações visuais de sucesso/erro
+  - Reload automático da página após sucesso (2 segundos)
+- **Client Portal (v2.4.0)**: Estilos CSS para timeline e modais (Fase 4)
+  - Classe `.dps-timeline` com marcadores e linha conectora
+  - Classe `.dps-timeline-item` com layout de card
+  - Classe `.dps-request-card` com bordas coloridas por status
+  - Classe `.dps-appointment-actions` para ações rápidas
+  - Modal `.dps-appointment-request-modal` com aviso destacado
+  - Design responsivo para mobile (media queries 768px)
+- **Client Portal (v2.4.0)**: Central de Mensagens melhorada (Fase 4 - continuação)
+  - Nova aba dedicada "Mensagens" 💬 no portal com contador de não lidas
+  - Badge dinâmica mostrando quantidade de mensagens não lidas
+  - Destaque visual para mensagens não lidas (borda azul, fundo claro, badge "Nova")
+  - Exibição de tipo de mensagem (confirmação, lembrete, mudança, geral)
+  - Link para agendamento relacionado quando mensagem está associada a um serviço
+  - Ordenação com mensagens mais recentes primeiro (DESC)
+  - Estado vazio melhorado com ícone e texto explicativo
+  - Marcação automática como lida ao visualizar
+  - Método `get_unread_messages_count()` para contagem eficiente
+  - Texto "Equipe do Banho e Tosa" em vez de genérico
+- **Client Portal (v2.4.0)**: Preferências do Cliente (Fase 4 - continuação)
+  - Nova seção "Minhas Preferências" ⚙️ em "Meus Dados"
+  - Campo "Como prefere ser contatado?": WhatsApp, Telefone, E-mail ou Sem preferência
+  - Campo "Período preferido para banho/tosa": Manhã, Tarde, Indiferente
+  - Salvamento em meta do cliente: `client_contact_preference`, `client_period_preference`
+  - Handler `update_client_preferences` para processar formulário
+  - Hook `dps_portal_after_update_preferences` para extensões
+  - Layout em grid responsivo com 2 colunas em desktop
+- **Client Portal (v2.4.0)**: Preferências do Pet (Fase 4 - continuação)
+  - Novo fieldset "Preferências de Banho e Tosa" 🌟 nos formulários de pet
+  - Campo "Observações de Comportamento": medos, sensibilidades (ex: medo de secador)
+  - Campo "Preferências de Corte/Tosa": estilo preferido (ex: tosa na tesoura, padrão raça)
+  - Campo "Produtos Especiais / Alergias": necessidades específicas (ex: shampoo hipoalergênico)
+  - Salvamento junto com dados do pet em update_pet
+  - Metadados: `pet_behavior_notes`, `pet_grooming_preference`, `pet_product_notes`
+  - Textos contextualizados para Banho e Tosa (não clínica veterinária)
+  - Preparado para futura visualização pela equipe ao atender o pet
+- **Client Portal (v2.4.0)**: Branding Customizável (Fase 4 - conclusão)
+  - Nova aba "Branding" 🎨 nas configurações admin ([dps_configuracoes])
+  - Upload de logo do Banho e Tosa (recomendado: 200x80px)
+  - Seletor de cor primária com preview visual e color picker
+  - Upload de imagem hero/destaque para topo do portal (recomendado: 1200x200px)
+  - Opções para remover logo ou hero image
+  - Preview das imagens atuais antes de trocar
+  - Handler `save_branding_settings()` com validação de segurança
+  - Aplicação automática no portal:
+    - Logo exibido no header (classe `.dps-portal-logo`)
+    - Hero image como background no topo (classe `.dps-portal-hero`)
+    - Cor primária via CSS custom properties (`--dps-custom-primary`)
+    - Cor de hover calculada automaticamente (20% mais escura)
+    - Classe `.dps-portal-branded` quando há customizações ativas
+  - Afeta: botões primários, links, badges de tab, timeline markers, mensagens não lidas
+  - Método helper `adjust_brightness()` para calcular variações de cor
+  - Armazenamento em options: `dps_portal_logo_id`, `dps_portal_primary_color`, `dps_portal_hero_id`
+  - Portal reflete identidade visual única de cada Banho e Tosa
 - **Client Portal (v2.4.0)**: Sistema de notificação de acesso ao portal (Fase 1.3)
   - Nova opção nas configurações do portal para ativar/desativar notificações de acesso
   - E-mail automático enviado ao cliente quando o portal é acessado via token

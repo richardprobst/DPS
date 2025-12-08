@@ -2227,3 +2227,572 @@ html {
         text-align: center;
     }
 }
+
+/* ========================================
+   FASE 4: TIMELINE DE SERVIÇOS E QUICK ACTIONS
+   ======================================== */
+
+/* Timeline de Serviços */
+.dps-timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.dps-timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 30px;
+}
+
+.dps-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 30px;
+    bottom: -30px;
+    width: 2px;
+    background-color: var(--dps-gray-200);
+}
+
+.dps-timeline-item:last-child::before {
+    display: none;
+}
+
+.dps-timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--dps-primary);
+    border-radius: 50%;
+    border: 3px solid var(--dps-white);
+    box-shadow: 0 0 0 2px var(--dps-gray-200);
+}
+
+.dps-timeline-content {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+
+.dps-timeline-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin-bottom: 8px;
+}
+
+.dps-timeline-service {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dps-gray-900);
+    margin-bottom: 8px;
+}
+
+.dps-timeline-notes {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-timeline-professional {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin-top: 8px;
+}
+
+.dps-timeline-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-btn-repeat-service {
+    font-size: 14px;
+    padding: 8px 16px;
+}
+
+/* Ações Rápidas do Agendamento */
+.dps-appointment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-btn-reschedule,
+.dps-btn-cancel {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px 16px;
+}
+
+/* Cards de Solicitações */
+.dps-portal-requests {
+    margin-top: 32px;
+}
+
+.dps-requests-list {
+    display: grid;
+    gap: 16px;
+}
+
+.dps-request-card {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-left: 4px solid var(--dps-gray-400);
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-request-card:hover {
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-request-card.status-pending {
+    border-left-color: var(--dps-warning);
+}
+
+.dps-request-card.status-confirmed {
+    border-left-color: var(--dps-success);
+}
+
+.dps-request-card.status-rejected {
+    border-left-color: var(--dps-danger);
+}
+
+.dps-request-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dps-request-card__type {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+}
+
+.dps-request-card__status {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--dps-gray-100);
+    color: var(--dps-gray-700);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-pending .dps-request-card__status {
+    background-color: var(--dps-warning-bg);
+    color: var(--dps-warning-text);
+}
+
+.status-confirmed .dps-request-card__status {
+    background-color: var(--dps-success-bg);
+    color: #065f46;
+}
+
+.status-rejected .dps-request-card__status {
+    background-color: var(--dps-danger-bg);
+    color: #991b1b;
+}
+
+.dps-request-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-request-card__pet,
+.dps-request-card__date {
+    font-size: 14px;
+    color: var(--dps-gray-700);
+}
+
+.dps-request-card__confirmed {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--dps-gray-100);
+    font-size: 14px;
+    color: var(--dps-success);
+}
+
+.dps-request-card__notes {
+    margin-top: 12px;
+    padding: 12px;
+    background-color: var(--dps-gray-50);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+/* Modal de Pedido de Agendamento */
+.dps-appointment-request-modal.dps-modal {
+    z-index: 99999;
+}
+
+.dps-modal__notice {
+    padding: 16px;
+    background-color: var(--dps-warning-bg);
+    border-left: 4px solid var(--dps-warning);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--dps-warning-text);
+    margin-bottom: 24px;
+}
+
+.dps-modal__notice strong {
+    font-weight: 600;
+}
+
+.dps-request-form .dps-form-field {
+    margin-bottom: 20px;
+}
+
+.dps-request-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dps-gray-700);
+}
+
+.dps-request-form .required {
+    color: var(--dps-danger);
+}
+
+.dps-request-form input[type="date"],
+.dps-request-form select,
+.dps-request-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--dps-border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.dps-request-form input[type="date"]:focus,
+.dps-request-form select:focus,
+.dps-request-form textarea:focus {
+    outline: none;
+    border-color: var(--dps-primary);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+/* Responsivo para Timeline e Modais */
+@media (max-width: 768px) {
+    .dps-timeline-item {
+        padding-left: 30px;
+    }
+    
+    .dps-timeline-marker {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .dps-appointment-actions {
+        flex-direction: column;
+    }
+    
+    .dps-form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .dps-form-actions button {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   FASE 4 CONTINUAÇÃO: MENSAGENS, PREFERÊNCIAS E BRANDING
+   ======================================== */
+
+/* Central de Mensagens - Melhorias */
+.dps-portal-messages__list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.dps-portal-message {
+    position: relative;
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-portal-message:hover {
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-portal-message--unread {
+    border-left: 4px solid var(--dps-primary);
+    background-color: #f0f9ff;
+}
+
+.dps-portal-message__unread-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dps-portal-message__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 16px;
+}
+
+.dps-portal-message__author {
+    font-weight: 600;
+    color: var(--dps-gray-900);
+}
+
+.dps-portal-message__date {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+}
+
+.dps-portal-message__type {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--dps-gray-100);
+    color: var(--dps-gray-700);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.dps-portal-message__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin-bottom: 12px;
+}
+
+.dps-portal-message__content {
+    color: var(--dps-gray-700);
+    line-height: 1.6;
+}
+
+.dps-portal-message__content p:last-child {
+    margin-bottom: 0;
+}
+
+.dps-portal-message__action {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-portal-message__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dps-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.dps-portal-message__link:hover {
+    text-decoration: underline;
+}
+
+.dps-portal-messages__form {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 2px solid var(--dps-gray-200);
+}
+
+.dps-portal-messages__form h3 {
+    margin-bottom: 20px;
+    color: var(--dps-gray-900);
+}
+
+/* Preferências do Cliente e Pet */
+.dps-preferences-section {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.dps-preferences-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.dps-preference-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-preference-item__label {
+    font-weight: 500;
+    color: var(--dps-gray-700);
+    font-size: 14px;
+}
+
+.dps-preference-item__value {
+    color: var(--dps-gray-900);
+    padding: 10px 14px;
+    background-color: var(--dps-gray-50);
+    border-radius: 6px;
+    border: 1px solid var(--dps-gray-200);
+}
+
+.dps-preference-item__value.is-empty {
+    color: var(--dps-gray-400);
+    font-style: italic;
+}
+
+.dps-preferences-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+/* Pet Preferences Card */
+.dps-pet-preferences {
+    background-color: var(--dps-gray-50);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.dps-pet-preferences__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-pet-preferences__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dps-pet-preference {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-pet-preference__label {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--dps-gray-600);
+}
+
+.dps-pet-preference__text {
+    color: var(--dps-gray-900);
+    font-size: 14px;
+}
+
+/* Branding - Logo e Hero Image */
+.dps-portal-header--branded {
+    position: relative;
+}
+
+.dps-portal-hero {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.dps-portal-logo {
+    max-width: 200px;
+    max-height: 80px;
+    margin-bottom: 20px;
+}
+
+/* Aplicação de Cor Primária Customizada */
+.dps-portal-branded .button-primary,
+.dps-portal-branded .dps-portal-tabs__link.is-active {
+    background-color: var(--dps-custom-primary, var(--dps-primary));
+    border-color: var(--dps-custom-primary, var(--dps-primary));
+}
+
+.dps-portal-branded .button-primary:hover {
+    background-color: var(--dps-custom-primary-hover, var(--dps-primary-hover));
+}
+
+.dps-portal-branded a {
+    color: var(--dps-custom-primary, var(--dps-primary));
+}
+
+.dps-portal-branded .dps-timeline-marker {
+    background-color: var(--dps-custom-primary, var(--dps-primary));
+}
+
+.dps-portal-branded .dps-portal-message--unread {
+    border-left-color: var(--dps-custom-primary, var(--dps-primary));
+}
+
+.dps-portal-branded .dps-portal-message__unread-badge {
+    background-color: var(--dps-custom-primary, var(--dps-primary));
+}
+
+/* Responsivo para Preferências */
+@media (max-width: 768px) {
+    .dps-preferences-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-portal-hero {
+        height: 150px;
+    }
+    
+    .dps-portal-logo {
+        max-width: 150px;
+    }
+}
