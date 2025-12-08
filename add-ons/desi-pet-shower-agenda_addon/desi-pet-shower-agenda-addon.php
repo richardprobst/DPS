@@ -178,6 +178,12 @@ class DPS_Agenda_Addon {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         // AJAX para atualizar status de agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_update_status', [ $this, 'update_status_ajax' ] );
+        
+        // UX-1: AJAX para ações rápidas de status
+        add_action( 'wp_ajax_dps_agenda_quick_action', [ $this, 'quick_action_ajax' ] );
+        
+        // CONF-2: AJAX para atualização de status de confirmação
+        add_action( 'wp_ajax_dps_agenda_update_confirmation', [ $this, 'update_confirmation_ajax' ] );
 
         // Versionamento de agendamentos para evitar conflitos de escrita
         add_action( 'save_post_dps_agendamento', [ $this, 'ensure_appointment_version_meta' ], 10, 3 );
@@ -360,6 +366,10 @@ class DPS_Agenda_Addon {
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
                 'nonce_services'=> wp_create_nonce( 'dps_get_services_details' ),
                 'nonce_export'  => wp_create_nonce( 'dps_agenda_export_csv' ),
+                // UX-1: Nonce para ações rápidas
+                'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
+                // CONF-2: Nonce para confirmação
+                'nonce_confirmation' => wp_create_nonce( 'dps_agenda_confirmation' ),
                 // FASE 5: Nonces para funcionalidades administrativas avançadas
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
@@ -479,92 +489,74 @@ class DPS_Agenda_Addon {
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
         $next_args = array_merge( $nav_args, [ 'dps_date' => $next_date, 'view' => $view ] );
         
-        // Navegação simplificada (FASE 2): consolidar botões
-        echo '<div class="dps-agenda-nav">';
+        // UX-4: Navegação e filtros consolidados em até 2 linhas
+        echo '<div class="dps-agenda-controls-wrapper">';
         
-        // Grupo 1: Navegação de data (Anterior | Hoje | Próximo)
-        echo '<div class="dps-agenda-nav-group">';
-        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft" title="' . esc_attr( $is_week_view ? __( 'Ver semana anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
-        echo '← ' . ( $is_week_view ? esc_html__( 'Anterior', 'dps-agenda-addon' ) : esc_html__( 'Anterior', 'dps-agenda-addon' ) );
+        // Linha 1: Navegação principal e data
+        echo '<div class="dps-agenda-nav dps-agenda-nav--primary">';
+        
+        // Grupo 1: Data e navegação temporal
+        echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--date">';
+        
+        // Data atual/selecionada como referência visual
+        if ( ! $show_all ) {
+            $date_display = date_i18n( 'd/m/Y', strtotime( $selected_date ) );
+            echo '<span class="dps-current-date" title="' . esc_attr__( 'Data atual', 'dps-agenda-addon' ) . '">';
+            echo '📅 <strong>' . esc_html( $date_display ) . '</strong>';
+            echo '</span>';
+        } else {
+            echo '<span class="dps-current-date">';
+            echo '📋 <strong>' . esc_html__( 'Todos os agendamentos', 'dps-agenda-addon' ) . '</strong>';
+            echo '</span>';
+        }
+        
+        // Navegação anterior/hoje/próximo
+        echo '<div class="dps-date-nav">';
+        echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver semana anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
+        echo '←';
         echo '</a>';
         
-        // Botão "Hoje"
         $today = current_time( 'Y-m-d' );
         $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
         unset( $today_args['show_all'] );
-        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
+        echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--today" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
         echo esc_html__( 'Hoje', 'dps-agenda-addon' );
         echo '</a>';
         
-        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft" title="' . esc_attr( $is_week_view ? __( 'Ver próxima semana', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
-        echo ( $is_week_view ? esc_html__( 'Próximo', 'dps-agenda-addon' ) : esc_html__( 'Próximo', 'dps-agenda-addon' ) ) . ' →';
+        echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver próxima semana', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
+        echo '→';
         echo '</a>';
         echo '</div>';
-        
-        // Grupo 2: Visualizações (Dia | Semana | Mês | Todos)
-        echo '<div class="dps-agenda-nav-group">';
-        
-        // Botão Ver Semana/Dia (toggle)
-        $toggle_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
-        if ( $is_week_view ) {
-            // Em visualização semanal, exibe botão para voltar à lista diária
-            $toggle_args['view'] = 'day';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver lista diária', 'dps-agenda-addon' ) . '">';
-            echo '📅 ' . esc_html__( 'Dia', 'dps-agenda-addon' );
-            echo '</a>';
-        } else {
-            // Em visualização diária, exibe botão para a lista semanal
-            $toggle_args['view'] = 'week';
-            echo '<a href="' . esc_url( add_query_arg( $toggle_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver lista semanal', 'dps-agenda-addon' ) . '">';
-            echo '📅 ' . esc_html__( 'Semana', 'dps-agenda-addon' );
-            echo '</a>';
-        }
-        
-        // FASE 4: Botão Calendário Mensal
-        $is_calendar_view = ( $view === 'calendar' );
-        $calendar_args = array_merge( $nav_args, [ 'dps_date' => $selected_date ] );
-        if ( $is_calendar_view ) {
-            $calendar_args['view'] = 'day';
-            echo '<a href="' . esc_url( add_query_arg( $calendar_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Voltar para lista', 'dps-agenda-addon' ) . '">';
-            echo '📆 ' . esc_html__( 'Lista', 'dps-agenda-addon' );
-            echo '</a>';
-        } else {
-            $calendar_args['view'] = 'calendar';
-            echo '<a href="' . esc_url( add_query_arg( $calendar_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver calendário mensal', 'dps-agenda-addon' ) . '">';
-            echo '📆 ' . esc_html__( 'Mês', 'dps-agenda-addon' );
-            echo '</a>';
-        }
-        
-        // Botão Todos os Atendimentos
-        $all_args = $current_args;
-        unset( $all_args['dps_date'] );
-        unset( $all_args['view'] );
-        $all_args['show_all'] = '1';
-        echo '<a href="' . esc_url( add_query_arg( $all_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Ver todos os agendamentos', 'dps-agenda-addon' ) . '">';
-        echo '📋 ' . esc_html__( 'Todos', 'dps-agenda-addon' );
-        echo '</a>';
-        
-        // FASE 2: Botão Agrupado por Cliente
-        $group_by_client = isset( $_GET['group_by_client'] ) && $_GET['group_by_client'] === '1';
-        $group_args = $current_args;
-        if ( $group_by_client ) {
-            unset( $group_args['group_by_client'] );
-            echo '<a href="' . esc_url( add_query_arg( $group_args, $base_url ) ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Desagrupar visualização', 'dps-agenda-addon' ) . '">';
-            echo '👥 ' . esc_html__( 'Desagrupar', 'dps-agenda-addon' );
-            echo '</a>';
-        } else {
-            $group_args['group_by_client'] = '1';
-            echo '<a href="' . esc_url( add_query_arg( $group_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost" title="' . esc_attr__( 'Agrupar agendamentos por cliente', 'dps-agenda-addon' ) . '">';
-            echo '👥 ' . esc_html__( 'Agrupar', 'dps-agenda-addon' );
-            echo '</a>';
-        }
-        
         echo '</div>';
         
-        // Grupo 3: Ação principal (Novo Agendamento) e Exportação
-        echo '<div class="dps-agenda-nav-group">';
+        // Grupo 2: Visualizações compactas (Dia | Semana | Mês)
+        echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--views">';
+        echo '<span class="dps-nav-label">' . esc_html__( 'Ver:', 'dps-agenda-addon' ) . '</span>';
         
-        // Botão "Novo Agendamento" - link para tela de criação no plugin base
+        $view_buttons = [];
+        
+        // Botão Dia
+        $day_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'day' ] );
+        $day_active = ( $view === 'day' ) ? ' dps-view-btn--active' : '';
+        $view_buttons[] = '<a href="' . esc_url( add_query_arg( $day_args, $base_url ) ) . '" class="dps-view-btn' . $day_active . '" title="' . esc_attr__( 'Ver lista diária', 'dps-agenda-addon' ) . '">' . esc_html__( 'Dia', 'dps-agenda-addon' ) . '</a>';
+        
+        // Botão Semana
+        $week_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'week' ] );
+        $week_active = ( $view === 'week' ) ? ' dps-view-btn--active' : '';
+        $view_buttons[] = '<a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="dps-view-btn' . $week_active . '" title="' . esc_attr__( 'Ver lista semanal', 'dps-agenda-addon' ) . '">' . esc_html__( 'Semana', 'dps-agenda-addon' ) . '</a>';
+        
+        // Botão Mês/Calendário
+        $cal_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'calendar' ] );
+        $cal_active = ( $view === 'calendar' ) ? ' dps-view-btn--active' : '';
+        $view_buttons[] = '<a href="' . esc_url( add_query_arg( $cal_args, $base_url ) ) . '" class="dps-view-btn' . $cal_active . '" title="' . esc_attr__( 'Ver calendário mensal', 'dps-agenda-addon' ) . '">' . esc_html__( 'Mês', 'dps-agenda-addon' ) . '</a>';
+        
+        echo '<div class="dps-view-buttons">' . implode( '', $view_buttons ) . '</div>';
+        echo '</div>';
+        
+        // Grupo 3: Ações principais
+        echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--actions">';
+        
+        // Botão Novo Agendamento
         $base_page_id = get_option( 'dps_base_page_id' );
         if ( $base_page_id ) {
             $new_appt_url = add_query_arg( [
@@ -573,156 +565,172 @@ class DPS_Agenda_Addon {
             ], get_permalink( $base_page_id ) );
             
             echo '<a href="' . esc_url( $new_appt_url ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '">';
-            echo '➕ ' . esc_html__( 'Novo Agendamento', 'dps-agenda-addon' );
+            echo '➕ ' . esc_html__( 'Novo', 'dps-agenda-addon' );
             echo '</a>';
         }
         
-        // FASE 2: Botão Exportar CSV
+        // Botão Exportar CSV
         $export_date = $show_all ? '' : $selected_date;
         echo '<button type="button" class="button dps-btn dps-btn--ghost dps-export-csv-btn" data-date="' . esc_attr( $export_date ) . '" data-view="' . esc_attr( $view ) . '" title="' . esc_attr__( 'Exportar agenda para Excel/CSV', 'dps-agenda-addon' ) . '">';
-        echo '📥 ' . esc_html__( 'Exportar', 'dps-agenda-addon' );
+        echo '📥';
         echo '</button>';
         
         echo '</div>';
         echo '</div>';
         
-        // Na visualização de calendário, não exibe formulários pois o calendário tem navegação própria
-        // Inicializa variáveis de filtro
-        $filter_client  = 0;
-        $filter_status  = '';
-        $filter_service = 0;
-        
+        // Linha 2: Seletor de data + Filtros principais + Filtros avançados (colapsável)
         if ( $view !== 'calendar' ) {
-            // Formulário de seleção de data
-            echo '<form method="get" class="dps-agenda-date-form">';
-            // Preserve outros parâmetros, exceto dps_date, view e show_all
+            echo '<div class="dps-agenda-nav dps-agenda-nav--filters">';
+            
+            // Formulário unificado de data e filtros
+            echo '<form method="get" class="dps-agenda-unified-form">';
+            
+            // Preserve parâmetros da URL
             foreach ( $_GET as $k => $v ) {
-                if ( $k === 'dps_date' || $k === 'view' || $k === 'show_all' ) {
+                if ( in_array( $k, [ 'dps_date', 'view', 'show_all', 'filter_client', 'filter_status', 'filter_service' ], true ) ) {
                     continue;
                 }
-                // Para view, já adicionaremos campo separado abaixo
                 echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
             }
-            // Preserve view explicitamente, caso exista
             echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
             if ( $show_all ) {
                 echo '<input type="hidden" name="show_all" value="1">';
             }
-            echo '<label>' . esc_html__( 'Selecione a data', 'dps-agenda-addon' ) . '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '"></label>';
-            echo '<div class="dps-agenda-date-actions">';
-            echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Ver', 'dps-agenda-addon' ) . '</button>';
-            echo '</div>';
-            echo '</form>';
-
-            // ========== Filtros por cliente, status e serviço ==========
-            // Obtém filtros atuais
+            
+            // Grupo de filtros principais
+            echo '<div class="dps-filters-main">';
+            
+            // Campo de data
+            echo '<label class="dps-filter-field">';
+            echo '<span class="dps-filter-label">' . esc_html__( 'Data:', 'dps-agenda-addon' ) . '</span>';
+            echo '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '" class="dps-filter-input">';
+            echo '</label>';
+            
+            // Inicializa variáveis de filtro
             $filter_client  = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
             $filter_status  = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
             $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
-        }
-        
-        // Limites configuráveis via filtro
-        $clients_limit = apply_filters( 'dps_agenda_clients_limit', self::CLIENTS_LIST_LIMIT );
-        $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
-        
-        // PERFORMANCE: Lista de clientes com cache transient (1 hora)
-        // Cache pode ser desabilitado via constante DPS_DISABLE_CACHE
-        $clients_cache_key = 'dps_agenda_clients_list';
-        $clients = false;
-        if ( ! dps_is_cache_disabled() ) {
-            $clients = get_transient( $clients_cache_key );
-        }
-        if ( false === $clients ) {
-            $clients = get_posts( [
-                'post_type'      => 'dps_cliente',
-                'posts_per_page' => $clients_limit,
-                'post_status'    => 'publish',
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-                'no_found_rows'  => true, // Otimização: não conta total
-            ] );
+            
+            // Filtro de Status (principal)
+            $status_options = [
+                ''                => __( 'Todos os status', 'dps-agenda-addon' ),
+                'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
+                'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
+                'finalizado_pago' => __( 'Pago', 'dps-agenda-addon' ),
+                'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
+            ];
+            
+            echo '<label class="dps-filter-field">';
+            echo '<span class="dps-filter-label">' . esc_html__( 'Status:', 'dps-agenda-addon' ) . '</span>';
+            echo '<select name="filter_status" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por status', 'dps-agenda-addon' ) . '">';
+            foreach ( $status_options as $val => $label ) {
+                echo '<option value="' . esc_attr( $val ) . '"' . selected( $filter_status, $val, false ) . '>' . esc_html( $label ) . '</option>';
+            }
+            echo '</select>';
+            echo '</label>';
+            
+            // Botão Aplicar
+            echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
+            
+            // UX-5: Botão para revelar filtros avançados
+            $has_advanced_filters = ( $filter_client > 0 || $filter_service > 0 );
+            echo '<button type="button" class="button dps-btn dps-btn--ghost dps-toggle-advanced-filters" data-expanded="' . ( $has_advanced_filters ? 'true' : 'false' ) . '" title="' . esc_attr__( 'Mostrar/ocultar filtros avançados', 'dps-agenda-addon' ) . '">';
+            echo esc_html__( 'Mais filtros', 'dps-agenda-addon' ) . ' <span class="dps-toggle-icon">▼</span>';
+            echo '</button>';
+            
+            // Link para limpar filtros (se houver algum ativo)
+            if ( $has_advanced_filters || $filter_status !== '' ) {
+                $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
+                if ( $show_all ) {
+                    $clear_args['show_all'] = '1';
+                }
+                echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost dps-clear-filters" title="' . esc_attr__( 'Remover todos os filtros', 'dps-agenda-addon' ) . '">✕</a>';
+            }
+            
+            echo '</div>';
+            
+            // UX-5: Filtros avançados colapsáveis
+            $advanced_class = $has_advanced_filters ? '' : ' dps-filters-advanced--hidden';
+            echo '<div class="dps-filters-advanced' . $advanced_class . '">';
+            
+            // Carrega listas de clientes e serviços (com cache)
+            $clients_limit = apply_filters( 'dps_agenda_clients_limit', self::CLIENTS_LIST_LIMIT );
+            $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
+            
+            $clients_cache_key = 'dps_agenda_clients_list';
+            $clients = false;
             if ( ! dps_is_cache_disabled() ) {
-                set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
+                $clients = get_transient( $clients_cache_key );
             }
-        }
-        
-        // PERFORMANCE: Lista de serviços com cache transient (1 hora)
-        // Cache pode ser desabilitado via constante DPS_DISABLE_CACHE
-        $services_cache_key = 'dps_agenda_services_list';
-        $services = false;
-        if ( ! dps_is_cache_disabled() ) {
-            $services = get_transient( $services_cache_key );
-        }
-        if ( false === $services ) {
-            $services = get_posts( [
-                'post_type'      => 'dps_service',
-                'posts_per_page' => $services_limit,
-                'post_status'    => 'publish',
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-                'no_found_rows'  => true, // Otimização: não conta total
-            ] );
+            if ( false === $clients ) {
+                $clients = get_posts( [
+                    'post_type'      => 'dps_cliente',
+                    'posts_per_page' => $clients_limit,
+                    'post_status'    => 'publish',
+                    'orderby'        => 'title',
+                    'order'          => 'ASC',
+                    'no_found_rows'  => true,
+                ] );
+                if ( ! dps_is_cache_disabled() ) {
+                    set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
+                }
+            }
+            
+            $services_cache_key = 'dps_agenda_services_list';
+            $services = false;
             if ( ! dps_is_cache_disabled() ) {
-                set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
+                $services = get_transient( $services_cache_key );
             }
-        }
-        
-        $status_options = [
-            ''                => __( 'Todos os status', 'dps-agenda-addon' ),
-            'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
-            'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
-            'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
-        ];
-        
-        // Na visualização de calendário, não exibe formulário de filtros
-        if ( $view !== 'calendar' ) {
-            // Formulário de filtros
-            echo '<form method="get" class="dps-agenda-filters">';
-            // Preserve data e view
-            echo '<input type="hidden" name="dps_date" value="' . esc_attr( $selected_date ) . '">';
-            echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
-            if ( $show_all ) {
-                echo '<input type="hidden" name="show_all" value="1">';
+            if ( false === $services ) {
+                $services = get_posts( [
+                    'post_type'      => 'dps_service',
+                    'posts_per_page' => $services_limit,
+                    'post_status'    => 'publish',
+                    'orderby'        => 'title',
+                    'order'          => 'ASC',
+                    'no_found_rows'  => true,
+                ] );
+                if ( ! dps_is_cache_disabled() ) {
+                    set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
+                }
             }
-            // Cliente select - FASE 1: Adicionado aria-label para acessibilidade
-            echo '<label>' . esc_html__( 'Cliente', 'dps-agenda-addon' );
-            echo '<select name="filter_client" aria-label="' . esc_attr__( 'Filtrar por cliente', 'dps-agenda-addon' ) . '">';
+            
+            // Filtro de Cliente
+            echo '<label class="dps-filter-field">';
+            echo '<span class="dps-filter-label">' . esc_html__( 'Cliente:', 'dps-agenda-addon' ) . '</span>';
+            echo '<select name="filter_client" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por cliente', 'dps-agenda-addon' ) . '">';
             echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
             foreach ( $clients as $cl ) {
-                $selected = ( $filter_client === $cl->ID ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $cl->ID ) . '" ' . $selected . '>' . esc_html( $cl->post_title ) . '</option>';
+                echo '<option value="' . esc_attr( $cl->ID ) . '"' . selected( $filter_client, $cl->ID, false ) . '>' . esc_html( $cl->post_title ) . '</option>';
             }
-            echo '</select></label>';
-            // Status select - FASE 1: Adicionado aria-label para acessibilidade
-            echo '<label>' . esc_html__( 'Status', 'dps-agenda-addon' );
-            echo '<select name="filter_status" aria-label="' . esc_attr__( 'Filtrar por status do agendamento', 'dps-agenda-addon' ) . '">';
-            foreach ( $status_options as $val => $label ) {
-                $selected = ( $filter_status === $val ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $val ) . '" ' . $selected . '>' . esc_html( $label ) . '</option>';
-            }
-            echo '</select></label>';
-            // Serviço select - FASE 1: Adicionado aria-label para acessibilidade
-            echo '<label>' . esc_html__( 'Serviço', 'dps-agenda-addon' );
-            echo '<select name="filter_service" aria-label="' . esc_attr__( 'Filtrar por serviço', 'dps-agenda-addon' ) . '">';
+            echo '</select>';
+            echo '</label>';
+            
+            // Filtro de Serviço
+            echo '<label class="dps-filter-field">';
+            echo '<span class="dps-filter-label">' . esc_html__( 'Serviço:', 'dps-agenda-addon' ) . '</span>';
+            echo '<select name="filter_service" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por serviço', 'dps-agenda-addon' ) . '">';
             echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
             foreach ( $services as $srv ) {
-                $selected = ( $filter_service === $srv->ID ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $srv->ID ) . '" ' . $selected . '>' . esc_html( $srv->post_title ) . '</option>';
+                echo '<option value="' . esc_attr( $srv->ID ) . '"' . selected( $filter_service, $srv->ID, false ) . '>' . esc_html( $srv->post_title ) . '</option>';
             }
-            echo '</select></label>';
-            // Botões
-            echo '<div class="dps-agenda-filter-actions">';
-            echo '<button type="submit" class="button dps-btn dps-btn--primary">' . esc_html__( 'Aplicar filtros', 'dps-agenda-addon' ) . '</button>';
-            // Link para limpar filtros
-            $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
-            if ( $show_all ) {
-                $clear_args['show_all'] = '1';
-            }
-            echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost">' . esc_html__( 'Limpar filtros', 'dps-agenda-addon' ) . '</a>';
+            echo '</select>';
+            echo '</label>';
+            
             echo '</div>';
+            
             echo '</form>';
-        } // Fim do if ( $view !== 'calendar' ) para formulário de filtros
+            echo '</div>';
+        }
+        
+        echo '</div>'; // Fim da .dps-agenda-controls-wrapper
+        
+        // Inicializa variáveis de filtro (já foram obtidas acima no formulário unificado)
+        if ( $view === 'calendar' ) {
+            $filter_client  = 0;
+            $filter_status  = '';
+            $filter_service = 0;
+        }
         
         // Carrega agendamentos conforme visualização ou modo "todos"
         $appointments = [];
@@ -951,263 +959,8 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
-                    $date  = get_post_meta( $appt->ID, 'appointment_date', true );
-                    $time  = get_post_meta( $appt->ID, 'appointment_time', true );
-                    $client_id = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                    $pet_id    = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    $client_post = $client_id ? get_post( $client_id ) : null;
-                    $pet_post    = $pet_id ? get_post( $pet_id ) : null;
-                    $status = get_post_meta( $appt->ID, 'appointment_status', true );
-                    if ( ! $status ) { $status = 'pendente'; }
-                    $appt_version = intval( get_post_meta( $appt->ID, '_dps_appointment_version', true ) );
-                    if ( $appt_version < 1 ) {
-                        $appt_version = 1;
-                        update_post_meta( $appt->ID, '_dps_appointment_version', $appt_version );
-                    }
-                    // Cada linha recebe classes de status e um data attribute para permitir manipulação via JS.
-                    echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="status-' . esc_attr( $status ) . '">';
-                    // FASE 5: Checkbox para seleção em lote
-                    echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
-                    // Mostra a data no formato dia-mês-ano
-                    echo '<td data-label="' . esc_attr( $column_labels['date'] ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
-                    echo '<td data-label="' . esc_attr( $column_labels['time'] ) . '">' . esc_html( $time ) . '</td>';
-                    // Nome do pet e cliente com flag de agressividade melhorada (FASE 2)
-                    $pet_name    = $pet_post ? $pet_post->post_title : '';
-                    $client_name = $client_post ? $client_post->post_title : '';
-                    $aggr_flag   = '';
-                    if ( $pet_post ) {
-                        $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
-                        if ( $aggr ) {
-                            // Flag melhorada com emoji e tooltip
-                            $aggr_flag = ' <span class="dps-aggressive-flag" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️</span>';
-                        }
-                    }
-                    echo '<td data-label="' . esc_attr( $column_labels['pet'] ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
-                    // Serviços e assinatura
-                    echo '<td data-label="' . esc_attr( $column_labels['service'] ) . '">';
-                    $sub_id_meta = get_post_meta( $appt->ID, 'subscription_id', true );
-                    if ( $sub_id_meta ) {
-                        echo '<span class="dps-subscription-flag" style="font-weight:bold; color:#0073aa;">' . esc_html__( 'Assinatura', 'dps-agenda-addon' ) . '</span> ';
-                    }
-                    $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-                    if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
-                        // Link com ícone para abrir modal de serviços (FASE 2)
-                        echo '<a href="#" class="dps-services-link" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver detalhes dos serviços', 'dps-agenda-addon' ) . '">';
-                        echo esc_html__( 'Ver serviços', 'dps-agenda-addon' ) . ' ↗';
-                        echo '</a>';
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // Status (editable if admin)
-                    echo '<td data-label="' . esc_attr( $column_labels['status'] ) . '">';
-                    // SEGURANÇA: Apenas usuários autenticados com capability manage_options podem editar
-                    // NUNCA confie em cookies para controle de acesso - são facilmente manipuláveis
-                    $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
-                    // Define lista de status padrão
-                    $statuses = [
-                        'pendente'   => __( 'Pendente', 'dps-agenda-addon' ),
-                        'finalizado' => __( 'Finalizado', 'dps-agenda-addon' ),
-                        'finalizado_pago' => __( 'Finalizado e pago', 'dps-agenda-addon' ),
-                        'cancelado'  => __( 'Cancelado', 'dps-agenda-addon' ),
-                    ];
-                    // Para agendamentos de assinatura, não há necessidade de usar o status "finalizado e pago"
-                    $is_subscription = ! empty( $sub_id_meta );
-                    if ( $is_subscription ) {
-                        unset( $statuses['finalizado_pago'] );
-                        // Se o status atual for finalizado_pago, normaliza para finalizado
-                        if ( $status === 'finalizado_pago' ) {
-                            $status = 'finalizado';
-                            update_post_meta( $appt->ID, 'appointment_status', $status );
-                        }
-                    }
-                    if ( $can_edit ) {
-                        // FASE 1: Adicionado aria-label para acessibilidade
-                        echo '<select class="dps-status-select" data-appt-id="' . esc_attr( $appt->ID ) . '" data-current-status="' . esc_attr( $status ) . '" data-appt-version="' . esc_attr( $appt_version ) . '" aria-label="' . esc_attr__( 'Alterar status do agendamento', 'dps-agenda-addon' ) . '">';
-                        foreach ( $statuses as $value => $label ) {
-                            echo '<option value="' . esc_attr( $value ) . '"' . selected( $status, $value, false ) . '>' . esc_html( $label ) . '</option>';
-                        }
-                        echo '</select>';
-                    } else {
-                        echo esc_html( $statuses[ $status ] ?? $status );
-                    }
-                    echo '</td>';
-                    // Mapa
-                    echo '<td data-label="' . esc_attr( $column_labels['map'] ) . '">';
-                    $map_link = '';
-                    if ( $client_post ) {
-                        // Tenta usar o endereço em texto (rua/número) para o link do mapa, se existir.
-                        $address = get_post_meta( $client_post->ID, 'client_address', true );
-                        if ( ! empty( $address ) ) {
-                            $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . urlencode( $address );
-                            $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-                        } else {
-                            // Caso não exista endereço, utiliza as coordenadas se disponíveis
-                            $client_lat = get_post_meta( $client_post->ID, 'client_lat', true );
-                            $client_lng = get_post_meta( $client_post->ID, 'client_lng', true );
-                            if ( ! empty( $client_lat ) && ! empty( $client_lng ) ) {
-                                $map_url  = 'https://www.google.com/maps/search/?api=1&query=' . $client_lat . ',' . $client_lng;
-                                $map_link = '<a href="' . esc_url( $map_url ) . '" target="_blank">' . __( 'Mapa', 'dps-agenda-addon' ) . '</a>';
-                            }
-                        }
-                    }
-                    // Identifica se há solicitação de TaxiDog
-                    $taxi_req = get_post_meta( $appt->ID, 'appointment_taxidog', true );
-                    if ( $map_link ) {
-                        if ( $taxi_req === '1' ) {
-                            echo $map_link . ' <span style="color:#0073aa; font-style:italic;">(' . esc_html__( 'TaxiDog', 'dps-agenda-addon' ) . ')</span>';
-                        } else {
-                            echo $map_link . ' <span style="color:#6c757d; font-style:italic;">(' . esc_html__( 'Cliente', 'dps-agenda-addon' ) . ')</span>';
-                        }
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // Confirmação via WhatsApp
-                    echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ) . '">';
-                    $confirmation_html = '-';
-                    if ( $status === 'pendente' && $client_post ) {
-                        $raw_phone = get_post_meta( $client_post->ID, 'client_phone', true );
-                        $whatsapp  = DPS_Phone_Helper::format_for_whatsapp( $raw_phone );
-                        if ( $whatsapp ) {
-                            $client_name = $client_post->post_title;
-                            $pet_names   = [];
-                            if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
-                                $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
-                                if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
-                                    $pet_names = $group_data['pet_names'];
-                                }
-                            }
-                            if ( empty( $pet_names ) ) {
-                                $pet_names[] = $pet_name ? $pet_name : __( 'Pet', 'dps-agenda-addon' );
-                            }
-                            $services_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-                            $services_txt = '';
-                            if ( is_array( $services_ids ) && ! empty( $services_ids ) ) {
-                                $service_names = [];
-                                foreach ( $services_ids as $srv_id ) {
-                                    $srv_post = get_post( $srv_id );
-                                    if ( $srv_post ) {
-                                        $service_names[] = $srv_post->post_title;
-                                    }
-                                }
-                                if ( $service_names ) {
-                                    $services_txt = ' (' . implode( ', ', $service_names ) . ')';
-                                }
-                            }
-                            $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
-                            $message = sprintf(
-                                'Olá %s, tudo bem? Poderia confirmar o atendimento do(s) pet(s) %s agendado para %s às %s%s? Caso precise reagendar é só responder esta mensagem. Obrigado!',
-                                $client_name,
-                                implode( ', ', $pet_names ),
-                                $date_fmt,
-                                $time,
-                                $services_txt
-                            );
-                            $message = apply_filters( 'dps_agenda_confirmation_message', $message, $appt );
-                            // Link de confirmação com ícone e tooltip usando helper centralizado
-                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $whatsapp, $message );
-                            } else {
-                                // Fallback
-                                $wa_url = 'https://wa.me/' . $whatsapp . '?text=' . rawurlencode( $message );
-                            }
-                            $confirmation_html = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar mensagem de confirmação via WhatsApp', 'dps-agenda-addon' ) . '">💬 ' . esc_html__( 'Confirmar', 'dps-agenda-addon' ) . '</a>';
-                        }
-                    }
-                    echo $confirmation_html;
-                    echo '</td>';
-                    // Cobrança via WhatsApp
-                    echo '<td data-label="' . esc_attr( $column_labels['charge'] ) . '">';
-                    // Mostra link de cobrança apenas para atendimentos finalizados (não assinaturas)
-                    $sub_meta = get_post_meta( $appt->ID, 'subscription_id', true );
-                    if ( $status === 'finalizado' && empty( $sub_meta ) ) {
-                        // Verifica se houve erro ao gerar link de pagamento
-                        $payment_link_status = get_post_meta( $appt->ID, '_dps_payment_link_status', true );
-                        
-                        if ( $payment_link_status === 'error' ) {
-                            // Exibe aviso de erro com tooltip
-                            echo '<span style="color: #ef4444; font-size: 14px;" title="' . esc_attr__( 'Houve erro ao gerar o link de pagamento. Tente novamente ou verifique o log.', 'dps-agenda-addon' ) . '">⚠️ ' . esc_html__( 'Erro ao gerar link', 'dps-agenda-addon' ) . '</span>';
-                            
-                            // Mostra detalhes do erro se disponíveis (somente para admins)
-                            if ( current_user_can( 'manage_options' ) ) {
-                                $last_error = get_post_meta( $appt->ID, '_dps_payment_last_error', true );
-                                if ( $last_error && is_array( $last_error ) ) {
-                                    $error_msg = isset( $last_error['message'] ) ? $last_error['message'] : __( 'Erro desconhecido', 'dps-agenda-addon' );
-                                    $error_time = isset( $last_error['timestamp'] ) ? $last_error['timestamp'] : '';
-                                    echo '<br><small style="color: #6b7280;">' . esc_html( $error_msg );
-                                    if ( $error_time ) {
-                                        echo '<br>' . esc_html( sprintf( __( 'Em: %s', 'dps-agenda-addon' ), $error_time ) );
-                                    }
-                                    echo '</small>';
-                                }
-                            }
-                        } else {
-                            // Comportamento normal: exibe links de cobrança
-                            $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
-                            $total_val    = (float) get_post_meta( $appt->ID, 'appointment_total_value', true );
-                            $digits       = DPS_Phone_Helper::format_for_whatsapp( $client_phone );
-                            if ( $digits && $total_val > 0 ) {
-                                $client_name = $client_post ? $client_post->post_title : '';
-                                $pet_names   = [];
-                                if ( class_exists( 'DPS_Base_Frontend' ) && method_exists( 'DPS_Base_Frontend', 'get_multi_pet_charge_data' ) ) {
-                                    $group_data = DPS_Base_Frontend::get_multi_pet_charge_data( $appt->ID );
-                                    if ( $group_data && ! empty( $group_data['pet_names'] ) ) {
-                                        $pet_names = $group_data['pet_names'];
-                                    }
-                                }
-                                if ( empty( $pet_names ) ) {
-                                    $pet_names[] = $pet_post ? $pet_post->post_title : '';
-                                }
-                                $valor_fmt    = number_format_i18n( $total_val, 2 );
-                                $payment_link = get_post_meta( $appt->ID, 'dps_payment_link', true );
-                                $default_link = 'https://link.mercadopago.com.br/desipetshower';
-                                $link_to_use  = $payment_link ? $payment_link : $default_link;
-                                $msg          = sprintf( 'Olá %s, tudo bem? O serviço do pet %s foi finalizado e o pagamento de R$ %s ainda está pendente. Para sua comodidade, você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Obrigado pela confiança!', $client_name, implode( ', ', array_filter( $pet_names ) ), $valor_fmt, $link_to_use );
-                                $msg          = apply_filters( 'dps_agenda_whatsapp_message', $msg, $appt, 'agenda' );
-                                $links        = [];
-                                // Link de cobrança com ícone e tooltip usando helper centralizado
-                                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                    $wa_url = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $msg );
-                                } else {
-                                    // Fallback
-                                    $wa_url = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
-                                }
-                                $links[]      = '<a href="' . esc_url( $wa_url ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança via WhatsApp', 'dps-agenda-addon' ) . '">💰 ' . esc_html__( 'Cobrar', 'dps-agenda-addon' ) . '</a>';
-                                if ( ! empty( $group_data ) && (int) $appt->ID === (int) min( $group_data['ids'] ) ) {
-                                    $group_total = number_format_i18n( $group_data['total'], 2 );
-                                    $date_fmt    = $group_data['date'] ? date_i18n( 'd/m/Y', strtotime( $group_data['date'] ) ) : '';
-                                    $group_msg   = sprintf( 'Olá %s, tudo bem? Finalizamos os atendimentos dos pets %s em %s às %s. O valor total ficou em R$ %s. Você pode pagar via PIX celular 15 99160‑6299 ou utilizar o link: %s. Caso tenha dúvidas estamos à disposição!', $client_name, implode( ', ', $group_data['pet_names'] ), $date_fmt, $group_data['time'], $group_total, $link_to_use );
-                                    $group_msg   = apply_filters( 'dps_agenda_whatsapp_group_message', $group_msg, $appt, $group_data );
-                                    // Link de cobrança conjunta com ícone usando helper centralizado
-                                    if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                                        $wa_url_group = DPS_WhatsApp_Helper::get_link_to_client( $client_phone, $group_msg );
-                                    } else {
-                                        // Fallback
-                                        $wa_url_group = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $group_msg );
-                                    }
-                                    $links[]     = '<a href="' . esc_url( $wa_url_group ) . '" target="_blank" title="' . esc_attr__( 'Enviar cobrança conjunta via WhatsApp', 'dps-agenda-addon' ) . '">💰💰 ' . esc_html__( 'Cobrança conjunta', 'dps-agenda-addon' ) . '</a>';
-                                }
-                                echo implode( '<br>', $links );
-                            } else {
-                                echo '-';
-                            }
-                        }
-                    } else {
-                        echo '-';
-                    }
-                    echo '</td>';
-                    // FASE 5: Coluna de ações rápidas (reagendar, histórico)
-                    echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
-                    // Botão de reagendamento rápido
-                    echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
-                    // Indicador de histórico
-                    $history = get_post_meta( $appt->ID, '_dps_appointment_history', true );
-                    if ( is_array( $history ) && ! empty( $history ) ) {
-                        echo ' <span class="dps-history-indicator" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Ver histórico', 'dps-agenda-addon' ) . '">📜 ' . count( $history ) . '</span>';
-                    }
-                    echo '</td>';
-                    echo '</tr>';
+                    // UX-2: Usa função reutilizável para renderizar linha
+                    echo $this->render_appointment_row( $appt, $column_labels );
                 }
                 echo '</tbody></table>';
                 echo '</div>';
@@ -1663,6 +1416,200 @@ class DPS_Agenda_Addon {
                 'agenda'
             );
         }
+    }
+
+    /**
+     * UX-1: AJAX handler para ações rápidas de status.
+     * Permite mudança rápida de status em 1 clique sem modais.
+     * 
+     * Ações suportadas:
+     * - finish: muda para 'finalizado'
+     * - finish_and_paid: muda para 'finalizado_pago'
+     * - cancel: muda para 'cancelado'
+     * - mark_paid: muda de 'finalizado' para 'finalizado_pago'
+     *
+     * @since 1.1.0
+     */
+    public function quick_action_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_quick_action' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        $action  = isset( $_POST['action_type'] ) ? sanitize_text_field( $_POST['action_type'] ) : '';
+        
+        if ( ! $appt_id || ! $action ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Mapeia ação para status
+        $status_map = [
+            'finish'          => 'finalizado',
+            'finish_and_paid' => 'finalizado_pago',
+            'cancel'          => 'cancelado',
+            'mark_paid'       => 'finalizado_pago',
+        ];
+        
+        if ( ! isset( $status_map[ $action ] ) ) {
+            wp_send_json_error( [ 'message' => __( 'Ação inválida.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $new_status = $status_map[ $action ];
+        $old_status = get_post_meta( $appt_id, 'appointment_status', true );
+        if ( ! $old_status ) {
+            $old_status = 'pendente';
+        }
+        
+        // Validações de negócio
+        // Não permite marcar como pago se não estiver finalizado
+        if ( $action === 'mark_paid' && $old_status !== 'finalizado' ) {
+            wp_send_json_error( [ 'message' => __( 'Apenas atendimentos finalizados podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica se é assinatura (não deve ter status finalizado_pago)
+        $is_subscription = ! empty( get_post_meta( $appt_id, 'subscription_id', true ) );
+        if ( $is_subscription && $new_status === 'finalizado_pago' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamentos de assinatura não podem ser marcados como pagos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Atualiza status usando mesma lógica do update_status_ajax
+        delete_post_meta( $appt_id, 'appointment_status' );
+        add_post_meta( $appt_id, 'appointment_status', $new_status, true );
+        
+        // Incrementa versão
+        $current_version = intval( get_post_meta( $appt_id, '_dps_appointment_version', true ) );
+        if ( $current_version < 1 ) {
+            $current_version = 1;
+        }
+        $new_version = $current_version + 1;
+        update_post_meta( $appt_id, '_dps_appointment_version', $new_version );
+        
+        // Log de auditoria
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Ação rápida "%s" (status %s → %s) por usuário #%d',
+                    $appt_id,
+                    $action,
+                    $old_status,
+                    $new_status,
+                    get_current_user_id()
+                ),
+                [
+                    'appointment_id' => $appt_id,
+                    'action'         => $action,
+                    'old_status'     => $old_status,
+                    'new_status'     => $new_status,
+                    'user_id'        => get_current_user_id(),
+                    'version'        => $new_version,
+                ],
+                'agenda'
+            );
+        }
+        
+        // Aciona hook para sincronização com outros add-ons
+        do_action( 'dps_base_after_save_appointment', $appt_id, 'simple' );
+        
+        // UX-2: Renderiza HTML da linha atualizada
+        $updated_post = get_post( $appt_id );
+        $column_labels = $this->get_column_labels();
+        $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+        
+        wp_send_json_success( [
+            'message'        => __( 'Status atualizado com sucesso!', 'dps-agenda-addon' ),
+            'row_html'       => $row_html,
+            'appointment_id' => $appt_id,
+            'new_status'     => $new_status,
+            'version'        => $new_version,
+        ] );
+    }
+
+    /**
+     * CONF-2: AJAX handler para atualizar status de confirmação.
+     * Permite marcar confirmação de atendimento sem alterar o status principal.
+     * 
+     * @since 1.2.0
+     */
+    public function update_confirmation_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_confirmation' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        $confirmation_status = isset( $_POST['confirmation_status'] ) ? sanitize_text_field( $_POST['confirmation_status'] ) : '';
+        
+        if ( ! $appt_id || ! $confirmation_status ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida status de confirmação
+        $valid_statuses = [ 'not_sent', 'sent', 'confirmed', 'denied', 'no_answer' ];
+        if ( ! in_array( $confirmation_status, $valid_statuses, true ) ) {
+            wp_send_json_error( [ 'message' => __( 'Status de confirmação inválido.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Atualiza status de confirmação usando helper
+        $success = $this->set_confirmation_status( $appt_id, $confirmation_status, get_current_user_id() );
+        
+        if ( ! $success ) {
+            wp_send_json_error( [ 'message' => __( 'Erro ao atualizar status de confirmação.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Log de auditoria
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::info(
+                sprintf(
+                    'Agendamento #%d: Status de confirmação alterado para "%s" por usuário #%d',
+                    $appt_id,
+                    $confirmation_status,
+                    get_current_user_id()
+                ),
+                [
+                    'appointment_id'      => $appt_id,
+                    'confirmation_status' => $confirmation_status,
+                    'user_id'             => get_current_user_id(),
+                ],
+                'agenda'
+            );
+        }
+        
+        // Renderiza HTML da linha atualizada
+        $updated_post = get_post( $appt_id );
+        $column_labels = $this->get_column_labels();
+        $row_html = $this->render_appointment_row( $updated_post, $column_labels );
+        
+        wp_send_json_success( [
+            'message'             => __( 'Confirmação atualizada com sucesso!', 'dps-agenda-addon' ),
+            'row_html'            => $row_html,
+            'appointment_id'      => $appt_id,
+            'confirmation_status' => $confirmation_status,
+        ] );
     }
 
     /**

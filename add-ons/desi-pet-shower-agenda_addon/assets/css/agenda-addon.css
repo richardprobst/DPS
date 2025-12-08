@@ -1479,3 +1479,549 @@
         padding: 0.75rem;
     }
 }
+
+/* === UX-1: Botões de Ação Rápida === */
+.dps-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.dps-quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.375rem;
+    background: var(--dps-surface);
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-quick-action-btn:hover:not(:disabled) {
+    background: var(--dps-background);
+    border-color: #94a3b8;
+}
+
+.dps-quick-action-btn:disabled,
+.dps-quick-action-btn.is-loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Cores específicas para cada tipo de ação */
+.dps-quick-finish {
+    border-color: #10b981;
+    color: #059669;
+}
+
+.dps-quick-finish:hover:not(:disabled) {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+
+.dps-quick-paid {
+    border-color: #0ea5e9;
+    color: #0284c7;
+}
+
+.dps-quick-paid:hover:not(:disabled) {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+}
+
+.dps-quick-cancel {
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+.dps-quick-cancel:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* === UX-3: Indicador de Atendimentos Atrasados === */
+tr.is-late {
+    background: #fef3c7 !important;
+    border-left: 4px solid #f59e0b;
+}
+
+tr.is-late td:first-child {
+    padding-left: calc(1rem - 4px);
+}
+
+/* Animação sutil para chamar atenção (opcional) */
+@keyframes pulse-late {
+    0%, 100% {
+        background-color: #fef3c7;
+    }
+    50% {
+        background-color: #fde68a;
+    }
+}
+
+tr.is-late.dps-late-critical {
+    animation: pulse-late 2s ease-in-out infinite;
+}
+
+/* === UX-2: Feedback Visual de Atualização de Linha === */
+@keyframes row-updated {
+    0% {
+        background-color: #d1fae5;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+tr.dps-row-updated {
+    animation: row-updated 1.5s ease-out;
+}
+
+/* === Responsividade para Ações Rápidas === */
+@media (max-width: 768px) {
+    .dps-quick-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .dps-quick-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* === UX-4/5/6: Layout Consolidado de Navegação e Filtros === */
+
+/* Wrapper principal dos controles */
+.dps-agenda-controls-wrapper {
+    margin-bottom: 2rem;
+}
+
+/* Linha 1: Navegação principal */
+.dps-agenda-nav--primary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.dps-agenda-nav-group--date {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dps-current-date {
+    font-size: 0.9375rem;
+    color: #0f172a;
+}
+
+.dps-date-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.dps-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.5rem;
+    background: var(--dps-surface);
+    color: #0f172a;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.dps-nav-btn:hover {
+    background: var(--dps-background);
+    border-color: #94a3b8;
+}
+
+.dps-nav-btn--today {
+    background: var(--dps-accent);
+    color: white;
+    border-color: var(--dps-accent);
+}
+
+.dps-nav-btn--today:hover {
+    background: var(--dps-accent-strong);
+}
+
+.dps-agenda-nav-group--views {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-nav-label {
+    font-size: 0.875rem;
+    color: var(--dps-muted);
+    font-weight: 500;
+}
+
+.dps-view-buttons {
+    display: flex;
+    gap: 0.25rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    background: var(--dps-background);
+}
+
+.dps-view-btn {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #0f172a;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.dps-view-btn:hover:not(.dps-view-btn--active) {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.dps-view-btn--active {
+    background: var(--dps-surface);
+    color: var(--dps-accent);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dps-agenda-nav-group--actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Linha 2: Filtros */
+.dps-agenda-nav--filters {
+    padding: 1rem 1.25rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+}
+
+.dps-agenda-unified-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.dps-filters-main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.dps-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    flex: 0 1 auto;
+}
+
+.dps-filter-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.dps-filter-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.5rem;
+    background: var(--dps-surface);
+    font-size: 0.875rem;
+    min-width: 140px;
+    transition: border-color 0.15s ease;
+}
+
+.dps-filter-input:focus {
+    outline: none;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dps-filter-apply {
+    padding: 0.5rem 1.25rem;
+    white-space: nowrap;
+}
+
+.dps-toggle-advanced-filters,
+.dps-clear-filters {
+    padding: 0.5rem 0.875rem;
+    white-space: nowrap;
+}
+
+.dps-toggle-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.dps-toggle-advanced-filters[data-expanded="true"] .dps-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.dps-filters-advanced {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--dps-border);
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 200px;
+    opacity: 1;
+}
+
+.dps-filters-advanced--hidden {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    border-top: none;
+}
+
+/* Responsividade para navegação consolidada */
+@media (max-width: 1024px) {
+    .dps-agenda-nav--primary {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-agenda-nav-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .dps-agenda-nav-group--actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .dps-filters-main {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-filter-field {
+        width: 100%;
+    }
+    
+    .dps-filter-input {
+        min-width: 100%;
+    }
+    
+    .dps-filter-apply,
+    .dps-toggle-advanced-filters,
+    .dps-clear-filters {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .dps-date-nav {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-view-buttons {
+        width: 100%;
+        justify-content: space-around;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-current-date {
+        font-size: 0.875rem;
+    }
+    
+    .dps-nav-btn {
+        font-size: 0.8125rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* === CONF-2/CONF-3: Sistema de Confirmação de Atendimentos === */
+
+/* Wrapper da coluna de confirmação */
+.dps-confirmation-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Badge de status de confirmação */
+.dps-confirmation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+}
+
+.status-confirmation-not-sent {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.status-confirmation-sent {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+.status-confirmation-confirmed {
+    background: #d1fae5;
+    color: #059669;
+    border: 1px solid #6ee7b7;
+}
+
+.status-confirmation-denied {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.status-confirmation-no-answer {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fcd34d;
+}
+
+/* Botões de ação de confirmação */
+.dps-confirmation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.dps-confirmation-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.25rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.375rem;
+    background: var(--dps-surface);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-confirmation-btn:hover:not(:disabled) {
+    background: var(--dps-background);
+    border-color: #94a3b8;
+    transform: scale(1.05);
+}
+
+.dps-confirmation-btn:disabled,
+.dps-confirmation-btn.is-loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dps-confirmation-btn--confirmed {
+    border-color: #10b981;
+}
+
+.dps-confirmation-btn--confirmed:hover:not(:disabled) {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+
+.dps-confirmation-btn--no-answer {
+    border-color: #f59e0b;
+}
+
+.dps-confirmation-btn--no-answer:hover:not(:disabled) {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+.dps-confirmation-btn--denied {
+    border-color: #ef4444;
+}
+
+.dps-confirmation-btn--denied:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.dps-confirmation-btn--clear {
+    border-color: #6b7280;
+}
+
+.dps-confirmation-btn--clear:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #6b7280;
+}
+
+/* Link do WhatsApp */
+.dps-confirmation-whatsapp {
+    margin-top: 0.25rem;
+}
+
+.dps-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    color: #0ea5e9;
+    text-decoration: none;
+    border: 1px solid #bae6fd;
+    border-radius: 0.375rem;
+    background: #f0f9ff;
+    transition: all 0.15s ease;
+}
+
+.dps-whatsapp-link:hover {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+}
+
+/* Responsividade para confirmação */
+@media (max-width: 768px) {
+    .dps-confirmation-wrapper {
+        align-items: flex-start;
+    }
+    
+    .dps-confirmation-actions {
+        width: 100%;
+    }
+    
+    .dps-confirmation-btn {
+        flex: 1 1 auto;
+    }
+    
+    .dps-whatsapp-link {
+        width: 100%;
+        justify-content: center;
+    }
+}
