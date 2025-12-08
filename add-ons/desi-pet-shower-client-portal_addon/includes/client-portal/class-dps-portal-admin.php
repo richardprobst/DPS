@@ -106,11 +106,14 @@ class DPS_Portal_Admin {
 
     /**
      * Registra menu administrativo.
+     * 
+     * NOTA: A partir da v2.5.0, estes menus estão ocultos (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-portal-hub para acessar via abas.
      */
     public function register_admin_menu() {
-        // Submenu: Portal do Cliente - Configurações
+        // Submenu: Portal do Cliente - Configurações (oculto)
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Portal do Cliente - Configurações', 'dps-client-portal' ),
             __( 'Portal do Cliente', 'dps-client-portal' ),
             'manage_options',
@@ -118,9 +121,9 @@ class DPS_Portal_Admin {
             [ $this, 'render_portal_settings_admin_page' ]
         );
         
-        // Submenu: Logins de Clientes
+        // Submenu: Logins de Clientes (oculto)
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Portal do Cliente - Logins', 'dps-client-portal' ),
             __( 'Logins de Clientes', 'dps-client-portal' ),
             'manage_options',

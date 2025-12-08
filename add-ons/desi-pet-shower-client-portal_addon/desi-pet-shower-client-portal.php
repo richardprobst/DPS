@@ -100,6 +100,9 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-por
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-admin.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/class-dps-portal-pet-history.php'; // Fase 4
 
+// Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-hub.php';
+
 // Inclui classe principal (coordenador)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-client-portal.php';
 
@@ -130,6 +133,11 @@ function dps_client_portal_init_addon() {
     // Inicializa handler AJAX (Fase 4)
     if ( class_exists( 'DPS_Portal_AJAX_Handler' ) ) {
         DPS_Portal_AJAX_Handler::get_instance();
+    }
+    
+    // Inicializa o Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
+    if ( class_exists( 'DPS_Portal_Hub' ) ) {
+        DPS_Portal_Hub::get_instance();
     }
 }
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
