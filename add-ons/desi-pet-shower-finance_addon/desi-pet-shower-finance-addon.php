@@ -1439,6 +1439,10 @@ class DPS_Finance_Addon {
             $end_date   = current_time( 'Y-m-d' );
             $start_date = date( 'Y-m-d', strtotime( $end_date . ' -' . ( $days - 1 ) . ' days' ) );
         }
+        
+        // F2.5: FASE 2 - Busca rápida por cliente
+        $search_client = isset( $_GET['fin_search_client'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_search_client'] ) ) : '';
+        
         $where      = '1=1';
         $params     = [];
         if ( $start_date ) {
@@ -1449,6 +1453,26 @@ class DPS_Finance_Addon {
             $where  .= ' AND data <= %s';
             $params[] = $end_date;
         }
+        
+        // F2.5: FASE 2 - Filtro de busca por nome de cliente
+        if ( $search_client ) {
+            // Busca clientes cujo título contenha o termo de busca
+            $search_like = '%' . $wpdb->esc_like( $search_client ) . '%';
+            $matching_clients = $wpdb->get_col( $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'dps_cliente' AND post_title LIKE %s AND post_status = 'publish'",
+                $search_like
+            ) );
+            
+            if ( ! empty( $matching_clients ) ) {
+                $placeholders = implode( ',', array_fill( 0, count( $matching_clients ), '%d' ) );
+                $where .= " AND cliente_id IN ($placeholders)";
+                $params = array_merge( $params, $matching_clients );
+            } else {
+                // Nenhum cliente encontrado - forçar resultado vazio
+                $where .= ' AND 1=0';
+            }
+        }
+        
         // Filtro por categoria
         if ( $cat_filter !== '' ) {
             $where  .= ' AND categoria = %s';
@@ -1654,7 +1678,7 @@ class DPS_Finance_Addon {
         // Mantém parâmetros existentes (exceto filtros de data, intervalo, categoria e status)
         // SEGURANÇA: Sanitiza valores de $_GET antes de usar
         foreach ( $_GET as $k => $v ) {
-            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status' ], true ) ) {
+            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status', 'fin_search_client' ], true ) ) {
                 continue;
             }
             $safe_key = sanitize_key( $k );
@@ -1679,6 +1703,8 @@ class DPS_Finance_Addon {
         echo '<option value="pago"' . selected( $status_filter, 'pago', false ) . '>' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
         echo '<option value="cancelado"' . selected( $status_filter, 'cancelado', false ) . '>' . esc_html__( 'Cancelado', 'dps-finance-addon' ) . '</option>';
         echo '</select></label> ';
+        // F2.5: FASE 2 - Campo de busca rápida por cliente
+        echo '<label>' . esc_html__( 'Buscar cliente', 'dps-finance-addon' ) . ' <input type="text" name="fin_search_client" value="' . esc_attr( $search_client ) . '" placeholder="' . esc_attr__( 'Nome do cliente...', 'dps-finance-addon' ) . '" style="width: 200px;"></label> ';
         echo '<div class="dps-finance-filter-buttons">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button> ';
         // Links rápidos: preserva categoria e status
@@ -1695,9 +1721,9 @@ class DPS_Finance_Addon {
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $link7 ) . '" class="button">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
         echo '<a href="' . esc_url( $link30 ) . '" class="button">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
-        // Link de limpar filtros: remove todos os filtros inclusive categoria e status
+        // F2.5: FASE 2 - Link de limpar filtros inclui campo de busca
         $clear_params = $quick_params;
-        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'] );
+        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'], $clear_params['fin_search_client'] );
         $clear_link = add_query_arg( $clear_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas

@@ -89,6 +89,7 @@ Antes de criar uma nova versão oficial:
 - **F2.2 - Botão "Reenviar link de pagamento"**: Novo botão "✉️ Reenviar link" na coluna de Ações para transações em aberto com link do Mercado Pago. Abre WhatsApp com mensagem personalizada contendo link de pagamento. Registra log de reenvio com timestamp e usuário. Reduz de 5 para 1 clique para follow-up com clientes.
 - **F2.3 - Badges visuais de status**: Status financeiros agora exibidos como badges coloridos: ✅ Pago (verde), ⏳ Em aberto (amarelo), ❌ Cancelado (vermelho). Facilita identificação rápida do estado de cada transação. Select de alteração de status agora menor e inline ao badge.
 - **F2.4 - Indicadores visuais de vencimento**: Datas na coluna exibem ícones e cores para urgência: 🚨 Vermelho para vencidas, ⚠️ Amarelo para hoje, normal para futuras. Aplicado apenas em transações em aberto tipo receita. Equipe identifica prioridades visualmente.
+- **F2.5 - Busca rápida por cliente**: Novo campo de texto "Buscar cliente" no formulário de filtros. Busca por nome de cliente em tempo real usando LIKE no banco. Funciona em conjunto com outros filtros (data, categoria, status). Reduz tempo de localização de transações específicas de minutos para segundos.
 
 #### Changed (Alterado)
 
