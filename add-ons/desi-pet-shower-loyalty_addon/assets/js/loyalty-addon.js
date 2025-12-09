@@ -181,6 +181,37 @@
     };
 
     /**
+     * Inicializa construtor de níveis configuráveis.
+     */
+    DPSLoyalty.initTierBuilder = function() {
+        var $table = $('#dps-tier-table');
+        var $rows = $('#dps-tier-rows');
+        var $template = $('#dps-tier-template');
+        var $addBtn = $('#dps-add-tier');
+
+        if (!$table.length || !$template.length || !$addBtn.length) {
+            return;
+        }
+
+        var nextIndex = $rows.find('tr').length;
+
+        $addBtn.on('click', function(e) {
+            e.preventDefault();
+            var html = $template.html().replace(/__index__/g, nextIndex);
+            $rows.append(html);
+            nextIndex++;
+        });
+
+        $rows.on('click', '.dps-remove-tier', function(e) {
+            e.preventDefault();
+            if ($rows.find('tr').length <= 1) {
+                return;
+            }
+            $(this).closest('tr').remove();
+        });
+    };
+
+    /**
      * Inicializa compartilhamento via WhatsApp.
      */
     DPSLoyalty.initWhatsAppShare = function() {
@@ -431,13 +462,31 @@
             return;
         }
 
+        var labels = [];
+        var values = [];
+        var colors = [];
+
+        $.each(tiers, function(key, value) {
+            labels.push(key);
+            values.push(value);
+            if (key === 'bronze') {
+                colors.push('#b45309');
+            } else if (key === 'prata') {
+                colors.push('#6b7280');
+            } else if (key === 'ouro') {
+                colors.push('#d97706');
+            } else {
+                colors.push('#0ea5e9');
+            }
+        });
+
         new Chart($canvas, {
             type: 'doughnut',
             data: {
-                labels: ['Bronze', 'Prata', 'Ouro'],
+                labels: labels,
                 datasets: [{
-                    data: [tiers.bronze || 0, tiers.prata || 0, tiers.ouro || 0],
-                    backgroundColor: ['#b45309', '#6b7280', '#d97706']
+                    data: values,
+                    backgroundColor: colors
                 }]
             },
             options: {
@@ -463,6 +512,7 @@
         DPSLoyalty.initClientAutocomplete();
         DPSLoyalty.renderTimeseries();
         DPSLoyalty.renderTierChart();
+        DPSLoyalty.initTierBuilder();
     };
 
     // Inicializar quando documento estiver pronto

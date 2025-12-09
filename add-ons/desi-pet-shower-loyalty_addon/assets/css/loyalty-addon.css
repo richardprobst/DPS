@@ -199,6 +199,67 @@
     border-radius: 4px;
 }
 
+.dps-tier-table th,
+.dps-tier-table td {
+    padding: 8px;
+}
+
+.dps-tier-table input[type="text"],
+.dps-tier-table input[type="number"],
+.dps-tier-table input[type="color"] {
+    width: 100%;
+}
+
+.dps-tier-row .button.dps-remove-tier {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.dps-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.dps-achievement-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+}
+
+.dps-achievement-card h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+}
+
+.dps-achievement-card p {
+    margin: 0;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.dps-achievement-card.is-locked {
+    opacity: 0.6;
+    background: #f9fafb;
+}
+
+.dps-achievement-status {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-achievement-card.is-locked .dps-achievement-status {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
 .dps-loyalty-settings-form legend {
     font-weight: 600;
     color: #374151;

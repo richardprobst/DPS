@@ -2113,6 +2113,8 @@ final class DPS_Client_Portal {
         $total_logs    = count( get_post_meta( $client_id, 'dps_loyalty_points_log' ) );
         $has_more      = $total_logs > $history_limit;
         $settings      = get_option( 'dps_loyalty_settings', [] );
+        $achievement_definitions = DPS_Loyalty_Achievements::get_achievements_definitions();
+        $unlocked_achievements  = DPS_Loyalty_Achievements::get_client_achievements( $client_id );
 
         $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit ) : 'R$ ' . number_format( $credit / 100, 2, ',', '.' );
         $progress       = isset( $tier['progress'] ) ? (int) $tier['progress'] : 0;
@@ -2168,6 +2170,24 @@ final class DPS_Client_Portal {
             echo '<div class="dps-loyalty-card__actions">';
             echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" />';
             echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">' . esc_html__( 'Copiar link', 'dps-client-portal' ) . '</button>';
+            echo '</div>';
+        }
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-loyalty-achievements">';
+        echo '<h3>' . esc_html__( 'Conquistas', 'dps-client-portal' ) . '</h3>';
+        echo '<div class="dps-loyalty-achievements__grid">';
+        foreach ( $achievement_definitions as $key => $achievement ) {
+            $unlocked = in_array( $key, $unlocked_achievements, true );
+            $card_class = $unlocked ? 'is-unlocked' : 'is-locked';
+            echo '<div class="dps-loyalty-achievement ' . esc_attr( $card_class ) . '">';
+            echo '<div class="dps-loyalty-achievement__icon">' . ( $unlocked ? '🏅' : '🔒' ) . '</div>';
+            echo '<div class="dps-loyalty-achievement__text">';
+            echo '<p class="dps-loyalty-achievement__title">' . esc_html( $achievement['label'] ) . '</p>';
+            echo '<p class="dps-loyalty-achievement__desc">' . esc_html( $achievement['description'] ) . '</p>';
+            echo '<span class="dps-loyalty-achievement__status">' . esc_html( $unlocked ? __( 'Conquistado', 'dps-client-portal' ) : __( 'Em progresso', 'dps-client-portal' ) ) . '</span>';
+            echo '</div>';
             echo '</div>';
         }
         echo '</div>';
