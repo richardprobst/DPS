@@ -26,7 +26,7 @@ class DPS_URL_Builder {
      */
     public static function build_edit_url( $record_type, $record_id, $tab = '', $base_url = null ) {
         if ( null === $base_url ) {
-            $base_url = get_permalink();
+            $base_url = self::get_clean_current_url();
         }
 
         $query_args = [
@@ -52,7 +52,7 @@ class DPS_URL_Builder {
      */
     public static function build_delete_url( $record_type, $record_id, $tab = '', $base_url = null ) {
         if ( null === $base_url ) {
-            $base_url = get_permalink();
+            $base_url = self::get_clean_current_url();
         }
 
         $query_args = [
@@ -78,7 +78,7 @@ class DPS_URL_Builder {
      */
     public static function build_view_url( $record_type, $record_id, $base_url = null ) {
         if ( null === $base_url ) {
-            $base_url = get_permalink();
+            $base_url = self::get_clean_current_url();
         }
 
         return add_query_arg( [
@@ -96,7 +96,7 @@ class DPS_URL_Builder {
      */
     public static function build_tab_url( $tab, $base_url = null ) {
         if ( null === $base_url ) {
-            $base_url = get_permalink();
+            $base_url = self::get_clean_current_url();
         }
 
         return add_query_arg( 'tab', sanitize_key( $tab ), $base_url );
@@ -111,7 +111,7 @@ class DPS_URL_Builder {
      */
     public static function build_schedule_url( $client_id, $base_url = null ) {
         if ( null === $base_url ) {
-            $base_url = get_permalink();
+            $base_url = self::get_clean_current_url();
         }
 
         return add_query_arg( [
@@ -150,6 +150,10 @@ class DPS_URL_Builder {
 
         if ( empty( $current_url ) ) {
             $current_url = get_permalink();
+        }
+
+        if ( empty( $current_url ) ) {
+            $current_url = home_url();
         }
 
         return self::remove_action_params( $current_url );
