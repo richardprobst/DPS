@@ -674,6 +674,16 @@ Antes de criar uma nova versão oficial:
   - Método `parse_email_response()` depreciado mas mantido para retrocompatibilidade
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on (v2.4.1)**: Correção de aviso "Translation loading triggered too early" no WordPress 6.7.0+
+  - **Problema**: Aviso PHP Notice "Translation loading for the dps-client-portal domain was triggered too early" no WordPress 6.7.0+
+  - **Causa Raiz**: Constante `DPS_CLIENT_PORTAL_PAGE_TITLE` definia valor com `__()` no nível do arquivo (linha 61), antes do hook `init`
+  - **Correção Aplicada**: 
+    - Removido `__()` da definição da constante; constante agora contém string não traduzida 'Portal do Cliente'
+    - Adicionada tradução onde a constante é usada para criar páginas (linha 443): `__( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' )`
+    - Busca de páginas existentes usa título não traduzido para consistência entre idiomas
+  - **Impacto**: Elimina avisos de carregamento prematuro de traduções nos logs; páginas criadas usam título traduzido conforme idioma do site
+  - **Arquivos Alterados**: `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php`
+  - **Compatibilidade**: Mantida retrocompatibilidade - constante ainda existe e funciona normalmente
 - **AGENDA Add-on (v1.4.1)**: Correção de PHP Warning - Undefined array key "payment"
   - **Problema**: Avisos PHP "Undefined array key 'payment'" na linha 455 de `trait-dps-agenda-renderer.php`
   - **Causa Raiz**: Funções de renderização (`render_appointment_row`, `render_appointment_row_tab1`, `render_appointment_row_tab2`) acessavam índices do array `$column_labels` sem verificar existência

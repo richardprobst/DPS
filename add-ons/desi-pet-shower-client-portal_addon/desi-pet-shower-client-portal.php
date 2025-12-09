@@ -56,9 +56,9 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
-// Define título padrão da página do portal (pode ser traduzido)
+// Define título padrão da página do portal (tradução deve ser feita ao usar a constante)
 if ( ! defined( 'DPS_CLIENT_PORTAL_PAGE_TITLE' ) ) {
-    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', __( 'Portal do Cliente', 'dps-client-portal' ) );
+    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', 'Portal do Cliente' );
 }
 
 /**
@@ -407,7 +407,7 @@ function dps_client_portal_maybe_create_page() {
         }
     }
     
-    // Busca página existente por título
+    // Busca página existente por título (usa título não traduzido para consistência entre idiomas)
     $page_title = DPS_CLIENT_PORTAL_PAGE_TITLE;
     
     if ( function_exists( 'dps_get_page_by_title_compat' ) ) {
@@ -439,9 +439,10 @@ function dps_client_portal_maybe_create_page() {
         return $portal_page->ID;
     }
     
-    // Nenhuma página encontrada - cria uma nova
+    // Nenhuma página encontrada - cria uma nova (usa título traduzido se disponível)
+    $translated_title = __( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' );
     $page_id = wp_insert_post( [
-        'post_title'     => $page_title,
+        'post_title'     => $translated_title,
         'post_name'      => 'portal-do-cliente',
         'post_content'   => '[dps_client_portal]',
         'post_status'    => 'publish',
