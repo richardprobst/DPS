@@ -68,7 +68,8 @@ final class DPS_Client_Portal {
         add_action( 'init', [ $this, 'handle_portal_actions' ] );
 
         // Registra tipos de dados e recursos do portal
-        add_action( 'init', [ $this, 'register_message_post_type' ] );
+        // NOTA: CPT dps_portal_message agora registrado por DPS_Portal_Admin (evita conflito de menu)
+        // add_action( 'init', [ $this, 'register_message_post_type' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
