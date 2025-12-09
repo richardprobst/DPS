@@ -843,6 +843,9 @@ trait DPS_Agenda_Renderer {
         
         echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="' . esc_attr( implode( ' ', $row_classes ) ) . '">';
         
+        // Checkbox para seleção em lote
+        echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
+        
         // Horário
         echo '<td data-label="' . esc_attr__( 'Horário', 'dps-agenda-addon' ) . '">' . esc_html( $time ) . '</td>';
         
@@ -876,16 +879,6 @@ trait DPS_Agenda_Renderer {
         echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '">';
         $confirmation_status = $this->get_confirmation_status( $appt->ID );
         echo $this->render_confirmation_badge( $confirmation_status );
-        echo '</td>';
-        
-        // TaxiDog (apenas se solicitado)
-        echo '<td data-label="TaxiDog">';
-        $taxidog_badge = DPS_Agenda_TaxiDog_Helper::render_taxidog_badge( $appt->ID );
-        if ( ! empty( $taxidog_badge ) ) {
-            echo $taxidog_badge;
-        } else {
-            echo '–';
-        }
         echo '</td>';
         
         echo '</tr>';
@@ -1002,47 +995,11 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
-        // Confirmação (badge + botões)
-        echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '">';
-        $confirmation_status = $this->get_confirmation_status( $appt->ID );
-        
-        echo '<div class="dps-confirmation-wrapper">';
-        echo $this->render_confirmation_badge( $confirmation_status );
-        
-        // Botões de confirmação
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-            echo '<div class="dps-confirmation-actions">';
-            echo '<button class="dps-confirmation-btn dps-confirmation-btn--confirmed" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="confirmed" title="' . esc_attr__( 'Marcar como confirmado', 'dps-agenda-addon' ) . '">✅</button>';
-            echo '<button class="dps-confirmation-btn dps-confirmation-btn--no-answer" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="no_answer" title="' . esc_attr__( 'Não atendeu', 'dps-agenda-addon' ) . '">⚠️</button>';
-            echo '<button class="dps-confirmation-btn dps-confirmation-btn--denied" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="denied" title="' . esc_attr__( 'Cliente cancelou', 'dps-agenda-addon' ) . '">❌</button>';
-            if ( $confirmation_status !== 'not_sent' ) {
-                echo '<button class="dps-confirmation-btn dps-confirmation-btn--clear" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="not_sent" title="' . esc_attr__( 'Limpar status', 'dps-agenda-addon' ) . '">🔄</button>';
-            }
-            echo '</div>';
-        }
-        echo '</div>';
-        echo '</td>';
-        
         // Pagamento
         echo '<td data-label="' . esc_attr( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '">';
         echo DPS_Agenda_Payment_Helper::render_payment_badge( $appt->ID );
         echo DPS_Agenda_Payment_Helper::render_payment_tooltip( $appt->ID );
         echo DPS_Agenda_Payment_Helper::render_resend_button( $appt->ID );
-        echo '</td>';
-        
-        // TaxiDog
-        echo '<td data-label="TaxiDog">';
-        $taxidog_badge = DPS_Agenda_TaxiDog_Helper::render_taxidog_badge( $appt->ID );
-        if ( ! empty( $taxidog_badge ) ) {
-            echo $taxidog_badge;
-        }
-        $taxidog_actions = DPS_Agenda_TaxiDog_Helper::render_taxidog_quick_actions( $appt->ID );
-        if ( ! empty( $taxidog_actions ) ) {
-            echo $taxidog_actions;
-        }
-        if ( empty( $taxidog_badge ) && empty( $taxidog_actions ) ) {
-            echo '–';
-        }
         echo '</td>';
         
         // Ações rápidas
@@ -1128,16 +1085,72 @@ trait DPS_Agenda_Renderer {
         $client_name = $client_post ? $client_post->post_title : '';
         echo '<td data-label="' . esc_attr__( 'Tutor', 'dps-agenda-addon' ) . '">' . esc_html( $client_name ) . '</td>';
         
-        // Observações do Atendimento
-        $appt_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
-        echo '<td data-label="' . esc_attr__( 'Observações do Atendimento', 'dps-agenda-addon' ) . '">';
-        echo ! empty( $appt_notes ) ? esc_html( wp_trim_words( $appt_notes, 15 ) ) : '–';
+        // Confirmação (badge + botões)
+        echo '<td data-label="' . esc_attr( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '">';
+        $confirmation_status = $this->get_confirmation_status( $appt->ID );
+        
+        echo '<div class="dps-confirmation-wrapper">';
+        echo $this->render_confirmation_badge( $confirmation_status );
+        
+        // Botões de confirmação
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+            echo '<div class="dps-confirmation-actions">';
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--confirmed" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="confirmed" title="' . esc_attr__( 'Marcar como confirmado', 'dps-agenda-addon' ) . '">✅</button>';
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--no-answer" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="no_answer" title="' . esc_attr__( 'Não atendeu', 'dps-agenda-addon' ) . '">⚠️</button>';
+            echo '<button class="dps-confirmation-btn dps-confirmation-btn--denied" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="denied" title="' . esc_attr__( 'Cliente cancelou', 'dps-agenda-addon' ) . '">❌</button>';
+            if ( $confirmation_status !== 'not_sent' ) {
+                echo '<button class="dps-confirmation-btn dps-confirmation-btn--clear" data-appt-id="' . esc_attr( $appt->ID ) . '" data-action="not_sent" title="' . esc_attr__( 'Limpar status', 'dps-agenda-addon' ) . '">🔄</button>';
+            }
+            echo '</div>';
+        }
+        echo '</div>';
         echo '</td>';
         
-        // Observações do Pet
+        // Observações consolidadas (atendimento + pet com tooltip)
+        echo '<td data-label="' . esc_attr__( 'Observações', 'dps-agenda-addon' ) . '">';
+        $appt_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
         $pet_notes = $pet_post ? get_post_meta( $pet_post->ID, 'pet_notes', true ) : '';
-        echo '<td data-label="' . esc_attr__( 'Observações do Pet', 'dps-agenda-addon' ) . '">';
-        echo ! empty( $pet_notes ) ? esc_html( wp_trim_words( $pet_notes, 15 ) ) : '–';
+        
+        $has_notes = ! empty( $appt_notes ) || ! empty( $pet_notes );
+        if ( $has_notes ) {
+            $preview = '';
+            if ( ! empty( $appt_notes ) ) {
+                $preview .= esc_html( wp_trim_words( $appt_notes, 10 ) );
+            }
+            if ( ! empty( $pet_notes ) ) {
+                if ( ! empty( $preview ) ) {
+                    $preview .= ' | ';
+                }
+                $preview .= esc_html( wp_trim_words( $pet_notes, 10 ) );
+            }
+            
+            $full_notes = '';
+            if ( ! empty( $appt_notes ) ) {
+                $full_notes .= '<strong>' . esc_html__( 'Atendimento:', 'dps-agenda-addon' ) . '</strong><br>' . esc_html( $appt_notes ) . '<br><br>';
+            }
+            if ( ! empty( $pet_notes ) ) {
+                $full_notes .= '<strong>' . esc_html__( 'Pet:', 'dps-agenda-addon' ) . '</strong><br>' . esc_html( $pet_notes );
+            }
+            
+            echo '<span class="dps-notes-preview" title="' . esc_attr( strip_tags( $full_notes ) ) . '">' . $preview . '</span>';
+        } else {
+            echo '–';
+        }
+        echo '</td>';
+        
+        // TaxiDog (badge + ações completas)
+        echo '<td data-label="TaxiDog">';
+        $taxidog_badge = DPS_Agenda_TaxiDog_Helper::render_taxidog_badge( $appt->ID );
+        if ( ! empty( $taxidog_badge ) ) {
+            echo $taxidog_badge;
+        }
+        $taxidog_actions = DPS_Agenda_TaxiDog_Helper::render_taxidog_quick_actions( $appt->ID );
+        if ( ! empty( $taxidog_actions ) ) {
+            echo $taxidog_actions;
+        }
+        if ( empty( $taxidog_badge ) && empty( $taxidog_actions ) ) {
+            echo '–';
+        }
         echo '</td>';
         
         // Endereço do Cliente
@@ -1146,26 +1159,16 @@ trait DPS_Agenda_Renderer {
         echo ! empty( $client_address ) ? esc_html( $client_address ) : '–';
         echo '</td>';
         
-        // Mapa (apenas rota quando TaxiDog solicitado)
+        // Mapa/Rota (sempre disponível)
         echo '<td data-label="' . esc_attr__( 'Mapa', 'dps-agenda-addon' ) . '">';
-        
-        // Verifica se TaxiDog foi solicitado
-        $taxidog_status = DPS_Agenda_TaxiDog_Helper::get_taxidog_status( $appt->ID );
-        $has_taxidog = ( $taxidog_status !== 'none' );
-        
-        if ( $has_taxidog ) {
-            // Mostra apenas o botão de rota quando TaxiDog foi solicitado
-            $route_button = DPS_Agenda_GPS_Helper::render_route_button( $appt->ID );
-            if ( ! empty( $route_button ) ) {
-                echo $route_button;
-            } else {
-                echo '–';
-            }
+        $route_button = DPS_Agenda_GPS_Helper::render_route_button( $appt->ID );
+        if ( ! empty( $route_button ) ) {
+            echo $route_button;
         } else {
             echo '–';
         }
-        
         echo '</td>';
+        
         echo '</tr>';
         
         return ob_get_clean();

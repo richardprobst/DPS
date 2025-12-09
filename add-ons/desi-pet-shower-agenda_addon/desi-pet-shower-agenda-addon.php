@@ -1528,12 +1528,12 @@ class DPS_Agenda_Addon {
                 echo '<h5>' . esc_html( $heading ) . '</h5>';
                 echo '<div class="dps-agenda-table-container">';
                 echo '<table class="dps-table dps-table--tab1"><thead><tr>';
+                echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>TaxiDog</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
                     echo $this->render_appointment_row_tab1( $appt, $column_labels );
@@ -1592,9 +1592,7 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviço', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>TaxiDog</th>';
                 echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
@@ -1651,8 +1649,9 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Observações do Atendimento', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Observações do Pet', 'dps-agenda-addon' ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
+                echo '<th>TaxiDog</th>';
                 echo '<th>' . esc_html__( 'Endereço', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Mapa', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
