@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
- * Version:           1.3.1
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.3.1' );
+    define( 'DPS_FINANCE_VERSION', '1.4.0' );
 }
 
 // Constante para limite de meses no gráfico financeiro
@@ -1440,6 +1440,9 @@ class DPS_Finance_Addon {
         // Exibe mensagens de feedback
         $this->render_feedback_messages();
 
+        // F2.1: FASE 2 - UX: Card de pendências de hoje e vencidas
+        $this->render_pending_alerts();
+
         // Dashboard de resumo financeiro (usa todos os registros, não paginados)
         $this->render_finance_summary( $all_trans );
         
@@ -2087,6 +2090,91 @@ class DPS_Finance_Addon {
         echo '<div class="' . esc_attr( $class ) . '" role="' . esc_attr( $role ) . '" aria-live="' . esc_attr( $aria_live ) . '">';
         echo esc_html( $text );
         echo '</div>';
+    }
+    
+    /**
+     * Renderiza alertas de pendências urgentes (vencidas e de hoje).
+     * 
+     * F2.1: FASE 2 - UX: Visibilidade imediata de cobranças urgentes.
+     * 
+     * @since 1.4.0
+     */
+    private function render_pending_alerts() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        $today = current_time( 'Y-m-d' );
+        
+        // Pendências vencidas (data < hoje E status em_aberto)
+        $overdue = $wpdb->get_row( $wpdb->prepare( "
+            SELECT COUNT(*) as count, SUM(valor) as total
+            FROM {$table}
+            WHERE status = 'em_aberto'
+              AND tipo = 'receita'
+              AND data < %s
+        ", $today ) );
+        
+        // Pendências de hoje (data = hoje E status em_aberto)
+        $today_pending = $wpdb->get_row( $wpdb->prepare( "
+            SELECT COUNT(*) as count, SUM(valor) as total
+            FROM {$table}
+            WHERE status = 'em_aberto'
+              AND tipo = 'receita'
+              AND data = %s
+        ", $today ) );
+        
+        // Só renderiza se houver pendências
+        if ( ( $overdue && $overdue->count > 0 ) || ( $today_pending && $today_pending->count > 0 ) ) {
+            echo '<div class="dps-finance-alerts" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap;">';
+            
+            // Alerta de vencidas (crítico)
+            if ( $overdue && $overdue->count > 0 ) {
+                $overdue_value = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $overdue->total * 100 ) );
+                $filter_url = add_query_arg( [
+                    'tab' => 'financeiro',
+                    'fin_status' => 'em_aberto',
+                    'fin_end' => date( 'Y-m-d', strtotime( '-1 day' ) ),
+                ], $this->get_current_url() );
+                
+                echo '<div class="dps-alert dps-alert--danger" style="flex: 1; min-width: 280px; padding: 15px; border-left: 4px solid #ef4444;">';
+                echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                echo '<span style="font-size: 24px;">🚨</span>';
+                echo '<div>';
+                echo '<strong>' . sprintf( 
+                    /* translators: %d: número de pendências */
+                    _n( '%d pendência vencida', '%d pendências vencidas', $overdue->count, 'dps-finance-addon' ),
+                    $overdue->count
+                ) . '</strong><br>';
+                echo '<span style="font-size: 18px; font-weight: 600;">R$ ' . esc_html( $overdue_value ) . '</span><br>';
+                echo '<a href="' . esc_url( $filter_url ) . '" style="font-size: 13px;">' . esc_html__( 'Ver detalhes →', 'dps-finance-addon' ) . '</a>';
+                echo '</div></div></div>';
+            }
+            
+            // Alerta de hoje (atenção)
+            if ( $today_pending && $today_pending->count > 0 ) {
+                $today_value = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $today_pending->total * 100 ) );
+                $filter_url = add_query_arg( [
+                    'tab' => 'financeiro',
+                    'fin_status' => 'em_aberto',
+                    'fin_start' => $today,
+                    'fin_end' => $today,
+                ], $this->get_current_url() );
+                
+                echo '<div class="dps-alert dps-alert--warning" style="flex: 1; min-width: 280px; padding: 15px; border-left: 4px solid #f59e0b;">';
+                echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                echo '<span style="font-size: 24px;">⚠️</span>';
+                echo '<div>';
+                echo '<strong>' . sprintf(
+                    /* translators: %d: número de pendências */
+                    _n( '%d pendência de hoje', '%d pendências de hoje', $today_pending->count, 'dps-finance-addon' ),
+                    $today_pending->count
+                ) . '</strong><br>';
+                echo '<span style="font-size: 18px; font-weight: 600;">R$ ' . esc_html( $today_value ) . '</span><br>';
+                echo '<a href="' . esc_url( $filter_url ) . '" style="font-size: 13px;">' . esc_html__( 'Ver detalhes →', 'dps-finance-addon' ) . '</a>';
+                echo '</div></div></div>';
+            }
+            
+            echo '</div>';
+        }
     }
 
     /**

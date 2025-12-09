@@ -83,6 +83,10 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Finance Add-on (v1.4.0) - FASE 2: UX do Dia a Dia**
+
+- **F2.1 - Card de pendências urgentes**: Novo card visual no topo da aba Financeiro exibindo pendências vencidas (🚨 vermelho) e pendências de hoje (⚠️ amarelo) com quantidade e valor total. Links diretos para filtrar e ver detalhes. Melhora visibilidade de cobranças urgentes para equipe.
+
 #### Changed (Alterado)
 
 #### Fixed (Corrigido)
