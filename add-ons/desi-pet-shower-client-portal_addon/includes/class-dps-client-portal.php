@@ -1070,6 +1070,15 @@ final class DPS_Client_Portal {
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
             'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
             'clientId' => $client_id,
+            'loyalty' => [
+                'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
+                'historyLimit' => 5,
+                'i18n' => [
+                    'loading' => __( 'Carregando...', 'dps-client-portal' ),
+                    'redeemSuccess' => __( 'Resgate realizado com sucesso!', 'dps-client-portal' ),
+                    'redeemError' => __( 'Não foi possível concluir o resgate.', 'dps-client-portal' ),
+                ],
+            ],
         ] );
         
         ob_start();
@@ -1162,6 +1171,12 @@ final class DPS_Client_Portal {
                 'active' => true,
                 'badge' => 0,
             ],
+            'fidelidade' => [
+                'icon'  => '⭐',
+                'label' => __( 'Fidelidade', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => 0,
+            ],
             'mensagens' => [
                 'icon'  => '💬',
                 'label' => __( 'Mensagens', 'dps-client-portal' ),
@@ -1240,6 +1255,13 @@ final class DPS_Client_Portal {
             $this->render_referrals_summary( $client_id );
         }
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
+        echo '</div>';
+
+        // Panel: Fidelidade
+        echo '<div id="panel-fidelidade" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_fidelidade_content', $client_id );
+        $this->render_loyalty_panel( $client_id );
+        do_action( 'dps_portal_after_fidelidade_content', $client_id );
         echo '</div>';
         
         // Panel: Mensagens (Fase 4 - continuação)
@@ -2064,6 +2086,147 @@ final class DPS_Client_Portal {
         ];
 
         return $labels[ $status ] ?? '';
+    }
+
+    /**
+     * Renderiza painel de fidelidade no portal.
+     *
+     * @param int $client_id ID do cliente autenticado.
+     */
+    private function render_loyalty_panel( $client_id ) {
+        echo '<section class="dps-portal-section dps-portal-loyalty">';
+
+        if ( ! class_exists( 'DPS_Loyalty_API' ) ) {
+            echo '<p>' . esc_html__( 'O programa de fidelidade não está ativo no momento.', 'dps-client-portal' ) . '</p>';
+            echo '</section>';
+            return;
+        }
+
+        $client_name   = get_the_title( $client_id );
+        $points        = DPS_Loyalty_API::get_points( $client_id );
+        $credit        = DPS_Loyalty_API::get_credit( $client_id );
+        $tier          = DPS_Loyalty_API::get_loyalty_tier( $client_id );
+        $referral_code = DPS_Loyalty_API::get_referral_code( $client_id );
+        $referral_url  = DPS_Loyalty_API::get_referral_url( $client_id );
+        $history_limit = 5;
+        $history       = DPS_Loyalty_API::get_points_history( $client_id, [ 'limit' => $history_limit, 'offset' => 0 ] );
+        $total_logs    = count( get_post_meta( $client_id, 'dps_loyalty_points_log' ) );
+        $has_more      = $total_logs > $history_limit;
+        $settings      = get_option( 'dps_loyalty_settings', [] );
+
+        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit ) : 'R$ ' . number_format( $credit / 100, 2, ',', '.' );
+        $progress       = isset( $tier['progress'] ) ? (int) $tier['progress'] : 0;
+        $next_points    = isset( $tier['next_points'] ) ? (int) $tier['next_points'] : null;
+        $loyalty_nonce  = wp_create_nonce( 'dps_portal_loyalty' );
+
+        $portal_enabled       = ! empty( $settings['enable_portal_redemption'] );
+        $portal_min_points    = isset( $settings['portal_min_points_to_redeem'] ) ? absint( $settings['portal_min_points_to_redeem'] ) : 0;
+        $points_per_real      = isset( $settings['portal_points_per_real'] ) ? max( 1, absint( $settings['portal_points_per_real'] ) ) : 100;
+        $max_discount_cents   = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
+        $max_points_by_cap    = $max_discount_cents > 0 ? (int) floor( ( $max_discount_cents / 100 ) * $points_per_real ) : $points;
+        $max_points_available = min( $points, $max_points_by_cap );
+        $max_discount_display = class_exists( 'DPS_Money_Helper' ) ? DPS_Money_Helper::format_to_brazilian( $max_discount_cents ) : number_format( $max_discount_cents / 100, 2, ',', '.' );
+
+        echo '<div class="dps-loyalty-hero" data-loyalty-nonce="' . esc_attr( $loyalty_nonce ) . '" data-history-limit="' . esc_attr( $history_limit ) . '">';
+        echo '<div class="dps-loyalty-hero__content">';
+        echo '<p class="dps-loyalty-hero__greeting">' . esc_html( sprintf( __( 'Olá, %s! 🐾', 'dps-client-portal' ), $client_name ) ) . '</p>';
+        echo '<h2 class="dps-loyalty-hero__title">' . esc_html__( 'Minha Fidelidade', 'dps-client-portal' ) . '</h2>';
+        echo '<div class="dps-loyalty-tier">';
+        echo '<span class="dps-loyalty-tier__icon">' . esc_html( $tier['icon'] ?? '⭐' ) . '</span>';
+        echo '<div class="dps-loyalty-tier__labels">';
+        echo '<span class="dps-loyalty-tier__name">' . esc_html( $tier['label'] ?? '' ) . '</span>';
+        if ( $next_points ) {
+            $remaining = max( 0, $next_points - $points );
+            echo '<span class="dps-loyalty-tier__hint">' . esc_html( sprintf( __( 'Faltam %d pts para o próximo nível', 'dps-client-portal' ), $remaining ) ) . '</span>';
+        }
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-loyalty-progress">';
+        echo '<div class="dps-loyalty-progress__bar"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
+        echo '<div class="dps-loyalty-progress__text">' . esc_html( $points ) . ' / ' . esc_html( $next_points ? $next_points : $points ) . ' pts</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-loyalty-stats">';
+        echo '<div class="dps-loyalty-card">';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Pontos', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-loyalty-card__value" data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</p>';
+        echo '<button class="dps-button-link dps-loyalty-history-trigger" type="button">' . esc_html__( 'Ver histórico', 'dps-client-portal' ) . '</button>';
+        echo '</div>';
+
+        echo '<div class="dps-loyalty-card">';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Créditos disponíveis', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-loyalty-card__value" data-loyalty-credit>' . esc_html( $credit_display ) . '</p>';
+        echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Utilize para descontos em atendimentos.', 'dps-client-portal' ) . '</small>';
+        echo '</div>';
+
+        echo '<div class="dps-loyalty-card">';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-loyalty-card__value">' . esc_html( $referral_code ) . '</p>';
+        if ( $referral_url ) {
+            echo '<div class="dps-loyalty-card__actions">';
+            echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" />';
+            echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">' . esc_html__( 'Copiar link', 'dps-client-portal' ) . '</button>';
+            echo '</div>';
+        }
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-loyalty-history" data-total="' . esc_attr( $total_logs ) . '" data-limit="' . esc_attr( $history_limit ) . '">';
+        echo '<div class="dps-loyalty-history__header">';
+        echo '<h3>' . esc_html__( 'Últimas movimentações', 'dps-client-portal' ) . '</h3>';
+        echo '</div>';
+        if ( ! empty( $history ) ) {
+            echo '<ul class="dps-loyalty-history__list">';
+            foreach ( $history as $entry ) {
+                $context_label = DPS_Loyalty_API::get_context_label( $entry['context'] );
+                $formatted_date = date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) );
+                $sign = ( 'add' === $entry['action'] || 'credit_add' === $entry['action'] ) ? '+' : '-';
+                echo '<li class="dps-loyalty-history__item">';
+                echo '<div>'; 
+                echo '<p class="dps-loyalty-history__context">' . esc_html( $context_label ) . '</p>';
+                echo '<span class="dps-loyalty-history__date">' . esc_html( $formatted_date ) . '</span>';
+                echo '</div>';
+                echo '<span class="dps-loyalty-history__points dps-loyalty-history__points--' . esc_attr( $entry['action'] ) . '">' . esc_html( $sign . $entry['points'] ) . '</span>';
+                echo '</li>';
+            }
+            echo '</ul>';
+        } else {
+            echo '<p class="dps-loyalty-history__empty">' . esc_html__( 'Sem movimentações ainda.', 'dps-client-portal' ) . '</p>';
+        }
+
+        if ( $has_more ) {
+            echo '<button type="button" class="dps-button-secondary dps-loyalty-history-more" data-offset="' . esc_attr( $history_limit ) . '" data-limit="' . esc_attr( $history_limit ) . '" data-nonce="' . esc_attr( $loyalty_nonce ) . '">' . esc_html__( 'Carregar mais', 'dps-client-portal' ) . '</button>';
+        }
+        echo '</div>';
+
+        if ( $portal_enabled ) {
+            echo '<div class="dps-loyalty-redemption">';
+            echo '<h3>' . esc_html__( 'Resgatar pontos', 'dps-client-portal' ) . '</h3>';
+            echo '<p class="dps-loyalty-redemption__hint">' . esc_html( sprintf( __( 'Cada R$ 1,00 = %d pts. Máximo por resgate: %s', 'dps-client-portal' ), $points_per_real, $max_discount_display ) ) . '</p>';
+
+            if ( $max_points_available < max( $portal_min_points, 1 ) ) {
+                echo '<p class="dps-loyalty-redemption__empty">' . esc_html__( 'Você ainda não possui pontos suficientes para resgate.', 'dps-client-portal' ) . '</p>';
+            } else {
+                $default_value = max( $portal_min_points, 1 );
+                $default_value = min( $default_value, $max_points_available );
+                echo '<form class="dps-loyalty-redemption-form" data-nonce="' . esc_attr( $loyalty_nonce ) . '" data-rate="' . esc_attr( $points_per_real ) . '" data-max-cents="' . esc_attr( $max_discount_cents ) . '" data-min-points="' . esc_attr( $portal_min_points ) . '" data-current-points="' . esc_attr( $points ) . '">';
+                echo '<label for="dps-loyalty-points-input">' . esc_html__( 'Quantidade de pontos para converter', 'dps-client-portal' ) . '</label>';
+                echo '<input type="number" id="dps-loyalty-points-input" name="points_to_redeem" min="' . esc_attr( max( $portal_min_points, 1 ) ) . '" max="' . esc_attr( $max_points_available ) . '" step="1" value="' . esc_attr( $default_value ) . '" />';
+                echo '<button type="submit" class="dps-button-primary dps-loyalty-redeem-btn">' . esc_html__( 'Resgatar pontos', 'dps-client-portal' ) . '</button>';
+                echo '<p class="dps-loyalty-redemption__balance">' . esc_html__( 'Saldo em pontos: ', 'dps-client-portal' ) . '<strong data-loyalty-points>' . esc_html( $points ) . '</strong></p>';
+                echo '<div class="dps-loyalty-redemption__feedback" aria-live="polite"></div>';
+                echo '</form>';
+            }
+            echo '</div>';
+        } else {
+            echo '<div class="dps-loyalty-redemption--disabled">';
+            echo '<p>' . esc_html__( 'Resgates pelo portal estão temporariamente indisponíveis. Fale com a equipe para utilizar seus pontos.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+        }
+
+        echo '</section>';
     }
 
     /**

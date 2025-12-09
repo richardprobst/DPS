@@ -75,6 +75,9 @@ class DPS_Loyalty_Addon {
         add_action( 'admin_post_dps_loyalty_export_referrals', [ $this, 'handle_export_referrals' ] );
         add_action( 'updated_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         add_action( 'added_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
+
+        add_action( 'dps_loyalty_points_added', [ $this, 'maybe_notify_points_added' ], 20, 3 );
+        add_action( 'dps_loyalty_tier_bonus_applied', [ $this, 'maybe_notify_referral_bonus' ], 20, 3 );
         
         // AJAX para busca de clientes (autocomplete).
         add_action( 'wp_ajax_dps_loyalty_search_clients', [ $this, 'ajax_search_clients' ] );
@@ -713,6 +716,14 @@ class DPS_Loyalty_Addon {
     private function render_settings_tab( $brl_per_pt ) {
         $settings = get_option( self::OPTION_KEY, [] );
         $referral_page_id = isset( $settings['referral_page_id'] ) ? (int) $settings['referral_page_id'] : 0;
+        $portal_enabled   = ! empty( $settings['enable_portal_redemption'] );
+        $portal_min_points = isset( $settings['portal_min_points_to_redeem'] ) ? absint( $settings['portal_min_points_to_redeem'] ) : 0;
+        $portal_points_per_real = isset( $settings['portal_points_per_real'] ) ? absint( $settings['portal_points_per_real'] ) : 100;
+        $portal_max_discount = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
+        $send_points_notification   = ! empty( $settings['send_points_notification'] );
+        $send_referral_notification = ! empty( $settings['send_referral_notification'] );
+        $points_template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $referral_template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
         
         // Busca todas as páginas publicadas para o dropdown
         $pages = get_pages( [
@@ -776,6 +787,86 @@ class DPS_Loyalty_Addon {
                     </tr>
                 </table>
             </fieldset>
+
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Comunicações', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Configure avisos automáticos via Communications quando o cliente ganhar pontos ou receber recompensas de indicação.', 'dps-loyalty-addon' ); ?></p>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Bonificação de pontos', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <p>
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[send_points_notification]" value="1" <?php checked( $send_points_notification ); ?> />
+                                    <?php esc_html_e( 'Enviar mensagem quando pontos forem creditados', 'dps-loyalty-addon' ); ?>
+                                </label>
+                            </p>
+                            <p>
+                                <label for="dps_points_notification_template" style="display:block;">
+                                    <?php esc_html_e( 'Template da mensagem', 'dps-loyalty-addon' ); ?>
+                                </label>
+                                <textarea id="dps_points_notification_template" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[points_notification_template]" rows="3" style="width: 100%; max-width: 480px;"><?php echo esc_textarea( $points_template ); ?></textarea>
+                                <span class="description"><?php esc_html_e( 'Placeholders: {client_name}, {points}, {new_balance}, {context}, {tier_name}', 'dps-loyalty-addon' ); ?></span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Recompensa de indicação', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <p>
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[send_referral_notification]" value="1" <?php checked( $send_referral_notification ); ?> />
+                                    <?php esc_html_e( 'Enviar mensagem quando bônus de indicação for aplicado', 'dps-loyalty-addon' ); ?>
+                                </label>
+                            </p>
+                            <p>
+                                <label for="dps_referral_notification_template" style="display:block;">
+                                    <?php esc_html_e( 'Template da mensagem', 'dps-loyalty-addon' ); ?>
+                                </label>
+                                <textarea id="dps_referral_notification_template" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referral_notification_template]" rows="3" style="width: 100%; max-width: 480px;"><?php echo esc_textarea( $referral_template ); ?></textarea>
+                                <span class="description"><?php esc_html_e( 'Placeholders: {client_name}, {points}, {new_balance}, {context}, {tier_name}', 'dps-loyalty-addon' ); ?></span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Resgate no Portal', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Permite que o cliente converta pontos em crédito diretamente pelo Portal do Cliente, respeitando limite por resgate.', 'dps-loyalty-addon' ); ?></p>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Habilitar resgate', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_portal_redemption]" value="1" <?php checked( $portal_enabled ); ?> />
+                                <?php esc_html_e( 'Permitir resgate de pontos pelo Portal', 'dps-loyalty-addon' ); ?>
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Mínimo de pontos', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_min_points_to_redeem]" value="<?php echo esc_attr( $portal_min_points ); ?>" />
+                            <p class="description"><?php esc_html_e( 'Quantidade mínima que o cliente precisa ter para iniciar um resgate.', 'dps-loyalty-addon' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Pontos por R$ 1,00', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <input type="number" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_points_per_real]" value="<?php echo esc_attr( $portal_points_per_real ); ?>" />
+                            <p class="description"><?php esc_html_e( 'Exemplo: 100 pontos = R$ 1,00 de crédito.', 'dps-loyalty-addon' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Limite por resgate (R$)', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[portal_max_discount_amount]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( $portal_max_discount ) ); ?>" />
+                            <p class="description"><?php esc_html_e( 'Teto de crédito convertido a cada solicitação no Portal.', 'dps-loyalty-addon' ); ?></p>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
             <?php submit_button(); ?>
         </form>
         <?php
@@ -790,7 +881,25 @@ class DPS_Loyalty_Addon {
      * @param int $selected_id ID do cliente selecionado.
      */
     private function render_clients_tab( $selected_id ) {
-        $logs = $selected_id ? dps_loyalty_get_logs( $selected_id ) : [];
+        $logs_limit       = 10;
+        $logs_page        = isset( $_GET['logs_page'] ) ? max( 1, absint( $_GET['logs_page'] ) ) : 1;
+        $logs_offset      = ( $logs_page - 1 ) * $logs_limit;
+        $logs             = [];
+        $total_logs       = 0;
+        $total_logs_pages = 1;
+
+        if ( $selected_id ) {
+            $logs = class_exists( 'DPS_Loyalty_API' ) ? DPS_Loyalty_API::get_points_history(
+                $selected_id,
+                [
+                    'limit'  => $logs_limit,
+                    'offset' => $logs_offset,
+                ]
+            ) : dps_loyalty_get_logs( $selected_id );
+
+            $total_logs = count( get_post_meta( $selected_id, 'dps_loyalty_points_log' ) );
+            $total_logs_pages = $logs_limit > 0 ? max( 1, (int) ceil( $total_logs / $logs_limit ) ) : 1;
+        }
         $selected_name = '';
         
         // Busca nome do cliente selecionado para exibir no campo.
@@ -937,9 +1046,9 @@ class DPS_Loyalty_Addon {
             </div>
 
             <?php if ( ! empty( $logs ) ) : ?>
-                <h3><?php esc_html_e( 'Histórico recente', 'dps-loyalty-addon' ); ?></h3>
+                <h3><?php esc_html_e( 'Histórico de pontos', 'dps-loyalty-addon' ); ?></h3>
                 <ul class="dps-points-history">
-                    <?php foreach ( $logs as $entry ) : 
+                    <?php foreach ( $logs as $entry ) :
                         $context_label = $this->get_context_label( $entry['context'] );
                         $formatted_date = date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) );
                     ?>
@@ -954,6 +1063,35 @@ class DPS_Loyalty_Addon {
                         </li>
                     <?php endforeach; ?>
                 </ul>
+
+                <?php if ( $total_logs_pages > 1 ) :
+                    $base_url = add_query_arg(
+                        [
+                            'page'          => 'dps-loyalty',
+                            'tab'           => 'clients',
+                            'dps_client_id' => $selected_id,
+                        ],
+                        admin_url( 'admin.php' )
+                    );
+                    ?>
+                    <div class="dps-pagination">
+                        <?php if ( $logs_page > 1 ) :
+                            $prev_url = add_query_arg( 'logs_page', $logs_page - 1, $base_url );
+                            ?>
+                            <a class="button" href="<?php echo esc_url( $prev_url ); ?>">&laquo; <?php esc_html_e( 'Anterior', 'dps-loyalty-addon' ); ?></a>
+                        <?php endif; ?>
+
+                        <span class="dps-pagination-info">
+                            <?php echo esc_html( sprintf( __( 'Página %1$d de %2$d', 'dps-loyalty-addon' ), $logs_page, $total_logs_pages ) ); ?>
+                        </span>
+
+                        <?php if ( $logs_page < $total_logs_pages ) :
+                            $next_url = add_query_arg( 'logs_page', $logs_page + 1, $base_url );
+                            ?>
+                            <a class="button" href="<?php echo esc_url( $next_url ); ?>"><?php esc_html_e( 'Próxima', 'dps-loyalty-addon' ); ?> &raquo;</a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             <?php else : ?>
                 <p><?php esc_html_e( 'Nenhum histórico disponível.', 'dps-loyalty-addon' ); ?></p>
             <?php endif; ?>
@@ -970,17 +1108,11 @@ class DPS_Loyalty_Addon {
      * @return string The translated label.
      */
     private function get_context_label( $context ) {
-        $labels = [
-            'appointment_payment' => __( 'Pagamento de atendimento', 'dps-loyalty-addon' ),
-            'referral_reward'     => __( 'Recompensa de indicação', 'dps-loyalty-addon' ),
-            'credit_add'          => __( 'Crédito adicionado', 'dps-loyalty-addon' ),
-            'credit_use'          => __( 'Crédito utilizado', 'dps-loyalty-addon' ),
-            'manual_adjustment'   => __( 'Ajuste manual', 'dps-loyalty-addon' ),
-            'points_expired'      => __( 'Pontos expirados', 'dps-loyalty-addon' ),
-            'redeem'              => __( 'Resgate de pontos', 'dps-loyalty-addon' ),
-        ];
+        if ( class_exists( 'DPS_Loyalty_API' ) ) {
+            return DPS_Loyalty_API::get_context_label( $context );
+        }
 
-        return isset( $labels[ $context ] ) ? $labels[ $context ] : $context;
+        return $context;
     }
 
     public function handle_campaign_audit() {
@@ -1288,10 +1420,126 @@ class DPS_Loyalty_Addon {
         $output['referrals_max_per_referrer'] = isset( $input['referrals_max_per_referrer'] ) ? absint( $input['referrals_max_per_referrer'] ) : 0;
         $output['referrals_first_purchase']   = ! empty( $input['referrals_first_purchase'] ) ? 1 : 0;
 
+        $output['enable_portal_redemption']   = ! empty( $input['enable_portal_redemption'] ) ? 1 : 0;
+        $output['portal_min_points_to_redeem']= isset( $input['portal_min_points_to_redeem'] ) ? absint( $input['portal_min_points_to_redeem'] ) : 0;
+        $output['portal_points_per_real']     = isset( $input['portal_points_per_real'] ) ? max( 1, absint( $input['portal_points_per_real'] ) ) : 100;
+        $output['portal_max_discount_amount'] = isset( $input['portal_max_discount_amount'] ) ? dps_loyalty_parse_money_br( $input['portal_max_discount_amount'] ) : 0;
+
+        $default_points_template  = __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $default_referral_template = __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+
+        $output['send_points_notification']   = ! empty( $input['send_points_notification'] ) ? 1 : 0;
+        $output['send_referral_notification'] = ! empty( $input['send_referral_notification'] ) ? 1 : 0;
+        $output['points_notification_template']  = isset( $input['points_notification_template'] ) ? sanitize_textarea_field( $input['points_notification_template'] ) : $default_points_template;
+        $output['referral_notification_template'] = isset( $input['referral_notification_template'] ) ? sanitize_textarea_field( $input['referral_notification_template'] ) : $default_referral_template;
+
         if ( $output['brl_per_point'] <= 0 ) {
             $output['brl_per_point'] = 10.0;
         }
         return $output;
+    }
+
+    /**
+     * Envia notificação quando pontos são adicionados, se habilitado.
+     *
+     * @param int    $client_id ID do cliente.
+     * @param int    $points    Pontos creditados.
+     * @param string $context   Contexto do crédito.
+     */
+    public function maybe_notify_points_added( $client_id, $points, $context ) {
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            return;
+        }
+
+        $settings = get_option( self::OPTION_KEY, [] );
+        if ( empty( $settings['send_points_notification'] ) ) {
+            return;
+        }
+
+        $template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
+        $message  = $this->prepare_loyalty_message( $template, $client_id, $points, $context );
+
+        $this->dispatch_loyalty_message( $client_id, $message, 'points_awarded' );
+    }
+
+    /**
+     * Envia notificação para recompensa de indicação, se habilitado.
+     *
+     * @param int   $client_id  ID do cliente.
+     * @param int   $bonus      Bônus aplicado.
+     * @param float $multiplier Multiplicador (não utilizado na mensagem, mas mantido para compatibilidade).
+     */
+    public function maybe_notify_referral_bonus( $client_id, $bonus, $multiplier ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            return;
+        }
+
+        $settings = get_option( self::OPTION_KEY, [] );
+        if ( empty( $settings['send_referral_notification'] ) ) {
+            return;
+        }
+
+        $template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $message  = $this->prepare_loyalty_message( $template, $client_id, $bonus, 'referral_reward' );
+
+        $this->dispatch_loyalty_message( $client_id, $message, 'referral_reward' );
+    }
+
+    /**
+     * Substitui placeholders do template de mensagem.
+     *
+     * @param string $template  Template configurado.
+     * @param int    $client_id ID do cliente.
+     * @param int    $points    Valor de pontos ou bônus.
+     * @param string $context   Contexto da ação.
+     * @return string Mensagem formatada.
+     */
+    private function prepare_loyalty_message( $template, $client_id, $points, $context ) {
+        $client_name  = get_the_title( $client_id );
+        $new_balance  = class_exists( 'DPS_Loyalty_API' ) ? DPS_Loyalty_API::get_points( $client_id ) : dps_loyalty_get_points( $client_id );
+        $tier         = class_exists( 'DPS_Loyalty_API' ) ? DPS_Loyalty_API::get_loyalty_tier( $client_id ) : [];
+        $tier_name    = isset( $tier['label'] ) ? $tier['label'] : '';
+        $context_label = class_exists( 'DPS_Loyalty_API' ) ? DPS_Loyalty_API::get_context_label( $context ) : $context;
+
+        $placeholders = [
+            '{client_name}' => $client_name,
+            '{points}'      => (int) $points,
+            '{new_balance}' => (int) $new_balance,
+            '{context}'     => $context_label,
+            '{tier_name}'   => $tier_name,
+        ];
+
+        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $template );
+    }
+
+    /**
+     * Encaminha mensagem via Communications (WhatsApp e e-mail quando disponível).
+     *
+     * @param int    $client_id ID do cliente.
+     * @param string $message   Mensagem já formatada.
+     * @param string $type      Tipo de evento.
+     */
+    private function dispatch_loyalty_message( $client_id, $message, $type ) {
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            return;
+        }
+
+        $phone = get_post_meta( $client_id, 'client_phone', true );
+        $email = get_post_meta( $client_id, 'client_email', true );
+        $api   = DPS_Communications_API::get_instance();
+        $context = [
+            'client_id' => $client_id,
+            'type'      => $type,
+        ];
+
+        if ( $phone ) {
+            $api->send_whatsapp( $phone, $message, $context );
+        }
+
+        if ( $email ) {
+            $subject = __( 'Atualização do programa de fidelidade', 'dps-loyalty-addon' );
+            $api->send_email( $email, $subject, $message, $context );
+        }
     }
 
     public function render_referrals_section_intro() {
@@ -1847,11 +2095,19 @@ if ( ! function_exists( 'dps_loyalty_log_event' ) ) {
 }
 
 if ( ! function_exists( 'dps_loyalty_get_logs' ) ) {
-    function dps_loyalty_get_logs( $client_id, $limit = 10 ) {
+    function dps_loyalty_get_logs( $client_id, $args = [] ) {
         $client_id = (int) $client_id;
         if ( $client_id <= 0 ) {
             return [];
         }
+
+        // Compatibilidade: se $args for inteiro, considera como limit.
+        if ( ! is_array( $args ) ) {
+            $args = [ 'limit' => (int) $args ];
+        }
+
+        $limit  = isset( $args['limit'] ) ? absint( $args['limit'] ) : 10;
+        $offset = isset( $args['offset'] ) ? absint( $args['offset'] ) : 0;
 
         $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
         if ( empty( $logs ) ) {
@@ -1859,7 +2115,12 @@ if ( ! function_exists( 'dps_loyalty_get_logs' ) ) {
         }
 
         $logs = array_reverse( $logs );
-        return array_slice( $logs, 0, $limit );
+
+        if ( 0 === $limit ) {
+            return $logs;
+        }
+
+        return array_slice( $logs, $offset, $limit );
     }
 }
 
