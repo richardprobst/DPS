@@ -248,11 +248,19 @@ class DPS_Dashboard {
         $has_finance = false;
         if ( class_exists( 'DPS_Finance_Addon' ) ) {
             $has_finance = true;
-            // Conta transações pendentes
+            // Conta transações pendentes apenas se a tabela existir
             global $wpdb;
-            $pending_payments = $wpdb->get_var(
-                "SELECT COUNT(*) FROM {$wpdb->prefix}dps_transacoes WHERE status = 'pendente'"
-            );
+            $table_name = $wpdb->prefix . 'dps_transacoes';
+            // Verifica se a tabela existe antes de consultar
+            $table_exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) === $table_name;
+            if ( $table_exists ) {
+                $pending_payments = (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$table_name} WHERE status = %s",
+                        'pendente'
+                    )
+                );
+            }
         }
 
         return [

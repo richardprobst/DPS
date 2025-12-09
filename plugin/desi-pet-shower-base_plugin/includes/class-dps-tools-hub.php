@@ -66,8 +66,8 @@ class DPS_Tools_Hub {
         $tabs = [];
         $callbacks = [];
 
-        // Aba Formulário de Cadastro (se add-on ativo)
-        if ( class_exists( 'DPS_Registration_Addon' ) ) {
+        // Aba Formulário de Cadastro (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Registration_Addon' ) && method_exists( 'DPS_Registration_Addon', 'get_instance' ) ) {
             $tabs['registration'] = __( 'Formulário de Cadastro', 'dps-base' );
             $callbacks['registration'] = [ $this, 'render_registration_tab' ];
         }
@@ -92,7 +92,7 @@ class DPS_Tools_Hub {
      * Renderiza a aba de Formulário de Cadastro.
      */
     public function render_registration_tab() {
-        if ( class_exists( 'DPS_Registration_Addon' ) ) {
+        if ( class_exists( 'DPS_Registration_Addon' ) && method_exists( 'DPS_Registration_Addon', 'get_instance' ) ) {
             $addon = DPS_Registration_Addon::get_instance();
             ob_start();
             $addon->render_settings_page();
@@ -103,6 +103,10 @@ class DPS_Tools_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Cadastro precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 }
