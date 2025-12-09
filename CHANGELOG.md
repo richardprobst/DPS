@@ -83,6 +83,12 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Loyalty Add-on (v1.3.0) - FASE 1: Performance & UX Básica**
+
+- **F1.1 - Auditoria de campanhas otimizada**: Novo método `get_last_appointments_batch()` elimina queries N+1 ao verificar clientes inativos. Antes: 500 clientes = 500+ queries individuais. Agora: 500 clientes = 1 query batch. Mesma lógica de elegibilidade mantida, apenas mais rápido. Métodos legados `is_client_inactive_for_days()` e `get_last_appointment_date_for_client()` marcados como depreciados.
+- **F1.2 - Autocomplete na aba "Consulta de Cliente"**: Substituído dropdown paginado por campo de busca com autocomplete AJAX. Novo endpoint `wp_ajax_dps_loyalty_search_clients` busca clientes por nome ou telefone. Busca dinâmica com debounce de 300ms e mínimo de 2 caracteres. Navegação por teclado (setas, Enter, Escape) e seleção por clique. Submissão automática do formulário ao selecionar cliente. Resultados exibem nome, telefone e pontos do cliente.
+- **F1.3 - Exibição padronizada de créditos**: Novos métodos `get_credit_for_display()` e `format_credits_display()` centralizam formatação de créditos. Valores negativos são tratados como zero. Formatação consistente (R$ X,XX) usando `DPS_Money_Helper` quando disponível, com fallback manual. Aplicado no Dashboard e na Consulta de Cliente.
+
 **Finance Add-on (v1.6.0) - FASE 4: Extras Avançados (Selecionados)**
 
 - **F4.2 - Lembretes automáticos de pagamento**: Sistema completo de lembretes configurável via painel admin. Checkbox para habilitar/desabilitar lembretes. Configuração de dias antes do vencimento (padrão: 1 dia) e dias após vencimento (padrão: 1 dia). Mensagens customizáveis com placeholders ({cliente}, {pet}, {valor}, {link}). Evento WP-Cron diário (`dps_finance_process_payment_reminders`) processa lembretes automaticamente. Sistema de flags via transients impede envio duplicado de lembretes (janela de 7 dias). Log de execução em error_log para debug. UI acessível via "⚙️ Configurações Avançadas" na aba Financeiro.

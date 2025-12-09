@@ -527,3 +527,121 @@
         justify-content: center;
     }
 }
+
+/* ==========================================================================
+   Autocomplete de Busca de Clientes (Fase 1.2)
+   ========================================================================== */
+
+.dps-client-search-container {
+    margin-bottom: 20px;
+}
+
+.dps-client-search-container form {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.dps-client-search-container label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-autocomplete-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.dps-autocomplete-wrapper input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.dps-autocomplete-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.dps-autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.dps-autocomplete-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s;
+}
+
+.dps-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.dps-autocomplete-item:hover,
+.dps-autocomplete-item.active {
+    background-color: #f0f9ff;
+}
+
+.dps-autocomplete-name {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dps-autocomplete-subtitle {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.dps-autocomplete-loading,
+.dps-autocomplete-no-results,
+.dps-autocomplete-error {
+    padding: 12px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.dps-autocomplete-error {
+    color: #ef4444;
+}
+
+.dps-selected-client-info {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.dps-selected-client-info .button-link {
+    margin-left: 8px;
+    color: #0ea5e9;
+    text-decoration: none;
+}
+
+.dps-selected-client-info .button-link:hover {
+    text-decoration: underline;
+}

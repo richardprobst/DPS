@@ -198,6 +198,171 @@
     };
 
     /**
+     * Inicializa autocomplete de busca de clientes.
+     *
+     * @since 1.3.0
+     */
+    DPSLoyalty.initClientAutocomplete = function() {
+        var $searchInput = $('#dps-loyalty-client-search');
+        var $resultsContainer = $('#dps-loyalty-client-results');
+        var $hiddenInput = $('#dps-loyalty-client-id');
+        var $form = $('#dps-loyalty-client-form');
+        
+        if (!$searchInput.length) {
+            return;
+        }
+
+        var searchTimeout = null;
+        var minChars = 2;
+
+        // Esconde resultados ao clicar fora.
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dps-autocomplete-wrapper').length) {
+                $resultsContainer.hide();
+            }
+        });
+
+        // Busca ao digitar.
+        $searchInput.on('input', function() {
+            var query = $(this).val().trim();
+            
+            // Limpa seleção anterior quando usuário digita.
+            $hiddenInput.val('');
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < minChars) {
+                $resultsContainer.hide().empty();
+                return;
+            }
+
+            // Debounce de 300ms.
+            searchTimeout = setTimeout(function() {
+                DPSLoyalty.searchClients(query, $resultsContainer, $searchInput, $hiddenInput);
+            }, 300);
+        });
+
+        // Navegação por teclado.
+        $searchInput.on('keydown', function(e) {
+            var $items = $resultsContainer.find('.dps-autocomplete-item');
+            var $active = $items.filter('.active');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!$active.length) {
+                    $items.first().addClass('active');
+                } else {
+                    $active.removeClass('active').next('.dps-autocomplete-item').addClass('active');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if ($active.length) {
+                    $active.removeClass('active').prev('.dps-autocomplete-item').addClass('active');
+                }
+            } else if (e.key === 'Enter') {
+                if ($active.length) {
+                    e.preventDefault();
+                    $active.trigger('click');
+                }
+            } else if (e.key === 'Escape') {
+                $resultsContainer.hide();
+            }
+        });
+
+        // Seleção de resultado.
+        $resultsContainer.on('click', '.dps-autocomplete-item', function(e) {
+            e.preventDefault();
+            var $item = $(this);
+            var clientId = $item.data('id');
+            var clientName = $item.data('name');
+            
+            $searchInput.val(clientName);
+            $hiddenInput.val(clientId);
+            $resultsContainer.hide();
+            
+            // Submete o formulário automaticamente.
+            $form.submit();
+        });
+
+        // Hover sobre resultados.
+        $resultsContainer.on('mouseenter', '.dps-autocomplete-item', function() {
+            $resultsContainer.find('.dps-autocomplete-item').removeClass('active');
+            $(this).addClass('active');
+        });
+    };
+
+    /**
+     * Busca clientes via AJAX.
+     *
+     * @since 1.3.0
+     *
+     * @param {string} query Termo de busca.
+     * @param {jQuery} $resultsContainer Container dos resultados.
+     * @param {jQuery} $searchInput Campo de busca.
+     * @param {jQuery} $hiddenInput Campo oculto com ID.
+     */
+    DPSLoyalty.searchClients = function(query, $resultsContainer, $searchInput, $hiddenInput) {
+        // Verifica se dados estão disponíveis.
+        if (typeof dpsLoyaltyData === 'undefined') {
+            return;
+        }
+
+        // Mostra loading.
+        $resultsContainer.html('<div class="dps-autocomplete-loading">' + 
+            (dpsLoyaltyData.i18n.searching || 'Buscando...') + '</div>').show();
+
+        $.ajax({
+            url: dpsLoyaltyData.ajaxUrl,
+            type: 'GET',
+            data: {
+                action: 'dps_loyalty_search_clients',
+                nonce: dpsLoyaltyData.nonce,
+                q: query
+            },
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    var html = '';
+                    $.each(response.data, function(i, client) {
+                        var subtitle = client.phone ? client.phone : '';
+                        if (client.points > 0) {
+                            subtitle += (subtitle ? ' • ' : '') + client.points + ' pts';
+                        }
+                        
+                        html += '<div class="dps-autocomplete-item" data-id="' + client.id + '" data-name="' + DPSLoyalty.escapeHtml(client.text) + '">';
+                        html += '<span class="dps-autocomplete-name">' + DPSLoyalty.escapeHtml(client.text) + '</span>';
+                        if (subtitle) {
+                            html += '<span class="dps-autocomplete-subtitle">' + DPSLoyalty.escapeHtml(subtitle) + '</span>';
+                        }
+                        html += '</div>';
+                    });
+                    $resultsContainer.html(html).show();
+                } else {
+                    $resultsContainer.html('<div class="dps-autocomplete-no-results">' + 
+                        (dpsLoyaltyData.i18n.noResults || 'Nenhum cliente encontrado.') + '</div>').show();
+                }
+            },
+            error: function() {
+                $resultsContainer.html('<div class="dps-autocomplete-error">Erro na busca.</div>').show();
+            }
+        });
+    };
+
+    /**
+     * Escapa HTML para prevenir XSS.
+     *
+     * @since 1.3.0
+     *
+     * @param {string} text Texto a escapar.
+     * @return {string} Texto escapado.
+     */
+    DPSLoyalty.escapeHtml = function(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    };
+
+    /**
      * Inicialização principal.
      */
     DPSLoyalty.init = function() {
@@ -206,6 +371,7 @@
         DPSLoyalty.initProgressAnimations();
         DPSLoyalty.initTooltips();
         DPSLoyalty.initWhatsAppShare();
+        DPSLoyalty.initClientAutocomplete();
     };
 
     // Inicializar quando documento estiver pronto
