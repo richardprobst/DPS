@@ -137,6 +137,21 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on (v2.4.1)**: Menu "Painel Central" desaparece ao ativar o add-on
+  - Registro duplicado do CPT `dps_portal_message` causava conflito de menu
+  - `DPS_Client_Portal` e `DPS_Portal_Admin` ambos registravam o mesmo CPT com `show_in_menu => 'desi-pet-shower'`
+  - WordPress sobrescreve callback do menu pai quando CPT usa `show_in_menu`, causando desaparecimento do "Painel Central"
+  - Removido registro duplicado em `DPS_Client_Portal` (linha 72), mantendo apenas em `DPS_Portal_Admin`
+  - Menu "Painel Central" agora permanece visível após ativar Client Portal
+  - CPT "Mensagens do Portal" continua aparecendo corretamente no menu DPS
+- **AGENDA Add-on (v1.4.1)**: Erro crítico ao acessar menu AGENDA no painel administrativo
+  - `DPS_Agenda_Addon::get_instance()` causava fatal error (linhas 93 e 112 de class-dps-agenda-hub.php)
+  - Implementado padrão singleton em `DPS_Agenda_Addon`
+  - Construtor convertido para privado com método público estático `get_instance()`
+  - Propriedade estática `$instance` adicionada para armazenar instância única
+  - Função de inicialização `dps_agenda_init_addon()` atualizada para usar `get_instance()`
+  - Alinha com padrão de todos os outros add-ons integrados aos Hubs do sistema
+  - Menu AGENDA agora funciona corretamente com suas 3 abas (Dashboard, Configurações, Capacidade)
 - **Finance Add-on (v1.3.1)**: PHP 8+ deprecation warnings relacionados a null em funções de string
   - Corrigido `add_query_arg( null, null )` para `add_query_arg( array() )` para compatibilidade com PHP 8+
   - Adicionado método helper `get_current_url()` para obter URL atual com fallback seguro

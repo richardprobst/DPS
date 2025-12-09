@@ -73,6 +73,27 @@ class DPS_Agenda_Addon {
     use DPS_Agenda_Query;
     
     /**
+     * Instância única (singleton).
+     *
+     * @since 1.4.1
+     * @var DPS_Agenda_Addon|null
+     */
+    private static $instance = null;
+    
+    /**
+     * Recupera a instância única.
+     *
+     * @since 1.4.1
+     * @return DPS_Agenda_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    /**
      * Número de agendamentos por página no modo "Todos".
      * 
      * @since 1.1.0
@@ -176,7 +197,12 @@ class DPS_Agenda_Addon {
         return isset( $config[ $status ]['label'] ) ? $config[ $status ]['label'] : $status;
     }
     
-    public function __construct() {
+    /**
+     * Construtor privado (singleton).
+     *
+     * @since 1.4.1
+     */
+    private function __construct() {
         // Verifica dependência do Finance Add-on após todos os plugins terem sido carregados
         add_action( 'plugins_loaded', [ $this, 'check_finance_dependency' ] );
 
@@ -3633,7 +3659,7 @@ class DPS_Agenda_Addon {
  */
 function dps_agenda_init_addon() {
     if ( class_exists( 'DPS_Agenda_Addon' ) ) {
-        new DPS_Agenda_Addon();
+        DPS_Agenda_Addon::get_instance();
         
         // Inicializa o Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
         if ( class_exists( 'DPS_Agenda_Hub' ) ) {
