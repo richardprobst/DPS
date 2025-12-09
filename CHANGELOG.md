@@ -152,6 +152,13 @@ Antes de criar uma nova versão oficial:
   - Função de inicialização `dps_agenda_init_addon()` atualizada para usar `get_instance()`
   - Alinha com padrão de todos os outros add-ons integrados aos Hubs do sistema
   - Menu AGENDA agora funciona corretamente com suas 3 abas (Dashboard, Configurações, Capacidade)
+- **Finance Add-on (v1.3.1)**: PHP 8+ deprecation warnings relacionados a null em funções de string
+  - Corrigido `add_query_arg( null, null )` para `add_query_arg( array() )` para compatibilidade com PHP 8+
+  - Adicionado método helper `get_current_url()` para obter URL atual com fallback seguro
+  - Substituídas todas as chamadas diretas de `get_permalink()` pelo helper para evitar warnings quando função retorna `false`
+  - Corrige avisos "Deprecated: strpos(): Passing null to parameter #1 ($haystack) of type string is deprecated"
+  - Corrige avisos "Deprecated: str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated"
+  - Elimina warnings de "Cannot modify header information - headers already sent" causados pelos deprecation notices
 - **Registration Add-on (v1.0.1)**: Erro fatal ao acessar página Hub de Ferramentas
   - `DPS_Registration_Addon::get_instance()` causava fatal error (linha 96 de class-dps-tools-hub.php)
   - Implementado padrão singleton em `DPS_Registration_Addon`
