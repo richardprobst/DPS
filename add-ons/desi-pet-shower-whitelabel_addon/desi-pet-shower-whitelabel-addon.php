@@ -342,13 +342,11 @@ class DPS_WhiteLabel_Addon {
  * @return DPS_WhiteLabel_Addon|null
  */
 function dps_whitelabel() {
-    static $instance = null;
-
-    if ( null === $instance && class_exists( 'DPS_WhiteLabel_Addon' ) ) {
-        $instance = new DPS_WhiteLabel_Addon();
+    if ( class_exists( 'DPS_WhiteLabel_Addon' ) ) {
+        return DPS_WhiteLabel_Addon::get_instance();
     }
 
-    return $instance;
+    return null;
 }
 
 /**
