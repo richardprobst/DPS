@@ -42,6 +42,8 @@ add-ons/desi-pet-shower-debugging_addon/
 
 **Total de linhas de código:** ~3.103 linhas (PHP: 2.056, CSS: 689, JS: 339, Uninstall: 19)
 
+> **Nota:** Contagem aproximada baseada em inspeção manual dos arquivos.
+
 ### 1.2 Objetivo Principal
 
 O add-on Debugging tem como objetivo fornecer ferramentas para desenvolvedores e administradores de sistemas:
@@ -283,8 +285,22 @@ $capability = apply_filters( 'dps_debugging_admin_bar_cap', 'manage_options' );
 **Recomendação:**
 ```php
 $capability = apply_filters( 'dps_debugging_admin_bar_cap', 'manage_options' );
-// Garante que nunca seja menos restritivo que edit_posts
-if ( ! current_user_can( 'edit_posts' ) ) {
+
+// Lista de capabilities permitidas (todas requerem algum nível de acesso administrativo)
+$allowed_capabilities = [
+    'manage_options',
+    'manage_network',
+    'edit_theme_options',
+    'export',
+];
+
+// Valida que a capability retornada pelo filtro está na whitelist
+// Isso previne que o filtro afrouxe permissões para capabilities insuficientes
+if ( ! in_array( $capability, $allowed_capabilities, true ) ) {
+    $capability = 'manage_options'; // Fallback seguro
+}
+
+if ( ! current_user_can( $capability ) ) {
     return false;
 }
 ```
@@ -372,6 +388,7 @@ if ( ! in_array( $hook, $allowed_hooks, true ) ) {
 }
 
 // Verificar se é a aba debugging no System Hub
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para carregar assets, sem ações
 if ( strpos( $hook, 'dps-system-hub' ) !== false ) {
     $current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'logs';
     if ( 'debugging' !== $current_tab ) {
@@ -895,7 +912,8 @@ public function get_grouped_entries() {
     foreach ( $entries as $entry ) {
         // Normaliza a entrada (remove timestamps, line numbers)
         $normalized = $this->normalize_entry( $entry );
-        $hash = md5( $normalized );
+        // Usa SHA-256 para melhor resistência a colisões em datasets grandes
+        $hash = hash( 'sha256', $normalized );
         
         if ( ! isset( $grouped[ $hash ] ) ) {
             $grouped[ $hash ] = [
