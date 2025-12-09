@@ -144,6 +144,11 @@ Antes de criar uma nova versão oficial:
   - Corrige avisos "Deprecated: strpos(): Passing null to parameter #1 ($haystack) of type string is deprecated"
   - Corrige avisos "Deprecated: str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated"
   - Elimina warnings de "Cannot modify header information - headers already sent" causados pelos deprecation notices
+- **Registration Add-on (v1.0.1)**: Erro fatal ao acessar página Hub de Ferramentas
+  - `DPS_Registration_Addon::get_instance()` causava fatal error (linha 96 de class-dps-tools-hub.php)
+  - Implementado padrão singleton em `DPS_Registration_Addon`
+  - Construtor convertido para privado com método público `get_instance()`
+  - Alinha com padrão de outros add-ons integrados aos Hubs do sistema
 - **Push Add-on (v1.0.1)**: Menu standalone visível incorretamente no painel administrativo
   - Corrigido `parent='desi-pet-shower'` para `parent=null` na função `register_admin_menu()`
   - Menu agora oculto do menu principal (acessível apenas via URL direta)
