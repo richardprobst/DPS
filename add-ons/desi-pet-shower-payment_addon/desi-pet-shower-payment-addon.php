@@ -57,6 +57,25 @@ add_action( 'init', 'dps_payment_load_textdomain', 1 );
 class DPS_Payment_Addon {
 
     /**
+     * Instância única (singleton).
+     *
+     * @var DPS_Payment_Addon|null
+     */
+    private static $instance = null;
+
+    /**
+     * Recupera a instância única.
+     *
+     * @return DPS_Payment_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Construtor. Registra hooks necessários.
      */
     public function __construct() {
@@ -1263,7 +1282,7 @@ class DPS_Payment_Addon {
  */
 function dps_payment_init_addon() {
     if ( class_exists( 'DPS_Payment_Addon' ) ) {
-        new DPS_Payment_Addon();
+        DPS_Payment_Addon::get_instance();
     }
 }
 add_action( 'init', 'dps_payment_init_addon', 5 );

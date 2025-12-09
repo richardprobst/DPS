@@ -53,6 +53,25 @@ class DPS_Communications_Addon {
 
     const OPTION_KEY = 'dps_comm_settings';
 
+    /**
+     * Instância única (singleton).
+     *
+     * @var DPS_Communications_Addon|null
+     */
+    private static $instance = null;
+
+    /**
+     * Recupera a instância única.
+     *
+     * @return DPS_Communications_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function __construct() {
         // Registra menu admin para comunicações
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
@@ -380,13 +399,10 @@ if ( ! function_exists( 'dps_comm_init' ) ) {
      * de outros registros (prioridade 10).
      */
     function dps_comm_init() {
-        static $instance = null;
-
-        if ( null === $instance ) {
-            $instance = new DPS_Communications_Addon();
+        if ( class_exists( 'DPS_Communications_Addon' ) ) {
+            return DPS_Communications_Addon::get_instance();
         }
-
-        return $instance;
+        return null;
     }
 }
 

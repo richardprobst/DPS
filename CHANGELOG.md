@@ -136,6 +136,16 @@ Antes de criar uma nova versão oficial:
   - `maybe_generate_payment_link()` salva flags de sucesso/erro
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
+#### Fixed (Corrigido)
+- **Base Plugin (v1.1.0)**: Erro fatal ao acessar página Hub de Integrações
+  - `DPS_Push_Addon::get_instance()` causava fatal error (linha 144 de class-dps-integrations-hub.php)
+  - `DPS_Payment_Addon::get_instance()` causava fatal error (linha 126 de class-dps-integrations-hub.php)
+  - `DPS_Communications_Addon::get_instance()` causava fatal error (linha 108 de class-dps-integrations-hub.php)
+  - Implementado padrão singleton em `DPS_Push_Addon`, `DPS_Payment_Addon` e `DPS_Communications_Addon`
+  - Adicionado método público estático `get_instance()` em cada classe
+  - Funções de inicialização atualizadas para usar singleton pattern
+  - Fix compatível com versões anteriores - comportamento mantido
+
 #### Security (Segurança)
 - **Payment Add-on (v1.1.0)**: Tokens do Mercado Pago podem ser movidos para wp-config.php
   - Recomendado definir `DPS_MERCADOPAGO_ACCESS_TOKEN` e `DPS_MERCADOPAGO_WEBHOOK_SECRET` em wp-config.php
