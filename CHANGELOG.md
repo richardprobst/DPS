@@ -86,6 +86,9 @@ Antes de criar uma nova versão oficial:
 **Finance Add-on (v1.4.0) - FASE 2: UX do Dia a Dia**
 
 - **F2.1 - Card de pendências urgentes**: Novo card visual no topo da aba Financeiro exibindo pendências vencidas (🚨 vermelho) e pendências de hoje (⚠️ amarelo) com quantidade e valor total. Links diretos para filtrar e ver detalhes. Melhora visibilidade de cobranças urgentes para equipe.
+- **F2.2 - Botão "Reenviar link de pagamento"**: Novo botão "✉️ Reenviar link" na coluna de Ações para transações em aberto com link do Mercado Pago. Abre WhatsApp com mensagem personalizada contendo link de pagamento. Registra log de reenvio com timestamp e usuário. Reduz de 5 para 1 clique para follow-up com clientes.
+- **F2.3 - Badges visuais de status**: Status financeiros agora exibidos como badges coloridos: ✅ Pago (verde), ⏳ Em aberto (amarelo), ❌ Cancelado (vermelho). Facilita identificação rápida do estado de cada transação. Select de alteração de status agora menor e inline ao badge.
+- **F2.4 - Indicadores visuais de vencimento**: Datas na coluna exibem ícones e cores para urgência: 🚨 Vermelho para vencidas, ⚠️ Amarelo para hoje, normal para futuras. Aplicado apenas em transações em aberto tipo receita. Equipe identifica prioridades visualmente.
 
 #### Changed (Alterado)
 
