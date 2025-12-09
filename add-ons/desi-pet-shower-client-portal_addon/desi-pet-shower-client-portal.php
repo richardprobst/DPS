@@ -56,9 +56,9 @@ if ( ! defined( 'DPS_CLIENT_PORTAL_ADDON_URL' ) ) {
     define( 'DPS_CLIENT_PORTAL_ADDON_URL', plugin_dir_url( __FILE__ ) );
 }
 
-// Define título padrão da página do portal (pode ser traduzido)
+// Define título padrão da página do portal (tradução deve ser feita ao usar a constante)
 if ( ! defined( 'DPS_CLIENT_PORTAL_PAGE_TITLE' ) ) {
-    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', __( 'Portal do Cliente', 'dps-client-portal' ) );
+    define( 'DPS_CLIENT_PORTAL_PAGE_TITLE', 'Portal do Cliente' );
 }
 
 /**
