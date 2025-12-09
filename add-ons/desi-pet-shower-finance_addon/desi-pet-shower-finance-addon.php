@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.3.0' );
+    define( 'DPS_FINANCE_VERSION', '1.4.0' );
 }
 
 // Constante para limite de meses no gráfico financeiro
@@ -146,6 +146,9 @@ class DPS_Finance_Addon {
         // AJAX handlers para histórico de parcelas
         add_action( 'wp_ajax_dps_get_partial_history', [ $this, 'ajax_get_partial_history' ] );
         add_action( 'wp_ajax_dps_delete_partial', [ $this, 'ajax_delete_partial' ] );
+        
+        // F1.1: Endpoint seguro para servir documentos financeiros (FASE 1 - Segurança)
+        add_action( 'template_redirect', [ $this, 'serve_finance_document' ] );
     }
 
     /**
@@ -293,6 +296,28 @@ class DPS_Finance_Addon {
             }
             
             update_option( 'dps_transacoes_db_version', '1.2.0' );
+            $transacoes_version = '1.2.0';
+        }
+        
+        // F1.3: FASE 1 - Performance: Adicionar índices otimizados (v1.3.1)
+        if ( version_compare( $transacoes_version, '1.3.1', '<' ) ) {
+            // Verifica e adiciona índices se não existirem
+            $indexes = $wpdb->get_results( "SHOW INDEX FROM $transacoes_table" );
+            $existing_indexes = array_column( $indexes, 'Key_name' );
+            
+            // Índice composto em data + status (queries de filtro mais comuns)
+            if ( ! in_array( 'idx_finance_date_status', $existing_indexes, true ) ) {
+                $wpdb->query( "CREATE INDEX idx_finance_date_status ON $transacoes_table(data, status)" );
+            }
+            
+            // Índice em categoria (filtros por categoria)
+            if ( ! in_array( 'idx_finance_categoria', $existing_indexes, true ) ) {
+                $wpdb->query( "CREATE INDEX idx_finance_categoria ON $transacoes_table(categoria)" );
+            }
+            
+            // Nota: cliente_id, agendamento_id e plano_id já possuem índices (KEY) da v1.0.0
+            
+            update_option( 'dps_transacoes_db_version', '1.3.1' );
         }
         
         // ========== 2. Criar/atualizar tabela dps_parcelas ==========
@@ -335,6 +360,32 @@ class DPS_Finance_Addon {
             }
             
             update_option( 'dps_parcelas_db_version', '1.2.0' );
+            $parcelas_version = '1.2.0';
+        }
+        
+        // F1.3: FASE 1 - Performance: Verificar índice em trans_id (v1.3.1)
+        if ( version_compare( $parcelas_version, '1.3.1', '<' ) ) {
+            // O índice trans_id já existe da v1.0.0 (KEY trans_id (trans_id))
+            // Apenas atualizamos a versão para manter consistência
+            update_option( 'dps_parcelas_db_version', '1.3.1' );
+        }
+        
+        // F1.1: FASE 1 - Segurança: Proteger diretório de documentos financeiros
+        $upload_dir = wp_upload_dir();
+        $doc_dir    = trailingslashit( $upload_dir['basedir'] ) . 'dps_docs';
+        if ( ! file_exists( $doc_dir ) ) {
+            wp_mkdir_p( $doc_dir );
+        }
+        
+        // Criar .htaccess para bloquear acesso direto aos documentos
+        $htaccess_file = trailingslashit( $doc_dir ) . '.htaccess';
+        if ( ! file_exists( $htaccess_file ) ) {
+            $htaccess_content = "# DPS Finance Add-on - Proteção de Documentos\n";
+            $htaccess_content .= "# FASE 1 - F1.1: Bloqueia acesso direto a documentos financeiros\n";
+            $htaccess_content .= "<Files \"*\">\n";
+            $htaccess_content .= "    Require all denied\n";
+            $htaccess_content .= "</Files>\n";
+            file_put_contents( $htaccess_file, $htaccess_content );
         }
         
         // ========== 3. Criar página de Documentos Financeiros ==========
@@ -457,6 +508,95 @@ class DPS_Finance_Addon {
             $this->export_transactions_csv();
             exit;
         }
+        
+        // F2.2: FASE 2 - Handler para reenvio de link de pagamento
+        if ( isset( $_GET['dps_resend_payment_link'] ) && isset( $_GET['trans_id'] ) ) {
+            $trans_id = intval( $_GET['trans_id'] );
+            
+            // Valida nonce
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_resend_link_' . $trans_id ) ) {
+                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
+            }
+            
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para esta ação.', 'dps-finance-addon' ) );
+            }
+            
+            // Busca transação e agendamento
+            $trans = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $trans_id ) );
+            
+            if ( ! $trans || ! $trans->agendamento_id ) {
+                wp_die( esc_html__( 'Transação ou agendamento não encontrado.', 'dps-finance-addon' ) );
+            }
+            
+            // Busca link de pagamento
+            $payment_link = get_post_meta( $trans->agendamento_id, 'dps_payment_link', true );
+            
+            if ( ! $payment_link ) {
+                $base_url = $this->get_current_url();
+                wp_redirect( add_query_arg( [
+                    'tab' => 'financeiro',
+                    'dps_msg' => 'no_payment_link',
+                ], $base_url ) );
+                exit;
+            }
+            
+            // Busca dados do cliente
+            $client_name = '';
+            $phone = '';
+            if ( $trans->cliente_id ) {
+                $client = get_post( $trans->cliente_id );
+                if ( $client ) {
+                    $client_name = $client->post_title;
+                    $phone = get_post_meta( $trans->cliente_id, 'client_phone', true );
+                }
+            }
+            
+            // Busca nome do pet
+            $pet_name = '';
+            $pet_id = get_post_meta( $trans->agendamento_id, 'appointment_pet_id', true );
+            if ( $pet_id ) {
+                $pet = get_post( $pet_id );
+                if ( $pet ) {
+                    $pet_name = $pet->post_title;
+                }
+            }
+            
+            // Prepara mensagem para WhatsApp com link
+            if ( $phone ) {
+                $digits = preg_replace( '/\D+/', '', $phone );
+                if ( strlen( $digits ) == 10 || strlen( $digits ) == 11 ) {
+                    $digits = '55' . $digits;
+                }
+                
+                $valor_str = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans->valor * 100 ) );
+                
+                $msg = sprintf(
+                    __( 'Olá %1$s! Segue o link para pagamento do atendimento do %2$s (R$ %3$s): %4$s', 'dps-finance-addon' ),
+                    $client_name,
+                    $pet_name,
+                    $valor_str,
+                    $payment_link
+                );
+                
+                $wa_link = 'https://wa.me/' . $digits . '?text=' . rawurlencode( $msg );
+                
+                // Registra log de reenvio
+                update_post_meta( $trans->agendamento_id, '_dps_payment_link_resent_at', current_time( 'mysql' ) );
+                update_post_meta( $trans->agendamento_id, '_dps_payment_link_resent_by', get_current_user_id() );
+                
+                wp_redirect( $wa_link );
+                exit;
+            } else {
+                $base_url = $this->get_current_url();
+                wp_redirect( add_query_arg( [
+                    'tab' => 'financeiro',
+                    'dps_msg' => 'no_phone',
+                ], $base_url ) );
+                exit;
+            }
+        }
 
         // Registrar pagamento parcial
         if ( isset( $_POST['dps_finance_action'] ) && $_POST['dps_finance_action'] === 'save_partial' && check_admin_referer( 'dps_finance_action', 'dps_finance_nonce' ) ) {
@@ -475,8 +615,34 @@ class DPS_Finance_Addon {
             $value_cents = DPS_Money_Helper::parse_brazilian_format( $raw_value );
             $value       = $value_cents / 100;
             $method    = isset( $_POST['partial_method'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_method'] ) ) : '';
+            
             if ( $trans_id && $value > 0 ) {
                 $parc_table = $wpdb->prefix . 'dps_parcelas';
+                
+                // F1.2: FASE 1 - Validação: Impedir que soma de parciais ultrapasse o total
+                // Busca valor total da transação
+                $total_val = $wpdb->get_var( $wpdb->prepare( "SELECT valor FROM {$table} WHERE id = %d", $trans_id ) );
+                $total_val_cents = $total_val ? (int) round( (float) $total_val * 100 ) : 0;
+                
+                // Soma parcelas já registradas
+                $paid_sum = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
+                $paid_sum_cents = $paid_sum ? (int) round( (float) $paid_sum * 100 ) : 0;
+                
+                // Valida se a nova parcela não ultrapassa o total (tolerância de R$ 0,01 para arredondamentos)
+                $new_total_cents = $paid_sum_cents + $value_cents;
+                if ( $new_total_cents > ( $total_val_cents + 1 ) ) { // +1 centavo de tolerância
+                    $base_url = $this->get_current_url();
+                    wp_redirect( add_query_arg( [
+                        'tab' => 'financeiro',
+                        'dps_msg' => 'partial_exceeds_total',
+                        'trans_id' => $trans_id,
+                        'total' => DPS_Money_Helper::format_to_brazilian( $total_val_cents ),
+                        'paid' => DPS_Money_Helper::format_to_brazilian( $paid_sum_cents ),
+                        'attempted' => DPS_Money_Helper::format_to_brazilian( $value_cents ),
+                    ], $base_url ) );
+                    exit;
+                }
+                
                 // Insere a parcela
                 $wpdb->insert( $parc_table, [
                     'trans_id' => $trans_id,
@@ -892,14 +1058,96 @@ class DPS_Finance_Addon {
         $filename  = $prefix . '_' . $client_slug . '_' . $pet_slug . '_' . $date_key . '.html';
         $file_path = trailingslashit( $doc_dir ) . $filename;
         file_put_contents( $file_path, $html );
-        $doc_url = trailingslashit( $upload_dir['baseurl'] ) . 'dps_docs/' . $filename;
-        // Armazena URL para reutilização futura
+        
+        // F1.1: FASE 1 - Segurança: Não expor URL pública direta do arquivo
+        // Armazena caminho do arquivo (interno) para servir via endpoint seguro
+        update_option( 'dps_fin_doc_path_' . $trans_id, $file_path );
+        
+        // Cria URL segura com nonce para visualização
+        $doc_url = wp_nonce_url(
+            add_query_arg( [ 'dps_view_doc' => $trans_id ], home_url() ),
+            'dps_view_doc_' . $trans_id
+        );
+        
+        // Armazena URL segura para reutilização futura (compatibilidade backward)
         update_option( $opt_key, $doc_url );
         // Armazena email padrão para envio posterior
         if ( $client_email && is_email( $client_email ) ) {
             update_option( 'dps_fin_doc_email_' . $trans_id, sanitize_email( $client_email ) );
         }
         return $doc_url;
+    }
+    
+    /**
+     * Serve documento financeiro de forma segura via endpoint autenticado.
+     * 
+     * FASE 1 - F1.1: Implementado para evitar exposição de dados sensíveis via URL direta.
+     * 
+     * Este método:
+     * - Valida nonce para evitar CSRF
+     * - Verifica capability manage_options (apenas administradores)
+     * - Serve o arquivo HTML sem expor URL pública
+     * - Mantém compatibilidade com documentos já gerados
+     * 
+     * @since 1.3.1 (FASE 1)
+     */
+    public function serve_finance_document() {
+        // Verifica se é uma requisição de documento
+        if ( ! isset( $_GET['dps_view_doc'] ) ) {
+            return;
+        }
+        
+        $doc_id = intval( $_GET['dps_view_doc'] );
+        
+        // Valida nonce
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_view_doc_' . $doc_id ) ) {
+            wp_die(
+                esc_html__( 'Link de segurança inválido ou expirado. Por favor, gere o documento novamente.', 'dps-finance-addon' ),
+                esc_html__( 'Acesso negado', 'dps-finance-addon' ),
+                [ 'response' => 403 ]
+            );
+        }
+        
+        // Verifica permissão de acesso
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die(
+                esc_html__( 'Você não tem permissão para visualizar documentos financeiros.', 'dps-finance-addon' ),
+                esc_html__( 'Acesso negado', 'dps-finance-addon' ),
+                [ 'response' => 403 ]
+            );
+        }
+        
+        // Busca caminho do arquivo
+        $file_path = get_option( 'dps_fin_doc_path_' . $doc_id );
+        
+        // Se não encontrar caminho salvo, tenta compatibilidade backward com URL antiga
+        if ( ! $file_path ) {
+            // Tenta reconstruir caminho a partir de URL antiga (se existir)
+            $old_url = get_option( 'dps_fin_doc_' . $doc_id );
+            if ( $old_url ) {
+                $upload_dir = wp_upload_dir();
+                $file_path = str_replace(
+                    trailingslashit( $upload_dir['baseurl'] ) . 'dps_docs/',
+                    trailingslashit( $upload_dir['basedir'] ) . 'dps_docs/',
+                    $old_url
+                );
+            }
+        }
+        
+        // Valida existência do arquivo
+        if ( ! $file_path || ! file_exists( $file_path ) ) {
+            wp_die(
+                esc_html__( 'Documento não encontrado. Pode ter sido excluído ou nunca foi gerado.', 'dps-finance-addon' ),
+                esc_html__( 'Documento não encontrado', 'dps-finance-addon' ),
+                [ 'response' => 404 ]
+            );
+        }
+        
+        // Serve o arquivo HTML
+        header( 'Content-Type: text/html; charset=utf-8' );
+        header( 'X-Robots-Tag: noindex, nofollow' ); // Evita indexação
+        readfile( $file_path );
+        exit;
     }
 
     /**
@@ -1191,6 +1439,10 @@ class DPS_Finance_Addon {
             $end_date   = current_time( 'Y-m-d' );
             $start_date = date( 'Y-m-d', strtotime( $end_date . ' -' . ( $days - 1 ) . ' days' ) );
         }
+        
+        // F2.5: FASE 2 - Busca rápida por cliente
+        $search_client = isset( $_GET['fin_search_client'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_search_client'] ) ) : '';
+        
         $where      = '1=1';
         $params     = [];
         if ( $start_date ) {
@@ -1201,6 +1453,26 @@ class DPS_Finance_Addon {
             $where  .= ' AND data <= %s';
             $params[] = $end_date;
         }
+        
+        // F2.5: FASE 2 - Filtro de busca por nome de cliente
+        if ( $search_client ) {
+            // Busca clientes cujo título contenha o termo de busca
+            $search_like = '%' . $wpdb->esc_like( $search_client ) . '%';
+            $matching_clients = $wpdb->get_col( $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'dps_cliente' AND post_title LIKE %s AND post_status = 'publish'",
+                $search_like
+            ) );
+            
+            if ( ! empty( $matching_clients ) ) {
+                $placeholders = implode( ',', array_fill( 0, count( $matching_clients ), '%d' ) );
+                $where .= " AND cliente_id IN ($placeholders)";
+                $params = array_merge( $params, $matching_clients );
+            } else {
+                // Nenhum cliente encontrado - forçar resultado vazio
+                $where .= ' AND 1=0';
+            }
+        }
+        
         // Filtro por categoria
         if ( $cat_filter !== '' ) {
             $where  .= ' AND categoria = %s';
@@ -1237,11 +1509,33 @@ class DPS_Finance_Addon {
         $trans = $wpdb->get_results( $query );
 
         // Para o resumo financeiro, precisamos de todos os registros (sem paginação)
-        if ( ! empty( $params ) ) {
-            $all_trans_query = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY data DESC", $params );
+        // F1.4: FASE 1 - Performance: Limita consulta a últimos 12 meses para gráfico
+        // Se não houver filtro de data aplicado, limita automaticamente aos últimos 12 meses
+        $chart_limit_date = date( 'Y-m-d', strtotime( '-12 months' ) );
+        $use_chart_limit = ! $start_date && ! $end_date; // Só limita se usuário não aplicou filtro próprio
+        
+        if ( $use_chart_limit ) {
+            // Cria query otimizada com agregação SQL para melhor performance
+            if ( ! empty( $params ) ) {
+                $all_trans_query = $wpdb->prepare( 
+                    "SELECT * FROM $table WHERE $where AND data >= %s ORDER BY data DESC", 
+                    array_merge( $params, [ $chart_limit_date ] )
+                );
+            } else {
+                $all_trans_query = $wpdb->prepare(
+                    "SELECT * FROM $table WHERE data >= %s ORDER BY data DESC",
+                    $chart_limit_date
+                );
+            }
         } else {
-            $all_trans_query = "SELECT * FROM $table ORDER BY data DESC";
+            // Usa query original quando usuário aplicou filtro de data
+            if ( ! empty( $params ) ) {
+                $all_trans_query = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY data DESC", $params );
+            } else {
+                $all_trans_query = "SELECT * FROM $table ORDER BY data DESC";
+            }
         }
+        
         $all_trans = $wpdb->get_results( $all_trans_query );
 
         // Lista de clientes para seleção opcional
@@ -1258,6 +1552,9 @@ class DPS_Finance_Addon {
 
         // Exibe mensagens de feedback
         $this->render_feedback_messages();
+
+        // F2.1: FASE 2 - UX: Card de pendências de hoje e vencidas
+        $this->render_pending_alerts();
 
         // Dashboard de resumo financeiro (usa todos os registros, não paginados)
         $this->render_finance_summary( $all_trans );
@@ -1381,7 +1678,7 @@ class DPS_Finance_Addon {
         // Mantém parâmetros existentes (exceto filtros de data, intervalo, categoria e status)
         // SEGURANÇA: Sanitiza valores de $_GET antes de usar
         foreach ( $_GET as $k => $v ) {
-            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status' ], true ) ) {
+            if ( in_array( $k, [ 'fin_start', 'fin_end', 'fin_range', 'fin_cat', 'fin_status', 'fin_search_client' ], true ) ) {
                 continue;
             }
             $safe_key = sanitize_key( $k );
@@ -1406,6 +1703,8 @@ class DPS_Finance_Addon {
         echo '<option value="pago"' . selected( $status_filter, 'pago', false ) . '>' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
         echo '<option value="cancelado"' . selected( $status_filter, 'cancelado', false ) . '>' . esc_html__( 'Cancelado', 'dps-finance-addon' ) . '</option>';
         echo '</select></label> ';
+        // F2.5: FASE 2 - Campo de busca rápida por cliente
+        echo '<label>' . esc_html__( 'Buscar cliente', 'dps-finance-addon' ) . ' <input type="text" name="fin_search_client" value="' . esc_attr( $search_client ) . '" placeholder="' . esc_attr__( 'Nome do cliente...', 'dps-finance-addon' ) . '" style="width: 200px;"></label> ';
         echo '<div class="dps-finance-filter-buttons">';
         echo '<button type="submit" class="button">' . esc_html__( 'Filtrar', 'dps-finance-addon' ) . '</button> ';
         // Links rápidos: preserva categoria e status
@@ -1422,9 +1721,9 @@ class DPS_Finance_Addon {
         $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $link7 ) . '" class="button">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
         echo '<a href="' . esc_url( $link30 ) . '" class="button">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
-        // Link de limpar filtros: remove todos os filtros inclusive categoria e status
+        // F2.5: FASE 2 - Link de limpar filtros inclui campo de busca
         $clear_params = $quick_params;
-        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'] );
+        unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'], $clear_params['fin_search_client'] );
         $clear_link = add_query_arg( $clear_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
@@ -1471,9 +1770,32 @@ class DPS_Finance_Addon {
             
             // Estilos para destacar o status das transações. Linhas com status em aberto ficam amareladas
             // e linhas com status pago ficam esverdeadas, facilitando a identificação rápida.
+            // F2.3: FASE 2 - Estilos para badges visuais de status
             echo '<style>
             table.dps-table tr.fin-status-em_aberto { background-color:#fff8e1; }
             table.dps-table tr.fin-status-pago { background-color:#e6ffed; }
+            
+            /* Badges visuais de status */
+            .dps-badge {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 13px;
+                font-weight: 600;
+                line-height: 1.2;
+            }
+            .dps-badge--success {
+                background-color: #d1fae5;
+                color: #065f46;
+            }
+            .dps-badge--warning {
+                background-color: #fef3c7;
+                color: #92400e;
+            }
+            .dps-badge--danger {
+                background-color: #fee2e2;
+                color: #991b1b;
+            }
             </style>';
             // Cabeçalho da tabela: adicionamos colunas para Pet atendido, Serviços, Contato (WhatsApp) e Recorrente
             echo '<table class="dps-table"><thead><tr>';
@@ -1518,16 +1840,63 @@ class DPS_Finance_Addon {
                 ];
                 // Adiciona classe para o status da transação
                 echo '<tr class="fin-status-' . esc_attr( $tr->status ) . '">';
-                echo '<td data-label="' . esc_attr__( 'Data', 'dps-finance-addon' ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $tr->data ) ) ) . '</td>';
+                // F2.4: FASE 2 - Indicadores visuais de vencimento
+                echo '<td data-label="' . esc_attr__( 'Data', 'dps-finance-addon' ) . '">';
+                $date_display = date_i18n( 'd-m-Y', strtotime( $tr->data ) );
+                
+                // Se está em aberto, verifica se venceu ou vence hoje
+                if ( $tr->status === 'em_aberto' && $tr->tipo === 'receita' ) {
+                    $today = current_time( 'Y-m-d' );
+                    $trans_date = $tr->data;
+                    
+                    if ( $trans_date < $today ) {
+                        // Vencida - vermelho
+                        echo '<span style="color: #ef4444; font-weight: 600;" title="' . esc_attr__( 'Vencida', 'dps-finance-addon' ) . '">';
+                        echo '🚨 ' . esc_html( $date_display );
+                        echo '</span>';
+                    } elseif ( $trans_date === $today ) {
+                        // Vence hoje - amarelo
+                        echo '<span style="color: #f59e0b; font-weight: 600;" title="' . esc_attr__( 'Vence hoje', 'dps-finance-addon' ) . '">';
+                        echo '⚠️ ' . esc_html( $date_display );
+                        echo '</span>';
+                    } else {
+                        // Futura - normal
+                        echo esc_html( $date_display );
+                    }
+                } else {
+                    echo esc_html( $date_display );
+                }
+                
+                echo '</td>';
                 $tr_valor_cents = (int) round( (float) $tr->valor * 100 );
                 echo '<td data-label="' . esc_attr__( 'Valor', 'dps-finance-addon' ) . '">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $tr_valor_cents ) ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Categoria', 'dps-finance-addon' ) . '">' . esc_html( $tr->categoria ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Tipo', 'dps-finance-addon' ) . '">' . esc_html( $tr->tipo ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Status', 'dps-finance-addon' ) . '">';
-                echo '<form method="post" style="display:inline-block;">';
+                // F2.3: FASE 2 - Badges visuais de status
+                $status_badge_class = 'dps-badge';
+                $status_emoji = '';
+                
+                if ( $tr->status === 'pago' ) {
+                    $status_badge_class .= ' dps-badge--success';
+                    $status_emoji = '✅ ';
+                } elseif ( $tr->status === 'em_aberto' ) {
+                    $status_badge_class .= ' dps-badge--warning';
+                    $status_emoji = '⏳ ';
+                } elseif ( $tr->status === 'cancelado' ) {
+                    $status_badge_class .= ' dps-badge--danger';
+                    $status_emoji = '❌ ';
+                }
+                
+                echo '<span class="' . esc_attr( $status_badge_class ) . '">';
+                echo $status_emoji . esc_html( $status_options[ $tr->status ] ?? $tr->status );
+                echo '</span>';
+                
+                // Form para editar status (inline, menor)
+                echo '<form method="post" style="display:inline-block; margin-left: 8px;">';
                 echo '<input type="hidden" name="dps_update_trans_status" value="1">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $tr->id ) . '">';
-                echo '<select name="trans_status" class="dps-status-select" data-current="' . esc_attr( $tr->status ) . '" onchange="this.form.submit()">';
+                echo '<select name="trans_status" class="dps-status-select" data-current="' . esc_attr( $tr->status ) . '" onchange="this.form.submit()" style="font-size: 12px; padding: 2px 4px;">';
                 foreach ( $status_options as $val => $label ) {
                     echo '<option value="' . esc_attr( $val ) . '"' . selected( $tr->status, $val, false ) . '>' . esc_html( $label ) . '</option>';
                 }
@@ -1603,12 +1972,37 @@ class DPS_Finance_Addon {
                 }
                 echo '</td>';
                 // Recorrência removida: não exibe coluna de recorrente
-                // Ações: excluir com nonce de segurança
+                // F2.2, F2.3: FASE 2 - Ações: excluir, reenviar link MP, badges visuais
+                echo '<td data-label="' . esc_attr__( 'Ações', 'dps-finance-addon' ) . '">';
+                
+                // F2.2: Botão "Reenviar link de pagamento" (Mercado Pago)
+                if ( $tr->agendamento_id && $tr->status === 'em_aberto' ) {
+                    $payment_link = get_post_meta( $tr->agendamento_id, 'dps_payment_link', true );
+                    
+                    if ( $payment_link ) {
+                        $resend_url = wp_nonce_url(
+                            add_query_arg( [
+                                'dps_resend_payment_link' => '1',
+                                'trans_id' => $tr->id,
+                                'tab' => 'financeiro',
+                            ], $this->get_current_url() ),
+                            'dps_resend_link_' . $tr->id
+                        );
+                        
+                        echo '<a href="' . esc_url( $resend_url ) . '" class="dps-action-link" style="margin-right: 8px;" title="' . esc_attr__( 'Reenviar link de pagamento via WhatsApp', 'dps-finance-addon' ) . '">';
+                        echo '✉️ ' . esc_html__( 'Reenviar link', 'dps-finance-addon' );
+                        echo '</a>';
+                    }
+                }
+                
+                // Ação: excluir com nonce de segurança
                 $delete_url = wp_nonce_url(
                     add_query_arg( [ 'dps_delete_trans' => '1', 'id' => $tr->id ] ),
                     'dps_finance_delete_' . $tr->id
                 );
-                echo '<td data-label="' . esc_attr__( 'Ações', 'dps-finance-addon' ) . '"><a href="' . esc_url( $delete_url ) . '" class="dps-action-link dps-action-link-danger dps-delete-trans">' . esc_html__( 'Excluir', 'dps-finance-addon' ) . '</a></td>';
+                echo '<a href="' . esc_url( $delete_url ) . '" class="dps-action-link dps-action-link-danger dps-delete-trans">' . esc_html__( 'Excluir', 'dps-finance-addon' ) . '</a>';
+                
+                echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
@@ -1841,6 +2235,7 @@ class DPS_Finance_Addon {
      * Renderiza mensagens de feedback após ações do usuário.
      *
      * @since 1.1.0
+     * @since 1.3.1 Adicionada mensagem partial_exceeds_total (FASE 1 - F1.2)
      */
     private function render_feedback_messages() {
         if ( ! isset( $_GET['dps_msg'] ) ) {
@@ -1848,12 +2243,40 @@ class DPS_Finance_Addon {
         }
 
         $msg_key = sanitize_text_field( wp_unslash( $_GET['dps_msg'] ) );
+        
+        // F1.2: FASE 1 - Mensagem de erro quando parcial excede total
+        if ( $msg_key === 'partial_exceeds_total' ) {
+            $total = isset( $_GET['total'] ) ? sanitize_text_field( wp_unslash( $_GET['total'] ) ) : '0,00';
+            $paid = isset( $_GET['paid'] ) ? sanitize_text_field( wp_unslash( $_GET['paid'] ) ) : '0,00';
+            $attempted = isset( $_GET['attempted'] ) ? sanitize_text_field( wp_unslash( $_GET['attempted'] ) ) : '0,00';
+            
+            $remaining_cents = DPS_Money_Helper::parse_brazilian_format( $total ) - DPS_Money_Helper::parse_brazilian_format( $paid );
+            $remaining = DPS_Money_Helper::format_to_brazilian( $remaining_cents );
+            
+            $text = sprintf(
+                /* translators: 1: Attempted value, 2: Total value, 3: Already paid, 4: Remaining */
+                __( 'ERRO: O valor informado (R$ %1$s) ultrapassa o saldo restante da transação. Total: R$ %2$s | Já pago: R$ %3$s | Restante: R$ %4$s', 'dps-finance-addon' ),
+                $attempted,
+                $total,
+                $paid,
+                $remaining
+            );
+            
+            echo '<div class="dps-alert dps-alert--danger" role="alert" aria-live="assertive">';
+            echo esc_html( $text );
+            echo '</div>';
+            return;
+        }
+        
         $messages = [
             'saved'          => [ 'success', __( 'Transação registrada com sucesso!', 'dps-finance-addon' ) ],
             'deleted'        => [ 'success', __( 'Transação excluída com sucesso!', 'dps-finance-addon' ) ],
             'partial_saved'  => [ 'success', __( 'Pagamento parcial registrado com sucesso!', 'dps-finance-addon' ) ],
             'status_updated' => [ 'success', __( 'Status atualizado com sucesso!', 'dps-finance-addon' ) ],
             'exported'       => [ 'success', __( 'Exportação concluída!', 'dps-finance-addon' ) ],
+            // F2.2: FASE 2 - Mensagens para reenvio de link
+            'no_payment_link' => [ 'error', __( 'Nenhum link de pagamento encontrado para esta transação.', 'dps-finance-addon' ) ],
+            'no_phone'        => [ 'error', __( 'Cliente sem telefone cadastrado. Não é possível reenviar link.', 'dps-finance-addon' ) ],
         ];
 
         if ( ! isset( $messages[ $msg_key ] ) ) {
@@ -1880,6 +2303,91 @@ class DPS_Finance_Addon {
         echo '<div class="' . esc_attr( $class ) . '" role="' . esc_attr( $role ) . '" aria-live="' . esc_attr( $aria_live ) . '">';
         echo esc_html( $text );
         echo '</div>';
+    }
+    
+    /**
+     * Renderiza alertas de pendências urgentes (vencidas e de hoje).
+     * 
+     * F2.1: FASE 2 - UX: Visibilidade imediata de cobranças urgentes.
+     * 
+     * @since 1.4.0
+     */
+    private function render_pending_alerts() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        $today = current_time( 'Y-m-d' );
+        
+        // Pendências vencidas (data < hoje E status em_aberto)
+        $overdue = $wpdb->get_row( $wpdb->prepare( "
+            SELECT COUNT(*) as count, SUM(valor) as total
+            FROM {$table}
+            WHERE status = 'em_aberto'
+              AND tipo = 'receita'
+              AND data < %s
+        ", $today ) );
+        
+        // Pendências de hoje (data = hoje E status em_aberto)
+        $today_pending = $wpdb->get_row( $wpdb->prepare( "
+            SELECT COUNT(*) as count, SUM(valor) as total
+            FROM {$table}
+            WHERE status = 'em_aberto'
+              AND tipo = 'receita'
+              AND data = %s
+        ", $today ) );
+        
+        // Só renderiza se houver pendências
+        if ( ( $overdue && $overdue->count > 0 ) || ( $today_pending && $today_pending->count > 0 ) ) {
+            echo '<div class="dps-finance-alerts" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap;">';
+            
+            // Alerta de vencidas (crítico)
+            if ( $overdue && $overdue->count > 0 ) {
+                $overdue_value = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $overdue->total * 100 ) );
+                $filter_url = add_query_arg( [
+                    'tab' => 'financeiro',
+                    'fin_status' => 'em_aberto',
+                    'fin_end' => date( 'Y-m-d', strtotime( '-1 day' ) ),
+                ], $this->get_current_url() );
+                
+                echo '<div class="dps-alert dps-alert--danger" style="flex: 1; min-width: 280px; padding: 15px; border-left: 4px solid #ef4444;">';
+                echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                echo '<span style="font-size: 24px;">🚨</span>';
+                echo '<div>';
+                echo '<strong>' . sprintf( 
+                    /* translators: %d: número de pendências */
+                    _n( '%d pendência vencida', '%d pendências vencidas', $overdue->count, 'dps-finance-addon' ),
+                    $overdue->count
+                ) . '</strong><br>';
+                echo '<span style="font-size: 18px; font-weight: 600;">R$ ' . esc_html( $overdue_value ) . '</span><br>';
+                echo '<a href="' . esc_url( $filter_url ) . '" style="font-size: 13px;">' . esc_html__( 'Ver detalhes →', 'dps-finance-addon' ) . '</a>';
+                echo '</div></div></div>';
+            }
+            
+            // Alerta de hoje (atenção)
+            if ( $today_pending && $today_pending->count > 0 ) {
+                $today_value = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $today_pending->total * 100 ) );
+                $filter_url = add_query_arg( [
+                    'tab' => 'financeiro',
+                    'fin_status' => 'em_aberto',
+                    'fin_start' => $today,
+                    'fin_end' => $today,
+                ], $this->get_current_url() );
+                
+                echo '<div class="dps-alert dps-alert--warning" style="flex: 1; min-width: 280px; padding: 15px; border-left: 4px solid #f59e0b;">';
+                echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                echo '<span style="font-size: 24px;">⚠️</span>';
+                echo '<div>';
+                echo '<strong>' . sprintf(
+                    /* translators: %d: número de pendências */
+                    _n( '%d pendência de hoje', '%d pendências de hoje', $today_pending->count, 'dps-finance-addon' ),
+                    $today_pending->count
+                ) . '</strong><br>';
+                echo '<span style="font-size: 18px; font-weight: 600;">R$ ' . esc_html( $today_value ) . '</span><br>';
+                echo '<a href="' . esc_url( $filter_url ) . '" style="font-size: 13px;">' . esc_html__( 'Ver detalhes →', 'dps-finance-addon' ) . '</a>';
+                echo '</div></div></div>';
+            }
+            
+            echo '</div>';
+        }
     }
 
     /**
