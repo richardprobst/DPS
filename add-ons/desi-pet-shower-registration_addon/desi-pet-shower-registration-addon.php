@@ -73,6 +73,8 @@ class DPS_Registration_Addon {
 
     /**
      * Construtor privado.
+     * 
+     * @since 1.0.1
      */
     private function __construct() {
         // Processa o envio do formulário
