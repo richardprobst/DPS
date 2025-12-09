@@ -250,6 +250,135 @@
 }
 
 /* ========================================
+   13. COMPARATIVO MENSAL (FASE 3)
+   ======================================== */
+
+.dps-finance-comparison {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-comparison h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-finance-comparison-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.dps-finance-card-current-month,
+.dps-finance-card-previous-month {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.dps-finance-card-current-month {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-finance-card-previous-month {
+    border-left: 4px solid #6b7280;
+}
+
+.dps-finance-card h5 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+}
+
+.dps-finance-trend {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dps-trend-up {
+    color: #10b981;
+}
+
+.dps-trend-down {
+    color: #ef4444;
+}
+
+/* ========================================
+   14. TOP 10 CLIENTES (FASE 3)
+   ======================================== */
+
+.dps-finance-top-clients {
+    margin: 24px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.dps-finance-top-clients h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-top-clients-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-top-clients-table th,
+.dps-top-clients-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-top-clients-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-top-clients-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.dps-top-clients-table td:first-child {
+    font-weight: 700;
+    color: #0ea5e9;
+    font-size: 16px;
+    width: 40px;
+    text-align: center;
+}
+
+.dps-top-clients-table td:nth-child(3),
+.dps-top-clients-table td:nth-child(4) {
+    text-align: right;
+}
+
+.dps-top-clients-table td:nth-child(4) {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 600;
+}
+
+.dps-top-clients-table td:last-child {
+    text-align: center;
+}
+
+/* ========================================
    3. BADGES DE STATUS
    ======================================== */
 
