@@ -686,3 +686,768 @@
         min-width: 100%;
     }
 }
+
+/* ==========================================================================
+   FASE 2: Novas Abas e UX Melhorada
+   ========================================================================== */
+
+/* Navegação de Abas */
+.dps-debugging-tabs .nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-debugging-tabs .nav-tab .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ==========================================================================
+   Aba de Logs - Nova Estrutura
+   ========================================================================== */
+
+.dps-debugging-logs-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dps-debugging-log-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f0f0f1;
+    border-radius: 4px;
+}
+
+.dps-debugging-log-actions-quick {
+    display: flex;
+    gap: 10px;
+}
+
+/* Filtros Container */
+.dps-debugging-log-filters-container {
+    background: #f6f7f7;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.dps-debugging-filters-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dps-debugging-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.dps-debugging-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-debugging-filter-group > label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.dps-debugging-filter-group select,
+.dps-debugging-filter-group input[type="date"] {
+    min-width: 150px;
+}
+
+.dps-debugging-compact-toggle {
+    flex-direction: row;
+    align-items: center;
+}
+
+.dps-debugging-compact-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.dps-debugging-search-row {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-debugging-search-row .dps-debugging-search-input {
+    flex: 1;
+    max-width: 400px;
+}
+
+/* Paginação */
+.dps-debugging-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    background: #f6f7f7;
+    border-radius: 4px;
+}
+
+.dps-debugging-pagination-info {
+    color: #646970;
+    font-size: 13px;
+}
+
+.dps-debugging-pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-debugging-pagination-pages {
+    color: #1d2327;
+    font-weight: 500;
+}
+
+.dps-debugging-pagination .button.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* ==========================================================================
+   Modo Compacto
+   ========================================================================== */
+
+.dps-debugging-log-entries.compact-mode .dps-debugging-log-entry-compact {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.dps-debugging-log-entry-compact.has-details:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dps-debugging-log-entry-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.dps-debugging-toggle-icon {
+    flex-shrink: 0;
+    color: #8899aa;
+    font-size: 10px;
+    transition: transform 0.2s ease;
+    line-height: 1.5;
+    margin-top: 2px;
+}
+
+.dps-debugging-log-entry-compact.is-expanded .dps-debugging-toggle-icon {
+    transform: rotate(90deg);
+}
+
+.dps-debugging-log-entry-text {
+    flex: 1;
+    word-break: break-word;
+}
+
+.dps-debugging-log-entry-details {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   Aba de Configurações - Modo Rápido
+   ========================================================================== */
+
+.dps-debugging-config-tab .card {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-quick-mode h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-debugging-quick-mode h2 .dashicons {
+    color: #2271b1;
+}
+
+.dps-debugging-quick-status {
+    margin: 20px 0;
+}
+
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.dps-status-badge .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.dps-status-active {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.dps-status-partial {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.dps-status-inactive {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.dps-debugging-quick-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.dps-debugging-quick-buttons .button-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    height: auto;
+    line-height: 1.4;
+}
+
+.dps-debugging-quick-buttons .button-hero .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Seção Avançada Colapsável */
+.dps-debugging-advanced-section h2 {
+    margin-bottom: 10px;
+}
+
+.dps-debugging-toggle-advanced {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+.dps-debugging-toggle-advanced:hover {
+    color: #2271b1;
+}
+
+.dps-debugging-toggle-advanced .dashicons {
+    transition: transform 0.2s ease;
+}
+
+.dps-debugging-toggle-advanced[aria-expanded="true"] .dashicons {
+    transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   Aba de Ferramentas
+   ========================================================================== */
+
+.dps-debugging-tools-tab .card {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-tools-tab .card h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.dps-debugging-tools-tab .card h2 .dashicons {
+    color: #2271b1;
+}
+
+.dps-debugging-tool-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 0;
+}
+
+.dps-debugging-tool-info {
+    flex: 1;
+}
+
+.dps-debugging-tool-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.dps-debugging-tool-info .description {
+    margin: 0;
+}
+
+.dps-debugging-tool-action .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: text-bottom;
+}
+
+.dps-debugging-security-notice {
+    margin-top: 0;
+}
+
+/* Tabela de informações do sistema */
+.dps-debugging-tools-tab .widefat td {
+    padding: 12px 15px;
+}
+
+.dps-debugging-tools-tab .widefat code {
+    word-break: break-all;
+}
+
+/* ==========================================================================
+   Log Empty State melhorado
+   ========================================================================== */
+
+.dps-debugging-log-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.dps-debugging-log-empty .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #646970;
+    margin-bottom: 15px;
+}
+
+.dps-debugging-log-empty p {
+    color: #a1a1a1;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ==========================================================================
+   Responsividade Adicional para Fase 2
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .dps-debugging-log-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-debugging-log-actions-quick {
+        justify-content: center;
+    }
+
+    .dps-debugging-filters-row {
+        flex-direction: column;
+    }
+
+    .dps-debugging-filter-group {
+        width: 100%;
+    }
+
+    .dps-debugging-filter-group select,
+    .dps-debugging-filter-group input[type="date"] {
+        width: 100%;
+    }
+
+    .dps-debugging-pagination {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .dps-debugging-quick-buttons {
+        flex-direction: column;
+    }
+
+    .dps-debugging-quick-buttons .button-hero {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dps-debugging-tool-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .dps-debugging-tool-action {
+        text-align: center;
+    }
+}
+
+
+/* ==========================================================================
+   FASE 3: Recursos Avançados
+   ========================================================================== */
+
+/* Aviso de novos erros */
+.dps-debugging-new-errors-notice {
+    border-left-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.dps-debugging-new-errors-notice .dashicons {
+    color: #2271b1;
+    margin-right: 5px;
+}
+
+/* Estatísticas por módulo */
+.dps-debugging-module-stats {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-module-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-debugging-module-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-left-width: 4px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #1d2327;
+    transition: all 0.2s ease;
+}
+
+.dps-debugging-module-card:hover {
+    background: #f6f7f7;
+    transform: translateY(-1px);
+}
+
+.dps-debugging-module-card.is-active {
+    background: #f0f6fc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dps-debugging-module-card .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.dps-debugging-module-label {
+    font-weight: 500;
+}
+
+.dps-debugging-module-count {
+    background: #e5e7eb;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Linha de filtros secundária */
+.dps-debugging-filters-row-secondary {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-debugging-filter-actions {
+    margin-left: auto;
+}
+
+/* Badge de novo */
+.dps-debugging-new-badge {
+    display: inline-block;
+    background: #2271b1;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Badge de módulo em entradas */
+.dps-debugging-entry-module {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    margin-right: 8px;
+    color: #fff;
+}
+
+.dps-debugging-entry-module .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Link de ação para módulo */
+.dps-debugging-entry-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: auto;
+    color: #646970;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.dps-debugging-log-entry:hover .dps-debugging-entry-action,
+.dps-debugging-log-entry-compact:hover .dps-debugging-entry-action {
+    opacity: 1;
+}
+
+.dps-debugging-entry-action:hover {
+    color: #2271b1;
+}
+
+/* Destaque de entrada nova */
+.dps-debugging-log-entry.is-new,
+.dps-debugging-log-entry-compact.is-new {
+    border-left: 4px solid #2271b1;
+    background: rgba(34, 113, 177, 0.05);
+}
+
+/* ==========================================================================
+   Grupos de Erros Recorrentes
+   ========================================================================== */
+
+.dps-debugging-log-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dps-debugging-log-group {
+    background: #2d2d2d;
+    border-radius: 6px;
+    padding: 15px;
+    border-left: 4px solid #646970;
+}
+
+.dps-debugging-log-group-fatal {
+    border-left-color: #dc3232;
+}
+
+.dps-debugging-log-group-warning {
+    border-left-color: #ffb900;
+}
+
+.dps-debugging-log-group-notice {
+    border-left-color: #72aee6;
+}
+
+.dps-debugging-log-group-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dps-debugging-group-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-debugging-group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.dps-debugging-group-type {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dps-debugging-group-module {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dps-debugging-group-module .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dps-debugging-group-times {
+    display: flex;
+    gap: 15px;
+    color: #a1a1a1;
+    font-size: 12px;
+}
+
+.dps-debugging-group-summary {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.dps-debugging-group-summary code {
+    background: transparent;
+    color: #e5e5e5;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.dps-debugging-group-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.dps-debugging-group-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-debugging-group-action .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dps-debugging-group-expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-debugging-group-expand .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+}
+
+.dps-debugging-group-expand.is-expanded .dashicons {
+    transform: rotate(180deg);
+}
+
+/* Entradas dentro do grupo */
+.dps-debugging-group-entries {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dps-debugging-group-entry {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.dps-debugging-group-entry pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    color: #a1a1a1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.dps-debugging-group-more {
+    color: #72aee6;
+    font-size: 12px;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Responsividade Adicional para Fase 3
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .dps-debugging-module-cards {
+        flex-direction: column;
+    }
+
+    .dps-debugging-module-card {
+        width: 100%;
+    }
+
+    .dps-debugging-group-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dps-debugging-group-meta {
+        flex-wrap: wrap;
+    }
+
+    .dps-debugging-group-actions {
+        flex-wrap: wrap;
+    }
+}

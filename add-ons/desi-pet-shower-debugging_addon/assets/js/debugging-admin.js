@@ -336,4 +336,182 @@
         return div.innerHTML;
     }
 
+    /**
+     * Inicializa toggle da seção avançada.
+     */
+    function initAdvancedToggle() {
+        var $toggle = $('.dps-debugging-toggle-advanced');
+        
+        if (!$toggle.length) {
+            return;
+        }
+
+        $toggle.on('click', function() {
+            var $button = $(this);
+            var $content = $button.closest('.card').find('.dps-debugging-advanced-content');
+            var isExpanded = $button.attr('aria-expanded') === 'true';
+            
+            $button.attr('aria-expanded', !isExpanded);
+            $content.slideToggle(200);
+        });
+    }
+
+    /**
+     * Inicializa toggle de entradas compactas.
+     */
+    function initCompactToggle() {
+        $(document).on('click', '.dps-debugging-log-entry-compact.has-details', function() {
+            var $entry = $(this);
+            var $details = $entry.find('.dps-debugging-log-entry-details');
+            
+            $entry.toggleClass('is-expanded');
+            $details.slideToggle(150);
+        });
+    }
+
+    /**
+     * Inicializa seletor de período customizado.
+     */
+    function initPeriodSelector() {
+        var $periodSelect = $('.dps-period-select');
+        var $customFields = $('.dps-custom-date-fields');
+        
+        if (!$periodSelect.length) {
+            return;
+        }
+
+        $periodSelect.on('change', function() {
+            var value = $(this).val();
+            if (value === 'custom') {
+                $customFields.slideDown(150);
+            } else {
+                $customFields.slideUp(150);
+            }
+        });
+    }
+
+    /**
+     * Inicializa botão de copiar log na aba de ferramentas.
+     */
+    function initCopyLogTool() {
+        var $copyButton = $('.dps-debugging-copy-log-tool');
+        
+        if (!$copyButton.length) {
+            return;
+        }
+
+        $copyButton.on('click', function() {
+            var $button = $(this);
+            var $textarea = $('#dps-log-content-hidden');
+            var originalHtml = $button.html();
+            
+            if (!$textarea.length) {
+                return;
+            }
+
+            var text = $textarea.val();
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    $button.html('<span class="dashicons dashicons-yes"></span> ' + dpsDebugging.copySuccess);
+                    $button.addClass('dps-debugging-copy-success');
+                    
+                    setTimeout(function() {
+                        $button.html(originalHtml);
+                        $button.removeClass('dps-debugging-copy-success');
+                    }, 2000);
+                }).catch(function() {
+                    showCopyFallback($textarea, $button, originalHtml);
+                });
+            } else {
+                showCopyFallback($textarea, $button, originalHtml);
+            }
+        });
+    }
+
+    /**
+     * Fallback para copiar via seleção.
+     */
+    function showCopyFallback($textarea, $button, originalHtml) {
+        $textarea.css({position: 'static', left: '0'}).select();
+        try {
+            document.execCommand('copy');
+            $button.html('<span class="dashicons dashicons-yes"></span> ' + dpsDebugging.copySuccess);
+            $button.addClass('dps-debugging-copy-success');
+        } catch(e) {
+            $button.html('<span class="dashicons dashicons-no"></span> ' + dpsDebugging.copyError);
+            $button.addClass('dps-debugging-copy-error');
+        }
+        $textarea.css({position: 'absolute', left: '-9999px'});
+        
+        setTimeout(function() {
+            $button.html(originalHtml);
+            $button.removeClass('dps-debugging-copy-success dps-debugging-copy-error');
+        }, 2000);
+    }
+
+    // ==========================================================================
+    // FASE 3: Recursos Avançados
+    // ==========================================================================
+
+    /**
+     * Inicializa toggle de grupos de erros recorrentes.
+     */
+    function initGroupToggle() {
+        $(document).on('click', '.dps-debugging-group-expand', function() {
+            var $button = $(this);
+            var $group = $button.closest('.dps-debugging-log-group');
+            var $entries = $group.find('.dps-debugging-group-entries');
+            
+            $button.toggleClass('is-expanded');
+            $entries.slideToggle(200);
+        });
+    }
+
+    /**
+     * Inicializa highlight de entradas novas.
+     */
+    function initNewEntriesHighlight() {
+        var $newEntries = $('.dps-debugging-log-entry.is-new, .dps-debugging-log-entry-compact.is-new');
+        
+        if ($newEntries.length > 0) {
+            // Scroll suave para a primeira entrada nova quando clicar no aviso
+            $('.dps-debugging-new-errors-notice').on('click', function() {
+                var $first = $newEntries.first();
+                if ($first.length) {
+                    $('html, body').animate({
+                        scrollTop: $first.offset().top - 100
+                    }, 500);
+                }
+            }).css('cursor', 'pointer');
+        }
+    }
+
+    /**
+     * Inicializa tooltips para badges de módulo.
+     */
+    function initModuleTooltips() {
+        $('.dps-debugging-entry-module').each(function() {
+            var $badge = $(this);
+            var title = $badge.attr('title');
+            if (title) {
+                $badge.attr('data-tooltip', title);
+            }
+        });
+    }
+
+    // Inicializa funcionalidades da Fase 2 e 3
+    $(document).ready(function() {
+        // Fase 2
+        initAdvancedToggle();
+        initCompactToggle();
+        initPeriodSelector();
+        initCopyLogTool();
+        
+        // Fase 3
+        initGroupToggle();
+        initNewEntriesHighlight();
+        initModuleTooltips();
+    });
+
 })(jQuery);

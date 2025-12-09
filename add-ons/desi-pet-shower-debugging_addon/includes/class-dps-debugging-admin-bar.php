@@ -14,18 +14,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Classe DPS_Debugging_Admin_Bar
  * 
  * Adiciona menu de debug na admin bar do WordPress.
+ *
+ * @since 1.0.0
  */
 class DPS_Debugging_Admin_Bar {
 
     /**
      * Caminho do arquivo wp-config.php.
      *
+     * @since 1.0.0
      * @var string
      */
     private $config_path;
 
     /**
      * Construtor.
+     *
+     * @since 1.0.0
      *
      * @param string $config_path Caminho do wp-config.php.
      */
@@ -35,6 +40,12 @@ class DPS_Debugging_Admin_Bar {
 
     /**
      * Inicializa a integração com admin bar.
+     *
+     * Registra os hooks necessários para adicionar o menu e estilos.
+     *
+     * @since 1.0.0
+     *
+     * @return void
      */
     public function init() {
         add_action( 'admin_bar_menu', [ $this, 'add_admin_bar_menu' ], 999 );
@@ -45,11 +56,15 @@ class DPS_Debugging_Admin_Bar {
     /**
      * Verifica se o usuário pode ver o menu de debug.
      *
-     * @return bool
+     * @since 1.0.0
+     *
+     * @return bool True se o usuário tem permissão.
      */
     private function can_view() {
         /**
          * Filtra a capability necessária para ver o menu de debug na admin bar.
+         *
+         * @since 1.0.0
          *
          * @param string $capability Capability padrão.
          */
@@ -61,7 +76,14 @@ class DPS_Debugging_Admin_Bar {
     /**
      * Adiciona menu à admin bar.
      *
+     * Exibe contador de entradas, alerta de erros fatais,
+     * status das constantes e links rápidos.
+     *
+     * @since 1.0.0
+     * @since 1.1.0 Adicionado alerta de erros fatais com animação.
+     *
      * @param WP_Admin_Bar $wp_admin_bar Objeto da admin bar.
+     * @return void
      */
     public function add_admin_bar_menu( $wp_admin_bar ) {
         if ( ! $this->can_view() || ! is_admin_bar_showing() ) {
@@ -242,6 +264,14 @@ class DPS_Debugging_Admin_Bar {
 
     /**
      * Adiciona estilos para admin bar.
+     *
+     * Injeta CSS inline para estilização do menu de debug:
+     * contadores, alertas, status de constantes.
+     *
+     * @since 1.0.0
+     * @since 1.1.0 Adicionado estilo de animação para alerta de erros fatais.
+     *
+     * @return void
      */
     public function add_admin_bar_styles() {
         if ( ! $this->can_view() || ! is_admin_bar_showing() ) {
