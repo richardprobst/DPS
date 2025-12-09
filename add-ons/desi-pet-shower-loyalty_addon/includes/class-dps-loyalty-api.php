@@ -199,6 +199,7 @@ class DPS_Loyalty_API {
             'points_expired'      => __( 'Pontos expirados', 'dps-loyalty-addon' ),
             'redeem'              => __( 'Resgate de pontos', 'dps-loyalty-addon' ),
             'portal_redemption'   => __( 'Resgate no Portal', 'dps-loyalty-addon' ),
+            'expiration_warning'  => __( 'Aviso de expiração de pontos', 'dps-loyalty-addon' ),
         ];
 
         $label = isset( $labels[ $context ] ) ? $labels[ $context ] : $context;
@@ -368,6 +369,408 @@ class DPS_Loyalty_API {
         }
 
         return $clients;
+    }
+
+    /**
+     * Obtém dados agregados de pontos concedidos e resgatados por mês.
+     *
+     * @since 1.4.0
+     *
+     * @param int $months Número de meses para buscar (retroativo a partir do mês atual).
+     * @return array
+     */
+    public static function get_points_timeseries( $months = 6 ) {
+        $months        = max( 1, absint( $months ) );
+        $start         = new DateTime( 'first day of this month', wp_timezone() );
+        $labels        = [];
+        $granted_data  = [];
+        $redeemed_data = [];
+
+        for ( $i = $months - 1; $i >= 0; $i-- ) {
+            $label              = clone $start;
+            $label_key          = $label->modify( '-' . $i . ' months' )->format( 'Y-m' );
+            $labels[ $label_key ] = $label->format( 'm/Y' );
+            $granted_data[ $label_key ]  = 0;
+            $redeemed_data[ $label_key ] = 0;
+        }
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 500,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+        ] );
+
+        if ( empty( $clients ) ) {
+            return [
+                'labels'         => array_values( $labels ),
+                'granted'        => array_values( $granted_data ),
+                'redeemed'       => array_values( $redeemed_data ),
+                'labels_indexes' => array_keys( $labels ),
+            ];
+        }
+
+        $cutoff = ( new DateTime( 'first day of this month', wp_timezone() ) )->modify( '-' . ( $months - 1 ) . ' months' );
+
+        foreach ( $clients as $client_id ) {
+            $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+            if ( empty( $logs ) ) {
+                continue;
+            }
+
+            foreach ( $logs as $log ) {
+                if ( empty( $log['date'] ) ) {
+                    continue;
+                }
+
+                $log_date = date_create( $log['date'] );
+                if ( ! $log_date || $log_date < $cutoff ) {
+                    continue;
+                }
+
+                $month_key = $log_date->format( 'Y-m' );
+                if ( ! isset( $granted_data[ $month_key ] ) ) {
+                    continue;
+                }
+
+                $points = isset( $log['points'] ) ? (int) $log['points'] : 0;
+                $action = isset( $log['action'] ) ? $log['action'] : '';
+
+                if ( 'add' === $action ) {
+                    $granted_data[ $month_key ] += $points;
+                }
+
+                if ( in_array( $action, [ 'redeem', 'expire' ], true ) ) {
+                    $redeemed_data[ $month_key ] += $points;
+                }
+            }
+        }
+
+        return [
+            'labels'         => array_values( $labels ),
+            'labels_indexes' => array_keys( $labels ),
+            'granted'        => array_values( $granted_data ),
+            'redeemed'       => array_values( $redeemed_data ),
+        ];
+    }
+
+    /**
+     * Retorna distribuição de clientes por nível.
+     *
+     * @since 1.4.0
+     *
+     * @return array
+     */
+    public static function get_tier_distribution() {
+        $distribution = self::get_clients_by_tier();
+        $defaults     = [
+            'bronze' => 0,
+            'prata'  => 0,
+            'ouro'   => 0,
+        ];
+
+        return array_merge( $defaults, $distribution );
+    }
+
+    /**
+     * Obtém ranking de clientes considerando pontos, resgates, indicações e atendimentos.
+     *
+     * @since 1.4.0
+     *
+     * @param array $args {start_date, end_date, limit} Datas em formato Y-m-d.
+     * @return array
+     */
+    public static function get_engagement_ranking( $args = [] ) {
+        global $wpdb;
+
+        $defaults = [
+            'start_date' => '',
+            'end_date'   => '',
+            'limit'      => 20,
+        ];
+
+        $args      = wp_parse_args( $args, $defaults );
+        $limit     = max( 1, absint( $args['limit'] ) );
+        $start_raw = ! empty( $args['start_date'] ) ? $args['start_date'] . ' 00:00:00' : '';
+        $end_raw   = ! empty( $args['end_date'] ) ? $args['end_date'] . ' 23:59:59' : '';
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 500,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+        ] );
+
+        $ranking = [];
+        foreach ( $clients as $client_id ) {
+            $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+            if ( empty( $logs ) ) {
+                continue;
+            }
+
+            $earned  = 0;
+            $redeem  = 0;
+            foreach ( $logs as $log ) {
+                $log_date = isset( $log['date'] ) ? $log['date'] : '';
+                if ( $start_raw && $log_date < $start_raw ) {
+                    continue;
+                }
+                if ( $end_raw && $log_date > $end_raw ) {
+                    continue;
+                }
+
+                $points = isset( $log['points'] ) ? (int) $log['points'] : 0;
+                if ( 'add' === $log['action'] ) {
+                    $earned += $points;
+                }
+                if ( in_array( $log['action'], [ 'redeem', 'expire' ], true ) ) {
+                    $redeem += $points;
+                }
+            }
+
+            $referrals_table = $wpdb->prefix . 'dps_referrals';
+            $referrals_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$referrals_table} WHERE referrer_client_id = %d", $client_id ) );
+
+            $appointments = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'dps_agendamento' AND post_status = 'publish' AND post_parent = %d",
+                $client_id
+            ) );
+
+            $score = $earned + ( $referrals_count * 50 ) + ( $appointments * 10 );
+
+            if ( $earned || $redeem || $referrals_count || $appointments ) {
+                $ranking[] = [
+                    'id'          => $client_id,
+                    'name'        => get_the_title( $client_id ),
+                    'earned'      => $earned,
+                    'redeemed'    => $redeem,
+                    'referrals'   => $referrals_count,
+                    'appointments'=> $appointments,
+                    'score'       => $score,
+                ];
+            }
+        }
+
+        usort(
+            $ranking,
+            function ( $a, $b ) {
+                if ( $a['score'] === $b['score'] ) {
+                    return 0;
+                }
+                return ( $a['score'] < $b['score'] ) ? 1 : -1;
+            }
+        );
+
+        return array_slice( $ranking, 0, $limit );
+    }
+
+    /**
+     * Obtém métricas de eficácia por campanha.
+     *
+     * @since 1.4.0
+     *
+     * @return array
+     */
+    public static function get_campaign_effectiveness() {
+        $campaigns = get_posts( [
+            'post_type'      => 'dps_campaign',
+            'posts_per_page' => 100,
+            'post_status'    => 'publish',
+        ] );
+
+        $data = [];
+        if ( empty( $campaigns ) ) {
+            return $data;
+        }
+
+        foreach ( $campaigns as $campaign ) {
+            $eligible    = get_post_meta( $campaign->ID, 'dps_campaign_pending_offers', true );
+            $eligible    = is_array( $eligible ) ? array_filter( array_map( 'absint', $eligible ) ) : [];
+            $used        = self::count_campaign_usage( $campaign->ID );
+            $points      = self::sum_points_by_campaign( $campaign->ID );
+            $start_date  = get_post_meta( $campaign->ID, 'dps_campaign_start_date', true );
+            $end_date    = get_post_meta( $campaign->ID, 'dps_campaign_end_date', true );
+
+            $data[] = [
+                'id'                => $campaign->ID,
+                'name'              => $campaign->post_title,
+                'start'             => $start_date,
+                'end'               => $end_date,
+                'eligible'          => count( $eligible ),
+                'used'              => $used,
+                'usage_rate'        => $eligible ? round( ( $used / count( $eligible ) ) * 100, 1 ) : 0,
+                'points'            => $points,
+            ];
+        }
+
+        return $data;
+    }
+
+    /**
+     * Soma pontos associados a um contexto de campanha.
+     *
+     * @since 1.4.0
+     *
+     * @param int $campaign_id Campaign ID.
+     * @return int
+     */
+    private static function sum_points_by_campaign( $campaign_id ) {
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 500,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+        ] );
+
+        $total = 0;
+        foreach ( $clients as $client_id ) {
+            $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+            foreach ( $logs as $log ) {
+                $context = isset( $log['context'] ) ? $log['context'] : '';
+                if ( $context === 'campaign_' . $campaign_id && 'add' === $log['action'] ) {
+                    $total += isset( $log['points'] ) ? (int) $log['points'] : 0;
+                }
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * Conta clientes com uso de campanha baseado no contexto do log.
+     *
+     * @since 1.4.0
+     *
+     * @param int $campaign_id Campaign ID.
+     * @return int
+     */
+    private static function count_campaign_usage( $campaign_id ) {
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 500,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+        ] );
+
+        $used = 0;
+        foreach ( $clients as $client_id ) {
+            $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+            foreach ( $logs as $log ) {
+                $context = isset( $log['context'] ) ? $log['context'] : '';
+                if ( $context === 'campaign_' . $campaign_id ) {
+                    $used++;
+                    break;
+                }
+            }
+        }
+
+        return $used;
+    }
+
+    /**
+     * Calcula pontos elegíveis para expiração baseados na data de concessão.
+     *
+     * @since 1.4.0
+     *
+     * @param int $client_id Cliente.
+     * @param int $months    Meses para expirar.
+     * @return int Pontos que podem ser expirados.
+     */
+    public static function get_expirable_points( $client_id, $months ) {
+        $client_id = (int) $client_id;
+        $months    = max( 1, absint( $months ) );
+
+        $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+        if ( empty( $logs ) ) {
+            return 0;
+        }
+
+        usort(
+            $logs,
+            function ( $a, $b ) {
+                $date_a = isset( $a['date'] ) ? $a['date'] : '';
+                $date_b = isset( $b['date'] ) ? $b['date'] : '';
+                return strcmp( $date_a, $date_b );
+            }
+        );
+
+        $cutoff    = ( new DateTime( 'now', wp_timezone() ) )->modify( '-' . $months . ' months' );
+        $accruals  = [];
+
+        foreach ( $logs as $log ) {
+            $points = isset( $log['points'] ) ? (int) $log['points'] : 0;
+            $date   = isset( $log['date'] ) ? $log['date'] : '';
+            $action = isset( $log['action'] ) ? $log['action'] : '';
+
+            if ( ! $date ) {
+                continue;
+            }
+
+            if ( 'add' === $action ) {
+                $accruals[] = [
+                    'remaining' => $points,
+                    'date'      => $date,
+                ];
+                continue;
+            }
+
+            if ( in_array( $action, [ 'redeem', 'expire' ], true ) ) {
+                $to_reduce = $points;
+                foreach ( $accruals as &$accrual ) {
+                    if ( $to_reduce <= 0 ) {
+                        break;
+                    }
+
+                    if ( $accrual['remaining'] <= 0 ) {
+                        continue;
+                    }
+
+                    $deduct              = min( $accrual['remaining'], $to_reduce );
+                    $accrual['remaining'] -= $deduct;
+                    $to_reduce           -= $deduct;
+                }
+                unset( $accrual );
+            }
+        }
+
+        $expirable = 0;
+        foreach ( $accruals as $accrual ) {
+            $date_obj = date_create( $accrual['date'] );
+            if ( $date_obj && $date_obj <= $cutoff ) {
+                $expirable += (int) $accrual['remaining'];
+            }
+        }
+
+        return max( 0, $expirable );
+    }
+
+    /**
+     * Expira pontos e registra log dedicado.
+     *
+     * @since 1.4.0
+     *
+     * @param int $client_id Cliente.
+     * @param int $points    Pontos a expirar.
+     * @return int|false Novo saldo ou falso em erro.
+     */
+    public static function expire_points( $client_id, $points ) {
+        $client_id = (int) $client_id;
+        $points    = (int) $points;
+
+        if ( $client_id <= 0 || $points <= 0 ) {
+            return false;
+        }
+
+        $current = self::get_points( $client_id );
+        if ( $current <= 0 ) {
+            return false;
+        }
+
+        $new_balance = max( 0, $current - $points );
+        update_post_meta( $client_id, 'dps_loyalty_points', $new_balance );
+        dps_loyalty_log_event( $client_id, 'expire', $points, 'points_expired' );
+
+        return $new_balance;
     }
 
     /**

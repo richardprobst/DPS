@@ -367,6 +367,91 @@
     };
 
     /**
+     * Renderiza gráfico de série temporal (pontos concedidos x resgatados).
+     */
+    DPSLoyalty.renderTimeseries = function() {
+        var $canvas = $('#dps-loyalty-timeseries');
+        if (!$canvas.length || typeof Chart === 'undefined') {
+            return;
+        }
+
+        var dataset = $canvas.data('timeseries');
+        if (!dataset || !dataset.labels) {
+            return;
+        }
+
+        new Chart($canvas, {
+            type: 'line',
+            data: {
+                labels: dataset.labels,
+                datasets: [
+                    {
+                        label: 'Pontos concedidos',
+                        data: dataset.granted,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14,165,233,0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Pontos resgatados/expirados',
+                        data: dataset.redeemed,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239,68,68,0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    };
+
+    /**
+     * Renderiza gráfico de pizza para níveis.
+     */
+    DPSLoyalty.renderTierChart = function() {
+        var $canvas = $('#dps-loyalty-tiers');
+        if (!$canvas.length || typeof Chart === 'undefined') {
+            return;
+        }
+
+        var tiers = $canvas.data('tiers');
+        if (!tiers) {
+            return;
+        }
+
+        new Chart($canvas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Bronze', 'Prata', 'Ouro'],
+                datasets: [{
+                    data: [tiers.bronze || 0, tiers.prata || 0, tiers.ouro || 0],
+                    backgroundColor: ['#b45309', '#6b7280', '#d97706']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    };
+
+    /**
      * Inicialização principal.
      */
     DPSLoyalty.init = function() {
@@ -376,6 +461,8 @@
         DPSLoyalty.initTooltips();
         DPSLoyalty.initWhatsAppShare();
         DPSLoyalty.initClientAutocomplete();
+        DPSLoyalty.renderTimeseries();
+        DPSLoyalty.renderTierChart();
     };
 
     // Inicializar quando documento estiver pronto
