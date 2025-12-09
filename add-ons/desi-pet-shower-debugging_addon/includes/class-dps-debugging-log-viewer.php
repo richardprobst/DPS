@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Gerencia visualização, estatísticas e limpeza do arquivo debug.log.
  *
  * @since 1.0.0
+ * @since 1.3.0 Adicionado suporte a paginação e filtro por data.
  */
 class DPS_Debugging_Log_Viewer {
 
@@ -33,7 +34,7 @@ class DPS_Debugging_Log_Viewer {
      * @since 1.0.0
      * @var int
      */
-    private $max_lines = 1000;
+    private $max_lines = 5000;
 
     /**
      * Tipos de erro para classificação visual.
@@ -72,12 +73,53 @@ class DPS_Debugging_Log_Viewer {
     private $entry_types = [];
 
     /**
+     * Opções de quantidade por página.
+     *
+     * @since 1.3.0
+     * @var array
+     */
+    public static $per_page_options = [ 10, 50, 100, 500 ];
+
+    /**
+     * Opções de período para filtro de data.
+     *
+     * @since 1.3.0
+     * @var array
+     */
+    public static $period_options = [
+        'all'    => 'Todos',
+        'today'  => 'Hoje',
+        '24h'    => 'Últimas 24h',
+        '7d'     => 'Últimos 7 dias',
+        '30d'    => 'Últimos 30 dias',
+        'custom' => 'Personalizado',
+    ];
+
+    /**
      * Construtor.
      *
      * @since 1.0.0
      */
     public function __construct() {
         $this->log_path = $this->get_debug_log_path();
+    }
+
+    /**
+     * Retorna as opções de período traduzidas.
+     *
+     * @since 1.3.0
+     *
+     * @return array Array associativo com período => label traduzido.
+     */
+    public static function get_period_labels() {
+        return [
+            'all'    => __( 'Todos', 'dps-debugging-addon' ),
+            'today'  => __( 'Hoje', 'dps-debugging-addon' ),
+            '24h'    => __( 'Últimas 24h', 'dps-debugging-addon' ),
+            '7d'     => __( 'Últimos 7 dias', 'dps-debugging-addon' ),
+            '30d'    => __( 'Últimos 30 dias', 'dps-debugging-addon' ),
+            'custom' => __( 'Personalizado', 'dps-debugging-addon' ),
+        ];
     }
 
     /**
@@ -647,5 +689,284 @@ class DPS_Debugging_Log_Viewer {
         $parsed = $this->parse_log_entries( $lines );
 
         return count( $parsed );
+    }
+
+    /**
+     * Obtém entradas filtradas e paginadas.
+     *
+     * @since 1.3.0
+     *
+     * @param array $args {
+     *     Argumentos de filtragem e paginação.
+     *
+     *     @type string $filter_type Tipo de erro para filtrar.
+     *     @type string $period      Período de data (all, today, 24h, 7d, 30d, custom).
+     *     @type string $date_from   Data inicial (Y-m-d) para filtro custom.
+     *     @type string $date_to     Data final (Y-m-d) para filtro custom.
+     *     @type int    $page        Página atual (começando em 1).
+     *     @type int    $per_page    Entradas por página.
+     *     @type bool   $compact     Modo compacto (apenas primeira linha).
+     * }
+     * @return array {
+     *     Resultado com entradas e metadados.
+     *
+     *     @type array $entries      Entradas da página atual.
+     *     @type int   $total        Total de entradas após filtros.
+     *     @type int   $page         Página atual.
+     *     @type int   $per_page     Entradas por página.
+     *     @type int   $total_pages  Total de páginas.
+     *     @type int   $from         Índice inicial (1-based).
+     *     @type int   $to           Índice final (1-based).
+     * }
+     */
+    public function get_paginated_entries( $args = [] ) {
+        $defaults = [
+            'filter_type' => '',
+            'period'      => 'all',
+            'date_from'   => '',
+            'date_to'     => '',
+            'page'        => 1,
+            'per_page'    => 100,
+            'compact'     => false,
+        ];
+        $args = wp_parse_args( $args, $defaults );
+
+        if ( ! $this->log_exists() ) {
+            return [
+                'entries'     => [],
+                'total'       => 0,
+                'page'        => 1,
+                'per_page'    => $args['per_page'],
+                'total_pages' => 0,
+                'from'        => 0,
+                'to'          => 0,
+            ];
+        }
+
+        // Obtém todas as entradas
+        $entries = $this->get_parsed_entries();
+
+        // Aplica filtro por tipo
+        if ( ! empty( $args['filter_type'] ) ) {
+            $filter_type = $args['filter_type'];
+            $entries = array_filter( $entries, function( $entry ) use ( $filter_type ) {
+                return $this->detect_entry_type( $entry ) === $filter_type;
+            } );
+        }
+
+        // Aplica filtro por período/data
+        if ( 'all' !== $args['period'] ) {
+            $entries = $this->filter_by_period( $entries, $args['period'], $args['date_from'], $args['date_to'] );
+        }
+
+        // Reindexar após filtros
+        $entries = array_values( $entries );
+
+        // Inverte para mostrar mais recentes primeiro
+        $entries = array_reverse( $entries );
+
+        // Calcula paginação
+        $total       = count( $entries );
+        $page        = max( 1, (int) $args['page'] );
+        $per_page    = (int) $args['per_page'];
+        $total_pages = ceil( $total / $per_page );
+        $page        = min( $page, max( 1, $total_pages ) );
+
+        $offset = ( $page - 1 ) * $per_page;
+        $from   = $total > 0 ? $offset + 1 : 0;
+        $to     = min( $offset + $per_page, $total );
+
+        // Aplica paginação
+        $paginated = array_slice( $entries, $offset, $per_page );
+
+        return [
+            'entries'     => $paginated,
+            'total'       => $total,
+            'page'        => $page,
+            'per_page'    => $per_page,
+            'total_pages' => (int) $total_pages,
+            'from'        => $from,
+            'to'          => $to,
+        ];
+    }
+
+    /**
+     * Filtra entradas por período de data.
+     *
+     * @since 1.3.0
+     *
+     * @param array  $entries   Entradas a filtrar.
+     * @param string $period    Período (today, 24h, 7d, 30d, custom).
+     * @param string $date_from Data inicial para filtro custom (Y-m-d).
+     * @param string $date_to   Data final para filtro custom (Y-m-d).
+     * @return array Entradas filtradas.
+     */
+    private function filter_by_period( $entries, $period, $date_from = '', $date_to = '' ) {
+        // Calcula timestamps de início e fim
+        $now = current_time( 'timestamp' );
+
+        switch ( $period ) {
+            case 'today':
+                $start = strtotime( 'today midnight', $now );
+                $end   = $now;
+                break;
+
+            case '24h':
+                $start = $now - DAY_IN_SECONDS;
+                $end   = $now;
+                break;
+
+            case '7d':
+                $start = $now - ( 7 * DAY_IN_SECONDS );
+                $end   = $now;
+                break;
+
+            case '30d':
+                $start = $now - ( 30 * DAY_IN_SECONDS );
+                $end   = $now;
+                break;
+
+            case 'custom':
+                if ( empty( $date_from ) || empty( $date_to ) ) {
+                    return $entries;
+                }
+                $start = strtotime( $date_from . ' 00:00:00' );
+                $end   = strtotime( $date_to . ' 23:59:59' );
+                if ( false === $start || false === $end ) {
+                    return $entries;
+                }
+                break;
+
+            default:
+                return $entries;
+        }
+
+        return array_filter( $entries, function( $entry ) use ( $start, $end ) {
+            $entry_time = $this->extract_entry_timestamp( $entry );
+            if ( null === $entry_time ) {
+                return false;
+            }
+            return $entry_time >= $start && $entry_time <= $end;
+        } );
+    }
+
+    /**
+     * Extrai timestamp de uma entrada de log.
+     *
+     * @since 1.3.0
+     *
+     * @param string $entry Entrada de log.
+     * @return int|null Timestamp Unix ou null se não encontrado.
+     */
+    public function extract_entry_timestamp( $entry ) {
+        // Padrão: [DD-Mon-YYYY HH:MM:SS UTC]
+        if ( preg_match( '/^\[([^\]]+)\]/', $entry, $matches ) ) {
+            $datetime = $matches[1];
+            $timestamp = strtotime( $datetime );
+            if ( false !== $timestamp ) {
+                return $timestamp;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Obtém a primeira linha de uma entrada (para modo compacto).
+     *
+     * @since 1.3.0
+     *
+     * @param string $entry Entrada completa do log.
+     * @return string Primeira linha da entrada.
+     */
+    public function get_entry_summary( $entry ) {
+        $lines = explode( "\n", $entry );
+        $first_line = isset( $lines[0] ) ? $lines[0] : $entry;
+        
+        // Limita a 200 caracteres
+        if ( strlen( $first_line ) > 200 ) {
+            $first_line = substr( $first_line, 0, 200 ) . '...';
+        }
+        
+        return $first_line;
+    }
+
+    /**
+     * Verifica se uma entrada tem múltiplas linhas (detalhes/stack trace).
+     *
+     * @since 1.3.0
+     *
+     * @param string $entry Entrada completa do log.
+     * @return bool True se tem mais de uma linha.
+     */
+    public function entry_has_details( $entry ) {
+        return strpos( $entry, "\n" ) !== false;
+    }
+
+    /**
+     * Formata uma entrada para modo compacto (apenas primeira linha, expansível).
+     *
+     * @since 1.3.0
+     *
+     * @param string $entry    Entrada de log.
+     * @param bool   $expanded Se já deve vir expandida.
+     * @return string HTML formatado.
+     */
+    public function format_entry_compact( $entry, $expanded = false ) {
+        $class = 'dps-debugging-log-entry dps-debugging-log-entry-compact';
+        $type  = $this->detect_entry_type( $entry );
+
+        if ( $type ) {
+            $class .= ' dps-debugging-log-entry-' . $type;
+        }
+
+        $has_details = $this->entry_has_details( $entry );
+        if ( $has_details ) {
+            $class .= ' has-details';
+        }
+        if ( $expanded ) {
+            $class .= ' is-expanded';
+        }
+
+        $summary = $this->get_entry_summary( $entry );
+        $formatted_summary = $this->format_entry_content_inline( $summary );
+
+        $output = '<div class="' . esc_attr( $class ) . '">';
+        
+        // Resumo (sempre visível)
+        $output .= '<div class="dps-debugging-log-entry-summary">';
+        if ( $has_details ) {
+            $output .= '<span class="dps-debugging-toggle-icon">▶</span>';
+        }
+        $output .= '<span class="dps-debugging-log-entry-text">' . $formatted_summary . '</span>';
+        $output .= '</div>';
+
+        // Detalhes (ocultos por padrão)
+        if ( $has_details ) {
+            $full_content = $this->format_entry_content( $entry );
+            $display = $expanded ? 'block' : 'none';
+            $output .= '<div class="dps-debugging-log-entry-details" style="display:' . $display . ';">' . $full_content . '</div>';
+        }
+
+        $output .= '</div>';
+
+        return $output;
+    }
+
+    /**
+     * Formata conteúdo inline (para resumo compacto).
+     *
+     * @since 1.3.0
+     *
+     * @param string $content Conteúdo a formatar.
+     * @return string HTML formatado (inline).
+     */
+    private function format_entry_content_inline( $content ) {
+        // Extrai e formata data/hora
+        $content = $this->format_datetime( $content );
+
+        // Formata tipos de erro
+        $content = $this->format_error_labels( $content );
+
+        return $content;
     }
 }
