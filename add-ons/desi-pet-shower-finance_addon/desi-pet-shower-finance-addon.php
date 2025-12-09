@@ -1110,8 +1110,8 @@ class DPS_Finance_Addon {
                     }
                     
                     // Define URL base atual removendo parâmetros de ação
-                    // PHP 8+ compatibility: use add_query_arg( array() ) instead of add_query_arg( null, null )
-                    $current_url = add_query_arg( array() );
+                    // Usa helper com fallback para evitar warnings de URL nula em PHP 8+
+                    $current_url = $this->get_current_url();
                     $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file', '_wpnonce' ], $current_url );
                     
                     // Link para envio por email (com nonce)
