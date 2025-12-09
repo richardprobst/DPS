@@ -24,6 +24,7 @@
    - [Principais Funcionalidades](#principais-funcionalidades)
    - [Arquitetura Modular](#arquitetura-modular)
    - [Requisitos do Sistema](#requisitos-do-sistema)
+   - [Novidades da Versão 1.3](#-novidades-da-versão-13)
 
 2. [Instalação](#-instalação)
    - [Pré-requisitos](#pré-requisitos)
@@ -147,6 +148,53 @@ O sistema é composto por um **plugin base** e **17 add-ons opcionais**:
 - JSON (para manipulação de dados)
 - mbstring (para caracteres especiais)
 - OpenSSL (para criptografia de senhas SMTP no White Label)
+
+---
+
+## ✨ Novidades da Versão 1.3
+
+Esta versão traz melhorias significativas em usabilidade, segurança e funcionalidades do sistema:
+
+### 🎨 Interface Administrativa Reorganizada
+- **Menus consolidados em módulos com abas**: Redução de 21 itens para 7-8 módulos principais
+- **Nova navegação por abas**: Agenda Hub, AI Hub, Portal Hub, Sistema, Ferramentas
+- **Menos poluição visual**: Interface mais limpa e organizada
+- **Acesso rápido**: Cada aba mantém URL própria para bookmarks
+
+### 🌐 Portal do Cliente - Fase 4
+- **Timeline de Serviços**: Histórico visual completo de atendimentos por pet
+- **Sistema de Pedidos**: Clientes podem solicitar agendamento, reagendamento ou cancelamento
+- **Central de Mensagens**: Aba dedicada com contador de não lidas e tipos de mensagem
+- **Branding Customizável**: Logo, cores e imagem hero personalizáveis
+- **Preferências**: Cliente e pet podem registrar preferências de atendimento
+- **Notificação de Acesso**: E-mail automático quando portal é acessado
+- **Criação Automática**: Página do portal criada automaticamente na ativação (v2.4.1+)
+
+### 🤖 Assistente de IA v1.7.0
+- **Dashboard de Insights**: Métricas consolidadas, top perguntas, horários de pico
+- **Modo Especialista**: Chat interno com comandos especiais para equipe
+- **Sugestões Proativas**: Sistema sugere agendamentos baseado em histórico
+- **Entrada por Voz**: Reconhecimento de voz em português no chat público
+- **WhatsApp Business**: Integração completa via webhook (Meta, Twilio, Custom)
+- **Base de Conhecimento**: Interface para gerenciar artigos e testar matching
+- **Histórico Persistente**: Todas conversas salvas em banco de dados
+
+### 📅 Agenda v1.4.0
+- **3 Abas Especializadas**: Visão Rápida, Operação e Detalhes
+- **Navegação sem reload**: Alterna entre abas instantaneamente
+- **Visão otimizada**: Cada aba focada em um objetivo específico
+
+### 💳 Pagamentos v1.1.0
+- **Credenciais via wp-config.php**: Maior segurança (recomendado)
+- **Logging de Erros**: Sistema completo de rastreamento de falhas
+- **Indicadores Visuais**: Avisos quando geração de link falha
+- **Validações Aprimoradas**: HTTP status, campos obrigatórios, timeouts
+
+### 🛠️ Melhorias Técnicas
+- **Helpers Globais**: Classes utilitárias para operações comuns
+- **Validação de Contraste**: Acessibilidade WCAG AA no chat
+- **Rate Limit Inteligente**: Indicador visual com contagem regressiva
+- **Performance**: Queries otimizadas e cache estratégico
 
 ---
 
@@ -1536,14 +1584,30 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 - [ANALYSIS.md](../ANALYSIS.md) - Arquitetura técnica do sistema
 - [AGENTS.md](../AGENTS.md) - Diretrizes para desenvolvedores
 - [CHANGELOG.md](../CHANGELOG.md) - Histórico de versões
+- [README.md](README.md) - Índice completo da documentação
 - [Guia Visual](visual/VISUAL_STYLE_GUIDE.md) - Padrões de design
-- [Análise White Label](analysis/WHITE_LABEL_ANALYSIS.md) - Documentação completa do White Label Add-on
+- [Análise White Label](analysis/WHITELABEL_ADDON_COMPLETE_ANALYSIS.md) - Documentação completa do White Label Add-on
 - [Análise de Compatibilidade](compatibility/COMPATIBILITY_ANALYSIS.md) - Compatibilidade PHP/WordPress/Astra
+- [Reorganização de Menus](implementation/ADMIN_MENUS_REORGANIZATION_SUMMARY.md) - Sumário da reorganização administrativa
+
+### Implementações Recentes
+- [Portal do Cliente - Fase 4](implementation/CLIENT_PORTAL_PHASE4_SUMMARY.md) - Timeline, pedidos, branding
+- [Portal do Cliente - Fase 1](implementation/CLIENT_PORTAL_PHASE1_SUMMARY.md) - Fundamentos e autenticação
+- [IA - Melhorias de UX v1.6.1](implementation/AI_ADDON_UX_IMPROVEMENTS_v1.6.1.md) - Chat, acessibilidade, rate limit
+- [IA - Base de Conhecimento](implementation/AI_KNOWLEDGE_BASE_MULTILINGUAL_IMPLEMENTATION.md) - Artigos e matching
+- [Integração WhatsApp](implementation/WHATSAPP_IMPLEMENTATION_SUMMARY.md) - Comunicações via WhatsApp
+
+### Layout e UX
+- [Análise de Layout Administrativo](layout/admin/ADMIN_LAYOUT_ANALYSIS.md) - Padrões de interface admin
+- [UX do Portal do Cliente](layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md) - Análise detalhada de UX
+- [Análise da Agenda](layout/agenda/AGENDA_LAYOUT_ANALYSIS.md) - Layout e funcionalidades
+- [Responsividade Geral](layout/RESPONSIVENESS_ANALYSIS.md) - Análise completa de responsividade
 
 ### Configuração de Integrações
-- [Configuração de Webhook](../add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md)
-- [Sistema de Tokens](../add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md)
-- [Compatibilidade YooTheme](compatibility/YOOTHEME_COMPATIBILITY.md)
+- [Configuração de Webhook](../add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md) - Mercado Pago
+- [Sistema de Tokens](../add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md) - Autenticação do portal
+- [Compatibilidade YooTheme](compatibility/YOOTHEME_COMPATIBILITY.md) - Page builder YooTheme
+- [Guia de Shortcodes no Editor](compatibility/EDITOR_SHORTCODE_GUIDE.md) - Como inserir shortcodes corretamente
 
 ### Recursos Externos
 - [Documentação WordPress](https://developer.wordpress.org/)
