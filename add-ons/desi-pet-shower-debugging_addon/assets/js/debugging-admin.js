@@ -450,12 +450,68 @@
         }, 2000);
     }
 
-    // Inicializa funcionalidades da Fase 2
+    // ==========================================================================
+    // FASE 3: Recursos Avançados
+    // ==========================================================================
+
+    /**
+     * Inicializa toggle de grupos de erros recorrentes.
+     */
+    function initGroupToggle() {
+        $(document).on('click', '.dps-debugging-group-expand', function() {
+            var $button = $(this);
+            var $group = $button.closest('.dps-debugging-log-group');
+            var $entries = $group.find('.dps-debugging-group-entries');
+            
+            $button.toggleClass('is-expanded');
+            $entries.slideToggle(200);
+        });
+    }
+
+    /**
+     * Inicializa highlight de entradas novas.
+     */
+    function initNewEntriesHighlight() {
+        var $newEntries = $('.dps-debugging-log-entry.is-new, .dps-debugging-log-entry-compact.is-new');
+        
+        if ($newEntries.length > 0) {
+            // Scroll suave para a primeira entrada nova quando clicar no aviso
+            $('.dps-debugging-new-errors-notice').on('click', function() {
+                var $first = $newEntries.first();
+                if ($first.length) {
+                    $('html, body').animate({
+                        scrollTop: $first.offset().top - 100
+                    }, 500);
+                }
+            }).css('cursor', 'pointer');
+        }
+    }
+
+    /**
+     * Inicializa tooltips para badges de módulo.
+     */
+    function initModuleTooltips() {
+        $('.dps-debugging-entry-module').each(function() {
+            var $badge = $(this);
+            var title = $badge.attr('title');
+            if (title) {
+                $badge.attr('data-tooltip', title);
+            }
+        });
+    }
+
+    // Inicializa funcionalidades da Fase 2 e 3
     $(document).ready(function() {
+        // Fase 2
         initAdvancedToggle();
         initCompactToggle();
         initPeriodSelector();
         initCopyLogTool();
+        
+        // Fase 3
+        initGroupToggle();
+        initNewEntriesHighlight();
+        initModuleTooltips();
     });
 
 })(jQuery);

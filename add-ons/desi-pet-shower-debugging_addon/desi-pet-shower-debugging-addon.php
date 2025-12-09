@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Debugging
  * Plugin URI:        https://www.probst.pro
  * Description:       Gerenciamento de debug no WordPress. Ative/desative constantes de debug e visualize o arquivo debug.log com busca, filtros, estatísticas e exportação.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-debugging-addon
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do add-on
-define( 'DPS_DEBUGGING_VERSION', '1.3.0' );
+define( 'DPS_DEBUGGING_VERSION', '1.4.0' );
 define( 'DPS_DEBUGGING_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_DEBUGGING_URL', plugin_dir_url( __FILE__ ) );
 
@@ -625,7 +625,7 @@ class DPS_Debugging_Addon {
             exit;
         }
 
-        // Exportação do log
+        // Exportação do log (suporta TXT, CSV, JSON)
         if ( isset( $_GET['dps_debug_action'] ) && 'export' === $_GET['dps_debug_action'] ) {
             if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_debugging_export' ) ) {
                 return;
@@ -636,10 +636,33 @@ class DPS_Debugging_Addon {
                 return;
             }
 
-            $content  = $log_viewer->get_raw_content();
-            $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.log';
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $format = isset( $_GET['format'] ) ? sanitize_key( $_GET['format'] ) : 'txt';
 
-            header( 'Content-Type: text/plain; charset=utf-8' );
+            switch ( $format ) {
+                case 'csv':
+                    $entries = $log_viewer->get_parsed_entries();
+                    $content = $log_viewer->export_to_csv( $entries );
+                    $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.csv';
+                    $content_type = 'text/csv; charset=utf-8';
+                    break;
+
+                case 'json':
+                    $entries = $log_viewer->get_parsed_entries();
+                    $content = $log_viewer->export_to_json( $entries );
+                    $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.json';
+                    $content_type = 'application/json; charset=utf-8';
+                    break;
+
+                case 'txt':
+                default:
+                    $content = $log_viewer->get_raw_content();
+                    $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.log';
+                    $content_type = 'text/plain; charset=utf-8';
+                    break;
+            }
+
+            header( 'Content-Type: ' . $content_type );
             header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
             header( 'Content-Length: ' . strlen( $content ) );
             header( 'Cache-Control: no-cache, no-store, must-revalidate' );
@@ -738,15 +761,22 @@ class DPS_Debugging_Addon {
      * Renderiza a aba de Logs (nova aba principal).
      *
      * @since 1.3.0
+     * @since 1.4.0 Adicionado agrupamento, filtro por módulo, destaque de novos erros.
      */
     private function render_logs_tab() {
         $log_viewer = new DPS_Debugging_Log_Viewer();
         $log_file   = $log_viewer->get_debug_log_path();
         $log_exists = $log_viewer->log_exists();
 
+        // Registra visita do usuário (para destaque de novos erros)
+        $last_visit = DPS_Debugging_Log_Viewer::get_last_visit_timestamp();
+        DPS_Debugging_Log_Viewer::record_visit();
+
         // Parâmetros de filtragem e paginação
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $filter_type = isset( $_GET['type'] ) ? sanitize_key( $_GET['type'] ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $filter_module = isset( $_GET['module'] ) ? sanitize_key( $_GET['module'] ) : '';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $period = isset( $_GET['period'] ) ? sanitize_key( $_GET['period'] ) : 'all';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -760,6 +790,8 @@ class DPS_Debugging_Addon {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $compact = isset( $_GET['compact'] ) && '1' === $_GET['compact'];
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $grouped = isset( $_GET['grouped'] ) && '1' === $_GET['grouped'];
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $view_mode = isset( $_GET['mode'] ) && 'raw' === $_GET['mode'] ? 'raw' : 'formatted';
 
         // Valida per_page
@@ -767,19 +799,28 @@ class DPS_Debugging_Addon {
             $per_page = 100;
         }
 
-        // Obtém entradas paginadas
-        $result = $log_viewer->get_paginated_entries( [
-            'filter_type' => $filter_type,
-            'period'      => $period,
-            'date_from'   => $date_from,
-            'date_to'     => $date_to,
-            'page'        => $page,
-            'per_page'    => $per_page,
-            'compact'     => $compact,
+        // Obtém entradas com recursos avançados
+        $result = $log_viewer->get_advanced_entries( [
+            'filter_type'   => $filter_type,
+            'filter_module' => $filter_module,
+            'period'        => $period,
+            'date_from'     => $date_from,
+            'date_to'       => $date_to,
+            'page'          => $page,
+            'per_page'      => $per_page,
+            'compact'       => $compact,
+            'grouped'       => $grouped,
         ] );
 
         // Estatísticas gerais (sem filtros, para exibir cards)
         $stats = $log_exists ? $log_viewer->get_entry_stats() : [];
+
+        // Conta novos erros desde última visita
+        $all_entries = $log_exists ? $log_viewer->get_parsed_entries() : [];
+        $new_count = $log_viewer->count_new_since_last_visit( $all_entries );
+
+        // Módulos conhecidos
+        $known_modules = DPS_Debugging_Log_Viewer::get_known_modules();
 
         ?>
         <div class="dps-debugging-logs-tab">
@@ -788,6 +829,28 @@ class DPS_Debugging_Addon {
                     <p>
                         <span class="dashicons dashicons-warning"></span>
                         <?php esc_html_e( 'A constante WP_DEBUG_LOG não está ativada. Ative-a na aba Configurações para gerar logs.', 'dps-debugging-addon' ); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $new_count > 0 ) : ?>
+                <div class="notice notice-info inline dps-debugging-new-errors-notice">
+                    <p>
+                        <span class="dashicons dashicons-bell"></span>
+                        <strong>
+                            <?php
+                            printf(
+                                /* translators: %d: Number of new errors */
+                                esc_html( _n(
+                                    '%d novo erro desde sua última visita',
+                                    '%d novos erros desde sua última visita',
+                                    $new_count,
+                                    'dps-debugging-addon'
+                                ) ),
+                                $new_count
+                            );
+                            ?>
+                        </strong>
                     </p>
                 </div>
             <?php endif; ?>
@@ -814,6 +877,9 @@ class DPS_Debugging_Addon {
                 <!-- Estatísticas -->
                 <?php $this->render_log_stats( $stats ); ?>
 
+                <!-- Estatísticas por módulo -->
+                <?php $this->render_module_stats( $result['module_stats'], $filter_module ); ?>
+
                 <!-- Filtros -->
                 <div class="dps-debugging-log-filters-container">
                     <form method="get" action="" class="dps-debugging-filters-form">
@@ -834,6 +900,26 @@ class DPS_Debugging_Addon {
                                             ?>
                                             <option value="<?php echo esc_attr( $type ); ?>" <?php selected( $filter_type, $type ); ?>>
                                                 <?php echo esc_html( $label . ' (' . $stats['by_type'][ $type ] . ')' ); ?>
+                                            </option>
+                                            <?php
+                                        endif;
+                                    endforeach;
+                                    ?>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por módulo -->
+                            <div class="dps-debugging-filter-group">
+                                <label for="dps-filter-module"><?php esc_html_e( 'Módulo:', 'dps-debugging-addon' ); ?></label>
+                                <select name="module" id="dps-filter-module">
+                                    <option value=""><?php esc_html_e( 'Todos os módulos', 'dps-debugging-addon' ); ?></option>
+                                    <?php
+                                    foreach ( $known_modules as $mod_key => $mod_data ) :
+                                        $mod_count = isset( $result['module_stats'][ $mod_key ] ) ? $result['module_stats'][ $mod_key ] : 0;
+                                        if ( $mod_count > 0 ) :
+                                            ?>
+                                            <option value="<?php echo esc_attr( $mod_key ); ?>" <?php selected( $filter_module, $mod_key ); ?>>
+                                                <?php echo esc_html( $mod_data['label'] . ' (' . $mod_count . ')' ); ?>
                                             </option>
                                             <?php
                                         endif;
@@ -876,7 +962,9 @@ class DPS_Debugging_Addon {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                        </div>
 
+                        <div class="dps-debugging-filters-row dps-debugging-filters-row-secondary">
                             <!-- Modo compacto -->
                             <div class="dps-debugging-filter-group dps-compact-toggle">
                                 <label>
@@ -885,7 +973,15 @@ class DPS_Debugging_Addon {
                                 </label>
                             </div>
 
-                            <div class="dps-debugging-filter-group">
+                            <!-- Agrupar erros recorrentes -->
+                            <div class="dps-debugging-filter-group dps-grouped-toggle">
+                                <label>
+                                    <input type="checkbox" name="grouped" value="1" <?php checked( $grouped ); ?>>
+                                    <?php esc_html_e( 'Agrupar recorrentes', 'dps-debugging-addon' ); ?>
+                                </label>
+                            </div>
+
+                            <div class="dps-debugging-filter-group dps-filter-actions">
                                 <button type="submit" class="button button-primary"><?php esc_html_e( 'Filtrar', 'dps-debugging-addon' ); ?></button>
                                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-debugging&tab=logs' ) ); ?>" class="button"><?php esc_html_e( 'Limpar', 'dps-debugging-addon' ); ?></a>
                             </div>
@@ -901,7 +997,7 @@ class DPS_Debugging_Addon {
                 <div id="dps-debugging-search-results" class="dps-debugging-search-results" style="display:none;"></div>
 
                 <!-- Paginação superior -->
-                <?php $this->render_pagination( $result, $filter_type, $period, $date_from, $date_to, $per_page, $compact ); ?>
+                <?php $this->render_pagination_advanced( $result, $filter_type, $filter_module, $period, $date_from, $date_to, $per_page, $compact, $grouped ); ?>
             <?php endif; ?>
 
             <!-- Conteúdo do log -->
@@ -913,31 +1009,344 @@ class DPS_Debugging_Addon {
                     </div>
                 <?php elseif ( 'raw' === $view_mode ) : ?>
                     <pre class="dps-debugging-log-raw"><?php echo esc_html( $log_viewer->get_raw_content() ); ?></pre>
-                <?php else : ?>
-                    <?php if ( empty( $result['entries'] ) ) : ?>
-                        <div class="dps-debugging-log-empty">
-                            <p><?php esc_html_e( 'Nenhuma entrada encontrada para os filtros selecionados.', 'dps-debugging-addon' ); ?></p>
-                        </div>
-                    <?php else : ?>
-                        <div class="dps-debugging-log-entries <?php echo $compact ? 'compact-mode' : ''; ?>">
-                            <?php
-                            foreach ( $result['entries'] as $entry ) {
-                                if ( $compact ) {
-                                    echo $log_viewer->format_entry_compact( $entry ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                                } else {
-                                    echo $this->format_log_entry( $entry, $log_viewer ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                                }
+                <?php elseif ( $grouped && ! empty( $result['groups'] ) ) : ?>
+                    <!-- Modo agrupado -->
+                    <div class="dps-debugging-log-groups">
+                        <?php foreach ( $result['groups'] as $group ) : ?>
+                            <?php echo $this->render_log_group( $group, $log_viewer ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php elseif ( ! empty( $result['entries'] ) ) : ?>
+                    <div class="dps-debugging-log-entries <?php echo $compact ? 'compact-mode' : ''; ?>">
+                        <?php
+                        foreach ( $result['entries'] as $entry ) {
+                            $is_new = $log_viewer->is_entry_new( $entry );
+                            if ( $compact ) {
+                                echo $this->format_log_entry_with_metadata( $entry, $log_viewer, $is_new, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                            } else {
+                                echo $this->format_log_entry_with_metadata( $entry, $log_viewer, $is_new, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                             }
-                            ?>
-                        </div>
-                    <?php endif; ?>
+                        }
+                        ?>
+                    </div>
+                <?php else : ?>
+                    <div class="dps-debugging-log-empty">
+                        <p><?php esc_html_e( 'Nenhuma entrada encontrada para os filtros selecionados.', 'dps-debugging-addon' ); ?></p>
+                    </div>
                 <?php endif; ?>
             </div>
 
             <?php if ( $log_exists && 'formatted' === $view_mode && $result['total_pages'] > 1 ) : ?>
                 <!-- Paginação inferior -->
-                <?php $this->render_pagination( $result, $filter_type, $period, $date_from, $date_to, $per_page, $compact ); ?>
+                <?php $this->render_pagination_advanced( $result, $filter_type, $filter_module, $period, $date_from, $date_to, $per_page, $compact, $grouped ); ?>
             <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * Renderiza estatísticas por módulo.
+     *
+     * @since 1.4.0
+     *
+     * @param array  $module_stats   Contagem por módulo.
+     * @param string $current_filter Módulo atualmente filtrado.
+     */
+    private function render_module_stats( $module_stats, $current_filter = '' ) {
+        $modules = DPS_Debugging_Log_Viewer::get_known_modules();
+        $has_any = false;
+
+        foreach ( $module_stats as $count ) {
+            if ( $count > 0 ) {
+                $has_any = true;
+                break;
+            }
+        }
+
+        if ( ! $has_any ) {
+            return;
+        }
+
+        ?>
+        <div class="dps-debugging-module-stats">
+            <div class="dps-debugging-module-cards">
+                <?php foreach ( $modules as $mod_key => $mod_data ) :
+                    $count = isset( $module_stats[ $mod_key ] ) ? $module_stats[ $mod_key ] : 0;
+                    if ( $count > 0 ) :
+                        $is_active = $current_filter === $mod_key;
+                        $url = add_query_arg( 'module', $mod_key, admin_url( 'admin.php?page=dps-debugging&tab=logs' ) );
+                        ?>
+                        <a href="<?php echo esc_url( $url ); ?>" 
+                           class="dps-debugging-module-card <?php echo $is_active ? 'is-active' : ''; ?>"
+                           style="border-color: <?php echo esc_attr( $mod_data['color'] ); ?>;">
+                            <span class="dashicons dashicons-<?php echo esc_attr( $mod_data['icon'] ); ?>" style="color: <?php echo esc_attr( $mod_data['color'] ); ?>;"></span>
+                            <span class="dps-debugging-module-label"><?php echo esc_html( $mod_data['label'] ); ?></span>
+                            <span class="dps-debugging-module-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
+                        </a>
+                    <?php endif;
+                endforeach; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Renderiza um grupo de erros recorrentes.
+     *
+     * @since 1.4.0
+     *
+     * @param array                    $group      Dados do grupo.
+     * @param DPS_Debugging_Log_Viewer $log_viewer Instância do log viewer.
+     * @return string HTML do grupo.
+     */
+    private function render_log_group( $group, $log_viewer ) {
+        $modules = DPS_Debugging_Log_Viewer::get_known_modules();
+        $type_labels = self::get_error_type_labels();
+
+        $class = 'dps-debugging-log-group';
+        if ( ! empty( $group['type'] ) ) {
+            $class .= ' dps-debugging-log-group-' . $group['type'];
+        }
+
+        $module_info = '';
+        $module_link = '';
+        if ( ! empty( $group['module'] ) && isset( $modules[ $group['module'] ] ) ) {
+            $mod = $modules[ $group['module'] ];
+            $module_info = '<span class="dps-debugging-group-module" style="background-color: ' . esc_attr( $mod['color'] ) . ';">';
+            $module_info .= '<span class="dashicons dashicons-' . esc_attr( $mod['icon'] ) . '"></span> ';
+            $module_info .= esc_html( $mod['label'] );
+            $module_info .= '</span>';
+
+            $module_url = DPS_Debugging_Log_Viewer::get_module_admin_url( $group['module'] );
+            if ( $module_url ) {
+                $module_link = '<a href="' . esc_url( $module_url ) . '" class="dps-debugging-group-action button button-small">';
+                $module_link .= '<span class="dashicons dashicons-admin-generic"></span> ';
+                $module_link .= esc_html__( 'Ir para módulo', 'dps-debugging-addon' );
+                $module_link .= '</a>';
+            }
+        }
+
+        $type_label = isset( $type_labels[ $group['type'] ] ) ? $type_labels[ $group['type'] ] : $group['type'];
+
+        $first_time = $group['first_time'] ? wp_date( 'd/m/Y H:i', $group['first_time'] ) : '';
+        $last_time = $group['last_time'] ? wp_date( 'd/m/Y H:i', $group['last_time'] ) : '';
+
+        $summary = $log_viewer->get_entry_summary( $group['representative'] );
+        // Remove timestamp do resumo
+        $summary = preg_replace( '/^\[[^\]]+\]\s*/', '', $summary );
+
+        $output = '<div class="' . esc_attr( $class ) . '" data-signature="' . esc_attr( $group['signature'] ) . '">';
+
+        // Header do grupo
+        $output .= '<div class="dps-debugging-group-header">';
+        $output .= '<div class="dps-debugging-group-meta">';
+        $output .= '<span class="dps-debugging-group-count">' . esc_html( number_format_i18n( $group['count'] ) ) . 'x</span>';
+        $output .= '<span class="dps-debugging-group-type dps-debugging-log-label-' . esc_attr( $group['type'] ) . '">' . esc_html( $type_label ) . '</span>';
+        $output .= $module_info;
+        $output .= '</div>';
+        $output .= '<div class="dps-debugging-group-times">';
+        if ( $first_time ) {
+            $output .= '<span class="dps-debugging-group-first">' . esc_html__( 'Primeiro:', 'dps-debugging-addon' ) . ' ' . esc_html( $first_time ) . '</span>';
+        }
+        if ( $last_time ) {
+            $output .= '<span class="dps-debugging-group-last">' . esc_html__( 'Último:', 'dps-debugging-addon' ) . ' ' . esc_html( $last_time ) . '</span>';
+        }
+        $output .= '</div>';
+        $output .= '</div>';
+
+        // Resumo do erro
+        $output .= '<div class="dps-debugging-group-summary">';
+        $output .= '<code>' . esc_html( $summary ) . '</code>';
+        $output .= '</div>';
+
+        // Ações
+        $output .= '<div class="dps-debugging-group-actions">';
+        $output .= $module_link;
+        $output .= '<button type="button" class="dps-debugging-group-expand button button-small">';
+        $output .= '<span class="dashicons dashicons-arrow-down-alt2"></span> ';
+        $output .= esc_html__( 'Ver ocorrências', 'dps-debugging-addon' );
+        $output .= '</button>';
+        $output .= '</div>';
+
+        // Ocorrências (ocultas por padrão)
+        $output .= '<div class="dps-debugging-group-entries" style="display:none;">';
+        // Mostra apenas as últimas 5 para não sobrecarregar
+        $show_entries = array_slice( $group['entries'], 0, 5 );
+        foreach ( $show_entries as $entry ) {
+            $output .= '<div class="dps-debugging-group-entry">';
+            $output .= '<pre>' . esc_html( $entry ) . '</pre>';
+            $output .= '</div>';
+        }
+        if ( $group['count'] > 5 ) {
+            $output .= '<div class="dps-debugging-group-more">';
+            $output .= sprintf(
+                /* translators: %d: Number of hidden entries */
+                esc_html__( '... e mais %d ocorrências', 'dps-debugging-addon' ),
+                $group['count'] - 5
+            );
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+
+        $output .= '</div>';
+
+        return $output;
+    }
+
+    /**
+     * Formata uma entrada de log com metadados (módulo, destaque de novo).
+     *
+     * @since 1.4.0
+     *
+     * @param string                   $entry      Entrada de log.
+     * @param DPS_Debugging_Log_Viewer $log_viewer Instância do log viewer.
+     * @param bool                     $is_new     Se é uma entrada nova.
+     * @param bool                     $compact    Se deve usar modo compacto.
+     * @return string HTML formatado.
+     */
+    private function format_log_entry_with_metadata( $entry, $log_viewer, $is_new = false, $compact = false ) {
+        $module = $log_viewer->detect_entry_module( $entry );
+        $modules = DPS_Debugging_Log_Viewer::get_known_modules();
+
+        $extra_class = '';
+        $module_badge = '';
+        $new_badge = '';
+        $module_link = '';
+
+        if ( $is_new ) {
+            $extra_class .= ' is-new';
+            $new_badge = '<span class="dps-debugging-new-badge">' . esc_html__( 'NOVO', 'dps-debugging-addon' ) . '</span>';
+        }
+
+        if ( $module && isset( $modules[ $module ] ) ) {
+            $mod = $modules[ $module ];
+            $extra_class .= ' has-module module-' . $module;
+            $module_badge = '<span class="dps-debugging-entry-module" style="background-color: ' . esc_attr( $mod['color'] ) . ';" title="' . esc_attr( $mod['label'] ) . '">';
+            $module_badge .= '<span class="dashicons dashicons-' . esc_attr( $mod['icon'] ) . '"></span>';
+            $module_badge .= '</span>';
+
+            $module_url = DPS_Debugging_Log_Viewer::get_module_admin_url( $module );
+            if ( $module_url ) {
+                $module_link = '<a href="' . esc_url( $module_url ) . '" class="dps-debugging-entry-action" title="' . esc_attr__( 'Ir para módulo', 'dps-debugging-addon' ) . '">';
+                $module_link .= '<span class="dashicons dashicons-external"></span>';
+                $module_link .= '</a>';
+            }
+        }
+
+        if ( $compact ) {
+            $base_html = $log_viewer->format_entry_compact( $entry );
+            // Injeta badges no HTML
+            $base_html = str_replace( 'dps-debugging-log-entry-compact', 'dps-debugging-log-entry-compact' . $extra_class, $base_html );
+            $base_html = str_replace( '<div class="dps-debugging-log-entry-summary">', '<div class="dps-debugging-log-entry-summary">' . $new_badge . $module_badge, $base_html );
+            if ( $module_link ) {
+                $base_html = str_replace( '</div></div></div>', $module_link . '</div></div></div>', $base_html );
+            }
+            return $base_html;
+        }
+
+        // Modo normal
+        $base_html = $this->format_log_entry( $entry, $log_viewer );
+        $base_html = str_replace( 'dps-debugging-log-entry"', 'dps-debugging-log-entry' . $extra_class . '"', $base_html );
+        $base_html = str_replace( '<div class="dps-debugging-log-entry-content">', '<div class="dps-debugging-log-entry-content">' . $new_badge . $module_badge, $base_html );
+        if ( $module_link ) {
+            $base_html = str_replace( '</div></div>', $module_link . '</div></div>', $base_html );
+        }
+        return $base_html;
+    }
+
+    /**
+     * Renderiza controles de paginação avançada.
+     *
+     * @since 1.4.0
+     *
+     * @param array  $result        Resultado da paginação.
+     * @param string $filter_type   Filtro de tipo atual.
+     * @param string $filter_module Filtro de módulo atual.
+     * @param string $period        Período atual.
+     * @param string $date_from     Data inicial.
+     * @param string $date_to       Data final.
+     * @param int    $per_page      Entradas por página.
+     * @param bool   $compact       Modo compacto.
+     * @param bool   $grouped       Modo agrupado.
+     */
+    private function render_pagination_advanced( $result, $filter_type, $filter_module, $period, $date_from, $date_to, $per_page, $compact, $grouped ) {
+        if ( $result['total'] === 0 ) {
+            return;
+        }
+
+        $base_args = [
+            'page'     => 'dps-debugging',
+            'tab'      => 'logs',
+            'per_page' => $per_page,
+        ];
+
+        if ( ! empty( $filter_type ) ) {
+            $base_args['type'] = $filter_type;
+        }
+        if ( ! empty( $filter_module ) ) {
+            $base_args['module'] = $filter_module;
+        }
+        if ( 'all' !== $period ) {
+            $base_args['period'] = $period;
+        }
+        if ( ! empty( $date_from ) ) {
+            $base_args['date_from'] = $date_from;
+        }
+        if ( ! empty( $date_to ) ) {
+            $base_args['date_to'] = $date_to;
+        }
+        if ( $compact ) {
+            $base_args['compact'] = '1';
+        }
+        if ( $grouped ) {
+            $base_args['grouped'] = '1';
+        }
+
+        $item_label = $grouped ? __( 'grupos', 'dps-debugging-addon' ) : __( 'entradas', 'dps-debugging-addon' );
+
+        ?>
+        <div class="dps-debugging-pagination">
+            <span class="dps-debugging-pagination-info">
+                <?php
+                printf(
+                    /* translators: %1$d: from, %2$d: to, %3$d: total, %4$s: item type (entries/groups) */
+                    esc_html__( 'Mostrando %1$d–%2$d de %3$d %4$s', 'dps-debugging-addon' ),
+                    $result['from'],
+                    $result['to'],
+                    $result['total'],
+                    $item_label
+                );
+                ?>
+            </span>
+
+            <div class="dps-debugging-pagination-nav">
+                <?php if ( $result['page'] > 1 ) : ?>
+                    <a href="<?php echo esc_url( add_query_arg( array_merge( $base_args, [ 'paged' => $result['page'] - 1 ] ), admin_url( 'admin.php' ) ) ); ?>" class="button">
+                        &laquo; <?php esc_html_e( 'Anterior', 'dps-debugging-addon' ); ?>
+                    </a>
+                <?php else : ?>
+                    <span class="button disabled">&laquo; <?php esc_html_e( 'Anterior', 'dps-debugging-addon' ); ?></span>
+                <?php endif; ?>
+
+                <span class="dps-debugging-pagination-pages">
+                    <?php
+                    printf(
+                        /* translators: %1$d: current page, %2$d: total pages */
+                        esc_html__( 'Página %1$d de %2$d', 'dps-debugging-addon' ),
+                        $result['page'],
+                        $result['total_pages']
+                    );
+                    ?>
+                </span>
+
+                <?php if ( $result['page'] < $result['total_pages'] ) : ?>
+                    <a href="<?php echo esc_url( add_query_arg( array_merge( $base_args, [ 'paged' => $result['page'] + 1 ] ), admin_url( 'admin.php' ) ) ); ?>" class="button">
+                        <?php esc_html_e( 'Próximo', 'dps-debugging-addon' ); ?> &raquo;
+                    </a>
+                <?php else : ?>
+                    <span class="button disabled"><?php esc_html_e( 'Próximo', 'dps-debugging-addon' ); ?> &raquo;</span>
+                <?php endif; ?>
+            </div>
         </div>
         <?php
     }
@@ -1237,6 +1646,12 @@ class DPS_Debugging_Addon {
      *
      * @since 1.3.0
      */
+    /**
+     * Renderiza a aba de Ferramentas.
+     *
+     * @since 1.3.0
+     * @since 1.4.0 Adicionadas opções de exportação CSV/JSON.
+     */
     private function render_tools_tab() {
         $log_viewer = new DPS_Debugging_Log_Viewer();
         $log_exists = $log_viewer->log_exists();
@@ -1252,14 +1667,52 @@ class DPS_Debugging_Addon {
 
                 <div class="dps-debugging-tool-row">
                     <div class="dps-debugging-tool-info">
-                        <strong><?php esc_html_e( 'Exportar Log', 'dps-debugging-addon' ); ?></strong>
-                        <p class="description"><?php esc_html_e( 'Baixe o arquivo de debug para análise offline ou compartilhamento.', 'dps-debugging-addon' ); ?></p>
+                        <strong><?php esc_html_e( 'Exportar Log (Texto)', 'dps-debugging-addon' ); ?></strong>
+                        <p class="description"><?php esc_html_e( 'Baixe o arquivo de debug completo em formato texto.', 'dps-debugging-addon' ); ?></p>
                     </div>
                     <div class="dps-debugging-tool-action">
                         <?php if ( $log_exists ) : ?>
-                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=tools&dps_debug_action=export' ), 'dps_debugging_export' ) ); ?>" class="button button-secondary">
+                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=tools&dps_debug_action=export&format=txt' ), 'dps_debugging_export' ) ); ?>" class="button button-secondary">
                                 <span class="dashicons dashicons-download"></span>
-                                <?php esc_html_e( 'Exportar Log', 'dps-debugging-addon' ); ?>
+                                <?php esc_html_e( 'Exportar TXT', 'dps-debugging-addon' ); ?>
+                            </a>
+                        <?php else : ?>
+                            <button class="button" disabled><?php esc_html_e( 'Sem log disponível', 'dps-debugging-addon' ); ?></button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="dps-debugging-tool-row">
+                    <div class="dps-debugging-tool-info">
+                        <strong><?php esc_html_e( 'Exportar Log (CSV)', 'dps-debugging-addon' ); ?></strong>
+                        <p class="description"><?php esc_html_e( 'Exporte os logs em formato CSV para análise em planilhas. Inclui data, tipo, módulo e mensagem.', 'dps-debugging-addon' ); ?></p>
+                    </div>
+                    <div class="dps-debugging-tool-action">
+                        <?php if ( $log_exists ) : ?>
+                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=tools&dps_debug_action=export&format=csv' ), 'dps_debugging_export' ) ); ?>" class="button button-secondary">
+                                <span class="dashicons dashicons-media-spreadsheet"></span>
+                                <?php esc_html_e( 'Exportar CSV', 'dps-debugging-addon' ); ?>
+                            </a>
+                        <?php else : ?>
+                            <button class="button" disabled><?php esc_html_e( 'Sem log disponível', 'dps-debugging-addon' ); ?></button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="dps-debugging-tool-row">
+                    <div class="dps-debugging-tool-info">
+                        <strong><?php esc_html_e( 'Exportar Log (JSON)', 'dps-debugging-addon' ); ?></strong>
+                        <p class="description"><?php esc_html_e( 'Exporte os logs em formato JSON estruturado para integração com outras ferramentas.', 'dps-debugging-addon' ); ?></p>
+                    </div>
+                    <div class="dps-debugging-tool-action">
+                        <?php if ( $log_exists ) : ?>
+                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=dps-debugging&tab=tools&dps_debug_action=export&format=json' ), 'dps_debugging_export' ) ); ?>" class="button button-secondary">
+                                <span class="dashicons dashicons-editor-code"></span>
+                                <?php esc_html_e( 'Exportar JSON', 'dps-debugging-addon' ); ?>
                             </a>
                         <?php else : ?>
                             <button class="button" disabled><?php esc_html_e( 'Sem log disponível', 'dps-debugging-addon' ); ?></button>

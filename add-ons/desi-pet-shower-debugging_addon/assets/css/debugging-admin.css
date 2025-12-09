@@ -1111,3 +1111,343 @@
         text-align: center;
     }
 }
+
+
+/* ==========================================================================
+   FASE 3: Recursos Avançados
+   ========================================================================== */
+
+/* Aviso de novos erros */
+.dps-debugging-new-errors-notice {
+    border-left-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.dps-debugging-new-errors-notice .dashicons {
+    color: #2271b1;
+    margin-right: 5px;
+}
+
+/* Estatísticas por módulo */
+.dps-debugging-module-stats {
+    margin-bottom: 20px;
+}
+
+.dps-debugging-module-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dps-debugging-module-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-left-width: 4px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #1d2327;
+    transition: all 0.2s ease;
+}
+
+.dps-debugging-module-card:hover {
+    background: #f6f7f7;
+    transform: translateY(-1px);
+}
+
+.dps-debugging-module-card.is-active {
+    background: #f0f6fc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dps-debugging-module-card .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.dps-debugging-module-label {
+    font-weight: 500;
+}
+
+.dps-debugging-module-count {
+    background: #e5e7eb;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Linha de filtros secundária */
+.dps-debugging-filters-row-secondary {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-debugging-filter-actions {
+    margin-left: auto;
+}
+
+/* Badge de novo */
+.dps-debugging-new-badge {
+    display: inline-block;
+    background: #2271b1;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Badge de módulo em entradas */
+.dps-debugging-entry-module {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    margin-right: 8px;
+    color: #fff;
+}
+
+.dps-debugging-entry-module .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Link de ação para módulo */
+.dps-debugging-entry-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: auto;
+    color: #646970;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.dps-debugging-log-entry:hover .dps-debugging-entry-action,
+.dps-debugging-log-entry-compact:hover .dps-debugging-entry-action {
+    opacity: 1;
+}
+
+.dps-debugging-entry-action:hover {
+    color: #2271b1;
+}
+
+/* Destaque de entrada nova */
+.dps-debugging-log-entry.is-new,
+.dps-debugging-log-entry-compact.is-new {
+    border-left: 4px solid #2271b1;
+    background: rgba(34, 113, 177, 0.05);
+}
+
+/* ==========================================================================
+   Grupos de Erros Recorrentes
+   ========================================================================== */
+
+.dps-debugging-log-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dps-debugging-log-group {
+    background: #2d2d2d;
+    border-radius: 6px;
+    padding: 15px;
+    border-left: 4px solid #646970;
+}
+
+.dps-debugging-log-group-fatal {
+    border-left-color: #dc3232;
+}
+
+.dps-debugging-log-group-warning {
+    border-left-color: #ffb900;
+}
+
+.dps-debugging-log-group-notice {
+    border-left-color: #72aee6;
+}
+
+.dps-debugging-log-group-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dps-debugging-group-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-debugging-group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.dps-debugging-group-type {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dps-debugging-group-module {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dps-debugging-group-module .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dps-debugging-group-times {
+    display: flex;
+    gap: 15px;
+    color: #a1a1a1;
+    font-size: 12px;
+}
+
+.dps-debugging-group-summary {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.dps-debugging-group-summary code {
+    background: transparent;
+    color: #e5e5e5;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.dps-debugging-group-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.dps-debugging-group-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-debugging-group-action .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dps-debugging-group-expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-debugging-group-expand .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+}
+
+.dps-debugging-group-expand.is-expanded .dashicons {
+    transform: rotate(180deg);
+}
+
+/* Entradas dentro do grupo */
+.dps-debugging-group-entries {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dps-debugging-group-entry {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.dps-debugging-group-entry pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    color: #a1a1a1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.dps-debugging-group-more {
+    color: #72aee6;
+    font-size: 12px;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Responsividade Adicional para Fase 3
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .dps-debugging-module-cards {
+        flex-direction: column;
+    }
+
+    .dps-debugging-module-card {
+        width: 100%;
+    }
+
+    .dps-debugging-group-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dps-debugging-group-meta {
+        flex-wrap: wrap;
+    }
+
+    .dps-debugging-group-actions {
+        flex-wrap: wrap;
+    }
+}

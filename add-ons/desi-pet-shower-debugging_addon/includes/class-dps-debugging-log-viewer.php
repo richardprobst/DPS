@@ -969,4 +969,555 @@ class DPS_Debugging_Log_Viewer {
 
         return $content;
     }
+
+    // ==========================================================================
+    // FASE 3: Recursos Avançados
+    // ==========================================================================
+
+    /**
+     * Módulos conhecidos do sistema DPS para detecção de origem.
+     *
+     * @since 1.4.0
+     * @var array
+     */
+    public static $known_modules = [
+        'agenda'       => [
+            'label'    => 'Agenda',
+            'patterns' => [ 'agenda', 'DPS_Agenda', 'dps-agenda', 'appointment', 'scheduling' ],
+            'color'    => '#2271b1',
+            'icon'     => 'calendar-alt',
+        ],
+        'portal'       => [
+            'label'    => 'Portal do Cliente',
+            'patterns' => [ 'portal', 'DPS_Client_Portal', 'dps-client-portal', 'client-portal' ],
+            'color'    => '#10b981',
+            'icon'     => 'admin-users',
+        ],
+        'ai'           => [
+            'label'    => 'IA',
+            'patterns' => [ 'ai', 'DPS_AI', 'dps-ai', 'openai', 'gpt', 'chatbot' ],
+            'color'    => '#8b5cf6',
+            'icon'     => 'admin-generic',
+        ],
+        'finance'      => [
+            'label'    => 'Financeiro',
+            'patterns' => [ 'finance', 'DPS_Finance', 'dps-finance', 'transacao', 'payment' ],
+            'color'    => '#f59e0b',
+            'icon'     => 'money-alt',
+        ],
+        'payment'      => [
+            'label'    => 'Pagamentos',
+            'patterns' => [ 'mercadopago', 'mercado_pago', 'payment', 'DPS_Payment', 'pix', 'boleto' ],
+            'color'    => '#00b1ea',
+            'icon'     => 'cart',
+        ],
+        'registration' => [
+            'label'    => 'Cadastro',
+            'patterns' => [ 'registration', 'DPS_Registration', 'dps-registration', 'cadastro' ],
+            'color'    => '#ec4899',
+            'icon'     => 'id-alt',
+        ],
+        'communications' => [
+            'label'    => 'Comunicações',
+            'patterns' => [ 'communications', 'DPS_Communications', 'email', 'sms', 'push', 'whatsapp' ],
+            'color'    => '#06b6d4',
+            'icon'     => 'email-alt',
+        ],
+        'loyalty'      => [
+            'label'    => 'Fidelidade',
+            'patterns' => [ 'loyalty', 'DPS_Loyalty', 'fidelidade', 'points', 'pontos' ],
+            'color'    => '#f97316',
+            'icon'     => 'star-filled',
+        ],
+        'wordpress'    => [
+            'label'    => 'WordPress Core',
+            'patterns' => [ 'wp-includes', 'wp-admin', 'wp-content/plugins/', 'wp-content/themes/' ],
+            'color'    => '#21759b',
+            'icon'     => 'wordpress',
+        ],
+    ];
+
+    /**
+     * Retorna os módulos conhecidos com labels traduzidos.
+     *
+     * @since 1.4.0
+     *
+     * @return array Array de módulos.
+     */
+    public static function get_known_modules() {
+        $modules = self::$known_modules;
+
+        // Traduz labels
+        $translations = [
+            'agenda'         => __( 'Agenda', 'dps-debugging-addon' ),
+            'portal'         => __( 'Portal do Cliente', 'dps-debugging-addon' ),
+            'ai'             => __( 'IA', 'dps-debugging-addon' ),
+            'finance'        => __( 'Financeiro', 'dps-debugging-addon' ),
+            'payment'        => __( 'Pagamentos', 'dps-debugging-addon' ),
+            'registration'   => __( 'Cadastro', 'dps-debugging-addon' ),
+            'communications' => __( 'Comunicações', 'dps-debugging-addon' ),
+            'loyalty'        => __( 'Fidelidade', 'dps-debugging-addon' ),
+            'wordpress'      => __( 'WordPress Core', 'dps-debugging-addon' ),
+        ];
+
+        foreach ( $translations as $key => $label ) {
+            if ( isset( $modules[ $key ] ) ) {
+                $modules[ $key ]['label'] = $label;
+            }
+        }
+
+        return $modules;
+    }
+
+    /**
+     * Detecta o módulo/origem de uma entrada de log.
+     *
+     * @since 1.4.0
+     *
+     * @param string $entry Entrada de log.
+     * @return string|null Chave do módulo ou null se não identificado.
+     */
+    public function detect_entry_module( $entry ) {
+        $entry_lower = strtolower( $entry );
+
+        foreach ( self::$known_modules as $module_key => $module_data ) {
+            foreach ( $module_data['patterns'] as $pattern ) {
+                if ( false !== stripos( $entry, $pattern ) ) {
+                    return $module_key;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Constrói a assinatura (hash) de uma entrada para agrupamento.
+     *
+     * Remove timestamps, IDs dinâmicos e outros dados voláteis para
+     * identificar erros "iguais" que devem ser agrupados.
+     *
+     * @since 1.4.0
+     *
+     * @param string $entry Entrada de log.
+     * @return string Hash SHA256 da assinatura.
+     */
+    public function build_entry_signature( $entry ) {
+        // Remove timestamp do início [DD-Mon-YYYY HH:MM:SS UTC]
+        $normalized = preg_replace( '/^\[[^\]]+\]\s*/', '', $entry );
+
+        // Remove números que parecem ser IDs dinâmicos (ex: ID: 12345)
+        $normalized = preg_replace( '/\b(ID|id|Id):\s*\d+/', 'ID:X', $normalized );
+
+        // Remove timestamps inline (2024-12-09 12:00:00)
+        $normalized = preg_replace( '/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/', 'TIMESTAMP', $normalized );
+
+        // Remove números de linha que podem variar
+        $normalized = preg_replace( '/:(\d+)$/', ':LINE', $normalized );
+
+        // Remove hashes e tokens aleatórios
+        $normalized = preg_replace( '/[a-f0-9]{32,}/', 'HASH', $normalized );
+
+        // Remove stack trace lines (mantém apenas primeira linha para assinatura)
+        $lines = explode( "\n", $normalized );
+        $first_line = isset( $lines[0] ) ? trim( $lines[0] ) : $normalized;
+
+        // Normaliza espaços múltiplos
+        $first_line = preg_replace( '/\s+/', ' ', $first_line );
+
+        return hash( 'sha256', $first_line );
+    }
+
+    /**
+     * Agrupa entradas por assinatura (erros recorrentes).
+     *
+     * @since 1.4.0
+     *
+     * @param array $entries Entradas a agrupar.
+     * @return array Array de grupos, cada um com 'entries', 'count', 'first', 'last', 'signature'.
+     */
+    public function group_entries_by_signature( $entries ) {
+        $groups = [];
+
+        foreach ( $entries as $entry ) {
+            $signature = $this->build_entry_signature( $entry );
+
+            if ( ! isset( $groups[ $signature ] ) ) {
+                $groups[ $signature ] = [
+                    'signature'      => $signature,
+                    'entries'        => [],
+                    'count'          => 0,
+                    'first_entry'    => $entry,
+                    'last_entry'     => $entry,
+                    'first_time'     => $this->extract_entry_timestamp( $entry ),
+                    'last_time'      => $this->extract_entry_timestamp( $entry ),
+                    'type'           => $this->detect_entry_type( $entry ),
+                    'module'         => $this->detect_entry_module( $entry ),
+                    'representative' => $entry, // Entrada representativa para exibição
+                ];
+            }
+
+            $groups[ $signature ]['entries'][] = $entry;
+            $groups[ $signature ]['count']++;
+            $groups[ $signature ]['last_entry'] = $entry;
+
+            $entry_time = $this->extract_entry_timestamp( $entry );
+            if ( null !== $entry_time ) {
+                if ( null === $groups[ $signature ]['first_time'] || $entry_time < $groups[ $signature ]['first_time'] ) {
+                    $groups[ $signature ]['first_time'] = $entry_time;
+                    $groups[ $signature ]['first_entry'] = $entry;
+                }
+                if ( null === $groups[ $signature ]['last_time'] || $entry_time > $groups[ $signature ]['last_time'] ) {
+                    $groups[ $signature ]['last_time'] = $entry_time;
+                    $groups[ $signature ]['last_entry'] = $entry;
+                }
+            }
+        }
+
+        // Ordena por última ocorrência (mais recentes primeiro)
+        uasort( $groups, function( $a, $b ) {
+            if ( null === $a['last_time'] && null === $b['last_time'] ) {
+                return 0;
+            }
+            if ( null === $a['last_time'] ) {
+                return 1;
+            }
+            if ( null === $b['last_time'] ) {
+                return -1;
+            }
+            return $b['last_time'] <=> $a['last_time'];
+        } );
+
+        return array_values( $groups );
+    }
+
+    /**
+     * Filtra entradas por módulo/origem.
+     *
+     * @since 1.4.0
+     *
+     * @param array  $entries Entradas a filtrar.
+     * @param string $module  Chave do módulo.
+     * @return array Entradas filtradas.
+     */
+    public function filter_by_module( $entries, $module ) {
+        if ( empty( $module ) || 'all' === $module ) {
+            return $entries;
+        }
+
+        return array_filter( $entries, function( $entry ) use ( $module ) {
+            return $this->detect_entry_module( $entry ) === $module;
+        } );
+    }
+
+    /**
+     * Conta ocorrências por módulo.
+     *
+     * @since 1.4.0
+     *
+     * @param array $entries Entradas a analisar.
+     * @return array Array com contagem por módulo.
+     */
+    public function count_by_module( $entries ) {
+        $counts = [];
+
+        foreach ( self::$known_modules as $module_key => $module_data ) {
+            $counts[ $module_key ] = 0;
+        }
+        $counts['other'] = 0;
+
+        foreach ( $entries as $entry ) {
+            $module = $this->detect_entry_module( $entry );
+            if ( null !== $module && isset( $counts[ $module ] ) ) {
+                $counts[ $module ]++;
+            } else {
+                $counts['other']++;
+            }
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Obtém entradas paginadas com suporte a agrupamento e filtro por módulo.
+     *
+     * @since 1.4.0
+     *
+     * @param array $args {
+     *     Argumentos de filtragem e paginação.
+     *
+     *     @type string $filter_type  Tipo de erro para filtrar.
+     *     @type string $filter_module Módulo para filtrar.
+     *     @type string $period       Período de data.
+     *     @type string $date_from    Data inicial para filtro custom.
+     *     @type string $date_to      Data final para filtro custom.
+     *     @type int    $page         Página atual.
+     *     @type int    $per_page     Entradas por página.
+     *     @type bool   $compact      Modo compacto.
+     *     @type bool   $grouped      Agrupar erros recorrentes.
+     * }
+     * @return array Resultado com entradas/grupos e metadados.
+     */
+    public function get_advanced_entries( $args = [] ) {
+        $defaults = [
+            'filter_type'   => '',
+            'filter_module' => '',
+            'period'        => 'all',
+            'date_from'     => '',
+            'date_to'       => '',
+            'page'          => 1,
+            'per_page'      => 100,
+            'compact'       => false,
+            'grouped'       => false,
+        ];
+        $args = wp_parse_args( $args, $defaults );
+
+        if ( ! $this->log_exists() ) {
+            return [
+                'entries'      => [],
+                'groups'       => [],
+                'total'        => 0,
+                'page'         => 1,
+                'per_page'     => $args['per_page'],
+                'total_pages'  => 0,
+                'from'         => 0,
+                'to'           => 0,
+                'module_stats' => [],
+                'grouped'      => $args['grouped'],
+            ];
+        }
+
+        // Obtém todas as entradas
+        $entries = $this->get_parsed_entries();
+
+        // Aplica filtro por tipo
+        if ( ! empty( $args['filter_type'] ) ) {
+            $filter_type = $args['filter_type'];
+            $entries = array_filter( $entries, function( $entry ) use ( $filter_type ) {
+                return $this->detect_entry_type( $entry ) === $filter_type;
+            } );
+        }
+
+        // Aplica filtro por período/data
+        if ( 'all' !== $args['period'] ) {
+            $entries = $this->filter_by_period( $entries, $args['period'], $args['date_from'], $args['date_to'] );
+        }
+
+        // Aplica filtro por módulo
+        if ( ! empty( $args['filter_module'] ) ) {
+            $entries = $this->filter_by_module( $entries, $args['filter_module'] );
+        }
+
+        // Reindexar após filtros
+        $entries = array_values( $entries );
+
+        // Estatísticas por módulo (antes de agrupar)
+        $module_stats = $this->count_by_module( $entries );
+
+        // Inverte para mostrar mais recentes primeiro
+        $entries = array_reverse( $entries );
+
+        // Agrupamento
+        $groups = [];
+        $items_to_paginate = $entries;
+
+        if ( $args['grouped'] ) {
+            $groups = $this->group_entries_by_signature( $entries );
+            $items_to_paginate = $groups;
+        }
+
+        // Calcula paginação
+        $total       = count( $items_to_paginate );
+        $page        = max( 1, (int) $args['page'] );
+        $per_page    = (int) $args['per_page'];
+        $total_pages = $total > 0 ? ceil( $total / $per_page ) : 1;
+        $page        = min( $page, max( 1, $total_pages ) );
+
+        $offset = ( $page - 1 ) * $per_page;
+        $from   = $total > 0 ? $offset + 1 : 0;
+        $to     = min( $offset + $per_page, $total );
+
+        // Aplica paginação
+        $paginated = array_slice( $items_to_paginate, $offset, $per_page );
+
+        return [
+            'entries'      => $args['grouped'] ? [] : $paginated,
+            'groups'       => $args['grouped'] ? $paginated : [],
+            'total'        => $total,
+            'page'         => $page,
+            'per_page'     => $per_page,
+            'total_pages'  => (int) $total_pages,
+            'from'         => $from,
+            'to'           => $to,
+            'module_stats' => $module_stats,
+            'grouped'      => $args['grouped'],
+        ];
+    }
+
+    /**
+     * Exporta entradas para CSV.
+     *
+     * @since 1.4.0
+     *
+     * @param array $entries Entradas a exportar.
+     * @return string Conteúdo CSV.
+     */
+    public function export_to_csv( $entries ) {
+        $output = fopen( 'php://temp', 'r+' );
+
+        // Cabeçalho
+        fputcsv( $output, [
+            __( 'Data/Hora', 'dps-debugging-addon' ),
+            __( 'Tipo', 'dps-debugging-addon' ),
+            __( 'Módulo', 'dps-debugging-addon' ),
+            __( 'Mensagem', 'dps-debugging-addon' ),
+        ] );
+
+        foreach ( $entries as $entry ) {
+            $timestamp = $this->extract_entry_timestamp( $entry );
+            $datetime = $timestamp ? wp_date( 'Y-m-d H:i:s', $timestamp ) : '';
+            $type = $this->detect_entry_type( $entry ) ?: 'other';
+            $module = $this->detect_entry_module( $entry ) ?: 'other';
+
+            // Extrai apenas a primeira linha como mensagem
+            $message = $this->get_entry_summary( $entry );
+            // Remove timestamp do início
+            $message = preg_replace( '/^\[[^\]]+\]\s*/', '', $message );
+
+            fputcsv( $output, [ $datetime, $type, $module, $message ] );
+        }
+
+        rewind( $output );
+        $csv = stream_get_contents( $output );
+        fclose( $output );
+
+        return $csv;
+    }
+
+    /**
+     * Exporta entradas para JSON.
+     *
+     * @since 1.4.0
+     *
+     * @param array $entries Entradas a exportar.
+     * @return string Conteúdo JSON.
+     */
+    public function export_to_json( $entries ) {
+        $data = [];
+
+        foreach ( $entries as $entry ) {
+            $timestamp = $this->extract_entry_timestamp( $entry );
+
+            $data[] = [
+                'timestamp'      => $timestamp,
+                'datetime'       => $timestamp ? wp_date( 'c', $timestamp ) : null,
+                'type'           => $this->detect_entry_type( $entry ),
+                'module'         => $this->detect_entry_module( $entry ),
+                'message'        => $this->get_entry_summary( $entry ),
+                'full_content'   => $entry,
+                'has_stacktrace' => $this->entry_has_details( $entry ),
+            ];
+        }
+
+        return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+    }
+
+    /**
+     * Obtém timestamp da última visita do usuário atual à tela de debug.
+     *
+     * @since 1.4.0
+     *
+     * @return int|null Timestamp ou null se nunca visitou.
+     */
+    public static function get_last_visit_timestamp() {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return null;
+        }
+
+        $timestamp = get_user_meta( $user_id, '_dps_debugging_last_visit', true );
+        return $timestamp ? (int) $timestamp : null;
+    }
+
+    /**
+     * Registra a visita atual do usuário à tela de debug.
+     *
+     * @since 1.4.0
+     */
+    public static function record_visit() {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return;
+        }
+
+        update_user_meta( $user_id, '_dps_debugging_last_visit', current_time( 'timestamp' ) );
+    }
+
+    /**
+     * Conta entradas novas desde a última visita do usuário.
+     *
+     * @since 1.4.0
+     *
+     * @param array $entries Entradas a verificar.
+     * @return int Número de entradas novas.
+     */
+    public function count_new_since_last_visit( $entries ) {
+        $last_visit = self::get_last_visit_timestamp();
+
+        if ( null === $last_visit ) {
+            return 0; // Primeira visita, não destaca nada
+        }
+
+        $count = 0;
+        foreach ( $entries as $entry ) {
+            $entry_time = $this->extract_entry_timestamp( $entry );
+            if ( null !== $entry_time && $entry_time > $last_visit ) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Verifica se uma entrada é "nova" desde a última visita.
+     *
+     * @since 1.4.0
+     *
+     * @param string $entry Entrada a verificar.
+     * @return bool True se é nova.
+     */
+    public function is_entry_new( $entry ) {
+        $last_visit = self::get_last_visit_timestamp();
+
+        if ( null === $last_visit ) {
+            return false;
+        }
+
+        $entry_time = $this->extract_entry_timestamp( $entry );
+        return null !== $entry_time && $entry_time > $last_visit;
+    }
+
+    /**
+     * Gera link para o módulo relacionado ao erro, se aplicável.
+     *
+     * @since 1.4.0
+     *
+     * @param string $module Chave do módulo.
+     * @return string|null URL do módulo ou null.
+     */
+    public static function get_module_admin_url( $module ) {
+        $urls = [
+            'agenda'         => admin_url( 'admin.php?page=dps-agenda-hub' ),
+            'portal'         => admin_url( 'admin.php?page=dps-client-portal' ),
+            'ai'             => admin_url( 'admin.php?page=dps-ai-hub' ),
+            'finance'        => admin_url( 'admin.php?page=dps-finance' ),
+            'payment'        => admin_url( 'admin.php?page=dps-integrations-hub&tab=payment' ),
+            'registration'   => admin_url( 'admin.php?page=dps-tools-hub&tab=registration' ),
+            'communications' => admin_url( 'admin.php?page=dps-integrations-hub&tab=communications' ),
+            'loyalty'        => admin_url( 'admin.php?page=dps-loyalty-hub' ),
+        ];
+
+        return isset( $urls[ $module ] ) ? $urls[ $module ] : null;
+    }
 }
