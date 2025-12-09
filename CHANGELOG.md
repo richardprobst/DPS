@@ -83,6 +83,12 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Finance Add-on (v1.6.0) - FASE 4: Extras Avançados (Selecionados)**
+
+- **F4.2 - Lembretes automáticos de pagamento**: Sistema completo de lembretes configurável via painel admin. Checkbox para habilitar/desabilitar lembretes. Configuração de dias antes do vencimento (padrão: 1 dia) e dias após vencimento (padrão: 1 dia). Mensagens customizáveis com placeholders ({cliente}, {pet}, {valor}, {link}). Evento WP-Cron diário (`dps_finance_process_payment_reminders`) processa lembretes automaticamente. Sistema de flags via transients impede envio duplicado de lembretes (janela de 7 dias). Log de execução em error_log para debug. UI acessível via "⚙️ Configurações Avançadas" na aba Financeiro.
+- **F4.4 - Auditoria de alterações financeiras**: Nova tabela `dps_finance_audit_log` registra todas as mudanças em transações. Captura mudanças de status (em_aberto → pago, etc.), criações manuais de transações e adições de pagamentos parciais. Registra user_id, IP, timestamps e valores before/after. Índices em trans_id, created_at e user_id para performance. Tela de visualização com filtros por transação ID e data em `admin.php?page=dps-finance-audit`. Paginação (20 registros por página). Labels traduzidas para tipos de ação. Sistema não bloqueia operações principais em caso de falha (log silencioso).
+- **F4.5 - API REST de consulta financeira (read-only)**: Namespace `dps-finance/v1` com 3 endpoints. `GET /transactions` lista transações com filtros (status, date_from, date_to, customer, paginação). `GET /transactions/{id}` retorna detalhes de transação específica. `GET /summary` retorna resumo financeiro por período (current_month, last_month, custom). Todos os endpoints requerem autenticação e capability `manage_options`. Validação robusta de parâmetros (status enum, datas, limites de paginação). Headers X-WP-Total e X-WP-TotalPages em respostas paginadas. Formatação monetária via DPS_Money_Helper. Estrutura WP_REST_Response padrão.
+
 **Finance Add-on (v1.5.0) - FASE 3: Relatórios & Visão Gerencial**
 
 - **F3.1 - Gráfico de evolução mensal aprimorado**: Gráfico convertido de barras para linhas com área preenchida, proporcionando melhor visualização de tendências. Exibe receitas (verde) e despesas (vermelho) nos últimos 6 meses (configurável via constante `DPS_FINANCE_CHART_MONTHS`). Inclui título "Evolução Financeira" e tooltips formatados em R$.

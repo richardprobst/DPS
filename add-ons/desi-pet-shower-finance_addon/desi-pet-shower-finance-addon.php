@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
- * Version:           1.5.0
+ * Version:           1.6.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.5.0' );
+    define( 'DPS_FINANCE_VERSION', '1.6.0' );
 }
 
 // Constante para limite de meses no gráfico financeiro
@@ -68,6 +68,11 @@ if ( ! defined( 'DPS_FINANCE_CHART_MONTHS' ) ) {
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-revenue-query.php';
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-api.php';
 require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-settings.php';
+
+// FASE 4: Carrega classes de recursos avançados
+require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-audit.php';
+require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-reminders.php';
+require_once DPS_FINANCE_PLUGIN_DIR . 'includes/class-dps-finance-rest.php';
 
 // Funções auxiliares globais para conversão monetária
 // DEPRECATED: Use DPS_Money_Helper do núcleo em vez dessas funções.
@@ -434,6 +439,33 @@ class DPS_Finance_Addon {
                 }
             }
         }
+        
+        // ========== 4. FASE 4 - F4.4: Criar tabela de auditoria ==========
+        $audit_table = $wpdb->prefix . 'dps_finance_audit_log';
+        $audit_version = get_option( 'dps_finance_audit_db_version', '0' );
+        
+        if ( version_compare( $audit_version, '1.0.0', '<' ) ) {
+            $sql = "CREATE TABLE $audit_table (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                trans_id bigint(20) NOT NULL,
+                user_id bigint(20) DEFAULT 0,
+                action varchar(50) NOT NULL,
+                from_status varchar(50) DEFAULT NULL,
+                to_status varchar(50) DEFAULT NULL,
+                from_value varchar(50) DEFAULT NULL,
+                to_value varchar(50) DEFAULT NULL,
+                meta_info text DEFAULT NULL,
+                ip_address varchar(50) DEFAULT 'unknown',
+                created_at datetime NOT NULL,
+                PRIMARY KEY  (id),
+                KEY trans_id (trans_id),
+                KEY created_at (created_at),
+                KEY user_id (user_id)
+            ) $charset_collate;";
+            
+            dbDelta( $sql );
+            update_option( 'dps_finance_audit_db_version', '1.0.0' );
+        }
     }
 
     /**
@@ -673,6 +705,18 @@ class DPS_Finance_Addon {
                     'valor'    => $value,
                     'metodo'   => $method,
                 ], [ '%d','%s','%f','%s' ] );
+                
+                // F4.4: FASE 4 - Registra auditoria de pagamento parcial
+                if ( class_exists( 'DPS_Finance_Audit' ) ) {
+                    DPS_Finance_Audit::log_event( $trans_id, 'partial_add', [
+                        'to_value'  => DPS_Money_Helper::format_to_brazilian( $value_cents ),
+                        'meta_info' => [
+                            'method' => $method,
+                            'date'   => $date,
+                        ],
+                    ] );
+                }
+                
                 // Calcula a soma de parcelas pagas
                 $paid_sum       = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
                 $paid_sum_cents = $paid_sum ? (int) round( (float) $paid_sum * 100 ) : 0;
@@ -740,6 +784,22 @@ class DPS_Finance_Addon {
                 'status'        => $status,
                 'descricao'     => $desc,
             ] );
+            
+            $new_trans_id = $wpdb->insert_id;
+            
+            // F4.4: FASE 4 - Registra auditoria de criação manual
+            if ( $new_trans_id && class_exists( 'DPS_Finance_Audit' ) ) {
+                DPS_Finance_Audit::log_event( $new_trans_id, 'manual_create', [
+                    'to_status' => $status,
+                    'to_value'  => DPS_Money_Helper::format_to_brazilian( $value_cent ),
+                    'meta_info' => [
+                        'category'   => $category,
+                        'type'       => $type,
+                        'cliente_id' => $client_id,
+                    ],
+                ] );
+            }
+            
             // Redireciona para aba finance com feedback
             $base_url = $this->get_current_url();
             wp_redirect( add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'saved' ], $base_url ) );
@@ -773,7 +833,19 @@ class DPS_Finance_Addon {
             
             $id     = intval( $_POST['trans_id'] );
             $status = isset( $_POST['trans_status'] ) ? sanitize_text_field( wp_unslash( $_POST['trans_status'] ) ) : 'em_aberto';
+            
+            // F4.4: FASE 4 - Busca status anterior para auditoria
+            $old_status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM $table WHERE id = %d", $id ) );
+            
             $wpdb->update( $table, [ 'status' => $status ], [ 'id' => $id ] );
+            
+            // F4.4: FASE 4 - Registra auditoria de mudança de status
+            if ( $old_status && $old_status !== $status && class_exists( 'DPS_Finance_Audit' ) ) {
+                DPS_Finance_Audit::log_event( $id, 'status_change', [
+                    'from_status' => $old_status,
+                    'to_status'   => $status,
+                ] );
+            }
 
             // Se for marcado como recorrente e status foi alterado para pago, cria nova transação recorrente para 30 dias depois
             $recurring_flag = get_option( 'dps_fin_recurring_' . $id );
@@ -819,6 +891,21 @@ class DPS_Finance_Addon {
         }
 
         // Alternar recorrência removido: funcionalidade de recorrente foi descontinuada
+        
+        // F4.2: FASE 4 - Salvar configurações de lembretes
+        if ( isset( $_POST['dps_finance_save_reminder_settings'] ) && check_admin_referer( 'dps_finance_settings', 'dps_finance_settings_nonce' ) ) {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
+            }
+            
+            if ( class_exists( 'DPS_Finance_Reminders' ) ) {
+                DPS_Finance_Reminders::save_settings( $_POST );
+            }
+            
+            $base_url = $this->get_current_url();
+            wp_redirect( add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'settings_saved' ], $base_url ) );
+            exit;
+        }
 
         /**
          * Envio ou exclusão de documentos financeiros
@@ -1593,6 +1680,34 @@ class DPS_Finance_Addon {
         
         // F3.5: FASE 3 - Top 10 clientes por receita (usa período filtrado ou mês atual)
         $this->render_top_clients( $start_date, $end_date );
+        
+        // F4.2: FASE 4 - Configurações de Lembretes (se usuário solicitar via parâmetro)
+        if ( isset( $_GET['show_settings'] ) && $_GET['show_settings'] === '1' ) {
+            echo '<form method="post" action="">';
+            wp_nonce_field( 'dps_finance_settings', 'dps_finance_settings_nonce' );
+            echo '<input type="hidden" name="dps_finance_save_reminder_settings" value="1">';
+            
+            if ( class_exists( 'DPS_Finance_Reminders' ) ) {
+                DPS_Finance_Reminders::render_settings_section();
+            }
+            
+            echo '<p class="submit"><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Configurações', 'dps-finance-addon' ) . '</button></p>';
+            echo '</form>';
+            
+            // Link para visualizar auditoria
+            if ( class_exists( 'DPS_Finance_Audit' ) ) {
+                echo '<div style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-left: 4px solid #0ea5e9;">';
+                echo '<h4>' . esc_html__( 'Auditoria de Alterações', 'dps-finance-addon' ) . '</h4>';
+                echo '<p>' . esc_html__( 'Veja o histórico completo de todas as alterações nas transações financeiras.', 'dps-finance-addon' ) . '</p>';
+                echo '<a href="' . esc_url( admin_url( 'admin.php?page=dps-finance-audit' ) ) . '" class="button">' . esc_html__( 'Ver Histórico de Auditoria', 'dps-finance-addon' ) . '</a>';
+                echo '</div>';
+            }
+        } else {
+            // Link para mostrar configurações
+            echo '<div style="margin: 20px 0;">';
+            echo '<a href="' . esc_url( add_query_arg( 'show_settings', '1' ) . '#financeiro' ) . '" class="button">' . esc_html__( '⚙️ Configurações Avançadas', 'dps-finance-addon' ) . '</a>';
+            echo '</div>';
+        }
 
         // Se um ID de transação foi passado via query para registrar pagamento parcial, exibe formulário especializado
         if ( isset( $_GET['register_partial'] ) && is_numeric( $_GET['register_partial'] ) ) {
