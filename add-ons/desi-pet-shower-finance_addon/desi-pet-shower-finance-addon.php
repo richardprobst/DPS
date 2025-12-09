@@ -503,6 +503,29 @@ class DPS_Finance_Addon {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
 
+        // F3.3: FASE 3 - Exportação PDF de relatórios
+        if ( isset( $_GET['dps_finance_export_pdf'] ) ) {
+            $report_type = sanitize_text_field( wp_unslash( $_GET['dps_finance_export_pdf'] ) );
+            
+            // Valida nonce
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_pdf' ) ) {
+                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
+            }
+            
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para exportar relatórios.', 'dps-finance-addon' ) );
+            }
+            
+            if ( $report_type === 'dre' ) {
+                $this->export_dre_pdf();
+            } elseif ( $report_type === 'monthly_summary' ) {
+                $this->export_monthly_summary_pdf();
+            }
+            
+            exit;
+        }
+
         // Exportação CSV - processa antes das outras ações
         if ( isset( $_GET['dps_fin_export'] ) && '1' === $_GET['dps_fin_export'] ) {
             $this->export_transactions_csv();
@@ -1732,6 +1755,24 @@ class DPS_Finance_Addon {
         unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'], $clear_params['fin_search_client'] );
         $clear_link = add_query_arg( $clear_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
+        
+        // F3.3: FASE 3 - Botões de exportação PDF
+        $nonce = wp_create_nonce( 'dps_export_pdf' );
+        
+        // Link para exportar DRE em PDF
+        $dre_params = $_GET;
+        $dre_params['dps_finance_export_pdf'] = 'dre';
+        $dre_params['_wpnonce'] = $nonce;
+        $dre_link = add_query_arg( $dre_params, $this->get_current_url() );
+        echo '<a href="' . esc_url( $dre_link ) . '" class="button" target="_blank" title="' . esc_attr__( 'Abre em nova aba para imprimir/salvar como PDF', 'dps-finance-addon' ) . '">📄 ' . esc_html__( 'Exportar DRE (PDF)', 'dps-finance-addon' ) . '</a>';
+        
+        // Link para exportar Resumo Mensal em PDF
+        $summary_params = $_GET;
+        $summary_params['dps_finance_export_pdf'] = 'monthly_summary';
+        $summary_params['_wpnonce'] = $nonce;
+        $summary_link = add_query_arg( $summary_params, $this->get_current_url() );
+        echo '<a href="' . esc_url( $summary_link ) . '" class="button" target="_blank" title="' . esc_attr__( 'Abre em nova aba para imprimir/salvar como PDF', 'dps-finance-addon' ) . '">📊 ' . esc_html__( 'Exportar Resumo (PDF)', 'dps-finance-addon' ) . '</a>';
+        
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
@@ -2918,6 +2959,385 @@ class DPS_Finance_Addon {
         echo '</tbody>';
         echo '</table>';
         echo '</div>';
+    }
+    
+    /**
+     * F3.3 - Exporta relatório DRE em formato PDF (HTML print-friendly).
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * Gera HTML limpo otimizado para impressão em PDF via navegador.
+     * 
+     * @since 1.5.0
+     */
+    private function export_dre_pdf() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Busca filtros de data
+        $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_start'] ) ) : date( 'Y-m-01' );
+        $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : date( 'Y-m-t' );
+        
+        // Query de transações
+        $trans = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM $table WHERE data >= %s AND data <= %s ORDER BY data DESC",
+            $start_date,
+            $end_date
+        ) );
+        
+        // Calcula DRE
+        $receitas_por_cat = [];
+        $despesas_por_cat = [];
+        $total_receitas   = 0;
+        $total_despesas   = 0;
+        
+        foreach ( $trans as $tr ) {
+            $valor     = (float) $tr->valor;
+            $categoria = $tr->categoria ?: __( 'Sem categoria', 'dps-finance-addon' );
+            
+            if ( $tr->tipo === 'receita' ) {
+                if ( ! isset( $receitas_por_cat[ $categoria ] ) ) {
+                    $receitas_por_cat[ $categoria ] = 0;
+                }
+                $receitas_por_cat[ $categoria ] += $valor;
+                $total_receitas += $valor;
+            } else {
+                if ( ! isset( $despesas_por_cat[ $categoria ] ) ) {
+                    $despesas_por_cat[ $categoria ] = 0;
+                }
+                $despesas_por_cat[ $categoria ] += $valor;
+                $total_despesas += $valor;
+            }
+        }
+        
+        $resultado = $total_receitas - $total_despesas;
+        arsort( $receitas_por_cat );
+        arsort( $despesas_por_cat );
+        
+        // Renderiza HTML para PDF
+        $this->render_pdf_template( 'dre', [
+            'start_date'        => $start_date,
+            'end_date'          => $end_date,
+            'receitas_por_cat'  => $receitas_por_cat,
+            'despesas_por_cat'  => $despesas_por_cat,
+            'total_receitas'    => $total_receitas,
+            'total_despesas'    => $total_despesas,
+            'resultado'         => $resultado,
+        ] );
+    }
+    
+    /**
+     * F3.3 - Exporta resumo mensal em formato PDF (HTML print-friendly).
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * Gera HTML limpo com cards de resumo e top 10 clientes.
+     * 
+     * @since 1.5.0
+     */
+    private function export_monthly_summary_pdf() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Usa mês atual por padrão
+        $start_date = isset( $_GET['fin_start'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_start'] ) ) : date( 'Y-m-01' );
+        $end_date   = isset( $_GET['fin_end'] ) ? sanitize_text_field( wp_unslash( $_GET['fin_end'] ) ) : date( 'Y-m-t' );
+        
+        // Query de transações
+        $trans = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM $table WHERE data >= %s AND data <= %s ORDER BY data DESC",
+            $start_date,
+            $end_date
+        ) );
+        
+        // Calcula resumo
+        $total_receitas = 0;
+        $total_despesas = 0;
+        $total_pendente = 0;
+        
+        foreach ( $trans as $tr ) {
+            $valor = (float) $tr->valor;
+            if ( $tr->tipo === 'receita' ) {
+                $total_receitas += $valor;
+                if ( $tr->status === 'em_aberto' ) {
+                    $remaining = $valor - $this->get_partial_sum( $tr->id );
+                    if ( $remaining > 0 ) {
+                        $total_pendente += $remaining;
+                    }
+                }
+            } else {
+                $total_despesas += $valor;
+            }
+        }
+        
+        $saldo = $total_receitas - $total_despesas;
+        
+        // Busca comparativo mensal
+        $comparison = $this->calculate_monthly_comparison();
+        
+        // Busca top 10 clientes
+        $top_clients = $this->get_top_clients( $start_date, $end_date );
+        
+        // Renderiza HTML para PDF
+        $this->render_pdf_template( 'monthly_summary', [
+            'start_date'      => $start_date,
+            'end_date'        => $end_date,
+            'total_receitas'  => $total_receitas,
+            'total_despesas'  => $total_despesas,
+            'total_pendente'  => $total_pendente,
+            'saldo'           => $saldo,
+            'comparison'      => $comparison,
+            'top_clients'     => $top_clients,
+        ] );
+    }
+    
+    /**
+     * F3.3 - Renderiza template HTML para PDF (print-friendly).
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * 
+     * @since 1.5.0
+     * @param string $type Tipo de relatório ('dre' ou 'monthly_summary').
+     * @param array  $data Dados para renderização.
+     */
+    private function render_pdf_template( $type, $data ) {
+        // Headers para download HTML (usuário pode salvar como PDF via print)
+        header( 'Content-Type: text/html; charset=utf-8' );
+        
+        ?>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title><?php echo esc_html( $type === 'dre' ? 'Relatório DRE' : 'Resumo Mensal Financeiro' ); ?></title>
+            <style>
+                @media print {
+                    @page { margin: 2cm; }
+                    body { margin: 0; }
+                    .no-print { display: none; }
+                }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                    line-height: 1.6;
+                    color: #111827;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                h1 {
+                    color: #374151;
+                    border-bottom: 3px solid #0ea5e9;
+                    padding-bottom: 10px;
+                    margin-bottom: 20px;
+                }
+                h2 {
+                    color: #6b7280;
+                    font-size: 14px;
+                    margin: 20px 0 10px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                th, td {
+                    padding: 10px;
+                    text-align: left;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+                th {
+                    background: #f9fafb;
+                    font-weight: 600;
+                    color: #374151;
+                }
+                .text-right {
+                    text-align: right;
+                }
+                .total-row {
+                    background: #f9fafb;
+                    font-weight: 600;
+                }
+                .resultado-row {
+                    background: #ecfdf5;
+                    font-weight: 700;
+                    font-size: 16px;
+                }
+                .resultado-negativo {
+                    background: #fef2f2;
+                    color: #991b1b;
+                }
+                .summary-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 15px;
+                    margin: 20px 0;
+                }
+                .summary-card {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 15px;
+                    border-left: 4px solid #0ea5e9;
+                }
+                .summary-card h3 {
+                    font-size: 12px;
+                    color: #6b7280;
+                    margin: 0 0 5px 0;
+                }
+                .summary-card .value {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #111827;
+                }
+                .print-button {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 10px 20px;
+                    background: #0ea5e9;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                .print-button:hover {
+                    background: #0284c7;
+                }
+                .header-info {
+                    color: #6b7280;
+                    font-size: 14px;
+                    margin-bottom: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <button class="print-button no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+            
+            <?php if ( $type === 'dre' ) : ?>
+                <h1>Demonstrativo de Resultado (DRE Simplificado)</h1>
+                <p class="header-info">
+                    <strong>Período:</strong> <?php echo esc_html( date( 'd/m/Y', strtotime( $data['start_date'] ) ) ); ?> 
+                    a <?php echo esc_html( date( 'd/m/Y', strtotime( $data['end_date'] ) ) ); ?><br>
+                    <strong>Gerado em:</strong> <?php echo esc_html( date( 'd/m/Y H:i' ) ); ?>
+                </p>
+                
+                <table>
+                    <thead>
+                        <tr style="background: #d1fae5; color: #065f46;">
+                            <th colspan="2">RECEITAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $data['receitas_por_cat'] as $cat => $valor ) : ?>
+                        <tr>
+                            <td><?php echo esc_html( $cat ); ?></td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <tr class="total-row">
+                            <td>Total Receitas</td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['total_receitas'] * 100 ) ) ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <table>
+                    <thead>
+                        <tr style="background: #fee2e2; color: #991b1b;">
+                            <th colspan="2">DESPESAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $data['despesas_por_cat'] as $cat => $valor ) : ?>
+                        <tr>
+                            <td><?php echo esc_html( $cat ); ?></td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $valor * 100 ) ) ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <tr class="total-row">
+                            <td>Total Despesas</td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['total_despesas'] * 100 ) ) ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <table>
+                    <tbody>
+                        <tr class="resultado-row <?php echo $data['resultado'] < 0 ? 'resultado-negativo' : ''; ?>">
+                            <td>RESULTADO DO PERÍODO</td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['resultado'] * 100 ) ) ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            <?php elseif ( $type === 'monthly_summary' ) : ?>
+                <h1>Resumo Financeiro Mensal</h1>
+                <p class="header-info">
+                    <strong>Período:</strong> <?php echo esc_html( date( 'd/m/Y', strtotime( $data['start_date'] ) ) ); ?> 
+                    a <?php echo esc_html( date( 'd/m/Y', strtotime( $data['end_date'] ) ) ); ?><br>
+                    <strong>Gerado em:</strong> <?php echo esc_html( date( 'd/m/Y H:i' ) ); ?>
+                </p>
+                
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Receitas</h3>
+                        <div class="value">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['total_receitas'] * 100 ) ) ); ?></div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Despesas</h3>
+                        <div class="value">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['total_despesas'] * 100 ) ) ); ?></div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Pendente</h3>
+                        <div class="value">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['total_pendente'] * 100 ) ) ); ?></div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Saldo</h3>
+                        <div class="value">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $data['saldo'] * 100 ) ) ); ?></div>
+                    </div>
+                </div>
+                
+                <?php if ( ! empty( $data['top_clients'] ) ) : ?>
+                <h2>Top 10 Clientes do Período</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th class="text-right">Qtde. Atendimentos</th>
+                            <th class="text-right">Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $position = 1;
+                        foreach ( $data['top_clients'] as $client ) : 
+                        ?>
+                        <tr>
+                            <td><strong><?php echo esc_html( $position ); ?></strong></td>
+                            <td><?php echo esc_html( $client->cliente_nome ); ?></td>
+                            <td class="text-right"><?php echo esc_html( $client->qtde_transacoes ); ?></td>
+                            <td class="text-right">R$ <?php echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $client->total_pago * 100 ) ) ); ?></td>
+                        </tr>
+                        <?php 
+                        $position++;
+                        endforeach; 
+                        ?>
+                    </tbody>
+                </table>
+                <?php endif; ?>
+                
+            <?php endif; ?>
+            
+            <script>
+                // Auto-print dialog on load (optional - comentado por padrão)
+                // window.addEventListener('load', function() {
+                //     setTimeout(function() { window.print(); }, 500);
+                // });
+            </script>
+        </body>
+        </html>
+        <?php
     }
 
     /**
