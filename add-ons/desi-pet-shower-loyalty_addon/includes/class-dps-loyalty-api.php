@@ -208,49 +208,157 @@ class DPS_Loyalty_API {
     }
 
     /**
-     * Obtém nível de fidelidade do cliente.
+     * Obtém nível de fidelidade do cliente, recalculando e persistindo quando necessário.
      *
      * @param int $client_id ID do cliente.
      * @return array Dados do nível atual.
      */
     public static function get_loyalty_tier( $client_id ) {
-        $points = self::get_points( $client_id );
+        return self::recalculate_client_tier( $client_id );
+    }
+
+    /**
+     * Obtém a configuração de níveis (personalizada ou padrão).
+     *
+     * @return array Lista ordenada de níveis.
+     */
+    public static function get_tiers_config() {
         $settings = get_option( 'dps_loyalty_settings', [] );
-        
-        $tiers = isset( $settings['loyalty_tiers'] ) ? $settings['loyalty_tiers'] : self::get_default_tiers();
-        
-        $current_tier = 'bronze';
-        $current_tier_data = $tiers['bronze'];
-        
-        foreach ( $tiers as $key => $tier ) {
-            if ( $points >= $tier['min_points'] ) {
-                $current_tier = $key;
-                $current_tier_data = $tier;
+        $tiers    = isset( $settings['loyalty_tiers'] ) ? $settings['loyalty_tiers'] : [];
+
+        if ( empty( $tiers ) || ! is_array( $tiers ) ) {
+            return self::get_default_tiers();
+        }
+
+        $normalized = [];
+        foreach ( $tiers as $index => $tier ) {
+            // Compatibilidade: aceita formato associativo [ slug => data ]
+            if ( self::is_associative_tiers( $tiers ) && isset( $tiers['bronze'] ) ) {
+                $normalized = self::normalize_legacy_tiers( $tiers );
+                break;
+            }
+
+            if ( empty( $tier['slug'] ) ) {
+                continue;
+            }
+
+            $slug = sanitize_key( $tier['slug'] );
+            $normalized[] = [
+                'slug'       => $slug,
+                'label'      => isset( $tier['label'] ) ? sanitize_text_field( $tier['label'] ) : strtoupper( $slug ),
+                'min_points' => isset( $tier['min_points'] ) ? (int) $tier['min_points'] : 0,
+                'multiplier' => isset( $tier['multiplier'] ) ? (float) $tier['multiplier'] : 1.0,
+                'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : '⭐',
+                'color'      => isset( $tier['color'] ) ? sanitize_hex_color( $tier['color'] ) : '',
+            ];
+        }
+
+        if ( empty( $normalized ) ) {
+            return self::get_default_tiers();
+        }
+
+        usort(
+            $normalized,
+            function ( $a, $b ) {
+                return $a['min_points'] <=> $b['min_points'];
+            }
+        );
+
+        return $normalized;
+    }
+
+    /**
+     * Recalcula o nível do cliente e registra mudança se necessário.
+     *
+     * @param int $client_id Cliente.
+     * @return array
+     */
+    public static function recalculate_client_tier( $client_id ) {
+        $points    = self::get_points( $client_id );
+        $tier_info = self::calculate_tier_from_points( $points );
+
+        $previous = get_post_meta( $client_id, '_dps_loyalty_tier', true );
+        $current  = isset( $tier_info['current'] ) ? $tier_info['current'] : '';
+
+        if ( $current && $current !== $previous ) {
+            update_post_meta( $client_id, '_dps_loyalty_tier', $current );
+            do_action( 'dps_loyalty_tier_changed', $client_id, $previous, $current );
+            if ( class_exists( 'DPS_Loyalty_Achievements' ) ) {
+                DPS_Loyalty_Achievements::evaluate_achievements_for_client( $client_id );
             }
         }
 
-        // Encontra próximo nível
-        $next_tier = null;
-        $next_tier_data = null;
-        $tier_keys = array_keys( $tiers );
-        $current_index = array_search( $current_tier, $tier_keys, true );
-        
-        if ( $current_index !== false && isset( $tier_keys[ $current_index + 1 ] ) ) {
-            $next_tier = $tier_keys[ $current_index + 1 ];
-            $next_tier_data = $tiers[ $next_tier ];
+        return $tier_info;
+    }
+
+    /**
+     * Calcula nível com base no saldo de pontos.
+     *
+     * @param int $points Pontos atuais.
+     * @return array
+     */
+    public static function calculate_tier_from_points( $points ) {
+        $tiers = self::get_tiers_config();
+        if ( empty( $tiers ) ) {
+            return [];
         }
 
+        $current     = $tiers[0];
+        $current_key = 0;
+        foreach ( $tiers as $index => $tier ) {
+            if ( $points >= $tier['min_points'] ) {
+                $current     = $tier;
+                $current_key = $index;
+            }
+        }
+
+        $next_tier   = isset( $tiers[ $current_key + 1 ] ) ? $tiers[ $current_key + 1 ] : null;
+        $next_points = $next_tier ? $next_tier['min_points'] : null;
+
         return [
-            'current'     => $current_tier,
-            'label'       => $current_tier_data['label'],
-            'icon'        => $current_tier_data['icon'],
-            'multiplier'  => $current_tier_data['multiplier'],
+            'current'     => $current['slug'],
+            'label'       => $current['label'],
+            'icon'        => $current['icon'],
+            'multiplier'  => $current['multiplier'],
             'points'      => $points,
-            'next_tier'   => $next_tier,
-            'next_label'  => $next_tier_data ? $next_tier_data['label'] : null,
-            'next_points' => $next_tier_data ? $next_tier_data['min_points'] : null,
-            'progress'    => $next_tier_data ? min( 100, round( ( $points / $next_tier_data['min_points'] ) * 100 ) ) : 100,
+            'next_tier'   => $next_tier ? $next_tier['slug'] : null,
+            'next_label'  => $next_tier ? $next_tier['label'] : null,
+            'next_points' => $next_points,
+            'progress'    => $next_points ? min( 100, round( ( $points / $next_points ) * 100 ) ) : 100,
+            'color'       => isset( $current['color'] ) ? $current['color'] : '',
         ];
+    }
+
+    /**
+     * Recupera multiplicador para um nível.
+     *
+     * @param string $tier_slug Slug do nível.
+     * @return float
+     */
+    public static function get_tier_multiplier( $tier_slug ) {
+        $tiers = self::get_tiers_config();
+        foreach ( $tiers as $tier ) {
+            if ( $tier['slug'] === $tier_slug ) {
+                return (float) $tier['multiplier'];
+            }
+        }
+
+        return 1.0;
+    }
+
+    /**
+     * Retorna slug do nível máximo configurado.
+     *
+     * @return string
+     */
+    public static function get_highest_tier_slug() {
+        $tiers = self::get_tiers_config();
+        if ( empty( $tiers ) ) {
+            return 'ouro';
+        }
+
+        $last = end( $tiers );
+        return isset( $last['slug'] ) ? $last['slug'] : 'ouro';
     }
 
     /**
@@ -260,25 +368,74 @@ class DPS_Loyalty_API {
      */
     public static function get_default_tiers() {
         return [
-            'bronze' => [
+            [
+                'slug'       => 'bronze',
                 'min_points' => 0,
                 'multiplier' => 1.0,
                 'label'      => __( 'Bronze', 'dps-loyalty-addon' ),
                 'icon'       => '🥉',
+                'color'      => '#b45309',
             ],
-            'prata'  => [
+            [
+                'slug'       => 'prata',
                 'min_points' => 500,
                 'multiplier' => 1.5,
                 'label'      => __( 'Prata', 'dps-loyalty-addon' ),
                 'icon'       => '🥈',
+                'color'      => '#6b7280',
             ],
-            'ouro'   => [
+            [
+                'slug'       => 'ouro',
                 'min_points' => 1000,
                 'multiplier' => 2.0,
                 'label'      => __( 'Ouro', 'dps-loyalty-addon' ),
                 'icon'       => '🥇',
+                'color'      => '#d97706',
             ],
         ];
+    }
+
+    /**
+     * Verifica se array é associativo.
+     *
+     * @param array $array Array a verificar.
+     * @return bool
+     */
+    private static function is_associative_tiers( $array ) {
+        if ( ! is_array( $array ) || empty( $array ) ) {
+            return false;
+        }
+
+        return array_keys( $array ) !== range( 0, count( $array ) - 1 );
+    }
+
+    /**
+     * Normaliza configuração antiga em formato associativo.
+     *
+     * @param array $tiers Configuração legada.
+     * @return array
+     */
+    private static function normalize_legacy_tiers( $tiers ) {
+        $normalized = [];
+        foreach ( $tiers as $slug => $data ) {
+            $normalized[] = [
+                'slug'       => sanitize_key( $slug ),
+                'label'      => isset( $data['label'] ) ? $data['label'] : strtoupper( $slug ),
+                'min_points' => isset( $data['min_points'] ) ? (int) $data['min_points'] : 0,
+                'multiplier' => isset( $data['multiplier'] ) ? (float) $data['multiplier'] : 1.0,
+                'icon'       => isset( $data['icon'] ) ? $data['icon'] : '⭐',
+                'color'      => isset( $data['color'] ) ? $data['color'] : '',
+            ];
+        }
+
+        usort(
+            $normalized,
+            function ( $a, $b ) {
+                return $a['min_points'] <=> $b['min_points'];
+            }
+        );
+
+        return $normalized;
     }
 
     /**
@@ -463,11 +620,12 @@ class DPS_Loyalty_API {
      */
     public static function get_tier_distribution() {
         $distribution = self::get_clients_by_tier();
-        $defaults     = [
-            'bronze' => 0,
-            'prata'  => 0,
-            'ouro'   => 0,
-        ];
+        $tiers        = self::get_tiers_config();
+        $defaults     = [];
+
+        foreach ( $tiers as $tier ) {
+            $defaults[ $tier['slug'] ] = 0;
+        }
 
         return array_merge( $defaults, $distribution );
     }
@@ -782,8 +940,8 @@ class DPS_Loyalty_API {
      */
     public static function get_clients_by_tier() {
         global $wpdb;
-        $tiers = self::get_default_tiers();
-        
+        $tiers = self::get_tiers_config();
+
         // Get all clients with points
         $results = $wpdb->get_results( "
             SELECT CAST(pm.meta_value AS UNSIGNED) as points
@@ -796,21 +954,21 @@ class DPS_Loyalty_API {
 
         // Initialize counts
         $counts = [];
-        foreach ( array_keys( $tiers ) as $tier_key ) {
-            $counts[ $tier_key ] = 0;
+        foreach ( $tiers as $tier_data ) {
+            $counts[ $tier_data['slug'] ] = 0;
         }
 
         // Count clients per tier
         foreach ( $results as $row ) {
             $points = (int) $row->points;
-            $client_tier = 'bronze';
-            
-            foreach ( $tiers as $key => $tier ) {
+            $client_tier = isset( $tiers[0]['slug'] ) ? $tiers[0]['slug'] : 'bronze';
+
+            foreach ( $tiers as $tier ) {
                 if ( $points >= $tier['min_points'] ) {
-                    $client_tier = $key;
+                    $client_tier = $tier['slug'];
                 }
             }
-            
+
             $counts[ $client_tier ]++;
         }
 

@@ -670,21 +670,33 @@ class DPS_Finance_Addon {
             $value_cents = DPS_Money_Helper::parse_brazilian_format( $raw_value );
             $value       = $value_cents / 100;
             $method    = isset( $_POST['partial_method'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_method'] ) ) : '';
-            
+            $credit_raw = isset( $_POST['loyalty_credit_to_use'] ) ? sanitize_text_field( wp_unslash( $_POST['loyalty_credit_to_use'] ) ) : '0';
+            $credit_cents = DPS_Money_Helper::parse_brazilian_format( $credit_raw );
+            $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
+            $credit_enabled   = ! empty( $loyalty_settings['enable_finance_credit_usage'] );
+            $credit_cap       = isset( $loyalty_settings['finance_max_credit_per_appointment'] ) ? (int) $loyalty_settings['finance_max_credit_per_appointment'] : 0;
+            $trans            = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $trans_id ) );
+
             if ( $trans_id && $value > 0 ) {
                 $parc_table = $wpdb->prefix . 'dps_parcelas';
-                
+
                 // F1.2: FASE 1 - Validação: Impedir que soma de parciais ultrapasse o total
                 // Busca valor total da transação
                 $total_val = $wpdb->get_var( $wpdb->prepare( "SELECT valor FROM {$table} WHERE id = %d", $trans_id ) );
                 $total_val_cents = $total_val ? (int) round( (float) $total_val * 100 ) : 0;
-                
+
                 // Soma parcelas já registradas
                 $paid_sum = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
                 $paid_sum_cents = $paid_sum ? (int) round( (float) $paid_sum * 100 ) : 0;
-                
+
+                $available_credit   = ( $credit_enabled && $trans && $trans->cliente_id ) ? DPS_Loyalty_API::get_credit( (int) $trans->cliente_id ) : 0;
+                $credit_cap_allowed = $credit_cap > 0 ? min( $credit_cap, $available_credit ) : $available_credit;
+                $outstanding_cents  = max( 0, $total_val_cents - $paid_sum_cents );
+                $credit_allowed     = min( $credit_cap_allowed, $outstanding_cents, $value_cents );
+                $credit_cents       = max( 0, min( $credit_cents, $credit_allowed ) );
+
                 // Valida se a nova parcela não ultrapassa o total (tolerância de R$ 0,01 para arredondamentos)
-                $new_total_cents = $paid_sum_cents + $value_cents;
+                $new_total_cents = $paid_sum_cents + $value_cents + $credit_cents;
                 if ( $new_total_cents > ( $total_val_cents + 1 ) ) { // +1 centavo de tolerância
                     $base_url = $this->get_current_url();
                     wp_redirect( add_query_arg( [
@@ -697,7 +709,7 @@ class DPS_Finance_Addon {
                     ], $base_url ) );
                     exit;
                 }
-                
+
                 // Insere a parcela
                 $wpdb->insert( $parc_table, [
                     'trans_id' => $trans_id,
@@ -705,6 +717,31 @@ class DPS_Finance_Addon {
                     'valor'    => $value,
                     'metodo'   => $method,
                 ], [ '%d','%s','%f','%s' ] );
+
+                if ( $credit_cents > 0 && $trans && $trans->cliente_id ) {
+                    $used = DPS_Loyalty_API::use_credit( (int) $trans->cliente_id, $credit_cents, 'finance_payment' );
+                    if ( $used > 0 ) {
+                        $wpdb->insert( $parc_table, [
+                            'trans_id' => $trans_id,
+                            'data'     => $date,
+                            'valor'    => $used / 100,
+                            'metodo'   => 'credito_fidelidade',
+                        ], [ '%d','%s','%f','%s' ] );
+
+                        $note = isset( $trans->descricao ) ? $trans->descricao : '';
+                        $note = trim( $note . ' | ' . sprintf( __( 'Créditos de fidelidade usados: R$ %s', 'dps-finance-addon' ), DPS_Money_Helper::format_to_brazilian( $used ) ) );
+                        $wpdb->update( $table, [ 'descricao' => $note ], [ 'id' => $trans_id ], [ '%s' ], [ '%d' ] );
+
+                        if ( class_exists( 'DPS_Finance_Audit' ) ) {
+                            DPS_Finance_Audit::log_event( $trans_id, 'loyalty_credit', [
+                                'to_value'  => DPS_Money_Helper::format_to_brazilian( $used ),
+                                'meta_info' => [
+                                    'client_id' => (int) $trans->cliente_id,
+                                ],
+                            ] );
+                        }
+                    }
+                }
                 
                 // F4.4: FASE 4 - Registra auditoria de pagamento parcial
                 if ( class_exists( 'DPS_Finance_Audit' ) ) {
@@ -1718,6 +1755,14 @@ class DPS_Finance_Addon {
                 $already_paid = $this->get_partial_sum( $partial_id );
                 $desc_value   = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $trans_pp->valor * 100 ) );
                 $paid_value   = DPS_Money_Helper::format_to_brazilian( (int) round( (float) $already_paid * 100 ) );
+                $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
+                $credit_enabled   = ! empty( $loyalty_settings['enable_finance_credit_usage'] );
+                $credit_cap       = isset( $loyalty_settings['finance_max_credit_per_appointment'] ) ? (int) $loyalty_settings['finance_max_credit_per_appointment'] : 0;
+                $client_credit    = ( $credit_enabled && $trans_pp->cliente_id ) ? DPS_Loyalty_API::get_credit( (int) $trans_pp->cliente_id ) : 0;
+                $outstanding_cents = max( 0, (int) round( (float) $trans_pp->valor * 100 ) - (int) round( (float) $already_paid * 100 ) );
+                $credit_limit      = $credit_cap > 0 ? min( $credit_cap, $client_credit ) : $client_credit;
+                $credit_limit      = min( $credit_limit, $outstanding_cents );
+                $credit_limit_display = DPS_Money_Helper::format_to_brazilian( $credit_limit );
                 echo '<div class="dps-partial-form" style="margin:15px 0;padding:10px;border:1px solid #ddd;background:#f9f9f9;">';
                 echo '<h4>' . sprintf( esc_html__( 'Registrar pagamento parcial - Transação #%1$s (Total: R$ %2$s, Pago: R$ %3$s)', 'dps-finance-addon' ), esc_html( $partial_id ), esc_html( $desc_value ), esc_html( $paid_value ) ) . '</h4>';
                 echo '<form method="post" class="dps-form">';
@@ -1728,6 +1773,9 @@ class DPS_Finance_Addon {
                 echo '<p><label>' . esc_html__( 'Data', 'dps-finance-addon' ) . '<br><input type="date" name="partial_date" value="' . esc_attr( $today ) . '" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Valor', 'dps-finance-addon' ) . '<br><input type="number" step="0.01" name="partial_value" required></label></p>';
                 echo '<p><label>' . esc_html__( 'Método', 'dps-finance-addon' ) . '<br><select name="partial_method"><option value="pix">PIX</option><option value="cartao">' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option><option value="dinheiro">' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option><option value="outro">' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option></select></label></p>';
+                if ( $credit_enabled && $credit_limit > 0 ) {
+                    echo '<p><label>' . esc_html__( 'Créditos de fidelidade a usar (R$)', 'dps-finance-addon' ) . '<br><input type="text" name="loyalty_credit_to_use" value="' . esc_attr( DPS_Money_Helper::format_to_brazilian( $credit_limit ) ) . '"></label><br><small>' . sprintf( esc_html__( 'Disponível: R$ %s | Limite por atendimento: R$ %s', 'dps-finance-addon' ), esc_html( DPS_Money_Helper::format_to_brazilian( $client_credit ) ), esc_html( $credit_limit_display ) ) . '</small></p>';
+                }
                 $cancel_link = esc_url( remove_query_arg( 'register_partial' ) . '#financeiro' );
                 echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Salvar', 'dps-finance-addon' ) . '</button> <a href="' . $cancel_link . '" class="button">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a></p>';
                 echo '</form>';

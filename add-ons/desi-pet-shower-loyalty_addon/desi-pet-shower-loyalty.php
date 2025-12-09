@@ -51,8 +51,10 @@ function dps_loyalty_load_textdomain() {
 }
 add_action( 'init', 'dps_loyalty_load_textdomain', 1 );
 
-// Carrega a API pública
+// Carrega helpers e APIs públicas
 require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-api.php';
+require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-achievements.php';
+require_once DPS_LOYALTY_DIR . 'includes/class-dps-loyalty-rest.php';
 
 class DPS_Loyalty_Addon {
 
@@ -1002,6 +1004,50 @@ class DPS_Loyalty_Addon {
                     </tr>
                 </table>
             </fieldset>
+
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Níveis de Fidelidade', 'dps-loyalty-addon' ); ?></legend>
+                <p class="description"><?php esc_html_e( 'Configure os níveis, limiares de pontos e multiplicadores. O último nível da lista é considerado o máximo.', 'dps-loyalty-addon' ); ?></p>
+                <?php $tiers = DPS_Loyalty_API::get_tiers_config(); ?>
+                <table class="widefat fixed dps-tier-table" id="dps-tier-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Slug', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Nome', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Pontos mínimos', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Multiplicador', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Ícone', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Cor', 'dps-loyalty-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Ações', 'dps-loyalty-addon' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody id="dps-tier-rows">
+                        <?php foreach ( $tiers as $index => $tier ) : ?>
+                            <tr class="dps-tier-row">
+                                <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][slug]" value="<?php echo esc_attr( $tier['slug'] ); ?>" required /></td>
+                                <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][label]" value="<?php echo esc_attr( $tier['label'] ); ?>" required /></td>
+                                <td><input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][min_points]" value="<?php echo esc_attr( $tier['min_points'] ); ?>" /></td>
+                                <td><input type="number" step="0.1" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][multiplier]" value="<?php echo esc_attr( $tier['multiplier'] ); ?>" /></td>
+                                <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][icon]" value="<?php echo esc_attr( $tier['icon'] ); ?>" /></td>
+                                <td><input type="color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][<?php echo esc_attr( $index ); ?>][color]" value="<?php echo esc_attr( $tier['color'] ); ?>" /></td>
+                                <td><button type="button" class="button dps-remove-tier">&times;</button></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <p><button type="button" class="button" id="dps-add-tier"><?php esc_html_e( 'Adicionar nível', 'dps-loyalty-addon' ); ?></button></p>
+                <template id="dps-tier-template">
+                    <tr class="dps-tier-row">
+                        <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][slug]" required /></td>
+                        <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][label]" required /></td>
+                        <td><input type="number" min="0" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][min_points]" /></td>
+                        <td><input type="number" step="0.1" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][multiplier]" value="1" /></td>
+                        <td><input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][icon]" /></td>
+                        <td><input type="color" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[loyalty_tiers][__index__][color]" value="#e5e7eb" /></td>
+                        <td><button type="button" class="button dps-remove-tier">&times;</button></td>
+                    </tr>
+                </template>
+            </fieldset>
             
             <fieldset style="margin-top: 20px;">
                 <legend><?php esc_html_e( 'Link de Indicação', 'dps-loyalty-addon' ); ?></legend>
@@ -1164,6 +1210,28 @@ class DPS_Loyalty_Addon {
                     </tr>
                 </table>
             </fieldset>
+
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Uso de créditos no Financeiro', 'dps-loyalty-addon' ); ?></legend>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Permitir abatimento', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_finance_credit_usage]" value="1" <?php checked( ! empty( $settings['enable_finance_credit_usage'] ) ); ?> />
+                                <?php esc_html_e( 'Permitir usar créditos de fidelidade ao registrar pagamentos no Financeiro.', 'dps-loyalty-addon' ); ?>
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Limite por atendimento (R$)', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <input type="text" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[finance_max_credit_per_appointment]" value="<?php echo esc_attr( DPS_Money_Helper::format_to_brazilian( isset( $settings['finance_max_credit_per_appointment'] ) ? (int) $settings['finance_max_credit_per_appointment'] : 0 ) ); ?>" />
+                            <p class="description"><?php esc_html_e( 'Valor máximo de créditos que podem ser abatidos em um atendimento.', 'dps-loyalty-addon' ); ?></p>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
             <?php submit_button(); ?>
         </form>
         <?php
@@ -1247,12 +1315,14 @@ class DPS_Loyalty_Addon {
             <?php endif; ?>
         </div>
 
-        <?php if ( $selected_id ) : 
+        <?php if ( $selected_id ) :
             $client_points = dps_loyalty_get_points( $selected_id );
             $client_credit = $this->get_credit_for_display( $selected_id );
             $referral_code = dps_loyalty_get_referral_code( $selected_id );
             $referral_stats = DPS_Loyalty_API::get_referral_stats( $selected_id );
             $tier_info = DPS_Loyalty_API::get_loyalty_tier( $selected_id );
+            $achievement_definitions = DPS_Loyalty_Achievements::get_achievements_definitions();
+            $unlocked_achievements  = DPS_Loyalty_Achievements::get_client_achievements( $selected_id );
         ?>
             <hr />
             
@@ -1299,15 +1369,37 @@ class DPS_Loyalty_Addon {
                         </div>
                     </div>
                     <div class="dps-tier-next">
-                        <span class="dps-tier-icon"><?php 
-                            $tiers = DPS_Loyalty_API::get_default_tiers();
-                            echo esc_html( $tiers[ $tier_info['next_tier'] ]['icon'] ?? '🏆' );
+                        <span class="dps-tier-icon"><?php
+                            $tiers = DPS_Loyalty_API::get_tiers_config();
+                            $next_tier_icon = '🏆';
+                            foreach ( $tiers as $tier_item ) {
+                                if ( $tier_item['slug'] === $tier_info['next_tier'] ) {
+                                    $next_tier_icon = $tier_item['icon'];
+                                    break;
+                                }
+                            }
+                            echo esc_html( $next_tier_icon );
                         ?></span>
                         <span class="dps-tier-name"><?php echo esc_html( $tier_info['next_label'] ); ?></span>
                     </div>
                 </div>
             </div>
             <?php endif; ?>
+
+            <div class="dps-achievements-wrapper">
+                <h3><?php esc_html_e( 'Conquistas', 'dps-loyalty-addon' ); ?></h3>
+                <div class="dps-achievements-grid">
+                    <?php foreach ( $achievement_definitions as $key => $achievement ) :
+                        $unlocked = in_array( $key, $unlocked_achievements, true );
+                        ?>
+                        <div class="dps-achievement-card <?php echo $unlocked ? '' : 'is-locked'; ?>">
+                            <h4><?php echo esc_html( $achievement['label'] ); ?></h4>
+                            <p><?php echo esc_html( $achievement['description'] ); ?></p>
+                            <span class="dps-achievement-status"><?php echo esc_html( $unlocked ? __( 'Conquistado', 'dps-loyalty-addon' ) : __( 'Ainda não', 'dps-loyalty-addon' ) ); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
             <!-- Código de indicação -->
             <div class="dps-referral-section">
@@ -1721,6 +1813,30 @@ class DPS_Loyalty_Addon {
         $output['portal_min_points_to_redeem']= isset( $input['portal_min_points_to_redeem'] ) ? absint( $input['portal_min_points_to_redeem'] ) : 0;
         $output['portal_points_per_real']     = isset( $input['portal_points_per_real'] ) ? max( 1, absint( $input['portal_points_per_real'] ) ) : 100;
         $output['portal_max_discount_amount'] = isset( $input['portal_max_discount_amount'] ) ? dps_loyalty_parse_money_br( $input['portal_max_discount_amount'] ) : 0;
+        $output['enable_finance_credit_usage'] = ! empty( $input['enable_finance_credit_usage'] ) ? 1 : 0;
+        $output['finance_max_credit_per_appointment'] = isset( $input['finance_max_credit_per_appointment'] ) ? dps_loyalty_parse_money_br( $input['finance_max_credit_per_appointment'] ) : 0;
+
+        $output['loyalty_tiers'] = [];
+        if ( isset( $input['loyalty_tiers'] ) && is_array( $input['loyalty_tiers'] ) ) {
+            foreach ( $input['loyalty_tiers'] as $tier ) {
+                if ( empty( $tier['slug'] ) ) {
+                    continue;
+                }
+
+                $output['loyalty_tiers'][] = [
+                    'slug'       => sanitize_key( $tier['slug'] ),
+                    'label'      => isset( $tier['label'] ) ? sanitize_text_field( $tier['label'] ) : strtoupper( sanitize_key( $tier['slug'] ) ),
+                    'min_points' => isset( $tier['min_points'] ) ? absint( $tier['min_points'] ) : 0,
+                    'multiplier' => isset( $tier['multiplier'] ) ? (float) $tier['multiplier'] : 1.0,
+                    'icon'       => isset( $tier['icon'] ) ? sanitize_text_field( $tier['icon'] ) : '⭐',
+                    'color'      => isset( $tier['color'] ) ? sanitize_hex_color( $tier['color'] ) : '',
+                ];
+            }
+        }
+
+        if ( empty( $output['loyalty_tiers'] ) ) {
+            $output['loyalty_tiers'] = DPS_Loyalty_API::get_default_tiers();
+        }
 
         $default_points_template  = __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
         $default_referral_template = __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
@@ -2519,6 +2635,14 @@ if ( ! function_exists( 'dps_loyalty_add_points' ) ) {
 
         do_action( 'dps_loyalty_points_added', $client_id, $points, $context );
 
+        if ( class_exists( 'DPS_Loyalty_API' ) ) {
+            DPS_Loyalty_API::recalculate_client_tier( $client_id );
+        }
+
+        if ( class_exists( 'DPS_Loyalty_Achievements' ) ) {
+            DPS_Loyalty_Achievements::evaluate_achievements_for_client( $client_id );
+        }
+
         return $new;
     }
 }
@@ -2556,6 +2680,10 @@ if ( ! function_exists( 'dps_loyalty_redeem_points' ) ) {
         dps_loyalty_log_event( $client_id, 'redeem', $points, $context );
 
         do_action( 'dps_loyalty_points_redeemed', $client_id, $points, $context );
+
+        if ( class_exists( 'DPS_Loyalty_API' ) ) {
+            DPS_Loyalty_API::recalculate_client_tier( $client_id );
+        }
 
         return $new;
     }
@@ -2805,6 +2933,10 @@ if ( ! function_exists( 'dps_loyalty_add_credit' ) ) {
         $new     = $current + $amount_in_cents;
         update_post_meta( $client_id, '_dps_credit_balance', $new );
         dps_loyalty_log_event( $client_id, 'credit_add', $amount_in_cents, $context );
+
+        if ( class_exists( 'DPS_Loyalty_Achievements' ) ) {
+            DPS_Loyalty_Achievements::evaluate_achievements_for_client( $client_id );
+        }
         return $new;
     }
 }

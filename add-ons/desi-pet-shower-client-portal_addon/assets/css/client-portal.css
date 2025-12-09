@@ -3018,3 +3018,59 @@ html {
     background: #f3f4f6;
     color: #6b7280;
 }
+
+.dps-loyalty-achievements {
+    margin-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+}
+
+.dps-loyalty-achievements__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.dps-loyalty-achievement {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    background: #fff;
+}
+
+.dps-loyalty-achievement__icon {
+    font-size: 24px;
+}
+
+.dps-loyalty-achievement__title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.dps-loyalty-achievement__desc {
+    margin: 4px 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.dps-loyalty-achievement__status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-loyalty-achievement.is-locked {
+    opacity: 0.7;
+    background: #f9fafb;
+}
+
+.dps-loyalty-achievement.is-locked .dps-loyalty-achievement__status {
+    background: #e5e7eb;
+    color: #4b5563;
+}
