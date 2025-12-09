@@ -9,6 +9,19 @@
         select.data('current-status', select.val());
       }
     });
+    
+    // Restaura última aba visitada ao carregar página
+    try {
+      var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
+      if (lastTab) {
+        var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
+        if (button.length) {
+          button.trigger('click');
+        }
+      }
+    } catch(e) {
+      // Ignora erros de sessionStorage (modo privado, etc)
+    }
 
     // Evento de alteração de status
     $(document).on('change', '.dps-status-select', function(){
@@ -695,20 +708,6 @@
     }
   });
   
-  // Restaura última aba visitada ao carregar página
-  $(document).ready(function(){
-    try {
-      var lastTab = sessionStorage.getItem('dps_agenda_current_tab');
-      if (lastTab) {
-        var button = $('.dps-agenda-tab-button[data-tab="' + lastTab + '"]');
-        if (button.length) {
-          button.trigger('click');
-        }
-      }
-    } catch(e) {
-      // Ignora erros
-    }
-  });
+  // Restaura última aba visitada ao carregar página removido daqui (movido para início do ready block)
 
-})(jQuery);
 })(jQuery);
