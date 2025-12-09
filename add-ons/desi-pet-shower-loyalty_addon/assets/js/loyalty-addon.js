@@ -328,8 +328,12 @@
                             subtitle += (subtitle ? ' • ' : '') + client.points + ' pts';
                         }
                         
-                        html += '<div class="dps-autocomplete-item" data-id="' + client.id + '" data-name="' + DPSLoyalty.escapeHtml(client.text) + '">';
-                        html += '<span class="dps-autocomplete-name">' + DPSLoyalty.escapeHtml(client.text) + '</span>';
+                        // Escape all dynamic values including ID to prevent XSS
+                        var clientId = DPSLoyalty.escapeHtml(String(client.id));
+                        var clientName = DPSLoyalty.escapeHtml(client.text);
+                        
+                        html += '<div class="dps-autocomplete-item" data-id="' + clientId + '" data-name="' + clientName + '">';
+                        html += '<span class="dps-autocomplete-name">' + clientName + '</span>';
                         if (subtitle) {
                             html += '<span class="dps-autocomplete-subtitle">' + DPSLoyalty.escapeHtml(subtitle) + '</span>';
                         }
@@ -337,7 +341,7 @@
                     });
                     $resultsContainer.html(html).show();
                 } else {
-                    $resultsContainer.html('<div class="dps-autocomplete-no-results">' + 
+                    $resultsContainer.html('<div class="dps-autocomplete-no-results">' +
                         (dpsLoyaltyData.i18n.noResults || 'Nenhum cliente encontrado.') + '</div>').show();
                 }
             },

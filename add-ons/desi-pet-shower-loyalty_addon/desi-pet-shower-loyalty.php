@@ -178,8 +178,8 @@ class DPS_Loyalty_Addon {
             wp_send_json_success( [] );
         }
 
-        // Busca clientes por título (nome) ou meta (telefone).
-        $args = [
+        // Argumentos base para busca de clientes.
+        $base_args = [
             'post_type'      => 'dps_cliente',
             'posts_per_page' => 20,
             'orderby'        => 'title',
@@ -187,15 +187,15 @@ class DPS_Loyalty_Addon {
             'post_status'    => 'publish',
         ];
 
-        // Busca por título.
-        $args['s'] = $search;
+        // Busca por título (nome).
+        $title_args = $base_args;
+        $title_args['s'] = $search;
+        $clients = get_posts( $title_args );
 
-        $clients = get_posts( $args );
-
-        // Se não encontrou por título, tenta por telefone.
+        // Se não encontrou por título, tenta por telefone/email.
         if ( empty( $clients ) ) {
-            unset( $args['s'] );
-            $args['meta_query'] = [
+            $meta_args = $base_args;
+            $meta_args['meta_query'] = [
                 'relation' => 'OR',
                 [
                     'key'     => 'client_phone',
@@ -208,7 +208,7 @@ class DPS_Loyalty_Addon {
                     'compare' => 'LIKE',
                 ],
             ];
-            $clients = get_posts( $args );
+            $clients = get_posts( $meta_args );
         }
 
         $results = [];
