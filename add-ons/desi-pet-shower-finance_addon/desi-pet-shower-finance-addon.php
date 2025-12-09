@@ -386,6 +386,34 @@ class DPS_Finance_Addon {
     }
 
     /**
+     * Obtém a URL atual com fallback para evitar warnings do PHP 8+.
+     * 
+     * get_permalink() pode retornar false em alguns contextos (ex: ações admin sem post atual).
+     * Esta função garante que sempre retornamos uma string válida.
+     *
+     * @since 1.3.1
+     * @return string URL atual ou home_url() como fallback.
+     */
+    private function get_current_url() {
+        $url = get_permalink();
+        
+        // get_permalink() pode retornar false - use fallback
+        if ( false === $url || empty( $url ) ) {
+            // Tenta construir URL a partir do REQUEST_URI
+            if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+                $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+                if ( ! empty( $request_uri ) ) {
+                    return esc_url_raw( home_url( $request_uri ) );
+                }
+            }
+            // Último fallback: home_url
+            return home_url();
+        }
+        
+        return $url;
+    }
+
+    /**
      * Adiciona a aba Financeiro na navegação do plugin base.
      *
      * @param bool $visitor_only Se o modo visitante está ativo; nesse caso, não mostra a aba.
@@ -471,7 +499,7 @@ class DPS_Finance_Addon {
                 }
             }
             // Redireciona de volta à aba Financeiro com feedback
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             wp_redirect( add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'partial_saved' ], $base_url ) );
             exit;
         }
@@ -524,7 +552,7 @@ class DPS_Finance_Addon {
                 'descricao'     => $desc,
             ] );
             // Redireciona para aba finance com feedback
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             wp_redirect( add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'saved' ], $base_url ) );
             exit;
         }
@@ -541,7 +569,7 @@ class DPS_Finance_Addon {
             
             $trans_id = intval( $_GET['id'] );
             $wpdb->delete( $table, [ 'id' => $trans_id ], [ '%d' ] );
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             $redir = remove_query_arg( [ 'dps_delete_trans', 'id', '_wpnonce' ], $base_url );
             $redir = add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'deleted' ], $redir );
             wp_redirect( $redir );
@@ -596,7 +624,7 @@ class DPS_Finance_Addon {
                 delete_post_meta( $appt_id, 'appointment_status' );
                 add_post_meta( $appt_id, 'appointment_status', $appt_status, true );
             }
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             wp_redirect( add_query_arg( [ 'tab' => 'financeiro', 'dps_msg' => 'status_updated' ], $base_url ) );
             exit;
         }
@@ -655,7 +683,7 @@ class DPS_Finance_Addon {
                 }
             }
             // Redireciona de volta à aba Financeiro
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_delete_doc', 'file', 'to_email', 'trans_id', '_wpnonce' ], $base_url ) );
             wp_redirect( $redir );
             exit;
@@ -681,7 +709,7 @@ class DPS_Finance_Addon {
             $trans_id = isset( $_GET['trans_id'] ) ? intval( $_GET['trans_id'] ) : 0;
             $this->send_finance_doc_email( $file, $trans_id, $to_email );
             // Redireciona de volta à aba Financeiro
-            $base_url = get_permalink();
+            $base_url = $this->get_current_url();
             $redir = add_query_arg( [ 'tab' => 'financeiro' ], remove_query_arg( [ 'dps_send_doc', 'file', 'to_email', 'trans_id', '_wpnonce' ], $base_url ) );
             wp_redirect( $redir );
             exit;
@@ -1082,7 +1110,8 @@ class DPS_Finance_Addon {
                     }
                     
                     // Define URL base atual removendo parâmetros de ação
-                    $current_url = home_url( add_query_arg( null, null ) );
+                    // PHP 8+ compatibility: use add_query_arg( array() ) instead of add_query_arg( null, null )
+                    $current_url = add_query_arg( array() );
                     $base_clean  = remove_query_arg( [ 'dps_send_doc', 'to_email', 'trans_id', 'dps_delete_doc', 'file', '_wpnonce' ], $current_url );
                     
                     // Link para envio por email (com nonce)
@@ -1389,19 +1418,19 @@ class DPS_Finance_Addon {
         if ( $status_filter !== '' ) {
             $quick_params['fin_status'] = $status_filter;
         }
-        $link7  = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '7' ] ), get_permalink() ) . '#financeiro';
-        $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), get_permalink() ) . '#financeiro';
+        $link7  = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '7' ] ), $this->get_current_url() ) . '#financeiro';
+        $link30 = add_query_arg( array_merge( $quick_params, [ 'fin_range' => '30' ] ), $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $link7 ) . '" class="button">' . esc_html__( 'Últimos 7 dias', 'dps-finance-addon' ) . '</a> ';
         echo '<a href="' . esc_url( $link30 ) . '" class="button">' . esc_html__( 'Últimos 30 dias', 'dps-finance-addon' ) . '</a> ';
         // Link de limpar filtros: remove todos os filtros inclusive categoria e status
         $clear_params = $quick_params;
         unset( $clear_params['fin_start'], $clear_params['fin_end'], $clear_params['fin_range'], $clear_params['fin_cat'], $clear_params['fin_status'] );
-        $clear_link = add_query_arg( $clear_params, get_permalink() ) . '#financeiro';
+        $clear_link = add_query_arg( $clear_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $clear_link ) . '" class="button">' . esc_html__( 'Limpar filtros', 'dps-finance-addon' ) . '</a>';
         // Link para exportar CSV das transações filtradas
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
-        $export_link = add_query_arg( $export_params, get_permalink() ) . '#financeiro';
+        $export_link = add_query_arg( $export_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $export_link ) . '" class="button">' . esc_html__( 'Exportar CSV', 'dps-finance-addon' ) . '</a>';
         echo '</div>';
         echo '</form>';
@@ -1518,7 +1547,7 @@ class DPS_Finance_Addon {
                     // Mantém parâmetros de filtro existentes ao gerar o link de registro
                     $link_params = $_GET;
                     $link_params['register_partial'] = $tr->id;
-                    $reg_link = add_query_arg( $link_params, get_permalink() ) . '#financeiro';
+                    $reg_link = add_query_arg( $link_params, $this->get_current_url() ) . '#financeiro';
                     echo ' <a href="' . esc_url( $reg_link ) . '">' . esc_html__( 'Registrar', 'dps-finance-addon' ) . '</a>';
                 }
                 echo '</td>';

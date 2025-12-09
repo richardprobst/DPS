@@ -137,6 +137,13 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Finance Add-on (v1.3.1)**: PHP 8+ deprecation warnings relacionados a null em funções de string
+  - Corrigido `add_query_arg( null, null )` para `add_query_arg( array() )` para compatibilidade com PHP 8+
+  - Adicionado método helper `get_current_url()` para obter URL atual com fallback seguro
+  - Substituídas todas as chamadas diretas de `get_permalink()` pelo helper para evitar warnings quando função retorna `false`
+  - Corrige avisos "Deprecated: strpos(): Passing null to parameter #1 ($haystack) of type string is deprecated"
+  - Corrige avisos "Deprecated: str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated"
+  - Elimina warnings de "Cannot modify header information - headers already sent" causados pelos deprecation notices
 - **Push Add-on (v1.0.1)**: Menu standalone visível incorretamente no painel administrativo
   - Corrigido `parent='desi-pet-shower'` para `parent=null` na função `register_admin_menu()`
   - Menu agora oculto do menu principal (acessível apenas via URL direta)
