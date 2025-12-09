@@ -14,12 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Classe DPS_Debugging_Log_Viewer
  * 
  * Gerencia visualização, estatísticas e limpeza do arquivo debug.log.
+ *
+ * @since 1.0.0
  */
 class DPS_Debugging_Log_Viewer {
 
     /**
      * Caminho do arquivo de log.
      *
+     * @since 1.0.0
      * @var string
      */
     private $log_path;
@@ -27,6 +30,7 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Limite máximo de linhas para exibição.
      *
+     * @since 1.0.0
      * @var int
      */
     private $max_lines = 1000;
@@ -34,6 +38,9 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Tipos de erro para classificação visual.
      *
+     * Array associativo com chave = tipo interno e valor = marcador no log.
+     *
+     * @since 1.0.0
      * @var array
      */
     private $error_types = [
@@ -51,6 +58,7 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Cache de entradas parseadas.
      *
+     * @since 1.1.0
      * @var array|null
      */
     private $parsed_entries = null;
@@ -58,12 +66,15 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Cache de tipos de entrada (entry => type).
      *
+     * @since 1.1.0
      * @var array
      */
     private $entry_types = [];
 
     /**
      * Construtor.
+     *
+     * @since 1.0.0
      */
     public function __construct() {
         $this->log_path = $this->get_debug_log_path();
@@ -72,7 +83,14 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém o caminho do arquivo debug.log.
      *
-     * @return string
+     * Verifica na ordem:
+     * 1. WP_DEBUG_LOG (se definido como caminho customizado)
+     * 2. PHP error_log (se definido e existir)
+     * 3. Caminho padrão do WordPress (wp-content/debug.log)
+     *
+     * @since 1.0.0
+     *
+     * @return string Caminho absoluto do arquivo de log.
      */
     public function get_debug_log_path() {
         // Verifica se WP_DEBUG_LOG está definido como um caminho customizado
@@ -93,7 +111,9 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Verifica se o arquivo de log existe e não está vazio.
      *
-     * @return bool
+     * @since 1.0.0
+     *
+     * @return bool True se o arquivo existe e tem conteúdo.
      */
     public function log_exists() {
         return file_exists( $this->log_path ) && filesize( $this->log_path ) > 0;
@@ -102,7 +122,11 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém o tamanho do arquivo de log formatado.
      *
-     * @return string
+     * Retorna o tamanho em formato legível (B, KB, MB, GB).
+     *
+     * @since 1.0.0
+     *
+     * @return string Tamanho formatado (ex: "125 KB", "1.5 MB").
      */
     public function get_log_size_formatted() {
         if ( ! file_exists( $this->log_path ) ) {
@@ -127,7 +151,9 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém o conteúdo raw do arquivo de log.
      *
-     * @return string
+     * @since 1.0.0
+     *
+     * @return string Conteúdo do arquivo ou string vazia se não existir.
      */
     public function get_raw_content() {
         if ( ! $this->log_exists() ) {
@@ -142,7 +168,14 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém estatísticas das entradas do log.
      *
-     * @return array Estatísticas com total e contagem por tipo.
+     * @since 1.1.0
+     *
+     * @return array {
+     *     Estatísticas com total e contagem por tipo.
+     *
+     *     @type int   $total   Total de entradas.
+     *     @type array $by_type Contagem por tipo (fatal, warning, notice, etc).
+     * }
      */
     public function get_entry_stats() {
         if ( ! $this->log_exists() ) {
@@ -179,6 +212,8 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém entradas parseadas (com cache).
      *
+     * @since 1.1.0
+     *
      * @return array Entradas parseadas.
      */
     private function get_parsed_entries() {
@@ -192,8 +227,17 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém o conteúdo formatado do arquivo de log.
      *
-     * @param string $filter_type Tipo de erro para filtrar (opcional).
-     * @return string HTML formatado.
+     * Retorna o conteúdo do log com formatação HTML incluindo:
+     * - Destaque visual por tipo de erro
+     * - Formatação de stack traces
+     * - Pretty-print de JSON
+     * - Ordenação mais recente primeiro
+     *
+     * @since 1.0.0
+     * @since 1.1.0 Adicionado suporte a filtro por tipo.
+     *
+     * @param string $filter_type Tipo de erro para filtrar (ex: 'fatal', 'warning'). Opcional.
+     * @return string HTML formatado com as entradas do log.
      */
     public function get_formatted_content( $filter_type = '' ) {
         if ( ! $this->log_exists() ) {
@@ -566,6 +610,10 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Limpa o arquivo de log.
      *
+     * Esvazia o conteúdo do arquivo debug.log, mantendo o arquivo existente.
+     *
+     * @since 1.0.0
+     *
      * @return bool True em sucesso, false em falha.
      */
     public function purge_log() {
@@ -586,7 +634,9 @@ class DPS_Debugging_Log_Viewer {
     /**
      * Obtém a contagem de entradas no log.
      *
-     * @return int
+     * @since 1.0.0
+     *
+     * @return int Número de entradas no log.
      */
     public function get_entry_count() {
         if ( ! $this->log_exists() ) {

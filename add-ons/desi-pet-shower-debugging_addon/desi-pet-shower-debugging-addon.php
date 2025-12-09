@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Debugging
  * Plugin URI:        https://www.probst.pro
  * Description:       Gerenciamento de debug no WordPress. Ative/desative constantes de debug e visualize o arquivo debug.log com busca, filtros, estatísticas e exportação.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-debugging-addon
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do add-on
-define( 'DPS_DEBUGGING_VERSION', '1.1.0' );
+define( 'DPS_DEBUGGING_VERSION', '1.2.0' );
 define( 'DPS_DEBUGGING_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_DEBUGGING_URL', plugin_dir_url( __FILE__ ) );
 
@@ -123,7 +123,59 @@ class DPS_Debugging_Addon {
     ];
 
     /**
+     * Labels dos tipos de erro para exibição (fonte única de verdade).
+     *
+     * Array associativo com chave = tipo interno e valor = label traduzido.
+     * Centraliza todos os labels usados em estatísticas, filtros e visualização.
+     *
+     * @since 1.2.0
+     * @var array
+     */
+    private static $error_type_labels = null;
+
+    /**
+     * Recupera os labels dos tipos de erro.
+     *
+     * Fonte única de verdade para labels usados em estatísticas, filtros e visualização.
+     * Tipos disponíveis: fatal, warning, notice, deprecated, parse, wordpress-db, exception, other.
+     *
+     * @since 1.2.0
+     *
+     * @return array Array associativo com tipo => label traduzido.
+     */
+    public static function get_error_type_labels() {
+        if ( null === self::$error_type_labels ) {
+            self::$error_type_labels = [
+                'fatal'        => __( 'Fatal', 'dps-debugging-addon' ),
+                'warning'      => __( 'Warning', 'dps-debugging-addon' ),
+                'notice'       => __( 'Notice', 'dps-debugging-addon' ),
+                'deprecated'   => __( 'Deprecated', 'dps-debugging-addon' ),
+                'parse'        => __( 'Parse Error', 'dps-debugging-addon' ),
+                'wordpress-db' => __( 'DB Error', 'dps-debugging-addon' ),
+                'exception'    => __( 'Exception', 'dps-debugging-addon' ),
+                'other'        => __( 'Outros', 'dps-debugging-addon' ),
+            ];
+        }
+        return self::$error_type_labels;
+    }
+
+    /**
+     * Recupera o label de um tipo de erro específico.
+     *
+     * @since 1.2.0
+     *
+     * @param string $type Tipo de erro (ex: 'fatal', 'warning').
+     * @return string Label traduzido ou o próprio tipo se não encontrado.
+     */
+    public static function get_error_type_label( $type ) {
+        $labels = self::get_error_type_labels();
+        return isset( $labels[ $type ] ) ? $labels[ $type ] : $type;
+    }
+
+    /**
      * Recupera a instância única.
+     *
+     * @since 1.0.0
      *
      * @return DPS_Debugging_Addon
      */
@@ -136,6 +188,8 @@ class DPS_Debugging_Addon {
 
     /**
      * Construtor.
+     *
+     * @since 1.0.0
      */
     private function __construct() {
         $this->config_path = $this->get_config_path();
@@ -327,12 +381,36 @@ class DPS_Debugging_Addon {
     /**
      * Enfileira assets administrativos.
      *
+     * Carrega CSS e JS nas páginas do add-on:
+     * - Página standalone do Debugging (dps-debugging)
+     * - System Hub quando a aba ativa é "debugging"
+     *
+     * @since 1.0.0
+     * @since 1.2.0 Adicionado suporte ao System Hub.
+     *
      * @param string $hook Hook da página atual.
+     * @return void
      */
     public function enqueue_admin_assets( $hook ) {
-        // Carrega apenas nas páginas do add-on
-        if ( 'desi-pet-shower_page_dps-debugging' !== $hook ) {
+        // Lista de hooks onde os assets podem ser carregados
+        $allowed_hooks = [
+            'desi-pet-shower_page_dps-debugging',      // Página standalone do Debugging
+            'desi-pet-shower_page_dps-system-hub',     // System Hub
+        ];
+
+        // Se não é nenhum dos hooks permitidos, retorna
+        if ( ! in_array( $hook, $allowed_hooks, true ) ) {
             return;
+        }
+
+        // Se é o System Hub, verifica se a aba ativa é "debugging"
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para carregamento de assets
+        if ( 'desi-pet-shower_page_dps-system-hub' === $hook ) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'logs';
+            if ( 'debugging' !== $current_tab ) {
+                return;
+            }
         }
 
         wp_enqueue_style(
@@ -761,22 +839,19 @@ class DPS_Debugging_Addon {
     /**
      * Renderiza estatísticas de erros no log.
      *
+     * @since 1.0.0
+     * @since 1.2.0 Usa labels centralizados via get_error_type_labels().
+     *
      * @param array $stats Estatísticas de entradas.
+     * @return void
      */
     private function render_log_stats( $stats ) {
         if ( empty( $stats ) ) {
             return;
         }
 
-        $type_labels = [
-            'fatal'        => __( 'Fatal', 'dps-debugging-addon' ),
-            'warning'      => __( 'Warning', 'dps-debugging-addon' ),
-            'notice'       => __( 'Notice', 'dps-debugging-addon' ),
-            'deprecated'   => __( 'Deprecated', 'dps-debugging-addon' ),
-            'parse'        => __( 'Parse Error', 'dps-debugging-addon' ),
-            'wordpress-db' => __( 'DB Error', 'dps-debugging-addon' ),
-            'other'        => __( 'Outros', 'dps-debugging-addon' ),
-        ];
+        // Usa labels centralizados (fonte única de verdade)
+        $type_labels = self::get_error_type_labels();
 
         ?>
         <div class="dps-debugging-log-stats">
@@ -801,18 +876,18 @@ class DPS_Debugging_Addon {
     /**
      * Renderiza filtros e busca para o log.
      *
+     * @since 1.0.0
+     * @since 1.2.0 Usa labels centralizados via get_error_type_labels().
+     *
      * @param array  $stats       Estatísticas de entradas.
      * @param string $filter_type Tipo de filtro ativo.
+     * @return void
      */
     private function render_log_filters( $stats, $filter_type ) {
-        $type_labels = [
-            'fatal'        => __( 'Fatal', 'dps-debugging-addon' ),
-            'warning'      => __( 'Warning', 'dps-debugging-addon' ),
-            'notice'       => __( 'Notice', 'dps-debugging-addon' ),
-            'deprecated'   => __( 'Deprecated', 'dps-debugging-addon' ),
-            'parse'        => __( 'Parse Error', 'dps-debugging-addon' ),
-            'wordpress-db' => __( 'DB Error', 'dps-debugging-addon' ),
-        ];
+        // Usa labels centralizados (fonte única de verdade)
+        // Exclui 'other' e 'exception' dos filtros clicáveis
+        $all_labels   = self::get_error_type_labels();
+        $type_labels  = array_diff_key( $all_labels, [ 'other' => '', 'exception' => '' ] );
 
         ?>
         <div class="dps-debugging-log-filters">
