@@ -55,7 +55,7 @@ function dps_whitelabel_init() {
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-access-control.php';
 
     // Inicializa a classe principal
-    new DPS_WhiteLabel_Addon();
+    DPS_WhiteLabel_Addon::get_instance();
 }
 add_action( 'init', 'dps_whitelabel_init', 5 );
 
@@ -93,6 +93,14 @@ function dps_whitelabel_missing_base_notice() {
  * @since 1.0.0
  */
 class DPS_WhiteLabel_Addon {
+
+    /**
+     * Instância única (singleton).
+     *
+     * @since 1.1.0
+     * @var DPS_WhiteLabel_Addon|null
+     */
+    private static $instance = null;
 
     /**
      * Instância de configurações.
@@ -151,9 +159,22 @@ class DPS_WhiteLabel_Addon {
     private $access_control;
 
     /**
+     * Recupera a instância única.
+     *
+     * @since 1.1.0
+     * @return DPS_WhiteLabel_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Construtor da classe.
      */
-    public function __construct() {
+    private function __construct() {
         // Inicializa módulos
         $this->settings       = new DPS_WhiteLabel_Settings();
         $this->branding       = new DPS_WhiteLabel_Branding();
@@ -209,6 +230,15 @@ class DPS_WhiteLabel_Addon {
 
         // Inclui template de configurações
         include DPS_WHITELABEL_DIR . 'templates/admin-settings.php';
+    }
+
+    /**
+     * Alias para render_settings_page() para compatibilidade com System Hub.
+     *
+     * @since 1.1.0
+     */
+    public function render_admin_page() {
+        $this->render_settings_page();
     }
 
     /**
@@ -312,13 +342,11 @@ class DPS_WhiteLabel_Addon {
  * @return DPS_WhiteLabel_Addon|null
  */
 function dps_whitelabel() {
-    static $instance = null;
-
-    if ( null === $instance && class_exists( 'DPS_WhiteLabel_Addon' ) ) {
-        $instance = new DPS_WhiteLabel_Addon();
+    if ( class_exists( 'DPS_WhiteLabel_Addon' ) ) {
+        return DPS_WhiteLabel_Addon::get_instance();
     }
 
-    return $instance;
+    return null;
 }
 
 /**

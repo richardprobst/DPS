@@ -53,7 +53,7 @@ function dps_debugging_init() {
     }
 
     // Inicializa a classe principal
-    new DPS_Debugging_Addon();
+    DPS_Debugging_Addon::get_instance();
 }
 
 /**
@@ -88,6 +88,13 @@ function dps_debugging_missing_base_notice() {
 class DPS_Debugging_Addon {
 
     /**
+     * Instância única (singleton).
+     *
+     * @var DPS_Debugging_Addon|null
+     */
+    private static $instance = null;
+
+    /**
      * Opções salvas do add-on.
      *
      * @var array
@@ -116,9 +123,21 @@ class DPS_Debugging_Addon {
     ];
 
     /**
+     * Recupera a instância única.
+     *
+     * @return DPS_Debugging_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Construtor.
      */
-    public function __construct() {
+    private function __construct() {
         $this->config_path = $this->get_config_path();
         $this->options     = $this->sync_options_with_config();
 
@@ -531,6 +550,15 @@ class DPS_Debugging_Addon {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Alias para render_settings_page() para compatibilidade com System Hub.
+     *
+     * @since 1.1.0
+     */
+    public function render_admin_page() {
+        $this->render_settings_page();
     }
 
     /**

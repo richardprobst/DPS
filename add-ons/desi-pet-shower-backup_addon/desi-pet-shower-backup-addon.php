@@ -113,11 +113,32 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         const MAX_FILE_SIZE = 52428800;
 
         /**
+         * Instância única (singleton).
+         *
+         * @since 1.1.0
+         * @var DPS_Backup_Addon|null
+         */
+        private static $instance = null;
+
+        /**
+         * Recupera a instância única.
+         *
+         * @since 1.1.0
+         * @return DPS_Backup_Addon
+         */
+        public static function get_instance() {
+            if ( null === self::$instance ) {
+                self::$instance = new self();
+            }
+            return self::$instance;
+        }
+
+        /**
          * Registra os hooks do add-on.
          *
          * @since 1.0.0
          */
-        public function __construct() {
+        private function __construct() {
             // Registra menu admin para backup - prioridade 20 para garantir que o menu pai já existe
             add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 
@@ -1806,7 +1827,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
      */
     function dps_backup_init_addon() {
         if ( class_exists( 'DPS_Backup_Addon' ) ) {
-            new DPS_Backup_Addon();
+            DPS_Backup_Addon::get_instance();
         }
     }
     add_action( 'init', 'dps_backup_init_addon', 5 );
