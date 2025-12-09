@@ -133,10 +133,13 @@ class DPS_Push_Addon {
 
     /**
      * Registra submenu admin para Push Notifications.
+     * 
+     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
+     * Use o novo hub unificado em dps-integrations-hub para acessar via aba "Notificações Push".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower',
+            null, // Oculto do menu, acessível apenas por URL direta
             __( 'Notificações Push', 'dps-push-addon' ),
             __( 'Notificações Push', 'dps-push-addon' ),
             'manage_options',

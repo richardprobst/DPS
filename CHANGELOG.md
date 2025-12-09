@@ -137,6 +137,12 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Push Add-on (v1.0.1)**: Menu standalone visível incorretamente no painel administrativo
+  - Corrigido `parent='desi-pet-shower'` para `parent=null` na função `register_admin_menu()`
+  - Menu agora oculto do menu principal (acessível apenas via URL direta)
+  - Mantém backward compatibility com URLs diretas existentes
+  - Alinha com padrão de outros add-ons integrados ao Hub de Integrações
+  - Acesso via aba "Notificações Push" em DPS > Integrações funciona corretamente
 - **Base Plugin (v1.1.0)**: Erro fatal ao acessar página Hub de Integrações
   - `DPS_Push_Addon::get_instance()` causava fatal error (linha 144 de class-dps-integrations-hub.php)
   - `DPS_Payment_Addon::get_instance()` causava fatal error (linha 126 de class-dps-integrations-hub.php)
