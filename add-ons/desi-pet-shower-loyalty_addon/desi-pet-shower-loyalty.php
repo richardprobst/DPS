@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-loyalty-addon
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_LOYALTY_VERSION', '1.3.0' );
+define( 'DPS_LOYALTY_VERSION', '1.4.0' );
 define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -78,6 +78,10 @@ class DPS_Loyalty_Addon {
 
         add_action( 'dps_loyalty_points_added', [ $this, 'maybe_notify_points_added' ], 20, 3 );
         add_action( 'dps_loyalty_tier_bonus_applied', [ $this, 'maybe_notify_referral_bonus' ], 20, 3 );
+
+        add_action( 'init', [ $this, 'maybe_schedule_crons' ] );
+        add_action( 'dps_loyalty_expire_points_daily', [ $this, 'handle_points_expiration' ] );
+        add_action( 'dps_loyalty_expiration_notices_daily', [ $this, 'handle_expiration_notices' ] );
         
         // AJAX para busca de clientes (autocomplete).
         add_action( 'wp_ajax_dps_loyalty_search_clients', [ $this, 'ajax_search_clients' ] );
@@ -107,6 +111,14 @@ class DPS_Loyalty_Addon {
             return;
         }
 
+        wp_enqueue_script(
+            'chartjs',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            [],
+            '4.4.1',
+            true
+        );
+
         wp_enqueue_style(
             'dps-loyalty-addon',
             DPS_LOYALTY_URL . 'assets/css/loyalty-addon.css',
@@ -117,7 +129,7 @@ class DPS_Loyalty_Addon {
         wp_enqueue_script(
             'dps-loyalty-addon',
             DPS_LOYALTY_URL . 'assets/js/loyalty-addon.js',
-            [ 'jquery' ],
+            [ 'jquery', 'chartjs' ],
             DPS_LOYALTY_VERSION,
             true
         );
@@ -459,11 +471,19 @@ class DPS_Loyalty_Addon {
 
             <!-- Navegação por abas -->
             <nav class="nav-tab-wrapper">
-                <a href="<?php echo esc_url( add_query_arg( 'tab', 'dashboard', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>" 
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'dashboard', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'dashboard' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Dashboard', 'dps-loyalty-addon' ); ?>
                 </a>
-                <a href="<?php echo esc_url( add_query_arg( 'tab', 'referrals', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>" 
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'reports', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
+                   class="nav-tab <?php echo $active_tab === 'reports' ? 'nav-tab-active' : ''; ?>">
+                    <?php esc_html_e( 'Relatórios', 'dps-loyalty-addon' ); ?>
+                </a>
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'ranking', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
+                   class="nav-tab <?php echo $active_tab === 'ranking' ? 'nav-tab-active' : ''; ?>">
+                    <?php esc_html_e( 'Ranking', 'dps-loyalty-addon' ); ?>
+                </a>
+                <a href="<?php echo esc_url( add_query_arg( 'tab', 'referrals', admin_url( 'admin.php?page=dps-loyalty' ) ) ); ?>"
                    class="nav-tab <?php echo $active_tab === 'referrals' ? 'nav-tab-active' : ''; ?>">
                     <?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?>
                 </a>
@@ -482,6 +502,12 @@ class DPS_Loyalty_Addon {
                 switch ( $active_tab ) {
                     case 'referrals':
                         $this->render_referrals_tab();
+                        break;
+                    case 'reports':
+                        $this->render_reports_tab();
+                        break;
+                    case 'ranking':
+                        $this->render_ranking_tab();
                         break;
                     case 'settings':
                         $this->render_settings_tab( $brl_per_pt );
@@ -508,6 +534,9 @@ class DPS_Loyalty_Addon {
      * @param array $metrics Métricas globais.
      */
     private function render_dashboard_tab( $metrics ) {
+        $timeseries         = DPS_Loyalty_API::get_points_timeseries( 6 );
+        $tier_distribution  = DPS_Loyalty_API::get_tier_distribution();
+        $recent_summary     = $this->get_recent_points_summary();
         ?>
         <!-- Cards de Métricas -->
         <div class="dps-loyalty-dashboard">
@@ -536,6 +565,34 @@ class DPS_Loyalty_Addon {
                 <span class="dps-loyalty-card-value"><?php echo esc_html( $this->format_credits_display( $metrics['total_credits'] ) ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Créditos em Circulação', 'dps-loyalty-addon' ); ?></span>
             </div>
+            <div class="dps-loyalty-card dps-loyalty-card--info">
+                <span class="dps-loyalty-card-icon">📈</span>
+                <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $recent_summary['granted_30d'], 0, ',', '.' ) ); ?></span>
+                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos concedidos (30d)', 'dps-loyalty-addon' ); ?></span>
+            </div>
+            <div class="dps-loyalty-card dps-loyalty-card--danger">
+                <span class="dps-loyalty-card-icon">↘️</span>
+                <span class="dps-loyalty-card-value"><?php echo esc_html( number_format( $recent_summary['redeemed_30d'], 0, ',', '.' ) ); ?></span>
+                <span class="dps-loyalty-card-label"><?php esc_html_e( 'Pontos resgatados (30d)', 'dps-loyalty-addon' ); ?></span>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="dps-loyalty-grid">
+            <div class="dps-loyalty-panel">
+                <h2><?php esc_html_e( 'Pontos concedidos x resgatados', 'dps-loyalty-addon' ); ?></h2>
+                <canvas id="dps-loyalty-timeseries" data-timeseries="<?php echo esc_attr( wp_json_encode( $timeseries ) ); ?>"></canvas>
+            </div>
+            <div class="dps-loyalty-panel">
+                <h2><?php esc_html_e( 'Distribuição por nível', 'dps-loyalty-addon' ); ?></h2>
+                <canvas id="dps-loyalty-tiers" data-tiers="<?php echo esc_attr( wp_json_encode( $tier_distribution ) ); ?>"></canvas>
+                <ul class="dps-tier-legend">
+                    <li><span class="dps-tier-dot dps-tier-bronze"></span><?php esc_html_e( 'Bronze', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['bronze'] ) ? $tier_distribution['bronze'] : 0 ); ?></li>
+                    <li><span class="dps-tier-dot dps-tier-prata"></span><?php esc_html_e( 'Prata', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['prata'] ) ? $tier_distribution['prata'] : 0 ); ?></li>
+                    <li><span class="dps-tier-dot dps-tier-ouro"></span><?php esc_html_e( 'Ouro', 'dps-loyalty-addon' ); ?> – <?php echo esc_html( isset( $tier_distribution['ouro'] ) ? $tier_distribution['ouro'] : 0 ); ?></li>
+                </ul>
+            </div>
         </div>
 
         <hr />
@@ -554,6 +611,195 @@ class DPS_Loyalty_Addon {
             </div>
         <?php endif; ?>
         <?php
+    }
+
+    /**
+     * Renderiza relatório de campanhas com métricas agregadas.
+     *
+     * @since 1.4.0
+     */
+    private function render_reports_tab() {
+        $campaigns = DPS_Loyalty_API::get_campaign_effectiveness();
+        ?>
+        <h2><?php esc_html_e( 'Relatório de Campanhas', 'dps-loyalty-addon' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'Acompanhe elegibilidade, uso e pontos gerados por campanha.', 'dps-loyalty-addon' ); ?></p>
+
+        <div class="dps-referrals-table-wrapper">
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'Campanha', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Período', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Elegíveis', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Usaram', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Taxa de uso', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Pontos gerados', 'dps-loyalty-addon' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ( empty( $campaigns ) ) : ?>
+                        <tr>
+                            <td colspan="6"><?php esc_html_e( 'Nenhuma campanha encontrada.', 'dps-loyalty-addon' ); ?></td>
+                        </tr>
+                    <?php else : ?>
+                        <?php foreach ( $campaigns as $campaign ) : ?>
+                            <tr>
+                                <td>
+                                    <strong><?php echo esc_html( $campaign['name'] ); ?></strong><br />
+                                    <code><?php echo esc_html( 'ID: ' . $campaign['id'] ); ?></code>
+                                </td>
+                                <td>
+                                    <?php
+                                    $start = $campaign['start'] ? esc_html( $campaign['start'] ) : '—';
+                                    $end   = $campaign['end'] ? esc_html( $campaign['end'] ) : '—';
+                                    echo $start . ' → ' . $end;
+                                    ?>
+                                </td>
+                                <td><?php echo esc_html( number_format_i18n( $campaign['eligible'] ) ); ?></td>
+                                <td><?php echo esc_html( number_format_i18n( $campaign['used'] ) ); ?></td>
+                                <td><?php echo esc_html( $campaign['usage_rate'] ); ?>%</td>
+                                <td><?php echo esc_html( number_format_i18n( $campaign['points'] ) ); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
+    /**
+     * Renderiza ranking de clientes mais engajados.
+     *
+     * @since 1.4.0
+     */
+    private function render_ranking_tab() {
+        $period = isset( $_GET['ranking_period'] ) ? sanitize_text_field( wp_unslash( $_GET['ranking_period'] ) ) : '90d';
+        $limit  = isset( $_GET['ranking_limit'] ) ? max( 5, absint( $_GET['ranking_limit'] ) ) : 20;
+
+        $start_date = '';
+        $end_date   = gmdate( 'Y-m-d' );
+
+        switch ( $period ) {
+            case '30d':
+                $start_date = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
+                break;
+            case '365d':
+                $start_date = gmdate( 'Y-m-d', strtotime( '-365 days' ) );
+                break;
+            default:
+                $start_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
+        }
+
+        $ranking = DPS_Loyalty_API::get_engagement_ranking(
+            [
+                'start_date' => $start_date,
+                'end_date'   => $end_date,
+                'limit'      => $limit,
+            ]
+        );
+        ?>
+        <h2><?php esc_html_e( 'Ranking de clientes', 'dps-loyalty-addon' ); ?></h2>
+        <form method="get" class="dps-ranking-filters">
+            <input type="hidden" name="page" value="dps-loyalty" />
+            <input type="hidden" name="tab" value="ranking" />
+            <label for="ranking_period">
+                <?php esc_html_e( 'Período', 'dps-loyalty-addon' ); ?>
+            </label>
+            <select name="ranking_period" id="ranking_period">
+                <option value="30d" <?php selected( $period, '30d' ); ?>><?php esc_html_e( 'Últimos 30 dias', 'dps-loyalty-addon' ); ?></option>
+                <option value="90d" <?php selected( $period, '90d' ); ?>><?php esc_html_e( 'Últimos 90 dias', 'dps-loyalty-addon' ); ?></option>
+                <option value="365d" <?php selected( $period, '365d' ); ?>><?php esc_html_e( 'Últimos 12 meses', 'dps-loyalty-addon' ); ?></option>
+            </select>
+
+            <label for="ranking_limit" style="margin-left:12px;">
+                <?php esc_html_e( 'Quantidade', 'dps-loyalty-addon' ); ?>
+            </label>
+            <input type="number" min="5" max="50" name="ranking_limit" id="ranking_limit" value="<?php echo esc_attr( $limit ); ?>" />
+            <?php submit_button( __( 'Aplicar', 'dps-loyalty-addon' ), 'secondary', '', false ); ?>
+        </form>
+
+        <div class="dps-referrals-table-wrapper">
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><?php esc_html_e( 'Cliente', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Pontos ganhos', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Pontos resgatados', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Indicações', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Atendimentos', 'dps-loyalty-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Score', 'dps-loyalty-addon' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ( empty( $ranking ) ) : ?>
+                        <tr>
+                            <td colspan="7"><?php esc_html_e( 'Nenhum dado para o período selecionado.', 'dps-loyalty-addon' ); ?></td>
+                        </tr>
+                    <?php else : ?>
+                        <?php foreach ( $ranking as $index => $client ) : ?>
+                            <tr>
+                                <td><?php echo esc_html( $index + 1 ); ?></td>
+                                <td>
+                                    <strong><?php echo esc_html( $client['name'] ); ?></strong>
+                                    <div class="description"><?php printf( esc_html__( 'ID: %d', 'dps-loyalty-addon' ), (int) $client['id'] ); ?></div>
+                                </td>
+                                <td><?php echo esc_html( number_format_i18n( $client['earned'] ) ); ?></td>
+                                <td><?php echo esc_html( number_format_i18n( $client['redeemed'] ) ); ?></td>
+                                <td><?php echo esc_html( number_format_i18n( $client['referrals'] ) ); ?></td>
+                                <td><?php echo esc_html( number_format_i18n( $client['appointments'] ) ); ?></td>
+                                <td><strong><?php echo esc_html( number_format_i18n( $client['score'] ) ); ?></strong></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
+    /**
+     * Resumo rápido de pontos concedidos e resgatados nos últimos 30 dias.
+     *
+     * @since 1.4.0
+     *
+     * @return array
+     */
+    private function get_recent_points_summary() {
+        $granted = 0;
+        $redeem  = 0;
+        $cutoff  = ( new DateTime( 'now', wp_timezone() ) )->modify( '-30 days' );
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 300,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+        ] );
+
+        foreach ( $clients as $client_id ) {
+            $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+            foreach ( $logs as $log ) {
+                $date = isset( $log['date'] ) ? date_create( $log['date'] ) : false;
+                if ( ! $date || $date < $cutoff ) {
+                    continue;
+                }
+
+                $points = isset( $log['points'] ) ? (int) $log['points'] : 0;
+                if ( 'add' === $log['action'] ) {
+                    $granted += $points;
+                }
+                if ( in_array( $log['action'], [ 'redeem', 'expire' ], true ) ) {
+                    $redeem += $points;
+                }
+            }
+        }
+
+        return [
+            'granted_30d'  => $granted,
+            'redeemed_30d' => $redeem,
+        ];
     }
 
     /**
@@ -724,6 +970,11 @@ class DPS_Loyalty_Addon {
         $send_referral_notification = ! empty( $settings['send_referral_notification'] );
         $points_template = isset( $settings['points_notification_template'] ) ? $settings['points_notification_template'] : __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
         $referral_template = isset( $settings['referral_notification_template'] ) ? $settings['referral_notification_template'] : __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $enable_expiration = ! empty( $settings['enable_points_expiration'] );
+        $expiration_months = isset( $settings['points_expire_after_months'] ) ? absint( $settings['points_expire_after_months'] ) : 12;
+        $enable_expiration_notices = ! empty( $settings['enable_expiration_notifications'] );
+        $days_before_notice = isset( $settings['days_before_expiration_notice'] ) ? absint( $settings['days_before_expiration_notice'] ) : 15;
+        $expiration_template = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
         
         // Busca todas as páginas publicadas para o dropdown
         $pages = get_pages( [
@@ -825,6 +1076,52 @@ class DPS_Loyalty_Addon {
                                 </label>
                                 <textarea id="dps_referral_notification_template" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[referral_notification_template]" rows="3" style="width: 100%; max-width: 480px;"><?php echo esc_textarea( $referral_template ); ?></textarea>
                                 <span class="description"><?php esc_html_e( 'Placeholders: {client_name}, {points}, {new_balance}, {context}, {tier_name}', 'dps-loyalty-addon' ); ?></span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+
+            <fieldset style="margin-top: 20px;">
+                <legend><?php esc_html_e( 'Expiração de Pontos', 'dps-loyalty-addon' ); ?></legend>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Ativar expiração automática', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_points_expiration]" value="1" <?php checked( $enable_expiration ); ?> />
+                                <?php esc_html_e( 'Expirar pontos após X meses', 'dps-loyalty-addon' ); ?>
+                            </label>
+                            <p style="margin-top:8px;">
+                                <label>
+                                    <?php esc_html_e( 'Meses até expirar', 'dps-loyalty-addon' ); ?>
+                                    <input type="number" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[points_expire_after_months]" value="<?php echo esc_attr( $expiration_months ); ?>" />
+                                </label>
+                            </p>
+                            <p class="description"><?php esc_html_e( 'Os lançamentos mais antigos são expirados primeiro (FIFO) com um lançamento negativo no histórico.', 'dps-loyalty-addon' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Avisos de pontos a expirar', 'dps-loyalty-addon' ); ?></th>
+                        <td>
+                            <p>
+                                <label>
+                                    <input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_expiration_notifications]" value="1" <?php checked( $enable_expiration_notices ); ?> />
+                                    <?php esc_html_e( 'Enviar alerta antes da expiração', 'dps-loyalty-addon' ); ?>
+                                </label>
+                            </p>
+                            <p>
+                                <label>
+                                    <?php esc_html_e( 'Dias antes do vencimento', 'dps-loyalty-addon' ); ?>
+                                    <input type="number" min="1" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[days_before_expiration_notice]" value="<?php echo esc_attr( $days_before_notice ); ?>" />
+                                </label>
+                            </p>
+                            <p>
+                                <label for="dps_loyalty_expiration_template" style="display:block;">
+                                    <?php esc_html_e( 'Template do aviso', 'dps-loyalty-addon' ); ?>
+                                </label>
+                                <textarea id="dps_loyalty_expiration_template" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[expiration_notification_template]" rows="3" style="width: 100%; max-width: 480px;"><?php echo esc_textarea( $expiration_template ); ?></textarea>
+                                <span class="description"><?php esc_html_e( 'Placeholders: {client_name}, {expiring_points}, {days}', 'dps-loyalty-addon' ); ?></span>
                             </p>
                         </td>
                     </tr>
@@ -1427,16 +1724,199 @@ class DPS_Loyalty_Addon {
 
         $default_points_template  = __( 'Olá {client_name}! 🎉 Você acabou de ganhar {points} pontos no programa de fidelidade. Seu saldo agora é de {new_balance} pontos.', 'dps-loyalty-addon' );
         $default_referral_template = __( 'Obrigad@ por indicar amigos! 🐾 Você recebeu uma recompensa no programa de fidelidade.', 'dps-loyalty-addon' );
+        $default_expiration_template = __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
 
         $output['send_points_notification']   = ! empty( $input['send_points_notification'] ) ? 1 : 0;
         $output['send_referral_notification'] = ! empty( $input['send_referral_notification'] ) ? 1 : 0;
+        $output['enable_points_expiration']   = ! empty( $input['enable_points_expiration'] ) ? 1 : 0;
+        $output['points_expire_after_months'] = isset( $input['points_expire_after_months'] ) ? max( 1, absint( $input['points_expire_after_months'] ) ) : 12;
+        $output['enable_expiration_notifications'] = ! empty( $input['enable_expiration_notifications'] ) ? 1 : 0;
+        $output['days_before_expiration_notice']   = isset( $input['days_before_expiration_notice'] ) ? max( 1, absint( $input['days_before_expiration_notice'] ) ) : 15;
+
         $output['points_notification_template']  = isset( $input['points_notification_template'] ) ? sanitize_textarea_field( $input['points_notification_template'] ) : $default_points_template;
         $output['referral_notification_template'] = isset( $input['referral_notification_template'] ) ? sanitize_textarea_field( $input['referral_notification_template'] ) : $default_referral_template;
+        $output['expiration_notification_template'] = isset( $input['expiration_notification_template'] ) ? sanitize_textarea_field( $input['expiration_notification_template'] ) : $default_expiration_template;
 
         if ( $output['brl_per_point'] <= 0 ) {
             $output['brl_per_point'] = 10.0;
         }
         return $output;
+    }
+
+    /**
+     * Garante o agendamento dos crons diários.
+     */
+    public function maybe_schedule_crons() {
+        if ( ! wp_next_scheduled( 'dps_loyalty_expire_points_daily' ) ) {
+            wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dps_loyalty_expire_points_daily' );
+        }
+
+        if ( ! wp_next_scheduled( 'dps_loyalty_expiration_notices_daily' ) ) {
+            wp_schedule_event( time() + ( 2 * HOUR_IN_SECONDS ), 'daily', 'dps_loyalty_expiration_notices_daily' );
+        }
+    }
+
+    /**
+     * Expira pontos vencidos com base no número de meses configurado.
+     */
+    public function handle_points_expiration() {
+        $settings = get_option( self::OPTION_KEY, [] );
+        if ( empty( $settings['enable_points_expiration'] ) ) {
+            return;
+        }
+
+        $months  = isset( $settings['points_expire_after_months'] ) ? max( 1, absint( $settings['points_expire_after_months'] ) ) : 12;
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 300,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'dps_loyalty_points',
+                    'value'   => 0,
+                    'compare' => '>',
+                ],
+            ],
+        ] );
+
+        foreach ( $clients as $client_id ) {
+            $expirable = DPS_Loyalty_API::get_expirable_points( $client_id, $months );
+            if ( $expirable > 0 ) {
+                DPS_Loyalty_API::expire_points( $client_id, $expirable );
+            }
+        }
+    }
+
+    /**
+     * Envia avisos de pontos próximos de expirar.
+     */
+    public function handle_expiration_notices() {
+        $settings = get_option( self::OPTION_KEY, [] );
+        if ( empty( $settings['enable_points_expiration'] ) || empty( $settings['enable_expiration_notifications'] ) ) {
+            return;
+        }
+
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            return;
+        }
+
+        $months       = isset( $settings['points_expire_after_months'] ) ? max( 1, absint( $settings['points_expire_after_months'] ) ) : 12;
+        $days_before  = isset( $settings['days_before_expiration_notice'] ) ? max( 1, absint( $settings['days_before_expiration_notice'] ) ) : 15;
+        $template     = isset( $settings['expiration_notification_template'] ) ? $settings['expiration_notification_template'] : __( 'Olá {client_name}! Você tem {expiring_points} pontos que expiram em {days} dias. Aproveite para usar seus benefícios com a gente! 🐾', 'dps-loyalty-addon' );
+        $today        = new DateTime( 'now', wp_timezone() );
+        $notice_limit = ( clone $today )->modify( '+' . $days_before . ' days' );
+
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 200,
+            'fields'         => 'ids',
+            'post_status'    => 'publish',
+            'meta_query'     => [
+                [
+                    'key'     => 'dps_loyalty_points',
+                    'value'   => 0,
+                    'compare' => '>',
+                ],
+            ],
+        ] );
+
+        foreach ( $clients as $client_id ) {
+            $last_notice = get_post_meta( $client_id, 'dps_loyalty_last_expiration_notice', true );
+            if ( $last_notice && strtotime( $last_notice ) > strtotime( '-1 day' ) ) {
+                continue;
+            }
+
+            $expiring_points = $this->calculate_points_expiring_soon( $client_id, $months, $notice_limit );
+            if ( $expiring_points <= 0 ) {
+                continue;
+            }
+
+            $message = str_replace(
+                [ '{client_name}', '{expiring_points}', '{days}' ],
+                [ get_the_title( $client_id ), (int) $expiring_points, $days_before ],
+                $template
+            );
+
+            $this->dispatch_loyalty_message( $client_id, $message, 'expiration_warning' );
+            update_post_meta( $client_id, 'dps_loyalty_last_expiration_notice', current_time( 'mysql' ) );
+        }
+    }
+
+    /**
+     * Calcula pontos que irão expirar até uma data limite.
+     *
+     * @param int       $client_id   Cliente.
+     * @param int       $months      Meses para expiração total.
+     * @param DateTime  $notice_date Data limite para aviso.
+     * @return int
+     */
+    private function calculate_points_expiring_soon( $client_id, $months, DateTime $notice_date ) {
+        $logs = get_post_meta( $client_id, 'dps_loyalty_points_log' );
+        if ( empty( $logs ) ) {
+            return 0;
+        }
+
+        usort(
+            $logs,
+            function ( $a, $b ) {
+                return strcmp( isset( $a['date'] ) ? $a['date'] : '', isset( $b['date'] ) ? $b['date'] : '' );
+            }
+        );
+
+        $accruals = [];
+        foreach ( $logs as $log ) {
+            $date = isset( $log['date'] ) ? $log['date'] : '';
+            if ( empty( $date ) ) {
+                continue;
+            }
+
+            $points = isset( $log['points'] ) ? (int) $log['points'] : 0;
+            $action = isset( $log['action'] ) ? $log['action'] : '';
+
+            if ( 'add' === $action ) {
+                $accruals[] = [
+                    'remaining' => $points,
+                    'date'      => $date,
+                ];
+                continue;
+            }
+
+            if ( in_array( $action, [ 'redeem', 'expire' ], true ) ) {
+                $to_reduce = $points;
+                foreach ( $accruals as &$accrual ) {
+                    if ( $to_reduce <= 0 ) {
+                        break;
+                    }
+
+                    if ( $accrual['remaining'] <= 0 ) {
+                        continue;
+                    }
+
+                    $deduct              = min( $accrual['remaining'], $to_reduce );
+                    $accrual['remaining'] -= $deduct;
+                    $to_reduce           -= $deduct;
+                }
+                unset( $accrual );
+            }
+        }
+
+        $soon_expiring = 0;
+        foreach ( $accruals as $accrual ) {
+            if ( $accrual['remaining'] <= 0 ) {
+                continue;
+            }
+            $grant_date = date_create( $accrual['date'] );
+            if ( ! $grant_date ) {
+                continue;
+            }
+            $expiration_date = ( clone $grant_date )->modify( '+' . $months . ' months' );
+            if ( $expiration_date <= $notice_date && $expiration_date >= new DateTime( 'now', wp_timezone() ) ) {
+                $soon_expiring += (int) $accrual['remaining'];
+            }
+        }
+
+        return $soon_expiring;
     }
 
     /**

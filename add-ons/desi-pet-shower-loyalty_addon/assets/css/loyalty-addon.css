@@ -66,6 +66,46 @@
     color: #0ea5e9;
 }
 
+.dps-loyalty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.dps-loyalty-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dps-tier-legend {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.dps-tier-legend li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    color: #4b5563;
+}
+
+.dps-tier-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dps-tier-bronze { background: #b45309; }
+.dps-tier-prata { background: #6b7280; }
+.dps-tier-ouro { background: #d97706; }
+
 /* ==========================================================================
    Tabela de Indicações
    ========================================================================== */
@@ -163,6 +203,13 @@
     font-weight: 600;
     color: #374151;
     padding: 0 8px;
+}
+
+.dps-ranking-filters {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .dps-loyalty-settings-form .form-table th {

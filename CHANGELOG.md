@@ -83,6 +83,14 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Loyalty Add-on (v1.4.0) - FASE 3: Relatórios & Engajamento**
+
+- **Dashboard de métricas** com cards de resumo, gráfico de pontos concedidos x resgatados (últimos 6 meses) e pizza de distribuição por nível.
+- **Relatório de campanhas** exibindo elegíveis, uso estimado e pontos gerados por campanha `dps_campaign`.
+- **Ranking de clientes engajados** com filtros de período, somatório de pontos ganhos/resgatados, indicações e atendimentos.
+- **Expiração automática de pontos** configurável (meses) com cron diário e lançamento de expiração no histórico.
+- **Avisos de pontos a expirar** integrados ao Communications (template configurável e janela em dias).
+
 **Loyalty Add-on (v1.3.0) - FASE 1: Performance & UX Básica**
 
 - **F1.1 - Auditoria de campanhas otimizada**: Novo método `get_last_appointments_batch()` elimina queries N+1 ao verificar clientes inativos. Antes: 500 clientes = 500+ queries individuais. Agora: 500 clientes = 1 query batch. Mesma lógica de elegibilidade mantida, apenas mais rápido. Métodos legados `is_client_inactive_for_days()` e `get_last_appointment_date_for_client()` marcados como depreciados.
