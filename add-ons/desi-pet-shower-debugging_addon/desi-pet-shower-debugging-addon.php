@@ -952,8 +952,6 @@ class DPS_Debugging_Addon {
      * @return string HTML formatado.
      */
     private function format_log_entry( $entry, $log_viewer ) {
-        // Usa o método interno do log_viewer via reflexão ou duplica lógica
-        // Por simplicidade, vamos duplicar a formatação básica aqui
         $class = 'dps-debugging-log-entry';
 
         // Detecta tipo
@@ -979,29 +977,37 @@ class DPS_Debugging_Addon {
             $class .= ' dps-debugging-log-entry-' . $type;
         }
 
-        // Formata datetime
-        $formatted = $entry;
-        if ( preg_match( '/^\[([^\]]+)\]/', $formatted, $matches ) ) {
+        // Constrói HTML de forma segura
+        $output = '<div class="' . esc_attr( $class ) . '"><div class="dps-debugging-log-entry-content">';
+
+        // Extrai e formata datetime separadamente
+        $datetime_html = '';
+        $rest_of_entry = $entry;
+        if ( preg_match( '/^\[([^\]]+)\](.*)$/s', $entry, $matches ) ) {
             $datetime = $matches[1];
-            $formatted = preg_replace( '/^\[[^\]]+\]/', '<span class="dps-debugging-log-datetime">[' . esc_html( $datetime ) . ']</span>', $formatted, 1 );
+            $rest_of_entry = $matches[2];
+            $datetime_html = '<span class="dps-debugging-log-datetime">[' . esc_html( $datetime ) . ']</span> ';
         }
 
-        // Formata tipo de erro
+        // Formata tipo de erro separadamente
+        $label_html = '';
         foreach ( $error_types as $etype => $marker ) {
-            if ( false !== strpos( $formatted, $marker ) ) {
-                $label = '<span class="dps-debugging-log-label dps-debugging-log-label-' . esc_attr( $etype ) . '">' . esc_html( rtrim( $marker, ':' ) ) . '</span>';
-                $formatted = str_replace( $marker, $label, $formatted );
+            if ( false !== strpos( $rest_of_entry, $marker ) ) {
+                $label_html = '<span class="dps-debugging-log-label dps-debugging-log-label-' . esc_attr( $etype ) . '">' . esc_html( rtrim( $marker, ':' ) ) . '</span> ';
+                // Remove o marker do resto da entrada
+                $rest_of_entry = str_replace( $marker, '', $rest_of_entry );
                 break;
             }
         }
 
-        // Converte quebras de linha
-        $formatted = nl2br( esc_html( $formatted ) );
-        // Desfaz escape nos spans que adicionamos
-        $formatted = preg_replace( '/&lt;span class=&quot;([^&]+)&quot;&gt;/', '<span class="$1">', $formatted );
-        $formatted = str_replace( '&lt;/span&gt;', '</span>', $formatted );
+        // Escapa o restante do conteúdo e converte quebras de linha
+        $content_html = nl2br( esc_html( trim( $rest_of_entry ) ) );
 
-        return '<div class="' . esc_attr( $class ) . '"><div class="dps-debugging-log-entry-content">' . $formatted . '</div></div>';
+        // Monta o HTML final na ordem correta
+        $output .= $datetime_html . $label_html . $content_html;
+        $output .= '</div></div>';
+
+        return $output;
     }
 
     /**
