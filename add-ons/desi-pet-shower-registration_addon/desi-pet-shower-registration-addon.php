@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -50,7 +50,31 @@ add_action( 'init', 'dps_registration_load_textdomain', 1 );
 
 class DPS_Registration_Addon {
 
-    public function __construct() {
+    /**
+     * Instância única (singleton).
+     *
+     * @since 1.0.1
+     * @var DPS_Registration_Addon|null
+     */
+    private static $instance = null;
+
+    /**
+     * Recupera a instância única.
+     *
+     * @since 1.0.1
+     * @return DPS_Registration_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Construtor privado.
+     */
+    private function __construct() {
         // Processa o envio do formulário
         add_action( 'init', [ $this, 'maybe_handle_registration' ] );
         // Confirmação de email
@@ -705,7 +729,7 @@ class DPS_Registration_Addon {
  */
 function dps_registration_init_addon() {
     if ( class_exists( 'DPS_Registration_Addon' ) ) {
-        new DPS_Registration_Addon();
+        DPS_Registration_Addon::get_instance();
     }
 }
 add_action( 'init', 'dps_registration_init_addon', 5 );

@@ -137,6 +137,11 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Registration Add-on (v1.0.1)**: Erro fatal ao acessar página Hub de Ferramentas
+  - `DPS_Registration_Addon::get_instance()` causava fatal error (linha 96 de class-dps-tools-hub.php)
+  - Implementado padrão singleton em `DPS_Registration_Addon`
+  - Construtor convertido para privado com método público `get_instance()`
+  - Alinha com padrão de outros add-ons integrados aos Hubs do sistema
 - **Push Add-on (v1.0.1)**: Menu standalone visível incorretamente no painel administrativo
   - Corrigido `parent='desi-pet-shower'` para `parent=null` na função `register_admin_menu()`
   - Menu agora oculto do menu principal (acessível apenas via URL direta)
