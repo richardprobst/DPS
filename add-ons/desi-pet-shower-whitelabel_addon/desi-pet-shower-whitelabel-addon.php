@@ -55,7 +55,7 @@ function dps_whitelabel_init() {
     require_once DPS_WHITELABEL_DIR . 'includes/class-dps-whitelabel-access-control.php';
 
     // Inicializa a classe principal
-    new DPS_WhiteLabel_Addon();
+    DPS_WhiteLabel_Addon::get_instance();
 }
 add_action( 'init', 'dps_whitelabel_init', 5 );
 
@@ -93,6 +93,14 @@ function dps_whitelabel_missing_base_notice() {
  * @since 1.0.0
  */
 class DPS_WhiteLabel_Addon {
+
+    /**
+     * Instância única (singleton).
+     *
+     * @since 1.1.0
+     * @var DPS_WhiteLabel_Addon|null
+     */
+    private static $instance = null;
 
     /**
      * Instância de configurações.
@@ -151,9 +159,22 @@ class DPS_WhiteLabel_Addon {
     private $access_control;
 
     /**
+     * Recupera a instância única.
+     *
+     * @since 1.1.0
+     * @return DPS_WhiteLabel_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Construtor da classe.
      */
-    public function __construct() {
+    private function __construct() {
         // Inicializa módulos
         $this->settings       = new DPS_WhiteLabel_Settings();
         $this->branding       = new DPS_WhiteLabel_Branding();

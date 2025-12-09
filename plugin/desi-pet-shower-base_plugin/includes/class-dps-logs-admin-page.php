@@ -34,7 +34,7 @@ class DPS_Logs_Admin_Page {
     /**
      * Renderiza a listagem com filtros e paginação.
      */
-    public function render_page() {
+    public static function render_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Você não possui permissão para acessar esta página.', 'desi-pet-shower' ) );
         }
@@ -48,7 +48,7 @@ class DPS_Logs_Admin_Page {
         $query_data = array();
 
         if ( DPS_Logger::table_exists() ) {
-            $query_data = $this->query_logs( $level, $source, $paged, $per_page );
+            $query_data = self::query_logs( $level, $source, $paged, $per_page );
         }
 
         $current_url = admin_url( 'admin.php?page=dps-logs' );
@@ -204,7 +204,7 @@ class DPS_Logs_Admin_Page {
      *
      * @return array
      */
-    private function query_logs( $level, $source, $paged, $per_page ) {
+    private static function query_logs( $level, $source, $paged, $per_page ) {
         global $wpdb;
 
         $table       = DPS_Logger::get_table_name();
