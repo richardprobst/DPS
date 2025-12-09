@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -56,7 +56,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.4.0' );
+    define( 'DPS_FINANCE_VERSION', '1.5.0' );
 }
 
 // Constante para limite de meses no gráfico financeiro
@@ -1555,6 +1555,9 @@ class DPS_Finance_Addon {
 
         // F2.1: FASE 2 - UX: Card de pendências de hoje e vencidas
         $this->render_pending_alerts();
+        
+        // F3.4: FASE 3 - Comparativo mensal (mês atual vs anterior)
+        $this->render_monthly_comparison();
 
         // Dashboard de resumo financeiro (usa todos os registros, não paginados)
         $this->render_finance_summary( $all_trans );
@@ -1564,6 +1567,9 @@ class DPS_Finance_Addon {
         if ( $show_dre && ! empty( $all_trans ) ) {
             $this->render_dre_report( $all_trans );
         }
+        
+        // F3.5: FASE 3 - Top 10 clientes por receita (usa período filtrado ou mês atual)
+        $this->render_top_clients( $start_date, $end_date );
 
         // Se um ID de transação foi passado via query para registrar pagamento parcial, exibe formulário especializado
         if ( isset( $_GET['register_partial'] ) && is_numeric( $_GET['register_partial'] ) ) {
@@ -2533,26 +2539,37 @@ class DPS_Finance_Addon {
             var ctx = document.getElementById('<?php echo esc_js( $chart_id ); ?>');
             if (!ctx) return;
             
+            // F3.1: FASE 3 - Gráfico de linhas para melhor visualização de evolução
             new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: <?php echo wp_json_encode( $labels ); ?>,
                     datasets: [
                         {
                             label: '<?php echo esc_js( __( 'Receitas', 'dps-finance-addon' ) ); ?>',
                             data: <?php echo wp_json_encode( $receitas ); ?>,
-                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
                         },
                         {
                             label: '<?php echo esc_js( __( 'Despesas', 'dps-finance-addon' ) ); ?>',
                             data: <?php echo wp_json_encode( $despesas ); ?>,
-                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
                             borderColor: 'rgba(239, 68, 68, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
                         }
                     ]
                 },
@@ -2572,6 +2589,14 @@ class DPS_Finance_Addon {
                                         maximumFractionDigits: 2
                                     });
                                 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '<?php echo esc_js( __( 'Evolução Financeira - Últimos Meses', 'dps-finance-addon' ) ); ?>',
+                            font: {
+                                size: 16,
+                                weight: 'normal'
                             }
                         }
                     },
@@ -2677,6 +2702,220 @@ class DPS_Finance_Addon {
         echo '</tr>';
         echo '</tfoot>';
         
+        echo '</table>';
+        echo '</div>';
+    }
+
+    /**
+     * F3.4 - Calcula comparativo entre mês atual e mês anterior.
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * 
+     * @since 1.4.1
+     * @return array Array com dados do comparativo: current_month, previous_month, difference_value, difference_percent
+     */
+    private function calculate_monthly_comparison() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Calcula datas para mês atual e anterior
+        $current_month_start = date( 'Y-m-01' );
+        $current_month_end   = date( 'Y-m-t' );
+        
+        $previous_month_start = date( 'Y-m-01', strtotime( '-1 month' ) );
+        $previous_month_end   = date( 'Y-m-t', strtotime( '-1 month' ) );
+        
+        // Consulta receitas do mês atual (apenas pagas)
+        $current_revenue = $wpdb->get_var( $wpdb->prepare(
+            "SELECT SUM(valor) FROM $table 
+             WHERE tipo = 'receita' 
+             AND status = 'pago' 
+             AND data >= %s 
+             AND data <= %s",
+            $current_month_start,
+            $current_month_end
+        ) );
+        
+        // Consulta receitas do mês anterior (apenas pagas)
+        $previous_revenue = $wpdb->get_var( $wpdb->prepare(
+            "SELECT SUM(valor) FROM $table 
+             WHERE tipo = 'receita' 
+             AND status = 'pago' 
+             AND data >= %s 
+             AND data <= %s",
+            $previous_month_start,
+            $previous_month_end
+        ) );
+        
+        $current_revenue  = (float) ( $current_revenue ?: 0 );
+        $previous_revenue = (float) ( $previous_revenue ?: 0 );
+        
+        $difference_value = $current_revenue - $previous_revenue;
+        $difference_percent = 0;
+        
+        if ( $previous_revenue > 0 ) {
+            $difference_percent = ( $difference_value / $previous_revenue ) * 100;
+        }
+        
+        return [
+            'current_month'       => $current_revenue,
+            'previous_month'      => $previous_revenue,
+            'difference_value'    => $difference_value,
+            'difference_percent'  => $difference_percent,
+        ];
+    }
+    
+    /**
+     * F3.4 - Renderiza cards de comparativo mensal.
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * Exibe comparação entre receita do mês atual vs mês anterior.
+     * 
+     * @since 1.4.1
+     */
+    private function render_monthly_comparison() {
+        $comparison = $this->calculate_monthly_comparison();
+        
+        $is_positive = $comparison['difference_value'] >= 0;
+        $trend_class = $is_positive ? 'dps-trend-up' : 'dps-trend-down';
+        $trend_icon  = $is_positive ? '↑' : '↓';
+        $trend_color = $is_positive ? '#10b981' : '#ef4444';
+        
+        echo '<div class="dps-finance-comparison">';
+        echo '<h4>' . esc_html__( 'Comparativo Mensal', 'dps-finance-addon' ) . '</h4>';
+        echo '<div class="dps-finance-comparison-cards">';
+        
+        // Card Mês Atual
+        echo '<div class="dps-finance-card dps-finance-card-current-month">';
+        echo '<h5>' . esc_html__( 'Receita - Mês Atual', 'dps-finance-addon' ) . '</h5>';
+        echo '<span class="dps-finance-card-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $comparison['current_month'] * 100 ) ) ) . '</span>';
+        
+        if ( abs( $comparison['difference_percent'] ) > 0.01 ) {
+            echo '<p class="dps-finance-trend ' . esc_attr( $trend_class ) . '" style="color: ' . esc_attr( $trend_color ) . ';">';
+            echo esc_html( $trend_icon ) . ' ';
+            echo esc_html( abs( round( $comparison['difference_percent'], 1 ) ) ) . '% ';
+            echo esc_html( $is_positive ? __( 'vs mês anterior', 'dps-finance-addon' ) : __( 'vs mês anterior', 'dps-finance-addon' ) );
+            echo '</p>';
+        }
+        echo '</div>';
+        
+        // Card Mês Anterior (informativo)
+        echo '<div class="dps-finance-card dps-finance-card-previous-month">';
+        echo '<h5>' . esc_html__( 'Receita - Mês Anterior', 'dps-finance-addon' ) . '</h5>';
+        echo '<span class="dps-finance-card-value">R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $comparison['previous_month'] * 100 ) ) ) . '</span>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+    }
+    
+    /**
+     * F3.5 - Obtém ranking dos top 10 clientes por receita.
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * 
+     * @since 1.4.1
+     * @param string $start_date Data inicial (Y-m-d) ou vazio para mês atual.
+     * @param string $end_date   Data final (Y-m-d) ou vazio para mês atual.
+     * @return array Array de objetos com cliente_id, cliente_nome, total_pago, qtde_transacoes
+     */
+    private function get_top_clients( $start_date = '', $end_date = '' ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Se datas não informadas, usa mês atual
+        if ( ! $start_date || ! $end_date ) {
+            $start_date = date( 'Y-m-01' );
+            $end_date   = date( 'Y-m-t' );
+        }
+        
+        // Consulta agregada: agrupa por cliente_id e soma valor
+        $results = $wpdb->get_results( $wpdb->prepare(
+            "SELECT 
+                cliente_id,
+                SUM(valor) as total_pago,
+                COUNT(*) as qtde_transacoes
+             FROM $table
+             WHERE tipo = 'receita'
+             AND status = 'pago'
+             AND data >= %s
+             AND data <= %s
+             AND cliente_id IS NOT NULL
+             AND cliente_id > 0
+             GROUP BY cliente_id
+             ORDER BY total_pago DESC
+             LIMIT 10",
+            $start_date,
+            $end_date
+        ) );
+        
+        // Enriquece com nome do cliente
+        $top_clients = [];
+        foreach ( $results as $row ) {
+            $cliente_post = get_post( $row->cliente_id );
+            $cliente_nome = $cliente_post ? $cliente_post->post_title : __( 'Cliente não encontrado', 'dps-finance-addon' );
+            
+            $top_clients[] = (object) [
+                'cliente_id'       => $row->cliente_id,
+                'cliente_nome'     => $cliente_nome,
+                'total_pago'       => (float) $row->total_pago,
+                'qtde_transacoes'  => (int) $row->qtde_transacoes,
+            ];
+        }
+        
+        return $top_clients;
+    }
+    
+    /**
+     * F3.5 - Renderiza tabela de Top 10 clientes.
+     * 
+     * FASE 3 - Relatórios & Visão Gerencial
+     * 
+     * @since 1.4.1
+     * @param string $start_date Data inicial do período.
+     * @param string $end_date   Data final do período.
+     */
+    private function render_top_clients( $start_date = '', $end_date = '' ) {
+        $top_clients = $this->get_top_clients( $start_date, $end_date );
+        
+        if ( empty( $top_clients ) ) {
+            return;
+        }
+        
+        echo '<div class="dps-finance-top-clients">';
+        echo '<h4>' . esc_html__( 'Top 10 Clientes por Receita', 'dps-finance-addon' ) . '</h4>';
+        
+        echo '<table class="dps-table dps-top-clients-table">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>' . esc_html__( '#', 'dps-finance-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Cliente', 'dps-finance-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Qtde. Atendimentos', 'dps-finance-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Valor Total', 'dps-finance-addon' ) . '</th>';
+        echo '<th>' . esc_html__( 'Ações', 'dps-finance-addon' ) . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+        
+        $position = 1;
+        foreach ( $top_clients as $client ) {
+            echo '<tr>';
+            echo '<td><strong>' . esc_html( $position ) . '</strong></td>';
+            echo '<td>' . esc_html( $client->cliente_nome ) . '</td>';
+            echo '<td>' . esc_html( $client->qtde_transacoes ) . '</td>';
+            echo '<td>R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) round( $client->total_pago * 100 ) ) ) . '</td>';
+            
+            // Link para filtrar transações deste cliente
+            $filter_url = add_query_arg( [
+                'fin_search_client' => urlencode( $client->cliente_nome ),
+            ], '#financeiro' );
+            
+            echo '<td><a href="' . esc_url( $filter_url ) . '" class="button button-small">' . esc_html__( 'Ver transações', 'dps-finance-addon' ) . '</a></td>';
+            echo '</tr>';
+            $position++;
+        }
+        
+        echo '</tbody>';
         echo '</table>';
         echo '</div>';
     }

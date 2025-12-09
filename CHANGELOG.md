@@ -83,6 +83,14 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Finance Add-on (v1.5.0) - FASE 3: Relatórios & Visão Gerencial**
+
+- **F3.1 - Gráfico de evolução mensal aprimorado**: Gráfico convertido de barras para linhas com área preenchida, proporcionando melhor visualização de tendências. Exibe receitas (verde) e despesas (vermelho) nos últimos 6 meses (configurável via constante `DPS_FINANCE_CHART_MONTHS`). Inclui título "Evolução Financeira" e tooltips formatados em R$.
+- **F3.2 - Relatório DRE simplificado existente mantido**: DRE já implementado na v1.3.0 continua disponível, exibindo receitas por categoria, despesas por categoria e resultado do período. Exibe automaticamente quando há filtro de data aplicado ou ao clicar em "show_dre".
+- **F3.3 - Preparação para exportação PDF**: Estrutura de dados e métodos preparados para futura implementação de exportação PDF (a ser completado em iteração posterior com biblioteca TCPDF ou DOMPDF).
+- **F3.4 - Comparativo mensal (mês atual vs anterior)**: Novos cards exibindo receita do mês atual vs mês anterior com indicador de variação percentual. Exibe ↑ (verde) para crescimento ou ↓ (vermelho) para queda. Cálculo automático usando apenas transações pagas tipo receita. Posicionado no topo dos relatórios para visibilidade imediata.
+- **F3.5 - Top 10 clientes por receita**: Nova tabela ranking exibindo os 10 clientes que mais geraram receita no período filtrado (ou mês atual se sem filtro). Mostra posição (#), nome do cliente, quantidade de atendimentos e valor total pago. Botão "Ver transações" permite filtrar rapidamente todas as transações de cada cliente. Query otimizada com GROUP BY e agregação SQL.
+
 **Finance Add-on (v1.4.0) - FASE 2: UX do Dia a Dia**
 
 - **F2.1 - Card de pendências urgentes**: Novo card visual no topo da aba Financeiro exibindo pendências vencidas (🚨 vermelho) e pendências de hoje (⚠️ amarelo) com quantidade e valor total. Links diretos para filtrar e ver detalhes. Melhora visibilidade de cobranças urgentes para equipe.
