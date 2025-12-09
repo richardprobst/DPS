@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-loyalty-addon
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_LOYALTY_VERSION', '1.2.0' );
+define( 'DPS_LOYALTY_VERSION', '1.3.0' );
 define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -76,6 +76,9 @@ class DPS_Loyalty_Addon {
         add_action( 'updated_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         add_action( 'added_post_meta', [ $this, 'maybe_award_points_on_status_change' ], 10, 4 );
         
+        // AJAX para busca de clientes (autocomplete).
+        add_action( 'wp_ajax_dps_loyalty_search_clients', [ $this, 'ajax_search_clients' ] );
+        
         // Enfileira assets
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
@@ -115,6 +118,17 @@ class DPS_Loyalty_Addon {
             DPS_LOYALTY_VERSION,
             true
         );
+
+        // Passa dados para o JS (nonce, URL do AJAX).
+        wp_localize_script( 'dps-loyalty-addon', 'dpsLoyaltyData', [
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'dps_loyalty_clients_nonce' ),
+            'i18n'    => [
+                'searchPlaceholder' => __( 'Digite para buscar cliente...', 'dps-loyalty-addon' ),
+                'noResults'         => __( 'Nenhum cliente encontrado.', 'dps-loyalty-addon' ),
+                'searching'         => __( 'Buscando...', 'dps-loyalty-addon' ),
+            ],
+        ] );
     }
 
     /**
@@ -140,6 +154,132 @@ class DPS_Loyalty_Addon {
             DPS_LOYALTY_VERSION,
             true
         );
+    }
+
+    /**
+     * Handler AJAX para busca de clientes (autocomplete).
+     *
+     * @since 1.3.0
+     */
+    public function ajax_search_clients() {
+        // Verifica permissão.
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-loyalty-addon' ) ], 403 );
+        }
+
+        // Verifica nonce.
+        if ( ! check_ajax_referer( 'dps_loyalty_clients_nonce', 'nonce', false ) ) {
+            wp_send_json_error( [ 'message' => __( 'Nonce inválido.', 'dps-loyalty-addon' ) ], 403 );
+        }
+
+        $search = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+
+        if ( strlen( $search ) < 2 ) {
+            wp_send_json_success( [] );
+        }
+
+        // Argumentos base para busca de clientes.
+        $base_args = [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => 20,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'post_status'    => 'publish',
+        ];
+
+        // Busca por título (nome).
+        $title_args = $base_args;
+        $title_args['s'] = $search;
+        $clients = get_posts( $title_args );
+
+        // Se não encontrou por título, tenta por telefone/email.
+        if ( empty( $clients ) ) {
+            $meta_args = $base_args;
+            $meta_args['meta_query'] = [
+                'relation' => 'OR',
+                [
+                    'key'     => 'client_phone',
+                    'value'   => $search,
+                    'compare' => 'LIKE',
+                ],
+                [
+                    'key'     => 'client_email',
+                    'value'   => $search,
+                    'compare' => 'LIKE',
+                ],
+            ];
+            $clients = get_posts( $meta_args );
+        }
+
+        $results = [];
+        foreach ( $clients as $client ) {
+            $phone = get_post_meta( $client->ID, 'client_phone', true );
+            $points = dps_loyalty_get_points( $client->ID );
+            
+            $results[] = [
+                'id'     => $client->ID,
+                'text'   => $client->post_title,
+                'phone'  => $phone ? $phone : '',
+                'points' => $points,
+            ];
+        }
+
+        wp_send_json_success( $results );
+    }
+
+    /**
+     * Formata o saldo de créditos de um cliente para exibição.
+     *
+     * Padroniza a leitura e formatação de créditos em todos os pontos do add-on:
+     * - Garante que valores negativos sejam tratados como zero.
+     * - Formata usando o DPS_Money_Helper quando disponível.
+     * - Retorna string pronta para exibição (ex: "R$ 10,00").
+     *
+     * @since 1.3.0
+     *
+     * @param int $client_id ID do cliente.
+     * @return string Saldo formatado (ex: "R$ 0,00" ou "Sem créditos").
+     */
+    private function get_credit_for_display( $client_id ) {
+        $credit_cents = (int) get_post_meta( $client_id, '_dps_credit_balance', true );
+        
+        // Garante que não haja valores negativos.
+        if ( $credit_cents < 0 ) {
+            $credit_cents = 0;
+        }
+
+        // Formata usando helper ou fallback.
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credit_cents );
+        }
+
+        // Fallback: formata manualmente.
+        return 'R$ ' . number_format( $credit_cents / 100, 2, ',', '.' );
+    }
+
+    /**
+     * Formata o saldo de créditos para exibição nas métricas globais.
+     *
+     * @since 1.3.0
+     *
+     * @param int $total_credits Total de créditos em centavos.
+     * @return string Saldo formatado.
+     */
+    private function format_credits_display( $total_credits ) {
+        $credits = (int) $total_credits;
+        
+        // Garante que não haja valores negativos.
+        if ( $credits < 0 ) {
+            $credits = 0;
+        }
+
+        // Formata usando helper ou fallback.
+        if ( class_exists( 'DPS_Money_Helper' ) ) {
+            return 'R$ ' . DPS_Money_Helper::format_to_brazilian( $credits );
+        }
+
+        // Fallback: formata manualmente.
+        return 'R$ ' . number_format( $credits / 100, 2, ',', '.' );
     }
 
     public function register_post_type() {
@@ -359,6 +499,9 @@ class DPS_Loyalty_Addon {
     /**
      * Renderiza a aba de dashboard com métricas.
      *
+     * @since 1.2.0
+     * @since 1.3.0 Usa método padronizado para exibição de créditos.
+     *
      * @param array $metrics Métricas globais.
      */
     private function render_dashboard_tab( $metrics ) {
@@ -387,15 +530,7 @@ class DPS_Loyalty_Addon {
             </div>
             <div class="dps-loyalty-card dps-loyalty-card--warning">
                 <span class="dps-loyalty-card-icon">💰</span>
-                <span class="dps-loyalty-card-value">
-                    <?php 
-                    if ( class_exists( 'DPS_Money_Helper' ) ) {
-                        echo 'R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $metrics['total_credits'] ) );
-                    } else {
-                        echo 'R$ ' . esc_html( number_format( $metrics['total_credits'] / 100, 2, ',', '.' ) );
-                    }
-                    ?>
-                </span>
+                <span class="dps-loyalty-card-value"><?php echo esc_html( $this->format_credits_display( $metrics['total_credits'] ) ); ?></span>
                 <span class="dps-loyalty-card-label"><?php esc_html_e( 'Créditos em Circulação', 'dps-loyalty-addon' ); ?></span>
             </div>
         </div>
@@ -649,80 +784,66 @@ class DPS_Loyalty_Addon {
     /**
      * Renderiza a aba de consulta de clientes.
      *
+     * @since 1.2.0
+     * @since 1.3.0 Substituído dropdown por autocomplete.
+     *
      * @param int $selected_id ID do cliente selecionado.
      */
     private function render_clients_tab( $selected_id ) {
-        // Implementa paginação para melhor performance com muitos clientes.
-        $per_page = 100;
-        $paged    = isset( $_GET['loyalty_page'] ) ? max( 1, absint( $_GET['loyalty_page'] ) ) : 1;
-
-        $clients_query = new WP_Query( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => $per_page,
-            'paged'          => $paged,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
-
-        $clients = $clients_query->posts;
-        $total_pages = $clients_query->max_num_pages;
-
         $logs = $selected_id ? dps_loyalty_get_logs( $selected_id ) : [];
-        ?>
-        <h2><?php esc_html_e( 'Resumo de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
-        <form method="get">
-            <input type="hidden" name="page" value="dps-loyalty" />
-            <input type="hidden" name="tab" value="clients" />
-            <label for="dps_client_id"><?php esc_html_e( 'Selecionar cliente', 'dps-loyalty-addon' ); ?></label>
-            <select id="dps_client_id" name="dps_client_id">
-                <option value="0"><?php esc_html_e( 'Selecione um cliente', 'dps-loyalty-addon' ); ?></option>
-                <?php foreach ( $clients as $client ) : ?>
-                    <option value="<?php echo esc_attr( $client->ID ); ?>" <?php selected( $selected_id, $client->ID ); ?>><?php echo esc_html( $client->post_title ); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <?php submit_button( __( 'Filtrar', 'dps-loyalty-addon' ), 'secondary', '', false ); ?>
-        </form>
-
-        <?php
-        // Renderiza paginação de clientes se houver múltiplas páginas.
-        if ( $total_pages > 1 ) {
-            echo '<div class="dps-pagination" style="margin: 10px 0;">';
-            $prev_page = $paged > 1 ? $paged - 1 : 0;
-            $next_page = $paged < $total_pages ? $paged + 1 : 0;
-
-            // Preserva o filtro de cliente selecionado nos links de paginação.
-            $base_url = admin_url( 'admin.php?page=dps-loyalty&tab=clients' );
-            if ( $selected_id ) {
-                $base_url = add_query_arg( 'dps_client_id', $selected_id, $base_url );
+        $selected_name = '';
+        
+        // Busca nome do cliente selecionado para exibir no campo.
+        if ( $selected_id ) {
+            $selected_client = get_post( $selected_id );
+            if ( $selected_client ) {
+                $selected_name = $selected_client->post_title;
             }
-
-            if ( $prev_page ) {
-                printf(
-                    '<a class="button" href="%s">&laquo; %s</a> ',
-                    esc_url( add_query_arg( 'loyalty_page', $prev_page, $base_url ) ),
-                    esc_html__( 'Anterior', 'dps-loyalty-addon' )
-                );
-            }
-
-            printf(
-                '<span class="dps-pagination-info">%s</span>',
-                esc_html( sprintf( __( 'Página %d de %d', 'dps-loyalty-addon' ), $paged, $total_pages ) )
-            );
-
-            if ( $next_page ) {
-                printf(
-                    ' <a class="button" href="%s">%s &raquo;</a>',
-                    esc_url( add_query_arg( 'loyalty_page', $next_page, $base_url ) ),
-                    esc_html__( 'Próxima', 'dps-loyalty-addon' )
-                );
-            }
-            echo '</div>';
         }
         ?>
+        <h2><?php esc_html_e( 'Resumo de Fidelidade', 'dps-loyalty-addon' ); ?></h2>
+        
+        <!-- Formulário com autocomplete -->
+        <div class="dps-client-search-container">
+            <form method="get" id="dps-loyalty-client-form">
+                <input type="hidden" name="page" value="dps-loyalty" />
+                <input type="hidden" name="tab" value="clients" />
+                <input type="hidden" id="dps-loyalty-client-id" name="dps_client_id" value="<?php echo esc_attr( $selected_id ); ?>" />
+                
+                <label for="dps-loyalty-client-search"><?php esc_html_e( 'Buscar cliente', 'dps-loyalty-addon' ); ?></label>
+                <div class="dps-autocomplete-wrapper">
+                    <input 
+                        type="text" 
+                        id="dps-loyalty-client-search" 
+                        class="regular-text"
+                        placeholder="<?php esc_attr_e( 'Digite o nome ou telefone do cliente...', 'dps-loyalty-addon' ); ?>"
+                        value="<?php echo esc_attr( $selected_name ); ?>"
+                        autocomplete="off"
+                    />
+                    <div id="dps-loyalty-client-results" class="dps-autocomplete-results"></div>
+                </div>
+                <?php submit_button( __( 'Carregar', 'dps-loyalty-addon' ), 'secondary', '', false ); ?>
+            </form>
+            
+            <?php if ( $selected_id && $selected_name ) : ?>
+                <p class="dps-selected-client-info">
+                    <?php 
+                    printf(
+                        /* translators: %s: client name */
+                        esc_html__( 'Cliente selecionado: %s', 'dps-loyalty-addon' ),
+                        '<strong>' . esc_html( $selected_name ) . '</strong>'
+                    );
+                    ?>
+                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-loyalty&tab=clients' ) ); ?>" class="button-link">
+                        <?php esc_html_e( 'Limpar', 'dps-loyalty-addon' ); ?>
+                    </a>
+                </p>
+            <?php endif; ?>
+        </div>
 
         <?php if ( $selected_id ) : 
             $client_points = dps_loyalty_get_points( $selected_id );
-            $client_credit = dps_loyalty_get_credit( $selected_id );
+            $client_credit = $this->get_credit_for_display( $selected_id );
             $referral_code = dps_loyalty_get_referral_code( $selected_id );
             $referral_stats = DPS_Loyalty_API::get_referral_stats( $selected_id );
             $tier_info = DPS_Loyalty_API::get_loyalty_tier( $selected_id );
@@ -743,15 +864,7 @@ class DPS_Loyalty_Addon {
                 </div>
                 <div class="dps-loyalty-card dps-loyalty-card--warning">
                     <span class="dps-loyalty-card-icon">💰</span>
-                    <span class="dps-loyalty-card-value">
-                        <?php 
-                        if ( class_exists( 'DPS_Money_Helper' ) ) {
-                            echo 'R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( $client_credit ) );
-                        } else {
-                            echo 'R$ ' . esc_html( number_format( $client_credit / 100, 2, ',', '.' ) );
-                        }
-                        ?>
-                    </span>
+                    <span class="dps-loyalty-card-value"><?php echo esc_html( $client_credit ); ?></span>
                     <span class="dps-loyalty-card-label"><?php esc_html_e( 'Crédito', 'dps-loyalty-addon' ); ?></span>
                 </div>
                 <div class="dps-loyalty-card dps-loyalty-card--success">
@@ -926,11 +1039,23 @@ class DPS_Loyalty_Addon {
         exit;
     }
 
+    /**
+     * Encontra clientes elegíveis para uma campanha.
+     *
+     * @since 1.2.0
+     * @since 1.3.0 Otimizado para usar batch query em vez de N+1.
+     *
+     * @param int $campaign_id ID da campanha.
+     * @return int[] Array de IDs de clientes elegíveis.
+     */
     private function find_eligible_clients_for_campaign( $campaign_id ) {
         $eligibility      = get_post_meta( $campaign_id, 'dps_campaign_eligibility', true );
         $inactive_days    = absint( get_post_meta( $campaign_id, 'dps_campaign_inactive_days', true ) );
         $points_threshold = absint( get_post_meta( $campaign_id, 'dps_campaign_points_threshold', true ) );
         $eligible_clients = [];
+
+        $check_inactive = ! empty( $eligibility ) && in_array( 'inactive', (array) $eligibility, true );
+        $check_points   = ! empty( $eligibility ) && in_array( 'points', (array) $eligibility, true );
 
         // Limite de clientes processados por campanha (500 clientes).
         // Para bases maiores, considerar processamento em background via cron job.
@@ -940,13 +1065,30 @@ class DPS_Loyalty_Addon {
             'fields'         => 'ids',
         ] );
 
+        if ( empty( $clients ) ) {
+            return $eligible_clients;
+        }
+
+        // Carrega datas de último atendimento em batch (elimina N+1).
+        $last_appointments = [];
+        if ( $check_inactive && $inactive_days > 0 ) {
+            $last_appointments = $this->get_last_appointments_batch( $clients );
+        }
+
         foreach ( $clients as $client_id ) {
-            $passes_inactive = ! empty( $eligibility ) && in_array( 'inactive', (array) $eligibility, true )
-                ? $this->is_client_inactive_for_days( $client_id, $inactive_days )
-                : false;
-            $passes_points   = ! empty( $eligibility ) && in_array( 'points', (array) $eligibility, true )
-                ? dps_loyalty_get_points( $client_id ) >= $points_threshold
-                : false;
+            $passes_inactive = false;
+            $passes_points   = false;
+
+            // Verifica inatividade usando dados do batch.
+            if ( $check_inactive && $inactive_days > 0 ) {
+                $last_date = isset( $last_appointments[ $client_id ] ) ? $last_appointments[ $client_id ] : '';
+                $passes_inactive = $this->is_client_inactive_from_date( $last_date, $inactive_days );
+            }
+
+            // Verifica pontos.
+            if ( $check_points ) {
+                $passes_points = dps_loyalty_get_points( $client_id ) >= $points_threshold;
+            }
 
             if ( ( $passes_inactive || $passes_points ) && ! in_array( $client_id, $eligible_clients, true ) ) {
                 $eligible_clients[] = $client_id;
@@ -956,13 +1098,85 @@ class DPS_Loyalty_Addon {
         return $eligible_clients;
     }
 
-    private function is_client_inactive_for_days( $client_id, $days ) {
+    /**
+     * Retorna, em batch, a última data de atendimento por cliente.
+     *
+     * Otimização para evitar queries N+1 ao verificar inatividade.
+     *
+     * @since 1.3.0
+     *
+     * @param int[] $client_ids Array de IDs de clientes.
+     * @return array Associativo: client_id => 'Y-m-d' (data do último atendimento).
+     */
+    private function get_last_appointments_batch( $client_ids ) {
+        if ( empty( $client_ids ) ) {
+            return [];
+        }
+
+        global $wpdb;
+
+        // Sanitiza IDs.
+        $client_ids = array_map( 'absint', $client_ids );
+        $client_ids = array_filter( $client_ids );
+
+        if ( empty( $client_ids ) ) {
+            return [];
+        }
+
+        // Cria placeholders para IN clause.
+        $placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
+
+        // Query otimizada: busca a última data de atendimento para cada cliente.
+        // Usa subquery com MAX para obter apenas a data mais recente.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT 
+                    m1.meta_value AS client_id,
+                    MAX(m2.meta_value) AS last_date
+                FROM {$wpdb->postmeta} m1
+                INNER JOIN {$wpdb->postmeta} m2 
+                    ON m1.post_id = m2.post_id 
+                    AND m2.meta_key = 'appointment_date'
+                INNER JOIN {$wpdb->posts} p 
+                    ON m1.post_id = p.ID 
+                    AND p.post_type = 'dps_agendamento'
+                    AND p.post_status = 'publish'
+                WHERE m1.meta_key = 'appointment_client_id'
+                    AND m1.meta_value IN ({$placeholders})
+                GROUP BY m1.meta_value",
+                ...$client_ids
+            ),
+            OBJECT
+        );
+
+        // Converte para array associativo.
+        $appointments = [];
+        if ( $results ) {
+            foreach ( $results as $row ) {
+                $appointments[ (int) $row->client_id ] = $row->last_date;
+            }
+        }
+
+        return $appointments;
+    }
+
+    /**
+     * Verifica se um cliente está inativo com base na data do último atendimento.
+     *
+     * @since 1.3.0
+     *
+     * @param string $last_date Data do último atendimento (Y-m-d ou vazio).
+     * @param int    $days      Número de dias para considerar inativo.
+     * @return bool True se inativo, false caso contrário.
+     */
+    private function is_client_inactive_from_date( $last_date, $days ) {
         if ( $days <= 0 ) {
             return false;
         }
 
-        $last_date = $this->get_last_appointment_date_for_client( $client_id );
-        if ( ! $last_date ) {
+        // Cliente sem atendimentos é considerado inativo.
+        if ( empty( $last_date ) ) {
             return true;
         }
 
@@ -970,6 +1184,32 @@ class DPS_Loyalty_Addon {
         return $interval >= $days;
     }
 
+    /**
+     * Verifica se um cliente está inativo há X dias.
+     *
+     * @deprecated 1.3.0 Use is_client_inactive_from_date() com dados do batch.
+     *
+     * @param int $client_id ID do cliente.
+     * @param int $days      Número de dias.
+     * @return bool True se inativo.
+     */
+    private function is_client_inactive_for_days( $client_id, $days ) {
+        if ( $days <= 0 ) {
+            return false;
+        }
+
+        $last_date = $this->get_last_appointment_date_for_client( $client_id );
+        return $this->is_client_inactive_from_date( $last_date, $days );
+    }
+
+    /**
+     * Obtém a data do último atendimento de um cliente individual.
+     *
+     * @deprecated 1.3.0 Use get_last_appointments_batch() para múltiplos clientes.
+     *
+     * @param int $client_id ID do cliente.
+     * @return string Data no formato Y-m-d ou vazio.
+     */
     private function get_last_appointment_date_for_client( $client_id ) {
         $appointments = get_posts( [
             'post_type'      => 'dps_agendamento',
