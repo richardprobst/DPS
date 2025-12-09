@@ -677,8 +677,11 @@ Antes de criar uma nova versão oficial:
 - **Client Portal Add-on (v2.4.1)**: Correção de aviso "Translation loading triggered too early" no WordPress 6.7.0+
   - **Problema**: Aviso PHP Notice "Translation loading for the dps-client-portal domain was triggered too early" no WordPress 6.7.0+
   - **Causa Raiz**: Constante `DPS_CLIENT_PORTAL_PAGE_TITLE` definia valor com `__()` no nível do arquivo (linha 61), antes do hook `init`
-  - **Correção Aplicada**: Removido `__()` da definição da constante; constante agora contém string não traduzida 'Portal do Cliente'
-  - **Impacto**: Elimina avisos de carregamento prematuro de traduções nos logs; tradução deve ser feita onde a constante é usada, não na definição
+  - **Correção Aplicada**: 
+    - Removido `__()` da definição da constante; constante agora contém string não traduzida 'Portal do Cliente'
+    - Adicionada tradução onde a constante é usada para criar páginas (linha 443): `__( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' )`
+    - Busca de páginas existentes usa título não traduzido para consistência entre idiomas
+  - **Impacto**: Elimina avisos de carregamento prematuro de traduções nos logs; páginas criadas usam título traduzido conforme idioma do site
   - **Arquivos Alterados**: `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php`
   - **Compatibilidade**: Mantida retrocompatibilidade - constante ainda existe e funciona normalmente
 - **AGENDA Add-on (v1.4.1)**: Correção de PHP Warning - Undefined array key "payment"
