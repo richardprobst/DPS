@@ -553,6 +553,15 @@ class DPS_Debugging_Addon {
     }
 
     /**
+     * Alias para render_settings_page() para compatibilidade com System Hub.
+     *
+     * @since 1.1.0
+     */
+    public function render_admin_page() {
+        $this->render_settings_page();
+    }
+
+    /**
      * Renderiza a aba de configurações.
      */
     private function render_settings_tab() {

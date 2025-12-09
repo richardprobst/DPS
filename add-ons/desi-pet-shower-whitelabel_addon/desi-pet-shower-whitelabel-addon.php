@@ -233,6 +233,15 @@ class DPS_WhiteLabel_Addon {
     }
 
     /**
+     * Alias para render_settings_page() para compatibilidade com System Hub.
+     *
+     * @since 1.1.0
+     */
+    public function render_admin_page() {
+        $this->render_settings_page();
+    }
+
+    /**
      * Enfileira assets do admin.
      *
      * @param string $hook Hook da página atual.
