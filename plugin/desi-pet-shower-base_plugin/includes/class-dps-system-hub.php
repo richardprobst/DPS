@@ -72,20 +72,20 @@ class DPS_System_Hub {
         $tabs['logs'] = __( 'Logs', 'dps-base' );
         $callbacks['logs'] = [ $this, 'render_logs_tab' ];
 
-        // Aba Backup (se add-on ativo)
-        if ( class_exists( 'DPS_Backup_Addon' ) ) {
+        // Aba Backup (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Backup_Addon' ) && method_exists( 'DPS_Backup_Addon', 'get_instance' ) ) {
             $tabs['backup'] = __( 'Backup', 'dps-base' );
             $callbacks['backup'] = [ $this, 'render_backup_tab' ];
         }
 
-        // Aba Debugging (se add-on ativo)
-        if ( class_exists( 'DPS_Debugging_Addon' ) ) {
+        // Aba Debugging (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Debugging_Addon' ) && method_exists( 'DPS_Debugging_Addon', 'get_instance' ) ) {
             $tabs['debugging'] = __( 'Debugging', 'dps-base' );
             $callbacks['debugging'] = [ $this, 'render_debugging_tab' ];
         }
 
-        // Aba White Label (se add-on ativo)
-        if ( class_exists( 'DPS_WhiteLabel_Addon' ) ) {
+        // Aba White Label (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_WhiteLabel_Addon' ) && method_exists( 'DPS_WhiteLabel_Addon', 'get_instance' ) ) {
             $tabs['whitelabel'] = __( 'White Label', 'dps-base' );
             $callbacks['whitelabel'] = [ $this, 'render_whitelabel_tab' ];
         }
@@ -120,7 +120,7 @@ class DPS_System_Hub {
      * Renderiza a aba de Backup.
      */
     public function render_backup_tab() {
-        if ( class_exists( 'DPS_Backup_Addon' ) ) {
+        if ( class_exists( 'DPS_Backup_Addon' ) && method_exists( 'DPS_Backup_Addon', 'get_instance' ) ) {
             $addon = DPS_Backup_Addon::get_instance();
             ob_start();
             $addon->render_admin_page();
@@ -131,6 +131,10 @@ class DPS_System_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Backup precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 
@@ -138,7 +142,7 @@ class DPS_System_Hub {
      * Renderiza a aba de Debugging.
      */
     public function render_debugging_tab() {
-        if ( class_exists( 'DPS_Debugging_Addon' ) ) {
+        if ( class_exists( 'DPS_Debugging_Addon' ) && method_exists( 'DPS_Debugging_Addon', 'get_instance' ) ) {
             $addon = DPS_Debugging_Addon::get_instance();
             ob_start();
             $addon->render_admin_page();
@@ -149,6 +153,10 @@ class DPS_System_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Debugging precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 
@@ -156,7 +164,7 @@ class DPS_System_Hub {
      * Renderiza a aba de White Label.
      */
     public function render_whitelabel_tab() {
-        if ( class_exists( 'DPS_WhiteLabel_Addon' ) ) {
+        if ( class_exists( 'DPS_WhiteLabel_Addon' ) && method_exists( 'DPS_WhiteLabel_Addon', 'get_instance' ) ) {
             $addon = DPS_WhiteLabel_Addon::get_instance();
             ob_start();
             $addon->render_admin_page();
@@ -167,6 +175,10 @@ class DPS_System_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de White Label precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 }

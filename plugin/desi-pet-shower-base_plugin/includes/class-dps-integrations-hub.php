@@ -67,20 +67,20 @@ class DPS_Integrations_Hub {
         $tabs = [];
         $callbacks = [];
 
-        // Aba Comunicações (se add-on ativo)
-        if ( class_exists( 'DPS_Communications_Addon' ) ) {
+        // Aba Comunicações (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Communications_Addon' ) && method_exists( 'DPS_Communications_Addon', 'get_instance' ) ) {
             $tabs['communications'] = __( 'Comunicações', 'dps-base' );
             $callbacks['communications'] = [ $this, 'render_communications_tab' ];
         }
 
-        // Aba Pagamentos (se add-on ativo)
-        if ( class_exists( 'DPS_Payment_Addon' ) ) {
+        // Aba Pagamentos (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Payment_Addon' ) && method_exists( 'DPS_Payment_Addon', 'get_instance' ) ) {
             $tabs['payments'] = __( 'Pagamentos', 'dps-base' );
             $callbacks['payments'] = [ $this, 'render_payments_tab' ];
         }
 
-        // Aba Notificações Push (se add-on ativo)
-        if ( class_exists( 'DPS_Push_Addon' ) ) {
+        // Aba Notificações Push (se add-on ativo e atualizado)
+        if ( class_exists( 'DPS_Push_Addon' ) && method_exists( 'DPS_Push_Addon', 'get_instance' ) ) {
             $tabs['push'] = __( 'Notificações Push', 'dps-base' );
             $callbacks['push'] = [ $this, 'render_push_tab' ];
         }
@@ -104,7 +104,7 @@ class DPS_Integrations_Hub {
      * Renderiza a aba de Comunicações.
      */
     public function render_communications_tab() {
-        if ( class_exists( 'DPS_Communications_Addon' ) ) {
+        if ( class_exists( 'DPS_Communications_Addon' ) && method_exists( 'DPS_Communications_Addon', 'get_instance' ) ) {
             $addon = DPS_Communications_Addon::get_instance();
             ob_start();
             $addon->render_admin_page();
@@ -115,6 +115,10 @@ class DPS_Integrations_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Comunicações precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 
@@ -122,7 +126,7 @@ class DPS_Integrations_Hub {
      * Renderiza a aba de Pagamentos.
      */
     public function render_payments_tab() {
-        if ( class_exists( 'DPS_Payment_Addon' ) ) {
+        if ( class_exists( 'DPS_Payment_Addon' ) && method_exists( 'DPS_Payment_Addon', 'get_instance' ) ) {
             $addon = DPS_Payment_Addon::get_instance();
             ob_start();
             $addon->render_settings_page();
@@ -133,6 +137,10 @@ class DPS_Integrations_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Pagamentos precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 
@@ -140,7 +148,7 @@ class DPS_Integrations_Hub {
      * Renderiza a aba de Notificações Push.
      */
     public function render_push_tab() {
-        if ( class_exists( 'DPS_Push_Addon' ) ) {
+        if ( class_exists( 'DPS_Push_Addon' ) && method_exists( 'DPS_Push_Addon', 'get_instance' ) ) {
             $addon = DPS_Push_Addon::get_instance();
             ob_start();
             $addon->render_admin_page();
@@ -151,6 +159,10 @@ class DPS_Integrations_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             echo $content;
+        } else {
+            echo '<div class="notice notice-warning"><p>';
+            esc_html_e( 'O add-on de Notificações Push precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            echo '</p></div>';
         }
     }
 }
