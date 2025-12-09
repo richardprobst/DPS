@@ -1645,11 +1645,6 @@ class DPS_Debugging_Addon {
      * Renderiza a aba de Ferramentas.
      *
      * @since 1.3.0
-     */
-    /**
-     * Renderiza a aba de Ferramentas.
-     *
-     * @since 1.3.0
      * @since 1.4.0 Adicionadas opções de exportação CSV/JSON.
      */
     private function render_tools_tab() {

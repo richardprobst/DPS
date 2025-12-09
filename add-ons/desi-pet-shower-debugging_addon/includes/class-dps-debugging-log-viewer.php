@@ -1078,8 +1078,6 @@ class DPS_Debugging_Log_Viewer {
      * @return string|null Chave do módulo ou null se não identificado.
      */
     public function detect_entry_module( $entry ) {
-        $entry_lower = strtolower( $entry );
-
         foreach ( self::$known_modules as $module_key => $module_data ) {
             foreach ( $module_data['patterns'] as $pattern ) {
                 if ( false !== stripos( $entry, $pattern ) ) {
@@ -1450,7 +1448,7 @@ class DPS_Debugging_Log_Viewer {
             return;
         }
 
-        update_user_meta( $user_id, '_dps_debugging_last_visit', current_time( 'timestamp' ) );
+        update_user_meta( $user_id, '_dps_debugging_last_visit', time() );
     }
 
     /**
