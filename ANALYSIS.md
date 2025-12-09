@@ -1414,6 +1414,8 @@ add-ons/desi-pet-shower-debugging_addon/
 - CSS tema escuro para visualização de logs (inspirado em IDEs modernas)
 - **[v1.1.0]** Melhorias significativas de UX: busca, filtros, estatísticas, exportação e alertas visuais
 
+**Análise profunda**: Consulte `docs/analysis/DEBUGGING_ADDON_ANALYSIS.md` para análise detalhada de código, arquitetura, segurança, layout/UX, funcionalidades e plano de melhorias em fases (código, performance, paginação, filtros por data, agrupamento de erros recorrentes).
+
 ---
 
 ## Mapa de hooks
