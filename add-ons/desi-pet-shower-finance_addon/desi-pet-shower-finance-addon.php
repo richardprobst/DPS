@@ -2752,7 +2752,7 @@ class DPS_Finance_Addon {
      * 
      * FASE 3 - Relatórios & Visão Gerencial
      * 
-     * @since 1.4.1
+     * @since 1.5.0
      * @return array Array com dados do comparativo: current_month, previous_month, difference_value, difference_percent
      */
     private function calculate_monthly_comparison() {
@@ -2812,7 +2812,7 @@ class DPS_Finance_Addon {
      * FASE 3 - Relatórios & Visão Gerencial
      * Exibe comparação entre receita do mês atual vs mês anterior.
      * 
-     * @since 1.4.1
+     * @since 1.5.0
      */
     private function render_monthly_comparison() {
         $comparison = $this->calculate_monthly_comparison();
@@ -2855,7 +2855,7 @@ class DPS_Finance_Addon {
      * 
      * FASE 3 - Relatórios & Visão Gerencial
      * 
-     * @since 1.4.1
+     * @since 1.5.0
      * @param string $start_date Data inicial (Y-m-d) ou vazio para mês atual.
      * @param string $end_date   Data final (Y-m-d) ou vazio para mês atual.
      * @return array Array de objetos com cliente_id, cliente_nome, total_pago, qtde_transacoes
@@ -2912,7 +2912,7 @@ class DPS_Finance_Addon {
      * 
      * FASE 3 - Relatórios & Visão Gerencial
      * 
-     * @since 1.4.1
+     * @since 1.5.0
      * @param string $start_date Data inicial do período.
      * @param string $end_date   Data final do período.
      */
