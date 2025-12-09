@@ -137,6 +137,14 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **AGENDA Add-on (v1.4.1)**: Erro crítico ao acessar menu AGENDA no painel administrativo
+  - `DPS_Agenda_Addon::get_instance()` causava fatal error (linhas 93 e 112 de class-dps-agenda-hub.php)
+  - Implementado padrão singleton em `DPS_Agenda_Addon`
+  - Construtor convertido para privado com método público estático `get_instance()`
+  - Propriedade estática `$instance` adicionada para armazenar instância única
+  - Função de inicialização `dps_agenda_init_addon()` atualizada para usar `get_instance()`
+  - Alinha com padrão de todos os outros add-ons integrados aos Hubs do sistema
+  - Menu AGENDA agora funciona corretamente com suas 3 abas (Dashboard, Configurações, Capacidade)
 - **Registration Add-on (v1.0.1)**: Erro fatal ao acessar página Hub de Ferramentas
   - `DPS_Registration_Addon::get_instance()` causava fatal error (linha 96 de class-dps-tools-hub.php)
   - Implementado padrão singleton em `DPS_Registration_Addon`
