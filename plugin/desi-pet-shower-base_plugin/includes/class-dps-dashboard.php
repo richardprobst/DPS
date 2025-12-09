@@ -254,8 +254,11 @@ class DPS_Dashboard {
             // Verifica se a tabela existe antes de consultar
             $table_exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) === $table_name;
             if ( $table_exists ) {
-                $pending_payments = $wpdb->get_var(
-                    "SELECT COUNT(*) FROM {$table_name} WHERE status = 'pendente'"
+                $pending_payments = (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$table_name} WHERE status = %s",
+                        'pendente'
+                    )
                 );
             }
         }

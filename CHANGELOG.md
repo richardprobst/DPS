@@ -137,6 +137,18 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Base Plugin (v1.1.1)**: Validações defensivas em Hubs administrativos para prevenir erros fatais
+  - Adicionado `method_exists()` antes de chamar `get_instance()` em todos os Hubs
+  - DPS_Tools_Hub agora verifica existência do método antes de renderizar aba de Cadastro
+  - DPS_Integrations_Hub valida método em abas de Comunicações, Pagamentos e Push
+  - DPS_System_Hub valida método em abas de Backup, Debugging e White Label
+  - Mensagens informativas quando add-on precisa ser atualizado
+  - Previne erro "Call to undefined method" quando add-ons desatualizados estão ativos
+- **Base Plugin (v1.1.1)**: Dashboard não consulta mais tabela inexistente do Finance Add-on
+  - Adicionada verificação `SHOW TABLES LIKE` antes de consultar `wp_dps_transacoes`
+  - Query de pendências financeiras executa apenas se tabela existir no banco
+  - Previne erro "Table doesn't exist" quando Finance Add-on não criou suas tabelas
+  - Usa `$wpdb->prepare()` para segurança adicional na verificação de tabela
 - **Client Portal Add-on (v2.4.1)**: Menu "Painel Central" desaparece ao ativar o add-on
   - Registro duplicado do CPT `dps_portal_message` causava conflito de menu
   - `DPS_Client_Portal` e `DPS_Portal_Admin` ambos registravam o mesmo CPT com `show_in_menu => 'desi-pet-shower'`
