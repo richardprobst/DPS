@@ -71,6 +71,10 @@ class DPS_Portal_AJAX_Handler {
         add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         add_action( 'wp_ajax_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4
         add_action( 'wp_ajax_nopriv_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4
+        add_action( 'wp_ajax_dps_loyalty_get_history', [ $this, 'ajax_get_loyalty_history' ] );
+        add_action( 'wp_ajax_nopriv_dps_loyalty_get_history', [ $this, 'ajax_get_loyalty_history' ] );
+        add_action( 'wp_ajax_dps_loyalty_portal_redeem', [ $this, 'ajax_redeem_loyalty_points' ] );
+        add_action( 'wp_ajax_nopriv_dps_loyalty_portal_redeem', [ $this, 'ajax_redeem_loyalty_points' ] );
     }
 
     /**
@@ -91,6 +95,27 @@ class DPS_Portal_AJAX_Handler {
 
         if ( ! $client_id ) {
             wp_send_json_error( [ 'message' => __( 'Cliente não autenticado', 'dps-client-portal' ) ] );
+        }
+
+        return $client_id;
+    }
+
+    /**
+     * Valida requisições relacionadas à fidelidade no portal.
+     *
+     * @return int Client ID ou encerra com erro.
+     */
+    private function validate_loyalty_request() {
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_portal_loyalty' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Sessão inválida. Recarregue a página.', 'dps-client-portal' ) ], 403 );
+        }
+
+        $session_manager = DPS_Portal_Session_Manager::get_instance();
+        $client_id       = $session_manager->get_authenticated_client_id();
+
+        if ( ! $client_id ) {
+            wp_send_json_error( [ 'message' => __( 'Cliente não autenticado', 'dps-client-portal' ) ], 403 );
         }
 
         return $client_id;
@@ -202,6 +227,110 @@ class DPS_Portal_AJAX_Handler {
         }
 
         wp_send_json_success( [ 'marked' => count( $messages ) ] );
+    }
+
+    /**
+     * Retorna histórico paginado de pontos para o portal.
+     */
+    public function ajax_get_loyalty_history() {
+        if ( ! class_exists( 'DPS_Loyalty_API' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Fidelidade indisponível.', 'dps-client-portal' ) ], 500 );
+        }
+
+        $client_id = $this->validate_loyalty_request();
+
+        $limit  = isset( $_POST['limit'] ) ? absint( $_POST['limit'] ) : 5;
+        $offset = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+
+        $history    = DPS_Loyalty_API::get_points_history( $client_id, [ 'limit' => $limit, 'offset' => $offset ] );
+        $total_logs = count( get_post_meta( $client_id, 'dps_loyalty_points_log' ) );
+        $items      = [];
+
+        foreach ( $history as $entry ) {
+            $items[] = [
+                'context' => DPS_Loyalty_API::get_context_label( $entry['context'] ),
+                'date'    => date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) ),
+                'action'  => $entry['action'],
+                'points'  => (int) $entry['points'],
+            ];
+        }
+
+        $next_offset = $offset + $limit;
+
+        wp_send_json_success( [
+            'items'       => $items,
+            'has_more'    => $next_offset < $total_logs,
+            'next_offset' => $next_offset,
+        ] );
+    }
+
+    /**
+     * Permite resgate de pontos via portal.
+     */
+    public function ajax_redeem_loyalty_points() {
+        if ( ! class_exists( 'DPS_Loyalty_API' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Fidelidade indisponível.', 'dps-client-portal' ) ], 500 );
+        }
+
+        $client_id = $this->validate_loyalty_request();
+
+        $points_to_redeem = isset( $_POST['points'] ) ? absint( $_POST['points'] ) : 0;
+        $settings         = get_option( 'dps_loyalty_settings', [] );
+
+        if ( empty( $settings['enable_portal_redemption'] ) ) {
+            wp_send_json_error( [ 'message' => __( 'Resgate pelo portal está desativado no momento.', 'dps-client-portal' ) ] );
+        }
+
+        if ( $points_to_redeem <= 0 ) {
+            wp_send_json_error( [ 'message' => __( 'Informe uma quantidade válida de pontos.', 'dps-client-portal' ) ] );
+        }
+
+        $current_points      = DPS_Loyalty_API::get_points( $client_id );
+        $portal_min_points   = isset( $settings['portal_min_points_to_redeem'] ) ? absint( $settings['portal_min_points_to_redeem'] ) : 0;
+        $points_per_real     = isset( $settings['portal_points_per_real'] ) ? max( 1, absint( $settings['portal_points_per_real'] ) ) : 100;
+        $max_discount_cents  = isset( $settings['portal_max_discount_amount'] ) ? (int) $settings['portal_max_discount_amount'] : 0;
+        $max_points_by_cap   = $max_discount_cents > 0 ? (int) floor( ( $max_discount_cents / 100 ) * $points_per_real ) : $current_points;
+
+        if ( $portal_min_points > 0 && $points_to_redeem < $portal_min_points ) {
+            wp_send_json_error( [ 'message' => sprintf( __( 'Resgate mínimo de %d pontos.', 'dps-client-portal' ), $portal_min_points ) ] );
+        }
+
+        if ( $points_to_redeem > $current_points ) {
+            wp_send_json_error( [ 'message' => __( 'Você não possui pontos suficientes.', 'dps-client-portal' ) ] );
+        }
+
+        if ( $points_to_redeem > $max_points_by_cap ) {
+            wp_send_json_error( [ 'message' => sprintf( __( 'O máximo permitido por resgate é %d pontos.', 'dps-client-portal' ), $max_points_by_cap ) ] );
+        }
+
+        $discount_cents = (int) floor( ( $points_to_redeem / $points_per_real ) * 100 );
+
+        if ( $discount_cents <= 0 ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível converter os pontos em crédito.', 'dps-client-portal' ) ] );
+        }
+
+        $redeemed = DPS_Loyalty_API::redeem_points( $client_id, $points_to_redeem, 'portal_redemption' );
+
+        if ( false === $redeemed ) {
+            wp_send_json_error( [ 'message' => __( 'Não foi possível resgatar seus pontos.', 'dps-client-portal' ) ] );
+        }
+
+        $new_credit = DPS_Loyalty_API::add_credit( $client_id, $discount_cents, 'portal_redemption' );
+        $new_points = DPS_Loyalty_API::get_points( $client_id );
+
+        $credit_display = class_exists( 'DPS_Money_Helper' ) ? 'R$ ' . DPS_Money_Helper::format_to_brazilian( $new_credit ) : 'R$ ' . number_format( $new_credit / 100, 2, ',', '.' );
+
+        $message = sprintf(
+            __( 'Você converteu %1$d pontos em %2$s de crédito. 🎉', 'dps-client-portal' ),
+            $points_to_redeem,
+            $credit_display
+        );
+
+        wp_send_json_success( [
+            'points'  => $new_points,
+            'credit'  => $credit_display,
+            'message' => $message,
+        ] );
     }
 
     /**

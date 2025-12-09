@@ -39,6 +39,7 @@
         handleSmoothScroll();
         handleToggleDetails(); // Phase 2: toggle for financial details
         handlePortalMessages(); // Phase 2: feedback for actions
+        handleLoyalty();
         initChatWidget();
     }
 
@@ -479,6 +480,173 @@
                 }
             });
         });
+    }
+
+    /**
+     * Interações da aba de fidelidade.
+     */
+    function handleLoyalty() {
+        var section = document.querySelector('.dps-portal-loyalty');
+        if (!section || !window.dpsPortal || !window.dpsPortal.loyalty) return;
+
+        var loyaltyConfig = window.dpsPortal.loyalty;
+        var ajaxUrl = window.dpsPortal.ajaxUrl;
+
+        function copyToClipboard(text) {
+            if (!navigator.clipboard) {
+                return false;
+            }
+            navigator.clipboard.writeText(text).then(function() {
+                if (window.DPSToast) {
+                    window.DPSToast.success('Link copiado!', 2500);
+                }
+            }).catch(function() {});
+            return true;
+        }
+
+        var copyButtons = section.querySelectorAll('.dps-portal-copy');
+        copyButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var target = btn.getAttribute('data-copy-target') || '';
+                copyToClipboard(target);
+            });
+        });
+
+        var historyButton = section.querySelector('.dps-loyalty-history-more');
+        var historyList = section.querySelector('.dps-loyalty-history__list');
+        var historyTrigger = section.querySelector('.dps-loyalty-history-trigger');
+
+        if (historyTrigger && historyButton) {
+            historyTrigger.addEventListener('click', function() {
+                historyButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+
+        function appendHistoryItems(items) {
+            if (!historyList) {
+                historyList = document.createElement('ul');
+                historyList.className = 'dps-loyalty-history__list';
+                section.querySelector('.dps-loyalty-history').insertBefore(historyList, historyButton);
+            }
+
+            items.forEach(function(item) {
+                var li = document.createElement('li');
+                li.className = 'dps-loyalty-history__item';
+                var isCredit = item.action === 'add' || item.action === 'credit_add';
+                li.innerHTML = '<div><p class="dps-loyalty-history__context">' + item.context + '</p>' +
+                    '<span class="dps-loyalty-history__date">' + item.date + '</span></div>' +
+                    '<span class="dps-loyalty-history__points dps-loyalty-history__points--' + item.action + '">' + (isCredit ? '+' : '-') + item.points + '</span>';
+                historyList.appendChild(li);
+            });
+        }
+
+        function loadHistory(button) {
+            if (!button) return;
+            var offset = parseInt(button.getAttribute('data-offset'), 10) || loyaltyConfig.historyLimit || 5;
+            var limit = parseInt(button.getAttribute('data-limit'), 10) || loyaltyConfig.historyLimit || 5;
+
+            button.disabled = true;
+            button.textContent = loyaltyConfig.i18n.loading || 'Carregando...';
+
+            var formData = new FormData();
+            formData.append('action', 'dps_loyalty_get_history');
+            formData.append('nonce', loyaltyConfig.nonce);
+            formData.append('limit', limit);
+            formData.append('offset', offset);
+
+            fetch(ajaxUrl, {
+                method: 'POST',
+                body: formData
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res && res.success && res.data && res.data.items) {
+                    appendHistoryItems(res.data.items);
+
+                    if (res.data.has_more) {
+                        button.disabled = false;
+                        button.textContent = 'Carregar mais';
+                        button.setAttribute('data-offset', res.data.next_offset || (offset + limit));
+                    } else {
+                        button.remove();
+                    }
+                } else {
+                    button.disabled = false;
+                    button.textContent = 'Carregar mais';
+                }
+            }).catch(function() {
+                button.disabled = false;
+                button.textContent = 'Carregar mais';
+            });
+        }
+
+        if (historyButton) {
+            historyButton.addEventListener('click', function() {
+                loadHistory(historyButton);
+            });
+        }
+
+        var redemptionForm = section.querySelector('.dps-loyalty-redemption-form');
+        if (redemptionForm) {
+            var input = redemptionForm.querySelector('#dps-loyalty-points-input');
+            var feedback = redemptionForm.querySelector('.dps-loyalty-redemption__feedback');
+            var submitBtn = redemptionForm.querySelector('.dps-loyalty-redeem-btn');
+
+            redemptionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!submitBtn || !input) return;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = loyaltyConfig.i18n.loading || 'Carregando...';
+                feedback.textContent = '';
+
+                var formData = new FormData();
+                formData.append('action', 'dps_loyalty_portal_redeem');
+                formData.append('nonce', redemptionForm.getAttribute('data-nonce'));
+                formData.append('points', parseInt(input.value, 10) || 0);
+
+                fetch(ajaxUrl, {
+                    method: 'POST',
+                    body: formData
+                }).then(function(res) { return res.json(); }).then(function(res) {
+                    if (res && res.success && res.data) {
+                        var pointsEls = section.querySelectorAll('[data-loyalty-points]');
+                        pointsEls.forEach(function(el) { el.textContent = res.data.points; });
+                        var creditEl = section.querySelector('[data-loyalty-credit]');
+                        if (creditEl) { creditEl.textContent = res.data.credit; }
+                        feedback.textContent = res.data.message || loyaltyConfig.i18n.redeemSuccess;
+                        feedback.classList.remove('is-error');
+                        feedback.classList.add('is-success');
+                        input.value = res.data.points;
+
+                        var maxAttr = parseInt(redemptionForm.getAttribute('data-max-cents'), 10) || 0;
+                        var rate = parseInt(redemptionForm.getAttribute('data-rate'), 10) || 1;
+                        var maxByCap = maxAttr > 0 ? Math.floor((maxAttr / 100) * rate) : res.data.points;
+                        var newMax = Math.min(res.data.points, maxByCap);
+                        input.setAttribute('max', newMax);
+
+                        if (window.DPSToast) {
+                            window.DPSToast.success(res.data.message || loyaltyConfig.i18n.redeemSuccess, 5000);
+                        }
+                    } else {
+                        var msg = res && res.data && res.data.message ? res.data.message : loyaltyConfig.i18n.redeemError;
+                        feedback.textContent = msg;
+                        feedback.classList.remove('is-success');
+                        feedback.classList.add('is-error');
+                        if (window.DPSToast) {
+                            window.DPSToast.error(msg, 5000);
+                        }
+                    }
+                }).catch(function() {
+                    feedback.textContent = loyaltyConfig.i18n.redeemError;
+                    feedback.classList.add('is-error');
+                    if (window.DPSToast) {
+                        window.DPSToast.error(loyaltyConfig.i18n.redeemError, 5000);
+                    }
+                }).finally(function() {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Resgatar pontos';
+                });
+            });
+        }
     }
 
     /**

@@ -170,12 +170,40 @@ class DPS_Loyalty_API {
     /**
      * Obtém histórico de pontos do cliente.
      *
-     * @param int $client_id ID do cliente.
-     * @param int $limit     Número máximo de registros.
+     * @param int   $client_id ID do cliente.
+     * @param array $args      Argumentos opcionais: limit (int), offset (int).
      * @return array Lista de eventos.
      */
-    public static function get_points_history( $client_id, $limit = 10 ) {
-        return dps_loyalty_get_logs( $client_id, $limit );
+    public static function get_points_history( $client_id, $args = [] ) {
+        // Compatibilidade: se o segundo parâmetro for inteiro, trata como limit.
+        if ( ! is_array( $args ) ) {
+            $args = [ 'limit' => (int) $args ];
+        }
+
+        return dps_loyalty_get_logs( $client_id, $args );
+    }
+
+    /**
+     * Converte contexto técnico em rótulo amigável.
+     *
+     * @param string $context Contexto salvo no log.
+     * @return string Rótulo traduzido.
+     */
+    public static function get_context_label( $context ) {
+        $labels = [
+            'appointment_payment' => __( 'Pagamento de atendimento', 'dps-loyalty-addon' ),
+            'referral_reward'     => __( 'Recompensa de indicação', 'dps-loyalty-addon' ),
+            'credit_add'          => __( 'Crédito adicionado', 'dps-loyalty-addon' ),
+            'credit_use'          => __( 'Crédito utilizado', 'dps-loyalty-addon' ),
+            'manual_adjustment'   => __( 'Ajuste manual', 'dps-loyalty-addon' ),
+            'points_expired'      => __( 'Pontos expirados', 'dps-loyalty-addon' ),
+            'redeem'              => __( 'Resgate de pontos', 'dps-loyalty-addon' ),
+            'portal_redemption'   => __( 'Resgate no Portal', 'dps-loyalty-addon' ),
+        ];
+
+        $label = isset( $labels[ $context ] ) ? $labels[ $context ] : $context;
+
+        return apply_filters( 'dps_loyalty_context_label', $label, $context );
     }
 
     /**
