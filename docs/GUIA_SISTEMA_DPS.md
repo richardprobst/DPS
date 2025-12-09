@@ -7,7 +7,7 @@
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
-*Versão 1.2 | Última atualização: Dezembro de 2025*
+*Versão 1.3 | Última atualização: 09 de Dezembro de 2024*
 
 ---
 
@@ -324,7 +324,7 @@ O sistema possui capabilities personalizadas:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Agenda** (se disponível) ou a página de configurações
+1. Acesse **DPS by PRObst > Agenda > Configurações**
 2. Configure:
    - **Horário de funcionamento**: início e fim do expediente
    - **Intervalo entre agendamentos**: tempo mínimo entre atendimentos
@@ -340,6 +340,36 @@ O sistema possui capabilities personalizadas:
 - Filtro por status (agendado, realizado, cancelado)
 - Ações rápidas (confirmar, cancelar, reagendar)
 - Envio de lembretes via WhatsApp
+
+**🆕 Sistema de 3 Abas (v1.4.0+):**
+
+A interface de lista de agendamentos foi reorganizada em **3 abas especializadas** para melhor usabilidade:
+
+**Aba 1: Visão Rápida** (padrão)
+- Visualização enxuta e limpa
+- Campos essenciais: Horário, Pet, Tutor, Status
+- Badge de confirmação visual
+- Indicador de TaxiDog (mostra "–" se não solicitado)
+- Ideal para consulta rápida da agenda do dia
+
+**Aba 2: Operação**
+- Visualização operacional completa
+- Todos os campos de identificação + ações
+- Botões de status (Agendado → Realizado → Cancelado)
+- Botões de confirmação (WhatsApp e manual)
+- Geração de link de pagamento
+- Ações rápidas (editar, excluir)
+- Ideal para processar atendimentos
+
+**Aba 3: Detalhes**
+- Foco em informações complementares
+- Observações do atendimento
+- Observações do pet
+- Endereço completo do cliente
+- Link para mapa/GPS
+- Ideal para preparação do atendimento
+
+> 💡 **Navegação**: Alterna entre abas sem recarregar página. Preferência de aba salva em sessionStorage.
 
 ---
 
@@ -414,6 +444,25 @@ O sistema possui capabilities personalizadas:
 | Chave PIX | Painel Mercado Pago > Seu Negócio > PIX |
 | Webhook Secret | Você define e configura no MP |
 
+**🆕 Configuração via wp-config.php (v1.1.0+ - Recomendado):**
+
+Por questões de **segurança**, é altamente recomendado definir as credenciais do Mercado Pago no arquivo `wp-config.php` em vez do banco de dados:
+
+```php
+// Adicione estas linhas em wp-config.php
+define( 'DPS_MERCADOPAGO_ACCESS_TOKEN', 'seu_access_token_aqui' );
+define( 'DPS_MERCADOPAGO_WEBHOOK_SECRET', 'sua_chave_secreta_aqui' );
+define( 'DPS_MERCADOPAGO_PUBLIC_KEY', 'sua_public_key_aqui' ); // opcional
+```
+
+**Vantagens:**
+- ✅ Credenciais não ficam em texto plano no banco de dados
+- ✅ Não são expostas em backups do banco
+- ✅ Não aparecem completas na interface (apenas últimos 4 caracteres)
+- ✅ Mantém compatibilidade com configuração via painel (útil para desenvolvimento)
+
+**Ordem de prioridade**: Constantes wp-config.php → Options em banco de dados
+
 **Configuração do Webhook (OBRIGATÓRIO):**
 
 O webhook permite que pagamentos sejam confirmados automaticamente.
@@ -424,6 +473,25 @@ O webhook permite que pagamentos sejam confirmados automaticamente.
    - **URL**: `https://seusite.com.br?secret=SUA_CHAVE_SECRETA`
    - **Eventos**: `payment.created`, `payment.updated`
 4. Copie a mesma chave secreta para o campo **Webhook Secret** no DPS
+
+**🆕 Sistema de Logging e Tratamento de Erros (v1.1.0+):**
+
+O add-on agora registra detalhadamente todos os erros de geração de link de pagamento:
+
+**Metadados salvos nos agendamentos:**
+- `_dps_payment_link_status`: `success`, `error` ou `not_requested`
+- `_dps_payment_last_error`: Detalhes do erro (código, mensagem, timestamp)
+
+**Indicador visual na Agenda:**
+- Ícone "⚠️ Erro ao gerar link" quando há falha
+- Tooltip com mensagem explicativa
+- Detalhes técnicos visíveis para administradores
+
+**Validações realizadas:**
+- HTTP status code
+- Presença de campos obrigatórios na resposta (`init_point`)
+- Erros de conexão e timeout
+- Todos os erros são logados para diagnóstico
 
 **Teste:**
 1. Gere um link de pagamento de teste
@@ -491,7 +559,7 @@ Todos os envios de mensagens são processados pela `DPS_Communications_API`, gar
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Portal do Cliente**
+1. Acesse **DPS by PRObst > Portal do Cliente > Configurações**
 2. Configure:
 
 | Opção | Descrição |
@@ -500,6 +568,8 @@ Todos os envios de mensagens são processados pela `DPS_Communications_API`, gar
 | Permitir Edição | Se clientes podem editar dados |
 | Exibir Financeiro | Se pendências são visíveis |
 | Exibir Fidelidade | Se pontos aparecem no portal |
+
+> 💡 **Novidade v2.4.1+**: A página do portal é criada automaticamente na ativação do add-on. O sistema verifica continuamente se a página existe, está publicada e contém o shortcode correto, exibindo avisos caso haja problemas.
 
 **Sistema de Tokens (Acesso sem Senha):**
 
@@ -511,8 +581,46 @@ O portal usa "magic links" em vez de senhas:
 4. Tokens podem ser temporários (30min) ou permanentes (até revogação)
 
 **Gerenciamento de Acessos:**
-- Acesse **DPS by PRObst > Logins de Clientes**
+- Acesse **DPS by PRObst > Portal do Cliente > Logins**
 - Gere tokens, revogue acessos, visualize histórico
+
+**🆕 Funcionalidades Avançadas (v2.4.0+):**
+
+**Timeline de Serviços:**
+- Visualização do histórico completo de atendimentos de cada pet
+- Linha do tempo visual com data, serviços realizados e observações
+- Botão "Repetir este Serviço" para facilitar novo agendamento
+- Organizado por pet em aba dedicada "Histórico dos Pets"
+
+**Sistema de Pedidos de Agendamento:**
+- Cliente pode solicitar **novo agendamento**, **reagendamento** ou **cancelamento**
+- Escolha de data desejada e período (manhã/tarde)
+- Todos os pedidos ficam com status "pendente" até aprovação da equipe
+- Dashboard de "Solicitações Recentes" exibe últimos 5 pedidos com status colorido
+
+> ⚠️ **Importante**: Pedidos são apenas SOLICITAÇÕES que precisam de confirmação da equipe. Nada é agendado automaticamente.
+
+**Central de Mensagens:**
+- Aba dedicada "Mensagens" 💬 com contador de não lidas
+- Mensagens organizadas por tipo (confirmação, lembrete, mudança, geral)
+- Link direto para agendamentos relacionados
+- Marcação automática como lida ao visualizar
+
+**Preferências do Cliente e do Pet:**
+- **Preferências do Cliente**: canal de contato preferido, período preferido para banho
+- **Preferências do Pet**: comportamento, preferências de corte/tosa, produtos especiais
+- Informações salvas para melhor atendimento pela equipe
+
+**Branding Customizável:**
+- Upload de logo personalizado do estabelecimento
+- Seleção de cor primária customizada
+- Imagem hero/destaque no topo do portal
+- Portal reflete identidade visual única de cada banho e tosa
+
+**Notificações de Acesso:**
+- E-mail automático enviado ao cliente quando o portal é acessado via token
+- Inclui data/hora e IP parcialmente ofuscado
+- Cliente pode reportar acessos não reconhecidos
 
 ---
 
@@ -526,7 +634,7 @@ O portal usa "magic links" em vez de senhas:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Assistente de IA**
+1. Acesse **DPS by PRObst > Assistente de IA > Configurações**
 2. Configure:
 
 | Campo | Descrição | Recomendação |
@@ -558,6 +666,68 @@ A IA responde APENAS sobre:
 - ✅ Pagamentos e fidelidade
 - ❌ Assuntos aleatórios (política, esportes, etc.)
 - ❌ Questões médicas veterinárias (orienta procurar veterinário)
+
+**🆕 Funcionalidades Avançadas (v1.7.0+):**
+
+**Dashboard de Insights:**
+- Página dedicada com métricas consolidadas de uso da IA
+- KPIs principais: conversas, mensagens, taxa de resolução, custo estimado
+- Top 10 perguntas mais frequentes
+- Horários de pico e dias da semana com mais uso
+- Top 10 clientes mais engajados
+- Estatísticas por canal (web_chat, portal, whatsapp)
+- Filtros de período customizados
+- Gráficos interativos com Chart.js
+
+**Modo Especialista:**
+- Chat interno exclusivo para equipe administrativa
+- Comandos especiais para buscar dados:
+  - `/buscar_cliente [nome]`: Busca cliente por nome/email
+  - `/historico [cliente_id]`: Exibe últimas conversas de um cliente
+  - `/metricas [dias]`: Mostra métricas dos últimos N dias
+  - `/conversas [canal]`: Lista conversas de um canal específico
+- Respostas com contexto técnico (IDs, timestamps, métricas detalhadas)
+- Histórico persistente com `channel='admin_specialist'`
+
+**Sugestões Proativas de Agendamento:**
+- Sistema inteligente que sugere agendamentos automaticamente
+- Analisa último serviço do cliente e calcula tempo decorrido
+- Sugere novo agendamento se passaram mais de X dias (configurável)
+- Cooldown entre sugestões para não ser invasivo
+- Mensagens customizáveis com variáveis dinâmicas ({pet_name}, {weeks}, {service})
+
+**Entrada por Voz:**
+- Botão de microfone no chat público
+- Integração com Web Speech API
+- Reconhecimento em português do Brasil (pt-BR)
+- Feedback visual durante captura ("ouvindo...")
+- Texto transcrito pode ser editado antes de enviar
+
+**Integração WhatsApp Business:**
+- Endpoint REST API para receber mensagens via webhook
+- Suporte a múltiplos providers (Meta, Twilio, Custom)
+- Conversas gravadas com `channel='whatsapp'`
+- Respostas automáticas enviadas de volta ao WhatsApp
+- Configurações específicas por provider na página de settings
+
+**Histórico de Conversas Persistente:**
+- Todas as conversas salvas em banco de dados
+- Página administrativa "Conversas IA" para visualizar histórico
+- Filtros por canal, status e período
+- Detalhes completos de cada conversa com metadados
+- Reutilização de conversas ativas (24h para portal, 2h para web_chat)
+
+**Base de Conhecimento:**
+- Interface administrativa para gerenciar artigos
+- Sistema de matching por keywords
+- Validação de tamanho de artigos com estimativa de tokens
+- Interface de teste para validar quais artigos seriam selecionados
+- Badges de prioridade e tamanho
+
+**Acessibilidade:**
+- Validação de contraste de cores (WCAG AA)
+- Avisos visuais se contraste insuficiente
+- Indicador específico de rate limit com contagem regressiva
 
 ---
 
@@ -903,6 +1073,46 @@ Cada aba apresenta:
 - Botões de ação (adicionar, editar, excluir)
 - Paginação para navegação
 
+**🆕 Navegação Administrativa Reorganizada:**
+
+Os menus administrativos do DPS foram reorganizados de 21 itens espalhados para **módulos consolidados com abas internas**. Isso reduz a poluição visual e facilita a navegação:
+
+**Módulos Principais:**
+
+1. **📅 Agenda** (`DPS by PRObst > Agenda`)
+   - Aba: Dashboard - Métricas e gráficos operacionais
+   - Aba: Configurações - Horários, capacidade, regras
+   - Aba: Capacidade - Gestão de capacidade (futuro)
+
+2. **🤖 Assistente de IA** (`DPS by PRObst > Assistente de IA`)
+   - Aba: Configurações - API OpenAI, modelo GPT, prompts
+   - Aba: Analytics - Métricas de uso da IA
+   - Aba: Conversas - Histórico completo de conversas
+   - Aba: Base de Conhecimento - Gerenciar artigos
+   - Aba: Testar Base - Validar matching de perguntas
+   - Aba: Modo Especialista - Chat interno para admin
+   - Aba: Insights - Dashboard de insights
+
+3. **👤 Portal do Cliente** (`DPS by PRObst > Portal do Cliente`)
+   - Aba: Configurações - Cores, logo, branding
+   - Aba: Logins - Credenciais de acesso
+   - Aba: Mensagens - Mensagens do portal (integração com CPT)
+
+4. **🎁 Fidelidade & Campanhas** (`DPS by PRObst > Fidelidade & Campanhas`)
+   - Aba: Fidelidade - Programa de pontos
+   - Aba: Campanhas - Gerenciamento de campanhas
+
+5. **🔧 Sistema** (`DPS by PRObst > Sistema`)
+   - Aba: Dashboard - Visão geral do sistema
+   - Aba: Logs - Visualizar logs de sistema
+   - Aba: Integrações - Status de integrações
+
+6. **🛠️ Ferramentas** (`DPS by PRObst > Ferramentas`)
+   - Aba: Backup & Restauração
+   - Aba: Debugging - Constantes de debug e visualizador de logs
+
+> 💡 **Dica**: Cada módulo mantém a aba ativa na URL, permitindo salvar links diretos para seções específicas.
+
 ### Gestão de Clientes
 
 **Adicionar Cliente:**
@@ -1217,6 +1427,27 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `[dps_groomer_login]` | Groomers | Página de login do groomer |
 | `[dps_groomer_dashboard]` | Groomers | Dashboard individual (param: `groomer_id`) |
 | `[dps_groomer_agenda]` | Groomers | Agenda semanal (param: `groomer_id`) |
+| `[dps_ai_public_chat]` | AI | Chat público com assistente de IA (v1.6.0+) |
+
+**🆕 Atributos do shortcode `[dps_ai_public_chat]`:**
+
+```
+[dps_ai_public_chat 
+    mode="widget"              // ou "embedded"
+    theme="light"              // ou "dark"
+    position="bottom-right"    // para mode="widget"
+    title="Tire suas dúvidas"
+    subtitle="Estamos aqui para ajudar"
+    placeholder="Digite sua mensagem..."
+    primary_color="#2271b1"
+    show_faqs="true"          // ou "false"
+]
+```
+
+**Rate limiting do chat público:**
+- 10 mensagens por minuto por IP
+- 60 mensagens por hora por IP
+- Indicador visual de rate limit com contagem regressiva
 
 ### Roles e Capabilities
 
@@ -1252,6 +1483,9 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | Campanhas | `dps_campaign` | nome, período, regras |
 | Assinaturas | `dps_subscription` | cliente_id, plano, frequência, valor |
 | Estoque | `dps_stock_item` | nome, quantidade, mínimo |
+| Mensagens do Portal | `dps_portal_message` | cliente_id, mensagem, tipo, status |
+| Pedidos de Agendamento | `dps_appt_request` | cliente_id, pet_id, tipo, data desejada, status (v2.4.0+) |
+| Base de Conhecimento IA | `dps_kb_article` | título, conteúdo, keywords, prioridade (v1.6.2+) |
 
 **Tabelas Customizadas:**
 
@@ -1265,6 +1499,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 | `wp_dps_groomer_tokens` | Groomers | Tokens de acesso de groomers |
 | `wp_dps_email_logs` | White Label | Logs de e-mails enviados |
 | `wp_dps_activity_logs` | White Label | Logs de atividade no sistema |
+| `wp_dps_ai_conversations` | AI (v1.7.0+) | Conversas do assistente de IA |
+| `wp_dps_ai_messages` | AI (v1.7.0+) | Mensagens dentro das conversas |
 
 ---
 
