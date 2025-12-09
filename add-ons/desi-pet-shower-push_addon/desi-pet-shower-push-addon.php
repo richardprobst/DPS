@@ -70,6 +70,25 @@ class DPS_Push_Addon {
     const VAPID_KEY = 'dps_push_vapid_keys';
 
     /**
+     * Instância única (singleton).
+     *
+     * @var DPS_Push_Addon|null
+     */
+    private static $instance = null;
+
+    /**
+     * Recupera a instância única.
+     *
+     * @return DPS_Push_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Construtor.
      */
     public function __construct() {
@@ -586,7 +605,7 @@ class DPS_Push_Addon {
  */
 function dps_push_init_addon() {
     if ( class_exists( 'DPS_Push_Addon' ) ) {
-        new DPS_Push_Addon();
+        DPS_Push_Addon::get_instance();
     }
 }
 add_action( 'init', 'dps_push_init_addon', 5 );
