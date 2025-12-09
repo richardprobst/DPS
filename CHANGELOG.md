@@ -137,6 +137,13 @@ Antes de criar uma nova versão oficial:
   - `inject_payment_link_in_message()` salva flags de sucesso/erro
 
 #### Fixed (Corrigido)
+- **Client Portal Add-on (v2.4.1)**: Menu "Painel Central" desaparece ao ativar o add-on
+  - Registro duplicado do CPT `dps_portal_message` causava conflito de menu
+  - `DPS_Client_Portal` e `DPS_Portal_Admin` ambos registravam o mesmo CPT com `show_in_menu => 'desi-pet-shower'`
+  - WordPress sobrescreve callback do menu pai quando CPT usa `show_in_menu`, causando desaparecimento do "Painel Central"
+  - Removido registro duplicado em `DPS_Client_Portal` (linha 72), mantendo apenas em `DPS_Portal_Admin`
+  - Menu "Painel Central" agora permanece visível após ativar Client Portal
+  - CPT "Mensagens do Portal" continua aparecendo corretamente no menu DPS
 - **AGENDA Add-on (v1.4.1)**: Erro crítico ao acessar menu AGENDA no painel administrativo
   - `DPS_Agenda_Addon::get_instance()` causava fatal error (linhas 93 e 112 de class-dps-agenda-hub.php)
   - Implementado padrão singleton em `DPS_Agenda_Addon`
