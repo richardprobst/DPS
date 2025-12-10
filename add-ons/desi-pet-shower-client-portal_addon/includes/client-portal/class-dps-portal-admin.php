@@ -603,7 +603,7 @@ class DPS_Portal_Admin {
 
     /**
      * Renderiza a página de configurações do portal.
-     * 
+     *
      * @param string $base_url URL base da página.
      */
     public function render_portal_settings_page( $base_url = '' ) {
@@ -614,9 +614,39 @@ class DPS_Portal_Admin {
             return;
         }
 
+        $feedback_messages = [];
+        $saved_param       = isset( $_GET['dps_portal_settings_saved'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_portal_settings_saved'] ) ) : '';
+
+        if ( '1' === $saved_param ) {
+            $feedback_messages[] = [
+                'type' => 'success',
+                'text' => __( 'Configurações do portal salvas com sucesso!', 'dps-client-portal' ),
+            ];
+        }
+
+        $base_url = $base_url ? $base_url : menu_page_url( 'dps-client-portal-settings', false );
+
+        $portal_page_id = (int) get_option( 'dps_portal_page_id', 0 );
+        $portal_url     = dps_get_portal_page_url();
+
+        if ( ! is_string( $portal_url ) ) {
+            $portal_url = '';
+        }
+
+        $pages = get_pages(
+            [
+                'post_status' => 'publish',
+                'sort_column' => 'post_title',
+            ]
+        );
+
+        if ( ! is_array( $pages ) ) {
+            $pages = [];
+        }
+
         // Carrega template
         $template_path = DPS_CLIENT_PORTAL_ADDON_DIR . 'templates/portal-settings.php';
-        
+
         if ( file_exists( $template_path ) ) {
             include $template_path;
         } else {
