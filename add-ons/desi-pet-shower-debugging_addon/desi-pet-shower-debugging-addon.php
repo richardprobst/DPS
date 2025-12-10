@@ -641,14 +641,14 @@ class DPS_Debugging_Addon {
 
             switch ( $format ) {
                 case 'csv':
-                    $entries = $log_viewer->get_parsed_entries();
+                    $entries = $log_viewer->get_entries();
                     $content = $log_viewer->export_to_csv( $entries );
                     $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.csv';
                     $content_type = 'text/csv; charset=utf-8';
                     break;
 
                 case 'json':
-                    $entries = $log_viewer->get_parsed_entries();
+                    $entries = $log_viewer->get_entries();
                     $content = $log_viewer->export_to_json( $entries );
                     $filename = 'debug-log-' . gmdate( 'Y-m-d-H-i-s' ) . '.json';
                     $content_type = 'application/json; charset=utf-8';
@@ -816,7 +816,7 @@ class DPS_Debugging_Addon {
         $stats = $log_exists ? $log_viewer->get_entry_stats() : [];
 
         // Conta novos erros desde última visita
-        $all_entries = $log_exists ? $log_viewer->get_parsed_entries() : [];
+        $all_entries = $log_exists ? $log_viewer->get_entries() : [];
         $new_count = $log_viewer->count_new_since_last_visit( $all_entries );
 
         // Módulos conhecidos
