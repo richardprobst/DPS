@@ -197,6 +197,7 @@ class DPS_Debugging_Addon {
 
         // Hooks de admin
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
+        add_action( 'admin_menu', [ $this, 'hide_admin_menu_entry' ], 999 );
         add_action( 'admin_init', [ $this, 'handle_settings_save' ] );
         add_action( 'admin_init', [ $this, 'handle_log_actions' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -373,6 +374,13 @@ class DPS_Debugging_Addon {
             'dps-debugging',
             [ $this, 'render_settings_page' ]
         );
+    }
+
+    /**
+     * Remove a entrada do menu para manter a página oculta.
+     */
+    public function hide_admin_menu_entry() {
+        remove_submenu_page( 'desi-pet-shower', 'dps-debugging' );
     }
 
     /**
