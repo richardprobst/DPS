@@ -364,8 +364,6 @@ class DPS_Debugging_Addon {
 
     /**
      * Registra menu administrativo.
-     * 
-     * NOTA: O menu permanece oculto; use o hub unificado em dps-system-hub para acessar via aba "Debugging".
      */
     public function register_admin_menu() {
         add_submenu_page(
