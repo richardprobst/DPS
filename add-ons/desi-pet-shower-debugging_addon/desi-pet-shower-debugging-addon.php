@@ -363,13 +363,10 @@ class DPS_Debugging_Addon {
 
     /**
      * Registra menu administrativo.
-     * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-system-hub para acessar via aba "Debugging".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Debugging', 'dps-debugging-addon' ),
             __( 'Debugging', 'dps-debugging-addon' ),
             'manage_options',
@@ -706,9 +703,14 @@ class DPS_Debugging_Addon {
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Arquivo de debug limpo com sucesso!', 'dps-debugging-addon' ) . '</p></div>';
         }
 
+        $page_title = get_admin_page_title();
+        if ( empty( $page_title ) ) {
+            $page_title = __( 'Debugging', 'dps-debugging-addon' );
+        }
+
         ?>
         <div class="wrap dps-debugging-wrap">
-            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <h1><?php echo esc_html( $page_title ); ?></h1>
 
             <nav class="nav-tab-wrapper dps-debugging-tabs">
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-debugging&tab=logs' ) ); ?>" 
