@@ -267,6 +267,20 @@ class DPS_Debugging_Log_Viewer {
     }
 
     /**
+     * Retorna entradas parseadas para consumo externo.
+     *
+     * Mantém o cache interno e evita acesso direto ao método privado
+     * em outras classes do add-on.
+     *
+     * @since 1.4.0
+     *
+     * @return array Entradas parseadas.
+     */
+    public function get_entries() {
+        return $this->get_parsed_entries();
+    }
+
+    /**
      * Obtém o conteúdo formatado do arquivo de log.
      *
      * Retorna o conteúdo do log com formatação HTML incluindo:
