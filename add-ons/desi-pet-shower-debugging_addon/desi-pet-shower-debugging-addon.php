@@ -197,6 +197,7 @@ class DPS_Debugging_Addon {
 
         // Hooks de admin
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
+        add_action( 'admin_menu', [ $this, 'hide_admin_menu_entry' ], 999 );
         add_action( 'admin_init', [ $this, 'handle_settings_save' ] );
         add_action( 'admin_init', [ $this, 'handle_log_actions' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -364,18 +365,24 @@ class DPS_Debugging_Addon {
     /**
      * Registra menu administrativo.
      * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-system-hub para acessar via aba "Debugging".
+     * NOTA: O menu permanece oculto; use o hub unificado em dps-system-hub para acessar via aba "Debugging".
      */
     public function register_admin_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Debugging', 'dps-debugging-addon' ),
             __( 'Debugging', 'dps-debugging-addon' ),
             'manage_options',
             'dps-debugging',
             [ $this, 'render_settings_page' ]
         );
+    }
+
+    /**
+     * Remove a entrada do menu para manter a página oculta.
+     */
+    public function hide_admin_menu_entry() {
+        remove_submenu_page( 'desi-pet-shower', 'dps-debugging' );
     }
 
     /**
@@ -706,9 +713,14 @@ class DPS_Debugging_Addon {
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Arquivo de debug limpo com sucesso!', 'dps-debugging-addon' ) . '</p></div>';
         }
 
+        $page_title = get_admin_page_title();
+        if ( empty( $page_title ) ) {
+            $page_title = __( 'Debugging', 'dps-debugging-addon' );
+        }
+
         ?>
         <div class="wrap dps-debugging-wrap">
-            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <h1><?php echo esc_html( $page_title ); ?></h1>
 
             <nav class="nav-tab-wrapper dps-debugging-tabs">
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=dps-debugging&tab=logs' ) ); ?>" 
