@@ -1,161 +1,156 @@
-# Resumo do Add-on Registration (Cadastro Público)
+# Resumo Executivo — Add-on Registration (Cadastro Público)
 
 **Plugin:** DPS by PRObst – Cadastro Add-on  
 **Versão Analisada:** 1.0.1  
 **Data da Análise:** 2024-12-12  
 **Analista:** Copilot Coding Agent  
-**Total de Linhas:** ~1.144 linhas (PHP: ~737 + CSS: ~407)
+**Arquivos Analisados:** `desi-pet-shower-registration-addon.php` (737 linhas), `assets/css/registration-addon.css` (407 linhas)
+
+> **Contexto**: Este add-on é estratégico para pet shops pois define como novos clientes (tutores) entram no sistema, a qualidade dos dados iniciais capturados, e a primeira impressão do negócio.
 
 ---
 
-## VISÃO GERAL
+## O QUE O ADD-ON FAZ HOJE
 
-O **Registration Add-on** é um componente estratégico do sistema DPS by PRObst, responsável por permitir que **novos clientes se cadastrem de forma autônoma** via formulário público na web. Este add-on define a **porta de entrada** do sistema para tutores de pets que desejam utilizar os serviços de banho e tosa.
+O **Registration Add-on** permite que **tutores de pets se cadastrem autonomamente** via formulário web público, sem necessidade de intervenção da equipe do pet shop. 
 
-### O que o add-on faz hoje
+### Funcionalidades Implementadas
 
-1. **Formulário Público de Cadastro**: Renderiza um formulário completo via shortcode `[dps_registration_form]` para clientes cadastrarem seus dados pessoais e informações de um ou mais pets.
+| Funcionalidade | Descrição | Status |
+|----------------|-----------|--------|
+| **Formulário público** | Shortcode `[dps_registration_form]` renderiza formulário completo de cadastro | ✅ Funcional |
+| **Cadastro de cliente** | Cria post `dps_cliente` com dados pessoais (nome, CPF, telefone, email, endereço) | ✅ Funcional |
+| **Cadastro de pets** | Cria posts `dps_pet` vinculados ao cliente (espécie, raça, porte, etc.) | ✅ Funcional |
+| **Multi-pet** | Permite cadastrar múltiplos pets em uma única submissão via JavaScript | ✅ Funcional |
+| **Confirmação de email** | Envia email com token UUID para ativar cadastro | ✅ Funcional |
+| **Autocomplete de endereço** | Integração opcional com Google Places API | ✅ Funcional |
+| **Integração Indique e Ganhe** | Hook para Loyalty registrar indicações via `?ref=CODIGO` | ✅ Funcional |
 
-2. **Criação de Registros**: Cria posts do tipo `dps_cliente` (cliente/tutor) e `dps_pet` (animais de estimação) ao receber o formulário, vinculando pets ao cliente.
+### O que NÃO faz (mas poderia)
 
-3. **Integração com Google Maps**: Oferece autocomplete de endereços usando a API do Google Places, capturando coordenadas de latitude/longitude para uso futuro (ex.: TaxiDog).
-
-4. **Confirmação por Email**: Envia email com link de confirmação para ativar o cadastro do cliente. Clientes não confirmados ficam com status `dps_email_confirmed = 0` e `dps_is_active = 0`.
-
-5. **Integração com Fidelidade**: Dispara hook `dps_registration_after_client_created` após criar cliente, permitindo que o Loyalty Add-on registre indicações ("Indique e Ganhe").
-
-6. **Campo de Referência**: Aceita parâmetro URL `?ref=CODIGO` para pré-preencher código de indicação no formulário.
+- ❌ Validação real de CPF/CNPJ (dígitos verificadores)
+- ❌ Verificação de duplicatas (email/telefone já cadastrados)
+- ❌ Rate limiting (proteção contra spam)
+- ❌ Notificação automática para equipe
+- ❌ Mensagem de boas-vindas via WhatsApp/Email
+- ❌ Link automático para Portal do Cliente
+- ❌ Estatísticas de cadastros
 
 ---
 
-## ONDE O ADD-ON É USADO
+## ONDE É USADO
 
-| Local | Descrição |
-|-------|-----------|
-| **Página Pública** | Página WordPress criada automaticamente na ativação contendo o shortcode `[dps_registration_form]` |
-| **Hub de Ferramentas** | Configurações acessíveis em `DPS by PRObst → Ferramentas → Formulário de Cadastro` |
-| **Links Externos** | Links de indicação compartilhados por clientes existentes (formato: `site.com/cadastro?ref=CODIGO`) |
-| **Portal do Cliente** | Client Portal usa a página de cadastro como fallback para URL de indicação |
+| Local | Como | Evidência |
+|-------|------|-----------|
+| **Página Pública** | Shortcode em página criada automaticamente na ativação | `activate()` linha 126-144 |
+| **Hub de Ferramentas** | Menu admin oculto (parent=null), acessível via DPS_Tools_Hub | `add_settings_page()` linha 152-161 |
+| **Links de Indicação** | URL com parâmetro `?ref=CODIGO` | Loyalty consome via hook |
+| **Portal do Cliente** | Fallback para URL de indicação em `class-dps-client-portal.php:2269` | `get_option('dps_registration_page_id')` |
 
 ---
 
 ## PONTOS FORTES ✅
 
-### 1. Segurança Básica Implementada
-- ✅ **Nonce CSRF**: Implementado corretamente com `wp_nonce_field()` e `check_admin_referer()`
-- ✅ **Honeypot anti-bot**: Campo oculto `dps_hp_field` que rejeita submissões de bots
-- ✅ **Sanitização de entrada**: Todos os campos sanitizados com `sanitize_text_field()`, `sanitize_email()`, `sanitize_textarea_field()`
-- ✅ **Hook para validação adicional**: Filtro `dps_registration_spam_check` permite adicionar reCAPTCHA
+### Segurança Básica
+- **Nonce CSRF**: `wp_nonce_field('dps_reg_action')` + `check_admin_referer()` (linhas 203-205, 386)
+- **Honeypot**: Campo oculto `dps_hp_field` rejeita submissões de bots (linhas 207-210, 387-390)
+- **Sanitização**: Todos os campos usam `sanitize_text_field()`, `sanitize_email()`, `sanitize_textarea_field()` (linhas 218-232)
+- **Hook extensível**: Filtro `dps_registration_spam_check` permite adicionar reCAPTCHA (linhas 213-216)
 
-### 2. Arquitetura de Hooks Bem Definida
-- ✅ **Hook de extensão**: `dps_registration_after_fields` permite add-ons adicionarem campos
-- ✅ **Hook de integração**: `dps_registration_after_client_created` notifica outros add-ons após criar cliente
-- ✅ **Parâmetros completos**: Hook inclui `$referral_code`, `$client_id`, `$client_email`, `$client_phone`
+### Arquitetura de Hooks
+- **Action `dps_registration_after_fields`**: Permite add-ons injetarem campos extras no formulário (linha 417)
+- **Action `dps_registration_after_client_created`**: Notifica outros add-ons após criar cliente com 4 parâmetros (linha 264)
 
-### 3. UX Responsiva
-- ✅ **CSS responsivo**: Breakpoints em 768px, 640px e 480px
-- ✅ **Grid adaptativo**: Campos em 2 colunas no desktop, 1 coluna no mobile
-- ✅ **Acessibilidade básica**: Inputs com foco visível, labels associados
-- ✅ **Adição dinâmica de pets**: JavaScript permite cadastrar múltiplos pets
-
-### 4. Integração com Ecossistema
-- ✅ **Singleton pattern**: Implementado corretamente para integração com Tools Hub
-- ✅ **Página automática**: Cria página de cadastro na ativação do plugin
-- ✅ **Confirmação de email**: Sistema básico de verificação de email implementado
+### UX Responsiva
+- CSS com breakpoints 768px/640px/480px
+- Grid adaptativo (2 colunas desktop → 1 coluna mobile)
+- Datalist com ~94 raças pré-populadas
+- Adição dinâmica de pets via JavaScript
 
 ---
 
 ## PONTOS FRACOS ❌
 
-### 1. Validação Frágil de Dados (CRÍTICO)
-- ❌ **Sem validação de CPF**: Aceita qualquer texto como CPF (não valida dígitos verificadores) - **RISCO DE DADOS CORRUPTOS**
-- ❌ **Sem validação de telefone**: Aceita qualquer formato de telefone - **COMUNICAÇÕES PODEM FALHAR**
-- ❌ **Sem validação de email**: Apenas `sanitize_email()`, não verifica sintaxe real - **CONFIRMAÇÕES NÃO CHEGAM**
-- ❌ **Sem verificação de duplicatas**: Permite múltiplos cadastros com mesmo email/telefone - **BASE FRAGMENTADA**
-- ❌ **Sem campos obrigatórios no backend**: Apenas `client_name` é validado; outros campos podem ficar vazios - **DADOS INCOMPLETOS**
+### 1. Validação de Dados (CRÍTICO)
+| Campo | Problema | Impacto |
+|-------|----------|---------|
+| **CPF** | Aceita qualquer texto, sem algoritmo mod 11 | CPFs inválidos na base, impossível validar cliente |
+| **Telefone** | Sem regex ou máscara, aceita "abc" | WhatsApp não funciona, cobrança falha |
+| **Email** | Apenas `sanitize_email()`, não usa `is_email()` | Emails inválidos, confirmação nunca chega |
+| **Campos obrigatórios** | Só `client_name` é validado no backend | Cadastros incompletos (telefone vazio) |
 
-### 2. Ausência de Rate Limiting
-- ❌ **Sem proteção contra flood**: Bots podem submeter formulários em massa
-- ❌ **Sem cooldown por IP**: Mesmo usuário pode cadastrar-se infinitamente
-- ❌ **Honeypot é fraco**: Bots sofisticados ignoram honeypots simples
+### 2. Verificação de Duplicatas (CRÍTICO)
+- **Problema**: `wp_insert_post()` é chamado diretamente sem verificar se email/telefone/CPF já existe (linha 237)
+- **Impacto**: Base fragmentada, cliente com múltiplos registros, histórico distribuído
 
-### 3. UX Incompleta
-- ❌ **Mensagem genérica de sucesso**: Não explica próximos passos (verificar email)
-- ❌ **Sem validação client-side**: Usuário só descobre erros após submeter
-- ❌ **Formulário longo**: ~18 campos visíveis podem intimidar novos usuários
-- ❌ **Sem indicador de progresso**: Usuário não sabe quanto falta para completar
-- ❌ **Sem máscara de entrada**: CPF, telefone e datas sem formatação automática
+### 3. Segurança Adicional
+| Item | Status | Risco |
+|------|--------|-------|
+| Rate limiting | ❌ Ausente | Bots podem criar milhares de cadastros |
+| Token expiração | ❌ UUID sem timestamp | Link de confirmação válido para sempre |
+| Enumeração | ⚠️ Parcial | Mensagem "email já existe" pode vazar informação |
 
-### 4. Integrações Incompletas
-- ❌ **Sem notificação para admin**: Equipe não sabe quando há novo cadastro
-- ❌ **Sem integração com Communications**: Não dispara boas-vindas automáticas
-- ❌ **Sem vínculo automático com Portal**: Cliente não recebe acesso imediato ao Portal
+### 4. UX/Onboarding
+- Mensagem de sucesso genérica (não menciona verificar email)
+- Sem validação client-side (erros só após submit)
+- Formulário longo (~18 campos visíveis)
+- Sem indicador de loading no botão
+- Sem CTA para primeiro agendamento
 
-### 5. Arquitetura de Código
-- ❌ **Arquivo único monolítico**: 737 linhas em um só arquivo
-- ❌ **Sem separação de responsabilidades**: Lógica de formulário, validação e persistência misturadas
-- ❌ **Scripts inline**: JavaScript embutido no HTML em vez de arquivo separado
-- ❌ **Sem classes de validação**: Não usa `DPS_Request_Validator` disponível no core
+### 5. Arquitetura
+- **Arquivo único monolítico**: 737 linhas em 1 arquivo
+- **JavaScript inline**: ~40 linhas de JS embutido no HTML (linhas 538-550)
+- **Duplicação de código**: `get_pet_fieldset_html()` e `get_pet_fieldset_html_placeholder()` são ~90% idênticos
+- **Não usa helpers do core**: `DPS_Request_Validator`, `DPS_Phone_Helper`, `DPS_Message_Helper` disponíveis mas não utilizados
 
 ---
 
 ## RISCOS TÉCNICOS E DE SEGURANÇA ⚠️
 
-### Alto Risco 🔴
+### 🔴 Alto Risco
 
-| Risco | Descrição | Impacto |
-|-------|-----------|---------|
-| **Cadastros duplicados** | Mesmo cliente pode se cadastrar várias vezes com dados diferentes | Dados inconsistentes, dificuldade de gestão |
-| **Dados inválidos** | CPF/telefone/email sem validação real | Comunicações falham, dados não confiáveis |
-| **Spam de cadastros** | Sem rate limiting, bots podem criar milhares de registros | Base de dados poluída, performance degradada |
+| ID | Risco | Impacto | Mitigação |
+|----|-------|---------|-----------|
+| R1 | Cadastros duplicados | Base fragmentada, histórico inconsistente | Verificar email/telefone/CPF antes de criar |
+| R2 | Dados inválidos | Comunicações falham, cobranças erradas | Validação real de CPF/telefone/email |
+| R3 | Spam/flood | Base poluída, performance degradada | Rate limiting por IP |
 
-### Médio Risco 🟡
+### 🟡 Médio Risco
 
-| Risco | Descrição | Impacto |
-|-------|-----------|---------|
-| **Token de email inseguro** | UUID v4 sem expiração, pode ser reutilizado | Ataques de replay, tokens nunca expiram |
-| **Uso de `session_start()`** | PHP sessions podem conflitar com cache e plugins | Comportamento imprevisível em ambientes com cache |
-| **Inline JavaScript** | Scripts não minificados, sem cache eficiente | Performance e manutenibilidade |
+| ID | Risco | Impacto | Mitigação |
+|----|-------|---------|-----------|
+| R4 | Token sem expiração | Link de confirmação válido para sempre | Adicionar timestamp, validar 48h |
+| R5 | `session_start()` | Conflito com cache, comportamento imprevisível | Usar transients ou cookies |
+| R6 | Enumeração de contas | Atacante descobre emails válidos | Mensagem genérica "verifique seu email" |
 
-### Baixo Risco 🟢
+### 🟢 Baixo Risco
 
-| Risco | Descrição | Impacto |
-|-------|-----------|---------|
-| **Dependência do Google Maps** | Se API key inválida, autocomplete não funciona | UX degradada, endereços incompletos |
-| **Página órfã** | Se página de cadastro for excluída, opção aponta para ID inexistente | Erro 404 após submissão |
+| ID | Risco | Impacto | Mitigação |
+|----|-------|---------|-----------|
+| R7 | Google Maps offline | Autocomplete não funciona | Fallback para campo texto simples |
+| R8 | Página órfã | 404 se página de cadastro excluída | Verificar existência antes de usar |
 
 ---
 
 ## OPORTUNIDADES DE MELHORIA 🚀
 
-### Curto Prazo (Quick Wins)
+### Quick Wins (1-2 dias cada)
+1. Validação de CPF/CNPJ com algoritmo mod 11
+2. Rate limiting básico com transient por IP
+3. Mensagem de sucesso explicando próximos passos
+4. Usar `is_email()` do WordPress para validar email
 
-1. **Validação de CPF/CNPJ**: Implementar algoritmo de dígitos verificadores
-2. **Máscara de telefone**: Formatar automaticamente (11) 98765-4321
-3. **Mensagem de sucesso melhorada**: Explicar que email de confirmação foi enviado
-4. **Rate limiting básico**: Transient com IP para limitar 3 cadastros/hora
+### Médio Prazo (3-5 dias cada)
+5. Detecção de duplicatas (email/telefone/CPF)
+6. Máscaras de entrada (CPF, telefone)
+7. Notificação automática para admin
+8. Expiração de token de confirmação (48h)
 
-### Médio Prazo
-
-5. **Detecção de duplicatas**: Verificar email/telefone antes de criar
-6. **Notificação para admin**: Email ou integração com Communications
-7. **Validação client-side**: JavaScript para feedback imediato
-8. **Expiração de token**: 24-48h de validade para link de confirmação
-
-### Longo Prazo
-
-9. **Formulário multi-etapas**: Wizard com indicador de progresso
-10. **Integração automática com Portal**: Acesso imediato após confirmação
-11. **Pré-cadastro**: Permitir iniciar cadastro e finalizar depois
-12. **API REST**: Endpoint para integração com apps externos
-
----
-
-## PRÓXIMOS PASSOS
-
-Para detalhes técnicos completos, incluindo análise de código linha a linha, fluxogramas de processo e roadmap de implementação em fases, consulte:
-
-👉 **[REGISTRATION_ADDON_DEEP_ANALYSIS.md](REGISTRATION_ADDON_DEEP_ANALYSIS.md)**
+### Longo Prazo (5-10 dias cada)
+9. Integração com Communications (boas-vindas)
+10. Link automático para Portal do Cliente
+11. Formulário multi-etapas (wizard)
+12. API REST para integração externa
 
 ---
 
@@ -163,20 +158,34 @@ Para detalhes técnicos completos, incluindo análise de código linha a linha, 
 
 | Métrica | Valor | Avaliação |
 |---------|-------|-----------|
-| Linhas de código PHP | 737 | 🟡 Acima do recomendado para arquivo único |
-| Linhas de CSS | 407 | ✅ Bem organizado com breakpoints |
-| Arquivos JavaScript | 0 (inline) | ❌ Deveria estar em arquivo separado |
-| Cobertura de testes | 0% | ❌ Sem testes automatizados |
-| Dependências externas | 1 (Google Maps opcional) | ✅ Baixa dependência |
-| Hooks expostos | 2 | ✅ Extensível |
+| Linhas PHP | 737 | 🟡 Alto para arquivo único |
+| Linhas CSS | 407 | ✅ Bem organizado |
+| Arquivos JS | 0 (inline) | ❌ Deveria ser arquivo separado |
+| Hooks expostos | 2 actions + 1 filter | ✅ Extensível |
 | Hooks consumidos | 0 | ✅ Independente |
+| Testes automatizados | 0% | ❌ Ausente |
+| Dependências externas | 1 (Google Maps) | ✅ Opcional |
+
+---
+
+## PRÓXIMOS PASSOS
+
+Para análise técnica completa com:
+- Mapa de contratos (hooks, endpoints, shortcodes)
+- Fluxos detalhados com diagramas
+- Modelagem de dados (User ↔ Cliente ↔ Pet)
+- Threat model de segurança
+- Achados formatados com severidade/evidência/teste
+- Roadmap de 4 fases pronto para virar PRs
+
+Consulte: 👉 **[REGISTRATION_ADDON_DEEP_ANALYSIS.md](REGISTRATION_ADDON_DEEP_ANALYSIS.md)**
 
 ---
 
 ## CONCLUSÃO
 
-O Registration Add-on cumpre sua função básica de permitir cadastro público de clientes e pets, com segurança CSRF adequada e integração funcional com o sistema de fidelidade. No entanto, apresenta **lacunas significativas em validação de dados, proteção contra abuso e experiência do usuário** que precisam ser endereçadas para um sistema de produção robusto.
+O Registration Add-on cumpre sua função básica de cadastro público, com segurança CSRF adequada e integração funcional com Loyalty. Porém, apresenta **lacunas críticas em validação de dados e proteção contra duplicatas** que precisam ser endereçadas antes de escalar o uso.
 
-A ausência de verificação de duplicatas e validação de CPF/telefone são os problemas mais críticos, pois impactam diretamente a **qualidade da base de dados** e a capacidade da equipe de comunicar-se com clientes.
+**Prioridade imediata**: Fase 1 do roadmap (validação de dados + rate limiting + detecção de duplicatas).
 
-Recomenda-se implementar as melhorias em **4 fases**, começando pelos itens de segurança e validação (Fase 1), seguidos de melhorias de UX (Fase 2), automações e integrações (Fase 3), e recursos avançados (Fase 4).
+**Benefício esperado**: Base de dados limpa, comunicações funcionais, proteção contra abuso.
