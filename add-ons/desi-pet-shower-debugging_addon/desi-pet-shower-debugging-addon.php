@@ -1215,6 +1215,9 @@ class DPS_Debugging_Addon {
      * @return string HTML formatado.
      */
     private function format_log_entry_with_metadata( $entry, $log_viewer, $is_new = false, $compact = false ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         $module = $log_viewer->detect_entry_module( $entry );
         $modules = DPS_Debugging_Log_Viewer::get_known_modules();
 
@@ -1371,6 +1374,9 @@ class DPS_Debugging_Addon {
      * @return string HTML formatado.
      */
     private function format_log_entry( $entry, $log_viewer ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         $class = 'dps-debugging-log-entry';
 
         // Detecta tipo

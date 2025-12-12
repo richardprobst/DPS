@@ -482,6 +482,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string|null Tipo de entrada ou null.
      */
     private function detect_entry_type( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         // Usa hash como chave para cache (entradas podem ser muito grandes)
         $entry_hash = md5( $entry );
         
@@ -551,6 +554,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string Entrada com labels formatados.
      */
     private function format_error_labels( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         foreach ( $this->error_types as $type => $marker ) {
             if ( false !== strpos( $entry, $marker ) ) {
                 $label = '<span class="dps-debugging-log-label dps-debugging-log-label-' . esc_attr( $type ) . '">' . esc_html( rtrim( $marker, ':' ) ) . '</span>';
@@ -569,6 +575,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string Entrada com stack trace formatado.
      */
     private function format_stack_trace( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         $pattern = '/Stack trace:\n((?:#\d*.+\n?)+)/m';
 
         if ( preg_match( $pattern, $entry, $matches ) ) {
@@ -600,6 +609,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string Entrada com JSON formatado.
      */
     private function format_json( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         // Encontra possíveis blocos JSON usando um padrão simples
         // Depois valida cada um com json_decode
         $potential_json = $this->extract_json_candidates( $entry );
@@ -893,6 +905,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string Primeira linha da entrada.
      */
     public function get_entry_summary( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         $lines = explode( "\n", $entry );
         $first_line = isset( $lines[0] ) ? $lines[0] : $entry;
         
@@ -913,7 +928,8 @@ class DPS_Debugging_Log_Viewer {
      * @return bool True se tem mais de uma linha.
      */
     public function entry_has_details( $entry ) {
-        return strpos( $entry, "\n" ) !== false;
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        return strpos( (string) $entry, "\n" ) !== false;
     }
 
     /**
@@ -1092,6 +1108,9 @@ class DPS_Debugging_Log_Viewer {
      * @return string|null Chave do módulo ou null se não identificado.
      */
     public function detect_entry_module( $entry ) {
+        // Garante que $entry seja string para compatibilidade com PHP 8.1+
+        $entry = (string) $entry;
+
         foreach ( self::$known_modules as $module_key => $module_data ) {
             foreach ( $module_data['patterns'] as $pattern ) {
                 if ( false !== stripos( $entry, $pattern ) ) {
