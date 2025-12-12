@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-loyalty-addon
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_LOYALTY_VERSION', '1.4.0' );
+define( 'DPS_LOYALTY_VERSION', '1.5.0' );
 define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 

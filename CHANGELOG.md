@@ -83,6 +83,13 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Loyalty Add-on (v1.5.0) - FASE 4: Recursos Avançados**
+
+- **F4.2 - Gamificação (badges e conquistas)**: Nova classe `DPS_Loyalty_Achievements` com sistema de conquistas automáticas. 4 conquistas iniciais: `first_bath` (Primeiro Banho), `loyal_client` (Fiel da Casa - 10 atendimentos), `referral_master` (Indicador Master - 5 indicações), `vip` (VIP - nível máximo). Avaliação automática após pontuação ou resgate via `evaluate_achievements_for_client()`. Hook `dps_loyalty_achievement_unlocked` para extensões. Exibição de badges no admin (Consulta de Cliente) e no Portal do Cliente com visual de cards desbloqueados/bloqueados.
+- **F4.3 - Níveis configuráveis pelo admin**: Tabela dinâmica na aba Configurações permite criar, editar e excluir níveis de fidelidade. Campos: slug, label, pontos mínimos, multiplicador, ícone e cor. Botão "Adicionar nível" com JavaScript. API `DPS_Loyalty_API::get_tiers_config()` retorna níveis personalizados ou padrão (Bronze/Prata/Ouro). Método `get_default_tiers()` para fallback. Método `get_highest_tier_slug()` para determinar nível máximo. Ordenação automática por pontos mínimos.
+- **F4.4 - Integração de créditos com Finance + limite por atendimento**: Nova seção "Integração com Finance" nas configurações. Checkbox `enable_finance_credit_usage` habilita uso de créditos no momento do pagamento. Campo monetário `finance_max_credit_per_appointment` define limite máximo (ex.: R$ 10,00). Finance Add-on consome créditos via `DPS_Loyalty_API::use_credit()` durante lançamento de parcelas. Validação de limite e saldo disponível. Log de auditoria `loyalty_credit` registra uso no histórico financeiro. Nota automática na descrição da transação.
+- **F4.5 - API REST de fidelidade (somente leitura)**: Nova classe `DPS_Loyalty_REST` com namespace `dps-loyalty/v1`. 3 endpoints: `GET /client/{id}` (pontos, tier, créditos, conquistas), `GET /client-by-ref/{code}` (busca por código de indicação), `GET /summary?months=N` (timeseries e distribuição por tier). Permissão `manage_options` para todos os endpoints. Formatação de conquistas com label, descrição e status de desbloqueio.
+
 **Loyalty Add-on (v1.4.0) - FASE 3: Relatórios & Engajamento**
 
 - **Dashboard de métricas** com cards de resumo, gráfico de pontos concedidos x resgatados (últimos 6 meses) e pizza de distribuição por nível.
