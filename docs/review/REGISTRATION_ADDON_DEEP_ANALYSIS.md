@@ -2,9 +2,11 @@
 
 **Plugin:** DPS by PRObst – Cadastro Add-on  
 **Versão Analisada:** 1.0.1  
-**Data da Análise:** 12/12/2024  
-**Autor da Análise:** Agente de Análise de Código  
+**Data da Análise:** 2024-12-12  
+**Analista:** Copilot Coding Agent  
 **Total de Linhas:** ~1.144 linhas (PHP: ~737 + CSS: ~407)
+
+> **Nota:** As referências a linhas de código neste documento são baseadas na versão 1.0.1 e podem variar em versões futuras.
 
 ---
 
@@ -472,7 +474,9 @@ Não existe proteção contra:
 **Recomendação**:
 
 ```php
-// Exemplo de implementação:
+// Exemplo de implementação (simplificado):
+// NOTA: Em produção, use detecção de IP mais robusta considerando
+// X-Forwarded-For para ambientes com proxy/load balancer
 $ip = $_SERVER['REMOTE_ADDR'];
 $transient_key = 'dps_reg_limit_' . md5( $ip );
 $attempts = (int) get_transient( $transient_key );
@@ -1001,13 +1005,15 @@ Não existe:
 
 ### Resumo do Roadmap
 
-| Fase | Foco | Itens | Esforço | Impacto |
-|------|------|-------|---------|---------|
+| Fase | Foco | Itens | Esforço Mínimo* | Impacto |
+|------|------|-------|-----------------|---------|
 | **Fase 1** | Segurança & Validação | 9 | 2-3 dias | 🔴 Crítico |
 | **Fase 2** | UX & Onboarding | 9 | 3-4 dias | 🟡 Alto |
 | **Fase 3** | Automação & Integrações | 8 | 4-5 dias | 🟡 Alto |
 | **Fase 4** | Recursos Avançados | 9 | 5-7 dias | 🟢 Médio |
 | **Total** | - | 35 | 14-19 dias | - |
+
+*Estimativas de esforço são mínimas e não incluem testes, QA e possíveis complicações. Adicione 30-50% de buffer para planejamento realista.
 
 ---
 
