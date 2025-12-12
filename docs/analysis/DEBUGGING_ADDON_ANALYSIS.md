@@ -157,7 +157,8 @@ private function sync_options_with_config() { ... }
 ┌─────────────────────────────────────────────────────────────────┐
 │                    DPS_Debugging_Addon (Singleton)               │
 │                                                                  │
-│  • register_admin_menu() ──► add_submenu_page (null parent)     │
+│  • register_admin_menu() ──► add_submenu_page (desi-pet-shower) │
+│  • hide_admin_menu_entry() ──► remove_submenu_page (oculta)     │
 │  • handle_settings_save() ──► Config_Transformer                │
 │  • handle_log_actions() ──► Log_Viewer                          │
 │  • render_settings_page() ──► render_*_tab()                    │

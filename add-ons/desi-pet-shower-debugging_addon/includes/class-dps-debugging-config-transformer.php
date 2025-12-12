@@ -319,6 +319,9 @@ class DPS_Debugging_Config_Transformer {
      * @return string Novo conteúdo.
      */
     private function insert_constant( $contents, $define ) {
+        // Garante que $contents seja string para compatibilidade com PHP 8.1+
+        $contents = (string) $contents;
+
         // Tenta inserir antes do comentário "That's all, stop editing!"
         $anchor = "/* That's all, stop editing!";
         if ( false !== strpos( $contents, $anchor ) ) {
