@@ -59,6 +59,22 @@ class DPS_Registration_Addon {
     private static $instance = null;
 
     /**
+     * TTL para mensagens de erro em segundos.
+     *
+     * @since 1.1.0
+     * @var int
+     */
+    const ERROR_MESSAGE_TTL = 60;
+
+    /**
+     * TTL para expiração de token de confirmação em segundos (48 horas).
+     *
+     * @since 1.1.0
+     * @var int
+     */
+    const TOKEN_EXPIRATION_SECONDS = 172800; // 48 * 60 * 60
+
+    /**
      * Recupera a instância única.
      *
      * @since 1.0.1
@@ -119,8 +135,8 @@ class DPS_Registration_Addon {
             $ip = trim( $ips[0] );
         }
         
-        // Hash para não armazenar IP diretamente
-        return md5( 'dps_reg_' . $ip );
+        // Hash para não armazenar IP diretamente (sha256 mais seguro que md5)
+        return hash( 'sha256', 'dps_reg_' . $ip );
     }
 
     /**
@@ -131,25 +147,42 @@ class DPS_Registration_Addon {
      */
     private function check_rate_limit() {
         $ip_hash = $this->get_client_ip_hash();
-        $transient_key = 'dps_reg_rate_' . $ip_hash;
+        $transient_key = 'dps_reg_rate_' . substr( $ip_hash, 0, 32 ); // Limita tamanho da chave
         
         $data = get_transient( $transient_key );
         
         if ( false === $data ) {
-            // Primeira tentativa
-            set_transient( $transient_key, 1, HOUR_IN_SECONDS );
+            // Primeira tentativa - salva count e timestamp de início
+            set_transient( $transient_key, [
+                'count' => 1,
+                'start' => time(),
+            ], HOUR_IN_SECONDS );
             return true;
         }
         
-        $count = (int) $data;
+        // Verifica formato antigo (apenas count) ou novo (array)
+        if ( is_array( $data ) ) {
+            $count = (int) $data['count'];
+            $start = (int) $data['start'];
+        } else {
+            $count = (int) $data;
+            $start = time();
+        }
         
         if ( $count >= 3 ) {
             // Limite atingido
             return false;
         }
         
-        // Incrementa contador mantendo expiração original
-        set_transient( $transient_key, $count + 1, HOUR_IN_SECONDS );
+        // Incrementa contador mantendo expiração original (calcula tempo restante)
+        $elapsed = time() - $start;
+        $remaining = max( HOUR_IN_SECONDS - $elapsed, 60 ); // Mínimo 60 segundos
+        
+        set_transient( $transient_key, [
+            'count' => $count + 1,
+            'start' => $start,
+        ], $remaining );
+        
         return true;
     }
 
@@ -225,8 +258,10 @@ class DPS_Registration_Addon {
     private function normalize_phone( $phone ) {
         $digits = preg_replace( '/\D/', '', (string) $phone );
         
-        // Remove código do país se presente (55)
-        if ( strlen( $digits ) > 11 && substr( $digits, 0, 2 ) === '55' ) {
+        // Remove código do país (55) apenas se tiver 12 ou 13 dígitos (formato internacional completo)
+        // 12 dígitos = 55 + DDD(2) + fixo(8), 13 dígitos = 55 + DDD(2) + celular(9)
+        $length = strlen( $digits );
+        if ( ( $length === 12 || $length === 13 ) && substr( $digits, 0, 2 ) === '55' ) {
             $digits = substr( $digits, 2 );
         }
         
@@ -349,7 +384,7 @@ class DPS_Registration_Addon {
             'text' => $message,
         ];
         
-        set_transient( $transient_key, $messages, 60 );
+        set_transient( $transient_key, $messages, self::ERROR_MESSAGE_TTL );
     }
 
     /**
@@ -742,16 +777,19 @@ class DPS_Registration_Addon {
         // F1.7: Verificar expiração do token (48h)
         $token_created = get_post_meta( $client_id, 'dps_email_confirm_token_created', true );
         if ( $token_created ) {
-            $token_age = time() - (int) $token_created;
-            $max_age = 48 * HOUR_IN_SECONDS; // 48 horas
-            
-            if ( $token_age > $max_age ) {
-                // Token expirado - limpa e mostra erro
-                delete_post_meta( $client_id, 'dps_email_confirm_token' );
-                delete_post_meta( $client_id, 'dps_email_confirm_token_created' );
+            // Valida que o timestamp é um inteiro válido
+            $created_timestamp = (int) $token_created;
+            if ( $created_timestamp > 0 && $created_timestamp <= time() ) {
+                $token_age = time() - $created_timestamp;
                 
-                $this->add_error( __( 'O link de confirmação expirou. Por favor, realize um novo cadastro ou entre em contato com a equipe do pet shop.', 'dps-registration-addon' ) );
-                $this->redirect_with_error();
+                if ( $token_age > self::TOKEN_EXPIRATION_SECONDS ) {
+                    // Token expirado - limpa e mostra erro
+                    delete_post_meta( $client_id, 'dps_email_confirm_token' );
+                    delete_post_meta( $client_id, 'dps_email_confirm_token_created' );
+                    
+                    $this->add_error( __( 'O link de confirmação expirou. Por favor, realize um novo cadastro ou entre em contato com a equipe do pet shop.', 'dps-registration-addon' ) );
+                    $this->redirect_with_error();
+                }
             }
         }
 
