@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Registration Add-on (v1.2.0) - FASE 2A: UX Quick Wins & Higiene Técnica**
+
+- **F2.5 - JS em arquivo separado**: Criado `assets/js/dps-registration.js` com ~400 linhas de JavaScript modular. Remove ~40 linhas de JS inline do PHP. Script enfileirado com `wp_enqueue_script` apenas quando o shortcode está presente. Expõe objeto global `DPSRegistration` com métodos públicos para extensibilidade.
+- **F2.1 - Máscaras de entrada (CPF e telefone)**: Máscara visual de CPF (###.###.###-##) aplicada automaticamente. Máscara de telefone adapta entre 10 dígitos (##) ####-#### e 11 dígitos (##) #####-####. Suporta colagem (paste) e edição no meio do texto sem quebrar.
+- **F2.2 - Validação client-side (JS)**: Validação de campos obrigatórios antes do submit. Validação de CPF com algoritmo mod 11 em JavaScript. Validação de telefone (10-11 dígitos) e email. Erros exibidos no topo do formulário com estilo consistente. Formulário ainda funciona se JS estiver desabilitado (graceful degradation).
+- **F2.4 - Indicador de loading no botão**: Botão é desabilitado durante envio. Texto muda para "Enviando..." com estilo visual de espera.
+- **F2.3 - Mensagem de sucesso melhorada**: Título destacado com ícone de check. Mensagem contextualizada para banho e tosa.
+- **F2.8 - Próximo passo sugerido**: Após sucesso, exibe orientação para agendar via WhatsApp/telefone. Formulário não é mais exibido após cadastro concluído.
+- **F2.9 - Removido session_start()**: Função removida pois não era mais necessária (sistema usa transients/cookies para mensagens). Elimina conflitos de headers e warnings em alguns hosts.
+
 **Registration Add-on (v1.1.0) - FASE 1: Segurança, Validação & Hardening**
 
 - **F1.1 - Validação de campos obrigatórios no backend**: Nome e telefone são agora validados no backend (não apenas HTML required). Campos vazios resultam em mensagem de erro clara e impede criação do cadastro.

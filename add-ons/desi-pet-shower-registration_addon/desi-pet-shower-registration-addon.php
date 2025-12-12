@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -439,9 +439,10 @@ class DPS_Registration_Addon {
     }
 
     /**
-     * Enfileira CSS responsivo do add-on de cadastro.
+     * Enfileira CSS e JS do add-on de cadastro.
      *
      * @since 1.1.0
+     * @since 1.2.0 Adicionado JS externo com validação e máscaras.
      */
     public function enqueue_assets() {
         // Carrega apenas na página de cadastro
@@ -454,13 +455,23 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.1.0';
+        $version   = '1.2.0';
 
+        // CSS responsivo
         wp_enqueue_style(
             'dps-registration-addon',
             $addon_url . 'assets/css/registration-addon.css',
             [],
             $version
+        );
+
+        // F2.5: JS externo com validação client-side e máscaras
+        wp_enqueue_script(
+            'dps-registration',
+            $addon_url . 'assets/js/dps-registration.js',
+            [],
+            $version,
+            true // Load in footer
         );
     }
 
@@ -808,12 +819,13 @@ class DPS_Registration_Addon {
      * Renderiza o formulário de cadastro de cliente e pets. Mostra mensagem de sucesso se necessário.
      *
      * @return string HTML
+     *
+     * @since 1.0.0
+     * @since 1.2.0 Removido session_start (F2.9), melhoradas mensagens de sucesso (F2.3/F2.8).
      */
     public function render_registration_form() {
-        // Inicia sessão para armazenar mensagens temporárias
-        if ( ! session_id() ) {
-            session_start();
-        }
+        // F2.9: Removido session_start() - não é mais necessário pois usamos transients/cookies
+        
         $success = false;
         if ( isset( $_GET['registered'] ) && '1' === $_GET['registered'] ) {
             $success = true;
@@ -833,15 +845,23 @@ class DPS_Registration_Addon {
             echo $messages_html;
         }
         
+        // F2.3/F2.8: Mensagem de sucesso melhorada com próximo passo
         if ( $success ) {
-            echo '<div style="padding: 12px 16px; margin-bottom: 16px; border-radius: 4px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
-            echo esc_html__( 'Cadastro realizado com sucesso!', 'dps-registration-addon' );
-            echo ' ' . esc_html__( 'Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro.', 'dps-registration-addon' );
+            echo '<div class="dps-success-box" style="padding: 16px 20px; margin-bottom: 20px; border-radius: 6px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
+            echo '<h4 style="margin: 0 0 12px 0; color: #166534;">' . esc_html__( '✓ Cadastro realizado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<p style="margin: 0 0 8px 0;">' . esc_html__( 'Seus dados foram recebidos. Você já pode agendar banho e tosa para seus pets!', 'dps-registration-addon' ) . '</p>';
+            echo '<p style="margin: 0 0 8px 0;"><strong>' . esc_html__( 'Próximo passo:', 'dps-registration-addon' ) . '</strong> ';
+            echo esc_html__( 'Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
+            echo '<p style="margin: 0; font-size: 0.9em; color: #15803d;">' . esc_html__( 'Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
+            // Não exibir formulário novamente após sucesso
+            echo '</div>';
+            return ob_get_clean();
         }
         if ( isset( $_GET['dps_email_confirmed'] ) && '1' === $_GET['dps_email_confirmed'] ) {
-            echo '<div style="padding: 12px 16px; margin-bottom: 16px; border-radius: 4px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
-            echo esc_html__( 'Email confirmado com sucesso! Seu cadastro está ativo.', 'dps-registration-addon' );
+            echo '<div class="dps-success-box" style="padding: 16px 20px; margin-bottom: 20px; border-radius: 6px; background-color: #f0fdf4; border: 1px solid #22c55e; color: #166534;" role="status">';
+            echo '<h4 style="margin: 0 0 12px 0; color: #166534;">' . esc_html__( '✓ Email confirmado com sucesso!', 'dps-registration-addon' ) . '</h4>';
+            echo '<p style="margin: 0;">' . esc_html__( 'Seu cadastro está ativo. Agora você pode agendar banho e tosa para seus pets e receber novidades por email.', 'dps-registration-addon' ) . '</p>';
             echo '</div>';
         }
         echo '<form method="post" id="dps-reg-form">';
@@ -990,52 +1010,29 @@ class DPS_Registration_Addon {
             echo '<option value="' . esc_attr( $br ) . '"></option>';
         }
         echo '</datalist>';
-        // Script para adicionar pets dinamicamente e preencher campo Cliente automaticamente
+        
         // CSS para melhorar a distribuição dos campos do formulário
         echo '<style>';
         echo '.dps-registration-form .dps-pet-fieldset, .dps-registration-form .dps-client-fields { display:flex; flex-wrap:wrap; gap:15px; }';
         echo '.dps-registration-form .dps-pet-fieldset p, .dps-registration-form .dps-client-fields p { flex:1 1 calc(50% - 15px); margin:0; }';
         echo '.dps-registration-form .dps-client-fields p[style*="100%"], .dps-registration-form .dps-client-fields textarea, .dps-registration-form .dps-pet-fieldset textarea { flex:1 1 100%; width:100%; }';
         echo '</style>';
-        // Script principal para clonar pets e atualizar campos de cliente
-        echo '<script type="text/javascript">(function(){';
-        echo 'let petCount = 1;';
-        echo 'const wrapper = document.getElementById("dps-pets-wrapper");';
-        echo 'const addBtn  = document.getElementById("dps-add-pet");';
-        echo 'const clientNameInput = document.getElementById("dps-client-name");';
-        // Template de pet como string (JSON encoded)
-        echo 'const template = ' . $placeholder_json . ';';
-        // Função para atualizar campos Cliente
-        echo 'function updateOwnerFields(){ var ownerFields=document.querySelectorAll(".dps-owner-name"); ownerFields.forEach(function(el){ el.value = clientNameInput.value; }); }';
-        echo 'clientNameInput.addEventListener("input", updateOwnerFields);';
-        echo 'addBtn.addEventListener("click", function(){ petCount++; let html = template.replace(/__INDEX__/g, petCount); const div = document.createElement("div"); div.innerHTML = html; wrapper.appendChild(div); updateOwnerFields(); });';
-        echo 'updateOwnerFields();';
-        echo '})();</script>';
+        
+        // F2.5: Template de pet para JS externo (via elemento script type="text/template")
+        echo '<script type="text/template" id="dps-pet-template">' . $placeholder_json . '</script>';
+        
+        // F2.5: Inicialização do JS (chama funções do arquivo externo)
+        echo '<script type="text/javascript">';
+        echo 'if (typeof DPSRegistration !== "undefined" && DPSRegistration.initPetClone) {';
+        echo '  var templateEl = document.getElementById("dps-pet-template");';
+        echo '  if (templateEl) { DPSRegistration.initPetClone(templateEl.textContent); }';
+        echo '}';
+        echo '</script>';
 
         // Se houver uma API key do Google Maps configurada, inclui o script de Places e inicializa autocomplete
         $api_key = get_option( 'dps_google_api_key', '' );
         if ( $api_key ) {
-            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places"></script>';
-            echo '<script>(function(){
-                // Inicializa autocomplete no campo de endereço
-                var input = document.getElementById("dps-client-address");
-                if ( input ) {
-                    var autocomplete = new google.maps.places.Autocomplete(input, { types: ["geocode"] });
-                    autocomplete.addListener("place_changed", function() {
-                        var place = autocomplete.getPlace();
-                        if ( place && place.geometry ) {
-                            var lat = place.geometry.location.lat();
-                            var lng = place.geometry.location.lng();
-                            var latField = document.getElementById("dps-client-lat");
-                            var lngField = document.getElementById("dps-client-lng");
-                            if ( latField && lngField ) {
-                                latField.value = lat;
-                                lngField.value = lng;
-                            }
-                        }
-                    });
-                }
-            })();</script>';
+            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places&callback=DPSRegistration.initGooglePlaces" async defer></script>';
         }
         echo '</div>';
         return ob_get_clean();
