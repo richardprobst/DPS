@@ -1020,19 +1020,19 @@ class DPS_Registration_Addon {
         
         // F2.5: Template de pet para JS externo (via elemento script type="text/template")
         echo '<script type="text/template" id="dps-pet-template">' . $placeholder_json . '</script>';
-        
-        // F2.5: Inicialização do JS (chama funções do arquivo externo)
-        echo '<script type="text/javascript">';
-        echo 'if (typeof DPSRegistration !== "undefined" && DPSRegistration.initPetClone) {';
-        echo '  var templateEl = document.getElementById("dps-pet-template");';
-        echo '  if (templateEl) { DPSRegistration.initPetClone(templateEl.textContent); }';
-        echo '}';
-        echo '</script>';
 
-        // Se houver uma API key do Google Maps configurada, inclui o script de Places e inicializa autocomplete
+        // Se houver uma API key do Google Maps configurada, inclui o script de Places
+        // O callback dpsGoogleMapsReady é uma função global que aguarda o DPSRegistration estar disponível
         $api_key = get_option( 'dps_google_api_key', '' );
         if ( $api_key ) {
-            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places&callback=DPSRegistration.initGooglePlaces" async defer></script>';
+            echo '<script type="text/javascript">';
+            echo 'function dpsGoogleMapsReady() {';
+            echo '  if (typeof DPSRegistration !== "undefined" && DPSRegistration.initGooglePlaces) {';
+            echo '    DPSRegistration.initGooglePlaces();';
+            echo '  }';
+            echo '}';
+            echo '</script>';
+            echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places&callback=dpsGoogleMapsReady" async defer></script>';
         }
         echo '</div>';
         return ob_get_clean();

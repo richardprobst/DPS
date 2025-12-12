@@ -345,8 +345,17 @@
             for (var i = 0; i < errors.length; i++) {
                 showError(errorContainer, errors[i]);
             }
-            // Scroll to errors
-            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll to errors (with fallback for older browsers)
+            try {
+                if (errorContainer.scrollIntoView) {
+                    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch (e) {
+                // Fallback for browsers that don't support smooth scrolling
+                if (errorContainer.scrollIntoView) {
+                    errorContainer.scrollIntoView(true);
+                }
+            }
             return false;
         }
         
