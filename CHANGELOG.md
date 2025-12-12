@@ -83,6 +83,42 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Registration Add-on (v1.2.0) - FASE 2A: UX Quick Wins & Higiene Técnica**
+
+- **F2.5 - JS em arquivo separado**: Criado `assets/js/dps-registration.js` com ~400 linhas de JavaScript modular. Remove ~40 linhas de JS inline do PHP. Script enfileirado com `wp_enqueue_script` apenas quando o shortcode está presente. Expõe objeto global `DPSRegistration` com métodos públicos para extensibilidade.
+- **F2.1 - Máscaras de entrada (CPF e telefone)**: Máscara visual de CPF (###.###.###-##) aplicada automaticamente. Máscara de telefone adapta entre 10 dígitos (##) ####-#### e 11 dígitos (##) #####-####. Suporta colagem (paste) e edição no meio do texto sem quebrar.
+- **F2.2 - Validação client-side (JS)**: Validação de campos obrigatórios antes do submit. Validação de CPF com algoritmo mod 11 em JavaScript. Validação de telefone (10-11 dígitos) e email. Erros exibidos no topo do formulário com estilo consistente. Formulário ainda funciona se JS estiver desabilitado (graceful degradation).
+- **F2.4 - Indicador de loading no botão**: Botão é desabilitado durante envio. Texto muda para "Enviando..." com estilo visual de espera.
+- **F2.3 - Mensagem de sucesso melhorada**: Título destacado com ícone de check. Mensagem contextualizada para banho e tosa.
+- **F2.8 - Próximo passo sugerido**: Após sucesso, exibe orientação para agendar via WhatsApp/telefone. Formulário não é mais exibido após cadastro concluído.
+- **F2.9 - Removido session_start()**: Função removida pois não era mais necessária (sistema usa transients/cookies para mensagens). Elimina conflitos de headers e warnings em alguns hosts.
+
+**Registration Add-on (v1.1.0) - FASE 1: Segurança, Validação & Hardening**
+
+- **F1.1 - Validação de campos obrigatórios no backend**: Nome e telefone são agora validados no backend (não apenas HTML required). Campos vazios resultam em mensagem de erro clara e impede criação do cadastro.
+- **F1.2 - Validação de CPF com algoritmo mod 11**: CPF informado é validado com dígitos verificadores. CPF inválido bloqueia cadastro. Campo continua opcional, mas se preenchido deve ser válido.
+- **F1.3 - Validação de telefone brasileiro**: Telefone validado para formato BR (10-11 dígitos). Aceita com ou sem código de país (55). Usa `DPS_Phone_Helper::is_valid_brazilian_phone()` quando disponível.
+- **F1.4 - Validação de email com `is_email()`**: Email preenchido é validado com função nativa do WordPress. Email inválido bloqueia cadastro com mensagem específica.
+- **F1.5 - Detecção de duplicatas**: Sistema verifica email, telefone e CPF antes de criar novo cliente. Se encontrar cadastro existente, exibe mensagem genérica orientando contato com equipe (não revela qual campo duplicou para evitar enumeração).
+- **F1.6 - Rate limiting por IP**: Máximo 3 cadastros por hora por IP. 4ª tentativa bloqueada com mensagem amigável. Usa transients com hash do IP para privacidade.
+- **F1.7 - Expiração de token de confirmação**: Token de confirmação de email agora expira em 48 horas. Novo meta `dps_email_confirm_token_created` registra timestamp. Email de confirmação menciona validade de 48h.
+- **F1.8 - Feedback de erro visível**: Todas as falhas de validação agora exibem mensagens claras no formulário. Usa `DPS_Message_Helper` quando disponível, com fallback para transients próprios.
+- **F1.9 - Normalização de telefone**: Telefone é salvo apenas com dígitos (sem máscaras). Facilita integração com WhatsApp e Communications Add-on.
+
+#### Changed (Alterado)
+
+- Mensagem de sucesso de cadastro agora menciona verificar email se informado.
+- Mensagem de email confirmado atualizada com estilo visual consistente.
+- Métodos helpers de validação (CPF, telefone, duplicatas) implementados como métodos privados na classe.
+
+#### Security (Segurança)
+
+- Nonce inválido agora exibe mensagem de erro em vez de falha silenciosa.
+- Honeypot preenchido exibe mensagem genérica (não revela ser anti-bot).
+- Rate limiting protege contra ataques de flood/spam.
+- Tokens de confirmação expiram em 48h, reduzindo janela de exposição.
+- Mensagem de duplicata é genérica para evitar enumeração de contas.
+
 **Loyalty Add-on (v1.5.0) - FASE 4: Recursos Avançados**
 
 - **F4.2 - Gamificação (badges e conquistas)**: Nova classe `DPS_Loyalty_Achievements` com sistema de conquistas automáticas. 4 conquistas iniciais: `first_bath` (Primeiro Banho), `loyal_client` (Fiel da Casa - 10 atendimentos), `referral_master` (Indicador Master - 5 indicações), `vip` (VIP - nível máximo). Avaliação automática após pontuação ou resgate via `evaluate_achievements_for_client()`. Hook `dps_loyalty_achievement_unlocked` para extensões. Exibição de badges no admin (Consulta de Cliente) e no Portal do Cliente com visual de cards desbloqueados/bloqueados.
