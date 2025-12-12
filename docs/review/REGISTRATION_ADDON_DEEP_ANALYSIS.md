@@ -6,7 +6,7 @@
 **Analista:** Copilot Coding Agent  
 **Arquivos:** `desi-pet-shower-registration-addon.php` (737 linhas), `assets/css/registration-addon.css` (407 linhas), `uninstall.php` (43 linhas), `README.md` (227 linhas)
 
-> **Regra de ouro**: Este documento cita apenas funcionalidades existentes no código. Nenhuma feature foi inventada.
+> **Regra de ouro**: Este documento cita apenas funcionalidades existentes no código. Nenhuma funcionalidade foi inventada.
 
 ---
 
@@ -1064,4 +1064,4 @@ O código está razoavelmente organizado para arquivo único, mas seria benefici
 - JavaScript em arquivo separado
 - Uso dos helpers do core (`DPS_Phone_Helper`, `DPS_Message_Helper`, `DPS_Request_Validator`)
 
-**Este documento está pronto para gerar PRs organizadas por fase.**
+**Este roadmap pode ser utilizado como base para planejamento de desenvolvimento futuro.**
