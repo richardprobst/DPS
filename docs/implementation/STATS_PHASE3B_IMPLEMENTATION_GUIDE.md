@@ -1,9 +1,9 @@
-# Stats Add-on — Fase 3B Implementation Guide
+# Stats Add-on — Phase 3B Implementation Guide
 
 **Status:** 🟡 Pending Implementation  
-**Complexity:** Alta (600+ linhas de código)  
-**Estimated Time:** 8-12 horas  
-**Dependencies:** Fase 1, 2 e 3.1 concluídas ✅
+**Complexity:** High (600+ lines of code)  
+**Estimated Time:** 8-12 hours  
+**Dependencies:** Phases 1, 2 and 3.1 completed ✅
 
 ---
 
@@ -82,10 +82,12 @@ private function render_drill_down_modal( $type, $filters = [], $page = 1 ) {
     }
     
     // Apply service filter
+    // NOTE: Using LIKE with serialized data is not ideal but works with WordPress serialized arrays
+    // Better approach: Store service IDs in separate meta table or use JSON
     if ( ! empty( $filters['service_id'] ) ) {
         $args['meta_query'][] = [
             'key'     => 'appointment_services',
-            'value'   => serialize( (string) $filters['service_id'] ),
+            'value'   => '"' . absint( $filters['service_id'] ) . '"', // Match serialized integer format
             'compare' => 'LIKE',
         ];
     }
@@ -606,8 +608,9 @@ public static function get_appointments_timeseries( $start_date, $end_date, $fil
     
     if ( ! empty( $filters['service_id'] ) ) {
         $sql .= " INNER JOIN {$wpdb->postmeta} pm_service ON p.ID = pm_service.post_id AND pm_service.meta_key = 'appointment_services'";
+        // NOTE: Matching serialized format - consider JSON storage for better querying
         $where_clauses[] = "pm_service.meta_value LIKE %s";
-        $prepare_values[] = '%' . $wpdb->esc_like( serialize( (string) $filters['service_id'] ) ) . '%';
+        $prepare_values[] = '%"' . absint( $filters['service_id'] ) . '"%'; // Match serialized integer
     }
     
     if ( ! empty( $filters['status'] ) && $filters['status'] !== 'all' ) {
