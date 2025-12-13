@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.1.0' );
+define( 'DPS_STATS_VERSION', '1.2.0' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -42,6 +42,7 @@ add_action( 'plugins_loaded', function() {
         return;
     }
     require_once DPS_STATS_PLUGIN_DIR . 'includes/class-dps-stats-api.php';
+    require_once DPS_STATS_PLUGIN_DIR . 'includes/class-dps-stats-cache-invalidator.php';
 }, 1 );
 
 function dps_stats_load_textdomain() {
@@ -54,6 +55,25 @@ if ( ! function_exists( 'dps_stats_build_cache_key' ) ) {
         $start_key = preg_replace( '/[^0-9]/', '', $start_date );
         $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
         return $end_key ? sprintf( '%s_%s_%s', $prefix, $start_key, $end_key ) : sprintf( '%s_%s', $prefix, $start_key );
+    }
+}
+
+if ( ! function_exists( 'dps_stats_table_exists' ) ) {
+    /**
+     * Verifica se a tabela dps_transacoes existe.
+     *
+     * @return bool True se a tabela existe, false caso contrário.
+     *
+     * @since 1.2.0
+     */
+    function dps_stats_table_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like( $table_name )
+        ) );
+        return $table_exists === $table_name;
     }
 }
 
@@ -74,29 +94,8 @@ if ( ! function_exists( 'dps_get_total_revenue' ) ) {
         if ( class_exists( 'DPS_Stats_API' ) ) {
             return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
         }
-        global $wpdb;
-        $start_date = sanitize_text_field( $start_date );
-        $end_date   = sanitize_text_field( $end_date );
-        $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
-        
-        // Verifica cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
-            if ( false !== $cached ) return (float) $cached;
-        }
-        
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $total = (float) $wpdb->get_var( $wpdb->prepare(
-            "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
-            $start_date, $end_date
-        ) );
-        
-        // Armazena cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $total, HOUR_IN_SECONDS );
-        }
-        
-        return $total;
+        // Delega para API que tem validação de tabela
+        return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
     }
 }
 
@@ -267,6 +266,23 @@ class DPS_Stats_Addon {
         $current = $comparison['current'];
         $previous = $comparison['previous'];
         $variation = $comparison['variation'];
+        
+        // F1.1: Verificar se Finance está ativo
+        $finance_inactive = isset( $current['error'] ) && $current['error'] === 'finance_not_active';
+        
+        if ( $finance_inactive ) {
+            ?>
+            <div style="padding: 16px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 16px;">
+                <p style="margin: 0; color: #92400e; font-weight: 500;">
+                    ⚠️ <?php esc_html_e( 'Finance Add-on não está ativo.', 'dps-stats-addon' ); ?>
+                </p>
+                <p style="margin: 8px 0 0; color: #92400e; font-size: 13px;">
+                    <?php esc_html_e( 'Ative o Finance Add-on para visualizar métricas financeiras (receita, despesas, lucro).', 'dps-stats-addon' ); ?>
+                </p>
+            </div>
+            <?php
+            return;
+        }
         ?>
         <div class="dps-stats-metrics-list">
             <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['revenue'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Receita Total', 'dps-stats-addon' ); ?></span></div>
@@ -281,15 +297,56 @@ class DPS_Stats_Addon {
 
     private function get_subscription_metrics( $start_date, $end_date ) {
         global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $subscriptions = get_posts( [ 'post_type' => 'dps_subscription', 'posts_per_page' => -1, 'post_status' => 'publish' ] );
-        $paid_count = 0; $pending_count = 0;
+        
+        // F1.3: Filtrar assinaturas por período
+        $subscriptions = get_posts( [
+            'post_type'      => 'dps_subscription',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'date_query'     => [
+                [
+                    'after'     => $start_date,
+                    'before'    => $end_date . ' 23:59:59',
+                    'inclusive' => true,
+                ],
+            ],
+        ] );
+        
+        $paid_count = 0;
+        $pending_count = 0;
         foreach ( $subscriptions as $sub ) {
-            if ( 'pago' === get_post_meta( $sub->ID, 'subscription_payment_status', true ) ) $paid_count++; else $pending_count++;
+            if ( 'pago' === get_post_meta( $sub->ID, 'subscription_payment_status', true ) ) {
+                $paid_count++;
+            } else {
+                $pending_count++;
+            }
         }
-        $revenue = (float) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND data >= %s AND data <= %s AND status = 'pago'", $start_date, $end_date ) );
-        $open_value = (float) $wpdb->get_var( "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND status != 'pago'" );
-        return [ 'total' => count( $subscriptions ), 'paid' => $paid_count, 'pending' => $pending_count, 'revenue' => $revenue ?: 0, 'open_value' => $open_value ?: 0 ];
+        
+        // F1.1: Validar existência da tabela antes de consultar
+        $revenue = 0;
+        $open_value = 0;
+        
+        if ( dps_stats_table_exists() ) {
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $revenue = (float) $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND data >= %s AND data <= %s AND status = 'pago'",
+                $start_date,
+                $end_date
+            ) );
+            $open_value = (float) $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND status != 'pago' AND data >= %s AND data <= %s",
+                $start_date,
+                $end_date
+            ) );
+        }
+        
+        return [
+            'total'      => count( $subscriptions ),
+            'paid'       => $paid_count,
+            'pending'    => $pending_count,
+            'revenue'    => $revenue ?: 0,
+            'open_value' => $open_value ?: 0,
+        ];
     }
 
     private function render_subscription_metrics( $data ) {

@@ -30,6 +30,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Stats_API {
 
     /**
+     * Verifica se a tabela dps_transacoes existe.
+     *
+     * @return bool True se a tabela existe, false caso contrário.
+     *
+     * @since 1.2.0
+     */
+    private static function table_dps_transacoes_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like( $table_name )
+        ) );
+        return $table_exists === $table_name;
+    }
+
+    /**
      * Obtém contagem de atendimentos no período.
      *
      * @param string $start_date Data inicial (Y-m-d).
@@ -145,22 +162,30 @@ class DPS_Stats_API {
                 'expenses' => isset( $totals['paid_expenses'] ) ? (float) $totals['paid_expenses'] : 0,
             ];
         } else {
-            // Fallback para SQL direto
-            global $wpdb;
-            $table   = $wpdb->prefix . 'dps_transacoes';
-            $results = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT tipo, SUM(valor) AS total FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' GROUP BY tipo",
-                    $start_date,
-                    $end_date
-                ),
-                OBJECT_K
-            );
+            // Fallback para SQL direto - verifica existência da tabela
+            if ( ! self::table_dps_transacoes_exists() ) {
+                $result = [
+                    'revenue'  => 0,
+                    'expenses' => 0,
+                    'error'    => 'finance_not_active',
+                ];
+            } else {
+                global $wpdb;
+                $table   = $wpdb->prefix . 'dps_transacoes';
+                $results = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT tipo, SUM(valor) AS total FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' GROUP BY tipo",
+                        $start_date,
+                        $end_date
+                    ),
+                    OBJECT_K
+                );
 
-            $result = [
-                'revenue'  => isset( $results['receita'] ) ? (float) $results['receita']->total : 0,
-                'expenses' => isset( $results['despesa'] ) ? (float) $results['despesa']->total : 0,
-            ];
+                $result = [
+                    'revenue'  => isset( $results['receita'] ) ? (float) $results['receita']->total : 0,
+                    'expenses' => isset( $results['despesa'] ) ? (float) $results['despesa']->total : 0,
+                ];
+            }
         }
 
         // Armazena cache apenas se não estiver desabilitado
@@ -291,27 +316,39 @@ class DPS_Stats_API {
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
+        // F1.4: Remover limite de 1000 usando paginação
         $service_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
-            if ( is_array( $service_ids ) ) {
-                foreach ( $service_ids as $sid ) {
-                    $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
+        $paged = 1;
+        $per_page = 500;
+        
+        do {
+            $appointments = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => $per_page,
+                'paged'          => $paged,
+                'post_status'    => 'publish',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
+                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
+                ],
+                'fields' => 'ids',
+                'no_found_rows' => false,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ] );
+            
+            foreach ( $appointments as $appt_id ) {
+                $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
+                if ( is_array( $service_ids ) ) {
+                    foreach ( $service_ids as $sid ) {
+                        $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
+                    }
                 }
             }
-        }
+            
+            $paged++;
+        } while ( count( $appointments ) === $per_page );
 
         arsort( $service_counts );
         $top_services = array_slice( $service_counts, 0, $limit, true );
@@ -541,33 +578,45 @@ class DPS_Stats_API {
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
+        // F1.4: Remover limite de 1000 usando paginação
         $species_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            if ( $pet_id ) {
-                $species = get_post_meta( $pet_id, 'pet_species', true );
-                if ( $species === 'cao' ) {
-                    $species_label = __( 'Cachorro', 'dps-stats-addon' );
-                } elseif ( $species === 'gato' ) {
-                    $species_label = __( 'Gato', 'dps-stats-addon' );
-                } else {
-                    $species_label = __( 'Outro', 'dps-stats-addon' );
+        $paged = 1;
+        $per_page = 500;
+        
+        do {
+            $appointments = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => $per_page,
+                'paged'          => $paged,
+                'post_status'    => 'publish',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
+                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
+                ],
+                'fields' => 'ids',
+                'no_found_rows' => false,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ] );
+            
+            foreach ( $appointments as $appt_id ) {
+                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $species = get_post_meta( $pet_id, 'pet_species', true );
+                    if ( $species === 'cao' ) {
+                        $species_label = __( 'Cachorro', 'dps-stats-addon' );
+                    } elseif ( $species === 'gato' ) {
+                        $species_label = __( 'Gato', 'dps-stats-addon' );
+                    } else {
+                        $species_label = __( 'Outro', 'dps-stats-addon' );
+                    }
+                    $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
                 }
-                $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
             }
-        }
+            
+            $paged++;
+        } while ( count( $appointments ) === $per_page );
 
         arsort( $species_counts );
         $total = array_sum( $species_counts );
@@ -615,28 +664,40 @@ class DPS_Stats_API {
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
+        // F1.4: Remover limite de 1000 usando paginação
         $breed_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            if ( $pet_id ) {
-                $breed = get_post_meta( $pet_id, 'pet_breed', true );
-                if ( $breed ) {
-                    $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
+        $paged = 1;
+        $per_page = 500;
+        
+        do {
+            $appointments = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => $per_page,
+                'paged'          => $paged,
+                'post_status'    => 'publish',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
+                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
+                ],
+                'fields' => 'ids',
+                'no_found_rows' => false,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ] );
+            
+            foreach ( $appointments as $appt_id ) {
+                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
+                if ( $pet_id ) {
+                    $breed = get_post_meta( $pet_id, 'pet_breed', true );
+                    if ( $breed ) {
+                        $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
+                    }
                 }
             }
-        }
+            
+            $paged++;
+        } while ( count( $appointments ) === $per_page );
 
         arsort( $breed_counts );
         $top_breeds = array_slice( $breed_counts, 0, $limit, true );

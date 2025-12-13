@@ -285,10 +285,94 @@ Consulte **[../docs/refactoring/REFACTORING_ANALYSIS.md](../docs/refactoring/REF
 - Export de relatórios em PDF com gráficos
 - Dashboard público para clientes (anonimizado)
 
+## Checklist de Testes Manuais — Fase 1 (v1.2.0)
+
+### F1.1: Validação de tabela dps_transacoes
+
+#### Teste com Finance Add-on DESATIVADO
+- [ ] Desativar o Finance Add-on
+- [ ] Acessar a aba "Estatísticas" no painel DPS
+- [ ] **Resultado Esperado**: Dashboard abre sem fatal error
+- [ ] **Resultado Esperado**: Seção "Métricas Financeiras" mostra aviso amarelo: "⚠️ Finance Add-on não está ativo"
+- [ ] **Resultado Esperado**: Métricas operacionais (atendimentos, pets inativos) continuam funcionando
+- [ ] Clicar em "Exportar Métricas CSV"
+- [ ] **Resultado Esperado**: CSV é gerado com valores financeiros zerados (R$ 0,00)
+
+#### Teste com Finance Add-on ATIVADO
+- [ ] Ativar o Finance Add-on
+- [ ] Recarregar a aba "Estatísticas"
+- [ ] **Resultado Esperado**: Métricas financeiras exibem valores corretos (receita, despesas, lucro)
+- [ ] **Resultado Esperado**: Aviso amarelo NÃO aparece
+
+### F1.2: Invalidação automática de cache
+
+#### Teste de invalidação em agendamentos
+- [ ] Visualizar dashboard e anotar número de atendimentos (ex: 42 atendimentos)
+- [ ] Criar um NOVO agendamento via painel DPS
+- [ ] Recarregar a aba "Estatísticas" (F5)
+- [ ] **Resultado Esperado**: Número de atendimentos aumenta automaticamente (43 atendimentos)
+- [ ] **Resultado Esperado**: Não precisa clicar em "Atualizar dados" manualmente
+
+#### Teste de invalidação em clientes
+- [ ] Anotar número de "Novos Clientes" no período
+- [ ] Criar um NOVO cliente com data dentro do período selecionado
+- [ ] Recarregar a aba "Estatísticas"
+- [ ] **Resultado Esperado**: Contador de novos clientes aumenta
+
+#### Teste de throttle (evitar sobrecarga)
+- [ ] Criar 5 agendamentos rapidamente em sequência (< 30 segundos)
+- [ ] **Resultado Esperado**: Sistema não trava (throttle evita invalidações excessivas)
+
+### F1.3: Assinaturas respeitam período selecionado
+
+#### Teste de filtro temporal
+- [ ] Selecionar período: 01/11/2024 a 30/11/2024
+- [ ] Clicar em "Aplicar intervalo"
+- [ ] Verificar seção "Assinaturas"
+- [ ] **Resultado Esperado**: Contadores mostram apenas assinaturas criadas entre 01/11 e 30/11
+- [ ] Alterar período: 01/12/2024 a 31/12/2024
+- [ ] **Resultado Esperado**: Contadores mudam (não mostram mais assinaturas de novembro)
+
+#### Teste de receita de assinaturas
+- [ ] Verificar "Receita de assinaturas no período"
+- [ ] **Resultado Esperado**: Valor reflete apenas transações do período selecionado (não soma global)
+
+### F1.4: Remoção de limite de 1000 agendamentos
+
+#### Teste com grande volume (>1000 agendamentos)
+- [ ] Selecionar período amplo (ex: últimos 6 meses) em site com >1000 agendamentos
+- [ ] Verificar seção "Serviços Mais Solicitados"
+- [ ] **Resultado Esperado**: Contagem completa (não truncada em 1000)
+- [ ] Verificar seção "Distribuição de Espécies"
+- [ ] **Resultado Esperado**: Percentuais corretos (baseados em todos os agendamentos)
+- [ ] Verificar "Top 5 Raças"
+- [ ] **Resultado Esperado**: Ranking correto sem truncamento
+
+#### Teste de performance
+- [ ] Com >2000 agendamentos, carregar dashboard
+- [ ] **Resultado Esperado**: Página carrega em tempo razoável (< 10 segundos)
+- [ ] **Resultado Esperado**: Sem timeout ou "white screen"
+
+### Teste de Regressão Geral
+- [ ] Todos os cards de métricas exibem valores corretos
+- [ ] Gráficos Chart.js renderizam sem erros JavaScript
+- [ ] Comparativo "vs. Período Anterior" mostra variação % correta
+- [ ] Links de export (CSV) funcionam
+- [ ] Tabela de pets inativos exibe corretamente
+- [ ] Links WhatsApp na tabela abrem corretamente
+
+---
+
 ## Histórico de mudanças (resumo)
 
 ### Principais marcos
 
+- **v1.2.0**: FASE 1 — Correções Críticas e Higiene Técnica
+  - Validação de tabela dps_transacoes (evita fatal error sem Finance)
+  - Invalidação automática de cache (dados sempre atualizados)
+  - Assinaturas respeitam período selecionado (consistência)
+  - Limite de 1000 agendamentos removido (paginação)
+- **v1.1.0**: Modularização, API pública, gráficos Chart.js, comparativo de períodos
 - **v0.1.0**: Lançamento inicial com dashboard de métricas operacionais, financeiras, análise de clientes/pets e ranking de serviços
 
 Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.
