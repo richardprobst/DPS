@@ -2381,7 +2381,7 @@ tr.dps-row-updated {
 
 .dps-tab-content--active {
     display: block;
-    animation: fadeIn 0.2s ease-in-out;
+    animation: tabFadeIn 0.2s ease-in-out;
 }
 
 @keyframes tabFadeIn {
@@ -2528,13 +2528,4 @@ tr.dps-row-updated {
 
 .dps-tab-content h5:first-child {
     margin-top: 0;
-}
-
-/* Indicador visual para seção de pendentes vs finalizados */
-.dps-tab-content h5:first-of-type::before {
-    content: '⏳';
-}
-
-.dps-tab-content h5:last-of-type::before {
-    content: '✅';
 }
