@@ -222,4 +222,11 @@ O **Groomers Add-on** é um módulo de gestão de profissionais de banho e tosa 
 
 - [GROOMER_ADDON_DEEP_ANALYSIS.md](./GROOMER_ADDON_DEEP_ANALYSIS.md) - Análise técnica detalhada
 - [ANALYSIS.md](../../ANALYSIS.md) - Arquitetura geral do DPS
-- [GROOMERS_ADDON_ANALYSIS.md](../analysis/GROOMERS_ADDON_ANALYSIS.md) - Análise anterior (v1.1.0)
+- [GROOMERS_ADDON_ANALYSIS.md](../analysis/GROOMERS_ADDON_ANALYSIS.md) - Análise inicial (v1.0.0→v1.1.0)
+
+**Evolução de versões**:
+- v1.0.0: Cadastro básico, vinculação a agendamentos
+- v1.1.0: Assets externos, fieldsets, integração Finance API
+- v1.2.0: Edição/exclusão, exportação CSV
+- v1.3.0: Dashboard, agenda semanal, avaliações, comissões
+- v1.4.0: Portal do Groomer com magic links (versão atual)

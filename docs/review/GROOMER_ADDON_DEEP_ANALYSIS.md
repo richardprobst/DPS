@@ -720,5 +720,17 @@ Filtros: [Tipo: Todos ▼] [Status: Ativos ▼] [Freelancer: Todos ▼]
 
 - [GROOMER_ADDON_SUMMARY.md](./GROOMER_ADDON_SUMMARY.md) - Resumo executivo
 - [ANALYSIS.md](../../ANALYSIS.md) - Arquitetura geral do DPS
-- [GROOMERS_ADDON_ANALYSIS.md](../analysis/GROOMERS_ADDON_ANALYSIS.md) - Análise anterior (v1.1.0)
+- [GROOMERS_ADDON_ANALYSIS.md](../analysis/GROOMERS_ADDON_ANALYSIS.md) - Análise inicial (v1.0.0→v1.1.0)
 - [AGENTS.md](../../AGENTS.md) - Diretrizes de desenvolvimento
+
+### Evolução de Versões do Add-on
+
+| Versão | Data | Principais Mudanças |
+|--------|------|---------------------|
+| v1.0.0 | - | Cadastro básico, vinculação a agendamentos, relatórios |
+| v1.1.0 | 2025-12-02 | Assets externos, fieldsets, integração Finance API, corrigido uninstall.php |
+| v1.2.0 | 2025-12-02 | Edição/exclusão de groomers, exportação CSV |
+| v1.3.0 | 2025-12-02 | Dashboard individual, agenda semanal, avaliações, comissões, gráficos |
+| v1.4.0 | 2025-12-02 | Portal do Groomer com magic links, gerenciamento de tokens, sessões independentes |
+
+**Nota**: A análise anterior focou em melhorias de código e UX até v1.1.0. Esta análise foca na **expansão funcional** para suportar múltiplos tipos de profissionais.
