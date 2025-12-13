@@ -83,6 +83,44 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Groomers Add-on (v1.7.0) - FASE 4: Recursos Avançados**
+
+- **F4.1 - Configuração de disponibilidade**: Novos campos para horário de início/término e dias de trabalho por profissional.
+- Metas `_dps_work_start`, `_dps_work_end`, `_dps_work_days` para armazenar configuração de turnos.
+- Fieldset "Disponibilidade" no formulário de cadastro com inputs de horário e grid de checkboxes para dias.
+- CSS responsivo para componentes de disponibilidade.
+
+**Groomers Add-on (v1.6.0) - FASE 3: Finance/Repasse**
+
+- **F3.2 - Hook `dps_finance_booking_paid` consumido**: Ao confirmar pagamento, comissão é calculada automaticamente para profissionais vinculados.
+- **F3.3 - Método `generate_staff_commission()`**: Calcula comissão proporcional para múltiplos profissionais.
+- Metas `_dps_staff_commissions`, `_dps_commission_generated`, `_dps_commission_date` no agendamento.
+- Hook `dps_groomers_commission_generated` para extensões (Loyalty, Stats, etc.).
+
+**Services Add-on (v1.3.0) - FASE 2: Integração com Profissionais**
+
+- **F2.1 - Campo `required_staff_type`**: Serviços podem exigir tipo específico de profissional (groomer, banhista ou qualquer).
+- Meta `required_staff_type` salva com valores 'any', 'groomer', 'banhista'.
+
+**Agenda Add-on (v1.1.0) - FASE 2: Filtro por Profissional**
+
+- **F2.5 - Filtro por profissional na Agenda**: Novo filtro nos filtros avançados para selecionar profissional específico.
+- Parâmetro `filter_staff` adicionado no trait de renderização.
+- Profissionais exibidos com tipo entre parênteses no dropdown de filtro.
+
+**Groomers Add-on (v1.5.0) - FASE 1: Tipos de Profissional + Freelancer**
+
+- **F1.1 - Meta `_dps_staff_type`**: Novo campo para diferenciar tipos de profissional (groomer, banhista, auxiliar, recepção). Metas são migradas automaticamente para groomers existentes.
+- **F1.2 - Meta `_dps_is_freelancer`**: Flag booleana para identificar profissionais autônomos vs CLT. Permite regras diferenciadas em relatórios e financeiro.
+- **F1.3 - Migração automática**: Na primeira execução da v1.5.0, todos os profissionais existentes recebem `staff_type='groomer'` e `is_freelancer='0'` automaticamente.
+- **F1.4 - Formulário de cadastro atualizado**: Novo fieldset "Tipo e Vínculo" com select de tipo de profissional e checkbox de freelancer.
+- **F1.5 - Tabela de listagem atualizada**: Novas colunas "Tipo" e "Freelancer" com badges visuais coloridas por tipo.
+- **F1.6 - Filtros na listagem**: Novos filtros por tipo, freelancer e status para facilitar busca em petshops com muitos profissionais.
+- **Select agrupado por tipo no agendamento**: Profissionais agrupados por tipo com optgroup no select.
+- **Método `get_staff_types()`**: Método estático para obter tipos disponíveis com labels traduzidos.
+- **Método `get_staff_type_label()`**: Método estático para obter label traduzido de um tipo específico.
+- **Método `validate_staff_type()`**: Método estático para validar e normalizar tipos.
+
 **Registration Add-on (v1.2.0) - FASE 2A: UX Quick Wins & Higiene Técnica**
 
 - **F2.5 - JS em arquivo separado**: Criado `assets/js/dps-registration.js` com ~400 linhas de JavaScript modular. Remove ~40 linhas de JS inline do PHP. Script enfileirado com `wp_enqueue_script` apenas quando o shortcode está presente. Expõe objeto global `DPSRegistration` com métodos públicos para extensibilidade.

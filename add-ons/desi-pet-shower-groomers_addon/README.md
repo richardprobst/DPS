@@ -4,19 +4,24 @@ Cadastro de profissionais, vinculação a atendimentos e relatórios de produtiv
 
 ## Visão geral
 
-O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tosa (groomers), vincular cada atendimento a um profissional específico e gerar relatórios de produtividade individual. É ideal para pet shops com múltiplos funcionários que precisam acompanhar desempenho e distribuição de trabalho.
+O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tosa (groomers, banhistas, auxiliares), vincular cada atendimento a um profissional específico e gerar relatórios de produtividade individual. É ideal para pet shops com múltiplos funcionários que precisam acompanhar desempenho e distribuição de trabalho.
 
 ### Funcionalidades principais
 - ✅ Cadastro de profissionais via role customizada do WordPress
-- ✅ Edição e exclusão de groomers via interface
-- ✅ Status ativo/inativo para groomers
+- ✅ **Múltiplos tipos de profissional: Groomer, Banhista, Auxiliar, Recepção** (v1.5.0)
+- ✅ **Flag de Freelancer para profissionais autônomos** (v1.5.0)
+- ✅ **Filtros na listagem: por tipo, freelancer e status** (v1.5.0)
+- ✅ **Geração automática de comissões ao confirmar pagamento** (v1.6.0)
+- ✅ **Configuração de disponibilidade/turnos por profissional** (v1.7.0)
+- ✅ Edição e exclusão de profissionais via interface
+- ✅ Status ativo/inativo para profissionais
 - ✅ Campo de telefone e percentual de comissão
-- ✅ Vinculação de múltiplos groomers por atendimento
+- ✅ Vinculação de múltiplos profissionais por atendimento
 - ✅ Relatórios de produtividade por profissional
 - ✅ Exportação de relatórios em CSV
 - ✅ Métricas: total de atendimentos, receita, ticket médio, comissão
-- ✅ Dashboard individual do groomer com gráficos
-- ✅ Agenda semanal do groomer
+- ✅ Dashboard individual do profissional com gráficos
+- ✅ Agenda semanal do profissional
 - ✅ Relatório de comissões a pagar
 - ✅ Sistema de avaliações de clientes
 - ✅ **Portal do Groomer com acesso via token (magic link)**
@@ -25,7 +30,7 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
-**Versão atual**: 1.4.0
+**Versão atual**: 1.7.0
 
 ## Shortcodes disponíveis
 
@@ -137,25 +142,68 @@ Post type para armazenar avaliações de clientes.
 | Meta Key | Tipo | Descrição |
 |----------|------|-----------|
 | `_dps_groomer_status` | string | Status: 'active' ou 'inactive' |
-| `_dps_groomer_phone` | string | Telefone do groomer |
+| `_dps_groomer_phone` | string | Telefone do profissional |
 | `_dps_groomer_commission_rate` | float | Percentual de comissão (0-100) |
+| `_dps_staff_type` | string | Tipo: 'groomer', 'banhista', 'auxiliar', 'recepcao' (v1.5.0) |
+| `_dps_is_freelancer` | string | '1' se freelancer, '0' se não (v1.5.0) |
+| `_dps_work_start` | string | Horário de início, ex: '08:00' (v1.7.0) |
+| `_dps_work_end` | string | Horário de término, ex: '18:00' (v1.7.0) |
+| `_dps_work_days` | array | Dias de trabalho: ['mon','tue','wed',...] (v1.7.0) |
 
 ### Metadados em agendamentos
 
 | Meta Key | Tipo | Descrição |
 |----------|------|-----------|
-| `_dps_groomers` | array | IDs dos groomers responsáveis pelo atendimento |
+| `_dps_groomers` | array | IDs dos profissionais responsáveis pelo atendimento |
+| `_dps_staff_commissions` | array | Dados das comissões geradas (v1.6.0) |
+| `_dps_commission_generated` | bool | Flag de comissão já processada (v1.6.0) |
+| `_dps_commission_date` | string | Data/hora da geração da comissão (v1.6.0) |
 
 ### Metadados em avaliações
 
 | Meta Key | Tipo | Descrição |
 |----------|------|-----------|
-| `_dps_review_groomer_id` | int | ID do groomer avaliado |
+| `_dps_review_groomer_id` | int | ID do profissional avaliado |
 | `_dps_review_rating` | int | Nota de 1 a 5 estrelas |
 | `_dps_review_name` | string | Nome do avaliador (opcional) |
 | `_dps_review_appointment_id` | int | ID do agendamento relacionado (opcional) |
 
 ## Changelog
+
+### [1.7.0] - 2025-12-13
+
+#### Added
+- **Configuração de disponibilidade**: Horário de início/término e dias de trabalho por profissional
+- Novos campos `_dps_work_start`, `_dps_work_end`, `_dps_work_days`
+- Fieldset "Disponibilidade" no formulário de cadastro
+- Grid visual de checkboxes para dias da semana
+- CSS para componentes de disponibilidade
+
+### [1.6.0] - 2025-12-13
+
+#### Added
+- **Geração automática de comissões**: Hook `dps_finance_booking_paid` consumido
+- Método `generate_staff_commission()` para cálculo proporcional
+- Metas `_dps_staff_commissions`, `_dps_commission_generated`, `_dps_commission_date`
+- Hook `dps_groomers_commission_generated` para extensões
+- Suporte a múltiplos profissionais com divisão proporcional
+
+### [1.5.0] - 2025-12-13
+
+#### Added
+- **Múltiplos tipos de profissional**: Groomer, Banhista, Auxiliar, Recepção
+- **Flag de Freelancer** para identificar profissionais autônomos
+- **Filtros na listagem** por tipo, freelancer e status
+- Migração automática de dados existentes para novos campos
+- Badges visuais para tipo de profissional e freelancer
+- Novos campos no formulário de cadastro e modal de edição
+- Método estático `get_staff_types()` para reutilização
+- Método estático `get_staff_type_label()` para labels traduzidos
+
+#### Changed
+- Renomeado "Groomer" para "Profissional" em labels genéricos
+- Atualizado CSS com estilos para badges e filtros
+- Atualizado JS para suportar novos campos no modal
 
 ### [1.4.0] - 2025-12-02
 

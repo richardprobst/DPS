@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.4.0
+ * Version:           1.7.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -62,7 +62,20 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.4.0';
+    const VERSION = '1.7.0';
+
+    /**
+     * Tipos de profissionais disponíveis.
+     *
+     * @since 1.5.0
+     * @var array
+     */
+    const STAFF_TYPES = [
+        'groomer'   => 'Groomer',
+        'banhista'  => 'Banhista',
+        'auxiliar'  => 'Auxiliar',
+        'recepcao'  => 'Recepção',
+    ];
 
     /**
      * Inicializa hooks do add-on.
@@ -86,6 +99,12 @@ class DPS_Groomers_Addon {
         
         // Registrar CPT de avaliações
         add_action( 'init', [ $this, 'register_review_post_type' ] );
+        
+        // Migração de dados para novos campos (staff_type, is_freelancer)
+        add_action( 'init', [ $this, 'maybe_migrate_staff_data' ], 2 );
+        
+        // FASE 3: Hook para gerar comissão automática quando pagamento é confirmado
+        add_action( 'dps_finance_booking_paid', [ $this, 'generate_staff_commission' ], 10, 3 );
         
         // Shortcode do dashboard do groomer
         add_shortcode( 'dps_groomer_dashboard', [ $this, 'render_groomer_dashboard_shortcode' ] );
@@ -718,6 +737,195 @@ class DPS_Groomers_Addon {
     }
 
     /**
+     * Migra dados de groomers existentes para os novos campos.
+     *
+     * Adiciona _dps_staff_type = 'groomer' e _dps_is_freelancer = '0'
+     * para todos os usuários com role dps_groomer que não têm esses campos.
+     *
+     * @since 1.5.0
+     */
+    public function maybe_migrate_staff_data() {
+        // Verifica se a migração já foi feita
+        $migration_done = get_option( 'dps_groomers_staff_migration_done', false );
+        if ( $migration_done ) {
+            return;
+        }
+
+        // Busca todos os groomers
+        $groomers = get_users( [
+            'role'   => 'dps_groomer',
+            'fields' => 'ids',
+        ] );
+
+        if ( empty( $groomers ) ) {
+            update_option( 'dps_groomers_staff_migration_done', true );
+            return;
+        }
+
+        foreach ( $groomers as $groomer_id ) {
+            // Adiciona staff_type se não existir
+            $staff_type = get_user_meta( $groomer_id, '_dps_staff_type', true );
+            if ( empty( $staff_type ) ) {
+                update_user_meta( $groomer_id, '_dps_staff_type', 'groomer' );
+            }
+
+            // Adiciona is_freelancer se não existir
+            $is_freelancer = get_user_meta( $groomer_id, '_dps_is_freelancer', true );
+            if ( '' === $is_freelancer ) {
+                update_user_meta( $groomer_id, '_dps_is_freelancer', '0' );
+            }
+        }
+
+        update_option( 'dps_groomers_staff_migration_done', true );
+    }
+
+    /**
+     * Retorna os tipos de profissionais disponíveis com labels traduzidos.
+     *
+     * @since 1.5.0
+     *
+     * @return array Array com slug => label traduzido.
+     */
+    public static function get_staff_types() {
+        return [
+            'groomer'  => __( 'Groomer', 'dps-groomers-addon' ),
+            'banhista' => __( 'Banhista', 'dps-groomers-addon' ),
+            'auxiliar' => __( 'Auxiliar', 'dps-groomers-addon' ),
+            'recepcao' => __( 'Recepção', 'dps-groomers-addon' ),
+        ];
+    }
+
+    /**
+     * Retorna o label traduzido de um tipo de profissional.
+     *
+     * @since 1.5.0
+     *
+     * @param string $type Tipo do profissional.
+     * @return string Label traduzido ou o próprio type se não encontrado.
+     */
+    public static function get_staff_type_label( $type ) {
+        $types = self::get_staff_types();
+        return isset( $types[ $type ] ) ? $types[ $type ] : ucfirst( $type );
+    }
+
+    /**
+     * Valida se um tipo de profissional é válido.
+     *
+     * @since 1.5.0
+     *
+     * @param string $type Tipo a validar.
+     * @return string Tipo validado ou 'groomer' como fallback.
+     */
+    public static function validate_staff_type( $type ) {
+        $valid_types = array_keys( self::get_staff_types() );
+        return in_array( $type, $valid_types, true ) ? $type : 'groomer';
+    }
+
+    /**
+     * Gera comissão automática para profissionais ao confirmar pagamento.
+     *
+     * Hook conectado a dps_finance_booking_paid. Quando um pagamento é confirmado,
+     * calcula e registra a comissão de cada profissional vinculado ao atendimento.
+     *
+     * @since 1.6.0
+     *
+     * @param int $charge_id    ID da transação/cobrança.
+     * @param int $client_id    ID do cliente.
+     * @param int $value_cents  Valor pago em centavos.
+     */
+    public function generate_staff_commission( $charge_id, $client_id, $value_cents ) {
+        // Busca o agendamento associado à cobrança
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        $transaction = $wpdb->get_row( $wpdb->prepare(
+            "SELECT agendamento_id FROM {$table} WHERE id = %d",
+            absint( $charge_id )
+        ) );
+        
+        if ( ! $transaction || ! $transaction->agendamento_id ) {
+            return;
+        }
+        
+        $appointment_id = absint( $transaction->agendamento_id );
+        
+        // Busca profissionais vinculados ao atendimento
+        $staff_ids = get_post_meta( $appointment_id, '_dps_groomers', true );
+        if ( ! is_array( $staff_ids ) || empty( $staff_ids ) ) {
+            return;
+        }
+        
+        // Verifica se já foi gerada comissão para este atendimento
+        $commission_generated = get_post_meta( $appointment_id, '_dps_commission_generated', true );
+        if ( $commission_generated ) {
+            return;
+        }
+        
+        // Calcula valor base em reais
+        $total_value = $value_cents / 100;
+        
+        // Divide proporcionalmente entre os profissionais
+        $staff_count = count( $staff_ids );
+        if ( $staff_count === 0 ) {
+            return;
+        }
+        $value_per_staff = $total_value / $staff_count;
+        
+        $commissions_data = [];
+        
+        foreach ( $staff_ids as $staff_id ) {
+            $staff_id = absint( $staff_id );
+            
+            // Busca dados do profissional
+            $user = get_user_by( 'id', $staff_id );
+            if ( ! $user || ! in_array( 'dps_groomer', (array) $user->roles, true ) ) {
+                continue;
+            }
+            
+            $commission_rate = (float) get_user_meta( $staff_id, '_dps_groomer_commission_rate', true );
+            $is_freelancer = get_user_meta( $staff_id, '_dps_is_freelancer', true );
+            $staff_type = get_user_meta( $staff_id, '_dps_staff_type', true ) ?: 'groomer';
+            
+            if ( $commission_rate <= 0 ) {
+                continue;
+            }
+            
+            // Calcula valor da comissão
+            $commission_value = $value_per_staff * ( $commission_rate / 100 );
+            
+            // Armazena dados da comissão
+            $commissions_data[] = [
+                'staff_id'        => $staff_id,
+                'staff_name'      => $user->display_name ?: $user->user_login,
+                'staff_type'      => $staff_type,
+                'is_freelancer'   => $is_freelancer === '1',
+                'base_value'      => $value_per_staff,
+                'commission_rate' => $commission_rate,
+                'commission_value'=> round( $commission_value, 2 ),
+                'date'            => current_time( 'Y-m-d H:i:s' ),
+            ];
+        }
+        
+        if ( ! empty( $commissions_data ) ) {
+            // Salva registro de comissões no agendamento
+            update_post_meta( $appointment_id, '_dps_staff_commissions', $commissions_data );
+            update_post_meta( $appointment_id, '_dps_commission_generated', true );
+            update_post_meta( $appointment_id, '_dps_commission_date', current_time( 'Y-m-d H:i:s' ) );
+            
+            /**
+             * Disparado após gerar comissões de profissionais.
+             *
+             * @since 1.6.0
+             *
+             * @param int   $appointment_id   ID do agendamento.
+             * @param array $commissions_data Dados das comissões geradas.
+             * @param int   $value_cents      Valor total pago em centavos.
+             */
+            do_action( 'dps_groomers_commission_generated', $appointment_id, $commissions_data, $value_cents );
+        }
+    }
+
+    /**
      * Registra e enfileira assets no frontend (shortcode [dps_base]).
      *
      * @since 1.1.0
@@ -993,6 +1201,8 @@ class DPS_Groomers_Addon {
         $name       = isset( $_POST['dps_groomer_name'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_groomer_name'] ) ) : '';
         $phone      = isset( $_POST['dps_groomer_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_groomer_phone'] ) ) : '';
         $commission = isset( $_POST['dps_groomer_commission'] ) ? floatval( $_POST['dps_groomer_commission'] ) : 0;
+        $staff_type = isset( $_POST['dps_staff_type'] ) ? sanitize_key( wp_unslash( $_POST['dps_staff_type'] ) ) : '';
+        $is_freelancer = isset( $_POST['dps_is_freelancer'] ) ? '1' : '0';
 
         $update_data = [
             'ID' => $groomer_id,
@@ -1021,7 +1231,15 @@ class DPS_Groomers_Addon {
             update_user_meta( $groomer_id, '_dps_groomer_phone', $phone );
             update_user_meta( $groomer_id, '_dps_groomer_commission_rate', $commission );
             
-            DPS_Message_Helper::add_success( __( 'Groomer atualizado com sucesso.', 'dps-groomers-addon' ) );
+            // Atualizar staff_type se fornecido, usando método centralizado
+            if ( $staff_type ) {
+                update_user_meta( $groomer_id, '_dps_staff_type', self::validate_staff_type( $staff_type ) );
+            }
+            
+            // Atualizar is_freelancer
+            update_user_meta( $groomer_id, '_dps_is_freelancer', $is_freelancer );
+            
+            DPS_Message_Helper::add_success( __( 'Profissional atualizado com sucesso.', 'dps-groomers-addon' ) );
         }
     }
 
@@ -1296,12 +1514,28 @@ class DPS_Groomers_Addon {
         // Salvar meta fields adicionais do groomer
         $phone = isset( $_POST['dps_groomer_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_groomer_phone'] ) ) : '';
         $commission = isset( $_POST['dps_groomer_commission'] ) ? floatval( $_POST['dps_groomer_commission'] ) : 0;
+        $staff_type = isset( $_POST['dps_staff_type'] ) ? sanitize_key( wp_unslash( $_POST['dps_staff_type'] ) ) : 'groomer';
+        $is_freelancer = isset( $_POST['dps_is_freelancer'] ) ? '1' : '0';
         
-        update_user_meta( $user_id, '_dps_groomer_status', 'active' ); // Novo groomer sempre começa ativo
+        // Validar staff_type usando método centralizado
+        $staff_type = self::validate_staff_type( $staff_type );
+        
+        update_user_meta( $user_id, '_dps_groomer_status', 'active' ); // Novo profissional sempre começa ativo
         update_user_meta( $user_id, '_dps_groomer_phone', $phone );
         update_user_meta( $user_id, '_dps_groomer_commission_rate', $commission );
+        update_user_meta( $user_id, '_dps_staff_type', $staff_type );
+        update_user_meta( $user_id, '_dps_is_freelancer', $is_freelancer );
+        
+        // FASE 4: Salvar campos de disponibilidade
+        $work_start = isset( $_POST['dps_work_start'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_work_start'] ) ) : '08:00';
+        $work_end = isset( $_POST['dps_work_end'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_work_end'] ) ) : '18:00';
+        $work_days = isset( $_POST['dps_work_days'] ) ? array_map( 'sanitize_key', (array) wp_unslash( $_POST['dps_work_days'] ) ) : [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
+        
+        update_user_meta( $user_id, '_dps_work_start', $work_start );
+        update_user_meta( $user_id, '_dps_work_end', $work_end );
+        update_user_meta( $user_id, '_dps_work_days', $work_days );
 
-        $message = __( 'Groomer criado com sucesso.', 'dps-groomers-addon' );
+        $message = __( 'Profissional criado com sucesso.', 'dps-groomers-addon' );
         if ( $use_frontend_messages ) {
             DPS_Message_Helper::add_success( $message );
         } elseif ( function_exists( 'add_settings_error' ) ) {
@@ -1404,21 +1638,43 @@ class DPS_Groomers_Addon {
             }
         }
 
-        // Usar apenas groomers ativos na seleção
+        // Usar apenas profissionais ativos na seleção
         $groomers = $this->get_active_groomers();
         
-        echo '<p><label>' . esc_html__( 'Groomers responsáveis', 'dps-groomers-addon' ) . '<br>';
-        echo '<select name="dps_groomers[]" multiple size="4" style="min-width:220px;">';
+        // Agrupar profissionais por tipo
+        $grouped = [];
+        foreach ( $groomers as $groomer ) {
+            $staff_type = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+            if ( empty( $staff_type ) ) {
+                $staff_type = 'groomer';
+            }
+            if ( ! isset( $grouped[ $staff_type ] ) ) {
+                $grouped[ $staff_type ] = [];
+            }
+            $grouped[ $staff_type ][] = $groomer;
+        }
+        
+        echo '<p><label>' . esc_html__( 'Profissionais responsáveis', 'dps-groomers-addon' ) . '<br>';
+        echo '<select name="dps_groomers[]" id="dps_groomers_select" multiple size="5" style="min-width:280px;">';
         if ( empty( $groomers ) ) {
-            echo '<option value="">' . esc_html__( 'Nenhum groomer ativo', 'dps-groomers-addon' ) . '</option>';
+            echo '<option value="">' . esc_html__( 'Nenhum profissional ativo', 'dps-groomers-addon' ) . '</option>';
         } else {
-            foreach ( $groomers as $groomer ) {
-                $selected_attr = in_array( $groomer->ID, $selected, true ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $groomer->ID ) . '" ' . esc_attr( $selected_attr ) . '>' . esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ) . '</option>';
+            // Renderizar agrupado por tipo
+            foreach ( $grouped as $type => $type_groomers ) {
+                $type_label = self::get_staff_type_label( $type );
+                echo '<optgroup label="' . esc_attr( $type_label ) . '">';
+                foreach ( $type_groomers as $groomer ) {
+                    $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+                    $freelancer_indicator = ( $is_freelancer === '1' ) ? ' (F)' : '';
+                    $selected_attr = in_array( $groomer->ID, $selected, true ) ? 'selected' : '';
+                    $display_name = $groomer->display_name ? $groomer->display_name : $groomer->user_login;
+                    echo '<option value="' . esc_attr( $groomer->ID ) . '" data-staff-type="' . esc_attr( $type ) . '" ' . esc_attr( $selected_attr ) . '>' . esc_html( $display_name . $freelancer_indicator ) . '</option>';
+                }
+                echo '</optgroup>';
             }
         }
         echo '</select>';
-        echo '<span class="description">' . esc_html__( 'Selecione um ou mais groomers para este atendimento.', 'dps-groomers-addon' ) . '</span>';
+        echo '<span class="description">' . esc_html__( 'Selecione um ou mais profissionais. (F) = Freelancer.', 'dps-groomers-addon' ) . '</span>';
         echo '</label></p>';
     }
 
@@ -1545,6 +1801,29 @@ class DPS_Groomers_Addon {
                         </fieldset>
                         
                         <fieldset class="dps-fieldset">
+                            <legend><?php echo esc_html__( 'Tipo e Vínculo', 'dps-groomers-addon' ); ?></legend>
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-field">
+                                    <label for="dps_staff_type"><?php echo esc_html__( 'Tipo de profissional', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                    <select name="dps_staff_type" id="dps_staff_type" required>
+                                        <?php foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
+                                            <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $type_slug, 'groomer' ); ?>>
+                                                <?php echo esc_html( $type_label ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="dps-form-field">
+                                    <label class="dps-checkbox-label">
+                                        <input type="checkbox" name="dps_is_freelancer" id="dps_is_freelancer" value="1" />
+                                        <?php echo esc_html__( 'É freelancer (autônomo)', 'dps-groomers-addon' ); ?>
+                                    </label>
+                                    <small class="dps-field-help"><?php echo esc_html__( 'Marque se o profissional não é funcionário fixo.', 'dps-groomers-addon' ); ?></small>
+                                </div>
+                            </div>
+                        </fieldset>
+                        
+                        <fieldset class="dps-fieldset">
                             <legend><?php echo esc_html__( 'Contato e Comissão', 'dps-groomers-addon' ); ?></legend>
                             <div class="dps-form-row dps-form-row--2col">
                                 <div class="dps-form-field">
@@ -1558,29 +1837,148 @@ class DPS_Groomers_Addon {
                             </div>
                         </fieldset>
                         
-                        <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Criar groomer', 'dps-groomers-addon' ); ?></button>
+                        <fieldset class="dps-fieldset">
+                            <legend><?php echo esc_html__( 'Disponibilidade', 'dps-groomers-addon' ); ?></legend>
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-field">
+                                    <label for="dps_work_start"><?php echo esc_html__( 'Horário de início', 'dps-groomers-addon' ); ?></label>
+                                    <input name="dps_work_start" id="dps_work_start" type="time" value="08:00" />
+                                </div>
+                                <div class="dps-form-field">
+                                    <label for="dps_work_end"><?php echo esc_html__( 'Horário de término', 'dps-groomers-addon' ); ?></label>
+                                    <input name="dps_work_end" id="dps_work_end" type="time" value="18:00" />
+                                </div>
+                            </div>
+                            <div class="dps-form-field">
+                                <label><?php echo esc_html__( 'Dias de trabalho', 'dps-groomers-addon' ); ?></label>
+                                <div class="dps-weekdays-grid">
+                                    <?php 
+                                    $weekdays = [
+                                        'mon' => __( 'Seg', 'dps-groomers-addon' ),
+                                        'tue' => __( 'Ter', 'dps-groomers-addon' ),
+                                        'wed' => __( 'Qua', 'dps-groomers-addon' ),
+                                        'thu' => __( 'Qui', 'dps-groomers-addon' ),
+                                        'fri' => __( 'Sex', 'dps-groomers-addon' ),
+                                        'sat' => __( 'Sáb', 'dps-groomers-addon' ),
+                                        'sun' => __( 'Dom', 'dps-groomers-addon' ),
+                                    ];
+                                    $default_days = [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
+                                    foreach ( $weekdays as $day_key => $day_label ) : 
+                                        $checked = in_array( $day_key, $default_days, true ) ? 'checked' : '';
+                                    ?>
+                                        <label class="dps-weekday-checkbox">
+                                            <input type="checkbox" name="dps_work_days[]" value="<?php echo esc_attr( $day_key ); ?>" <?php echo esc_attr( $checked ); ?> />
+                                            <?php echo esc_html( $day_label ); ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                                <small class="dps-field-help"><?php echo esc_html__( 'Selecione os dias em que o profissional trabalha.', 'dps-groomers-addon' ); ?></small>
+                            </div>
+                        </fieldset>
+                        
+                        <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Criar profissional', 'dps-groomers-addon' ); ?></button>
                     </form>
                 </div>
 
                 <div class="dps-groomers-list-container">
-                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Groomers cadastrados', 'dps-groomers-addon' ); ?></h3>
+                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Profissionais cadastrados', 'dps-groomers-addon' ); ?></h3>
+                    
+                    <!-- Filtros da listagem -->
+                    <div class="dps-groomers-filters">
+                        <form method="get" class="dps-inline-filters">
+                            <input type="hidden" name="tab" value="groomers" />
+                            <div class="dps-filter-group">
+                                <label for="filter_staff_type"><?php echo esc_html__( 'Tipo:', 'dps-groomers-addon' ); ?></label>
+                                <select name="filter_staff_type" id="filter_staff_type">
+                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
+                                    <?php 
+                                    $filter_type = isset( $_GET['filter_staff_type'] ) ? sanitize_key( wp_unslash( $_GET['filter_staff_type'] ) ) : '';
+                                    foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
+                                        <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $filter_type, $type_slug ); ?>>
+                                            <?php echo esc_html( $type_label ); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="dps-filter-group">
+                                <label for="filter_freelancer"><?php echo esc_html__( 'Freelancer:', 'dps-groomers-addon' ); ?></label>
+                                <select name="filter_freelancer" id="filter_freelancer">
+                                    <?php $filter_freelancer = isset( $_GET['filter_freelancer'] ) ? sanitize_key( wp_unslash( $_GET['filter_freelancer'] ) ) : ''; ?>
+                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
+                                    <option value="1" <?php selected( $filter_freelancer, '1' ); ?>><?php echo esc_html__( 'Sim', 'dps-groomers-addon' ); ?></option>
+                                    <option value="0" <?php selected( $filter_freelancer, '0' ); ?>><?php echo esc_html__( 'Não', 'dps-groomers-addon' ); ?></option>
+                                </select>
+                            </div>
+                            <div class="dps-filter-group">
+                                <label for="filter_status"><?php echo esc_html__( 'Status:', 'dps-groomers-addon' ); ?></label>
+                                <select name="filter_status" id="filter_status">
+                                    <?php $filter_status = isset( $_GET['filter_status'] ) ? sanitize_key( wp_unslash( $_GET['filter_status'] ) ) : ''; ?>
+                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
+                                    <option value="active" <?php selected( $filter_status, 'active' ); ?>><?php echo esc_html__( 'Ativos', 'dps-groomers-addon' ); ?></option>
+                                    <option value="inactive" <?php selected( $filter_status, 'inactive' ); ?>><?php echo esc_html__( 'Inativos', 'dps-groomers-addon' ); ?></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="dps-btn dps-btn--small dps-btn--secondary"><?php echo esc_html__( 'Filtrar', 'dps-groomers-addon' ); ?></button>
+                            <?php if ( $filter_type || $filter_freelancer !== '' || $filter_status ) : ?>
+                                <a href="?tab=groomers" class="dps-btn dps-btn--small dps-btn--outline"><?php echo esc_html__( 'Limpar', 'dps-groomers-addon' ); ?></a>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                    
+                    <?php 
+                    // Aplicar filtros à lista de groomers em PHP.
+                    // Para datasets típicos (<100 profissionais) isso é suficiente.
+                    // Se performance se tornar um problema, mover para meta_query com user_meta.
+                    $filtered_groomers = $groomers;
+                    if ( $filter_type || $filter_freelancer !== '' || $filter_status ) {
+                        $filtered_groomers = array_filter( $groomers, function( $groomer ) use ( $filter_type, $filter_freelancer, $filter_status ) {
+                            // Filtrar por tipo
+                            if ( $filter_type ) {
+                                $staff_type = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+                                if ( $staff_type !== $filter_type ) {
+                                    return false;
+                                }
+                            }
+                            // Filtrar por freelancer
+                            if ( $filter_freelancer !== '' ) {
+                                $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+                                if ( $is_freelancer !== $filter_freelancer ) {
+                                    return false;
+                                }
+                            }
+                            // Filtrar por status
+                            if ( $filter_status ) {
+                                $status = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
+                                if ( empty( $status ) ) {
+                                    $status = 'active';
+                                }
+                                if ( $status !== $filter_status ) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } );
+                    }
+                    ?>
+                    
                     <table class="dps-groomers-table">
                         <thead>
                             <tr>
                                 <th><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Telefone', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Tipo', 'dps-groomers-addon' ); ?></th>
+                                <th><?php echo esc_html__( 'Freelancer', 'dps-groomers-addon' ); ?></th>
                                 <th><?php echo esc_html__( 'Comissão', 'dps-groomers-addon' ); ?></th>
                                 <th><?php echo esc_html__( 'Status', 'dps-groomers-addon' ); ?></th>
                                 <th><?php echo esc_html__( 'Ações', 'dps-groomers-addon' ); ?></th>
                             </tr>
                         </thead>
                         <tbody>
-                        <?php if ( empty( $groomers ) ) : ?>
+                        <?php if ( empty( $filtered_groomers ) ) : ?>
                             <tr>
-                                <td colspan="5" class="dps-empty-message"><?php echo esc_html__( 'Nenhum groomer cadastrado ainda. Use o formulário ao lado para adicionar o primeiro profissional.', 'dps-groomers-addon' ); ?></td>
+                                <td colspan="6" class="dps-empty-message"><?php echo esc_html__( 'Nenhum profissional encontrado. Use o formulário ao lado para adicionar.', 'dps-groomers-addon' ); ?></td>
                             </tr>
                         <?php else : ?>
-                            <?php foreach ( $groomers as $groomer ) : 
+                            <?php foreach ( $filtered_groomers as $groomer ) : 
                                 $delete_url = wp_nonce_url(
                                     add_query_arg(
                                         [
@@ -1603,10 +2001,15 @@ class DPS_Groomers_Addon {
                                 $groomer_status     = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
                                 $groomer_phone      = get_user_meta( $groomer->ID, '_dps_groomer_phone', true );
                                 $groomer_commission = get_user_meta( $groomer->ID, '_dps_groomer_commission_rate', true );
+                                $staff_type         = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+                                $is_freelancer      = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
                                 
-                                // Default para ativo se não tiver status definido
+                                // Defaults
                                 if ( empty( $groomer_status ) ) {
                                     $groomer_status = 'active';
+                                }
+                                if ( empty( $staff_type ) ) {
+                                    $staff_type = 'groomer';
                                 }
                                 
                                 $status_class = ( $groomer_status === 'active' ) ? 'dps-status-badge--ativo' : 'dps-status-badge--inativo';
@@ -1620,10 +2023,15 @@ class DPS_Groomers_Addon {
                                         <br><small><?php echo esc_html( $groomer->user_email ); ?></small>
                                     </td>
                                     <td>
-                                        <?php if ( $groomer_phone ) : ?>
-                                            <?php echo esc_html( $groomer_phone ); ?>
+                                        <span class="dps-badge dps-badge--type-<?php echo esc_attr( $staff_type ); ?>">
+                                            <?php echo esc_html( self::get_staff_type_label( $staff_type ) ); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ( $is_freelancer === '1' ) : ?>
+                                            <span class="dps-badge dps-badge--freelancer"><?php echo esc_html__( 'Sim', 'dps-groomers-addon' ); ?></span>
                                         <?php else : ?>
-                                            <span class="dps-no-data">-</span>
+                                            <span class="dps-text-muted"><?php echo esc_html__( 'Não', 'dps-groomers-addon' ); ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -1648,14 +2056,16 @@ class DPS_Groomers_Addon {
                                             data-groomer-email="<?php echo esc_attr( $groomer->user_email ); ?>"
                                             data-groomer-phone="<?php echo esc_attr( $groomer_phone ); ?>"
                                             data-groomer-commission="<?php echo esc_attr( $groomer_commission ); ?>"
-                                            title="<?php echo esc_attr__( 'Editar groomer', 'dps-groomers-addon' ); ?>">
+                                            data-staff-type="<?php echo esc_attr( $staff_type ); ?>"
+                                            data-is-freelancer="<?php echo esc_attr( $is_freelancer ); ?>"
+                                            title="<?php echo esc_attr__( 'Editar profissional', 'dps-groomers-addon' ); ?>">
                                             ✏️ <?php echo esc_html__( 'Editar', 'dps-groomers-addon' ); ?>
                                         </button>
                                         <a href="<?php echo esc_url( $delete_url ); ?>" 
                                             class="dps-action-link dps-action-link--delete dps-delete-groomer"
                                             data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
                                             data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
-                                            title="<?php echo esc_attr__( 'Excluir groomer', 'dps-groomers-addon' ); ?>">
+                                            title="<?php echo esc_attr__( 'Excluir profissional', 'dps-groomers-addon' ); ?>">
                                             🗑️ <?php echo esc_html__( 'Excluir', 'dps-groomers-addon' ); ?>
                                         </a>
                                     </td>
@@ -1667,11 +2077,11 @@ class DPS_Groomers_Addon {
                 </div>
             </div>
 
-            <!-- Modal de Edição de Groomer -->
+            <!-- Modal de Edição de Profissional -->
             <div id="dps-edit-groomer-modal" class="dps-modal" style="display: none;">
                 <div class="dps-modal-content">
                     <div class="dps-modal-header">
-                        <h4><?php echo esc_html__( 'Editar Groomer', 'dps-groomers-addon' ); ?></h4>
+                        <h4><?php echo esc_html__( 'Editar Profissional', 'dps-groomers-addon' ); ?></h4>
                         <button type="button" class="dps-modal-close">&times;</button>
                     </div>
                     <form method="post" action="" class="dps-groomers-form">
@@ -1688,6 +2098,24 @@ class DPS_Groomers_Addon {
                                 <div class="dps-form-field">
                                     <label for="edit_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
                                     <input type="email" name="dps_groomer_email" id="edit_groomer_email" class="regular-text" required />
+                                </div>
+                            </div>
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-field">
+                                    <label for="edit_staff_type"><?php echo esc_html__( 'Tipo de profissional', 'dps-groomers-addon' ); ?></label>
+                                    <select name="dps_staff_type" id="edit_staff_type">
+                                        <?php foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
+                                            <option value="<?php echo esc_attr( $type_slug ); ?>">
+                                                <?php echo esc_html( $type_label ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="dps-form-field">
+                                    <label class="dps-checkbox-label">
+                                        <input type="checkbox" name="dps_is_freelancer" id="edit_is_freelancer" value="1" />
+                                        <?php echo esc_html__( 'É freelancer (autônomo)', 'dps-groomers-addon' ); ?>
+                                    </label>
                                 </div>
                             </div>
                             <div class="dps-form-row dps-form-row--2col">

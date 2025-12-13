@@ -7,6 +7,7 @@
  * @since 1.1.0
  * @updated 1.2.0 - Adicionado modal de edição e confirmação melhorada de exclusão
  * @updated 1.4.0 - Adicionado portal do groomer e gerenciamento de tokens
+ * @updated 1.5.0 - Adicionado suporte a staff_type e is_freelancer no modal de edição
  */
 
 (function($) {
@@ -93,6 +94,8 @@
             var groomerEmail = $button.data('groomer-email') || '';
             var groomerPhone = $button.data('groomer-phone') || '';
             var groomerCommission = $button.data('groomer-commission') || '';
+            var staffType = $button.data('staff-type') || 'groomer';
+            var isFreelancer = $button.data('is-freelancer') || '0';
             
             var $modal = $('#dps-edit-groomer-modal');
             
@@ -102,6 +105,8 @@
             $modal.find('#edit_groomer_email').val(groomerEmail);
             $modal.find('#edit_groomer_phone').val(groomerPhone);
             $modal.find('#edit_groomer_commission').val(groomerCommission);
+            $modal.find('#edit_staff_type').val(staffType);
+            $modal.find('#edit_is_freelancer').prop('checked', isFreelancer === '1');
             
             // Exibe o modal
             $modal.fadeIn(200);
