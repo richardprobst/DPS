@@ -51,6 +51,14 @@ add_action( 'init', 'dps_registration_load_textdomain', 1 );
 class DPS_Registration_Addon {
 
     /**
+     * Ação padrão usada no reCAPTCHA.
+     *
+     * @since 1.5.0
+     * @var string
+     */
+    const RECAPTCHA_ACTION = 'dps_registration';
+
+    /**
      * Instância única (singleton).
      *
      * @since 1.0.1
@@ -517,6 +525,19 @@ class DPS_Registration_Addon {
         $addon_url = plugin_dir_url( __FILE__ );
         $version   = '1.2.0';
 
+        $recaptcha_settings = $this->get_recaptcha_settings();
+        $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
+
+        if ( $should_load_recaptcha ) {
+            wp_enqueue_script(
+                'google-recaptcha',
+                'https://www.google.com/recaptcha/api.js?render=' . rawurlencode( $recaptcha_settings['site_key'] ),
+                array(),
+                null,
+                true
+            );
+        }
+
         // CSS responsivo
         wp_enqueue_style(
             'dps-registration-addon',
@@ -532,6 +553,20 @@ class DPS_Registration_Addon {
             [],
             $version,
             true // Load in footer
+        );
+
+        wp_localize_script(
+            'dps-registration',
+            'dpsRegistrationData',
+            array(
+                'recaptcha' => array(
+                    'enabled'            => $should_load_recaptcha,
+                    'siteKey'            => $recaptcha_settings['site_key'],
+                    'action'             => self::RECAPTCHA_ACTION,
+                    'errorMessage'       => __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ),
+                    'unavailableMessage' => __( 'Não foi possível carregar o verificador anti-spam. Recarregue a página e tente novamente.', 'dps-registration-addon' ),
+                ),
+            )
         );
     }
 
@@ -609,6 +644,91 @@ class DPS_Registration_Addon {
             'sanitize_callback' => 'sanitize_text_field',
             'default'           => '',
         ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_recaptcha_enabled', [
+            'type'              => 'boolean',
+            'sanitize_callback' => [ $this, 'sanitize_checkbox' ],
+            'default'           => 0,
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_recaptcha_site_key', [
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '',
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_recaptcha_secret_key', [
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '',
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_recaptcha_threshold', [
+            'type'              => 'number',
+            'sanitize_callback' => [ $this, 'sanitize_recaptcha_threshold' ],
+            'default'           => 0.5,
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_confirm_email_subject', [
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '',
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_confirm_email_body', [
+            'type'              => 'string',
+            'sanitize_callback' => 'wp_kses_post',
+            'default'           => '',
+        ] );
+    }
+
+    /**
+     * Sanitiza checkboxes de configurações.
+     *
+     * @since 1.5.0
+     *
+     * @param mixed $value Valor recebido.
+     * @return int 1 ou 0
+     */
+    public function sanitize_checkbox( $value ) {
+        return ! empty( $value ) ? 1 : 0;
+    }
+
+    /**
+     * Sanitiza o threshold do reCAPTCHA garantindo faixa entre 0 e 1.
+     *
+     * @since 1.5.0
+     *
+     * @param mixed $value Valor recebido.
+     * @return float Valor clamped.
+     */
+    public function sanitize_recaptcha_threshold( $value ) {
+        $value = floatval( $value );
+        if ( $value < 0 ) {
+            $value = 0;
+        }
+
+        if ( $value > 1 ) {
+            $value = 1;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Retorna configurações sanitizadas do reCAPTCHA.
+     *
+     * @since 1.5.0
+     *
+     * @return array
+     */
+    private function get_recaptcha_settings() {
+        return array(
+            'enabled'    => (bool) get_option( 'dps_registration_recaptcha_enabled', 0 ),
+            'site_key'   => sanitize_text_field( get_option( 'dps_registration_recaptcha_site_key', '' ) ),
+            'secret_key' => sanitize_text_field( get_option( 'dps_registration_recaptcha_secret_key', '' ) ),
+            'threshold'  => $this->sanitize_recaptcha_threshold( get_option( 'dps_registration_recaptcha_threshold', 0.5 ) ),
+        );
     }
 
     /**
@@ -624,9 +744,36 @@ class DPS_Registration_Addon {
         settings_fields( 'dps_registration_settings' );
         do_settings_sections( 'dps_registration_settings' );
         $api_key = get_option( 'dps_google_api_key', '' );
+        $recaptcha_enabled    = (bool) get_option( 'dps_registration_recaptcha_enabled', 0 );
+        $recaptcha_site_key   = get_option( 'dps_registration_recaptcha_site_key', '' );
+        $recaptcha_secret_key = get_option( 'dps_registration_recaptcha_secret_key', '' );
+        $recaptcha_threshold  = get_option( 'dps_registration_recaptcha_threshold', 0.5 );
+        $email_subject        = get_option( 'dps_registration_confirm_email_subject', '' );
+        $email_body           = get_option( 'dps_registration_confirm_email_body', '' );
         echo '<table class="form-table">';
         echo '<tr><th scope="row"><label for="dps_google_api_key">' . esc_html__( 'Google Maps API Key', 'dps-registration-addon' ) . '</label></th>';
         echo '<td><input type="text" id="dps_google_api_key" name="dps_google_api_key" value="' . esc_attr( $api_key ) . '" class="regular-text"></td></tr>';
+
+        echo '<tr><th scope="row">' . esc_html__( 'Ativar reCAPTCHA v3', 'dps-registration-addon' ) . '</th>';
+        echo '<td><label><input type="checkbox" name="dps_registration_recaptcha_enabled" value="1" ' . checked( $recaptcha_enabled, true, false ) . '> ' . esc_html__( 'Habilitar verificação anti-spam com reCAPTCHA v3', 'dps-registration-addon' ) . '</label></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_recaptcha_site_key">' . esc_html__( 'Site Key (reCAPTCHA v3)', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="text" id="dps_registration_recaptcha_site_key" name="dps_registration_recaptcha_site_key" value="' . esc_attr( $recaptcha_site_key ) . '" class="regular-text" autocomplete="off"></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_recaptcha_secret_key">' . esc_html__( 'Secret Key (reCAPTCHA v3)', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="password" id="dps_registration_recaptcha_secret_key" name="dps_registration_recaptcha_secret_key" value="' . esc_attr( $recaptcha_secret_key ) . '" class="regular-text" autocomplete="new-password"></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_recaptcha_threshold">' . esc_html__( 'Score mínimo (0-1)', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="number" id="dps_registration_recaptcha_threshold" name="dps_registration_recaptcha_threshold" value="' . esc_attr( $recaptcha_threshold ) . '" min="0" max="1" step="0.1">';
+        echo '<p class="description">' . esc_html__( 'Cadastros com score abaixo deste valor serão bloqueados.', 'dps-registration-addon' ) . '</p></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_confirm_email_subject">' . esc_html__( 'Assunto do email de confirmação', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="text" id="dps_registration_confirm_email_subject" name="dps_registration_confirm_email_subject" value="' . esc_attr( $email_subject ) . '" class="regular-text">';
+        echo '<p class="description">' . esc_html__( 'Deixe vazio para usar o padrão.', 'dps-registration-addon' ) . '</p></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_confirm_email_body">' . esc_html__( 'Corpo do email de confirmação', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><textarea id="dps_registration_confirm_email_body" name="dps_registration_confirm_email_body" rows="6" class="large-text code">' . esc_textarea( $email_body ) . '</textarea>';
+        echo '<p class="description">' . esc_html__( 'Suporta HTML básico e os placeholders {client_name}, {confirm_url}, {registration_url}, {portal_url}, {business_name}. Deixe vazio para usar o modelo padrão.', 'dps-registration-addon' ) . '</p></td></tr>';
         echo '</table>';
         submit_button();
         echo '</form>';
@@ -786,6 +933,30 @@ class DPS_Registration_Addon {
             ) );
             $this->add_error( __( 'Muitas tentativas de cadastro. Por favor, aguarde alguns minutos antes de tentar novamente.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
+        }
+
+        $recaptcha_settings = $this->get_recaptcha_settings();
+        if ( $recaptcha_settings['enabled'] ) {
+            $recaptcha_token  = isset( $_POST['dps_recaptcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_recaptcha_token'] ) ) : '';
+            $recaptcha_action = isset( $_POST['dps_recaptcha_action'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_recaptcha_action'] ) ) : '';
+
+            if ( empty( $recaptcha_token ) ) {
+                $this->add_error( __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ) );
+                $this->redirect_with_error();
+            }
+
+            if ( self::RECAPTCHA_ACTION !== $recaptcha_action ) {
+                $this->add_error( __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ) );
+                $this->redirect_with_error();
+            }
+
+            $recaptcha_result = $this->verify_recaptcha_token( $recaptcha_token, $recaptcha_settings );
+
+            if ( is_wp_error( $recaptcha_result ) || true !== $recaptcha_result ) {
+                $message = is_wp_error( $recaptcha_result ) ? $recaptcha_result->get_error_message() : __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' );
+                $this->add_error( $message );
+                $this->redirect_with_error();
+            }
         }
 
         // F1.8: Hook para validações adicionais (ex.: reCAPTCHA)
@@ -1063,6 +1234,92 @@ class DPS_Registration_Addon {
     }
 
     /**
+     * Valida token do reCAPTCHA v3 com o endpoint oficial.
+     *
+     * @since 1.5.0
+     *
+     * @param string $token              Token retornado pelo reCAPTCHA.
+     * @param array  $recaptcha_settings Configurações sanitizadas.
+     * @return true|WP_Error
+     */
+    private function verify_recaptcha_token( $token, $recaptcha_settings ) {
+        if ( empty( $recaptcha_settings['secret_key'] ) ) {
+            $this->log_event( 'error', 'reCAPTCHA habilitado sem secret key', array(
+                'ip_hash'     => $this->get_client_ip_hash(),
+                'token_hash'  => $this->get_safe_hash( $token ),
+                'has_sitekey' => ! empty( $recaptcha_settings['site_key'] ),
+            ) );
+            return new WP_Error( 'recaptcha_misconfigured', __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        $remote_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+        $response = wp_remote_post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            array(
+                'timeout' => 10,
+                'body'    => array(
+                    'secret'   => $recaptcha_settings['secret_key'],
+                    'response' => $token,
+                    'remoteip' => $remote_ip,
+                ),
+            )
+        );
+
+        if ( is_wp_error( $response ) ) {
+            $this->log_event( 'error', 'Erro ao consultar reCAPTCHA', array(
+                'error'      => $response->get_error_message(),
+                'ip_hash'    => $this->get_client_ip_hash(),
+                'token_hash' => $this->get_safe_hash( $token ),
+            ) );
+            return new WP_Error( 'recaptcha_unavailable', __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        $status_code = wp_remote_retrieve_response_code( $response );
+        $body        = wp_remote_retrieve_body( $response );
+        $data        = json_decode( $body, true );
+
+        if ( 200 !== (int) $status_code || ! is_array( $data ) ) {
+            $this->log_event( 'error', 'Resposta inválida do reCAPTCHA', array(
+                'status'     => $status_code,
+                'ip_hash'    => $this->get_client_ip_hash(),
+                'token_hash' => $this->get_safe_hash( $token ),
+            ) );
+            return new WP_Error( 'recaptcha_unavailable', __( 'Não foi possível validar o anti-spam. Tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        if ( empty( $data['success'] ) ) {
+            $this->log_event( 'warning', 'reCAPTCHA falhou', array(
+                'error_codes' => isset( $data['error-codes'] ) ? $data['error-codes'] : array(),
+                'ip_hash'     => $this->get_client_ip_hash(),
+                'token_hash'  => $this->get_safe_hash( $token ),
+            ) );
+            return new WP_Error( 'recaptcha_failed', __( 'Validação anti-spam reprovada. Por favor, tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        if ( isset( $data['action'] ) && self::RECAPTCHA_ACTION !== $data['action'] ) {
+            $this->log_event( 'warning', 'Ação do reCAPTCHA divergente', array(
+                'action'     => $data['action'],
+                'ip_hash'    => $this->get_client_ip_hash(),
+                'token_hash' => $this->get_safe_hash( $token ),
+            ) );
+            return new WP_Error( 'recaptcha_failed', __( 'Validação anti-spam reprovada. Por favor, tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        if ( isset( $data['score'] ) && floatval( $data['score'] ) < $recaptcha_settings['threshold'] ) {
+            $this->log_event( 'warning', 'Score do reCAPTCHA abaixo do mínimo', array(
+                'score'      => $data['score'],
+                'threshold'  => $recaptcha_settings['threshold'],
+                'ip_hash'    => $this->get_client_ip_hash(),
+                'token_hash' => $this->get_safe_hash( $token ),
+            ) );
+            return new WP_Error( 'recaptcha_low_score', __( 'Validação anti-spam reprovada. Por favor, tente novamente.', 'dps-registration-addon' ) );
+        }
+
+        return true;
+    }
+
+    /**
      * Envia notificação para o admin sobre novo cadastro.
      *
      * @since 1.3.0
@@ -1192,6 +1449,11 @@ class DPS_Registration_Addon {
         echo '<form method="post" id="dps-reg-form">';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
+        $recaptcha = $this->get_recaptcha_settings();
+        if ( $recaptcha['enabled'] && ! empty( $recaptcha['site_key'] ) ) {
+            echo '<input type="hidden" name="dps_recaptcha_token" value="">';
+            echo '<input type="hidden" name="dps_recaptcha_action" value="' . esc_attr( self::RECAPTCHA_ACTION ) . '">';
+        }
         if ( $ref_param ) {
             echo '<input type="hidden" name="dps_referral_code" value="' . esc_attr( $ref_param ) . '">';
         }
@@ -1451,6 +1713,76 @@ class DPS_Registration_Addon {
     }
 
     /**
+     * Monta template de email de confirmação com placeholders resolvidos.
+     *
+     * @since 1.5.0
+     *
+     * @param int    $client_id          ID do cliente.
+     * @param string $confirmation_link  URL de confirmação.
+     * @return array
+     */
+    private function get_confirmation_email_template( $client_id, $confirmation_link ) {
+        $client_name     = get_the_title( $client_id );
+        $registration_url = $this->get_registration_page_url();
+        $portal_url      = $this->get_portal_url();
+        $business_name   = get_bloginfo( 'name' );
+
+        $placeholders = array(
+            '{client_name}'     => $client_name,
+            '{confirm_url}'     => esc_url_raw( $confirmation_link ),
+            '{registration_url}' => esc_url_raw( $registration_url ),
+            '{portal_url}'      => $portal_url ? esc_url_raw( $portal_url ) : '',
+            '{business_name}'   => $business_name,
+        );
+
+        $subject_option = get_option( 'dps_registration_confirm_email_subject', '' );
+        $body_option    = get_option( 'dps_registration_confirm_email_body', '' );
+
+        $subject = $subject_option
+            ? $this->replace_placeholders( $subject_option, $placeholders )
+            : __( 'Confirme seu email - DPS by PRObst', 'desi-pet-shower' );
+
+        if ( $body_option ) {
+            $body = $this->replace_placeholders( $body_option, $placeholders );
+        } else {
+            $body_parts = array();
+            $body_parts[] = '<p>' . esc_html__( 'Olá! Recebemos seu cadastro no DPS by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ) . '</p>';
+            $body_parts[] = '<p><a href="' . esc_url( $confirmation_link ) . '">' . esc_html( $confirmation_link ) . '</a></p>';
+            $body_parts[] = '<p>' . esc_html__( 'Este link é válido por 48 horas.', 'dps-registration-addon' ) . '</p>';
+            $body_parts[] = '<p>' . esc_html__( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' ) . '</p>';
+
+            if ( $portal_url ) {
+                $body_parts[] = '<p>' . sprintf(
+                    '%s <a href="%s">%s</a>',
+                    esc_html__( 'Após confirmar, acesse o Portal por aqui:', 'dps-registration-addon' ),
+                    esc_url( $portal_url ),
+                    esc_html( $portal_url )
+                ) . '</p>';
+            }
+
+            $body = implode( '', $body_parts );
+        }
+
+        return array(
+            'subject' => $subject,
+            'body'    => $body,
+        );
+    }
+
+    /**
+     * Substitui placeholders suportados no template.
+     *
+     * @since 1.5.0
+     *
+     * @param string $template Texto com placeholders.
+     * @param array  $replacements Valores para substituir.
+     * @return string
+     */
+    private function replace_placeholders( $template, $replacements ) {
+        return strtr( $template, $replacements );
+    }
+
+    /**
      * Envia email com token de confirmação para o cliente.
      *
      * @param int    $client_id    ID do post do cliente.
@@ -1474,26 +1806,29 @@ class DPS_Registration_Addon {
         }
 
         $confirmation_link = add_query_arg( 'dps_confirm_email', $token, $this->get_registration_page_url() );
+        $email_content = $this->get_confirmation_email_template( $client_id, $confirmation_link );
+        $headers       = array( 'Content-Type: text/html; charset=UTF-8' );
 
-        $subject = __( 'Confirme seu email - DPS by PRObst', 'desi-pet-shower' );
-        $message = sprintf(
-            "%s\n\n%s\n\n%s\n\n%s",
-            __( 'Olá! Recebemos seu cadastro no DPS by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ),
-            esc_url_raw( $confirmation_link ),
-            __( 'Este link é válido por 48 horas.', 'dps-registration-addon' ),
-            __( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' )
-        );
+        $sent = false;
 
-        $portal_url = $this->get_portal_url();
-        if ( $portal_url ) {
-            $message .= "\n\n" . sprintf(
-                '%s %s',
-                __( 'Após confirmar, acesse o Portal por aqui:', 'dps-registration-addon' ),
-                esc_url_raw( $portal_url )
-            );
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $communications = DPS_Communications_API::get_instance();
+            if ( $communications && method_exists( $communications, 'send_email' ) ) {
+                $context = array( 'source' => 'registration', 'type' => 'confirmation' );
+                $sent    = $communications->send_email( $client_email, $email_content['subject'], $email_content['body'], $context );
+            }
         }
 
-        wp_mail( $client_email, $subject, $message );
+        if ( ! $sent ) {
+            $sent = wp_mail( $client_email, $email_content['subject'], $email_content['body'], $headers );
+        }
+
+        if ( ! $sent ) {
+            $this->log_event( 'warning', 'Falha ao enviar email de confirmação', array(
+                'client_id'  => $client_id,
+                'email_hash' => $this->get_safe_hash( $client_email ),
+            ) );
+        }
     }
 
     /**
