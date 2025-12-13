@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.3.0' );
+define( 'DPS_STATS_VERSION', '1.4.0' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -209,6 +209,13 @@ class DPS_Stats_Addon {
         $new_clients   = DPS_Stats_API::get_new_clients_count( $start_date, $end_date );
         $cancel_rate   = DPS_Stats_API::get_cancellation_rate( $start_date, $end_date );
         $subs_data     = $this->get_subscription_metrics( $start_date, $end_date );
+        
+        // F3.1: Novos KPIs
+        $return_rate       = DPS_Stats_API::get_return_rate( $start_date, $end_date, 30 );
+        $no_show_rate      = DPS_Stats_API::get_no_show_rate( $start_date, $end_date );
+        $overdue_revenue   = DPS_Stats_API::get_overdue_revenue( $start_date, $end_date );
+        $conversion_rate   = DPS_Stats_API::get_conversion_rate( $start_date, $end_date, 30 );
+        $recurring_clients = DPS_Stats_API::get_recurring_clients( $start_date, $end_date );
 
         ob_start();
         ?>
@@ -216,6 +223,9 @@ class DPS_Stats_Addon {
             <h3><?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?></h3>
             <?php $this->render_date_filter( $start_date, $end_date ); ?>
             <?php $this->render_metric_cards( $comparison, $new_clients, $cancel_rate ); ?>
+            
+            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #374151; font-size: 18px; font-weight: 600;"><?php esc_html_e( 'Indicadores Avançados', 'dps-stats-addon' ); ?></h4>
+            <?php $this->render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ); ?>
             
             <details class="dps-stats-section" open>
                 <summary><span class="dps-stats-section__icon">📊</span> <?php esc_html_e( 'Métricas Financeiras', 'dps-stats-addon' ); ?></summary>
@@ -301,6 +311,105 @@ class DPS_Stats_Addon {
             <span class="dps-stats-card__icon"><?php echo esc_html( $icon ); ?></span>
             <span class="dps-stats-card__value"><?php echo esc_html( $value ); ?></span>
             <span class="dps-stats-card__label"><?php echo esc_html( $label ); ?></span>
+            <?php if ( $variation !== null ) : ?>
+                <span class="dps-stats-card__trend <?php echo esc_attr( $trend_class ); ?>"><?php echo $variation >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation, 1 ) ); ?>%</span>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * F3.1: Renderiza cards de KPIs avançados com tooltips.
+     *
+     * @param array $return_rate Taxa de retorno.
+     * @param array $no_show_rate Taxa de no-show.
+     * @param array $overdue_revenue Inadimplência.
+     * @param array $conversion_rate Taxa de conversão.
+     * @param array $recurring_clients Clientes recorrentes.
+     *
+     * @since 1.4.0
+     */
+    private function render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ) {
+        ?>
+        <div class="dps-stats-cards">
+            <?php
+            // Taxa de Retorno
+            $this->render_card_with_tooltip(
+                '🔄',
+                $return_rate['value'] . $return_rate['unit'],
+                __( 'Taxa de Retorno (30d)', 'dps-stats-addon' ),
+                $return_rate['note'],
+                'primary'
+            );
+            
+            // No-Show
+            $this->render_card_with_tooltip(
+                '👻',
+                $no_show_rate['value'] . $no_show_rate['unit'],
+                __( 'No-Show', 'dps-stats-addon' ),
+                $no_show_rate['note'],
+                $no_show_rate['value'] > 5 ? 'warning' : 'primary'
+            );
+            
+            // Inadimplência
+            $overdue_display = $overdue_revenue['value'] > 0
+                ? 'R$ ' . number_format( $overdue_revenue['value'], 2, ',', '.' )
+                : 'R$ 0,00';
+            $this->render_card_with_tooltip(
+                '⚠️',
+                $overdue_display,
+                __( 'Inadimplência', 'dps-stats-addon' ),
+                $overdue_revenue['note'],
+                $overdue_revenue['value'] > 0 ? 'danger' : 'success'
+            );
+            
+            // Taxa de Conversão
+            $this->render_card_with_tooltip(
+                '✨',
+                $conversion_rate['value'] . $conversion_rate['unit'],
+                __( 'Conversão (30d)', 'dps-stats-addon' ),
+                $conversion_rate['note'],
+                'success'
+            );
+            
+            // Clientes Recorrentes
+            $this->render_card_with_tooltip(
+                '🔁',
+                $recurring_clients['value'],
+                __( 'Clientes Recorrentes', 'dps-stats-addon' ),
+                $recurring_clients['note'],
+                'primary'
+            );
+            ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * F3.1: Renderiza card com tooltip explicativo.
+     *
+     * @param string      $icon    Emoji/ícone.
+     * @param string      $value   Valor principal.
+     * @param string      $label   Label do card.
+     * @param string      $tooltip Texto do tooltip (definição).
+     * @param string      $type    Tipo do card (primary/success/warning/danger).
+     * @param float|null  $variation Variação vs período anterior (opcional).
+     *
+     * @since 1.4.0
+     */
+    private function render_card_with_tooltip( $icon, $value, $label, $tooltip, $type = 'primary', $variation = null ) {
+        $trend_class = '';
+        if ( $variation !== null ) {
+            $trend_class = $variation > 0 ? 'dps-stats-card__trend--up' : ( $variation < 0 ? 'dps-stats-card__trend--down' : 'dps-stats-card__trend--neutral' );
+        }
+        ?>
+        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" title="<?php echo esc_attr( $tooltip ); ?>">
+            <span class="dps-stats-card__icon"><?php echo esc_html( $icon ); ?></span>
+            <span class="dps-stats-card__value"><?php echo esc_html( $value ); ?></span>
+            <span class="dps-stats-card__label">
+                <?php echo esc_html( $label ); ?>
+                <span class="dps-stats-card__info" title="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
+            </span>
             <?php if ( $variation !== null ) : ?>
                 <span class="dps-stats-card__trend <?php echo esc_attr( $trend_class ); ?>"><?php echo $variation >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation, 1 ) ); ?>%</span>
             <?php endif; ?>

@@ -447,3 +447,30 @@
         padding: 0 16px 16px;
     }
 }
+
+/* ==========================================================================
+   F3.1: Tooltips e Info Icons
+   ========================================================================== */
+
+.dps-stats-card--with-tooltip {
+    cursor: help;
+}
+
+.dps-stats-card__info {
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 4px;
+    opacity: 0.6;
+    cursor: help;
+    transition: opacity 0.2s;
+}
+
+.dps-stats-card__info:hover {
+    opacity: 1;
+}
+
+.dps-stats-card__label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

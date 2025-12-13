@@ -850,4 +850,408 @@ class DPS_Stats_API {
 
         return $csv;
     }
+
+    /**
+     * F3.1: Obtém taxa de retorno de clientes (30/60/90 dias).
+     *
+     * Calcula percentual de clientes que tiveram atendimento no período base
+     * e retornaram dentro de X dias.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     * @param int    $days       Dias para retorno (padrão: 30).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_return_rate( $start_date, $end_date, $days = 30 ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+        $days       = absint( $days );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_return_rate', $start_date, $end_date ) . '_' . $days;
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes com atendimentos no período base
+        $sql_base_clients = $wpdb->prepare(
+            "SELECT DISTINCT pm_client.meta_value as client_id
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $base_clients = $wpdb->get_col( $sql_base_clients );
+        $total_clients = count( $base_clients );
+        
+        if ( $total_clients === 0 ) {
+            $result = [
+                'value' => 0,
+                'unit'  => '%',
+                'note'  => __( 'Nenhum cliente no período base', 'dps-stats-addon' ),
+            ];
+        } else {
+            // Calcular data limite para retorno
+            $return_deadline = date( 'Y-m-d', strtotime( $end_date ) + ( $days * DAY_IN_SECONDS ) );
+            
+            // Buscar clientes que retornaram
+            $placeholders = implode( ',', array_fill( 0, count( $base_clients ), '%d' ) );
+            $sql_returned = $wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm_client.meta_value) as returned
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value > %s
+                   AND pm_date.meta_value <= %s
+                   AND pm_client.meta_value IN ($placeholders)",
+                array_merge( [ $end_date, $return_deadline ], $base_clients )
+            );
+            
+            $returned = (int) $wpdb->get_var( $sql_returned );
+            $rate = $total_clients > 0 ? round( ( $returned / $total_clients ) * 100, 1 ) : 0;
+            
+            $result = [
+                'value' => $rate,
+                'unit'  => '%',
+                'note'  => sprintf(
+                    __( '%d de %d clientes retornaram em até %d dias', 'dps-stats-addon' ),
+                    $returned,
+                    $total_clients,
+                    $days
+                ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém taxa de no-show (diferente de cancelamento).
+     *
+     * Atendimentos com status específico de no-show (cliente não compareceu).
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'count' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_no_show_rate( $start_date, $end_date ) {
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_no_show', $start_date, $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        $total = self::get_appointments_count( $start_date, $end_date );
+        
+        // Tentar buscar agendamentos com status no_show ou meta específica
+        $no_show = self::get_appointments_count( $start_date, $end_date, 'no_show' );
+        
+        // Se não houver status no_show, tentar meta de cancelamento com motivo
+        if ( $no_show === 0 ) {
+            // Verificar se existe meta appointment_no_show ou appointment_cancellation_reason
+            global $wpdb;
+            $no_show = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(DISTINCT p.ID)
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 LEFT JOIN {$wpdb->postmeta} pm_reason ON p.ID = pm_reason.post_id AND pm_reason.meta_key = 'appointment_cancellation_reason'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value >= %s
+                   AND pm_date.meta_value <= %s
+                   AND pm_reason.meta_value = 'no_show'",
+                $start_date,
+                $end_date
+            ) );
+        }
+        
+        $rate = $total > 0 ? round( ( $no_show / $total ) * 100, 1 ) : 0;
+        
+        $result = [
+            'value' => $rate,
+            'unit'  => '%',
+            'count' => $no_show,
+            'note'  => __( 'Cliente não compareceu ao agendamento', 'dps-stats-addon' ),
+        ];
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém total de inadimplência (receita vencida não paga).
+     *
+     * Soma de lançamentos vencidos com status pendente/em aberto.
+     * Requer Finance Add-on.
+     *
+     * @param string $start_date Data inicial (Y-m-d) - opcional para período.
+     * @param string $end_date   Data final (Y-m-d) - opcional para período.
+     *
+     * @return array ['value' => float, 'unit' => 'R$', 'count' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_overdue_revenue( $start_date = '', $end_date = '' ) {
+        $cache_key = 'dps_stats_overdue_' . md5( $start_date . $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Verificar se Finance Add-on está ativo e tabela existe
+        if ( ! self::table_dps_transacoes_exists() ) {
+            $result = [
+                'value' => 0,
+                'unit'  => 'R$',
+                'count' => 0,
+                'note'  => __( 'Finance Add-on não ativo', 'dps-stats-addon' ),
+            ];
+        } else {
+            global $wpdb;
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $today = current_time( 'Y-m-d' );
+            
+            // Buscar receitas vencidas (data_vencimento < hoje e status != pago)
+            $sql = "SELECT SUM(valor) as total, COUNT(*) as count
+                    FROM {$table}
+                    WHERE tipo = 'receita'
+                      AND status != 'pago'
+                      AND data_vencimento < %s";
+            
+            $params = [ $today ];
+            
+            // Se período especificado, filtrar por data de lançamento
+            if ( $start_date && $end_date ) {
+                $sql .= " AND data >= %s AND data <= %s";
+                $params[] = sanitize_text_field( $start_date );
+                $params[] = sanitize_text_field( $end_date );
+            }
+            
+            $row = $wpdb->get_row( $wpdb->prepare( $sql, $params ) );
+            
+            $result = [
+                'value' => (float) ( $row->total ?? 0 ),
+                'unit'  => 'R$',
+                'count' => (int) ( $row->count ?? 0 ),
+                'note'  => __( 'Receitas vencidas não pagas', 'dps-stats-addon' ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém taxa de conversão de cadastro para primeiro agendamento.
+     *
+     * Clientes cadastrados no período que tiveram ao menos 1 agendamento
+     * concluído/confirmado em até X dias.
+     *
+     * @param string $start_date     Data inicial (Y-m-d).
+     * @param string $end_date       Data final (Y-m-d).
+     * @param int    $conversion_days Dias para conversão (padrão: 30).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'converted' => int, 'total' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_conversion_rate( $start_date, $end_date, $conversion_days = 30 ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+        $conversion_days = absint( $conversion_days );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_conversion', $start_date, $end_date ) . '_' . $conversion_days;
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes cadastrados no período
+        $new_clients_query = new WP_Query( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'date_query'     => [
+                [
+                    'after'     => $start_date,
+                    'before'    => $end_date . ' 23:59:59',
+                    'inclusive' => true,
+                ],
+            ],
+            'fields' => 'ids',
+        ] );
+        
+        $new_clients = $new_clients_query->posts;
+        $total_new = count( $new_clients );
+        
+        if ( $total_new === 0 ) {
+            $result = [
+                'value'     => 0,
+                'unit'      => '%',
+                'converted' => 0,
+                'total'     => 0,
+                'note'      => __( 'Nenhum cliente novo no período', 'dps-stats-addon' ),
+            ];
+        } else {
+            // Calcular deadline para conversão
+            $conversion_deadline = date( 'Y-m-d', strtotime( $end_date ) + ( $conversion_days * DAY_IN_SECONDS ) );
+            
+            // Buscar clientes que tiveram ao menos 1 agendamento
+            $placeholders = implode( ',', array_fill( 0, count( $new_clients ), '%d' ) );
+            $sql_converted = $wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm_client.meta_value) as converted
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+                 INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id AND pm_status.meta_key = 'appointment_status'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value <= %s
+                   AND pm_status.meta_value IN ('concluido', 'confirmado')
+                   AND pm_client.meta_value IN ($placeholders)",
+                array_merge( [ $conversion_deadline ], $new_clients )
+            );
+            
+            $converted = (int) $wpdb->get_var( $sql_converted );
+            $rate = $total_new > 0 ? round( ( $converted / $total_new ) * 100, 1 ) : 0;
+            
+            $result = [
+                'value'     => $rate,
+                'unit'      => '%',
+                'converted' => $converted,
+                'total'     => $total_new,
+                'note'      => sprintf(
+                    __( '%d de %d clientes agendaram em até %d dias', 'dps-stats-addon' ),
+                    $converted,
+                    $total_new,
+                    $conversion_days
+                ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém contagem de clientes recorrentes (2+ atendimentos no período).
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array ['value' => int, 'unit' => '', 'percentage' => float, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_recurring_clients( $start_date, $end_date ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_recurring', $start_date, $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes com 2 ou mais atendimentos no período
+        $sql = $wpdb->prepare(
+            "SELECT pm_client.meta_value as client_id, COUNT(*) as appointments
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+             GROUP BY pm_client.meta_value
+             HAVING COUNT(*) >= 2",
+            $start_date,
+            $end_date
+        );
+        
+        $recurring = $wpdb->get_results( $sql );
+        $recurring_count = count( $recurring );
+        
+        // Total de clientes únicos no período
+        $sql_total = $wpdb->prepare(
+            "SELECT COUNT(DISTINCT pm_client.meta_value) as total
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $total_clients = (int) $wpdb->get_var( $sql_total );
+        $percentage = $total_clients > 0 ? round( ( $recurring_count / $total_clients ) * 100, 1 ) : 0;
+        
+        $result = [
+            'value'      => $recurring_count,
+            'unit'       => '',
+            'percentage' => $percentage,
+            'note'       => sprintf(
+                __( '%d clientes com 2+ atendimentos (%s%% do total)', 'dps-stats-addon' ),
+                $recurring_count,
+                number_format( $percentage, 1, ',', '.' )
+            ),
+        ];
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
 }
