@@ -83,6 +83,17 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Groomers Add-on (v1.5.0) - FASE 1: Tipos de Profissional + Freelancer**
+
+- **F1.1 - Meta `_dps_staff_type`**: Novo campo para diferenciar tipos de profissional (groomer, banhista, auxiliar, recepção). Metas são migradas automaticamente para groomers existentes.
+- **F1.2 - Meta `_dps_is_freelancer`**: Flag booleana para identificar profissionais autônomos vs CLT. Permite regras diferenciadas em relatórios e financeiro.
+- **F1.3 - Migração automática**: Na primeira execução da v1.5.0, todos os profissionais existentes recebem `staff_type='groomer'` e `is_freelancer='0'` automaticamente.
+- **F1.4 - Formulário de cadastro atualizado**: Novo fieldset "Tipo e Vínculo" com select de tipo de profissional e checkbox de freelancer.
+- **F1.5 - Tabela de listagem atualizada**: Novas colunas "Tipo" e "Freelancer" com badges visuais coloridas por tipo.
+- **F1.6 - Filtros na listagem**: Novos filtros por tipo, freelancer e status para facilitar busca em petshops com muitos profissionais.
+- **Método `get_staff_types()`**: Método estático para obter tipos disponíveis com labels traduzidos.
+- **Método `get_staff_type_label()`**: Método estático para obter label traduzido de um tipo específico.
+
 **Registration Add-on (v1.2.0) - FASE 2A: UX Quick Wins & Higiene Técnica**
 
 - **F2.5 - JS em arquivo separado**: Criado `assets/js/dps-registration.js` com ~400 linhas de JavaScript modular. Remove ~40 linhas de JS inline do PHP. Script enfileirado com `wp_enqueue_script` apenas quando o shortcode está presente. Expõe objeto global `DPSRegistration` com métodos públicos para extensibilidade.
