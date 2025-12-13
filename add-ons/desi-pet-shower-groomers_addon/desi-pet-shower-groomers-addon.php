@@ -62,7 +62,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.6.0';
+    const VERSION = '1.7.0';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -1522,6 +1522,15 @@ class DPS_Groomers_Addon {
         update_user_meta( $user_id, '_dps_groomer_commission_rate', $commission );
         update_user_meta( $user_id, '_dps_staff_type', $staff_type );
         update_user_meta( $user_id, '_dps_is_freelancer', $is_freelancer );
+        
+        // FASE 4: Salvar campos de disponibilidade
+        $work_start = isset( $_POST['dps_work_start'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_work_start'] ) ) : '08:00';
+        $work_end = isset( $_POST['dps_work_end'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_work_end'] ) ) : '18:00';
+        $work_days = isset( $_POST['dps_work_days'] ) ? array_map( 'sanitize_key', (array) wp_unslash( $_POST['dps_work_days'] ) ) : [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
+        
+        update_user_meta( $user_id, '_dps_work_start', $work_start );
+        update_user_meta( $user_id, '_dps_work_end', $work_end );
+        update_user_meta( $user_id, '_dps_work_days', $work_days );
 
         $message = __( 'Profissional criado com sucesso.', 'dps-groomers-addon' );
         if ( $use_frontend_messages ) {
@@ -1822,6 +1831,45 @@ class DPS_Groomers_Addon {
                                     <label for="dps_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
                                     <input name="dps_groomer_commission" id="dps_groomer_commission" type="number" min="0" max="100" step="0.5" placeholder="<?php echo esc_attr__( '10', 'dps-groomers-addon' ); ?>" />
                                 </div>
+                            </div>
+                        </fieldset>
+                        
+                        <fieldset class="dps-fieldset">
+                            <legend><?php echo esc_html__( 'Disponibilidade', 'dps-groomers-addon' ); ?></legend>
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-field">
+                                    <label for="dps_work_start"><?php echo esc_html__( 'Horário de início', 'dps-groomers-addon' ); ?></label>
+                                    <input name="dps_work_start" id="dps_work_start" type="time" value="08:00" />
+                                </div>
+                                <div class="dps-form-field">
+                                    <label for="dps_work_end"><?php echo esc_html__( 'Horário de término', 'dps-groomers-addon' ); ?></label>
+                                    <input name="dps_work_end" id="dps_work_end" type="time" value="18:00" />
+                                </div>
+                            </div>
+                            <div class="dps-form-field">
+                                <label><?php echo esc_html__( 'Dias de trabalho', 'dps-groomers-addon' ); ?></label>
+                                <div class="dps-weekdays-grid">
+                                    <?php 
+                                    $weekdays = [
+                                        'mon' => __( 'Seg', 'dps-groomers-addon' ),
+                                        'tue' => __( 'Ter', 'dps-groomers-addon' ),
+                                        'wed' => __( 'Qua', 'dps-groomers-addon' ),
+                                        'thu' => __( 'Qui', 'dps-groomers-addon' ),
+                                        'fri' => __( 'Sex', 'dps-groomers-addon' ),
+                                        'sat' => __( 'Sáb', 'dps-groomers-addon' ),
+                                        'sun' => __( 'Dom', 'dps-groomers-addon' ),
+                                    ];
+                                    $default_days = [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
+                                    foreach ( $weekdays as $day_key => $day_label ) : 
+                                        $checked = in_array( $day_key, $default_days, true ) ? 'checked' : '';
+                                    ?>
+                                        <label class="dps-weekday-checkbox">
+                                            <input type="checkbox" name="dps_work_days[]" value="<?php echo esc_attr( $day_key ); ?>" <?php echo esc_attr( $checked ); ?> />
+                                            <?php echo esc_html( $day_label ); ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                                <small class="dps-field-help"><?php echo esc_html__( 'Selecione os dias em que o profissional trabalha.', 'dps-groomers-addon' ); ?></small>
                             </div>
                         </fieldset>
                         

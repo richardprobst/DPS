@@ -1649,3 +1649,51 @@
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   19. Disponibilidade/Turnos (v1.7.0)
+   ========================================================================== */
+
+.dps-weekdays-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.dps-weekday-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-weekday-checkbox:hover {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.dps-weekday-checkbox input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.dps-weekday-checkbox input[type="checkbox"]:checked + * {
+    color: #0ea5e9;
+    font-weight: 500;
+}
+
+/* Campo de horário */
+input[type="time"].dps-time-input,
+.dps-form-field input[type="time"] {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}

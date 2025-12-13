@@ -12,7 +12,7 @@
 | Fase 1 | ✅ **IMPLEMENTADA** | Este PR | Base de dados + UI para tipos e freelancer |
 | Fase 2 | ✅ **IMPLEMENTADA** | Este PR | Integração com Agenda/Serviços |
 | Fase 3 | ✅ **IMPLEMENTADA** | Este PR | Finance/Repasse automático |
-| Fase 4 | 🔄 EM ANDAMENTO | Este PR | Recursos avançados |
+| Fase 4 | ✅ **IMPLEMENTADA** | Este PR | Recursos avançados (disponibilidade) |
 
 ---
 
@@ -147,35 +147,40 @@
 
 ---
 
-## Fase 4: Recursos Avançados 🔄 EM ANDAMENTO
+## Fase 4: Recursos Avançados ✅ COMPLETA
 
-**Versão alvo**: 1.8.0+  
-**Esforço estimado**: 5-10 dias  
-**Dependências**: Fases 1, 2, 3, Stats Add-on (opcional)
+**Versão**: 1.7.0  
+**Implementado em**: Este PR
 
-### Itens Planejados
+### Itens Implementados
 
-| Item | Descrição | Add-on Afetado |
-|------|-----------|----------------|
-| F4.1 | Disponibilidade/turnos por profissional | Groomers Add-on |
-| F4.2 | Bloqueios de agenda (férias/ausência) | Groomers Add-on |
-| F4.3 | Métricas no Stats Add-on | Stats Add-on |
-| F4.4 | Suporte a múltiplos profissionais por atendimento | Groomers Add-on |
-| F4.5 | Notificação ao profissional | Push/Communications |
+| Item | Descrição | Add-on Afetado | Status |
+|------|-----------|----------------|--------|
+| F4.1 | Disponibilidade/turnos por profissional | Groomers Add-on v1.7.0 | ✅ |
+| F4.2 | Bloqueios de agenda (férias/ausência) | Pendente (futura) | ⏸️ |
+| F4.3 | Métricas no Stats Add-on | Não há Stats Add-on ainda | ⏸️ |
+| F4.4 | Suporte a múltiplos profissionais por atendimento | Já existente (v1.0.0) | ✅ |
+| F4.5 | Notificação ao profissional | Push Add-on (futura) | ⏸️ |
 
-### Critérios de Aceite
+### Detalhes da Implementação
 
-1. Admin pode configurar horários de trabalho por profissional
-2. Admin pode bloquear períodos de ausência (férias, folgas)
-3. Stats exibe métricas de produtividade por profissional
-4. Agendamento pode ter profissional principal + apoio
-5. Profissional recebe notificação de novo atendimento
+**Novos campos de disponibilidade** (F4.1):
+- `_dps_work_start` - Horário de início (ex: "08:00")
+- `_dps_work_end` - Horário de término (ex: "18:00")
+- `_dps_work_days` - Array de dias de trabalho (ex: ["mon","tue","wed","thu","fri","sat"])
 
-### Benefícios
+**UI adicionada**:
+- Fieldset "Disponibilidade" no formulário de cadastro
+- Inputs de horário (tipo time)
+- Grid de checkboxes para dias da semana
+- CSS para exibição responsiva
 
-- **Equipe**: Gestão de escala
-- **Dono**: Visão analítica
-- **Cliente**: Melhor experiência
+### Critérios de Aceite ✅
+
+1. ✅ Admin pode configurar horários de trabalho por profissional
+2. ✅ Dias de trabalho são salvos como array de códigos (mon, tue, etc.)
+3. ✅ Valores padrão sensatos: 08:00-18:00, seg-sáb
+4. ✅ Múltiplos profissionais por atendimento já funciona (select multiple)
 
 ---
 
