@@ -705,14 +705,17 @@
      */
     function init() {
         var form = document.getElementById('dps-reg-form');
-        
+
         if (!form) {
             return;
         }
-        
+
         // F2.1: Apply input masks
         var cpfInput = form.querySelector('input[name="client_cpf"]');
         var phoneInput = form.querySelector('input[name="client_phone"]');
+
+        var recaptchaConfig = (window.dpsRegistrationData && window.dpsRegistrationData.recaptcha) ? window.dpsRegistrationData.recaptcha : null;
+        var recaptchaValidated = false;
 
         applyCPFMask(cpfInput);
         applyPhoneMask(phoneInput);
@@ -798,6 +801,42 @@
 
             // Show loading
             showLoading(submitButton);
+
+            if (recaptchaConfig && recaptchaConfig.enabled) {
+                if (recaptchaValidated) {
+                    return true;
+                }
+
+                e.preventDefault();
+
+                if (typeof grecaptcha === 'undefined' || !grecaptcha.execute) {
+                    hideLoading(submitButton);
+                    showError(getErrorContainer(form), recaptchaConfig.unavailableMessage || 'Não foi possível validar o anti-spam. Tente novamente.');
+                    return false;
+                }
+
+                var tokenInput = form.querySelector('input[name="dps_recaptcha_token"]');
+                var actionInput = form.querySelector('input[name="dps_recaptcha_action"]');
+
+                if (actionInput && recaptchaConfig.action) {
+                    actionInput.value = recaptchaConfig.action;
+                }
+
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(recaptchaConfig.siteKey, { action: recaptchaConfig.action }).then(function(token) {
+                        if (tokenInput) {
+                            tokenInput.value = token;
+                        }
+                        recaptchaValidated = true;
+                        form.submit();
+                    }).catch(function() {
+                        hideLoading(submitButton);
+                        showError(getErrorContainer(form), recaptchaConfig.errorMessage || 'Não foi possível validar o anti-spam. Tente novamente.');
+                    });
+                });
+
+                return false;
+            }
 
             // Allow form to submit
             return true;
