@@ -272,11 +272,30 @@
         for (var i = 0; i < errors.length; i++) {
             errors[i].parentNode.removeChild(errors[i]);
         }
-        
+
         var wrapper = form.querySelector('.dps-js-errors');
         if (wrapper) {
             wrapper.innerHTML = '';
         }
+    }
+
+    /**
+     * Returns the error container element, creating it if necessary.
+     *
+     * @param {HTMLFormElement} form - The form element.
+     * @return {HTMLElement} Error container.
+     */
+    function getErrorContainer(form) {
+        var errorContainer = form.querySelector('.dps-js-errors');
+        if (!errorContainer) {
+            errorContainer = document.createElement('div');
+            errorContainer.className = 'dps-js-errors';
+            errorContainer.setAttribute('role', 'alert');
+            errorContainer.setAttribute('aria-live', 'polite');
+            form.insertBefore(errorContainer, form.firstChild);
+        }
+
+        return errorContainer;
     }
 
     /**
@@ -287,18 +306,11 @@
      */
     function validateForm(form) {
         clearJSErrors(form);
-        
+
         var errors = [];
-        
+
         // Get error container (create if not exists)
-        var errorContainer = form.querySelector('.dps-js-errors');
-        if (!errorContainer) {
-            errorContainer = document.createElement('div');
-            errorContainer.className = 'dps-js-errors';
-            errorContainer.setAttribute('role', 'alert');
-            errorContainer.setAttribute('aria-live', 'polite');
-            form.insertBefore(errorContainer, form.firstChild);
-        }
+        var errorContainer = getErrorContainer(form);
         
         // Required: Name
         var nameInput = form.querySelector('input[name="client_name"]');
@@ -362,6 +374,55 @@
         return true;
     }
 
+    /**
+     * Validate step 1 fields before advancing in the wizard.
+     *
+     * @param {HTMLFormElement} form - The form element.
+     * @return {boolean} True if valid.
+     */
+    function validateStepOne(form) {
+        clearJSErrors(form);
+
+        var errors = [];
+        var errorContainer = getErrorContainer(form);
+
+        var nameInput = form.querySelector('input[name="client_name"]');
+        if (nameInput) {
+            var name = (nameInput.value || '').trim();
+            if (!name || name.length < CONFIG.MIN_NAME_LENGTH) {
+                errors.push('O campo Nome é obrigatório.');
+            }
+        }
+
+        var phoneInput = form.querySelector('input[name="client_phone"]');
+        if (phoneInput) {
+            var phone = phoneInput.value || '';
+            var phoneDigits = onlyDigits(phone);
+            if (!phoneDigits) {
+                errors.push('O campo Telefone / WhatsApp é obrigatório.');
+            } else if (!validatePhone(phone)) {
+                errors.push('O telefone informado não é válido. Use o formato (11) 98765-4321.');
+            }
+        }
+
+        var emailInput = form.querySelector('input[name="client_email"]');
+        if (emailInput) {
+            var email = (emailInput.value || '').trim();
+            if (email && !validateEmail(email)) {
+                errors.push('O email informado não é válido.');
+            }
+        }
+
+        if (errors.length > 0) {
+            for (var i = 0; i < errors.length; i++) {
+                showError(errorContainer, errors[i]);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     // =========================================================================
     // Loading Indicator (F2.4)
     // =========================================================================
@@ -405,7 +466,7 @@
      *
      * @param {string} templateJson - JSON-encoded HTML template.
      */
-    function initPetClone(templateJson) {
+    function initPetClone(templateJson, onAddPet) {
         var petCount = 1;
         var wrapper = document.getElementById('dps-pets-wrapper');
         var addBtn = document.getElementById('dps-add-pet');
@@ -445,6 +506,10 @@
             div.innerHTML = html;
             wrapper.appendChild(div);
             updateOwnerFields();
+
+            if (typeof onAddPet === 'function') {
+                onAddPet();
+            }
         });
         
         // Initial update
@@ -486,6 +551,152 @@
     }
 
     // =========================================================================
+    // Wizard Navigation and Summary (F2.6 / F2.7)
+    // =========================================================================
+
+    var currentStep = 1;
+
+    function updateProgress(step, progressElements) {
+        if (!progressElements) return;
+
+        var label = progressElements.label;
+        var counter = progressElements.counter;
+        var bar = progressElements.bar;
+
+        if (label) {
+            label.textContent = 'Passo ' + step + ' de 2';
+        }
+
+        if (counter) {
+            counter.textContent = step + '/2';
+        }
+
+        if (bar) {
+            var width = step === 1 ? '50%' : '100%';
+            bar.style.width = width;
+            bar.parentElement.setAttribute('aria-valuenow', step);
+        }
+    }
+
+    function showStep(step, form, steps, progressElements, buttons) {
+        if (!steps || !steps.length) return;
+
+        for (var i = 0; i < steps.length; i++) {
+            var isCurrent = parseInt(steps[i].getAttribute('data-step'), 10) === step;
+            steps[i].classList.toggle('dps-step-active', isCurrent);
+            steps[i].setAttribute('aria-hidden', !isCurrent);
+        }
+
+        currentStep = step;
+        updateProgress(step, progressElements);
+
+        if (buttons) {
+            if (buttons.next) {
+                buttons.next.style.display = step === 1 ? 'inline-flex' : 'none';
+            }
+            if (buttons.back) {
+                buttons.back.style.display = step === 2 ? 'inline-flex' : 'none';
+            }
+            if (buttons.submit) {
+                buttons.submit.style.display = step === 2 ? 'inline-flex' : 'none';
+            }
+        }
+    }
+
+    function addSummaryItem(list, label, value) {
+        if (!value) return;
+
+        var li = document.createElement('li');
+        var strong = document.createElement('strong');
+        strong.textContent = label + ':';
+        li.appendChild(strong);
+        li.appendChild(document.createTextNode(' ' + value));
+        list.appendChild(li);
+    }
+
+    function buildSummary(form) {
+        var summaryContent = document.getElementById('dps-summary-content');
+
+        if (!summaryContent) {
+            return;
+        }
+
+        summaryContent.innerHTML = '';
+
+        var tutorSection = document.createElement('div');
+        tutorSection.className = 'dps-summary-section';
+        var tutorTitle = document.createElement('h5');
+        tutorTitle.textContent = 'Tutor';
+        tutorSection.appendChild(tutorTitle);
+        var tutorList = document.createElement('ul');
+
+        var nameInput = form.querySelector('input[name="client_name"]');
+        var phoneInput = form.querySelector('input[name="client_phone"]');
+        var emailInput = form.querySelector('input[name="client_email"]');
+        var addressInput = form.querySelector('textarea[name="client_address"]');
+
+        addSummaryItem(tutorList, 'Nome', nameInput ? nameInput.value.trim() : '');
+        addSummaryItem(tutorList, 'Telefone', phoneInput ? phoneInput.value.trim() : '');
+        addSummaryItem(tutorList, 'Email', emailInput ? emailInput.value.trim() : '');
+        addSummaryItem(tutorList, 'Endereço', addressInput ? addressInput.value.trim() : '');
+
+        if (tutorList.children.length) {
+            tutorSection.appendChild(tutorList);
+            summaryContent.appendChild(tutorSection);
+        }
+
+        var petsWrapper = document.getElementById('dps-pets-wrapper');
+        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
+
+        if (petFieldsets && petFieldsets.length) {
+            var petsContainer = document.createElement('div');
+            petsContainer.className = 'dps-summary-section';
+            var petsTitle = document.createElement('h5');
+            petsTitle.textContent = 'Pets';
+            petsContainer.appendChild(petsTitle);
+
+            for (var i = 0; i < petFieldsets.length; i++) {
+                var petBox = document.createElement('div');
+                petBox.className = 'dps-summary-pet';
+                var petTitle = document.createElement('h6');
+                petTitle.textContent = 'Pet ' + (i + 1);
+                petBox.appendChild(petTitle);
+
+                var petList = document.createElement('ul');
+                var petName = petFieldsets[i].querySelector('input[name="pet_name[]"]');
+                var petBreed = petFieldsets[i].querySelector('input[name="pet_breed[]"]');
+                var petSize = petFieldsets[i].querySelector('select[name="pet_size[]"]');
+                var petNotes = petFieldsets[i].querySelector('textarea[name="pet_care[]"]');
+
+                var petSizeText = '';
+                if (petSize) {
+                    var selectedOption = petSize.options[petSize.selectedIndex];
+                    petSizeText = selectedOption ? selectedOption.text.trim() : petSize.value.trim();
+                }
+
+                addSummaryItem(petList, 'Nome', petName ? petName.value.trim() : '');
+                addSummaryItem(petList, 'Raça', petBreed ? petBreed.value.trim() : '');
+                addSummaryItem(petList, 'Porte', petSizeText);
+                addSummaryItem(petList, 'Observações', petNotes ? petNotes.value.trim() : '');
+
+                if (petList.children.length) {
+                    petBox.appendChild(petList);
+                    petsContainer.appendChild(petBox);
+                }
+            }
+
+            summaryContent.appendChild(petsContainer);
+        }
+
+        if (!summaryContent.children.length) {
+            var empty = document.createElement('p');
+            empty.className = 'dps-summary-empty';
+            empty.textContent = 'Preencha os campos para visualizar o resumo.';
+            summaryContent.appendChild(empty);
+        }
+    }
+
+    // =========================================================================
     // Main Initialization
     // =========================================================================
 
@@ -502,24 +713,92 @@
         // F2.1: Apply input masks
         var cpfInput = form.querySelector('input[name="client_cpf"]');
         var phoneInput = form.querySelector('input[name="client_phone"]');
-        
+
         applyCPFMask(cpfInput);
         applyPhoneMask(phoneInput);
-        
-        // F2.2 & F2.4: Form validation and loading on submit
+
+        // Wizard elements
+        var steps = form.querySelectorAll('.dps-step');
+        var nextButton = document.getElementById('dps-next-step');
+        var backButton = document.getElementById('dps-back-step');
         var submitButton = form.querySelector('button[type="submit"]');
-        
+        var confirmCheckbox = document.getElementById('dps-summary-confirm');
+        var progressElements = {
+            label: document.getElementById('dps-step-label'),
+            counter: document.getElementById('dps-step-counter'),
+            bar: document.getElementById('dps-progress-bar-fill')
+        };
+
+        showStep(1, form, steps, progressElements, {
+            next: nextButton,
+            back: backButton,
+            submit: submitButton
+        });
+
+        if (nextButton) {
+            nextButton.addEventListener('click', function() {
+                if (!validateStepOne(form)) {
+                    return;
+                }
+
+                if (confirmCheckbox) {
+                    confirmCheckbox.checked = false;
+                }
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+
+                showStep(2, form, steps, progressElements, {
+                    next: nextButton,
+                    back: backButton,
+                    submit: submitButton
+                });
+                buildSummary(form);
+            });
+        }
+
+        if (backButton) {
+            backButton.addEventListener('click', function() {
+                showStep(1, form, steps, progressElements, {
+                    next: nextButton,
+                    back: backButton,
+                    submit: submitButton
+                });
+            });
+        }
+
+        if (confirmCheckbox && submitButton) {
+            submitButton.disabled = !confirmCheckbox.checked;
+            confirmCheckbox.addEventListener('change', function() {
+                submitButton.disabled = !confirmCheckbox.checked;
+            });
+        }
+
+        form.addEventListener('input', function() {
+            if (currentStep === 2) {
+                buildSummary(form);
+            }
+        });
+
+        // F2.2 & F2.4: Form validation and loading on submit
         form.addEventListener('submit', function(e) {
-            // Validate form
             if (!validateForm(form)) {
                 e.preventDefault();
                 hideLoading(submitButton);
                 return false;
             }
-            
+
+            if (confirmCheckbox && !confirmCheckbox.checked) {
+                e.preventDefault();
+                hideLoading(submitButton);
+                showError(getErrorContainer(form), 'Confirme que os dados estão corretos antes de enviar.');
+                return false;
+            }
+
             // Show loading
             showLoading(submitButton);
-            
+
             // Allow form to submit
             return true;
         });
@@ -527,7 +806,11 @@
         // Initialize pet clone if template is available
         var templateElement = document.getElementById('dps-pet-template');
         if (templateElement) {
-            initPetClone(templateElement.textContent);
+            initPetClone(templateElement.textContent, function() {
+                if (currentStep === 2) {
+                    buildSummary(form);
+                }
+            });
         }
         
         // Initialize Google Places if available

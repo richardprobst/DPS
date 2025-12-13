@@ -871,6 +871,19 @@ class DPS_Registration_Addon {
         echo '<label for="dps_hp_field">' . esc_html__( 'Deixe este campo vazio', 'desi-pet-shower' ) . '</label>';
         echo '<input type="text" name="dps_hp_field" id="dps_hp_field" tabindex="-1" autocomplete="off">';
         echo '</div>';
+
+        echo '<div class="dps-progress" aria-live="polite">';
+        echo '<div class="dps-progress-top">';
+        echo '<span id="dps-step-label">' . esc_html__( 'Passo 1 de 2', 'dps-registration-addon' ) . '</span>';
+        echo '<span id="dps-step-counter">1/2</span>';
+        echo '</div>';
+        echo '<div class="dps-progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1">';
+        echo '<span id="dps-progress-bar-fill"></span>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-steps">';
+        echo '<div class="dps-step dps-step-active" data-step="1">';
         echo '<h4>' . esc_html__( 'Dados do Cliente', 'dps-registration-addon' ) . '</h4>';
         // Campos do cliente agrupados para melhor distribuição
         echo '<div class="dps-client-fields">';
@@ -886,6 +899,12 @@ class DPS_Registration_Addon {
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
         echo '</div>';
+        echo '<div class="dps-step-actions">';
+        echo '<button type="button" id="dps-next-step" class="button button-primary dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-step" data-step="2">';
         echo '<h4>' . esc_html__( 'Dados dos Pets', 'dps-registration-addon' ) . '</h4>';
         echo '<div id="dps-pets-wrapper">';
         // Insere o primeiro conjunto de campos de pet
@@ -893,12 +912,24 @@ class DPS_Registration_Addon {
         echo '</div>';
         // Botão para adicionar outro pet
         echo '<p><button type="button" id="dps-add-pet" class="button">' . esc_html__( 'Adicionar outro pet', 'dps-registration-addon' ) . '</button></p>';
-        // Botão de envio
+        echo '<div class="dps-summary-box" id="dps-summary-box">';
+        echo '<div class="dps-summary-header">';
+        echo '<h4>' . esc_html__( 'Resumo antes de enviar', 'dps-registration-addon' ) . '</h4>';
+        echo '<p class="dps-summary-subtitle">' . esc_html__( 'Revise os dados do tutor e de todos os pets antes de confirmar.', 'dps-registration-addon' ) . '</p>';
+        echo '</div>';
+        echo '<div id="dps-summary-content" class="dps-summary-content"></div>';
+        echo '<label class="dps-summary-confirm"><input type="checkbox" id="dps-summary-confirm" name="dps_summary_confirm" value="1"> ' . esc_html__( 'Confirmo que os dados estão corretos', 'dps-registration-addon' ) . '</label>';
+        echo '</div>';
         // Campos ocultos para coordenadas, preenchidos via script de autocomplete
         echo '<input type="hidden" name="client_lat" id="dps-client-lat" value="">';
         echo '<input type="hidden" name="client_lng" id="dps-client-lng" value="">';
         do_action( 'dps_registration_after_fields' );
-        echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button></p>';
+        echo '<div class="dps-step-actions">';
+        echo '<button type="button" id="dps-back-step" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="submit" class="button button-primary" disabled>' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
         echo '</form>';
         // Lista de raças
         echo '<datalist id="dps-breed-list">';

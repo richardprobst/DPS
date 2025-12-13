@@ -42,6 +42,68 @@
     border-top: none;
 }
 
+.dps-progress {
+    margin-bottom: 20px;
+}
+
+.dps-progress-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.dps-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.dps-progress-bar span {
+    display: block;
+    height: 100%;
+    width: 50%;
+    background: #0ea5e9;
+    transition: width 0.2s ease;
+}
+
+.dps-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-step {
+    display: none;
+}
+
+.dps-step-active {
+    display: block;
+}
+
+.dps-step-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.dps-button-next,
+.dps-button-secondary {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+}
+
+.dps-button-secondary:hover,
+.dps-button-next:hover {
+    background: #e5e7eb;
+}
+
 /* ==========================================================================
    2. Grid de Campos
    ========================================================================== */
@@ -202,6 +264,76 @@
     background: #e5e7eb;
 }
 
+.dps-summary-box {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.dps-summary-header h4 {
+    margin: 0 0 6px 0;
+    border: none;
+    padding: 0;
+}
+
+.dps-summary-subtitle {
+    margin: 0 0 12px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-summary-section {
+    margin-bottom: 12px;
+}
+
+.dps-summary-section h5 {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    color: #374151;
+}
+
+.dps-summary-pet {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: #ffffff;
+    margin-bottom: 8px;
+}
+
+.dps-summary-pet h6 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    color: #111827;
+}
+
+.dps-summary-section ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #111827;
+    font-size: 14px;
+}
+
+.dps-summary-section li {
+    margin-bottom: 4px;
+}
+
+.dps-summary-empty {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-summary-confirm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-weight: 500;
+    color: #111827;
+}
+
 /* ==========================================================================
    7. Mensagens de Feedback
    ========================================================================== */
@@ -284,14 +416,18 @@
         padding: 20px;
         margin: 0 16px;
     }
-    
+
     .dps-client-fields,
     .dps-pet-fieldset {
         grid-template-columns: 1fr;
     }
-    
+
     .dps-registration-form h4 {
         font-size: 16px;
+    }
+
+    .dps-step-actions {
+        flex-direction: column;
     }
 }
 
@@ -323,7 +459,11 @@
         justify-content: center;
         padding: 12px 20px;
     }
-    
+
+    .dps-step-actions {
+        width: 100%;
+    }
+
     #dps-add-pet {
         width: 100%;
         justify-content: center;
