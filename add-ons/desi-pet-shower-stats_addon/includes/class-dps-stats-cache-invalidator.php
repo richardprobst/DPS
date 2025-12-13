@@ -180,7 +180,10 @@ class DPS_Stats_Cache_Invalidator {
      * Para evitar invalidações excessivas em saves múltiplos,
      * só invalida se não tiver sido invalidado nos últimos 30 segundos.
      *
+     * F2.3: Usa version bumping para invalidar cache (mais eficiente com object cache).
+     *
      * @since 1.2.0
+     * @since 1.3.0 Adicionado version bumping para object cache.
      */
     private static function invalidate_all_with_throttle() {
         $throttle_key = 'dps_stats_invalidated_recently';
@@ -190,7 +193,12 @@ class DPS_Stats_Cache_Invalidator {
             return; // Não invalida de novo
         }
         
-        // Invalidar todos os transients
+        // F2.3: Incrementar versão do cache (invalida tanto transients quanto object cache)
+        if ( class_exists( 'DPS_Stats_API' ) && method_exists( 'DPS_Stats_API', 'bump_cache_version' ) ) {
+            DPS_Stats_API::bump_cache_version();
+        }
+        
+        // Limpar transients antigos (opcional, para liberar espaço no banco)
         self::delete_transients_by_pattern( 'dps_stats_' );
         
         // Setar throttle por 30 segundos

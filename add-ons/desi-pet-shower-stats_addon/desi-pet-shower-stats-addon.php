@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.2.0' );
+define( 'DPS_STATS_VERSION', '1.3.0' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -54,7 +54,14 @@ if ( ! function_exists( 'dps_stats_build_cache_key' ) ) {
     function dps_stats_build_cache_key( $prefix, $start_date, $end_date = '' ) {
         $start_key = preg_replace( '/[^0-9]/', '', $start_date );
         $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
-        return $end_key ? sprintf( '%s_%s_%s', $prefix, $start_key, $end_key ) : sprintf( '%s_%s', $prefix, $start_key );
+        
+        // F2.3: Incluir versão do cache para invalidação eficiente
+        $version = get_option( 'dps_stats_cache_version', 1 );
+        
+        if ( $end_key ) {
+            return sprintf( '%s_v%d_%s_%s', $prefix, $version, $start_key, $end_key );
+        }
+        return sprintf( '%s_v%d_%s', $prefix, $version, $start_key );
     }
 }
 
@@ -130,13 +137,52 @@ class DPS_Stats_Addon {
 
     public function register_assets() {
         wp_register_style( 'dps-stats-addon', DPS_STATS_PLUGIN_URL . 'assets/css/stats-addon.css', [], DPS_STATS_VERSION );
+        
+        // F2.2: Registrar Chart.js CDN e fallback local
         wp_register_script( 'chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true );
+        wp_register_script( 'chartjs-fallback', DPS_STATS_PLUGIN_URL . 'assets/js/chart.min.js', [], '4.4.0', true );
+        
         wp_register_script( 'dps-stats-addon', DPS_STATS_PLUGIN_URL . 'assets/js/stats-addon.js', [ 'chartjs' ], DPS_STATS_VERSION, true );
     }
 
     private function enqueue_assets() {
         wp_enqueue_style( 'dps-stats-addon' );
         wp_enqueue_script( 'chartjs' );
+        
+        // F2.2: Adicionar fallback inline para Chart.js
+        $fallback_script = "
+        (function() {
+            function checkChartJS() {
+                if (typeof Chart === 'undefined' || !window.Chart) {
+                    console.warn('Chart.js CDN failed, loading local fallback...');
+                    var script = document.createElement('script');
+                    script.src = '" . esc_url( DPS_STATS_PLUGIN_URL . 'assets/js/chart.min.js' ) . "';
+                    script.onload = function() {
+                        console.log('Chart.js fallback loaded successfully');
+                        if (typeof dpsStatsInit === 'function') {
+                            dpsStatsInit();
+                        }
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    // Chart.js loaded from CDN
+                    if (typeof dpsStatsInit === 'function') {
+                        dpsStatsInit();
+                    }
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(checkChartJS, 100);
+                });
+            } else {
+                setTimeout(checkChartJS, 100);
+            }
+        })();
+        ";
+        wp_add_inline_script( 'chartjs', $fallback_script, 'after' );
+        
         wp_enqueue_script( 'dps-stats-addon' );
     }
 

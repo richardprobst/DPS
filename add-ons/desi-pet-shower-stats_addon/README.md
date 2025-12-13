@@ -363,10 +363,97 @@ Consulte **[../docs/refactoring/REFACTORING_ANALYSIS.md](../docs/refactoring/REF
 
 ---
 
+## Checklist de Testes Manuais — Fase 2 (v1.3.0)
+
+### F2.1: SQL GROUP BY (Performance)
+
+#### Teste de performance com alto volume
+- [ ] Selecionar período de 90 dias com >1000 agendamentos
+- [ ] Abrir DevTools Network e recarregar aba Stats
+- [ ] Verificar tempo de carregamento da página
+- [ ] **Resultado Esperado**: Dashboard carrega em <3 segundos (vs 5-10s antes)
+- [ ] **Resultado Esperado**: Console não mostra erros SQL
+
+#### Teste de precisão dos dados
+- [ ] Anotar valores ANTES do update (Top Serviços, Espécies, Raças)
+- [ ] Atualizar para v1.3.0
+- [ ] Recarregar Stats
+- [ ] **Resultado Esperado**: Valores batem com os anotados (mesma lógica, query otimizada)
+
+### F2.2: Fallback Chart.js
+
+#### Teste com CDN disponível (internet OK)
+- [ ] Abrir DevTools Network
+- [ ] Carregar aba Stats
+- [ ] Verificar que Chart.js carrega de `cdn.jsdelivr.net`
+- [ ] **Resultado Esperado**: Gráficos renderizam normalmente
+- [ ] **Resultado Esperado**: Console não mostra warnings de fallback
+
+#### Teste com CDN bloqueada (simular offline)
+- [ ] DevTools Network → Bloquear domínio `cdn.jsdelivr.net` ou ativar "Offline"
+- [ ] Recarregar aba Stats (Ctrl+Shift+R)
+- [ ] **Resultado Esperado**: Console mostra "Chart.js CDN failed, loading local fallback..."
+- [ ] **Resultado Esperado**: Gráficos renderizam usando arquivo local
+- [ ] **Resultado Esperado**: Network mostra carregamento de `/assets/js/chart.min.js`
+
+⚠️ **NOTA IMPORTANTE**: O arquivo `assets/js/chart.min.js` é um placeholder. Para funcionamento completo:
+```bash
+cd add-ons/desi-pet-shower-stats_addon/assets/js/
+curl -o chart.min.js https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js
+```
+
+### F2.3: Object Cache (Redis/Memcached)
+
+#### Teste com object cache DESATIVADO (padrão)
+- [ ] Verificar que `WP_CACHE` não está definido ou `wp_using_ext_object_cache()` retorna false
+- [ ] Carregar Stats duas vezes
+- [ ] **Resultado Esperado**: Segunda carga mais rápida (hit em transient)
+- [ ] Verificar `wp_options` no banco: existem transients `_transient_dps_stats_v*`
+
+#### Teste com object cache ATIVADO (Redis/Memcached)
+- [ ] Instalar e ativar plugin de object cache (ex: Redis Object Cache)
+- [ ] Confirmar que `wp_using_ext_object_cache()` retorna true
+- [ ] Limpar cache Stats (botão "Atualizar dados" ou criar novo agendamento)
+- [ ] Carregar Stats primeira vez (cache miss)
+- [ ] Carregar Stats segunda vez
+- [ ] **Resultado Esperado**: Hit em object cache (não consulta banco)
+- [ ] **Resultado Esperado**: Performance melhor em sites com múltiplos admins
+
+#### Teste de invalidação com versioning
+- [ ] Carregar Stats e anotar valor de atendimentos
+- [ ] Criar novo agendamento
+- [ ] Recarregar Stats
+- [ ] **Resultado Esperado**: Contador aumenta (cache invalidado via version bump)
+- [ ] Verificar `wp_options`: `dps_stats_cache_version` incrementou
+
+### Testes de Regressão
+
+#### Todas as métricas continuam funcionando
+- [ ] Atendimentos, receita, despesas, lucro exibem valores corretos
+- [ ] Comparativo vs período anterior funciona
+- [ ] Pets inativos listam corretamente
+- [ ] Novos clientes contam corretamente
+- [ ] Taxa de cancelamento calcula corretamente
+- [ ] Assinaturas respeitam período selecionado
+
+#### UI e UX não quebraram
+- [ ] Cards visuais renderizam corretamente
+- [ ] Gráficos Chart.js (barras, pizza) funcionam
+- [ ] Seções colapsáveis (`<details>`) abrem/fecham
+- [ ] Links WhatsApp funcionam
+- [ ] Exports CSV funcionam
+
+---
+
 ## Histórico de mudanças (resumo)
 
 ### Principais marcos
 
+- **v1.3.0**: FASE 2 — Performance e Otimização
+  - SQL GROUP BY para Top Serviços, Espécies e Raças (10-100x mais rápido)
+  - Fallback local para Chart.js (funciona offline)
+  - Object Cache (Redis/Memcached) com fallback para transients
+  - Cache versioning para invalidação eficiente
 - **v1.2.0**: FASE 1 — Correções Críticas e Higiene Técnica
   - Validação de tabela dps_transacoes (evita fatal error sem Finance)
   - Invalidação automática de cache (dados sempre atualizados)

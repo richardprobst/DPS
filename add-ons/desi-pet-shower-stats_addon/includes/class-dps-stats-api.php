@@ -47,6 +47,62 @@ class DPS_Stats_API {
     }
 
     /**
+     * F2.3: Obtém valor do cache (object cache ou transient).
+     *
+     * @param string $key Chave do cache.
+     *
+     * @return mixed|false Valor do cache ou false se não encontrado.
+     *
+     * @since 1.3.0
+     */
+    private static function cache_get( $key ) {
+        if ( wp_using_ext_object_cache() ) {
+            return wp_cache_get( $key, 'dps_stats' );
+        }
+        return get_transient( $key );
+    }
+
+    /**
+     * F2.3: Armazena valor no cache (object cache ou transient).
+     *
+     * @param string $key   Chave do cache.
+     * @param mixed  $value Valor a armazenar.
+     * @param int    $ttl   Time to live em segundos.
+     *
+     * @return bool True se armazenado com sucesso.
+     *
+     * @since 1.3.0
+     */
+    private static function cache_set( $key, $value, $ttl ) {
+        if ( wp_using_ext_object_cache() ) {
+            return wp_cache_set( $key, $value, 'dps_stats', $ttl );
+        }
+        return set_transient( $key, $value, $ttl );
+    }
+
+    /**
+     * F2.3: Obtém versão do cache para invalidação.
+     *
+     * @return int Versão atual do cache.
+     *
+     * @since 1.3.0
+     */
+    private static function get_cache_version() {
+        $version = get_option( 'dps_stats_cache_version', 1 );
+        return (int) $version;
+    }
+
+    /**
+     * F2.3: Incrementa versão do cache (invalida todo cache).
+     *
+     * @since 1.3.0
+     */
+    public static function bump_cache_version() {
+        $current = self::get_cache_version();
+        update_option( 'dps_stats_cache_version', $current + 1, false );
+    }
+
+    /**
      * Obtém contagem de atendimentos no período.
      *
      * @param string $start_date Data inicial (Y-m-d).
@@ -302,53 +358,55 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_top_services( $start_date, $end_date, $limit = 5 ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_services', $start_date, $end_date ) . '_' . $limit;
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        // F1.4: Remover limite de 1000 usando paginação
-        $service_counts = [];
-        $paged = 1;
-        $per_page = 500;
+        // F2.1: Query SQL com GROUP BY para performance
+        // Meta appointment_services pode ser serializado (array), então precisamos JOIN múltiplo
+        // ou processar em PHP. Como appointment_services é array, mantemos loop mas otimizado.
         
-        do {
-            $appointments = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'posts_per_page' => $per_page,
-                'paged'          => $paged,
-                'post_status'    => 'publish',
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-                ],
-                'fields' => 'ids',
-                'no_found_rows' => false,
-                'update_post_meta_cache' => false,
-                'update_post_term_cache' => false,
-            ] );
-            
-            foreach ( $appointments as $appt_id ) {
-                $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
-                if ( is_array( $service_ids ) ) {
-                    foreach ( $service_ids as $sid ) {
-                        $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
-                    }
-                }
+        // Query 1: Buscar todos os appointments do período (apenas IDs e meta de serviços)
+        $sql = $wpdb->prepare(
+            "SELECT p.ID, pm_services.meta_value as services
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             LEFT JOIN {$wpdb->postmeta} pm_services ON p.ID = pm_services.post_id AND pm_services.meta_key = 'appointment_services'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $appointments = $wpdb->get_results( $sql );
+        
+        $service_counts = [];
+        foreach ( $appointments as $appt ) {
+            if ( empty( $appt->services ) ) {
+                continue;
             }
             
-            $paged++;
-        } while ( count( $appointments ) === $per_page );
+            // Deserializar array de serviços
+            $service_ids = maybe_unserialize( $appt->services );
+            if ( is_array( $service_ids ) ) {
+                foreach ( $service_ids as $sid ) {
+                    $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
+                }
+            }
+        }
 
         arsort( $service_counts );
         $top_services = array_slice( $service_counts, 0, $limit, true );
@@ -365,9 +423,9 @@ class DPS_Stats_API {
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
@@ -565,58 +623,52 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_species_distribution( $start_date, $end_date ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_species', $start_date, $end_date );
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        // F1.4: Remover limite de 1000 usando paginação
-        $species_counts = [];
-        $paged = 1;
-        $per_page = 500;
+        // F2.1: Query SQL com GROUP BY para performance
+        $sql = $wpdb->prepare(
+            "SELECT pm_species.meta_value as species, COUNT(*) as count
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_pet ON p.ID = pm_pet.post_id AND pm_pet.meta_key = 'appointment_pet_id'
+             INNER JOIN {$wpdb->postmeta} pm_species ON pm_pet.meta_value = pm_species.post_id AND pm_species.meta_key = 'pet_species'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+             GROUP BY pm_species.meta_value
+             ORDER BY count DESC",
+            $start_date,
+            $end_date
+        );
         
-        do {
-            $appointments = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'posts_per_page' => $per_page,
-                'paged'          => $paged,
-                'post_status'    => 'publish',
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-                ],
-                'fields' => 'ids',
-                'no_found_rows' => false,
-                'update_post_meta_cache' => false,
-                'update_post_term_cache' => false,
-            ] );
-            
-            foreach ( $appointments as $appt_id ) {
-                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-                if ( $pet_id ) {
-                    $species = get_post_meta( $pet_id, 'pet_species', true );
-                    if ( $species === 'cao' ) {
-                        $species_label = __( 'Cachorro', 'dps-stats-addon' );
-                    } elseif ( $species === 'gato' ) {
-                        $species_label = __( 'Gato', 'dps-stats-addon' );
-                    } else {
-                        $species_label = __( 'Outro', 'dps-stats-addon' );
-                    }
-                    $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
-                }
+        $species_data = $wpdb->get_results( $sql );
+        
+        // Mapear espécies para labels traduzidos
+        $species_counts = [];
+        foreach ( $species_data as $row ) {
+            $species = $row->species;
+            if ( $species === 'cao' ) {
+                $species_label = __( 'Cachorro', 'dps-stats-addon' );
+            } elseif ( $species === 'gato' ) {
+                $species_label = __( 'Gato', 'dps-stats-addon' );
+            } else {
+                $species_label = __( 'Outro', 'dps-stats-addon' );
             }
-            
-            $paged++;
-        } while ( count( $appointments ) === $per_page );
+            $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + (int) $row->count;
+        }
 
         arsort( $species_counts );
         $total = array_sum( $species_counts );
@@ -630,9 +682,9 @@ class DPS_Stats_API {
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
@@ -650,71 +702,61 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_top_breeds( $start_date, $end_date, $limit = 5 ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_breeds', $start_date, $end_date ) . '_' . $limit;
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        // F1.4: Remover limite de 1000 usando paginação
-        $breed_counts = [];
-        $paged = 1;
-        $per_page = 500;
+        // F2.1: Query SQL com GROUP BY para performance
+        $sql = $wpdb->prepare(
+            "SELECT pm_breed.meta_value as breed, COUNT(*) as count
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_pet ON p.ID = pm_pet.post_id AND pm_pet.meta_key = 'appointment_pet_id'
+             INNER JOIN {$wpdb->postmeta} pm_breed ON pm_pet.meta_value = pm_breed.post_id AND pm_breed.meta_key = 'pet_breed'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+               AND pm_breed.meta_value != ''
+             GROUP BY pm_breed.meta_value
+             ORDER BY count DESC
+             LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        );
         
-        do {
-            $appointments = get_posts( [
-                'post_type'      => 'dps_agendamento',
-                'posts_per_page' => $per_page,
-                'paged'          => $paged,
-                'post_status'    => 'publish',
-                'meta_query'     => [
-                    'relation' => 'AND',
-                    [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                    [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-                ],
-                'fields' => 'ids',
-                'no_found_rows' => false,
-                'update_post_meta_cache' => false,
-                'update_post_term_cache' => false,
-            ] );
-            
-            foreach ( $appointments as $appt_id ) {
-                $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-                if ( $pet_id ) {
-                    $breed = get_post_meta( $pet_id, 'pet_breed', true );
-                    if ( $breed ) {
-                        $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
-                    }
-                }
-            }
-            
-            $paged++;
-        } while ( count( $appointments ) === $per_page );
-
-        arsort( $breed_counts );
-        $top_breeds = array_slice( $breed_counts, 0, $limit, true );
-        $total = array_sum( $breed_counts );
+        $breed_data = $wpdb->get_results( $sql );
+        
+        // Calcular total para percentuais
+        $total = 0;
+        foreach ( $breed_data as $row ) {
+            $total += (int) $row->count;
+        }
 
         $result = [];
-        foreach ( $top_breeds as $breed => $count ) {
+        foreach ( $breed_data as $row ) {
             $result[] = [
-                'breed'      => $breed,
-                'count'      => $count,
-                'percentage' => $total > 0 ? round( ( $count / $total ) * 100 ) : 0,
+                'breed'      => $row->breed,
+                'count'      => (int) $row->count,
+                'percentage' => $total > 0 ? round( ( (int) $row->count / $total ) * 100 ) : 0,
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
