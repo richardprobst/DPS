@@ -1119,6 +1119,11 @@ class DPS_Agenda_Addon {
         if ( $view !== 'calendar' ) {
             echo '<div class="dps-agenda-nav dps-agenda-nav--filters">';
             
+            // Título da seção de filtros
+            echo '<div class="dps-filters-header">';
+            echo '<span class="dps-filters-title">🔍 ' . esc_html__( 'Filtros', 'dps-agenda-addon' ) . '</span>';
+            echo '</div>';
+            
             // Formulário unificado de data e filtros
             echo '<form method="get" class="dps-agenda-unified-form">';
             
@@ -1137,9 +1142,9 @@ class DPS_Agenda_Addon {
             // Grupo de filtros principais
             echo '<div class="dps-filters-main">';
             
-            // Campo de data
+            // Campo de data com ícone
             echo '<label class="dps-filter-field">';
-            echo '<span class="dps-filter-label">' . esc_html__( 'Data:', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-filter-label">📅 ' . esc_html__( 'Data', 'dps-agenda-addon' ) . '</span>';
             echo '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '" class="dps-filter-input">';
             echo '</label>';
             
@@ -1158,7 +1163,7 @@ class DPS_Agenda_Addon {
             ];
             
             echo '<label class="dps-filter-field">';
-            echo '<span class="dps-filter-label">' . esc_html__( 'Status:', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-filter-label">📊 ' . esc_html__( 'Status', 'dps-agenda-addon' ) . '</span>';
             echo '<select name="filter_status" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por status', 'dps-agenda-addon' ) . '">';
             foreach ( $status_options as $val => $label ) {
                 echo '<option value="' . esc_attr( $val ) . '"' . selected( $filter_status, $val, false ) . '>' . esc_html( $label ) . '</option>';
@@ -1170,26 +1175,26 @@ class DPS_Agenda_Addon {
             $filter_pending_payment = isset( $_GET['filter_pending_payment'] ) ? sanitize_text_field( $_GET['filter_pending_payment'] ) : '';
             echo '<label class="dps-filter-field dps-filter-field--checkbox">';
             echo '<input type="checkbox" name="filter_pending_payment" value="1" ' . checked( $filter_pending_payment, '1', false ) . '>';
-            echo '<span class="dps-filter-label">' . esc_html__( 'Pagamento pendente', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-filter-label">💰 ' . esc_html__( 'Pag. pendente', 'dps-agenda-addon' ) . '</span>';
             echo '</label>';
             
             // Botão Aplicar
-            echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
+            echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">🔍 ' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
             
             // UX-5: Botão para revelar filtros avançados
             $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
             $has_advanced_filters = ( $filter_client > 0 || $filter_service > 0 || $filter_staff > 0 );
             echo '<button type="button" class="button dps-btn dps-btn--ghost dps-toggle-advanced-filters" data-expanded="' . ( $has_advanced_filters ? 'true' : 'false' ) . '" title="' . esc_attr__( 'Mostrar/ocultar filtros avançados', 'dps-agenda-addon' ) . '">';
-            echo esc_html__( 'Mais filtros', 'dps-agenda-addon' ) . ' <span class="dps-toggle-icon">▼</span>';
+            echo '⚙️ ' . esc_html__( 'Mais', 'dps-agenda-addon' ) . ' <span class="dps-toggle-icon">▼</span>';
             echo '</button>';
             
             // Link para limpar filtros (se houver algum ativo)
-            if ( $has_advanced_filters || $filter_status !== '' ) {
+            if ( $has_advanced_filters || $filter_status !== '' || $filter_pending_payment === '1' ) {
                 $clear_args = [ 'dps_date' => $selected_date, 'view' => $view ];
                 if ( $show_all ) {
                     $clear_args['show_all'] = '1';
                 }
-                echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost dps-clear-filters" title="' . esc_attr__( 'Remover todos os filtros', 'dps-agenda-addon' ) . '">✕</a>';
+                echo '<a href="' . esc_url( add_query_arg( $clear_args, $base_url ) ) . '" class="button dps-btn dps-btn--danger-soft dps-clear-filters" title="' . esc_attr__( 'Remover todos os filtros', 'dps-agenda-addon' ) . '">🗑️ ' . esc_html__( 'Limpar', 'dps-agenda-addon' ) . '</a>';
             }
             
             echo '</div>';
@@ -1242,9 +1247,9 @@ class DPS_Agenda_Addon {
             
             // Filtro de Cliente
             echo '<label class="dps-filter-field">';
-            echo '<span class="dps-filter-label">' . esc_html__( 'Cliente:', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-filter-label">👤 ' . esc_html__( 'Cliente', 'dps-agenda-addon' ) . '</span>';
             echo '<select name="filter_client" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por cliente', 'dps-agenda-addon' ) . '">';
-            echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
+            echo '<option value="0">' . esc_html__( 'Todos os clientes', 'dps-agenda-addon' ) . '</option>';
             foreach ( $clients as $cl ) {
                 echo '<option value="' . esc_attr( $cl->ID ) . '"' . selected( $filter_client, $cl->ID, false ) . '>' . esc_html( $cl->post_title ) . '</option>';
             }
@@ -1253,9 +1258,9 @@ class DPS_Agenda_Addon {
             
             // Filtro de Serviço
             echo '<label class="dps-filter-field">';
-            echo '<span class="dps-filter-label">' . esc_html__( 'Serviço:', 'dps-agenda-addon' ) . '</span>';
+            echo '<span class="dps-filter-label">✂️ ' . esc_html__( 'Serviço', 'dps-agenda-addon' ) . '</span>';
             echo '<select name="filter_service" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por serviço', 'dps-agenda-addon' ) . '">';
-            echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
+            echo '<option value="0">' . esc_html__( 'Todos os serviços', 'dps-agenda-addon' ) . '</option>';
             foreach ( $services as $srv ) {
                 echo '<option value="' . esc_attr( $srv->ID ) . '"' . selected( $filter_service, $srv->ID, false ) . '>' . esc_html( $srv->post_title ) . '</option>';
             }
@@ -1277,7 +1282,7 @@ class DPS_Agenda_Addon {
                 if ( ! empty( $staff_members ) ) {
                     $staff_available = true;
                     echo '<label class="dps-filter-field">';
-                    echo '<span class="dps-filter-label">' . esc_html__( 'Profissional:', 'dps-agenda-addon' ) . '</span>';
+                    echo '<span class="dps-filter-label">🧑‍💼 ' . esc_html__( 'Profissional', 'dps-agenda-addon' ) . '</span>';
                     echo '<select name="filter_staff" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por profissional', 'dps-agenda-addon' ) . '">';
                     echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
                     foreach ( $staff_members as $staff ) {
@@ -1752,10 +1757,11 @@ class DPS_Agenda_Addon {
                 // FASE 2: Seção de Relatório de Ocupação (colapsável)
                 $this->render_occupancy_report( $filtered, $selected_date, $is_week_view );
                 
+                // Resumo com ícones e visual melhorado
                 echo '<div class="dps-agenda-summary" role="status">';
-                echo '<span><strong>' . esc_html( $total_upcoming ) . '</strong> ' . esc_html( _n( 'atendimento pendente', 'atendimentos pendentes', $total_upcoming, 'dps-agenda-addon' ) ) . '</span>';
-                echo '<span><strong>' . esc_html( $total_completed ) . '</strong> ' . esc_html( _n( 'atendimento finalizado', 'atendimentos finalizados', $total_completed, 'dps-agenda-addon' ) ) . '</span>';
-                echo '<span><strong>' . esc_html( count( $filtered ) ) . '</strong> ' . esc_html__( 'agendamentos no total', 'dps-agenda-addon' ) . '</span>';
+                echo '<span class="dps-summary-item dps-summary-item--pending"><span class="dps-summary-icon">⏳</span><strong>' . esc_html( $total_upcoming ) . '</strong> ' . esc_html( _n( 'pendente', 'pendentes', $total_upcoming, 'dps-agenda-addon' ) ) . '</span>';
+                echo '<span class="dps-summary-item dps-summary-item--done"><span class="dps-summary-icon">✅</span><strong>' . esc_html( $total_completed ) . '</strong> ' . esc_html( _n( 'finalizado', 'finalizados', $total_completed, 'dps-agenda-addon' ) ) . '</span>';
+                echo '<span class="dps-summary-item dps-summary-item--total"><span class="dps-summary-icon">📊</span><strong>' . esc_html( count( $filtered ) ) . '</strong> ' . esc_html__( 'total', 'dps-agenda-addon' ) . '</span>';
                 echo '</div>';
             }
             
