@@ -75,6 +75,42 @@ class DPS_Registration_Addon {
     const TOKEN_EXPIRATION_SECONDS = 172800; // 48 * 60 * 60
 
     /**
+     * Registra eventos com DPS_Logger quando disponível ou error_log como fallback.
+     * Evita PII em claro usando apenas hashes ou indicadores booleanos.
+     *
+     * @since 1.3.0
+     *
+     * @param string $level   Nível (info|warning|error).
+     * @param string $message Mensagem principal.
+     * @param array  $context Dados adicionais sem PII.
+     */
+    private function log_event( $level, $message, $context = array() ) {
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::log( $level, $message, $context, 'registration' );
+            return;
+        }
+
+        $payload = wp_json_encode( $context );
+        error_log( '[DPS Registration] ' . $message . ( $payload ? ' ' . $payload : '' ) );
+    }
+
+    /**
+     * Gera hash seguro para valores sensíveis.
+     *
+     * @since 1.3.0
+     *
+     * @param string $value Valor bruto.
+     * @return string Hash SHA-256 com prefixo.
+     */
+    private function get_safe_hash( $value ) {
+        if ( empty( $value ) ) {
+            return '';
+        }
+
+        return hash( 'sha256', 'dps_reg_' . $value );
+    }
+
+    /**
      * Recupera a instância única.
      *
      * @since 1.0.1
@@ -168,7 +204,7 @@ class DPS_Registration_Addon {
             $count = (int) $data;
             $start = time();
         }
-        
+
         if ( $count >= 3 ) {
             // Limite atingido
             return false;
@@ -574,6 +610,9 @@ class DPS_Registration_Addon {
 
         // F1.6: Rate limiting
         if ( ! $this->check_rate_limit() ) {
+            $this->log_event( 'warning', 'Cadastro bloqueado por rate limit', array(
+                'ip_hash' => $this->get_client_ip_hash(),
+            ) );
             $this->add_error( __( 'Muitas tentativas de cadastro. Por favor, aguarde alguns minutos antes de tentar novamente.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }
@@ -653,6 +692,13 @@ class DPS_Registration_Addon {
         // =====================================================================
         $duplicate_id = $this->find_duplicate_client( $client_email, $client_phone, $client_cpf );
         if ( $duplicate_id > 0 ) {
+            $this->log_event( 'warning', 'Cadastro bloqueado por duplicata', array(
+                'duplicate_id' => $duplicate_id,
+                'email_hash'   => $this->get_safe_hash( $client_email ),
+                'phone_hash'   => $this->get_safe_hash( $client_phone ),
+                'cpf_hash'     => $this->get_safe_hash( $client_cpf ),
+                'ip_hash'      => $this->get_client_ip_hash(),
+            ) );
             $this->add_error( __( 'Já encontramos um cadastro com esses dados. Se você já se cadastrou, verifique seu e-mail (se informado) ou fale com a equipe do pet shop.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }
@@ -683,6 +729,10 @@ class DPS_Registration_Addon {
         update_post_meta( $client_id, 'client_referral', $client_referral );
         update_post_meta( $client_id, 'dps_email_confirmed', 0 );
         update_post_meta( $client_id, 'dps_is_active', 0 );
+        update_post_meta( $client_id, 'dps_registration_source', 'public' );
+        if ( ! empty( $referral_code ) ) {
+            update_post_meta( $client_id, 'dps_registration_ref', $referral_code );
+        }
 
         // Salva coordenadas se fornecidas
         if ( $client_lat !== '' && $client_lng !== '' ) {
@@ -695,6 +745,8 @@ class DPS_Registration_Addon {
         }
 
         do_action( 'dps_registration_after_client_created', $referral_code, $client_id, $client_email, $client_phone );
+
+        $pets_created = 0;
 
         // Lê pets submetidos (campos em arrays)
         $pet_names      = $_POST['pet_name'] ?? [];
@@ -733,6 +785,7 @@ class DPS_Registration_Addon {
                     'post_status' => 'publish',
                 ] );
                 if ( $pet_id ) {
+                    $pets_created++;
                     update_post_meta( $pet_id, 'owner_id', $client_id );
                     update_post_meta( $pet_id, 'pet_species', $species );
                     update_post_meta( $pet_id, 'pet_breed', $breed );
@@ -747,6 +800,17 @@ class DPS_Registration_Addon {
                 }
             }
         }
+
+        $this->send_admin_notification( $client_id, $client_name, $client_phone_raw );
+        $this->send_welcome_messages( $client_phone, $client_email, $client_name );
+
+        $this->log_event( 'info', 'Cadastro criado com sucesso', array(
+            'client_id' => $client_id,
+            'pets'      => $pets_created,
+            'has_email' => ! empty( $client_email ),
+            'has_cpf'   => ! empty( $client_cpf ),
+            'ip_hash'   => $this->get_client_ip_hash(),
+        ) );
 
         // Redireciona e indica sucesso
         wp_redirect( add_query_arg( 'registered', '1', $this->get_registration_page_url() ) );
@@ -779,6 +843,9 @@ class DPS_Registration_Addon {
 
         if ( empty( $client ) ) {
             // Token não encontrado - pode ter sido usado ou expirado
+            $this->log_event( 'warning', 'Confirmação de email inválida', array(
+                'token_hash' => $this->get_safe_hash( $token ),
+            ) );
             $this->add_error( __( 'Link de confirmação inválido ou já utilizado. Se você já confirmou seu email, seu cadastro está ativo. Caso contrário, tente realizar um novo cadastro ou entre em contato com a equipe.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }
@@ -797,7 +864,12 @@ class DPS_Registration_Addon {
                     // Token expirado - limpa e mostra erro
                     delete_post_meta( $client_id, 'dps_email_confirm_token' );
                     delete_post_meta( $client_id, 'dps_email_confirm_token_created' );
-                    
+
+                    $this->log_event( 'warning', 'Confirmação de email expirada', array(
+                        'client_id'  => $client_id,
+                        'token_age'  => $token_age,
+                        'token_hash' => $this->get_safe_hash( $token ),
+                    ) );
                     $this->add_error( __( 'O link de confirmação expirou. Por favor, realize um novo cadastro ou entre em contato com a equipe do pet shop.', 'dps-registration-addon' ) );
                     $this->redirect_with_error();
                 }
@@ -810,9 +882,84 @@ class DPS_Registration_Addon {
         delete_post_meta( $client_id, 'dps_email_confirm_token' );
         delete_post_meta( $client_id, 'dps_email_confirm_token_created' );
 
+        $this->log_event( 'info', 'Confirmação de email concluída', array(
+            'client_id' => $client_id,
+            'ip_hash'   => $this->get_client_ip_hash(),
+        ) );
         $redirect = add_query_arg( 'dps_email_confirmed', '1', $this->get_registration_page_url() );
         wp_safe_redirect( $redirect );
         exit;
+    }
+
+    /**
+     * Envia notificação para o admin sobre novo cadastro.
+     *
+     * @since 1.3.0
+     *
+     * @param int    $client_id   ID do cliente criado.
+     * @param string $client_name Nome do tutor.
+     * @param string $client_phone Telefone informado.
+     */
+    private function send_admin_notification( $client_id, $client_name, $client_phone ) {
+        $admin_email = get_option( 'admin_email' );
+        if ( ! $admin_email || ! is_email( $admin_email ) ) {
+            return;
+        }
+
+        $subject = __( 'Novo cadastro recebido (DPS)', 'dps-registration-addon' );
+
+        $edit_link = get_edit_post_link( $client_id );
+        $body_parts = array();
+        $body_parts[] = sprintf( '%s: %s', __( 'Nome', 'dps-registration-addon' ), $client_name );
+        if ( ! empty( $client_phone ) ) {
+            $body_parts[] = sprintf( '%s: %s', __( 'Telefone', 'dps-registration-addon' ), $client_phone );
+        }
+        if ( $edit_link ) {
+            $body_parts[] = sprintf( '%s: %s', __( 'Editar cadastro', 'dps-registration-addon' ), esc_url_raw( $edit_link ) );
+        }
+
+        $body = implode( "\n", $body_parts );
+        wp_mail( $admin_email, $subject, $body );
+    }
+
+    /**
+     * Dispara mensagens de boas-vindas via Communications (WhatsApp/email) quando disponível.
+     *
+     * @since 1.3.0
+     *
+     * @param string $client_phone Telefone normalizado (apenas dígitos).
+     * @param string $client_email Email validado.
+     * @param string $client_name  Nome do tutor.
+     */
+    private function send_welcome_messages( $client_phone, $client_email, $client_name ) {
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            return;
+        }
+
+        $communications = DPS_Communications_API::get_instance();
+        if ( ! $communications ) {
+            return;
+        }
+
+        $context = array( 'source' => 'registration' );
+        $welcome_message = sprintf(
+            '%s %s',
+            __( 'Olá! Recebemos seu cadastro. Em breve nossa equipe entrará em contato para os próximos passos.', 'dps-registration-addon' ),
+            __( 'Enquanto isso, você pode confirmar seu email (se informou) e deixar seus pets prontos para agendar.', 'dps-registration-addon' )
+        );
+
+        if ( ! empty( $client_phone ) && method_exists( $communications, 'send_whatsapp' ) ) {
+            $communications->send_whatsapp( $client_phone, $welcome_message, $context );
+        }
+
+        if ( ! empty( $client_email ) && is_email( $client_email ) && method_exists( $communications, 'send_email' ) ) {
+            $communications->send_email(
+                $client_email,
+                __( 'Bem-vindo ao DPS by PRObst', 'dps-registration-addon' ),
+                $welcome_message,
+                $context
+            );
+        }
     }
 
     /**
@@ -830,6 +977,7 @@ class DPS_Registration_Addon {
         if ( isset( $_GET['registered'] ) && '1' === $_GET['registered'] ) {
             $success = true;
         }
+        $ref_param = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
         // Pré-renderiza o primeiro conjunto de campos de pet e o template de clonagem
         $first_pet_html   = $this->get_pet_fieldset_html( 1 );
         $placeholder_html = $this->get_pet_fieldset_html_placeholder();
@@ -853,6 +1001,12 @@ class DPS_Registration_Addon {
             echo '<p style="margin: 0 0 8px 0;"><strong>' . esc_html__( 'Próximo passo:', 'dps-registration-addon' ) . '</strong> ';
             echo esc_html__( 'Entre em contato conosco por WhatsApp ou telefone para agendar o primeiro atendimento.', 'dps-registration-addon' ) . '</p>';
             echo '<p style="margin: 0; font-size: 0.9em; color: #15803d;">' . esc_html__( 'Se você informou um email, verifique sua caixa de entrada para confirmar o cadastro e receber novidades.', 'dps-registration-addon' ) . '</p>';
+            $agenda_url = $this->get_agenda_cta_url();
+            if ( $agenda_url ) {
+                echo '<p style="margin: 12px 0 0 0;">';
+                echo '<a class="button button-primary" href="' . esc_url( $agenda_url ) . '" style="background:#16a34a; border-color:#16a34a; text-decoration:none;">' . esc_html__( 'Agendar meu primeiro atendimento', 'dps-registration-addon' ) . '</a>';
+                echo '</p>';
+            }
             echo '</div>';
             // Não exibir formulário novamente após sucesso
             echo '</div>';
@@ -867,6 +1021,9 @@ class DPS_Registration_Addon {
         echo '<form method="post" id="dps-reg-form">';
         echo '<input type="hidden" name="dps_reg_action" value="save_registration">';
         wp_nonce_field( 'dps_reg_action', 'dps_reg_nonce' );
+        if ( $ref_param ) {
+            echo '<input type="hidden" name="dps_referral_code" value="' . esc_attr( $ref_param ) . '">';
+        }
         echo '<div class="dps-hp-field" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">';
         echo '<label for="dps_hp_field">' . esc_html__( 'Deixe este campo vazio', 'desi-pet-shower' ) . '</label>';
         echo '<input type="text" name="dps_hp_field" id="dps_hp_field" tabindex="-1" autocomplete="off">';
@@ -1070,6 +1227,59 @@ class DPS_Registration_Addon {
     }
 
     /**
+     * Obtém URL do Portal do Cliente se configurado/ativo.
+     *
+     * @since 1.3.0
+     *
+     * @return string URL ou string vazia.
+     */
+    private function get_portal_url() {
+        if ( function_exists( 'dps_get_portal_page_url' ) ) {
+            $url = dps_get_portal_page_url();
+            if ( $url ) {
+                return $url;
+            }
+        }
+
+        $portal_page_id = (int) get_option( 'dps_portal_page_id', 0 );
+        if ( $portal_page_id ) {
+            $url = get_permalink( $portal_page_id );
+            if ( $url ) {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Retorna URL para CTA de agendamento.
+     *
+     * @since 1.3.0
+     *
+     * @return string URL resolvida ou vazia.
+     */
+    private function get_agenda_cta_url() {
+        $agenda_page_id = (int) get_option( 'dps_agenda_page_id', 0 );
+        if ( $agenda_page_id ) {
+            $agenda_url = get_permalink( $agenda_page_id );
+            if ( $agenda_url ) {
+                return $agenda_url;
+            }
+        }
+
+        $fallback = home_url( '/' );
+        /**
+         * Permite sobrescrever a URL de agendamento padrão.
+         *
+         * @since 1.3.0
+         */
+        $fallback = apply_filters( 'dps_registration_agenda_url', $fallback );
+
+        return $fallback ? $fallback : '';
+    }
+
+    /**
      * Envia email com token de confirmação para o cliente.
      *
      * @param int    $client_id    ID do post do cliente.
@@ -1094,6 +1304,15 @@ class DPS_Registration_Addon {
             __( 'Este link é válido por 48 horas.', 'dps-registration-addon' ),
             __( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' )
         );
+
+        $portal_url = $this->get_portal_url();
+        if ( $portal_url ) {
+            $message .= "\n\n" . sprintf(
+                '%s %s',
+                __( 'Após confirmar, acesse o Portal por aqui:', 'dps-registration-addon' ),
+                esc_url_raw( $portal_url )
+            );
+        }
 
         wp_mail( $client_email, $subject, $message );
     }
