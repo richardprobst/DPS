@@ -2285,43 +2285,93 @@ tr.dps-row-updated {
     margin-top: 1.5rem;
 }
 
-/* Navegação de abas */
-.dps-agenda-tabs-nav {
+/* Cabeçalho das abas */
+.dps-agenda-tabs-header {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--dps-border);
-    padding-bottom: 0;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--dps-border);
 }
 
-/* Botões de aba */
-.dps-agenda-tab-button {
+.dps-agenda-tabs-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Navegação de abas - Cards */
+.dps-agenda-tabs-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0;
     background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
+}
+
+/* Botões de aba - Card Style */
+.dps-agenda-tab-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 0.75rem;
+    background: var(--dps-surface);
+    border: 2px solid var(--dps-border);
+    border-radius: 0.75rem;
     font-weight: 600;
     color: var(--dps-muted);
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
-    bottom: -2px;
+    text-align: center;
 }
 
 .dps-agenda-tab-button:hover {
-    color: var(--dps-accent);
+    border-color: var(--dps-accent);
     background: var(--dps-accent-soft);
+    color: var(--dps-accent);
 }
 
 .dps-agenda-tab-button--active {
+    border-color: var(--dps-accent);
+    background: var(--dps-accent-soft);
     color: var(--dps-accent);
-    border-bottom-color: var(--dps-accent);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
 .dps-agenda-tab-button:focus {
     outline: 2px solid var(--dps-accent);
     outline-offset: 2px;
+}
+
+/* Elementos internos dos botões de aba */
+.dps-tab-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.dps-tab-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: inherit;
+}
+
+.dps-tab-desc {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--dps-muted);
+    opacity: 0.8;
+}
+
+.dps-agenda-tab-button--active .dps-tab-desc {
+    color: var(--dps-accent);
+    opacity: 1;
 }
 
 /* Conteúdo das abas */
@@ -2331,27 +2381,62 @@ tr.dps-row-updated {
 
 .dps-tab-content--active {
     display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Ajustes responsivos para abas */
 @media (max-width: 768px) {
     .dps-agenda-tabs-nav {
-        flex-direction: column;
-        border-bottom: none;
-        gap: 0.25rem;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
     
     .dps-agenda-tab-button {
-        border-bottom: none;
-        border-left: 3px solid transparent;
-        padding: 0.6rem 1rem;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
         text-align: left;
-        bottom: 0;
+        gap: 0.75rem;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.25rem;
+    }
+    
+    .dps-tab-label {
+        flex: 1;
+    }
+    
+    .dps-tab-desc {
+        display: none;
     }
     
     .dps-agenda-tab-button--active {
-        border-left-color: var(--dps-accent);
-        background: var(--dps-accent-soft);
+        border-left: 4px solid var(--dps-accent);
+        border-radius: 0 0.75rem 0.75rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-agenda-tabs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-tabs-title {
+        font-size: 1rem;
     }
 }
 
@@ -2360,6 +2445,8 @@ tr.dps-row-updated {
 .dps-table--tab2,
 .dps-table--tab3 {
     /* Estilos herdados da classe base .dps-table */
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 /* Aba 1: Visão Rápida - layout mais compacto */
@@ -2369,7 +2456,37 @@ tr.dps-row-updated {
     font-size: 0.9rem;
 }
 
+.dps-table--tab1 thead th {
+    background: #f0f9ff;
+    color: #0369a1;
+    font-weight: 600;
+}
+
+/* Aba 2: Operação - destaque para ações */
+.dps-table--tab2 thead th {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+}
+
+.dps-table--tab2 .dps-quick-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+}
+
+.dps-table--tab2 .dps-quick-action-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+}
+
 /* Aba 3: Detalhes - permite mais espaço para texto */
+.dps-table--tab3 thead th {
+    background: #f0fdf4;
+    color: #166534;
+    font-weight: 600;
+}
+
 .dps-table--tab3 td {
     max-width: none;
     white-space: normal;
@@ -2378,4 +2495,46 @@ tr.dps-row-updated {
 .dps-table--tab3 td[data-label*="Observ"],
 .dps-table--tab3 td[data-label*="Endereço"] {
     min-width: 200px;
+}
+
+/* Preview de observações */
+.dps-notes-preview {
+    display: block;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+    color: var(--dps-muted);
+    font-size: 0.85rem;
+}
+
+.dps-notes-preview:hover {
+    color: #0f172a;
+}
+
+/* Subtítulos das seções de atendimentos */
+.dps-tab-content h5 {
+    margin: 1.5rem 0 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid var(--dps-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-tab-content h5:first-child {
+    margin-top: 0;
+}
+
+/* Indicador visual para seção de pendentes vs finalizados */
+.dps-tab-content h5:first-of-type::before {
+    content: '⏳';
+}
+
+.dps-tab-content h5:last-of-type::before {
+    content: '✅';
 }

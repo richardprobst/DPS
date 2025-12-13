@@ -1426,20 +1426,41 @@ class DPS_Agenda_Addon {
         $current_tab = isset( $_GET['agenda_tab'] ) ? sanitize_text_field( $_GET['agenda_tab'] ) : 'visao-rapida';
         
         echo '<div class="dps-agenda-tabs-wrapper">';
+        
+        // Cabeçalho das abas com título e descrição
+        echo '<div class="dps-agenda-tabs-header">';
+        echo '<h3 class="dps-agenda-tabs-title">📋 ' . esc_html__( 'Lista de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '</div>';
+        
         echo '<nav class="dps-agenda-tabs-nav" role="tablist">';
         
+        // Definir abas com ícones e descrições
         $tabs = [
-            'visao-rapida' => __( 'Visão Rápida', 'dps-agenda-addon' ),
-            'operacao'     => __( 'Operação', 'dps-agenda-addon' ),
-            'detalhes'     => __( 'Detalhes', 'dps-agenda-addon' ),
+            'visao-rapida' => [
+                'label' => __( 'Visão Rápida', 'dps-agenda-addon' ),
+                'icon'  => '👁️',
+                'desc'  => __( 'Check rápido de status', 'dps-agenda-addon' ),
+            ],
+            'operacao'     => [
+                'label' => __( 'Operação', 'dps-agenda-addon' ),
+                'icon'  => '⚙️',
+                'desc'  => __( 'Ações e pagamentos', 'dps-agenda-addon' ),
+            ],
+            'detalhes'     => [
+                'label' => __( 'Detalhes', 'dps-agenda-addon' ),
+                'icon'  => '📍',
+                'desc'  => __( 'Logística e TaxiDog', 'dps-agenda-addon' ),
+            ],
         ];
         
-        foreach ( $tabs as $tab_id => $tab_label ) {
+        foreach ( $tabs as $tab_id => $tab_data ) {
             $is_active = ( $current_tab === $tab_id );
             $tab_class = 'dps-agenda-tab-button' . ( $is_active ? ' dps-agenda-tab-button--active' : '' );
             
-            echo '<button type="button" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '">';
-            echo esc_html( $tab_label );
+            echo '<button type="button" class="' . esc_attr( $tab_class ) . '" data-tab="' . esc_attr( $tab_id ) . '" role="tab" aria-selected="' . ( $is_active ? 'true' : 'false' ) . '" aria-controls="dps-tab-content-' . esc_attr( $tab_id ) . '" title="' . esc_attr( $tab_data['desc'] ) . '">';
+            echo '<span class="dps-tab-icon">' . $tab_data['icon'] . '</span>';
+            echo '<span class="dps-tab-label">' . esc_html( $tab_data['label'] ) . '</span>';
+            echo '<span class="dps-tab-desc">' . esc_html( $tab_data['desc'] ) . '</span>';
             echo '</button>';
         }
         
@@ -1560,6 +1581,7 @@ class DPS_Agenda_Addon {
                     update_meta_cache( 'post', $related_ids );
                 }
                 
+                // Ordenação cronológica (próximo atendimento primeiro)
                 usort(
                     $apts,
                     function( $a, $b ) {
@@ -1570,9 +1592,9 @@ class DPS_Agenda_Addon {
                         $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
                         $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
                         if ( $dt_a === $dt_b ) {
-                            return $b->ID <=> $a->ID;
+                            return $a->ID <=> $b->ID;
                         }
-                        return $dt_b <=> $dt_a;
+                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
                     }
                 );
                 
@@ -1618,6 +1640,7 @@ class DPS_Agenda_Addon {
                     update_meta_cache( 'post', $related_ids );
                 }
                 
+                // Ordenação cronológica (próximo atendimento primeiro)
                 usort(
                     $apts,
                     function( $a, $b ) {
@@ -1628,9 +1651,9 @@ class DPS_Agenda_Addon {
                         $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
                         $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
                         if ( $dt_a === $dt_b ) {
-                            return $b->ID <=> $a->ID;
+                            return $a->ID <=> $b->ID;
                         }
-                        return $dt_b <=> $dt_a;
+                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
                     }
                 );
                 
@@ -1678,6 +1701,7 @@ class DPS_Agenda_Addon {
                     update_meta_cache( 'post', $related_ids );
                 }
                 
+                // Ordenação cronológica (próximo atendimento primeiro)
                 usort(
                     $apts,
                     function( $a, $b ) {
@@ -1688,9 +1712,9 @@ class DPS_Agenda_Addon {
                         $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
                         $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
                         if ( $dt_a === $dt_b ) {
-                            return $b->ID <=> $a->ID;
+                            return $a->ID <=> $b->ID;
                         }
-                        return $dt_b <=> $dt_a;
+                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
                     }
                 );
                 
