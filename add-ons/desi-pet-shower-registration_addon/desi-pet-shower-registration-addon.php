@@ -75,6 +75,22 @@ class DPS_Registration_Addon {
     const TOKEN_EXPIRATION_SECONDS = 172800; // 48 * 60 * 60
 
     /**
+     * Nome do hook do cron para lembretes de confirmação de email.
+     *
+     * @since 1.4.0
+     * @var string
+     */
+    const CONFIRMATION_REMINDER_CRON = 'dps_registration_confirmation_reminder';
+
+    /**
+     * Nome da meta que registra se o lembrete de confirmação já foi enviado.
+     *
+     * @since 1.4.0
+     * @var string
+     */
+    const REMINDER_SENT_META = 'dps_reg_reminder_sent';
+
+    /**
      * Registra eventos com DPS_Logger quando disponível ou error_log como fallback.
      * Evita PII em claro usando apenas hashes ou indicadores booleanos.
      *
@@ -137,6 +153,7 @@ class DPS_Registration_Addon {
         add_shortcode( 'dps_registration_form', [ $this, 'render_registration_form' ] );
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
+        register_deactivation_hook( __FILE__, [ 'DPS_Registration_Addon', 'deactivate' ] );
 
         // Enfileira assets CSS para responsividade
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -144,6 +161,13 @@ class DPS_Registration_Addon {
         // Adiciona página de configurações para API do Google Maps
         add_action( 'admin_menu', [ $this, 'add_settings_page' ], 20 );
         add_action( 'admin_init', [ $this, 'register_settings' ] );
+
+        // F3.4: Agendamento do lembrete de confirmação
+        add_action( 'init', [ $this, 'maybe_schedule_confirmation_reminders' ] );
+        add_action( self::CONFIRMATION_REMINDER_CRON, [ $this, 'send_confirmation_reminders' ] );
+
+        // F3.7: Tela de pendentes no admin
+        add_action( 'admin_menu', [ $this, 'register_pending_clients_page' ], 30 );
     }
 
     // =========================================================================
@@ -535,6 +559,15 @@ class DPS_Registration_Addon {
     }
 
     /**
+     * Remove eventos agendados ao desativar o plugin.
+     *
+     * @since 1.4.0
+     */
+    public static function deactivate() {
+        wp_clear_scheduled_hook( self::CONFIRMATION_REMINDER_CRON );
+    }
+
+    /**
      * Adiciona a página de configurações no menu principal "DPS by PRObst"
      * 
      * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
@@ -548,6 +581,22 @@ class DPS_Registration_Addon {
             'manage_options',
             'dps-registration-settings',
             [ $this, 'render_settings_page' ]
+        );
+    }
+
+    /**
+     * Registra submenu para listar cadastros pendentes.
+     *
+     * @since 1.4.0
+     */
+    public function register_pending_clients_page() {
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Cadastros Pendentes', 'dps-registration-addon' ),
+            __( 'Cadastros Pendentes', 'dps-registration-addon' ),
+            'manage_options',
+            'dps-registration-pending',
+            [ $this, 'render_pending_clients_page' ]
         );
     }
 
@@ -581,6 +630,128 @@ class DPS_Registration_Addon {
         echo '</table>';
         submit_button();
         echo '</form>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a lista de cadastros pendentes de confirmação.
+     *
+     * @since 1.4.0
+     */
+    public function render_pending_clients_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $paged       = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+        $search_term = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+        $phone_term  = preg_replace( '/\D+/', '', $search_term );
+
+        $meta_query = [
+            [
+                'key'     => 'dps_email_confirmed',
+                'value'   => 0,
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ],
+        ];
+
+        if ( ! empty( $phone_term ) ) {
+            $meta_query[] = [
+                'key'     => 'client_phone',
+                'value'   => $phone_term,
+                'compare' => 'LIKE',
+            ];
+        }
+
+        $query_args = [
+            'post_type'           => 'dps_cliente',
+            'post_status'         => 'publish',
+            'posts_per_page'      => 20,
+            'paged'               => $paged,
+            's'                   => $search_term,
+            'orderby'             => 'date',
+            'order'               => 'DESC',
+            'meta_query'          => $meta_query,
+            'update_post_meta_cache' => true,
+            'update_post_term_cache' => false,
+        ];
+
+        $clients_query = new WP_Query( $query_args );
+
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__( 'Cadastros Pendentes', 'dps-registration-addon' ) . '</h1>';
+        echo '<p>' . esc_html__( 'Clientes que ainda não confirmaram o e-mail aparecem aqui. Você pode abrir o cadastro para editar ou complementar dados.', 'dps-registration-addon' ) . '</p>';
+
+        $search_url = add_query_arg( [ 'page' => 'dps-registration-pending' ], admin_url( 'admin.php' ) );
+        echo '<form method="get" action="' . esc_url( $search_url ) . '" style="margin-bottom: 16px;">';
+        echo '<input type="hidden" name="page" value="dps-registration-pending" />';
+        echo '<label class="screen-reader-text" for="dps-registration-search">' . esc_html__( 'Buscar por nome ou telefone', 'dps-registration-addon' ) . '</label>';
+        echo '<input type="search" id="dps-registration-search" name="s" value="' . esc_attr( $search_term ) . '" placeholder="' . esc_attr__( 'Buscar por nome ou telefone', 'dps-registration-addon' ) . '" /> ';
+        submit_button( __( 'Buscar', 'dps-registration-addon' ), 'primary', '', false );
+        echo '</form>';
+
+        echo '<h2 class="nav-tab-wrapper" style="margin-bottom: 10px;">';
+        echo '<span class="nav-tab nav-tab-active">' . esc_html__( 'Pendentes', 'dps-registration-addon' ) . '</span>';
+        echo '</h2>';
+
+        if ( $clients_query->have_posts() ) {
+            echo '<table class="wp-list-table widefat fixed striped">';
+            echo '<thead><tr>';
+            echo '<th scope="col">' . esc_html__( 'Nome', 'dps-registration-addon' ) . '</th>';
+            echo '<th scope="col">' . esc_html__( 'Telefone', 'dps-registration-addon' ) . '</th>';
+            echo '<th scope="col">' . esc_html__( 'Email', 'dps-registration-addon' ) . '</th>';
+            echo '<th scope="col">' . esc_html__( 'Data', 'dps-registration-addon' ) . '</th>';
+            echo '<th scope="col">' . esc_html__( 'Ações', 'dps-registration-addon' ) . '</th>';
+            echo '</tr></thead>';
+            echo '<tbody>';
+
+            while ( $clients_query->have_posts() ) {
+                $clients_query->the_post();
+                $client_id    = get_the_ID();
+                $client_phone = get_post_meta( $client_id, 'client_phone', true );
+                $client_email = get_post_meta( $client_id, 'client_email', true );
+
+                echo '<tr>';
+                echo '<td>' . esc_html( get_the_title() ) . '</td>';
+                echo '<td>' . esc_html( $client_phone ) . '</td>';
+                echo '<td>' . esc_html( $client_email ) . '</td>';
+                echo '<td>' . esc_html( get_the_date() ) . '</td>';
+
+                $edit_link = get_edit_post_link( $client_id );
+                echo '<td>';
+                if ( $edit_link ) {
+                    echo '<a class="button" href="' . esc_url( $edit_link ) . '">' . esc_html__( 'Editar cadastro', 'dps-registration-addon' ) . '</a>';
+                } else {
+                    echo esc_html__( 'Sem ações disponíveis', 'dps-registration-addon' );
+                }
+                echo '</td>';
+                echo '</tr>';
+            }
+
+            echo '</tbody>';
+            echo '</table>';
+
+            $total_pages = $clients_query->max_num_pages;
+            if ( $total_pages > 1 ) {
+                $pagination_links = paginate_links( [
+                    'base'      => add_query_arg( [ 'paged' => '%#%', 'page' => 'dps-registration-pending', 's' => $search_term ], admin_url( 'admin.php' ) ),
+                    'format'    => '',
+                    'current'   => $paged,
+                    'total'     => $total_pages,
+                    'prev_text' => __( '« Anterior', 'dps-registration-addon' ),
+                    'next_text' => __( 'Próximo »', 'dps-registration-addon' ),
+                ] );
+
+                if ( $pagination_links ) {
+                    echo '<div class="tablenav"><div class="tablenav-pages" style="margin-top: 10px;">' . wp_kses_post( $pagination_links ) . '</div></div>';
+                }
+            }
+        } else {
+            echo '<p>' . esc_html__( 'Nenhum cadastro pendente encontrado.', 'dps-registration-addon' ) . '</p>';
+        }
+
+        wp_reset_postdata();
         echo '</div>';
     }
 
@@ -1291,8 +1462,16 @@ class DPS_Registration_Addon {
     protected function send_confirmation_email( $client_id, $client_email ) {
         $token = wp_generate_uuid4();
         update_post_meta( $client_id, 'dps_email_confirm_token', $token );
-        // F1.7: Salva timestamp para expiração
-        update_post_meta( $client_id, 'dps_email_confirm_token_created', time() );
+        // F1.7/F3.4: Salva timestamp para expiração e lembrete (reutilizando se já existir)
+        $created_at = get_post_meta( $client_id, 'dps_email_confirm_token_created', true );
+        if ( empty( $created_at ) ) {
+            $created_at = time();
+            update_post_meta( $client_id, 'dps_email_confirm_token_created', $created_at );
+        }
+
+        if ( ! get_post_meta( $client_id, self::REMINDER_SENT_META, true ) ) {
+            update_post_meta( $client_id, self::REMINDER_SENT_META, 0 );
+        }
 
         $confirmation_link = add_query_arg( 'dps_confirm_email', $token, $this->get_registration_page_url() );
 
@@ -1332,6 +1511,166 @@ class DPS_Registration_Addon {
         }
 
         return home_url( '/' );
+    }
+
+    /**
+     * Agenda evento de cron para lembretes de confirmação de email.
+     *
+     * @since 1.4.0
+     */
+    public function maybe_schedule_confirmation_reminders() {
+        if ( ! wp_next_scheduled( self::CONFIRMATION_REMINDER_CRON ) ) {
+            wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', self::CONFIRMATION_REMINDER_CRON );
+        }
+    }
+
+    /**
+     * Envia lembretes de confirmação para cadastros não confirmados após 24h.
+     *
+     * @since 1.4.0
+     */
+    public function send_confirmation_reminders() {
+        if ( ! class_exists( 'DPS_Communications_API' ) ) {
+            $this->log_event( 'info', 'Communications inativo - lembretes não enviados' );
+            return;
+        }
+
+        $communications = DPS_Communications_API::get_instance();
+        if ( ! $communications ) {
+            $this->log_event( 'warning', 'Communications API indisponível - abortando lembretes' );
+            return;
+        }
+
+        $offset     = 0;
+        $batch_size = 50;
+        $now        = time();
+        $oldest     = $now - self::TOKEN_EXPIRATION_SECONDS;
+        $newest     = $now - DAY_IN_SECONDS;
+
+        do {
+            $pending_clients = new WP_Query( [
+                'post_type'              => 'dps_cliente',
+                'post_status'            => 'publish',
+                'posts_per_page'         => $batch_size,
+                'offset'                 => $offset,
+                'fields'                 => 'ids',
+                'no_found_rows'          => true,
+                'update_post_term_cache' => false,
+                'update_post_meta_cache' => false,
+                'meta_query'             => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'dps_email_confirmed',
+                        'value'   => 0,
+                        'compare' => '=',
+                        'type'    => 'NUMERIC',
+                    ],
+                    [
+                        'key'     => 'dps_email_confirm_token',
+                        'compare' => 'EXISTS',
+                    ],
+                    [
+                        'key'     => 'dps_email_confirm_token_created',
+                        'value'   => [ $oldest, $newest ],
+                        'compare' => 'BETWEEN',
+                        'type'    => 'NUMERIC',
+                    ],
+                    [
+                        'relation' => 'OR',
+                        [
+                            'key'     => self::REMINDER_SENT_META,
+                            'compare' => 'NOT EXISTS',
+                        ],
+                        [
+                            'key'     => self::REMINDER_SENT_META,
+                            'value'   => 0,
+                            'compare' => '=',
+                            'type'    => 'NUMERIC',
+                        ],
+                    ],
+                ],
+            ] );
+
+            $client_ids = $pending_clients->posts;
+            if ( empty( $client_ids ) ) {
+                break;
+            }
+
+            foreach ( $client_ids as $client_id ) {
+                $this->send_confirmation_reminder_to_client( $client_id, $communications );
+            }
+
+            $offset += $batch_size;
+        } while ( count( $client_ids ) === $batch_size );
+    }
+
+    /**
+     * Envia o lembrete para um cliente específico.
+     *
+     * @since 1.4.0
+     *
+     * @param int                    $client_id      ID do cliente.
+     * @param DPS_Communications_API $communications Instância da API de comunicações.
+     */
+    private function send_confirmation_reminder_to_client( $client_id, $communications ) {
+        $token        = get_post_meta( $client_id, 'dps_email_confirm_token', true );
+        $created_at   = (int) get_post_meta( $client_id, 'dps_email_confirm_token_created', true );
+        $reminder_log = [
+            'client_id' => $client_id,
+            'token_set' => ! empty( $token ),
+        ];
+
+        if ( empty( $token ) || empty( $created_at ) ) {
+            $this->log_event( 'warning', 'Lembrete ignorado por dados faltando', $reminder_log );
+            return;
+        }
+
+        $client_email = get_post_meta( $client_id, 'client_email', true );
+        $client_phone = get_post_meta( $client_id, 'client_phone', true );
+        $client_name  = get_the_title( $client_id );
+        $confirm_url  = add_query_arg( 'dps_confirm_email', $token, $this->get_registration_page_url() );
+
+        $greeting = $client_name
+            ? sprintf( __( 'Olá %s!', 'dps-registration-addon' ), $client_name )
+            : __( 'Olá!', 'dps-registration-addon' );
+
+        $message = sprintf(
+            "%s %s %s\n%s",
+            $greeting,
+            __( 'Lembrete: confirme seu cadastro no DPS by PRObst para ativar sua conta.', 'dps-registration-addon' ),
+            __( 'Use o link abaixo para finalizar a confirmação.', 'dps-registration-addon' ),
+            esc_url_raw( $confirm_url )
+        );
+
+        $sent = false;
+        $context = [
+            'source'       => 'registration',
+            'type'         => 'confirmation_reminder',
+            'client_id'    => $client_id,
+            'token_hash'   => $this->get_safe_hash( $token ),
+            'token_age'    => time() - $created_at,
+        ];
+
+        if ( ! empty( $client_phone ) && method_exists( $communications, 'send_whatsapp' ) ) {
+            $sent = $communications->send_whatsapp( $client_phone, $message, $context ) || $sent;
+        }
+
+        if ( ! empty( $client_email ) && is_email( $client_email ) && method_exists( $communications, 'send_email' ) ) {
+            $email_message = $message . "\n\n" . __( 'Se você já confirmou, pode ignorar este lembrete.', 'dps-registration-addon' );
+            $sent          = $communications->send_email(
+                $client_email,
+                __( 'Lembrete: confirme seu cadastro', 'dps-registration-addon' ),
+                $email_message,
+                $context
+            ) || $sent;
+        }
+
+        if ( $sent ) {
+            update_post_meta( $client_id, self::REMINDER_SENT_META, time() );
+            $this->log_event( 'info', 'Lembrete de confirmação enviado', $context );
+        } else {
+            $this->log_event( 'warning', 'Nenhum canal disponível para lembrete', $context );
+        }
     }
 
     /**
