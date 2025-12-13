@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.4.0
+ * Version:           1.7.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -866,6 +866,9 @@ class DPS_Groomers_Addon {
         
         // Divide proporcionalmente entre os profissionais
         $staff_count = count( $staff_ids );
+        if ( $staff_count === 0 ) {
+            return;
+        }
         $value_per_staff = $total_value / $staff_count;
         
         $commissions_data = [];
