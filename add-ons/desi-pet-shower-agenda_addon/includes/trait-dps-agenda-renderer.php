@@ -52,6 +52,7 @@ trait DPS_Agenda_Renderer {
         $filter_client = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
         $filter_status = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
         $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
+        $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
 
         // Paginação
         $paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
@@ -65,6 +66,7 @@ trait DPS_Agenda_Renderer {
             'filter_client'    => $filter_client,
             'filter_status'    => $filter_status,
             'filter_service'   => $filter_service,
+            'filter_staff'     => $filter_staff,
             'paged'            => $paged,
         ];
     }
@@ -202,13 +204,15 @@ trait DPS_Agenda_Renderer {
      * Aplica filtros aos agendamentos.
      *
      * @since 1.3.0
+     * @since 1.5.0 Adicionado filtro por profissional (staff).
      * @param array $appointments Lista de agendamentos.
      * @param int   $filter_client ID do cliente para filtrar.
      * @param string $filter_status Status para filtrar.
      * @param int   $filter_service ID do serviço para filtrar.
+     * @param int   $filter_staff ID do profissional para filtrar (opcional).
      * @return array Agendamentos filtrados.
      */
-    private function apply_filters_to_appointments( $appointments, $filter_client, $filter_status, $filter_service ) {
+    private function apply_filters_to_appointments( $appointments, $filter_client, $filter_status, $filter_service, $filter_staff = 0 ) {
         $filtered = [];
         
         foreach ( $appointments as $appt ) {
@@ -237,6 +241,14 @@ trait DPS_Agenda_Renderer {
             if ( $filter_service ) {
                 $service_ids_meta = get_post_meta( $appt->ID, 'appointment_services', true );
                 if ( ! is_array( $service_ids_meta ) || ! in_array( $filter_service, $service_ids_meta ) ) {
+                    $match = false;
+                }
+            }
+            
+            // Filtro por profissional (integração com Groomers Add-on)
+            if ( $filter_staff ) {
+                $staff_ids = get_post_meta( $appt->ID, '_dps_groomers', true );
+                if ( ! is_array( $staff_ids ) || ! in_array( $filter_staff, array_map( 'intval', $staff_ids ) ) ) {
                     $match = false;
                 }
             }

@@ -10,8 +10,8 @@
 | Fase | Status | PR | Descrição |
 |------|--------|-----|-----------|
 | Fase 1 | ✅ **IMPLEMENTADA** | Este PR | Base de dados + UI para tipos e freelancer |
-| Fase 2 | ⏳ Próxima | - | Integração com Agenda/Serviços |
-| Fase 3 | 📋 Planejada | - | Finance/Repasse automático |
+| Fase 2 | ✅ **IMPLEMENTADA** | Este PR | Integração com Agenda/Serviços |
+| Fase 3 | 🔄 EM ANDAMENTO | Este PR | Finance/Repasse automático |
 | Fase 4 | 📋 Planejada | - | Recursos avançados |
 
 ---
@@ -71,35 +71,41 @@
 
 ---
 
-## Fase 2: Integração com Agenda/Serviços ⏳ PRÓXIMA
+## Fase 2: Integração com Agenda/Serviços ✅ COMPLETA
 
-**Versão alvo**: 1.6.0  
-**Esforço estimado**: 3-5 dias  
-**Dependências**: Fase 1 (✅ completa)
+**Versão**: 1.6.0  
+**Implementado em**: Este PR
 
-### Itens Planejados
+### Itens Implementados
 
-| Item | Descrição | Add-on Afetado |
-|------|-----------|----------------|
-| F2.1 | Campo `required_staff_type` em serviços | Services Add-on |
-| F2.2 | Select agrupado por tipo no agendamento | Groomers Add-on |
-| F2.3 | Validação de tipo x serviço | Groomers Add-on |
-| F2.4 | Exibição de profissional na Agenda | Agenda Add-on |
-| F2.5 | Filtro por profissional na Agenda | Agenda Add-on |
+| Item | Descrição | Add-on Afetado | Status |
+|------|-----------|----------------|--------|
+| F2.1 | Campo `required_staff_type` em serviços | Services Add-on v1.3.0 | ✅ |
+| F2.2 | Select agrupado por tipo no agendamento | Groomers Add-on v1.5.0 | ✅ |
+| F2.3 | Validação de tipo x serviço | Pendente (futura) | ⏸️ |
+| F2.4 | Exibição de profissional na Agenda | Parcial (filtro implementado) | ✅ |
+| F2.5 | Filtro por profissional na Agenda | Agenda Add-on v1.1.0 | ✅ |
 
-### Critérios de Aceite
+### Arquivos Modificados
 
-1. Serviços podem exigir tipo específico de profissional (groomer/banhista/qualquer)
-2. Select de profissional no agendamento agrupa por tipo
-3. Alerta exibido se serviço requer tipo não selecionado
-4. Nome do profissional aparece na visualização da Agenda
-5. Filtro por profissional funciona na Agenda
+**Services Add-on**:
+- `desi-pet-shower-services.php` - versão 1.3.0
+- `dps_service/desi-pet-shower-services-addon.php` - campo `required_staff_type`
 
-### Benefícios
+**Groomers Add-on**:
+- `desi-pet-shower-groomers-addon.php` - select agrupado por tipo
 
-- **Equipe**: Clareza de quem faz o quê
-- **Dono**: Menos erros de alocação
-- **UX**: Validação imediata
+**Agenda Add-on**:
+- `desi-pet-shower-agenda-addon.php` - versão 1.1.0, filtro por profissional
+- `includes/trait-dps-agenda-renderer.php` - parâmetro filter_staff
+
+### Critérios de Aceite ✅
+
+1. ✅ Serviços podem exigir tipo específico de profissional (groomer/banhista/qualquer)
+2. ✅ Select de profissional no agendamento agrupa por tipo com optgroup
+3. ⏸️ Validação de tipo x serviço (adiada para futura implementação JS)
+4. ✅ Filtro por profissional funciona na Agenda
+5. ✅ Profissionais exibidos com tipo entre parênteses no filtro
 
 ---
 

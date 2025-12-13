@@ -1522,21 +1522,43 @@ class DPS_Groomers_Addon {
             }
         }
 
-        // Usar apenas groomers ativos na seleção
+        // Usar apenas profissionais ativos na seleção
         $groomers = $this->get_active_groomers();
         
-        echo '<p><label>' . esc_html__( 'Groomers responsáveis', 'dps-groomers-addon' ) . '<br>';
-        echo '<select name="dps_groomers[]" multiple size="4" style="min-width:220px;">';
+        // Agrupar profissionais por tipo
+        $grouped = [];
+        foreach ( $groomers as $groomer ) {
+            $staff_type = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+            if ( empty( $staff_type ) ) {
+                $staff_type = 'groomer';
+            }
+            if ( ! isset( $grouped[ $staff_type ] ) ) {
+                $grouped[ $staff_type ] = [];
+            }
+            $grouped[ $staff_type ][] = $groomer;
+        }
+        
+        echo '<p><label>' . esc_html__( 'Profissionais responsáveis', 'dps-groomers-addon' ) . '<br>';
+        echo '<select name="dps_groomers[]" id="dps_groomers_select" multiple size="5" style="min-width:280px;">';
         if ( empty( $groomers ) ) {
-            echo '<option value="">' . esc_html__( 'Nenhum groomer ativo', 'dps-groomers-addon' ) . '</option>';
+            echo '<option value="">' . esc_html__( 'Nenhum profissional ativo', 'dps-groomers-addon' ) . '</option>';
         } else {
-            foreach ( $groomers as $groomer ) {
-                $selected_attr = in_array( $groomer->ID, $selected, true ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $groomer->ID ) . '" ' . esc_attr( $selected_attr ) . '>' . esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ) . '</option>';
+            // Renderizar agrupado por tipo
+            foreach ( $grouped as $type => $type_groomers ) {
+                $type_label = self::get_staff_type_label( $type );
+                echo '<optgroup label="' . esc_attr( $type_label ) . '">';
+                foreach ( $type_groomers as $groomer ) {
+                    $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+                    $freelancer_indicator = ( $is_freelancer === '1' ) ? ' (F)' : '';
+                    $selected_attr = in_array( $groomer->ID, $selected, true ) ? 'selected' : '';
+                    $display_name = $groomer->display_name ? $groomer->display_name : $groomer->user_login;
+                    echo '<option value="' . esc_attr( $groomer->ID ) . '" data-staff-type="' . esc_attr( $type ) . '" ' . esc_attr( $selected_attr ) . '>' . esc_html( $display_name . $freelancer_indicator ) . '</option>';
+                }
+                echo '</optgroup>';
             }
         }
         echo '</select>';
-        echo '<span class="description">' . esc_html__( 'Selecione um ou mais groomers para este atendimento.', 'dps-groomers-addon' ) . '</span>';
+        echo '<span class="description">' . esc_html__( 'Selecione um ou mais profissionais. (F) = Freelancer.', 'dps-groomers-addon' ) . '</span>';
         echo '</label></p>';
     }
 

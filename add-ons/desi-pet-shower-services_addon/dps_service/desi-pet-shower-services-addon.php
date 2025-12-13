@@ -6,7 +6,7 @@
  * O header oficial está em desi-pet-shower-services.php (arquivo wrapper).
  *
  * @package DPS_Services_Addon
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 // Impede acesso direto
@@ -240,6 +240,7 @@ class DPS_Services_Addon {
                 'category'     => get_post_meta( $edit_id, 'service_category', true ),
                 'duration'     => get_post_meta( $edit_id, 'service_duration', true ),
                 'active'       => get_post_meta( $edit_id, 'service_active', true ),
+                'required_staff_type' => get_post_meta( $edit_id, 'required_staff_type', true ),
                 // Variações por porte
                 'price_small'  => get_post_meta( $edit_id, 'service_price_small', true ),
                 'price_medium' => get_post_meta( $edit_id, 'service_price_medium', true ),
@@ -309,6 +310,31 @@ class DPS_Services_Addon {
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select></label></p>';
+        
+        // Tipo de profissional requerido (integração com Groomers Add-on)
+        $required_staff = $meta['required_staff_type'] ?? 'any';
+        $staff_type_options = [
+            'any'      => __( 'Qualquer profissional', 'dps-services-addon' ),
+            'groomer'  => __( 'Groomer (tosador)', 'dps-services-addon' ),
+            'banhista' => __( 'Banhista', 'dps-services-addon' ),
+        ];
+        // Adiciona tipos extras do Groomers Add-on se disponível
+        if ( class_exists( 'DPS_Groomers_Addon' ) && method_exists( 'DPS_Groomers_Addon', 'get_staff_types' ) ) {
+            $extra_types = DPS_Groomers_Addon::get_staff_types();
+            foreach ( $extra_types as $key => $label ) {
+                if ( ! isset( $staff_type_options[ $key ] ) && $key !== 'recepcao' ) {
+                    $staff_type_options[ $key ] = $label;
+                }
+            }
+        }
+        echo '<p><label>' . esc_html__( 'Profissional requerido', 'dps-services-addon' ) . '<br><select name="required_staff_type">';
+        foreach ( $staff_type_options as $val => $label ) {
+            $sel = ( $val === $required_staff ) ? 'selected' : '';
+            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '<span class="description">' . esc_html__( 'Define qual tipo de profissional pode executar este serviço.', 'dps-services-addon' ) . '</span>';
+        echo '</label></p>';
         // Preço base e variações por porte (se existir).  
         $price_small    = $meta['price_small'] ?? ( $meta['price'] ?? '' );
         $price_medium   = $meta['price_medium'] ?? '';
@@ -606,6 +632,10 @@ class DPS_Services_Addon {
                 update_post_meta( $srv_id, 'service_price', $price );
                 update_post_meta( $srv_id, 'service_duration', $duration );
                 update_post_meta( $srv_id, 'service_active', $active );
+                
+                // Salva tipo de profissional requerido (integração Groomers Add-on)
+                $required_staff = isset( $_POST['required_staff_type'] ) ? sanitize_key( wp_unslash( $_POST['required_staff_type'] ) ) : 'any';
+                update_post_meta( $srv_id, 'required_staff_type', $required_staff );
 
                 // Registra histórico de alteração de preços
                 if ( class_exists( 'DPS_Services_API' ) ) {

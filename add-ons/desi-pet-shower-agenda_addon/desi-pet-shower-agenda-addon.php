@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Agenda Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cria página automática com agenda de atendimentos. Visualize e gerencie compromissos de forma prática.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-agenda-addon
@@ -1124,7 +1124,7 @@ class DPS_Agenda_Addon {
             
             // Preserve parâmetros da URL
             foreach ( $_GET as $k => $v ) {
-                if ( in_array( $k, [ 'dps_date', 'view', 'show_all', 'filter_client', 'filter_status', 'filter_service' ], true ) ) {
+                if ( in_array( $k, [ 'dps_date', 'view', 'show_all', 'filter_client', 'filter_status', 'filter_service', 'filter_staff' ], true ) ) {
                     continue;
                 }
                 echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
@@ -1177,7 +1177,8 @@ class DPS_Agenda_Addon {
             echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
             
             // UX-5: Botão para revelar filtros avançados
-            $has_advanced_filters = ( $filter_client > 0 || $filter_service > 0 );
+            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
+            $has_advanced_filters = ( $filter_client > 0 || $filter_service > 0 || $filter_staff > 0 );
             echo '<button type="button" class="button dps-btn dps-btn--ghost dps-toggle-advanced-filters" data-expanded="' . ( $has_advanced_filters ? 'true' : 'false' ) . '" title="' . esc_attr__( 'Mostrar/ocultar filtros avançados', 'dps-agenda-addon' ) . '">';
             echo esc_html__( 'Mais filtros', 'dps-agenda-addon' ) . ' <span class="dps-toggle-icon">▼</span>';
             echo '</button>';
@@ -1261,6 +1262,38 @@ class DPS_Agenda_Addon {
             echo '</select>';
             echo '</label>';
             
+            // Filtro de Profissional (integração com Groomers Add-on)
+            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
+            $staff_available = false;
+            
+            // Verifica se o Groomers Add-on está ativo
+            if ( class_exists( 'DPS_Groomers_Addon' ) ) {
+                $staff_members = get_users( [
+                    'role'    => 'dps_groomer',
+                    'orderby' => 'display_name',
+                    'order'   => 'ASC',
+                ] );
+                
+                if ( ! empty( $staff_members ) ) {
+                    $staff_available = true;
+                    echo '<label class="dps-filter-field">';
+                    echo '<span class="dps-filter-label">' . esc_html__( 'Profissional:', 'dps-agenda-addon' ) . '</span>';
+                    echo '<select name="filter_staff" class="dps-filter-input" aria-label="' . esc_attr__( 'Filtrar por profissional', 'dps-agenda-addon' ) . '">';
+                    echo '<option value="0">' . esc_html__( 'Todos', 'dps-agenda-addon' ) . '</option>';
+                    foreach ( $staff_members as $staff ) {
+                        $staff_type = get_user_meta( $staff->ID, '_dps_staff_type', true );
+                        $type_label = $staff_type ? DPS_Groomers_Addon::get_staff_type_label( $staff_type ) : '';
+                        $display = $staff->display_name ? $staff->display_name : $staff->user_login;
+                        if ( $type_label ) {
+                            $display .= ' (' . $type_label . ')';
+                        }
+                        echo '<option value="' . esc_attr( $staff->ID ) . '"' . selected( $filter_staff, $staff->ID, false ) . '>' . esc_html( $display ) . '</option>';
+                    }
+                    echo '</select>';
+                    echo '</label>';
+                }
+            }
+            
             echo '</div>';
             
             echo '</form>';
@@ -1274,6 +1307,9 @@ class DPS_Agenda_Addon {
             $filter_client  = 0;
             $filter_status  = '';
             $filter_service = 0;
+            $filter_staff   = 0;
+        } else {
+            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
         }
         
         // Carrega agendamentos conforme visualização ou modo "todos"
@@ -1359,6 +1395,21 @@ class DPS_Agenda_Addon {
                 if ( is_array( $appts ) ) {
                     $appointments[ $date ] = array_filter( $appts, function( $appt ) {
                         return DPS_Agenda_Payment_Helper::has_pending_payment( $appt->ID );
+                    } );
+                }
+            }
+        }
+        
+        // FASE 2 Groomers: Filtrar por profissional
+        if ( $filter_staff > 0 ) {
+            foreach ( $appointments as $date => $appts ) {
+                if ( is_array( $appts ) ) {
+                    $appointments[ $date ] = array_filter( $appts, function( $appt ) use ( $filter_staff ) {
+                        $staff_ids = get_post_meta( $appt->ID, '_dps_groomers', true );
+                        if ( ! is_array( $staff_ids ) ) {
+                            return false;
+                        }
+                        return in_array( $filter_staff, array_map( 'intval', $staff_ids ) );
                     } );
                 }
             }
