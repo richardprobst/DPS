@@ -176,6 +176,9 @@ class DPS_Registration_Addon {
 
         // F3.7: Tela de pendentes no admin
         add_action( 'admin_menu', [ $this, 'register_pending_clients_page' ], 30 );
+
+        // F4.2: API segura de cadastro
+        add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
     }
 
     // =========================================================================
@@ -205,6 +208,58 @@ class DPS_Registration_Addon {
         
         // Hash para não armazenar IP diretamente (sha256 mais seguro que md5)
         return hash( 'sha256', 'dps_reg_' . $ip );
+    }
+
+    /**
+     * Recupera hash da API key enviada no header.
+     *
+     * @since 1.6.0
+     *
+     * @param WP_REST_Request $request Objeto da requisição.
+     * @return string Hash SHA-256 ou string vazia.
+     */
+    private function get_request_api_key_hash( WP_REST_Request $request ) {
+        $api_key = $request->get_header( 'X-DPS-Registration-Key' );
+        if ( empty( $api_key ) ) {
+            return '';
+        }
+
+        return hash( 'sha256', sanitize_text_field( $api_key ) );
+    }
+
+    /**
+     * Sanitiza valores numéricos de rate limit (mínimo 1).
+     *
+     * @since 1.6.0
+     *
+     * @param mixed $value Valor recebido.
+     * @return int Valor sanitizado.
+     */
+    public function sanitize_rate_limit_value( $value ) {
+        $value = absint( $value );
+        if ( $value < 1 ) {
+            return 1;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Sanitiza e hasheia a API key antes de salvar.
+     *
+     * @since 1.6.0
+     *
+     * @param string $value Valor recebido.
+     * @return string Hash persistido.
+     */
+    public function sanitize_api_key( $value ) {
+        $value = sanitize_text_field( $value );
+
+        if ( '' === $value ) {
+            return get_option( 'dps_registration_api_key_hash', '' );
+        }
+
+        return hash( 'sha256', $value );
     }
 
     /**
@@ -418,8 +473,78 @@ class DPS_Registration_Addon {
             'fields'         => 'ids',
             'meta_query'     => $meta_query,
         ] );
-        
+
         return ! empty( $clients ) ? (int) $clients[0] : 0;
+    }
+
+    /**
+     * Valida dados enviados via API reutilizando regras do formulário público.
+     *
+     * @since 1.6.0
+     *
+     * @param string $client_name  Nome do cliente.
+     * @param string $client_phone Telefone informado (pode conter caracteres diversos).
+     * @param string $client_email Email informado.
+     * @param string $client_cpf   CPF informado.
+     * @return array|WP_Error Dados normalizados ou erro.
+     */
+    private function validate_api_client_data( $client_name, $client_phone, $client_email, $client_cpf ) {
+        $client_name  = sanitize_text_field( $client_name );
+        $phone_raw    = sanitize_text_field( $client_phone );
+        $email_clean  = sanitize_email( $client_email );
+        $cpf_raw      = sanitize_text_field( $client_cpf );
+
+        $errors = array();
+
+        if ( empty( $client_name ) ) {
+            $errors['missing_name'] = true;
+        }
+
+        if ( empty( $phone_raw ) ) {
+            $errors['missing_phone'] = true;
+        } elseif ( ! $this->validate_phone( $phone_raw ) ) {
+            $errors['invalid_phone'] = true;
+        }
+
+        $normalized_phone = ! empty( $phone_raw ) ? $this->normalize_phone( $phone_raw ) : '';
+
+        if ( ! empty( $email_clean ) && ! is_email( $email_clean ) ) {
+            $errors['invalid_email'] = true;
+        }
+
+        $normalized_cpf = '';
+        if ( ! empty( $cpf_raw ) ) {
+            if ( ! $this->validate_cpf( $cpf_raw ) ) {
+                $errors['invalid_cpf'] = true;
+            } else {
+                $normalized_cpf = $this->normalize_cpf( $cpf_raw );
+            }
+        }
+
+        if ( ! empty( $errors ) ) {
+            $code = array_key_first( $errors );
+            return new WP_Error( $code, __( 'Não foi possível validar os dados enviados.', 'dps-registration-addon' ), array( 'status' => 400 ) );
+        }
+
+        $duplicate_id = $this->find_duplicate_client( $email_clean, $normalized_phone, $normalized_cpf );
+        if ( $duplicate_id > 0 ) {
+            $this->log_event( 'warning', 'Cadastro bloqueado por duplicata (API)', array(
+                'duplicate_id' => $duplicate_id,
+                'email_hash'   => $this->get_safe_hash( $email_clean ),
+                'phone_hash'   => $this->get_safe_hash( $normalized_phone ),
+                'cpf_hash'     => $this->get_safe_hash( $normalized_cpf ),
+                'ip_hash'      => $this->get_client_ip_hash(),
+            ) );
+
+            return new WP_Error( 'duplicate_client', __( 'Não foi possível concluir o cadastro. Verifique os dados informados ou contate o suporte.', 'dps-registration-addon' ), array( 'status' => 400 ) );
+        }
+
+        return array(
+            'client_name'  => $client_name,
+            'client_phone' => $normalized_phone,
+            'client_email' => $email_clean,
+            'client_cpf'   => $normalized_cpf,
+        );
     }
 
     // =========================================================================
@@ -635,6 +760,252 @@ class DPS_Registration_Addon {
         );
     }
 
+    // =========================================================================
+    // F4.2 - REST API Segura
+    // =========================================================================
+
+    /**
+     * Registra rotas REST do add-on.
+     *
+     * @since 1.6.0
+     */
+    public function register_rest_routes() {
+        register_rest_route(
+            'dps/v1',
+            '/register',
+            array(
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => [ $this, 'handle_rest_register' ],
+                'permission_callback' => [ $this, 'rest_register_permission_check' ],
+            )
+        );
+    }
+
+    /**
+     * Valida permissão para uso da rota protegida.
+     *
+     * @since 1.6.0
+     *
+     * @param WP_REST_Request $request Requisição recebida.
+     * @return true|WP_Error
+     */
+    public function rest_register_permission_check( WP_REST_Request $request ) {
+        $api_enabled = (bool) get_option( 'dps_registration_api_enabled', 0 );
+        if ( ! $api_enabled ) {
+            return new WP_Error( 'dps_registration_api_disabled', __( 'API de cadastro desativada.', 'dps-registration-addon' ), array( 'status' => 403 ) );
+        }
+
+        $stored_hash    = get_option( 'dps_registration_api_key_hash', '' );
+        $provided_hash  = $this->get_request_api_key_hash( $request );
+
+        if ( empty( $stored_hash ) || empty( $provided_hash ) || ! hash_equals( (string) $stored_hash, $provided_hash ) ) {
+            $this->log_event( 'warning', 'Tentativa de autenticação REST sem sucesso', array(
+                'ip_hash'  => $this->get_client_ip_hash(),
+                'key_hash' => $provided_hash ? substr( sha1( $provided_hash ), 0, 16 ) : '',
+            ) );
+
+            return new WP_Error( 'rest_forbidden', __( 'Não autorizado.', 'dps-registration-addon' ), array( 'status' => 401 ) );
+        }
+
+        return true;
+    }
+
+    /**
+     * Incrementa contadores de rate limit.
+     *
+     * @since 1.6.0
+     *
+     * @param string $transient_key Chave do transient.
+     * @param int    $limit         Limite máximo permitido.
+     * @return bool True se permitido, false se bloqueado.
+     */
+    private function bump_api_rate_counter( $transient_key, $limit ) {
+        $data = get_transient( $transient_key );
+
+        if ( false === $data ) {
+            set_transient( $transient_key, array(
+                'count' => 1,
+                'start' => time(),
+            ), HOUR_IN_SECONDS );
+            return true;
+        }
+
+        $count = isset( $data['count'] ) ? (int) $data['count'] : (int) $data;
+        $start = isset( $data['start'] ) ? (int) $data['start'] : time();
+
+        if ( $count >= $limit ) {
+            return false;
+        }
+
+        $elapsed   = time() - $start;
+        $remaining = max( HOUR_IN_SECONDS - $elapsed, 60 );
+
+        set_transient( $transient_key, array(
+            'count' => $count + 1,
+            'start' => $start,
+        ), $remaining );
+
+        return true;
+    }
+
+    /**
+     * Aplica rate limit por chave e por IP.
+     *
+     * @since 1.6.0
+     *
+     * @param string $api_key_hash Hash da chave recebida.
+     * @return true|WP_Error
+     */
+    private function enforce_api_rate_limits( $api_key_hash ) {
+        $key_limit = $this->sanitize_rate_limit_value( get_option( 'dps_registration_api_rate_key_per_hour', 60 ) );
+        $ip_limit  = $this->sanitize_rate_limit_value( get_option( 'dps_registration_api_rate_ip_per_hour', 20 ) );
+
+        $ip_hash   = $this->get_client_ip_hash();
+        $key_token = 'dps_reg_api_k_' . sha1( $api_key_hash );
+        $ip_token  = 'dps_reg_api_ip_' . sha1( $ip_hash );
+
+        if ( ! $this->bump_api_rate_counter( $key_token, $key_limit ) ) {
+            $this->log_event( 'warning', 'Rate limit excedido para chave da API', array(
+                'key_hash' => substr( sha1( $api_key_hash ), 0, 16 ),
+                'ip_hash'  => $ip_hash,
+            ) );
+
+            return new WP_Error( 'rate_limited', __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ), array( 'status' => 429 ) );
+        }
+
+        if ( ! $this->bump_api_rate_counter( $ip_token, $ip_limit ) ) {
+            $this->log_event( 'warning', 'Rate limit excedido para IP', array(
+                'key_hash' => substr( sha1( $api_key_hash ), 0, 16 ),
+                'ip_hash'  => $ip_hash,
+            ) );
+
+            return new WP_Error( 'rate_limited', __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ), array( 'status' => 429 ) );
+        }
+
+        return true;
+    }
+
+    /**
+     * Handler do endpoint REST de cadastro.
+     *
+     * @since 1.6.0
+     *
+     * @param WP_REST_Request $request Requisição JSON.
+     * @return WP_REST_Response|WP_Error
+     */
+    public function handle_rest_register( WP_REST_Request $request ) {
+        $api_key_hash = $this->get_request_api_key_hash( $request );
+
+        $rate_check = $this->enforce_api_rate_limits( $api_key_hash );
+        if ( is_wp_error( $rate_check ) ) {
+            return $rate_check;
+        }
+
+        $params = $request->get_json_params();
+        if ( empty( $params ) ) {
+            $params = $request->get_params();
+        }
+
+        $client_name  = $params['client_name'] ?? '';
+        $client_phone = $params['client_phone'] ?? '';
+        $client_email = array_key_exists( 'client_email', $params ) ? $params['client_email'] : '';
+        $client_cpf   = array_key_exists( 'client_cpf', $params ) ? $params['client_cpf'] : '';
+
+        $validation = $this->validate_api_client_data( $client_name, $client_phone, $client_email, $client_cpf );
+        if ( is_wp_error( $validation ) ) {
+            $this->log_event( 'warning', 'Cadastro via API rejeitado por validação', array(
+                'code'       => $validation->get_error_code(),
+                'ip_hash'    => $this->get_client_ip_hash(),
+                'email_hash' => $this->get_safe_hash( $client_email ),
+                'phone_hash' => $this->get_safe_hash( $client_phone ),
+            ) );
+
+            return $validation;
+        }
+
+        $client_id = wp_insert_post( array(
+            'post_type'   => 'dps_cliente',
+            'post_title'  => $validation['client_name'],
+            'post_status' => 'publish',
+        ) );
+
+        if ( ! $client_id || is_wp_error( $client_id ) ) {
+            $this->log_event( 'error', 'Falha ao criar cliente via API', array(
+                'ip_hash'  => $this->get_client_ip_hash(),
+                'key_hash' => substr( sha1( $api_key_hash ), 0, 16 ),
+            ) );
+
+            return new WP_Error( 'registration_failed', __( 'Não foi possível criar o cadastro no momento.', 'dps-registration-addon' ), array( 'status' => 500 ) );
+        }
+
+        update_post_meta( $client_id, 'client_cpf', $validation['client_cpf'] );
+        update_post_meta( $client_id, 'client_phone', $validation['client_phone'] );
+        update_post_meta( $client_id, 'client_email', $validation['client_email'] );
+        update_post_meta( $client_id, 'dps_email_confirmed', 0 );
+        update_post_meta( $client_id, 'dps_is_active', 0 );
+        update_post_meta( $client_id, 'dps_registration_source', 'api' );
+
+        if ( ! empty( $validation['client_email'] ) ) {
+            $this->send_confirmation_email( $client_id, $validation['client_email'] );
+        }
+
+        do_action( 'dps_registration_after_client_created', '', $client_id, $validation['client_email'], $validation['client_phone'] );
+
+        $pets_created = 0;
+        $pets_payload = array();
+        if ( isset( $params['pets'] ) && is_array( $params['pets'] ) ) {
+            $pets_payload = $params['pets'];
+        }
+
+        foreach ( $pets_payload as $pet_data ) {
+            if ( is_object( $pet_data ) ) {
+                $pet_data = (array) $pet_data;
+            }
+
+            $pet_name = sanitize_text_field( $pet_data['pet_name'] ?? '' );
+            if ( '' === $pet_name ) {
+                continue;
+            }
+
+            $pet_breed         = sanitize_text_field( $pet_data['pet_breed'] ?? '' );
+            $pet_size          = sanitize_text_field( $pet_data['pet_size'] ?? '' );
+            $pet_observations  = sanitize_textarea_field( $pet_data['pet_observations'] ?? '' );
+
+            $pet_id = wp_insert_post( array(
+                'post_type'   => 'dps_pet',
+                'post_title'  => $pet_name,
+                'post_status' => 'publish',
+            ) );
+
+            if ( $pet_id ) {
+                $pets_created++;
+                update_post_meta( $pet_id, 'owner_id', $client_id );
+                update_post_meta( $pet_id, 'pet_breed', $pet_breed );
+                update_post_meta( $pet_id, 'pet_size', $pet_size );
+                if ( '' !== $pet_observations ) {
+                    update_post_meta( $pet_id, 'pet_care', $pet_observations );
+                }
+            }
+        }
+
+        $this->send_admin_notification( $client_id, $validation['client_name'], $validation['client_phone'] );
+        $this->send_welcome_messages( $validation['client_phone'], $validation['client_email'], $validation['client_name'] );
+
+        $this->log_event( 'info', 'Cadastro criado via API', array(
+            'client_id'    => $client_id,
+            'pets_created' => $pets_created,
+            'ip_hash'      => $this->get_client_ip_hash(),
+            'email_hash'   => $this->get_safe_hash( $validation['client_email'] ),
+            'phone_hash'   => $this->get_safe_hash( $validation['client_phone'] ),
+        ) );
+
+        return rest_ensure_response( array(
+            'success'      => true,
+            'client_id'    => $client_id,
+            'pets_created' => $pets_created,
+        ) );
+    }
+
     /**
      * Registra as configurações utilizadas pelo plugin
      */
@@ -679,6 +1050,30 @@ class DPS_Registration_Addon {
             'type'              => 'string',
             'sanitize_callback' => 'wp_kses_post',
             'default'           => '',
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_api_enabled', [
+            'type'              => 'boolean',
+            'sanitize_callback' => [ $this, 'sanitize_checkbox' ],
+            'default'           => 0,
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_api_key_hash', [
+            'type'              => 'string',
+            'sanitize_callback' => [ $this, 'sanitize_api_key' ],
+            'default'           => '',
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_api_rate_key_per_hour', [
+            'type'              => 'number',
+            'sanitize_callback' => [ $this, 'sanitize_rate_limit_value' ],
+            'default'           => 60,
+        ] );
+
+        register_setting( 'dps_registration_settings', 'dps_registration_api_rate_ip_per_hour', [
+            'type'              => 'number',
+            'sanitize_callback' => [ $this, 'sanitize_rate_limit_value' ],
+            'default'           => 20,
         ] );
     }
 
@@ -750,6 +1145,9 @@ class DPS_Registration_Addon {
         $recaptcha_threshold  = get_option( 'dps_registration_recaptcha_threshold', 0.5 );
         $email_subject        = get_option( 'dps_registration_confirm_email_subject', '' );
         $email_body           = get_option( 'dps_registration_confirm_email_body', '' );
+        $api_enabled          = (bool) get_option( 'dps_registration_api_enabled', 0 );
+        $rate_key_limit       = get_option( 'dps_registration_api_rate_key_per_hour', 60 );
+        $rate_ip_limit        = get_option( 'dps_registration_api_rate_ip_per_hour', 20 );
         echo '<table class="form-table">';
         echo '<tr><th scope="row"><label for="dps_google_api_key">' . esc_html__( 'Google Maps API Key', 'dps-registration-addon' ) . '</label></th>';
         echo '<td><input type="text" id="dps_google_api_key" name="dps_google_api_key" value="' . esc_attr( $api_key ) . '" class="regular-text"></td></tr>';
@@ -775,6 +1173,43 @@ class DPS_Registration_Addon {
         echo '<td><textarea id="dps_registration_confirm_email_body" name="dps_registration_confirm_email_body" rows="6" class="large-text code">' . esc_textarea( $email_body ) . '</textarea>';
         echo '<p class="description">' . esc_html__( 'Suporta HTML básico e os placeholders {client_name}, {confirm_url}, {registration_url}, {portal_url}, {business_name}. Deixe vazio para usar o modelo padrão.', 'dps-registration-addon' ) . '</p></td></tr>';
         echo '</table>';
+
+        echo '<h2>' . esc_html__( 'API de Cadastro (Fase 4)', 'dps-registration-addon' ) . '</h2>';
+        echo '<table class="form-table">';
+        echo '<tr><th scope="row">' . esc_html__( 'Ativar API', 'dps-registration-addon' ) . '</th>';
+        echo '<td><label><input type="checkbox" name="dps_registration_api_enabled" value="1" ' . checked( $api_enabled, true, false ) . '> ' . esc_html__( 'Habilitar endpoint protegido para cadastros via API', 'dps-registration-addon' ) . '</label></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_api_key_hash">' . esc_html__( 'API Key', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="text" id="dps_registration_api_key_hash" name="dps_registration_api_key_hash" value="" class="regular-text" autocomplete="off"> ';
+        echo '<button type="button" class="button" id="dps_registration_generate_api_key">' . esc_html__( 'Gerar chave', 'dps-registration-addon' ) . '</button>';
+        echo '<p class="description">' . esc_html__( 'A chave será mostrada apenas uma vez. Insira ou gere uma nova chave para substituir a atual.', 'dps-registration-addon' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'O valor salvo será armazenado apenas como hash (sha256). Deixe em branco para manter a chave atual.', 'dps-registration-addon' ) . '</p></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_api_rate_key_per_hour">' . esc_html__( 'Limite por chave/hora', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="number" id="dps_registration_api_rate_key_per_hour" name="dps_registration_api_rate_key_per_hour" value="' . esc_attr( $rate_key_limit ) . '" min="1" step="1">';
+        echo '<p class="description">' . esc_html__( 'Número máximo de requisições por chave em 1 hora.', 'dps-registration-addon' ) . '</p></td></tr>';
+
+        echo '<tr><th scope="row"><label for="dps_registration_api_rate_ip_per_hour">' . esc_html__( 'Limite por IP/hora', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><input type="number" id="dps_registration_api_rate_ip_per_hour" name="dps_registration_api_rate_ip_per_hour" value="' . esc_attr( $rate_ip_limit ) . '" min="1" step="1">';
+        echo '<p class="description">' . esc_html__( 'Número máximo de requisições por IP em 1 hora.', 'dps-registration-addon' ) . '</p></td></tr>';
+        echo '</table>';
+
+        echo '<script type="text/javascript">(function(){
+            const btn = document.getElementById("dps_registration_generate_api_key");
+            const input = document.getElementById("dps_registration_api_key_hash");
+            if(btn && input){
+                btn.addEventListener("click", function(){
+                    const cryptoObj = window.crypto || window.msCrypto;
+                    if(!cryptoObj || !cryptoObj.getRandomValues){
+                        input.value = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                        return;
+                    }
+                    const randomKey = Array.from(cryptoObj.getRandomValues(new Uint32Array(8)), function(v){ return v.toString(16); }).join("");
+                    input.value = randomKey;
+                });
+            }
+        })();</script>';
+
         submit_button();
         echo '</form>';
         echo '</div>';
