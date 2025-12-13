@@ -806,6 +806,19 @@ class DPS_Groomers_Addon {
     }
 
     /**
+     * Valida se um tipo de profissional é válido.
+     *
+     * @since 1.5.0
+     *
+     * @param string $type Tipo a validar.
+     * @return string Tipo validado ou 'groomer' como fallback.
+     */
+    public static function validate_staff_type( $type ) {
+        $valid_types = array_keys( self::get_staff_types() );
+        return in_array( $type, $valid_types, true ) ? $type : 'groomer';
+    }
+
+    /**
      * Registra e enfileira assets no frontend (shortcode [dps_base]).
      *
      * @since 1.1.0
@@ -1111,12 +1124,9 @@ class DPS_Groomers_Addon {
             update_user_meta( $groomer_id, '_dps_groomer_phone', $phone );
             update_user_meta( $groomer_id, '_dps_groomer_commission_rate', $commission );
             
-            // Atualizar staff_type se fornecido
+            // Atualizar staff_type se fornecido, usando método centralizado
             if ( $staff_type ) {
-                $valid_types = array_keys( self::get_staff_types() );
-                if ( in_array( $staff_type, $valid_types, true ) ) {
-                    update_user_meta( $groomer_id, '_dps_staff_type', $staff_type );
-                }
+                update_user_meta( $groomer_id, '_dps_staff_type', self::validate_staff_type( $staff_type ) );
             }
             
             // Atualizar is_freelancer
@@ -1400,19 +1410,16 @@ class DPS_Groomers_Addon {
         $staff_type = isset( $_POST['dps_staff_type'] ) ? sanitize_key( wp_unslash( $_POST['dps_staff_type'] ) ) : 'groomer';
         $is_freelancer = isset( $_POST['dps_is_freelancer'] ) ? '1' : '0';
         
-        // Validar staff_type
-        $valid_types = array_keys( self::get_staff_types() );
-        if ( ! in_array( $staff_type, $valid_types, true ) ) {
-            $staff_type = 'groomer';
-        }
+        // Validar staff_type usando método centralizado
+        $staff_type = self::validate_staff_type( $staff_type );
         
-        update_user_meta( $user_id, '_dps_groomer_status', 'active' ); // Novo groomer sempre começa ativo
+        update_user_meta( $user_id, '_dps_groomer_status', 'active' ); // Novo profissional sempre começa ativo
         update_user_meta( $user_id, '_dps_groomer_phone', $phone );
         update_user_meta( $user_id, '_dps_groomer_commission_rate', $commission );
         update_user_meta( $user_id, '_dps_staff_type', $staff_type );
         update_user_meta( $user_id, '_dps_is_freelancer', $is_freelancer );
 
-        $message = __( 'Groomer criado com sucesso.', 'dps-groomers-addon' );
+        $message = __( 'Profissional criado com sucesso.', 'dps-groomers-addon' );
         if ( $use_frontend_messages ) {
             DPS_Message_Helper::add_success( $message );
         } elseif ( function_exists( 'add_settings_error' ) ) {
@@ -1742,7 +1749,9 @@ class DPS_Groomers_Addon {
                     </div>
                     
                     <?php 
-                    // Aplicar filtros à lista de groomers
+                    // Aplicar filtros à lista de groomers em PHP.
+                    // Para datasets típicos (<100 profissionais) isso é suficiente.
+                    // Se performance se tornar um problema, mover para meta_query com user_meta.
                     $filtered_groomers = $groomers;
                     if ( $filter_type || $filter_freelancer !== '' || $filter_status ) {
                         $filtered_groomers = array_filter( $groomers, function( $groomer ) use ( $filter_type, $filter_freelancer, $filter_status ) {
