@@ -62,7 +62,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.5.0';
+    const VERSION = '1.6.0';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -102,6 +102,9 @@ class DPS_Groomers_Addon {
         
         // Migração de dados para novos campos (staff_type, is_freelancer)
         add_action( 'init', [ $this, 'maybe_migrate_staff_data' ], 2 );
+        
+        // FASE 3: Hook para gerar comissão automática quando pagamento é confirmado
+        add_action( 'dps_finance_booking_paid', [ $this, 'generate_staff_commission' ], 10, 3 );
         
         // Shortcode do dashboard do groomer
         add_shortcode( 'dps_groomer_dashboard', [ $this, 'render_groomer_dashboard_shortcode' ] );
@@ -816,6 +819,107 @@ class DPS_Groomers_Addon {
     public static function validate_staff_type( $type ) {
         $valid_types = array_keys( self::get_staff_types() );
         return in_array( $type, $valid_types, true ) ? $type : 'groomer';
+    }
+
+    /**
+     * Gera comissão automática para profissionais ao confirmar pagamento.
+     *
+     * Hook conectado a dps_finance_booking_paid. Quando um pagamento é confirmado,
+     * calcula e registra a comissão de cada profissional vinculado ao atendimento.
+     *
+     * @since 1.6.0
+     *
+     * @param int $charge_id    ID da transação/cobrança.
+     * @param int $client_id    ID do cliente.
+     * @param int $value_cents  Valor pago em centavos.
+     */
+    public function generate_staff_commission( $charge_id, $client_id, $value_cents ) {
+        // Busca o agendamento associado à cobrança
+        global $wpdb;
+        $table = $wpdb->prefix . 'dps_transacoes';
+        
+        $transaction = $wpdb->get_row( $wpdb->prepare(
+            "SELECT agendamento_id FROM {$table} WHERE id = %d",
+            absint( $charge_id )
+        ) );
+        
+        if ( ! $transaction || ! $transaction->agendamento_id ) {
+            return;
+        }
+        
+        $appointment_id = absint( $transaction->agendamento_id );
+        
+        // Busca profissionais vinculados ao atendimento
+        $staff_ids = get_post_meta( $appointment_id, '_dps_groomers', true );
+        if ( ! is_array( $staff_ids ) || empty( $staff_ids ) ) {
+            return;
+        }
+        
+        // Verifica se já foi gerada comissão para este atendimento
+        $commission_generated = get_post_meta( $appointment_id, '_dps_commission_generated', true );
+        if ( $commission_generated ) {
+            return;
+        }
+        
+        // Calcula valor base em reais
+        $total_value = $value_cents / 100;
+        
+        // Divide proporcionalmente entre os profissionais
+        $staff_count = count( $staff_ids );
+        $value_per_staff = $total_value / $staff_count;
+        
+        $commissions_data = [];
+        
+        foreach ( $staff_ids as $staff_id ) {
+            $staff_id = absint( $staff_id );
+            
+            // Busca dados do profissional
+            $user = get_user_by( 'id', $staff_id );
+            if ( ! $user || ! in_array( 'dps_groomer', (array) $user->roles, true ) ) {
+                continue;
+            }
+            
+            $commission_rate = (float) get_user_meta( $staff_id, '_dps_groomer_commission_rate', true );
+            $is_freelancer = get_user_meta( $staff_id, '_dps_is_freelancer', true );
+            $staff_type = get_user_meta( $staff_id, '_dps_staff_type', true ) ?: 'groomer';
+            
+            if ( $commission_rate <= 0 ) {
+                continue;
+            }
+            
+            // Calcula valor da comissão
+            $commission_value = $value_per_staff * ( $commission_rate / 100 );
+            
+            // Armazena dados da comissão
+            $commissions_data[] = [
+                'staff_id'        => $staff_id,
+                'staff_name'      => $user->display_name ?: $user->user_login,
+                'staff_type'      => $staff_type,
+                'is_freelancer'   => $is_freelancer === '1',
+                'base_value'      => $value_per_staff,
+                'commission_rate' => $commission_rate,
+                'commission_value'=> round( $commission_value, 2 ),
+                'date'            => current_time( 'Y-m-d H:i:s' ),
+            ];
+        }
+        
+        if ( ! empty( $commissions_data ) ) {
+            // Salva registro de comissões no agendamento
+            update_post_meta( $appointment_id, '_dps_staff_commissions', $commissions_data );
+            update_post_meta( $appointment_id, '_dps_commission_generated', true );
+            update_post_meta( $appointment_id, '_dps_commission_date', current_time( 'Y-m-d H:i:s' ) );
+            
+            /**
+             * Disparado após gerar comissões de profissionais.
+             *
+             * @since 1.6.0
+             *
+             * @param int   $appointment_id   ID do agendamento.
+             * @param array $commissions_data Dados das comissões geradas.
+             * @param int   $value_cents      Valor total pago em centavos.
+             */
+            do_action( 'dps_groomers_commission_generated', $appointment_id, $commissions_data, $value_cents );
+        }
     }
 
     /**

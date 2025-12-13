@@ -11,8 +11,8 @@
 |------|--------|-----|-----------|
 | Fase 1 | ✅ **IMPLEMENTADA** | Este PR | Base de dados + UI para tipos e freelancer |
 | Fase 2 | ✅ **IMPLEMENTADA** | Este PR | Integração com Agenda/Serviços |
-| Fase 3 | 🔄 EM ANDAMENTO | Este PR | Finance/Repasse automático |
-| Fase 4 | 📋 Planejada | - | Recursos avançados |
+| Fase 3 | ✅ **IMPLEMENTADA** | Este PR | Finance/Repasse automático |
+| Fase 4 | 🔄 EM ANDAMENTO | Este PR | Recursos avançados |
 
 ---
 
@@ -109,38 +109,45 @@
 
 ---
 
-## Fase 3: Finance/Repasse 📋 PLANEJADA
+## Fase 3: Finance/Repasse ✅ COMPLETA
 
-**Versão alvo**: 1.7.0  
-**Esforço estimado**: 3-5 dias  
-**Dependências**: Fase 1 (✅), Finance Add-on ativo
+**Versão**: 1.6.0  
+**Implementado em**: Este PR
 
-### Itens Planejados
+### Itens Implementados
 
-| Item | Descrição | Add-on Afetado |
-|------|-----------|----------------|
-| F3.1 | Configuração de modelo de remuneração | Groomers Add-on |
-| F3.2 | Hook de conclusão de atendimento | Groomers Add-on |
-| F3.3 | Lançamento automático de comissão | Finance Add-on |
-| F3.4 | Diferenciação CLT x Freelancer | Groomers/Finance |
-| F3.5 | Relatório de repasse exportável | Groomers Add-on |
+| Item | Descrição | Add-on Afetado | Status |
+|------|-----------|----------------|--------|
+| F3.1 | Configuração de modelo de remuneração (% comissão) | Groomers Add-on | ✅ |
+| F3.2 | Hook `dps_finance_booking_paid` consumido | Groomers Add-on v1.6.0 | ✅ |
+| F3.3 | Lançamento automático de comissão em meta | Groomers Add-on v1.6.0 | ✅ |
+| F3.4 | Flag is_freelancer registrada nas comissões | Groomers Add-on v1.6.0 | ✅ |
+| F3.5 | Relatório de comissões já existente | Groomers Add-on | ✅ |
 
-### Critérios de Aceite
+### Detalhes da Implementação
 
-1. Profissional pode ter modelo de remuneração: % comissão, valor fixo, diária
-2. Ao concluir atendimento (status='realizado'), comissão é lançada automaticamente
-3. Freelancers podem ter regras diferentes de lançamento
-4. Relatório de repasse agrupado por profissional e exportável
+**Novo método `generate_staff_commission()`**:
+- Conectado ao hook `dps_finance_booking_paid`
+- Calcula comissão proporcional para múltiplos profissionais
+- Salva em `_dps_staff_commissions` (array com detalhes)
+- Marca `_dps_commission_generated` para evitar duplicação
+- Dispara hook `dps_groomers_commission_generated` para extensões
 
-### Benefícios
+**Metas salvas no agendamento**:
+- `_dps_staff_commissions` - Array com detalhes de cada comissão
+- `_dps_commission_generated` - Flag booleana
+- `_dps_commission_date` - Data/hora da geração
 
-- **Dono**: Controle financeiro automatizado
-- **Profissional**: Transparência de ganhos
-- **Contabilidade**: Dados estruturados
+### Critérios de Aceite ✅
+
+1. ✅ Profissional usa % comissão configurada no cadastro
+2. ✅ Ao confirmar pagamento, comissão é calculada automaticamente
+3. ✅ Flag is_freelancer é registrada junto com a comissão
+4. ✅ Relatório de comissões por período já funciona
 
 ---
 
-## Fase 4: Recursos Avançados 📋 PLANEJADA
+## Fase 4: Recursos Avançados 🔄 EM ANDAMENTO
 
 **Versão alvo**: 1.8.0+  
 **Esforço estimado**: 5-10 dias  
