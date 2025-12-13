@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.1.0
+ * Version:           1.4.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.1.0' );
+define( 'DPS_STATS_VERSION', '1.4.0' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -42,6 +42,7 @@ add_action( 'plugins_loaded', function() {
         return;
     }
     require_once DPS_STATS_PLUGIN_DIR . 'includes/class-dps-stats-api.php';
+    require_once DPS_STATS_PLUGIN_DIR . 'includes/class-dps-stats-cache-invalidator.php';
 }, 1 );
 
 function dps_stats_load_textdomain() {
@@ -53,7 +54,33 @@ if ( ! function_exists( 'dps_stats_build_cache_key' ) ) {
     function dps_stats_build_cache_key( $prefix, $start_date, $end_date = '' ) {
         $start_key = preg_replace( '/[^0-9]/', '', $start_date );
         $end_key   = $end_date ? preg_replace( '/[^0-9]/', '', $end_date ) : '';
-        return $end_key ? sprintf( '%s_%s_%s', $prefix, $start_key, $end_key ) : sprintf( '%s_%s', $prefix, $start_key );
+        
+        // F2.3: Incluir versão do cache para invalidação eficiente
+        $version = get_option( 'dps_stats_cache_version', 1 );
+        
+        if ( $end_key ) {
+            return sprintf( '%s_v%d_%s_%s', $prefix, $version, $start_key, $end_key );
+        }
+        return sprintf( '%s_v%d_%s', $prefix, $version, $start_key );
+    }
+}
+
+if ( ! function_exists( 'dps_stats_table_exists' ) ) {
+    /**
+     * Verifica se a tabela dps_transacoes existe.
+     *
+     * @return bool True se a tabela existe, false caso contrário.
+     *
+     * @since 1.2.0
+     */
+    function dps_stats_table_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like( $table_name )
+        ) );
+        return $table_exists === $table_name;
     }
 }
 
@@ -74,29 +101,8 @@ if ( ! function_exists( 'dps_get_total_revenue' ) ) {
         if ( class_exists( 'DPS_Stats_API' ) ) {
             return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
         }
-        global $wpdb;
-        $start_date = sanitize_text_field( $start_date );
-        $end_date   = sanitize_text_field( $end_date );
-        $cache_key = dps_stats_build_cache_key( 'dps_stats_total_revenue', $start_date, $end_date );
-        
-        // Verifica cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
-            if ( false !== $cached ) return (float) $cached;
-        }
-        
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $total = (float) $wpdb->get_var( $wpdb->prepare(
-            "SELECT SUM(valor) FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' AND tipo = 'receita'",
-            $start_date, $end_date
-        ) );
-        
-        // Armazena cache apenas se não estiver desabilitado
-        if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $total, HOUR_IN_SECONDS );
-        }
-        
-        return $total;
+        // Delega para API que tem validação de tabela
+        return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
     }
 }
 
@@ -131,13 +137,52 @@ class DPS_Stats_Addon {
 
     public function register_assets() {
         wp_register_style( 'dps-stats-addon', DPS_STATS_PLUGIN_URL . 'assets/css/stats-addon.css', [], DPS_STATS_VERSION );
+        
+        // F2.2: Registrar Chart.js CDN e fallback local
         wp_register_script( 'chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true );
+        wp_register_script( 'chartjs-fallback', DPS_STATS_PLUGIN_URL . 'assets/js/chart.min.js', [], '4.4.0', true );
+        
         wp_register_script( 'dps-stats-addon', DPS_STATS_PLUGIN_URL . 'assets/js/stats-addon.js', [ 'chartjs' ], DPS_STATS_VERSION, true );
     }
 
     private function enqueue_assets() {
         wp_enqueue_style( 'dps-stats-addon' );
         wp_enqueue_script( 'chartjs' );
+        
+        // F2.2: Adicionar fallback inline para Chart.js
+        $fallback_script = "
+        (function() {
+            function checkChartJS() {
+                if (typeof Chart === 'undefined' || !window.Chart) {
+                    console.warn('Chart.js CDN failed, loading local fallback...');
+                    var script = document.createElement('script');
+                    script.src = '" . esc_url( DPS_STATS_PLUGIN_URL . 'assets/js/chart.min.js' ) . "';
+                    script.onload = function() {
+                        console.log('Chart.js fallback loaded successfully');
+                        if (typeof dpsStatsInit === 'function') {
+                            dpsStatsInit();
+                        }
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    // Chart.js loaded from CDN
+                    if (typeof dpsStatsInit === 'function') {
+                        dpsStatsInit();
+                    }
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(checkChartJS, 100);
+                });
+            } else {
+                setTimeout(checkChartJS, 100);
+            }
+        })();
+        ";
+        wp_add_inline_script( 'chartjs', $fallback_script, 'after' );
+        
         wp_enqueue_script( 'dps-stats-addon' );
     }
 
@@ -164,6 +209,13 @@ class DPS_Stats_Addon {
         $new_clients   = DPS_Stats_API::get_new_clients_count( $start_date, $end_date );
         $cancel_rate   = DPS_Stats_API::get_cancellation_rate( $start_date, $end_date );
         $subs_data     = $this->get_subscription_metrics( $start_date, $end_date );
+        
+        // F3.1: Novos KPIs
+        $return_rate       = DPS_Stats_API::get_return_rate( $start_date, $end_date, 30 );
+        $no_show_rate      = DPS_Stats_API::get_no_show_rate( $start_date, $end_date );
+        $overdue_revenue   = DPS_Stats_API::get_overdue_revenue( $start_date, $end_date );
+        $conversion_rate   = DPS_Stats_API::get_conversion_rate( $start_date, $end_date, 30 );
+        $recurring_clients = DPS_Stats_API::get_recurring_clients( $start_date, $end_date );
 
         ob_start();
         ?>
@@ -171,6 +223,9 @@ class DPS_Stats_Addon {
             <h3><?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?></h3>
             <?php $this->render_date_filter( $start_date, $end_date ); ?>
             <?php $this->render_metric_cards( $comparison, $new_clients, $cancel_rate ); ?>
+            
+            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #374151; font-size: 18px; font-weight: 600;"><?php esc_html_e( 'Indicadores Avançados', 'dps-stats-addon' ); ?></h4>
+            <?php $this->render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ); ?>
             
             <details class="dps-stats-section" open>
                 <summary><span class="dps-stats-section__icon">📊</span> <?php esc_html_e( 'Métricas Financeiras', 'dps-stats-addon' ); ?></summary>
@@ -263,10 +318,126 @@ class DPS_Stats_Addon {
         <?php
     }
 
+    /**
+     * F3.1: Renderiza cards de KPIs avançados com tooltips.
+     *
+     * @param array $return_rate Taxa de retorno.
+     * @param array $no_show_rate Taxa de no-show.
+     * @param array $overdue_revenue Inadimplência.
+     * @param array $conversion_rate Taxa de conversão.
+     * @param array $recurring_clients Clientes recorrentes.
+     *
+     * @since 1.4.0
+     */
+    private function render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ) {
+        ?>
+        <div class="dps-stats-cards">
+            <?php
+            // Taxa de Retorno
+            $this->render_card_with_tooltip(
+                '🔄',
+                $return_rate['value'] . $return_rate['unit'],
+                __( 'Taxa de Retorno (30d)', 'dps-stats-addon' ),
+                $return_rate['note'],
+                'primary'
+            );
+            
+            // No-Show
+            $this->render_card_with_tooltip(
+                '👻',
+                $no_show_rate['value'] . $no_show_rate['unit'],
+                __( 'No-Show', 'dps-stats-addon' ),
+                $no_show_rate['note'],
+                $no_show_rate['value'] > 5 ? 'warning' : 'primary'
+            );
+            
+            // Inadimplência
+            $overdue_display = $overdue_revenue['value'] > 0
+                ? 'R$ ' . number_format( $overdue_revenue['value'], 2, ',', '.' )
+                : 'R$ 0,00';
+            $this->render_card_with_tooltip(
+                '⚠️',
+                $overdue_display,
+                __( 'Inadimplência', 'dps-stats-addon' ),
+                $overdue_revenue['note'],
+                $overdue_revenue['value'] > 0 ? 'danger' : 'success'
+            );
+            
+            // Taxa de Conversão
+            $this->render_card_with_tooltip(
+                '✨',
+                $conversion_rate['value'] . $conversion_rate['unit'],
+                __( 'Conversão (30d)', 'dps-stats-addon' ),
+                $conversion_rate['note'],
+                'success'
+            );
+            
+            // Clientes Recorrentes
+            $this->render_card_with_tooltip(
+                '🔁',
+                $recurring_clients['value'],
+                __( 'Clientes Recorrentes', 'dps-stats-addon' ),
+                $recurring_clients['note'],
+                'primary'
+            );
+            ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * F3.1: Renderiza card com tooltip explicativo.
+     *
+     * @param string      $icon    Emoji/ícone.
+     * @param string      $value   Valor principal.
+     * @param string      $label   Label do card.
+     * @param string      $tooltip Texto do tooltip (definição).
+     * @param string      $type    Tipo do card (primary/success/warning/danger).
+     * @param float|null  $variation Variação vs período anterior (opcional).
+     *
+     * @since 1.4.0
+     */
+    private function render_card_with_tooltip( $icon, $value, $label, $tooltip, $type = 'primary', $variation = null ) {
+        $trend_class = '';
+        if ( $variation !== null ) {
+            $trend_class = $variation > 0 ? 'dps-stats-card__trend--up' : ( $variation < 0 ? 'dps-stats-card__trend--down' : 'dps-stats-card__trend--neutral' );
+        }
+        ?>
+        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" title="<?php echo esc_attr( $tooltip ); ?>">
+            <span class="dps-stats-card__icon"><?php echo esc_html( $icon ); ?></span>
+            <span class="dps-stats-card__value"><?php echo esc_html( $value ); ?></span>
+            <span class="dps-stats-card__label">
+                <?php echo esc_html( $label ); ?>
+                <span class="dps-stats-card__info" title="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
+            </span>
+            <?php if ( $variation !== null ) : ?>
+                <span class="dps-stats-card__trend <?php echo esc_attr( $trend_class ); ?>"><?php echo $variation >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation, 1 ) ); ?>%</span>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
     private function render_financial_metrics( $comparison ) {
         $current = $comparison['current'];
         $previous = $comparison['previous'];
         $variation = $comparison['variation'];
+        
+        // F1.1: Verificar se Finance está ativo
+        $finance_inactive = isset( $current['error'] ) && $current['error'] === 'finance_not_active';
+        
+        if ( $finance_inactive ) {
+            ?>
+            <div style="padding: 16px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 16px;">
+                <p style="margin: 0; color: #92400e; font-weight: 500;">
+                    ⚠️ <?php esc_html_e( 'Finance Add-on não está ativo.', 'dps-stats-addon' ); ?>
+                </p>
+                <p style="margin: 8px 0 0; color: #92400e; font-size: 13px;">
+                    <?php esc_html_e( 'Ative o Finance Add-on para visualizar métricas financeiras (receita, despesas, lucro).', 'dps-stats-addon' ); ?>
+                </p>
+            </div>
+            <?php
+            return;
+        }
         ?>
         <div class="dps-stats-metrics-list">
             <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['revenue'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Receita Total', 'dps-stats-addon' ); ?></span></div>
@@ -281,15 +452,56 @@ class DPS_Stats_Addon {
 
     private function get_subscription_metrics( $start_date, $end_date ) {
         global $wpdb;
-        $table = $wpdb->prefix . 'dps_transacoes';
-        $subscriptions = get_posts( [ 'post_type' => 'dps_subscription', 'posts_per_page' => -1, 'post_status' => 'publish' ] );
-        $paid_count = 0; $pending_count = 0;
+        
+        // F1.3: Filtrar assinaturas por período
+        $subscriptions = get_posts( [
+            'post_type'      => 'dps_subscription',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'date_query'     => [
+                [
+                    'after'     => $start_date,
+                    'before'    => $end_date . ' 23:59:59',
+                    'inclusive' => true,
+                ],
+            ],
+        ] );
+        
+        $paid_count = 0;
+        $pending_count = 0;
         foreach ( $subscriptions as $sub ) {
-            if ( 'pago' === get_post_meta( $sub->ID, 'subscription_payment_status', true ) ) $paid_count++; else $pending_count++;
+            if ( 'pago' === get_post_meta( $sub->ID, 'subscription_payment_status', true ) ) {
+                $paid_count++;
+            } else {
+                $pending_count++;
+            }
         }
-        $revenue = (float) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND data >= %s AND data <= %s AND status = 'pago'", $start_date, $end_date ) );
-        $open_value = (float) $wpdb->get_var( "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND status != 'pago'" );
-        return [ 'total' => count( $subscriptions ), 'paid' => $paid_count, 'pending' => $pending_count, 'revenue' => $revenue ?: 0, 'open_value' => $open_value ?: 0 ];
+        
+        // F1.1: Validar existência da tabela antes de consultar
+        $revenue = 0;
+        $open_value = 0;
+        
+        if ( dps_stats_table_exists() ) {
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $revenue = (float) $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND data >= %s AND data <= %s AND status = 'pago'",
+                $start_date,
+                $end_date
+            ) );
+            $open_value = (float) $wpdb->get_var( $wpdb->prepare(
+                "SELECT SUM(valor) FROM {$table} WHERE plano_id IS NOT NULL AND status != 'pago' AND data >= %s AND data <= %s",
+                $start_date,
+                $end_date
+            ) );
+        }
+        
+        return [
+            'total'      => count( $subscriptions ),
+            'paid'       => $paid_count,
+            'pending'    => $pending_count,
+            'revenue'    => $revenue ?: 0,
+            'open_value' => $open_value ?: 0,
+        ];
     }
 
     private function render_subscription_metrics( $data ) {

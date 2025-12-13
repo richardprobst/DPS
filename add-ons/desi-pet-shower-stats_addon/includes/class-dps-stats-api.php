@@ -30,6 +30,79 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Stats_API {
 
     /**
+     * Verifica se a tabela dps_transacoes existe.
+     *
+     * @return bool True se a tabela existe, false caso contrário.
+     *
+     * @since 1.2.0
+     */
+    private static function table_dps_transacoes_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like( $table_name )
+        ) );
+        return $table_exists === $table_name;
+    }
+
+    /**
+     * F2.3: Obtém valor do cache (object cache ou transient).
+     *
+     * @param string $key Chave do cache.
+     *
+     * @return mixed|false Valor do cache ou false se não encontrado.
+     *
+     * @since 1.3.0
+     */
+    private static function cache_get( $key ) {
+        if ( wp_using_ext_object_cache() ) {
+            return wp_cache_get( $key, 'dps_stats' );
+        }
+        return get_transient( $key );
+    }
+
+    /**
+     * F2.3: Armazena valor no cache (object cache ou transient).
+     *
+     * @param string $key   Chave do cache.
+     * @param mixed  $value Valor a armazenar.
+     * @param int    $ttl   Time to live em segundos.
+     *
+     * @return bool True se armazenado com sucesso.
+     *
+     * @since 1.3.0
+     */
+    private static function cache_set( $key, $value, $ttl ) {
+        if ( wp_using_ext_object_cache() ) {
+            return wp_cache_set( $key, $value, 'dps_stats', $ttl );
+        }
+        return set_transient( $key, $value, $ttl );
+    }
+
+    /**
+     * F2.3: Obtém versão do cache para invalidação.
+     *
+     * @return int Versão atual do cache.
+     *
+     * @since 1.3.0
+     */
+    private static function get_cache_version() {
+        $version = get_option( 'dps_stats_cache_version', 1 );
+        return (int) $version;
+    }
+
+    /**
+     * F2.3: Incrementa versão do cache (invalida todo cache).
+     *
+     * @since 1.3.0
+     */
+    public static function bump_cache_version() {
+        $current = self::get_cache_version();
+        update_option( 'dps_stats_cache_version', $current + 1, false );
+    }
+
+    /**
      * Obtém contagem de atendimentos no período.
      *
      * @param string $start_date Data inicial (Y-m-d).
@@ -145,22 +218,30 @@ class DPS_Stats_API {
                 'expenses' => isset( $totals['paid_expenses'] ) ? (float) $totals['paid_expenses'] : 0,
             ];
         } else {
-            // Fallback para SQL direto
-            global $wpdb;
-            $table   = $wpdb->prefix . 'dps_transacoes';
-            $results = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT tipo, SUM(valor) AS total FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' GROUP BY tipo",
-                    $start_date,
-                    $end_date
-                ),
-                OBJECT_K
-            );
+            // Fallback para SQL direto - verifica existência da tabela
+            if ( ! self::table_dps_transacoes_exists() ) {
+                $result = [
+                    'revenue'  => 0,
+                    'expenses' => 0,
+                    'error'    => 'finance_not_active',
+                ];
+            } else {
+                global $wpdb;
+                $table   = $wpdb->prefix . 'dps_transacoes';
+                $results = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT tipo, SUM(valor) AS total FROM {$table} WHERE data >= %s AND data <= %s AND status = 'pago' GROUP BY tipo",
+                        $start_date,
+                        $end_date
+                    ),
+                    OBJECT_K
+                );
 
-            $result = [
-                'revenue'  => isset( $results['receita'] ) ? (float) $results['receita']->total : 0,
-                'expenses' => isset( $results['despesa'] ) ? (float) $results['despesa']->total : 0,
-            ];
+                $result = [
+                    'revenue'  => isset( $results['receita'] ) ? (float) $results['receita']->total : 0,
+                    'expenses' => isset( $results['despesa'] ) ? (float) $results['despesa']->total : 0,
+                ];
+            }
         }
 
         // Armazena cache apenas se não estiver desabilitado
@@ -277,35 +358,49 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_top_services( $start_date, $end_date, $limit = 5 ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_services', $start_date, $end_date ) . '_' . $limit;
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
+        // F2.1: Query SQL com GROUP BY para performance
+        // Meta appointment_services pode ser serializado (array), então precisamos JOIN múltiplo
+        // ou processar em PHP. Como appointment_services é array, mantemos loop mas otimizado.
+        
+        // Query 1: Buscar todos os appointments do período (apenas IDs e meta de serviços)
+        $sql = $wpdb->prepare(
+            "SELECT p.ID, pm_services.meta_value as services
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             LEFT JOIN {$wpdb->postmeta} pm_services ON p.ID = pm_services.post_id AND pm_services.meta_key = 'appointment_services'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $appointments = $wpdb->get_results( $sql );
+        
         $service_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $service_ids = get_post_meta( $appt_id, 'appointment_services', true );
+        foreach ( $appointments as $appt ) {
+            if ( empty( $appt->services ) ) {
+                continue;
+            }
+            
+            // Deserializar array de serviços
+            $service_ids = maybe_unserialize( $appt->services );
             if ( is_array( $service_ids ) ) {
                 foreach ( $service_ids as $sid ) {
                     $service_counts[ $sid ] = ( $service_counts[ $sid ] ?? 0 ) + 1;
@@ -328,9 +423,9 @@ class DPS_Stats_API {
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
@@ -528,45 +623,51 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_species_distribution( $start_date, $end_date ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_species', $start_date, $end_date );
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
+        // F2.1: Query SQL com GROUP BY para performance
+        $sql = $wpdb->prepare(
+            "SELECT pm_species.meta_value as species, COUNT(*) as count
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_pet ON p.ID = pm_pet.post_id AND pm_pet.meta_key = 'appointment_pet_id'
+             INNER JOIN {$wpdb->postmeta} pm_species ON pm_pet.meta_value = pm_species.post_id AND pm_species.meta_key = 'pet_species'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+             GROUP BY pm_species.meta_value
+             ORDER BY count DESC",
+            $start_date,
+            $end_date
+        );
+        
+        $species_data = $wpdb->get_results( $sql );
+        
+        // Mapear espécies para labels traduzidos
         $species_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            if ( $pet_id ) {
-                $species = get_post_meta( $pet_id, 'pet_species', true );
-                if ( $species === 'cao' ) {
-                    $species_label = __( 'Cachorro', 'dps-stats-addon' );
-                } elseif ( $species === 'gato' ) {
-                    $species_label = __( 'Gato', 'dps-stats-addon' );
-                } else {
-                    $species_label = __( 'Outro', 'dps-stats-addon' );
-                }
-                $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + 1;
+        foreach ( $species_data as $row ) {
+            $species = $row->species;
+            if ( $species === 'cao' ) {
+                $species_label = __( 'Cachorro', 'dps-stats-addon' );
+            } elseif ( $species === 'gato' ) {
+                $species_label = __( 'Gato', 'dps-stats-addon' );
+            } else {
+                $species_label = __( 'Outro', 'dps-stats-addon' );
             }
+            $species_counts[ $species_label ] = ( $species_counts[ $species_label ] ?? 0 ) + (int) $row->count;
         }
 
         arsort( $species_counts );
@@ -581,9 +682,9 @@ class DPS_Stats_API {
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
@@ -601,59 +702,61 @@ class DPS_Stats_API {
      * @since 1.1.0
      */
     public static function get_top_breeds( $start_date, $end_date, $limit = 5 ) {
+        global $wpdb;
         $start_date = sanitize_text_field( $start_date );
         $end_date   = sanitize_text_field( $end_date );
         $limit      = absint( $limit );
 
         $cache_key = dps_stats_build_cache_key( 'dps_stats_top_breeds', $start_date, $end_date ) . '_' . $limit;
         
-        // Verifica cache apenas se não estiver desabilitado
+        // F2.3: Usa cache layer (object cache ou transient)
         if ( ! dps_is_cache_disabled() ) {
-            $cached = get_transient( $cache_key );
+            $cached = self::cache_get( $cache_key );
             if ( false !== $cached ) {
                 return $cached;
             }
         }
 
-        $appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => 1000,
-            'post_status'    => 'publish',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [ 'key' => 'appointment_date', 'value' => $start_date, 'compare' => '>=', 'type' => 'DATE' ],
-                [ 'key' => 'appointment_date', 'value' => $end_date,   'compare' => '<=', 'type' => 'DATE' ],
-            ],
-            'fields' => 'ids',
-        ] );
-
-        $breed_counts = [];
-        foreach ( $appointments as $appt_id ) {
-            $pet_id = get_post_meta( $appt_id, 'appointment_pet_id', true );
-            if ( $pet_id ) {
-                $breed = get_post_meta( $pet_id, 'pet_breed', true );
-                if ( $breed ) {
-                    $breed_counts[ $breed ] = ( $breed_counts[ $breed ] ?? 0 ) + 1;
-                }
-            }
+        // F2.1: Query SQL com GROUP BY para performance
+        $sql = $wpdb->prepare(
+            "SELECT pm_breed.meta_value as breed, COUNT(*) as count
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_pet ON p.ID = pm_pet.post_id AND pm_pet.meta_key = 'appointment_pet_id'
+             INNER JOIN {$wpdb->postmeta} pm_breed ON pm_pet.meta_value = pm_breed.post_id AND pm_breed.meta_key = 'pet_breed'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+               AND pm_breed.meta_value != ''
+             GROUP BY pm_breed.meta_value
+             ORDER BY count DESC
+             LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        );
+        
+        $breed_data = $wpdb->get_results( $sql );
+        
+        // Calcular total para percentuais
+        $total = 0;
+        foreach ( $breed_data as $row ) {
+            $total += (int) $row->count;
         }
 
-        arsort( $breed_counts );
-        $top_breeds = array_slice( $breed_counts, 0, $limit, true );
-        $total = array_sum( $breed_counts );
-
         $result = [];
-        foreach ( $top_breeds as $breed => $count ) {
+        foreach ( $breed_data as $row ) {
             $result[] = [
-                'breed'      => $breed,
-                'count'      => $count,
-                'percentage' => $total > 0 ? round( ( $count / $total ) * 100 ) : 0,
+                'breed'      => $row->breed,
+                'count'      => (int) $row->count,
+                'percentage' => $total > 0 ? round( ( (int) $row->count / $total ) * 100 ) : 0,
             ];
         }
 
-        // Armazena cache apenas se não estiver desabilitado
+        // F2.3: Armazena cache usando cache layer
         if ( ! dps_is_cache_disabled() ) {
-            set_transient( $cache_key, $result, HOUR_IN_SECONDS );
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
         }
 
         return $result;
@@ -746,5 +849,409 @@ class DPS_Stats_API {
         }
 
         return $csv;
+    }
+
+    /**
+     * F3.1: Obtém taxa de retorno de clientes (30/60/90 dias).
+     *
+     * Calcula percentual de clientes que tiveram atendimento no período base
+     * e retornaram dentro de X dias.
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     * @param int    $days       Dias para retorno (padrão: 30).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_return_rate( $start_date, $end_date, $days = 30 ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+        $days       = absint( $days );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_return_rate', $start_date, $end_date ) . '_' . $days;
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes com atendimentos no período base
+        $sql_base_clients = $wpdb->prepare(
+            "SELECT DISTINCT pm_client.meta_value as client_id
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $base_clients = $wpdb->get_col( $sql_base_clients );
+        $total_clients = count( $base_clients );
+        
+        if ( $total_clients === 0 ) {
+            $result = [
+                'value' => 0,
+                'unit'  => '%',
+                'note'  => __( 'Nenhum cliente no período base', 'dps-stats-addon' ),
+            ];
+        } else {
+            // Calcular data limite para retorno
+            $return_deadline = date( 'Y-m-d', strtotime( $end_date ) + ( $days * DAY_IN_SECONDS ) );
+            
+            // Buscar clientes que retornaram
+            $placeholders = implode( ',', array_fill( 0, count( $base_clients ), '%d' ) );
+            $sql_returned = $wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm_client.meta_value) as returned
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value > %s
+                   AND pm_date.meta_value <= %s
+                   AND pm_client.meta_value IN ($placeholders)",
+                array_merge( [ $end_date, $return_deadline ], $base_clients )
+            );
+            
+            $returned = (int) $wpdb->get_var( $sql_returned );
+            $rate = $total_clients > 0 ? round( ( $returned / $total_clients ) * 100, 1 ) : 0;
+            
+            $result = [
+                'value' => $rate,
+                'unit'  => '%',
+                'note'  => sprintf(
+                    __( '%d de %d clientes retornaram em até %d dias', 'dps-stats-addon' ),
+                    $returned,
+                    $total_clients,
+                    $days
+                ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém taxa de no-show (diferente de cancelamento).
+     *
+     * Atendimentos com status específico de no-show (cliente não compareceu).
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'count' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_no_show_rate( $start_date, $end_date ) {
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_no_show', $start_date, $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        $total = self::get_appointments_count( $start_date, $end_date );
+        
+        // Tentar buscar agendamentos com status no_show ou meta específica
+        $no_show = self::get_appointments_count( $start_date, $end_date, 'no_show' );
+        
+        // Se não houver status no_show, tentar meta de cancelamento com motivo
+        if ( $no_show === 0 ) {
+            // Verificar se existe meta appointment_no_show ou appointment_cancellation_reason
+            global $wpdb;
+            $no_show = (int) $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(DISTINCT p.ID)
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 LEFT JOIN {$wpdb->postmeta} pm_reason ON p.ID = pm_reason.post_id AND pm_reason.meta_key = 'appointment_cancellation_reason'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value >= %s
+                   AND pm_date.meta_value <= %s
+                   AND pm_reason.meta_value = 'no_show'",
+                $start_date,
+                $end_date
+            ) );
+        }
+        
+        $rate = $total > 0 ? round( ( $no_show / $total ) * 100, 1 ) : 0;
+        
+        $result = [
+            'value' => $rate,
+            'unit'  => '%',
+            'count' => $no_show,
+            'note'  => __( 'Cliente não compareceu ao agendamento', 'dps-stats-addon' ),
+        ];
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém total de inadimplência (receita vencida não paga).
+     *
+     * Soma de lançamentos vencidos com status pendente/em aberto.
+     * Requer Finance Add-on.
+     *
+     * @param string $start_date Data inicial (Y-m-d) - opcional para período.
+     * @param string $end_date   Data final (Y-m-d) - opcional para período.
+     *
+     * @return array ['value' => float, 'unit' => 'R$', 'count' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_overdue_revenue( $start_date = '', $end_date = '' ) {
+        $cache_key = 'dps_stats_overdue_' . md5( $start_date . $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Verificar se Finance Add-on está ativo e tabela existe
+        if ( ! self::table_dps_transacoes_exists() ) {
+            $result = [
+                'value' => 0,
+                'unit'  => 'R$',
+                'count' => 0,
+                'note'  => __( 'Finance Add-on não ativo', 'dps-stats-addon' ),
+            ];
+        } else {
+            global $wpdb;
+            $table = $wpdb->prefix . 'dps_transacoes';
+            $today = current_time( 'Y-m-d' );
+            
+            // Buscar receitas vencidas (data_vencimento < hoje e status != pago)
+            $sql = "SELECT SUM(valor) as total, COUNT(*) as count
+                    FROM {$table}
+                    WHERE tipo = 'receita'
+                      AND status != 'pago'
+                      AND data_vencimento < %s";
+            
+            $params = [ $today ];
+            
+            // Se período especificado, filtrar por data de lançamento
+            if ( $start_date && $end_date ) {
+                $sql .= " AND data >= %s AND data <= %s";
+                $params[] = sanitize_text_field( $start_date );
+                $params[] = sanitize_text_field( $end_date );
+            }
+            
+            $row = $wpdb->get_row( $wpdb->prepare( $sql, $params ) );
+            
+            $result = [
+                'value' => (float) ( $row->total ?? 0 ),
+                'unit'  => 'R$',
+                'count' => (int) ( $row->count ?? 0 ),
+                'note'  => __( 'Receitas vencidas não pagas', 'dps-stats-addon' ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém taxa de conversão de cadastro para primeiro agendamento.
+     *
+     * Clientes cadastrados no período que tiveram ao menos 1 agendamento
+     * concluído/confirmado em até X dias.
+     *
+     * @param string $start_date     Data inicial (Y-m-d).
+     * @param string $end_date       Data final (Y-m-d).
+     * @param int    $conversion_days Dias para conversão (padrão: 30).
+     *
+     * @return array ['value' => float, 'unit' => '%', 'converted' => int, 'total' => int, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_conversion_rate( $start_date, $end_date, $conversion_days = 30 ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+        $conversion_days = absint( $conversion_days );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_conversion', $start_date, $end_date ) . '_' . $conversion_days;
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes cadastrados no período
+        $new_clients_query = new WP_Query( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'date_query'     => [
+                [
+                    'after'     => $start_date,
+                    'before'    => $end_date . ' 23:59:59',
+                    'inclusive' => true,
+                ],
+            ],
+            'fields' => 'ids',
+        ] );
+        
+        $new_clients = $new_clients_query->posts;
+        $total_new = count( $new_clients );
+        
+        if ( $total_new === 0 ) {
+            $result = [
+                'value'     => 0,
+                'unit'      => '%',
+                'converted' => 0,
+                'total'     => 0,
+                'note'      => __( 'Nenhum cliente novo no período', 'dps-stats-addon' ),
+            ];
+        } else {
+            // Calcular deadline para conversão
+            $conversion_deadline = date( 'Y-m-d', strtotime( $end_date ) + ( $conversion_days * DAY_IN_SECONDS ) );
+            
+            // Buscar clientes que tiveram ao menos 1 agendamento
+            $placeholders = implode( ',', array_fill( 0, count( $new_clients ), '%d' ) );
+            $sql_converted = $wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm_client.meta_value) as converted
+                 FROM {$wpdb->posts} p
+                 INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+                 INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+                 INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id AND pm_status.meta_key = 'appointment_status'
+                 WHERE p.post_type = 'dps_agendamento'
+                   AND p.post_status = 'publish'
+                   AND pm_date.meta_value <= %s
+                   AND pm_status.meta_value IN ('concluido', 'confirmado')
+                   AND pm_client.meta_value IN ($placeholders)",
+                array_merge( [ $conversion_deadline ], $new_clients )
+            );
+            
+            $converted = (int) $wpdb->get_var( $sql_converted );
+            $rate = $total_new > 0 ? round( ( $converted / $total_new ) * 100, 1 ) : 0;
+            
+            $result = [
+                'value'     => $rate,
+                'unit'      => '%',
+                'converted' => $converted,
+                'total'     => $total_new,
+                'note'      => sprintf(
+                    __( '%d de %d clientes agendaram em até %d dias', 'dps-stats-addon' ),
+                    $converted,
+                    $total_new,
+                    $conversion_days
+                ),
+            ];
+        }
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
+    }
+
+    /**
+     * F3.1: Obtém contagem de clientes recorrentes (2+ atendimentos no período).
+     *
+     * @param string $start_date Data inicial (Y-m-d).
+     * @param string $end_date   Data final (Y-m-d).
+     *
+     * @return array ['value' => int, 'unit' => '', 'percentage' => float, 'note' => string]
+     *
+     * @since 1.4.0
+     */
+    public static function get_recurring_clients( $start_date, $end_date ) {
+        global $wpdb;
+        $start_date = sanitize_text_field( $start_date );
+        $end_date   = sanitize_text_field( $end_date );
+
+        $cache_key = dps_stats_build_cache_key( 'dps_stats_recurring', $start_date, $end_date );
+        
+        if ( ! dps_is_cache_disabled() ) {
+            $cached = self::cache_get( $cache_key );
+            if ( false !== $cached ) {
+                return $cached;
+            }
+        }
+
+        // Buscar clientes com 2 ou mais atendimentos no período
+        $sql = $wpdb->prepare(
+            "SELECT pm_client.meta_value as client_id, COUNT(*) as appointments
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s
+             GROUP BY pm_client.meta_value
+             HAVING COUNT(*) >= 2",
+            $start_date,
+            $end_date
+        );
+        
+        $recurring = $wpdb->get_results( $sql );
+        $recurring_count = count( $recurring );
+        
+        // Total de clientes únicos no período
+        $sql_total = $wpdb->prepare(
+            "SELECT COUNT(DISTINCT pm_client.meta_value) as total
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'appointment_date'
+             INNER JOIN {$wpdb->postmeta} pm_client ON p.ID = pm_client.post_id AND pm_client.meta_key = 'appointment_client_id'
+             WHERE p.post_type = 'dps_agendamento'
+               AND p.post_status = 'publish'
+               AND pm_date.meta_value >= %s
+               AND pm_date.meta_value <= %s",
+            $start_date,
+            $end_date
+        );
+        
+        $total_clients = (int) $wpdb->get_var( $sql_total );
+        $percentage = $total_clients > 0 ? round( ( $recurring_count / $total_clients ) * 100, 1 ) : 0;
+        
+        $result = [
+            'value'      => $recurring_count,
+            'unit'       => '',
+            'percentage' => $percentage,
+            'note'       => sprintf(
+                __( '%d clientes com 2+ atendimentos (%s%% do total)', 'dps-stats-addon' ),
+                $recurring_count,
+                number_format( $percentage, 1, ',', '.' )
+            ),
+        ];
+
+        if ( ! dps_is_cache_disabled() ) {
+            self::cache_set( $cache_key, $result, HOUR_IN_SECONDS );
+        }
+
+        return $result;
     }
 }
