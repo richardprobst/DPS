@@ -209,12 +209,52 @@
     flex-wrap: wrap;
     gap: 0.75rem 1.5rem;
     align-items: center;
-    margin: 0.75rem 0 1.5rem;
-    padding: 0.75rem 1rem;
-    background: var(--dps-accent-soft);
-    border: 1px solid rgba(37, 99, 235, 0.12);
+    justify-content: center;
+    margin: 1rem 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--dps-accent-soft) 0%, #f0f9ff 100%);
+    border: 1px solid rgba(37, 99, 235, 0.15);
     border-radius: 0.75rem;
     color: #0f172a;
+}
+
+.dps-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--dps-surface);
+    border-radius: 0.5rem;
+    border: 1px solid var(--dps-border);
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+}
+
+.dps-summary-item:hover {
+    border-color: var(--dps-accent);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.dps-summary-icon {
+    font-size: 1.1rem;
+}
+
+.dps-summary-item strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--dps-accent);
+}
+
+.dps-summary-item--pending strong {
+    color: #f59e0b;
+}
+
+.dps-summary-item--done strong {
+    color: #22c55e;
+}
+
+.dps-summary-item--total strong {
+    color: #2563eb;
 }
 
 .dps-agenda-summary span {
@@ -572,6 +612,13 @@
     
     .dps-agenda-summary {
         width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .dps-summary-item {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -589,6 +636,10 @@
     .dps-agenda-empty {
         padding: 1.1rem;
         border-radius: 0.75rem;
+    }
+    
+    .dps-filters-header {
+        display: none;
     }
 }
 
@@ -1720,6 +1771,24 @@ tr.dps-row-updated {
     border-radius: 0.75rem;
 }
 
+/* Cabeçalho dos filtros */
+.dps-filters-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--dps-border);
+}
+
+.dps-filters-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
 .dps-agenda-unified-form {
     display: flex;
     flex-direction: column;
@@ -1744,11 +1813,20 @@ tr.dps-row-updated {
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 0.5rem;
+}
+
+.dps-filter-field--checkbox:hover {
+    background: #fde68a;
 }
 
 .dps-filter-field--checkbox input[type="checkbox"] {
     width: auto;
     margin: 0;
+    accent-color: #f59e0b;
 }
 
 .dps-filter-label {
@@ -1782,6 +1860,18 @@ tr.dps-row-updated {
 .dps-clear-filters {
     padding: 0.5rem 0.875rem;
     white-space: nowrap;
+}
+
+/* Botão de limpar filtros com estilo vermelho suave */
+.dps-btn--danger-soft {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+.dps-btn--danger-soft:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
 }
 
 .dps-toggle-icon {
@@ -2285,43 +2375,93 @@ tr.dps-row-updated {
     margin-top: 1.5rem;
 }
 
-/* Navegação de abas */
-.dps-agenda-tabs-nav {
+/* Cabeçalho das abas */
+.dps-agenda-tabs-header {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--dps-border);
-    padding-bottom: 0;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--dps-border);
 }
 
-/* Botões de aba */
-.dps-agenda-tab-button {
+.dps-agenda-tabs-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Navegação de abas - Cards */
+.dps-agenda-tabs-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0;
     background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
+}
+
+/* Botões de aba - Card Style */
+.dps-agenda-tab-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 0.75rem;
+    background: var(--dps-surface);
+    border: 2px solid var(--dps-border);
+    border-radius: 0.75rem;
     font-weight: 600;
     color: var(--dps-muted);
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
-    bottom: -2px;
+    text-align: center;
 }
 
 .dps-agenda-tab-button:hover {
-    color: var(--dps-accent);
+    border-color: var(--dps-accent);
     background: var(--dps-accent-soft);
+    color: var(--dps-accent);
 }
 
 .dps-agenda-tab-button--active {
+    border-color: var(--dps-accent);
+    background: var(--dps-accent-soft);
     color: var(--dps-accent);
-    border-bottom-color: var(--dps-accent);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
 .dps-agenda-tab-button:focus {
     outline: 2px solid var(--dps-accent);
     outline-offset: 2px;
+}
+
+/* Elementos internos dos botões de aba */
+.dps-tab-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.dps-tab-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: inherit;
+}
+
+.dps-tab-desc {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--dps-muted);
+    opacity: 0.8;
+}
+
+.dps-agenda-tab-button--active .dps-tab-desc {
+    color: var(--dps-accent);
+    opacity: 1;
 }
 
 /* Conteúdo das abas */
@@ -2331,27 +2471,62 @@ tr.dps-row-updated {
 
 .dps-tab-content--active {
     display: block;
+    animation: tabFadeIn 0.2s ease-in-out;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Ajustes responsivos para abas */
 @media (max-width: 768px) {
     .dps-agenda-tabs-nav {
-        flex-direction: column;
-        border-bottom: none;
-        gap: 0.25rem;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
     
     .dps-agenda-tab-button {
-        border-bottom: none;
-        border-left: 3px solid transparent;
-        padding: 0.6rem 1rem;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
         text-align: left;
-        bottom: 0;
+        gap: 0.75rem;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.25rem;
+    }
+    
+    .dps-tab-label {
+        flex: 1;
+    }
+    
+    .dps-tab-desc {
+        display: none;
     }
     
     .dps-agenda-tab-button--active {
-        border-left-color: var(--dps-accent);
-        background: var(--dps-accent-soft);
+        border-left: 4px solid var(--dps-accent);
+        border-radius: 0 0.75rem 0.75rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-agenda-tabs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-tabs-title {
+        font-size: 1rem;
     }
 }
 
@@ -2360,6 +2535,8 @@ tr.dps-row-updated {
 .dps-table--tab2,
 .dps-table--tab3 {
     /* Estilos herdados da classe base .dps-table */
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 /* Aba 1: Visão Rápida - layout mais compacto */
@@ -2369,7 +2546,37 @@ tr.dps-row-updated {
     font-size: 0.9rem;
 }
 
+.dps-table--tab1 thead th {
+    background: #f0f9ff;
+    color: #0369a1;
+    font-weight: 600;
+}
+
+/* Aba 2: Operação - destaque para ações */
+.dps-table--tab2 thead th {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+}
+
+.dps-table--tab2 .dps-quick-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+}
+
+.dps-table--tab2 .dps-quick-action-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+}
+
 /* Aba 3: Detalhes - permite mais espaço para texto */
+.dps-table--tab3 thead th {
+    background: #f0fdf4;
+    color: #166534;
+    font-weight: 600;
+}
+
 .dps-table--tab3 td {
     max-width: none;
     white-space: normal;
@@ -2378,4 +2585,37 @@ tr.dps-row-updated {
 .dps-table--tab3 td[data-label*="Observ"],
 .dps-table--tab3 td[data-label*="Endereço"] {
     min-width: 200px;
+}
+
+/* Preview de observações */
+.dps-notes-preview {
+    display: block;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+    color: var(--dps-muted);
+    font-size: 0.85rem;
+}
+
+.dps-notes-preview:hover {
+    color: #0f172a;
+}
+
+/* Subtítulos das seções de atendimentos */
+.dps-tab-content h5 {
+    margin: 1.5rem 0 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid var(--dps-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-tab-content h5:first-child {
+    margin-top: 0;
 }
