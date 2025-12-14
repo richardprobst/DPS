@@ -37,6 +37,13 @@ class DPS_AI_Prompts {
 	];
 
 	/**
+	 * Chave da opção no banco de dados para prompts customizados.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_PROMPTS_OPTION = 'dps_ai_custom_prompts';
+
+	/**
 	 * Cache de prompts carregados.
 	 *
 	 * @var array
@@ -47,6 +54,7 @@ class DPS_AI_Prompts {
 	 * Retorna o system prompt para um contexto específico.
 	 *
 	 * Esta é a função principal que deve ser usada por todos os componentes do plugin.
+	 * Prioriza prompts customizados do banco de dados, com fallback para arquivos padrão.
 	 *
 	 * @param string $context  Contexto do prompt ('portal', 'public', 'whatsapp', 'email').
 	 * @param array  $metadata Metadados adicionais do contexto (opcional).
@@ -67,8 +75,13 @@ class DPS_AI_Prompts {
 			$context = 'portal';
 		}
 
-		// Carrega o prompt base do arquivo
-		$prompt = self::load_prompt_from_file( $context );
+		// Tenta carregar prompt customizado do banco de dados primeiro
+		$prompt = self::get_custom_prompt( $context );
+
+		// Se não houver prompt customizado, carrega do arquivo padrão
+		if ( empty( $prompt ) ) {
+			$prompt = self::load_prompt_from_file( $context );
+		}
 
 		// Aplica filtro do WordPress para permitir customização
 		// Filtro global: permite alterar qualquer prompt independente do contexto
@@ -79,6 +92,120 @@ class DPS_AI_Prompts {
 		$prompt = apply_filters( "dps_ai_system_prompt_{$context}", $prompt, $metadata );
 
 		return $prompt;
+	}
+
+	/**
+	 * Retorna o prompt customizado do banco de dados para um contexto.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return string|null Prompt customizado ou null se não existir.
+	 */
+	public static function get_custom_prompt( $context ) {
+		$custom_prompts = get_option( self::CUSTOM_PROMPTS_OPTION, [] );
+		
+		if ( isset( $custom_prompts[ $context ] ) && ! empty( trim( $custom_prompts[ $context ] ) ) ) {
+			return $custom_prompts[ $context ];
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Salva um prompt customizado para um contexto específico.
+	 *
+	 * @param string $context Contexto do prompt.
+	 * @param string $prompt  Conteúdo do prompt.
+	 *
+	 * @return bool True se salvou com sucesso, false caso contrário.
+	 */
+	public static function save_custom_prompt( $context, $prompt ) {
+		// Valida contexto
+		if ( ! self::is_valid_context( $context ) ) {
+			return false;
+		}
+
+		$custom_prompts = get_option( self::CUSTOM_PROMPTS_OPTION, [] );
+		$custom_prompts[ $context ] = sanitize_textarea_field( $prompt );
+		
+		// Limpa cache para este contexto
+		if ( isset( self::$cache[ $context ] ) ) {
+			unset( self::$cache[ $context ] );
+		}
+		
+		return update_option( self::CUSTOM_PROMPTS_OPTION, $custom_prompts );
+	}
+
+	/**
+	 * Remove o prompt customizado de um contexto, restaurando o padrão.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return bool True se removeu com sucesso, false caso contrário.
+	 */
+	public static function reset_to_default( $context ) {
+		// Valida contexto
+		if ( ! self::is_valid_context( $context ) ) {
+			return false;
+		}
+
+		$custom_prompts = get_option( self::CUSTOM_PROMPTS_OPTION, [] );
+		
+		if ( isset( $custom_prompts[ $context ] ) ) {
+			unset( $custom_prompts[ $context ] );
+			
+			// Limpa cache para este contexto
+			if ( isset( self::$cache[ $context ] ) ) {
+				unset( self::$cache[ $context ] );
+			}
+			
+			return update_option( self::CUSTOM_PROMPTS_OPTION, $custom_prompts );
+		}
+		
+		return true; // Já estava no padrão
+	}
+
+	/**
+	 * Verifica se um contexto tem prompt customizado.
+	 *
+	 * @param string $context Contexto a verificar.
+	 *
+	 * @return bool True se tem customizado, false se usa padrão.
+	 */
+	public static function has_custom_prompt( $context ) {
+		$custom_prompts = get_option( self::CUSTOM_PROMPTS_OPTION, [] );
+		return isset( $custom_prompts[ $context ] ) && ! empty( trim( $custom_prompts[ $context ] ) );
+	}
+
+	/**
+	 * Retorna o prompt padrão do arquivo para um contexto.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return string Prompt padrão do arquivo.
+	 */
+	public static function get_default_prompt( $context ) {
+		// Limpa cache temporariamente para forçar leitura do arquivo
+		$cached = isset( self::$cache[ $context ] ) ? self::$cache[ $context ] : null;
+		unset( self::$cache[ $context ] );
+		
+		$default = self::load_prompt_from_file( $context );
+		
+		// Restaura cache se existia
+		if ( null !== $cached ) {
+			self::$cache[ $context ] = $cached;
+		}
+		
+		return $default;
+	}
+
+	/**
+	 * Retorna todos os prompts customizados salvos.
+	 *
+	 * @return array Array associativo [contexto => prompt].
+	 */
+	public static function get_all_custom_prompts() {
+		return get_option( self::CUSTOM_PROMPTS_OPTION, [] );
 	}
 
 	/**
