@@ -204,6 +204,10 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Registration Add-on (v1.2.1)**
+
+- **Redirecionamento pós-cadastro corrigido**: Após finalizar o cadastro, o sistema agora busca corretamente a página de registro, mesmo quando a option `dps_registration_page_id` não está configurada ou a página foi excluída. O método `get_registration_page_url()` agora tenta: (1) ID salvo na option, (2) página pelo slug padrão "cadastro-de-clientes-e-pets", (3) qualquer página com o shortcode `[dps_registration_form]`. Quando encontra a página por fallback, atualiza automaticamente a option para evitar buscas futuras. Resolve problema de página em branco após cadastro.
+
 #### Security (Segurança)
 
 **Finance Add-on (v1.3.1) - FASE 1: Segurança e Performance**

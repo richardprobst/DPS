@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -648,7 +648,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.0';
+        $version   = '1.2.1';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -2272,9 +2272,61 @@ class DPS_Registration_Addon {
      * @return string
      */
     protected function get_registration_page_url() {
+        // 1. Tenta usar o ID salvo na option
         $page_id = (int) get_option( 'dps_registration_page_id' );
         if ( $page_id ) {
-            $url = get_permalink( $page_id );
+            $page = get_post( $page_id );
+            // Verifica se a página existe e está publicada
+            if ( $page && 'publish' === $page->post_status && 'page' === $page->post_type ) {
+                $url = get_permalink( $page_id );
+                if ( $url ) {
+                    return $url;
+                }
+            }
+        }
+
+        // 2. Fallback: tenta encontrar a página pelo slug traduzido
+        $default_slug = sanitize_title( __( 'Cadastro de Clientes e Pets', 'dps-registration-addon' ) );
+        $page_by_slug = get_page_by_path( $default_slug );
+        if ( $page_by_slug && 'publish' === $page_by_slug->post_status ) {
+            // Verifica se contém o shortcode antes de salvar
+            if ( has_shortcode( $page_by_slug->post_content, 'dps_registration_form' ) ) {
+                update_option( 'dps_registration_page_id', $page_by_slug->ID );
+                $url = get_permalink( $page_by_slug->ID );
+                if ( $url ) {
+                    return $url;
+                }
+            }
+        }
+
+        // 2b. Fallback: tenta com slug em português fixo (caso locale seja diferente)
+        if ( 'cadastro-de-clientes-e-pets' !== $default_slug ) {
+            $page_by_fixed_slug = get_page_by_path( 'cadastro-de-clientes-e-pets' );
+            if ( $page_by_fixed_slug && 'publish' === $page_by_fixed_slug->post_status ) {
+                if ( has_shortcode( $page_by_fixed_slug->post_content, 'dps_registration_form' ) ) {
+                    update_option( 'dps_registration_page_id', $page_by_fixed_slug->ID );
+                    $url = get_permalink( $page_by_fixed_slug->ID );
+                    if ( $url ) {
+                        return $url;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback: busca qualquer página com o shortcode [dps_registration_form]
+        global $wpdb;
+        $found_page_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s AND post_content LIKE %s LIMIT 1",
+                'page',
+                'publish',
+                '%[dps_registration_form%'
+            )
+        );
+        if ( $found_page_id ) {
+            $found_page_id = (int) $found_page_id;
+            update_option( 'dps_registration_page_id', $found_page_id );
+            $url = get_permalink( $found_page_id );
             if ( $url ) {
                 return $url;
             }
