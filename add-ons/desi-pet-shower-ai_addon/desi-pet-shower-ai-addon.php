@@ -2377,8 +2377,12 @@ class DPS_AI_Addon {
                     $prompt_text = sanitize_textarea_field( $system_prompts[ $ctx_key ] );
                     $default_text = DPS_AI_Prompts::get_default_prompt( $ctx_key );
                     
+                    // Armazena valores trimados para evitar chamadas repetidas
+                    $trimmed_prompt = trim( $prompt_text );
+                    $trimmed_default = trim( $default_text );
+                    
                     // Se está vazio ou igual ao padrão, restaura o padrão
-                    if ( empty( trim( $prompt_text ) ) || trim( $prompt_text ) === trim( $default_text ) ) {
+                    if ( empty( $trimmed_prompt ) || $trimmed_prompt === $trimmed_default ) {
                         DPS_AI_Prompts::reset_to_default( $ctx_key );
                     } else {
                         DPS_AI_Prompts::save_custom_prompt( $ctx_key, $prompt_text );
