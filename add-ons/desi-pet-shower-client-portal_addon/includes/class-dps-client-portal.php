@@ -51,10 +51,22 @@ final class DPS_Client_Portal {
         // Migration completed in Phase 1 (commit ab6deda)
         
         // Processa autenticação por token
-        add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
-        
-        // Processa logout
-        add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
+        // IMPORTANTE: Se o hook 'init' já está em execução ou já passou, precisamos chamar
+        // o método diretamente, pois add_action() não executará callbacks para hooks que
+        // já foram processados neste request.
+        if ( did_action( 'init' ) ) {
+            // Hook 'init' já executou - chamar diretamente
+            $this->handle_token_authentication();
+            $this->handle_logout_request();
+            $this->handle_portal_actions();
+            $this->handle_portal_settings_save();
+        } else {
+            // Hook 'init' ainda não executou - registrar normalmente
+            add_action( 'init', [ $this, 'handle_token_authentication' ], 5 );
+            add_action( 'init', [ $this, 'handle_logout_request' ], 6 );
+            add_action( 'init', [ $this, 'handle_portal_actions' ] );
+            add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
+        }
 
         // Cria login para novo cliente ao salvar post do tipo dps_cliente
         add_action( 'save_post_dps_cliente', [ $this, 'maybe_create_login_for_client' ], 10, 3 );
@@ -63,9 +75,6 @@ final class DPS_Client_Portal {
         add_shortcode( 'dps_client_portal', [ $this, 'render_portal_shortcode' ] );
         // Adiciona shortcode para o formulário de login
         add_shortcode( 'dps_client_login', [ $this, 'render_login_shortcode' ] );
-
-        // Processa ações de atualização do portal e login/logout
-        add_action( 'init', [ $this, 'handle_portal_actions' ] );
 
         // Registra tipos de dados e recursos do portal
         // NOTA: CPT dps_portal_message agora registrado por DPS_Portal_Admin (evita conflito de menu)
@@ -90,9 +99,6 @@ final class DPS_Client_Portal {
         add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
         add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
         add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
-        
-        // Processa salvamento das configurações do portal
-        add_action( 'init', [ $this, 'handle_portal_settings_save' ] );
         
         // AJAX handlers para o chat do portal
         add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );

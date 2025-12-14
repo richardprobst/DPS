@@ -49,7 +49,12 @@ class DPS_Portal_Admin {
         $this->client_repository = DPS_Client_Repository::get_instance();
         
         // Registra hooks administrativos
-        add_action( 'init', [ $this, 'register_message_post_type' ] );
+        // NOTA: Se o hook 'init' já executou, chamamos diretamente
+        if ( did_action( 'init' ) ) {
+            $this->register_message_post_type();
+        } else {
+            add_action( 'init', [ $this, 'register_message_post_type' ] );
+        }
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         

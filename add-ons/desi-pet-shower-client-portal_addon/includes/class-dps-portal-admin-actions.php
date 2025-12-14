@@ -44,7 +44,12 @@ final class DPS_Portal_Admin_Actions {
      */
     private function __construct() {
         // Processa ações de token via query params
-        add_action( 'init', [ $this, 'handle_token_actions' ], 10 );
+        // NOTA: Se o hook 'init' já executou, chamamos diretamente
+        if ( did_action( 'init' ) ) {
+            $this->handle_token_actions();
+        } else {
+            add_action( 'init', [ $this, 'handle_token_actions' ], 10 );
+        }
         
         // Registra endpoints AJAX
         add_action( 'wp_ajax_dps_generate_client_token', [ $this, 'ajax_generate_token' ] );

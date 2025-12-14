@@ -72,7 +72,14 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
         // Valida sessão em cada requisição
         // IMPORTANTE: Prioridade 10 para executar APÓS handle_token_authentication (prioridade 5)
         // Isso garante que o cookie esteja definido antes da validação
-        add_action( 'init', [ $this, 'validate_session' ], 10 );
+        // 
+        // NOTA: Se o hook 'init' já executou, chamamos validate_session() diretamente
+        // para garantir validação de sessão mesmo em inicialização tardia.
+        if ( did_action( 'init' ) ) {
+            $this->validate_session();
+        } else {
+            add_action( 'init', [ $this, 'validate_session' ], 10 );
+        }
     }
 
     /**
