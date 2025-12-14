@@ -166,6 +166,13 @@ final class DPS_Client_Portal {
             'client_id' => $token_data['client_id'],
             'ip'        => $ip_address,
         ], DPS_Logger::LEVEL_INFO );
+        
+        // Registra acesso no histórico para auditoria
+        $user_agent = '';
+        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] ) ) {
+            $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+        }
+        $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
 
         // Armazena client_id para disponibilizar autenticação imediatamente
         // sem depender de cookies que só estarão disponíveis na próxima requisição
@@ -1167,6 +1174,18 @@ final class DPS_Client_Portal {
         echo '<span class="dps-portal-breadcrumb__item">' . esc_html__( 'Portal do Cliente', 'dps-client-portal' ) . '</span>';
         echo '<span class="dps-portal-breadcrumb__separator">›</span>';
         echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
+        
+        // Link de avaliação discreto no canto superior (movido da seção de dados)
+        // URL configurável via option ou filtro (padrão usa constante para retrocompatibilidade)
+        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : 'https://g.page/r/CUPivNuiAGwnEAE/review';
+        $review_url = get_option( 'dps_portal_review_url', $default_review_url );
+        $review_url = apply_filters( 'dps_portal_review_url', $review_url );
+        if ( $review_url ) {
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
+            echo '<span class="dps-portal-review-icon">⭐</span>';
+            echo '<span class="dps-portal-review-text">' . esc_html__( 'Avalie-nos', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
         echo '</nav>';
         
         // Define tabs padrão (Fase 2.3)
@@ -2456,10 +2475,8 @@ final class DPS_Client_Portal {
                 echo '</div>';
             }
         }
-        // Link para avaliação no Google
-        echo '<h3>' . esc_html__( 'Avalie nosso serviço', 'dps-client-portal' ) . '</h3>';
-        $review_url = 'https://g.page/r/CUPivNuiAGwnEAE/review';
-        echo '<p><a class="button" href="' . esc_url( $review_url ) . '" target="_blank">' . esc_html__( 'Deixar uma Avaliação', 'dps-client-portal' ) . '</a></p>';
+        // Link de avaliação foi movido para o topo do portal (na barra de navegação)
+        // Veja render_portal_shortcode() - seção breadcrumb
         echo '</section>';
     }
 

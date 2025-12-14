@@ -76,11 +76,15 @@ if ( ! empty( $clients ) ) {
         $client_id = $client_data['id'];
         $stats     = $client_data['token_stats'];
         
+        // Busca último login real do histórico (não apenas last_used_at do token)
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $last_login_data = $token_manager->get_last_login( $client_id );
+        
         // Determina situação do acesso
         if ( $stats['active_tokens'] > 0 ) {
             $access_status = __( 'Link ativo', 'dps-client-portal' );
             $status_class  = 'active';
-        } elseif ( $stats['total_used'] > 0 ) {
+        } elseif ( $stats['total_used'] > 0 || $last_login_data ) {
             $access_status = __( 'Já acessou', 'dps-client-portal' );
             $status_class  = 'used';
         } else {
@@ -88,10 +92,14 @@ if ( ! empty( $clients ) ) {
             $status_class  = 'none';
         }
         
-        // Formata último login
-        $last_login = $stats['last_used_at'] 
-            ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $stats['last_used_at'] ) )
-            : '—';
+        // Formata último login - usa o histórico real
+        if ( $last_login_data && $last_login_data['timestamp'] ) {
+            $last_login = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $last_login_data['timestamp'] ) );
+        } elseif ( $stats['last_used_at'] ) {
+            $last_login = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $stats['last_used_at'] ) );
+        } else {
+            $last_login = '—';
+        }
 
         echo '<tr>';
         
@@ -127,6 +135,13 @@ if ( ! empty( $clients ) ) {
         // Último login
         echo '<td data-label="' . esc_attr__( 'Último Login', 'dps-client-portal' ) . '">';
         echo esc_html( $last_login );
+        // Mostra botão de histórico se houver acessos
+        $access_history = $token_manager->get_access_history( $client_id, 1 );
+        if ( ! empty( $access_history ) ) {
+            echo '<br><button type="button" class="button button-small dps-view-history-btn" data-client-id="' . esc_attr( $client_id ) . '" data-client-name="' . esc_attr( $client_data['name'] ) . '" style="margin-top: 4px;">';
+            echo '📋 ' . esc_html__( 'Histórico', 'dps-client-portal' );
+            echo '</button>';
+        }
         echo '</td>';
         
         // Ações
@@ -185,6 +200,17 @@ if ( ! empty( $clients ) ) {
             echo '<a href="' . esc_url( $revoke_url ) . '" class="button button-secondary" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja revogar todos os links ativos deste cliente?', 'dps-client-portal' ) ) . '\');">';
             echo esc_html__( 'Revogar', 'dps-client-portal' );
             echo '</a>';
+            
+            // Verifica se há tokens permanentes ativos para mostrar botão de visualização
+            $permanent_tokens = $token_manager->get_active_permanent_tokens( $client_id );
+            if ( ! empty( $permanent_tokens ) ) {
+                echo '<button type="button" class="button button-secondary dps-view-permanent-link-btn" ';
+                echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
+                echo 'data-client-name="' . esc_attr( $client_data['name'] ) . '" ';
+                echo 'title="' . esc_attr__( 'Ver link permanente existente', 'dps-client-portal' ) . '">';
+                echo '🔗 ' . esc_html__( 'Ver Link', 'dps-client-portal' );
+                echo '</button>';
+            }
         }
         
         echo '</div>';
@@ -548,3 +574,165 @@ if ( 'admin' === $context ) {
     }
 }
 </style>
+
+<!-- Modal de histórico de acessos -->
+<div id="dps-access-history-modal" class="dps-modal" style="display:none;">
+    <div class="dps-modal__overlay"></div>
+    <div class="dps-modal__content">
+        <div class="dps-modal__header">
+            <h2><?php esc_html_e( 'Histórico de Acessos', 'dps-client-portal' ); ?></h2>
+            <button type="button" class="dps-modal__close">&times;</button>
+        </div>
+        <div class="dps-modal__body">
+            <p id="dps-history-client-name" style="font-weight: 600; margin-bottom: 16px;"></p>
+            <div id="dps-history-content">
+                <p><?php esc_html_e( 'Carregando...', 'dps-client-portal' ); ?></p>
+            </div>
+        </div>
+        <div class="dps-modal__footer">
+            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Fechar', 'dps-client-portal' ); ?></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de link permanente -->
+<div id="dps-permanent-link-modal" class="dps-modal" style="display:none;">
+    <div class="dps-modal__overlay"></div>
+    <div class="dps-modal__content">
+        <div class="dps-modal__header">
+            <h2><?php esc_html_e( 'Link Permanente de Acesso', 'dps-client-portal' ); ?></h2>
+            <button type="button" class="dps-modal__close">&times;</button>
+        </div>
+        <div class="dps-modal__body">
+            <p id="dps-permanent-client-name" style="font-weight: 600; margin-bottom: 16px;"></p>
+            <div id="dps-permanent-link-content">
+                <p><?php esc_html_e( 'Carregando...', 'dps-client-portal' ); ?></p>
+            </div>
+        </div>
+        <div class="dps-modal__footer">
+            <button type="button" class="button button-secondary dps-modal__close"><?php esc_html_e( 'Fechar', 'dps-client-portal' ); ?></button>
+        </div>
+    </div>
+</div>
+
+<?php
+// Prepara dados para JavaScript (histórico e links permanentes)
+$history_data = [];
+$permanent_links_data = [];
+
+// Cache de opções de formato de data (evita múltiplas chamadas get_option)
+$date_format = get_option( 'date_format' );
+$time_format = get_option( 'time_format' );
+$datetime_format = $date_format . ' ' . $time_format;
+
+// Token manager é singleton, obtém uma vez fora do loop
+$token_manager = DPS_Portal_Token_Manager::get_instance();
+
+foreach ( $clients as $client_data ) {
+    $client_id = $client_data['id'];
+    
+    // Histórico de acessos
+    $access_history = $token_manager->get_access_history( $client_id, 20 );
+    if ( ! empty( $access_history ) ) {
+        $history_data[ $client_id ] = [];
+        foreach ( $access_history as $access ) {
+            // Trunca user_agent para exibição (80 chars é suficiente para a UI, log armazena até 255)
+            $display_user_agent = isset( $access['user_agent'] ) ? esc_html( substr( $access['user_agent'], 0, 80 ) ) : '—';
+            $history_data[ $client_id ][] = [
+                'date'       => date_i18n( $datetime_format, strtotime( $access['timestamp'] ) ),
+                'ip'         => isset( $access['ip'] ) ? esc_html( $access['ip'] ) : '—',
+                'user_agent' => $display_user_agent,
+            ];
+        }
+    }
+    
+    // Links permanentes ativos
+    $permanent_tokens = $token_manager->get_active_permanent_tokens( $client_id );
+    if ( ! empty( $permanent_tokens ) ) {
+        // Para tokens permanentes, precisamos armazenar a URL do portal (não o token em si por segurança)
+        $created_formatted = date_i18n( $datetime_format, strtotime( $permanent_tokens[0]['created_at'] ) );
+        $permanent_links_data[ $client_id ] = [
+            'count'    => count( $permanent_tokens ),
+            'created'  => $created_formatted,
+            // Nota: Não podemos recuperar o token original (está hashado), mas podemos mostrar info
+            'info'     => sprintf( 
+                __( 'Token permanente criado em %s. O link original foi enviado ao cliente quando gerado. Se precisar de um novo link, use "Gerar Novo Link" e selecione "Permanente".', 'dps-client-portal' ),
+                $created_formatted
+            ),
+        ];
+    }
+}
+?>
+
+<script>
+(function($) {
+    'use strict';
+    
+    var historyData = <?php echo wp_json_encode( $history_data ); ?>;
+    var permanentLinksData = <?php echo wp_json_encode( $permanent_links_data ); ?>;
+    
+    // Handler para botão de histórico
+    $(document).on('click', '.dps-view-history-btn', function(e) {
+        e.preventDefault();
+        var clientId = $(this).data('client-id');
+        var clientName = $(this).data('client-name');
+        
+        $('#dps-history-client-name').text(clientName);
+        
+        var content = '';
+        if (historyData[clientId] && historyData[clientId].length > 0) {
+            content = '<table class="widefat striped" style="font-size: 13px;">';
+            content += '<thead><tr><th><?php echo esc_js( __( 'Data/Hora', 'dps-client-portal' ) ); ?></th><th><?php echo esc_js( __( 'IP', 'dps-client-portal' ) ); ?></th><th><?php echo esc_js( __( 'Navegador', 'dps-client-portal' ) ); ?></th></tr></thead>';
+            content += '<tbody>';
+            
+            historyData[clientId].forEach(function(access) {
+                content += '<tr>';
+                content += '<td>' + access.date + '</td>';
+                content += '<td><code>' + access.ip + '</code></td>';
+                content += '<td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + access.user_agent + '">' + access.user_agent + '</td>';
+                content += '</tr>';
+            });
+            
+            content += '</tbody></table>';
+        } else {
+            content = '<p><?php echo esc_js( __( 'Nenhum acesso registrado ainda.', 'dps-client-portal' ) ); ?></p>';
+        }
+        
+        $('#dps-history-content').html(content);
+        $('#dps-access-history-modal').show();
+    });
+    
+    // Handler para botão de ver link permanente
+    $(document).on('click', '.dps-view-permanent-link-btn', function(e) {
+        e.preventDefault();
+        var clientId = $(this).data('client-id');
+        var clientName = $(this).data('client-name');
+        
+        $('#dps-permanent-client-name').text(clientName);
+        
+        var content = '';
+        if (permanentLinksData[clientId]) {
+            content = '<div class="notice notice-info" style="margin: 0; padding: 12px;">';
+            content += '<p><strong><?php echo esc_js( __( 'Informação sobre o Link Permanente', 'dps-client-portal' ) ); ?></strong></p>';
+            content += '<p>' + permanentLinksData[clientId].info + '</p>';
+            content += '<p><em><?php echo esc_js( __( 'Por segurança, links de acesso não são armazenados no sistema após a geração.', 'dps-client-portal' ) ); ?></em></p>';
+            content += '</div>';
+        } else {
+            content = '<p><?php echo esc_js( __( 'Nenhum link permanente ativo encontrado.', 'dps-client-portal' ) ); ?></p>';
+        }
+        
+        $('#dps-permanent-link-content').html(content);
+        $('#dps-permanent-link-modal').show();
+    });
+    
+    // Fechar modais
+    $(document).on('click', '#dps-access-history-modal .dps-modal__close, #dps-access-history-modal .dps-modal__overlay', function() {
+        $('#dps-access-history-modal').hide();
+    });
+    
+    $(document).on('click', '#dps-permanent-link-modal .dps-modal__close, #dps-permanent-link-modal .dps-modal__overlay', function() {
+        $('#dps-permanent-link-modal').hide();
+    });
+    
+})(jQuery);
+</script>

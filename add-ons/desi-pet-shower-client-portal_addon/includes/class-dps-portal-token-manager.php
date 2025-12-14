@@ -50,6 +50,13 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
      * @var int
      */
     const PERMANENT_EXPIRATION_MINUTES = 60 * 24 * 365 * 10;
+    
+    /**
+     * Tamanho máximo do user agent armazenado no log de acesso
+     *
+     * @var int
+     */
+    const MAX_USER_AGENT_LENGTH = 255;
 
     /**
      * Única instância da classe
@@ -538,6 +545,153 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
     public function generate_access_url( $token_plain ) {
         $portal_url = dps_get_portal_page_url();
         return add_query_arg( 'dps_token', $token_plain, $portal_url );
+    }
+
+    /**
+     * Obtém tokens permanentes ativos de um cliente
+     *
+     * @param int $client_id ID do cliente
+     * @return array Lista de tokens permanentes ativos com suas URLs
+     */
+    public function get_active_permanent_tokens( $client_id ) {
+        global $wpdb;
+
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return [];
+        }
+
+        $table_name = $this->get_table_name();
+        $now        = current_time( 'mysql' );
+
+        $tokens = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, created_at, expires_at, used_at, ip_created
+                 FROM {$table_name} 
+                 WHERE client_id = %d 
+                   AND type = 'permanent'
+                   AND expires_at > %s 
+                   AND revoked_at IS NULL
+                 ORDER BY created_at DESC",
+                $client_id,
+                $now
+            ),
+            ARRAY_A
+        );
+
+        return $tokens ? $tokens : [];
+    }
+
+    /**
+     * Registra acesso ao portal na tabela de histórico
+     * 
+     * @since 2.5.0
+     * @param int    $client_id ID do cliente
+     * @param int    $token_id  ID do token usado (opcional)
+     * @param string $ip        Endereço IP
+     * @param string $user_agent User agent do navegador
+     * @return bool True se sucesso
+     */
+    public function log_access( $client_id, $token_id = 0, $ip = '', $user_agent = '' ) {
+        global $wpdb;
+
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return false;
+        }
+
+        // Obtém IP e user agent se não fornecidos
+        if ( empty( $ip ) ) {
+            $ip = $this->get_client_ip_with_proxy_support();
+        }
+        if ( empty( $user_agent ) && isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+            // Sanitiza e trunca user agent para evitar dados muito longos
+            $raw_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
+            // Valida que é string antes de processar
+            if ( is_string( $raw_user_agent ) ) {
+                $user_agent = sanitize_text_field( $raw_user_agent );
+            } else {
+                $user_agent = '';
+            }
+        }
+
+        // Armazena no meta do cliente como histórico simples
+        $access_log = get_post_meta( $client_id, '_dps_portal_access_log', true );
+        if ( ! is_array( $access_log ) ) {
+            $access_log = [];
+        }
+
+        // Adiciona novo registro (trunca user agent com a constante)
+        $access_log[] = [
+            'timestamp'  => current_time( 'mysql' ),
+            'ip'         => $ip,
+            'user_agent' => substr( $user_agent, 0, self::MAX_USER_AGENT_LENGTH ),
+            'token_id'   => $token_id,
+        ];
+
+        // Mantém apenas últimos 50 acessos
+        if ( count( $access_log ) > 50 ) {
+            $access_log = array_slice( $access_log, -50 );
+        }
+
+        update_post_meta( $client_id, '_dps_portal_access_log', $access_log );
+        
+        // Atualiza timestamp de último login
+        update_post_meta( $client_id, '_dps_portal_last_login', current_time( 'mysql' ) );
+        update_post_meta( $client_id, '_dps_portal_last_login_ip', $ip );
+
+        return true;
+    }
+
+    /**
+     * Obtém histórico de acessos de um cliente
+     * 
+     * @since 2.5.0
+     * @param int $client_id ID do cliente
+     * @param int $limit     Limite de registros (padrão: 20)
+     * @return array Lista de acessos
+     */
+    public function get_access_history( $client_id, $limit = 20 ) {
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return [];
+        }
+
+        $access_log = get_post_meta( $client_id, '_dps_portal_access_log', true );
+        if ( ! is_array( $access_log ) ) {
+            return [];
+        }
+
+        // Retorna em ordem reversa (mais recente primeiro)
+        $access_log = array_reverse( $access_log );
+        
+        return array_slice( $access_log, 0, $limit );
+    }
+
+    /**
+     * Obtém o último login de um cliente
+     * 
+     * @since 2.5.0
+     * @param int $client_id ID do cliente
+     * @return array|null Dados do último login ou null
+     */
+    public function get_last_login( $client_id ) {
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return null;
+        }
+
+        $last_login    = get_post_meta( $client_id, '_dps_portal_last_login', true );
+        $last_login_ip = get_post_meta( $client_id, '_dps_portal_last_login_ip', true );
+
+        if ( ! $last_login ) {
+            return null;
+        }
+
+        return [
+            'timestamp' => $last_login,
+            'ip'        => $last_login_ip,
+        ];
     }
 }
 

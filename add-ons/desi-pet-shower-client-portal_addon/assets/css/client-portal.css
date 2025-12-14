@@ -210,6 +210,7 @@
     margin-bottom: 16px;
     font-size: 14px;
     color: var(--dps-gray-600);
+    flex-wrap: wrap;
 }
 
 .dps-portal-breadcrumb__item {
@@ -224,6 +225,48 @@
 .dps-portal-breadcrumb__separator {
     color: var(--dps-gray-400);
     user-select: none;
+}
+
+/* Link de avaliação discreto no breadcrumb */
+.dps-portal-review-link {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--dps-gray-100);
+    color: var(--dps-gray-600);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dps-portal-review-link:hover {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #f59e0b;
+}
+
+.dps-portal-review-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.dps-portal-review-text {
+    display: inline;
+}
+
+@media (max-width: 480px) {
+    .dps-portal-review-text {
+        display: none;
+    }
+    
+    .dps-portal-review-link {
+        padding: 6px 10px;
+    }
 }
 
 /* ========================================
@@ -1679,13 +1722,46 @@ html {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .dps-portal-section {
+    /* Elementos que devem ocupar toda a largura (2 colunas) */
+    .dps-portal-section,
+    .dps-portal-breadcrumb,
+    .dps-portal-tabs,
+    .dps-portal-tab-content,
+    .dps-portal-header {
         grid-column: span 2;
     }
 
+    /* Seções lado a lado (1 coluna cada) */
     .dps-portal-section.dps-portal-next,
     .dps-portal-section.dps-portal-finances {
         grid-column: span 1;
+    }
+}
+
+/* Layout refinado para telas grandes (1024px+) */
+@media (min-width: 1024px) {
+    .dps-client-portal {
+        padding: 0 20px;
+    }
+    
+    .dps-portal-tabs {
+        flex-wrap: nowrap;
+    }
+    
+    .dps-portal-tabs__item {
+        flex: 0 1 auto;
+    }
+    
+    .dps-portal-tabs__link {
+        padding: 1rem 1.5rem;
+    }
+    
+    .dps-portal-tab-content {
+        padding: 32px;
+    }
+    
+    .dps-portal-section {
+        padding: 28px;
     }
 }
 

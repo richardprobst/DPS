@@ -130,6 +130,11 @@ function dps_client_portal_init_addon() {
         DPS_Portal_Admin_Actions::get_instance();
     }
     
+    // Inicializa administração do portal (CPT dps_portal_message, menus, etc.)
+    if ( class_exists( 'DPS_Portal_Admin' ) ) {
+        DPS_Portal_Admin::get_instance();
+    }
+    
     // Inicializa handler AJAX (Fase 4)
     if ( class_exists( 'DPS_Portal_AJAX_Handler' ) ) {
         DPS_Portal_AJAX_Handler::get_instance();
