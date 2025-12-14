@@ -2048,7 +2048,7 @@ class DPS_Groomers_Addon {
                                             <?php echo esc_html( $status_label ); ?>
                                         </a>
                                     </td>
-                                    <td data-label="" class="dps-actions">
+                                    <td data-label="<?php echo esc_attr__( 'Ações', 'dps-groomers-addon' ); ?>" class="dps-actions">
                                         <button type="button" 
                                             class="dps-action-link dps-edit-groomer" 
                                             data-groomer-id="<?php echo esc_attr( $groomer->ID ); ?>"
