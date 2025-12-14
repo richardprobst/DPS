@@ -114,7 +114,7 @@ class DPS_AI_Prompts {
 		if ( isset( $custom_prompts[ $context ] ) ) {
 			$trimmed = trim( $custom_prompts[ $context ] );
 			if ( ! empty( $trimmed ) ) {
-				return $custom_prompts[ $context ];
+				return $trimmed;
 			}
 		}
 		
@@ -200,25 +200,20 @@ class DPS_AI_Prompts {
 	 * @return bool True se tem customizado, false se usa padrão.
 	 */
 	public static function has_custom_prompt( $context ) {
-		$custom_prompts = self::load_custom_prompts();
-		
-		if ( isset( $custom_prompts[ $context ] ) ) {
-			$trimmed = trim( $custom_prompts[ $context ] );
-			return ! empty( $trimmed );
-		}
-		
-		return false;
+		return null !== self::get_custom_prompt( $context );
 	}
 
 	/**
 	 * Retorna o prompt padrão do arquivo para um contexto.
+	 *
+	 * Usa o cache de arquivo para evitar leituras repetidas.
 	 *
 	 * @param string $context Contexto do prompt.
 	 *
 	 * @return string Prompt padrão do arquivo.
 	 */
 	public static function get_default_prompt( $context ) {
-		return self::load_prompt_from_file( $context, true );
+		return self::load_prompt_from_file( $context );
 	}
 
 	/**
