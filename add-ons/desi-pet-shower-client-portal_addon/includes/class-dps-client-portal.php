@@ -168,9 +168,10 @@ final class DPS_Client_Portal {
         ], DPS_Logger::LEVEL_INFO );
         
         // Registra acesso no histórico para auditoria
-        $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) 
-            ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) 
-            : '';
+        $user_agent = '';
+        if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] ) ) {
+            $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+        }
         $token_manager->log_access( $token_data['client_id'], $token_data['id'], $ip_address, $user_agent );
 
         // Armazena client_id para disponibilizar autenticação imediatamente

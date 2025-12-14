@@ -636,10 +636,12 @@ foreach ( $clients as $client_data ) {
     if ( ! empty( $access_history ) ) {
         $history_data[ $client_id ] = [];
         foreach ( $access_history as $access ) {
+            // Trunca user_agent para exibição (80 chars é suficiente para a UI, log armazena até 255)
+            $display_user_agent = isset( $access['user_agent'] ) ? esc_html( substr( $access['user_agent'], 0, 80 ) ) : '—';
             $history_data[ $client_id ][] = [
                 'date'       => date_i18n( $datetime_format, strtotime( $access['timestamp'] ) ),
                 'ip'         => isset( $access['ip'] ) ? esc_html( $access['ip'] ) : '—',
-                'user_agent' => isset( $access['user_agent'] ) ? esc_html( substr( $access['user_agent'], 0, 80 ) ) : '—',
+                'user_agent' => $display_user_agent,
             ];
         }
     }

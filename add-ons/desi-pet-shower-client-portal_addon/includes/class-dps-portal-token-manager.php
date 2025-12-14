@@ -625,7 +625,7 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
         $access_log[] = [
             'timestamp'  => current_time( 'mysql' ),
             'ip'         => $ip,
-            'user_agent' => substr( (string) $user_agent, 0, self::MAX_USER_AGENT_LENGTH ),
+            'user_agent' => substr( $user_agent, 0, self::MAX_USER_AGENT_LENGTH ),
             'token_id'   => $token_id,
         ];
 
