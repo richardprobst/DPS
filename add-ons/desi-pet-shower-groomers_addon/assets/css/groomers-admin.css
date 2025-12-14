@@ -14,19 +14,36 @@
 
 .dps-groomers-container {
     display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 32px;
     margin-top: 24px;
 }
 
 .dps-groomers-form-container {
-    flex: 1 1 340px;
-    min-width: 300px;
+    width: 100%;
+    max-width: 800px;
 }
 
 .dps-groomers-list-container {
-    flex: 2 1 400px;
-    min-width: 300px;
+    width: 100%;
+}
+
+/* Layout em telas grandes (>1200px): formulário e lista lado a lado */
+@media screen and (min-width: 1200px) {
+    .dps-groomers-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .dps-groomers-form-container {
+        flex: 1 1 380px;
+        max-width: 450px;
+    }
+
+    .dps-groomers-list-container {
+        flex: 2 1 500px;
+        min-width: 450px;
+    }
 }
 
 /* ==========================================================================
@@ -480,14 +497,10 @@
    9. Responsividade
    ========================================================================== */
 
+/* Tablet (768px) */
 @media screen and (max-width: 768px) {
-    .dps-groomers-container {
-        flex-direction: column;
-    }
-    
-    .dps-groomers-form-container,
-    .dps-groomers-list-container {
-        flex: 1 1 100%;
+    .dps-groomers-form-container {
+        max-width: 100%;
     }
     
     .dps-groomers-form .dps-form-row--2col > .dps-form-field {
@@ -503,7 +516,7 @@
     }
     
     .dps-metrics-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .dps-groomers-table,
@@ -513,17 +526,121 @@
     }
 }
 
-@media screen and (max-width: 480px) {
-    .dps-groomers-form fieldset {
-        padding: 16px;
+/* Mobile (640px) - Transformação tabela → cards */
+@media screen and (max-width: 640px) {
+    .dps-groomers-table thead {
+        display: none;
     }
     
-    .dps-groomers-table th,
-    .dps-groomers-table td,
-    .dps-report-table th,
-    .dps-report-table td {
-        padding: 10px 12px;
+    .dps-groomers-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .dps-groomers-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fff;
+    }
+    
+    .dps-groomers-table tbody tr:hover {
+        background: #f9fafb;
+    }
+    
+    .dps-groomers-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .dps-groomers-table td:last-child {
+        border-bottom: none;
+        padding-top: 16px;
+    }
+    
+    .dps-groomers-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 12px;
+        flex-shrink: 0;
+        margin-right: 16px;
+    }
+    
+    .dps-groomers-table td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .dps-groomers-table td:first-child::before {
+        display: none;
+    }
+    
+    .dps-groomers-table .dps-empty-message {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .dps-groomers-table .dps-actions {
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+    
+    .dps-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-weekdays-grid {
+        gap: 6px;
+    }
+    
+    .dps-weekday-checkbox {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media screen and (max-width: 480px) {
+    .dps-groomers-container {
+        gap: 24px;
+    }
+    
+    .dps-groomers-form fieldset {
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .dps-groomers-form legend {
         font-size: 13px;
+    }
+    
+    .dps-groomers-form .dps-form-row {
+        gap: 12px;
+    }
+    
+    .dps-groomers-form .dps-form-field input,
+    .dps-groomers-form .dps-form-field select {
+        font-size: 16px;
+        padding: 12px;
+    }
+    
+    .dps-groomers-table td {
+        padding: 8px 0;
+        font-size: 13px;
+    }
+    
+    .dps-groomers-table td:first-child strong {
+        font-size: 15px;
     }
     
     .dps-metric-card {
@@ -532,6 +649,26 @@
     
     .dps-metric-card__value {
         font-size: 24px;
+    }
+    
+    .dps-btn {
+        padding: 12px 16px;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .dps-btn--small {
+        width: auto;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .dps-section-title {
+        font-size: 20px;
+    }
+    
+    .dps-section-description {
+        font-size: 13px;
     }
 }
 
