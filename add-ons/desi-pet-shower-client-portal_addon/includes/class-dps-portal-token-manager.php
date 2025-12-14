@@ -50,6 +50,13 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
      * @var int
      */
     const PERMANENT_EXPIRATION_MINUTES = 60 * 24 * 365 * 10;
+    
+    /**
+     * Tamanho máximo do user agent armazenado no log de acesso
+     *
+     * @var int
+     */
+    const MAX_USER_AGENT_LENGTH = 255;
 
     /**
      * Única instância da classe
@@ -598,7 +605,14 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
             $ip = $this->get_client_ip_with_proxy_support();
         }
         if ( empty( $user_agent ) && isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-            $user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+            // Sanitiza e trunca user agent para evitar dados muito longos
+            $raw_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
+            // Valida que é string antes de processar
+            if ( is_string( $raw_user_agent ) ) {
+                $user_agent = sanitize_text_field( $raw_user_agent );
+            } else {
+                $user_agent = '';
+            }
         }
 
         // Armazena no meta do cliente como histórico simples
@@ -607,11 +621,11 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
             $access_log = [];
         }
 
-        // Adiciona novo registro
+        // Adiciona novo registro (trunca user agent com a constante)
         $access_log[] = [
             'timestamp'  => current_time( 'mysql' ),
             'ip'         => $ip,
-            'user_agent' => substr( $user_agent, 0, 255 ),
+            'user_agent' => substr( (string) $user_agent, 0, self::MAX_USER_AGENT_LENGTH ),
             'token_id'   => $token_id,
         ];
 

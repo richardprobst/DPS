@@ -620,9 +620,16 @@ if ( 'admin' === $context ) {
 $history_data = [];
 $permanent_links_data = [];
 
+// Cache de opções de formato de data (evita múltiplas chamadas get_option)
+$date_format = get_option( 'date_format' );
+$time_format = get_option( 'time_format' );
+$datetime_format = $date_format . ' ' . $time_format;
+
+// Token manager é singleton, obtém uma vez fora do loop
+$token_manager = DPS_Portal_Token_Manager::get_instance();
+
 foreach ( $clients as $client_data ) {
     $client_id = $client_data['id'];
-    $token_manager = DPS_Portal_Token_Manager::get_instance();
     
     // Histórico de acessos
     $access_history = $token_manager->get_access_history( $client_id, 20 );
@@ -630,7 +637,7 @@ foreach ( $clients as $client_data ) {
         $history_data[ $client_id ] = [];
         foreach ( $access_history as $access ) {
             $history_data[ $client_id ][] = [
-                'date'       => date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $access['timestamp'] ) ),
+                'date'       => date_i18n( $datetime_format, strtotime( $access['timestamp'] ) ),
                 'ip'         => isset( $access['ip'] ) ? esc_html( $access['ip'] ) : '—',
                 'user_agent' => isset( $access['user_agent'] ) ? esc_html( substr( $access['user_agent'], 0, 80 ) ) : '—',
             ];
@@ -641,14 +648,14 @@ foreach ( $clients as $client_data ) {
     $permanent_tokens = $token_manager->get_active_permanent_tokens( $client_id );
     if ( ! empty( $permanent_tokens ) ) {
         // Para tokens permanentes, precisamos armazenar a URL do portal (não o token em si por segurança)
-        $portal_url = dps_get_portal_page_url();
+        $created_formatted = date_i18n( $datetime_format, strtotime( $permanent_tokens[0]['created_at'] ) );
         $permanent_links_data[ $client_id ] = [
             'count'    => count( $permanent_tokens ),
-            'created'  => date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $permanent_tokens[0]['created_at'] ) ),
+            'created'  => $created_formatted,
             // Nota: Não podemos recuperar o token original (está hashado), mas podemos mostrar info
             'info'     => sprintf( 
                 __( 'Token permanente criado em %s. O link original foi enviado ao cliente quando gerado. Se precisar de um novo link, use "Gerar Novo Link" e selecione "Permanente".', 'dps-client-portal' ),
-                date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $permanent_tokens[0]['created_at'] ) )
+                $created_formatted
             ),
         ];
     }

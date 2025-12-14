@@ -1175,7 +1175,10 @@ final class DPS_Client_Portal {
         echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
         
         // Link de avaliação discreto no canto superior (movido da seção de dados)
-        $review_url = apply_filters( 'dps_portal_review_url', 'https://g.page/r/CUPivNuiAGwnEAE/review' );
+        // URL configurável via option ou filtro (padrão usa constante para retrocompatibilidade)
+        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : 'https://g.page/r/CUPivNuiAGwnEAE/review';
+        $review_url = get_option( 'dps_portal_review_url', $default_review_url );
+        $review_url = apply_filters( 'dps_portal_review_url', $review_url );
         if ( $review_url ) {
             echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
             echo '<span class="dps-portal-review-icon">⭐</span>';
