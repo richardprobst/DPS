@@ -1975,7 +1975,7 @@ class DPS_Groomers_Addon {
                         <tbody>
                         <?php if ( empty( $filtered_groomers ) ) : ?>
                             <tr>
-                                <td colspan="6" class="dps-empty-message"><?php echo esc_html__( 'Nenhum profissional encontrado. Use o formulário ao lado para adicionar.', 'dps-groomers-addon' ); ?></td>
+                                <td colspan="6" class="dps-empty-message"><?php echo esc_html__( 'Nenhum profissional encontrado. Use o formulário acima para adicionar.', 'dps-groomers-addon' ); ?></td>
                             </tr>
                         <?php else : ?>
                             <?php foreach ( $filtered_groomers as $groomer ) : 
@@ -2018,37 +2018,37 @@ class DPS_Groomers_Addon {
                                     : __( 'Inativo', 'dps-groomers-addon' );
                                 ?>
                                 <tr class="<?php echo ( $groomer_status === 'inactive' ) ? 'dps-groomer-inactive' : ''; ?>">
-                                    <td>
+                                    <td data-label="<?php echo esc_attr__( 'Nome', 'dps-groomers-addon' ); ?>">
                                         <strong><?php echo esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?></strong>
                                         <br><small><?php echo esc_html( $groomer->user_email ); ?></small>
                                     </td>
-                                    <td>
+                                    <td data-label="<?php echo esc_attr__( 'Tipo', 'dps-groomers-addon' ); ?>">
                                         <span class="dps-badge dps-badge--type-<?php echo esc_attr( $staff_type ); ?>">
                                             <?php echo esc_html( self::get_staff_type_label( $staff_type ) ); ?>
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="<?php echo esc_attr__( 'Freelancer', 'dps-groomers-addon' ); ?>">
                                         <?php if ( $is_freelancer === '1' ) : ?>
                                             <span class="dps-badge dps-badge--freelancer"><?php echo esc_html__( 'Sim', 'dps-groomers-addon' ); ?></span>
                                         <?php else : ?>
                                             <span class="dps-text-muted"><?php echo esc_html__( 'Não', 'dps-groomers-addon' ); ?></span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td data-label="<?php echo esc_attr__( 'Comissão', 'dps-groomers-addon' ); ?>">
                                         <?php if ( $groomer_commission ) : ?>
                                             <?php echo esc_html( number_format_i18n( $groomer_commission, 1 ) ); ?>%
                                         <?php else : ?>
                                             <span class="dps-no-data">-</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td data-label="<?php echo esc_attr__( 'Status', 'dps-groomers-addon' ); ?>">
                                         <a href="<?php echo esc_url( $toggle_url ); ?>" 
                                             class="dps-status-badge <?php echo esc_attr( $status_class ); ?>"
                                             title="<?php echo esc_attr__( 'Clique para alternar status', 'dps-groomers-addon' ); ?>">
                                             <?php echo esc_html( $status_label ); ?>
                                         </a>
                                     </td>
-                                    <td class="dps-actions">
+                                    <td data-label="<?php echo esc_attr__( 'Ações', 'dps-groomers-addon' ); ?>" class="dps-actions">
                                         <button type="button" 
                                             class="dps-action-link dps-edit-groomer" 
                                             data-groomer-id="<?php echo esc_attr( $groomer->ID ); ?>"
