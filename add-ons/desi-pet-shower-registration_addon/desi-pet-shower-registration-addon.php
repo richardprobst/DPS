@@ -2285,29 +2285,46 @@ class DPS_Registration_Addon {
             }
         }
 
-        // 2. Fallback: tenta encontrar a página pelo slug padrão
+        // 2. Fallback: tenta encontrar a página pelo slug traduzido
         $default_slug = sanitize_title( __( 'Cadastro de Clientes e Pets', 'dps-registration-addon' ) );
         $page_by_slug = get_page_by_path( $default_slug );
         if ( $page_by_slug && 'publish' === $page_by_slug->post_status ) {
-            // Atualiza a option para evitar buscas futuras
-            update_option( 'dps_registration_page_id', $page_by_slug->ID );
-            $url = get_permalink( $page_by_slug->ID );
-            if ( $url ) {
-                return $url;
+            // Verifica se contém o shortcode antes de salvar
+            if ( has_shortcode( $page_by_slug->post_content, 'dps_registration_form' ) ) {
+                update_option( 'dps_registration_page_id', $page_by_slug->ID );
+                $url = get_permalink( $page_by_slug->ID );
+                if ( $url ) {
+                    return $url;
+                }
+            }
+        }
+
+        // 2b. Fallback: tenta com slug em português fixo (caso locale seja diferente)
+        if ( 'cadastro-de-clientes-e-pets' !== $default_slug ) {
+            $page_by_fixed_slug = get_page_by_path( 'cadastro-de-clientes-e-pets' );
+            if ( $page_by_fixed_slug && 'publish' === $page_by_fixed_slug->post_status ) {
+                if ( has_shortcode( $page_by_fixed_slug->post_content, 'dps_registration_form' ) ) {
+                    update_option( 'dps_registration_page_id', $page_by_fixed_slug->ID );
+                    $url = get_permalink( $page_by_fixed_slug->ID );
+                    if ( $url ) {
+                        return $url;
+                    }
+                }
             }
         }
 
         // 3. Fallback: busca qualquer página com o shortcode [dps_registration_form]
-        $pages_with_shortcode = get_posts( [
-            'post_type'      => 'page',
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            's'              => '[dps_registration_form]',
-            'fields'         => 'ids',
-        ] );
-        if ( ! empty( $pages_with_shortcode ) ) {
-            $found_page_id = (int) $pages_with_shortcode[0];
-            // Atualiza a option para evitar buscas futuras
+        global $wpdb;
+        $found_page_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s AND post_content LIKE %s LIMIT 1",
+                'page',
+                'publish',
+                '%[dps_registration_form%'
+            )
+        );
+        if ( $found_page_id ) {
+            $found_page_id = (int) $found_page_id;
             update_option( 'dps_registration_page_id', $found_page_id );
             $url = get_permalink( $found_page_id );
             if ( $url ) {
