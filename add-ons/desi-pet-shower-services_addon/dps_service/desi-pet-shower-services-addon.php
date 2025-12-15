@@ -629,6 +629,9 @@ class DPS_Services_Addon {
                     foreach ( $validation_errors as $error ) {
                         DPS_Message_Helper::add_error( $error );
                     }
+                } else {
+                    // Fallback: registra erros em log se DPS_Message_Helper não estiver disponível
+                    error_log( 'DPS Services Addon - Erros de validação: ' . implode( '; ', $validation_errors ) );
                 }
                 $redirect = $this->get_redirect_url();
                 wp_safe_redirect( $redirect );
