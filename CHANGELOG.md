@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**AI Add-on (v1.9.0) - Edição de Regras de Sistema (System Prompts)**
+
+- **Campo editável de System Prompts**: Nova seção "Regras de Sistema (System Prompts)" na página de configurações do add-on IA.
+- Permite visualizar e editar as regras de segurança e escopo para cada contexto: Portal do Cliente, Chat Público, WhatsApp e E-mail.
+- Indicadores visuais (badges) mostram se o prompt está "Customizado", "Padrão" ou "Modificado".
+- Botão "Restaurar Padrão" via AJAX para cada contexto, permitindo reverter para o prompt original.
+- Prompts customizados são armazenados na opção `dps_ai_custom_prompts` e priorizados sobre os arquivos padrão.
+- Classe `DPS_AI_Prompts` refatorada com cache unificado para arquivos (`$file_cache`) e banco de dados (`$custom_prompts_cache`).
+- Novos métodos: `get_custom_prompt()`, `save_custom_prompt()`, `reset_to_default()`, `has_custom_prompt()`, `get_default_prompt()`, `get_all_custom_prompts()`.
+
 **Groomers Add-on (v1.7.0) - FASE 4: Recursos Avançados**
 
 - **F4.1 - Configuração de disponibilidade**: Novos campos para horário de início/término e dias de trabalho por profissional.
