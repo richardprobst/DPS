@@ -214,6 +214,14 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Services Add-on (v1.3.1)**
+
+- **Redirecionamento incorreto após salvar serviço corrigido**: Após adicionar ou editar um serviço no Painel de Gestão DPS, o sistema agora redireciona corretamente para a aba de serviços (ex: `/administracao/?tab=servicos`) em vez da página inicial do site. O método `get_redirect_url()` agora segue a mesma hierarquia de fallbacks do plugin base: (1) HTTP referer, (2) `get_queried_object_id()` + `get_permalink()`, (3) global `$post`, (4) `REQUEST_URI`, (5) `home_url()`. Resolve problema onde o usuário era redirecionado para "Welcome to WordPress" após salvar serviço.
+
+**Client Portal Add-on (v2.4.2)**
+
+- **Melhoria no fallback de redirecionamento**: Método `get_redirect_url()` em `DPS_Portal_Admin_Actions` agora inclui fallback adicional via global `$post` e `REQUEST_URI` antes de usar `home_url()`, seguindo o padrão do plugin base para maior robustez.
+
 **Registration Add-on (v1.2.1)**
 
 - **Redirecionamento pós-cadastro corrigido**: Após finalizar o cadastro, o sistema agora busca corretamente a página de registro, mesmo quando a option `dps_registration_page_id` não está configurada ou a página foi excluída. O método `get_registration_page_url()` agora tenta: (1) ID salvo na option, (2) página pelo slug padrão "cadastro-de-clientes-e-pets", (3) qualquer página com o shortcode `[dps_registration_form]`. Quando encontra a página por fallback, atualiza automaticamente a option para evitar buscas futuras. Resolve problema de página em branco após cadastro.

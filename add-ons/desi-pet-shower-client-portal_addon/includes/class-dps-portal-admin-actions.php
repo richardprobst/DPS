@@ -460,10 +460,24 @@ final class DPS_Portal_Admin_Actions {
             );
         }
 
-        // Fallback
+        // Fallback: use current page permalink
         $page_id = get_queried_object_id();
         if ( $page_id ) {
             return add_query_arg( 'tab', 'logins', get_permalink( $page_id ) );
+        }
+
+        // Secondary fallback: use global $post
+        global $post;
+        if ( isset( $post->ID ) ) {
+            return add_query_arg( 'tab', 'logins', get_permalink( $post->ID ) );
+        }
+
+        // Tertiary fallback: construct URL from REQUEST_URI
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+            $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+            if ( ! empty( $request_uri ) ) {
+                return esc_url_raw( home_url( $request_uri ) );
+            }
         }
 
         return home_url();
