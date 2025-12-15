@@ -263,12 +263,22 @@ class DPS_Communications_Addon {
             return;
         }
 
+        // Verifica nonce e dá feedback adequado
         if ( ! isset( $_POST['dps_comm_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_comm_nonce'] ) ), 'dps_comm_save' ) ) {
-            return;
+            if ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_communications', 'nonce_failed', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-communications-addon' ), 'error' );
+            }
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
+            exit;
         }
 
+        // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
-            return;
+            if ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_communications', 'permission_denied', __( 'Você não tem permissão para alterar estas configurações.', 'dps-communications-addon' ), 'error' );
+            }
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
+            exit;
         }
 
         $raw_settings = isset( $_POST[ self::OPTION_KEY ] ) ? (array) wp_unslash( $_POST[ self::OPTION_KEY ] ) : [];
@@ -282,7 +292,7 @@ class DPS_Communications_Addon {
             update_option( 'dps_whatsapp_number', $whatsapp_number );
         }
 
-        wp_redirect( add_query_arg( [ 'page' => 'dps-communications', 'updated' => '1' ], admin_url( 'admin.php' ) ) );
+        wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications', 'updated' => '1' ], admin_url( 'admin.php' ) ) );
         exit;
     }
 

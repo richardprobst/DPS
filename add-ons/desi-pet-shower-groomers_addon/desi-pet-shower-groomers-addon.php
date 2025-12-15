@@ -1456,11 +1456,30 @@ class DPS_Groomers_Addon {
      * @param bool $use_frontend_messages Se true, usa DPS_Message_Helper; se false, usa add_settings_error.
      */
     private function handle_new_groomer_submission( $use_frontend_messages = false ) {
-        if ( ! isset( $_POST['dps_new_groomer_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['dps_new_groomer_nonce'] ), 'dps_new_groomer' ) ) {
+        // Verifica se o formulário foi submetido (se o nonce não existe, não é uma submissão)
+        if ( ! isset( $_POST['dps_new_groomer_nonce'] ) ) {
             return;
         }
 
+        // Verifica o nonce e dá feedback adequado
+        if ( ! wp_verify_nonce( wp_unslash( $_POST['dps_new_groomer_nonce'] ), 'dps_new_groomer' ) ) {
+            $message = __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-groomers-addon' );
+            if ( $use_frontend_messages && class_exists( 'DPS_Message_Helper' ) ) {
+                DPS_Message_Helper::add_error( $message );
+            } elseif ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_groomers', 'nonce_failed', $message, 'error' );
+            }
+            return;
+        }
+
+        // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
+            $message = __( 'Você não tem permissão para cadastrar groomers.', 'dps-groomers-addon' );
+            if ( $use_frontend_messages && class_exists( 'DPS_Message_Helper' ) ) {
+                DPS_Message_Helper::add_error( $message );
+            } elseif ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_groomers', 'permission_denied', $message, 'error' );
+            }
             return;
         }
 

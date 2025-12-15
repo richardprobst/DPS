@@ -464,7 +464,14 @@ class DPS_Debugging_Addon {
             return;
         }
 
+        // Verifica nonce e dá feedback adequado
         if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), 'dps_debugging_settings' ) ) {
+            add_settings_error(
+                'dps_debugging',
+                'nonce_failed',
+                __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-debugging-addon' ),
+                'error'
+            );
             return;
         }
 
@@ -531,7 +538,14 @@ class DPS_Debugging_Addon {
      * @since 1.3.0
      */
     private function handle_quick_mode() {
+        // Verifica nonce e dá feedback adequado
         if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), 'dps_debugging_quick_mode' ) ) {
+            add_settings_error(
+                'dps_debugging',
+                'nonce_failed',
+                __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-debugging-addon' ),
+                'error'
+            );
             return;
         }
 
@@ -600,7 +614,14 @@ class DPS_Debugging_Addon {
         // Limpeza do log
         if ( isset( $_GET['dps_debug_action'] ) && 'purge' === $_GET['dps_debug_action'] ) {
             if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_debugging_purge' ) ) {
-                return;
+                add_settings_error(
+                    'dps_debugging',
+                    'nonce_failed',
+                    __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-debugging-addon' ),
+                    'error'
+                );
+                wp_safe_redirect( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer' ) );
+                exit;
             }
 
             $log_viewer = new DPS_Debugging_Log_Viewer();
@@ -633,7 +654,14 @@ class DPS_Debugging_Addon {
         // Exportação do log (suporta TXT, CSV, JSON)
         if ( isset( $_GET['dps_debug_action'] ) && 'export' === $_GET['dps_debug_action'] ) {
             if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_debugging_export' ) ) {
-                return;
+                add_settings_error(
+                    'dps_debugging',
+                    'nonce_failed',
+                    __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-debugging-addon' ),
+                    'error'
+                );
+                wp_safe_redirect( admin_url( 'admin.php?page=dps-debugging&tab=log-viewer' ) );
+                exit;
             }
 
             $log_viewer = new DPS_Debugging_Log_Viewer();

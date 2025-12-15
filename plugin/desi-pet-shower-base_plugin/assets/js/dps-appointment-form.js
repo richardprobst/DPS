@@ -52,7 +52,8 @@
             $(document).on('input', '.dps-service-price', this.updateAppointmentSummary.bind(this));
             
             // FASE 2: Validação e estado do botão submit
-            $('form.dps-form').on('submit', this.handleFormSubmit.bind(this));
+            // Aplica somente ao form de agendamento (que contém appointment_type), não a outros forms .dps-form
+            $('form.dps-form').has('input[name="appointment_type"]').on('submit', this.handleFormSubmit.bind(this));
         },
         
         /**

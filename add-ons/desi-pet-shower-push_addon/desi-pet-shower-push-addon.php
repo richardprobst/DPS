@@ -472,11 +472,19 @@ class DPS_Push_Addon {
             return;
         }
 
+        // Verifica nonce e dá feedback adequado
         if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'dps_push_settings' ) ) {
+            if ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_push', 'nonce_failed', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-push-addon' ), 'error' );
+            }
             return;
         }
 
+        // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
+            if ( function_exists( 'add_settings_error' ) ) {
+                add_settings_error( 'dps_push', 'permission_denied', __( 'Você não tem permissão para alterar estas configurações.', 'dps-push-addon' ), 'error' );
+            }
             return;
         }
 
@@ -488,11 +496,9 @@ class DPS_Push_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
-        add_action( 'admin_notices', function() {
-            echo '<div class="notice notice-success is-dismissible"><p>';
-            echo esc_html__( 'Configurações salvas com sucesso.', 'dps-push-addon' );
-            echo '</p></div>';
-        } );
+        if ( function_exists( 'add_settings_error' ) ) {
+            add_settings_error( 'dps_push', 'settings_saved', __( 'Configurações salvas com sucesso.', 'dps-push-addon' ), 'success' );
+        }
     }
 
     /**
