@@ -1568,6 +1568,20 @@ class DPS_Finance_Addon {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
         
+        // Verifica se a tabela existe antes de qualquer consulta
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+        if ( ! $table_exists ) {
+            ob_start();
+            echo '<div class="dps-section" id="dps-section-financeiro">';
+            echo '<h3>' . esc_html__( 'Controle Financeiro', 'dps-finance-addon' ) . '</h3>';
+            echo '<div class="notice notice-warning" style="padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; background: #fcf8e3;">';
+            echo '<p><strong>' . esc_html__( 'Tabela financeira não encontrada.', 'dps-finance-addon' ) . '</strong></p>';
+            echo '<p>' . esc_html__( 'A tabela de transações ainda não foi criada. Por favor, desative e reative o add-on Financeiro para criar as tabelas necessárias.', 'dps-finance-addon' ) . '</p>';
+            echo '</div>';
+            echo '</div>';
+            return ob_get_clean();
+        }
+        
         // Busca categorias distintas na base para uso no datalist e dropdown
         $cats = $wpdb->get_col( "SELECT DISTINCT categoria FROM $table ORDER BY categoria" );
         
