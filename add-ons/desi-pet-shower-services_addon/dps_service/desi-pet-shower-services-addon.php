@@ -607,13 +607,35 @@ class DPS_Services_Addon {
             }
             $price    = ! empty( $price_candidates ) ? min( $price_candidates ) : 0;
             $duration = ! empty( $duration_candidates ) ? min( $duration_candidates ) : 0;
+
+            // Validação com mensagens de erro para o usuário
+            $validation_errors = [];
+
+            if ( empty( $name ) ) {
+                $validation_errors[] = __( 'O nome do serviço é obrigatório.', 'dps-services-addon' );
+            }
+
+            if ( empty( $type ) ) {
+                $validation_errors[] = __( 'O tipo de serviço é obrigatório.', 'dps-services-addon' );
+            }
+
             if ( empty( $price_candidates ) && 'package' !== $type ) {
-                return;
+                $validation_errors[] = __( 'Informe pelo menos um valor de preço para o serviço.', 'dps-services-addon' );
             }
+
+            // Se houver erros de validação, exibe mensagens e redireciona
+            if ( ! empty( $validation_errors ) ) {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    foreach ( $validation_errors as $error ) {
+                        DPS_Message_Helper::add_error( $error );
+                    }
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
+            }
+
             $active   = ( isset( $_POST['service_active'] ) && '1' === wp_unslash( $_POST['service_active'] ) ) ? '1' : '0';
-            if ( empty( $name ) || empty( $type ) ) {
-                return;
-            }
             $srv_id = isset( $_POST['service_id'] ) ? intval( wp_unslash( $_POST['service_id'] ) ) : 0;
             if ( $srv_id ) {
                 wp_update_post( [ 'ID' => $srv_id, 'post_title' => $name ] );
