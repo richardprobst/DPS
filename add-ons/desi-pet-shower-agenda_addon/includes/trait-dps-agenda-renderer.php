@@ -880,7 +880,6 @@ trait DPS_Agenda_Renderer {
         // Serviços (botão que abre popup)
         echo '<td data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '">';
         $service_ids = get_post_meta( $appt->ID, 'appointment_services', true );
-        $appt_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
         if ( is_array( $service_ids ) && ! empty( $service_ids ) ) {
             // Conta quantos serviços
             $service_count = count( $service_ids );
@@ -907,10 +906,13 @@ trait DPS_Agenda_Renderer {
         
         $current_conf = $confirmation_config[ $confirmation_status ] ?? $confirmation_config['not_sent'];
         
+        // Status não confirmados são agrupados sob "NÃO CONFIRMADO"
+        $is_not_confirmed = in_array( $confirmation_status, [ 'not_sent', 'sent', 'no_answer' ], true );
+        
         echo '<div class="dps-confirmation-dropdown-wrapper">';
         echo '<select class="dps-confirmation-dropdown dps-dropdown--' . esc_attr( $current_conf['class'] ) . '" data-appt-id="' . esc_attr( $appt->ID ) . '">';
         echo '<option value="confirmed"' . selected( $confirmation_status, 'confirmed', false ) . '>✅ ' . esc_html__( 'CONFIRMADO', 'dps-agenda-addon' ) . '</option>';
-        echo '<option value="not_sent"' . selected( in_array( $confirmation_status, [ 'not_sent', 'sent', 'no_answer' ], true ), true, false ) . '>⚪ ' . esc_html__( 'NÃO CONFIRMADO', 'dps-agenda-addon' ) . '</option>';
+        echo '<option value="not_sent"' . selected( $is_not_confirmed, true, false ) . '>⚪ ' . esc_html__( 'NÃO CONFIRMADO', 'dps-agenda-addon' ) . '</option>';
         echo '<option value="denied"' . selected( $confirmation_status, 'denied', false ) . '>❌ ' . esc_html__( 'CANCELADO', 'dps-agenda-addon' ) . '</option>';
         echo '</select>';
         echo '</div>';

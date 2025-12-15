@@ -901,12 +901,21 @@
     var petName = btn.data('pet-name');
     var totalValue = btn.data('total-value');
     
-    // Formata o número de WhatsApp
+    // Formata o número de WhatsApp (Brasil)
+    // Remove todos os caracteres não numéricos
     var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
-    if (whatsappNumber.length === 11) {
+    // Adiciona código do país apenas se necessário
+    // 10 dígitos = DDD (2) + número fixo (8) - formato antigo celular
+    // 11 dígitos = DDD (2) + número celular (9)
+    // 12 dígitos = código país (2) + DDD (2) + número fixo (8)
+    // 13 dígitos = código país (2) + DDD (2) + número celular (9)
+    if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
+      // Número brasileiro sem código do país
       whatsappNumber = '55' + whatsappNumber;
-    } else if (whatsappNumber.length === 10) {
-      whatsappNumber = '55' + whatsappNumber;
+    } else if (whatsappNumber.length >= 12 && whatsappNumber.substring(0, 2) === '55') {
+      // Número já tem código do país (mantém como está)
+    } else if (whatsappNumber.length < 10) {
+      // Número muito curto - mantém para o usuário corrigir
     }
     
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);

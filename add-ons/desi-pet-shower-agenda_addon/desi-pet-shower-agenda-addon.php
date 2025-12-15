@@ -1991,12 +1991,16 @@ class DPS_Agenda_Addon {
         if ( ! $id_param ) {
             wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
         }
+        
+        // Busca observações do agendamento
+        $appt_notes = get_post_meta( $id_param, 'appointment_notes', true );
 
         // Delega para Services API se disponível (recomendado)
         if ( class_exists( 'DPS_Services_API' ) ) {
             $details = DPS_Services_API::get_services_details( $id_param );
             wp_send_json_success( [
                 'services' => $details['services'],
+                'notes'    => $appt_notes,
             ] );
         }
 
@@ -2023,7 +2027,7 @@ class DPS_Agenda_Addon {
                 }
             }
         }
-        wp_send_json_success( [ 'services' => $services ] );
+        wp_send_json_success( [ 'services' => $services, 'notes' => $appt_notes ] );
     }
 
     /**
