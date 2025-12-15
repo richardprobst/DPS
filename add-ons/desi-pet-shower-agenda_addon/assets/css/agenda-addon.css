@@ -2619,3 +2619,701 @@ tr.dps-row-updated {
 .dps-tab-content h5:first-child {
     margin-top: 0;
 }
+
+/* ========================================================
+   FASE 7: Novos Estilos para Agenda Reorganizada
+   ======================================================== */
+
+/* === Badge de Pet Agressivo === */
+.dps-pet-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.dps-pet-badge--aggressive {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    animation: pulse-aggressive 2s ease-in-out infinite;
+}
+
+@keyframes pulse-aggressive {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+    }
+}
+
+/* === Dropdown Elegante de Confirmação (Tab1) === */
+.dps-confirmation-dropdown-wrapper {
+    position: relative;
+}
+
+.dps-confirmation-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 2px solid var(--dps-border);
+    border-radius: 8px;
+    background: var(--dps-surface);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 180px;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.dps-confirmation-dropdown:hover {
+    border-color: var(--dps-accent);
+}
+
+.dps-confirmation-dropdown:focus {
+    outline: none;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.dps-dropdown--confirmed {
+    background-color: #d1fae5;
+    border-color: #10b981;
+    color: #059669;
+}
+
+.dps-dropdown--not-confirmed {
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #6b7280;
+}
+
+.dps-dropdown--cancelled {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+/* === Dropdown Elegante de Status (Tab2) === */
+.dps-status-dropdown-wrapper {
+    position: relative;
+}
+
+.dps-status-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 2px solid var(--dps-border);
+    border-radius: 8px;
+    background: var(--dps-surface);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 200px;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.dps-status-dropdown:hover {
+    border-color: var(--dps-accent);
+}
+
+.dps-status-dropdown:focus {
+    outline: none;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.dps-dropdown--pending {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.dps-dropdown--finished {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.dps-dropdown--paid {
+    background-color: #d1fae5;
+    border-color: #10b981;
+    color: #059669;
+}
+
+.dps-dropdown--cancelled {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+/* === Badge de Status (para não-editores) === */
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.dps-status-badge--pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-badge--finished {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.dps-status-badge--paid {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.dps-status-badge--cancelled {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* === Botão de Serviços Popup (Tab1) === */
+.dps-services-popup-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    color: #1e40af;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-services-popup-btn:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+.dps-services-popup-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.dps-no-services {
+    color: var(--dps-muted);
+    font-style: italic;
+}
+
+/* === Botão de Pagamento Popup (Tab2) === */
+.dps-payment-popup-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.dps-payment-popup-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.dps-payment-popup-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+/* === Status de Pagamento (Tab2) === */
+.dps-payment-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.dps-payment-status--paid {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.dps-payment-status--pending {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-payment-status--cancelled {
+    background-color: transparent;
+    color: var(--dps-muted);
+}
+
+/* === TaxiDog Wrapper e Labels (Tab3) === */
+.dps-taxidog-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dps-taxidog-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dps-taxidog-label--requested {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #f59e0b;
+}
+
+.dps-taxidog-label--not-requested {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+/* === Dropdown de TaxiDog (Tab3) === */
+.dps-taxidog-dropdown-wrapper {
+    margin-top: 0.35rem;
+}
+
+.dps-taxidog-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.4rem 2rem 0.4rem 0.65rem;
+    border: 2px solid #f59e0b;
+    border-radius: 6px;
+    background: #fffbeb;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 180px;
+    color: #92400e;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f59e0b' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+}
+
+.dps-taxidog-dropdown:hover {
+    border-color: #d97706;
+    background-color: #fef3c7;
+}
+
+.dps-taxidog-dropdown:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* === Botão de Solicitar TaxiDog (Tab3) === */
+.dps-taxidog-request-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.35rem;
+}
+
+.dps-taxidog-request-btn:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    border-color: #d97706;
+    transform: translateY(-1px);
+}
+
+.dps-taxidog-request-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+}
+
+/* === Modal de Popup de Pagamento === */
+.dps-payment-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 1rem;
+    backdrop-filter: blur(2px);
+}
+
+.dps-payment-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.dps-payment-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.dps-payment-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-payment-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.dps-payment-modal-close:hover {
+    color: white;
+}
+
+.dps-payment-modal-body {
+    padding: 1.5rem 1.25rem;
+}
+
+.dps-payment-info {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.dps-payment-info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.dps-payment-info-item:last-child {
+    margin-bottom: 0;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #bbf7d0;
+    font-weight: 700;
+}
+
+.dps-payment-info-label {
+    color: #6b7280;
+}
+
+.dps-payment-info-value {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.dps-payment-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dps-payment-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.dps-payment-action-btn--whatsapp {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    border: none;
+    color: white;
+}
+
+.dps-payment-action-btn--whatsapp:hover {
+    background: linear-gradient(135deg, #128c7e 0%, #075e54 100%);
+    transform: translateY(-1px);
+}
+
+.dps-payment-action-btn--copy {
+    background: var(--dps-surface);
+    border: 2px solid var(--dps-border);
+    color: #0f172a;
+}
+
+.dps-payment-action-btn--copy:hover {
+    border-color: var(--dps-accent);
+    color: var(--dps-accent);
+}
+
+.dps-payment-action-btn--copy.copied {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #059669;
+}
+
+/* === Modal de Popup de Serviços === */
+.dps-services-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 1rem;
+    backdrop-filter: blur(2px);
+}
+
+.dps-services-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+.dps-services-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.dps-services-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dps-services-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.dps-services-modal-close:hover {
+    color: white;
+}
+
+.dps-services-modal-body {
+    padding: 1.5rem 1.25rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.dps-services-list-modal {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dps-services-list-modal li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--dps-border);
+}
+
+.dps-services-list-modal li:last-child {
+    border-bottom: none;
+}
+
+.dps-services-list-modal .service-name {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.dps-services-list-modal .service-price {
+    font-weight: 600;
+    color: var(--dps-accent);
+}
+
+.dps-services-notes {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid var(--dps-border);
+    border-radius: 8px;
+}
+
+.dps-services-notes-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.dps-services-notes-content {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.5;
+}
+
+/* === Resumo do Dia Colapsável === */
+.dps-summary-report {
+    margin-top: 2rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+    background: var(--dps-surface);
+}
+
+.dps-summary-report > summary {
+    padding: 0.85rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--dps-background);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #374151;
+    list-style: none;
+}
+
+.dps-summary-report > summary::-webkit-details-marker {
+    display: none;
+}
+
+.dps-summary-report > summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+}
+
+.dps-summary-report[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.dps-summary-report[open] > summary {
+    border-bottom: 1px solid var(--dps-border);
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.dps-summary-content {
+    padding: 1rem;
+}
+
+/* === Responsividade para novos elementos === */
+@media (max-width: 768px) {
+    .dps-pet-badge {
+        display: block;
+        margin-left: 0;
+        margin-top: 0.35rem;
+    }
+    
+    .dps-confirmation-dropdown,
+    .dps-status-dropdown,
+    .dps-taxidog-dropdown {
+        min-width: 100%;
+    }
+    
+    .dps-services-popup-btn,
+    .dps-payment-popup-btn,
+    .dps-taxidog-request-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-payment-modal-content,
+    .dps-services-modal-content {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+    
+    .dps-taxidog-wrapper {
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-payment-action-btn {
+        font-size: 0.875rem;
+        padding: 0.75rem 0.875rem;
+    }
+}

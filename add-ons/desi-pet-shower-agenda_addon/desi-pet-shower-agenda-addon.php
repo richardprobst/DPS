@@ -230,6 +230,9 @@ class DPS_Agenda_Addon {
         // FASE 3: AJAX para atualização de status de TaxiDog
         add_action( 'wp_ajax_dps_agenda_update_taxidog', [ $this, 'update_taxidog_ajax' ] );
         
+        // FASE 7: AJAX para solicitar TaxiDog
+        add_action( 'wp_ajax_dps_agenda_request_taxidog', [ $this, 'request_taxidog_ajax' ] );
+        
         // FASE 4: AJAX para salvar configuração de capacidade
         add_action( 'wp_ajax_dps_agenda_save_capacity', [ $this, 'save_capacity_ajax' ] );
         
@@ -984,10 +987,7 @@ class DPS_Agenda_Addon {
         // Título simples da agenda
         echo '<h3>' . __( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
         
-        // FASE 5: Dashboard de KPIs (exibido apenas para visualização diária)
-        if ( ! $show_all && $view !== 'calendar' ) {
-            $this->render_admin_dashboard( $selected_date );
-        }
+        // NOTA: "Resumo do Dia" movido para o final da página (render_admin_dashboard chamado após as abas)
         
         // FASE 5: Barra de ações em lote (oculta inicialmente, exibida via JS)
         echo '<div class="dps-bulk-actions">';
@@ -1476,6 +1476,7 @@ class DPS_Agenda_Addon {
         
         // Renderiza tabela para cada dia, aplicando filtros se necessário
         $has_any = false;
+        $all_filtered_appointments = []; // FASE 7: Armazena todos os appointments filtrados para relatório no final
         $column_labels = [
             'date'          => __( 'Data', 'dps-agenda-addon' ),
             'time'          => __( 'Hora', 'dps-agenda-addon' ),
@@ -1544,6 +1545,10 @@ class DPS_Agenda_Addon {
                     $filtered[] = $appt;
                 }
             }
+            
+            // FASE 7: Acumula todos os appointments filtrados para relatório no final
+            $all_filtered_appointments = array_merge( $all_filtered_appointments, $filtered );
+            
             // Classificar por status: pendente vs finalizado
             $upcoming  = [];
             $completed = [];
@@ -1610,7 +1615,7 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
@@ -1669,10 +1674,8 @@ class DPS_Agenda_Addon {
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviço', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['status'] ?? __( 'Status', 'dps-agenda-addon' ) ) . '</th>';
+                echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
                     echo $this->render_appointment_row_tab2( $appt, $column_labels );
@@ -1726,14 +1729,11 @@ class DPS_Agenda_Addon {
                 echo '<h5>' . esc_html( $heading ) . '</h5>';
                 echo '<div class="dps-agenda-table-container">';
                 echo '<table class="dps-table dps-table--tab3"><thead><tr>';
+                echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
                 echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
                 echo '<th>TaxiDog</th>';
-                echo '<th>' . esc_html__( 'Endereço', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Mapa', 'dps-agenda-addon' ) . '</th>';
                 echo '</tr></thead><tbody>';
                 foreach ( $apts as $appt ) {
                     echo $this->render_appointment_row_tab3( $appt, $column_labels );
@@ -1753,17 +1753,7 @@ class DPS_Agenda_Addon {
                 }
             }
             
-            if ( ! empty( $filtered ) ) {
-                // FASE 2: Seção de Relatório de Ocupação (colapsável)
-                $this->render_occupancy_report( $filtered, $selected_date, $is_week_view );
-                
-                // Resumo com ícones e visual melhorado
-                echo '<div class="dps-agenda-summary" role="status">';
-                echo '<span class="dps-summary-item dps-summary-item--pending"><span class="dps-summary-icon">⏳</span><strong>' . esc_html( $total_upcoming ) . '</strong> ' . esc_html( _n( 'pendente', 'pendentes', $total_upcoming, 'dps-agenda-addon' ) ) . '</span>';
-                echo '<span class="dps-summary-item dps-summary-item--done"><span class="dps-summary-icon">✅</span><strong>' . esc_html( $total_completed ) . '</strong> ' . esc_html( _n( 'finalizado', 'finalizados', $total_completed, 'dps-agenda-addon' ) ) . '</span>';
-                echo '<span class="dps-summary-item dps-summary-item--total"><span class="dps-summary-icon">📊</span><strong>' . esc_html( count( $filtered ) ) . '</strong> ' . esc_html__( 'total', 'dps-agenda-addon' ) . '</span>';
-                echo '</div>';
-            }
+            // NOTA: Relatório de Ocupação movido para o final da página (após as abas)
             
             // FASE 2: Verifica se deve agrupar por cliente
             $group_by_client = isset( $_GET['group_by_client'] ) && $_GET['group_by_client'] === '1';
@@ -1848,6 +1838,17 @@ class DPS_Agenda_Addon {
             }
             
             echo '</div>';
+        }
+        
+        // FASE 7: "Resumo do Dia" e "Relatório de Ocupação" movidos para o final da página
+        // Renderiza Relatório de Ocupação como seção colapsável
+        if ( ! $show_all && $view !== 'calendar' && ! empty( $all_filtered_appointments ) ) {
+            $this->render_occupancy_report( $all_filtered_appointments, $selected_date, $is_week_view );
+        }
+        
+        // Renderiza Dashboard de KPIs como seção colapsável no final
+        if ( ! $show_all && $view !== 'calendar' ) {
+            $this->render_admin_dashboard( $selected_date );
         }
         
         echo '</div>';
@@ -1990,12 +1991,16 @@ class DPS_Agenda_Addon {
         if ( ! $id_param ) {
             wp_send_json_error( [ 'message' => __( 'ID inválido.', 'dps-agenda-addon' ) ] );
         }
+        
+        // Busca observações do agendamento
+        $appt_notes = get_post_meta( $id_param, 'appointment_notes', true );
 
         // Delega para Services API se disponível (recomendado)
         if ( class_exists( 'DPS_Services_API' ) ) {
             $details = DPS_Services_API::get_services_details( $id_param );
             wp_send_json_success( [
                 'services' => $details['services'],
+                'notes'    => $appt_notes,
             ] );
         }
 
@@ -2022,7 +2027,7 @@ class DPS_Agenda_Addon {
                 }
             }
         }
-        wp_send_json_success( [ 'services' => $services ] );
+        wp_send_json_success( [ 'services' => $services, 'notes' => $appt_notes ] );
     }
 
     /**
@@ -2457,6 +2462,47 @@ class DPS_Agenda_Addon {
             'row_html'       => $row_html,
             'appointment_id' => $appt_id,
             'taxidog_status' => $new_status,
+        ] );
+    }
+
+    /**
+     * FASE 7: AJAX handler para solicitar TaxiDog.
+     *
+     * Habilita TaxiDog para um agendamento que não tinha solicitado.
+     *
+     * @since 1.4.2
+     */
+    public function request_taxidog_ajax() {
+        // Verifica permissão do usuário
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Verifica nonce
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'dps_agenda_taxidog' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-agenda-addon' ) ] );
+        }
+        
+        $appt_id = isset( $_POST['appt_id'] ) ? intval( $_POST['appt_id'] ) : 0;
+        
+        if ( ! $appt_id ) {
+            wp_send_json_error( [ 'message' => __( 'Dados inválidos.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Valida que o post existe e é um agendamento
+        $post = get_post( $appt_id );
+        if ( ! $post || $post->post_type !== 'dps_agendamento' ) {
+            wp_send_json_error( [ 'message' => __( 'Agendamento não encontrado.', 'dps-agenda-addon' ) ] );
+        }
+        
+        // Habilita TaxiDog no agendamento
+        update_post_meta( $appt_id, 'appointment_taxidog', 1 );
+        update_post_meta( $appt_id, '_dps_taxidog_status', 'requested' );
+        
+        wp_send_json_success( [
+            'message'        => __( 'TaxiDog solicitado com sucesso!', 'dps-agenda-addon' ),
+            'appointment_id' => $appt_id,
         ] );
     }
 
@@ -3676,18 +3722,21 @@ class DPS_Agenda_Addon {
     }
 
     /**
-     * Renderiza o dashboard de KPIs no topo da agenda.
+     * Renderiza o dashboard de KPIs como seção colapsável no final da agenda.
      *
      * @since 1.3.2
+     * @since 1.4.1 Modificado para usar <details> colapsável, fechado por padrão
      * @param string $date Data selecionada.
      * @return void
      */
     private function render_admin_dashboard( $date ) {
         $kpis = $this->calculate_admin_kpis( $date );
         $status_config = self::get_status_config();
+        $date_formatted = date_i18n( 'd/m/Y', strtotime( $date ) );
         
-        echo '<div class="dps-admin-dashboard">';
-        echo '<h4 class="dps-dashboard-title">📊 ' . esc_html__( 'Resumo do Dia', 'dps-agenda-addon' ) . '</h4>';
+        echo '<details class="dps-summary-report">';
+        echo '<summary>📊 ' . esc_html__( 'Resumo do Dia', 'dps-agenda-addon' ) . ' - ' . esc_html( $date_formatted ) . '</summary>';
+        echo '<div class="dps-summary-content">';
         echo '<div class="dps-kpi-grid">';
         
         // Card: Pendentes
@@ -3726,7 +3775,8 @@ class DPS_Agenda_Addon {
         echo '</div>';
         
         echo '</div>'; // .dps-kpi-grid
-        echo '</div>'; // .dps-admin-dashboard
+        echo '</div>'; // .dps-summary-content
+        echo '</details>'; // .dps-summary-report
     }
 
 

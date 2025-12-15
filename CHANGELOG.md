@@ -112,6 +112,18 @@ Antes de criar uma nova versão oficial:
 - **F2.1 - Campo `required_staff_type`**: Serviços podem exigir tipo específico de profissional (groomer, banhista ou qualquer).
 - Meta `required_staff_type` salva com valores 'any', 'groomer', 'banhista'.
 
+**Agenda Add-on (v1.4.2) - FASE 7: Reorganização das Abas**
+
+- **Resumo do Dia e Relatório de Ocupação**: Movidos para o final da página, ambos agora usam `<details>` expansível (fechados por padrão).
+- **Aba "Visão Rápida" reorganizada**: Colunas Checkbox, Horário, Pet (com badge de agressivo), Tutor, Serviços (botão popup), Confirmação (dropdown elegante com CONFIRMADO/NÃO CONFIRMADO/CANCELADO).
+- **Aba "Operação" reorganizada**: Colunas Checkbox, Horário, Pet (com badge de agressivo), Tutor, Status do Serviço (dropdown com ícones), Pagamento (popup com envio por WhatsApp e copiar link).
+- **Aba "Detalhes" reorganizada**: Colunas Checkbox, Horário, Pet (com badge de agressivo), Tutor, TaxiDog (lógica condicional para solicitado/não solicitado).
+- **Badge de pet agressivo**: Badge visual em todas as abas identificando pets marcados como agressivos.
+- **Popup de Serviços**: Modal com lista de serviços, preços e observações do atendimento.
+- **Popup de Pagamento**: Modal com botão para enviar link de pagamento por WhatsApp e botão para copiar link.
+- **Handler AJAX `dps_agenda_request_taxidog`**: Permite solicitar TaxiDog para agendamentos que não tinham solicitado.
+- **CSS e JS**: Novos estilos para dropdowns elegantes, badges, popups e responsividade.
+
 **Agenda Add-on (v1.1.0) - FASE 2: Filtro por Profissional**
 
 - **F2.5 - Filtro por profissional na Agenda**: Novo filtro nos filtros avançados para selecionar profissional específico.

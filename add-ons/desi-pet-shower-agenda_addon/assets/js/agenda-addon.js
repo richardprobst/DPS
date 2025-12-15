@@ -710,4 +710,349 @@
   
   // Restaura última aba visitada ao carregar página removido daqui (movido para início do ready block)
 
+  // =========================================================================
+  // FASE 7: Novos Handlers para Dropdowns e Popups
+  // =========================================================================
+
+  // Handler para dropdown de confirmação (Tab1)
+  $(document).on('change', '.dps-confirmation-dropdown', function(){
+    var select = $(this);
+    var apptId = select.data('appt-id');
+    var confirmationStatus = select.val();
+    var row = select.closest('tr');
+    
+    select.prop('disabled', true).addClass('is-loading');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_update_confirmation',
+      appt_id: apptId,
+      confirmation_status: confirmationStatus,
+      nonce: DPS_AG_Addon.nonce_confirmation
+    }, function(resp){
+      if (resp && resp.success) {
+        // Atualiza a classe do dropdown para refletir o novo status
+        select.removeClass('dps-dropdown--confirmed dps-dropdown--not-confirmed dps-dropdown--cancelled');
+        if (confirmationStatus === 'confirmed') {
+          select.addClass('dps-dropdown--confirmed');
+        } else if (confirmationStatus === 'denied') {
+          select.addClass('dps-dropdown--cancelled');
+        } else {
+          select.addClass('dps-dropdown--not-confirmed');
+        }
+        
+        // Feedback visual
+        row.css('background-color', '#d1fae5');
+        setTimeout(function(){
+          row.css('background-color', '');
+        }, 1000);
+      } else {
+        alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.');
+      }
+    }).fail(function(){
+      alert('Erro de comunicação.');
+    }).always(function(){
+      select.prop('disabled', false).removeClass('is-loading');
+    });
+  });
+
+  // Handler para dropdown de status (Tab2) - usa o mesmo handler dps-status-select existente
+  $(document).on('change', '.dps-status-dropdown', function(){
+    var select = $(this);
+    var apptId = select.data('appt-id');
+    var status = select.val();
+    var apptVersion = parseInt(select.data('appt-version'), 10) || 0;
+    var previous = select.data('current-status');
+    var row = select.closest('tr');
+    
+    select.prop('disabled', true).addClass('is-loading');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_update_status',
+      id: apptId,
+      status: status,
+      version: apptVersion,
+      nonce: DPS_AG_Addon.nonce_status
+    }, function(resp){
+      if (resp && resp.success) {
+        select.data('current-status', status);
+        if (resp.data && resp.data.version) {
+          select.data('appt-version', resp.data.version);
+        }
+        
+        // Atualiza a classe do dropdown
+        select.removeClass('dps-dropdown--pending dps-dropdown--finished dps-dropdown--paid dps-dropdown--cancelled');
+        if (status === 'pendente') {
+          select.addClass('dps-dropdown--pending');
+        } else if (status === 'finalizado') {
+          select.addClass('dps-dropdown--finished');
+        } else if (status === 'finalizado_pago') {
+          select.addClass('dps-dropdown--paid');
+        } else if (status === 'cancelado') {
+          select.addClass('dps-dropdown--cancelled');
+        }
+        
+        // Atualiza classes da linha
+        row.removeClass('status-pendente status-finalizado status-finalizado_pago status-cancelado')
+           .addClass('status-' + status);
+        
+        // Feedback visual
+        row.css('background-color', '#d1fae5');
+        setTimeout(function(){
+          row.css('background-color', '');
+          location.reload(); // Reload para atualizar a coluna de pagamento
+        }, 800);
+      } else {
+        if (resp && resp.data && resp.data.error_code === 'version_conflict') {
+          alert(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'));
+        } else {
+          alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.');
+        }
+        select.val(previous);
+      }
+    }).fail(function(){
+      alert('Erro de comunicação.');
+      select.val(previous);
+    }).always(function(){
+      select.prop('disabled', false).removeClass('is-loading');
+    });
+  });
+
+  // Handler para botão de popup de serviços (Tab1)
+  $(document).on('click', '.dps-services-popup-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    
+    btn.prop('disabled', true);
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_get_services_details',
+      appt_id: apptId,
+      nonce: DPS_AG_Addon.nonce_services
+    }, function(resp){
+      if (resp && resp.success) {
+        var services = resp.data.services || [];
+        var notes = resp.data.notes || '';
+        
+        // Monta o HTML do modal
+        var modalHtml = '<div class="dps-services-modal">' +
+          '<div class="dps-services-modal-content">' +
+            '<div class="dps-services-modal-header">' +
+              '<h3 class="dps-services-modal-title">📋 Serviços do Atendimento</h3>' +
+              '<button type="button" class="dps-services-modal-close">&times;</button>' +
+            '</div>' +
+            '<div class="dps-services-modal-body">';
+        
+        if (services.length > 0) {
+          modalHtml += '<ul class="dps-services-list-modal">';
+          var total = 0;
+          for (var i = 0; i < services.length; i++) {
+            var srv = services[i];
+            var price = parseFloat(srv.price) || 0;
+            total += price;
+            modalHtml += '<li><span class="service-name">' + srv.name + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
+          }
+          modalHtml += '<li style="font-weight:700; border-top:2px solid #e2e8f0; padding-top:1rem;"><span>Total</span><span class="service-price">R$ ' + total.toFixed(2).replace('.', ',') + '</span></li>';
+          modalHtml += '</ul>';
+        } else {
+          modalHtml += '<p style="color:#6b7280; text-align:center;">Nenhum serviço registrado.</p>';
+        }
+        
+        if (notes) {
+          modalHtml += '<div class="dps-services-notes">' +
+            '<div class="dps-services-notes-title">📝 Observações</div>' +
+            '<div class="dps-services-notes-content">' + notes.replace(/\n/g, '<br>') + '</div>' +
+          '</div>';
+        }
+        
+        modalHtml += '</div></div></div>';
+        
+        $('body').append(modalHtml);
+      } else {
+        alert(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.');
+      }
+    }).fail(function(){
+      alert('Erro de comunicação.');
+    }).always(function(){
+      btn.prop('disabled', false);
+    });
+  });
+
+  // Fechar modal de serviços
+  $(document).on('click', '.dps-services-modal-close', function(){
+    $('.dps-services-modal').remove();
+  });
+  
+  $(document).on('click', '.dps-services-modal', function(e){
+    if ($(e.target).hasClass('dps-services-modal')) {
+      $(this).remove();
+    }
+  });
+
+  // Handler para botão de popup de pagamento (Tab2)
+  $(document).on('click', '.dps-payment-popup-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var paymentLink = btn.data('payment-link');
+    var clientPhone = btn.data('client-phone');
+    var whatsappMsg = btn.data('whatsapp-msg');
+    var clientName = btn.data('client-name');
+    var petName = btn.data('pet-name');
+    var totalValue = btn.data('total-value');
+    
+    // Formata o número de WhatsApp (Brasil)
+    // Remove todos os caracteres não numéricos
+    var whatsappNumber = (clientPhone || '').replace(/\D/g, '');
+    // Adiciona código do país apenas se necessário
+    // 10 dígitos = DDD (2) + número fixo (8) - formato antigo celular
+    // 11 dígitos = DDD (2) + número celular (9)
+    // 12 dígitos = código país (2) + DDD (2) + número fixo (8)
+    // 13 dígitos = código país (2) + DDD (2) + número celular (9)
+    if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
+      // Número brasileiro sem código do país
+      whatsappNumber = '55' + whatsappNumber;
+    } else if (whatsappNumber.length >= 12 && whatsappNumber.substring(0, 2) === '55') {
+      // Número já tem código do país (mantém como está)
+    } else if (whatsappNumber.length < 10) {
+      // Número muito curto - mantém para o usuário corrigir
+    }
+    
+    var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
+    
+    // Monta o HTML do modal
+    var modalHtml = '<div class="dps-payment-modal">' +
+      '<div class="dps-payment-modal-content">' +
+        '<div class="dps-payment-modal-header">' +
+          '<h3 class="dps-payment-modal-title">💳 Enviar Link de Pagamento</h3>' +
+          '<button type="button" class="dps-payment-modal-close">&times;</button>' +
+        '</div>' +
+        '<div class="dps-payment-modal-body">' +
+          '<div class="dps-payment-info">' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Cliente:</span><span class="dps-payment-info-value">' + clientName + '</span></div>' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet:</span><span class="dps-payment-info-value">' + petName + '</span></div>' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor:</span><span class="dps-payment-info-value">R$ ' + totalValue + '</span></div>' +
+          '</div>' +
+          '<div class="dps-payment-actions">' +
+            '<a href="' + whatsappUrl + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
+              '📱 Enviar por WhatsApp' +
+            '</a>' +
+            '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + paymentLink + '">' +
+              '📋 Copiar Link de Pagamento' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+    
+    $('body').append(modalHtml);
+  });
+
+  // Fechar modal de pagamento
+  $(document).on('click', '.dps-payment-modal-close', function(){
+    $('.dps-payment-modal').remove();
+  });
+  
+  $(document).on('click', '.dps-payment-modal', function(e){
+    if ($(e.target).hasClass('dps-payment-modal')) {
+      $(this).remove();
+    }
+  });
+
+  // Copiar link de pagamento
+  $(document).on('click', '.dps-payment-action-btn--copy', function(){
+    var btn = $(this);
+    var link = btn.data('link');
+    
+    // Copia para clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function(){
+        btn.addClass('copied').text('✅ Link Copiado!');
+        setTimeout(function(){
+          btn.removeClass('copied').text('📋 Copiar Link de Pagamento');
+        }, 2000);
+      });
+    } else {
+      // Fallback para navegadores antigos
+      var tempInput = $('<input>');
+      $('body').append(tempInput);
+      tempInput.val(link).select();
+      document.execCommand('copy');
+      tempInput.remove();
+      btn.addClass('copied').text('✅ Link Copiado!');
+      setTimeout(function(){
+        btn.removeClass('copied').text('📋 Copiar Link de Pagamento');
+      }, 2000);
+    }
+  });
+
+  // Handler para dropdown de TaxiDog (Tab3)
+  $(document).on('change', '.dps-taxidog-dropdown', function(){
+    var select = $(this);
+    var apptId = select.data('appt-id');
+    var taxidogStatus = select.val();
+    var row = select.closest('tr');
+    
+    select.prop('disabled', true).addClass('is-loading');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_update_taxidog',
+      appt_id: apptId,
+      taxidog_status: taxidogStatus,
+      nonce: DPS_AG_Addon.nonce_taxidog
+    }, function(resp){
+      if (resp && resp.success) {
+        // Feedback visual
+        row.css('background-color', '#d1fae5');
+        setTimeout(function(){
+          row.css('background-color', '');
+        }, 1000);
+      } else {
+        alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.');
+      }
+    }).fail(function(){
+      alert('Erro de comunicação.');
+    }).always(function(){
+      select.prop('disabled', false).removeClass('is-loading');
+    });
+  });
+
+  // Handler para botão de solicitar TaxiDog (Tab3)
+  $(document).on('click', '.dps-taxidog-request-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var apptId = btn.data('appt-id');
+    var row = btn.closest('tr');
+    
+    if (!confirm('Deseja solicitar TaxiDog para este atendimento?')) {
+      return;
+    }
+    
+    btn.prop('disabled', true).text('Solicitando...');
+    
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_agenda_request_taxidog',
+      appt_id: apptId,
+      nonce: DPS_AG_Addon.nonce_taxidog
+    }, function(resp){
+      if (resp && resp.success) {
+        // Recarrega a página para atualizar a UI
+        location.reload();
+      } else {
+        alert(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.');
+        btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
+      }
+    }).fail(function(){
+      alert('Erro de comunicação.');
+      btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
+    });
+  });
+
+  // Fechar modais com ESC
+  $(document).on('keydown', function(e){
+    if (e.key === 'Escape') {
+      $('.dps-services-modal, .dps-payment-modal').remove();
+    }
+  });
+
 })(jQuery);
