@@ -125,41 +125,56 @@
 
 /* Input Container */
 .dps-specialist-input-container {
-    padding: 20px;
+    padding: 24px;
     background: #fff;
     border-top: 1px solid #e5e7eb;
 }
 
 .dps-specialist-input-container form {
     display: flex;
-    gap: 12px;
-    align-items: flex-end;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .dps-specialist-input-container textarea {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    width: 100%;
+    min-height: 140px;
+    padding: 16px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
     resize: vertical;
     font-family: inherit;
-    font-size: 14px;
-    transition: border-color 0.2s;
+    font-size: 15px;
+    line-height: 1.6;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
 }
 
 .dps-specialist-input-container textarea:focus {
     outline: none;
     border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.dps-specialist-input-container textarea::placeholder {
+    color: #9ca3af;
+}
+
+.dps-specialist-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 .dps-specialist-input-container button {
-    padding: 12px 24px;
-    font-size: 14px;
+    padding: 14px 32px;
+    font-size: 15px;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    border-radius: 6px;
 }
 
 .dps-specialist-input-container button .dashicons {
@@ -171,6 +186,11 @@
 .dps-specialist-input-container button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.dps-specialist-shortcut-hint {
+    font-size: 12px;
+    color: #9ca3af;
 }
 
 /* Loading State */
@@ -235,12 +255,21 @@
         max-width: 90%;
     }
     
-    .dps-specialist-input-container form {
+    .dps-specialist-input-container textarea {
+        min-height: 100px;
+    }
+    
+    .dps-specialist-form-actions {
         flex-direction: column;
+        align-items: stretch;
     }
     
     .dps-specialist-input-container button {
         width: 100%;
         justify-content: center;
+    }
+    
+    .dps-specialist-shortcut-hint {
+        text-align: center;
     }
 }

@@ -148,14 +148,19 @@ class DPS_AI_Specialist_Mode {
                         <textarea 
                             id="dps-specialist-query" 
                             name="query" 
-                            rows="3" 
+                            rows="6" 
                             placeholder="<?php esc_attr_e( 'Digite sua consulta ou comando (ex: /buscar_cliente João)...', 'dps-ai' ); ?>"
                             required
                         ></textarea>
-                        <button type="submit" class="button button-primary">
-                            <span class="dashicons dashicons-admin-generic"></span>
-                            <?php esc_html_e( 'Processar', 'dps-ai' ); ?>
-                        </button>
+                        <div class="dps-specialist-form-actions">
+                            <button type="submit" class="button button-primary button-large">
+                                <span class="dashicons dashicons-admin-generic"></span>
+                                <?php esc_html_e( 'Processar Consulta', 'dps-ai' ); ?>
+                            </button>
+                            <span class="dps-specialist-shortcut-hint">
+                                <?php esc_html_e( 'Pressione Ctrl+Enter para enviar', 'dps-ai' ); ?>
+                            </span>
+                        </div>
                     </form>
                 </div>
             </div>

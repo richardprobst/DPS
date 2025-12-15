@@ -319,6 +319,7 @@ class DPS_AI_Addon {
         add_action( 'wp_ajax_dps_ai_suggest_email_message', [ $this, 'ajax_suggest_email_message' ] );
         add_action( 'wp_ajax_dps_ai_test_connection', [ $this, 'ajax_test_connection' ] );
         add_action( 'wp_ajax_dps_ai_validate_contrast', [ $this, 'ajax_validate_contrast' ] );
+        add_action( 'wp_ajax_dps_ai_reset_system_prompt', [ $this, 'ajax_reset_system_prompt' ] );
 
         // Registra assets admin
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -672,6 +673,129 @@ class DPS_AI_Addon {
                         </tr>
                     </tbody>
                 </table>
+
+                <h2 id="dps-ai-system-prompts"><?php esc_html_e( 'Regras de Sistema (System Prompts)', 'dps-ai' ); ?></h2>
+                <p>
+                    <?php esc_html_e( 'As regras abaixo definem como a IA deve se comportar em cada contexto. Você pode customizá-las para adequar ao seu negócio.', 'dps-ai' ); ?>
+                    <br />
+                    <strong><?php esc_html_e( 'Atenção:', 'dps-ai' ); ?></strong>
+                    <?php esc_html_e( 'Alterar estas regras pode afetar a segurança e o escopo das respostas da IA. Mantenha as regras de segurança (não fornecer informações médicas, limitar ao contexto pet shop, etc.) para garantir um atendimento adequado.', 'dps-ai' ); ?>
+                </p>
+                <?php
+                // Carrega prompts para exibição
+                $system_contexts = DPS_AI_Prompts::get_available_contexts();
+                foreach ( $system_contexts as $ctx_key => $ctx_label ) :
+                    $has_custom  = DPS_AI_Prompts::has_custom_prompt( $ctx_key );
+                    $prompt_text = $has_custom ? DPS_AI_Prompts::get_custom_prompt( $ctx_key ) : DPS_AI_Prompts::get_default_prompt( $ctx_key );
+                    $field_id    = 'dps_ai_system_prompt_' . $ctx_key;
+                ?>
+                <div class="dps-ai-system-prompt-section" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 15px; color: #374151;">
+                            <?php echo esc_html( $ctx_label ); ?>
+                            <?php if ( $has_custom ) : ?>
+                                <span style="font-size: 11px; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; margin-left: 8px;"><?php esc_html_e( 'Customizado', 'dps-ai' ); ?></span>
+                            <?php else : ?>
+                                <span style="font-size: 11px; background: #e5e7eb; color: #6b7280; padding: 2px 8px; border-radius: 4px; margin-left: 8px;"><?php esc_html_e( 'Padrão', 'dps-ai' ); ?></span>
+                            <?php endif; ?>
+                        </h3>
+                        <button type="button" class="button button-secondary dps-ai-reset-prompt" data-context="<?php echo esc_attr( $ctx_key ); ?>" <?php echo ! $has_custom ? 'disabled' : ''; ?>>
+                            <span class="dashicons dashicons-image-rotate" style="vertical-align: middle; margin-right: 4px;"></span>
+                            <?php esc_html_e( 'Restaurar Padrão', 'dps-ai' ); ?>
+                        </button>
+                    </div>
+                    <label for="<?php echo esc_attr( $field_id ); ?>" class="screen-reader-text">
+                        <?php echo esc_html( sprintf( __( 'Regras para %s', 'dps-ai' ), $ctx_label ) ); ?>
+                    </label>
+                    <textarea id="<?php echo esc_attr( $field_id ); ?>" name="dps_ai_system_prompts[<?php echo esc_attr( $ctx_key ); ?>]" rows="8" class="large-text" style="font-family: monospace; font-size: 13px; line-height: 1.5;"><?php echo esc_textarea( $prompt_text ); ?></textarea>
+                    <p class="description" style="margin-top: 8px;">
+                        <?php
+                        switch ( $ctx_key ) {
+                            case 'portal':
+                                esc_html_e( 'Usado no chat do Portal do Cliente (clientes autenticados). Tem acesso a dados do cliente e pets.', 'dps-ai' );
+                                break;
+                            case 'public':
+                                esc_html_e( 'Usado no chat público para visitantes (shortcode [dps_ai_public_chat]). Foco em informações gerais.', 'dps-ai' );
+                                break;
+                            case 'whatsapp':
+                                esc_html_e( 'Usado para respostas via WhatsApp. Mensagens mais curtas e diretas.', 'dps-ai' );
+                                break;
+                            case 'email':
+                                esc_html_e( 'Usado para gerar conteúdo de e-mails. Formato mais formal e estruturado.', 'dps-ai' );
+                                break;
+                        }
+                        ?>
+                    </p>
+                </div>
+                <?php endforeach; ?>
+                <p class="description" style="color: #6b7280; font-style: italic;">
+                    <span class="dashicons dashicons-info-outline" style="font-size: 16px; vertical-align: text-top;"></span>
+                    <?php esc_html_e( 'Dica: Deixe um campo em branco para usar as regras padrão do sistema.', 'dps-ai' ); ?>
+                </p>
+                <script>
+                (function($) {
+                    $(document).ready(function() {
+                        // Handler para botões de restaurar padrão
+                        $('.dps-ai-reset-prompt').on('click', function(e) {
+                            e.preventDefault();
+                            var $btn = $(this);
+                            var context = $btn.data('context');
+                            var $textarea = $('#dps_ai_system_prompt_' + context);
+                            var $section = $btn.closest('.dps-ai-system-prompt-section');
+                            
+                            if (!confirm('<?php echo esc_js( __( 'Tem certeza que deseja restaurar o prompt padrão? As alterações customizadas serão perdidas.', 'dps-ai' ) ); ?>')) {
+                                return;
+                            }
+                            
+                            $btn.prop('disabled', true).text('<?php echo esc_js( __( 'Restaurando...', 'dps-ai' ) ); ?>');
+                            
+                            $.post(ajaxurl, {
+                                action: 'dps_ai_reset_system_prompt',
+                                nonce: '<?php echo esc_js( wp_create_nonce( 'dps_ai_reset_prompt' ) ); ?>',
+                                context: context
+                            }, function(response) {
+                                if (response.success) {
+                                    $textarea.val(response.data.prompt);
+                                    // Atualiza badge para "Padrão"
+                                    $section.find('h3 span').removeClass().css({
+                                        'font-size': '11px',
+                                        'background': '#e5e7eb',
+                                        'color': '#6b7280',
+                                        'padding': '2px 8px',
+                                        'border-radius': '4px',
+                                        'margin-left': '8px'
+                                    }).text('<?php echo esc_js( __( 'Padrão', 'dps-ai' ) ); ?>');
+                                    $btn.prop('disabled', true);
+                                } else {
+                                    alert(response.data.message || '<?php echo esc_js( __( 'Erro ao restaurar prompt.', 'dps-ai' ) ); ?>');
+                                }
+                            }).fail(function() {
+                                alert('<?php echo esc_js( __( 'Erro de conexão. Tente novamente.', 'dps-ai' ) ); ?>');
+                            }).always(function() {
+                                $btn.html('<span class="dashicons dashicons-image-rotate" style="vertical-align: middle; margin-right: 4px;"></span><?php echo esc_js( __( 'Restaurar Padrão', 'dps-ai' ) ); ?>');
+                            });
+                        });
+                        
+                        // Habilita botão de reset quando textarea é modificado
+                        $('textarea[id^="dps_ai_system_prompt_"]').on('input', function() {
+                            var context = $(this).attr('id').replace('dps_ai_system_prompt_', '');
+                            var $btn = $('.dps-ai-reset-prompt[data-context="' + context + '"]');
+                            var $section = $(this).closest('.dps-ai-system-prompt-section');
+                            
+                            // Habilita botão
+                            $btn.prop('disabled', false);
+                            
+                            // Atualiza badge para "Modificado"
+                            if ($(this).val().trim() !== '') {
+                                $section.find('h3 span').css({
+                                    'background': '#fef3c7',
+                                    'color': '#92400e'
+                                }).text('<?php echo esc_js( __( 'Modificado', 'dps-ai' ) ); ?>');
+                            }
+                        });
+                    });
+                })(jQuery);
+                </script>
 
                 <h2><?php esc_html_e( 'Chat Público para Visitantes (v1.6.0)', 'dps-ai' ); ?></h2>
                 <p><?php esc_html_e( 'Configure o chat de IA aberto para visitantes do site. Diferente do chat do Portal, este não requer login e é focado em informações gerais sobre os serviços.', 'dps-ai' ); ?></p>
@@ -2243,6 +2367,30 @@ class DPS_AI_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
+        // Salva System Prompts customizados (v1.9.0)
+        if ( isset( $_POST['dps_ai_system_prompts'] ) && is_array( $_POST['dps_ai_system_prompts'] ) ) {
+            $system_prompts = wp_unslash( $_POST['dps_ai_system_prompts'] );
+            $valid_contexts = DPS_AI_Prompts::get_available_contexts();
+            
+            foreach ( $valid_contexts as $ctx_key => $ctx_label ) {
+                if ( isset( $system_prompts[ $ctx_key ] ) ) {
+                    $prompt_text = sanitize_textarea_field( $system_prompts[ $ctx_key ] );
+                    $default_text = DPS_AI_Prompts::get_default_prompt( $ctx_key );
+                    
+                    // Armazena valores trimados para evitar chamadas repetidas
+                    $trimmed_prompt = trim( $prompt_text );
+                    $trimmed_default = trim( $default_text );
+                    
+                    // Se está vazio ou igual ao padrão, restaura o padrão
+                    if ( empty( $trimmed_prompt ) || $trimmed_prompt === $trimmed_default ) {
+                        DPS_AI_Prompts::reset_to_default( $ctx_key );
+                    } else {
+                        DPS_AI_Prompts::save_custom_prompt( $ctx_key, $prompt_text );
+                    }
+                }
+            }
+        }
+
         $redirect_args = [ 'updated' => '1' ];
         if ( $was_truncated ) {
             $redirect_args['truncated'] = '1';
@@ -2461,6 +2609,47 @@ class DPS_AI_Addon {
             'passes'  => $validation['passes'],
             'ratio'   => $validation['ratio'],
             'warning' => $warning,
+        ] );
+    }
+
+    /**
+     * Handler AJAX para resetar um system prompt para o padrão.
+     *
+     * Retorna o prompt padrão do arquivo para substituir no textarea.
+     */
+    public function ajax_reset_system_prompt() {
+        // Verifica nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_reset_prompt' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
+            ] );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
+            ] );
+        }
+
+        // Obtém contexto
+        $context = isset( $_POST['context'] ) ? sanitize_key( wp_unslash( $_POST['context'] ) ) : '';
+
+        if ( ! DPS_AI_Prompts::is_valid_context( $context ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Contexto inválido.', 'dps-ai' ),
+            ] );
+        }
+
+        // Reseta para o padrão
+        DPS_AI_Prompts::reset_to_default( $context );
+
+        // Obtém o prompt padrão
+        $default_prompt = DPS_AI_Prompts::get_default_prompt( $context );
+
+        wp_send_json_success( [
+            'prompt'  => $default_prompt,
+            'message' => __( 'Prompt restaurado para o padrão.', 'dps-ai' ),
         ] );
     }
 

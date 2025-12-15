@@ -37,16 +37,31 @@ class DPS_AI_Prompts {
 	];
 
 	/**
-	 * Cache de prompts carregados.
+	 * Chave da opção no banco de dados para prompts customizados.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_PROMPTS_OPTION = 'dps_ai_custom_prompts';
+
+	/**
+	 * Cache de prompts de arquivos carregados.
 	 *
 	 * @var array
 	 */
-	private static $cache = [];
+	private static $file_cache = [];
+
+	/**
+	 * Cache de prompts customizados carregados do banco de dados.
+	 *
+	 * @var array|null
+	 */
+	private static $custom_prompts_cache = null;
 
 	/**
 	 * Retorna o system prompt para um contexto específico.
 	 *
 	 * Esta é a função principal que deve ser usada por todos os componentes do plugin.
+	 * Prioriza prompts customizados do banco de dados, com fallback para arquivos padrão.
 	 *
 	 * @param string $context  Contexto do prompt ('portal', 'public', 'whatsapp', 'email').
 	 * @param array  $metadata Metadados adicionais do contexto (opcional).
@@ -67,8 +82,13 @@ class DPS_AI_Prompts {
 			$context = 'portal';
 		}
 
-		// Carrega o prompt base do arquivo
-		$prompt = self::load_prompt_from_file( $context );
+		// Tenta carregar prompt customizado do banco de dados primeiro
+		$prompt = self::get_custom_prompt( $context );
+
+		// Se não houver prompt customizado, carrega do arquivo padrão
+		if ( empty( $prompt ) ) {
+			$prompt = self::load_prompt_from_file( $context );
+		}
 
 		// Aplica filtro do WordPress para permitir customização
 		// Filtro global: permite alterar qualquer prompt independente do contexto
@@ -82,16 +102,141 @@ class DPS_AI_Prompts {
 	}
 
 	/**
+	 * Retorna o prompt customizado do banco de dados para um contexto.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return string|null Prompt customizado ou null se não existir.
+	 */
+	public static function get_custom_prompt( $context ) {
+		$custom_prompts = self::load_custom_prompts();
+		
+		if ( isset( $custom_prompts[ $context ] ) ) {
+			$trimmed = trim( $custom_prompts[ $context ] );
+			if ( ! empty( $trimmed ) ) {
+				return $trimmed;
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Carrega os prompts customizados do banco de dados com cache.
+	 *
+	 * @return array Array de prompts customizados.
+	 */
+	private static function load_custom_prompts() {
+		if ( null === self::$custom_prompts_cache ) {
+			self::$custom_prompts_cache = get_option( self::CUSTOM_PROMPTS_OPTION, [] );
+		}
+		return self::$custom_prompts_cache;
+	}
+
+	/**
+	 * Invalida o cache de prompts customizados.
+	 *
+	 * @return void
+	 */
+	private static function invalidate_custom_prompts_cache() {
+		self::$custom_prompts_cache = null;
+	}
+
+	/**
+	 * Salva um prompt customizado para um contexto específico.
+	 *
+	 * @param string $context Contexto do prompt.
+	 * @param string $prompt  Conteúdo do prompt.
+	 *
+	 * @return bool True se salvou com sucesso, false caso contrário.
+	 */
+	public static function save_custom_prompt( $context, $prompt ) {
+		// Valida contexto
+		if ( ! self::is_valid_context( $context ) ) {
+			return false;
+		}
+
+		$custom_prompts = self::load_custom_prompts();
+		$custom_prompts[ $context ] = sanitize_textarea_field( $prompt );
+		
+		// Invalida cache
+		self::invalidate_custom_prompts_cache();
+		
+		return update_option( self::CUSTOM_PROMPTS_OPTION, $custom_prompts );
+	}
+
+	/**
+	 * Remove o prompt customizado de um contexto, restaurando o padrão.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return bool True se removeu com sucesso, false caso contrário.
+	 */
+	public static function reset_to_default( $context ) {
+		// Valida contexto
+		if ( ! self::is_valid_context( $context ) ) {
+			return false;
+		}
+
+		$custom_prompts = self::load_custom_prompts();
+		
+		if ( isset( $custom_prompts[ $context ] ) ) {
+			unset( $custom_prompts[ $context ] );
+			
+			// Invalida cache
+			self::invalidate_custom_prompts_cache();
+			
+			return update_option( self::CUSTOM_PROMPTS_OPTION, $custom_prompts );
+		}
+		
+		return true; // Já estava no padrão
+	}
+
+	/**
+	 * Verifica se um contexto tem prompt customizado.
+	 *
+	 * @param string $context Contexto a verificar.
+	 *
+	 * @return bool True se tem customizado, false se usa padrão.
+	 */
+	public static function has_custom_prompt( $context ) {
+		return null !== self::get_custom_prompt( $context );
+	}
+
+	/**
+	 * Retorna o prompt padrão do arquivo para um contexto.
+	 *
+	 * Usa o cache de arquivo para evitar leituras repetidas.
+	 *
+	 * @param string $context Contexto do prompt.
+	 *
+	 * @return string Prompt padrão do arquivo.
+	 */
+	public static function get_default_prompt( $context ) {
+		return self::load_prompt_from_file( $context );
+	}
+
+	/**
+	 * Retorna todos os prompts customizados salvos.
+	 *
+	 * @return array Array associativo [contexto => prompt].
+	 */
+	public static function get_all_custom_prompts() {
+		return self::load_custom_prompts();
+	}
+
+	/**
 	 * Carrega o prompt de um arquivo .txt no diretório /prompts.
 	 *
-	 * @param string $context Nome do contexto (usado para construir o nome do arquivo).
+	 * @param string $context     Nome do contexto (usado para construir o nome do arquivo).
+	 * @param bool   $skip_cache  Se true, ignora o cache e lê diretamente do arquivo.
 	 *
 	 * @return string Conteúdo do prompt ou string vazia em caso de erro.
 	 */
-	private static function load_prompt_from_file( $context ) {
+	private static function load_prompt_from_file( $context, $skip_cache = false ) {
 		// Verifica se já está em cache
-		if ( isset( self::$cache[ $context ] ) ) {
-			return self::$cache[ $context ];
+		if ( ! $skip_cache && isset( self::$file_cache[ $context ] ) ) {
+			return self::$file_cache[ $context ];
 		}
 
 		// Monta o caminho do arquivo
@@ -118,10 +263,14 @@ class DPS_AI_Prompts {
 			return self::get_fallback_prompt();
 		}
 
-		// Armazena em cache
-		self::$cache[ $context ] = trim( $content );
+		$trimmed_content = trim( $content );
 
-		return self::$cache[ $context ];
+		// Armazena em cache apenas se não estiver pulando cache
+		if ( ! $skip_cache ) {
+			self::$file_cache[ $context ] = $trimmed_content;
+		}
+
+		return $trimmed_content;
 	}
 
 	/**
@@ -141,7 +290,8 @@ class DPS_AI_Prompts {
 	 * @return void
 	 */
 	public static function clear_cache() {
-		self::$cache = [];
+		self::$file_cache = [];
+		self::$custom_prompts_cache = null;
 		dps_ai_log_debug( 'Cache de prompts limpo' );
 	}
 
