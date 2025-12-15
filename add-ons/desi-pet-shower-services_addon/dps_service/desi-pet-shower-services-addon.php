@@ -575,14 +575,25 @@ class DPS_Services_Addon {
      * Processa solicitações de salvamento ou exclusão de serviços
      */
     public function maybe_handle_service_request() {
-        if ( ! $this->can_manage() ) {
-            return;
-        }
         // Salvamento
         if ( isset( $_POST['dps_service_action'] ) && 'save_service' === $_POST['dps_service_action'] ) {
+            // Verifica permissão antes de processar
+            if ( ! $this->can_manage() ) {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Você não tem permissão para gerenciar serviços.', 'dps-services-addon' ) );
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
+            }
             // Verifica nonce
             if ( ! isset( $_POST['dps_service_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_service_nonce'] ) ), 'dps_service_action' ) ) {
-                return;
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-services-addon' ) );
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
             }
             $name     = isset( $_POST['service_name'] ) ? sanitize_text_field( wp_unslash( $_POST['service_name'] ) ) : '';
             $type     = isset( $_POST['service_type'] ) ? sanitize_text_field( wp_unslash( $_POST['service_type'] ) ) : '';
@@ -773,6 +784,15 @@ class DPS_Services_Addon {
         }
         // Exclusão via GET com verificação de nonce
         if ( isset( $_GET['dps_service_delete'] ) ) {
+            // Verifica permissão antes de processar
+            if ( ! $this->can_manage() ) {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Você não tem permissão para excluir serviços.', 'dps-services-addon' ) );
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
+            }
             $id = intval( wp_unslash( $_GET['dps_service_delete'] ) );
             // Verifica nonce antes de excluir
             if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_service_' . $id ) ) {
@@ -783,6 +803,10 @@ class DPS_Services_Addon {
                         DPS_Message_Helper::add_success( __( 'Serviço excluído com sucesso.', 'dps-services-addon' ) );
                     }
                 }
+            } else {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-services-addon' ) );
+                }
             }
             $redirect = $this->get_redirect_url();
             wp_safe_redirect( $redirect );
@@ -791,6 +815,15 @@ class DPS_Services_Addon {
 
         // Alterna status ativo/inativo via GET com verificação de nonce
         if ( isset( $_GET['dps_toggle_service'] ) ) {
+            // Verifica permissão antes de processar
+            if ( ! $this->can_manage() ) {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Você não tem permissão para alterar serviços.', 'dps-services-addon' ) );
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
+            }
             $id = intval( wp_unslash( $_GET['dps_toggle_service'] ) );
             // Verifica nonce antes de alterar status
             if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_toggle_service_' . $id ) ) {
@@ -806,6 +839,10 @@ class DPS_Services_Addon {
                         DPS_Message_Helper::add_success( $message );
                     }
                 }
+            } else {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-services-addon' ) );
+                }
             }
             $redirect = $this->get_redirect_url();
             wp_safe_redirect( $redirect );
@@ -814,6 +851,15 @@ class DPS_Services_Addon {
 
         // Duplicar serviço via GET com verificação de nonce
         if ( isset( $_GET['dps_duplicate_service'] ) ) {
+            // Verifica permissão antes de processar
+            if ( ! $this->can_manage() ) {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Você não tem permissão para duplicar serviços.', 'dps-services-addon' ) );
+                }
+                $redirect = $this->get_redirect_url();
+                wp_safe_redirect( $redirect );
+                exit;
+            }
             $id = intval( wp_unslash( $_GET['dps_duplicate_service'] ) );
             if ( $id && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_duplicate_service_' . $id ) ) {
                 $new_id = DPS_Services_API::duplicate_service( $id );
@@ -835,6 +881,10 @@ class DPS_Services_Addon {
                     if ( class_exists( 'DPS_Message_Helper' ) ) {
                         DPS_Message_Helper::add_error( __( 'Erro ao duplicar serviço.', 'dps-services-addon' ) );
                     }
+                }
+            } else {
+                if ( class_exists( 'DPS_Message_Helper' ) ) {
+                    DPS_Message_Helper::add_error( __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-services-addon' ) );
                 }
             }
             $redirect = $this->get_redirect_url();
