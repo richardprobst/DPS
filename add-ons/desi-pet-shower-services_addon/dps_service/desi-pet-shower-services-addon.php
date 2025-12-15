@@ -6,7 +6,7 @@
  * O header oficial está em desi-pet-shower-services.php (arquivo wrapper).
  *
  * @package DPS_Services_Addon
- * @version 1.3.0
+ * @version 1.3.1
  */
 
 // Impede acesso direto
@@ -80,12 +80,38 @@ class DPS_Services_Addon {
      */
     private function get_redirect_url( $tab = 'servicos' ) {
         $base = wp_get_referer();
+        
+        // Fallback: use get_queried_object_id() + get_permalink()
+        if ( ! $base ) {
+            $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+            if ( $queried_id ) {
+                $base = get_permalink( $queried_id );
+            }
+        }
+        
+        // Secondary fallback: use current $post
+        if ( ! $base ) {
+            global $post;
+            if ( isset( $post->ID ) ) {
+                $base = get_permalink( $post->ID );
+            }
+        }
+        
+        // Tertiary fallback: construct URL from REQUEST_URI
+        if ( ! $base && isset( $_SERVER['REQUEST_URI'] ) ) {
+            $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+            if ( ! empty( $request_uri ) ) {
+                $base = esc_url_raw( home_url( $request_uri ) );
+            }
+        }
+        
+        // Final fallback: home_url (should rarely be reached)
         if ( ! $base ) {
             $base = home_url();
         }
 
         $base = remove_query_arg(
-            [ 'dps_service_delete', 'dps_service_action', 'service_id', 'dps_service_nonce' ],
+            [ 'dps_service_delete', 'dps_service_action', 'service_id', 'dps_service_nonce', 'dps_toggle_service', 'dps_duplicate_service', 'dps_edit', 'id', '_wpnonce' ],
             $base
         );
 
@@ -865,9 +891,15 @@ class DPS_Services_Addon {
                 $new_id = DPS_Services_API::duplicate_service( $id );
                 if ( $new_id ) {
                     if ( class_exists( 'DPS_Message_Helper' ) ) {
+                        // Use current page URL as base, with fallback to avoid empty URL
+                        $current_url = get_permalink();
+                        if ( ! $current_url && isset( $_SERVER['REQUEST_URI'] ) ) {
+                            $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+                            $current_url = esc_url_raw( home_url( $request_uri ) );
+                        }
                         $edit_url = add_query_arg(
                             [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $new_id ],
-                            get_permalink()
+                            $current_url ? remove_query_arg( [ 'dps_duplicate_service', '_wpnonce' ], $current_url ) : home_url()
                         );
                         DPS_Message_Helper::add_success(
                             sprintf(
