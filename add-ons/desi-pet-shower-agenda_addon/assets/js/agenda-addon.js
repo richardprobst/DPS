@@ -850,7 +850,11 @@
             var srv = services[i];
             var price = parseFloat(srv.price) || 0;
             total += price;
-            modalHtml += '<li><span class="service-name">' + srv.name + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
+            
+            // Verifica se é TaxiDog para adicionar ícone especial
+            var icon = srv.is_taxidog ? '🚐 ' : '';
+            var itemClass = srv.is_taxidog ? ' class="dps-service-taxidog"' : '';
+            modalHtml += '<li' + itemClass + '><span class="service-name">' + icon + srv.name + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
           }
           modalHtml += '<li style="font-weight:700; border-top:2px solid #e2e8f0; padding-top:1rem;"><span>Total</span><span class="service-price">R$ ' + total.toFixed(2).replace('.', ',') + '</span></li>';
           modalHtml += '</ul>';

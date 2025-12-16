@@ -2973,6 +2973,36 @@ tr.dps-row-updated {
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
 }
 
+/* === Botão de Mapa TaxiDog (Tab3) === */
+.dps-taxidog-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    border: 2px solid #22c55e;
+    border-radius: 8px;
+    color: #166534;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-taxidog-map-btn:hover {
+    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+    border-color: #16a34a;
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: #166534;
+}
+
+.dps-taxidog-map-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+}
+
 /* === Modal de Popup de Pagamento === */
 .dps-payment-modal {
     position: fixed;
@@ -3209,6 +3239,22 @@ tr.dps-row-updated {
 .dps-services-list-modal .service-price {
     font-weight: 600;
     color: var(--dps-accent);
+}
+
+/* Estilo especial para TaxiDog no modal de serviços */
+.dps-services-list-modal li.dps-service-taxidog {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 6px;
+    margin: 0.25rem -0.5rem;
+    padding: 0.75rem 0.5rem;
+}
+
+.dps-services-list-modal li.dps-service-taxidog .service-name {
+    color: #92400e;
+}
+
+.dps-services-list-modal li.dps-service-taxidog .service-price {
+    color: #92400e;
 }
 
 .dps-services-notes {

@@ -1124,49 +1124,34 @@ trait DPS_Agenda_Renderer {
         $client_name = $client_post ? $client_post->post_title : '';
         echo '<td data-label="' . esc_attr__( 'Tutor', 'dps-agenda-addon' ) . '">' . esc_html( $client_name ) . '</td>';
         
-        // TaxiDog (com lógica condicional)
+        // TaxiDog (exibe informação simples com botão para Google Maps quando solicitado)
         echo '<td data-label="TaxiDog">';
         
         // Verifica se TaxiDog foi solicitado no agendamento
         $taxidog_requested = get_post_meta( $appt->ID, 'appointment_taxidog', true );
-        $taxidog_status = get_post_meta( $appt->ID, '_dps_taxidog_status', true );
-        
-        $can_edit = is_user_logged_in() && current_user_can( 'manage_options' );
         
         if ( $taxidog_requested ) {
-            // TaxiDog foi solicitado
+            // TaxiDog foi solicitado - exibe label e botão do Google Maps
             echo '<div class="dps-taxidog-wrapper">';
-            echo '<span class="dps-taxidog-label dps-taxidog-label--requested">🚐 ' . esc_html__( 'TAXIDOG SOLICITADO', 'dps-agenda-addon' ) . '</span>';
             
-            if ( $can_edit ) {
-                // Config de status do TaxiDog
-                $taxidog_config = [
-                    'requested'   => [ 'icon' => '🚐', 'label' => __( 'SOLICITADO', 'dps-agenda-addon' ) ],
-                    'on_way'      => [ 'icon' => '🚗', 'label' => __( 'TAXIDOG A CAMINHO', 'dps-agenda-addon' ) ],
-                    'cancelled'   => [ 'icon' => '❌', 'label' => __( 'TAXIDOG CANCELADO', 'dps-agenda-addon' ) ],
-                ];
-                
-                echo '<div class="dps-taxidog-dropdown-wrapper">';
-                echo '<select class="dps-taxidog-dropdown" data-appt-id="' . esc_attr( $appt->ID ) . '">';
-                
-                $current_taxidog_status = $taxidog_status ?: 'requested';
-                echo '<option value="on_way"' . selected( $current_taxidog_status, 'on_way', false ) . '>🚗 ' . esc_html__( 'TAXIDOG A CAMINHO', 'dps-agenda-addon' ) . '</option>';
-                echo '<option value="cancelled"' . selected( $current_taxidog_status, 'cancelled', false ) . '>❌ ' . esc_html__( 'TAXIDOG CANCELADO', 'dps-agenda-addon' ) . '</option>';
-                
-                echo '</select>';
-                echo '</div>';
+            // Obtém endereço do cliente para o Google Maps
+            $client_address = DPS_Agenda_GPS_Helper::get_client_address( $appt->ID );
+            
+            if ( ! empty( $client_address ) ) {
+                // URL de busca no Google Maps (abre direto no endereço)
+                $map_url = 'https://www.google.com/maps/search/?api=1&query=' . urlencode( $client_address );
+                echo '<a href="' . esc_url( $map_url ) . '" target="_blank" class="dps-taxidog-map-btn" title="' . esc_attr__( 'Abrir endereço no Google Maps', 'dps-agenda-addon' ) . '">';
+                echo '🚐 ' . esc_html__( 'TAXIDOG SOLICITADO', 'dps-agenda-addon' ) . ' 📍';
+                echo '</a>';
+            } else {
+                // Sem endereço cadastrado - mostra apenas o label
+                echo '<span class="dps-taxidog-label dps-taxidog-label--requested">🚐 ' . esc_html__( 'TAXIDOG SOLICITADO', 'dps-agenda-addon' ) . '</span>';
             }
             echo '</div>';
         } else {
             // TaxiDog NÃO foi solicitado
             echo '<div class="dps-taxidog-wrapper">';
-            echo '<span class="dps-taxidog-label dps-taxidog-label--not-requested">⚪ ' . esc_html__( 'TAXIDOG NÃO SOLICITADO', 'dps-agenda-addon' ) . '</span>';
-            
-            if ( $can_edit ) {
-                echo '<button type="button" class="dps-taxidog-request-btn" data-appt-id="' . esc_attr( $appt->ID ) . '" title="' . esc_attr__( 'Solicitar TaxiDog', 'dps-agenda-addon' ) . '">';
-                echo '🚐 ' . esc_html__( 'SOLICITAR TAXIDOG', 'dps-agenda-addon' );
-                echo '</button>';
-            }
+            echo '<span class="dps-taxidog-label dps-taxidog-label--not-requested">⚪ ' . esc_html__( 'NÃO SOLICITADO', 'dps-agenda-addon' ) . '</span>';
             echo '</div>';
         }
         echo '</td>';
