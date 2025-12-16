@@ -1474,9 +1474,10 @@ class DPS_Agenda_Addon {
         // Container para conteúdo das abas
         echo '<div class="dps-agenda-tabs-content">';
         
-        // Renderiza tabela para cada dia, aplicando filtros se necessário
+        // Inicializa variáveis e coleta dados de todos os dias primeiro
         $has_any = false;
         $all_filtered_appointments = []; // FASE 7: Armazena todos os appointments filtrados para relatório no final
+        $days_data = []; // Armazena dados processados de cada dia para renderização posterior
         $column_labels = [
             'date'          => __( 'Data', 'dps-agenda-addon' ),
             'time'          => __( 'Hora', 'dps-agenda-addon' ),
@@ -1488,28 +1489,27 @@ class DPS_Agenda_Addon {
             'confirmation'  => __( 'Confirmação', 'dps-agenda-addon' ),
             'charge'        => __( 'Cobrança', 'dps-agenda-addon' ),
         ];
+        
+        // FASE 1: Pré-processa todos os dias para coletar dados filtrados
         foreach ( $appointments as $day => $appts ) {
             $has_any = $has_any || ! empty( $appts );
+            
             // Define título do bloco
             if ( $show_all ) {
-                // Em modo "todos", usamos título genérico
                 $day_title = __( 'Todos os Atendimentos', 'dps-agenda-addon' );
             } elseif ( $view === 'week' ) {
                 $day_dt = DateTime::createFromFormat( 'Y-m-d', $day );
-                // Exibe dia e mês no formato dd-mm
                 $day_title = ucfirst( date_i18n( 'l', $day_dt->getTimestamp() ) ) . ' ' . date_i18n( 'd-m', $day_dt->getTimestamp() );
             } else {
                 $day_title = __( 'Agendamentos do dia', 'dps-agenda-addon' );
             }
+            
             // Se não houver appointments para o dia, pula se semanal
             if ( empty( $appts ) && $view === 'week' ) {
                 continue;
             }
-            // Se semanal e multiple days, show heading
-            echo '<h4>' . esc_html( $day_title ) . '</h4>';
             
             // PERFORMANCE: Pre-cache metadata para todos os agendamentos do dia
-            // Reduz chamadas ao banco de dados durante o loop de filtros
             if ( ! empty( $appts ) ) {
                 $appointment_ids = wp_list_pluck( $appts, 'ID' );
                 update_meta_cache( 'post', $appointment_ids );
@@ -1519,14 +1519,12 @@ class DPS_Agenda_Addon {
             $filtered = [];
             foreach ( $appts as $appt ) {
                 $match = true;
-                // Filtro por cliente
                 if ( $filter_client ) {
                     $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
                     if ( intval( $cid ) !== $filter_client ) {
                         $match = false;
                     }
                 }
-                // Filtro por status
                 if ( $filter_status ) {
                     $st_val = get_post_meta( $appt->ID, 'appointment_status', true );
                     if ( ! $st_val ) { $st_val = 'pendente'; }
@@ -1534,7 +1532,6 @@ class DPS_Agenda_Addon {
                         $match = false;
                     }
                 }
-                // Filtro por serviço
                 if ( $filter_service ) {
                     $service_ids_meta = get_post_meta( $appt->ID, 'appointment_services', true );
                     if ( ! is_array( $service_ids_meta ) || ! in_array( $filter_service, $service_ids_meta ) ) {
@@ -1546,7 +1543,7 @@ class DPS_Agenda_Addon {
                 }
             }
             
-            // FASE 7: Acumula todos os appointments filtrados para relatório no final
+            // Acumula todos os appointments filtrados para relatório no final
             $all_filtered_appointments = array_merge( $all_filtered_appointments, $filtered );
             
             // Classificar por status: pendente vs finalizado
@@ -1564,225 +1561,237 @@ class DPS_Agenda_Addon {
                 }
             }
             
-            // FASE 6: Funções de renderização específicas para cada aba
+            // Armazena dados processados do dia
+            $days_data[] = [
+                'day'       => $day,
+                'title'     => $day_title,
+                'filtered'  => $filtered,
+                'upcoming'  => $upcoming,
+                'completed' => $completed,
+            ];
+        }
+        
+        // FASE 2: Verifica se deve agrupar por cliente (mantém comportamento antigo)
+        $group_by_client = isset( $_GET['group_by_client'] ) && $_GET['group_by_client'] === '1';
+        
+        // FASE 3: Define funções de renderização (uma vez, fora do loop de dias)
+        
+        // Aba 1: Visão Rápida
+        $render_table_tab1 = function( $apts, $heading ) use ( $column_labels ) {
+            if ( empty( $apts ) ) {
+                return;
+            }
             
+            // Pre-carregar posts relacionados
+            $client_ids = [];
+            $pet_ids    = [];
+            foreach ( $apts as $appt ) {
+                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $cid ) {
+                    $client_ids[] = (int) $cid;
+                }
+                if ( $pid ) {
+                    $pet_ids[] = (int) $pid;
+                }
+            }
+            $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+            if ( ! empty( $related_ids ) ) {
+                _prime_post_caches( $related_ids, false, false );
+                update_meta_cache( 'post', $related_ids );
+            }
+            
+            // Ordenação cronológica (próximo atendimento primeiro)
+            usort(
+                $apts,
+                function( $a, $b ) {
+                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                    $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                    $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                    if ( $dt_a === $dt_b ) {
+                        return $a->ID <=> $b->ID;
+                    }
+                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                }
+            );
+            
+            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<div class="dps-agenda-table-container">';
+            echo '<table class="dps-table dps-table--tab1"><thead><tr>';
+            echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
+            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
+            echo '</tr></thead><tbody>';
+            foreach ( $apts as $appt ) {
+                echo $this->render_appointment_row_tab1( $appt, $column_labels );
+            }
+            echo '</tbody></table>';
+            echo '</div>';
+        };
+        
+        // Aba 2: Operação
+        $render_table_tab2 = function( $apts, $heading ) use ( $column_labels ) {
+            if ( empty( $apts ) ) {
+                return;
+            }
+            
+            // Pre-carregar posts relacionados
+            $client_ids = [];
+            $pet_ids    = [];
+            foreach ( $apts as $appt ) {
+                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $cid ) {
+                    $client_ids[] = (int) $cid;
+                }
+                if ( $pid ) {
+                    $pet_ids[] = (int) $pid;
+                }
+            }
+            $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+            if ( ! empty( $related_ids ) ) {
+                _prime_post_caches( $related_ids, false, false );
+                update_meta_cache( 'post', $related_ids );
+            }
+            
+            // Ordenação cronológica (próximo atendimento primeiro)
+            usort(
+                $apts,
+                function( $a, $b ) {
+                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                    $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                    $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                    if ( $dt_a === $dt_b ) {
+                        return $a->ID <=> $b->ID;
+                    }
+                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                }
+            );
+            
+            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<div class="dps-agenda-table-container">';
+            echo '<table class="dps-table dps-table--tab2"><thead><tr>';
+            echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
+            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
+            echo '</tr></thead><tbody>';
+            foreach ( $apts as $appt ) {
+                echo $this->render_appointment_row_tab2( $appt, $column_labels );
+            }
+            echo '</tbody></table>';
+            echo '</div>';
+        };
+        
+        // Aba 3: Detalhes
+        $render_table_tab3 = function( $apts, $heading ) use ( $column_labels ) {
+            if ( empty( $apts ) ) {
+                return;
+            }
+            
+            // Pre-carregar posts relacionados
+            $client_ids = [];
+            $pet_ids    = [];
+            foreach ( $apts as $appt ) {
+                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $cid ) {
+                    $client_ids[] = (int) $cid;
+                }
+                if ( $pid ) {
+                    $pet_ids[] = (int) $pid;
+                }
+            }
+            $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
+            if ( ! empty( $related_ids ) ) {
+                _prime_post_caches( $related_ids, false, false );
+                update_meta_cache( 'post', $related_ids );
+            }
+            
+            // Ordenação cronológica (próximo atendimento primeiro)
+            usort(
+                $apts,
+                function( $a, $b ) {
+                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                    $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
+                    $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
+                    if ( $dt_a === $dt_b ) {
+                        return $a->ID <=> $b->ID;
+                    }
+                    return $dt_a <=> $dt_b; // ASC: próximo primeiro
+                }
+            );
+            
+            echo '<h5>' . esc_html( $heading ) . '</h5>';
+            echo '<div class="dps-agenda-table-container">';
+            echo '<table class="dps-table dps-table--tab3"><thead><tr>';
+            echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
+            echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>TaxiDog</th>';
+            echo '</tr></thead><tbody>';
+            foreach ( $apts as $appt ) {
+                echo $this->render_appointment_row_tab3( $appt, $column_labels );
+            }
+            echo '</tbody></table>';
+            echo '</div>';
+        };
+        
+        // FASE 4: Renderiza conteúdo das abas (uma única vez, fora do loop de dias)
+        if ( $group_by_client && ! empty( $all_filtered_appointments ) ) {
+            // Renderiza tabelas agrupadas por cliente (mantém comportamento antigo)
+            $this->render_grouped_by_client( $all_filtered_appointments, $column_labels );
+        } else {
             // Aba 1: Visão Rápida
-            $render_table_tab1 = function( $apts, $heading ) use ( $column_labels ) {
-                if ( empty( $apts ) ) {
-                    return;
+            echo '<div id="dps-tab-content-visao-rapida" class="dps-tab-content' . ( $current_tab === 'visao-rapida' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
+            foreach ( $days_data as $day_info ) {
+                // Exibe título do dia apenas em visualização semanal com múltiplos dias
+                if ( $view === 'week' && count( $days_data ) > 1 ) {
+                    echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
                 }
-                
-                // Pre-carregar posts relacionados
-                $client_ids = [];
-                $pet_ids    = [];
-                foreach ( $apts as $appt ) {
-                    $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                    $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    if ( $cid ) {
-                        $client_ids[] = (int) $cid;
-                    }
-                    if ( $pid ) {
-                        $pet_ids[] = (int) $pid;
-                    }
-                }
-                $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
-                if ( ! empty( $related_ids ) ) {
-                    _prime_post_caches( $related_ids, false, false );
-                    update_meta_cache( 'post', $related_ids );
-                }
-                
-                // Ordenação cronológica (próximo atendimento primeiro)
-                usort(
-                    $apts,
-                    function( $a, $b ) {
-                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
-                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
-                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
-                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-                        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
-                        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
-                        if ( $dt_a === $dt_b ) {
-                            return $a->ID <=> $b->ID;
-                        }
-                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
-                    }
-                );
-                
-                echo '<h5>' . esc_html( $heading ) . '</h5>';
-                echo '<div class="dps-agenda-table-container">';
-                echo '<table class="dps-table dps-table--tab1"><thead><tr>';
-                echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
-                echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
-                echo '</tr></thead><tbody>';
-                foreach ( $apts as $appt ) {
-                    echo $this->render_appointment_row_tab1( $appt, $column_labels );
-                }
-                echo '</tbody></table>';
-                echo '</div>';
-            };
+                $render_table_tab1( $day_info['upcoming'], __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
+                $render_table_tab1( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
+            }
+            echo '</div>';
             
             // Aba 2: Operação
-            $render_table_tab2 = function( $apts, $heading ) use ( $column_labels ) {
-                if ( empty( $apts ) ) {
-                    return;
+            echo '<div id="dps-tab-content-operacao" class="dps-tab-content' . ( $current_tab === 'operacao' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
+            foreach ( $days_data as $day_info ) {
+                if ( $view === 'week' && count( $days_data ) > 1 ) {
+                    echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
                 }
-                
-                // Pre-carregar posts relacionados
-                $client_ids = [];
-                $pet_ids    = [];
-                foreach ( $apts as $appt ) {
-                    $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                    $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    if ( $cid ) {
-                        $client_ids[] = (int) $cid;
-                    }
-                    if ( $pid ) {
-                        $pet_ids[] = (int) $pid;
-                    }
-                }
-                $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
-                if ( ! empty( $related_ids ) ) {
-                    _prime_post_caches( $related_ids, false, false );
-                    update_meta_cache( 'post', $related_ids );
-                }
-                
-                // Ordenação cronológica (próximo atendimento primeiro)
-                usort(
-                    $apts,
-                    function( $a, $b ) {
-                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
-                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
-                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
-                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-                        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
-                        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
-                        if ( $dt_a === $dt_b ) {
-                            return $a->ID <=> $b->ID;
-                        }
-                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
-                    }
-                );
-                
-                echo '<h5>' . esc_html( $heading ) . '</h5>';
-                echo '<div class="dps-agenda-table-container">';
-                echo '<table class="dps-table dps-table--tab2"><thead><tr>';
-                echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
-                echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
-                echo '</tr></thead><tbody>';
-                foreach ( $apts as $appt ) {
-                    echo $this->render_appointment_row_tab2( $appt, $column_labels );
-                }
-                echo '</tbody></table>';
-                echo '</div>';
-            };
+                $render_table_tab2( $day_info['upcoming'], __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
+                $render_table_tab2( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
+            }
+            echo '</div>';
             
             // Aba 3: Detalhes
-            $render_table_tab3 = function( $apts, $heading ) use ( $column_labels ) {
-                if ( empty( $apts ) ) {
-                    return;
+            echo '<div id="dps-tab-content-detalhes" class="dps-tab-content' . ( $current_tab === 'detalhes' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
+            foreach ( $days_data as $day_info ) {
+                if ( $view === 'week' && count( $days_data ) > 1 ) {
+                    echo '<h4>' . esc_html( $day_info['title'] ) . '</h4>';
                 }
-                
-                // Pre-carregar posts relacionados
-                $client_ids = [];
-                $pet_ids    = [];
-                foreach ( $apts as $appt ) {
-                    $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
-                    $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                    if ( $cid ) {
-                        $client_ids[] = (int) $cid;
-                    }
-                    if ( $pid ) {
-                        $pet_ids[] = (int) $pid;
-                    }
-                }
-                $related_ids = array_unique( array_merge( $client_ids, $pet_ids ) );
-                if ( ! empty( $related_ids ) ) {
-                    _prime_post_caches( $related_ids, false, false );
-                    update_meta_cache( 'post', $related_ids );
-                }
-                
-                // Ordenação cronológica (próximo atendimento primeiro)
-                usort(
-                    $apts,
-                    function( $a, $b ) {
-                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
-                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
-                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
-                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-                        $dt_a   = strtotime( trim( $date_a . ' ' . $time_a ) );
-                        $dt_b   = strtotime( trim( $date_b . ' ' . $time_b ) );
-                        if ( $dt_a === $dt_b ) {
-                            return $a->ID <=> $b->ID;
-                        }
-                        return $dt_a <=> $dt_b; // ASC: próximo primeiro
-                    }
-                );
-                
-                echo '<h5>' . esc_html( $heading ) . '</h5>';
-                echo '<div class="dps-agenda-table-container">';
-                echo '<table class="dps-table dps-table--tab3"><thead><tr>';
-                echo '<th class="dps-select-all-wrapper"><input type="checkbox" class="dps-select-all dps-select-checkbox" title="' . esc_attr__( 'Selecionar todos', 'dps-agenda-addon' ) . '"></th>';
-                echo '<th>' . esc_html__( 'Horário', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
-                echo '<th>TaxiDog</th>';
-                echo '</tr></thead><tbody>';
-                foreach ( $apts as $appt ) {
-                    echo $this->render_appointment_row_tab3( $appt, $column_labels );
-                }
-                echo '</tbody></table>';
-                echo '</div>';
-            };
-            
-            // FASE 2: Calcular métricas de ocupação
-            $total_upcoming  = count( $upcoming );
-            $total_completed = count( $completed );
-            $total_canceled  = 0;
-            foreach ( $filtered as $appt ) {
-                $st = get_post_meta( $appt->ID, 'appointment_status', true );
-                if ( $st === 'cancelado' ) {
-                    $total_canceled++;
-                }
+                $render_table_tab3( $day_info['upcoming'], __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
+                $render_table_tab3( $day_info['completed'], __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
             }
-            
-            // NOTA: Relatório de Ocupação movido para o final da página (após as abas)
-            
-            // FASE 2: Verifica se deve agrupar por cliente
-            $group_by_client = isset( $_GET['group_by_client'] ) && $_GET['group_by_client'] === '1';
-            
-            if ( $group_by_client && ! empty( $filtered ) ) {
-                // Renderiza tabelas agrupadas por cliente (mantém comportamento antigo)
-                $this->render_grouped_by_client( $filtered, $column_labels );
-            } else {
-                // FASE 6: Renderiza conteúdo das 3 abas
-                
-                // Aba 1: Visão Rápida
-                echo '<div id="dps-tab-content-visao-rapida" class="dps-tab-content' . ( $current_tab === 'visao-rapida' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
-                $render_table_tab1( $upcoming, __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab1( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
-                echo '</div>';
-                
-                // Aba 2: Operação
-                echo '<div id="dps-tab-content-operacao" class="dps-tab-content' . ( $current_tab === 'operacao' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
-                $render_table_tab2( $upcoming, __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab2( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
-                echo '</div>';
-                
-                // Aba 3: Detalhes
-                echo '<div id="dps-tab-content-detalhes" class="dps-tab-content' . ( $current_tab === 'detalhes' ? ' dps-tab-content--active' : '' ) . '" role="tabpanel">';
-                $render_table_tab3( $upcoming, __( 'Próximos Atendimentos', 'dps-agenda-addon' ) );
-                $render_table_tab3( $completed, __( 'Atendimentos Finalizados', 'dps-agenda-addon' ) );
-                echo '</div>';
-            }
+            echo '</div>';
         }
+        
         if ( ! $has_any ) {
             echo '<p class="dps-agenda-empty" role="status">' . __( 'Nenhum agendamento.', 'dps-agenda-addon' ) . '</p>';
         }
