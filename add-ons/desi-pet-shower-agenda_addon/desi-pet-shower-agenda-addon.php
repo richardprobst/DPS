@@ -1210,47 +1210,27 @@ class DPS_Agenda_Addon {
             $advanced_class = $has_advanced_filters ? '' : ' dps-filters-advanced--hidden';
             echo '<div class="dps-filters-advanced' . $advanced_class . '">';
             
-            // Carrega listas de clientes e serviços (com cache)
+            // Carrega listas de clientes e serviços (sem cache - sempre busca dados frescos)
             $clients_limit = apply_filters( 'dps_agenda_clients_limit', self::CLIENTS_LIST_LIMIT );
             $services_limit = apply_filters( 'dps_agenda_services_limit', self::SERVICES_LIST_LIMIT );
             
-            $clients_cache_key = 'dps_agenda_clients_list';
-            $clients = false;
-            if ( ! dps_is_cache_disabled() ) {
-                $clients = get_transient( $clients_cache_key );
-            }
-            if ( false === $clients ) {
-                $clients = get_posts( [
-                    'post_type'      => 'dps_cliente',
-                    'posts_per_page' => $clients_limit,
-                    'post_status'    => 'publish',
-                    'orderby'        => 'title',
-                    'order'          => 'ASC',
-                    'no_found_rows'  => true,
-                ] );
-                if ( ! dps_is_cache_disabled() ) {
-                    set_transient( $clients_cache_key, $clients, HOUR_IN_SECONDS );
-                }
-            }
+            $clients = get_posts( [
+                'post_type'      => 'dps_cliente',
+                'posts_per_page' => $clients_limit,
+                'post_status'    => 'publish',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'no_found_rows'  => true,
+            ] );
             
-            $services_cache_key = 'dps_agenda_services_list';
-            $services = false;
-            if ( ! dps_is_cache_disabled() ) {
-                $services = get_transient( $services_cache_key );
-            }
-            if ( false === $services ) {
-                $services = get_posts( [
-                    'post_type'      => 'dps_service',
-                    'posts_per_page' => $services_limit,
-                    'post_status'    => 'publish',
-                    'orderby'        => 'title',
-                    'order'          => 'ASC',
-                    'no_found_rows'  => true,
-                ] );
-                if ( ! dps_is_cache_disabled() ) {
-                    set_transient( $services_cache_key, $services, HOUR_IN_SECONDS );
-                }
-            }
+            $services = get_posts( [
+                'post_type'      => 'dps_service',
+                'posts_per_page' => $services_limit,
+                'post_status'    => 'publish',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'no_found_rows'  => true,
+            ] );
             
             // Filtro de Cliente
             echo '<label class="dps-filter-field">';
