@@ -226,6 +226,10 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Plugin Base (v1.x.x)**
+
+- **Correção ao alterar status de agendamento no Painel de Gestão DPS**: Corrigido bug onde a mensagem "Selecione um status válido para o agendamento" aparecia mesmo ao selecionar um status válido. O problema era causado pelo JavaScript em `dps-base.js` que desabilitava o elemento `<select>` antes de disparar o submit do formulário, fazendo com que o browser não incluísse o valor do status nos dados enviados. A linha que desabilitava o select foi removida, mantendo a proteção contra múltiplos envios via flag `submitting`.
+
 **Services Add-on (v1.3.1)**
 
 - **Redirecionamento incorreto após salvar serviço corrigido**: Após adicionar ou editar um serviço no Painel de Gestão DPS, o sistema agora redireciona corretamente para a aba de serviços (ex: `/administracao/?tab=servicos`) em vez da página inicial do site. O método `get_redirect_url()` agora segue a mesma hierarquia de fallbacks do plugin base: (1) HTTP referer, (2) `get_queried_object_id()` + `get_permalink()`, (3) global `$post`, (4) `REQUEST_URI`, (5) `home_url()`. Resolve problema onde o usuário era redirecionado para "Welcome to WordPress" após salvar serviço.
