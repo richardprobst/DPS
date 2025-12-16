@@ -32,7 +32,6 @@ foreach ( $tables as $table ) {
 
 // Remove options
 delete_option( 'dps_fin_docs_page_id' );
-delete_option( 'dps_finance_db_version' );
 delete_option( 'dps_transacoes_db_version' );
 delete_option( 'dps_parcelas_db_version' );
 delete_option( 'dps_finance_audit_db_version' );
