@@ -1994,12 +1994,30 @@ class DPS_Agenda_Addon {
         
         // Busca observações do agendamento
         $appt_notes = get_post_meta( $id_param, 'appointment_notes', true );
+        
+        // Verifica se TaxiDog foi solicitado e seu valor
+        $taxidog_requested = get_post_meta( $id_param, 'appointment_taxidog', true );
+        $taxidog_price = 0;
+        if ( $taxidog_requested ) {
+            $taxidog_price = (float) get_post_meta( $id_param, 'appointment_taxidog_price', true );
+        }
 
         // Delega para Services API se disponível (recomendado)
         if ( class_exists( 'DPS_Services_API' ) ) {
             $details = DPS_Services_API::get_services_details( $id_param );
+            $services = $details['services'];
+            
+            // Adiciona TaxiDog como serviço se foi solicitado
+            if ( $taxidog_requested ) {
+                $services[] = [
+                    'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
+                    'price'      => $taxidog_price,
+                    'is_taxidog' => true,
+                ];
+            }
+            
             wp_send_json_success( [
-                'services' => $details['services'],
+                'services' => $services,
                 'notes'    => $appt_notes,
             ] );
         }
@@ -2027,6 +2045,16 @@ class DPS_Agenda_Addon {
                 }
             }
         }
+        
+        // Adiciona TaxiDog como serviço se foi solicitado
+        if ( $taxidog_requested ) {
+            $services[] = [
+                'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
+                'price'      => $taxidog_price,
+                'is_taxidog' => true,
+            ];
+        }
+        
         wp_send_json_success( [ 'services' => $services, 'notes' => $appt_notes ] );
     }
 
