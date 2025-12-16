@@ -52,8 +52,8 @@ class DPS_Agenda_Hub {
     public function register_hub_menu() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Agenda', 'dps-agenda' ),
-            __( 'Agenda', 'dps-agenda' ),
+            __( 'Agenda', 'dps-agenda-addon' ),
+            __( 'Agenda', 'dps-agenda-addon' ),
             'manage_options',
             'dps-agenda-hub',
             [ $this, 'render_hub_page' ]
@@ -65,9 +65,9 @@ class DPS_Agenda_Hub {
      */
     public function render_hub_page() {
         $tabs = [
-            'dashboard' => __( 'Dashboard', 'dps-agenda' ),
-            'settings'  => __( 'Configurações', 'dps-agenda' ),
-            'capacity'  => __( 'Capacidade', 'dps-agenda' ),
+            'dashboard' => __( 'Dashboard', 'dps-agenda-addon' ),
+            'settings'  => __( 'Configurações', 'dps-agenda-addon' ),
+            'capacity'  => __( 'Capacidade', 'dps-agenda-addon' ),
         ];
 
         $callbacks = [
@@ -77,7 +77,7 @@ class DPS_Agenda_Hub {
         ];
 
         DPS_Admin_Tabs_Helper::render_tabbed_page(
-            __( 'Agenda', 'dps-agenda' ),
+            __( 'Agenda', 'dps-agenda-addon' ),
             $tabs,
             $callbacks,
             'dps-agenda-hub',
@@ -131,18 +131,18 @@ class DPS_Agenda_Hub {
         <div class="dps-capacity-placeholder">
             <div class="notice notice-info inline">
                 <p>
-                    <strong><?php esc_html_e( 'Gerenciamento de Capacidade', 'dps-agenda' ); ?></strong><br>
-                    <?php esc_html_e( 'Esta funcionalidade está em desenvolvimento. Em breve você poderá configurar limites de agendamentos por horário, dia da semana e período.', 'dps-agenda' ); ?>
+                    <strong><?php esc_html_e( 'Gerenciamento de Capacidade', 'dps-agenda-addon' ); ?></strong><br>
+                    <?php esc_html_e( 'Esta funcionalidade está em desenvolvimento. Em breve você poderá configurar limites de agendamentos por horário, dia da semana e período.', 'dps-agenda-addon' ); ?>
                 </p>
             </div>
-            
-            <h2><?php esc_html_e( 'Funcionalidades Planejadas', 'dps-agenda' ); ?></h2>
+
+            <h2><?php esc_html_e( 'Funcionalidades Planejadas', 'dps-agenda-addon' ); ?></h2>
             <ul style="line-height: 2; margin-left: 20px;">
-                <li><?php esc_html_e( '✓ Limite de agendamentos simultâneos por horário', 'dps-agenda' ); ?></li>
-                <li><?php esc_html_e( '✓ Configuração de capacidade por dia da semana', 'dps-agenda' ); ?></li>
-                <li><?php esc_html_e( '✓ Bloqueio de horários específicos', 'dps-agenda' ); ?></li>
-                <li><?php esc_html_e( '✓ Alertas de sobrecarga', 'dps-agenda' ); ?></li>
-                <li><?php esc_html_e( '✓ Relatório de ocupação', 'dps-agenda' ); ?></li>
+                <li><?php esc_html_e( '✓ Limite de agendamentos simultâneos por horário', 'dps-agenda-addon' ); ?></li>
+                <li><?php esc_html_e( '✓ Configuração de capacidade por dia da semana', 'dps-agenda-addon' ); ?></li>
+                <li><?php esc_html_e( '✓ Bloqueio de horários específicos', 'dps-agenda-addon' ); ?></li>
+                <li><?php esc_html_e( '✓ Alertas de sobrecarga', 'dps-agenda-addon' ); ?></li>
+                <li><?php esc_html_e( '✓ Relatório de ocupação', 'dps-agenda-addon' ); ?></li>
             </ul>
         </div>
         <?php

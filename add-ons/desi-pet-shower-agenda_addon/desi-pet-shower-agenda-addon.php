@@ -340,8 +340,15 @@ class DPS_Agenda_Addon {
      * @since 1.3.0
      */
     public function enqueue_dashboard_assets( $hook ) {
-        // Carrega apenas na página do dashboard
-        if ( 'desi-pet-shower_page_dps-agenda-dashboard' !== $hook ) {
+        // Carrega apenas na página do dashboard ou na aba Dashboard do hub
+        $is_dashboard_page = 'desi-pet-shower_page_dps-agenda-dashboard' === $hook;
+
+        $is_hub_dashboard_tab = (
+            'desi-pet-shower_page_dps-agenda-hub' === $hook
+            && 'dashboard' === DPS_Admin_Tabs_Helper::get_active_tab( 'dashboard' )
+        );
+
+        if ( ! $is_dashboard_page && ! $is_hub_dashboard_tab ) {
             return;
         }
 
