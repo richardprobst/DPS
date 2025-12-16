@@ -500,12 +500,23 @@ class DPS_Push_Addon {
         update_option( self::OPTION_KEY, $settings );
 
         // Salva configurações de relatórios por email.
-        $emails_agenda = isset( $_POST['dps_push_emails_agenda'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_agenda'] ) ) : '';
-        $emails_report = isset( $_POST['dps_push_emails_report'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_report'] ) ) : '';
-        $agenda_time   = isset( $_POST['dps_push_agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_agenda_time'] ) ) : '08:00';
-        $report_time   = isset( $_POST['dps_push_report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_report_time'] ) ) : '19:00';
-        $weekly_day    = isset( $_POST['dps_push_weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_day'] ) ) : 'monday';
-        $weekly_time   = isset( $_POST['dps_push_weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_time'] ) ) : '08:00';
+        $emails_agenda_raw = isset( $_POST['dps_push_emails_agenda'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_agenda'] ) ) : '';
+        $emails_report_raw = isset( $_POST['dps_push_emails_report'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_report'] ) ) : '';
+        
+        // Valida emails (lista separada por vírgula).
+        $emails_agenda = $this->validate_email_list( $emails_agenda_raw );
+        $emails_report = $this->validate_email_list( $emails_report_raw );
+        
+        // Valida horários (formato HH:MM).
+        $agenda_time = $this->validate_time( isset( $_POST['dps_push_agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_agenda_time'] ) ) : '08:00' );
+        $report_time = $this->validate_time( isset( $_POST['dps_push_report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_report_time'] ) ) : '19:00' );
+        $weekly_time = $this->validate_time( isset( $_POST['dps_push_weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_time'] ) ) : '08:00' );
+        
+        // Valida dia da semana (whitelist).
+        $allowed_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
+        $weekly_day_raw = isset( $_POST['dps_push_weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_day'] ) ) : 'monday';
+        $weekly_day = in_array( $weekly_day_raw, $allowed_days, true ) ? $weekly_day_raw : 'monday';
+        
         $inactive_days = isset( $_POST['dps_push_inactive_days'] ) ? absint( $_POST['dps_push_inactive_days'] ) : 30;
         $telegram_token = isset( $_POST['dps_push_telegram_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_token'] ) ) : '';
         $telegram_chat  = isset( $_POST['dps_push_telegram_chat'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_chat'] ) ) : '';
@@ -527,6 +538,34 @@ class DPS_Push_Addon {
         if ( function_exists( 'add_settings_error' ) ) {
             add_settings_error( 'dps_push', 'settings_saved', __( 'Configurações salvas com sucesso.', 'dps-push-addon' ), 'success' );
         }
+    }
+
+    /**
+     * Valida e filtra lista de emails separados por vírgula.
+     *
+     * @param string $input Lista de emails.
+     * @return string Lista de emails válidos.
+     */
+    private function validate_email_list( $input ) {
+        if ( empty( $input ) ) {
+            return '';
+        }
+        $emails = array_map( 'trim', explode( ',', $input ) );
+        $valid_emails = array_filter( $emails, 'is_email' );
+        return implode( ', ', $valid_emails );
+    }
+
+    /**
+     * Valida horário no formato HH:MM.
+     *
+     * @param string $time Horário.
+     * @return string Horário válido ou padrão.
+     */
+    private function validate_time( $time ) {
+        if ( preg_match( '/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time ) ) {
+            return $time;
+        }
+        return '08:00';
     }
 
     /**
@@ -753,7 +792,13 @@ function dps_push_init_addon() {
     }
     // Inicializa os relatórios por email.
     if ( class_exists( 'DPS_Email_Reports' ) ) {
-        DPS_Email_Reports::get_instance();
+        try {
+            DPS_Email_Reports::get_instance();
+        } catch ( Exception $e ) {
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::error( 'Erro ao inicializar DPS_Email_Reports: ' . $e->getMessage(), [], 'push' );
+            }
+        }
     }
 }
 add_action( 'init', 'dps_push_init_addon', 5 );
