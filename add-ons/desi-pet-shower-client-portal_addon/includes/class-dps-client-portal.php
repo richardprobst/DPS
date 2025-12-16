@@ -386,7 +386,13 @@ final class DPS_Client_Portal {
         // Verifica nonce de segurança
         $nonce = isset( $_POST['_dps_client_portal_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_dps_client_portal_nonce'] ) ) : '';
         if ( ! wp_verify_nonce( $nonce, 'dps_client_portal_action' ) ) {
-            return;
+            // Redireciona com mensagem de erro quando a validação de sessão falha.
+            // Isso pode ocorrer se a sessão expirou ou se há problemas de cache.
+            $referer      = wp_get_referer();
+            $redirect_url = $referer ? remove_query_arg( 'portal_msg', $referer ) : remove_query_arg( 'portal_msg' );
+            $redirect_url = add_query_arg( 'portal_msg', 'session_expired', $redirect_url );
+            wp_safe_redirect( $redirect_url );
+            exit;
         }
         $action    = sanitize_key( wp_unslash( $_POST['dps_client_portal_action'] ) );
 
@@ -1110,6 +1116,14 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Tipo de arquivo não permitido. Apenas imagens JPG, PNG, GIF e WebP são aceitas.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'file_too_large' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'O arquivo é muito grande. O tamanho máximo permitido é 5MB.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'session_expired' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Sua sessão expirou ou é inválida. Por favor, atualize a página e tente novamente.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'pet_updated' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Dados do pet atualizados com sucesso.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'preferences_updated' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'pet_preferences_updated' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências do pet atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
             }
         }
         
