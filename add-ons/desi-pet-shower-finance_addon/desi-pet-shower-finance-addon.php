@@ -252,6 +252,14 @@ class DPS_Finance_Addon {
         $transacoes_table = $wpdb->prefix . 'dps_transacoes';
         $transacoes_version = get_option( 'dps_transacoes_db_version', '0' );
         
+        // BUGFIX: Verifica se a tabela existe antes de confiar na versão armazenada
+        // Se a tabela não existe mas a versão diz que existe, reseta a versão para forçar criação
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table;
+        if ( ! $table_exists ) {
+            $transacoes_version = '0';
+            delete_option( 'dps_transacoes_db_version' );
+        }
+        
         // Criar tabela se não existir (primeira instalação)
         if ( version_compare( $transacoes_version, '1.0.0', '<' ) ) {
             $sql = "CREATE TABLE $transacoes_table (
@@ -328,6 +336,14 @@ class DPS_Finance_Addon {
         // ========== 2. Criar/atualizar tabela dps_parcelas ==========
         $parcelas_table = $wpdb->prefix . 'dps_parcelas';
         $parcelas_version = get_option( 'dps_parcelas_db_version', '0' );
+        
+        // BUGFIX: Verifica se a tabela existe antes de confiar na versão armazenada
+        // Se a tabela não existe mas a versão diz que existe, reseta a versão para forçar criação
+        $parcelas_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $parcelas_table ) ) === $parcelas_table;
+        if ( ! $parcelas_table_exists ) {
+            $parcelas_version = '0';
+            delete_option( 'dps_parcelas_db_version' );
+        }
         
         // Criar tabela se não existir (primeira instalação)
         if ( version_compare( $parcelas_version, '1.0.0', '<' ) ) {
@@ -443,6 +459,13 @@ class DPS_Finance_Addon {
         // ========== 4. FASE 4 - F4.4: Criar tabela de auditoria ==========
         $audit_table = $wpdb->prefix . 'dps_finance_audit_log';
         $audit_version = get_option( 'dps_finance_audit_db_version', '0' );
+        
+        // BUGFIX: Verifica se a tabela existe antes de confiar na versão armazenada
+        $audit_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $audit_table ) ) === $audit_table;
+        if ( ! $audit_table_exists ) {
+            $audit_version = '0';
+            delete_option( 'dps_finance_audit_db_version' );
+        }
         
         if ( version_compare( $audit_version, '1.0.0', '<' ) ) {
             $sql = "CREATE TABLE $audit_table (
@@ -1571,15 +1594,25 @@ class DPS_Finance_Addon {
         // Verifica se a tabela existe antes de qualquer consulta
         $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
         if ( ! $table_exists ) {
-            ob_start();
-            echo '<div class="dps-section" id="dps-section-financeiro">';
-            echo '<h3>' . esc_html__( 'Controle Financeiro', 'dps-finance-addon' ) . '</h3>';
-            echo '<div class="notice notice-warning" style="padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; background: #fcf8e3;">';
-            echo '<p><strong>' . esc_html__( 'Tabela financeira não encontrada.', 'dps-finance-addon' ) . '</strong></p>';
-            echo '<p>' . esc_html__( 'A tabela de transações ainda não foi criada. Por favor, desative e reative o add-on Financeiro para criar as tabelas necessárias.', 'dps-finance-addon' ) . '</p>';
-            echo '</div>';
-            echo '</div>';
-            return ob_get_clean();
+            // BUGFIX: Tenta criar as tabelas automaticamente se o usuário for admin
+            if ( current_user_can( 'manage_options' ) ) {
+                self::activate();
+                // Verifica novamente após tentar criar
+                $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+            }
+            
+            // Se ainda não existe, mostra mensagem de erro
+            if ( ! $table_exists ) {
+                ob_start();
+                echo '<div class="dps-section" id="dps-section-financeiro">';
+                echo '<h3>' . esc_html__( 'Controle Financeiro', 'dps-finance-addon' ) . '</h3>';
+                echo '<div class="notice notice-warning" style="padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e; background: #fcf8e3;">';
+                echo '<p><strong>' . esc_html__( 'Tabela financeira não encontrada.', 'dps-finance-addon' ) . '</strong></p>';
+                echo '<p>' . esc_html__( 'A tabela de transações ainda não foi criada. Por favor, desative e reative o add-on Financeiro para criar as tabelas necessárias.', 'dps-finance-addon' ) . '</p>';
+                echo '</div>';
+                echo '</div>';
+                return ob_get_clean();
+            }
         }
         
         // Busca categorias distintas na base para uso no datalist e dropdown
