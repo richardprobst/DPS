@@ -2368,6 +2368,13 @@ class DPS_Finance_Addon {
         }
         global $wpdb;
         $table   = $wpdb->prefix . 'dps_transacoes';
+        
+        // Verifica se a tabela existe antes de qualquer consulta
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table;
+        if ( ! $table_exists ) {
+            return;
+        }
+        
         $appt_id = intval( $object_id );
         if ( ! $appt_id ) {
             return;
