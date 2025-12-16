@@ -27,6 +27,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Finance_API {
 
     /**
+     * Verifica se uma tabela existe no banco de dados atual.
+     *
+     * @since 1.3.0
+     *
+     * @param string $table_name Nome completo da tabela (com prefixo).
+     * @return bool True se a tabela existe, false caso contrário.
+     */
+    private static function table_exists( $table_name ) {
+        global $wpdb;
+
+        $table_exists = $wpdb->get_var( $wpdb->prepare(
+            'SHOW TABLES LIKE %s',
+            $wpdb->esc_like( $table_name )
+        ) );
+
+        return $table_exists === $table_name;
+    }
+
+    /**
      * Criar ou atualizar cobrança vinculada a um agendamento.
      *
      * Este é o método principal usado pela Agenda e outros add-ons para registrar cobranças.
@@ -419,6 +438,11 @@ class DPS_Finance_API {
             return 0;
         }
 
+        // Evita erros quando tabelas ainda não foram criadas (ex.: plugin recém-instalado).
+        if ( ! self::table_exists( $table ) ) {
+            return 0;
+        }
+
         // Busca IDs das transações a remover
         $trans_ids = $wpdb->get_col( $wpdb->prepare(
             "SELECT id FROM {$table} WHERE agendamento_id = %d",
@@ -430,8 +454,10 @@ class DPS_Finance_API {
         }
 
         // Remove parcelas vinculadas
-        foreach ( $trans_ids as $trans_id ) {
-            $wpdb->delete( $parcelas_table, [ 'trans_id' => $trans_id ], [ '%d' ] );
+        if ( self::table_exists( $parcelas_table ) ) {
+            foreach ( $trans_ids as $trans_id ) {
+                $wpdb->delete( $parcelas_table, [ 'trans_id' => $trans_id ], [ '%d' ] );
+            }
         }
 
         // Remove transações
