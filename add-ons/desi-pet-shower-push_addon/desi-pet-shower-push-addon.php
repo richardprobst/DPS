@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DPS by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Notificações push para administradores e equipe. Receba alertas em tempo real sobre novos agendamentos e mudanças de status.
- * Version:           1.0.0
+ * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
@@ -48,6 +48,9 @@ add_action( 'init', 'dps_push_load_textdomain', 1 );
 
 // Carrega a API de Push Notifications
 require_once __DIR__ . '/includes/class-dps-push-api.php';
+
+// Carrega a classe de Relatórios por Email
+require_once __DIR__ . '/includes/class-dps-email-reports.php';
 
 /**
  * Classe principal do Push Notifications Add-on.
@@ -496,9 +499,73 @@ class DPS_Push_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
+        // Salva configurações de relatórios por email.
+        $emails_agenda_raw = isset( $_POST['dps_push_emails_agenda'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_agenda'] ) ) : '';
+        $emails_report_raw = isset( $_POST['dps_push_emails_report'] ) ? sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_report'] ) ) : '';
+        
+        // Valida emails (lista separada por vírgula).
+        $emails_agenda = $this->validate_email_list( $emails_agenda_raw );
+        $emails_report = $this->validate_email_list( $emails_report_raw );
+        
+        // Valida horários (formato HH:MM).
+        $agenda_time = $this->validate_time( isset( $_POST['dps_push_agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_agenda_time'] ) ) : '08:00' );
+        $report_time = $this->validate_time( isset( $_POST['dps_push_report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_report_time'] ) ) : '19:00' );
+        $weekly_time = $this->validate_time( isset( $_POST['dps_push_weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_time'] ) ) : '08:00' );
+        
+        // Valida dia da semana (whitelist).
+        $allowed_days = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
+        $weekly_day_raw = isset( $_POST['dps_push_weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_day'] ) ) : 'monday';
+        $weekly_day = in_array( $weekly_day_raw, $allowed_days, true ) ? $weekly_day_raw : 'monday';
+        
+        $inactive_days = isset( $_POST['dps_push_inactive_days'] ) ? absint( $_POST['dps_push_inactive_days'] ) : 30;
+        $telegram_token = isset( $_POST['dps_push_telegram_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_token'] ) ) : '';
+        $telegram_chat  = isset( $_POST['dps_push_telegram_chat'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_chat'] ) ) : '';
+
+        update_option( 'dps_push_emails_agenda', $emails_agenda );
+        update_option( 'dps_push_emails_report', $emails_report );
+        update_option( 'dps_push_agenda_time', $agenda_time );
+        update_option( 'dps_push_report_time', $report_time );
+        update_option( 'dps_push_weekly_day', $weekly_day );
+        update_option( 'dps_push_weekly_time', $weekly_time );
+        update_option( 'dps_push_inactive_days', $inactive_days );
+        update_option( 'dps_push_telegram_token', $telegram_token );
+        update_option( 'dps_push_telegram_chat', $telegram_chat );
+
+        update_option( 'dps_push_agenda_enabled', ! empty( $_POST['dps_push_agenda_enabled'] ) );
+        update_option( 'dps_push_report_enabled', ! empty( $_POST['dps_push_report_enabled'] ) );
+        update_option( 'dps_push_weekly_enabled', ! empty( $_POST['dps_push_weekly_enabled'] ) );
+
         if ( function_exists( 'add_settings_error' ) ) {
             add_settings_error( 'dps_push', 'settings_saved', __( 'Configurações salvas com sucesso.', 'dps-push-addon' ), 'success' );
         }
+    }
+
+    /**
+     * Valida e filtra lista de emails separados por vírgula.
+     *
+     * @param string $input Lista de emails.
+     * @return string Lista de emails válidos.
+     */
+    private function validate_email_list( $input ) {
+        if ( empty( $input ) ) {
+            return '';
+        }
+        $emails = array_map( 'trim', explode( ',', $input ) );
+        $valid_emails = array_filter( $emails, 'is_email' );
+        return implode( ', ', $valid_emails );
+    }
+
+    /**
+     * Valida horário no formato HH:MM.
+     *
+     * @param string $time Horário.
+     * @return string Horário válido ou padrão.
+     */
+    private function validate_time( $time ) {
+        if ( preg_match( '/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time ) ) {
+            return $time;
+        }
+        return '08:00';
     }
 
     /**
@@ -510,6 +577,20 @@ class DPS_Push_Addon {
         $user_id = get_current_user_id();
         $subscriptions = get_user_meta( $user_id, '_dps_push_subscriptions', true );
         $sub_count = is_array( $subscriptions ) ? count( $subscriptions ) : 0;
+
+        // Configurações de relatórios por email.
+        $emails_agenda   = get_option( 'dps_push_emails_agenda', get_option( 'admin_email' ) );
+        $emails_report   = get_option( 'dps_push_emails_report', get_option( 'admin_email' ) );
+        $agenda_time     = get_option( 'dps_push_agenda_time', '08:00' );
+        $report_time     = get_option( 'dps_push_report_time', '19:00' );
+        $weekly_day      = get_option( 'dps_push_weekly_day', 'monday' );
+        $weekly_time     = get_option( 'dps_push_weekly_time', '08:00' );
+        $inactive_days   = get_option( 'dps_push_inactive_days', 30 );
+        $telegram_token  = get_option( 'dps_push_telegram_token', '' );
+        $telegram_chat   = get_option( 'dps_push_telegram_chat', '' );
+        $agenda_enabled  = get_option( 'dps_push_agenda_enabled', true );
+        $report_enabled  = get_option( 'dps_push_report_enabled', true );
+        $weekly_enabled  = get_option( 'dps_push_weekly_enabled', true );
 
         ?>
         <div class="wrap dps-push-settings">
@@ -580,6 +661,92 @@ class DPS_Push_Addon {
                             </tr>
                         </table>
 
+                        <h3 style="margin-top: 30px;">📧 <?php echo esc_html__( 'Relatórios por Email', 'dps-push-addon' ); ?></h3>
+
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Agenda Diária', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <fieldset>
+                                        <label>
+                                            <input type="checkbox" name="dps_push_agenda_enabled" value="1" <?php checked( $agenda_enabled ); ?>>
+                                            <?php echo esc_html__( 'Enviar resumo diário de agendamentos', 'dps-push-addon' ); ?>
+                                        </label>
+                                        <br><br>
+                                        <label for="dps_push_agenda_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
+                                        <input type="time" id="dps_push_agenda_time" name="dps_push_agenda_time" value="<?php echo esc_attr( $agenda_time ); ?>">
+                                        <br><br>
+                                        <label for="dps_push_emails_agenda"><?php echo esc_html__( 'Destinatários (separados por vírgula):', 'dps-push-addon' ); ?></label><br>
+                                        <textarea id="dps_push_emails_agenda" name="dps_push_emails_agenda" rows="2" class="large-text" placeholder="email1@exemplo.com, email2@exemplo.com"><?php echo esc_textarea( $emails_agenda ); ?></textarea>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Relatório Financeiro', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <fieldset>
+                                        <label>
+                                            <input type="checkbox" name="dps_push_report_enabled" value="1" <?php checked( $report_enabled ); ?>>
+                                            <?php echo esc_html__( 'Enviar relatório financeiro diário', 'dps-push-addon' ); ?>
+                                        </label>
+                                        <br><br>
+                                        <label for="dps_push_report_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
+                                        <input type="time" id="dps_push_report_time" name="dps_push_report_time" value="<?php echo esc_attr( $report_time ); ?>">
+                                        <br><br>
+                                        <label for="dps_push_emails_report"><?php echo esc_html__( 'Destinatários (separados por vírgula):', 'dps-push-addon' ); ?></label><br>
+                                        <textarea id="dps_push_emails_report" name="dps_push_emails_report" rows="2" class="large-text" placeholder="email1@exemplo.com, email2@exemplo.com"><?php echo esc_textarea( $emails_report ); ?></textarea>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Relatório Semanal', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <fieldset>
+                                        <label>
+                                            <input type="checkbox" name="dps_push_weekly_enabled" value="1" <?php checked( $weekly_enabled ); ?>>
+                                            <?php echo esc_html__( 'Enviar relatório de pets inativos', 'dps-push-addon' ); ?>
+                                        </label>
+                                        <br><br>
+                                        <label for="dps_push_weekly_day"><?php echo esc_html__( 'Dia da semana:', 'dps-push-addon' ); ?></label>
+                                        <select id="dps_push_weekly_day" name="dps_push_weekly_day">
+                                            <option value="monday" <?php selected( $weekly_day, 'monday' ); ?>><?php echo esc_html__( 'Segunda-feira', 'dps-push-addon' ); ?></option>
+                                            <option value="tuesday" <?php selected( $weekly_day, 'tuesday' ); ?>><?php echo esc_html__( 'Terça-feira', 'dps-push-addon' ); ?></option>
+                                            <option value="wednesday" <?php selected( $weekly_day, 'wednesday' ); ?>><?php echo esc_html__( 'Quarta-feira', 'dps-push-addon' ); ?></option>
+                                            <option value="thursday" <?php selected( $weekly_day, 'thursday' ); ?>><?php echo esc_html__( 'Quinta-feira', 'dps-push-addon' ); ?></option>
+                                            <option value="friday" <?php selected( $weekly_day, 'friday' ); ?>><?php echo esc_html__( 'Sexta-feira', 'dps-push-addon' ); ?></option>
+                                            <option value="saturday" <?php selected( $weekly_day, 'saturday' ); ?>><?php echo esc_html__( 'Sábado', 'dps-push-addon' ); ?></option>
+                                            <option value="sunday" <?php selected( $weekly_day, 'sunday' ); ?>><?php echo esc_html__( 'Domingo', 'dps-push-addon' ); ?></option>
+                                        </select>
+                                        <br><br>
+                                        <label for="dps_push_weekly_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
+                                        <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>">
+                                        <br><br>
+                                        <label for="dps_push_inactive_days"><?php echo esc_html__( 'Considerar inativo após (dias):', 'dps-push-addon' ); ?></label>
+                                        <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" style="width: 80px;">
+                                    </fieldset>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <h3 style="margin-top: 30px;">📱 <?php echo esc_html__( 'Telegram', 'dps-push-addon' ); ?></h3>
+
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Token do Bot', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <input type="text" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ">
+                                    <p class="description"><?php echo esc_html__( 'Obtenha um token criando um bot via @BotFather no Telegram.', 'dps-push-addon' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Chat ID', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890">
+                                    <p class="description"><?php echo esc_html__( 'ID do chat ou grupo onde os relatórios serão enviados.', 'dps-push-addon' ); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+
                         <p class="submit">
                             <button type="submit" name="dps_push_save" class="button button-primary">
                                 <?php echo esc_html__( 'Salvar Configurações', 'dps-push-addon' ); ?>
@@ -599,6 +766,13 @@ class DPS_Push_Addon {
                         <li><?php echo esc_html__( 'Receba alertas em tempo real, mesmo com o navegador fechado!', 'dps-push-addon' ); ?></li>
                     </ol>
 
+                    <h3 style="margin-top: 20px;">📧 <?php echo esc_html__( 'Relatórios por Email', 'dps-push-addon' ); ?></h3>
+                    <ul>
+                        <li><?php echo esc_html__( 'Agenda Diária: resumo dos agendamentos do dia', 'dps-push-addon' ); ?></li>
+                        <li><?php echo esc_html__( 'Relatório Financeiro: receitas e despesas do dia', 'dps-push-addon' ); ?></li>
+                        <li><?php echo esc_html__( 'Relatório Semanal: lista de pets inativos para reengajamento', 'dps-push-addon' ); ?></li>
+                    </ul>
+
                     <p class="description">
                         <?php echo esc_html__( 'Nota: Requer HTTPS e navegador compatível (Chrome, Firefox, Edge, Safari 16+).', 'dps-push-addon' ); ?>
                     </p>
@@ -615,6 +789,16 @@ class DPS_Push_Addon {
 function dps_push_init_addon() {
     if ( class_exists( 'DPS_Push_Addon' ) ) {
         DPS_Push_Addon::get_instance();
+    }
+    // Inicializa os relatórios por email.
+    if ( class_exists( 'DPS_Email_Reports' ) ) {
+        try {
+            DPS_Email_Reports::get_instance();
+        } catch ( Exception $e ) {
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::error( 'Erro ao inicializar DPS_Email_Reports: ' . $e->getMessage(), [], 'push' );
+            }
+        }
     }
 }
 add_action( 'init', 'dps_push_init_addon', 5 );

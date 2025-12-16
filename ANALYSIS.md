@@ -951,6 +951,10 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 | `dps_push_report_time` | string | Horário do relatório financeiro (HH:MM) |
 | `dps_push_weekly_day` | string | Dia da semana para relatório semanal (english) |
 | `dps_push_weekly_time` | string | Horário do relatório semanal (HH:MM) |
+| `dps_push_inactive_days` | int | Dias de inatividade para considerar pet inativo (padrão: 30) |
+| `dps_push_agenda_enabled` | bool | Ativar/desativar agenda diária |
+| `dps_push_report_enabled` | bool | Ativar/desativar relatório financeiro |
+| `dps_push_weekly_enabled` | bool | Ativar/desativar relatório semanal |
 | `dps_push_telegram_token` | string | Token do bot do Telegram |
 | `dps_push_telegram_chat` | string | ID do chat/grupo Telegram |
 
@@ -981,15 +985,15 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: 1.0.0
+**Versão atual**: 1.1.0
 
 **Observações**:
 - Implementa `register_deactivation_hook` corretamente para limpar cron jobs
 - Usa timezone do WordPress para agendamentos (`get_option('timezone_string')`)
 - Emails enviados em formato HTML com headers `Content-Type: text/html; charset=UTF-8`
 - Integração Telegram envia mensagens em texto plano com `parse_mode` HTML
-- Arquivo único de 788 linhas; candidato a refatoração modular futura
-- Threshold de inatividade fixo em 30 dias (não configurável atualmente)
+- Threshold de inatividade configurável via interface admin (padrão: 30 dias)
+- Interface administrativa integrada na página de Notificações Push
 
 **Análise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas
 
