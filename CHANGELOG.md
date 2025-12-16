@@ -124,6 +124,17 @@ Antes de criar uma nova versão oficial:
 - **Handler AJAX `dps_agenda_request_taxidog`**: Permite solicitar TaxiDog para agendamentos que não tinham solicitado.
 - **CSS e JS**: Novos estilos para dropdowns elegantes, badges, popups e responsividade.
 
+**Push Notifications Add-on (v1.1.0) - Relatórios por Email**
+
+- **Interface de configuração de relatórios por email**: Adicionada seção completa de configuração na página de administração do Push Add-on.
+- **Agenda Diária por Email**: Resumo dos agendamentos do dia enviado automaticamente no horário configurado.
+- **Relatório Financeiro Diário**: Receitas, despesas e transações do dia enviados automaticamente.
+- **Relatório Semanal de Pets Inativos**: Lista de pets sem atendimento há X dias para reengajamento.
+- **Configuração de destinatários**: Campos para definir emails de destinatários separados por vírgula.
+- **Configuração de horários**: Inputs de horário para cada tipo de relatório.
+- **Configuração de Telegram**: Campos para token do bot e chat ID para envio paralelo via Telegram.
+- **Classe DPS_Email_Reports carregada e instanciada**: Classe existente agora é incluída e inicializada automaticamente.
+
 **Agenda Add-on (v1.1.0) - FASE 2: Filtro por Profissional**
 
 - **F2.5 - Filtro por profissional na Agenda**: Novo filtro nos filtros avançados para selecionar profissional específico.
