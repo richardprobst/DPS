@@ -483,7 +483,6 @@
       }
       $form.data('submitting', true);
       $form.addClass('is-updating');
-      $select.prop('disabled', true);
       $form.trigger('submit');
     });
 
