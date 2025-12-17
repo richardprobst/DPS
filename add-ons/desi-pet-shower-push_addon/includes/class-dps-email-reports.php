@@ -55,10 +55,16 @@ class DPS_Email_Reports {
         register_activation_hook( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php', [ $this, 'activate' ] );
         register_deactivation_hook( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php', [ $this, 'deactivate' ] );
 
-        // Reagendar crons após salvar configurações
+        // Reagendar crons após salvar configurações de horário.
         add_action( 'update_option_dps_push_agenda_time', [ $this, 'reschedule_agenda_cron' ] );
         add_action( 'update_option_dps_push_report_time', [ $this, 'reschedule_report_cron' ] );
         add_action( 'update_option_dps_push_weekly_time', [ $this, 'reschedule_weekly_cron' ] );
+        add_action( 'update_option_dps_push_weekly_day', [ $this, 'reschedule_weekly_cron' ] );
+
+        // Reagendar crons quando habilitação mudar.
+        add_action( 'update_option_dps_push_agenda_enabled', [ $this, 'reschedule_agenda_cron' ] );
+        add_action( 'update_option_dps_push_report_enabled', [ $this, 'reschedule_report_cron' ] );
+        add_action( 'update_option_dps_push_weekly_enabled', [ $this, 'reschedule_weekly_cron' ] );
     }
 
     /**

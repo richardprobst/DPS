@@ -257,3 +257,32 @@
         padding: 0.5rem 0;
     }
 }
+
+/* === Test Result Messages (v1.2.0) === */
+.dps-test-result {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+.dps-test-result.success {
+    color: #10b981;
+}
+
+.dps-test-result.error {
+    color: #ef4444;
+}
+
+/* === Test Buttons === */
+.dps-test-report-btn,
+#dps-test-telegram {
+    margin-top: 5px;
+}
+
+.dps-test-report-btn:disabled,
+#dps-test-telegram:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
