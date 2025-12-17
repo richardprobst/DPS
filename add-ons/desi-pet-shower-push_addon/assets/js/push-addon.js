@@ -5,6 +5,7 @@
  *
  * @package DPS_Push_Addon
  * @since 1.0.0
+ * @since 1.2.0 Adicionados botões de teste de relatórios e Telegram.
  */
 
 (function($) {
@@ -26,6 +27,12 @@
         bindEvents: function() {
             $('#dps-push-subscribe').on('click', this.subscribe.bind(this));
             $('#dps-push-test').on('click', this.testPush.bind(this));
+            
+            // Botões de teste de relatórios por email.
+            $('.dps-test-report-btn').on('click', this.testReport.bind(this));
+            
+            // Botão de teste de conexão Telegram.
+            $('#dps-test-telegram').on('click', this.testTelegram.bind(this));
         },
 
         /**
@@ -169,6 +176,76 @@
                 alert(DPS_Push.messages.error);
             }).always(function() {
                 $btn.prop('disabled', false).text('Testar Notificação');
+            });
+        },
+
+        /**
+         * Envia teste de relatório por email.
+         *
+         * @since 1.2.0
+         */
+        testReport: function(e) {
+            e.preventDefault();
+            var $btn = $(e.currentTarget);
+            var type = $btn.data('type');
+            var $result = $('.dps-test-result[data-type="' + type + '"]');
+            var originalText = $btn.html();
+
+            $btn.prop('disabled', true).html('⏳ Enviando...');
+            $result.removeClass('success error').text('');
+
+            $.ajax({
+                url: DPS_Push.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'dps_push_test_report',
+                    nonce: DPS_Push.nonce_test,
+                    type: type
+                }
+            }).done(function(response) {
+                if (response.success) {
+                    $result.addClass('success').text('✓ ' + response.data.message);
+                } else {
+                    $result.addClass('error').text('✗ ' + response.data.message);
+                }
+            }).fail(function() {
+                $result.addClass('error').text('✗ ' + DPS_Push.messages.error);
+            }).always(function() {
+                $btn.prop('disabled', false).html(originalText);
+            });
+        },
+
+        /**
+         * Testa conexão com Telegram.
+         *
+         * @since 1.2.0
+         */
+        testTelegram: function(e) {
+            e.preventDefault();
+            var $btn = $('#dps-test-telegram');
+            var $result = $('#dps-telegram-result');
+            var originalText = $btn.html();
+
+            $btn.prop('disabled', true).html('⏳ Testando...');
+            $result.removeClass('success error').text('');
+
+            $.ajax({
+                url: DPS_Push.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'dps_push_test_telegram',
+                    nonce: DPS_Push.nonce_test
+                }
+            }).done(function(response) {
+                if (response.success) {
+                    $result.addClass('success').text('✓ ' + response.data.message);
+                } else {
+                    $result.addClass('error').text('✗ ' + response.data.message);
+                }
+            }).fail(function() {
+                $result.addClass('error').text('✗ ' + DPS_Push.messages.error);
+            }).always(function() {
+                $btn.prop('disabled', false).html(originalText);
             });
         },
 

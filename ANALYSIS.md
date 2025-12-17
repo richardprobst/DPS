@@ -360,7 +360,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)
 - **Logs do Sistema** (`dps-logs`) - Plugin Base (visualização de logs do sistema)
 - **Mensagens do Portal** (`edit.php?post_type=dps_portal_message`) - Client Portal Add-on (mensagens enviadas pelos clientes)
-- **Notificações** (`dps-notifications`) - Push Add-on (agenda, relatórios, Telegram)
+- **Notificações** (`dps-push-notifications`) - Push Add-on (push, agenda, relatórios, Telegram)
 - **Pagamentos** (`dps-payment-settings`) - Payment Add-on (Mercado Pago, PIX)
 - **Portal do Cliente** (`dps-client-portal-settings`) - Client Portal Add-on (configurações do portal)
 - **White Label** (`dps-whitelabel`) - White Label Add-on (branding, login customizado, modo de manutenção)
@@ -959,7 +959,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 | `dps_push_telegram_chat` | string | ID do chat/grupo Telegram |
 
 **Menus administrativos**:
-- **Notificações** (`dps-notifications`): configurações de destinatários, horários e integração Telegram
+- **Notificações** (`dps-push-notifications`): configurações de destinatários, horários e integração Telegram
 
 **Hooks consumidos**:
 - Nenhum hook do sistema de configurações (usa menu admin próprio)
@@ -985,7 +985,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Introduzido em**: v0.1.0 (estimado)
 
-**Versão atual**: 1.1.0
+**Versão atual**: 1.2.0
 
 **Observações**:
 - Implementa `register_deactivation_hook` corretamente para limpar cron jobs
@@ -993,7 +993,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Emails enviados em formato HTML com headers `Content-Type: text/html; charset=UTF-8`
 - Integração Telegram envia mensagens em texto plano com `parse_mode` HTML
 - Threshold de inatividade configurável via interface admin (padrão: 30 dias)
-- Interface administrativa integrada na página de Notificações Push
+- Interface administrativa integrada na página de Notificações sob menu DPS by PRObst
+- **v1.2.0**: Menu admin visível, botões de teste para relatórios e Telegram, uninstall.php atualizado
 
 **Análise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas
 

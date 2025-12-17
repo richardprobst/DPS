@@ -1,6 +1,6 @@
 # DPS by PRObst – Push Notifications Add-on
 
-Notificações push nativas do navegador para administradores do DPS. Receba alertas em tempo real sobre novos agendamentos, mudanças de status e reagendamentos.
+Notificações push nativas do navegador e relatórios automáticos por email/Telegram para administradores do DPS. Receba alertas em tempo real sobre novos agendamentos, mudanças de status e reagendamentos.
 
 ## Funcionalidades
 
@@ -8,12 +8,20 @@ Notificações push nativas do navegador para administradores do DPS. Receba ale
 - **Multi-dispositivo**: Ative em quantos dispositivos quiser
 - **Configurável**: Escolha quais eventos devem gerar notificações
 - **Privado**: Dados ficam no seu servidor, sem terceiros
+- **Relatórios por Email**: Agenda diária, relatório financeiro e pets inativos
+- **Integração Telegram**: Receba relatórios diretamente no seu grupo ou chat
 
 ## Eventos Notificados
 
 1. **Novos agendamentos**: Quando um cliente agenda um serviço
 2. **Mudanças de status**: Quando outro usuário altera status de um agendamento
 3. **Reagendamentos**: Quando um agendamento é reagendado para outra data/hora
+
+## Relatórios Automáticos
+
+1. **Agenda Diária**: Resumo dos agendamentos do dia
+2. **Relatório Financeiro**: Receitas e despesas do dia
+3. **Relatório Semanal**: Lista de pets sem atendimento há mais de X dias
 
 ## Requisitos
 
@@ -30,9 +38,11 @@ Notificações push nativas do navegador para administradores do DPS. Receba ale
 
 1. Faça upload da pasta `desi-pet-shower-push_addon` para `/wp-content/plugins/`
 2. Ative o plugin no WordPress
-3. Acesse **DPS by PRObst > Push Notifications**
+3. Acesse **DPS by PRObst > Notificações**
 4. Clique em "Ativar Notificações" e permita no navegador
 5. Configure quais eventos devem gerar notificações
+6. Configure destinatários e horários para relatórios por email
+7. (Opcional) Configure integração com Telegram
 
 ## Como Funciona
 
@@ -122,6 +132,31 @@ add_filter( 'dps_push_payload', function( $payload, $event_type ) {
 
 1. Desative e reative o plugin para gerar novas chaves
 2. Verifique se OpenSSL está disponível no PHP
+
+## Changelog
+
+### v1.2.0 (2025-12-17)
+
+- **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações"
+- **Botões de teste**: Botões "Enviar Teste" para cada tipo de relatório (Agenda, Financeiro, Semanal)
+- **Teste de conexão Telegram**: Valida configuração e envia mensagem de teste
+- **Carregamento de assets otimizado**: CSS/JS carregados apenas em páginas DPS relevantes
+- **uninstall.php corrigido**: Limpa todas as options e cron jobs
+
+### v1.1.0 (2025-12-02)
+
+- Status card com próximos envios
+- Checkbox habilitar/desabilitar por relatório
+- Threshold de inatividade configurável (padrão: 30 dias)
+- Integração com DPS_Logger
+- CSS e JS externos
+
+### v1.0.0
+
+- Lançamento inicial
+- Notificações push via Web Push API
+- Relatórios por email (agenda, financeiro, semanal)
+- Integração com Telegram
 
 ## Licença
 

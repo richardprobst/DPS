@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
@@ -13,7 +13,7 @@
  * License:           GPL-2.0+
  */
 
-// Impede acesso direto
+// Impede acesso direto.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -107,6 +107,8 @@ class DPS_Push_Addon {
         add_action( 'wp_ajax_dps_push_subscribe', [ $this, 'subscribe_ajax' ] );
         add_action( 'wp_ajax_dps_push_unsubscribe', [ $this, 'unsubscribe_ajax' ] );
         add_action( 'wp_ajax_dps_push_test', [ $this, 'test_push_ajax' ] );
+        add_action( 'wp_ajax_dps_push_test_report', [ $this, 'test_report_ajax' ] );
+        add_action( 'wp_ajax_dps_push_test_telegram', [ $this, 'test_telegram_ajax' ] );
 
         // Hooks para enviar notificações
         add_action( 'dps_base_after_save_appointment', [ $this, 'notify_new_appointment' ], 20, 2 );
@@ -137,14 +139,16 @@ class DPS_Push_Addon {
     /**
      * Registra submenu admin para Push Notifications.
      * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-integrations-hub para acessar via aba "Notificações Push".
+     * Registra submenu sob o menu principal "DPS by PRObst".
+     *
+     * @since 1.0.0
+     * @since 1.2.0 Menu agora visível sob "DPS by PRObst" (antes estava oculto).
      */
     public function register_admin_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
-            __( 'Notificações Push', 'dps-push-addon' ),
-            __( 'Notificações Push', 'dps-push-addon' ),
+            'desi-pet-shower', // Menu pai: DPS by PRObst.
+            __( 'Notificações', 'dps-push-addon' ),
+            __( 'Notificações', 'dps-push-addon' ),
             'manage_options',
             'dps-push-notifications',
             [ $this, 'render_admin_page' ]
@@ -154,19 +158,24 @@ class DPS_Push_Addon {
     /**
      * Enfileira assets do admin.
      *
+     * @since 1.0.0
+     * @since 1.2.0 Melhorado para carregar apenas nas páginas relevantes.
+     *
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
-        // Carrega em todas as páginas admin do DPS para permitir inscrição
-        if ( strpos( $hook, 'desi-pet-shower' ) === false && strpos( $hook, 'dps-' ) === false ) {
-            // Verifica se é página do DPS ou agenda
-            if ( ! is_admin() ) {
-                return;
-            }
+        // Carrega apenas na página de configurações do Push ou outras páginas DPS relevantes.
+        $is_push_page = ( strpos( $hook, 'dps-push-notifications' ) !== false );
+        $is_dps_page  = ( strpos( $hook, 'desi-pet-shower' ) !== false || strpos( $hook, 'dps-' ) !== false );
+
+        // Carrega CSS/JS apenas na página de configurações do Push.
+        // Se precisar em outras páginas, carregar apenas o botão de inscrição (minimalista).
+        if ( ! $is_push_page && ! $is_dps_page ) {
+            return;
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.0.0';
+        $version   = '1.2.0';
 
         wp_enqueue_style(
             'dps-push-addon',
@@ -192,28 +201,30 @@ class DPS_Push_Addon {
             'vapid_public'    => $vapid_keys['public'] ?? '',
             'sw_url'          => $addon_url . 'assets/js/push-sw.js',
             'messages'        => [
-                'subscribing'     => __( 'Ativando notificações...', 'dps-push-addon' ),
-                'subscribed'      => __( 'Notificações ativadas!', 'dps-push-addon' ),
-                'unsubscribed'    => __( 'Notificações desativadas.', 'dps-push-addon' ),
-                'error'           => __( 'Erro ao ativar notificações.', 'dps-push-addon' ),
-                'not_supported'   => __( 'Seu navegador não suporta notificações push.', 'dps-push-addon' ),
+                'subscribing'       => __( 'Ativando notificações...', 'dps-push-addon' ),
+                'subscribed'        => __( 'Notificações ativadas!', 'dps-push-addon' ),
+                'unsubscribed'      => __( 'Notificações desativadas.', 'dps-push-addon' ),
+                'error'             => __( 'Erro ao ativar notificações.', 'dps-push-addon' ),
+                'not_supported'     => __( 'Seu navegador não suporta notificações push.', 'dps-push-addon' ),
                 'permission_denied' => __( 'Permissão negada. Habilite nas configurações do navegador.', 'dps-push-addon' ),
-                'test_sent'       => __( 'Notificação de teste enviada!', 'dps-push-addon' ),
+                'test_sent'         => __( 'Notificação de teste enviada!', 'dps-push-addon' ),
             ],
         ] );
     }
 
     /**
      * Enfileira assets no frontend (para página de agenda).
+     *
+     * @since 1.0.0
      */
     public function enqueue_frontend_assets() {
-        // Verificar se está na página de agenda
+        // Verificar se está na página de agenda.
         global $post;
         if ( ! $post || ! has_shortcode( $post->post_content, 'dps_agenda_page' ) ) {
             return;
         }
 
-        // Somente para usuários logados com permissão
+        // Somente para usuários logados com permissão.
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             return;
         }
@@ -325,6 +336,107 @@ class DPS_Push_Addon {
         } else {
             wp_send_json_error( [ 
                 'message' => __( 'Nenhum dispositivo inscrito ou erro ao enviar.', 'dps-push-addon' ),
+            ] );
+        }
+    }
+
+    /**
+     * AJAX: Enviar teste de relatório por email.
+     *
+     * @since 1.2.0
+     */
+    public function test_report_ajax() {
+        check_ajax_referer( 'dps_push_test', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
+        }
+
+        $type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : '';
+
+        $valid_types = [ 'agenda', 'report', 'weekly' ];
+        if ( ! in_array( $type, $valid_types, true ) ) {
+            wp_send_json_error( [ 'message' => __( 'Tipo de relatório inválido.', 'dps-push-addon' ) ] );
+        }
+
+        $email_reports = DPS_Email_Reports::get_instance();
+        $result = $email_reports->send_test( $type );
+
+        if ( $result ) {
+            wp_send_json_success( [ 
+                'message' => __( 'Relatório de teste enviado com sucesso!', 'dps-push-addon' ),
+            ] );
+        } else {
+            wp_send_json_error( [ 
+                'message' => __( 'Erro ao enviar relatório de teste.', 'dps-push-addon' ),
+            ] );
+        }
+    }
+
+    /**
+     * AJAX: Testar conexão com Telegram.
+     *
+     * @since 1.2.0
+     */
+    public function test_telegram_ajax() {
+        check_ajax_referer( 'dps_push_test', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
+        }
+
+        $token   = get_option( 'dps_push_telegram_token', '' );
+        $chat_id = get_option( 'dps_push_telegram_chat', '' );
+
+        if ( empty( $token ) || empty( $chat_id ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Configure o Token do Bot e o Chat ID antes de testar.', 'dps-push-addon' ),
+            ] );
+        }
+
+        // Testar enviando mensagem.
+        $url = "https://api.telegram.org/bot{$token}/sendMessage";
+
+        $test_message = sprintf(
+            /* translators: %s: blog name */
+            __( '🔔 Teste de conexão do DPS by PRObst (%s). Conexão funcionando!', 'dps-push-addon' ),
+            get_bloginfo( 'name' )
+        );
+
+        $response = wp_remote_post( $url, [
+            'body'    => [
+                'chat_id'    => $chat_id,
+                'text'       => $test_message,
+                'parse_mode' => 'HTML',
+            ],
+            'timeout' => 30,
+        ] );
+
+        if ( is_wp_error( $response ) ) {
+            wp_send_json_error( [ 
+                'message' => sprintf( 
+                    /* translators: %s: error message */
+                    __( 'Erro de conexão: %s', 'dps-push-addon' ),
+                    $response->get_error_message()
+                ),
+            ] );
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( isset( $data['ok'] ) && $data['ok'] ) {
+            wp_send_json_success( [ 
+                'message' => __( 'Conexão com Telegram funcionando! Mensagem de teste enviada.', 'dps-push-addon' ),
+            ] );
+        } else {
+            $error_desc = isset( $data['description'] ) ? $data['description'] : __( 'Erro desconhecido.', 'dps-push-addon' );
+            wp_send_json_error( [ 
+                'message' => sprintf( 
+                    /* translators: %s: error description */
+                    __( 'Erro do Telegram: %s', 'dps-push-addon' ),
+                    $error_desc
+                ),
             ] );
         }
     }
@@ -678,6 +790,11 @@ class DPS_Push_Addon {
                                         <br><br>
                                         <label for="dps_push_emails_agenda"><?php echo esc_html__( 'Destinatários (separados por vírgula):', 'dps-push-addon' ); ?></label><br>
                                         <textarea id="dps_push_emails_agenda" name="dps_push_emails_agenda" rows="2" class="large-text" placeholder="email1@exemplo.com, email2@exemplo.com"><?php echo esc_textarea( $emails_agenda ); ?></textarea>
+                                        <br><br>
+                                        <button type="button" class="button dps-test-report-btn" data-type="agenda">
+                                            📤 <?php echo esc_html__( 'Enviar Teste', 'dps-push-addon' ); ?>
+                                        </button>
+                                        <span class="dps-test-result" data-type="agenda"></span>
                                     </fieldset>
                                 </td>
                             </tr>
@@ -695,6 +812,11 @@ class DPS_Push_Addon {
                                         <br><br>
                                         <label for="dps_push_emails_report"><?php echo esc_html__( 'Destinatários (separados por vírgula):', 'dps-push-addon' ); ?></label><br>
                                         <textarea id="dps_push_emails_report" name="dps_push_emails_report" rows="2" class="large-text" placeholder="email1@exemplo.com, email2@exemplo.com"><?php echo esc_textarea( $emails_report ); ?></textarea>
+                                        <br><br>
+                                        <button type="button" class="button dps-test-report-btn" data-type="report">
+                                            📤 <?php echo esc_html__( 'Enviar Teste', 'dps-push-addon' ); ?>
+                                        </button>
+                                        <span class="dps-test-result" data-type="report"></span>
                                     </fieldset>
                                 </td>
                             </tr>
@@ -723,6 +845,11 @@ class DPS_Push_Addon {
                                         <br><br>
                                         <label for="dps_push_inactive_days"><?php echo esc_html__( 'Considerar inativo após (dias):', 'dps-push-addon' ); ?></label>
                                         <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" style="width: 80px;">
+                                        <br><br>
+                                        <button type="button" class="button dps-test-report-btn" data-type="weekly">
+                                            📤 <?php echo esc_html__( 'Enviar Teste', 'dps-push-addon' ); ?>
+                                        </button>
+                                        <span class="dps-test-result" data-type="weekly"></span>
                                     </fieldset>
                                 </td>
                             </tr>
@@ -743,6 +870,15 @@ class DPS_Push_Addon {
                                 <td>
                                     <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890">
                                     <p class="description"><?php echo esc_html__( 'ID do chat ou grupo onde os relatórios serão enviados.', 'dps-push-addon' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo esc_html__( 'Testar Conexão', 'dps-push-addon' ); ?></th>
+                                <td>
+                                    <button type="button" id="dps-test-telegram" class="button">
+                                        🔗 <?php echo esc_html__( 'Testar Conexão', 'dps-push-addon' ); ?>
+                                    </button>
+                                    <span id="dps-telegram-result" class="dps-test-result"></span>
                                 </td>
                             </tr>
                         </table>

@@ -83,6 +83,30 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Push Add-on (v1.2.0) - Melhorias de Interface e Correções**
+
+- **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações" (antes estava oculto).
+- **Botões de teste de relatórios**: Botões "Enviar Teste" para cada tipo de relatório (Agenda, Financeiro, Semanal).
+- **Botão de teste de conexão Telegram**: Valida configuração e envia mensagem de teste.
+- **AJAX handlers**: Novos handlers `dps_push_test_report` e `dps_push_test_telegram` para testes via AJAX.
+- **Feedback visual**: Mensagens de sucesso/erro exibidas ao lado dos botões de teste.
+
+#### Changed (Alterado)
+
+**Push Add-on (v1.2.0)**
+
+- **Carregamento de assets otimizado**: CSS/JS agora carregados apenas em páginas DPS relevantes.
+- **Cron hooks adicionais**: Reagendamento automático quando opções `_enabled` ou `_day` mudam.
+- **Versão atualizada para 1.2.0** no cabeçalho do plugin e assets.
+
+#### Fixed (Corrigido)
+
+**Push Add-on (v1.2.0)**
+
+- **uninstall.php corrigido**: Agora limpa todas as options criadas pelo add-on e remove cron jobs.
+
+---
+
 **AI Add-on (v1.9.0) - Edição de Regras de Sistema (System Prompts)**
 
 - **Campo editável de System Prompts**: Nova seção "Regras de Sistema (System Prompts)" na página de configurações do add-on IA.
