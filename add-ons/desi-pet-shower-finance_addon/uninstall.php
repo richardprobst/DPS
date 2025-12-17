@@ -17,6 +17,7 @@ global $wpdb;
 $tables = [
     $wpdb->prefix . 'dps_transacoes',
     $wpdb->prefix . 'dps_parcelas',
+    $wpdb->prefix . 'dps_finance_audit_log',
 ];
 
 foreach ( $tables as $table ) {
@@ -31,7 +32,9 @@ foreach ( $tables as $table ) {
 
 // Remove options
 delete_option( 'dps_fin_docs_page_id' );
-delete_option( 'dps_finance_db_version' );
+delete_option( 'dps_transacoes_db_version' );
+delete_option( 'dps_parcelas_db_version' );
+delete_option( 'dps_finance_audit_db_version' );
 
 // Remove quaisquer transients relacionados
 $transient_like = $wpdb->esc_like( '_transient_dps_fin' ) . '%';
