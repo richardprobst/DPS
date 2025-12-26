@@ -219,6 +219,223 @@
     margin-bottom: 20px;
 }
 
+/* Badges reutilizáveis */
+.dps-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    background: #f9fafb;
+}
+
+.dps-badge--info {
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.dps-badge--success {
+    border-color: #10b981;
+    color: #0f9f6e;
+    background: #ecfdf3;
+}
+
+.dps-badge--warning {
+    border-color: #f59e0b;
+    color: #b45309;
+    background: #fffbeb;
+}
+
+.dps-badge--muted {
+    color: #6b7280;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+.dps-badge--neutral {
+    color: #374151;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+/* Página de Shortcods */
+.dps-shortcodes-page h1 {
+    margin-bottom: 12px;
+}
+
+.dps-shortcodes-intro {
+    max-width: 900px;
+    font-size: 15px;
+    color: #4b5563;
+    margin-bottom: 20px;
+}
+
+.dps-suggestions-panel {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f0f9ff;
+    margin-bottom: 20px;
+}
+
+.dps-suggestions-panel__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #e0f2fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.dps-suggestions-panel h3 {
+    margin: 0 0 6px;
+    color: #0f172a;
+}
+
+.dps-suggestions-panel ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #475569;
+}
+
+.dps-shortcodes-group {
+    margin-top: 28px;
+}
+
+.dps-shortcodes-group__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.dps-shortcodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.dps-shortcode-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.dps-shortcode-card--deprecated {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.dps-shortcode-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dps-shortcode-tag {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #111827;
+    display: inline-block;
+}
+
+.dps-shortcode-title {
+    font-weight: 600;
+    color: #111827;
+    margin-top: 4px;
+}
+
+.dps-shortcode-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-shortcode-card__summary {
+    color: #4b5563;
+    margin: 0;
+}
+
+.dps-copy-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-copy-button.is-copied {
+    border-color: #10b981;
+    color: #0f9f6e;
+    background: #ecfdf3;
+}
+
+.dps-shortcode-details {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f9fafb;
+}
+
+.dps-shortcode-details summary {
+    font-weight: 600;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.dps-shortcode-details__content {
+    margin-top: 8px;
+    color: #4b5563;
+}
+
+.dps-shortcode-attributes {
+    margin: 10px 0;
+    padding-left: 18px;
+}
+
+.dps-shortcode-attributes li {
+    margin-bottom: 6px;
+}
+
+.dps-shortcode-recommendations {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #eef2ff;
+    border-radius: 6px;
+    border: 1px solid #e0e7ff;
+    color: #4338ca;
+}
+
+@media (max-width: 782px) {
+    .dps-shortcode-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dps-suggestions-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
 .dps-field-group-title {
     font-weight: 600;
     color: #374151;
