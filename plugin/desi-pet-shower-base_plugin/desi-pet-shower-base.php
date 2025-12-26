@@ -54,6 +54,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-message-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-phone-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
 
 // Hubs centralizados (Fase 2 - Reorganização de Menus)
@@ -433,6 +434,16 @@ class DPS_Base_Plugin {
         }
 
         wp_enqueue_style( 'dps-admin-style', DPS_BASE_URL . 'assets/css/dps-admin.css', [], DPS_BASE_VERSION );
+
+        if ( strpos( $hook, 'dps-shortcodes' ) !== false ) {
+            wp_enqueue_script(
+                'dps-shortcodes-admin',
+                DPS_BASE_URL . 'assets/js/dps-shortcodes.js',
+                [],
+                DPS_BASE_VERSION,
+                true
+            );
+        }
     }
 
     /**
