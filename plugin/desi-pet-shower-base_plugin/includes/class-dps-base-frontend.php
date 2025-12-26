@@ -389,9 +389,10 @@ class DPS_Base_Frontend {
      * @param int    $client_id ID do cliente relacionado ao agendamento.
      * @param string $tab       Aba para a qual o usuário deve ser redirecionado.
      */
-    private static function redirect_with_pending_notice( $client_id, $tab = 'agendas' ) {
+    private static function redirect_with_pending_notice( $client_id, $tab = 'agendas', $context = 'page' ) {
         $redirect = self::get_redirect_url( $tab );
         $client_id = (int) $client_id;
+        $pending_notice = [];
         if ( $client_id ) {
             $pending = self::get_client_pending_transactions( $client_id );
             if ( ! empty( $pending ) ) {
@@ -406,7 +407,17 @@ class DPS_Base_Frontend {
                     MINUTE_IN_SECONDS * 10
                 );
                 $redirect = add_query_arg( 'dps_notice', 'pending_payments', $redirect );
+                $pending_notice = [
+                    'client_name'  => $client_post ? $client_post->post_title : '',
+                    'transactions' => $pending,
+                ];
             }
+        }
+        if ( 'ajax' === $context || wp_doing_ajax() ) {
+            return [
+                'redirect'       => $redirect,
+                'pending_notice' => $pending_notice,
+            ];
         }
         wp_safe_redirect( $redirect );
         exit;
@@ -527,6 +538,29 @@ class DPS_Base_Frontend {
         $redirect_tab = isset( $tabs[ $action ] ) ? $tabs[ $action ] : '';
         wp_safe_redirect( self::get_redirect_url( $redirect_tab ) );
         exit;
+    }
+
+    /**
+     * Envia respostas JSON padronizadas para requisições AJAX do formulário.
+     *
+     * @param bool  $success      Define se a operação foi bem-sucedida.
+     * @param array $data         Dados adicionais para o payload.
+     * @param int   $status_code  Código HTTP a ser retornado.
+     */
+    private static function send_ajax_response( $success, array $data = [], $status_code = 200 ) {
+        $messages_html = DPS_Message_Helper::display_messages();
+        $payload = array_merge(
+            [
+                'messages_html' => $messages_html,
+            ],
+            $data
+        );
+
+        if ( $success ) {
+            wp_send_json_success( $payload, $status_code );
+        }
+
+        wp_send_json_error( $payload, $status_code );
     }
 
     /**
@@ -1174,7 +1208,7 @@ class DPS_Base_Frontend {
      *     @type bool        $is_duplicate Se true, está duplicando um agendamento.
      * }
      */
-    private static function prepare_appointments_section_data( $visitor_only = false ) {
+    private static function prepare_appointments_section_data( $visitor_only = false, array $overrides = [] ) {
         $clients    = self::get_clients();
         $pets_query = self::get_pets();
         $pets       = $pets_query->posts;
@@ -1238,6 +1272,28 @@ class DPS_Base_Frontend {
             $pref_client = intval( $meta['client_id'] );
         }
 
+        // Sobrescreve valores quando fornecidos explicitamente (ex.: modal).
+        if ( isset( $overrides['force_new'] ) && $overrides['force_new'] ) {
+            $edit_id      = 0;
+            $duplicate_id = 0;
+            $editing      = null;
+            $meta         = [];
+            $is_duplicate = false;
+        }
+
+        if ( isset( $overrides['pref_client'] ) ) {
+            $pref_client = intval( $overrides['pref_client'] );
+        }
+
+        if ( isset( $overrides['pref_pet'] ) ) {
+            $pref_pet = intval( $overrides['pref_pet'] );
+        }
+
+        $override_base_url    = isset( $overrides['base_url'] ) ? esc_url_raw( $overrides['base_url'] ) : '';
+        $override_current_url = isset( $overrides['current_url'] ) ? esc_url_raw( $overrides['current_url'] ) : '';
+        $base_url             = $override_base_url ? $override_base_url : get_permalink();
+        $current_url          = $override_current_url ? $override_current_url : self::get_current_page_url();
+
         return [
             'clients'      => $clients,
             'pets'         => $pets,
@@ -1247,8 +1303,8 @@ class DPS_Base_Frontend {
             'meta'         => $meta,
             'pref_client'  => $pref_client,
             'pref_pet'     => $pref_pet,
-            'base_url'     => get_permalink(),
-            'current_url'  => self::get_current_page_url(),
+            'base_url'     => $base_url,
+            'current_url'  => $current_url,
             'is_duplicate' => $is_duplicate,
         ];
     }
@@ -1269,7 +1325,7 @@ class DPS_Base_Frontend {
      * @param bool  $visitor_only Se true, exibe apenas a listagem sem formulário.
      * @return string HTML da seção.
      */
-    private static function render_appointments_section( array $data, $visitor_only = false ) {
+    private static function render_appointments_section( array $data, $visitor_only = false, array $options = [] ) {
         // Extrai variáveis do array de dados.
         $clients      = $data['clients'];
         $pets         = $data['pets'];
@@ -1280,9 +1336,27 @@ class DPS_Base_Frontend {
         $pref_client  = $data['pref_client'];
         $pref_pet     = $data['pref_pet'];
         $is_duplicate = isset( $data['is_duplicate'] ) ? $data['is_duplicate'] : false;
+        $base_url     = isset( $data['base_url'] ) ? $data['base_url'] : get_permalink();
+        $current_url  = isset( $data['current_url'] ) ? $data['current_url'] : self::get_current_page_url();
+
+        $options      = wp_parse_args(
+            $options,
+            [
+                'context'      => 'page',
+                'include_list' => true,
+            ]
+        );
+
+        $is_modal     = ( 'modal' === $options['context'] );
+        $include_list = (bool) $options['include_list'];
+        $section_id   = $is_modal ? 'dps-section-agendas-modal' : 'dps-section-agendas';
+        $section_classes = [ 'dps-section' ];
+        if ( $is_modal ) {
+            $section_classes[] = 'dps-section--modal';
+        }
 
         ob_start();
-        echo '<div class="dps-section" id="dps-section-agendas">';
+        echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h2>';
         
         // Mensagem de duplicação
@@ -1318,7 +1392,7 @@ class DPS_Base_Frontend {
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
             wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos' );
-            echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( self::get_current_page_url() ) . '">';
+            echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( $current_url ) . '">';
             if ( $edit_id ) {
                 echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
             }
@@ -1670,136 +1744,137 @@ class DPS_Base_Frontend {
             echo '</form>';
         }
         // Listagem de agendamentos organizados por status
-        $args = [
-            'post_type'      => 'dps_agendamento',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'orderby'        => 'meta_value',
-            'meta_key'       => 'appointment_date',
-            'order'          => 'ASC',
-        ];
-        $appointments   = get_posts( $args );
-        $base_url       = get_permalink();
-        $status_labels  = [
-            'pendente'        => __( 'Pendente', 'desi-pet-shower' ),
-            'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
-            'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
-            'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
-        ];
-        $overdue        = [];
-        $finalized_today = [];
-        $upcoming       = [];
-        $now_ts         = current_time( 'timestamp' );
-        $today_date     = wp_date( 'Y-m-d', $now_ts );
+        if ( $include_list ) {
+            $args = [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_date',
+                'order'          => 'ASC',
+            ];
+            $appointments   = get_posts( $args );
+            $status_labels  = [
+                'pendente'        => __( 'Pendente', 'desi-pet-shower' ),
+                'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
+                'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
+                'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
+            ];
+            $overdue        = [];
+            $finalized_today = [];
+            $upcoming       = [];
+            $now_ts         = current_time( 'timestamp' );
+            $today_date     = wp_date( 'Y-m-d', $now_ts );
 
-        if ( $appointments ) {
-            foreach ( $appointments as $appt ) {
-                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-                if ( ! $status_meta ) {
-                    $status_meta = 'pendente';
-                }
-                if ( 'finalizado e pago' === $status_meta ) {
-                    $status_meta = 'finalizado_pago';
-                }
-                $date_value = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time_value = get_post_meta( $appt->ID, 'appointment_time', true );
-                $datetime   = trim( $date_value . ' ' . ( $time_value ? $time_value : '00:00' ) );
-                $appt_ts    = $date_value ? strtotime( $datetime ) : 0;
+            if ( $appointments ) {
+                foreach ( $appointments as $appt ) {
+                    $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
+                    if ( ! $status_meta ) {
+                        $status_meta = 'pendente';
+                    }
+                    if ( 'finalizado e pago' === $status_meta ) {
+                        $status_meta = 'finalizado_pago';
+                    }
+                    $date_value = get_post_meta( $appt->ID, 'appointment_date', true );
+                    $time_value = get_post_meta( $appt->ID, 'appointment_time', true );
+                    $datetime   = trim( $date_value . ' ' . ( $time_value ? $time_value : '00:00' ) );
+                    $appt_ts    = $date_value ? strtotime( $datetime ) : 0;
 
-                if ( in_array( $status_meta, [ 'finalizado_pago', 'cancelado' ], true ) ) {
-                    continue;
-                }
-
-                if ( 'pendente' === $status_meta ) {
-                    if ( $appt_ts && $appt_ts < $now_ts ) {
-                        $overdue[] = $appt;
+                    if ( in_array( $status_meta, [ 'finalizado_pago', 'cancelado' ], true ) ) {
                         continue;
                     }
-                    if ( ! $appt_ts && $date_value && $date_value < $today_date ) {
-                        $overdue[] = $appt;
+
+                    if ( 'pendente' === $status_meta ) {
+                        if ( $appt_ts && $appt_ts < $now_ts ) {
+                            $overdue[] = $appt;
+                            continue;
+                        }
+                        if ( ! $appt_ts && $date_value && $date_value < $today_date ) {
+                            $overdue[] = $appt;
+                            continue;
+                        }
+                    }
+
+                    if ( 'finalizado' === $status_meta ) {
+                        if ( $date_value === $today_date ) {
+                            $finalized_today[] = $appt;
+                        }
                         continue;
                     }
-                }
 
-                if ( 'finalizado' === $status_meta ) {
-                    if ( $date_value === $today_date ) {
-                        $finalized_today[] = $appt;
+                    if ( $appt_ts && $appt_ts >= $now_ts ) {
+                        $upcoming[] = $appt;
+                        continue;
                     }
-                    continue;
-                }
 
-                if ( $appt_ts && $appt_ts >= $now_ts ) {
-                    $upcoming[] = $appt;
-                    continue;
-                }
-
-                if ( 'pendente' === $status_meta && $date_value && $date_value >= $today_date ) {
-                    $upcoming[] = $appt;
+                    if ( 'pendente' === $status_meta && $date_value && $date_value >= $today_date ) {
+                        $upcoming[] = $appt;
+                    }
                 }
             }
-        }
 
-        $sort_appointments = function( $items ) {
-            if ( empty( $items ) ) {
-                return [];
-            }
-            usort(
-                $items,
-                function( $a, $b ) {
-                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
-                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
-                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
-                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
-                    $dt_a   = $date_a ? strtotime( trim( $date_a . ' ' . ( $time_a ? $time_a : '00:00' ) ) ) : 0;
-                    $dt_b   = $date_b ? strtotime( trim( $date_b . ' ' . ( $time_b ? $time_b : '00:00' ) ) ) : 0;
-                    $dt_a   = $dt_a ? $dt_a : 0;
-                    $dt_b   = $dt_b ? $dt_b : 0;
-                    if ( $dt_a === $dt_b ) {
-                        return $b->ID <=> $a->ID;
-                    }
-                    return $dt_b <=> $dt_a;
+            $sort_appointments = function( $items ) {
+                if ( empty( $items ) ) {
+                    return [];
                 }
+                usort(
+                    $items,
+                    function( $a, $b ) {
+                        $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                        $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                        $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                        $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                        $dt_a   = $date_a ? strtotime( trim( $date_a . ' ' . ( $time_a ? $time_a : '00:00' ) ) ) : 0;
+                        $dt_b   = $date_b ? strtotime( trim( $date_b . ' ' . ( $time_b ? $time_b : '00:00' ) ) ) : 0;
+                        $dt_a   = $dt_a ? $dt_a : 0;
+                        $dt_b   = $dt_b ? $dt_b : 0;
+                        if ( $dt_a === $dt_b ) {
+                            return $b->ID <=> $a->ID;
+                        }
+                        return $dt_b <=> $dt_a;
+                    }
+                );
+                return $items;
+            };
+
+            $appointments_groups = [
+                [
+                    'items' => $sort_appointments( $overdue ),
+                    'title' => __( 'Agendamentos pendentes (dias anteriores)', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--overdue',
+                ],
+                [
+                    'items' => $sort_appointments( $finalized_today ),
+                    'title' => __( 'Atendimentos finalizados hoje', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--finalized',
+                ],
+                [
+                    'items' => $sort_appointments( $upcoming ),
+                    'title' => __( 'Próximos atendimentos', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--upcoming',
+                ],
+            ];
+
+            $status_selector = function( $appt_id, $status ) use ( $status_labels, $visitor_only ) {
+                return self::render_status_selector( $appt_id, $status, $status_labels, $visitor_only );
+            };
+
+            $charge_renderer = function( $appt_id ) {
+                return self::build_charge_html( $appt_id, 'agendas' );
+            };
+
+            dps_get_template(
+                'appointments-list.php',
+                [
+                    'groups'           => $appointments_groups,
+                    'base_url'         => $base_url,
+                    'visitor_only'     => $visitor_only,
+                    'status_labels'    => $status_labels,
+                    'status_selector'  => $status_selector,
+                    'charge_renderer'  => $charge_renderer,
+                ]
             );
-            return $items;
-        };
-
-        $appointments_groups = [
-            [
-                'items' => $sort_appointments( $overdue ),
-                'title' => __( 'Agendamentos pendentes (dias anteriores)', 'desi-pet-shower' ),
-                'class' => 'dps-appointments-group--overdue',
-            ],
-            [
-                'items' => $sort_appointments( $finalized_today ),
-                'title' => __( 'Atendimentos finalizados hoje', 'desi-pet-shower' ),
-                'class' => 'dps-appointments-group--finalized',
-            ],
-            [
-                'items' => $sort_appointments( $upcoming ),
-                'title' => __( 'Próximos atendimentos', 'desi-pet-shower' ),
-                'class' => 'dps-appointments-group--upcoming',
-            ],
-        ];
-
-        $status_selector = function( $appt_id, $status ) use ( $status_labels, $visitor_only ) {
-            return self::render_status_selector( $appt_id, $status, $status_labels, $visitor_only );
-        };
-
-        $charge_renderer = function( $appt_id ) {
-            return self::build_charge_html( $appt_id, 'agendas' );
-        };
-
-        dps_get_template(
-            'appointments-list.php',
-            [
-                'groups'           => $appointments_groups,
-                'base_url'         => $base_url,
-                'visitor_only'     => $visitor_only,
-                'status_labels'    => $status_labels,
-                'status_selector'  => $status_selector,
-                'charge_renderer'  => $charge_renderer,
-            ]
-        );
+        }
 
         echo '</div>';
         return ob_get_clean();
@@ -2358,14 +2433,35 @@ class DPS_Base_Frontend {
      * @since 1.0.2 Refatorado para usar métodos auxiliares.
      * @return void
      */
-    private static function save_appointment() {
+    private static function save_appointment( $context = 'page' ) {
+        $is_ajax = ( 'ajax' === $context ) || wp_doing_ajax();
+
         if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+            if ( $is_ajax ) {
+                self::send_ajax_response(
+                    false,
+                    [
+                        'message'  => __( 'Acesso negado.', 'desi-pet-shower' ),
+                        'redirect' => self::get_redirect_url( 'agendas' ),
+                    ],
+                    403
+                );
+            }
             wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
         }
 
         // Passo 1: Validar e sanitizar dados do formulário.
         $data = self::validate_and_sanitize_appointment_data();
         if ( null === $data ) {
+            if ( $is_ajax ) {
+                self::send_ajax_response(
+                    false,
+                    [
+                        'redirect' => self::get_redirect_url( 'agendas' ),
+                    ],
+                    400
+                );
+            }
             // Redireciona para exibir mensagens de erro
             wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
             exit;
@@ -2376,22 +2472,52 @@ class DPS_Base_Frontend {
         $pet_ids   = $data['pet_ids'];
 
         // Passo 2: Decidir qual fluxo seguir e delegar para método especializado.
+        $result = false;
 
         // Fluxo 1: Nova assinatura (cria múltiplos agendamentos recorrentes).
         if ( ! $edit_id && 'subscription' === $appt_type ) {
-            self::create_subscription_appointments( $data );
+            $result = self::create_subscription_appointments( $data, $context );
+        } elseif ( ! $edit_id && 'simple' === $appt_type && count( $pet_ids ) > 1 ) {
+            // Fluxo 2: Agendamento simples com múltiplos pets (cria um agendamento por pet).
+            $result = self::create_multi_pet_appointments( $data, $context );
+        } else {
+            // Fluxo 3: Agendamento único (novo ou edição de qualquer tipo).
+            $result = self::save_single_appointment( $data, $context );
+        }
+
+        if ( $is_ajax ) {
+            if ( false === $result ) {
+                self::send_ajax_response(
+                    false,
+                    [
+                        'redirect' => self::get_redirect_url( 'agendas' ),
+                    ],
+                    400
+                );
+            }
+
+            $redirect_data = self::redirect_with_pending_notice( $result['client_id'], 'agendas', 'ajax' );
+
+            self::send_ajax_response(
+                true,
+                array_merge(
+                    [
+                        'appointment_id'   => isset( $result['appointment_id'] ) ? $result['appointment_id'] : 0,
+                        'appointment_ids'  => isset( $result['appointment_ids'] ) ? $result['appointment_ids'] : [],
+                        'appointment_type' => isset( $result['appointment_type'] ) ? $result['appointment_type'] : '',
+                    ],
+                    $redirect_data ? $redirect_data : []
+                )
+            );
             return;
         }
 
-        // Fluxo 2: Agendamento simples com múltiplos pets (cria um agendamento por pet).
-        if ( ! $edit_id && 'simple' === $appt_type && count( $pet_ids ) > 1 ) {
-            self::create_multi_pet_appointments( $data );
-            return;
+        if ( false === $result ) {
+            wp_safe_redirect( self::get_redirect_url( 'agendas' ) );
+            exit;
         }
 
-        // Fluxo 3: Agendamento único (novo ou edição de qualquer tipo).
-        // Nota: save_single_appointment() já trata mensagem de sucesso e redirecionamento.
-        self::save_single_appointment( $data );
+        self::redirect_with_pending_notice( $result['client_id'] );
     }
 
     /**
@@ -2555,9 +2681,10 @@ class DPS_Base_Frontend {
      *
      * @since 1.0.2
      * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
-     * @return void Redireciona ao final.
+     * @param string $context Contexto de execução (page|ajax).
+     * @return array|false Dados do resultado ou false em caso de erro.
      */
-    private static function create_subscription_appointments( array $data ) {
+    private static function create_subscription_appointments( array $data, $context = 'page' ) {
         $client_id                      = $data['client_id'];
         $pet_ids                        = $data['pet_ids'];
         $date                           = $data['date'];
@@ -2620,7 +2747,7 @@ class DPS_Base_Frontend {
 
         if ( ! $sub_id ) {
             DPS_Message_Helper::add_error( __( 'Erro ao criar assinatura.', 'desi-pet-shower' ) );
-            return;
+            return false;
         }
 
         // Salva metadados da assinatura.
@@ -2656,6 +2783,7 @@ class DPS_Base_Frontend {
         $interval_days = ( 'quinzenal' === $appt_freq ) ? 14 : 7;
         $count_events  = ( 'quinzenal' === $appt_freq ) ? 2 : 4;
 
+        $created_ids = [];
         foreach ( $pet_ids as $p_id_each ) {
             $current_dt = DateTime::createFromFormat( 'Y-m-d', $date );
             if ( ! $current_dt ) {
@@ -2674,6 +2802,7 @@ class DPS_Base_Frontend {
                 ] );
 
                 if ( $appt_new ) {
+                    $created_ids[] = (int) $appt_new;
                     update_post_meta( $appt_new, 'appointment_client_id', $client_id );
                     update_post_meta( $appt_new, 'appointment_pet_id', $p_id_each );
                     update_post_meta( $appt_new, 'appointment_pet_ids', [ $p_id_each ] );
@@ -2740,7 +2869,12 @@ class DPS_Base_Frontend {
         }
 
         DPS_Message_Helper::add_success( __( 'Agendamento de assinatura salvo com sucesso!', 'desi-pet-shower' ) );
-        self::redirect_with_pending_notice( $client_id );
+        return [
+            'client_id'        => $client_id,
+            'subscription_id'  => $sub_id,
+            'appointment_ids'  => $created_ids,
+            'appointment_type' => 'subscription',
+        ];
     }
 
     /**
@@ -2753,10 +2887,11 @@ class DPS_Base_Frontend {
      * a lógica de multi-pets, melhorando legibilidade e manutenção.
      *
      * @since 1.0.2
-     * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
-     * @return void Redireciona ao final.
+     * @param array  $data    Dados validados do formulário (de validate_and_sanitize_appointment_data).
+     * @param string $context Contexto de execução (page|ajax).
+     * @return array|false Dados do resultado ou false em caso de erro.
      */
-    private static function create_multi_pet_appointments( array $data ) {
+    private static function create_multi_pet_appointments( array $data, $context = 'page' ) {
         $client_id         = $data['client_id'];
         $pet_ids           = $data['pet_ids'];
         $date              = $data['date'];
@@ -2771,6 +2906,7 @@ class DPS_Base_Frontend {
 
         $posted_total = isset( $_POST['appointment_total'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_total'] ) ) ) : 0;
 
+        $created = [];
         foreach ( $pet_ids as $p_id_each ) {
             $new_appt = wp_insert_post( [
                 'post_type'   => 'dps_agendamento',
@@ -2779,6 +2915,7 @@ class DPS_Base_Frontend {
             ] );
 
             if ( $new_appt ) {
+                $created[] = (int) $new_appt;
                 update_post_meta( $new_appt, 'appointment_client_id', $client_id );
                 update_post_meta( $new_appt, 'appointment_pet_id', $p_id_each );
                 update_post_meta( $new_appt, 'appointment_pet_ids', $pet_ids );
@@ -2801,8 +2938,17 @@ class DPS_Base_Frontend {
             }
         }
 
+        if ( empty( $created ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro ao salvar agendamento.', 'desi-pet-shower' ) );
+            return false;
+        }
+
         DPS_Message_Helper::add_success( __( 'Agendamentos salvos com sucesso!', 'desi-pet-shower' ) );
-        self::redirect_with_pending_notice( $client_id );
+        return [
+            'client_id'        => $client_id,
+            'appointment_ids'  => $created,
+            'appointment_type' => $appt_type,
+        ];
     }
 
     /**
@@ -2818,10 +2964,11 @@ class DPS_Base_Frontend {
      * a lógica de agendamentos únicos, melhorando legibilidade e manutenção.
      *
      * @since 1.0.2
-     * @param array $data Dados validados do formulário (de validate_and_sanitize_appointment_data).
-     * @return void Redireciona ao final.
+     * @param array  $data    Dados validados do formulário (de validate_and_sanitize_appointment_data).
+     * @param string $context Contexto de execução (page|ajax).
+     * @return array|false Dados do resultado ou false em caso de erro.
      */
-    private static function save_single_appointment( array $data ) {
+    private static function save_single_appointment( array $data, $context = 'page' ) {
         $client_id                      = $data['client_id'];
         $pet_id                         = $data['pet_id'];
         $date                           = $data['date'];
@@ -2856,7 +3003,7 @@ class DPS_Base_Frontend {
 
         if ( ! $appt_id ) {
             DPS_Message_Helper::add_error( __( 'Erro ao salvar agendamento.', 'desi-pet-shower' ) );
-            return;
+            return false;
         }
 
         // Salva metadados básicos.
@@ -2883,7 +3030,11 @@ class DPS_Base_Frontend {
         }
 
         DPS_Message_Helper::add_success( __( 'Agendamento salvo com sucesso!', 'desi-pet-shower' ) );
-        self::redirect_with_pending_notice( $client_id );
+        return [
+            'client_id'        => $client_id,
+            'appointment_id'   => $appt_id,
+            'appointment_type' => $appt_type,
+        ];
     }
 
     /**
@@ -4326,6 +4477,81 @@ class DPS_Base_Frontend {
                 }
             }
         }
+    }
+
+    /**
+     * Renderiza o formulário de agendamento em modo modal via AJAX.
+     */
+    public static function ajax_render_appointment_form() {
+        check_ajax_referer( 'dps_modal_appointment', 'nonce' );
+
+        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Acesso negado.', 'desi-pet-shower' ) ], 403 );
+        }
+
+        $pref_client  = isset( $_POST['pref_client'] ) ? absint( wp_unslash( $_POST['pref_client'] ) ) : 0;
+        $pref_pet     = isset( $_POST['pref_pet'] ) ? absint( wp_unslash( $_POST['pref_pet'] ) ) : 0;
+        $redirect_url = isset( $_POST['redirect_url'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_url'] ) ) : '';
+
+        $overrides = [
+            'pref_client' => $pref_client,
+            'pref_pet'    => $pref_pet,
+            'force_new'   => true,
+        ];
+
+        if ( $redirect_url ) {
+            $overrides['base_url']    = $redirect_url;
+            $overrides['current_url'] = $redirect_url;
+        }
+
+        $data = self::prepare_appointments_section_data( false, $overrides );
+
+        $html = self::render_appointments_section(
+            $data,
+            false,
+            [
+                'context'      => 'modal',
+                'include_list' => false,
+            ]
+        );
+
+        wp_send_json_success(
+            [
+                'html' => $html,
+            ]
+        );
+    }
+
+    /**
+     * Processa submissões do formulário de agendamento via modal (AJAX).
+     */
+    public static function ajax_save_appointment_modal() {
+        check_ajax_referer( 'dps_modal_appointment', 'nonce' );
+
+        if ( ! isset( $_POST['dps_nonce_agendamentos'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce_agendamentos'] ) ), 'dps_action' ) ) {
+            DPS_Message_Helper::add_error( __( 'Não foi possível validar sua sessão. Atualize a página e tente novamente.', 'desi-pet-shower' ) );
+            self::send_ajax_response(
+                false,
+                [
+                    'redirect' => self::get_redirect_url( 'agendas' ),
+                ],
+                400
+            );
+        }
+
+        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+            self::send_ajax_response(
+                false,
+                [
+                    'message'  => __( 'Acesso negado.', 'desi-pet-shower' ),
+                    'redirect' => self::get_redirect_url( 'agendas' ),
+                ],
+                403
+            );
+        }
+
+        $_POST['dps_action'] = 'save_appointment';
+        self::save_appointment( 'ajax' );
     }
 
     /**

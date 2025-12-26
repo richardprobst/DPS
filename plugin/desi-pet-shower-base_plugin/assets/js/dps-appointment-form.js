@@ -8,11 +8,15 @@
     'use strict';
     
     const DPSAppointmentForm = {
+        eventsBound: false,
         /**
          * Inicializa o formulário
          */
         init: function() {
-            this.bindEvents();
+            if ( ! this.eventsBound ) {
+                this.bindEvents();
+                this.eventsBound = true;
+            }
             this.updateTypeFields();
             this.updateTosaOptions();
             this.updateTosaFields();
@@ -28,24 +32,24 @@
             
             // Eventos de mudança de tipo de agendamento
             $(document).on('change', 'input[name="appointment_type"]', this.handleTypeChange.bind(this));
-            $('#appointment_frequency, select[name="appointment_frequency"]').on('change', this.updateTosaOptions.bind(this));
-            $('#dps-taxidog-toggle').on('change', this.toggleTaxiDog.bind(this));
-            $('#dps-tosa-toggle').on('change', this.updateTosaFields.bind(this));
+            $(document).on('change', '#appointment_frequency, select[name="appointment_frequency"]', this.updateTosaOptions.bind(this));
+            $(document).on('change', '#dps-taxidog-toggle', this.toggleTaxiDog.bind(this));
+            $(document).on('change', '#dps-tosa-toggle', this.updateTosaFields.bind(this));
             
             // Eventos para agendamento passado
-            $('#past_payment_status').on('change', this.togglePastPaymentValue.bind(this));
+            $(document).on('change', '#past_payment_status', this.togglePastPaymentValue.bind(this));
             
             // FASE 2: Eventos para atualização de resumo
-            $('#dps-appointment-cliente').on('change', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '#dps-appointment-cliente', this.updateAppointmentSummary.bind(this));
             $(document).on('change', '.dps-pet-checkbox', this.updateAppointmentSummary.bind(this));
-            $('#appointment_date').on('change', function() {
+            $(document).on('change', '#appointment_date', function() {
                 self.loadAvailableTimes();
                 self.updateAppointmentSummary();
             });
-            $('#appointment_time').on('change', this.updateAppointmentSummary.bind(this));
-            $('#dps-taxidog-toggle, #dps-tosa-toggle').on('change', this.updateAppointmentSummary.bind(this));
-            $('#dps-taxidog-price, #dps-tosa-price').on('input', this.updateAppointmentSummary.bind(this));
-            $('#appointment_notes').on('input', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '#appointment_time', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '#dps-taxidog-toggle, #dps-tosa-toggle', this.updateAppointmentSummary.bind(this));
+            $(document).on('input', '#dps-taxidog-price, #dps-tosa-price', this.updateAppointmentSummary.bind(this));
+            $(document).on('input', '#appointment_notes', this.updateAppointmentSummary.bind(this));
             
             // Eventos para serviços do Services Add-on
             $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
@@ -53,7 +57,11 @@
             
             // FASE 2: Validação e estado do botão submit
             // Aplica somente ao form de agendamento (que contém appointment_type), não a outros forms .dps-form
-            $('form.dps-form').has('input[name="appointment_type"]').on('submit', this.handleFormSubmit.bind(this));
+            $(document).on('submit', 'form.dps-form', function(event) {
+                if ( $(this).find('input[name="appointment_type"]').length ) {
+                    DPSAppointmentForm.handleFormSubmit.call(DPSAppointmentForm, event);
+                }
+            });
         },
         
         /**
@@ -419,6 +427,14 @@
         }
     };
     
+    window.DPSAppointmentForm = DPSAppointmentForm;
+
+    document.addEventListener('dps:appointmentFormLoaded', function() {
+        if ($('form.dps-form input[name="appointment_type"]').length) {
+            DPSAppointmentForm.init();
+        }
+    });
+
     // Inicializa quando o documento estiver pronto
     $(document).ready(function() {
         if ($('form.dps-form input[name="appointment_type"]').length) {

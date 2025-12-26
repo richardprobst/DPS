@@ -12,6 +12,14 @@ Implementar melhorias de FASE 1 e FASE 2 da Agenda de Atendimentos conforme docu
 
 ---
 
+## Atualização – Fluxo modal para novo agendamento
+
+- Botão **➕ Novo** agora abre um modal carregado via AJAX (`dps_render_appointment_form` com nonce `dps_modal_appointment`), mantendo o link original `?tab=agendas&action=new` como fallback automático em caso de erro.
+- O HTML do formulário reaproveita `DPS_Base_Frontend::render_appointments_section` em modo `modal` (sem cabeçalhos/listagem), preservando hooks (`dps_base_appointment_fields`), campos condicionais e nonces do núcleo.
+- Submissão via `dps_modal_save_appointment` retorna JSON com mensagens do `DPS_Message_Helper`; em sucesso, fecha o modal e recarrega a agenda com o aviso de pendências financeiras quando houver.
+- Scripts base reusados (`dps-base.js`, `dps-appointment-form.js`, `dps-form-validation.js`) são enfileirados na página da agenda; o evento `dps:appointmentFormLoaded` reexecuta validação e lógica de campos após injetar o HTML.
+- Acessibilidade e UX: backdrop clicável, tecla ESC, botão fechar, foco inicial no título do modal e bloqueio de scroll do `body` enquanto o modal está aberto.
+
 ## ✅ FASE 1 – ESTRUTURA E FLUXO BÁSICO (Prioridade ALTA)
 
 ### 1.1. CSS Inline → Arquivo Externo
