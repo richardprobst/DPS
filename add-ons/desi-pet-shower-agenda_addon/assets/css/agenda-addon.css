@@ -17,6 +17,10 @@
     --dps-background: #f8fafc;
     --dps-border: #e2e8f0;
     --dps-muted: #64748b;
+    --dps-status-pending: #f59e0b;
+    --dps-status-finished: #0ea5e9;
+    --dps-status-paid: #22c55e;
+    --dps-status-cancelled: #ef4444;
     max-width: 100%;
     color: #0f172a;
 }
@@ -38,6 +42,37 @@
     font-weight: 600;
 }
 
+.dps-agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.9rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.dps-agenda-title h3 {
+    margin-bottom: 0.25rem;
+}
+
+.dps-agenda-subtitle {
+    margin: 0;
+    color: var(--dps-muted);
+    font-size: 0.95rem;
+}
+
+.dps-agenda-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 /* === Navegação, Formulários e Filtros === */
 .dps-agenda-wrapper .dps-agenda-nav,
 .dps-agenda-wrapper .dps-agenda-date-form,
@@ -51,6 +86,7 @@
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
     border-radius: 0.75rem;
+    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.03);
     /* Estilo minimalista: sem sombras decorativas */
 }
 
@@ -80,6 +116,49 @@
 }
 
 /* === Labels e Inputs === */
+.dps-filters-main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem 1rem;
+    align-items: end;
+}
+
+.dps-filters-advanced {
+    margin-top: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    background: var(--dps-background);
+    border: 1px solid var(--dps-border);
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.dps-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.35rem 0 0.25rem;
+}
+
+.dps-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: #f9fafb;
+    border: 1px solid var(--dps-border);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.dps-filter-chip__label {
+    color: var(--dps-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.8rem;
+}
+
 .dps-agenda-date-form label,
 .dps-agenda-filters label {
     display: flex;
@@ -310,6 +389,7 @@
 .dps-agenda-wrapper table.dps-table tbody tr {
     transition: background .2s ease, border-left-color .2s ease;
     border-left: 3px solid transparent; /* Reduzido de 4px para 3px (estilo mais clean) */
+    background: transparent;
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr:hover {
@@ -330,23 +410,19 @@
 
 /* === Status com Cores (Borda Esquerda de 3px) === */
 .dps-agenda-wrapper table.dps-table tr.status-pendente {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
+    border-left-color: var(--dps-status-pending);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-finalizado {
-    border-left-color: #0ea5e9;
-    background: #f0f9ff;
+    border-left-color: var(--dps-status-finished);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago {
-    border-left-color: #22c55e;
-    background: #f0fdf4;
+    border-left-color: var(--dps-status-paid);
 }
 
 .dps-agenda-wrapper table.dps-table tr.status-cancelado {
-    border-left-color: #ef4444;
-    background: #fef2f2;
+    border-left-color: var(--dps-status-cancelled);
 }
 
 /* === Links e Feedback === */
@@ -587,6 +663,7 @@
         border-radius: 0.75rem;
         background: var(--dps-surface);
         padding: 1rem;
+        box-shadow: 0 6px 18px rgba(17, 24, 39, 0.06);
     }
     
     .dps-agenda-empty {
@@ -1244,11 +1321,12 @@
     gap: 0.75rem;
     align-items: center;
     padding: 0.85rem 1rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    margin-bottom: 0;
+    background: var(--dps-surface);
     border-radius: 0.75rem;
-    color: white;
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+    border: 1px solid var(--dps-border);
+    color: #0f172a;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
 }
 
 .dps-bulk-actions.is-visible {
@@ -1272,10 +1350,10 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.5rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--dps-border);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+    background: #f3f6fb;
+    color: #0f172a;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -1283,8 +1361,8 @@
 }
 
 .dps-bulk-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--dps-accent-soft);
+    border-color: var(--dps-accent);
 }
 
 .dps-bulk-btn:disabled {
@@ -1884,13 +1962,12 @@ tr.dps-row-updated {
 }
 
 .dps-filters-advanced {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem 1rem;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--dps-border);
     transition: max-height 0.3s ease, opacity 0.3s ease;
-    max-height: 200px;
+    max-height: 220px;
     opacity: 1;
 }
 
@@ -2715,15 +2792,16 @@ tr.dps-row-updated {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    padding: 0.5rem 2rem 0.5rem 0.75rem;
-    border: 2px solid var(--dps-border);
-    border-radius: 8px;
-    background: var(--dps-surface);
-    font-size: 0.85rem;
+    padding: 0.45rem 2rem 0.45rem 0.85rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     min-width: 200px;
     transition: all 0.2s ease;
+    box-shadow: inset 4px 0 0 var(--dps-border);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
@@ -2740,27 +2818,23 @@ tr.dps-row-updated {
 }
 
 .dps-dropdown--pending {
-    background-color: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
+    box-shadow: inset 4px 0 0 var(--dps-status-pending);
+    color: #374151;
 }
 
 .dps-dropdown--finished {
-    background-color: #dbeafe;
-    border-color: #3b82f6;
-    color: #1e40af;
+    box-shadow: inset 4px 0 0 var(--dps-status-finished);
+    color: #0f172a;
 }
 
 .dps-dropdown--paid {
-    background-color: #d1fae5;
-    border-color: #10b981;
-    color: #059669;
+    box-shadow: inset 4px 0 0 var(--dps-status-paid);
+    color: #0f172a;
 }
 
 .dps-dropdown--cancelled {
-    background-color: #fee2e2;
-    border-color: #ef4444;
-    color: #dc2626;
+    box-shadow: inset 4px 0 0 var(--dps-status-cancelled);
+    color: #0f172a;
 }
 
 /* === Badge de Status (para não-editores) === */
@@ -2769,29 +2843,31 @@ tr.dps-row-updated {
     align-items: center;
     gap: 0.25rem;
     padding: 0.4rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
     font-weight: 600;
+    border: 1px solid var(--dps-border);
+    background: #fff;
 }
 
 .dps-status-badge--pending {
-    background-color: #fef3c7;
-    color: #92400e;
+    box-shadow: inset 4px 0 0 var(--dps-status-pending);
+    color: #374151;
 }
 
 .dps-status-badge--finished {
-    background-color: #dbeafe;
-    color: #1e40af;
+    box-shadow: inset 4px 0 0 var(--dps-status-finished);
+    color: #0f172a;
 }
 
 .dps-status-badge--paid {
-    background-color: #d1fae5;
-    color: #059669;
+    box-shadow: inset 4px 0 0 var(--dps-status-paid);
+    color: #0f172a;
 }
 
 .dps-status-badge--cancelled {
-    background-color: #fee2e2;
-    color: #dc2626;
+    box-shadow: inset 4px 0 0 var(--dps-status-cancelled);
+    color: #0f172a;
 }
 
 /* === Botão de Serviços Popup (Tab1) === */
@@ -2799,11 +2875,11 @@ tr.dps-row-updated {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.4rem 0.75rem;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border: 1px solid #93c5fd;
-    border-radius: 6px;
-    color: #1e40af;
+    padding: 0.45rem 0.85rem;
+    background: #f9fafb;
+    border: 1px solid var(--dps-border);
+    border-radius: 10px;
+    color: #0f172a;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -2811,9 +2887,8 @@ tr.dps-row-updated {
 }
 
 .dps-services-popup-btn:hover {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border-color: #3b82f6;
-    transform: translateY(-1px);
+    background: #eef2f7;
+    border-color: var(--dps-accent);
 }
 
 .dps-services-popup-btn:focus {

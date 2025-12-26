@@ -991,12 +991,65 @@ class DPS_Agenda_Addon {
         $is_week_view = ( $view === 'week' || $view === 'calendar' );
         // Exibe todos os atendimentos? Se show_all=1, ignoramos view e data para a listagem principal
         $show_all = isset( $_GET['show_all'] ) ? sanitize_text_field( $_GET['show_all'] ) : '';
+        // Filtros globais
+        $filter_client            = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
+        $filter_status            = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
+        $filter_service           = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
+        $filter_pending_payment   = isset( $_GET['filter_pending_payment'] ) ? sanitize_text_field( $_GET['filter_pending_payment'] ) : '';
+        $filter_staff             = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
+
+        // Filtros ativos para chips
+        $active_filters = [];
+        if ( $filter_status ) {
+            $active_filters[] = [
+                'label' => __( 'Status', 'dps-agenda-addon' ),
+                'value' => DPS_Agenda_Addon::get_status_label( $filter_status ),
+            ];
+        }
+        if ( $filter_client ) {
+            $client_post = get_post( $filter_client );
+            if ( $client_post ) {
+                $active_filters[] = [
+                    'label' => __( 'Cliente', 'dps-agenda-addon' ),
+                    'value' => $client_post->post_title,
+                ];
+            }
+        }
+        if ( $filter_service ) {
+            $service_post = get_post( $filter_service );
+            if ( $service_post ) {
+                $active_filters[] = [
+                    'label' => __( 'Serviço', 'dps-agenda-addon' ),
+                    'value' => $service_post->post_title,
+                ];
+            }
+        }
+        if ( $filter_staff ) {
+            $staff_user = get_user_by( 'id', $filter_staff );
+            if ( $staff_user ) {
+                $active_filters[] = [
+                    'label' => __( 'Profissional', 'dps-agenda-addon' ),
+                    'value' => $staff_user->display_name ? $staff_user->display_name : $staff_user->user_login,
+                ];
+            }
+        }
+        if ( $filter_pending_payment === '1' ) {
+            $active_filters[] = [
+                'label' => __( 'Pagamentos', 'dps-agenda-addon' ),
+                'value' => __( 'Pendentes', 'dps-agenda-addon' ),
+            ];
+        }
         // Título simples da agenda
+        echo '<header class="dps-agenda-header">';
+        echo '<div class="dps-agenda-title">';
         echo '<h3>' . __( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '<p class="dps-agenda-subtitle">' . esc_html__( 'Visual limpo para navegar, filtrar e agir rapidamente na agenda.', 'dps-agenda-addon' ) . '</p>';
+        echo '</div>';
         
         // NOTA: "Resumo do Dia" movido para o final da página (render_admin_dashboard chamado após as abas)
         
         // FASE 5: Barra de ações em lote (oculta inicialmente, exibida via JS)
+        echo '<div class="dps-agenda-header-actions">';
         echo '<div class="dps-bulk-actions">';
         echo '<span class="dps-bulk-count">0 ' . esc_html__( 'selecionados', 'dps-agenda-addon' ) . '</span>';
         echo '<button type="button" class="dps-bulk-btn" data-action="update_status" data-status="' . esc_attr( self::STATUS_FINISHED ) . '">✅ ' . esc_html__( 'Finalizar', 'dps-agenda-addon' ) . '</button>';
@@ -1004,6 +1057,8 @@ class DPS_Agenda_Addon {
         echo '<button type="button" class="dps-bulk-btn dps-bulk-btn--danger" data-action="update_status" data-status="' . esc_attr( self::STATUS_CANCELED ) . '">❌ ' . esc_html__( 'Cancelar', 'dps-agenda-addon' ) . '</button>';
         echo '<button type="button" class="dps-bulk-close">✕ ' . esc_html__( 'Limpar seleção', 'dps-agenda-addon' ) . '</button>';
         echo '</div>';
+        echo '</div>';
+        echo '</header>';
         
         // Links para dia/semana anterior/próximo, preservando filtros
         $date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
@@ -1130,6 +1185,16 @@ class DPS_Agenda_Addon {
             echo '<div class="dps-filters-header">';
             echo '<span class="dps-filters-title">🔍 ' . esc_html__( 'Filtros', 'dps-agenda-addon' ) . '</span>';
             echo '</div>';
+            if ( ! empty( $active_filters ) ) {
+                echo '<div class="dps-active-filters" aria-label="' . esc_attr__( 'Filtros aplicados', 'dps-agenda-addon' ) . '">';
+                foreach ( $active_filters as $active_filter ) {
+                    echo '<span class="dps-filter-chip">';
+                    echo '<span class="dps-filter-chip__label">' . esc_html( $active_filter['label'] ) . '</span>';
+                    echo '<span class="dps-filter-chip__value">' . esc_html( $active_filter['value'] ) . '</span>';
+                    echo '</span>';
+                }
+                echo '</div>';
+            }
             
             // Formulário unificado de data e filtros
             echo '<form method="get" class="dps-agenda-unified-form">';
@@ -1155,11 +1220,6 @@ class DPS_Agenda_Addon {
             echo '<input type="date" name="dps_date" value="' . esc_attr( $selected_date ) . '" class="dps-filter-input">';
             echo '</label>';
             
-            // Inicializa variáveis de filtro
-            $filter_client  = isset( $_GET['filter_client'] ) ? intval( $_GET['filter_client'] ) : 0;
-            $filter_status  = isset( $_GET['filter_status'] ) ? sanitize_text_field( $_GET['filter_status'] ) : '';
-            $filter_service = isset( $_GET['filter_service'] ) ? intval( $_GET['filter_service'] ) : 0;
-            
             // Filtro de Status (principal)
             $status_options = [
                 ''                => __( 'Todos os status', 'dps-agenda-addon' ),
@@ -1179,7 +1239,6 @@ class DPS_Agenda_Addon {
             echo '</label>';
             
             // FASE 5: Filtro de Pagamentos Pendentes
-            $filter_pending_payment = isset( $_GET['filter_pending_payment'] ) ? sanitize_text_field( $_GET['filter_pending_payment'] ) : '';
             echo '<label class="dps-filter-field dps-filter-field--checkbox">';
             echo '<input type="checkbox" name="filter_pending_payment" value="1" ' . checked( $filter_pending_payment, '1', false ) . '>';
             echo '<span class="dps-filter-label">💰 ' . esc_html__( 'Pag. pendente', 'dps-agenda-addon' ) . '</span>';
@@ -1189,7 +1248,6 @@ class DPS_Agenda_Addon {
             echo '<button type="submit" class="button dps-btn dps-btn--primary dps-filter-apply">🔍 ' . esc_html__( 'Filtrar', 'dps-agenda-addon' ) . '</button>';
             
             // UX-5: Botão para revelar filtros avançados
-            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
             $has_advanced_filters = ( $filter_client > 0 || $filter_service > 0 || $filter_staff > 0 );
             echo '<button type="button" class="button dps-btn dps-btn--ghost dps-toggle-advanced-filters" data-expanded="' . ( $has_advanced_filters ? 'true' : 'false' ) . '" title="' . esc_attr__( 'Mostrar/ocultar filtros avançados', 'dps-agenda-addon' ) . '">';
             echo '⚙️ ' . esc_html__( 'Mais', 'dps-agenda-addon' ) . ' <span class="dps-toggle-icon">▼</span>';
@@ -1255,7 +1313,6 @@ class DPS_Agenda_Addon {
             echo '</label>';
             
             // Filtro de Profissional (integração com Groomers Add-on)
-            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
             $staff_available = false;
             
             // Verifica se o Groomers Add-on está ativo
@@ -1300,8 +1357,6 @@ class DPS_Agenda_Addon {
             $filter_status  = '';
             $filter_service = 0;
             $filter_staff   = 0;
-        } else {
-            $filter_staff = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
         }
         
         // Carrega agendamentos conforme visualização ou modo "todos"
