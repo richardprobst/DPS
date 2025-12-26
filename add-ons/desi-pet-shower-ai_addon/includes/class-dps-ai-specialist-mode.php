@@ -52,12 +52,12 @@ class DPS_AI_Specialist_Mode {
     /**
      * Registra a página de modo especialista no menu admin.
      * 
-     * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-ai-hub para acessar via aba "Modo Especialista".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-ai-hub (aba "Modo Especialista").
      */
     public function register_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'IA – Modo Especialista', 'dps-ai' ),
             __( 'IA – Modo Especialista', 'dps-ai' ),
             'manage_options',

@@ -65,6 +65,25 @@ Toda documentação adicional deve ser organizada nas seguintes subpastas:
   - Documente migrações ou passos manuais em `CHANGELOG.md` e, se necessário, em `ANALYSIS.md`.
 - Commits devem ser curtos, em português, no imperativo, descrevendo a ação (ex.: "Atualizar checklist de segurança").
 
+## Requisitos mínimos e níveis de regra
+- **Versões mínimas**: todos os plugins e add-ons DEVEM declarar `Requires at least: 6.9` e `Requires PHP: 8.4` nos headers, utilizando apenas APIs compatíveis com essas versões.
+- **MUST (obrigatório)**:
+  - Validar nonce + capability + sanitização/escape em toda entrada/saída (inclui AJAX e REST).
+  - Carregar text domain em `init` (prioridade 1) e inicializar classes principais em `init` (prioridade 5) após o text domain.
+  - Registrar menus e páginas administrativas sempre como submenus do menu pai `desi-pet-shower` (capability `manage_options`, `admin_menu` prioridade 20); não usar `add_menu_page` próprio nem `parent=null`.
+  - Versionar alterações de banco: manter option de versão e executar `dbDelta()` apenas quando a versão salva for menor que a atual (nunca em todo request).
+  - Preservar assinaturas de hooks/tabelas compartilhadas; se precisar mudar, criar novo hook e manter compatibilidade com depreciação documentada.
+  - Não expor segredos em código; usar constantes ou variáveis de ambiente.
+- **PREFER (recomendado)**:
+  - Usar helpers globais (`DPS_Phone_Helper`, `DPS_Money_Helper`, `DPS_URL_Builder`, etc.) em vez de duplicar regex, formatadores ou validações.
+  - Registrar assets de forma condicional apenas nas páginas/abas relevantes.
+  - Usar `show_in_menu => 'desi-pet-shower'` para CPTs que precisam aparecer no admin e otimizar consultas com `fields => 'ids'`/`update_meta_cache()`.
+  - Manter `ANALYSIS.md` alinhado ao comportamento real (menus, flags como `show_ui`, hooks e fluxos).
+- **ASK BEFORE (requer validação humana)**:
+  - Alterar schema de tabelas compartilhadas (`dps_transacoes`, `dps_parcelas`, etc.).
+  - Mudanças grandes de UX ou novas dependências externas (APIs/SDKs).
+  - Alterar assinaturas de hooks existentes ou fluxos críticos de autenticação.
+
 ## Regras de documentação
 - Mantenha a documentação em português, clara e orientada a passos.
 - Sempre que alterar fluxos de integração, atualize `ANALYSIS.md` e descreva impactos em add-ons.
@@ -159,6 +178,7 @@ O DPS adota um padrão **minimalista/clean** para todas as interfaces administra
 - Reutilize a tabela `dps_transacoes` e contratos de metadados para fluxos financeiros ou de assinatura.
 - Documente dependências entre add-ons (ex.: Financeiro + Assinaturas) e valide o comportamento conjunto em ambiente de testes.
 - Registre assets apenas nas páginas relevantes e considere colisões com temas/plugins instalados.
+- Menus/admin pages de add-ons devem sempre ser submenus de `desi-pet-shower`; evite páginas ocultas (`parent=null`) e menus de topo próprios.
 - Para detalhes de estrutura de arquivos recomendada, cron hooks e prioridades de refatoração, consulte a seção "Padrões de desenvolvimento de add-ons" no **ANALYSIS.md**.
 
 ## Recursos para refatoração
@@ -239,6 +259,23 @@ As seguintes ações requerem cuidado especial e devem ser acompanhadas de docum
 - Princípio do menor privilégio para capabilities (`manage_options`, `edit_posts`, etc.).
 - Armazene segredos apenas via constantes ou variáveis de ambiente; não commitar chaves ou tokens.
 - Sempre registrar correções de segurança na categoria "Security (Segurança)" do changelog.
+
+## Setup & validação antes de abrir PR
+- Ambiente local: utilize o ambiente oficial do projeto (ex.: `docker compose up` ou `wp-env start` se disponível). Caso não exista automação, descreva no PR como validou manualmente.
+- Dependências: `composer install` e `npm ci` (quando houver build de assets).
+- Checks mínimos:
+  - `php -l <arquivos alterados>`
+  - `phpcs` (se configurado no repositório)
+  - Testes automatizados disponíveis (ex.: `phpunit`, `npm test`, `npm run build`/`npm run lint` se aplicável)
+- Fallback: se algum comando não estiver disponível no ambiente, registre no PR que o check não pôde ser executado e descreva a validação manual equivalente.
+
+## Definition of Done (checklist rápido)
+- [ ] Text domain carregado em `init` (prioridade 1) e classes principais inicializadas em `init` (prioridade 5).
+- [ ] Menus/admin pages registrados como submenus de `desi-pet-shower` (sem `parent=null` ou menus de topo próprios).
+- [ ] Nonce + capability + sanitização/escape aplicados em todos os fluxos tocados.
+- [ ] `dbDelta()` protegido por option de versão, executando apenas quando necessário (nunca em todo request).
+- [ ] `ANALYSIS.md` atualizado ao alterar fluxos/menus/hooks/flags; `CHANGELOG.md` atualizado para mudanças user-facing.
+- [ ] Checks de lint/teste rodados ou limitações documentadas no PR.
 
 ## Boas práticas de revisão e testes
 - Execute `php -l <arquivo>` nos arquivos alterados e valide fluxos críticos em ambiente WordPress local.

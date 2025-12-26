@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-payment-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  * License:           GPL-2.0+
  */
 
@@ -145,12 +145,12 @@ class DPS_Payment_Addon {
     /**
      * Adiciona uma página de configurações no menu principal "DPS by PRObst".
      * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-integrations-hub para acessar via aba "Pagamentos".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-integrations-hub (aba "Pagamentos").
      */
     public function add_settings_page() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Pagamentos', 'dps-payment-addon' ),
             __( 'Pagamentos', 'dps-payment-addon' ),
             'manage_options',

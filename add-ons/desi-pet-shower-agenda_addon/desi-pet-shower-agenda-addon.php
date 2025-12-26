@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-agenda-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  * License:           GPL-2.0+
  */
 
@@ -318,14 +318,14 @@ class DPS_Agenda_Addon {
     /**
      * FASE 4: Registra página de Dashboard no admin.
      * 
-     * NOTA: A partir da v1.4.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-agenda-hub para acessar via aba "Dashboard".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-agenda-hub (aba "Dashboard").
      *
      * @since 1.3.0
      */
     public function register_dashboard_admin_page() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Dashboard da Agenda', 'dps-agenda-addon' ),
             __( 'Dashboard', 'dps-agenda-addon' ),
             'manage_options',
@@ -382,14 +382,14 @@ class DPS_Agenda_Addon {
     /**
      * FASE 5: Registra página de Configurações no admin.
      * 
-     * NOTA: A partir da v1.4.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-agenda-hub para acessar via aba "Configurações".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-agenda-hub (aba "Configurações").
      *
      * @since 1.5.0
      */
     public function register_settings_admin_page() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Configurações da Agenda', 'dps-agenda-addon' ),
             __( 'Configurações', 'dps-agenda-addon' ),
             'manage_options',

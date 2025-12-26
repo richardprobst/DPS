@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-client-portal
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  *
  * Este add-on cria um portal de autoatendimento para clientes.  Ele registra
  * automaticamente um usuário WordPress para cada cliente cadastrado (quando

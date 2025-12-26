@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       desi-pet-shower
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  */
 
 // Impede acesso direto
@@ -857,8 +857,17 @@ register_activation_hook( __FILE__, [ 'DPS_Base_Plugin', 'activate' ] );
 // Registra hook de desativação para limpeza de transients e cron jobs
 register_deactivation_hook( __FILE__, [ 'DPS_Base_Plugin', 'deactivate' ] );
 
-// Instancia o plugin
-new DPS_Base_Plugin();
+/**
+ * Inicializa a classe principal do plugin após o carregamento do text domain.
+ */
+function dps_base_init_plugin() {
+    static $instance = null;
+
+    if ( null === $instance ) {
+        $instance = new DPS_Base_Plugin();
+    }
+}
+add_action( 'init', 'dps_base_init_plugin', 5 );
 
 // Inicializa os hubs centralizados (Fase 2 - Reorganização de Menus)
 add_action( 'init', function() {

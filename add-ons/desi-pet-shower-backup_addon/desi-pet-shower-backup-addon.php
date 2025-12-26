@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-backup-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -166,21 +166,21 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         }
 
         /**
-         * Registra submenu admin para backup & restauração.
-         * 
-         * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-         * Use o novo hub unificado em dps-system-hub para acessar via aba "Backup".
-         *
-         * @since 1.0.0
-         */
-        public function register_admin_menu() {
-            add_submenu_page(
-                null, // Oculto do menu, acessível apenas por URL direta
-                __( 'Backup & Restauração', 'dps-backup-addon' ),
-                __( 'Backup & Restauração', 'dps-backup-addon' ),
-                'manage_options',
-                'dps-backup',
-                [ $this, 'render_admin_page' ]
+     * Registra submenu admin para backup & restauração.
+     * 
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-system-hub (aba "Backup").
+     *
+     * @since 1.0.0
+     */
+    public function register_admin_menu() {
+        add_submenu_page(
+            'desi-pet-shower',
+            __( 'Backup & Restauração', 'dps-backup-addon' ),
+            __( 'Backup & Restauração', 'dps-backup-addon' ),
+            'manage_options',
+            'dps-backup',
+            [ $this, 'render_admin_page' ]
             );
         }
 

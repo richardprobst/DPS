@@ -53,12 +53,12 @@ class DPS_AI_Insights_Dashboard {
     /**
      * Registra a página de insights no menu admin.
      * 
-     * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-ai-hub para acessar via aba "Insights".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-ai-hub (aba "Insights").
      */
     public function register_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'IA – Insights', 'dps-ai' ),
             __( 'IA – Insights', 'dps-ai' ),
             'manage_options',

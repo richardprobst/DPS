@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  * License:           GPL-2.0+
  */
 

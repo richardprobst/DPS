@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-communications-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -111,12 +111,12 @@ class DPS_Communications_Addon {
     /**
      * Registra submenu admin para comunicações.
      * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-integrations-hub para acessar via aba "Comunicações".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-integrations-hub (aba "Comunicações").
      */
     public function register_admin_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'Comunicações', 'dps-communications-addon' ),
             __( 'Comunicações', 'dps-communications-addon' ),
             'manage_options',
