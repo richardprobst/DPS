@@ -876,6 +876,39 @@ class DPS_Agenda_Addon {
         
         // Agenda page: carrega CSS e scripts da agenda
         if ( $is_agenda_target_page || $has_agenda_shortcode ) {
+            wp_enqueue_style(
+                'dps-base-style',
+                DPS_BASE_URL . 'assets/css/dps-base.css',
+                [],
+                DPS_BASE_VERSION
+            );
+            wp_enqueue_style(
+                'dps-form-validation',
+                DPS_BASE_URL . 'assets/css/dps-form-validation.css',
+                [],
+                DPS_BASE_VERSION
+            );
+            wp_enqueue_script(
+                'dps-base-script',
+                DPS_BASE_URL . 'assets/js/dps-base.js',
+                [ 'jquery' ],
+                DPS_BASE_VERSION,
+                true
+            );
+            wp_enqueue_script(
+                'dps-appointment-form',
+                DPS_BASE_URL . 'assets/js/dps-appointment-form.js',
+                [ 'jquery' ],
+                DPS_BASE_VERSION,
+                true
+            );
+            wp_enqueue_script(
+                'dps-form-validation',
+                DPS_BASE_URL . 'assets/js/dps-form-validation.js',
+                [],
+                DPS_BASE_VERSION,
+                true
+            );
             // CSS da agenda (extraído do inline para arquivo dedicado)
             wp_enqueue_style(
                 'dps-agenda-addon-css',
@@ -897,11 +930,80 @@ class DPS_Agenda_Addon {
             wp_enqueue_script( 
                 'dps-agenda-addon', 
                 plugin_dir_url( __FILE__ ) . 'assets/js/agenda-addon.js', 
-                [ 'jquery', 'dps-services-modal' ], 
-                '1.3.0', 
+                [ 'jquery', 'dps-services-modal', 'dps-base-script', 'dps-appointment-form', 'dps-form-validation' ], 
+                '1.4.0', 
                 true 
             );
             
+            wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
+                'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'dps_action' ),
+                'appointmentId' => 0,
+                'l10n' => [
+                    'loadingTimes'    => __( 'Carregando horários...', 'dps-agenda-addon' ),
+                    'selectTime'      => __( 'Selecione um horário', 'dps-agenda-addon' ),
+                    'noTimes'         => __( 'Nenhum horário disponível para esta data', 'dps-agenda-addon' ),
+                    'selectClient'    => __( 'Selecione um cliente', 'dps-agenda-addon' ),
+                    'selectPet'       => __( 'Selecione pelo menos um pet', 'dps-agenda-addon' ),
+                    'selectDate'      => __( 'Selecione uma data', 'dps-agenda-addon' ),
+                    'selectTimeSlot'  => __( 'Selecione um horário', 'dps-agenda-addon' ),
+                    'pastDate'        => __( 'A data não pode ser anterior a hoje', 'dps-agenda-addon' ),
+                    'saving'          => __( 'Salvando...', 'dps-agenda-addon' ),
+                    'loadError'       => __( 'Erro ao carregar horários', 'dps-agenda-addon' ),
+                    'formErrorsTitle' => __( 'Por favor, corrija os seguintes erros:', 'dps-agenda-addon' ),
+                ],
+            ] );
+
+            wp_localize_script( 'dps-base-script', 'dpsBaseData', [
+                'restUrl'     => esc_url_raw( rest_url( 'dps/v1/pets' ) ),
+                'restNonce'   => wp_create_nonce( 'wp_rest' ),
+                'petsPerPage' => DPS_BASE_PETS_PER_PAGE,
+            ] );
+            wp_localize_script( 'dps-base-script', 'dpsBaseL10n', [
+                'summarySingle'     => __( 'Pet selecionado: %s', 'dps-agenda-addon' ),
+                'summaryMultiple'   => __( '%d pets selecionados: %s', 'dps-agenda-addon' ),
+                'selectPetWarning'  => __( 'Selecione pelo menos um pet para o agendamento.', 'dps-agenda-addon' ),
+                'historySummary'    => __( '%1$s atendimentos filtrados. Total estimado: R$ %2$s.', 'dps-agenda-addon' ),
+                'historyEmpty'      => __( 'Nenhum atendimento corresponde aos filtros aplicados.', 'dps-agenda-addon' ),
+                'historyExportEmpty'=> __( 'Nenhum atendimento visível para exportar.', 'dps-agenda-addon' ),
+                'historyExportFileName' => __( 'historico-atendimentos-%s.csv', 'dps-agenda-addon' ),
+                'pendingTitle'          => __( 'Pagamentos em aberto para %s.', 'dps-agenda-addon' ),
+                'pendingGenericTitle'   => __( 'Este cliente possui pagamentos pendentes.', 'dps-agenda-addon' ),
+                'pendingItem'           => __( '%1$s: R$ %2$s – %3$s', 'dps-agenda-addon' ),
+                'pendingItemNoDate'     => __( 'R$ %1$s – %2$s', 'dps-agenda-addon' ),
+                'petSearchPlaceholder'  => __( 'Buscar pets por nome, tutor ou raça', 'dps-agenda-addon' ),
+                'petLoadMore'           => __( 'Carregar mais pets', 'dps-agenda-addon' ),
+                'petLoading'            => __( 'Carregando pets...', 'dps-agenda-addon' ),
+                'petNoResults'          => __( 'Nenhum pet encontrado para o filtro atual.', 'dps-agenda-addon' ),
+                'savingText'            => __( 'Salvando...', 'dps-agenda-addon' ),
+                'selectedSingle'        => __( 'selecionado', 'dps-agenda-addon' ),
+                'selectedMultiple'      => __( 'selecionados', 'dps-agenda-addon' ),
+            ] );
+            wp_localize_script( 'dps-form-validation', 'dpsFormL10n', [
+                'generic'     => [
+                    'formErrorsTitle' => __( 'Por favor, corrija os campos destacados:', 'dps-agenda-addon' ),
+                ],
+                'client'      => [
+                    'nameRequired'  => __( 'O campo Nome é obrigatório.', 'dps-agenda-addon' ),
+                    'phoneRequired' => __( 'O campo Telefone / WhatsApp é obrigatório.', 'dps-agenda-addon' ),
+                ],
+                'pet'         => [
+                    'nameRequired'    => __( 'Informe o nome do pet.', 'dps-agenda-addon' ),
+                    'ownerRequired'   => __( 'Selecione o cliente (tutor) do pet.', 'dps-agenda-addon' ),
+                    'speciesRequired' => __( 'Selecione a espécie do pet.', 'dps-agenda-addon' ),
+                    'sexRequired'     => __( 'Selecione o sexo do pet.', 'dps-agenda-addon' ),
+                    'sizeRequired'    => __( 'Selecione o porte do pet.', 'dps-agenda-addon' ),
+                ],
+                'appointment' => [
+                    'clientRequired'    => __( 'Selecione um cliente para o agendamento.', 'dps-agenda-addon' ),
+                    'petRequired'       => __( 'Selecione pelo menos um pet.', 'dps-agenda-addon' ),
+                    'dateRequired'      => __( 'Selecione uma data para o agendamento.', 'dps-agenda-addon' ),
+                    'timeRequired'      => __( 'Selecione um horário para o agendamento.', 'dps-agenda-addon' ),
+                    'frequencyRequired' => __( 'Selecione a frequência da assinatura.', 'dps-agenda-addon' ),
+                    'errorTitle'        => __( 'Corrija os erros para continuar.', 'dps-agenda-addon' ),
+                ],
+            ] );
+
             wp_localize_script( 'dps-agenda-addon', 'DPS_AG_Addon', [
                 'ajax'          => admin_url( 'admin-ajax.php' ),
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
@@ -921,6 +1023,7 @@ class DPS_Agenda_Addon {
                 'nonce_bulk'      => wp_create_nonce( 'dps_bulk_actions' ),
                 'nonce_reschedule'=> wp_create_nonce( 'dps_quick_reschedule' ),
                 'nonce_history'   => wp_create_nonce( 'dps_appointment_history' ),
+                'nonce_modal_form'=> wp_create_nonce( 'dps_modal_appointment' ),
                 'nonce_kpis'      => wp_create_nonce( 'dps_admin_kpis' ),
                 'statuses'      => [
                     'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
@@ -950,6 +1053,10 @@ class DPS_Agenda_Addon {
                     'action_created'    => __( 'Criado', 'dps-agenda-addon' ),
                     'action_status_change' => __( 'Status alterado', 'dps-agenda-addon' ),
                     'action_rescheduled'   => __( 'Reagendado', 'dps-agenda-addon' ),
+                    'modalTitle'      => __( 'Novo agendamento', 'dps-agenda-addon' ),
+                    'formLoading'     => __( 'Carregando formulário de agendamento...', 'dps-agenda-addon' ),
+                    'saveError'       => __( 'Não foi possível salvar o agendamento.', 'dps-agenda-addon' ),
+                    'close'           => __( 'Fechar', 'dps-agenda-addon' ),
                 ],
                 'reloadDelay'  => 700,
             ] );
@@ -980,6 +1087,8 @@ class DPS_Agenda_Addon {
         // Nenhum controle adicional de cookies é necessário; o acesso é controlado por permissões do usuário.
         // Wrapper da agenda (CSS agora carregado de arquivo externo via enqueue_assets)
         echo '<div class="dps-agenda-wrapper">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
+        echo DPS_Message_Helper::display_messages();
         // Acesso permitido: mostrar agenda
         // Filtro de data e visualização
         $selected_date = isset( $_GET['dps_date'] ) ? sanitize_text_field( $_GET['dps_date'] ) : '';
@@ -1162,8 +1271,11 @@ class DPS_Agenda_Addon {
                 'tab' => 'agendas',
                 'action' => 'new'
             ], get_permalink( $base_page_id ) );
-            
-            echo '<a href="' . esc_url( $new_appt_url ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '">';
+            $new_button_attrs = ' data-dps-open-appointment-modal="true"';
+            if ( $filter_client ) {
+                $new_button_attrs .= ' data-pref-client="' . esc_attr( $filter_client ) . '"';
+            }
+            echo '<a href="' . esc_url( $new_appt_url ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '"' . $new_button_attrs . '>';
             echo '➕ ' . esc_html__( 'Novo', 'dps-agenda-addon' );
             echo '</a>';
         }

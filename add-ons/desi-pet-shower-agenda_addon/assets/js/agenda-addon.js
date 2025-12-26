@@ -23,6 +23,11 @@
       // Ignora erros de sessionStorage (modo privado, etc)
     }
 
+    $(document).on('click', '[data-dps-open-appointment-modal]', function(e){
+      e.preventDefault();
+      openAppointmentModal($(this));
+    });
+
     // Evento de alteração de status
     $(document).on('change', '.dps-status-select', function(){
       var select   = $(this);
@@ -289,6 +294,154 @@
     }
     return fallback;
   }
+
+  var appointmentModal;
+
+  function ensureAppointmentModal(){
+    if ( appointmentModal && appointmentModal.length ) {
+      return appointmentModal;
+    }
+    appointmentModal = $('<div class="dps-appointment-modal" role="dialog" aria-modal="true" aria-labelledby="dps-appointment-modal-title"></div>');
+    var content = $('<div class="dps-appointment-modal__content" role="document"></div>');
+    content.append('<div class="dps-appointment-modal__header"><h2 class="dps-appointment-modal__title" id="dps-appointment-modal-title" tabindex="-1"></h2><button type="button" class="dps-appointment-modal__close" aria-label="' + getMessage('close', 'Fechar modal') + '">&times;</button></div>');
+    content.append('<div class="dps-appointment-modal__messages" aria-live="polite"></div>');
+    content.append('<div class="dps-appointment-modal__body"></div>');
+    appointmentModal.append('<div class="dps-appointment-modal__backdrop" aria-hidden="true"></div>');
+    appointmentModal.append(content);
+    $('body').append(appointmentModal);
+    return appointmentModal;
+  }
+
+  function setModalBody(content){
+    var modal = ensureAppointmentModal();
+    modal.find('.dps-appointment-modal__body').html(content);
+  }
+
+  function renderModalMessages(html, fallbackMessage){
+    var modal = ensureAppointmentModal();
+    var container = modal.find('.dps-appointment-modal__messages');
+    container.empty();
+    if ( html ) {
+      container.html(html);
+      return;
+    }
+    if ( fallbackMessage ) {
+      container.html('<div class="dps-modal-alert">' + fallbackMessage + '</div>');
+    }
+  }
+
+  function closeAppointmentModal(){
+    if ( appointmentModal && appointmentModal.length ) {
+      appointmentModal.removeClass('is-open');
+      appointmentModal.find('.dps-appointment-modal__body').empty();
+      appointmentModal.find('.dps-appointment-modal__messages').empty();
+      $('body').removeClass('dps-modal-open');
+    }
+  }
+
+  function dispatchAppointmentFormLoaded(container){
+    var target = container || (appointmentModal ? appointmentModal.find('.dps-appointment-modal__body')[0] : document);
+    var eventData = { detail: { container: target } };
+    document.dispatchEvent(new CustomEvent('dps:appointmentFormLoaded', eventData));
+    $(document).trigger('dps:appointmentFormLoaded', [target]);
+  }
+
+  function fallbackToNewPage(url){
+    closeAppointmentModal();
+    if ( url ) {
+      window.location.href = url;
+    }
+  }
+
+  function openAppointmentModal(button){
+    var fallbackUrl = button && button.attr ? button.attr('href') : '';
+    if ( typeof DPS_AG_Addon === 'undefined' || ! DPS_AG_Addon.nonce_modal_form ) {
+      fallbackToNewPage(fallbackUrl);
+      return;
+    }
+
+    var modal = ensureAppointmentModal();
+    modal.find('.dps-appointment-modal__title').text(getMessage('modalTitle', 'Novo agendamento'));
+    renderModalMessages('', '');
+    setModalBody('<div class="dps-appointment-modal__loader">' + getMessage('formLoading', 'Carregando formulário...') + '</div>');
+    modal.addClass('is-open');
+    $('body').addClass('dps-modal-open');
+    if ( button && button.length ) {
+      button.addClass('is-loading').prop('disabled', true);
+    }
+
+    var prefClient = (button && button.data('pref-client')) ? button.data('pref-client') : '';
+    var filterClient = $('[name="filter_client"]').val();
+    if ( ! prefClient && filterClient ) {
+      prefClient = filterClient;
+    }
+    var prefPet = (button && button.data('pref-pet')) ? button.data('pref-pet') : '';
+
+    $.post(DPS_AG_Addon.ajax, {
+      action: 'dps_render_appointment_form',
+      nonce: DPS_AG_Addon.nonce_modal_form,
+      pref_client: prefClient || '',
+      pref_pet: prefPet || '',
+      redirect_url: window.location.href
+    }).done(function(resp){
+      if ( resp && resp.success && resp.data && resp.data.html ) {
+        setModalBody(resp.data.html);
+        if ( typeof window.dpsAppointmentData !== 'undefined' ) {
+          window.dpsAppointmentData.appointmentId = 0;
+        }
+        dispatchAppointmentFormLoaded(appointmentModal.find('.dps-appointment-modal__body')[0]);
+        appointmentModal.find('.dps-appointment-modal__title').focus();
+      } else {
+        fallbackToNewPage(fallbackUrl);
+      }
+    }).fail(function(){
+      fallbackToNewPage(fallbackUrl);
+    }).always(function(){
+      if ( button && button.length ) {
+        button.removeClass('is-loading').prop('disabled', false);
+      }
+    });
+  }
+
+  $(document).on('click', '.dps-appointment-modal__close, .dps-appointment-modal__backdrop', function(){
+    closeAppointmentModal();
+  });
+
+  $(document).on('submit', '.dps-appointment-modal form.dps-form', function(e){
+    e.preventDefault();
+    var form = $(this);
+    var submitBtn = form.find('.dps-appointment-submit');
+    submitBtn.addClass('is-loading').prop('disabled', true);
+
+    var formData = new FormData(this);
+    formData.append('action', 'dps_modal_save_appointment');
+    formData.append('nonce', DPS_AG_Addon.nonce_modal_form);
+
+    $.ajax({
+      url: DPS_AG_Addon.ajax,
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false
+    }).done(function(resp){
+      if ( resp && resp.data && resp.data.messages_html ) {
+        renderModalMessages(resp.data.messages_html);
+      } else if ( ! (resp && resp.success) ) {
+        renderModalMessages('', getMessage('saveError', 'Não foi possível salvar o agendamento.'));
+      }
+
+      if ( resp && resp.success ) {
+        setTimeout(function(){
+          var redirect = (resp.data && resp.data.redirect) ? resp.data.redirect : window.location.href;
+          window.location.href = redirect;
+        }, 350);
+      }
+    }).fail(function(){
+      renderModalMessages('', getMessage('saveError', 'Não foi possível salvar o agendamento.'));
+    }).always(function(){
+      submitBtn.removeClass('is-loading').prop('disabled', false);
+    });
+  });
 
   // FASE 2: Exportação CSV
   $(document).on('click', '.dps-export-csv-btn', function(e){
@@ -1056,6 +1209,7 @@
   $(document).on('keydown', function(e){
     if (e.key === 'Escape') {
       $('.dps-services-modal, .dps-payment-modal').remove();
+      closeAppointmentModal();
     }
   });
 

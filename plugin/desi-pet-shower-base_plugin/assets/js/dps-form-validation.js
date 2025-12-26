@@ -226,8 +226,23 @@
         });
     }
 
+    function attachAll(container) {
+        const scope = container && container.querySelectorAll ? container : document;
+        scope.querySelectorAll('form.dps-form').forEach((form) => attachValidation(form));
+    }
+
+    window.DPSFormValidation = {
+        attach: attachValidation,
+        attachAll: attachAll
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('form.dps-form').forEach((form) => attachValidation(form));
+        attachAll(document);
         scrollToServerAlert();
+    });
+
+    document.addEventListener('dps:appointmentFormLoaded', function (event) {
+        const target = event && event.detail && event.detail.container ? event.detail.container : document;
+        attachAll(target);
     });
 })();
