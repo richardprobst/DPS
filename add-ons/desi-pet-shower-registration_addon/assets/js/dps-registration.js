@@ -143,6 +143,108 @@
         return regex.test(email);
     }
 
+    /**
+     * Retorna a lista de raças para a espécie informada com populares primeiro.
+     *
+     * @param {string} species - Código da espécie.
+     * @return {Array<string>} Lista de raças.
+     */
+    function getBreedOptions(species) {
+        var dataset = (window.dpsRegistrationData && window.dpsRegistrationData.breeds) ? window.dpsRegistrationData.breeds : null;
+        if (!dataset) {
+            return [];
+        }
+
+        var selected = dataset[species] || dataset.all || { popular: [], all: [] };
+        var combined = [].concat(selected.popular || [], selected.all || []);
+        var seen = {};
+        var result = [];
+
+        for (var i = 0; i < combined.length; i++) {
+            var value = combined[i];
+            if (!value || seen[value]) {
+                continue;
+            }
+            seen[value] = true;
+            result.push(value);
+        }
+
+        return result;
+    }
+
+    /**
+     * Popula o datalist de raças de acordo com a espécie selecionada.
+     *
+     * @param {HTMLSelectElement} selectEl - Select de espécie.
+     */
+    function populateBreedDatalist(selectEl) {
+        if (!selectEl || !(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+            return;
+        }
+
+        var fieldset = selectEl.closest('.dps-pet-fieldset');
+        if (!fieldset) {
+            return;
+        }
+
+        var breedInput = fieldset.querySelector('input[name="pet_breed[]"]');
+        var listId = breedInput ? breedInput.getAttribute('list') : null;
+        var datalist = listId ? document.getElementById(listId) : null;
+        if (!datalist) {
+            return;
+        }
+
+        var species = selectEl.value || '';
+        var options = getBreedOptions(species);
+        if (!options.length) {
+            options = getBreedOptions('all');
+        }
+
+        datalist.innerHTML = '';
+        for (var i = 0; i < options.length; i++) {
+            var option = document.createElement('option');
+            option.value = options[i];
+            datalist.appendChild(option);
+        }
+    }
+
+    /**
+     * Habilita autocomplete de raças em um select de espécie.
+     *
+     * @param {HTMLSelectElement} selectEl - Select de espécie.
+     */
+    function bindBreedSelector(selectEl) {
+        if (!selectEl || selectEl.dataset.breedBound === '1' || !(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+            return;
+        }
+
+        selectEl.dataset.breedBound = '1';
+        populateBreedDatalist(selectEl);
+
+        selectEl.addEventListener('change', function() {
+            populateBreedDatalist(selectEl);
+            var fieldset = selectEl.closest('.dps-pet-fieldset');
+            var breedInput = fieldset ? fieldset.querySelector('input[name="pet_breed[]"]') : null;
+            if (breedInput) {
+                breedInput.value = '';
+            }
+        });
+    }
+
+    /**
+     * Inicializa selects de espécie para manter o datalist sincronizado.
+     */
+    function initBreedSelectors() {
+        if (!(window.dpsRegistrationData && window.dpsRegistrationData.breeds)) {
+            return;
+        }
+
+        var selects = document.querySelectorAll('select[name="pet_species[]"]');
+        for (var i = 0; i < selects.length; i++) {
+            bindBreedSelector(selects[i]);
+        }
+    }
+
     // =========================================================================
     // Input Masks (F2.1)
     // =========================================================================
@@ -738,6 +840,8 @@
             submit: submitButton
         });
 
+        initBreedSelectors();
+
         if (nextButton) {
             nextButton.addEventListener('click', function() {
                 if (!validateStepOne(form)) {
@@ -846,6 +950,7 @@
         var templateElement = document.getElementById('dps-pet-template');
         if (templateElement) {
             initPetClone(templateElement.textContent, function() {
+                initBreedSelectors();
                 if (currentStep === 2) {
                     buildSummary(form);
                 }

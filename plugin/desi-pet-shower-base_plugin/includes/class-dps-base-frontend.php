@@ -913,23 +913,8 @@ class DPS_Base_Frontend {
                 ];
             }
         }
-        // Prepara lista de raças para datalist (inclui várias raças de cães e gatos)
-        $breeds = [
-            'Affenpinscher', 'Afghan Hound', 'Airedale Terrier', 'Akita', 'Alaskan Malamute',
-            'American Bulldog', 'Australian Shepherd', 'Basset Hound', 'Beagle', 'Belgian Malinois',
-            'Bernese Mountain Dog', 'Bichon Frise', 'Border Collie', 'Boxer', 'Bulldog',
-            'Bull Terrier', 'Cavalier King Charles Spaniel', 'Chihuahua', 'Chow Chow', 'Cocker Spaniel',
-            'Collie', 'Dachshund', 'Dalmatian', 'Doberman Pinscher', 'French Bulldog',
-            'German Shepherd', 'Golden Retriever', 'Great Dane', 'Greyhound', 'Jack Russell Terrier',
-            'Labrador Retriever', 'Maltese', 'Miniature Pinscher', 'Newfoundland', 'Pomeranian',
-            'Poodle', 'Portuguese Water Dog', 'Rottweiler', 'Samoyed', 'Schnauzer',
-            'Shih Tzu', 'Siberian Husky', 'Staffordshire Bull Terrier', 'Weimaraner', 'Whippet',
-            'Yorkshire Terrier', 'Siamese', 'Persian', 'Maine Coon', 'Ragdoll',
-            'British Shorthair', 'Bengal', 'Abyssinian', 'Scottish Fold', 'Sphynx',
-            'Birman', 'Oriental Shorthair', 'Russian Blue', 'Turkish Angora', 'Somali',
-            'Burmese', 'Himalayan', 'Tonkinese', 'Munchkin', 'Chartreux',
-            'Cornish Rex', 'Devon Rex', 'Norwegian Forest', 'Savannah', 'Selkirk Rex'
-        ];
+        $breed_data    = $this->get_breed_dataset();
+        $breed_options = $this->get_breed_options_for_species( $species_val );
         ob_start();
         echo '<div class="dps-section" id="dps-section-pets">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h2>';
@@ -997,10 +982,24 @@ class DPS_Base_Frontend {
         
         // Datalist definition (fora do fieldset mas após uso)
         echo '<datalist id="dps-breed-list">';
-        foreach ( $breeds as $breed ) {
+        foreach ( $breed_options as $breed ) {
             echo '<option value="' . esc_attr( $breed ) . '">';
         }
         echo '</datalist>';
+
+        echo '<script>';
+        echo '(function(){';
+        echo 'const breedData = ' . wp_json_encode( $breed_data ) . ';';
+        echo 'const speciesSelect = document.querySelector(\'select[name="pet_species"]\');';
+        echo 'const breedInput = document.querySelector(\'input[name="pet_breed"]\');';
+        echo 'const datalist = document.getElementById(\'dps-breed-list\');';
+        echo 'if (!datalist || !speciesSelect) { return; }';
+        echo 'const unique = function(list){ const seen = new Set(); return list.filter(function(item){ if (seen.has(item)) { return false; } seen.add(item); return true; }); };';
+        echo 'const render = function(species){ const data = breedData[species] || breedData.all || { popular: [], all: [] }; const items = unique([].concat(data.popular || [], data.all || [])); datalist.innerHTML = \'\'; items.forEach(function(breed){ const option = document.createElement(\'option\'); option.value = breed; datalist.appendChild(option); }); };';
+        echo 'render(speciesSelect.value);';
+        echo 'speciesSelect.addEventListener(\'change\', function(){ render(this.value); if (breedInput) { breedInput.value = \'\'; } });';
+        echo '})();';
+        echo '</script>';
         
         echo '</fieldset>';
         
@@ -4088,6 +4087,191 @@ class DPS_Base_Frontend {
         })(jQuery);
         </script>
         <?php
+    }
+
+    /**
+     * Retorna dataset de raças por espécie, incluindo lista de populares.
+     *
+     * @since 1.0.0
+     * @return array
+     */
+    private function get_breed_dataset() {
+        static $dataset = null;
+
+        if ( null !== $dataset ) {
+            return $dataset;
+        }
+
+        $dog_breeds = [
+            'SRD (Sem Raça Definida)',
+            'Affenpinscher',
+            'Afghan Hound',
+            'Airedale Terrier',
+            'Akita',
+            'Alaskan Malamute',
+            'American Bulldog',
+            'American Cocker Spaniel',
+            'American Pit Bull Terrier',
+            'American Staffordshire Terrier',
+            'Basenji',
+            'Basset Hound',
+            'Beagle',
+            'Bearded Collie',
+            'Belgian Malinois',
+            'Bernese Mountain Dog (Boiadeiro Bernês)',
+            'Bichon Frisé',
+            'Bichon Havanês',
+            'Bloodhound',
+            'Boiadeiro Australiano',
+            'Border Collie',
+            'Borzói',
+            'Boston Terrier',
+            'Boxer',
+            'Bulldog',
+            'Bulldog Americano',
+            'Bulldog Campeiro',
+            'Bulldog Francês',
+            'Bulldog Inglês',
+            'Bull Terrier',
+            'Bullmastiff',
+            'Cairn Terrier',
+            'Cane Corso',
+            'Cão Afegão',
+            'Cão de Água Português',
+            'Cão de Crista Chinês',
+            'Cão de Pastor Alemão (Pastor Alemão)',
+            'Cão de Pastor Shetland',
+            'Cavalier King Charles Spaniel',
+            'Chesapeake Bay Retriever',
+            'Chihuahua',
+            'Chow Chow',
+            'Cocker Spaniel',
+            'Collie',
+            'Coton de Tulear',
+            'Dachshund (Teckel)',
+            'Dálmata',
+            'Dobermann',
+            'Dogo Argentino',
+            'Dogue Alemão',
+            'Fila Brasileiro',
+            'Fox Paulistinha',
+            'Galgo Inglês',
+            'Golden Retriever',
+            'Greyhound',
+            'Husky Siberiano',
+            'Irish Setter',
+            'Irish Wolfhound',
+            'Jack Russell Terrier',
+            'Kelpie Australiano',
+            'Kerry Blue Terrier',
+            'Labradoodle',
+            'Labrador Retriever',
+            'Lhasa Apso',
+            'Lulu da Pomerânia (Spitz Alemão)',
+            'Malamute do Alasca',
+            'Maltês',
+            'Mastiff Inglês',
+            'Mastim Tibetano',
+            'Old English Sheepdog (Bobtail)',
+            'Papillon',
+            'Pastor Australiano',
+            'Pastor Belga Malinois',
+            'Pastor de Shetland',
+            'Pequinês',
+            'Pinscher',
+            'Pinscher Miniatura',
+            'Pit Bull Terrier',
+            'Podengo Português',
+            'Poodle',
+            'Poodle Toy',
+            'Pug',
+            'Rottweiler',
+            'Samoieda',
+            'Schnauzer',
+            'Scottish Terrier',
+            'Serra da Estrela',
+            'Shar Pei',
+            'Shiba Inu',
+            'Shih Tzu',
+            'Spitz Japonês',
+            'Springer Spaniel Inglês',
+            'Staffordshire Bull Terrier',
+            'Terra-Nova',
+            'Vira-lata',
+            'Weimaraner',
+            'Welsh Corgi Pembroke',
+            'Whippet',
+            'Yorkshire Terrier',
+        ];
+
+        $cat_breeds = [
+            'SRD (Sem Raça Definida)',
+            'Abissínio',
+            'Angorá Turco',
+            'Azul Russo',
+            'Bengal',
+            'Birmanês',
+            'British Shorthair',
+            'Chartreux',
+            'Cornish Rex',
+            'Devon Rex',
+            'Exótico de Pelo Curto',
+            'Himalaio',
+            'LaPerm',
+            'Maine Coon',
+            'Manx',
+            'Munchkin',
+            'Norueguês da Floresta',
+            'Ocicat',
+            'Oriental de Pelo Curto',
+            'Persa',
+            'Ragdoll',
+            'Sagrado da Birmânia',
+            'Savannah',
+            'Scottish Fold',
+            'Selkirk Rex',
+            'Siamês',
+            'Siberiano',
+            'Singapura',
+            'Somali',
+            'Sphynx',
+            'Tonquinês',
+            'Toyger',
+            'Van Turco',
+        ];
+
+        $dataset = [
+            'cao'  => [
+                'popular' => [ 'SRD (Sem Raça Definida)', 'Shih Tzu', 'Poodle', 'Labrador Retriever', 'Golden Retriever' ],
+                'all'     => $dog_breeds,
+            ],
+            'gato' => [
+                'popular' => [ 'SRD (Sem Raça Definida)', 'Siamês', 'Persa', 'Maine Coon', 'Ragdoll' ],
+                'all'     => $cat_breeds,
+            ],
+        ];
+
+        $dataset['all'] = [
+            'popular' => array_values( array_unique( array_merge( $dataset['cao']['popular'], $dataset['gato']['popular'] ) ) ),
+            'all'     => array_values( array_unique( array_merge( $dog_breeds, $cat_breeds ) ) ),
+        ];
+
+        return $dataset;
+    }
+
+    /**
+     * Monta lista de opções de raças para a espécie selecionada.
+     *
+     * @since 1.0.0
+     * @param string $species Código da espécie (cao/gato/outro).
+     * @return array Lista ordenada com populares primeiro.
+     */
+    private function get_breed_options_for_species( $species ) {
+        $dataset  = $this->get_breed_dataset();
+        $selected = isset( $dataset[ $species ] ) ? $dataset[ $species ] : $dataset['all'];
+        $merged   = array_merge( $selected['popular'], $selected['all'] );
+
+        return array_values( array_unique( $merged ) );
     }
 
     /**
