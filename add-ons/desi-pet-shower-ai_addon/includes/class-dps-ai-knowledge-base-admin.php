@@ -54,17 +54,17 @@ class DPS_AI_Knowledge_Base_Admin {
 	/**
 	 * Registra página administrativa.
 	 * 
-	 * NOTA: A partir da v1.8.0, este menu está oculto (parent=null) para backward compatibility.
-	 * Use o novo hub unificado em dps-ai-hub para acessar via aba "Base de Conhecimento".
-	 */
-	public function register_admin_page() {
-		add_submenu_page(
-			null, // Oculto do menu, acessível apenas por URL direta
-			__( 'Gerenciar Base de Conhecimento', 'dps-ai' ),
-			__( 'Base de Conhecimento', 'dps-ai' ),
-			'edit_posts', // Capability para editar posts
-			'dps-ai-knowledge-base',
-			[ $this, 'render_admin_page' ]
+		 * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+		 * Também acessível pelo hub em dps-ai-hub (aba "Base de Conhecimento").
+		 */
+		public function register_admin_page() {
+			add_submenu_page(
+				'desi-pet-shower',
+				__( 'Gerenciar Base de Conhecimento', 'dps-ai' ),
+				__( 'Base de Conhecimento', 'dps-ai' ),
+				'edit_posts', // Capability para editar posts
+				'dps-ai-knowledge-base',
+				[ $this, 'render_admin_page' ]
 		);
 	}
 

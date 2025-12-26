@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-ai
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  *
  * Este add-on implementa um assistente virtual no Portal do Cliente com foco
  * EXCLUSIVO em assuntos relacionados a:
@@ -401,13 +401,13 @@ class DPS_AI_Addon {
     /**
      * Registra submenu admin para configurações de IA.
      * 
-     * NOTA: A partir da v1.8.0, estes menus estão ocultos (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-ai-hub para acessar todas as funcionalidades via abas.
+     * NOTA: Menus exibidos como submenus de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessíveis pelo hub em dps-ai-hub para navegação por abas.
      */
     public function register_admin_menu() {
         // Oculta do menu mas mantém a URL acessível para compatibilidade
         add_submenu_page(
-            null, // Parent null = não aparece no menu
+            'desi-pet-shower',
             __( 'Assistente de IA', 'dps-ai' ),
             __( 'Assistente de IA', 'dps-ai' ),
             'manage_options',
@@ -417,7 +417,7 @@ class DPS_AI_Addon {
 
         // Página de Analytics (oculta)
         add_submenu_page(
-            null, // Parent null = não aparece no menu
+            'desi-pet-shower',
             __( 'Analytics de IA', 'dps-ai' ),
             __( 'Analytics de IA', 'dps-ai' ),
             'manage_options',

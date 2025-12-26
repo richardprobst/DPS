@@ -8,8 +8,8 @@
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-whitelabel-addon
  * Domain Path:       /languages
- * Requires at least: 6.0
- * Requires PHP:      7.4
+ * Requires at least: 6.9
+ * Requires PHP:      8.4
  *
  * @package DPS_WhiteLabel_Addon
  */
@@ -198,12 +198,12 @@ class DPS_WhiteLabel_Addon {
     /**
      * Registra o menu admin do White Label.
      * 
-     * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
-     * Use o novo hub unificado em dps-system-hub para acessar via aba "White Label".
+     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * Também acessível pelo hub em dps-system-hub (aba "White Label").
      */
     public function register_admin_menu() {
         add_submenu_page(
-            null, // Oculto do menu, acessível apenas por URL direta
+            'desi-pet-shower',
             __( 'White Label', 'dps-whitelabel-addon' ),
             __( 'White Label', 'dps-whitelabel-addon' ),
             'manage_options',

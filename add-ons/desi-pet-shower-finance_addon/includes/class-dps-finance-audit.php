@@ -212,7 +212,7 @@ class DPS_Finance_Audit {
      */
     public static function register_audit_page() {
         add_submenu_page(
-            null, // Parent null = página oculta, acessível via URL direta
+            'desi-pet-shower',
             __( 'Histórico de Auditoria Financeira', 'dps-finance-addon' ),
             __( 'Auditoria', 'dps-finance-addon' ),
             'manage_options',
