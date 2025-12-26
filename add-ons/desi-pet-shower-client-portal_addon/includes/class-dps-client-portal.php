@@ -1190,10 +1190,7 @@ final class DPS_Client_Portal {
         echo '<span class="dps-portal-breadcrumb__item dps-portal-breadcrumb__item--active">' . esc_html__( 'Início', 'dps-client-portal' ) . '</span>';
         
         // Link de avaliação discreto no canto superior (movido da seção de dados)
-        // URL configurável via option ou filtro (padrão usa constante para retrocompatibilidade)
-        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : 'https://g.page/r/CUPivNuiAGwnEAE/review';
-        $review_url = get_option( 'dps_portal_review_url', $default_review_url );
-        $review_url = apply_filters( 'dps_portal_review_url', $review_url );
+        $review_url = $this->get_review_url();
         if ( $review_url ) {
             echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-portal-review-link" title="' . esc_attr__( 'Avalie nosso serviço', 'dps-client-portal' ) . '">';
             echo '<span class="dps-portal-review-icon">⭐</span>';
@@ -1213,6 +1210,12 @@ final class DPS_Client_Portal {
             'fidelidade' => [
                 'icon'  => '⭐',
                 'label' => __( 'Fidelidade', 'dps-client-portal' ),
+                'active' => false,
+                'badge' => 0,
+            ],
+            'avaliacoes' => [
+                'icon'  => '⭐',
+                'label' => __( 'Avaliações', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
             ],
@@ -1301,6 +1304,13 @@ final class DPS_Client_Portal {
         do_action( 'dps_portal_before_fidelidade_content', $client_id );
         $this->render_loyalty_panel( $client_id );
         do_action( 'dps_portal_after_fidelidade_content', $client_id );
+        echo '</div>';
+
+        // Panel: Avaliações (CTA + prova social)
+        echo '<div id="panel-avaliacoes" class="dps-portal-tab-panel" role="tabpanel" aria-hidden="true">';
+        do_action( 'dps_portal_before_reviews_content', $client_id );
+        $this->render_reviews_hub( $client_id );
+        do_action( 'dps_portal_after_reviews_content', $client_id );
         echo '</div>';
         
         // Panel: Mensagens (Fase 4 - continuação)
@@ -1439,6 +1449,94 @@ final class DPS_Client_Portal {
         ] );
 
         return count( $messages );
+    }
+
+    /**
+     * Obtém a URL configurada para avaliações no Google.
+     *
+     * @return string
+     */
+    private function get_review_url() {
+        $default_review_url = defined( 'DPS_PORTAL_REVIEW_URL' ) ? DPS_PORTAL_REVIEW_URL : 'https://g.page/r/CUPivNuiAGwnEAE/review';
+        $review_url         = get_option( 'dps_portal_review_url', $default_review_url );
+
+        /**
+         * Permite customizar o link de avaliação exibido no portal.
+         *
+         * @param string $review_url URL configurada.
+         */
+        $review_url = apply_filters( 'dps_portal_review_url', $review_url );
+
+        return $review_url ? (string) $review_url : '';
+    }
+
+    /**
+     * Busca avaliações internas para exibir prova social no portal.
+     *
+     * @param int $limit Quantidade de avaliações a exibir.
+     * @return array
+     */
+    private function get_reviews_summary( $limit = 3 ) {
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return [
+                'average' => 0,
+                'count'   => 0,
+                'items'   => [],
+            ];
+        }
+
+        $reviews = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => $limit,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ] );
+
+        $total_rating = 0;
+        $rated_count  = 0;
+        $items        = [];
+
+        foreach ( $reviews as $review ) {
+            $rating = (int) get_post_meta( $review->ID, '_dps_review_rating', true );
+            $rating = max( 0, min( 5, $rating ) );
+
+            if ( $rating > 0 ) {
+                $total_rating += $rating;
+                $rated_count++;
+            }
+
+            $items[] = [
+                'rating'  => $rating,
+                'author'  => get_post_meta( $review->ID, '_dps_review_name', true ),
+                'date'    => get_the_date( get_option( 'date_format', 'd/m/Y' ), $review ),
+                'content' => $review->post_content,
+            ];
+        }
+
+        $average = $rated_count > 0 ? round( $total_rating / $rated_count, 1 ) : 0;
+
+        return [
+            'average' => $average,
+            'count'   => $rated_count,
+            'items'   => $items,
+        ];
+    }
+
+    /**
+     * Retorna marcação de estrelas acessível.
+     *
+     * @param float  $rating     Nota de 0 a 5.
+     * @param string $aria_label Texto descritivo para leitores de tela.
+     * @return string HTML das estrelas.
+     */
+    private function render_star_icons( $rating, $aria_label = '' ) {
+        $rounded = max( 0, min( 5, (int) round( $rating ) ) );
+        $filled  = str_repeat( '★', $rounded );
+        $empty   = str_repeat( '☆', 5 - $rounded );
+        $label   = $aria_label ? ' aria-label="' . esc_attr( $aria_label ) . '"' : '';
+
+        return '<span class="dps-stars"' . $label . '>' . esc_html( $filled . $empty ) . '</span>';
     }
 
     /**
@@ -2108,6 +2206,104 @@ final class DPS_Client_Portal {
         echo '</form>';
         echo '</div>';
 
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza a central de avaliações (CTA + prova social).
+     *
+     * Mantém o cliente na página antes de ir para o Google Reviews e exibe
+     * avaliações internas quando disponíveis.
+     *
+     * @param int $client_id ID do cliente autenticado.
+     */
+    private function render_reviews_hub( $client_id ) {
+        $review_url = $this->get_review_url();
+        $summary    = $this->get_reviews_summary( 4 );
+
+        echo '<section class="dps-portal-section dps-portal-reviews">';
+
+        echo '<div class="dps-review-cta">';
+        echo '<div>';
+        echo '<p class="dps-review-cta__eyebrow">' . esc_html__( 'Sua opinião importa', 'dps-client-portal' ) . '</p>';
+        echo '<h2 class="dps-review-cta__title">' . esc_html__( 'Avalie nossa equipe e serviços', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-review-cta__text">' . esc_html__( 'Conte como foi a experiência do seu pet. Suas 5 estrelas ajudam outros clientes a confiar em nós e nos mostram onde melhorar.', 'dps-client-portal' ) . '</p>';
+        echo '<ul class="dps-review-cta__steps">';
+        echo '<li>' . esc_html__( '1) Clique no botão abaixo', 'dps-client-portal' ) . '</li>';
+        echo '<li>' . esc_html__( '2) Escolha a nota de 1 a 5 estrelas', 'dps-client-portal' ) . '</li>';
+        echo '<li>' . esc_html__( '3) (Opcional) Escreva um comentário rápido', 'dps-client-portal' ) . '</li>';
+        echo '</ul>';
+        echo '</div>';
+
+        echo '<div class="dps-review-cta__actions">';
+        if ( $review_url ) {
+            echo '<a class="dps-review-cta__button" href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer">';
+            echo '<span>⭐</span> ';
+            echo esc_html__( 'Avaliar no Google', 'dps-client-portal' );
+            echo '</a>';
+            echo '<p class="dps-review-cta__hint">' . esc_html__( 'Abre em nova aba. Leva menos de 1 minuto.', 'dps-client-portal' ) . '</p>';
+        } else {
+            echo '<div class="dps-portal-notice dps-portal-notice--warning">';
+            echo esc_html__( 'Configure o link de avaliação em dps_portal_review_url para exibir o botão.', 'dps-client-portal' );
+            echo '</div>';
+        }
+        echo '</div>';
+        echo '</div>'; // .dps-review-cta
+
+        echo '<div class="dps-review-social">';
+        echo '<div class="dps-review-social__header">';
+        echo '<h3>' . esc_html__( 'O que os clientes dizem', 'dps-client-portal' ) . '</h3>';
+        if ( $summary['count'] > 0 ) {
+            $average_label = sprintf(
+                /* translators: %s: average rating */
+                __( '%s de 5 estrelas', 'dps-client-portal' ),
+                number_format_i18n( $summary['average'], 1 )
+            );
+            echo '<div class="dps-review-social__metric">';
+            echo $this->render_star_icons( $summary['average'], $average_label );
+            echo '<div class="dps-review-social__metric-text">';
+            echo '<span class="dps-review-social__value">' . esc_html( number_format_i18n( $summary['average'], 1 ) ) . '</span>';
+            echo '<span class="dps-review-social__label">' . esc_html( sprintf( _n( '%d avaliação interna', '%d avaliações internas', $summary['count'], 'dps-client-portal' ), $summary['count'] ) ) . '</span>';
+            echo '</div>';
+            echo '</div>';
+        }
+        echo '</div>';
+
+        if ( ! empty( $summary['items'] ) ) {
+            echo '<div class="dps-review-list">';
+            foreach ( $summary['items'] as $item ) {
+                echo '<article class="dps-review-card">';
+                echo '<div class="dps-review-card__header">';
+                $label = sprintf(
+                    /* translators: %s: star rating */
+                    __( '%s de 5 estrelas', 'dps-client-portal' ),
+                    number_format_i18n( $item['rating'], 1 )
+                );
+                echo $this->render_star_icons( $item['rating'], $label );
+                if ( $item['date'] ) {
+                    echo '<span class="dps-review-card__date">' . esc_html( $item['date'] ) . '</span>';
+                }
+                echo '</div>';
+                if ( $item['author'] ) {
+                    echo '<p class="dps-review-card__author">' . esc_html( $item['author'] ) . '</p>';
+                }
+                if ( $item['content'] ) {
+                    echo '<p class="dps-review-card__comment">' . esc_html( $item['content'] ) . '</p>';
+                }
+                echo '</article>';
+            }
+            echo '</div>';
+        } else {
+            echo '<div class="dps-empty-state">';
+            echo '<div class="dps-empty-state__icon">⭐</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Ainda não temos avaliações internas para mostrar aqui.', 'dps-client-portal' ) . '</div>';
+            if ( $review_url ) {
+                echo '<p class="dps-empty-state__hint">' . esc_html__( 'Seja o primeiro a avaliar e ajudar outros clientes.', 'dps-client-portal' ) . '</p>';
+            }
+            echo '</div>';
+        }
+
+        echo '</div>'; // .dps-review-social
         echo '</section>';
     }
 
