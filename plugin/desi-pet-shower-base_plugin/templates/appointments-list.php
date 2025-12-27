@@ -18,10 +18,11 @@ $visitor_only    = ! empty( $visitor_only );
 $status_labels   = isset( $status_labels ) && is_array( $status_labels ) ? $status_labels : [];
 $status_selector = isset( $status_selector ) && is_callable( $status_selector ) ? $status_selector : null;
 $charge_renderer = isset( $charge_renderer ) && is_callable( $charge_renderer ) ? $charge_renderer : null;
+$list_title      = isset( $list_title ) ? $list_title : __( 'Próximos Agendamentos', 'desi-pet-shower' );
 
 ?>
 <div class="dps-appointments" id="dps-section-agendas-list">
-    <h3><?php echo esc_html__( 'Próximos Agendamentos', 'desi-pet-shower' ); ?></h3>
+    <h3><?php echo esc_html( $list_title ); ?></h3>
     <input
         type="text"
         class="dps-search dps-appointments-search"

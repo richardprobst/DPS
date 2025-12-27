@@ -187,6 +187,110 @@ class DPS_Base_Frontend {
     }
 
     /**
+     * Agrupa agendamentos por proximidade temporal para a aba Histórico.
+     *
+     * @return array {
+     *     @type array $groups Lista de grupos formatada para o template de agendamentos.
+     *     @type array $counts Contadores por grupo para destaques visuais.
+     * }
+     */
+    private static function get_history_timeline_groups() {
+        $appointments = get_posts(
+            [
+                'post_type'      => 'dps_agendamento',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'orderby'        => 'meta_value',
+                'meta_key'       => 'appointment_date',
+                'order'          => 'ASC',
+                'fields'         => 'ids',
+            ]
+        );
+
+        $now_ts     = current_time( 'timestamp' );
+        $today_date = wp_date( 'Y-m-d', $now_ts );
+
+        $buckets = [
+            'today'    => [],
+            'upcoming' => [],
+            'past'     => [],
+        ];
+
+        foreach ( $appointments as $appt_id ) {
+            $date_value = get_post_meta( $appt_id, 'appointment_date', true );
+            $time_value = get_post_meta( $appt_id, 'appointment_time', true );
+            $datetime   = trim( $date_value . ' ' . ( $time_value ? $time_value : '00:00' ) );
+            $appt_ts    = $date_value ? strtotime( $datetime ) : 0;
+
+            if ( $date_value === $today_date ) {
+                $buckets['today'][] = (object) [ 'ID' => (int) $appt_id ];
+                continue;
+            }
+
+            if ( $appt_ts && $appt_ts > $now_ts ) {
+                $buckets['upcoming'][] = (object) [ 'ID' => (int) $appt_id ];
+                continue;
+            }
+
+            if ( ( $appt_ts && $appt_ts <= $now_ts ) || ( $date_value && $date_value < $today_date ) ) {
+                $buckets['past'][] = (object) [ 'ID' => (int) $appt_id ];
+                continue;
+            }
+
+            $buckets['upcoming'][] = (object) [ 'ID' => (int) $appt_id ];
+        }
+
+        $sort_appointments = function( $items ) {
+            if ( empty( $items ) ) {
+                return [];
+            }
+            usort(
+                $items,
+                function( $a, $b ) {
+                    $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                    $time_a = get_post_meta( $a->ID, 'appointment_time', true );
+                    $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                    $time_b = get_post_meta( $b->ID, 'appointment_time', true );
+                    $dt_a   = $date_a ? strtotime( trim( $date_a . ' ' . ( $time_a ? $time_a : '00:00' ) ) ) : 0;
+                    $dt_b   = $date_b ? strtotime( trim( $date_b . ' ' . ( $time_b ? $time_b : '00:00' ) ) ) : 0;
+                    $dt_a   = $dt_a ? $dt_a : 0;
+                    $dt_b   = $dt_b ? $dt_b : 0;
+                    if ( $dt_a === $dt_b ) {
+                        return $b->ID <=> $a->ID;
+                    }
+                    return $dt_b <=> $dt_a;
+                }
+            );
+            return $items;
+        };
+
+        return [
+            'groups' => [
+                [
+                    'items' => $sort_appointments( $buckets['today'] ),
+                    'title' => __( 'Atendimentos do dia', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--today',
+                ],
+                [
+                    'items' => $sort_appointments( $buckets['upcoming'] ),
+                    'title' => __( 'Agendamentos futuros', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--upcoming',
+                ],
+                [
+                    'items' => $sort_appointments( $buckets['past'] ),
+                    'title' => __( 'Atendimentos que já passaram', 'desi-pet-shower' ),
+                    'class' => 'dps-appointments-group--past',
+                ],
+            ],
+            'counts' => [
+                'today'    => count( $buckets['today'] ),
+                'upcoming' => count( $buckets['upcoming'] ),
+                'past'     => count( $buckets['past'] ),
+            ],
+        ];
+    }
+
+    /**
      * Retorna o rótulo amigável para um status de agendamento.
      *
      * @param string $status Status bruto.
@@ -1175,7 +1279,13 @@ class DPS_Base_Frontend {
         $data = self::prepare_appointments_section_data( $visitor_only );
 
         // Passo 2: Renderizar usando os dados preparados.
-        return self::render_appointments_section( $data, $visitor_only );
+        return self::render_appointments_section(
+            $data,
+            $visitor_only,
+            [
+                'include_list' => false,
+            ]
+        );
     }
 
     /**
@@ -1887,8 +1997,12 @@ class DPS_Base_Frontend {
             return '';
         }
 
-        $history_data = self::get_history_appointments_data();
-        $appointments = $history_data['appointments'];
+        $history_data   = self::get_history_appointments_data();
+        $appointments   = $history_data['appointments'];
+        $base_url       = get_permalink();
+        $timeline_data   = self::get_history_timeline_groups();
+        $timeline_groups = $timeline_data['groups'];
+        $timeline_counts = $timeline_data['counts'];
 
         $clients = self::get_clients();
         $client_options = [];
@@ -1910,6 +2024,12 @@ class DPS_Base_Frontend {
             $pet_options[ $pet->ID ] = $pet->post_title;
         }
 
+        $status_labels = [
+            'pendente'        => __( 'Pendente', 'desi-pet-shower' ),
+            'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
+            'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
+            'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
+        ];
         $status_filters = [
             'finalizado'      => __( 'Finalizado', 'desi-pet-shower' ),
             'finalizado_pago' => __( 'Finalizado e pago', 'desi-pet-shower' ),
@@ -1918,11 +2038,70 @@ class DPS_Base_Frontend {
 
         $total_count  = $history_data['total_count'];
         $total_amount = $history_data['total_amount'];
+        $summary_value = number_format_i18n( $total_amount, 2 );
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
-        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos finalizados, pagos ou cancelados.', 'desi-pet-shower' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos, agora com linha do tempo para pendentes e futuros.', 'desi-pet-shower' ) . '</p>';
+
+        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
+        if ( $total_count ) {
+            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
+        } else {
+            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'desi-pet-shower' ) . '</strong>';
+        }
+        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+
+        echo '<div class="dps-history-overview">';
+        echo '<div class="dps-history-cards">';
+        echo '<div class="dps-history-card">';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Atendimentos do dia', 'desi-pet-shower' ) . '</span>';
+        echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['today'] ?? 0 ) ) . '</strong>';
+        echo '<p class="dps-history-card__hint">' . esc_html__( 'Inclui agendados e finalizados na data atual.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        echo '<div class="dps-history-card">';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Agendamentos futuros', 'desi-pet-shower' ) . '</span>';
+        echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['upcoming'] ?? 0 ) ) . '</strong>';
+        echo '<p class="dps-history-card__hint">' . esc_html__( 'Organizados por data e hora para priorizar o próximo atendimento.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        echo '<div class="dps-history-card">';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Atendimentos que já passaram', 'desi-pet-shower' ) . '</span>';
+        echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['past'] ?? 0 ) ) . '</strong>';
+        echo '<p class="dps-history-card__hint">' . esc_html__( 'Facilita regularizar pendências e marcar cobranças concluídas.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        echo '<div class="dps-history-card dps-history-card--notes">';
+        echo '<h3>' . esc_html__( 'Melhorias de layout e operação', 'desi-pet-shower' ) . '</h3>';
+        echo '<ul class="dps-history-notes">';
+        echo '<li>' . esc_html__( 'Linha do tempo única agrupa atendimentos do dia, futuros e passados, concentrando a lista no histórico.', 'desi-pet-shower' ) . '</li>';
+        echo '<li>' . esc_html__( 'Contadores rápidos ajudam a dimensionar capacidade da equipe e pendências.', 'desi-pet-shower' ) . '</li>';
+        echo '<li>' . esc_html__( 'Status e cobranças permanecem acessíveis diretamente no histórico para ações rápidas.', 'desi-pet-shower' ) . '</li>';
+        echo '</ul>';
+        echo '</div>';
+        echo '</div>';
+
+        $timeline_status_selector = function( $appt_id, $status ) use ( $status_labels ) {
+            return self::render_status_selector( $appt_id, $status, $status_labels, false );
+        };
+
+        $history_charge_renderer = function( $appt_id ) {
+            return self::build_charge_html( $appt_id, 'historico' );
+        };
+
+        dps_get_template(
+            'appointments-list.php',
+            [
+                'groups'           => $timeline_groups,
+                'base_url'         => $base_url,
+                'visitor_only'     => false,
+                'status_labels'    => $status_labels,
+                'status_selector'  => $timeline_status_selector,
+                'charge_renderer'  => $history_charge_renderer,
+                'list_title'       => __( 'Linha do tempo de agendamentos', 'desi-pet-shower' ),
+            ]
+        );
 
         echo '<div class="dps-history-toolbar">';
 
@@ -1962,16 +2141,6 @@ class DPS_Base_Frontend {
         echo '</div>';
         echo '</div>';
 
-        $summary_value = number_format_i18n( $total_amount, 2 );
-        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
-        if ( $total_count ) {
-            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
-        } else {
-            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'desi-pet-shower' ) . '</strong>';
-        }
-        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'desi-pet-shower' ) . '</p>';
-        echo '</div>';
-
         if ( $appointments ) {
             echo '<div class="dps-table-wrapper">';
             echo '<table class="dps-table dps-table-sortable" id="dps-history-table"><thead><tr>';
@@ -1985,7 +2154,6 @@ class DPS_Base_Frontend {
             echo '<th class="hide-mobile">' . esc_html__( 'Cobrança', 'desi-pet-shower' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
             echo '</tr></thead><tbody>';
-            $base_url        = get_permalink();
             $clients_cache   = [];
             $pets_cache      = [];
             $services_cache  = [];
@@ -2071,7 +2239,6 @@ class DPS_Base_Frontend {
         echo '</div>';
         return ob_get_clean();
     }
-
     /**
      * Compara agendamentos pela data e hora em ordem decrescente.
      *
