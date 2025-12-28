@@ -1157,3 +1157,123 @@
     background: #f9fafb;
     border-radius: 8px;
 }
+
+/* ========================================
+   20. BOTÕES MODERNOS - ESTILO CONSISTENTE
+   ======================================== */
+
+/* Botão principal para ações da aba Financeiro */
+.dps-finance-btn-primary,
+#dps-section-financeiro .button-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    text-shadow: none;
+}
+
+.dps-finance-btn-primary:hover,
+#dps-section-financeiro .button-primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-finance-btn-primary:active,
+#dps-section-financeiro .button-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+/* Botão secundário para ações secundárias */
+.dps-finance-btn-secondary,
+#dps-section-financeiro .button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #ffffff;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.dps-finance-btn-secondary:hover,
+#dps-section-financeiro .button-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+/* Botão de sucesso (verde) para confirmar pagamentos */
+.dps-finance-btn-success {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.dps-finance-btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+/* Botão pequeno para tabelas */
+.dps-finance-btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+/* Container de ações com botões */
+.dps-finance-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Ícone dentro do botão */
+.dps-finance-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
+}

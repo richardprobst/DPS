@@ -406,3 +406,82 @@
         font-size: 11px;
     }
 }
+
+/* ==========================================================================
+   9. Botões Modernos - Estilo Consistente
+   ========================================================================== */
+
+/* Botão principal para ações do Stock */
+.dps-stock-btn-primary,
+#dps-section-estoque .button-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    text-shadow: none;
+}
+
+.dps-stock-btn-primary:hover,
+#dps-section-estoque .button-primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-stock-btn-primary:active,
+#dps-section-estoque .button-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+/* Botão secundário */
+.dps-stock-btn-secondary,
+#dps-section-estoque .button-secondary,
+.dps-stock-actions .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #ffffff;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-stock-btn-secondary:hover,
+#dps-section-estoque .button-secondary:hover,
+.dps-stock-actions .button:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+/* Ícone dentro do botão */
+.dps-stock-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
+}
