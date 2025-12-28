@@ -6,6 +6,11 @@
  * - Bordas simples (sem sombras exageradas)
  * - Sem transformações de movimento em hover
  * - Foco em legibilidade e espaço em branco
+ *
+ * Compatibilidade com Microsoft Edge e outros navegadores:
+ * - Propriedade 'inset:' substituída por top/right/bottom/left para Edge antigo
+ * - backdrop-filter inclui prefixo -webkit- para Safari/Edge antigo
+ * - Fallbacks via classes JS para seletores :has() quando necessário
  */
 
 /* === Variáveis CSS e Estrutura Base === */
@@ -470,7 +475,10 @@
 /* === Modal de Serviços === */
 .dps-modal-overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: rgba(15, 23, 42, 0.5);
     display: flex;
     align-items: center;
@@ -578,7 +586,10 @@
 
 .dps-appointment-modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: none;
     align-items: center;
     justify-content: center;
@@ -593,7 +604,10 @@
 
 .dps-appointment-modal__backdrop {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }
 
 .dps-appointment-modal__content {
@@ -1532,7 +1546,10 @@
 /* === FASE 5: Modal de Reagendamento Rápido === */
 .dps-reschedule-modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 10000;
     display: flex;
     align-items: center;
@@ -3203,13 +3220,17 @@ tr.dps-row-updated {
 /* === Modal de Popup de Pagamento === */
 .dps-payment-modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(15, 23, 42, 0.6);
     padding: 1rem;
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 
@@ -3352,13 +3373,17 @@ tr.dps-row-updated {
 /* === Modal de Popup de Serviços === */
 .dps-services-modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(15, 23, 42, 0.6);
     padding: 1rem;
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 
