@@ -131,6 +131,25 @@ Antes de criar uma nova versão oficial:
 - Metas `_dps_staff_commissions`, `_dps_commission_generated`, `_dps_commission_date` no agendamento.
 - Hook `dps_groomers_commission_generated` para extensões (Loyalty, Stats, etc.).
 
+**Services Add-on (v1.4.0) - Reformulação do Layout da Aba Serviços**
+
+- **Layout do formulário completamente reorganizado**: Formulário de cadastro de serviços agora usa fieldsets semânticos com legendas claras ("Informações Básicas", "Valores por Porte", "Duração por Porte", "Configuração do Pacote").
+- **Grid responsivo**: Campos organizados em grid de 2 colunas (desktop) com fallback para 1 coluna (mobile).
+- **Inputs com prefixo/sufixo**: Campos de preço mostram "R$" como prefixo visual, campos de duração mostram "min" como sufixo.
+- **Listagem melhorada**: Nova coluna "Duração" na tabela, busca com placeholder mais claro, contador de serviços ativos/totais no cabeçalho.
+- **Badges de tipo coloridos**: Tipo de serviço exibido como badge colorido (padrão=azul, extra=amarelo, pacote=roxo).
+- **Botões de ação estilizados**: Ações (Editar, Duplicar, Ativar/Desativar, Excluir) exibidas como botões compactos com cores semânticas.
+- **Categoria como linha secundária**: Categoria exibida abaixo do nome do serviço em vez de coluna separada.
+- **Estado vazio amigável**: Mensagem orientativa quando não há serviços cadastrados.
+- **CSS ampliado**: Novos estilos para formulário, fieldsets, grid de porte, inputs com prefixo/sufixo, badges e ações.
+- **Botão Cancelar**: Ao editar serviço, botão para cancelar edição e voltar ao formulário vazio.
+
+#### Removed (Removido)
+
+**Services Add-on (v1.4.0)**
+
+- **Seção "Consumo de estoque" removida**: Funcionalidade não utilizada foi removida do formulário de cadastro de serviços. A meta `dps_service_stock_consumption` continua sendo lida para serviços existentes mas não é mais editável.
+
 **Services Add-on (v1.3.0) - FASE 2: Integração com Profissionais**
 
 - **F2.1 - Campo `required_staff_type`**: Serviços podem exigir tipo específico de profissional (groomer, banhista ou qualquer).

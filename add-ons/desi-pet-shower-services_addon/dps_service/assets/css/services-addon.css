@@ -2,12 +2,514 @@
  * Estilos do Services Add-on - DPS
  * 
  * Estilos responsivos e minimalistas para campos de serviços
- * injetados no formulário de agendamento.
+ * injetados no formulário de agendamento e painel de gestão.
  * 
  * @package DesiPetShower
  * @subpackage ServicesAddon
- * @since 1.0.0
+ * @since 1.4.0
  */
+
+/* ============================================
+   SEÇÃO DE SERVIÇOS - LAYOUT GERAL
+   ============================================ */
+
+.dps-services-section {
+    max-width: 1200px;
+}
+
+/* === Container do Formulário === */
+.dps-form-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.dps-form-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 8px 0;
+    padding: 0;
+    border: none;
+}
+
+.dps-form-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 20px 0;
+}
+
+/* === Formulário de Serviços === */
+.dps-services-form {
+    margin: 0;
+}
+
+/* === Fieldsets === */
+.dps-fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #f9fafb;
+}
+
+.dps-fieldset legend {
+    font-weight: 600;
+    color: #374151;
+    font-size: 15px;
+    padding: 0 10px;
+    margin-left: -6px;
+}
+
+.dps-fieldset-description {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 16px 0;
+}
+
+/* === Grid de Formulário (2 colunas) === */
+.dps-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.dps-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-form-field-full {
+    grid-column: 1 / -1;
+}
+
+.dps-form-field label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-form-field label .required {
+    color: #ef4444;
+}
+
+.dps-form-field input[type="text"],
+.dps-form-field input[type="number"],
+.dps-form-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.dps-form-field input:focus,
+.dps-form-field select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-field-description {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* === Checkbox Label === */
+.dps-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400 !important;
+    cursor: pointer;
+}
+
+.dps-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.dps-checkbox-label span {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* === Grid de Porte (3 colunas) === */
+.dps-porte-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.dps-porte-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-porte-item label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* === Input com Prefixo/Sufixo === */
+.dps-input-prefix,
+.dps-input-suffix {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dps-input-prefix span,
+.dps-input-suffix span {
+    padding: 10px 12px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.dps-input-prefix input,
+.dps-input-suffix input {
+    flex: 1;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.dps-input-prefix input:focus,
+.dps-input-suffix input:focus {
+    outline: none;
+}
+
+/* === Campo "ou" para pacotes === */
+.dps-field-or {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+}
+
+.dps-or-label {
+    color: #6b7280;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* === Multiselect === */
+.dps-multiselect {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+/* === Ações do Formulário === */
+.dps-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-form-actions .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 10px 24px;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.dps-form-actions .button-primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+.dps-form-actions .button-secondary {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #374151;
+}
+
+.dps-form-actions .button-secondary:hover {
+    background: #f9fafb;
+    border-color: #cbd5e1;
+}
+
+/* ============================================
+   LISTAGEM DE SERVIÇOS
+   ============================================ */
+
+.dps-list-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 24px;
+}
+
+.dps-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dps-list-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.dps-list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.dps-search-wrapper {
+    position: relative;
+}
+
+.dps-search-input {
+    width: 250px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    transition: border-color 0.2s ease;
+}
+
+.dps-search-input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-list-stats {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.dps-stat-active {
+    color: #059669;
+}
+
+/* === Tabela de Serviços === */
+.dps-services-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-services-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dps-services-table td {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    vertical-align: middle;
+}
+
+.dps-services-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.dps-services-table tbody tr.dps-row-inactive {
+    opacity: 0.6;
+}
+
+.dps-services-table tbody tr.dps-row-inactive:hover {
+    opacity: 1;
+}
+
+/* === Coluna Nome + Categoria === */
+.dps-col-name strong {
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-service-category {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 400;
+}
+
+/* === Badges de Tipo === */
+.dps-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dps-type-padrao {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.dps-type-extra {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.dps-type-package {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+/* === Badges de Status === */
+.dps-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dps-badge-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.dps-badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* === Botões de Ação === */
+.dps-action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dps-action-btn {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.dps-action-edit {
+    background: #eff6ff;
+    color: #0ea5e9;
+}
+
+.dps-action-edit:hover {
+    background: #0ea5e9;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dps-action-duplicate {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-action-duplicate:hover {
+    background: #6b7280;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dps-action-activate {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.dps-action-activate:hover {
+    background: #059669;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dps-action-deactivate {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.dps-action-deactivate:hover {
+    background: #d97706;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dps-action-delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.dps-action-delete:hover {
+    background: #dc2626;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* === Estado Vazio === */
+.dps-empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6b7280;
+}
+
+.dps-empty-state p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.dps-empty-hint {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+/* ============================================
+   CAMPOS NO FORMULÁRIO DE AGENDAMENTO
+   ============================================ */
 
 /* === Inputs de Preço de Serviços === */
 .dps-service-price-wrapper {
@@ -18,9 +520,9 @@
 }
 
 .dps-service-price {
-    width: 120px;
+    width: 100px;
     max-width: 100%;
-    min-width: 88px;
+    min-width: 80px;
     box-sizing: border-box;
     padding: 4px 6px;
     border: 1px solid #e5e7eb;
@@ -48,123 +550,7 @@
     cursor: pointer;
 }
 
-/* === Badges de Status === */
-.dps-status-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-}
-
-.dps-badge-active {
-    background: #d1fae5;
-    color: #059669;
-}
-
-.dps-badge-inactive {
-    background: #f3f4f6;
-    color: #6b7280;
-}
-
-/* === Tabela de Serviços === */
-.dps-services-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.dps-services-table th {
-    background: #f9fafb;
-    font-weight: 600;
-    color: #374151;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-align: left;
-    padding: 12px;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.dps-services-table td {
-    padding: 12px;
-    border-bottom: 1px solid #e5e7eb;
-    color: #374151;
-}
-
-.dps-services-table tbody tr:hover {
-    background: #f9fafb;
-}
-
-.dps-services-table td a {
-    color: #0ea5e9;
-    text-decoration: none;
-}
-
-.dps-services-table td a:hover {
-    text-decoration: underline;
-}
-
-/* === Layout Responsivo === */
-
-/* Tablets e telas médias (até 768px) */
-@media (max-width: 768px) {
-    .dps-service-price {
-        width: 110px;
-        font-size: 15px; /* Ligeiramente maior para mobile */
-    }
-    
-    /* Tabela responsiva - ocultar colunas de categoria e preço em tablet */
-    .dps-services-table .dps-col-category,
-    .dps-services-table .dps-col-price {
-        display: none;
-    }
-}
-
-/* Mobile (até 480px) */
-@media (max-width: 480px) {
-    .dps-service-price-wrapper {
-        gap: 4px;
-    }
-
-    .dps-service-price {
-        width: 90px;
-        min-width: 70px;
-        max-width: 110px;
-        font-size: 16px; /* Evita zoom automático no iOS */
-        padding: 6px 8px;
-    }
-    
-    /* Labels de serviços em mobile */
-    .dps-services-fields label {
-        display: block;
-        padding: 8px 0;
-    }
-    
-    /* Tabela mais compacta */
-    .dps-services-table th,
-    .dps-services-table td {
-        padding: 8px;
-        font-size: 13px;
-    }
-    
-    /* Ocultar coluna de tipo em mobile pequeno */
-    .dps-services-table .dps-col-type {
-        display: none;
-    }
-}
-
-/* Mobile pequeno (até 375px) */
-@media (max-width: 375px) {
-    .dps-service-price {
-        width: 80px;
-        min-width: 60px;
-        max-width: 90px;
-    }
-}
-
-/* === Fieldset de Serviços === */
+/* === Fieldset de Serviços (Agendamento) === */
 .dps-services-fields {
     border: 1px solid #e5e7eb;
     padding: 20px;
@@ -213,7 +599,107 @@
     background: #f9fafb;
 }
 
+/* ============================================
+   RESPONSIVIDADE
+   ============================================ */
+
+/* Tablets e telas médias (até 1024px) */
+@media (max-width: 1024px) {
+    .dps-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-porte-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .dps-list-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-list-toolbar {
+        justify-content: space-between;
+    }
+}
+
+/* Tablets (até 768px) */
+@media (max-width: 768px) {
+    .dps-form-container,
+    .dps-list-container {
+        padding: 16px;
+    }
+    
+    .dps-fieldset {
+        padding: 16px;
+    }
+    
+    .dps-porte-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .dps-search-input {
+        width: 100%;
+    }
+    
+    /* Tabela responsiva - ocultar colunas secundárias */
+    .dps-services-table .dps-col-duration {
+        display: none;
+    }
+    
+    .dps-action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .dps-action-btn {
+        text-align: center;
+    }
+    
+    .dps-service-price {
+        width: 90px;
+        font-size: 15px;
+    }
+}
+
+/* Mobile (até 480px) */
 @media (max-width: 480px) {
+    .dps-form-title,
+    .dps-list-title {
+        font-size: 18px;
+    }
+    
+    .dps-services-table th,
+    .dps-services-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+    
+    /* Ocultar mais colunas em mobile */
+    .dps-services-table .dps-col-type,
+    .dps-services-table .dps-col-price {
+        display: none;
+    }
+    
+    .dps-service-price {
+        width: 80px;
+        min-width: 60px;
+        max-width: 100px;
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 6px 8px;
+    }
+    
+    .dps-service-price-wrapper {
+        gap: 4px;
+    }
+    
+    /* Labels de serviços em mobile */
+    .dps-services-fields label {
+        display: block;
+        padding: 8px 0;
+    }
+    
     #dps-appointment-total,
     #dps-subscription-total {
         width: 100%;
@@ -221,46 +707,22 @@
         font-size: 18px;
         padding: 8px;
     }
+    
+    .dps-form-actions {
+        flex-direction: column;
+    }
+    
+    .dps-form-actions .button {
+        width: 100%;
+        text-align: center;
+    }
 }
 
-/* === Formulário de Cadastro de Serviços === */
-.dps-price-by-size,
-.dps-duration-by-size {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.dps-price-by-size p:first-of-type,
-.dps-duration-by-size p:first-of-type {
-    margin-top: 0;
-}
-
-.dps-stock-consumption {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-}
-
-#dps-stock-consumption-table {
-    margin-top: 12px;
-}
-
-#dps-stock-consumption-table th {
-    background: #f9fafb;
-    font-weight: 600;
-    text-align: left;
-    padding: 8px 12px;
-}
-
-#dps-stock-consumption-table td {
-    padding: 8px 12px;
-}
-
-#dps-stock-consumption-table select,
-#dps-stock-consumption-table input[type="number"] {
-    width: 100%;
-    max-width: 200px;
+/* Mobile pequeno (até 375px) */
+@media (max-width: 375px) {
+    .dps-service-price {
+        width: 70px;
+        min-width: 50px;
+        max-width: 80px;
+    }
 }
