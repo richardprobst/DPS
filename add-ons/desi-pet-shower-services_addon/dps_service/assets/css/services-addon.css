@@ -180,19 +180,27 @@
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .dps-input-prefix input,
 .dps-input-suffix input {
     flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding: 10px 12px;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    background: transparent;
+    font-size: 14px;
+    color: #374151;
 }
 
 .dps-input-prefix input:focus,
 .dps-input-suffix input:focus {
     outline: none;
+    background: #f9fafb;
 }
 
 /* === Campo "ou" para pacotes === */
@@ -370,6 +378,13 @@
     font-weight: 400;
 }
 
+/* === Coluna de Ações === */
+.dps-col-actions {
+    min-width: 200px;
+    width: auto;
+    white-space: nowrap;
+}
+
 /* === Badges de Tipo === */
 .dps-type-badge {
     display: inline-block;
@@ -420,19 +435,23 @@
 /* === Botões de Ação === */
 .dps-action-buttons {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .dps-action-btn {
-    display: inline-block;
-    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     text-decoration: none;
     transition: all 0.2s ease;
     white-space: nowrap;
+    line-height: 1.2;
 }
 
 .dps-action-edit {
@@ -648,13 +667,20 @@
         display: none;
     }
     
+    /* Coluna de ações em tablets */
+    .dps-col-actions {
+        min-width: 120px;
+    }
+    
     .dps-action-buttons {
         flex-direction: column;
         gap: 4px;
+        align-items: stretch;
     }
     
     .dps-action-btn {
         text-align: center;
+        width: 100%;
     }
     
     .dps-service-price {
@@ -680,6 +706,17 @@
     .dps-services-table .dps-col-type,
     .dps-services-table .dps-col-price {
         display: none;
+    }
+    
+    /* Coluna de ações em mobile */
+    .dps-col-actions {
+        min-width: 80px;
+        padding: 12px 6px;
+    }
+    
+    .dps-action-btn {
+        font-size: 11px;
+        padding: 4px 8px;
     }
     
     .dps-service-price {
