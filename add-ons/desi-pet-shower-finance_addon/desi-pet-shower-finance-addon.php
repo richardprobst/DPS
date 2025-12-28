@@ -1847,10 +1847,10 @@ class DPS_Finance_Addon {
                 echo '<div class="dps-field">';
                 echo '<label for="partial_method">' . esc_html__( 'Método de Pagamento', 'dps-finance-addon' ) . '</label>';
                 echo '<select id="partial_method" name="partial_method">';
-                echo '<option value="pix">💠 PIX</option>';
-                echo '<option value="cartao">💳 ' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option>';
-                echo '<option value="dinheiro">💵 ' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option>';
-                echo '<option value="outro">📝 ' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option>';
+                echo '<option value="pix">PIX</option>';
+                echo '<option value="cartao">' . esc_html__( 'Cartão', 'dps-finance-addon' ) . '</option>';
+                echo '<option value="dinheiro">' . esc_html__( 'Dinheiro', 'dps-finance-addon' ) . '</option>';
+                echo '<option value="outro">' . esc_html__( 'Outro', 'dps-finance-addon' ) . '</option>';
                 echo '</select>';
                 echo '</div>';
                 
@@ -1866,9 +1866,9 @@ class DPS_Finance_Addon {
                 
                 // Ações
                 echo '<div class="dps-partial-actions">';
-                echo '<button type="submit" class="button button-primary">✅ ' . esc_html__( 'Salvar Pagamento', 'dps-finance-addon' ) . '</button>';
+                echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Pagamento', 'dps-finance-addon' ) . '</button>';
                 $cancel_link = esc_url( remove_query_arg( 'register_partial' ) . '#financeiro' );
-                echo '<a href="' . $cancel_link . '" class="button">❌ ' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a>';
+                echo '<a href="' . $cancel_link . '" class="button">' . esc_html__( 'Cancelar', 'dps-finance-addon' ) . '</a>';
                 echo '</div>';
                 
                 echo '</form>';
@@ -1923,8 +1923,8 @@ class DPS_Finance_Addon {
         echo '<div class="dps-field">';
         echo '<label for="finance_type">' . esc_html__( 'Tipo', 'dps-finance-addon' ) . ' *</label>';
         echo '<select id="finance_type" name="finance_type" required>';
-        echo '<option value="receita">📈 ' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
-        echo '<option value="despesa">📉 ' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="receita">' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="despesa">' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
         echo '</select>';
         echo '</div>';
         
@@ -1932,8 +1932,8 @@ class DPS_Finance_Addon {
         echo '<div class="dps-field">';
         echo '<label for="finance_status">' . esc_html__( 'Status', 'dps-finance-addon' ) . ' *</label>';
         echo '<select id="finance_status" name="finance_status" required>';
-        echo '<option value="em_aberto">⏳ ' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
-        echo '<option value="pago">✅ ' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="em_aberto">' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="pago">' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
         echo '</select>';
         echo '</div>';
         
@@ -1956,7 +1956,7 @@ class DPS_Finance_Addon {
         
         // Botão de salvar
         echo '<div class="dps-field" style="display: flex; align-items: flex-end;">';
-        echo '<button type="submit" class="button button-primary">' . esc_html__( '💾 Salvar Transação', 'dps-finance-addon' ) . '</button>';
+        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Transação', 'dps-finance-addon' ) . '</button>';
         echo '</div>';
         
         echo '</div>'; // .dps-finance-form-compact
