@@ -2042,43 +2042,42 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
-        echo '<p class="description">' . esc_html__( 'Visualize, filtre e exporte o histórico completo de atendimentos, agora com linha do tempo para pendentes e futuros.', 'desi-pet-shower' ) . '</p>';
-
-        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
-        if ( $total_count ) {
-            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos registrados. Receita acumulada: R$ %2$s.', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
-        } else {
-            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado até o momento.', 'desi-pet-shower' ) . '</strong>';
-        }
-        echo '<p class="description">' . esc_html__( 'Os totais são atualizados automaticamente conforme os filtros são aplicados.', 'desi-pet-shower' ) . '</p>';
+        echo '<div class="dps-history-header">';
+        echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
+        echo '<p class="dps-history-header__description">' . esc_html__( 'Visualize, filtre e exporte todos os atendimentos registrados no sistema.', 'desi-pet-shower' ) . '</p>';
         echo '</div>';
 
+        // Cards de métricas rápidas
         echo '<div class="dps-history-overview">';
         echo '<div class="dps-history-cards">';
-        echo '<div class="dps-history-card">';
-        echo '<span class="dps-history-card__label">' . esc_html__( 'Atendimentos do dia', 'desi-pet-shower' ) . '</span>';
+        echo '<div class="dps-history-card dps-history-card--today">';
+        echo '<span class="dps-history-card__icon" aria-hidden="true">📅</span>';
+        echo '<div class="dps-history-card__content">';
         echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['today'] ?? 0 ) ) . '</strong>';
-        echo '<p class="dps-history-card__hint">' . esc_html__( 'Inclui agendados e finalizados na data atual.', 'desi-pet-shower' ) . '</p>';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Hoje', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
-        echo '<div class="dps-history-card">';
-        echo '<span class="dps-history-card__label">' . esc_html__( 'Agendamentos futuros', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+        echo '<div class="dps-history-card dps-history-card--upcoming">';
+        echo '<span class="dps-history-card__icon" aria-hidden="true">🗓️</span>';
+        echo '<div class="dps-history-card__content">';
         echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['upcoming'] ?? 0 ) ) . '</strong>';
-        echo '<p class="dps-history-card__hint">' . esc_html__( 'Organizados por data e hora para priorizar o próximo atendimento.', 'desi-pet-shower' ) . '</p>';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Futuros', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
-        echo '<div class="dps-history-card">';
-        echo '<span class="dps-history-card__label">' . esc_html__( 'Atendimentos que já passaram', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+        echo '<div class="dps-history-card dps-history-card--past">';
+        echo '<span class="dps-history-card__icon" aria-hidden="true">✓</span>';
+        echo '<div class="dps-history-card__content">';
         echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['past'] ?? 0 ) ) . '</strong>';
-        echo '<p class="dps-history-card__hint">' . esc_html__( 'Facilita regularizar pendências e marcar cobranças concluídas.', 'desi-pet-shower' ) . '</p>';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Passados', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
         echo '</div>';
-        echo '<div class="dps-history-card dps-history-card--notes">';
-        echo '<h3>' . esc_html__( 'Melhorias de layout e operação', 'desi-pet-shower' ) . '</h3>';
-        echo '<ul class="dps-history-notes">';
-        echo '<li>' . esc_html__( 'Linha do tempo única agrupa atendimentos do dia, futuros e passados, concentrando a lista no histórico.', 'desi-pet-shower' ) . '</li>';
-        echo '<li>' . esc_html__( 'Contadores rápidos ajudam a dimensionar capacidade da equipe e pendências.', 'desi-pet-shower' ) . '</li>';
-        echo '<li>' . esc_html__( 'Status e cobranças permanecem acessíveis diretamente no histórico para ações rápidas.', 'desi-pet-shower' ) . '</li>';
-        echo '</ul>';
+        echo '<div class="dps-history-card dps-history-card--total">';
+        echo '<span class="dps-history-card__icon" aria-hidden="true">💰</span>';
+        echo '<div class="dps-history-card__content">';
+        echo '<strong class="dps-history-card__value">R$ ' . esc_html( $summary_value ) . '</strong>';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Receita', 'desi-pet-shower' ) . '</span>';
+        echo '</div>';
+        echo '</div>';
         echo '</div>';
         echo '</div>';
 
@@ -2103,7 +2102,26 @@ class DPS_Base_Frontend {
             ]
         );
 
+        // Toolbar de filtros reorganizada
         echo '<div class="dps-history-toolbar">';
+        
+        // Cabeçalho da seção de tabela com título e ações
+        echo '<div class="dps-history-toolbar__header">';
+        echo '<h3 class="dps-history-toolbar__title">' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
+        echo '<div class="dps-history-toolbar__actions">';
+        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
+        echo '</div>';
+        echo '</div>';
+
+        // Resumo dinâmico dos filtros aplicados (atualizado via JavaScript)
+        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
+        if ( $total_count ) {
+            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos • R$ %2$s', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
+        } else {
+            echo '<strong>' . esc_html__( 'Nenhum atendimento registrado.', 'desi-pet-shower' ) . '</strong>';
+        }
+        echo '</div>';
 
         // Botões de período rápido
         echo '<div class="dps-history-quick-filters">';
@@ -2114,32 +2132,71 @@ class DPS_Base_Frontend {
         echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="month">' . esc_html__( 'Este mês', 'desi-pet-shower' ) . '</button>';
         echo '</div>';
 
+        // Filtros organizados em grid
         echo '<div class="dps-history-filters">';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Buscar', 'desi-pet-shower' ) . '<br><input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'desi-pet-shower' ) . '"></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '<br><select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
+        
+        // Campo de busca (largura total)
+        echo '<div class="dps-history-filter dps-history-filter--search">';
+        echo '<label for="dps-history-search">' . esc_html__( 'Buscar', 'desi-pet-shower' ) . '</label>';
+        echo '<input type="search" id="dps-history-search" placeholder="' . esc_attr__( 'Filtrar por cliente, pet ou serviço...', 'desi-pet-shower' ) . '">';
+        echo '</div>';
+        
+        // Linha com selects lado a lado
+        echo '<div class="dps-history-filters__row">';
+        
+        echo '<div class="dps-history-filter">';
+        echo '<label for="dps-history-client">' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</label>';
+        echo '<select id="dps-history-client"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $client_options as $id => $name ) {
             echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
         }
-        echo '</select></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Pet', 'desi-pet-shower' ) . '<br><select id="dps-history-pet"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        echo '<div class="dps-history-filter">';
+        echo '<label for="dps-history-pet">' . esc_html__( 'Pet', 'desi-pet-shower' ) . '</label>';
+        echo '<select id="dps-history-pet"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $pet_options as $id => $name ) {
             echo '<option value="' . esc_attr( $id ) . '">' . esc_html( $name ) . '</option>';
         }
-        echo '</select></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Status', 'desi-pet-shower' ) . '<br><select id="dps-history-status"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        echo '<div class="dps-history-filter">';
+        echo '<label for="dps-history-status">' . esc_html__( 'Status', 'desi-pet-shower' ) . '</label>';
+        echo '<select id="dps-history-status"><option value="">' . esc_html__( 'Todos', 'desi-pet-shower' ) . '</option>';
         foreach ( $status_filters as $key => $label ) {
             echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $label ) . '</option>';
         }
-        echo '</select></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data inicial', 'desi-pet-shower' ) . '<br><input type="date" id="dps-history-start"></label></div>';
-        echo '<div class="dps-history-filter"><label>' . esc_html__( 'Data final', 'desi-pet-shower' ) . '<br><input type="date" id="dps-history-end"></label></div>';
-        echo '<div class="dps-history-filter"><label><input type="checkbox" id="dps-history-pending"> ' . esc_html__( 'Somente pendentes de pagamento', 'desi-pet-shower' ) . '</label></div>';
+        echo '</select>';
         echo '</div>';
-        echo '<div class="dps-history-actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar filtros', 'desi-pet-shower' ) . '</button> ';
-        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
+        
+        echo '</div>'; // .dps-history-filters__row
+        
+        // Linha com datas
+        echo '<div class="dps-history-filters__row">';
+        
+        echo '<div class="dps-history-filter">';
+        echo '<label for="dps-history-start">' . esc_html__( 'Data inicial', 'desi-pet-shower' ) . '</label>';
+        echo '<input type="date" id="dps-history-start">';
         echo '</div>';
+        
+        echo '<div class="dps-history-filter">';
+        echo '<label for="dps-history-end">' . esc_html__( 'Data final', 'desi-pet-shower' ) . '</label>';
+        echo '<input type="date" id="dps-history-end">';
         echo '</div>';
+        
+        echo '<div class="dps-history-filter dps-history-filter--checkbox">';
+        echo '<label class="dps-checkbox-label">';
+        echo '<input type="checkbox" id="dps-history-pending">';
+        echo '<span>' . esc_html__( 'Somente pendentes de pagamento', 'desi-pet-shower' ) . '</span>';
+        echo '</label>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-history-filters__row
+        echo '</div>'; // .dps-history-filters
+        
+        echo '</div>'; // .dps-history-toolbar
 
         if ( $appointments ) {
             echo '<div class="dps-table-wrapper">';
