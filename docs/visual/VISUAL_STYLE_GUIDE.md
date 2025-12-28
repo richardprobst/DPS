@@ -1,8 +1,8 @@
 # Guia de Estilo Visual DPS
 
-**Versão:** 1.0  
-**Última atualização:** 21/11/2024  
-**Princípio:** Minimalista/Clean
+**Versão:** 1.1  
+**Última atualização:** 28/12/2024  
+**Princípio:** Minimalista/Clean com Destaques Modernos
 
 ---
 
@@ -15,9 +15,10 @@ O DPS adota uma abordagem **minimalista** que prioriza:
 - **Espaço em branco**: respiro visual para reduzir fadiga
 
 ### Menos é mais
-- Evitar decoração desnecessária (sombras, gradientes, bordas grossas)
+- Evitar decoração desnecessária (bordas grossas, animações excessivas)
 - Usar cores apenas quando comunicam informação
 - Manter hierarquia visual através de tipografia e espaçamento
+- **Exceção para botões de ação**: gradientes sutis são permitidos para destacar ações primárias
 
 ---
 
@@ -166,9 +167,12 @@ font-weight: 600;
 
 ### Bordas
 ```css
-/* Padrão */
+/* Padrão para containers */
 border: 1px solid #e5e7eb;
 border-radius: 4px;
+
+/* Botões - border-radius maior */
+border-radius: 8px;
 
 /* Destaque lateral (alertas, cards especiais) */
 border-left: 4px solid [cor-de-status];
@@ -177,21 +181,27 @@ border-left: 4px solid [cor-de-status];
 border-bottom: 1px solid #e5e7eb;
 ```
 
-**Regra:** Sempre 1px, nunca variar espessura. Border-radius consistente em 4px.
+**Regra:** Sempre 1px para containers, nunca variar espessura. Border-radius 4px para containers, 8px para botões.
 
 ### Sombras
 ```css
-/* Apenas para modais e tooltips */
+/* Botões primários - sombra sutil permitida */
+box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+
+/* Botões primários hover - sombra aumentada */
+box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+
+/* Modais e tooltips */
 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
 /* NÃO usar para: */
-- Botões
 - Cards estáticos
 - Containers de formulário
 - Tabelas
+- Fieldsets
 ```
 
-**Regra:** Evitar sombras decorativas. Usar apenas para elevação (dropdowns, modais).
+**Regra:** Sombras são permitidas apenas em botões primários (para destaque de ação) e elementos elevados (modais, dropdowns, tooltips). Evitar sombras decorativas em outros elementos.
 
 ---
 
@@ -199,30 +209,79 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
 ### Botões
 ```css
-/* Primário */
-.button-primary {
-    background: #0ea5e9;
-    border-color: #0ea5e9;
-    color: #ffffff;
+/* Primário - Estilo Moderno com Gradiente */
+.button-primary,
+.dps-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
     font-weight: 600;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
     text-shadow: none;
-    box-shadow: none;
-}
-.button-primary:hover {
-    background: #0284c7;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Secundário */
-.button-secondary {
+.button-primary:hover,
+.dps-btn-primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.button-primary:active,
+.dps-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+/* Secundário - Borda elegante */
+.button-secondary,
+.dps-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.button-secondary:hover,
+.dps-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
     color: #374151;
 }
-.button-secondary:hover {
-    background: #f9fafb;
-    border-color: #cbd5e1;
+
+/* Sucesso - Para ações de confirmação */
+.dps-btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.dps-btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 ```
+
+**Nota sobre Gradientes em Botões:** Embora o sistema seja minimalista, os botões primários usam gradientes sutis para melhor destacar ações principais. Esta é uma exceção intencional ao princípio geral, aplicada de forma consistente em todo o sistema.
 
 ### Tabelas
 ```css
@@ -419,9 +478,9 @@ Ao criar nova interface DPS, verificar:
 - [ ] **Cores**: Apenas paleta aprovada (neutros + 1 destaque + status quando necessário)
 - [ ] **Tipografia**: Hierarquia h1>h2>h3 correta, font-weight 600 para destaques
 - [ ] **Espaçamento**: Mínimo 16px entre campos, 24px entre seções, 40px antes de subseções
-- [ ] **Bordas**: Sempre 1px, border-radius 4px, sem variação de espessura
-- [ ] **Sombras**: Apenas em modais/tooltips, nunca decorativas
-- [ ] **Botões**: Primários com background azul, secundários brancos com borda
+- [ ] **Bordas**: Sempre 1px em containers, border-radius 4px (8px para botões)
+- [ ] **Sombras**: Apenas em modais/tooltips e botões primários (box-shadow sutil)
+- [ ] **Botões**: Primários com gradiente azul, secundários brancos com borda, border-radius 8px
 - [ ] **Formulários**: Agrupados em fieldsets/dps-field-group quando >5 campos
 - [ ] **Tabelas**: Headers uppercase 13px, hover suave, wrapper responsivo
 - [ ] **Feedback**: Notices com borda lateral colorida, ícones discretos
@@ -433,25 +492,26 @@ Ao criar nova interface DPS, verificar:
 
 ❌ **Não fazer:**
 - Usar mais de 3 cores diferentes em uma tela
-- Adicionar sombras em todos os elementos
-- Criar bordas de 2px ou 3px
+- Adicionar sombras decorativas em containers estáticos
+- Criar bordas de 2px ou 3px (exceção: borda de ênfase em botões secundários)
 - Usar font-weight: 700 (bold)
 - Comprimir espaçamento para "caber mais"
 - Ícones sem label de texto
-- Background gradients
-- Animações desnecessárias
+- Background gradients em containers, cards ou formulários
+- Animações desnecessárias ou excessivas
 - Tabelas sem overflow-x em mobile
 - Formulários sem agrupamento lógico
 
 ✅ **Fazer:**
 - Paleta restrita e consistente
 - Espaço em branco generoso
-- Bordas 1px suaves
+- Bordas 1px suaves (exceto botões que usam border-radius: 8px)
 - Hierarquia clara de títulos
 - Feedback visual discreto mas claro
 - Agrupar campos relacionados
 - Testar em mobile
 - Documentar exceções ao guia
+- **Gradientes sutis apenas em botões de ação primária**
 
 ---
 
