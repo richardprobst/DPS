@@ -83,6 +83,25 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Base Plugin (v1.0.4) - Redesign das Abas CLIENTES e PETS**
+
+- **Templates modulares para pets**: Criados templates separados para formulário (`pet-form.php`), listagem (`pets-list.php`) e seção completa (`pets-section.php`), seguindo mesmo padrão já existente para clientes.
+- **Colunas adicionais na listagem de clientes**: Email e contagem de pets agora visíveis na tabela de clientes para consulta rápida.
+- **Colunas adicionais na listagem de pets**: Porte e Sexo agora visíveis na tabela de pets, com ícones para espécie e badges coloridos por tamanho.
+- **Indicador de pet agressivo na listagem**: Badge visual ⚠️ e destaque vermelho na linha para pets marcados como agressivos.
+- **Link "Adicionar pet" para clientes sem pets**: Na coluna Pets, clientes sem pets têm link rápido para cadastrar.
+- **Contagem de registros no header das listas**: Badge com total de clientes/pets cadastrados ao lado do título.
+
+#### Changed (Alterado)
+
+**Base Plugin (v1.0.4)**
+
+- **Formulário de pets refatorado para templates**: Lógica de preparação de dados separada da renderização (métodos `prepare_pets_section_data()` e `render_pets_section()`).
+- **Header de listas redesenhado**: Títulos "Clientes Cadastrados" e "Pets Cadastrados" agora com ícones, badges de contagem e espaçamento melhorado.
+- **Toolbar de busca padronizada**: Campo de busca com placeholder mais descritivo e layout flex responsivo.
+- **Ações nas tabelas melhoradas**: Links Editar/Agendar/Excluir agora com cores semânticas (azul para editar, verde para agendar, vermelho para excluir).
+- **Estilos CSS ampliados**: Novas classes para badges de porte (`.dps-size-badge--pequeno/medio/grande`), pets agressivos, links de ação e responsividade.
+
 **Groomers Add-on (v1.8.0) - Redesign completo do Layout da Aba Equipe**
 
 - **Navegação por sub-abas**: Separação em 3 sub-abas (Equipe, Relatórios, Comissões) para organização mais clara e navegação mais fluida.

@@ -6,6 +6,8 @@
  * para personalizar o HTML mantendo a lógica do plugin.
  *
  * @package DesiPetShower
+ * @since 1.0.0
+ * @since 1.0.4 Adicionadas colunas Email e Pets, melhorado layout visual
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,15 +16,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Extrai variáveis passadas para o template
 $clients  = isset( $clients ) && is_array( $clients ) ? $clients : [];
-$base_url = isset( $base_url ) ? $base_url : '';
+$base_url = isset( $base_url ) ? $base_url : get_permalink();
+
+// Pré-carregar contagem de pets para todos os clientes (evita N+1 queries)
+$pets_counts = [];
+if ( ! empty( $clients ) ) {
+	global $wpdb;
+	$client_ids = array_map( function( $c ) { return $c->ID; }, $clients );
+	$placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
+	
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT meta_value AS owner_id, COUNT(*) AS pet_count
+			 FROM {$wpdb->postmeta} pm
+			 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+			 WHERE pm.meta_key = 'owner_id'
+			 AND p.post_type = 'dps_pet'
+			 AND p.post_status = 'publish'
+			 AND pm.meta_value IN ($placeholders)
+			 GROUP BY pm.meta_value",
+			...$client_ids
+		),
+		ARRAY_A
+	);
+	
+	foreach ( $results as $row ) {
+		$pets_counts[ $row['owner_id'] ] = (int) $row['pet_count'];
+	}
+}
 ?>
 
-<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">
+<h3 class="dps-list-header">
+	<span class="dps-list-header__icon">👥</span>
 	<?php echo esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ); ?>
+	<?php if ( ! empty( $clients ) ) : ?>
+		<span class="dps-list-header__count"><?php echo count( $clients ); ?></span>
+	<?php endif; ?>
 </h3>
 
-<div class="dps-clients-toolbar" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px;">
-	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar...', 'desi-pet-shower' ); ?>" style="flex: 1; min-width: 200px;">
+<div class="dps-list-toolbar">
+	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar por nome, telefone ou email...', 'desi-pet-shower' ); ?>">
 	
 	<?php if ( ! empty( $clients ) && ( current_user_can( 'dps_manage_clients' ) || current_user_can( 'manage_options' ) ) ) : ?>
 		<?php
@@ -39,56 +73,95 @@ $base_url = isset( $base_url ) ? $base_url : '';
 
 <?php if ( ! empty( $clients ) ) : ?>
 	<div class="dps-table-wrapper">
-		<table class="dps-table">
-		<thead>
-			<tr>
-				<th><?php echo esc_html__( 'Nome', 'desi-pet-shower' ); ?></th>
-				<th><?php echo esc_html__( 'Telefone', 'desi-pet-shower' ); ?></th>
-				<th><?php echo esc_html__( 'Ações', 'desi-pet-shower' ); ?></th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php foreach ( $clients as $client ) : ?>
-				<?php
-				$phone_raw = get_post_meta( $client->ID, 'client_phone', true );
-				$wa_url = '';
-
-				// Gera link do WhatsApp se houver telefone usando helper centralizado
-				if ( $phone_raw && class_exists( 'DPS_WhatsApp_Helper' ) ) {
-					$wa_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw );
-				} elseif ( $phone_raw ) {
-					// Fallback para compatibilidade
-					$phone_digits = preg_replace( '/\D+/', '', $phone_raw );
-					$wa_url = 'https://wa.me/' . $phone_digits;
-				}
-
-				$edit_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
-				$delete_url = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
-				$view_url = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
-				$schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client->ID ], $base_url );
-				?>
+		<table class="dps-table dps-table--clients">
+			<thead>
 				<tr>
-					<td><a href="<?php echo esc_url( $view_url ); ?>"><?php echo esc_html( $client->post_title ); ?></a></td>
-					<td>
-						<?php if ( $phone_raw ) : ?>
-							<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank"><?php echo esc_html( $phone_raw ); ?></a>
-						<?php else : ?>
-							-
-						<?php endif; ?>
-					</td>
-					<td>
-						<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html__( 'Editar', 'desi-pet-shower' ); ?></a>
-						|
-						<a href="<?php echo esc_url( $delete_url ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ); ?>');">
-							<?php echo esc_html__( 'Excluir', 'desi-pet-shower' ); ?>
-						</a>
-						|
-						<a href="<?php echo esc_url( $schedule_url ); ?>"><?php echo esc_html__( 'Agendar', 'desi-pet-shower' ); ?></a>
-					</td>
+					<th class="dps-table__col--name"><?php echo esc_html__( 'Cliente', 'desi-pet-shower' ); ?></th>
+					<th class="dps-table__col--phone"><?php echo esc_html__( 'Telefone', 'desi-pet-shower' ); ?></th>
+					<th class="dps-table__col--email hide-mobile"><?php echo esc_html__( 'Email', 'desi-pet-shower' ); ?></th>
+					<th class="dps-table__col--pets"><?php echo esc_html__( 'Pets', 'desi-pet-shower' ); ?></th>
+					<th class="dps-table__col--actions"><?php echo esc_html__( 'Ações', 'desi-pet-shower' ); ?></th>
 				</tr>
-			<?php endforeach; ?>
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				<?php foreach ( $clients as $client ) : ?>
+					<?php
+					$phone_raw   = get_post_meta( $client->ID, 'client_phone', true );
+					$email       = get_post_meta( $client->ID, 'client_email', true );
+					$wa_url      = '';
+
+					// Gera link do WhatsApp se houver telefone usando helper centralizado
+					if ( $phone_raw && class_exists( 'DPS_WhatsApp_Helper' ) ) {
+						$wa_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw );
+					} elseif ( $phone_raw ) {
+						// Fallback para compatibilidade
+						$phone_digits = preg_replace( '/\D+/', '', $phone_raw );
+						$wa_url = 'https://wa.me/' . $phone_digits;
+					}
+
+					// Usa contagem pré-carregada (evita N+1 queries)
+					$pets_count = isset( $pets_counts[ (string) $client->ID ] ) ? $pets_counts[ (string) $client->ID ] : 0;
+
+					$edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
+					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
+					$view_url     = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
+					$schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client->ID ], $base_url );
+					$add_pet_url  = add_query_arg( [ 'tab' => 'pets', 'pref_owner' => $client->ID ], $base_url );
+					?>
+					<tr>
+						<td class="dps-table__col--name">
+							<a href="<?php echo esc_url( $view_url ); ?>" class="dps-client-link">
+								<?php echo esc_html( $client->post_title ); ?>
+							</a>
+						</td>
+						<td class="dps-table__col--phone">
+							<?php if ( $phone_raw ) : ?>
+								<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" class="dps-phone-link" title="<?php echo esc_attr__( 'Abrir WhatsApp', 'desi-pet-shower' ); ?>">
+									<?php echo esc_html( $phone_raw ); ?>
+								</a>
+							<?php else : ?>
+								<span class="dps-text-muted">-</span>
+							<?php endif; ?>
+						</td>
+						<td class="dps-table__col--email hide-mobile">
+							<?php if ( $email ) : ?>
+								<a href="mailto:<?php echo esc_attr( $email ); ?>" class="dps-email-link">
+									<?php echo esc_html( $email ); ?>
+								</a>
+							<?php else : ?>
+								<span class="dps-text-muted">-</span>
+							<?php endif; ?>
+						</td>
+						<td class="dps-table__col--pets">
+							<?php if ( $pets_count > 0 ) : ?>
+								<span class="dps-pets-badge">
+									🐾 <?php echo esc_html( $pets_count ); ?>
+								</span>
+							<?php else : ?>
+								<a href="<?php echo esc_url( $add_pet_url ); ?>" class="dps-add-pet-link" title="<?php echo esc_attr__( 'Adicionar pet', 'desi-pet-shower' ); ?>">
+									+ <?php echo esc_html__( 'Adicionar', 'desi-pet-shower' ); ?>
+								</a>
+							<?php endif; ?>
+						</td>
+						<td class="dps-table__col--actions">
+							<div class="dps-actions">
+								<a href="<?php echo esc_url( $edit_url ); ?>" class="dps-action-link" title="<?php echo esc_attr__( 'Editar', 'desi-pet-shower' ); ?>">
+									<?php echo esc_html__( 'Editar', 'desi-pet-shower' ); ?>
+								</a>
+								<span class="dps-action-separator">|</span>
+								<a href="<?php echo esc_url( $schedule_url ); ?>" class="dps-action-link dps-action-link--primary" title="<?php echo esc_attr__( 'Agendar serviço', 'desi-pet-shower' ); ?>">
+									<?php echo esc_html__( 'Agendar', 'desi-pet-shower' ); ?>
+								</a>
+								<span class="dps-action-separator">|</span>
+								<a href="<?php echo esc_url( $delete_url ); ?>" class="dps-action-link dps-action-delete" onclick="return confirm('<?php echo esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ); ?>');" title="<?php echo esc_attr__( 'Excluir', 'desi-pet-shower' ); ?>">
+									<?php echo esc_html__( 'Excluir', 'desi-pet-shower' ); ?>
+								</a>
+							</div>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 <?php else : ?>
 	<div class="dps-empty-state">
