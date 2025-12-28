@@ -711,11 +711,11 @@
     /* Coluna de ações em mobile */
     .dps-col-actions {
         min-width: 80px;
-        padding: 12px 6px !important;
+        padding: 12px 6px;
     }
     
     .dps-action-btn {
-        font-size: 10px;
+        font-size: 11px;
         padding: 4px 8px;
     }
     
