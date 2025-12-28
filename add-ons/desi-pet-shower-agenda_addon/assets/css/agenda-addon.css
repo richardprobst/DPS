@@ -231,60 +231,68 @@
     word-break: break-word;
 }
 
-/* === Botões (Estilo Minimalista) === */
+/* === Botões (Estilo Moderno - Padronizado com o Sistema DPS) === */
 .dps-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.55rem 1.25rem;
-    border-radius: 999px;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 15px;
     line-height: 1.1;
     text-decoration: none;
-    border: 1px solid transparent;
+    border: none;
     cursor: pointer;
-    transition: background .2s ease, border-color .2s ease, color .2s ease;
-    /* Removido: transform no hover (estilo minimalista) */
+    transition: all 0.2s ease;
 }
 
 .dps-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
 }
 
 .dps-btn--primary {
-    background: var(--dps-accent);
-    border-color: var(--dps-accent);
-    color: #fff;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
 }
 
 .dps-btn--primary:hover {
-    background: var(--dps-accent-strong);
-    border-color: var(--dps-accent-strong);
-    /* Removido: transform: translateY(-1px) - menos movimento visual */
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-btn--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
 }
 
 .dps-btn--ghost {
     background: transparent;
-    border-color: var(--dps-accent);
-    color: var(--dps-accent);
+    border: 2px solid #0ea5e9;
+    color: #0ea5e9;
 }
 
 .dps-btn--ghost:hover {
-    background: var(--dps-accent-soft);
+    background: #f0f9ff;
+    border-color: #0284c7;
+    color: #0284c7;
 }
 
 .dps-btn--soft {
-    background: var(--dps-background);
-    border-color: var(--dps-border);
-    color: #0f172a;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    color: #374151;
 }
 
 .dps-btn--soft:hover {
-    border-color: var(--dps-accent);
-    color: var(--dps-accent);
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+    background: #f9fafb;
 }
 
 /* === Resumo de Atendimentos === */
