@@ -2632,3 +2632,292 @@
         flex: 1 1 100%;
     }
 }
+
+/* ================================================
+   LISTAGEM DE CLIENTES E PETS - LAYOUT MELHORADO
+   ================================================ */
+
+/* Header de listas */
+.dps-list-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 40px 0 20px 0;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-list-header__icon {
+    font-size: 1.2em;
+}
+
+.dps-list-header__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+/* Toolbar de listas */
+.dps-list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dps-list-toolbar .dps-search {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+/* Título da seção */
+.dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 24px 0;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 22px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-section-title__icon {
+    font-size: 1.1em;
+}
+
+/* Células especiais na tabela */
+.dps-pet-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-pet-cell__badge {
+    font-size: 14px;
+}
+
+.dps-pet-cell__name {
+    font-weight: 500;
+}
+
+/* Badge de espécie */
+.dps-species-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+/* Badge de porte/tamanho */
+.dps-size-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-size-badge--pequeno {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.dps-size-badge--medio {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-size-badge--grande {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Badge de pets (contagem) */
+.dps-pets-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: #ecfdf5;
+    color: #047857;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Link para adicionar pet */
+.dps-add-pet-link {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dps-add-pet-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+}
+
+/* Linha de pet agressivo */
+.dps-pet-row--aggressive {
+    background: #fef2f2;
+}
+
+.dps-pet-row--aggressive td:first-child {
+    border-left: 4px solid #ef4444;
+}
+
+/* Ações na tabela */
+.dps-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.dps-action-separator {
+    color: #d1d5db;
+    font-size: 12px;
+}
+
+.dps-action-link {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background-color 0.15s ease;
+}
+
+.dps-action-link:hover {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.dps-action-link--primary {
+    color: #10b981;
+}
+
+.dps-action-link--primary:hover {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.dps-action-delete {
+    color: #dc2626;
+}
+
+.dps-action-delete:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* Texto esmaecido */
+.dps-text-muted {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Link de cliente */
+.dps-client-link {
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-client-link:hover {
+    color: #0ea5e9;
+    text-decoration: underline;
+}
+
+/* Link de telefone */
+.dps-phone-link {
+    color: #0ea5e9;
+    text-decoration: none;
+}
+
+.dps-phone-link:hover {
+    text-decoration: underline;
+}
+
+/* Link de email */
+.dps-email-link {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.dps-email-link:hover {
+    color: #0ea5e9;
+    text-decoration: underline;
+}
+
+/* Responsividade para listas */
+@media (max-width: 768px) {
+    .dps-list-header {
+        margin: 24px 0 16px 0;
+        padding-top: 16px;
+        font-size: 16px;
+    }
+    
+    .dps-list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-list-toolbar .dps-search {
+        min-width: 0;
+        width: 100%;
+    }
+    
+    .dps-list-toolbar .button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .dps-actions {
+        flex-wrap: nowrap;
+    }
+    
+    .dps-action-link {
+        font-size: 12px;
+        padding: 2px 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-section-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+    
+    .dps-list-header {
+        font-size: 15px;
+    }
+    
+    .dps-size-badge,
+    .dps-pets-badge {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+}

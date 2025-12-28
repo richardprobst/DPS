@@ -983,33 +983,72 @@ class DPS_Base_Frontend {
 
     /**
      * Seção de pets: formulário e listagem
+     * 
+     * REFATORADO v1.0.4: Separa preparação de dados da renderização.
+     * A lógica de dados permanece aqui, a renderização foi movida para templates.
+     * 
+     * @since 1.0.0
+     * @since 1.0.4 Refatorado para usar templates.
+     * @return string HTML da seção de pets.
      */
     private static function section_pets() {
+        // 1. Preparar dados (lógica de negócio)
+        $data = self::prepare_pets_section_data();
+        
+        // 2. Renderizar usando template (apresentação)
+        return self::render_pets_section( $data );
+    }
+    
+    /**
+     * Prepara os dados necessários para a seção de pets.
+     * 
+     * @since 1.0.4
+     * @return array {
+     *     Dados estruturados para o template.
+     *     
+     *     @type array       $pets          Lista de posts de pets.
+     *     @type int         $pets_page     Página atual da paginação.
+     *     @type int         $pets_pages    Total de páginas.
+     *     @type array       $clients       Lista de clientes disponíveis.
+     *     @type int         $edit_id       ID do pet sendo editado (0 se novo).
+     *     @type WP_Post|null $editing      Post do pet em edição (null se novo).
+     *     @type array       $meta          Metadados do pet.
+     *     @type array       $breed_options Lista de raças disponíveis.
+     *     @type array       $breed_data    Dataset completo de raças por espécie.
+     *     @type string      $base_url      URL base da página.
+     * }
+     */
+    private static function prepare_pets_section_data() {
         $clients    = self::get_clients();
         $pets_page  = isset( $_GET['dps_pets_page'] ) ? max( 1, intval( $_GET['dps_pets_page'] ) ) : 1;
         $pets_query = self::get_pets( $pets_page );
         $pets       = $pets_query->posts;
         $pets_pages = (int) max( 1, $pets_query->max_num_pages );
-        // Detecta edição
-        $edit_id    = ( isset( $_GET['dps_edit'] ) && 'pet' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
-        $editing    = null;
-        $meta       = [];
+        
+        // Detecta edição via parâmetros GET
+        $edit_id = ( isset( $_GET['dps_edit'] ) && 'pet' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) 
+                   ? intval( $_GET['id'] ) 
+                   : 0;
+        
+        $editing = null;
+        $meta    = [];
+        
         if ( $edit_id ) {
             $editing = get_post( $edit_id );
             if ( $editing ) {
+                // Carrega metadados do pet para edição
                 $meta = [
-                    'owner_id'  => get_post_meta( $edit_id, 'owner_id', true ),
-                    'species'   => get_post_meta( $edit_id, 'pet_species', true ),
-                    'breed'     => get_post_meta( $edit_id, 'pet_breed', true ),
-                    'size'      => get_post_meta( $edit_id, 'pet_size', true ),
-                    'weight'    => get_post_meta( $edit_id, 'pet_weight', true ),
-                    'coat'      => get_post_meta( $edit_id, 'pet_coat', true ),
-                    'color'     => get_post_meta( $edit_id, 'pet_color', true ),
-                    'birth'     => get_post_meta( $edit_id, 'pet_birth', true ),
-                    'sex'       => get_post_meta( $edit_id, 'pet_sex', true ),
-                    'care'      => get_post_meta( $edit_id, 'pet_care', true ),
-                    'aggressive'=> get_post_meta( $edit_id, 'pet_aggressive', true ),
-                    // Campos adicionais de saúde, comportamento e foto para pets
+                    'owner_id'     => get_post_meta( $edit_id, 'owner_id', true ),
+                    'species'      => get_post_meta( $edit_id, 'pet_species', true ),
+                    'breed'        => get_post_meta( $edit_id, 'pet_breed', true ),
+                    'size'         => get_post_meta( $edit_id, 'pet_size', true ),
+                    'weight'       => get_post_meta( $edit_id, 'pet_weight', true ),
+                    'coat'         => get_post_meta( $edit_id, 'pet_coat', true ),
+                    'color'        => get_post_meta( $edit_id, 'pet_color', true ),
+                    'birth'        => get_post_meta( $edit_id, 'pet_birth', true ),
+                    'sex'          => get_post_meta( $edit_id, 'pet_sex', true ),
+                    'care'         => get_post_meta( $edit_id, 'pet_care', true ),
+                    'aggressive'   => get_post_meta( $edit_id, 'pet_aggressive', true ),
                     'vaccinations' => get_post_meta( $edit_id, 'pet_vaccinations', true ),
                     'allergies'    => get_post_meta( $edit_id, 'pet_allergies', true ),
                     'behavior'     => get_post_meta( $edit_id, 'pet_behavior', true ),
@@ -1017,248 +1056,35 @@ class DPS_Base_Frontend {
                 ];
             }
         }
+        
         $species_val   = $meta['species'] ?? '';
         $breed_data    = self::get_breed_dataset();
         $breed_options = self::get_breed_options_for_species( $species_val );
-        ob_start();
-        echo '<div class="dps-section" id="dps-section-pets">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h2>';
-        // Define enctype multipart/form-data para permitir upload de foto
-        echo '<form method="post" enctype="multipart/form-data" class="dps-form dps-form--pet">';
-        echo '<input type="hidden" name="dps_action" value="save_pet">';
-        wp_nonce_field( 'dps_action', 'dps_nonce_pets' );
-        if ( $edit_id ) {
-            echo '<input type="hidden" name="pet_id" value="' . esc_attr( $edit_id ) . '">';
-        }
         
-        // Fieldset 1: Dados Básicos
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Dados Básicos', 'desi-pet-shower' ) . '</legend>';
-        
-        // Nome do pet e Cliente em grid
-        echo '<div class="dps-form-row dps-form-row--2col">';
-        $pet_name = $editing ? $editing->post_title : '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Nome do Pet', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><input type="text" name="pet_name" value="' . esc_attr( $pet_name ) . '" required></label></p>';
-        
-        // Cliente (tutor)
-        $owner_selected = $meta['owner_id'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Cliente (Tutor)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="owner_id" id="dps-pet-owner" required>';
-        echo '<option value="">' . esc_html__( 'Selecione...', 'desi-pet-shower' ) . '</option>';
-        foreach ( $clients as $client ) {
-            $sel = (string) $client->ID === (string) $owner_selected ? 'selected' : '';
-            echo '<option value="' . esc_attr( $client->ID ) . '" ' . $sel . '>' . esc_html( $client->post_title ) . '</option>';
-        }
-        echo '</select></label></p>';
-        echo '</div>';
-        
-        // Espécie, Raça e Sexo em grid de 3 colunas
-        echo '<div class="dps-form-row dps-form-row--3col">';
-        // Espécie
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_species" required>';
-        $species_options = [
-            ''      => __( 'Selecione...', 'desi-pet-shower' ),
-            'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
-            'gato'  => __( 'Gato', 'desi-pet-shower' ),
-            'outro' => __( 'Outro', 'desi-pet-shower' ),
+        return [
+            'pets'          => $pets,
+            'pets_page'     => $pets_page,
+            'pets_pages'    => $pets_pages,
+            'clients'       => $clients,
+            'edit_id'       => $edit_id,
+            'editing'       => $editing,
+            'meta'          => $meta,
+            'breed_options' => $breed_options,
+            'breed_data'    => $breed_data,
+            'base_url'      => get_permalink(),
         ];
-        foreach ( $species_options as $val => $label ) {
-            $sel = ( $species_val === $val ) ? 'selected' : '';
-            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
-        }
-        echo '</select></label></p>';
-        
-        // Raça (com datalist)
-        $breed_val = $meta['breed'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '<br>';
-        echo '<input type="text" name="pet_breed" list="dps-breed-list" value="' . esc_attr( $breed_val ) . '" placeholder="' . esc_attr__( 'Digite ou selecione', 'desi-pet-shower' ) . '">';
-        echo '</label></p>';
-        
-        // Sexo
-        $sex_val = $meta['sex'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Sexo', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_sex" required>';
-        $sexes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'macho' => __( 'Macho', 'desi-pet-shower' ), 'femea' => __( 'Fêmea', 'desi-pet-shower' ) ];
-        foreach ( $sexes as $val => $lab ) {
-            $sel = ( $sex_val === $val ) ? 'selected' : '';
-            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
-        }
-        echo '</select></label></p>';
-        echo '</div>';
-        
-        // Datalist definition (fora do fieldset mas após uso)
-        echo '<datalist id="dps-breed-list">';
-        foreach ( $breed_options as $breed ) {
-            echo '<option value="' . esc_attr( $breed ) . '">';
-        }
-        echo '</datalist>';
-
-        echo '<script>';
-        echo '(function(){';
-        echo 'const breedData = ' . wp_json_encode( $breed_data ) . ';';
-        echo 'const speciesSelect = document.querySelector(\'select[name="pet_species"]\');';
-        echo 'const breedInput = document.querySelector(\'input[name="pet_breed"]\');';
-        echo 'const datalist = document.getElementById(\'dps-breed-list\');';
-        echo 'if (!datalist || !speciesSelect) { return; }';
-        echo 'const unique = function(list){ const seen = new Set(); return list.filter(function(item){ if (seen.has(item)) { return false; } seen.add(item); return true; }); };';
-        echo 'const render = function(species){ const data = breedData[species] || breedData.all || { popular: [], all: [] }; const items = unique([].concat(data.popular || [], data.all || [])); datalist.innerHTML = \'\'; items.forEach(function(breed){ const option = document.createElement(\'option\'); option.value = breed; datalist.appendChild(option); }); };';
-        echo 'render(speciesSelect.value);';
-        echo 'speciesSelect.addEventListener(\'change\', function(){ render(this.value); if (breedInput) { breedInput.value = \'\'; } });';
-        echo '})();';
-        echo '</script>';
-        
-        echo '</fieldset>';
-        
-        // Fieldset 2: Características Físicas
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Características Físicas', 'desi-pet-shower' ) . '</legend>';
-        
-        // Tamanho, Peso e Data de Nascimento em grid
-        echo '<div class="dps-form-row dps-form-row--3col">';
-        $size_val = $meta['size'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Tamanho', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_size" required>';
-        $sizes = [ '' => __( 'Selecione...', 'desi-pet-shower' ), 'pequeno' => __( 'Pequeno', 'desi-pet-shower' ), 'medio' => __( 'Médio', 'desi-pet-shower' ), 'grande' => __( 'Grande', 'desi-pet-shower' ) ];
-        foreach ( $sizes as $val => $lab ) {
-            $sel = ( $size_val === $val ) ? 'selected' : '';
-            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $lab ) . '</option>';
-        }
-        echo '</select></label></p>';
-        
-        // Peso
-        $weight_val = $meta['weight'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Peso (kg)', 'desi-pet-shower' ) . '<br><input type="number" step="0.1" min="0.1" max="100" name="pet_weight" value="' . esc_attr( $weight_val ) . '" placeholder="5.5"></label></p>';
-        
-        // Data de nascimento
-        $birth_val = $meta['birth'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Data de nascimento', 'desi-pet-shower' ) . '<br><input type="date" name="pet_birth" value="' . esc_attr( $birth_val ) . '"></label></p>';
-        echo '</div>';
-        
-        // Tipo de pelo e Cor em grid
-        echo '<div class="dps-form-row dps-form-row--2col">';
-        $coat_val = $meta['coat'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Tipo de pelo', 'desi-pet-shower' ) . '<br><input type="text" name="pet_coat" value="' . esc_attr( $coat_val ) . '" placeholder="Curto, longo, encaracolado..."></label></p>';
-        
-        $color_val = $meta['color'] ?? '';
-        echo '<p class="dps-form-col"><label>' . esc_html__( 'Cor predominante', 'desi-pet-shower' ) . '<br><input type="text" name="pet_color" value="' . esc_attr( $color_val ) . '" placeholder="Branco, preto, caramelo..."></label></p>';
-        echo '</div>';
-        
-        echo '</fieldset>';
-        
-        // Fieldset 3: Saúde e Comportamento
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Saúde e Comportamento', 'desi-pet-shower' ) . '</legend>';
-        
-        // Vacinas / Saúde
-        $vaccinations_val = $meta['vaccinations'] ?? '';
-        echo '<p><label>' . esc_html__( 'Vacinas / Saúde', 'desi-pet-shower' ) . '<br><textarea name="pet_vaccinations" rows="2" placeholder="Liste vacinas, condições médicas...">' . esc_textarea( $vaccinations_val ) . '</textarea></label></p>';
-        
-        // Alergias / Restrições
-        $allergies_val = $meta['allergies'] ?? '';
-        echo '<p><label>' . esc_html__( 'Alergias / Restrições', 'desi-pet-shower' ) . '<br><textarea name="pet_allergies" rows="2" placeholder="Alergias a alimentos, medicamentos...">' . esc_textarea( $allergies_val ) . '</textarea></label></p>';
-        
-        // Cuidados especiais/restrições
-        $care_val = $meta['care'] ?? '';
-        echo '<p><label>' . esc_html__( 'Cuidados especiais', 'desi-pet-shower' ) . '<br><textarea name="pet_care" rows="2" placeholder="Necessita cuidados especiais durante o banho?">' . esc_textarea( $care_val ) . '</textarea></label></p>';
-        
-        // Notas de Comportamento
-        $behavior_val = $meta['behavior'] ?? '';
-        echo '<p><label>' . esc_html__( 'Notas de comportamento', 'desi-pet-shower' ) . '<br><textarea name="pet_behavior" rows="2" placeholder="Como o pet costuma se comportar?">' . esc_textarea( $behavior_val ) . '</textarea></label></p>';
-        
-        // Agressivo (checkbox melhorado)
-        $aggressive = $meta['aggressive'] ?? '';
-        $checked_ag = $aggressive ? 'checked' : '';
-        echo '<p><label class="dps-checkbox-label"><input type="checkbox" name="pet_aggressive" value="1" ' . $checked_ag . '> <span class="dps-checkbox-text">⚠️ ' . esc_html__( 'Cão agressivo (requer cuidado especial)', 'desi-pet-shower' ) . '</span></label></p>';
-        
-        echo '</fieldset>';
-        
-        // Fieldset 4: Foto do Pet
-        echo '<fieldset class="dps-fieldset">';
-        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Foto do Pet', 'desi-pet-shower' ) . '</legend>';
-        
-        $photo_id  = $meta['photo_id'] ?? '';
-        $photo_url = '';
-        if ( $photo_id ) {
-            $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
-        }
-        
-        echo '<div class="dps-file-upload">';
-        echo '<label class="dps-file-upload__label">';
-        echo '<input type="file" name="pet_photo" accept="image/*" class="dps-file-upload__input">';
-        echo '<span class="dps-file-upload__text">📷 ' . esc_html__( 'Escolher foto', 'desi-pet-shower' ) . '</span>';
-        echo '</label>';
-        if ( $photo_url ) {
-            echo '<div class="dps-file-upload__preview"><img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '"></div>';
-        }
-        echo '</div>';
-        
-        echo '</fieldset>';
-        
-        // Botão
-        $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
-        echo '<p><button type="submit" class="button button-primary dps-submit-btn">' . $btn_text . '</button></p>';
-        echo '</form>';
-        // Listagem de pets
-        echo '<h3 style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #374151;">' . esc_html__( 'Pets Cadastrados', 'desi-pet-shower' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'desi-pet-shower' ) . '"></p>';
-        if ( ! empty( $pets ) ) {
-            $base_url = get_permalink();
-            echo '<table class="dps-table"><thead><tr><th>' . esc_html__( 'Nome', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Cliente', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Raça', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th></tr></thead><tbody>';
-            foreach ( $pets as $pet ) {
-                $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
-                $owner    = $owner_id ? get_post( $owner_id ) : null;
-                $species  = get_post_meta( $pet->ID, 'pet_species', true );
-                $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
-                $edit_url   = add_query_arg( [ 'tab' => 'pets', 'dps_edit' => 'pet', 'id' => $pet->ID ], $base_url );
-                $delete_url = add_query_arg( [ 'tab' => 'pets', 'dps_delete' => 'pet', 'id' => $pet->ID ], $base_url );
-                // Mapping species codes to labels
-                $species_label = '';
-                switch ( $species ) {
-                    case 'cao':
-                        $species_label = __( 'Cachorro', 'desi-pet-shower' );
-                        break;
-                    case 'gato':
-                        $species_label = __( 'Gato', 'desi-pet-shower' );
-                        break;
-                    case 'outro':
-                        $species_label = __( 'Outro', 'desi-pet-shower' );
-                        break;
-                    default:
-                        $species_label = $species;
-                        break;
-                }
-                // Link owner name to client page
-                $owner_display = $owner ? '<a href="' . esc_url( add_query_arg( [ 'dps_view' => 'client', 'id' => $owner->ID ], $base_url ) ) . '">' . esc_html( $owner->post_title ) . '</a>' : '-';
-                // Link to schedule service for this pet
-                $schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $owner_id, 'pref_pet' => $pet->ID ], $base_url );
-                echo '<tr>';
-                echo '<td>' . esc_html( $pet->post_title ) . '</td>';
-                echo '<td>' . $owner_display . '</td>';
-                echo '<td>' . esc_html( $species_label ) . '</td>';
-                echo '<td>' . esc_html( $breed ) . '</td>';
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $schedule_url ) . '">' . esc_html__( 'Agendar', 'desi-pet-shower' ) . '</a></td>';
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-            if ( $pets_pages > 1 ) {
-                $pagination = paginate_links( [
-                    'base'      => add_query_arg( 'dps_pets_page', '%#%' ),
-                    'format'    => '',
-                    'prev_text' => __( '&laquo; Anterior', 'desi-pet-shower' ),
-                    'next_text' => __( 'Próxima &raquo;', 'desi-pet-shower' ),
-                    'current'   => $pets_page,
-                    'total'     => $pets_pages,
-                ] );
-
-                if ( $pagination ) {
-                    echo '<div class="dps-pagination">' . $pagination . '</div>';
-                }
-            }
-        } else {
-            echo '<div class="dps-empty-state">';
-            echo '<span class="dps-empty-state__icon">🐾</span>';
-            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado', 'desi-pet-shower' ) . '</h4>';
-            echo '<p class="dps-empty-state__description">' . esc_html__( 'Cadastre pets vinculados aos seus clientes usando o formulário acima. Selecione primeiro o cliente (tutor) e preencha os dados do pet.', 'desi-pet-shower' ) . '</p>';
-            echo '</div>';
-        }
-        echo '</div>';
+    }
+    
+    /**
+     * Renderiza a seção de pets usando template.
+     * 
+     * @since 1.0.4
+     * @param array $data Dados preparados para renderização.
+     * @return string HTML da seção.
+     */
+    private static function render_pets_section( $data ) {
+        ob_start();
+        dps_get_template( 'frontend/pets-section.php', $data );
         return ob_get_clean();
     }
 
