@@ -1010,7 +1010,7 @@ class DPS_Subscription_Addon {
             
             echo '<div class="dps-stat-card dps-stat-success">';
             echo '<span class="dps-stat-number">R$ ' . esc_html( number_format( $monthly_revenue, 2, ',', '.' ) ) . '</span>';
-            echo '<span class="dps-stat-label">' . esc_html__( 'Receita Mensal', 'dps-subscription-addon' ) . '</span>';
+            echo '<span class="dps-stat-label">' . esc_html__( 'Valor dos Pacotes', 'dps-subscription-addon' ) . '</span>';
             echo '</div>';
             
             if ( $pending_payment > 0 ) {
@@ -1141,10 +1141,14 @@ class DPS_Subscription_Addon {
                 
                 // Progresso com barra visual
                 echo '<td data-label="' . $lbl_progresso . '">';
-                echo '<div class="dps-progress-bar" title="' . esc_attr( $completed_count . ' de ' . $total_appts . ' atendimentos realizados' ) . '">';
-                echo '<div class="dps-progress-fill" style="width: ' . esc_attr( $progress_pct ) . '%;"></div>';
-                echo '<span class="dps-progress-text">' . esc_html( $completed_count . '/' . $total_appts ) . '</span>';
-                echo '</div>';
+                if ( $total_appts > 0 ) {
+                    echo '<div class="dps-progress-bar" title="' . esc_attr( $completed_count . ' de ' . $total_appts . ' atendimentos realizados' ) . '">';
+                    echo '<div class="dps-progress-fill" style="width: ' . esc_attr( $progress_pct ) . '%;"></div>';
+                    echo '<span class="dps-progress-text">' . esc_html( $completed_count . '/' . $total_appts ) . '</span>';
+                    echo '</div>';
+                } else {
+                    echo '<span class="dps-text-muted" title="' . esc_attr__( 'Nenhum agendamento gerado ainda', 'dps-subscription-addon' ) . '">—</span>';
+                }
                 echo '</td>';
                 
                 // Pagamento (com nonce para proteção CSRF)
