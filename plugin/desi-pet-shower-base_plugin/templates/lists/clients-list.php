@@ -17,6 +17,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Extrai variáveis passadas para o template
 $clients  = isset( $clients ) && is_array( $clients ) ? $clients : [];
 $base_url = isset( $base_url ) ? $base_url : get_permalink();
+
+// Pré-carregar contagem de pets para todos os clientes (evita N+1 queries)
+$pets_counts = [];
+if ( ! empty( $clients ) ) {
+	global $wpdb;
+	$client_ids = array_map( function( $c ) { return $c->ID; }, $clients );
+	$placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
+	
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT meta_value AS owner_id, COUNT(*) AS pet_count
+			 FROM {$wpdb->postmeta} pm
+			 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+			 WHERE pm.meta_key = 'owner_id'
+			 AND p.post_type = 'dps_pet'
+			 AND p.post_status = 'publish'
+			 AND pm.meta_value IN ($placeholders)
+			 GROUP BY pm.meta_value",
+			...$client_ids
+		),
+		ARRAY_A
+	);
+	
+	foreach ( $results as $row ) {
+		$pets_counts[ $row['owner_id'] ] = (int) $row['pet_count'];
+	}
+}
 ?>
 
 <h3 class="dps-list-header">
@@ -71,26 +99,11 @@ $base_url = isset( $base_url ) ? $base_url : get_permalink();
 						$wa_url = 'https://wa.me/' . $phone_digits;
 					}
 
-					// Conta pets do cliente
-					$pets_count = 0;
-					$pets_query = new WP_Query(
-						[
-							'post_type'      => 'dps_pet',
-							'post_status'    => 'publish',
-							'posts_per_page' => -1,
-							'fields'         => 'ids',
-							'meta_query'     => [
-								[
-									'key'   => 'owner_id',
-									'value' => $client->ID,
-								],
-							],
-						]
-					);
-					$pets_count = $pets_query->found_posts;
+					// Usa contagem pré-carregada (evita N+1 queries)
+					$pets_count = isset( $pets_counts[ (string) $client->ID ] ) ? $pets_counts[ (string) $client->ID ] : 0;
 
 					$edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
-					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID, 'dps_nonce' => wp_create_nonce( 'dps_delete' ) ], $base_url );
+					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
 					$view_url     = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
 					$schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client->ID ], $base_url );
 					$add_pet_url  = add_query_arg( [ 'tab' => 'pets', 'pref_owner' => $client->ID ], $base_url );
