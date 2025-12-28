@@ -247,12 +247,16 @@
     text-decoration: none;
 }
 
-/* Link de Excluir com cor vermelha */
-.dps-table td a[onclick*="confirm"] {
+/* Link de Excluir com cor vermelha 
+   Nota: Usa seletor de onclick como fallback para templates existentes.
+   Preferir usar a classe .dps-action-delete quando possível. */
+.dps-table td a[onclick*="confirm"],
+.dps-table td a.dps-action-delete {
     color: #dc2626;
 }
 
-.dps-table td a[onclick*="confirm"]:hover {
+.dps-table td a[onclick*="confirm"]:hover,
+.dps-table td a.dps-action-delete:hover {
     background-color: #fef2f2;
     color: #b91c1c;
 }
@@ -617,6 +621,8 @@
 }
 
 /* === TABELA DE AGENDAMENTOS === */
+/* Nota: border-collapse: separate é necessário para que as bordas laterais coloridas
+   nas células funcionem corretamente. border-spacing: 0 mantém o visual sem gaps. */
 .dps-appointments .dps-table {
     min-width: 640px;
     border-collapse: separate;
@@ -636,10 +642,12 @@
 }
 
 /* === CORES DE STATUS DAS LINHAS === */
+/* Nota: border-left aplicada apenas na primeira célula para melhor compatibilidade
+   com border-collapse e temas que possam sobrescrever estilos de linha */
+
 /* Pendente: laranja/amarelo com borda laranja */
 .dps-table tr.status-pendente {
     background: #fffbeb;
-    border-left: 4px solid #f59e0b;
 }
 
 .dps-table tr.status-pendente td:first-child {
@@ -649,7 +657,6 @@
 /* Finalizado: cinza neutro com borda azul */
 .dps-table tr.status-finalizado {
     background: #f8fafc;
-    border-left: 4px solid #0ea5e9;
 }
 
 .dps-table tr.status-finalizado td:first-child {
@@ -660,7 +667,6 @@
 .dps-table tr.status-finalizado_pago,
 .dps-table tr.status-finalizado\ e\ pago {
     background: #ecfdf5;
-    border-left: 4px solid #10b981;
 }
 
 .dps-table tr.status-finalizado_pago td:first-child,
@@ -672,7 +678,6 @@
 .dps-table tr.status-cancelado {
     background: #fef2f2;
     opacity: 0.7;
-    border-left: 4px solid #ef4444;
 }
 
 .dps-table tr.status-cancelado td:first-child {
