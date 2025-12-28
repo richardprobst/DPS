@@ -636,7 +636,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Metadados: `_dps_groomers` (array de IDs de groomers por agendamento)
 
 **Hooks consumidos**:
-- `dps_base_appointment_fields`: adiciona campo de seleção múltipla de groomers
+- `dps_base_appointment_assignment_fields`: adiciona campo de seleção múltipla de groomers na seção "Atribuição" (desde v1.8.0)
 - `dps_base_after_save_appointment`: salva groomers selecionados
 - `dps_base_nav_tabs_after_history`: adiciona aba "Groomers" (prioridade 15)
 - `dps_base_sections_after_history`: renderiza cadastro e relatórios (prioridade 15)
@@ -1464,9 +1464,15 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
 #### Fluxo de agendamentos
 
 - **`dps_base_appointment_fields`** (action)
-  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos)
-  - **Propósito**: adicionar campos customizados ao formulário de agendamento
-  - **Consumido por**: Groomers (seleção de profissional), Serviços (seleção de serviços)
+  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
+  - **Propósito**: adicionar campos customizados ao formulário de agendamento (seção "Serviços e Extras")
+  - **Consumido por**: Serviços (seleção de serviços e extras)
+
+- **`dps_base_appointment_assignment_fields`** (action) (desde v1.8.0)
+  - **Parâmetros**: `$appointment_id` (int, pode ser 0 para novos agendamentos), `$meta` (array)
+  - **Propósito**: adicionar campos de atribuição de profissionais ao formulário de agendamento (seção "Atribuição")
+  - **Consumido por**: Groomers (seleção de profissionais responsáveis)
+  - **Nota**: Esta seção só é renderizada se houver hooks registrados
 
 - **`dps_base_after_save_appointment`** (action)
   - **Parâmetros**: `$appointment_id` (int)

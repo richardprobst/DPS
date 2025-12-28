@@ -1574,8 +1574,12 @@ class DPS_Services_Addon {
         
         // === NOVOS CAMPOS DE MÚLTIPLOS EXTRAS ===
         // Salva extras do agendamento simples (novo formato)
-        $extras_descriptions = isset( $_POST['appointment_extras_descriptions'] ) ? (array) $_POST['appointment_extras_descriptions'] : [];
-        $extras_values = isset( $_POST['appointment_extras_values'] ) ? (array) $_POST['appointment_extras_values'] : [];
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitização é feita em parse_extras_from_post()
+        $extras_descriptions_raw = isset( $_POST['appointment_extras_descriptions'] ) ? wp_unslash( $_POST['appointment_extras_descriptions'] ) : [];
+        $extras_descriptions = is_array( $extras_descriptions_raw ) ? array_map( 'sanitize_text_field', $extras_descriptions_raw ) : [];
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitização numérica é feita em parse_extras_from_post()
+        $extras_values_raw = isset( $_POST['appointment_extras_values'] ) ? wp_unslash( $_POST['appointment_extras_values'] ) : [];
+        $extras_values = is_array( $extras_values_raw ) ? $extras_values_raw : [];
         $extras_list = $this->parse_extras_from_post( $extras_descriptions, $extras_values );
         
         if ( ! empty( $extras_list ) ) {
@@ -1604,8 +1608,12 @@ class DPS_Services_Addon {
         }
         
         // Salva extras da assinatura (novo formato)
-        $sub_extras_descriptions = isset( $_POST['subscription_extras_descriptions'] ) ? (array) $_POST['subscription_extras_descriptions'] : [];
-        $sub_extras_values = isset( $_POST['subscription_extras_values'] ) ? (array) $_POST['subscription_extras_values'] : [];
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitização é feita em parse_extras_from_post()
+        $sub_extras_descriptions_raw = isset( $_POST['subscription_extras_descriptions'] ) ? wp_unslash( $_POST['subscription_extras_descriptions'] ) : [];
+        $sub_extras_descriptions = is_array( $sub_extras_descriptions_raw ) ? array_map( 'sanitize_text_field', $sub_extras_descriptions_raw ) : [];
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitização numérica é feita em parse_extras_from_post()
+        $sub_extras_values_raw = isset( $_POST['subscription_extras_values'] ) ? wp_unslash( $_POST['subscription_extras_values'] ) : [];
+        $sub_extras_values = is_array( $sub_extras_values_raw ) ? $sub_extras_values_raw : [];
         $sub_extras_list = $this->parse_extras_from_post( $sub_extras_descriptions, $sub_extras_values );
         
         $sub_base = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
@@ -1714,23 +1722,29 @@ class DPS_Services_Addon {
     }
     
     /**
-     * Processa arrays de descrições e valores de extras do POST.
+     * Processa arrays de descrições e valores de extras.
+     *
+     * Descrições devem ser pré-sanitizadas antes de chamar este método.
+     * Valores são sanitizados aqui como floats.
      *
      * @since 1.4.0
      *
-     * @param array $descriptions Array de descrições.
-     * @param array $values       Array de valores.
+     * @param array $descriptions Array de descrições (já sanitizadas).
+     * @param array $values       Array de valores (strings ou floats).
      * @return array Lista de extras processados.
      */
     private function parse_extras_from_post( $descriptions, $values ) {
         $extras_list = [];
         
         foreach ( $descriptions as $idx => $description ) {
-            $desc  = sanitize_text_field( wp_unslash( $description ) );
+            // Descrição já vem sanitizada do chamador
+            $desc  = (string) $description;
             $value = 0;
             
             if ( isset( $values[ $idx ] ) ) {
-                $value = floatval( str_replace( ',', '.', wp_unslash( $values[ $idx ] ) ) );
+                // Sanitiza valor numérico
+                $raw_value = is_string( $values[ $idx ] ) ? str_replace( ',', '.', $values[ $idx ] ) : $values[ $idx ];
+                $value = floatval( $raw_value );
                 if ( $value < 0 ) {
                     $value = 0;
                 }

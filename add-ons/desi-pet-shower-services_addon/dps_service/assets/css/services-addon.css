@@ -967,6 +967,26 @@
         width: 100%;
         text-align: center;
     }
+    
+    /* === Extras responsivo mobile === */
+    .dps-extra-row-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-extra-value-field {
+        width: 100%;
+    }
+    
+    .dps-remove-extra-btn {
+        align-self: flex-end;
+        margin-top: 8px;
+    }
+    
+    .dps-extras-toggle {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* Mobile pequeno (até 375px) */

@@ -160,7 +160,8 @@ jQuery(document).ready(function ($) {
           // Adiciona uma linha vazia se não houver nenhuma
           var $list = $target.find('.dps-extras-list');
           if ($list.children().length === 0) {
-            addExtraRow($list, $(this).siblings('.dps-extras-container').find('.dps-add-extra-btn').data('type') || 'simple');
+            var type = $(this).closest('.dps-extras-section').find('.dps-add-extra-btn').data('type') || 'simple';
+            addExtraRow($list, type);
           }
         }
         updateTotal();
