@@ -275,6 +275,8 @@
 
         if (selectedIds.indexOf(String(pet.id)) !== -1) {
           $checkbox.prop('checked', true);
+          // Fallback for browsers without :has() support
+          $label.addClass('is-selected');
         }
 
         $label.append($checkbox);
@@ -422,6 +424,14 @@
       });
 
       $petWrapper.on('change', '.dps-pet-checkbox', function(){
+        // Fallback for browsers without :has() support - toggle .is-selected class
+        var $checkbox = $(this);
+        var $option = $checkbox.closest('.dps-pet-option');
+        if ($checkbox.prop('checked')) {
+          $option.addClass('is-selected');
+        } else {
+          $option.removeClass('is-selected');
+        }
         updateSummary();
         $(document).trigger('dps-pet-selection-updated');
       });
@@ -437,6 +447,12 @@
           var matches = ownerId && String(optionOwner) === String(ownerId);
           if (matches) {
             $option.find('.dps-pet-checkbox').prop('checked', action === 'select');
+            // Fallback for browsers without :has() support
+            if (action === 'select') {
+              $option.addClass('is-selected');
+            } else {
+              $option.removeClass('is-selected');
+            }
           }
         });
         updateSummary();
@@ -927,6 +943,43 @@
           $preview.html('<img src="' + e.target.result + '" alt="Preview">');
         };
         reader.readAsDataURL(file);
+      });
+    })();
+
+    /*
+     * Fallback para seletor CSS :has() em navegadores sem suporte (ex: Opera antigo).
+     * Adiciona classe .is-selected aos elementos .dps-radio-option quando seu radio está selecionado.
+     * O CSS utiliza :has(input:checked) com fallback via .is-selected para garantir compatibilidade.
+     */
+    (function(){
+      // Handler para radio options - atualiza classe .is-selected
+      $(document).on('change', '.dps-radio-option input[type="radio"]', function(){
+        var $radio = $(this);
+        var $option = $radio.closest('.dps-radio-option');
+        var radioName = $radio.attr('name');
+        
+        // Remove .is-selected de todos os radio options com o mesmo name
+        if (radioName) {
+          $('.dps-radio-option input[name="' + radioName + '"]').each(function(){
+            $(this).closest('.dps-radio-option').removeClass('is-selected');
+          });
+        }
+        
+        // Adiciona .is-selected ao option selecionado
+        if ($radio.prop('checked')) {
+          $option.addClass('is-selected');
+        }
+      });
+
+      // Inicializa estado .is-selected para radio options já selecionados no carregamento
+      $('.dps-radio-option input[type="radio"]:checked').each(function(){
+        $(this).closest('.dps-radio-option').addClass('is-selected');
+      });
+
+      // Inicializa estado .is-selected para pet options já selecionados no carregamento
+      // (complementa o handler de change para casos onde o HTML já vem com checked)
+      $('.dps-pet-option .dps-pet-checkbox:checked').each(function(){
+        $(this).closest('.dps-pet-option').addClass('is-selected');
       });
     })();
   });
