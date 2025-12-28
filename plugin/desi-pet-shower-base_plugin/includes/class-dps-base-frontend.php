@@ -1017,8 +1017,9 @@ class DPS_Base_Frontend {
                 ];
             }
         }
-        $breed_data    = $this->get_breed_dataset();
-        $breed_options = $this->get_breed_options_for_species( $species_val );
+        $species_val   = $meta['species'] ?? '';
+        $breed_data    = self::get_breed_dataset();
+        $breed_options = self::get_breed_options_for_species( $species_val );
         ob_start();
         echo '<div class="dps-section" id="dps-section-pets">';
         echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ) . '</h2>';
@@ -1053,7 +1054,6 @@ class DPS_Base_Frontend {
         // Espécie, Raça e Sexo em grid de 3 colunas
         echo '<div class="dps-form-row dps-form-row--3col">';
         // Espécie
-        $species_val = $meta['species'] ?? '';
         echo '<p class="dps-form-col"><label>' . esc_html__( 'Espécie', 'desi-pet-shower' ) . ' <span class="dps-required">*</span><br><select name="pet_species" required>';
         $species_options = [
             ''      => __( 'Selecione...', 'desi-pet-shower' ),
@@ -4262,7 +4262,7 @@ class DPS_Base_Frontend {
      * @since 1.0.0
      * @return array
      */
-    private function get_breed_dataset() {
+    private static function get_breed_dataset() {
         static $dataset = null;
 
         if ( null !== $dataset ) {
@@ -4433,8 +4433,8 @@ class DPS_Base_Frontend {
      * @param string $species Código da espécie (cao/gato/outro).
      * @return array Lista ordenada com populares primeiro.
      */
-    private function get_breed_options_for_species( $species ) {
-        $dataset  = $this->get_breed_dataset();
+    private static function get_breed_options_for_species( $species ) {
+        $dataset  = self::get_breed_dataset();
         $selected = isset( $dataset[ $species ] ) ? $dataset[ $species ] : $dataset['all'];
         $merged   = array_merge( $selected['popular'], $selected['all'] );
 
