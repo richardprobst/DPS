@@ -6,7 +6,7 @@
  * O header oficial está em desi-pet-shower-services.php (arquivo wrapper).
  *
  * @package DPS_Services_Addon
- * @version 1.3.1
+ * @version 1.4.0
  */
 
 // Impede acesso direto
@@ -260,22 +260,21 @@ class DPS_Services_Addon {
         if ( $edit_id ) {
             $editing = get_post( $edit_id );
             if ( $editing && 'dps_service' === $editing->post_type ) {
-            $meta = [
-                'price'        => get_post_meta( $edit_id, 'service_price', true ),
-                'type'         => get_post_meta( $edit_id, 'service_type', true ),
-                'category'     => get_post_meta( $edit_id, 'service_category', true ),
-                'duration'     => get_post_meta( $edit_id, 'service_duration', true ),
-                'active'       => get_post_meta( $edit_id, 'service_active', true ),
-                'required_staff_type' => get_post_meta( $edit_id, 'required_staff_type', true ),
-                // Variações por porte
-                'price_small'  => get_post_meta( $edit_id, 'service_price_small', true ),
-                'price_medium' => get_post_meta( $edit_id, 'service_price_medium', true ),
-                'price_large'  => get_post_meta( $edit_id, 'service_price_large', true ),
-                'duration_small'  => get_post_meta( $edit_id, 'service_duration_small', true ),
-                'duration_medium' => get_post_meta( $edit_id, 'service_duration_medium', true ),
-                'duration_large'  => get_post_meta( $edit_id, 'service_duration_large', true ),
-                'stock'           => get_post_meta( $edit_id, 'dps_service_stock_consumption', true ),
-            ];
+                $meta = [
+                    'price'        => get_post_meta( $edit_id, 'service_price', true ),
+                    'type'         => get_post_meta( $edit_id, 'service_type', true ),
+                    'category'     => get_post_meta( $edit_id, 'service_category', true ),
+                    'duration'     => get_post_meta( $edit_id, 'service_duration', true ),
+                    'active'       => get_post_meta( $edit_id, 'service_active', true ),
+                    'required_staff_type' => get_post_meta( $edit_id, 'required_staff_type', true ),
+                    // Variações por porte
+                    'price_small'  => get_post_meta( $edit_id, 'service_price_small', true ),
+                    'price_medium' => get_post_meta( $edit_id, 'service_price_medium', true ),
+                    'price_large'  => get_post_meta( $edit_id, 'service_price_large', true ),
+                    'duration_small'  => get_post_meta( $edit_id, 'service_duration_small', true ),
+                    'duration_medium' => get_post_meta( $edit_id, 'service_duration_medium', true ),
+                    'duration_large'  => get_post_meta( $edit_id, 'service_duration_large', true ),
+                ];
             }
         }
         // Lista de serviços existentes
@@ -303,41 +302,71 @@ class DPS_Services_Addon {
             'pelagem'            => __( 'Tratamento da pelagem e pele', 'dps-services-addon' ),
         ];
         ob_start();
-        echo '<div class="dps-section" id="dps-section-servicos">';
+        echo '<div class="dps-section dps-services-section" id="dps-section-servicos">';
         // Exibe mensagens de feedback
         if ( class_exists( 'DPS_Message_Helper' ) ) {
             echo DPS_Message_Helper::display_messages();
         }
-        echo '<h3>' . esc_html__( 'Cadastro de Serviços', 'dps-services-addon' ) . '</h3>';
-        echo '<form method="post" class="dps-form">';
+
+        // --- FORMULÁRIO DE CADASTRO ---
+        $form_title = $edit_id 
+            ? sprintf( __( 'Editar Serviço: %s', 'dps-services-addon' ), esc_html( $editing->post_title ) )
+            : __( 'Novo Serviço', 'dps-services-addon' );
+        echo '<div class="dps-form-container">';
+        echo '<h3 class="dps-form-title">' . esc_html( $form_title ) . '</h3>';
+        
+        if ( $edit_id ) {
+            echo '<p class="dps-form-subtitle">' . esc_html__( 'Altere os dados abaixo e clique em Atualizar.', 'dps-services-addon' ) . '</p>';
+        }
+        
+        echo '<form method="post" class="dps-form dps-services-form">';
         echo '<input type="hidden" name="dps_service_action" value="save_service">';
         wp_nonce_field( 'dps_service_action', 'dps_service_nonce' );
         if ( $edit_id ) {
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $edit_id ) . '">';
         }
-        // Nome
+
+        // === FIELDSET: Informações Básicas ===
+        echo '<fieldset class="dps-fieldset dps-fieldset-basic">';
+        echo '<legend>' . esc_html__( 'Informações Básicas', 'dps-services-addon' ) . '</legend>';
+        
+        // Grid de 2 colunas para campos básicos
+        echo '<div class="dps-form-grid">';
+        
+        // Nome do serviço
         $name_val = $editing ? $editing->post_title : '';
-        echo '<p><label>' . esc_html__( 'Nome do serviço', 'dps-services-addon' ) . '<br><input type="text" name="service_name" value="' . esc_attr( $name_val ) . '" required></label></p>';
-        // Tipo
+        echo '<div class="dps-form-field dps-form-field-full">';
+        echo '<label for="service_name">' . esc_html__( 'Nome do serviço', 'dps-services-addon' ) . ' <span class="required">*</span></label>';
+        echo '<input type="text" id="service_name" name="service_name" value="' . esc_attr( $name_val ) . '" required placeholder="' . esc_attr__( 'Ex: Banho Completo', 'dps-services-addon' ) . '">';
+        echo '</div>';
+        
+        // Tipo de serviço
         $type_val = $meta['type'] ?? '';
-        echo '<p><label>' . esc_html__( 'Tipo de serviço', 'dps-services-addon' ) . '<br><select name="service_type" required>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="service_type">' . esc_html__( 'Tipo de serviço', 'dps-services-addon' ) . ' <span class="required">*</span></label>';
+        echo '<select id="service_type" name="service_type" required>';
         echo '<option value="">' . esc_html__( 'Selecione...', 'dps-services-addon' ) . '</option>';
         foreach ( $types as $val => $label ) {
             $sel = ( $val === $type_val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
-        echo '</select></label></p>';
+        echo '</select>';
+        echo '</div>';
+        
         // Categoria (somente para extras)
         $cat_val = $meta['category'] ?? '';
-        echo '<p><label>' . esc_html__( 'Categoria', 'dps-services-addon' ) . '<br><select name="service_category">';
+        echo '<div class="dps-form-field" id="dps-category-field">';
+        echo '<label for="service_category">' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</label>';
+        echo '<select id="service_category" name="service_category">';
         echo '<option value="">' . esc_html__( 'Nenhuma', 'dps-services-addon' ) . '</option>';
         foreach ( $categories as $val => $label ) {
             $sel = ( $val === $cat_val ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
-        echo '</select></label></p>';
+        echo '</select>';
+        echo '</div>';
         
-        // Tipo de profissional requerido (integração com Groomers Add-on)
+        // Tipo de profissional requerido
         $required_staff = $meta['required_staff_type'] ?? 'any';
         $staff_type_options = [
             'any'      => __( 'Qualquer profissional', 'dps-services-addon' ),
@@ -348,91 +377,109 @@ class DPS_Services_Addon {
         if ( class_exists( 'DPS_Groomers_Addon' ) && method_exists( 'DPS_Groomers_Addon', 'get_staff_types' ) ) {
             $extra_types = DPS_Groomers_Addon::get_staff_types();
             foreach ( $extra_types as $key => $label ) {
-                if ( ! isset( $staff_type_options[ $key ] ) && $key !== 'recepcao' ) {
+                if ( ! isset( $staff_type_options[ $key ] ) && 'recepcao' !== $key ) {
                     $staff_type_options[ $key ] = $label;
                 }
             }
         }
-        echo '<p><label>' . esc_html__( 'Profissional requerido', 'dps-services-addon' ) . '<br><select name="required_staff_type">';
+        echo '<div class="dps-form-field">';
+        echo '<label for="required_staff_type">' . esc_html__( 'Profissional requerido', 'dps-services-addon' ) . '</label>';
+        echo '<select id="required_staff_type" name="required_staff_type">';
         foreach ( $staff_type_options as $val => $label ) {
             $sel = ( $val === $required_staff ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select>';
-        echo '<span class="description">' . esc_html__( 'Define qual tipo de profissional pode executar este serviço.', 'dps-services-addon' ) . '</span>';
-        echo '</label></p>';
-        // Preço base e variações por porte (se existir).  
+        echo '<span class="dps-field-description">' . esc_html__( 'Define qual tipo de profissional pode executar este serviço.', 'dps-services-addon' ) . '</span>';
+        echo '</div>';
+        
+        // Status Ativo/Inativo
+        $active_val = $meta['active'] ?? '';
+        $checked    = ( '0' === $active_val ) ? '' : 'checked';
+        echo '<div class="dps-form-field">';
+        echo '<label class="dps-checkbox-label">';
+        echo '<input type="checkbox" name="service_active" value="1" ' . $checked . '>';
+        echo '<span>' . esc_html__( 'Serviço ativo', 'dps-services-addon' ) . '</span>';
+        echo '</label>';
+        echo '<span class="dps-field-description">' . esc_html__( 'Serviços inativos não aparecem para seleção nos agendamentos.', 'dps-services-addon' ) . '</span>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-grid
+        echo '</fieldset>';
+
+        // === FIELDSET: Valores por Porte ===
+        echo '<fieldset class="dps-fieldset dps-fieldset-pricing">';
+        echo '<legend>' . esc_html__( 'Valores por Porte', 'dps-services-addon' ) . '</legend>';
+        echo '<p class="dps-fieldset-description">' . esc_html__( 'Informe os valores para cada porte de pet. O menor valor será usado como referência geral.', 'dps-services-addon' ) . '</p>';
+        
         $price_small    = $meta['price_small'] ?? ( $meta['price'] ?? '' );
         $price_medium   = $meta['price_medium'] ?? '';
         $price_large    = $meta['price_large'] ?? '';
-        echo '<div class="dps-price-by-size">';
-        echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Valores por porte', 'dps-services-addon' ) . '</strong><br><span class="description">' . esc_html__( 'Informe pelo menos um valor. O menor deles será usado como referência geral.', 'dps-services-addon' ) . '</span></p>';
-        echo '<p><label>' . esc_html__( 'Pequeno', 'dps-services-addon' ) . ' <input type="number" name="service_price_small" step="0.01" value="' . esc_attr( $price_small ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Médio', 'dps-services-addon' ) . ' <input type="number" name="service_price_medium" step="0.01" value="' . esc_attr( $price_medium ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Grande', 'dps-services-addon' ) . ' <input type="number" name="service_price_large" step="0.01" value="' . esc_attr( $price_large ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '"></label></p>';
+        
+        echo '<div class="dps-porte-grid">';
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_price_small">' . esc_html__( 'Pequeno', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-prefix">';
+        echo '<span>R$</span>';
+        echo '<input type="number" id="service_price_small" name="service_price_small" step="0.01" min="0" value="' . esc_attr( $price_small ) . '" placeholder="0,00">';
         echo '</div>';
-        // Duração média (minutos) e variações por porte
-        $dur_small       = $meta['duration_small'] ?? ( $meta['duration'] ?? '' );
-        $dur_medium      = $meta['duration_medium'] ?? '';
-        $dur_large       = $meta['duration_large'] ?? '';
-        echo '<div class="dps-duration-by-size">';
-        echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Durações por porte (minutos)', 'dps-services-addon' ) . '</strong><br><span class="description">' . esc_html__( 'Preencha os tempos previstos para cada porte. O menor tempo será utilizado como base padrão.', 'dps-services-addon' ) . '</span></p>';
-        echo '<p><label>' . esc_html__( 'Pequeno', 'dps-services-addon' ) . ' <input type="number" name="service_duration_small" step="5" min="0" value="' . esc_attr( $dur_small ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Médio', 'dps-services-addon' ) . ' <input type="number" name="service_duration_medium" step="5" min="0" value="' . esc_attr( $dur_medium ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Grande', 'dps-services-addon' ) . ' <input type="number" name="service_duration_large" step="5" min="0" value="' . esc_attr( $dur_large ) . '" placeholder="' . esc_attr__( '0', 'dps-services-addon' ) . '"></label></p>';
         echo '</div>';
-        // Consumo de estoque
-        $consumption = isset( $meta['stock'] ) && is_array( $meta['stock'] ) ? $meta['stock'] : [];
-        $stock_items = [];
-        if ( post_type_exists( 'dps_stock_item' ) ) {
-            $stock_items = get_posts( [
-                'post_type'      => 'dps_stock_item',
-                'post_status'    => 'publish',
-                'posts_per_page' => -1,
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-            ] );
-        }
-        echo '<div class="dps-stock-consumption">';
-        echo '<p style="margin-bottom:2px;"><strong>' . esc_html__( 'Consumo de estoque', 'desi-pet-shower' ) . '</strong><br><span class="description">' . esc_html__( 'Relacione insumos utilizados por atendimento deste serviço. A baixa acontecerá automaticamente ao concluir um agendamento.', 'desi-pet-shower' ) . '</span></p>';
-        if ( empty( $stock_items ) ) {
-            echo '<p class="description">' . esc_html__( 'Cadastre itens em Estoque DPS para selecionar insumos.', 'desi-pet-shower' ) . '</p>';
-        }
-        echo '<table class="widefat striped" id="dps-stock-consumption-table">';
-        echo '<thead><tr><th>' . esc_html__( 'Item de estoque', 'desi-pet-shower' ) . '</th><th>' . esc_html__( 'Quantidade consumida', 'desi-pet-shower' ) . '</th><th></th></tr></thead><tbody id="dps-stock-consumption-rows">';
+        
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_price_medium">' . esc_html__( 'Médio', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-prefix">';
+        echo '<span>R$</span>';
+        echo '<input type="number" id="service_price_medium" name="service_price_medium" step="0.01" min="0" value="' . esc_attr( $price_medium ) . '" placeholder="0,00">';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_price_large">' . esc_html__( 'Grande', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-prefix">';
+        echo '<span>R$</span>';
+        echo '<input type="number" id="service_price_large" name="service_price_large" step="0.01" min="0" value="' . esc_attr( $price_large ) . '" placeholder="0,00">';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>'; // .dps-porte-grid
+        echo '</fieldset>';
 
-        if ( ! empty( $consumption ) ) {
-            foreach ( $consumption as $row ) {
-                $selected_item = isset( $row['item_id'] ) ? intval( $row['item_id'] ) : 0;
-                $qty_value     = isset( $row['quantity'] ) ? $row['quantity'] : '';
-                echo '<tr>';
-                echo '<td><select name="dps_stock_item[]">';
-                echo '<option value="">' . esc_html__( 'Selecione um item', 'desi-pet-shower' ) . '</option>';
-                foreach ( $stock_items as $stock ) {
-                    $selected = selected( $selected_item, $stock->ID, false );
-                    echo '<option value="' . esc_attr( $stock->ID ) . '" ' . $selected . '>' . esc_html( $stock->post_title ) . '</option>';
-                }
-                echo '</select></td>';
-                echo '<td><input type="number" name="dps_stock_quantity[]" step="0.01" min="0" value="' . esc_attr( $qty_value ) . '" placeholder="0"></td>';
-                echo '<td><button type="button" class="button dps-remove-stock-row">' . esc_html__( 'Remover', 'desi-pet-shower' ) . '</button></td>';
-                echo '</tr>';
-            }
-        }
-
-        echo '</tbody></table>';
-        echo '<p><button type="button" class="button" id="dps-add-stock-row">' . esc_html__( 'Adicionar insumo', 'desi-pet-shower' ) . '</button></p>';
-        $options = '<option value="">' . esc_html__( 'Selecione um item', 'desi-pet-shower' ) . '</option>';
-        foreach ( $stock_items as $stock ) {
-            $options .= '<option value="' . esc_attr( $stock->ID ) . '">' . esc_html( $stock->post_title ) . '</option>';
-        }
-        $template = '<tr><td><select name="dps_stock_item[]">' . $options . '</select></td><td><input type="number" name="dps_stock_quantity[]" step="0.01" min="0" value="" placeholder="0"></td><td><button type="button" class="button dps-remove-stock-row">' . esc_html__( 'Remover', 'desi-pet-shower' ) . '</button></td></tr>';
-        echo '<script>(function($){$(document).ready(function(){var rowTemplate = ' . wp_json_encode( $template ) . ';';
-        echo 'if($("#dps-stock-consumption-rows tr").length === 0){$("#dps-stock-consumption-rows").append(rowTemplate);}';
-        echo '$("#dps-add-stock-row").on("click", function(e){e.preventDefault();$("#dps-stock-consumption-rows").append(rowTemplate);});';
-        echo '$(document).on("click", ".dps-remove-stock-row", function(e){e.preventDefault();$(this).closest("tr").remove();});';
-        echo '});})(jQuery);</script>';
+        // === FIELDSET: Duração por Porte ===
+        echo '<fieldset class="dps-fieldset dps-fieldset-duration">';
+        echo '<legend>' . esc_html__( 'Duração por Porte', 'dps-services-addon' ) . '</legend>';
+        echo '<p class="dps-fieldset-description">' . esc_html__( 'Tempo estimado de execução do serviço em minutos. Usado para cálculo de agenda.', 'dps-services-addon' ) . '</p>';
+        
+        $dur_small  = $meta['duration_small'] ?? ( $meta['duration'] ?? '' );
+        $dur_medium = $meta['duration_medium'] ?? '';
+        $dur_large  = $meta['duration_large'] ?? '';
+        
+        echo '<div class="dps-porte-grid">';
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_duration_small">' . esc_html__( 'Pequeno', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-suffix">';
+        echo '<input type="number" id="service_duration_small" name="service_duration_small" step="5" min="0" value="' . esc_attr( $dur_small ) . '" placeholder="0">';
+        echo '<span>min</span>';
         echo '</div>';
-        // Campos específicos para pacotes: seleção de serviços incluídos
+        echo '</div>';
+        
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_duration_medium">' . esc_html__( 'Médio', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-suffix">';
+        echo '<input type="number" id="service_duration_medium" name="service_duration_medium" step="5" min="0" value="' . esc_attr( $dur_medium ) . '" placeholder="0">';
+        echo '<span>min</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-porte-item">';
+        echo '<label for="service_duration_large">' . esc_html__( 'Grande', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-suffix">';
+        echo '<input type="number" id="service_duration_large" name="service_duration_large" step="5" min="0" value="' . esc_attr( $dur_large ) . '" placeholder="0">';
+        echo '<span>min</span>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>'; // .dps-porte-grid
+        echo '</fieldset>';
+
+        // === FIELDSET: Configuração de Pacote (oculto por padrão) ===
         $package_items = [];
         $package_discount = '';
         $package_fixed_price = '';
@@ -444,8 +491,11 @@ class DPS_Services_Addon {
             $package_discount = get_post_meta( $edit_id, 'service_package_discount', true );
             $package_fixed_price = get_post_meta( $edit_id, 'service_package_fixed_price', true );
         }
-        echo '<div id="dps-package-items-wrap" style="display:none;margin-bottom:10px;">';
-        // List all services except this one for package selection
+        
+        echo '<fieldset class="dps-fieldset dps-fieldset-package" id="dps-package-items-wrap" style="display:none;">';
+        echo '<legend>' . esc_html__( 'Configuração do Pacote', 'dps-services-addon' ) . '</legend>';
+        
+        // Lista de serviços para inclusão no pacote
         $all_services = get_posts( [
             'post_type'      => 'dps_service',
             'posts_per_page' => -1,
@@ -453,77 +503,131 @@ class DPS_Services_Addon {
             'orderby'        => 'title',
             'order'          => 'ASC',
         ] );
-        echo '<p><strong>' . esc_html__( 'Selecione os serviços incluídos no pacote', 'dps-services-addon' ) . '</strong></p>';
-        echo '<select name="service_package_items[]" multiple size="6" style="width:100%;">';
+        
+        echo '<div class="dps-form-field">';
+        echo '<label>' . esc_html__( 'Serviços incluídos no pacote', 'dps-services-addon' ) . '</label>';
+        echo '<select name="service_package_items[]" multiple size="5" class="dps-multiselect">';
         foreach ( $all_services as $asrv ) {
-            // Skip if this is the service being edited
-            if ( $edit_id && $asrv->ID == $edit_id ) {
+            if ( $edit_id && $asrv->ID === $edit_id ) {
                 continue;
             }
-            $sel = in_array( $asrv->ID, $package_items ) ? 'selected' : '';
+            $sel = in_array( $asrv->ID, $package_items, false ) ? 'selected' : '';
             echo '<option value="' . esc_attr( $asrv->ID ) . '" ' . $sel . '>' . esc_html( $asrv->post_title ) . '</option>';
         }
         echo '</select>';
-        // Campos de preço do pacote: desconto percentual ou preço fixo
-        echo '<div class="dps-package-pricing" style="margin-top:15px;padding:15px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;">';
-        echo '<p style="margin-bottom:10px;"><strong>' . esc_html__( 'Preço do Pacote', 'dps-services-addon' ) . '</strong><br><span class="description">' . esc_html__( 'Defina um desconto percentual OU um preço fixo para o pacote.', 'dps-services-addon' ) . '</span></p>';
-        echo '<p><label>' . esc_html__( 'Desconto (%)', 'dps-services-addon' ) . ' <input type="number" name="service_package_discount" step="1" min="0" max="100" value="' . esc_attr( $package_discount ) . '" placeholder="' . esc_attr__( 'Ex: 10', 'dps-services-addon' ) . '" style="width:100px;"></label></p>';
-        echo '<p>' . esc_html__( '— ou —', 'dps-services-addon' ) . '</p>';
-        echo '<p><label>' . esc_html__( 'Preço fixo (R$)', 'dps-services-addon' ) . ' <input type="number" name="service_package_fixed_price" step="0.01" min="0" value="' . esc_attr( $package_fixed_price ) . '" placeholder="' . esc_attr__( 'R$...', 'dps-services-addon' ) . '" style="width:120px;"></label></p>';
+        echo '<span class="dps-field-description">' . esc_html__( 'Segure Ctrl/Cmd para selecionar múltiplos serviços.', 'dps-services-addon' ) . '</span>';
+        echo '</div>';
+        
+        // Preço do pacote
+        echo '<div class="dps-package-pricing-options">';
+        echo '<p class="dps-fieldset-description">' . esc_html__( 'Defina um desconto percentual OU um preço fixo para o pacote.', 'dps-services-addon' ) . '</p>';
+        
+        echo '<div class="dps-form-grid">';
+        echo '<div class="dps-form-field">';
+        echo '<label for="service_package_discount">' . esc_html__( 'Desconto (%)', 'dps-services-addon' ) . '</label>';
+        echo '<input type="number" id="service_package_discount" name="service_package_discount" step="1" min="0" max="100" value="' . esc_attr( $package_discount ) . '" placeholder="10">';
+        echo '</div>';
+        
+        echo '<div class="dps-form-field dps-field-or">';
+        echo '<span class="dps-or-label">' . esc_html__( 'ou', 'dps-services-addon' ) . '</span>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-field">';
+        echo '<label for="service_package_fixed_price">' . esc_html__( 'Preço fixo', 'dps-services-addon' ) . '</label>';
+        echo '<div class="dps-input-prefix">';
+        echo '<span>R$</span>';
+        echo '<input type="number" id="service_package_fixed_price" name="service_package_fixed_price" step="0.01" min="0" value="' . esc_attr( $package_fixed_price ) . '" placeholder="0,00">';
         echo '</div>';
         echo '</div>';
+        echo '</div>'; // .dps-form-grid
+        echo '</div>'; // .dps-package-pricing-options
+        echo '</fieldset>';
 
-        // Ativo
-        $active_val = $meta['active'] ?? '';
-        $checked    = ( $active_val === '0' ) ? '' : 'checked';
-        echo '<p><label><input type="checkbox" name="service_active" value="1" ' . $checked . '> ' . esc_html__( 'Ativo', 'dps-services-addon' ) . '</label></p>';
-        // Botão
+        // === Botões do formulário ===
+        echo '<div class="dps-form-actions">';
         $btn_text = $edit_id ? esc_html__( 'Atualizar Serviço', 'dps-services-addon' ) : esc_html__( 'Salvar Serviço', 'dps-services-addon' );
-        echo '<p><button type="submit" class="button button-primary">' . $btn_text . '</button></p>';
+        echo '<button type="submit" class="button button-primary">' . $btn_text . '</button>';
+        if ( $edit_id ) {
+            $cancel_url = remove_query_arg( [ 'dps_edit', 'id' ] );
+            $cancel_url = add_query_arg( 'tab', 'servicos', $cancel_url );
+            echo '<a href="' . esc_url( $cancel_url ) . '" class="button button-secondary">' . esc_html__( 'Cancelar', 'dps-services-addon' ) . '</a>';
+        }
+        echo '</div>';
+        
         echo '</form>';
+        echo '</div>'; // .dps-form-container
+
         // Script para ocultar/mostrar campos de categoria e pacote dependendo do tipo
         echo '<script>(function($){$(document).ready(function(){
             function toggleFields(){
-                var type = $("select[name=service_type]").val();
+                var type = $("#service_type").val();
                 if(type === "extra") {
-                    $("select[name=service_category]").closest("p").show();
+                    $("#dps-category-field").show();
                     $("#dps-package-items-wrap").hide();
                 } else if(type === "package") {
-                    $("select[name=service_category]").closest("p").hide();
+                    $("#dps-category-field").hide();
                     $("#dps-package-items-wrap").show();
                 } else {
-                    $("select[name=service_category]").closest("p").hide();
+                    $("#dps-category-field").hide();
                     $("#dps-package-items-wrap").hide();
                 }
             }
             toggleFields();
-            $(document).on("change", "select[name=service_type]", toggleFields);
+            $(document).on("change", "#service_type", toggleFields);
             // Pesquisa simples na listagem de serviços
-            $(".dps-search").on("keyup", function(){
+            $(".dps-search-input").on("keyup", function(){
                 var term = $(this).val().toLowerCase();
-                $("#dps-section-servicos table tbody tr").each(function(){
+                $(".dps-services-table tbody tr").each(function(){
                     var text = $(this).text().toLowerCase();
                     $(this).toggle(text.indexOf(term) >= 0);
                 });
             });
         });})(jQuery);</script>';
-        // Listagem
-        echo '<h3>' . esc_html__( 'Serviços Cadastrados', 'dps-services-addon' ) . '</h3>';
-        echo '<p><input type="text" class="dps-search" placeholder="' . esc_attr__( 'Buscar...', 'dps-services-addon' ) . '"></p>';
+
+        // --- LISTAGEM DE SERVIÇOS ---
+        echo '<div class="dps-list-container">';
+        echo '<div class="dps-list-header">';
+        echo '<h3 class="dps-list-title">' . esc_html__( 'Serviços Cadastrados', 'dps-services-addon' ) . '</h3>';
+        
+        // Barra de ferramentas: busca e contador
+        echo '<div class="dps-list-toolbar">';
+        echo '<div class="dps-search-wrapper">';
+        echo '<input type="text" class="dps-search-input" placeholder="' . esc_attr__( 'Buscar serviço...', 'dps-services-addon' ) . '">';
+        echo '</div>';
+        if ( $services ) {
+            $total_services = count( $services );
+            $active_count = 0;
+            foreach ( $services as $srv ) {
+                if ( '0' !== get_post_meta( $srv->ID, 'service_active', true ) ) {
+                    $active_count++;
+                }
+            }
+            echo '<div class="dps-list-stats">';
+            echo '<span class="dps-stat-total">' . sprintf( esc_html__( '%d serviços', 'dps-services-addon' ), $total_services ) . '</span>';
+            echo '<span class="dps-stat-active">' . sprintf( esc_html__( '(%d ativos)', 'dps-services-addon' ), $active_count ) . '</span>';
+            echo '</div>';
+        }
+        echo '</div>'; // .dps-list-toolbar
+        echo '</div>'; // .dps-list-header
+        
         if ( $services ) {
             $base_url = get_permalink();
             echo '<div class="dps-table-wrapper">';
             echo '<table class="dps-table dps-services-table"><thead><tr>';
-            echo '<th class="dps-col-name">' . esc_html__( 'Nome', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-name">' . esc_html__( 'Serviço', 'dps-services-addon' ) . '</th>';
             echo '<th class="dps-col-type">' . esc_html__( 'Tipo', 'dps-services-addon' ) . '</th>';
-            echo '<th class="dps-col-category">' . esc_html__( 'Categoria', 'dps-services-addon' ) . '</th>';
             echo '<th class="dps-col-price">' . esc_html__( 'Preço', 'dps-services-addon' ) . '</th>';
+            echo '<th class="dps-col-duration">' . esc_html__( 'Duração', 'dps-services-addon' ) . '</th>';
             echo '<th class="dps-col-status">' . esc_html__( 'Status', 'dps-services-addon' ) . '</th>';
             echo '<th class="dps-col-actions">' . esc_html__( 'Ações', 'dps-services-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
+            
             foreach ( $services as $service ) {
                 $type  = get_post_meta( $service->ID, 'service_type', true );
                 $cat   = get_post_meta( $service->ID, 'service_category', true );
+                $active = get_post_meta( $service->ID, 'service_active', true );
+                
+                // Preços
                 $price_values = [];
                 $base_price   = get_post_meta( $service->ID, 'service_price', true );
                 if ( '' !== $base_price && null !== $base_price ) {
@@ -549,10 +653,31 @@ class DPS_Services_Addon {
                         );
                     }
                 }
+                
+                // Duração
+                $duration_values = [];
+                foreach ( [ 'service_duration_small', 'service_duration_medium', 'service_duration_large' ] as $dur_key ) {
+                    $dur_meta = get_post_meta( $service->ID, $dur_key, true );
+                    if ( '' !== $dur_meta && null !== $dur_meta && (int) $dur_meta > 0 ) {
+                        $duration_values[] = (int) $dur_meta;
+                    }
+                }
+                $duration_display = __( '—', 'dps-services-addon' );
+                if ( ! empty( $duration_values ) ) {
+                    $min_dur = min( $duration_values );
+                    $max_dur = max( $duration_values );
+                    if ( $min_dur === $max_dur ) {
+                        $duration_display = sprintf( __( '%d min', 'dps-services-addon' ), $min_dur );
+                    } else {
+                        $duration_display = sprintf( __( '%d – %d min', 'dps-services-addon' ), $min_dur, $max_dur );
+                    }
+                }
+                
                 $type_label = isset( $types[ $type ] ) ? $types[ $type ] : $type;
-                $cat_label  = isset( $categories[ $cat ] ) ? $categories[ $cat ] : $cat;
-                $edit_url   = add_query_arg( [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $service->ID ], $base_url );
-                // URLs com nonce para proteção CSRF
+                $cat_label  = isset( $categories[ $cat ] ) ? $categories[ $cat ] : '';
+                
+                // URLs
+                $edit_url = add_query_arg( [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $service->ID ], $base_url );
                 $del_url = wp_nonce_url(
                     add_query_arg( [ 'tab' => 'servicos', 'dps_service_delete' => $service->ID ], $base_url ),
                     'dps_delete_service_' . $service->ID
@@ -561,39 +686,63 @@ class DPS_Services_Addon {
                     add_query_arg( [ 'tab' => 'servicos', 'dps_toggle_service' => $service->ID ], $base_url ),
                     'dps_toggle_service_' . $service->ID
                 );
-                echo '<tr>';
-                echo '<td class="dps-col-name">' . esc_html( $service->post_title ) . '</td>';
-                echo '<td class="dps-col-type">' . esc_html( $type_label ) . '</td>';
-                echo '<td class="dps-col-category">' . esc_html( $cat_label ) . '</td>';
-                echo '<td class="dps-col-price">' . esc_html( $price_display ) . '</td>';
-                $active = get_post_meta( $service->ID, 'service_active', true );
-                $status_class = ( '0' === $active ) ? 'dps-badge-inactive' : 'dps-badge-active';
-                $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
-                echo '<td class="dps-col-status"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
-                // URL para duplicar serviço
                 $duplicate_url = wp_nonce_url(
                     add_query_arg( [ 'tab' => 'servicos', 'dps_duplicate_service' => $service->ID ], $base_url ),
                     'dps_duplicate_service_' . $service->ID
                 );
-                // Ações: editar, duplicar, ativar/desativar, excluir
-                echo '<td class="dps-col-actions">';
-                echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'dps-services-addon' ) . '</a> | ';
-                echo '<a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Criar cópia deste serviço', 'dps-services-addon' ) . '">' . esc_html__( 'Duplicar', 'dps-services-addon' ) . '</a> | ';
-                if ( '0' === $active ) {
-                    echo '<a href="' . esc_url( $toggle_url ) . '">' . esc_html__( 'Ativar', 'dps-services-addon' ) . '</a> | ';
-                } else {
-                    echo '<a href="' . esc_url( $toggle_url ) . '">' . esc_html__( 'Desativar', 'dps-services-addon' ) . '</a> | ';
+                
+                // Linha da tabela com classe para status
+                $row_class = ( '0' === $active ) ? 'dps-row-inactive' : '';
+                echo '<tr class="' . esc_attr( $row_class ) . '">';
+                
+                // Nome + Categoria (sublinhado)
+                echo '<td class="dps-col-name">';
+                echo '<strong>' . esc_html( $service->post_title ) . '</strong>';
+                if ( $cat_label ) {
+                    echo '<br><span class="dps-service-category">' . esc_html( $cat_label ) . '</span>';
                 }
-                echo '<a href="' . esc_url( $del_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'dps-services-addon' ) ) . '\');">' . esc_html__( 'Excluir', 'dps-services-addon' ) . '</a>';
+                echo '</td>';
+                
+                // Tipo com badge colorido
+                $type_class = 'dps-type-' . sanitize_html_class( $type );
+                echo '<td class="dps-col-type"><span class="dps-type-badge ' . esc_attr( $type_class ) . '">' . esc_html( $type_label ) . '</span></td>';
+                
+                // Preço
+                echo '<td class="dps-col-price">' . esc_html( $price_display ) . '</td>';
+                
+                // Duração
+                echo '<td class="dps-col-duration">' . esc_html( $duration_display ) . '</td>';
+                
+                // Status
+                $status_class = ( '0' === $active ) ? 'dps-badge-inactive' : 'dps-badge-active';
+                $status_label = ( '0' === $active ) ? __( 'Inativo', 'dps-services-addon' ) : __( 'Ativo', 'dps-services-addon' );
+                echo '<td class="dps-col-status"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span></td>';
+                
+                // Ações com ícones/botões compactos
+                echo '<td class="dps-col-actions">';
+                echo '<div class="dps-action-buttons">';
+                echo '<a href="' . esc_url( $edit_url ) . '" class="dps-action-btn dps-action-edit" title="' . esc_attr__( 'Editar', 'dps-services-addon' ) . '">' . esc_html__( 'Editar', 'dps-services-addon' ) . '</a>';
+                echo '<a href="' . esc_url( $duplicate_url ) . '" class="dps-action-btn dps-action-duplicate" title="' . esc_attr__( 'Duplicar', 'dps-services-addon' ) . '">' . esc_html__( 'Duplicar', 'dps-services-addon' ) . '</a>';
+                if ( '0' === $active ) {
+                    echo '<a href="' . esc_url( $toggle_url ) . '" class="dps-action-btn dps-action-activate" title="' . esc_attr__( 'Ativar', 'dps-services-addon' ) . '">' . esc_html__( 'Ativar', 'dps-services-addon' ) . '</a>';
+                } else {
+                    echo '<a href="' . esc_url( $toggle_url ) . '" class="dps-action-btn dps-action-deactivate" title="' . esc_attr__( 'Desativar', 'dps-services-addon' ) . '">' . esc_html__( 'Desativar', 'dps-services-addon' ) . '</a>';
+                }
+                echo '<a href="' . esc_url( $del_url ) . '" class="dps-action-btn dps-action-delete" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir este serviço?', 'dps-services-addon' ) ) . '\');" title="' . esc_attr__( 'Excluir', 'dps-services-addon' ) . '">' . esc_html__( 'Excluir', 'dps-services-addon' ) . '</a>';
+                echo '</div>';
                 echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
             echo '</div>'; // .dps-table-wrapper
         } else {
-            echo '<p>' . esc_html__( 'Nenhum serviço cadastrado.', 'dps-services-addon' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<p>' . esc_html__( 'Nenhum serviço cadastrado ainda.', 'dps-services-addon' ) . '</p>';
+            echo '<p class="dps-empty-hint">' . esc_html__( 'Use o formulário acima para cadastrar seu primeiro serviço.', 'dps-services-addon' ) . '</p>';
+            echo '</div>';
         }
-        echo '</div>';
+        echo '</div>'; // .dps-list-container
+        echo '</div>'; // .dps-section
         return ob_get_clean();
     }
 
@@ -1426,8 +1575,8 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.3.0' );
-        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.3.0', true );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.4.0' );
+        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.4.0', true );
     }
 
     /**
