@@ -647,7 +647,7 @@ class DPS_Services_Addon {
                         $price_display = sprintf( 'R$ %s', number_format_i18n( $min_price, 2 ) );
                     } else {
                         $price_display = sprintf(
-                            'R$ %s – %s',
+                            'R$ %s – R$ %s',
                             number_format_i18n( $min_price, 2 ),
                             number_format_i18n( $max_price, 2 )
                         );

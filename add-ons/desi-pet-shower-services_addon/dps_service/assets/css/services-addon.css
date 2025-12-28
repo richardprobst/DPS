@@ -79,7 +79,7 @@
 .dps-form-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .dps-form-field-full {
@@ -152,7 +152,7 @@
 .dps-porte-item {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .dps-porte-item label {
