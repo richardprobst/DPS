@@ -972,12 +972,19 @@ class DPS_Subscription_Addon {
             echo '</div>'; // .dps-form-row
             echo '</fieldset>';
             
-            // Botões de ação
+            // Botões de ação - estilo moderno
+            $submit_icon = $edit_id ? '💾' : '✓';
             echo '<div class="dps-form-actions">';
-            echo '<button type="submit" class="button button-primary">' . $button_text . '</button>';
+            echo '<button type="submit" class="dps-btn-submit">';
+            echo '<span class="dps-btn-icon">' . $submit_icon . '</span>';
+            echo '<span>' . $button_text . '</span>';
+            echo '</button>';
             $base_url = get_permalink();
             $back_url = add_query_arg( [ 'tab' => 'assinaturas' ], $base_url );
-            echo ' <a href="' . esc_url( $back_url ) . '" class="button">' . esc_html__( 'Cancelar', 'dps-subscription-addon' ) . '</a>';
+            echo '<a href="' . esc_url( $back_url ) . '" class="dps-btn-cancel">';
+            echo '<span class="dps-btn-icon">✕</span>';
+            echo '<span>' . esc_html__( 'Cancelar', 'dps-subscription-addon' ) . '</span>';
+            echo '</a>';
             echo '</div>';
             
             echo '</form>';
@@ -1033,7 +1040,10 @@ class DPS_Subscription_Addon {
             $base_url = get_permalink();
             $new_url  = add_query_arg( [ 'tab' => 'assinaturas', 'dps_new' => 'subscription' ], $base_url );
             echo '<div class="dps-subscription-actions">';
-            echo '<a href="' . esc_url( $new_url ) . '" class="button button-primary">➕ ' . esc_html__( 'Nova Assinatura', 'dps-subscription-addon' ) . '</a>';
+            echo '<a href="' . esc_url( $new_url ) . '" class="dps-btn-new-subscription">';
+            echo '<span class="dps-btn-icon">➕</span>';
+            echo '<span>' . esc_html__( 'Nova Assinatura', 'dps-subscription-addon' ) . '</span>';
+            echo '</a>';
             echo '</div>';
         }
         

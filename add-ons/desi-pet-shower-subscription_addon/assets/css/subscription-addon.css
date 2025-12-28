@@ -4,6 +4,7 @@
  * @package Desi_Pet_Shower_Subscription
  * @since 1.1.0
  * @updated 1.2.0 - Melhorias de layout e UX
+ * @updated 1.2.1 - Botões modernos e melhorias de formulário
  */
 
 /* ==========================================================================
@@ -153,10 +154,95 @@ table.dps-table tr.dps-canceled-row {
 }
 
 .dps-subscription-form .dps-form-actions {
-    margin-top: 20px;
+    margin-top: 24px;
     display: flex;
-    gap: 12px;
+    gap: 16px;
     flex-wrap: wrap;
+    padding: 20px;
+    background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+/* ==========================================================================
+   Botões de Ação do Formulário - Estilo Moderno
+   ========================================================================== */
+
+.dps-subscription-form .dps-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    min-width: 180px;
+}
+
+.dps-subscription-form .dps-btn-submit:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-subscription-form .dps-btn-submit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.dps-subscription-form .dps-btn-submit:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.dps-subscription-form .dps-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #ffffff;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.dps-subscription-form .dps-btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.dps-subscription-form .dps-btn-cancel:active {
+    background: #f3f4f6;
+}
+
+.dps-subscription-form .dps-btn-cancel:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
+}
+
+/* Ícones nos botões */
+.dps-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
 /* ==========================================================================
@@ -195,10 +281,59 @@ table.dps-table tr.dps-canceled-row {
    ========================================================================== */
 
 .dps-subscription-actions {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
+}
+
+/* ==========================================================================
+   Botão Principal "Nova Assinatura" - Estilo Moderno
+   ========================================================================== */
+
+.dps-btn-new-subscription {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.dps-btn-new-subscription:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-btn-new-subscription:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+.dps-btn-new-subscription:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3), 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.dps-btn-new-subscription .dps-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
 }
 
 .dps-subscription-actions .button {
@@ -399,18 +534,24 @@ table.dps-table tr.dps-canceled-row {
         flex-direction: column;
     }
     
-    .dps-subscription-actions .button {
+    .dps-subscription-actions .button,
+    .dps-subscription-actions .dps-btn-new-subscription {
         width: 100%;
         text-align: center;
+        justify-content: center;
     }
     
     .dps-subscription-form .dps-form-actions {
         flex-direction: column;
+        padding: 16px;
     }
     
-    .dps-subscription-form .dps-form-actions .button {
+    .dps-subscription-form .dps-form-actions .button,
+    .dps-subscription-form .dps-btn-submit,
+    .dps-subscription-form .dps-btn-cancel {
         width: 100%;
         text-align: center;
+        justify-content: center;
     }
 }
 
