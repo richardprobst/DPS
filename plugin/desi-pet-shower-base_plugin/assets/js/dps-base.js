@@ -959,8 +959,13 @@
         var radioName = $radio.attr('name');
         
         // Remove .is-selected de todos os radio options com o mesmo name
+        // Usa o container pai mais próximo para limitar a busca e evitar queries globais
         if (radioName) {
-          $('.dps-radio-option input[name="' + radioName + '"]').each(function(){
+          var $container = $option.closest('form, .dps-form, .dps-radio-group, .dps-section, body');
+          // Usa seletor por atributo com escape para evitar injeção
+          $container.find('.dps-radio-option input[type="radio"]').filter(function(){
+            return $(this).attr('name') === radioName;
+          }).each(function(){
             $(this).closest('.dps-radio-option').removeClass('is-selected');
           });
         }
