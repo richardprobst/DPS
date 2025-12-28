@@ -1,6 +1,21 @@
 /*
  * Estilos básicos para o plugin Desi Pet Shower Base.
+ *
+ * Compatibilidade:
+ * - Suporta navegadores modernos (Chrome 88+, Firefox 78+, Safari 14+, Edge 88+)
+ * - Fallbacks incluídos para Edge Legacy e versões mais antigas
+ * - Seletores :has() possuem fallback via classes JS (.is-selected, .is-checked)
+ * - accent-color tem fallback para aparência nativa do navegador
  */
+
+/* === Notas de Compatibilidade === */
+/*
+ * Fallbacks para navegadores antigos:
+ * - accent-color: Navegadores sem suporte usam estilo nativo de checkbox/radio
+ * - :has() selector: Classes JS (.is-selected, .is-checked) fornecem fallback
+ * - Propriedades como inset: são evitadas em favor de top/right/bottom/left
+ */
+
 .dps-base-wrapper {
     margin: 20px 0;
     font-family: Arial, sans-serif;
