@@ -321,7 +321,19 @@
     display: none;
 }
 
+/* Usando atributo de checkbox para styling - fallback para navegadores sem :has() */
+.dps-weekday-checkbox--mini input:checked + span {
+    color: white;
+}
+
 .dps-weekday-checkbox--mini:has(input:checked) {
+    background: var(--dps-groomers-primary);
+    border-color: var(--dps-groomers-primary);
+    color: white;
+}
+
+/* Fallback via JavaScript - classe adicionada pelo JS quando checkbox está marcado */
+.dps-weekday-checkbox--mini.is-checked {
     background: var(--dps-groomers-primary);
     border-color: var(--dps-groomers-primary);
     color: white;

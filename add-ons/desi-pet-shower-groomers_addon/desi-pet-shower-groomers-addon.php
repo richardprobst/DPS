@@ -1902,14 +1902,15 @@ class DPS_Groomers_Addon {
                                                     <label><?php echo esc_html__( 'Dias', 'dps-groomers-addon' ); ?></label>
                                                     <div class="dps-weekdays-grid dps-weekdays-grid--compact">
                                                         <?php 
+                                                        // Abreviações de 2 letras para evitar ambiguidade
                                                         $weekdays = [
-                                                            'mon' => 'S',
-                                                            'tue' => 'T',
-                                                            'wed' => 'Q',
-                                                            'thu' => 'Q',
-                                                            'fri' => 'S',
-                                                            'sat' => 'S',
-                                                            'sun' => 'D',
+                                                            'mon' => 'Se',
+                                                            'tue' => 'Te',
+                                                            'wed' => 'Qa',
+                                                            'thu' => 'Qi',
+                                                            'fri' => 'Sx',
+                                                            'sat' => 'Sa',
+                                                            'sun' => 'Do',
                                                         ];
                                                         $weekdays_full = [
                                                             'mon' => __( 'Segunda', 'dps-groomers-addon' ),

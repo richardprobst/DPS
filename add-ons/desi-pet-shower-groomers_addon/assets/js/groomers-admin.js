@@ -185,6 +185,44 @@
                     $label.append(' <span class="dps-required">*</span>');
                 }
             });
+            
+            // Fallback para :has() - adiciona classe .is-checked em checkboxes mini
+            this.initWeekdayCheckboxes();
+        },
+        
+        /**
+         * Inicializa checkboxes de dias da semana com fallback para browsers sem :has()
+         */
+        initWeekdayCheckboxes: function() {
+            var $checkboxes = $('.dps-weekday-checkbox--mini input[type="checkbox"]');
+            
+            if ($checkboxes.length === 0) {
+                return;
+            }
+            
+            // Aplica estado inicial
+            $checkboxes.each(function() {
+                var $checkbox = $(this);
+                var $label = $checkbox.closest('.dps-weekday-checkbox--mini');
+                
+                if ($checkbox.is(':checked')) {
+                    $label.addClass('is-checked');
+                } else {
+                    $label.removeClass('is-checked');
+                }
+            });
+            
+            // Atualiza ao mudar
+            $checkboxes.on('change', function() {
+                var $checkbox = $(this);
+                var $label = $checkbox.closest('.dps-weekday-checkbox--mini');
+                
+                if ($checkbox.is(':checked')) {
+                    $label.addClass('is-checked');
+                } else {
+                    $label.removeClass('is-checked');
+                }
+            });
         },
 
         /**
