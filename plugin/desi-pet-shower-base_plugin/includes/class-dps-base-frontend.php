@@ -1580,18 +1580,37 @@ class DPS_Base_Frontend {
             echo '</div>';
             echo '</div>';
 
-            // Campo: escolha de TaxiDog
+            // Campo: escolha de TaxiDog (melhorado com feedback visual)
             $taxidog = $meta['taxidog'] ?? '';
-            echo '<label class="dps-checkbox-label">';
+            $taxidog_price_val = $meta['taxidog_price'] ?? '';
+            $taxidog_has_value = ( $taxidog_price_val !== '' && floatval( $taxidog_price_val ) > 0 );
+            
+            echo '<div class="dps-taxidog-section">';
+            echo '<label class="dps-checkbox-label dps-taxidog-toggle-label">';
             echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
             echo '<span class="dps-checkbox-text">';
+            echo '<span class="dps-taxidog-icon">🚗</span> ';
             echo esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' );
             echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Serviço de transporte do pet', 'desi-pet-shower' ) . '">ℹ️</span>';
             echo '</span>';
             echo '</label>';
-            echo '<div id="dps-taxidog-extra" class="dps-conditional-field" style="display:' . ( $taxidog ? 'block' : 'none' ) . ';">';
-            echo '<label for="dps-taxidog-price">' . esc_html__( 'Valor TaxiDog (R$)', 'desi-pet-shower' ) . '</label> ';
-            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $meta['taxidog_price'] ?? '' ) . '" class="dps-input-money">';
+            
+            // Área de preço do TaxiDog com feedback visual melhorado
+            echo '<div id="dps-taxidog-extra" class="dps-taxidog-value-section" style="display:' . ( $taxidog ? 'block' : 'none' ) . ';">';
+            echo '<div class="dps-taxidog-value-wrapper">';
+            echo '<label for="dps-taxidog-price">' . esc_html__( 'Valor TaxiDog', 'desi-pet-shower' ) . '</label>';
+            echo '<div class="dps-input-with-prefix">';
+            echo '<span class="dps-input-prefix">R$</span>';
+            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $taxidog_price_val ) . '" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">';
+            echo '</div>';
+            // Indicador visual do valor preenchido
+            echo '<span id="dps-taxidog-value-indicator" class="dps-value-indicator' . ( $taxidog_has_value ? ' dps-value-filled' : '' ) . '">';
+            if ( $taxidog_has_value ) {
+                echo '<span class="dps-value-badge">✓ R$ ' . esc_html( number_format( floatval( $taxidog_price_val ), 2, ',', '.' ) ) . '</span>';
+            }
+            echo '</span>';
+            echo '</div>';
+            echo '</div>';
             echo '</div>';
             
             // Hook para add-ons injetarem campos extras (ex.: serviços)
@@ -1605,7 +1624,27 @@ class DPS_Base_Frontend {
             
             echo '</fieldset>';
             
-            // FIELDSET 5: Informações de Pagamento (apenas para agendamentos passados)
+            // FIELDSET 5: Atribuição (Profissionais responsáveis)
+            // Hook para add-ons injetarem campo de profissionais
+            $has_assignment_content = has_action( 'dps_base_appointment_assignment_fields' );
+            if ( $has_assignment_content ) {
+                echo '<fieldset class="dps-fieldset dps-assignment-fieldset">';
+                echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Atribuição', 'desi-pet-shower' ) . '</legend>';
+                
+                /**
+                 * Permite que add‑ons adicionem campos de atribuição de profissionais.
+                 *
+                 * @since 1.8.0
+                 *
+                 * @param int   $edit_id ID do agendamento em edição ou 0 se novo
+                 * @param array $meta    Meta dados do agendamento
+                 */
+                do_action( 'dps_base_appointment_assignment_fields', $edit_id, $meta );
+                
+                echo '</fieldset>';
+            }
+            
+            // FIELDSET 6: Informações de Pagamento (apenas para agendamentos passados)
             $past_payment_status = isset( $meta['past_payment_status'] ) ? $meta['past_payment_status'] : '';
             $past_payment_value  = isset( $meta['past_payment_value'] ) ? $meta['past_payment_value'] : '';
             $past_display = ( $appt_type === 'past' ) ? 'block' : 'none';
@@ -1657,6 +1696,7 @@ class DPS_Base_Frontend {
             echo '<li><strong>' . esc_html__( 'Data:', 'desi-pet-shower' ) . '</strong> <span data-summary="date">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Horário:', 'desi-pet-shower' ) . '</strong> <span data-summary="time">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Serviços:', 'desi-pet-shower' ) . '</strong> <span data-summary="services">-</span></li>';
+            echo '<li class="dps-appointment-summary__extras" style="display:none;"><strong>' . esc_html__( 'Extras:', 'desi-pet-shower' ) . '</strong> <span data-summary="extras">-</span></li>';
             echo '<li><strong>' . esc_html__( 'Valor estimado:', 'desi-pet-shower' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
             echo '<li class="dps-appointment-summary__notes"><strong>' . esc_html__( 'Observações:', 'desi-pet-shower' ) . '</strong> <span data-summary="notes">-</span></li>';
             echo '</ul>';

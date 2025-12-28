@@ -13,6 +13,17 @@ jQuery(document).ready(function ($) {
     return isNaN(num) ? 0 : num;
   }
 
+  /**
+   * Calcula o total de todos os extras em uma lista.
+   */
+  function calculateExtrasTotal(listSelector) {
+    var total = 0;
+    $(listSelector).find('.dps-extra-value-input').each(function () {
+      total += parseCurrency($(this).val());
+    });
+    return total;
+  }
+
   function updateSimpleTotal() {
     var total = 0;
     $('.dps-service-checkbox').each(function () {
@@ -26,9 +37,16 @@ jQuery(document).ready(function ($) {
         priceInput.prop('disabled', true);
       }
     });
+    
+    // Adiciona extras (novo formato)
+    if ($('#dps-simple-extras-container').is(':visible')) {
+      total += calculateExtrasTotal('#dps-simple-extras-list');
+    }
+    // Compatibilidade com formato antigo
     if ($('#dps-simple-extra-fields').is(':visible')) {
       total += parseCurrency($('#dps-simple-extra-value').val());
     }
+    
     if ($('#dps-taxidog-toggle').is(':checked')) {
       total += parseCurrency($('#dps-taxidog-price').val());
     }
@@ -40,9 +58,16 @@ jQuery(document).ready(function ($) {
     if ($('#dps-tosa-toggle').is(':checked')) {
       total += parseCurrency($('#dps-tosa-price').val());
     }
+    
+    // Adiciona extras (novo formato)
+    if ($('#dps-subscription-extras-container').is(':visible')) {
+      total += calculateExtrasTotal('#dps-subscription-extras-list');
+    }
+    // Compatibilidade com formato antigo
     if ($('#dps-subscription-extra-fields').is(':visible')) {
       total += parseCurrency($('#dps-subscription-extra-value').val());
     }
+    
     $('#dps-subscription-total').val(total.toFixed(2));
   }
 
@@ -117,6 +142,33 @@ jQuery(document).ready(function ($) {
   $(document).on('change', '.dps-service-checkbox, .dps-service-price', function () {
     updateTotal();
   });
+  
+  // === NOVO: Toggle para seção de extras redesenhada ===
+  $(document).on('click', '.dps-extras-toggle', function (event) {
+    event.preventDefault();
+    var target = $(this).data('target');
+    if (target) {
+      var $target = $(target);
+      if ($target.length) {
+        var isExpanded = $(this).attr('aria-expanded') === 'true';
+        if (isExpanded) {
+          $target.slideUp(200);
+          $(this).attr('aria-expanded', 'false');
+        } else {
+          $target.slideDown(200);
+          $(this).attr('aria-expanded', 'true');
+          // Adiciona uma linha vazia se não houver nenhuma
+          var $list = $target.find('.dps-extras-list');
+          if ($list.children().length === 0) {
+            addExtraRow($list, $(this).siblings('.dps-extras-container').find('.dps-add-extra-btn').data('type') || 'simple');
+          }
+        }
+        updateTotal();
+      }
+    }
+  });
+  
+  // Compatibilidade: toggle antigo
   $(document).on('click', '.dps-extra-toggle', function (event) {
     event.preventDefault();
     var target = $(this).data('target');
@@ -128,6 +180,51 @@ jQuery(document).ready(function ($) {
       }
     }
   });
+  
+  // === NOVO: Adicionar linha de extra ===
+  function addExtraRow($list, type) {
+    var prefix = (type === 'subscription') ? 'subscription_extras' : 'appointment_extras';
+    var index = $list.children().length;
+    var html = '<div class="dps-extra-row" data-index="' + index + '">' +
+      '<div class="dps-extra-row-fields">' +
+      '<div class="dps-extra-description-field">' +
+      '<input type="text" name="' + prefix + '_descriptions[]" value="" placeholder="Descrição do serviço" class="dps-extra-description-input">' +
+      '</div>' +
+      '<div class="dps-extra-value-field">' +
+      '<div class="dps-input-with-prefix">' +
+      '<span class="dps-input-prefix">R$</span>' +
+      '<input type="number" step="0.01" min="0" name="' + prefix + '_values[]" value="" placeholder="0,00" class="dps-extra-value-input">' +
+      '</div>' +
+      '</div>' +
+      '<button type="button" class="dps-btn dps-btn--icon dps-remove-extra-btn" title="Remover">' +
+      '<span>✕</span>' +
+      '</button>' +
+      '</div>' +
+      '</div>';
+    $list.append(html);
+  }
+  
+  $(document).on('click', '.dps-add-extra-btn', function (event) {
+    event.preventDefault();
+    var $list = $($(this).data('list'));
+    var type = $(this).data('type') || 'simple';
+    addExtraRow($list, type);
+  });
+  
+  // === NOVO: Remover linha de extra ===
+  $(document).on('click', '.dps-remove-extra-btn', function (event) {
+    event.preventDefault();
+    $(this).closest('.dps-extra-row').fadeOut(200, function () {
+      $(this).remove();
+      updateTotal();
+    });
+  });
+  
+  // === NOVO: Atualizar total quando valores de extras mudam ===
+  $(document).on('input', '.dps-extra-value-input', function () {
+    updateTotal();
+  });
+  
   $(document).on('change', '#dps-taxidog-toggle, input[name="appointment_type"]', function () {
     updateTotal();
   });

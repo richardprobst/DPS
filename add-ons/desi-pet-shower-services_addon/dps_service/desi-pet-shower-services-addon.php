@@ -1132,9 +1132,27 @@ class DPS_Services_Addon {
         $appt_type = isset( $meta['appointment_type'] ) && $meta['appointment_type'] ? $meta['appointment_type'] : ( isset( $_POST['appointment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_type'] ) ) : 'simple' );
         $simple_display       = ( 'subscription' === $appt_type ) ? 'none' : 'block';
         $subscription_display = ( 'subscription' === $appt_type ) ? 'block' : 'none';
-        $extra_desc    = $meta['extra_description'] ?? '';
-        $extra_value   = $meta['extra_value'] ?? '';
-        $show_extra    = ( '' !== $extra_desc || '' !== $extra_value );
+        
+        // Recupera extras salvos (novo formato: array de extras)
+        $extras_list = [];
+        if ( $edit_id ) {
+            $saved_extras = get_post_meta( $edit_id, 'appointment_extras_list', true );
+            if ( is_array( $saved_extras ) && ! empty( $saved_extras ) ) {
+                $extras_list = $saved_extras;
+            } else {
+                // Compatibilidade: migra formato antigo (single extra) para novo formato
+                $extra_desc  = $meta['extra_description'] ?? '';
+                $extra_value = $meta['extra_value'] ?? '';
+                if ( '' !== $extra_desc || '' !== $extra_value ) {
+                    $extras_list[] = [
+                        'description' => $extra_desc,
+                        'value'       => floatval( $extra_value ),
+                    ];
+                }
+            }
+        }
+        $has_extras = ! empty( $extras_list );
+        
         echo '<div class="dps-simple-fields" style="display:' . esc_attr( $simple_display ) . ';">';
         if ( ! empty( $grouped['padrao'] ) ) {
             echo '<p><strong>' . esc_html__( 'Serviços padrão', 'dps-services-addon' ) . '</strong></p>';
@@ -1252,28 +1270,127 @@ class DPS_Services_Addon {
         if ( $edit_id ) {
             $total_val = get_post_meta( $edit_id, 'appointment_total_value', true );
         }
-        echo '<p><button type="button" class="button dps-extra-toggle" data-target="#dps-simple-extra-fields">' . esc_html__( 'Extra', 'dps-services-addon' ) . '</button></p>';
-        echo '<div id="dps-simple-extra-fields" class="dps-extra-fields" style="display:' . ( $show_extra ? 'block' : 'none' ) . ';">';
-        echo '<p><label>' . esc_html__( 'Descrição do extra', 'dps-services-addon' ) . '<br><input type="text" name="appointment_extra_description" value="' . esc_attr( $extra_desc ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Valor extra (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-simple-extra-value" name="appointment_extra_value" value="' . esc_attr( $extra_value ) . '"></label></p>';
+        
+        // === SEÇÃO DE SERVIÇOS EXTRAS (REDESENHADA) ===
+        echo '<div class="dps-extras-section">';
+        echo '<button type="button" class="dps-btn dps-btn--outline dps-extras-toggle" data-target="#dps-simple-extras-container" aria-expanded="' . ( $has_extras ? 'true' : 'false' ) . '">';
+        echo '<span class="dps-extras-toggle-icon">➕</span> ';
+        echo esc_html__( 'Adicionar Serviço Extra', 'dps-services-addon' );
+        echo '</button>';
+        
+        echo '<div id="dps-simple-extras-container" class="dps-extras-container" style="display:' . ( $has_extras ? 'block' : 'none' ) . ';">';
+        echo '<div class="dps-extras-header">';
+        echo '<h4 class="dps-extras-title">' . esc_html__( 'Serviços Extras', 'dps-services-addon' ) . '</h4>';
+        echo '<p class="dps-extras-hint">' . esc_html__( 'Adicione serviços extras com descrição e valor.', 'dps-services-addon' ) . '</p>';
         echo '</div>';
+        
+        echo '<div id="dps-simple-extras-list" class="dps-extras-list">';
+        // Renderiza extras existentes
+        if ( ! empty( $extras_list ) ) {
+            foreach ( $extras_list as $idx => $extra_item ) {
+                $this->render_extra_row( 'simple', $idx, $extra_item );
+            }
+        }
+        echo '</div>';
+        
+        echo '<button type="button" class="dps-btn dps-btn--secondary dps-add-extra-btn" data-list="#dps-simple-extras-list" data-type="simple">';
+        echo '<span>➕</span> ' . esc_html__( 'Adicionar outro extra', 'dps-services-addon' );
+        echo '</button>';
+        echo '</div>'; // extras-container
+        echo '</div>'; // extras-section
+        
         echo '<p><label>' . esc_html__( 'Valor total do serviço (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" id="dps-appointment-total" name="appointment_total" value="' . esc_attr( $total_val ) . '" min="0"></label></p>';
-        echo '</div>';
+        echo '</div>'; // simple-fields
+        
+        // === CAMPOS PARA ASSINATURA ===
         $subscription_base_value  = $meta['subscription_base_value'] ?? '';
         $subscription_total_value = $meta['subscription_total_value'] ?? '';
-        $subscription_extra_desc  = $meta['subscription_extra_description'] ?? '';
-        $subscription_extra_value = $meta['subscription_extra_value'] ?? '';
-        $subscription_show_extra  = ( '' !== $subscription_extra_desc || '' !== $subscription_extra_value );
+        
+        // Recupera extras de assinatura
+        $subscription_extras_list = [];
+        if ( $edit_id ) {
+            $saved_sub_extras = get_post_meta( $edit_id, 'subscription_extras_list', true );
+            if ( is_array( $saved_sub_extras ) && ! empty( $saved_sub_extras ) ) {
+                $subscription_extras_list = $saved_sub_extras;
+            } else {
+                // Compatibilidade: migra formato antigo
+                $sub_extra_desc  = $meta['subscription_extra_description'] ?? '';
+                $sub_extra_value = $meta['subscription_extra_value'] ?? '';
+                if ( '' !== $sub_extra_desc || '' !== $sub_extra_value ) {
+                    $subscription_extras_list[] = [
+                        'description' => $sub_extra_desc,
+                        'value'       => floatval( $sub_extra_value ),
+                    ];
+                }
+            }
+        }
+        $has_subscription_extras = ! empty( $subscription_extras_list );
+        
         echo '<div id="dps-subscription-fields" class="dps-subscription-fields" style="display:' . esc_attr( $subscription_display ) . ';">';
         echo '<p><label>' . esc_html__( 'Valor da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-base" name="subscription_base_value" value="' . esc_attr( $subscription_base_value ) . '"></label></p>';
         echo '<p><label>' . esc_html__( 'Valor total da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-total" name="subscription_total_value" value="' . esc_attr( $subscription_total_value ) . '"></label></p>';
-        echo '<p><button type="button" class="button dps-extra-toggle" data-target="#dps-subscription-extra-fields">' . esc_html__( 'Extra', 'dps-services-addon' ) . '</button></p>';
-        echo '<div id="dps-subscription-extra-fields" class="dps-extra-fields" style="display:' . ( $subscription_show_extra ? 'block' : 'none' ) . ';">';
-        echo '<p><label>' . esc_html__( 'Descrição do extra', 'dps-services-addon' ) . '<br><input type="text" name="subscription_extra_description" value="' . esc_attr( $subscription_extra_desc ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Valor extra (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-extra-value" name="subscription_extra_value" value="' . esc_attr( $subscription_extra_value ) . '"></label></p>';
+        
+        // Seção de extras para assinatura
+        echo '<div class="dps-extras-section">';
+        echo '<button type="button" class="dps-btn dps-btn--outline dps-extras-toggle" data-target="#dps-subscription-extras-container" aria-expanded="' . ( $has_subscription_extras ? 'true' : 'false' ) . '">';
+        echo '<span class="dps-extras-toggle-icon">➕</span> ';
+        echo esc_html__( 'Adicionar Serviço Extra', 'dps-services-addon' );
+        echo '</button>';
+        
+        echo '<div id="dps-subscription-extras-container" class="dps-extras-container" style="display:' . ( $has_subscription_extras ? 'block' : 'none' ) . ';">';
+        echo '<div class="dps-extras-header">';
+        echo '<h4 class="dps-extras-title">' . esc_html__( 'Serviços Extras', 'dps-services-addon' ) . '</h4>';
+        echo '<p class="dps-extras-hint">' . esc_html__( 'Adicione serviços extras com descrição e valor.', 'dps-services-addon' ) . '</p>';
         echo '</div>';
+        
+        echo '<div id="dps-subscription-extras-list" class="dps-extras-list">';
+        if ( ! empty( $subscription_extras_list ) ) {
+            foreach ( $subscription_extras_list as $idx => $extra_item ) {
+                $this->render_extra_row( 'subscription', $idx, $extra_item );
+            }
+        }
         echo '</div>';
+        
+        echo '<button type="button" class="dps-btn dps-btn--secondary dps-add-extra-btn" data-list="#dps-subscription-extras-list" data-type="subscription">';
+        echo '<span>➕</span> ' . esc_html__( 'Adicionar outro extra', 'dps-services-addon' );
+        echo '</button>';
+        echo '</div>'; // extras-container
+        echo '</div>'; // extras-section
+        
+        echo '</div>'; // subscription-fields
         echo '</fieldset>';
+    }
+    
+    /**
+     * Renderiza uma linha de serviço extra.
+     *
+     * @since 1.4.0
+     *
+     * @param string $type       Tipo do extra ('simple' ou 'subscription').
+     * @param int    $index      Índice do extra.
+     * @param array  $extra_item Dados do extra (description, value).
+     */
+    private function render_extra_row( $type, $index, $extra_item = [] ) {
+        $prefix = ( 'subscription' === $type ) ? 'subscription_extras' : 'appointment_extras';
+        $description = isset( $extra_item['description'] ) ? $extra_item['description'] : '';
+        $value       = isset( $extra_item['value'] ) ? $extra_item['value'] : '';
+        
+        echo '<div class="dps-extra-row" data-index="' . esc_attr( $index ) . '">';
+        echo '<div class="dps-extra-row-fields">';
+        echo '<div class="dps-extra-description-field">';
+        echo '<input type="text" name="' . esc_attr( $prefix ) . '_descriptions[]" value="' . esc_attr( $description ) . '" placeholder="' . esc_attr__( 'Descrição do serviço', 'dps-services-addon' ) . '" class="dps-extra-description-input">';
+        echo '</div>';
+        echo '<div class="dps-extra-value-field">';
+        echo '<div class="dps-input-with-prefix">';
+        echo '<span class="dps-input-prefix">R$</span>';
+        echo '<input type="number" step="0.01" min="0" name="' . esc_attr( $prefix ) . '_values[]" value="' . esc_attr( $value ) . '" placeholder="0,00" class="dps-extra-value-input">';
+        echo '</div>';
+        echo '</div>';
+        echo '<button type="button" class="dps-btn dps-btn--icon dps-remove-extra-btn" title="' . esc_attr__( 'Remover', 'dps-services-addon' ) . '">';
+        echo '<span>✕</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '</div>';
     }
 
     /**
@@ -1454,25 +1571,46 @@ class DPS_Services_Addon {
             $total = floatval( $_POST['appointment_total'] );
             update_post_meta( $post_id, 'appointment_total_value', $total );
         }
-        $extra_desc = isset( $_POST['appointment_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_extra_description'] ) ) : '';
-        $extra_value = 0;
-        if ( isset( $_POST['appointment_extra_value'] ) ) {
-            $extra_value = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_extra_value'] ) ) );
-            if ( $extra_value < 0 ) {
-                $extra_value = 0;
+        
+        // === NOVOS CAMPOS DE MÚLTIPLOS EXTRAS ===
+        // Salva extras do agendamento simples (novo formato)
+        $extras_descriptions = isset( $_POST['appointment_extras_descriptions'] ) ? (array) $_POST['appointment_extras_descriptions'] : [];
+        $extras_values = isset( $_POST['appointment_extras_values'] ) ? (array) $_POST['appointment_extras_values'] : [];
+        $extras_list = $this->parse_extras_from_post( $extras_descriptions, $extras_values );
+        
+        if ( ! empty( $extras_list ) ) {
+            update_post_meta( $post_id, 'appointment_extras_list', $extras_list );
+            // Mantém compatibilidade com formato antigo (primeiro extra)
+            update_post_meta( $post_id, 'appointment_extra_description', $extras_list[0]['description'] );
+            update_post_meta( $post_id, 'appointment_extra_value', $extras_list[0]['value'] );
+        } else {
+            delete_post_meta( $post_id, 'appointment_extras_list' );
+            // Tenta formato antigo se novo não presente
+            $extra_desc = isset( $_POST['appointment_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_extra_description'] ) ) : '';
+            $extra_value = 0;
+            if ( isset( $_POST['appointment_extra_value'] ) ) {
+                $extra_value = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_extra_value'] ) ) );
+                if ( $extra_value < 0 ) {
+                    $extra_value = 0;
+                }
+            }
+            if ( '' !== $extra_desc || $extra_value > 0 ) {
+                update_post_meta( $post_id, 'appointment_extra_description', $extra_desc );
+                update_post_meta( $post_id, 'appointment_extra_value', $extra_value );
+            } else {
+                delete_post_meta( $post_id, 'appointment_extra_description' );
+                delete_post_meta( $post_id, 'appointment_extra_value' );
             }
         }
-        if ( '' !== $extra_desc || $extra_value > 0 ) {
-            update_post_meta( $post_id, 'appointment_extra_description', $extra_desc );
-            update_post_meta( $post_id, 'appointment_extra_value', $extra_value );
-        } else {
-            delete_post_meta( $post_id, 'appointment_extra_description' );
-            delete_post_meta( $post_id, 'appointment_extra_value' );
-        }
+        
+        // Salva extras da assinatura (novo formato)
+        $sub_extras_descriptions = isset( $_POST['subscription_extras_descriptions'] ) ? (array) $_POST['subscription_extras_descriptions'] : [];
+        $sub_extras_values = isset( $_POST['subscription_extras_values'] ) ? (array) $_POST['subscription_extras_values'] : [];
+        $sub_extras_list = $this->parse_extras_from_post( $sub_extras_descriptions, $sub_extras_values );
+        
         $sub_base = isset( $_POST['subscription_base_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_base_value'] ) ) ) : 0;
         $sub_total = isset( $_POST['subscription_total_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_total_value'] ) ) ) : 0;
-        $sub_extra_desc = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
-        $sub_extra_value = isset( $_POST['subscription_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_extra_value'] ) ) ) : 0;
+        
         if ( $sub_base > 0 ) {
             update_post_meta( $post_id, 'subscription_base_value', max( 0, $sub_base ) );
         } else {
@@ -1483,15 +1621,27 @@ class DPS_Services_Addon {
         } else {
             delete_post_meta( $post_id, 'subscription_total_value' );
         }
-        if ( '' !== $sub_extra_desc || $sub_extra_value > 0 ) {
-            if ( $sub_extra_value < 0 ) {
-                $sub_extra_value = 0;
-            }
-            update_post_meta( $post_id, 'subscription_extra_description', $sub_extra_desc );
-            update_post_meta( $post_id, 'subscription_extra_value', $sub_extra_value );
+        
+        if ( ! empty( $sub_extras_list ) ) {
+            update_post_meta( $post_id, 'subscription_extras_list', $sub_extras_list );
+            // Mantém compatibilidade
+            update_post_meta( $post_id, 'subscription_extra_description', $sub_extras_list[0]['description'] );
+            update_post_meta( $post_id, 'subscription_extra_value', $sub_extras_list[0]['value'] );
         } else {
-            delete_post_meta( $post_id, 'subscription_extra_description' );
-            delete_post_meta( $post_id, 'subscription_extra_value' );
+            delete_post_meta( $post_id, 'subscription_extras_list' );
+            // Tenta formato antigo
+            $sub_extra_desc = isset( $_POST['subscription_extra_description'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_extra_description'] ) ) : '';
+            $sub_extra_value = isset( $_POST['subscription_extra_value'] ) ? floatval( str_replace( ',', '.', wp_unslash( $_POST['subscription_extra_value'] ) ) ) : 0;
+            if ( '' !== $sub_extra_desc || $sub_extra_value > 0 ) {
+                if ( $sub_extra_value < 0 ) {
+                    $sub_extra_value = 0;
+                }
+                update_post_meta( $post_id, 'subscription_extra_description', $sub_extra_desc );
+                update_post_meta( $post_id, 'subscription_extra_value', $sub_extra_value );
+            } else {
+                delete_post_meta( $post_id, 'subscription_extra_description' );
+                delete_post_meta( $post_id, 'subscription_extra_value' );
+            }
         }
 
         // Calcula e armazena preço histórico deste agendamento em centavos
@@ -1561,6 +1711,41 @@ class DPS_Services_Addon {
         } else {
             delete_post_meta( $appointment_id, '_dps_services_at_booking' );
         }
+    }
+    
+    /**
+     * Processa arrays de descrições e valores de extras do POST.
+     *
+     * @since 1.4.0
+     *
+     * @param array $descriptions Array de descrições.
+     * @param array $values       Array de valores.
+     * @return array Lista de extras processados.
+     */
+    private function parse_extras_from_post( $descriptions, $values ) {
+        $extras_list = [];
+        
+        foreach ( $descriptions as $idx => $description ) {
+            $desc  = sanitize_text_field( wp_unslash( $description ) );
+            $value = 0;
+            
+            if ( isset( $values[ $idx ] ) ) {
+                $value = floatval( str_replace( ',', '.', wp_unslash( $values[ $idx ] ) ) );
+                if ( $value < 0 ) {
+                    $value = 0;
+                }
+            }
+            
+            // Adiciona apenas se tiver descrição ou valor
+            if ( '' !== $desc || $value > 0 ) {
+                $extras_list[] = [
+                    'description' => $desc,
+                    'value'       => $value,
+                ];
+            }
+        }
+        
+        return $extras_list;
     }
 
     /**
