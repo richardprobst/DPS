@@ -131,6 +131,229 @@
     display: block;
 }
 
+/* ================================================
+   SISTEMA DE DESIGN MODERNO - TÍTULOS E SUBTÍTULOS
+   ================================================ */
+
+/* Título principal de seção (H2) - Estilo moderno e elegante */
+.dps-section-header {
+    margin-bottom: 24px;
+}
+
+.dps-section-header__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+.dps-section-header__subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Subtítulos de seção (H3, H4) - Estilo moderno */
+.dps-section h3,
+.dps-subsection-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin: 32px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-section h4,
+.dps-subsection-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 24px 0 12px 0;
+}
+
+/* ================================================
+   SISTEMA DE DESIGN MODERNO - BOTÕES
+   ================================================ */
+
+/* Botão Principal (Primary) - Gradiente azul moderno */
+.dps-btn-primary,
+.dps-section .button-primary,
+.dps-base-wrapper .button-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    text-shadow: none;
+}
+
+.dps-btn-primary:hover,
+.dps-section .button-primary:hover,
+.dps-base-wrapper .button-primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dps-btn-primary:active,
+.dps-section .button-primary:active,
+.dps-base-wrapper .button-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+.dps-btn-primary:focus,
+.dps-section .button-primary:focus,
+.dps-base-wrapper .button-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3), 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+/* Botão Secundário (Secondary) - Borda elegante */
+.dps-btn-secondary,
+.dps-section .button-secondary,
+.dps-base-wrapper .button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #ffffff;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.dps-btn-secondary:hover,
+.dps-section .button-secondary:hover,
+.dps-base-wrapper .button-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+    text-decoration: none;
+}
+
+.dps-btn-secondary:active,
+.dps-section .button-secondary:active,
+.dps-base-wrapper .button-secondary:active {
+    background: #f3f4f6;
+}
+
+.dps-btn-secondary:focus,
+.dps-section .button-secondary:focus,
+.dps-base-wrapper .button-secondary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
+}
+
+/* Botão de Sucesso (Success) - Gradiente verde moderno */
+.dps-btn-success {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.dps-btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-btn-success:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.dps-btn-success:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+/* Botão com ícone - wrapper para ícone decorativo */
+.dps-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Tamanhos de botão alternativos */
+.dps-btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.dps-btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+}
+
+/* Botão desabilitado */
+.dps-btn-primary:disabled,
+.dps-btn-secondary:disabled,
+.dps-btn-success:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Container de ações com espaçamento consistente */
+.dps-actions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
 /* === SEÇÃO DE AGENDAMENTOS - CABEÇALHO VISUAL === */
 #dps-section-agendas > h2 {
     display: flex;
