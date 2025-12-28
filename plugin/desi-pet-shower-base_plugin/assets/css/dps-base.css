@@ -165,10 +165,11 @@
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
+/* Largura máxima para campos específicos - evita inputs muito largos em telas grandes */
 .dps-form .dps-client-select,
 .dps-form #appointment_date,
 .dps-form #appointment_time {
-    max-width: 100%;
+    max-width: 480px;
     width: 100%;
 }
 .dps-form textarea {
@@ -512,11 +513,17 @@
     background: #f0f9ff;
 }
 
-/* Pet selecionado */
+/* Pet selecionado - fallback usando classe .is-selected adicionada via JS */
+.dps-pet-option.is-selected,
 .dps-pet-option:has(input:checked) {
     border-color: #0ea5e9;
     background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Fallback adicional para browsers antigos usando input:checked + labels */
+.dps-pet-option input[type="checkbox"]:checked ~ .dps-pet-name {
+    color: #0369a1;
 }
 
 .dps-pet-option input[type="checkbox"] {
@@ -1617,13 +1624,17 @@
     background: #f0f9ff;
 }
 
-/* Estado selecionado */
+/* Estado selecionado - com fallback usando classe .is-selected para browsers antigos
+   Nota: O checkmark visual (✓) é decorativo; o estado selecionado é comunicado
+   pelo input radio nativo que é acessível por screen readers */
+.dps-radio-option.is-selected,
 .dps-radio-option:has(input:checked) {
     border-color: #0ea5e9;
     background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
+.dps-radio-option.is-selected::before,
 .dps-radio-option:has(input:checked)::before {
     content: '✓';
     position: absolute;
@@ -1632,6 +1643,13 @@
     font-size: 12px;
     color: #0ea5e9;
     font-weight: 700;
+    /* aria-hidden via CSS não é possível, mas o input radio nativo
+       já comunica o estado selecionado para screen readers */
+}
+
+/* Fallback adicional para browsers antigos */
+.dps-radio-option input[type="radio"]:checked + .dps-radio-label strong {
+    color: #0369a1;
 }
 
 .dps-radio-option input[type="radio"] {
