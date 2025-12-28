@@ -226,7 +226,8 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
     text-shadow: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* Evitar transition: all por performance - especificar propriedades */
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .button-primary:hover,
@@ -258,7 +259,7 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-weight: 600;
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .button-secondary:hover,

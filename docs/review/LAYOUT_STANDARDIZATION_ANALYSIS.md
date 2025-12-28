@@ -118,16 +118,17 @@ Porém, a PR #345 introduziu exatamente essas características nos botões.
 2. Padronizar gradiente em TODOS os add-ons
 3. Criar classes globais no dps-base.css
 
-### Opção C: Híbrida (Recomendada)
+### Opção C: Híbrida (Implementada)
 
-Manter **gradientes leves apenas em botões primários** de ação principal, mas sem animações de transform. Resto do sistema permanece minimalista.
+Manter **gradientes leves apenas em botões primários** de ação principal, incluindo animação de transform sutil para feedback visual. Resto do sistema permanece minimalista.
 
-**Ações:**
-1. Manter gradiente nos botões primários
-2. Remover `transform: translateY(-1px)` (contra guia)
-3. Reduzir intensidade das sombras
-4. Atualizar VISUAL_STYLE_GUIDE.md com exceção para botões
-5. Padronizar em todos os add-ons
+**Ações implementadas:**
+1. ✅ Manter gradiente nos botões primários
+2. ✅ Manter `transform: translateY(-1px)` para feedback de hover
+3. ✅ Usar sombras específicas para botões de ação
+4. ✅ Atualizar VISUAL_STYLE_GUIDE.md para v1.1 com exceção documentada
+5. ✅ Padronizar em todos os add-ons com estilos inconsistentes
+6. ✅ Corrigir `transition: all` para transições específicas (performance)
 
 ---
 
