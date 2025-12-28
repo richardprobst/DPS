@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Assinaturas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Pacotes mensais de banho com frequência semanal ou quinzenal. Agendamentos automáticos e controle de renovação.
- * Version:           1.0.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-subscription-addon
