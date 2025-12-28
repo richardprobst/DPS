@@ -547,7 +547,7 @@ class DPS_AI_Assistant {
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed with wpdb prefix
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT valor_centavos, descricao FROM {$table_name} WHERE cliente_id = %d AND status = %s ORDER BY data_vencimento ASC",
+                "SELECT valor_centavos, descricao FROM {$table_name} WHERE cliente_id = %d AND status = %s ORDER BY data ASC",
                 $client_id,
                 'pendente'
             )

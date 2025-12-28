@@ -117,7 +117,7 @@
 3. **Inadimplência (Receita Vencida)** ⚠️
    - `get_overdue_revenue()`: Overdue unpaid revenue
    - Requires Finance table (validates existence)
-   - Query: `data_vencimento < today AND status != 'pago'` ✅
+   - Query: `data < today AND status != 'pago'` ✅
 
 4. **Taxa de Conversão** ✨
    - `get_conversion_rate()`: Registration → first appointment
