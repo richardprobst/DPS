@@ -296,11 +296,17 @@
     flex-wrap: wrap;
 }
 .dps-history-summary {
-    background: #f8f9fa;
-    border: 1px solid #e2e6ea;
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    background: #eff6ff;
+    border-left: 4px solid #0ea5e9;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 16px;
+}
+
+.dps-history-summary strong {
+    color: #0284c7;
+    font-size: 14px;
+    font-weight: 600;
 }
 /* Estilos para ordenação de tabelas */
 .dps-table-sortable .dps-sortable {
@@ -1706,5 +1712,362 @@
     .dps-btn-action {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* ================================================
+   ABA HISTÓRICO - LAYOUT REDESENHADO
+   ================================================ */
+
+/* Header da seção de histórico */
+.dps-history-header {
+    margin-bottom: 24px;
+}
+
+.dps-history-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-history-header__description {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Container de visão geral */
+.dps-history-overview {
+    margin-bottom: 32px;
+}
+
+/* Cards de métricas */
+.dps-history-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-history-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-history-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dps-history-card__icon {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.dps-history-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-history-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+}
+
+.dps-history-card__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Variações de cores para cada card */
+.dps-history-card--today {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-history-card--today .dps-history-card__icon {
+    background: #eff6ff;
+    color: #0ea5e9;
+}
+
+.dps-history-card--upcoming {
+    border-left: 4px solid #10b981;
+}
+
+.dps-history-card--upcoming .dps-history-card__icon {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.dps-history-card--past {
+    border-left: 4px solid #6b7280;
+}
+
+.dps-history-card--past .dps-history-card__icon {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-history-card--total {
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-history-card--total .dps-history-card__icon {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.dps-history-card--total .dps-history-card__value {
+    color: #0ea5e9;
+}
+
+/* Toolbar de filtros redesenhada */
+.dps-history-toolbar {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dps-history-toolbar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-history-toolbar__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-history-toolbar__actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Filtros organizados */
+.dps-history-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dps-history-filters__row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.dps-history-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-history-filter label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-history-filter input[type="search"],
+.dps-history-filter input[type="date"],
+.dps-history-filter select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-history-filter input:focus,
+.dps-history-filter select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-history-filter--search {
+    grid-column: 1 / -1;
+}
+
+.dps-history-filter--checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 28px;
+}
+
+.dps-history-filter--checkbox .dps-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+}
+
+.dps-history-filter--checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Botões de período rápido */
+.dps-history-quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-history-quick-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-right: 4px;
+}
+
+.dps-history-quick-btn {
+    padding: 6px 14px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.dps-history-quick-btn:hover {
+    background: #e5e7eb !important;
+}
+
+.dps-history-quick-btn.active {
+    background: #0ea5e9 !important;
+    border-color: #0ea5e9 !important;
+    color: #ffffff !important;
+}
+
+/* Responsividade da aba Histórico */
+@media (max-width: 1024px) {
+    .dps-history-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-history-filters__row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dps-history-filter--checkbox {
+        grid-column: 1 / -1;
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .dps-history-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .dps-history-card {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .dps-history-card__icon {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+    
+    .dps-history-card__value {
+        font-size: 20px;
+    }
+    
+    .dps-history-card__label {
+        font-size: 11px;
+    }
+    
+    .dps-history-toolbar {
+        padding: 16px;
+    }
+    
+    .dps-history-toolbar__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .dps-history-toolbar__actions {
+        width: 100%;
+    }
+    
+    .dps-history-toolbar__actions .button {
+        flex: 1;
+    }
+    
+    .dps-history-filters__row {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-history-quick-filters {
+        flex-wrap: wrap;
+    }
+    
+    .dps-history-quick-btn {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 80px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-history-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-history-card {
+        padding: 14px;
+    }
+    
+    .dps-history-card__value {
+        font-size: 18px;
+    }
+    
+    .dps-history-quick-btn {
+        flex: 1 1 100%;
     }
 }
