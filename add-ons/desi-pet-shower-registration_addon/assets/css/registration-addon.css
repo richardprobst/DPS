@@ -94,14 +94,31 @@
 
 .dps-button-next,
 .dps-button-secondary {
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    color: #111827;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 8px;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .dps-button-secondary:hover,
 .dps-button-next:hover {
-    background: #e5e7eb;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    color: #334155;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.dps-button-secondary:active,
+.dps-button-next:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* ==========================================================================
@@ -232,36 +249,56 @@
    ========================================================================== */
 
 .dps-registration-form .button {
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
 }
 
 .dps-registration-form .button-primary {
-    background: #0ea5e9;
-    border-color: #0ea5e9;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: none;
     color: #ffffff;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    text-shadow: none;
 }
 
 .dps-registration-form .button-primary:hover {
-    background: #0284c7;
-    border-color: #0284c7;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-registration-form .button-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
 }
 
 #dps-add-pet {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    color: #374151;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    color: #6b7280;
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 #dps-add-pet:hover {
-    background: #e5e7eb;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
 }
 
 .dps-summary-box {
