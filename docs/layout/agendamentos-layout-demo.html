@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Layout Melhorado Aba Agendamentos</title>
+    <style>
+        /* Reset básico */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: #1f2937; }
+        .demo-container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        
+        /* Estilos da aba Agendamentos - COPIADOS DO dps-base.css */
+        
+        /* === CONTAINER PRINCIPAL === */
+        .dps-appointments {
+            margin-top: 24px;
+            padding: 0;
+        }
+
+        .dps-appointments > h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .dps-appointments > h3::before {
+            content: '📋';
+            font-size: 1.2em;
+        }
+
+        /* Campo de busca */
+        .dps-appointments .dps-appointments-search {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") no-repeat 12px center;
+            background-size: 18px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dps-appointments .dps-appointments-search:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        /* === GRUPOS DE AGENDAMENTOS === */
+        .dps-appointments-group {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .dps-appointments-group h4 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Badge de contagem */
+        .dps-group-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 12px;
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Grupo: Pendentes (dias anteriores) */
+        .dps-appointments-group--overdue {
+            border-left-color: #ef4444;
+            background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+        }
+
+        .dps-appointments-group--overdue h4 {
+            color: #b91c1c;
+        }
+
+        .dps-appointments-group--overdue h4::before {
+            content: '⚠️';
+            font-size: 1.1em;
+        }
+
+        .dps-appointments-group--overdue .dps-group-badge {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Grupo: Finalizados hoje */
+        .dps-appointments-group--finalized {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+        }
+
+        .dps-appointments-group--finalized h4 {
+            color: #047857;
+        }
+
+        .dps-appointments-group--finalized h4::before {
+            content: '✅';
+            font-size: 1em;
+        }
+
+        .dps-appointments-group--finalized .dps-group-badge {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        /* Grupo: Próximos atendimentos */
+        .dps-appointments-group--upcoming {
+            border-left-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+        }
+
+        .dps-appointments-group--upcoming h4 {
+            color: #0369a1;
+        }
+
+        .dps-appointments-group--upcoming h4::before {
+            content: '📅';
+            font-size: 1em;
+        }
+
+        .dps-appointments-group--upcoming .dps-group-badge {
+            background: #dbeafe;
+            color: #0369a1;
+        }
+
+        /* === TABELA === */
+        .dps-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+
+        .dps-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dps-table th,
+        .dps-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dps-table th {
+            background: #f8fafc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .dps-table td {
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+        /* Status com bordas laterais */
+        .dps-table tr.status-pendente {
+            background: #fffbeb;
+        }
+
+        .dps-table tr.status-pendente td:first-child {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .dps-table tr.status-finalizado {
+            background: #f8fafc;
+        }
+
+        .dps-table tr.status-finalizado td:first-child {
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .dps-table tr.status-finalizado_pago {
+            background: #ecfdf5;
+        }
+
+        .dps-table tr.status-finalizado_pago td:first-child {
+            border-left: 4px solid #10b981;
+        }
+
+        .dps-table tr.status-cancelado {
+            background: #fef2f2;
+            opacity: 0.7;
+        }
+
+        .dps-table tr.status-cancelado td:first-child {
+            border-left: 4px solid #ef4444;
+        }
+
+        .dps-table tr.status-cancelado td {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        /* Links de ações */
+        .dps-table td a {
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+            border-radius: 4px;
+            transition: background-color 0.15s ease;
+        }
+
+        .dps-table td a:hover {
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .dps-table td a.delete-link {
+            color: #dc2626;
+        }
+
+        .dps-table td a.delete-link:hover {
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* Select de status */
+        .dps-inline-status-form select {
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .dps-inline-status-form select:hover {
+            border-color: #0ea5e9;
+        }
+
+        /* === COMPARAÇÃO === */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
+        .comparison-box { padding: 20px; border-radius: 8px; }
+        .comparison-box h3 { margin-bottom: 15px; font-size: 1rem; }
+        .old-style { background: #fef2f2; border: 1px dashed #fca5a5; }
+        .new-style { background: #ecfdf5; border: 1px dashed #86efac; }
+        
+        @media (max-width: 768px) {
+            .comparison { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Demo - Melhorias de Layout da Aba AGENDAMENTOS</h1>
+    
+    <div class="demo-container">
+        <div class="dps-appointments">
+            <h3>Próximos Agendamentos</h3>
+            
+            <input type="text" class="dps-appointments-search" placeholder="Buscar agendamento por cliente, pet ou data...">
+            
+            <!-- Grupo 1: Pendentes (dias anteriores) -->
+            <div class="dps-appointments-group dps-appointments-group--overdue">
+                <h4>Agendamentos pendentes (dias anteriores) <span class="dps-group-badge">2</span></h4>
+                <div class="dps-table-wrapper">
+                    <table class="dps-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Cliente</th>
+                                <th>Pet</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="status-pendente">
+                                <td>25/12/2024</td>
+                                <td>10:00</td>
+                                <td>Maria Silva</td>
+                                <td>Rex</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-pendente">
+                                <td>26/12/2024</td>
+                                <td>14:00</td>
+                                <td>João Santos</td>
+                                <td>Bella</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Grupo 2: Finalizados hoje -->
+            <div class="dps-appointments-group dps-appointments-group--finalized">
+                <h4>Atendimentos finalizados hoje <span class="dps-group-badge">3</span></h4>
+                <div class="dps-table-wrapper">
+                    <table class="dps-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Cliente</th>
+                                <th>Pet</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="status-finalizado">
+                                <td>28/12/2024</td>
+                                <td>08:00</td>
+                                <td>Ana Costa</td>
+                                <td>Thor</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option>Pendente</option>
+                                            <option selected>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-finalizado_pago">
+                                <td>28/12/2024</td>
+                                <td>09:30</td>
+                                <td>Pedro Lima</td>
+                                <td>Luna</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option selected>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-cancelado">
+                                <td>28/12/2024</td>
+                                <td>11:00</td>
+                                <td>Carlos Mendes</td>
+                                <td>Max</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option selected>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Grupo 3: Próximos atendimentos -->
+            <div class="dps-appointments-group dps-appointments-group--upcoming">
+                <h4>Próximos atendimentos <span class="dps-group-badge">4</span></h4>
+                <div class="dps-table-wrapper">
+                    <table class="dps-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Cliente</th>
+                                <th>Pet</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="status-pendente">
+                                <td>29/12/2024</td>
+                                <td>09:00</td>
+                                <td>Fernanda Rocha</td>
+                                <td>Bob</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-pendente">
+                                <td>29/12/2024</td>
+                                <td>10:30</td>
+                                <td>Lucas Oliveira</td>
+                                <td>Mel (Assinatura)</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-pendente">
+                                <td>30/12/2024</td>
+                                <td>08:30</td>
+                                <td>Mariana Souza</td>
+                                <td>Tobby</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                            <tr class="status-pendente">
+                                <td>30/12/2024</td>
+                                <td>14:00</td>
+                                <td>Roberto Alves</td>
+                                <td>Nina</td>
+                                <td>
+                                    <div class="dps-inline-status-form">
+                                        <select>
+                                            <option selected>Pendente</option>
+                                            <option>Finalizado</option>
+                                            <option>Finalizado e pago</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td><a href="#">Editar</a> | <a href="#">Duplicar</a> | <a href="#" class="delete-link">Excluir</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumo das Melhorias -->
+        <div class="comparison">
+            <div class="comparison-box old-style">
+                <h3>❌ Problemas Anteriores</h3>
+                <ul>
+                    <li>Grupos sem distinção visual</li>
+                    <li>Cores de status pouco visíveis</li>
+                    <li>Difícil identificar prioridade</li>
+                    <li>Sem contagem de itens</li>
+                    <li>Layout "bagunçado"</li>
+                </ul>
+            </div>
+            <div class="comparison-box new-style">
+                <h3>✅ Melhorias Implementadas</h3>
+                <ul>
+                    <li>Cores distintas por grupo</li>
+                    <li>Ícones visuais (⚠️✅📅)</li>
+                    <li>Bordas laterais coloridas</li>
+                    <li>Badges de contagem</li>
+                    <li>Layout limpo e organizado</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -106,14 +106,34 @@
 }
 .dps-section {
     display: none;
-    border: 1px solid #ccc;
+    border: 1px solid #e5e7eb;
     border-top: none;
-    padding: 15px;
+    padding: 24px;
     background: #fff;
+    border-radius: 0 0 8px 8px;
 }
 .dps-section.active {
     display: block;
 }
+
+/* === SEÇÃO DE AGENDAMENTOS - CABEÇALHO VISUAL === */
+#dps-section-agendas > h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 24px 0;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+#dps-section-agendas > h2::before {
+    content: '📅';
+    font-size: 1.2em;
+}
+
 .dps-form p {
     margin-bottom: 10px;
 }
@@ -125,15 +145,31 @@
 .dps-form select,
 .dps-form textarea {
     width: 100%;
-    padding: 6px;
+    padding: 10px 12px;
     box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
+.dps-form input[type="text"]:focus,
+.dps-form input[type="email"]:focus,
+.dps-form input[type="date"]:focus,
+.dps-form input[type="time"]:focus,
+.dps-form input[type="number"]:focus,
+.dps-form select:focus,
+.dps-form textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Largura máxima para campos específicos - evita inputs muito largos em telas grandes */
 .dps-form .dps-client-select,
 .dps-form #appointment_date,
 .dps-form #appointment_time {
-    max-width: 420px;
+    max-width: 480px;
     width: 100%;
 }
 .dps-form textarea {
@@ -228,6 +264,42 @@
 
 .dps-table-wrapper .dps-table tbody tr:last-child td {
     border-bottom: 0;
+}
+
+/* === AÇÕES NA TABELA (EDITAR, DUPLICAR, EXCLUIR) === */
+.dps-table td a {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dps-table td a:hover {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    text-decoration: none;
+}
+
+/* Link de Excluir com cor vermelha 
+   Nota: Usa seletor de onclick como fallback para templates existentes.
+   Preferir usar a classe .dps-action-delete quando possível. */
+.dps-table td a[onclick*="confirm"],
+.dps-table td a.dps-action-delete {
+    color: #dc2626;
+}
+
+.dps-table td a[onclick*="confirm"]:hover,
+.dps-table td a.dps-action-delete:hover {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+
+/* Separadores mais sutis */
+.dps-table td:last-child {
+    white-space: nowrap;
 }
 
 .dps-search {
@@ -332,96 +404,208 @@
 .dps-sortable.desc .dps-sort-icon {
     color: #0ea5e9;
 }
+/* === PET PICKER MELHORADO === */
 .dps-pet-picker {
-    border: 1px solid #e2e2e2;
-    background: #fafafa;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 15px;
+    border: 2px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    margin-top: 8px;
 }
+
 .dps-pet-picker--disabled {
-    opacity: 0.6;
+    opacity: 0.5;
+    pointer-events: none;
 }
+
 .dps-pet-picker--warning {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
+
+/* Título do pet picker */
+.dps-pet-picker > p:first-child {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.dps-pet-picker .dps-selection-counter {
+    margin-left: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0ea5e9;
+    background: #f0f9ff;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* Barra de busca de pets */
+.dps-pet-picker .dps-pet-search input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") no-repeat 10px center;
+    background-size: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-pet-picker .dps-pet-search input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    background-color: #ffffff;
+}
+
 .dps-pet-picker-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
 }
+
+.dps-pet-picker-actions .button {
+    font-size: 0.8rem;
+}
+
 .dps-pet-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
+
+.dps-pet-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dps-pet-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.dps-pet-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
 .dps-pet-option {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px;
-    border: 1px solid #d8d8d8;
-    border-radius: 6px;
-    background: #fff;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
 }
+
 .dps-pet-option:hover {
-    border-color: #0073aa;
-    box-shadow: 0 0 0 1px rgba(0, 115, 170, 0.15);
+    border-color: #0ea5e9;
+    background: #f0f9ff;
 }
+
+/* Pet selecionado - fallback usando classe .is-selected adicionada via JS */
+.dps-pet-option.is-selected,
+.dps-pet-option:has(input:checked) {
+    border-color: #0ea5e9;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Fallback adicional para browsers antigos usando input:checked + labels */
+.dps-pet-option input[type="checkbox"]:checked ~ .dps-pet-name {
+    color: #0369a1;
+}
+
 .dps-pet-option input[type="checkbox"] {
-    margin-right: 6px;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    accent-color: #0ea5e9;
 }
+
 .dps-pet-option .dps-pet-name {
     font-weight: 600;
-    color: #1d2327;
+    color: #1f2937;
+    font-size: 0.95rem;
 }
+
 .dps-pet-option .dps-pet-owner,
 .dps-pet-option .dps-pet-breed,
 .dps-pet-option .dps-pet-size {
-    font-size: 12px;
-    color: #555d66;
+    font-size: 0.8rem;
+    color: #6b7280;
 }
+
 .dps-pet-option .dps-pet-breed::before,
 .dps-pet-option .dps-pet-owner::before,
 .dps-pet-option .dps-pet-size::before {
     content: '';
 }
 
-/* Container principal de listagem de agendamentos */
+/* === CONTAINER PRINCIPAL DE AGENDAMENTOS - LAYOUT LIMPO === */
 .dps-appointments {
-    margin-top: 20px;
+    margin-top: 24px;
+    padding: 0;
 }
 
 .dps-appointments > h3 {
     margin-top: 0;
-    margin-bottom: 16px;
-    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-size: 1.35rem;
     font-weight: 600;
-    color: #374151;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
 }
 
+.dps-appointments > h3::before {
+    content: '📋';
+    font-size: 1.2em;
+}
+
+/* Campo de busca estilizado */
 .dps-appointments .dps-appointments-search {
-    margin-bottom: 16px;
-    padding: 10px 12px;
+    margin-bottom: 20px;
+    padding: 12px 16px 12px 40px;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.95rem;
+    background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") no-repeat 12px center;
+    background-size: 18px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-appointments .dps-appointments-search:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.dps-appointments .dps-appointments-search::placeholder {
+    color: #9ca3af;
 }
 
 .dps-appointments-empty {
-    padding: 24px;
+    padding: 32px 24px;
     text-align: center;
     color: #6b7280;
     background: #f9fafb;
-    border: 1px dashed #e5e7eb;
-    border-radius: 6px;
-    margin-top: 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    margin-top: 20px;
 }
 
 /* Empty state melhorado */
@@ -462,60 +646,227 @@
     margin-top: 8px;
 }
 
+/* === GRUPOS DE AGENDAMENTOS - LAYOUT MELHORADO === */
 .dps-appointments-group {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    padding: 16px;
-    border-radius: 6px;
-    border-left: 3px solid #0ea5e9;
-    background: #f9fafb;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #0ea5e9;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
+
 .dps-appointments-group h4 {
     margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.1rem;
+    margin-bottom: 16px;
+    font-size: 1.15rem;
     font-weight: 600;
     color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+
+/* Badge de contagem nos grupos */
+.dps-group-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 12px;
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Grupo: Agendamentos Pendentes (dias anteriores) - ALERTA */
+.dps-appointments-group--overdue {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+}
+
+.dps-appointments-group--overdue h4 {
+    color: #b91c1c;
+}
+
+.dps-appointments-group--overdue h4::before {
+    content: '⚠️';
+    font-size: 1.1em;
+}
+
+.dps-appointments-group--overdue .dps-group-badge {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Grupo: Atendimentos finalizados hoje */
+.dps-appointments-group--finalized {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+}
+
+.dps-appointments-group--finalized h4 {
+    color: #047857;
+}
+
+.dps-appointments-group--finalized .dps-group-badge {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.dps-appointments-group--finalized h4::before {
+    content: '✅';
+    font-size: 1em;
+}
+
+/* Grupo: Próximos atendimentos */
+.dps-appointments-group--upcoming {
+    border-left-color: #0ea5e9;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+}
+
+.dps-appointments-group--upcoming h4 {
+    color: #0369a1;
+}
+
+.dps-appointments-group--upcoming .dps-group-badge {
+    background: #dbeafe;
+    color: #0369a1;
+}
+
+.dps-appointments-group--upcoming h4::before {
+    content: '📅';
+    font-size: 1em;
+}
+
+/* === TABELA DE AGENDAMENTOS === */
+/* Nota: border-collapse: separate é necessário para que as bordas laterais coloridas
+   nas células funcionem corretamente. border-spacing: 0 mantém o visual sem gaps. */
 .dps-appointments .dps-table {
     min-width: 640px;
+    border-collapse: separate;
+    border-spacing: 0;
 }
+
 .dps-appointments .dps-table th,
 .dps-appointments .dps-table td {
-    padding: 8px 10px;
+    padding: 10px 12px;
 }
+
+.dps-appointments .dps-table th {
+    background: #f8fafc;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* === CORES DE STATUS DAS LINHAS === */
+/* Nota: border-left aplicada apenas na primeira célula para melhor compatibilidade
+   com border-collapse e temas que possam sobrescrever estilos de linha */
+
+/* Pendente: laranja/amarelo com borda laranja */
 .dps-table tr.status-pendente {
-    background: #fef3c7;
+    background: #fffbeb;
 }
+
+.dps-table tr.status-pendente td:first-child {
+    border-left: 4px solid #f59e0b;
+}
+
+/* Finalizado: cinza neutro com borda azul */
 .dps-table tr.status-finalizado {
-    background: #f3f4f6;
+    background: #f8fafc;
 }
+
+.dps-table tr.status-finalizado td:first-child {
+    border-left: 4px solid #0ea5e9;
+}
+
+/* Finalizado e Pago: verde claro com borda verde */
 .dps-table tr.status-finalizado_pago,
 .dps-table tr.status-finalizado\ e\ pago {
-    background: #d1fae5;
+    background: #ecfdf5;
 }
+
+.dps-table tr.status-finalizado_pago td:first-child,
+.dps-table tr.status-finalizado\ e\ pago td:first-child {
+    border-left: 4px solid #10b981;
+}
+
+/* Cancelado: estilo esmaecido com borda vermelha */
 .dps-table tr.status-cancelado {
-    opacity: 0.6;
+    background: #fef2f2;
+    opacity: 0.7;
 }
+
+.dps-table tr.status-cancelado td:first-child {
+    border-left: 4px solid #ef4444;
+}
+
+.dps-table tr.status-cancelado td {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+/* === FORMULÁRIO DE STATUS INLINE === */
 .dps-inline-status-form {
     position: relative;
     display: inline-flex;
     align-items: center;
+    gap: 6px;
 }
+
 .dps-inline-status-form select {
-    min-width: 140px;
+    min-width: 150px;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: #ffffff;
 }
+
+.dps-inline-status-form select:hover {
+    border-color: #0ea5e9;
+}
+
+.dps-inline-status-form select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
 .dps-inline-status-form.is-updating select {
     opacity: 0.6;
     pointer-events: none;
+    cursor: wait;
 }
+
+.dps-inline-status-form.is-updating::after {
+    content: '⏳';
+    font-size: 0.9rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* === ALERTAS === */
 .dps-alert {
     padding: 16px 20px;
     border-left: 4px solid #f59e0b;
     background: #ffffff;
     margin: 20px 0;
-    border-radius: 4px;
+    border-radius: 6px;
     color: #374151;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .dps-alert--danger {
     border-left-color: #ef4444;
@@ -571,9 +922,21 @@
     
     /* Ajustar espaçamento em grupos de agendamentos */
     .dps-appointments-group {
-        margin-top: 12px;
+        margin-top: 16px;
+        margin-bottom: 16px;
+        padding: 14px;
+        border-radius: 6px;
+    }
+    
+    .dps-appointments-group h4 {
+        font-size: 1.05rem;
         margin-bottom: 12px;
-        padding: 12px;
+    }
+    
+    /* Campo de busca em telas menores */
+    .dps-appointments .dps-appointments-search {
+        padding-left: 36px;
+        background-size: 16px;
     }
 }
 
@@ -727,14 +1090,44 @@
     
     /* Reduzir ainda mais o espaçamento dos grupos */
     .dps-appointments-group {
-        padding: 10px;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        padding: 12px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        border-radius: 4px;
     }
     
     .dps-appointments-group h4 {
-        font-size: 1rem;
-        margin-bottom: 8px;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .dps-appointments-group h4::before {
+        font-size: 0.9em;
+    }
+    
+    .dps-group-badge {
+        font-size: 0.7rem;
+        min-width: 18px;
+        height: 18px;
+    }
+    
+    /* Campo de busca em mobile pequeno */
+    .dps-appointments .dps-appointments-search {
+        padding: 10px 12px 10px 34px;
+        font-size: 16px; /* Evita zoom no iOS */
+        background-size: 14px;
+        background-position: 10px center;
+    }
+    
+    /* Título principal em mobile */
+    .dps-appointments > h3 {
+        font-size: 1.15rem;
+        padding-bottom: 10px;
+    }
+    
+    .dps-appointments > h3::before {
+        font-size: 1em;
     }
 }
 
@@ -762,19 +1155,93 @@
     margin: 0;
 }
 
-/* Fieldsets padronizados */
+/* === FORMULÁRIO DE AGENDAMENTO - LAYOUT MELHORADO === */
+
+/* Fieldsets padronizados com visual mais limpo */
 .dps-fieldset {
-    border: 1px solid #e5e7eb;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 4px;
+    border: none;
+    border-left: 4px solid #0ea5e9;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .dps-fieldset__legend {
-    font-weight: 600;
+    font-weight: 700;
+    color: #0369a1;
+    padding: 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+/* Ícones para cada seção do formulário */
+.dps-fieldset__legend::before {
+    font-size: 1.1em;
+}
+
+/* Seção 1: Tipo de Agendamento */
+.dps-fieldset:nth-of-type(1) {
+    border-left-color: #8b5cf6;
+    background: linear-gradient(to right, #f5f3ff 0%, #ffffff 100%);
+}
+
+.dps-fieldset:nth-of-type(1) .dps-fieldset__legend {
+    color: #6d28d9;
+}
+
+/* Seção 2: Cliente e Pet(s) */
+.dps-fieldset:nth-of-type(2) {
+    border-left-color: #0ea5e9;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+}
+
+.dps-fieldset:nth-of-type(2) .dps-fieldset__legend {
+    color: #0369a1;
+}
+
+/* Seção 3: Data e Horário */
+.dps-fieldset:nth-of-type(3) {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+}
+
+.dps-fieldset:nth-of-type(3) .dps-fieldset__legend {
+    color: #b45309;
+}
+
+/* Seção 4: Serviços e Extras */
+.dps-fieldset:nth-of-type(4) {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+}
+
+.dps-fieldset:nth-of-type(4) .dps-fieldset__legend {
+    color: #047857;
+}
+
+/* Seção 5: Pagamento (agendamentos passados) */
+#dps-past-payment-wrapper {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+}
+
+#dps-past-payment-wrapper .dps-fieldset__legend {
+    color: #b91c1c;
+}
+
+/* Seção 6: Observações */
+.dps-fieldset:last-of-type {
+    border-left-color: #6b7280;
+    background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+}
+
+.dps-fieldset:last-of-type .dps-fieldset__legend {
     color: #374151;
-    padding: 0 8px;
-    font-size: 16px;
 }
 
 /* Indicador de campo obrigatório */
@@ -895,58 +1362,83 @@
     display: inline-block;
 }
 
-/* Resumo do agendamento */
+/* === RESUMO DO AGENDAMENTO - DESTAQUE VISUAL === */
 .dps-appointment-summary {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 32px auto 20px auto;
-    max-width: 800px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+    border: 2px solid #10b981;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 32px 0 24px 0;
+    position: relative;
+}
+
+.dps-appointment-summary::before {
+    content: '📋';
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    font-size: 24px;
+    background: #ffffff;
+    padding: 0 8px;
 }
 
 .dps-appointment-summary h3 {
     margin: 0 0 16px 0;
-    color: #374151;
-    font-size: 18px;
-    font-weight: 600;
+    color: #047857;
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .dps-appointment-summary__empty {
     color: #6b7280;
     font-size: 14px;
     margin: 0;
+    padding: 16px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    border: 1px dashed #d1d5db;
 }
 
 .dps-appointment-summary__list {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
 }
 
 .dps-appointment-summary__list li {
-    padding: 8px 0;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
     color: #374151;
     font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .dps-appointment-summary__list li:last-child,
 .dps-appointment-summary__list .dps-appointment-summary__notes {
-    border-bottom: none;
+    grid-column: 1 / -1;
 }
 
 .dps-appointment-summary__list strong {
     display: inline-block;
-    min-width: 140px;
     color: #6b7280;
     font-weight: 600;
+    font-size: 0.85rem;
 }
 
 .dps-appointment-summary__list [data-summary="price"] {
-    color: #0ea5e9;
+    color: #059669;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 1.25rem;
 }
 
 .dps-appointment-summary__notes {
@@ -1058,36 +1550,73 @@
     z-index: 10;
 }
 
-/* Ações do formulário */
+/* === AÇÕES DO FORMULÁRIO - DESTAQUE === */
 .dps-form-actions {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 16px;
     align-items: center;
+    justify-content: center;
     margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
+    padding: 24px;
+    background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
 }
 
 .dps-form-actions .dps-btn {
-    min-width: 140px;
+    min-width: 180px;
+    padding: 14px 24px;
+    font-size: 1rem;
+    border-radius: 8px;
 }
 
-/* Radio buttons estilizados */
+.dps-form-actions .dps-btn--primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: none;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    transition: all 0.2s ease;
+}
+
+.dps-form-actions .dps-btn--primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+    transform: translateY(-1px);
+}
+
+.dps-form-actions .dps-btn--secondary {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.dps-form-actions .dps-btn--secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+/* === RADIO BUTTONS ESTILIZADOS - LAYOUT COMPACTO === */
 .dps-radio-group {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
 }
 
 .dps-radio-option {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+    background: #ffffff;
+    position: relative;
 }
 
 .dps-radio-option:hover {
@@ -1095,9 +1624,39 @@
     background: #f0f9ff;
 }
 
+/* Estado selecionado - com fallback usando classe .is-selected para browsers antigos
+   Nota: O checkmark visual (✓) é decorativo; o estado selecionado é comunicado
+   pelo input radio nativo que é acessível por screen readers */
+.dps-radio-option.is-selected,
+.dps-radio-option:has(input:checked) {
+    border-color: #0ea5e9;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.dps-radio-option.is-selected::before,
+.dps-radio-option:has(input:checked)::before {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 12px;
+    color: #0ea5e9;
+    font-weight: 700;
+    /* aria-hidden via CSS não é possível, mas o input radio nativo
+       já comunica o estado selecionado para screen readers */
+}
+
+/* Fallback adicional para browsers antigos */
+.dps-radio-option input[type="radio"]:checked + .dps-radio-label strong {
+    color: #0369a1;
+}
+
 .dps-radio-option input[type="radio"] {
-    margin-top: 2px;
-    width: auto;
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: #0ea5e9;
 }
 
 .dps-radio-label {
@@ -1106,14 +1665,16 @@
 
 .dps-radio-label strong {
     display: block;
-    color: #374151;
-    margin-bottom: 4px;
+    color: #1f2937;
+    margin-bottom: 2px;
+    font-size: 0.95rem;
 }
 
 .dps-radio-label p {
     margin: 0;
-    font-size: 13px;
+    font-size: 12px;
     color: #6b7280;
+    line-height: 1.4;
 }
 
 @media (max-width: 640px) {

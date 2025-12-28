@@ -37,9 +37,13 @@ $list_title      = isset( $list_title ) ? $list_title : __( 'Próximos Agendamen
             continue;
         }
         $has_items = true;
+        $item_count = count( $items );
         ?>
         <div class="dps-appointments-group <?php echo esc_attr( $group['class'] ?? '' ); ?>">
-            <h4><?php echo esc_html( $group['title'] ?? '' ); ?></h4>
+            <h4>
+                <?php echo esc_html( $group['title'] ?? '' ); ?>
+                <span class="dps-group-badge"><?php echo esc_html( $item_count ); ?></span>
+            </h4>
             <div class="dps-table-wrapper">
                 <table class="dps-table">
                     <thead>
