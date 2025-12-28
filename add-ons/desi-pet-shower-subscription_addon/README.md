@@ -233,6 +233,9 @@ Ao modificar este add-on:
 
 ### Principais marcos
 
-- **v0.2.0**: Lançamento inicial com planos de assinatura, cobranças recorrentes, integração Finance/Payment e lembretes de renovação
+- **v1.2.0**: Melhorias de layout e UX - Dashboard de métricas, formulário em fieldsets, tabela responsiva, barra de progresso de atendimentos
+- **v1.1.0**: Extração de CSS/JS para arquivos externos, estilos de status de pagamento
+- **v1.0.0**: Primeira versão estável com integração Finance/Payment
+- **v0.2.0**: Lançamento inicial com planos de assinatura, cobranças recorrentes e lembretes
 
 Para o histórico completo de mudanças, consulte `CHANGELOG.md` na raiz do repositório.

@@ -83,6 +83,27 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Subscription Add-on (v1.2.0) - Melhorias de Layout e UX na Aba Assinaturas**
+
+- **Dashboard de métricas**: Cards de resumo no topo da seção mostrando Assinaturas Ativas, Receita Mensal, Pagamentos Pendentes e Canceladas.
+- **Barra de progresso visual**: Visualização gráfica do progresso de atendimentos (X/4 ou X/2 realizados) com cores e animação.
+- **Tabela responsiva**: Wrapper com scroll horizontal e transformação em cards para mobile (<640px).
+- **Data-labels para mobile**: Cada célula da tabela inclui atributo `data-label` para exibição correta em layout de cards.
+- **Botões de ação estilizados**: Ações (Editar, Cancelar, Renovar, Cobrar) exibidas como botões compactos com cores semânticas e hover states.
+- **Badges de status**: Status de pagamento em assinaturas canceladas exibido como badge colorido.
+
+#### Changed (Alterado)
+
+**Subscription Add-on (v1.2.0)**
+
+- **Formulário reorganizado em fieldsets**: Campos agrupados em "Dados do Cliente", "Detalhes da Assinatura" e "Agendamento Inicial" com legendas claras.
+- **Grid de 2 colunas**: Campos Cliente/Pet, Serviço/Frequência e Data/Hora lado a lado em desktop.
+- **Tabela simplificada**: Colunas Cliente e Pet unificadas em "Cliente / Pet" com layout empilhado para reduzir número de colunas.
+- **Coluna Início removida**: Data de início não exibida na listagem (informação menos relevante para operação diária).
+- **Próximo agendamento compacto**: Formato de data reduzido para "dd/mm HH:mm" para economizar espaço.
+- **Estilos CSS ampliados**: Novos estilos para dashboard, formulário com fieldsets, barra de progresso, badges, botões de ação e responsividade.
+- **Versão atualizada para 1.2.0** no cabeçalho do plugin e assets.
+
 **Push Add-on (v1.2.0) - Melhorias de Interface e Correções**
 
 - **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações" (antes estava oculto).
