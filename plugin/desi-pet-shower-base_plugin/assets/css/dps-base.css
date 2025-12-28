@@ -232,7 +232,7 @@
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3), 0 2px 8px rgba(14, 165, 233, 0.25);
 }
 
-/* Botão Secundário (Secondary) - Borda elegante */
+/* Botão Secundário (Secondary) - Gradiente elegante cinza/azul */
 .dps-btn-secondary,
 .dps-section .button-secondary,
 .dps-base-wrapper .button-secondary {
@@ -241,39 +241,42 @@
     justify-content: center;
     gap: 8px;
     padding: 12px 24px;
-    background: #ffffff;
-    color: #6b7280;
-    border: 2px solid #e5e7eb;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #475569;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
     text-shadow: none;
-    box-shadow: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .dps-btn-secondary:hover,
 .dps-section .button-secondary:hover,
 .dps-base-wrapper .button-secondary:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #374151;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    color: #334155;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
     text-decoration: none;
 }
 
 .dps-btn-secondary:active,
 .dps-section .button-secondary:active,
 .dps-base-wrapper .button-secondary:active {
-    background: #f3f4f6;
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .dps-btn-secondary:focus,
 .dps-section .button-secondary:focus,
 .dps-base-wrapper .button-secondary:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* Botão de Sucesso (Success) - Gradiente verde moderno */

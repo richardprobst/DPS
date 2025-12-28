@@ -207,9 +207,12 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
 ## 6. Componentes
 
-### Botões
+### Botões - Padrão Global Moderno e Elegante
+
+Todos os botões do sistema DPS seguem um padrão visual moderno e elegante com gradientes sutis. Não há distinção visual significativa entre "primários" e "secundários" - ambos usam gradientes para manter consistência visual.
+
 ```css
-/* Primário - Estilo Moderno com Gradiente */
+/* Botão Primário - Gradiente Azul */
 .button-primary,
 .dps-btn-primary {
     display: inline-flex;
@@ -226,7 +229,6 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
     text-shadow: none;
     cursor: pointer;
-    /* Evitar transition: all por performance - especificar propriedades */
     transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -244,7 +246,7 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
 }
 
-/* Secundário - Borda elegante */
+/* Botão Secundário - Gradiente Elegante Cinza/Prata */
 .button-secondary,
 .dps-btn-secondary {
     display: inline-flex;
@@ -252,24 +254,33 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     justify-content: center;
     gap: 8px;
     padding: 12px 24px;
-    background: #ffffff;
-    border: 2px solid #e5e7eb;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 15px;
     font-weight: 600;
-    color: #6b7280;
+    color: #475569;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .button-secondary:hover,
 .dps-btn-secondary:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #374151;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    color: #334155;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
 }
 
-/* Sucesso - Para ações de confirmação */
+.button-secondary:active,
+.dps-btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Botão de Sucesso - Gradiente Verde */
 .dps-btn-success {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #ffffff;
@@ -279,10 +290,11 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 .dps-btn-success:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
 }
 ```
 
-**Nota sobre Gradientes em Botões:** Embora o sistema seja minimalista, os botões primários usam gradientes sutis para melhor destacar ações principais. Esta é uma exceção intencional ao princípio geral, aplicada de forma consistente em todo o sistema.
+**Padrão Global:** Todos os botões (primários, secundários e de sucesso) utilizam gradientes, sombras sutis e animações de hover consistentes para criar uma experiência visual moderna e elegante em todo o sistema.
 
 ### Tabelas
 ```css
