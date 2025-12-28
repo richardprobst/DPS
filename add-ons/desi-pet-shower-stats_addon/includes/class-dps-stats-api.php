@@ -1045,12 +1045,12 @@ class DPS_Stats_API {
             $table = $wpdb->prefix . 'dps_transacoes';
             $today = current_time( 'Y-m-d' );
             
-            // Buscar receitas vencidas (data_vencimento < hoje e status != pago)
+            // Buscar receitas vencidas (data < hoje e status != pago)
             $sql = "SELECT SUM(valor) as total, COUNT(*) as count
                     FROM {$table}
                     WHERE tipo = 'receita'
                       AND status != 'pago'
-                      AND data_vencimento < %s";
+                      AND data < %s";
             
             $params = [ $today ];
             
