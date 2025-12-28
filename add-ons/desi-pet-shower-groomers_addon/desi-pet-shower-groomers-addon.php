@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.7.0
+ * Version:           1.8.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -1776,323 +1776,383 @@ class DPS_Groomers_Addon {
 
         $this->handle_new_groomer_submission( true );
         $groomers = $this->get_groomers();
+        
+        // Determinar sub-aba ativa
+        $active_subtab = isset( $_GET['groomers_subtab'] ) ? sanitize_key( wp_unslash( $_GET['groomers_subtab'] ) ) : 'equipe';
 
         ob_start();
         ?>
         <div class="dps-section" id="dps-section-groomers">
-            <h2 class="dps-section-title"><?php echo esc_html__( 'Groomers', 'dps-groomers-addon' ); ?></h2>
-            <p class="dps-section-description"><?php echo esc_html__( 'Cadastre profissionais, associe-os a atendimentos e acompanhe relatórios por período.', 'dps-groomers-addon' ); ?></p>
+            <div class="dps-section-header">
+                <h2 class="dps-section-title"><?php echo esc_html__( 'Equipe', 'dps-groomers-addon' ); ?></h2>
+                <p class="dps-section-description"><?php echo esc_html__( 'Gerencie profissionais, acompanhe produtividade e calcule comissões.', 'dps-groomers-addon' ); ?></p>
+            </div>
 
             <?php echo DPS_Message_Helper::display_messages(); ?>
 
-            <div class="dps-groomers-container">
-                <div class="dps-groomers-form-container">
-                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Adicionar novo groomer', 'dps-groomers-addon' ); ?></h3>
-                    <form method="post" action="" class="dps-groomers-form">
-                        <?php wp_nonce_field( 'dps_new_groomer', 'dps_new_groomer_nonce' ); ?>
-                        
-                        <fieldset class="dps-fieldset">
-                            <legend><?php echo esc_html__( 'Dados de Acesso', 'dps-groomers-addon' ); ?></legend>
-                            <div class="dps-form-row dps-form-row--2col">
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
-                                    <input name="dps_groomer_username" id="dps_groomer_username" type="text" placeholder="<?php echo esc_attr__( 'joao.silva', 'dps-groomers-addon' ); ?>" required />
-                                </div>
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
-                                    <input name="dps_groomer_email" id="dps_groomer_email" type="email" placeholder="<?php echo esc_attr__( 'joao@petshop.com', 'dps-groomers-addon' ); ?>" required />
-                                </div>
-                            </div>
-                        </fieldset>
-                        
-                        <fieldset class="dps-fieldset">
-                            <legend><?php echo esc_html__( 'Informações Pessoais', 'dps-groomers-addon' ); ?></legend>
-                            <div class="dps-form-row dps-form-row--2col">
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_name"><?php echo esc_html__( 'Nome completo', 'dps-groomers-addon' ); ?></label>
-                                    <input name="dps_groomer_name" id="dps_groomer_name" type="text" placeholder="<?php echo esc_attr__( 'João da Silva', 'dps-groomers-addon' ); ?>" />
-                                </div>
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
-                                    <input name="dps_groomer_password" id="dps_groomer_password" type="password" placeholder="<?php echo esc_attr__( 'Mínimo 8 caracteres', 'dps-groomers-addon' ); ?>" required />
-                                </div>
-                            </div>
-                        </fieldset>
-                        
-                        <fieldset class="dps-fieldset">
-                            <legend><?php echo esc_html__( 'Tipo e Vínculo', 'dps-groomers-addon' ); ?></legend>
-                            <div class="dps-form-row dps-form-row--2col">
-                                <div class="dps-form-field">
-                                    <label for="dps_staff_type"><?php echo esc_html__( 'Tipo de profissional', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
-                                    <select name="dps_staff_type" id="dps_staff_type" required>
-                                        <?php foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
-                                            <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $type_slug, 'groomer' ); ?>>
-                                                <?php echo esc_html( $type_label ); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="dps-form-field">
-                                    <label class="dps-checkbox-label">
-                                        <input type="checkbox" name="dps_is_freelancer" id="dps_is_freelancer" value="1" />
-                                        <?php echo esc_html__( 'É freelancer (autônomo)', 'dps-groomers-addon' ); ?>
-                                    </label>
-                                    <small class="dps-field-help"><?php echo esc_html__( 'Marque se o profissional não é funcionário fixo.', 'dps-groomers-addon' ); ?></small>
-                                </div>
-                            </div>
-                        </fieldset>
-                        
-                        <fieldset class="dps-fieldset">
-                            <legend><?php echo esc_html__( 'Contato e Comissão', 'dps-groomers-addon' ); ?></legend>
-                            <div class="dps-form-row dps-form-row--2col">
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_phone"><?php echo esc_html__( 'Telefone', 'dps-groomers-addon' ); ?></label>
-                                    <input name="dps_groomer_phone" id="dps_groomer_phone" type="tel" placeholder="<?php echo esc_attr__( '(15) 99999-9999', 'dps-groomers-addon' ); ?>" />
-                                </div>
-                                <div class="dps-form-field">
-                                    <label for="dps_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
-                                    <input name="dps_groomer_commission" id="dps_groomer_commission" type="number" min="0" max="100" step="0.5" placeholder="<?php echo esc_attr__( '10', 'dps-groomers-addon' ); ?>" />
-                                </div>
-                            </div>
-                        </fieldset>
-                        
-                        <fieldset class="dps-fieldset">
-                            <legend><?php echo esc_html__( 'Disponibilidade', 'dps-groomers-addon' ); ?></legend>
-                            <div class="dps-form-row dps-form-row--2col">
-                                <div class="dps-form-field">
-                                    <label for="dps_work_start"><?php echo esc_html__( 'Horário de início', 'dps-groomers-addon' ); ?></label>
-                                    <input name="dps_work_start" id="dps_work_start" type="time" value="08:00" />
-                                </div>
-                                <div class="dps-form-field">
-                                    <label for="dps_work_end"><?php echo esc_html__( 'Horário de término', 'dps-groomers-addon' ); ?></label>
-                                    <input name="dps_work_end" id="dps_work_end" type="time" value="18:00" />
-                                </div>
-                            </div>
-                            <div class="dps-form-field">
-                                <label><?php echo esc_html__( 'Dias de trabalho', 'dps-groomers-addon' ); ?></label>
-                                <div class="dps-weekdays-grid">
-                                    <?php 
-                                    $weekdays = [
-                                        'mon' => __( 'Seg', 'dps-groomers-addon' ),
-                                        'tue' => __( 'Ter', 'dps-groomers-addon' ),
-                                        'wed' => __( 'Qua', 'dps-groomers-addon' ),
-                                        'thu' => __( 'Qui', 'dps-groomers-addon' ),
-                                        'fri' => __( 'Sex', 'dps-groomers-addon' ),
-                                        'sat' => __( 'Sáb', 'dps-groomers-addon' ),
-                                        'sun' => __( 'Dom', 'dps-groomers-addon' ),
-                                    ];
-                                    $default_days = [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
-                                    foreach ( $weekdays as $day_key => $day_label ) : 
-                                        $checked = in_array( $day_key, $default_days, true ) ? 'checked' : '';
-                                    ?>
-                                        <label class="dps-weekday-checkbox">
-                                            <input type="checkbox" name="dps_work_days[]" value="<?php echo esc_attr( $day_key ); ?>" <?php echo esc_attr( $checked ); ?> />
-                                            <?php echo esc_html( $day_label ); ?>
-                                        </label>
-                                    <?php endforeach; ?>
-                                </div>
-                                <small class="dps-field-help"><?php echo esc_html__( 'Selecione os dias em que o profissional trabalha.', 'dps-groomers-addon' ); ?></small>
-                            </div>
-                        </fieldset>
-                        
-                        <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Criar profissional', 'dps-groomers-addon' ); ?></button>
-                    </form>
-                </div>
+            <!-- Navegação por sub-abas -->
+            <nav class="dps-groomers-subnav">
+                <ul class="dps-subnav-list">
+                    <li class="dps-subnav-item <?php echo ( 'equipe' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=equipe" class="dps-subnav-link">
+                            👥 <?php echo esc_html__( 'Equipe', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                    <li class="dps-subnav-item <?php echo ( 'relatorios' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=relatorios" class="dps-subnav-link">
+                            📊 <?php echo esc_html__( 'Relatórios', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                    <li class="dps-subnav-item <?php echo ( 'comissoes' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=comissoes" class="dps-subnav-link">
+                            💰 <?php echo esc_html__( 'Comissões', 'dps-groomers-addon' ); ?>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-                <div class="dps-groomers-list-container">
-                    <h3 class="dps-field-group-title"><?php echo esc_html__( 'Profissionais cadastrados', 'dps-groomers-addon' ); ?></h3>
-                    
-                    <!-- Filtros da listagem -->
-                    <div class="dps-groomers-filters">
-                        <form method="get" class="dps-inline-filters">
-                            <input type="hidden" name="tab" value="groomers" />
-                            <div class="dps-filter-group">
-                                <label for="filter_staff_type"><?php echo esc_html__( 'Tipo:', 'dps-groomers-addon' ); ?></label>
-                                <select name="filter_staff_type" id="filter_staff_type">
-                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
-                                    <?php 
-                                    $filter_type = isset( $_GET['filter_staff_type'] ) ? sanitize_key( wp_unslash( $_GET['filter_staff_type'] ) ) : '';
-                                    foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
-                                        <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $filter_type, $type_slug ); ?>>
+            <!-- Sub-aba: Equipe (Cadastro + Listagem) -->
+            <div class="dps-groomers-subtab <?php echo ( 'equipe' === $active_subtab ) ? 'dps-groomers-subtab--active' : ''; ?>" id="groomers-subtab-equipe" <?php echo ( 'equipe' !== $active_subtab ) ? 'style="display:none;"' : ''; ?>>
+                
+                <div class="dps-groomers-layout">
+                    <!-- Coluna: Cadastro -->
+                    <div class="dps-groomers-form-container">
+                        <div class="dps-card">
+                            <div class="dps-card__header">
+                                <h3 class="dps-card__title"><?php echo esc_html__( 'Novo Profissional', 'dps-groomers-addon' ); ?></h3>
+                            </div>
+                            <div class="dps-card__body">
+                                <form method="post" action="" class="dps-groomers-form">
+                                    <?php wp_nonce_field( 'dps_new_groomer', 'dps_new_groomer_nonce' ); ?>
+                                    
+                                    <!-- Dados Básicos (sempre visíveis) -->
+                                    <div class="dps-form-section">
+                                        <div class="dps-form-row dps-form-row--2col">
+                                            <div class="dps-form-field">
+                                                <label for="dps_groomer_name"><?php echo esc_html__( 'Nome completo', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                                <input name="dps_groomer_name" id="dps_groomer_name" type="text" placeholder="<?php echo esc_attr__( 'João da Silva', 'dps-groomers-addon' ); ?>" required />
+                                            </div>
+                                            <div class="dps-form-field">
+                                                <label for="dps_staff_type"><?php echo esc_html__( 'Função', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                                <select name="dps_staff_type" id="dps_staff_type" required>
+                                                    <?php foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
+                                                        <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $type_slug, 'groomer' ); ?>>
+                                                            <?php echo esc_html( $type_label ); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="dps-form-row dps-form-row--2col">
+                                            <div class="dps-form-field">
+                                                <label for="dps_groomer_email"><?php echo esc_html__( 'Email', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                                <input name="dps_groomer_email" id="dps_groomer_email" type="email" placeholder="<?php echo esc_attr__( 'joao@petshop.com', 'dps-groomers-addon' ); ?>" required />
+                                            </div>
+                                            <div class="dps-form-field">
+                                                <label for="dps_groomer_phone"><?php echo esc_html__( 'Telefone', 'dps-groomers-addon' ); ?></label>
+                                                <input name="dps_groomer_phone" id="dps_groomer_phone" type="tel" placeholder="<?php echo esc_attr__( '(15) 99999-9999', 'dps-groomers-addon' ); ?>" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Acesso (accordion colapsável) -->
+                                    <details class="dps-form-details" open>
+                                        <summary class="dps-form-details__summary"><?php echo esc_html__( 'Credenciais de Acesso', 'dps-groomers-addon' ); ?></summary>
+                                        <div class="dps-form-details__content">
+                                            <div class="dps-form-row dps-form-row--2col">
+                                                <div class="dps-form-field">
+                                                    <label for="dps_groomer_username"><?php echo esc_html__( 'Usuário', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                                    <input name="dps_groomer_username" id="dps_groomer_username" type="text" placeholder="<?php echo esc_attr__( 'joao.silva', 'dps-groomers-addon' ); ?>" required />
+                                                </div>
+                                                <div class="dps-form-field">
+                                                    <label for="dps_groomer_password"><?php echo esc_html__( 'Senha', 'dps-groomers-addon' ); ?> <span class="dps-required">*</span></label>
+                                                    <input name="dps_groomer_password" id="dps_groomer_password" type="password" placeholder="<?php echo esc_attr__( 'Mínimo 8 caracteres', 'dps-groomers-addon' ); ?>" required />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+
+                                    <!-- Configurações (accordion colapsável) -->
+                                    <details class="dps-form-details">
+                                        <summary class="dps-form-details__summary"><?php echo esc_html__( 'Configurações Adicionais', 'dps-groomers-addon' ); ?></summary>
+                                        <div class="dps-form-details__content">
+                                            <div class="dps-form-row dps-form-row--2col">
+                                                <div class="dps-form-field">
+                                                    <label for="dps_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
+                                                    <input name="dps_groomer_commission" id="dps_groomer_commission" type="number" min="0" max="100" step="0.5" placeholder="<?php echo esc_attr__( '10', 'dps-groomers-addon' ); ?>" />
+                                                </div>
+                                                <div class="dps-form-field">
+                                                    <label class="dps-checkbox-label dps-checkbox-label--inline">
+                                                        <input type="checkbox" name="dps_is_freelancer" id="dps_is_freelancer" value="1" />
+                                                        <?php echo esc_html__( 'Freelancer', 'dps-groomers-addon' ); ?>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="dps-form-row dps-form-row--3col">
+                                                <div class="dps-form-field">
+                                                    <label for="dps_work_start"><?php echo esc_html__( 'Início', 'dps-groomers-addon' ); ?></label>
+                                                    <input name="dps_work_start" id="dps_work_start" type="time" value="08:00" />
+                                                </div>
+                                                <div class="dps-form-field">
+                                                    <label for="dps_work_end"><?php echo esc_html__( 'Término', 'dps-groomers-addon' ); ?></label>
+                                                    <input name="dps_work_end" id="dps_work_end" type="time" value="18:00" />
+                                                </div>
+                                                <div class="dps-form-field dps-form-field--wide">
+                                                    <label><?php echo esc_html__( 'Dias', 'dps-groomers-addon' ); ?></label>
+                                                    <div class="dps-weekdays-grid dps-weekdays-grid--compact">
+                                                        <?php 
+                                                        $weekdays = [
+                                                            'mon' => 'S',
+                                                            'tue' => 'T',
+                                                            'wed' => 'Q',
+                                                            'thu' => 'Q',
+                                                            'fri' => 'S',
+                                                            'sat' => 'S',
+                                                            'sun' => 'D',
+                                                        ];
+                                                        $weekdays_full = [
+                                                            'mon' => __( 'Segunda', 'dps-groomers-addon' ),
+                                                            'tue' => __( 'Terça', 'dps-groomers-addon' ),
+                                                            'wed' => __( 'Quarta', 'dps-groomers-addon' ),
+                                                            'thu' => __( 'Quinta', 'dps-groomers-addon' ),
+                                                            'fri' => __( 'Sexta', 'dps-groomers-addon' ),
+                                                            'sat' => __( 'Sábado', 'dps-groomers-addon' ),
+                                                            'sun' => __( 'Domingo', 'dps-groomers-addon' ),
+                                                        ];
+                                                        $default_days = [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat' ];
+                                                        foreach ( $weekdays as $day_key => $day_label ) : 
+                                                            $checked = in_array( $day_key, $default_days, true ) ? 'checked' : '';
+                                                        ?>
+                                                            <label class="dps-weekday-checkbox dps-weekday-checkbox--mini" title="<?php echo esc_attr( $weekdays_full[ $day_key ] ); ?>">
+                                                                <input type="checkbox" name="dps_work_days[]" value="<?php echo esc_attr( $day_key ); ?>" <?php echo esc_attr( $checked ); ?> />
+                                                                <span><?php echo esc_html( $day_label ); ?></span>
+                                                            </label>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+                                    
+                                    <div class="dps-form-actions">
+                                        <button type="submit" class="dps-btn dps-btn--primary dps-btn--full"><?php echo esc_html__( 'Cadastrar Profissional', 'dps-groomers-addon' ); ?></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna: Listagem -->
+                    <div class="dps-groomers-list-container">
+                        <div class="dps-card">
+                            <div class="dps-card__header dps-card__header--with-actions">
+                                <h3 class="dps-card__title"><?php echo esc_html__( 'Profissionais', 'dps-groomers-addon' ); ?></h3>
+                                <span class="dps-card__count"><?php echo esc_html( count( $groomers ) ); ?></span>
+                            </div>
+                            <div class="dps-card__filters">
+                                <form method="get" class="dps-inline-filters">
+                                    <input type="hidden" name="tab" value="groomers" />
+                                    <input type="hidden" name="groomers_subtab" value="equipe" />
+                                    <select name="filter_staff_type" id="filter_staff_type" class="dps-filter-select">
+                                        <option value=""><?php echo esc_html__( 'Todos os tipos', 'dps-groomers-addon' ); ?></option>
+                                        <?php 
+                                        $filter_type = isset( $_GET['filter_staff_type'] ) ? sanitize_key( wp_unslash( $_GET['filter_staff_type'] ) ) : '';
+                                        foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
+                                            <option value="<?php echo esc_attr( $type_slug ); ?>" <?php selected( $filter_type, $type_slug ); ?>>
                                             <?php echo esc_html( $type_label ); ?>
                                         </option>
                                     <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="dps-filter-group">
-                                <label for="filter_freelancer"><?php echo esc_html__( 'Freelancer:', 'dps-groomers-addon' ); ?></label>
-                                <select name="filter_freelancer" id="filter_freelancer">
+                                    </select>
+                                    <select name="filter_status" id="filter_status" class="dps-filter-select">
+                                        <?php $filter_status = isset( $_GET['filter_status'] ) ? sanitize_key( wp_unslash( $_GET['filter_status'] ) ) : ''; ?>
+                                        <option value=""><?php echo esc_html__( 'Todos os status', 'dps-groomers-addon' ); ?></option>
+                                        <option value="active" <?php selected( $filter_status, 'active' ); ?>><?php echo esc_html__( 'Ativos', 'dps-groomers-addon' ); ?></option>
+                                        <option value="inactive" <?php selected( $filter_status, 'inactive' ); ?>><?php echo esc_html__( 'Inativos', 'dps-groomers-addon' ); ?></option>
+                                    </select>
                                     <?php $filter_freelancer = isset( $_GET['filter_freelancer'] ) ? sanitize_key( wp_unslash( $_GET['filter_freelancer'] ) ) : ''; ?>
-                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
-                                    <option value="1" <?php selected( $filter_freelancer, '1' ); ?>><?php echo esc_html__( 'Sim', 'dps-groomers-addon' ); ?></option>
-                                    <option value="0" <?php selected( $filter_freelancer, '0' ); ?>><?php echo esc_html__( 'Não', 'dps-groomers-addon' ); ?></option>
-                                </select>
+                                    <input type="hidden" name="filter_freelancer" value="<?php echo esc_attr( $filter_freelancer ); ?>" />
+                                    <button type="submit" class="dps-btn dps-btn--small dps-btn--icon"><?php echo esc_html__( 'Filtrar', 'dps-groomers-addon' ); ?></button>
+                                    <?php if ( $filter_type || $filter_freelancer !== '' || $filter_status ) : ?>
+                                        <a href="?tab=groomers&groomers_subtab=equipe" class="dps-btn dps-btn--small dps-btn--link"><?php echo esc_html__( 'Limpar', 'dps-groomers-addon' ); ?></a>
+                                    <?php endif; ?>
+                                </form>
                             </div>
-                            <div class="dps-filter-group">
-                                <label for="filter_status"><?php echo esc_html__( 'Status:', 'dps-groomers-addon' ); ?></label>
-                                <select name="filter_status" id="filter_status">
-                                    <?php $filter_status = isset( $_GET['filter_status'] ) ? sanitize_key( wp_unslash( $_GET['filter_status'] ) ) : ''; ?>
-                                    <option value=""><?php echo esc_html__( 'Todos', 'dps-groomers-addon' ); ?></option>
-                                    <option value="active" <?php selected( $filter_status, 'active' ); ?>><?php echo esc_html__( 'Ativos', 'dps-groomers-addon' ); ?></option>
-                                    <option value="inactive" <?php selected( $filter_status, 'inactive' ); ?>><?php echo esc_html__( 'Inativos', 'dps-groomers-addon' ); ?></option>
-                                </select>
-                            </div>
-                            <button type="submit" class="dps-btn dps-btn--small dps-btn--secondary"><?php echo esc_html__( 'Filtrar', 'dps-groomers-addon' ); ?></button>
-                            <?php if ( $filter_type || $filter_freelancer !== '' || $filter_status ) : ?>
-                                <a href="?tab=groomers" class="dps-btn dps-btn--small dps-btn--outline"><?php echo esc_html__( 'Limpar', 'dps-groomers-addon' ); ?></a>
-                            <?php endif; ?>
-                        </form>
-                    </div>
-                    
-                    <?php 
-                    // Aplicar filtros à lista de groomers em PHP.
-                    // Para datasets típicos (<100 profissionais) isso é suficiente.
-                    // Se performance se tornar um problema, mover para meta_query com user_meta.
-                    $filtered_groomers = $groomers;
-                    if ( $filter_type || $filter_freelancer !== '' || $filter_status ) {
-                        $filtered_groomers = array_filter( $groomers, function( $groomer ) use ( $filter_type, $filter_freelancer, $filter_status ) {
-                            // Filtrar por tipo
-                            if ( $filter_type ) {
-                                $staff_type = get_user_meta( $groomer->ID, '_dps_staff_type', true );
-                                if ( $staff_type !== $filter_type ) {
-                                    return false;
+                            <div class="dps-card__body dps-card__body--table">
+                                <?php 
+                                // Aplicar filtros à lista de groomers em PHP.
+                                $filtered_groomers = $groomers;
+                                if ( $filter_type || $filter_freelancer !== '' || $filter_status ) {
+                                    $filtered_groomers = array_filter( $groomers, function( $groomer ) use ( $filter_type, $filter_freelancer, $filter_status ) {
+                                        if ( $filter_type ) {
+                                            $staff_type = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+                                            if ( $staff_type !== $filter_type ) {
+                                                return false;
+                                            }
+                                        }
+                                        if ( $filter_freelancer !== '' ) {
+                                            $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+                                            if ( $is_freelancer !== $filter_freelancer ) {
+                                                return false;
+                                            }
+                                        }
+                                        if ( $filter_status ) {
+                                            $status = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
+                                            if ( empty( $status ) ) {
+                                                $status = 'active';
+                                            }
+                                            if ( $status !== $filter_status ) {
+                                                return false;
+                                            }
+                                        }
+                                        return true;
+                                    } );
                                 }
-                            }
-                            // Filtrar por freelancer
-                            if ( $filter_freelancer !== '' ) {
-                                $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
-                                if ( $is_freelancer !== $filter_freelancer ) {
-                                    return false;
-                                }
-                            }
-                            // Filtrar por status
-                            if ( $filter_status ) {
-                                $status = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
-                                if ( empty( $status ) ) {
-                                    $status = 'active';
-                                }
-                                if ( $status !== $filter_status ) {
-                                    return false;
-                                }
-                            }
-                            return true;
-                        } );
-                    }
-                    ?>
-                    
-                    <table class="dps-groomers-table">
-                        <thead>
-                            <tr>
-                                <th><?php echo esc_html__( 'Nome', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Tipo', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Freelancer', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Comissão', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Status', 'dps-groomers-addon' ); ?></th>
-                                <th><?php echo esc_html__( 'Ações', 'dps-groomers-addon' ); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if ( empty( $filtered_groomers ) ) : ?>
-                            <tr>
-                                <td colspan="6" class="dps-empty-message"><?php echo esc_html__( 'Nenhum profissional encontrado. Use o formulário acima para adicionar.', 'dps-groomers-addon' ); ?></td>
-                            </tr>
-                        <?php else : ?>
-                            <?php foreach ( $filtered_groomers as $groomer ) : 
-                                $delete_url = wp_nonce_url(
-                                    add_query_arg(
-                                        [
-                                            'dps_groomer_action' => 'delete',
-                                            'groomer_id'         => $groomer->ID,
-                                        ]
-                                    ),
-                                    'dps_delete_groomer_' . $groomer->ID
-                                );
-                                $toggle_url = wp_nonce_url(
-                                    add_query_arg(
-                                        [
-                                            'dps_groomer_action' => 'toggle_status',
-                                            'groomer_id'         => $groomer->ID,
-                                        ]
-                                    ),
-                                    'dps_toggle_status_' . $groomer->ID
-                                );
-                                $appointments_count = $this->get_groomer_appointments_count( $groomer->ID );
-                                $groomer_status     = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
-                                $groomer_phone      = get_user_meta( $groomer->ID, '_dps_groomer_phone', true );
-                                $groomer_commission = get_user_meta( $groomer->ID, '_dps_groomer_commission_rate', true );
-                                $staff_type         = get_user_meta( $groomer->ID, '_dps_staff_type', true );
-                                $is_freelancer      = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
-                                
-                                // Defaults
-                                if ( empty( $groomer_status ) ) {
-                                    $groomer_status = 'active';
-                                }
-                                if ( empty( $staff_type ) ) {
-                                    $staff_type = 'groomer';
-                                }
-                                
-                                $status_class = ( $groomer_status === 'active' ) ? 'dps-status-badge--ativo' : 'dps-status-badge--inativo';
-                                $status_label = ( $groomer_status === 'active' ) 
-                                    ? __( 'Ativo', 'dps-groomers-addon' ) 
-                                    : __( 'Inativo', 'dps-groomers-addon' );
                                 ?>
-                                <tr class="<?php echo ( $groomer_status === 'inactive' ) ? 'dps-groomer-inactive' : ''; ?>">
-                                    <td data-label="<?php echo esc_attr__( 'Nome', 'dps-groomers-addon' ); ?>">
-                                        <strong><?php echo esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?></strong>
-                                        <br><small><?php echo esc_html( $groomer->user_email ); ?></small>
-                                    </td>
-                                    <td data-label="<?php echo esc_attr__( 'Tipo', 'dps-groomers-addon' ); ?>">
-                                        <span class="dps-badge dps-badge--type-<?php echo esc_attr( $staff_type ); ?>">
-                                            <?php echo esc_html( self::get_staff_type_label( $staff_type ) ); ?>
-                                        </span>
-                                    </td>
-                                    <td data-label="<?php echo esc_attr__( 'Freelancer', 'dps-groomers-addon' ); ?>">
-                                        <?php if ( $is_freelancer === '1' ) : ?>
-                                            <span class="dps-badge dps-badge--freelancer"><?php echo esc_html__( 'Sim', 'dps-groomers-addon' ); ?></span>
-                                        <?php else : ?>
-                                            <span class="dps-text-muted"><?php echo esc_html__( 'Não', 'dps-groomers-addon' ); ?></span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="<?php echo esc_attr__( 'Comissão', 'dps-groomers-addon' ); ?>">
-                                        <?php if ( $groomer_commission ) : ?>
-                                            <?php echo esc_html( number_format_i18n( $groomer_commission, 1 ) ); ?>%
-                                        <?php else : ?>
-                                            <span class="dps-no-data">-</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="<?php echo esc_attr__( 'Status', 'dps-groomers-addon' ); ?>">
-                                        <a href="<?php echo esc_url( $toggle_url ); ?>" 
-                                            class="dps-status-badge <?php echo esc_attr( $status_class ); ?>"
-                                            title="<?php echo esc_attr__( 'Clique para alternar status', 'dps-groomers-addon' ); ?>">
-                                            <?php echo esc_html( $status_label ); ?>
-                                        </a>
-                                    </td>
-                                    <td data-label="<?php echo esc_attr__( 'Ações', 'dps-groomers-addon' ); ?>" class="dps-actions">
-                                        <button type="button" 
-                                            class="dps-action-link dps-edit-groomer" 
-                                            data-groomer-id="<?php echo esc_attr( $groomer->ID ); ?>"
-                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ); ?>"
-                                            data-groomer-email="<?php echo esc_attr( $groomer->user_email ); ?>"
-                                            data-groomer-phone="<?php echo esc_attr( $groomer_phone ); ?>"
-                                            data-groomer-commission="<?php echo esc_attr( $groomer_commission ); ?>"
-                                            data-staff-type="<?php echo esc_attr( $staff_type ); ?>"
-                                            data-is-freelancer="<?php echo esc_attr( $is_freelancer ); ?>"
-                                            title="<?php echo esc_attr__( 'Editar profissional', 'dps-groomers-addon' ); ?>">
-                                            ✏️ <?php echo esc_html__( 'Editar', 'dps-groomers-addon' ); ?>
-                                        </button>
-                                        <a href="<?php echo esc_url( $delete_url ); ?>" 
-                                            class="dps-action-link dps-action-link--delete dps-delete-groomer"
-                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
-                                            data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
-                                            title="<?php echo esc_attr__( 'Excluir profissional', 'dps-groomers-addon' ); ?>">
-                                            🗑️ <?php echo esc_html__( 'Excluir', 'dps-groomers-addon' ); ?>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                    </table>
+                                
+                                <table class="dps-groomers-table dps-groomers-table--compact">
+                                    <thead>
+                                        <tr>
+                                            <th><?php echo esc_html__( 'Profissional', 'dps-groomers-addon' ); ?></th>
+                                            <th class="dps-hide-mobile"><?php echo esc_html__( 'Contato', 'dps-groomers-addon' ); ?></th>
+                                            <th><?php echo esc_html__( 'Função', 'dps-groomers-addon' ); ?></th>
+                                            <th class="dps-text-center"><?php echo esc_html__( 'Status', 'dps-groomers-addon' ); ?></th>
+                                            <th class="dps-text-right"><?php echo esc_html__( 'Ações', 'dps-groomers-addon' ); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php if ( empty( $filtered_groomers ) ) : ?>
+                                        <tr>
+                                            <td colspan="5" class="dps-empty-message"><?php echo esc_html__( 'Nenhum profissional encontrado.', 'dps-groomers-addon' ); ?></td>
+                                        </tr>
+                                    <?php else : ?>
+                                        <?php foreach ( $filtered_groomers as $groomer ) : 
+                                            $delete_url = wp_nonce_url(
+                                                add_query_arg(
+                                                    [
+                                                        'dps_groomer_action' => 'delete',
+                                                        'groomer_id'         => $groomer->ID,
+                                                    ]
+                                                ),
+                                                'dps_delete_groomer_' . $groomer->ID
+                                            );
+                                            $toggle_url = wp_nonce_url(
+                                                add_query_arg(
+                                                    [
+                                                        'dps_groomer_action' => 'toggle_status',
+                                                        'groomer_id'         => $groomer->ID,
+                                                    ]
+                                                ),
+                                                'dps_toggle_status_' . $groomer->ID
+                                            );
+                                            $appointments_count = $this->get_groomer_appointments_count( $groomer->ID );
+                                            $groomer_status     = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
+                                            $groomer_phone      = get_user_meta( $groomer->ID, '_dps_groomer_phone', true );
+                                            $groomer_commission = get_user_meta( $groomer->ID, '_dps_groomer_commission_rate', true );
+                                            $staff_type         = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+                                            $is_freelancer      = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+                                            
+                                            if ( empty( $groomer_status ) ) {
+                                                $groomer_status = 'active';
+                                            }
+                                            if ( empty( $staff_type ) ) {
+                                                $staff_type = 'groomer';
+                                            }
+                                            
+                                            $status_class = ( $groomer_status === 'active' ) ? 'dps-status-dot--active' : 'dps-status-dot--inactive';
+                                            $status_label = ( $groomer_status === 'active' ) 
+                                                ? __( 'Ativo', 'dps-groomers-addon' ) 
+                                                : __( 'Inativo', 'dps-groomers-addon' );
+                                            ?>
+                                            <tr class="<?php echo ( $groomer_status === 'inactive' ) ? 'dps-groomer-inactive' : ''; ?>">
+                                                <td>
+                                                    <div class="dps-user-cell">
+                                                        <div class="dps-user-avatar"><?php echo esc_html( mb_strtoupper( mb_substr( $groomer->display_name ? $groomer->display_name : $groomer->user_login, 0, 1 ) ) ); ?></div>
+                                                        <div class="dps-user-info">
+                                                            <strong class="dps-user-name"><?php echo esc_html( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?></strong>
+                                                            <?php if ( $is_freelancer === '1' ) : ?>
+                                                                <span class="dps-tag dps-tag--freelancer">F</span>
+                                                            <?php endif; ?>
+                                                            <?php if ( $groomer_commission ) : ?>
+                                                                <span class="dps-user-commission"><?php echo esc_html( number_format_i18n( $groomer_commission, 0 ) ); ?>%</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="dps-hide-mobile">
+                                                    <div class="dps-contact-cell">
+                                                        <small><?php echo esc_html( $groomer->user_email ); ?></small>
+                                                        <?php if ( $groomer_phone ) : ?>
+                                                            <br><small class="dps-text-muted"><?php echo esc_html( $groomer_phone ); ?></small>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="dps-badge dps-badge--type-<?php echo esc_attr( $staff_type ); ?>">
+                                                        <?php echo esc_html( self::get_staff_type_label( $staff_type ) ); ?>
+                                                    </span>
+                                                </td>
+                                                <td class="dps-text-center">
+                                                    <a href="<?php echo esc_url( $toggle_url ); ?>" 
+                                                        class="dps-status-dot <?php echo esc_attr( $status_class ); ?>"
+                                                        title="<?php echo esc_attr( $status_label . ' - ' . __( 'Clique para alternar', 'dps-groomers-addon' ) ); ?>">
+                                                    </a>
+                                                </td>
+                                                <td class="dps-text-right">
+                                                    <div class="dps-actions-cell">
+                                                        <button type="button" 
+                                                            class="dps-action-btn dps-edit-groomer" 
+                                                            data-groomer-id="<?php echo esc_attr( $groomer->ID ); ?>"
+                                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ); ?>"
+                                                            data-groomer-email="<?php echo esc_attr( $groomer->user_email ); ?>"
+                                                            data-groomer-phone="<?php echo esc_attr( $groomer_phone ); ?>"
+                                                            data-groomer-commission="<?php echo esc_attr( $groomer_commission ); ?>"
+                                                            data-staff-type="<?php echo esc_attr( $staff_type ); ?>"
+                                                            data-is-freelancer="<?php echo esc_attr( $is_freelancer ); ?>"
+                                                            title="<?php echo esc_attr__( 'Editar', 'dps-groomers-addon' ); ?>">
+                                                            ✏️
+                                                        </button>
+                                                        <a href="<?php echo esc_url( $delete_url ); ?>" 
+                                                            class="dps-action-btn dps-action-btn--danger dps-delete-groomer"
+                                                            data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
+                                                            data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
+                                                            title="<?php echo esc_attr__( 'Excluir', 'dps-groomers-addon' ); ?>">
+                                                            🗑️
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-aba: Relatórios -->
+            <div class="dps-groomers-subtab <?php echo ( 'relatorios' === $active_subtab ) ? 'dps-groomers-subtab--active' : ''; ?>" id="groomers-subtab-relatorios" <?php echo ( 'relatorios' !== $active_subtab ) ? 'style="display:none;"' : ''; ?>>
+                <div class="dps-card">
+                    <div class="dps-card__header">
+                        <h3 class="dps-card__title"><?php echo esc_html__( 'Relatório por Profissional', 'dps-groomers-addon' ); ?></h3>
+                    </div>
+                    <div class="dps-card__body">
+                        <?php echo $this->render_report_block( $groomers ); ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-aba: Comissões -->
+            <div class="dps-groomers-subtab <?php echo ( 'comissoes' === $active_subtab ) ? 'dps-groomers-subtab--active' : ''; ?>" id="groomers-subtab-comissoes" <?php echo ( 'comissoes' !== $active_subtab ) ? 'style="display:none;"' : ''; ?>>
+                <div class="dps-card">
+                    <div class="dps-card__header">
+                        <h3 class="dps-card__title"><?php echo esc_html__( 'Cálculo de Comissões', 'dps-groomers-addon' ); ?></h3>
+                    </div>
+                    <div class="dps-card__body">
+                        <?php echo $this->render_commissions_report( $groomers ); ?>
+                    </div>
                 </div>
             </div>
 
@@ -2121,7 +2181,7 @@ class DPS_Groomers_Addon {
                             </div>
                             <div class="dps-form-row dps-form-row--2col">
                                 <div class="dps-form-field">
-                                    <label for="edit_staff_type"><?php echo esc_html__( 'Tipo de profissional', 'dps-groomers-addon' ); ?></label>
+                                    <label for="edit_staff_type"><?php echo esc_html__( 'Função', 'dps-groomers-addon' ); ?></label>
                                     <select name="dps_staff_type" id="edit_staff_type">
                                         <?php foreach ( self::get_staff_types() as $type_slug => $type_label ) : ?>
                                             <option value="<?php echo esc_attr( $type_slug ); ?>">
@@ -2146,10 +2206,6 @@ class DPS_Groomers_Addon {
                                     <label for="edit_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
                                     <input type="number" name="dps_groomer_commission" id="edit_groomer_commission" class="regular-text" min="0" max="100" step="0.5" />
                                 </div>
-                            </div>
-                            <p class="dps-modal-note">
-                                <?php echo esc_html__( 'Nota: O nome de usuário não pode ser alterado após a criação.', 'dps-groomers-addon' ); ?>
-                            </p>
                         </div>
                         
                         <div class="dps-modal-footer">
@@ -2158,14 +2214,6 @@ class DPS_Groomers_Addon {
                         </div>
                     </form>
                 </div>
-            </div>
-
-            <div class="dps-groomers-report">
-                <?php echo $this->render_report_block( $groomers ); ?>
-            </div>
-
-            <div class="dps-commissions-report">
-                <?php echo $this->render_commissions_report( $groomers ); ?>
             </div>
         </div>
         <?php
@@ -2253,30 +2301,29 @@ class DPS_Groomers_Addon {
 
         ob_start();
         ?>
-        <h4 class="dps-field-group-title"><?php echo esc_html__( 'Relatório de Comissões', 'dps-groomers-addon' ); ?></h4>
-        
         <form method="get" action="" class="dps-report-filters">
             <input type="hidden" name="tab" value="groomers" />
+            <input type="hidden" name="groomers_subtab" value="comissoes" />
             <?php wp_nonce_field( 'dps_commission_report', 'dps_commission_nonce' ); ?>
             
             <div class="dps-form-field">
-                <label for="dps_commission_start"><?php echo esc_html__( 'Data inicial', 'dps-groomers-addon' ); ?></label>
+                <label for="dps_commission_start"><?php echo esc_html__( 'Período de', 'dps-groomers-addon' ); ?></label>
                 <input type="date" name="dps_commission_start" id="dps_commission_start" value="<?php echo esc_attr( $start_date ); ?>" required />
             </div>
             
             <div class="dps-form-field">
-                <label for="dps_commission_end"><?php echo esc_html__( 'Data final', 'dps-groomers-addon' ); ?></label>
+                <label for="dps_commission_end"><?php echo esc_html__( 'até', 'dps-groomers-addon' ); ?></label>
                 <input type="date" name="dps_commission_end" id="dps_commission_end" value="<?php echo esc_attr( $end_date ); ?>" required />
             </div>
             
             <div class="dps-report-actions">
-                <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Calcular comissões', 'dps-groomers-addon' ); ?></button>
+                <button type="submit" class="dps-btn dps-btn--primary"><?php echo esc_html__( 'Calcular', 'dps-groomers-addon' ); ?></button>
             </div>
         </form>
 
         <?php if ( ! empty( $commissions_data ) ) : ?>
             <!-- Cards de totais -->
-            <div class="dps-metrics-grid" style="margin-bottom: 24px;">
+            <div class="dps-metrics-grid">
                 <div class="dps-metric-card dps-metric-card--success">
                     <span class="dps-metric-card__label"><?php echo esc_html__( 'Receita Total', 'dps-groomers-addon' ); ?></span>
                     <span class="dps-metric-card__value">R$ <?php echo esc_html( number_format_i18n( $total_revenue, 2 ) ); ?></span>
@@ -2414,14 +2461,13 @@ class DPS_Groomers_Addon {
 
         ob_start();
         ?>
-        <h4 class="dps-field-group-title"><?php echo esc_html__( 'Relatório por Groomer', 'dps-groomers-addon' ); ?></h4>
-        
         <form method="get" action="" class="dps-report-filters">
             <input type="hidden" name="tab" value="groomers" />
+            <input type="hidden" name="groomers_subtab" value="relatorios" />
             <?php wp_nonce_field( 'dps_report', 'dps_report_nonce' ); ?>
             
             <div class="dps-form-field">
-                <label for="dps_report_groomer"><?php echo esc_html__( 'Groomer', 'dps-groomers-addon' ); ?></label>
+                <label for="dps_report_groomer"><?php echo esc_html__( 'Profissional', 'dps-groomers-addon' ); ?></label>
                 <select name="dps_report_groomer" id="dps_report_groomer" required>
                     <option value=""><?php echo esc_html__( 'Selecione...', 'dps-groomers-addon' ); ?></option>
                     <?php foreach ( $groomers as $groomer ) : ?>

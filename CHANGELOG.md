@@ -83,6 +83,26 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Groomers Add-on (v1.8.0) - Redesign completo do Layout da Aba Equipe**
+
+- **Navegação por sub-abas**: Separação em 3 sub-abas (Equipe, Relatórios, Comissões) para organização mais clara e navegação mais fluida.
+- **Layout em cards**: Formulário e listagem agora em containers visuais estilizados com headers e bordas claras.
+- **Tabela compacta com avatares**: Listagem de profissionais redesenhada com avatares circulares, indicadores de comissão e status como ponto colorido (dot).
+- **Formulário reorganizado com accordions**: Campos básicos sempre visíveis, credenciais e configurações adicionais em seções colapsáveis (`<details>`).
+- **Dias de trabalho compactos**: Grid de checkboxes em formato mini (letras) para melhor aproveitamento de espaço.
+- **Filtros inline na listagem**: Filtros de tipo e status como dropdowns compactos no header do card.
+
+#### Changed (Alterado)
+
+**Groomers Add-on (v1.8.0)**
+
+- **Título da seção alterado de "Groomers" para "Equipe"**: Nomenclatura mais abrangente para suportar diferentes tipos de profissionais.
+- **Tabela de 6 para 5 colunas**: Colunas reorganizadas (Profissional, Contato, Função, Status, Ações) com informações condensadas.
+- **Status como indicador visual**: Antes era badge com texto, agora é ponto colorido clicável para alternar status.
+- **Botões de ação como ícones**: Editar e Excluir agora são botões de ícone compactos em vez de links com texto.
+- **Relatórios e Comissões em abas separadas**: Antes ficavam no final da página, agora têm abas dedicadas para melhor foco.
+- **CSS ampliado com variáveis CSS**: Uso de custom properties para cores e bordas, facilitando manutenção.
+
 **Subscription Add-on (v1.2.0) - Melhorias de Layout e UX na Aba Assinaturas**
 
 - **Dashboard de métricas**: Cards de resumo no topo da seção mostrando Assinaturas Ativas, Receita Mensal, Pagamentos Pendentes e Canceladas.

@@ -6,48 +6,333 @@
  * 
  * @package Desi_Pet_Shower_Groomers
  * @since 1.1.0
+ * @updated 1.8.0 - Redesign com sub-abas e layout em cards
  */
 
 /* ==========================================================================
-   1. Layout Principal
+   0. Variáveis CSS
    ========================================================================== */
 
-.dps-groomers-container {
+:root {
+    --dps-groomers-primary: #0ea5e9;
+    --dps-groomers-primary-hover: #0284c7;
+    --dps-groomers-success: #10b981;
+    --dps-groomers-warning: #f59e0b;
+    --dps-groomers-danger: #ef4444;
+    --dps-groomers-gray-50: #f9fafb;
+    --dps-groomers-gray-100: #f3f4f6;
+    --dps-groomers-gray-200: #e5e7eb;
+    --dps-groomers-gray-400: #9ca3af;
+    --dps-groomers-gray-500: #6b7280;
+    --dps-groomers-gray-700: #374151;
+    --dps-groomers-radius: 8px;
+    --dps-groomers-radius-sm: 4px;
+}
+
+/* ==========================================================================
+   1. Navegação por Sub-abas
+   ========================================================================== */
+
+.dps-section-header {
+    margin-bottom: 24px;
+}
+
+.dps-groomers-subnav {
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--dps-groomers-gray-200);
+}
+
+.dps-subnav-list {
     display: flex;
-    flex-direction: column;
-    gap: 32px;
-    margin-top: 24px;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dps-subnav-item {
+    margin-bottom: -2px;
+}
+
+.dps-subnav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dps-groomers-gray-500);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.dps-subnav-link:hover {
+    color: var(--dps-groomers-primary);
+}
+
+.dps-subnav-item--active .dps-subnav-link {
+    color: var(--dps-groomers-primary);
+    border-bottom-color: var(--dps-groomers-primary);
+}
+
+/* ==========================================================================
+   2. Cards
+   ========================================================================== */
+
+.dps-card {
+    background: #ffffff;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius);
+    overflow: hidden;
+}
+
+.dps-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--dps-groomers-gray-50);
+    border-bottom: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-card__header--with-actions {
+    gap: 12px;
+}
+
+.dps-card__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-groomers-gray-700);
+}
+
+.dps-card__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dps-groomers-primary);
+    background: rgba(14, 165, 233, 0.1);
+    border-radius: 12px;
+}
+
+.dps-card__filters {
+    padding: 12px 20px;
+    background: var(--dps-groomers-gray-50);
+    border-bottom: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-card__body {
+    padding: 20px;
+}
+
+.dps-card__body--table {
+    padding: 0;
+}
+
+/* ==========================================================================
+   3. Layout Principal
+   ========================================================================== */
+
+.dps-groomers-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media screen and (min-width: 1024px) {
+    .dps-groomers-layout {
+        grid-template-columns: 380px 1fr;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .dps-groomers-layout {
+        grid-template-columns: 420px 1fr;
+    }
 }
 
 .dps-groomers-form-container {
-    width: 100%;
-    max-width: 800px;
+    order: 2;
 }
 
 .dps-groomers-list-container {
-    width: 100%;
+    order: 1;
 }
 
-/* Layout em telas grandes (>1200px): formulário e lista lado a lado */
-@media screen and (min-width: 1200px) {
-    .dps-groomers-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
+@media screen and (min-width: 1024px) {
     .dps-groomers-form-container {
-        flex: 1 1 380px;
-        max-width: 450px;
+        order: 1;
     }
-
+    
     .dps-groomers-list-container {
-        flex: 2 1 500px;
-        min-width: 450px;
+        order: 2;
     }
 }
 
 /* ==========================================================================
-   2. Formulário de Cadastro
+   4. Formulário de Cadastro (Novo Design)
+   ========================================================================== */
+
+.dps-form-section {
+    margin-bottom: 16px;
+}
+
+.dps-form-details {
+    margin-bottom: 12px;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius-sm);
+}
+
+.dps-form-details__summary {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dps-groomers-gray-700);
+    background: var(--dps-groomers-gray-50);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-form-details__summary::-webkit-details-marker {
+    display: none;
+}
+
+.dps-form-details__summary::before {
+    content: '▶';
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.dps-form-details[open] .dps-form-details__summary::before {
+    transform: rotate(90deg);
+}
+
+.dps-form-details__content {
+    padding: 16px;
+    border-top: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-form-actions {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-groomers-form .dps-form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.dps-groomers-form .dps-form-row:last-child {
+    margin-bottom: 0;
+}
+
+.dps-groomers-form .dps-form-row--2col {
+    flex-wrap: wrap;
+}
+
+.dps-groomers-form .dps-form-row--2col > .dps-form-field {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 140px;
+}
+
+.dps-groomers-form .dps-form-row--3col > .dps-form-field {
+    flex: 1 1 calc(33% - 8px);
+    min-width: 100px;
+}
+
+.dps-groomers-form .dps-form-row--3col > .dps-form-field--wide {
+    flex: 2 1 calc(66% - 8px);
+}
+
+.dps-groomers-form .dps-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-groomers-form .dps-form-field label {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--dps-groomers-gray-700);
+}
+
+.dps-groomers-form .dps-form-field input,
+.dps-groomers-form .dps-form-field select {
+    padding: 8px 10px;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius-sm);
+    font-size: 14px;
+    color: var(--dps-groomers-gray-700);
+    transition: border-color 0.2s ease;
+}
+
+.dps-groomers-form .dps-form-field input:focus,
+.dps-groomers-form .dps-form-field select:focus {
+    border-color: var(--dps-groomers-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.dps-groomers-form .dps-form-field input::placeholder {
+    color: var(--dps-groomers-gray-400);
+}
+
+.dps-checkbox-label--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    font-weight: normal;
+}
+
+.dps-weekdays-grid--compact {
+    display: flex;
+    gap: 4px;
+}
+
+.dps-weekday-checkbox--mini {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: var(--dps-groomers-gray-100);
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-weekday-checkbox--mini input {
+    display: none;
+}
+
+.dps-weekday-checkbox--mini:has(input:checked) {
+    background: var(--dps-groomers-primary);
+    border-color: var(--dps-groomers-primary);
+    color: white;
+}
+
+.dps-weekday-checkbox--mini:hover {
+    border-color: var(--dps-groomers-primary);
+}
+
+/* ==========================================================================
+   5. Formulário Antigo (mantido para compatibilidade)
    ========================================================================== */
 
 .dps-groomers-form fieldset {
@@ -65,59 +350,208 @@
     padding: 0 10px;
 }
 
-.dps-groomers-form .dps-form-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.dps-groomers-form .dps-form-row--2col {
-    flex-wrap: wrap;
-}
-
-.dps-groomers-form .dps-form-row--2col > .dps-form-field {
-    flex: 1 1 calc(50% - 8px);
-    min-width: 140px;
-}
-
-.dps-groomers-form .dps-form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.dps-groomers-form .dps-form-field label {
-    font-weight: 500;
-    font-size: 14px;
-    color: #374151;
-}
-
-.dps-groomers-form .dps-form-field input {
-    padding: 10px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #374151;
-    transition: border-color 0.2s ease;
-}
-
-.dps-groomers-form .dps-form-field input:focus {
-    border-color: #0ea5e9;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
-}
-
-.dps-groomers-form .dps-form-field input::placeholder {
-    color: #9ca3af;
-}
-
 .dps-required {
     color: #ef4444;
     margin-left: 2px;
 }
 
 /* ==========================================================================
-   3. Tabela de Groomers
+   6. Tabela Compacta (Novo Design)
+   ========================================================================== */
+
+.dps-groomers-table--compact {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-groomers-table--compact th {
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--dps-groomers-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--dps-groomers-gray-200);
+    background: var(--dps-groomers-gray-50);
+}
+
+.dps-groomers-table--compact td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--dps-groomers-gray-700);
+    border-bottom: 1px solid var(--dps-groomers-gray-100);
+}
+
+.dps-groomers-table--compact tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-groomers-table--compact tbody tr:hover {
+    background: var(--dps-groomers-gray-50);
+}
+
+/* Célula de usuário com avatar */
+.dps-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--dps-groomers-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.dps-user-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-user-name {
+    font-weight: 600;
+    color: var(--dps-groomers-gray-700);
+}
+
+.dps-user-commission {
+    font-size: 11px;
+    color: var(--dps-groomers-gray-400);
+    background: var(--dps-groomers-gray-100);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.dps-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+}
+
+.dps-tag--freelancer {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.dps-contact-cell small {
+    display: block;
+    font-size: 12px;
+    color: var(--dps-groomers-gray-500);
+}
+
+/* Status como ponto colorido */
+.dps-status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.dps-status-dot:hover {
+    transform: scale(1.3);
+}
+
+.dps-status-dot--active {
+    background: var(--dps-groomers-success);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.dps-status-dot--inactive {
+    background: var(--dps-groomers-gray-400);
+    box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.2);
+}
+
+/* Ações como botões de ícone */
+.dps-actions-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.dps-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-action-btn:hover {
+    background: var(--dps-groomers-gray-100);
+    border-color: var(--dps-groomers-gray-400);
+}
+
+.dps-action-btn--danger:hover {
+    background: #fee2e2;
+    border-color: var(--dps-groomers-danger);
+}
+
+/* Filtros inline */
+.dps-inline-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dps-filter-select {
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius-sm);
+    background: white;
+    min-width: 120px;
+}
+
+.dps-filter-select:focus {
+    border-color: var(--dps-groomers-primary);
+    outline: none;
+}
+
+.dps-text-center {
+    text-align: center;
+}
+
+.dps-text-right {
+    text-align: right;
+}
+
+.dps-hide-mobile {
+    display: table-cell;
+}
+
+@media screen and (max-width: 768px) {
+    .dps-hide-mobile {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   7. Tabela de Groomers (Estilo Antigo)
    ========================================================================== */
 
 .dps-groomers-table {
@@ -192,13 +626,12 @@
 }
 
 /* ==========================================================================
-   4. Seção de Relatórios
+   8. Seção de Relatórios
    ========================================================================== */
 
 .dps-groomers-report {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid #e5e7eb;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 .dps-groomers-report h4 {
@@ -210,11 +643,11 @@
 
 .dps-report-filters {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
     align-items: flex-end;
     margin-bottom: 24px;
-    padding: 20px;
+    padding: 16px;
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 4px;
@@ -223,20 +656,20 @@
 .dps-report-filters .dps-form-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    flex: 1 1 180px;
-    min-width: 150px;
+    gap: 4px;
+    flex: 1 1 150px;
+    min-width: 120px;
 }
 
 .dps-report-filters .dps-form-field label {
     font-weight: 500;
-    font-size: 13px;
+    font-size: 12px;
     color: #6b7280;
 }
 
 .dps-report-filters .dps-form-field select,
 .dps-report-filters .dps-form-field input[type="date"] {
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     font-size: 14px;
@@ -252,34 +685,34 @@
 
 .dps-report-actions {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
 }
 
 /* ==========================================================================
-   5. Cards de Métricas
+   9. Cards de Métricas
    ========================================================================== */
 
 .dps-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .dps-metric-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .dps-metric-card__label {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -364,9 +797,8 @@
 
 /* Relatório de comissões */
 .dps-commissions-report {
-    margin-top: 40px;
-    padding-top: 32px;
-    border-top: 1px solid #e5e7eb;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 .dps-status-badge {
@@ -493,17 +925,54 @@
     cursor: not-allowed;
 }
 
+.dps-btn--full {
+    width: 100%;
+}
+
+.dps-btn--icon {
+    padding: 6px 12px;
+}
+
+.dps-btn--link {
+    background: transparent;
+    color: var(--dps-groomers-gray-500);
+    padding: 6px 8px;
+}
+
+.dps-btn--link:hover {
+    color: var(--dps-groomers-primary);
+    background: transparent;
+}
+
 /* ==========================================================================
-   9. Responsividade
+   10. Responsividade
    ========================================================================== */
+
+/* Sub-abas em mobile */
+@media screen and (max-width: 640px) {
+    .dps-subnav-list {
+        flex-wrap: wrap;
+    }
+    
+    .dps-subnav-link {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
 
 /* Tablet (768px) */
 @media screen and (max-width: 768px) {
-    .dps-groomers-form-container {
-        max-width: 100%;
+    .dps-groomers-layout {
+        grid-template-columns: 1fr;
     }
     
-    .dps-groomers-form .dps-form-row--2col > .dps-form-field {
+    .dps-groomers-form-container,
+    .dps-groomers-list-container {
+        order: unset;
+    }
+    
+    .dps-groomers-form .dps-form-row--2col > .dps-form-field,
+    .dps-groomers-form .dps-form-row--3col > .dps-form-field {
         flex: 1 1 100%;
     }
     
@@ -513,6 +982,15 @@
     
     .dps-report-filters .dps-form-field {
         flex: 1 1 100%;
+    }
+    
+    .dps-inline-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-filter-select {
+        width: 100%;
     }
     
     .dps-metrics-grid {
