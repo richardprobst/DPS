@@ -36,6 +36,9 @@
             $(document).on('change', '#dps-taxidog-toggle', this.toggleTaxiDog.bind(this));
             $(document).on('change', '#dps-tosa-toggle', this.updateTosaFields.bind(this));
             
+            // Evento para atualização do indicador de valor do TaxiDog
+            $(document).on('input', '#dps-taxidog-price', this.updateTaxiDogIndicator.bind(this));
+            
             // Eventos para agendamento passado
             $(document).on('change', '#past_payment_status', this.togglePastPaymentValue.bind(this));
             
@@ -54,6 +57,13 @@
             // Eventos para serviços do Services Add-on
             $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
             $(document).on('input', '.dps-service-price', this.updateAppointmentSummary.bind(this));
+            
+            // Eventos para extras (novo formato múltiplos)
+            $(document).on('input', '.dps-extra-description-input, .dps-extra-value-input', this.updateAppointmentSummary.bind(this));
+            $(document).on('click', '.dps-extras-toggle, .dps-add-extra-btn, .dps-remove-extra-btn', function() {
+                // Delay para aguardar animação de toggle
+                setTimeout(function() { DPSAppointmentForm.updateAppointmentSummary(); }, 250);
+            });
             
             // FASE 2: Validação e estado do botão submit
             // Aplica somente ao form de agendamento (que contém appointment_type), não a outros forms .dps-form
@@ -110,6 +120,26 @@
                 $('#dps-taxidog-extra').hide();
             } else {
                 $('#dps-taxidog-extra').toggle(hasTaxi);
+            }
+            
+            // Atualiza indicador visual do valor
+            this.updateTaxiDogIndicator();
+        },
+        
+        /**
+         * Atualiza o indicador visual do valor do TaxiDog
+         */
+        updateTaxiDogIndicator: function() {
+            const $indicator = $('#dps-taxidog-value-indicator');
+            const value = parseFloat($('#dps-taxidog-price').val()) || 0;
+            
+            if (value > 0) {
+                const formatted = value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                $indicator.addClass('dps-value-filled').html(
+                    '<span class="dps-value-badge">✓ R$ ' + formatted + '</span>'
+                );
+            } else {
+                $indicator.removeClass('dps-value-filled').html('');
             }
         },
         
@@ -229,6 +259,19 @@
                     totalValue += baseValue;
                 }
 
+                // Novo formato: múltiplos extras
+                if ($('#dps-subscription-extras-container').is(':visible')) {
+                    $('#dps-subscription-extras-list .dps-extra-row').each(function() {
+                        const desc = $(this).find('.dps-extra-description-input').val();
+                        const val = parseCurrency($(this).find('.dps-extra-value-input').val());
+                        if (val > 0) {
+                            const labelText = desc && desc.trim() !== '' ? desc.trim() : 'Extra';
+                            services.push(labelText + ' (R$ ' + val.toFixed(2) + ')');
+                            totalValue += val;
+                        }
+                    });
+                }
+                // Compatibilidade: formato antigo
                 const extraWrapper = $('#dps-subscription-extra-fields');
                 const extraDesc = $('input[name="subscription_extra_description"]').val();
                 const extraValue = parseCurrency($('#dps-subscription-extra-value').val());
@@ -238,6 +281,19 @@
                     totalValue += extraValue;
                 }
             } else {
+                // Novo formato: múltiplos extras
+                if ($('#dps-simple-extras-container').is(':visible')) {
+                    $('#dps-simple-extras-list .dps-extra-row').each(function() {
+                        const desc = $(this).find('.dps-extra-description-input').val();
+                        const val = parseCurrency($(this).find('.dps-extra-value-input').val());
+                        if (val > 0) {
+                            const labelText = desc && desc.trim() !== '' ? desc.trim() : 'Extra';
+                            services.push(labelText + ' (R$ ' + val.toFixed(2) + ')');
+                            totalValue += val;
+                        }
+                    });
+                }
+                // Compatibilidade: formato antigo
                 const extraWrapper = $('#dps-simple-extra-fields');
                 const extraDesc = $('input[name="appointment_extra_description"]').val();
                 const extraValue = parseCurrency($('#dps-simple-extra-value').val());

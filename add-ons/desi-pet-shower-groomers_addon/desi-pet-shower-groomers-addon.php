@@ -83,7 +83,8 @@ class DPS_Groomers_Addon {
     public function __construct() {
         add_action( 'dps_base_nav_tabs_after_history', [ $this, 'add_groomers_tab' ], 15, 1 );
         add_action( 'dps_base_sections_after_history', [ $this, 'add_groomers_section' ], 15, 1 );
-        add_action( 'dps_base_appointment_fields', [ $this, 'render_appointment_groomer_field' ], 10, 2 );
+        // Hook para área de atribuição (separada de Serviços e Extras)
+        add_action( 'dps_base_appointment_assignment_fields', [ $this, 'render_appointment_groomer_field' ], 10, 2 );
         add_action( 'dps_base_after_save_appointment', [ $this, 'save_appointment_groomers' ], 10, 2 );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -1673,8 +1674,9 @@ class DPS_Groomers_Addon {
             $grouped[ $staff_type ][] = $groomer;
         }
         
-        echo '<p><label>' . esc_html__( 'Profissionais responsáveis', 'dps-groomers-addon' ) . '<br>';
-        echo '<select name="dps_groomers[]" id="dps_groomers_select" multiple size="5" style="min-width:280px;">';
+        echo '<div class="dps-form-field dps-groomers-field">';
+        echo '<label for="dps_groomers_select">' . esc_html__( 'Profissionais responsáveis', 'dps-groomers-addon' ) . '</label>';
+        echo '<select name="dps_groomers[]" id="dps_groomers_select" multiple size="5" class="dps-groomers-select">';
         if ( empty( $groomers ) ) {
             echo '<option value="">' . esc_html__( 'Nenhum profissional ativo', 'dps-groomers-addon' ) . '</option>';
         } else {
@@ -1693,8 +1695,8 @@ class DPS_Groomers_Addon {
             }
         }
         echo '</select>';
-        echo '<span class="description">' . esc_html__( 'Selecione um ou mais profissionais. (F) = Freelancer.', 'dps-groomers-addon' ) . '</span>';
-        echo '</label></p>';
+        echo '<p class="dps-field-hint">' . esc_html__( 'Selecione um ou mais profissionais. (F) = Freelancer.', 'dps-groomers-addon' ) . '</p>';
+        echo '</div>';
     }
 
     /**

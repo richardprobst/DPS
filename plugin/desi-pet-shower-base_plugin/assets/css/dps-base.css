@@ -1344,6 +1344,143 @@
     margin-bottom: 12px;
 }
 
+/* === SEÇÃO TAXIDOG MELHORADA === */
+.dps-taxidog-section {
+    margin: 16px 0;
+    padding: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dps-taxidog-toggle-label {
+    margin-bottom: 0;
+}
+
+.dps-taxidog-icon {
+    font-size: 18px;
+    margin-right: 4px;
+}
+
+.dps-taxidog-value-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.dps-taxidog-value-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dps-taxidog-value-wrapper > label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0;
+}
+
+.dps-taxidog-price-input {
+    width: 80px !important;
+    text-align: right;
+}
+
+/* Indicador visual de valor */
+.dps-value-indicator {
+    display: inline-flex;
+    align-items: center;
+}
+
+.dps-value-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #d1fae5;
+    color: #047857;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Input com prefixo R$ */
+.dps-input-with-prefix {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dps-input-prefix {
+    padding: 8px 8px 8px 12px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+    border-right: 1px solid #e5e7eb;
+}
+
+.dps-input-with-prefix input {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 8px 12px 8px 8px !important;
+    box-shadow: none !important;
+}
+
+.dps-input-with-prefix input:focus {
+    outline: none;
+}
+
+.dps-input-with-prefix:focus-within {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+}
+
+/* === SEÇÃO DE ATRIBUIÇÃO === */
+.dps-assignment-fieldset {
+    border-left-color: #8b5cf6 !important;
+    background: linear-gradient(to right, #f5f3ff 0%, #ffffff 100%) !important;
+}
+
+.dps-assignment-fieldset .dps-fieldset__legend {
+    color: #7c3aed !important;
+}
+
+.dps-groomers-field {
+    margin-bottom: 0;
+}
+
+.dps-groomers-field label {
+    font-weight: 500;
+    color: #374151;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.dps-groomers-select {
+    min-width: 280px;
+    max-width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.dps-groomers-select:focus {
+    border-color: #8b5cf6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
 /* Inputs de valores monetários */
 .dps-form input.dps-input-money {
     width: 120px;
