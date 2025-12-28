@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Formulário de Agendamento Melhorado</title>
+    <style>
+        /* Reset básico */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: #1f2937; }
+        .demo-container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        
+        /* Cabeçalho da seção */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 24px 0;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .section-header::before {
+            content: '📅';
+            font-size: 1.2em;
+        }
+        
+        /* Fieldsets coloridos por seção */
+        .dps-fieldset {
+            border: none;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            border-radius: 0 8px 8px 0;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dps-fieldset__legend {
+            font-weight: 700;
+            padding: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        /* Seção 1: Tipo de Agendamento - Roxo */
+        .dps-fieldset.section-1 {
+            border-left-color: #8b5cf6;
+            background: linear-gradient(to right, #f5f3ff 0%, #ffffff 100%);
+        }
+        .dps-fieldset.section-1 .dps-fieldset__legend { color: #6d28d9; }
+
+        /* Seção 2: Cliente e Pet(s) - Azul */
+        .dps-fieldset.section-2 {
+            border-left-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+        }
+        .dps-fieldset.section-2 .dps-fieldset__legend { color: #0369a1; }
+
+        /* Seção 3: Data e Horário - Laranja */
+        .dps-fieldset.section-3 {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+        }
+        .dps-fieldset.section-3 .dps-fieldset__legend { color: #b45309; }
+
+        /* Seção 4: Serviços e Extras - Verde */
+        .dps-fieldset.section-4 {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+        }
+        .dps-fieldset.section-4 .dps-fieldset__legend { color: #047857; }
+
+        /* Seção 5: Observações - Cinza */
+        .dps-fieldset.section-5 {
+            border-left-color: #6b7280;
+            background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+        }
+        .dps-fieldset.section-5 .dps-fieldset__legend { color: #374151; }
+        
+        /* Radio buttons em grid */
+        .dps-radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .dps-radio-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #ffffff;
+            position: relative;
+        }
+
+        .dps-radio-option:hover {
+            border-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+
+        .dps-radio-option:has(input:checked) {
+            border-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        .dps-radio-option:has(input:checked)::before {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 12px;
+            color: #0ea5e9;
+            font-weight: 700;
+        }
+
+        .dps-radio-option input[type="radio"] {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            accent-color: #0ea5e9;
+        }
+
+        .dps-radio-label {
+            flex: 1;
+        }
+
+        .dps-radio-label strong {
+            display: block;
+            color: #1f2937;
+            margin-bottom: 2px;
+            font-size: 0.95rem;
+        }
+
+        .dps-radio-label p {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        /* Inputs e selects */
+        .dps-form-field {
+            margin-bottom: 16px;
+        }
+        
+        .dps-form-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        
+        .dps-form-field input,
+        .dps-form-field select,
+        .dps-form-field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .dps-form-field input:focus,
+        .dps-form-field select:focus,
+        .dps-form-field textarea:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+        
+        .dps-required {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        .dps-field-hint {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Grid 2 colunas */
+        .dps-form-row--2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        /* Pet Picker */
+        .dps-pet-picker {
+            border: 2px solid #e5e7eb;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        
+        .dps-pet-picker-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .dps-pet-picker-actions button {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: #ffffff;
+            cursor: pointer;
+        }
+        
+        .dps-pet-picker-actions button:hover {
+            background: #f3f4f6;
+        }
+        
+        .dps-pet-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dps-pet-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dps-pet-option:hover {
+            border-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+
+        .dps-pet-option:has(input:checked) {
+            border-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        .dps-pet-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #0ea5e9;
+        }
+
+        .dps-pet-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .dps-pet-breed,
+        .dps-pet-owner,
+        .dps-pet-size {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        
+        /* Checkbox label */
+        .dps-checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+        
+        .dps-checkbox-label:hover {
+            border-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+        
+        .dps-checkbox-label input[type="checkbox"] {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            accent-color: #0ea5e9;
+        }
+        
+        /* Resumo do agendamento */
+        .dps-appointment-summary {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .dps-appointment-summary::before {
+            content: '📋';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            font-size: 24px;
+            background: #ffffff;
+            padding: 0 8px;
+        }
+
+        .dps-appointment-summary h3 {
+            margin: 0 0 16px 0;
+            color: #047857;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .dps-appointment-summary__list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .dps-appointment-summary__list li {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .dps-appointment-summary__list strong {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        .dps-appointment-summary__list .price {
+            color: #059669;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        /* Botões de ação */
+        .dps-form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            margin-top: 24px;
+        }
+
+        .dps-btn {
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .dps-btn--primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: none;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .dps-btn--primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .dps-btn--secondary {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            color: #6b7280;
+        }
+
+        .dps-btn--secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            color: #374151;
+        }
+        
+        /* Comparação */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .comparison-box { padding: 16px; border-radius: 8px; }
+        .comparison-box h3 { margin-bottom: 12px; font-size: 1rem; }
+        .comparison-box ul { padding-left: 20px; }
+        .comparison-box li { margin: 4px 0; font-size: 0.9rem; }
+        .old-style { background: #fef2f2; border: 1px dashed #fca5a5; }
+        .new-style { background: #ecfdf5; border: 1px dashed #86efac; }
+        
+        @media (max-width: 768px) {
+            .comparison { grid-template-columns: 1fr; }
+            .dps-form-row--2col { grid-template-columns: 1fr; }
+            .dps-radio-group { grid-template-columns: 1fr; }
+            .dps-appointment-summary__list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Demo - Formulário de Agendamento Melhorado</h1>
+    
+    <div class="demo-container">
+        <h2 class="section-header">Agendamento de Serviços</h2>
+        
+        <form>
+            <!-- FIELDSET 1: Tipo de Agendamento -->
+            <fieldset class="dps-fieldset section-1">
+                <legend class="dps-fieldset__legend">📋 Tipo de Agendamento</legend>
+                
+                <div class="dps-radio-group">
+                    <label class="dps-radio-option">
+                        <input type="radio" name="appointment_type" value="simple" checked>
+                        <div class="dps-radio-label">
+                            <strong>Agendamento Simples</strong>
+                            <p>Atendimento único, sem recorrência</p>
+                        </div>
+                    </label>
+                    
+                    <label class="dps-radio-option">
+                        <input type="radio" name="appointment_type" value="subscription">
+                        <div class="dps-radio-label">
+                            <strong>Agendamento de Assinatura</strong>
+                            <p>Atendimentos recorrentes</p>
+                        </div>
+                    </label>
+                    
+                    <label class="dps-radio-option">
+                        <input type="radio" name="appointment_type" value="past">
+                        <div class="dps-radio-label">
+                            <strong>Agendamento Passado</strong>
+                            <p>Registrar atendimento anterior</p>
+                        </div>
+                    </label>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 2: Cliente e Pet(s) -->
+            <fieldset class="dps-fieldset section-2">
+                <legend class="dps-fieldset__legend">👤 Cliente e Pet(s)</legend>
+                
+                <div class="dps-form-field">
+                    <label>Cliente <span class="dps-required">*</span></label>
+                    <select>
+                        <option value="">Selecione...</option>
+                        <option value="1">Maria Silva</option>
+                        <option value="2">João Santos</option>
+                        <option value="3">Ana Costa</option>
+                    </select>
+                </div>
+                
+                <div class="dps-pet-picker">
+                    <p><strong>Pet(s) <span class="dps-required">*</span></strong> <span style="margin-left: 12px; font-size: 0.85rem; color: #0ea5e9; background: #f0f9ff; padding: 2px 8px; border-radius: 12px;">2 selecionados</span></p>
+                    <p class="dps-field-hint">Selecione os pets do cliente. É possível marcar mais de um.</p>
+                    
+                    <div class="dps-pet-picker-actions">
+                        <button type="button">Selecionar todos</button>
+                        <button type="button">Limpar seleção</button>
+                    </div>
+                    
+                    <div class="dps-pet-list">
+                        <label class="dps-pet-option">
+                            <input type="checkbox" checked>
+                            <span class="dps-pet-name">Rex</span>
+                            <span class="dps-pet-breed">– Labrador</span>
+                            <span class="dps-pet-size">· Grande</span>
+                        </label>
+                        <label class="dps-pet-option">
+                            <input type="checkbox" checked>
+                            <span class="dps-pet-name">Bella</span>
+                            <span class="dps-pet-breed">– Poodle</span>
+                            <span class="dps-pet-size">· Pequeno</span>
+                        </label>
+                        <label class="dps-pet-option">
+                            <input type="checkbox">
+                            <span class="dps-pet-name">Thor</span>
+                            <span class="dps-pet-breed">– Bulldog</span>
+                            <span class="dps-pet-size">· Médio</span>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 3: Data e Horário -->
+            <fieldset class="dps-fieldset section-3">
+                <legend class="dps-fieldset__legend">📅 Data e Horário</legend>
+                
+                <div class="dps-form-row--2col">
+                    <div class="dps-form-field">
+                        <label>Data <span class="dps-required">*</span></label>
+                        <input type="date" value="2024-12-29">
+                        <p class="dps-field-hint">Horários disponíveis serão carregados após escolher a data</p>
+                    </div>
+                    <div class="dps-form-field">
+                        <label>Horário <span class="dps-required">*</span></label>
+                        <select>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00" selected>10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="14:00">14:00</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            
+            <!-- FIELDSET 4: Serviços e Extras -->
+            <fieldset class="dps-fieldset section-4">
+                <legend class="dps-fieldset__legend">🛁 Serviços e Extras</legend>
+                
+                <label class="dps-checkbox-label">
+                    <input type="checkbox">
+                    <div>
+                        <strong>Solicitar TaxiDog?</strong>
+                        <p class="dps-field-hint">Serviço de transporte do pet</p>
+                    </div>
+                </label>
+                
+                <label class="dps-checkbox-label">
+                    <input type="checkbox" checked>
+                    <div>
+                        <strong>Banho completo</strong>
+                        <p class="dps-field-hint">R$ 50,00</p>
+                    </div>
+                </label>
+                
+                <label class="dps-checkbox-label">
+                    <input type="checkbox">
+                    <div>
+                        <strong>Tosa higiênica</strong>
+                        <p class="dps-field-hint">R$ 30,00</p>
+                    </div>
+                </label>
+            </fieldset>
+            
+            <!-- FIELDSET 5: Observações -->
+            <fieldset class="dps-fieldset section-5">
+                <legend class="dps-fieldset__legend">📝 Observações e Notas</legend>
+                
+                <div class="dps-form-field">
+                    <label>Observações</label>
+                    <textarea rows="3" placeholder="Instruções especiais, preferências do cliente, etc."></textarea>
+                    <p class="dps-field-hint">Opcional - use este campo para anotações internas</p>
+                </div>
+            </fieldset>
+            
+            <!-- Resumo do agendamento -->
+            <div class="dps-appointment-summary">
+                <h3>Resumo do agendamento</h3>
+                <ul class="dps-appointment-summary__list">
+                    <li><strong>Cliente:</strong> <span>Maria Silva</span></li>
+                    <li><strong>Pets:</strong> <span>Rex, Bella</span></li>
+                    <li><strong>Data:</strong> <span>29/12/2024</span></li>
+                    <li><strong>Horário:</strong> <span>10:00</span></li>
+                    <li><strong>Serviços:</strong> <span>Banho completo</span></li>
+                    <li><strong>Valor estimado:</strong> <span class="price">R$ 100,00</span></li>
+                </ul>
+            </div>
+            
+            <!-- Botões de ação -->
+            <div class="dps-form-actions">
+                <button type="submit" class="dps-btn dps-btn--primary">✓ Salvar Agendamento</button>
+                <a href="#" class="dps-btn dps-btn--secondary">Cancelar</a>
+            </div>
+        </form>
+        
+        <!-- Comparação -->
+        <div class="comparison">
+            <div class="comparison-box old-style">
+                <h3>❌ Problemas Anteriores</h3>
+                <ul>
+                    <li>Fieldsets sem distinção visual</li>
+                    <li>Radio buttons ocupando muito espaço</li>
+                    <li>Pet picker confuso</li>
+                    <li>Campos sem hierarquia clara</li>
+                    <li>Resumo pouco destacado</li>
+                    <li>Botões sem destaque</li>
+                </ul>
+            </div>
+            <div class="comparison-box new-style">
+                <h3>✅ Melhorias Implementadas</h3>
+                <ul>
+                    <li>Fieldsets com cores por seção</li>
+                    <li>Radio buttons em grid compacto</li>
+                    <li>Pet picker organizado</li>
+                    <li>Inputs com feedback visual</li>
+                    <li>Resumo destacado em verde</li>
+                    <li>Botões com gradiente e sombra</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
