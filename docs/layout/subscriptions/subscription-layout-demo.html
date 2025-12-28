@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS - Aba Assinaturas - Demonstração de Layout v1.2.0</title>
+    <style>
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f3f4f6;
+            color: #374151;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        
+        .demo-header {
+            background: #374151;
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .demo-header h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .demo-header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .dps-section {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .dps-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #374151;
+        }
+        
+        /* Dashboard */
+        .dps-subscription-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .dps-stat-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .dps-stat-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .dps-stat-number {
+            display: block;
+            font-size: 28px;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.2;
+        }
+        
+        .dps-stat-label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .dps-stat-card.dps-stat-warning .dps-stat-number {
+            color: #f59e0b;
+        }
+        
+        .dps-stat-card.dps-stat-success .dps-stat-number {
+            color: #10b981;
+        }
+        
+        /* Botão */
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #374151;
+        }
+        
+        .button-primary {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+            color: white;
+        }
+        
+        .dps-subscription-actions {
+            margin-bottom: 20px;
+        }
+        
+        /* Formulário */
+        .dps-subscription-form {
+            max-width: 600px;
+            margin-bottom: 32px;
+        }
+        
+        .dps-fieldset {
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background: #ffffff;
+        }
+        
+        .dps-fieldset legend {
+            font-weight: 600;
+            color: #374151;
+            padding: 0 8px;
+            font-size: 15px;
+        }
+        
+        .dps-form-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .dps-form-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dps-form-row--2col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .dps-form-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dps-form-field label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        
+        .dps-form-field select,
+        .dps-form-field input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .dps-required {
+            color: #ef4444;
+        }
+        
+        .dps-form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* Tabela */
+        .dps-subscription-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+        
+        .dps-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .dps-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: nowrap;
+        }
+        
+        .dps-table td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .dps-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Status de pagamento */
+        .dps-table tr.pay-status-pendente {
+            background-color: #fff8e1;
+        }
+        
+        .dps-table tr.pay-status-pago {
+            background-color: #e6ffed;
+        }
+        
+        /* Textos */
+        .dps-text-secondary {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        
+        .dps-text-muted {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        
+        /* Barra de progresso */
+        .dps-progress-bar {
+            position: relative;
+            height: 24px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            overflow: hidden;
+            min-width: 80px;
+        }
+        
+        .dps-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 12px;
+        }
+        
+        .dps-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        /* Botões de ação */
+        .dps-action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .dps-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        
+        .dps-action-btn:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Select de pagamento */
+        .dps-select-payment {
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 13px;
+            background: #ffffff;
+            min-width: 100px;
+        }
+        
+        /* Seção título */
+        .dps-section-title {
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .dps-form-row--2col {
+                grid-template-columns: 1fr;
+            }
+            
+            .dps-form-actions {
+                flex-direction: column;
+            }
+            
+            .dps-form-actions .button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .dps-subscription-table-wrapper {
+                border: none;
+                background: transparent;
+            }
+            
+            .dps-table thead {
+                display: none;
+            }
+            
+            .dps-table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .dps-table tbody tr {
+                display: flex;
+                flex-direction: column;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 16px;
+                background: #ffffff;
+            }
+            
+            .dps-table tbody tr.pay-status-pendente {
+                border-left: 4px solid #f59e0b;
+            }
+            
+            .dps-table tbody tr.pay-status-pago {
+                border-left: 4px solid #10b981;
+            }
+            
+            .dps-table tbody td {
+                display: grid;
+                grid-template-columns: 100px 1fr;
+                gap: 8px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f3f4f6;
+            }
+            
+            .dps-table tbody td:first-child {
+                padding-top: 0;
+            }
+            
+            .dps-table tbody td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            
+            .dps-table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+                font-size: 11px;
+                text-transform: uppercase;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dps-subscription-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .dps-stat-card {
+                padding: 16px 12px;
+            }
+            
+            .dps-stat-number {
+                font-size: 22px;
+            }
+            
+            .dps-stat-label {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🐾 DPS by PRObst - Aba Assinaturas</h1>
+        <p>Demonstração das melhorias de layout v1.2.0</p>
+    </div>
+    
+    <div class="dps-section">
+        <h3>Assinaturas Mensais</h3>
+        
+        <!-- Dashboard de Métricas -->
+        <div class="dps-subscription-dashboard">
+            <div class="dps-stat-card">
+                <span class="dps-stat-number">12</span>
+                <span class="dps-stat-label">Assinaturas Ativas</span>
+            </div>
+            <div class="dps-stat-card dps-stat-success">
+                <span class="dps-stat-number">R$ 2.400,00</span>
+                <span class="dps-stat-label">Valor dos Pacotes</span>
+            </div>
+            <div class="dps-stat-card dps-stat-warning">
+                <span class="dps-stat-number">3</span>
+                <span class="dps-stat-label">Pagamentos Pendentes</span>
+            </div>
+            <div class="dps-stat-card">
+                <span class="dps-stat-number">2</span>
+                <span class="dps-stat-label">Canceladas</span>
+            </div>
+        </div>
+        
+        <!-- Botão Nova Assinatura -->
+        <div class="dps-subscription-actions">
+            <a href="#" class="button button-primary">➕ Nova Assinatura</a>
+        </div>
+        
+        <!-- Tabela de Assinaturas Ativas -->
+        <h4>Assinaturas Ativas</h4>
+        <div class="dps-subscription-table-wrapper">
+            <table class="dps-table">
+                <thead>
+                    <tr>
+                        <th>Cliente / Pet</th>
+                        <th>Serviço</th>
+                        <th>Frequência</th>
+                        <th>Valor</th>
+                        <th>Próximo</th>
+                        <th>Progresso</th>
+                        <th>Pagamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="pay-status-pago">
+                        <td data-label="Cliente">
+                            <strong>Maria Silva</strong><br>
+                            <span class="dps-text-secondary">🐾 Thor</span>
+                        </td>
+                        <td data-label="Serviço">Banho e Tosa</td>
+                        <td data-label="Frequência">Semanal</td>
+                        <td data-label="Valor"><strong>R$ 280,00</strong></td>
+                        <td data-label="Próximo">15/01 09:00</td>
+                        <td data-label="Progresso">
+                            <div class="dps-progress-bar">
+                                <div class="dps-progress-fill" style="width: 50%;"></div>
+                                <span class="dps-progress-text">2/4</span>
+                            </div>
+                        </td>
+                        <td data-label="Pagamento">
+                            <select class="dps-select-payment">
+                                <option selected>Pago</option>
+                                <option>Pendente</option>
+                            </select>
+                        </td>
+                        <td data-label="Ações" class="dps-col-actions">
+                            <div class="dps-action-buttons">
+                                <a href="#" class="dps-action-btn" title="Editar">✏️</a>
+                                <a href="#" class="dps-action-btn" title="Cancelar">❌</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="pay-status-pendente">
+                        <td data-label="Cliente">
+                            <strong>João Oliveira</strong><br>
+                            <span class="dps-text-secondary">🐾 Luna</span>
+                        </td>
+                        <td data-label="Serviço">Banho</td>
+                        <td data-label="Frequência">Quinzenal</td>
+                        <td data-label="Valor"><strong>R$ 120,00</strong></td>
+                        <td data-label="Próximo">18/01 14:00</td>
+                        <td data-label="Progresso">
+                            <div class="dps-progress-bar">
+                                <div class="dps-progress-fill" style="width: 0%;"></div>
+                                <span class="dps-progress-text">0/2</span>
+                            </div>
+                        </td>
+                        <td data-label="Pagamento">
+                            <select class="dps-select-payment">
+                                <option>Pago</option>
+                                <option selected>Pendente</option>
+                            </select>
+                        </td>
+                        <td data-label="Ações" class="dps-col-actions">
+                            <div class="dps-action-buttons">
+                                <a href="#" class="dps-action-btn" title="Editar">✏️</a>
+                                <a href="#" class="dps-action-btn" title="Cancelar">❌</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="pay-status-pago">
+                        <td data-label="Cliente">
+                            <strong>Ana Costa</strong><br>
+                            <span class="dps-text-secondary">🐾 Max</span>
+                        </td>
+                        <td data-label="Serviço">Banho e Tosa</td>
+                        <td data-label="Frequência">Semanal</td>
+                        <td data-label="Valor"><strong>R$ 320,00</strong></td>
+                        <td data-label="Próximo"><span class="dps-text-muted">—</span></td>
+                        <td data-label="Progresso">
+                            <div class="dps-progress-bar">
+                                <div class="dps-progress-fill" style="width: 100%;"></div>
+                                <span class="dps-progress-text">4/4</span>
+                            </div>
+                        </td>
+                        <td data-label="Pagamento">
+                            <select class="dps-select-payment">
+                                <option selected>Pago</option>
+                                <option>Pendente</option>
+                            </select>
+                        </td>
+                        <td data-label="Ações" class="dps-col-actions">
+                            <div class="dps-action-buttons">
+                                <a href="#" class="dps-action-btn" title="Editar">✏️</a>
+                                <a href="#" class="dps-action-btn" title="Cancelar">❌</a>
+                                <a href="#" class="dps-action-btn" title="Renovar">🔄</a>
+                                <a href="#" class="dps-action-btn" title="Cobrar">💰</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Formulário de Nova Assinatura -->
+    <div class="dps-section">
+        <h3>Formulário: Nova Assinatura</h3>
+        
+        <form class="dps-subscription-form">
+            <fieldset class="dps-fieldset">
+                <legend>Dados do Cliente</legend>
+                <div class="dps-form-row dps-form-row--2col">
+                    <div class="dps-form-field">
+                        <label>Cliente <span class="dps-required">*</span></label>
+                        <select>
+                            <option>Selecione o cliente...</option>
+                            <option>Maria Silva</option>
+                            <option>João Oliveira</option>
+                            <option>Ana Costa</option>
+                        </select>
+                    </div>
+                    <div class="dps-form-field">
+                        <label>Pet <span class="dps-required">*</span></label>
+                        <select>
+                            <option>Selecione o pet...</option>
+                            <option>Thor</option>
+                            <option>Luna</option>
+                            <option>Max</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            
+            <fieldset class="dps-fieldset">
+                <legend>Detalhes da Assinatura</legend>
+                <div class="dps-form-row dps-form-row--2col">
+                    <div class="dps-form-field">
+                        <label>Serviço <span class="dps-required">*</span></label>
+                        <select>
+                            <option>Selecione o serviço...</option>
+                            <option>Banho</option>
+                            <option>Banho e Tosa</option>
+                        </select>
+                    </div>
+                    <div class="dps-form-field">
+                        <label>Frequência <span class="dps-required">*</span></label>
+                        <select>
+                            <option>Selecione a frequência...</option>
+                            <option>Semanal</option>
+                            <option>Quinzenal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dps-form-field">
+                    <label>Valor do pacote (R$) <span class="dps-required">*</span></label>
+                    <input type="number" placeholder="0,00">
+                </div>
+            </fieldset>
+            
+            <fieldset class="dps-fieldset">
+                <legend>Agendamento Inicial</legend>
+                <div class="dps-form-row dps-form-row--2col">
+                    <div class="dps-form-field">
+                        <label>Data de início <span class="dps-required">*</span></label>
+                        <input type="date">
+                    </div>
+                    <div class="dps-form-field">
+                        <label>Horário <span class="dps-required">*</span></label>
+                        <input type="time">
+                    </div>
+                </div>
+            </fieldset>
+            
+            <div class="dps-form-actions">
+                <button type="button" class="button button-primary">Criar Assinatura</button>
+                <a href="#" class="button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
