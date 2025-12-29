@@ -353,3 +353,53 @@
 .dps-addon-manager .notice {
     margin: 20px 0;
 }
+
+/* Botões de Ação Individual */
+.dps-addon-individual-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.dps-btn-individual {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 4px 10px;
+    height: auto;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+}
+
+.dps-btn-individual .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dps-btn-activate {
+    background: #10b981;
+    border-color: #10b981;
+    color: #fff;
+}
+
+.dps-btn-activate:hover,
+.dps-btn-activate:focus {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+}
+
+.dps-btn-deactivate {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #6b7280;
+}
+
+.dps-btn-deactivate:hover,
+.dps-btn-deactivate:focus {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+}
