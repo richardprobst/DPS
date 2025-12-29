@@ -92,6 +92,13 @@ Antes de criar uma nova versão oficial:
 - **Categorização de add-ons**: Add-ons organizados em 6 categorias (Essenciais, Operação, Integrações, Cliente, Avançado, Sistema).
 - **Verificação de dependências**: Alertas visuais quando dependências de um add-on não estão ativas.
 
+#### Removed (Removido)
+
+**Add-ons Descontinuados**
+
+- **Debugging Add-on removido**: Add-on de gerenciamento de constantes de debug e visualização de logs removido por complexidade de manutenção.
+- **White Label Add-on removido**: Add-on de personalização de marca, cores, logo e SMTP removido por baixa utilização e dificuldades de manutenção.
+
 **Base Plugin (v1.0.4) - Redesign das Abas CLIENTES e PETS**
 
 - **Templates modulares para pets**: Criados templates separados para formulário (`pet-form.php`), listagem (`pets-list.php`) e seção completa (`pets-section.php`), seguindo mesmo padrão já existente para clientes.

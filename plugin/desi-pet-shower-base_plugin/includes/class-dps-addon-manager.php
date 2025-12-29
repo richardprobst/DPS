@@ -262,28 +262,6 @@ class DPS_Addon_Manager {
                 'category'     => 'system',
                 'icon'         => '💾',
             ],
-            'debugging' => [
-                'slug'         => 'debugging',
-                'name'         => __( 'Debugging', 'desi-pet-shower' ),
-                'description'  => __( 'Gerenciamento de constantes de debug e visualização de logs.', 'desi-pet-shower' ),
-                'file'         => 'desi-pet-shower-debugging_addon/desi-pet-shower-debugging-addon.php',
-                'class'        => 'DPS_Debugging_Addon',
-                'dependencies' => [],
-                'priority'     => 90,
-                'category'     => 'system',
-                'icon'         => '🔧',
-            ],
-            'whitelabel' => [
-                'slug'         => 'whitelabel',
-                'name'         => __( 'White Label', 'desi-pet-shower' ),
-                'description'  => __( 'Personalização de marca, cores, logo e SMTP.', 'desi-pet-shower' ),
-                'file'         => 'desi-pet-shower-whitelabel_addon/desi-pet-shower-whitelabel-addon.php',
-                'class'        => 'DPS_WhiteLabel_Addon',
-                'dependencies' => [],
-                'priority'     => 95,
-                'category'     => 'system',
-                'icon'         => '🏷️',
-            ],
         ];
 
         // Mapeia arquivos para busca rápida
