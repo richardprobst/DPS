@@ -762,7 +762,7 @@ class DPS_AI_Public_Chat {
         }
 
         // Verifica se o shortcode está no conteúdo
-        if ( ! has_shortcode( $post->post_content, self::SHORTCODE ) ) {
+        if ( ! has_shortcode( (string) $post->post_content, self::SHORTCODE ) ) {
             return;
         }
 

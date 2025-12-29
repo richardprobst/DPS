@@ -99,6 +99,9 @@ class DPS_Loyalty_Addon {
      * @param string $hook Hook atual do admin.
      */
     public function enqueue_admin_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.4+
+        $hook = (string) $hook;
+
         // Carrega apenas nas páginas relevantes
         $is_loyalty_page = strpos( $hook, 'dps-loyalty' ) !== false;
         $is_campaign_edit = false;

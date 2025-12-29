@@ -332,7 +332,7 @@ class DPS_AI_Integration_Portal {
     public function enqueue_portal_assets() {
         // Verifica se estamos em uma página com o shortcode do Portal
         global $post;
-        if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'dps_client_portal' ) ) {
+        if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( (string) $post->post_content, 'dps_client_portal' ) ) {
             return;
         }
 

@@ -869,8 +869,9 @@ class DPS_Agenda_Addon {
         $charges_page_id = get_option( 'dps_charges_page_id' );
 
         $current_post            = is_singular() ? get_post() : null;
-        $has_agenda_shortcode    = $current_post ? has_shortcode( $current_post->post_content, 'dps_agenda_page' ) : false;
-        $has_charges_shortcode   = $current_post ? has_shortcode( $current_post->post_content, 'dps_charges_notes' ) : false;
+        $current_content         = $current_post ? (string) $current_post->post_content : '';
+        $has_agenda_shortcode    = $current_post ? has_shortcode( $current_content, 'dps_agenda_page' ) : false;
+        $has_charges_shortcode   = $current_post ? has_shortcode( $current_content, 'dps_charges_notes' ) : false;
         $is_agenda_target_page   = $agenda_page_id && is_page( $agenda_page_id );
         $is_charges_target_page  = $charges_page_id && is_page( $charges_page_id );
         

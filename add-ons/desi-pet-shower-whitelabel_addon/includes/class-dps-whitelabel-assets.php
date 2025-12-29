@@ -50,6 +50,9 @@ class DPS_WhiteLabel_Assets {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_custom_styles( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.4+
+        $hook = (string) $hook;
+
         // Lista whitelist de hooks DPS
         $allowed_hooks = [
             'toplevel_page_desi-pet-shower',

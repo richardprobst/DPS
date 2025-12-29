@@ -252,7 +252,7 @@ function dps_client_portal_check_configuration() {
             }
             
             // Verifica se a página tem o shortcode
-            if ( ! has_shortcode( $page->post_content, 'dps_client_portal' ) ) {
+            if ( ! has_shortcode( (string) $page->post_content, 'dps_client_portal' ) ) {
                 $messages[] = [
                     'type'    => 'error',
                     'message' => sprintf(
@@ -398,7 +398,7 @@ function dps_client_portal_maybe_create_page() {
     if ( $existing_page_id && get_post_status( $existing_page_id ) === 'publish' ) {
         // Verifica se a página tem o shortcode
         $page = get_post( $existing_page_id );
-        if ( $page && has_shortcode( $page->post_content, 'dps_client_portal' ) ) {
+        if ( $page && has_shortcode( (string) $page->post_content, 'dps_client_portal' ) ) {
             return $existing_page_id;
         }
         
@@ -431,7 +431,7 @@ function dps_client_portal_maybe_create_page() {
     
     if ( $portal_page ) {
         // Página existe - verifica se tem o shortcode
-        if ( ! has_shortcode( $portal_page->post_content, 'dps_client_portal' ) ) {
+        if ( ! has_shortcode( (string) $portal_page->post_content, 'dps_client_portal' ) ) {
             // Adiciona o shortcode ao conteúdo existente
             wp_update_post( [
                 'ID'           => $portal_page->ID,

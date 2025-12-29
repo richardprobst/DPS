@@ -332,7 +332,8 @@ class DPS_Base_Plugin {
             return;
         }
 
-        $should_enqueue = ( $post instanceof WP_Post ) && ( has_shortcode( $post->post_content, 'dps_base' ) || has_shortcode( $post->post_content, 'dps_configuracoes' ) );
+        $content = ( $post instanceof WP_Post ) ? (string) $post->post_content : '';
+        $should_enqueue = ( $post instanceof WP_Post ) && ( has_shortcode( $content, 'dps_base' ) || has_shortcode( $content, 'dps_configuracoes' ) );
         $should_enqueue = apply_filters( 'dps_base_should_enqueue_assets', $should_enqueue, $post );
 
         if ( ! $should_enqueue ) {
@@ -427,6 +428,9 @@ class DPS_Base_Plugin {
             'toplevel_page_dps-logs',
             'dps-logs',
         ];
+
+        // Cast para string para compatibilidade com PHP 8.4+
+        $hook = (string) $hook;
 
         // Verifica se estamos em uma página DPS ou se o hook contém 'dps'
         $is_dps_page = in_array( $hook, $dps_admin_pages, true ) || strpos( $hook, 'dps' ) !== false;
