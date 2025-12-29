@@ -2396,7 +2396,7 @@ class DPS_AI_Addon {
             $redirect_args['truncated'] = '1';
         }
 
-        wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ) );
+        wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ?: admin_url( 'admin.php?page=dps-ai' ) ) );
         exit;
     }
 

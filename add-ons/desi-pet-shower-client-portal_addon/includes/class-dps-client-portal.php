@@ -3056,7 +3056,7 @@ final class DPS_Client_Portal {
         $redirect_url = add_query_arg( [
             'tab'                       => 'portal',
             'dps_portal_settings_saved' => '1',
-        ], wp_get_referer() );
+        ], wp_get_referer() ?: admin_url( 'admin.php?page=desi-pet-shower' ) );
         
         wp_safe_redirect( $redirect_url );
         exit;
