@@ -1395,7 +1395,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
                 
                 // Sanitizar nome da tabela: permitir apenas caracteres alfanuméricos e underscore
-                $table_name = preg_replace( '/[^a-zA-Z0-9_]/', '', $table['name'] );
+                $table_name = (string) preg_replace( '/[^a-zA-Z0-9_]/', '', (string) $table['name'] );
                 
                 // Validar que o nome começa com 'dps_' (tabelas do plugin)
                 if ( 0 !== strpos( $table_name, 'dps_' ) ) {

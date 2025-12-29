@@ -681,7 +681,7 @@ final class DPS_Client_Portal {
         $should_load = false;
 
         // Carrega se estiver na tela de configurações do DPS
-        if ( isset( $_GET['page'] ) && false !== strpos( $_GET['page'], 'dps' ) ) {
+        if ( isset( $_GET['page'] ) && false !== strpos( (string) $_GET['page'], 'dps' ) ) {
             $should_load = true;
         }
 
@@ -3642,8 +3642,8 @@ Equipe %4$s', 'dps-client-portal' ),
      * @return string Cor ajustada em hexadecimal.
      */
     private function adjust_brightness( $hex, $steps ) {
-        // Converte hex para RGB
-        $hex = str_replace( '#', '', $hex );
+        // Converte hex para RGB (cast para string para compatibilidade com PHP 8.1+)
+        $hex = str_replace( '#', '', (string) $hex );
         if ( strlen( $hex ) === 3 ) {
             $hex = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );
         }
