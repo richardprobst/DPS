@@ -116,6 +116,23 @@ class DPS_Base_Plugin {
     }
 
     /**
+     * Retorna a versão do asset baseada no timestamp de modificação do arquivo.
+     *
+     * Usa `filemtime` para forçar atualização de CSS/JS quando o conteúdo muda,
+     * garantindo que o layout moderno do painel não fique preso em cache antigo.
+     *
+     * @since 1.0.4
+     * @param string $relative_path Caminho relativo dentro do plugin (sem barra inicial).
+     * @return string Versão calculada ou fallback para constante do plugin.
+     */
+    private static function get_asset_version( $relative_path ) {
+        $file_path = DPS_BASE_DIR . ltrim( $relative_path, '/' );
+        $mtime     = file_exists( $file_path ) ? filemtime( $file_path ) : false;
+
+        return $mtime ? (string) $mtime : DPS_BASE_VERSION;
+    }
+
+    /**
      * Executa rotinas de ativação: criação de capabilities e do papel de recepção.
      */
     public static function activate() {
@@ -359,12 +376,12 @@ class DPS_Base_Plugin {
         $enqueued = true;
 
         // CSS
-        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], DPS_BASE_VERSION );
-        wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], DPS_BASE_VERSION );
+        wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], self::get_asset_version( 'assets/css/dps-base.css' ) );
+        wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], self::get_asset_version( 'assets/css/dps-form-validation.css' ) );
         // JS
-        wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], DPS_BASE_VERSION, true );
-        wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], DPS_BASE_VERSION, true );
-        wp_enqueue_script( 'dps-form-validation', DPS_BASE_URL . 'assets/js/dps-form-validation.js', [], DPS_BASE_VERSION, true );
+        wp_enqueue_script( 'dps-base-script', DPS_BASE_URL . 'assets/js/dps-base.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-base.js' ), true );
+        wp_enqueue_script( 'dps-appointment-form', DPS_BASE_URL . 'assets/js/dps-appointment-form.js', [ 'jquery' ], self::get_asset_version( 'assets/js/dps-appointment-form.js' ), true );
+        wp_enqueue_script( 'dps-form-validation', DPS_BASE_URL . 'assets/js/dps-form-validation.js', [], self::get_asset_version( 'assets/js/dps-form-validation.js' ), true );
         
         // Localização para o script de agendamento
         wp_localize_script( 'dps-appointment-form', 'dpsAppointmentData', [
@@ -457,14 +474,14 @@ class DPS_Base_Plugin {
             return;
         }
 
-        wp_enqueue_style( 'dps-admin-style', DPS_BASE_URL . 'assets/css/dps-admin.css', [], DPS_BASE_VERSION );
+        wp_enqueue_style( 'dps-admin-style', DPS_BASE_URL . 'assets/css/dps-admin.css', [], self::get_asset_version( 'assets/css/dps-admin.css' ) );
 
         if ( strpos( $hook, 'dps-shortcodes' ) !== false ) {
             wp_enqueue_script(
                 'dps-shortcodes-admin',
                 DPS_BASE_URL . 'assets/js/dps-shortcodes.js',
                 [],
-                DPS_BASE_VERSION,
+                self::get_asset_version( 'assets/js/dps-shortcodes.js' ),
                 true
             );
         }
