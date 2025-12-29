@@ -131,6 +131,63 @@
     display: block;
 }
 
+/* Containers reutilizáveis para manter o padrão visual da aba Agendamentos em todo o sistema */
+.dps-section-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dps-surface {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.dps-surface--neutral {
+    border-left-color: #e5e7eb;
+    background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+}
+
+.dps-surface--info {
+    border-left-color: #0ea5e9;
+    background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+}
+
+.dps-surface--success {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+}
+
+.dps-surface--warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+}
+
+.dps-surface--danger {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+}
+
+.dps-surface__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dps-surface__description {
+    margin: 0 0 16px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 /* ================================================
    SISTEMA DE DESIGN MODERNO - TÍTULOS E SUBTÍTULOS
    ================================================ */

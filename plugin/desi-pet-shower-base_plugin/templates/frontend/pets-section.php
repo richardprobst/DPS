@@ -47,29 +47,51 @@ $base_url      = isset( $base_url ) ? $base_url : get_permalink();
 		<?php echo esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ); ?>
 	</h2>
 
-	<?php
-	// Renderizar formulário de pet usando template
-	dps_get_template(
-		'forms/pet-form.php',
-		[
-			'edit_id'       => $edit_id,
-			'editing'       => $editing,
-			'meta'          => $meta,
-			'clients'       => $clients,
-			'breed_options' => $breed_options,
-			'breed_data'    => $breed_data,
-		]
-	);
+	<div class="dps-section-grid">
+		<div class="dps-surface dps-surface--info">
+			<div class="dps-surface__title">
+				<span>📋</span>
+				<?php echo esc_html__( 'Formulário de pets', 'desi-pet-shower' ); ?>
+			</div>
+			<p class="dps-surface__description">
+				<?php echo esc_html__( 'Cadastre ou edite pets mantendo o mesmo cabeçalho, botões e boxes coloridos da aba Agendamentos.', 'desi-pet-shower' ); ?>
+			</p>
+			<?php
+			// Renderizar formulário de pet usando template
+			dps_get_template(
+				'forms/pet-form.php',
+				[
+					'edit_id'       => $edit_id,
+					'editing'       => $editing,
+					'meta'          => $meta,
+					'clients'       => $clients,
+					'breed_options' => $breed_options,
+					'breed_data'    => $breed_data,
+				]
+			);
+			?>
+		</div>
 
-	// Renderizar listagem de pets usando template
-	dps_get_template(
-		'lists/pets-list.php',
-		[
-			'pets'       => $pets,
-			'pets_page'  => $pets_page,
-			'pets_pages' => $pets_pages,
-			'base_url'   => $base_url,
-		]
-	);
-	?>
+		<div class="dps-surface dps-surface--neutral">
+			<div class="dps-surface__title">
+				<span>🐶</span>
+				<?php echo esc_html__( 'Lista de pets', 'desi-pet-shower' ); ?>
+			</div>
+			<p class="dps-surface__description">
+				<?php echo esc_html__( 'Listagem unificada com espaçamentos e bordas inspirados na seção de Agendamentos.', 'desi-pet-shower' ); ?>
+			</p>
+			<?php
+			// Renderizar listagem de pets usando template
+			dps_get_template(
+				'lists/pets-list.php',
+				[
+					'pets'       => $pets,
+					'pets_page'  => $pets_page,
+					'pets_pages' => $pets_pages,
+					'base_url'   => $base_url,
+				]
+			);
+			?>
+		</div>
+	</div>
 </div>

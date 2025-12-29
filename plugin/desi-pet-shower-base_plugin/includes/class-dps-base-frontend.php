@@ -1916,8 +1916,11 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
+        echo '<div class="dps-section-grid">';
+
+        echo '<div class="dps-surface dps-surface--neutral">';
         echo '<div class="dps-history-header">';
-        echo '<h2>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">📚</span>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
         echo '<p class="dps-history-header__description">' . esc_html__( 'Visualize, filtre e exporte todos os atendimentos registrados no sistema.', 'desi-pet-shower' ) . '</p>';
         echo '</div>';
 
@@ -1954,6 +1957,7 @@ class DPS_Base_Frontend {
         echo '</div>';
         echo '</div>';
         echo '</div>';
+        echo '</div>';
 
         $timeline_status_selector = function( $appt_id, $status ) use ( $status_labels ) {
             return self::render_status_selector( $appt_id, $status, $status_labels, false );
@@ -1963,6 +1967,7 @@ class DPS_Base_Frontend {
             return self::build_charge_html( $appt_id, 'historico' );
         };
 
+        echo '<div class="dps-surface dps-surface--info">';
         dps_get_template(
             'appointments-list.php',
             [
@@ -1975,8 +1980,10 @@ class DPS_Base_Frontend {
                 'list_title'       => __( 'Linha do tempo de agendamentos', 'desi-pet-shower' ),
             ]
         );
+        echo '</div>';
 
         // Toolbar de filtros reorganizada
+        echo '<div class="dps-surface dps-surface--neutral">';
         echo '<div class="dps-history-toolbar">';
         
         // Cabeçalho da seção de tabela com título e ações
@@ -2167,6 +2174,8 @@ class DPS_Base_Frontend {
             echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'desi-pet-shower' ) . '</p>';
         }
 
+        echo '</div>'; // dps-surface--neutral (toolbar + tabela)
+        echo '</div>'; // dps-section-grid
         echo '</div>';
         return ob_get_clean();
     }
