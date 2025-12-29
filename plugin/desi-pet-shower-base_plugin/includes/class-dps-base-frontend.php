@@ -755,6 +755,11 @@ class DPS_Base_Frontend {
      * Renderiza a aplicação no frontend (abas para clientes, pets e agendamentos)
      */
     public static function render_app() {
+        // Garante que o CSS/JS do painel estejam carregados mesmo em contextos
+        // onde wp_enqueue_scripts não foi executado (ex.: shortcodes renderizados
+        // em builders ou pré-visualizações).
+        DPS_Base_Plugin::enqueue_frontend_assets();
+
         // Verifica se há visualização específica (detalhes do cliente)
         if ( isset( $_GET['dps_view'] ) && 'client' === $_GET['dps_view'] && isset( $_GET['id'] ) ) {
             $client_id = intval( $_GET['id'] );
