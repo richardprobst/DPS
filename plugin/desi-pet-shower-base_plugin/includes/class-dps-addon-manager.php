@@ -22,6 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Addon_Manager {
 
     /**
+     * Diretório onde os add-ons estão instalados (relativo a WP_PLUGIN_DIR).
+     *
+     * @var string
+     */
+    const ADDONS_DIR = 'add-ons';
+
+    /**
      * Instância singleton.
      *
      * @var DPS_Addon_Manager|null
@@ -337,7 +344,7 @@ class DPS_Addon_Manager {
         if ( ! isset( $this->addon_files[ $slug ] ) ) {
             return false;
         }
-        $addon_path = WP_PLUGIN_DIR . '/add-ons/' . $this->addon_files[ $slug ];
+        $addon_path = WP_PLUGIN_DIR . '/' . self::ADDONS_DIR . '/' . $this->addon_files[ $slug ];
         // Também verifica se está no diretório padrão de plugins
         $alt_path = WP_PLUGIN_DIR . '/' . $this->addon_files[ $slug ];
         return file_exists( $addon_path ) || file_exists( $alt_path );
@@ -367,9 +374,9 @@ class DPS_Addon_Manager {
         if ( ! isset( $this->addon_files[ $slug ] ) ) {
             return false;
         }
-        $addon_path = WP_PLUGIN_DIR . '/add-ons/' . $this->addon_files[ $slug ];
+        $addon_path = WP_PLUGIN_DIR . '/' . self::ADDONS_DIR . '/' . $this->addon_files[ $slug ];
         if ( file_exists( $addon_path ) ) {
-            return 'add-ons/' . $this->addon_files[ $slug ];
+            return self::ADDONS_DIR . '/' . $this->addon_files[ $slug ];
         }
         // Verifica caminho alternativo
         $alt_path = WP_PLUGIN_DIR . '/' . $this->addon_files[ $slug ];
@@ -441,26 +448,33 @@ class DPS_Addon_Manager {
         $sorted = [];
         $visited = [];
 
-        $visit = function( $slug ) use ( &$visit, &$sorted, &$visited ) {
-            if ( isset( $visited[ $slug ] ) ) {
-                return;
-            }
-            $visited[ $slug ] = true;
-
-            if ( isset( $this->addons[ $slug ] ) ) {
-                foreach ( $this->addons[ $slug ]['dependencies'] as $dep ) {
-                    $visit( $dep );
-                }
-            }
-
-            $sorted[] = $slug;
-        };
-
         foreach ( $slugs as $slug ) {
-            $visit( $slug );
+            $this->visit_for_sort( $slug, $sorted, $visited );
         }
 
         return $sorted;
+    }
+
+    /**
+     * Visita um add-on recursivamente para ordenação topológica.
+     *
+     * @param string $slug Slug do add-on a visitar.
+     * @param array  $sorted Array de slugs ordenados (passado por referência).
+     * @param array  $visited Array de slugs já visitados (passado por referência).
+     */
+    private function visit_for_sort( $slug, &$sorted, &$visited ) {
+        if ( isset( $visited[ $slug ] ) ) {
+            return;
+        }
+        $visited[ $slug ] = true;
+
+        if ( isset( $this->addons[ $slug ] ) ) {
+            foreach ( $this->addons[ $slug ]['dependencies'] as $dep ) {
+                $this->visit_for_sort( $dep, $sorted, $visited );
+            }
+        }
+
+        $sorted[] = $slug;
     }
 
     /**
@@ -651,7 +665,9 @@ class DPS_Addon_Manager {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_assets( $hook ) {
-        if ( 'dps-by-probst_page_dps-addons' !== $hook ) {
+        // O hook é formado pelo slug do menu pai + '_page_' + slug da página
+        // Para 'desi-pet-shower' como parent e 'dps-addons' como slug da página
+        if ( false === strpos( $hook, 'dps-addons' ) ) {
             return;
         }
 
