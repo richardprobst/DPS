@@ -937,7 +937,7 @@ class DPS_Groomers_Addon {
         if ( ! $post || ! is_a( $post, 'WP_Post' ) ) {
             return;
         }
-        if ( ! isset( $post->post_content ) || ! has_shortcode( $post->post_content, 'dps_base' ) ) {
+        if ( ! isset( $post->post_content ) || ! has_shortcode( (string) $post->post_content, 'dps_base' ) ) {
             return;
         }
 
@@ -951,6 +951,9 @@ class DPS_Groomers_Addon {
      * @param string $hook_suffix Sufixo do hook da página atual.
      */
     public function enqueue_admin_assets( $hook_suffix ) {
+        // Cast para string para compatibilidade com PHP 8.4+
+        $hook_suffix = (string) $hook_suffix;
+
         // Verifica se estamos em uma página relevante do DPS
         if ( strpos( $hook_suffix, 'desi-pet-shower' ) === false && strpos( $hook_suffix, 'dps' ) === false ) {
             return;

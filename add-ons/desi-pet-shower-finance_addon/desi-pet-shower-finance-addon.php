@@ -446,7 +446,7 @@ class DPS_Finance_Addon {
                 
                 // BUGFIX: Verifica se o conteúdo da página contém o shortcode
                 // Se não contiver, adiciona ao final do conteúdo existente (ou cria conteúdo se vazio)
-                if ( ! has_shortcode( $page->post_content, 'dps_fin_docs' ) ) {
+                if ( ! has_shortcode( (string) $page->post_content, 'dps_fin_docs' ) ) {
                     $new_content = $page->post_content ? $page->post_content . "\n\n[dps_fin_docs]" : '[dps_fin_docs]';
                     wp_update_post( [
                         'ID'           => $page->ID,

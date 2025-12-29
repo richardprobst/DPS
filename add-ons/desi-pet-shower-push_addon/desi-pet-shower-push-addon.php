@@ -164,6 +164,9 @@ class DPS_Push_Addon {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.4+
+        $hook = (string) $hook;
+
         // Carrega apenas na página de configurações do Push ou outras páginas DPS relevantes.
         $is_push_page = ( strpos( $hook, 'dps-push-notifications' ) !== false );
         $is_dps_page  = ( strpos( $hook, 'desi-pet-shower' ) !== false || strpos( $hook, 'dps-' ) !== false );
@@ -220,7 +223,7 @@ class DPS_Push_Addon {
     public function enqueue_frontend_assets() {
         // Verificar se está na página de agenda.
         global $post;
-        if ( ! $post || ! has_shortcode( $post->post_content, 'dps_agenda_page' ) ) {
+        if ( ! $post || ! has_shortcode( (string) $post->post_content, 'dps_agenda_page' ) ) {
             return;
         }
 

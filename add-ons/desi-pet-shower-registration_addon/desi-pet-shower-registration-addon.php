@@ -641,7 +641,7 @@ class DPS_Registration_Addon {
         // Carrega apenas na página de cadastro
         $registration_page_id = get_option( 'dps_registration_page_id' );
         $current_post = get_post();
-        $post_content = $current_post ? $current_post->post_content : '';
+        $post_content = $current_post ? (string) $current_post->post_content : '';
         
         if ( ! is_page( $registration_page_id ) && ! has_shortcode( $post_content, 'dps_registration_form' ) ) {
             return;
@@ -2365,7 +2365,7 @@ class DPS_Registration_Addon {
         $page_by_slug = get_page_by_path( $default_slug );
         if ( $page_by_slug && 'publish' === $page_by_slug->post_status ) {
             // Verifica se contém o shortcode antes de salvar
-            if ( has_shortcode( $page_by_slug->post_content, 'dps_registration_form' ) ) {
+            if ( has_shortcode( (string) $page_by_slug->post_content, 'dps_registration_form' ) ) {
                 update_option( 'dps_registration_page_id', $page_by_slug->ID );
                 $url = get_permalink( $page_by_slug->ID );
                 if ( $url ) {
@@ -2378,7 +2378,7 @@ class DPS_Registration_Addon {
         if ( 'cadastro-de-clientes-e-pets' !== $default_slug ) {
             $page_by_fixed_slug = get_page_by_path( 'cadastro-de-clientes-e-pets' );
             if ( $page_by_fixed_slug && 'publish' === $page_by_fixed_slug->post_status ) {
-                if ( has_shortcode( $page_by_fixed_slug->post_content, 'dps_registration_form' ) ) {
+                if ( has_shortcode( (string) $page_by_fixed_slug->post_content, 'dps_registration_form' ) ) {
                     update_option( 'dps_registration_page_id', $page_by_fixed_slug->ID );
                     $url = get_permalink( $page_by_fixed_slug->ID );
                     if ( $url ) {

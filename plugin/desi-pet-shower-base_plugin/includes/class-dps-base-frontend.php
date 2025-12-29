@@ -2093,7 +2093,7 @@ class DPS_Base_Frontend {
                 $client_name = $client_post ? $client_post->post_title : '-';
 
                 $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-                $status_key  = strtolower( str_replace( ' ', '_', $status_meta ) );
+                $status_key  = strtolower( str_replace( ' ', '_', (string) $status_meta ) );
                 if ( 'finalizado_e_pago' === $status_key ) {
                     $status_key = 'finalizado_pago';
                 }

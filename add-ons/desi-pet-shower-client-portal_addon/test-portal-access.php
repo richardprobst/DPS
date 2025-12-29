@@ -39,7 +39,7 @@ if ( $page_id ) {
         echo "   ✓ Status: {$page->post_status}\n";
         echo "   ✓ URL: " . get_permalink( $page_id ) . "\n";
         
-        if ( has_shortcode( $page->post_content, 'dps_client_portal' ) ) {
+        if ( has_shortcode( (string) $page->post_content, 'dps_client_portal' ) ) {
             echo "   ✓ Shortcode [dps_client_portal] presente\n";
         } else {
             echo "   ✗ ERRO: Shortcode [dps_client_portal] NÃO encontrado\n";
@@ -136,7 +136,7 @@ if ( isset( $_GET['dps_test_portal'] ) && current_user_can( 'manage_options' ) )
     $result = [
         'page_configured' => (bool) $page_id,
         'page_exists'     => isset( $page ) && $page !== null,
-        'has_shortcode'   => isset( $page ) && has_shortcode( $page->post_content, 'dps_client_portal' ),
+        'has_shortcode'   => isset( $page ) && has_shortcode( (string) $page->post_content, 'dps_client_portal' ),
         'table_exists'    => $table_exists,
         'portal_url'      => $portal_url,
     ];
