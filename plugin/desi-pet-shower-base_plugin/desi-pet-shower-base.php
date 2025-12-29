@@ -340,6 +340,24 @@ class DPS_Base_Plugin {
             return;
         }
 
+        self::enqueue_frontend_assets();
+    }
+
+    /**
+     * Enfileira os assets necessários para o painel no frontend.
+     *
+     * Protege contra múltiplas chamadas no mesmo request para evitar
+     * duplicação de localizações de scripts e enfileiramento redundante.
+     */
+    public static function enqueue_frontend_assets() {
+        static $enqueued = false;
+
+        if ( $enqueued ) {
+            return;
+        }
+
+        $enqueued = true;
+
         // CSS
         wp_enqueue_style( 'dps-base-style', DPS_BASE_URL . 'assets/css/dps-base.css', [], DPS_BASE_VERSION );
         wp_enqueue_style( 'dps-form-validation', DPS_BASE_URL . 'assets/css/dps-form-validation.css', [], DPS_BASE_VERSION );
