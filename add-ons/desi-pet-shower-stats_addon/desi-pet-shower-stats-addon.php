@@ -186,6 +186,22 @@ class DPS_Stats_Addon {
         wp_enqueue_script( 'dps-stats-addon' );
     }
 
+    /**
+     * Garante que um valor seja um array com chaves padrão preenchidas.
+     *
+     * @param mixed $data     Dados que devem ser um array.
+     * @param array $defaults Valores padrão para chaves ausentes.
+     *
+     * @return array Array com valores padrão garantidos.
+     * @since 1.4.1
+     */
+    private function ensure_array_defaults( $data, array $defaults ) {
+        if ( ! is_array( $data ) ) {
+            return $defaults;
+        }
+        return array_merge( $defaults, $data );
+    }
+
     public function add_stats_tab( $visitor_only ) {
         if ( $visitor_only ) return;
         echo '<li><a href="#" class="dps-tab-link" data-tab="estatisticas">' . esc_html__( 'Estatísticas', 'dps-stats-addon' ) . '</a></li>';
@@ -312,12 +328,8 @@ class DPS_Stats_Addon {
             'profit'       => 0,
             'ticket_avg'   => 0,
         ];
-        $current   = isset( $comparison['current'] ) && is_array( $comparison['current'] ) 
-            ? array_merge( $default_metrics, $comparison['current'] ) 
-            : $default_metrics;
-        $variation = isset( $comparison['variation'] ) && is_array( $comparison['variation'] ) 
-            ? array_merge( $default_metrics, $comparison['variation'] ) 
-            : $default_metrics;
+        $current   = $this->ensure_array_defaults( $comparison['current'] ?? [], $default_metrics );
+        $variation = $this->ensure_array_defaults( $comparison['variation'] ?? [], $default_metrics );
         ?>
         <div class="dps-stats-cards">
             <?php $this->render_card( '📋', $current['appointments'], __( 'Atendimentos', 'dps-stats-addon' ), $variation['appointments'], 'primary' ); ?>
@@ -364,11 +376,11 @@ class DPS_Stats_Addon {
             'unit'  => '',
             'note'  => '',
         ];
-        $return_rate       = is_array( $return_rate ) ? array_merge( $default_kpi, $return_rate ) : $default_kpi;
-        $no_show_rate      = is_array( $no_show_rate ) ? array_merge( $default_kpi, $no_show_rate ) : $default_kpi;
-        $overdue_revenue   = is_array( $overdue_revenue ) ? array_merge( $default_kpi, $overdue_revenue ) : $default_kpi;
-        $conversion_rate   = is_array( $conversion_rate ) ? array_merge( $default_kpi, $conversion_rate ) : $default_kpi;
-        $recurring_clients = is_array( $recurring_clients ) ? array_merge( $default_kpi, $recurring_clients ) : $default_kpi;
+        $return_rate       = $this->ensure_array_defaults( $return_rate, $default_kpi );
+        $no_show_rate      = $this->ensure_array_defaults( $no_show_rate, $default_kpi );
+        $overdue_revenue   = $this->ensure_array_defaults( $overdue_revenue, $default_kpi );
+        $conversion_rate   = $this->ensure_array_defaults( $conversion_rate, $default_kpi );
+        $recurring_clients = $this->ensure_array_defaults( $recurring_clients, $default_kpi );
         ?>
         <div class="dps-stats-cards">
             <?php
@@ -467,15 +479,9 @@ class DPS_Stats_Addon {
             'start_date'   => '',
             'end_date'     => '',
         ];
-        $current   = isset( $comparison['current'] ) && is_array( $comparison['current'] ) 
-            ? array_merge( $default_metrics, $comparison['current'] ) 
-            : $default_metrics;
-        $previous  = isset( $comparison['previous'] ) && is_array( $comparison['previous'] ) 
-            ? array_merge( $default_metrics, $comparison['previous'] ) 
-            : $default_metrics;
-        $variation = isset( $comparison['variation'] ) && is_array( $comparison['variation'] ) 
-            ? array_merge( $default_metrics, $comparison['variation'] ) 
-            : $default_metrics;
+        $current   = $this->ensure_array_defaults( $comparison['current'] ?? [], $default_metrics );
+        $previous  = $this->ensure_array_defaults( $comparison['previous'] ?? [], $default_metrics );
+        $variation = $this->ensure_array_defaults( $comparison['variation'] ?? [], $default_metrics );
         
         // F1.1: Verificar se Finance está ativo
         $finance_inactive = isset( $current['error'] ) && $current['error'] === 'finance_not_active';
@@ -567,7 +573,7 @@ class DPS_Stats_Addon {
             'revenue'    => 0,
             'open_value' => 0,
         ];
-        $data = is_array( $data ) ? array_merge( $default_data, $data ) : $default_data;
+        $data = $this->ensure_array_defaults( $data, $default_data );
         ?>
         <div class="dps-stats-metrics-list">
             <div class="dps-stats-metric"><span class="dps-stats-metric__value" style="color: #10b981;"><?php echo esc_html( $data['paid'] ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Ativas', 'dps-stats-addon' ); ?></span></div>
