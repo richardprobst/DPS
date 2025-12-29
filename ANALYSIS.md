@@ -226,6 +226,79 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Design minimalista com paleta reduzida: base neutra (#f9fafb, #e5e7eb, #374151) + 3 cores de status essenciais (verde, amarelo, vermelho)
 - Responsividade básica implementada com media queries para mobile (480px), tablets (768px) e desktops pequenos (1024px)
 
+### Gerenciador de Add-ons
+
+O plugin base inclui um gerenciador de add-ons centralizado (`DPS_Addon_Manager`) que:
+- Lista todos os add-ons disponíveis do ecossistema DPS
+- Verifica status de instalação e ativação
+- Determina a ordem correta de ativação baseada em dependências
+- Permite ativar/desativar add-ons em lote respeitando dependências
+
+**Classe**: `includes/class-dps-addon-manager.php`
+
+**Menu administrativo**: DPS by PRObst → Add-ons (`dps-addons`)
+
+#### Categorias de Add-ons
+
+| Categoria | Descrição | Add-ons |
+|-----------|-----------|---------|
+| Essenciais | Funcionalidades base recomendadas | Serviços, Financeiro, Comunicações |
+| Operação | Gestão do dia a dia | Agenda, Groomers, Assinaturas, Estoque |
+| Integrações | Conexões externas | Pagamentos, Push Notifications |
+| Cliente | Voltados ao cliente final | Cadastro Público, Portal do Cliente, Fidelidade |
+| Avançado | Funcionalidades extras | IA, Estatísticas |
+| Sistema | Administração e manutenção | Backup, Debugging, White Label |
+
+#### Dependências entre Add-ons
+
+O sistema resolve automaticamente as dependências na ordem de ativação:
+
+| Add-on | Depende de |
+|--------|-----------|
+| Agenda | Serviços |
+| Assinaturas | Serviços, Financeiro |
+| Pagamentos | Financeiro |
+| IA | Portal do Cliente |
+
+#### API Pública
+
+```php
+// Obter instância do gerenciador
+$manager = DPS_Addon_Manager::get_instance();
+
+// Verificar se add-on está ativo
+$is_active = $manager->is_active( 'agenda' );
+
+// Verificar dependências
+$deps = $manager->check_dependencies( 'ai' );
+// Retorna: ['satisfied' => false, 'missing' => ['client-portal']]
+
+// Obter ordem recomendada de ativação
+$order = $manager->get_activation_order();
+// Retorna array ordenado por dependências com status de cada add-on
+
+// Ativar múltiplos add-ons na ordem correta
+$result = $manager->activate_addons( ['services', 'agenda', 'finance'] );
+// Ativa: services → finance → agenda (respeitando dependências)
+```
+
+#### Interface Administrativa
+
+A página "Add-ons" exibe:
+1. **Ordem de Ativação Recomendada**: Lista visual dos add-ons instalados na ordem sugerida
+2. **Categorias de Add-ons**: Cards organizados por categoria com:
+   - Nome e ícone do add-on
+   - Status (Ativo/Inativo/Não Instalado)
+   - Descrição curta
+   - Dependências necessárias
+   - Checkbox para seleção
+3. **Ações em Lote**: Botões para ativar ou desativar add-ons selecionados
+
+**Segurança**:
+- Verificação de nonce em todas as ações
+- Capability `manage_options` para acesso à página
+- Capability `activate_plugins`/`deactivate_plugins` para ações
+
 ### Tipos de Agendamento
 
 O sistema suporta três tipos de agendamentos, identificados pelo metadado `appointment_type`:
