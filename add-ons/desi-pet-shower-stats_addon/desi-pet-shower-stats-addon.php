@@ -186,6 +186,22 @@ class DPS_Stats_Addon {
         wp_enqueue_script( 'dps-stats-addon' );
     }
 
+    /**
+     * Garante que um valor seja um array com chaves padrão preenchidas.
+     *
+     * @param mixed $data     Dados que devem ser um array.
+     * @param array $defaults Valores padrão para chaves ausentes.
+     *
+     * @return array Array com valores padrão garantidos.
+     * @since 1.4.1
+     */
+    private function ensure_array_defaults( $data, array $defaults ) {
+        if ( ! is_array( $data ) ) {
+            return $defaults;
+        }
+        return array_merge( $defaults, $data );
+    }
+
     public function add_stats_tab( $visitor_only ) {
         if ( $visitor_only ) return;
         echo '<li><a href="#" class="dps-tab-link" data-tab="estatisticas">' . esc_html__( 'Estatísticas', 'dps-stats-addon' ) . '</a></li>';
@@ -198,6 +214,22 @@ class DPS_Stats_Addon {
     }
 
     private function section_stats() {
+        // Verificação de segurança: API deve existir
+        if ( ! class_exists( 'DPS_Stats_API' ) ) {
+            ob_start();
+            ?>
+            <div class="dps-section" id="dps-section-estatisticas">
+                <h3><?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?></h3>
+                <div style="padding: 20px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                    <p style="margin: 0; color: #92400e;">
+                        ⚠️ <?php esc_html_e( 'A API de estatísticas não foi carregada. Verifique se o plugin base DPS está ativo.', 'dps-stats-addon' ); ?>
+                    </p>
+                </div>
+            </div>
+            <?php
+            return ob_get_clean();
+        }
+
         $dates = $this->get_date_range();
         $start_date = $dates['start'];
         $end_date   = $dates['end'];
@@ -288,8 +320,16 @@ class DPS_Stats_Addon {
     }
 
     private function render_metric_cards( $comparison, $new_clients, $cancel_rate ) {
-        $current = $comparison['current'];
-        $variation = $comparison['variation'];
+        // Proteção contra dados incompletos
+        $default_metrics = [
+            'appointments' => 0,
+            'revenue'      => 0,
+            'expenses'     => 0,
+            'profit'       => 0,
+            'ticket_avg'   => 0,
+        ];
+        $current   = $this->ensure_array_defaults( $comparison['current'] ?? [], $default_metrics );
+        $variation = $this->ensure_array_defaults( $comparison['variation'] ?? [], $default_metrics );
         ?>
         <div class="dps-stats-cards">
             <?php $this->render_card( '📋', $current['appointments'], __( 'Atendimentos', 'dps-stats-addon' ), $variation['appointments'], 'primary' ); ?>
@@ -330,6 +370,17 @@ class DPS_Stats_Addon {
      * @since 1.4.0
      */
     private function render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ) {
+        // Proteção contra dados incompletos - define valores padrão
+        $default_kpi = [
+            'value' => 0,
+            'unit'  => '',
+            'note'  => '',
+        ];
+        $return_rate       = $this->ensure_array_defaults( $return_rate, $default_kpi );
+        $no_show_rate      = $this->ensure_array_defaults( $no_show_rate, $default_kpi );
+        $overdue_revenue   = $this->ensure_array_defaults( $overdue_revenue, $default_kpi );
+        $conversion_rate   = $this->ensure_array_defaults( $conversion_rate, $default_kpi );
+        $recurring_clients = $this->ensure_array_defaults( $recurring_clients, $default_kpi );
         ?>
         <div class="dps-stats-cards">
             <?php
@@ -418,9 +469,19 @@ class DPS_Stats_Addon {
     }
 
     private function render_financial_metrics( $comparison ) {
-        $current = $comparison['current'];
-        $previous = $comparison['previous'];
-        $variation = $comparison['variation'];
+        // Proteção contra dados incompletos
+        $default_metrics = [
+            'appointments' => 0,
+            'revenue'      => 0,
+            'expenses'     => 0,
+            'profit'       => 0,
+            'ticket_avg'   => 0,
+            'start_date'   => '',
+            'end_date'     => '',
+        ];
+        $current   = $this->ensure_array_defaults( $comparison['current'] ?? [], $default_metrics );
+        $previous  = $this->ensure_array_defaults( $comparison['previous'] ?? [], $default_metrics );
+        $variation = $this->ensure_array_defaults( $comparison['variation'] ?? [], $default_metrics );
         
         // F1.1: Verificar se Finance está ativo
         $finance_inactive = isset( $current['error'] ) && $current['error'] === 'finance_not_active';
@@ -505,6 +566,14 @@ class DPS_Stats_Addon {
     }
 
     private function render_subscription_metrics( $data ) {
+        // Proteção contra dados incompletos
+        $default_data = [
+            'paid'       => 0,
+            'pending'    => 0,
+            'revenue'    => 0,
+            'open_value' => 0,
+        ];
+        $data = $this->ensure_array_defaults( $data, $default_data );
         ?>
         <div class="dps-stats-metrics-list">
             <div class="dps-stats-metric"><span class="dps-stats-metric__value" style="color: #10b981;"><?php echo esc_html( $data['paid'] ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Ativas', 'dps-stats-addon' ); ?></span></div>
