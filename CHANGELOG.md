@@ -161,6 +161,8 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+- **Base Plugin (v1.0.4)**: Cache dos assets CSS/JS agora usa `filemtime` para versionar automaticamente o layout modernizado do Painel de Gestão DPS, evitando exibição do modelo antigo em navegadores com cache. 
+
 **Push Add-on (v1.2.0)**
 
 - **uninstall.php corrigido**: Agora limpa todas as options criadas pelo add-on e remove cron jobs.
