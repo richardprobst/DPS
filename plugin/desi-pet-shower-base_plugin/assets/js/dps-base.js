@@ -776,11 +776,11 @@
      * simplesmente será ignorada.
      */
     (function(){
-      // Nova ordem de abas: coloca Agendamentos como primeira e Notificações como última.
-      // A ordem foi ajustada para melhorar a usabilidade conforme solicitação: Agendamentos, Clientes, Pets, Serviços,
-      // Assinaturas, Financeiro, Estatísticas, Notificações. Se algumas abas não existirem (por exemplo, senhas
-      // foram removidas e notificações podem não estar presentes), elas serão ignoradas.
-      var desiredOrder = ['agendas','clientes','pets','servicos','assinaturas','financeiro','estatisticas','notificacoes'];
+      // Nova ordem de abas: coloca Agendamentos como primeira e Histórico antes das abas de add-ons.
+      // A ordem foi ajustada para melhorar a usabilidade: Agendamentos, Clientes, Pets, Serviços, Assinaturas,
+      // Histórico, Financeiro, Groomers, Estatísticas, Estoque. Se algumas abas não existirem (por exemplo, 
+      // add-ons não estão ativos), elas serão ignoradas.
+      var desiredOrder = ['agendas','clientes','pets','servicos','assinaturas','historico','financeiro','groomers','estatisticas','estoque'];
       var $nav = $('.dps-base-wrapper .dps-nav-container .dps-nav');
       if ($nav.length) {
         var $items = {};

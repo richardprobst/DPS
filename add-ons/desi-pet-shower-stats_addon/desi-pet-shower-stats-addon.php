@@ -230,24 +230,47 @@ class DPS_Stats_Addon {
             return ob_get_clean();
         }
 
+        // Inicializa variáveis com valores padrão para garantir que a seção seja renderizada
         $dates = $this->get_date_range();
         $start_date = $dates['start'];
         $end_date   = $dates['end'];
-        $comparison    = DPS_Stats_API::get_period_comparison( $start_date, $end_date );
-        $top_services  = DPS_Stats_API::get_top_services( $start_date, $end_date, 5 );
-        $species       = DPS_Stats_API::get_species_distribution( $start_date, $end_date );
-        $top_breeds    = DPS_Stats_API::get_top_breeds( $start_date, $end_date, 5 );
-        $inactive_pets = DPS_Stats_API::get_inactive_pets( 30 );
-        $new_clients   = DPS_Stats_API::get_new_clients_count( $start_date, $end_date );
-        $cancel_rate   = DPS_Stats_API::get_cancellation_rate( $start_date, $end_date );
-        $subs_data     = $this->get_subscription_metrics( $start_date, $end_date );
         
-        // F3.1: Novos KPIs
-        $return_rate       = DPS_Stats_API::get_return_rate( $start_date, $end_date, 30 );
-        $no_show_rate      = DPS_Stats_API::get_no_show_rate( $start_date, $end_date );
-        $overdue_revenue   = DPS_Stats_API::get_overdue_revenue( $start_date, $end_date );
-        $conversion_rate   = DPS_Stats_API::get_conversion_rate( $start_date, $end_date, 30 );
-        $recurring_clients = DPS_Stats_API::get_recurring_clients( $start_date, $end_date );
+        // Valores padrão para caso as APIs falhem
+        $comparison    = [ 'current' => [], 'previous' => [], 'variation' => [] ];
+        $top_services  = [];
+        $species       = [];
+        $top_breeds    = [];
+        $inactive_pets = [];
+        $new_clients   = 0;
+        $cancel_rate   = 0;
+        $subs_data     = [];
+        $return_rate       = [ 'value' => 0, 'unit' => '%', 'note' => '' ];
+        $no_show_rate      = [ 'value' => 0, 'unit' => '%', 'count' => 0, 'note' => '' ];
+        $overdue_revenue   = [ 'value' => 0, 'unit' => 'R$', 'count' => 0, 'note' => '' ];
+        $conversion_rate   = [ 'value' => 0, 'unit' => '%', 'converted' => 0, 'total' => 0, 'note' => '' ];
+        $recurring_clients = [ 'value' => 0, 'unit' => '', 'percentage' => 0, 'note' => '' ];
+        
+        // Tenta carregar dados das APIs com tratamento de erro
+        try {
+            $comparison    = DPS_Stats_API::get_period_comparison( $start_date, $end_date );
+            $top_services  = DPS_Stats_API::get_top_services( $start_date, $end_date, 5 );
+            $species       = DPS_Stats_API::get_species_distribution( $start_date, $end_date );
+            $top_breeds    = DPS_Stats_API::get_top_breeds( $start_date, $end_date, 5 );
+            $inactive_pets = DPS_Stats_API::get_inactive_pets( 30 );
+            $new_clients   = DPS_Stats_API::get_new_clients_count( $start_date, $end_date );
+            $cancel_rate   = DPS_Stats_API::get_cancellation_rate( $start_date, $end_date );
+            $subs_data     = $this->get_subscription_metrics( $start_date, $end_date );
+            
+            // F3.1: Novos KPIs
+            $return_rate       = DPS_Stats_API::get_return_rate( $start_date, $end_date, 30 );
+            $no_show_rate      = DPS_Stats_API::get_no_show_rate( $start_date, $end_date );
+            $overdue_revenue   = DPS_Stats_API::get_overdue_revenue( $start_date, $end_date );
+            $conversion_rate   = DPS_Stats_API::get_conversion_rate( $start_date, $end_date, 30 );
+            $recurring_clients = DPS_Stats_API::get_recurring_clients( $start_date, $end_date );
+        } catch ( \Throwable $e ) {
+            // Log do erro para diagnóstico (apenas código de erro genérico, sem dados sensíveis)
+            error_log( 'DPS Stats API Error: Stats data loading failed. Code: ' . $e->getCode() );
+        }
 
         ob_start();
         ?>
