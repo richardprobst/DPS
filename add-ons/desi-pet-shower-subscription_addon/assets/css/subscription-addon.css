@@ -507,7 +507,7 @@ table.dps-table tr.dps-canceled-row {
     text-align: left;
 }
 
-.dps-section-title {
+#dps-section-assinaturas .dps-section-title {
     margin-top: 32px;
     margin-bottom: 16px;
     padding-top: 24px;
