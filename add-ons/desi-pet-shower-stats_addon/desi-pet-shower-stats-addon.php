@@ -202,6 +202,54 @@ class DPS_Stats_Addon {
         return array_merge( $defaults, $data );
     }
 
+    /**
+     * Normaliza dados de comparativo financeiro para evitar erros de tipo.
+     *
+     * @param mixed $comparison Dados de comparativo retornados pela API.
+     *
+     * @return array Dados com chaves e valores padrão.
+     */
+    private function normalize_comparison_data( $comparison ) {
+        $base = [
+            'current'   => [],
+            'previous'  => [],
+            'variation' => [],
+        ];
+
+        if ( ! is_array( $comparison ) ) {
+            $comparison = $base;
+        } else {
+            $comparison = array_merge( $base, $comparison );
+        }
+
+        $metric_defaults = [
+            'appointments' => 0,
+            'revenue'      => 0,
+            'expenses'     => 0,
+            'profit'       => 0,
+            'ticket_avg'   => 0,
+            'start_date'   => '',
+            'end_date'     => '',
+        ];
+
+        $comparison['current']   = $this->ensure_array_defaults( $comparison['current'], $metric_defaults );
+        $comparison['previous']  = $this->ensure_array_defaults( $comparison['previous'], $metric_defaults );
+        $comparison['variation'] = $this->ensure_array_defaults( $comparison['variation'], $metric_defaults );
+
+        return $comparison;
+    }
+
+    /**
+     * Garante que listas renderizadas sejam sempre arrays.
+     *
+     * @param mixed $value Valor a validar.
+     *
+     * @return array Lista segura.
+     */
+    private function ensure_list( $value ) {
+        return is_array( $value ) ? $value : [];
+    }
+
     public function add_stats_tab( $visitor_only ) {
         if ( $visitor_only ) return;
         echo '<li><a href="#" class="dps-tab-link" data-tab="estatisticas">' . esc_html__( 'Estatísticas', 'dps-stats-addon' ) . '</a></li>';
@@ -271,6 +319,20 @@ class DPS_Stats_Addon {
             // Log do erro para diagnóstico (apenas código de erro genérico, sem dados sensíveis)
             error_log( 'DPS Stats API Error: Stats data loading failed. Code: ' . $e->getCode() );
         }
+
+        // Normaliza dados para evitar falhas ao renderizar a aba
+        $comparison    = $this->normalize_comparison_data( $comparison );
+        $top_services  = $this->ensure_list( $top_services );
+        $species       = $this->ensure_list( $species );
+        $top_breeds    = $this->ensure_list( $top_breeds );
+        $inactive_pets = $this->ensure_list( $inactive_pets );
+        $subs_data     = $this->ensure_array_defaults( $subs_data, [
+            'total'      => 0,
+            'paid'       => 0,
+            'pending'    => 0,
+            'revenue'    => 0,
+            'open_value' => 0,
+        ] );
 
         ob_start();
         ?>
