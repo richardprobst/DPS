@@ -34,7 +34,8 @@ $base_url = isset( $base_url ) ? $base_url : '';
 ?>
 
 <div class="dps-section" id="dps-section-clientes">
-	<h2 style="margin-bottom: 20px; color: #374151;">
+	<h2 class="dps-section-title">
+		<span class="dps-section-title__icon">👥</span>
 		<?php echo esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ); ?>
 	</h2>
 	
