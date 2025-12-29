@@ -96,7 +96,7 @@ if ( ! function_exists( 'dps_parse_money_br' ) ) {
             return 0;
         }
         $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
-        $normalized = (string) str_replace( ' ', '', (string) $normalized );
+        $normalized = str_replace( ' ', '', (string) $normalized );
         if ( strpos( $normalized, ',' ) !== false ) {
             $normalized = str_replace( '.', '', $normalized );
             $normalized = str_replace( ',', '.', $normalized );

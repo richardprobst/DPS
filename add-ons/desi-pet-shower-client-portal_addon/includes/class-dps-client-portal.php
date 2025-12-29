@@ -3642,7 +3642,7 @@ Equipe %4$s', 'dps-client-portal' ),
      * @return string Cor ajustada em hexadecimal.
      */
     private function adjust_brightness( $hex, $steps ) {
-        // Converte hex para RGB (cast para string para compatibilidade com PHP 8.1+)
+        // Convert hex to RGB (cast to string for PHP 8.1+ compatibility)
         $hex = str_replace( '#', '', (string) $hex );
         if ( strlen( $hex ) === 3 ) {
             $hex = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );

@@ -2755,7 +2755,7 @@ if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
         }
 
         $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
-        $normalized = (string) str_replace( ' ', '', (string) $normalized );
+        $normalized = str_replace( ' ', '', (string) $normalized );
         if ( strpos( $normalized, ',' ) !== false ) {
             $normalized = str_replace( '.', '', $normalized );
             $normalized = str_replace( ',', '.', $normalized );

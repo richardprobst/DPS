@@ -2690,7 +2690,7 @@ class DPS_AI_Addon {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
-        // Cast para string para compatibilidade com PHP 8.1+
+        // Cast to string for PHP 8.1+ compatibility
         $hook = (string) $hook;
 
         // Verifica se estamos em uma página relevante do DPS
