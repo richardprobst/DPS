@@ -138,7 +138,7 @@ class DPS_Finance_Settings {
             '{email}'   => self::get( 'store_email' ),
         ];
 
-        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $template );
+        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), (string) $template );
     }
 
     /**

@@ -672,9 +672,9 @@ class DPS_Payment_Addon {
             $this->log_notification( 'Resposta inválida do Mercado Pago', [ 'body' => wp_remote_retrieve_body( $response ) ] );
             return false;
         }
-        $status = isset( $data['status'] ) ? strtolower( $data['status'] ) : '';
+        $status = isset( $data['status'] ) ? strtolower( (string) $data['status'] ) : '';
         // O campo external_reference deve estar presente para identificar o registro
-        $external_reference = $data['external_reference'] ?? '';
+        $external_reference = (string) ( $data['external_reference'] ?? '' );
         if ( ! $external_reference ) {
             $this->log_notification( 'Notificação sem external_reference; não é possível mapear agendamento/assinatura.', [ 'payment_id' => $payment_id ] );
             return false;

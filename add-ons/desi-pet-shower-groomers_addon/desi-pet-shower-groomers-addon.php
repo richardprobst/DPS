@@ -3366,7 +3366,7 @@ class DPS_Groomers_Addon {
 
             <?php echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-            <?php if ( empty( $message ) || strpos( $message, 'error' ) !== false ) : ?>
+            <?php if ( empty( $message ) || strpos( (string) $message, 'error' ) !== false ) : ?>
             <form method="post" class="dps-review-form">
                 <?php wp_nonce_field( 'dps_submit_review', 'dps_review_nonce' ); ?>
                 

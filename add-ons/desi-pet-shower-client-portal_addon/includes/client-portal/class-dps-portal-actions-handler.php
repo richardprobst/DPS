@@ -73,7 +73,7 @@ class DPS_Portal_Actions_Handler {
         // Hook: Após atualizar dados do cliente (Fase 2.3)
         do_action( 'dps_portal_after_update_client', $client_id, $_POST );
         
-        return add_query_arg( 'portal_msg', 'updated', wp_get_referer() );
+        return add_query_arg( 'portal_msg', 'updated', wp_get_referer() ?: home_url() );
     }
 
     /**
@@ -87,7 +87,7 @@ class DPS_Portal_Actions_Handler {
         // Validação de ownership usando helper centralizado (Fase 1.4)
         if ( ! dps_portal_assert_client_owns_resource( $client_id, $pet_id, 'pet' ) ) {
             // Log de tentativa de acesso indevido já feito pelo helper
-            return add_query_arg( 'portal_msg', 'error', wp_get_referer() );
+            return add_query_arg( 'portal_msg', 'error', wp_get_referer() ?: home_url() );
         }
 
         $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
@@ -120,7 +120,7 @@ class DPS_Portal_Actions_Handler {
         update_post_meta( $pet_id, 'pet_behavior', $behavior );
 
         // Processa upload de foto se fornecido
-        $redirect_url = wp_get_referer();
+        $redirect_url = wp_get_referer() ?: home_url();
         if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
             $redirect_url = $this->handle_pet_photo_upload( $pet_id, $redirect_url );
         }
@@ -209,7 +209,7 @@ class DPS_Portal_Actions_Handler {
         $subject = isset( $_POST['message_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['message_subject'] ) ) : '';
         $content = isset( $_POST['message_body'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message_body'] ) ) : '';
 
-        $redirect_url = wp_get_referer();
+        $redirect_url = wp_get_referer() ?: home_url();
         
         if ( ! $content ) {
             return add_query_arg( 'portal_msg', 'message_error', $redirect_url );
@@ -301,7 +301,7 @@ class DPS_Portal_Actions_Handler {
      */
     public function handle_pay_transaction( $client_id, $trans_id ) {
         if ( ! $this->transaction_belongs_to_client( $trans_id, $client_id ) ) {
-            return add_query_arg( 'portal_msg', 'error', wp_get_referer() );
+            return add_query_arg( 'portal_msg', 'error', wp_get_referer() ?: home_url() );
         }
 
         $link = $this->generate_payment_link_for_transaction( $trans_id );
@@ -310,7 +310,7 @@ class DPS_Portal_Actions_Handler {
             return $link;
         }
         
-        return add_query_arg( 'portal_msg', 'error', wp_get_referer() );
+        return add_query_arg( 'portal_msg', 'error', wp_get_referer() ?: home_url() );
     }
 
     /**

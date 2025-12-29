@@ -3180,7 +3180,7 @@ class DPS_Agenda_Addon {
         $csv_content = "\xEF\xBB\xBF"; // BOM UTF-8 para Excel
         foreach ( $rows as $row ) {
             $csv_content .= '"' . implode( '","', array_map( function( $cell ) {
-                return str_replace( '"', '""', $cell );
+                return str_replace( '"', '""', (string) $cell );
             }, $row ) ) . '"' . "\n";
         }
         

@@ -173,13 +173,13 @@ private static $settings_cache = null;
 	private function is_exception_url() {
 		$settings       = self::get_settings();
 		$exception_urls = $settings['exception_urls'] ?? [];
-		$current_url    = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+		$current_url    = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
 
 		// Aplicar filtro para permitir exceções dinâmicas
 		$exception_urls = apply_filters( 'dps_whitelabel_access_exception_urls', $exception_urls );
 
 		foreach ( $exception_urls as $exception ) {
-			$exception = trim( $exception );
+			$exception = trim( (string) $exception );
 			if ( empty( $exception ) ) {
 				continue;
 			}
@@ -217,7 +217,7 @@ private static $settings_cache = null;
 	 * @return bool True se é mídia.
 	 */
 	private function is_media_file() {
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
 		return strpos( $request_uri, '/wp-content/uploads/' ) !== false;
 	}
 

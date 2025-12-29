@@ -2396,7 +2396,7 @@ class DPS_AI_Addon {
             $redirect_args['truncated'] = '1';
         }
 
-        wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ) );
+        wp_safe_redirect( add_query_arg( $redirect_args, wp_get_referer() ?: admin_url( 'admin.php?page=dps-ai' ) ) );
         exit;
     }
 
@@ -2690,6 +2690,9 @@ class DPS_AI_Addon {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
+        // Cast to string for PHP 8.1+ compatibility
+        $hook = (string) $hook;
+
         // Verifica se estamos em uma página relevante do DPS
         $screen = get_current_screen();
         if ( ! $screen ) {
@@ -2716,7 +2719,7 @@ class DPS_AI_Addon {
         // Usa comparação estrita para páginas conhecidas e strpos para submenus dinâmicos
         // pois add-ons podem registrar submenus com slugs como 'desi-pet-shower_page_dps-*'
         $is_dps_page = in_array( $hook, $dps_pages, true );
-        if ( ! $is_dps_page && is_string( $hook ) ) {
+        if ( ! $is_dps_page ) {
             $is_dps_page = strpos( $hook, 'desi-pet-shower' ) !== false;
         }
 
