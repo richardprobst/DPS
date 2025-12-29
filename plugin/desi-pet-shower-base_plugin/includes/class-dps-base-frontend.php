@@ -1297,7 +1297,10 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
-        echo '<h2 style="margin-bottom: 20px; color: #374151;">' . esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' ) . '</h2>';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
+        echo '</h2>';
         
         // Mensagem de duplicação
         if ( $is_duplicate && ! $visitor_only ) {
