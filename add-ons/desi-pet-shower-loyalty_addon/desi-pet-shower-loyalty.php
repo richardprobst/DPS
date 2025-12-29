@@ -2108,7 +2108,7 @@ class DPS_Loyalty_Addon {
             '{tier_name}'   => $tier_name,
         ];
 
-        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $template );
+        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), (string) $template );
     }
 
     /**
@@ -2755,7 +2755,7 @@ if ( ! function_exists( 'dps_loyalty_parse_money_br' ) ) {
         }
 
         $normalized = preg_replace( '/[^0-9,.-]/', '', $raw );
-        $normalized = str_replace( ' ', '', $normalized );
+        $normalized = str_replace( ' ', '', (string) $normalized );
         if ( strpos( $normalized, ',' ) !== false ) {
             $normalized = str_replace( '.', '', $normalized );
             $normalized = str_replace( ',', '.', $normalized );

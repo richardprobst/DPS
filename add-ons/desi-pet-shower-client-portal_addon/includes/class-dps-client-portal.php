@@ -681,7 +681,7 @@ final class DPS_Client_Portal {
         $should_load = false;
 
         // Carrega se estiver na tela de configurações do DPS
-        if ( isset( $_GET['page'] ) && false !== strpos( $_GET['page'], 'dps' ) ) {
+        if ( isset( $_GET['page'] ) && false !== strpos( (string) $_GET['page'], 'dps' ) ) {
             $should_load = true;
         }
 
@@ -3056,7 +3056,7 @@ final class DPS_Client_Portal {
         $redirect_url = add_query_arg( [
             'tab'                       => 'portal',
             'dps_portal_settings_saved' => '1',
-        ], wp_get_referer() );
+        ], wp_get_referer() ?: admin_url( 'admin.php?page=desi-pet-shower' ) );
         
         wp_safe_redirect( $redirect_url );
         exit;
@@ -3642,8 +3642,8 @@ Equipe %4$s', 'dps-client-portal' ),
      * @return string Cor ajustada em hexadecimal.
      */
     private function adjust_brightness( $hex, $steps ) {
-        // Converte hex para RGB
-        $hex = str_replace( '#', '', $hex );
+        // Convert hex to RGB (cast to string for PHP 8.1+ compatibility)
+        $hex = str_replace( '#', '', (string) $hex );
         if ( strlen( $hex ) === 3 ) {
             $hex = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );
         }

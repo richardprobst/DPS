@@ -284,14 +284,14 @@ class DPS_AI_Proactive_Scheduler {
      */
     private function get_recurring_suggestion( $appointment, $days_since, $settings ) {
         $custom_message = isset( $settings['proactive_scheduling_recurring_message'] ) 
-            ? $settings['proactive_scheduling_recurring_message'] 
+            ? (string) $settings['proactive_scheduling_recurring_message'] 
             : '';
 
         if ( ! empty( $custom_message ) ) {
             // Substitui variáveis dinâmicas
-            $message = str_replace( '{pet_name}', $appointment['pet_name'], $custom_message );
-            $message = str_replace( '{weeks}', floor( $days_since / 7 ), $message );
-            $message = str_replace( '{service}', $appointment['type'], $message );
+            $message = str_replace( '{pet_name}', (string) $appointment['pet_name'], $custom_message );
+            $message = str_replace( '{weeks}', (string) floor( $days_since / 7 ), $message );
+            $message = str_replace( '{service}', (string) $appointment['type'], $message );
             return $message;
         }
 

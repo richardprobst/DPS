@@ -273,7 +273,7 @@ class DPS_Finance_Reminders {
             '{link}'    => isset( $data['link'] ) ? $data['link'] : '',
         ];
 
-        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $template );
+        return str_replace( array_keys( $placeholders ), array_values( $placeholders ), (string) $template );
     }
 
     /**
