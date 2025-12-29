@@ -268,10 +268,8 @@ class DPS_Stats_Addon {
             $conversion_rate   = DPS_Stats_API::get_conversion_rate( $start_date, $end_date, 30 );
             $recurring_clients = DPS_Stats_API::get_recurring_clients( $start_date, $end_date );
         } catch ( \Throwable $e ) {
-            // Log do erro para diagnóstico
-            if ( function_exists( 'error_log' ) ) {
-                error_log( 'DPS Stats API Error: ' . $e->getMessage() );
-            }
+            // Log do erro para diagnóstico (apenas código de erro genérico, sem dados sensíveis)
+            error_log( 'DPS Stats API Error: Stats data loading failed. Code: ' . $e->getCode() );
         }
 
         ob_start();
