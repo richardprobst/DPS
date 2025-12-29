@@ -1,0 +1,355 @@
+/**
+ * Estilos do Gerenciador de Add-ons DPS.
+ *
+ * @package DPS_Base_Plugin
+ * @since 1.1.0
+ */
+
+/* Container principal */
+.dps-addon-manager {
+    max-width: 1200px;
+}
+
+.dps-addon-manager > p.description {
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Ordem de Ativação */
+.dps-activation-order {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.dps-activation-order h2 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-activation-order > p.description {
+    margin-bottom: 16px;
+    color: #6b7280;
+}
+
+.dps-order-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-order-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.dps-order-item.is-active {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #047857;
+}
+
+.dps-order-item.is-inactive {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.dps-order-position {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #d1d5db;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.dps-order-item.is-active .dps-order-position {
+    background: #10b981;
+}
+
+.dps-order-icon {
+    font-size: 14px;
+}
+
+.dps-order-name {
+    font-weight: 500;
+}
+
+.dps-order-status {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Categorias de Add-ons */
+.dps-addon-category {
+    margin-bottom: 32px;
+}
+
+.dps-addon-category h2 {
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+/* Grid de Add-ons */
+.dps-addon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* Card de Add-on */
+.dps-addon-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.dps-addon-card:hover {
+    border-color: #0ea5e9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dps-addon-card.is-active {
+    border-left: 4px solid #10b981;
+}
+
+.dps-addon-card.not-installed {
+    opacity: 0.6;
+    background: #f9fafb;
+}
+
+.dps-addon-card.not-installed:hover {
+    border-color: #e5e7eb;
+    box-shadow: none;
+}
+
+/* Header do Card */
+.dps-addon-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.dps-addon-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dps-addon-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-addon-title h3 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Status Badge */
+.dps-status {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-status--active {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.dps-status--inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-status--missing {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Checkbox customizado */
+.dps-addon-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.dps-addon-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.dps-addon-checkbox .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.dps-addon-checkbox:hover .checkmark {
+    border-color: #0ea5e9;
+}
+
+.dps-addon-checkbox input:checked + .checkmark {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.dps-addon-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.dps-addon-checkbox input:checked + .checkmark:after {
+    display: block;
+}
+
+/* Descrição do Add-on */
+.dps-addon-description {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Dependências */
+.dps-addon-deps {
+    font-size: 12px;
+    color: #9ca3af;
+    padding-top: 8px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.dps-addon-deps strong {
+    color: #6b7280;
+}
+
+/* Aviso de Dependências */
+.dps-addon-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px;
+    background: #fef3c7;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #92400e;
+}
+
+.dps-addon-warning .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Botões de Ação */
+.dps-addon-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-addon-actions .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    height: auto;
+    font-size: 14px;
+}
+
+.dps-addon-actions .button .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.dps-addon-actions .button-primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.dps-addon-actions .button-primary:hover {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+/* Responsividade */
+@media (max-width: 782px) {
+    .dps-addon-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-order-list {
+        flex-direction: column;
+    }
+    
+    .dps-order-item {
+        width: 100%;
+    }
+    
+    .dps-addon-actions {
+        flex-direction: column;
+    }
+    
+    .dps-addon-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Mensagens de erro/sucesso */
+.dps-addon-manager .notice {
+    margin: 20px 0;
+}

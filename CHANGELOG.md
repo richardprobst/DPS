@@ -83,6 +83,22 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Base Plugin (v1.1.0) - Gerenciador de Add-ons**
+
+- **Gerenciador centralizado de add-ons**: Nova página administrativa (DPS by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
+- **Resolução automática de dependências**: Sistema ordena add-ons por suas dependências e ativa na ordem correta automaticamente.
+- **Visualização de ordem de ativação**: Painel exibe ordem recomendada de ativação baseada nas dependências de cada add-on.
+- **Ativação/desativação em lote**: Seleção múltipla de add-ons com ativação respeitando ordem de dependências.
+- **Categorização de add-ons**: Add-ons organizados em 6 categorias (Essenciais, Operação, Integrações, Cliente, Avançado, Sistema).
+- **Verificação de dependências**: Alertas visuais quando dependências de um add-on não estão ativas.
+
+#### Removed (Removido)
+
+**Add-ons Descontinuados**
+
+- **Debugging Add-on removido**: Add-on de gerenciamento de constantes de debug e visualização de logs removido por complexidade de manutenção.
+- **White Label Add-on removido**: Add-on de personalização de marca, cores, logo e SMTP removido por baixa utilização e dificuldades de manutenção.
+
 **Base Plugin (v1.0.4) - Redesign das Abas CLIENTES e PETS**
 
 - **Templates modulares para pets**: Criados templates separados para formulário (`pet-form.php`), listagem (`pets-list.php`) e seção completa (`pets-section.php`), seguindo mesmo padrão já existente para clientes.

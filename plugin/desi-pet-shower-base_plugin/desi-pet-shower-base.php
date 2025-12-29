@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Base
  * Plugin URI:        https://www.probst.pro
  * Description:       Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente. Expanda com add-ons para controle financeiro, comunicações, portal do cliente e mais.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       desi-pet-shower
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes do plugin
-define( 'DPS_BASE_VERSION', '1.0.1' );
+define( 'DPS_BASE_VERSION', '1.1.0' );
 define( 'DPS_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_BASE_URL', plugin_dir_url( __FILE__ ) );
 define( 'DPS_BASE_PETS_PER_PAGE', 20 );
@@ -61,6 +61,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-integrations-hub.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-system-hub.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-tools-hub.php';
+
+// Gerenciador de Add-ons
+require_once DPS_BASE_DIR . 'includes/class-dps-addon-manager.php';
 
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
