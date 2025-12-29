@@ -674,6 +674,21 @@ class DPS_Addon_Manager {
         }
 
         $action = sanitize_text_field( wp_unslash( $_POST['dps_addon_action'] ) );
+        
+        // Verifica se é ação individual (formato: activate_single_SLUG ou deactivate_single_SLUG)
+        if ( strpos( $action, 'activate_single_' ) === 0 ) {
+            $slug = sanitize_key( str_replace( 'activate_single_', '', $action ) );
+            $this->handle_single_addon_action( 'activate', $slug );
+            return;
+        }
+        
+        if ( strpos( $action, 'deactivate_single_' ) === 0 ) {
+            $slug = sanitize_key( str_replace( 'deactivate_single_', '', $action ) );
+            $this->handle_single_addon_action( 'deactivate', $slug );
+            return;
+        }
+        
+        // Ação em lote (comportamento original)
         $selected = isset( $_POST['dps_addons'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['dps_addons'] ) ) : [];
 
         if ( empty( $selected ) ) {
@@ -719,6 +734,74 @@ class DPS_Addon_Manager {
                         /* translators: %d: number of add-ons deactivated */
                         __( '%d add-on(s) desativado(s) com sucesso.', 'desi-pet-shower' ),
                         count( $result['deactivated'] )
+                    ),
+                    'updated'
+                );
+            } else {
+                foreach ( $result['errors'] as $error ) {
+                    add_settings_error(
+                        'dps_addon_manager',
+                        'deactivation_error',
+                        $error,
+                        'error'
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Processa ação de ativação/desativação de um único add-on.
+     *
+     * @param string $action Ação a realizar ('activate' ou 'deactivate').
+     * @param string $slug   Slug do add-on (já sanitizado com sanitize_key).
+     */
+    private function handle_single_addon_action( $action, $slug ) {
+        if ( ! isset( $this->addons[ $slug ] ) ) {
+            add_settings_error(
+                'dps_addon_manager',
+                'invalid_addon',
+                __( 'Add-on inválido.', 'desi-pet-shower' ),
+                'error'
+            );
+            return;
+        }
+        
+        $addon_name = $this->addons[ $slug ]['name'];
+        
+        if ( 'activate' === $action ) {
+            $result = $this->activate_addons( [ $slug ] );
+            if ( $result['success'] && ! empty( $result['activated'] ) ) {
+                add_settings_error(
+                    'dps_addon_manager',
+                    'activated',
+                    sprintf(
+                        /* translators: %s: add-on name */
+                        __( '%s ativado com sucesso.', 'desi-pet-shower' ),
+                        $addon_name
+                    ),
+                    'updated'
+                );
+            } else {
+                foreach ( $result['errors'] as $error ) {
+                    add_settings_error(
+                        'dps_addon_manager',
+                        'activation_error',
+                        $error,
+                        'error'
+                    );
+                }
+            }
+        } else {
+            $result = $this->deactivate_addons( [ $slug ] );
+            if ( $result['success'] && ! empty( $result['deactivated'] ) ) {
+                add_settings_error(
+                    'dps_addon_manager',
+                    'deactivated',
+                    sprintf(
+                        /* translators: %s: add-on name */
+                        __( '%s desativado com sucesso.', 'desi-pet-shower' ),
+                        $addon_name
                     ),
                     'updated'
                 );
@@ -833,6 +916,21 @@ class DPS_Addon_Manager {
                                                     esc_html( implode( ', ', $missing_names ) )
                                                 );
                                                 ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ( $is_installed ) : ?>
+                                            <div class="dps-addon-individual-actions">
+                                                <?php if ( $is_active ) : ?>
+                                                    <button type="submit" name="dps_addon_action" value="deactivate_single_<?php echo esc_attr( $addon['slug'] ); ?>" class="button button-small dps-btn-individual dps-btn-deactivate">
+                                                        <span class="dashicons dashicons-no-alt"></span>
+                                                        <?php esc_html_e( 'Desativar', 'desi-pet-shower' ); ?>
+                                                    </button>
+                                                <?php else : ?>
+                                                    <button type="submit" name="dps_addon_action" value="activate_single_<?php echo esc_attr( $addon['slug'] ); ?>" class="button button-small button-primary dps-btn-individual dps-btn-activate">
+                                                        <span class="dashicons dashicons-yes-alt"></span>
+                                                        <?php esc_html_e( 'Ativar', 'desi-pet-shower' ); ?>
+                                                    </button>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
