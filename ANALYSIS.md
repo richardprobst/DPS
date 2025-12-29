@@ -404,7 +404,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 - **Não** carregar text domains ou instanciar classes antes do hook `init` (evitar `plugins_loaded` ou escopo global)
 
 **Status de localização pt_BR**:
-- ✅ Todos os 14 plugins (1 base + 13 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
+- ✅ Todos os 16 plugins (1 base + 15 add-ons) possuem headers `Text Domain` e `Domain Path` corretos
 - ✅ Todos os plugins carregam text domain no hook `init` com prioridade 1
 - ✅ Todas as classes são inicializadas no hook `init` com prioridade 5
 - ✅ Todo código, comentários e strings estão em Português do Brasil
