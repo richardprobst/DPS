@@ -2222,6 +2222,7 @@ class DPS_Groomers_Addon {
                 </div>
             </div>
         </div>
+        </div>
         <?php
         return ob_get_clean();
     }
