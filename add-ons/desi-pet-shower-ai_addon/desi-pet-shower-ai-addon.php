@@ -10,6 +10,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.9
  * Requires PHP:      8.4
+ * Update URI:        https://github.com/richardprobst/DPS
  *
  * Este add-on implementa um assistente virtual no Portal do Cliente com foco
  * EXCLUSIVO em assuntos relacionados a:

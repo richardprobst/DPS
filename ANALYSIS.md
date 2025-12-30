@@ -299,6 +299,86 @@ A página "Add-ons" exibe:
 - Capability `manage_options` para acesso à página
 - Capability `activate_plugins`/`deactivate_plugins` para ações
 
+### GitHub Updater
+
+O plugin base inclui um sistema de atualização automática via GitHub (`DPS_GitHub_Updater`) que:
+- Verifica novas versões diretamente do repositório GitHub
+- Notifica atualizações disponíveis no painel de Plugins do WordPress
+- Suporta o plugin base e todos os add-ons oficiais
+- Usa cache inteligente para evitar chamadas excessivas à API
+
+**Classe**: `includes/class-dps-github-updater.php`
+
+**Repositório**: `richardprobst/DPS`
+
+#### Como Funciona
+
+1. **Verificação de Versões**: O updater consulta a API do GitHub (`/repos/{owner}/{repo}/releases/latest`) para obter a versão mais recente.
+2. **Comparação**: Compara a versão instalada de cada plugin com a versão da release mais recente.
+3. **Notificação**: Se houver atualização disponível, injeta os dados no transient de updates do WordPress.
+4. **Instalação**: O WordPress usa seu fluxo padrão de atualização para baixar e instalar.
+
+#### Configuração
+
+O sistema funciona automaticamente sem configuração adicional. Para desabilitar:
+
+```php
+// Desabilitar o updater via hook (em wp-config.php ou plugin)
+add_filter( 'dps_github_updater_enabled', '__return_false' );
+```
+
+#### API Pública
+
+```php
+// Obter instância do updater
+$updater = DPS_GitHub_Updater::get_instance();
+
+// Forçar verificação (limpa cache)
+$release_data = $updater->force_check();
+
+// Obter lista de plugins gerenciados
+$plugins = $updater->get_managed_plugins();
+
+// Verificar se um plugin é gerenciado
+$is_managed = $updater->is_managed_plugin( 'desi-pet-shower-base_plugin/desi-pet-shower-base.php' );
+```
+
+#### Forçar Verificação Manual
+
+Adicione `?dps_force_update_check=1` à URL do painel de Plugins para forçar nova verificação:
+
+```
+/wp-admin/plugins.php?dps_force_update_check=1
+```
+
+#### Requisitos para Releases
+
+Para que o updater reconheça uma nova versão:
+1. A release no GitHub deve usar tags semver (ex: `v1.2.0` ou `1.2.0`)
+2. A versão na tag deve ser maior que a versão instalada
+3. Opcionalmente, anexe arquivos `.zip` individuais por plugin para download direto
+
+#### Plugins Gerenciados
+
+| Plugin | Arquivo | Caminho no Repositório |
+|--------|---------|------------------------|
+| Base Plugin | `desi-pet-shower-base_plugin/desi-pet-shower-base.php` | `plugin/desi-pet-shower-base_plugin` |
+| Agenda | `desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` | `add-ons/desi-pet-shower-agenda_addon` |
+| AI | `desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php` | `add-ons/desi-pet-shower-ai_addon` |
+| Backup | `desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php` | `add-ons/desi-pet-shower-backup_addon` |
+| Client Portal | `desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php` | `add-ons/desi-pet-shower-client-portal_addon` |
+| Communications | `desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php` | `add-ons/desi-pet-shower-communications_addon` |
+| Finance | `desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php` | `add-ons/desi-pet-shower-finance_addon` |
+| Groomers | `desi-pet-shower-groomers_addon/desi-pet-shower-groomers-addon.php` | `add-ons/desi-pet-shower-groomers_addon` |
+| Loyalty | `desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` | `add-ons/desi-pet-shower-loyalty_addon` |
+| Payment | `desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php` | `add-ons/desi-pet-shower-payment_addon` |
+| Push | `desi-pet-shower-push_addon/desi-pet-shower-push-addon.php` | `add-ons/desi-pet-shower-push_addon` |
+| Registration | `desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php` | `add-ons/desi-pet-shower-registration_addon` |
+| Services | `desi-pet-shower-services_addon/desi-pet-shower-services.php` | `add-ons/desi-pet-shower-services_addon` |
+| Stats | `desi-pet-shower-stats_addon/desi-pet-shower-stats-addon.php` | `add-ons/desi-pet-shower-stats_addon` |
+| Stock | `desi-pet-shower-stock_addon/desi-pet-shower-stock.php` | `add-ons/desi-pet-shower-stock_addon` |
+| Subscription | `desi-pet-shower-subscription_addon/desi-pet-shower-subscription.php` | `add-ons/desi-pet-shower-subscription_addon` |
+
 ### Tipos de Agendamento
 
 O sistema suporta três tipos de agendamentos, identificados pelo metadado `appointment_type`:
