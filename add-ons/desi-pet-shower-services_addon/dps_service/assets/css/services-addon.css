@@ -15,6 +15,29 @@
 
 .dps-services-section {
     max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.dps-services-header {
+    margin-bottom: 8px;
+}
+
+.dps-services-header .dps-section-header__subtitle {
+    margin: 0;
+}
+
+.dps-services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 1024px) {
+    .dps-services-grid {
+        grid-template-columns: minmax(0, 0.58fr) minmax(0, 0.42fr);
+        align-items: start;
+    }
 }
 
 /* === Container do Formulário === */
@@ -145,8 +168,9 @@
 /* === Grid de Porte (3 colunas) === */
 .dps-porte-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
+    align-items: start;
 }
 
 .dps-porte-item {
@@ -885,7 +909,7 @@
     }
     
     .dps-porte-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
     
     .dps-list-header {

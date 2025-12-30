@@ -303,11 +303,16 @@ class DPS_Services_Addon {
         ];
         ob_start();
         echo '<div class="dps-section dps-services-section" id="dps-section-servicos">';
+        echo '<div class="dps-section-header dps-services-header">';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">🧼</span>' . esc_html__( 'Gestão de Serviços', 'dps-services-addon' ) . '</h2>';
+        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Gerencie valores, duração e disponibilidade com o mesmo cabeçalho utilizado na aba de Agendamentos.', 'dps-services-addon' ) . '</p>';
+        echo '</div>';
         // Exibe mensagens de feedback
         if ( class_exists( 'DPS_Message_Helper' ) ) {
             echo DPS_Message_Helper::display_messages();
         }
 
+        echo '<div class="dps-services-grid">';
         // --- FORMULÁRIO DE CADASTRO ---
         $form_title = $edit_id 
             ? sprintf( __( 'Editar Serviço: %s', 'dps-services-addon' ), esc_html( $editing->post_title ) )
@@ -542,7 +547,7 @@ class DPS_Services_Addon {
         echo '</div>'; // .dps-form-grid
         echo '</div>'; // .dps-package-pricing-options
         echo '</fieldset>';
-
+        
         // === Botões do formulário ===
         echo '<div class="dps-form-actions">';
         $btn_text = $edit_id ? esc_html__( 'Atualizar Serviço', 'dps-services-addon' ) : esc_html__( 'Salvar Serviço', 'dps-services-addon' );
@@ -742,6 +747,7 @@ class DPS_Services_Addon {
             echo '</div>';
         }
         echo '</div>'; // .dps-list-container
+        echo '</div>'; // .dps-services-grid
         echo '</div>'; // .dps-section
         return ob_get_clean();
     }
