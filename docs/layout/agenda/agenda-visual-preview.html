@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-visualização da Agenda DPS</title>
+    <link rel="stylesheet" href="../../add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css">
+    <style>
+        body {
+            background: #f8fafc;
+            padding: 24px;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .preview-note {
+            margin: 0 0 16px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <p class="preview-note">Prévia estática da Agenda com o botão “Novo” visível e a navegação principal. Use este arquivo apenas como referência visual.</p>
+
+    <div class="dps-agenda-wrapper">
+        <header class="dps-agenda-header">
+            <div class="dps-agenda-title">
+                <h3>Agenda de Atendimentos</h3>
+                <p class="dps-agenda-subtitle">Visual limpo para navegar e agir rapidamente na agenda.</p>
+            </div>
+            <div class="dps-agenda-header-actions">
+                <div class="dps-bulk-actions">
+                    <span class="dps-bulk-count">0 selecionados</span>
+                    <button type="button" class="dps-bulk-btn">✅ Finalizar</button>
+                    <button type="button" class="dps-bulk-btn">💰 Marcar Pago</button>
+                    <button type="button" class="dps-bulk-btn dps-bulk-btn--danger">❌ Cancelar</button>
+                    <button type="button" class="dps-bulk-close">✕ Limpar seleção</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="dps-agenda-controls-wrapper">
+            <div class="dps-agenda-nav dps-agenda-nav--primary">
+                <div class="dps-agenda-nav-group dps-agenda-nav-group--date">
+                    <span class="dps-current-date">📅 <strong>25/06/2025</strong></span>
+                    <div class="dps-date-nav">
+                        <a href="#" class="dps-nav-btn dps-nav-btn--prev">←</a>
+                        <a href="#" class="dps-nav-btn dps-nav-btn--today">Hoje</a>
+                        <a href="#" class="dps-nav-btn dps-nav-btn--next">→</a>
+                    </div>
+                </div>
+                <div class="dps-agenda-nav-group dps-agenda-nav-group--views">
+                    <span class="dps-nav-label">Ver:</span>
+                    <div class="dps-view-buttons">
+                        <a href="#" class="dps-view-btn dps-view-btn--active">Dia</a>
+                        <a href="#" class="dps-view-btn">Semana</a>
+                        <a href="#" class="dps-view-btn">Mês</a>
+                    </div>
+                </div>
+                <div class="dps-agenda-nav-group dps-agenda-nav-group--actions">
+                    <a href="#" class="button dps-btn dps-btn--primary" data-dps-open-appointment-modal="true">➕ Novo</a>
+                    <button type="button" class="button dps-btn dps-btn--ghost">📥</button>
+                </div>
+            </div>
+
+            <div class="dps-agenda-context-bar">
+                <div class="dps-context-meta">
+                    <span class="dps-context-pill dps-context-pill--accent">Visão do dia</span>
+                    <span class="dps-context-pill">25/06/2025</span>
+                    <span class="dps-context-hint">Use a navegação para avançar pela agenda.</span>
+                </div>
+                <div class="dps-context-actions">
+                    <a href="#" class="button dps-btn dps-btn--soft dps-context-btn">📋 Ver agenda completa</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dps-agenda-tabs-wrapper">
+            <div class="dps-agenda-tabs">
+                <button class="dps-agenda-tab-button dps-agenda-tab-button--active" type="button">Visão Rápida</button>
+                <button class="dps-agenda-tab-button" type="button">Operação</button>
+                <button class="dps-agenda-tab-button" type="button">Detalhes</button>
+            </div>
+            <div class="dps-agenda-tabs-content">
+                <div class="dps-tab-content dps-tab-content--active">
+                    <div class="dps-agenda-table-container">
+                        <table class="dps-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Data</th>
+                                    <th>Hora</th>
+                                    <th>Pet (Cliente)</th>
+                                    <th>Serviço</th>
+                                    <th>Status</th>
+                                    <th>Pagamento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="dps-select-checkbox" checked></td>
+                                    <td>25/06/2025</td>
+                                    <td>14:00</td>
+                                    <td>Luna (Ana Souza)</td>
+                                    <td>Banho &amp; Tosa</td>
+                                    <td><span class="dps-status-badge status-pendente">Pendente</span></td>
+                                    <td><span class="dps-payment-badge dps-payment-badge--pending">Pendente</span></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="dps-select-checkbox"></td>
+                                    <td>25/06/2025</td>
+                                    <td>15:30</td>
+                                    <td>Thor (Pedro Lima)</td>
+                                    <td>Hidratação</td>
+                                    <td><span class="dps-status-badge status-finalizado">Finalizado</span></td>
+                                    <td><span class="dps-payment-badge dps-payment-badge--paid">Pago</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -253,24 +253,6 @@
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
       }
     });
-    
-    // UX-5: Toggle de filtros avançados
-    $(document).on('click', '.dps-toggle-advanced-filters', function(e){
-      e.preventDefault();
-      var btn = $(this);
-      var advancedFilters = $('.dps-filters-advanced');
-      var isExpanded = btn.attr('data-expanded') === 'true';
-      
-      if ( isExpanded ) {
-        // Colapsar
-        advancedFilters.addClass('dps-filters-advanced--hidden');
-        btn.attr('data-expanded', 'false');
-      } else {
-        // Expandir
-        advancedFilters.removeClass('dps-filters-advanced--hidden');
-        btn.attr('data-expanded', 'true');
-      }
-    });
   });
 
   /**
