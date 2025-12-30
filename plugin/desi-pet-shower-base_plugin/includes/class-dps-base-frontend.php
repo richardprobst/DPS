@@ -1694,7 +1694,7 @@ class DPS_Base_Frontend {
             
             // Resumo dinâmico do agendamento (FASE 2)
             echo '<div class="dps-appointment-summary" aria-live="polite">';
-            echo '<h3>' . esc_html__( 'Resumo do agendamento', 'desi-pet-shower' ) . '</h3>';
+            echo '<h3><span class="dps-appointment-summary__icon" aria-hidden="true">📋</span>' . esc_html__( 'Resumo do agendamento', 'desi-pet-shower' ) . '</h3>';
             echo '<p class="dps-appointment-summary__empty">';
             echo esc_html__( 'Preencha cliente, pet, data e horário para ver o resumo aqui.', 'desi-pet-shower' );
             echo '</p>';

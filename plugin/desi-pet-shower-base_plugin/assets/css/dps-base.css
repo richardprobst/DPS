@@ -427,9 +427,9 @@
     color: #1f2937;
 }
 
-#dps-section-agendas > h2::before {
-    content: '📅';
+#dps-section-agendas > h2 .dps-section-title__icon {
     font-size: 1.2em;
+    line-height: 1;
 }
 
 .dps-form p {
@@ -1755,6 +1755,9 @@
 
 .dps-groomers-field {
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .dps-groomers-field label {
@@ -1765,7 +1768,8 @@
 }
 
 .dps-groomers-select {
-    min-width: 280px;
+    width: 100%;
+    min-width: 0;
     max-width: 100%;
     padding: 8px;
     border: 1px solid #d1d5db;
@@ -1807,14 +1811,9 @@
     position: relative;
 }
 
-.dps-appointment-summary::before {
-    content: '📋';
-    position: absolute;
-    top: -12px;
-    left: 20px;
-    font-size: 24px;
-    background: #ffffff;
-    padding: 0 8px;
+.dps-appointment-summary__icon {
+    font-size: 1.2em;
+    line-height: 1;
 }
 
 .dps-appointment-summary h3 {
@@ -1843,8 +1842,8 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 24px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px 16px;
 }
 
 .dps-appointment-summary__list li {
@@ -1855,7 +1854,9 @@
     font-size: 14px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .dps-appointment-summary__list li:last-child,
@@ -2167,6 +2168,11 @@
         margin: 24px auto 16px auto;
     }
     
+    .dps-appointment-summary__list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
     /* Reduzir largura mínima dos labels em telas pequenas */
     .dps-appointment-summary__list strong {
         min-width: 100px;
@@ -2175,6 +2181,7 @@
     
     .dps-appointment-summary__list li {
         font-size: 13px;
+        justify-content: flex-start;
     }
     
     .dps-appointment-summary h3 {
