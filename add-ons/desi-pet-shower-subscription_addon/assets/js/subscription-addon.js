@@ -9,6 +9,10 @@
     'use strict';
 
     window.DPSSubscription = window.DPSSubscription || {};
+    window.dpsSubscriptionStrings = window.dpsSubscriptionStrings || {
+        description: 'Descrição do serviço',
+        remove: 'Remover'
+    };
 
     /**
      * Filtra pets pelo cliente selecionado no formulário de assinatura.
@@ -18,7 +22,7 @@
      */
     DPSSubscription.filterPetsByClient = function(ownerId) {
         var $select = $('#dps-subscription-pet-select');
-        var $container = $select.closest('p');
+        var $container = $select.closest('.dps-form-field');
         
         if (!ownerId) {
             $select.val('');
@@ -63,12 +67,65 @@
         if (initialClient) {
             DPSSubscription.filterPetsByClient(initialClient);
         } else {
-            $('#dps-subscription-pet-select').closest('p').hide();
+            $('#dps-subscription-pet-select').closest('.dps-form-field').hide();
         }
         
         // Evento de mudança de cliente
         $clientSelect.on('change', function() {
             DPSSubscription.filterPetsByClient($(this).val());
+        });
+
+        DPSSubscription.bindExtras();
+    };
+
+    /**
+     * Gera uma nova linha de extra na lista desejada.
+     *
+     * @param {string} listSelector Seletor CSS da lista de extras.
+     */
+    DPSSubscription.addExtraRow = function(listSelector) {
+        var $list = $(listSelector);
+        if ($list.length === 0) {
+            return;
+        }
+        var index = $list.children('.dps-extra-row').length;
+        var row = [
+            '<div class="dps-extra-row" data-index="' + index + '">',
+            '  <div class="dps-extra-row-fields">',
+            '    <div class="dps-extra-description-field">',
+            '      <input type="text" name="subscription_extras_descriptions[]" placeholder="' + dpsSubscriptionStrings.description + '" class="dps-extra-description-input" />',
+            '    </div>',
+            '    <div class="dps-extra-value-field">',
+            '      <div class="dps-input-with-prefix">',
+            '        <span class="dps-input-prefix">R$</span>',
+            '        <input type="number" step="0.01" min="0" name="subscription_extras_values[]" placeholder="0,00" class="dps-extra-value-input" />',
+            '      </div>',
+            '    </div>',
+            '    <button type="button" class="dps-btn dps-btn--icon dps-remove-extra-btn" title="' + dpsSubscriptionStrings.remove + '"><span>✕</span></button>',
+            '  </div>',
+            '</div>'
+        ].join('');
+        $list.append(row);
+        $list.removeAttr('data-empty');
+    };
+
+    /**
+     * Liga eventos de adicionar/remover extras.
+     */
+    DPSSubscription.bindExtras = function() {
+        $(document).on('click', '.dps-add-extra-btn', function(event) {
+            event.preventDefault();
+            var listSelector = $(this).data('list');
+            DPSSubscription.addExtraRow(listSelector);
+        });
+
+        $(document).on('click', '.dps-remove-extra-btn', function(event) {
+            event.preventDefault();
+            var $list = $(this).closest('.dps-extras-list');
+            $(this).closest('.dps-extra-row').remove();
+            if ($list.children('.dps-extra-row').length === 0) {
+                $list.attr('data-empty', 'true');
+            }
         });
     };
 
