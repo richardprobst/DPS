@@ -83,6 +83,12 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Base Plugin (v1.2.0) - Card "Agendar serviço" na aba Agendamentos**
+
+- **Card "Agendar serviço" no formulário de agendamentos**: Formulário de agendamento agora está envolvido por um card visual com header contendo eyebrow "AGENDAR SERVIÇO", título dinâmico (Novo Agendamento/Editar Agendamento) e hint descritivo. Estrutura idêntica ao implementado na aba Assinaturas.
+- **Estilos de card no CSS base**: Adicionados estilos `.dps-card`, `.dps-card__header`, `.dps-card__body`, `.dps-card__eyebrow`, `.dps-card__title`, `.dps-card__hint` e `.dps-card__actions` no arquivo `dps-base.css` para garantir consistência visual em todas as abas.
+- **Responsividade do card**: Media queries para adaptar layout do card em dispositivos móveis (768px e 480px).
+
 **Base Plugin (v1.2.0) - Atualizações via GitHub**
 
 - **Atualizações automáticas via GitHub**: Nova classe `DPS_GitHub_Updater` que verifica e notifica atualizações disponíveis diretamente do repositório GitHub.

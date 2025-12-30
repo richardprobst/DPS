@@ -1297,41 +1297,54 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
-        echo '<h2 class="dps-section-title">';
-        echo '<span class="dps-section-title__icon">📅</span>';
-        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
-        echo '</h2>';
         
-        // Mensagem de duplicação
-        if ( $is_duplicate && ! $visitor_only ) {
-            echo '<div class="dps-alert dps-alert--info" role="status" aria-live="polite">';
-            echo '<strong>' . esc_html__( 'Duplicando agendamento', 'desi-pet-shower' ) . '</strong><br>';
-            echo esc_html__( 'Os dados do agendamento anterior foram copiados. Selecione uma nova data e horário, então salve para criar o novo agendamento.', 'desi-pet-shower' );
+        // Formulário de agendamento com estrutura de Card
+        if ( ! $visitor_only ) {
+            // Título do formulário: Novo ou Editar
+            $form_title = $edit_id
+                ? esc_html__( 'Editar Agendamento', 'desi-pet-shower' )
+                : esc_html__( 'Novo Agendamento', 'desi-pet-shower' );
+            
+            echo '<div class="dps-card dps-card--form">';
+            echo '<div class="dps-card__header">';
+            echo '<div>';
+            echo '<p class="dps-card__eyebrow">' . esc_html__( 'Agendar serviço', 'desi-pet-shower' ) . '</p>';
+            echo '<h4 class="dps-card__title">' . $form_title . '</h4>';
+            echo '<p class="dps-card__hint">' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' ) . '</p>';
             echo '</div>';
-        }
-        
-        if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] && ! $visitor_only ) {
-            $notice_key  = 'dps_pending_notice_' . get_current_user_id();
-            $notice_data = get_transient( $notice_key );
-            if ( $notice_data && ! empty( $notice_data['transactions'] ) ) {
-                echo '<div class="dps-alert dps-alert--danger">';
-                $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'desi-pet-shower' );
-                echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'desi-pet-shower' ), esc_html( $client_label ) ) . '</strong>';
-                echo '<ul>';
-                foreach ( $notice_data['transactions'] as $row ) {
-                    $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
-                    $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
-                    $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'desi-pet-shower' );
-                    $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
-                    echo '<li>' . esc_html( $message ) . '</li>';
-                }
-                echo '</ul>';
+            echo '</div>'; // .dps-card__header
+            
+            echo '<div class="dps-card__body">';
+            
+            // Mensagem de duplicação
+            if ( $is_duplicate ) {
+                echo '<div class="dps-alert dps-alert--info" role="status" aria-live="polite">';
+                echo '<strong>' . esc_html__( 'Duplicando agendamento', 'desi-pet-shower' ) . '</strong><br>';
+                echo esc_html__( 'Os dados do agendamento anterior foram copiados. Selecione uma nova data e horário, então salve para criar o novo agendamento.', 'desi-pet-shower' );
                 echo '</div>';
             }
-            delete_transient( $notice_key );
-        }
-        // Formulário de agendamento
-        if ( ! $visitor_only ) {
+            
+            if ( isset( $_GET['dps_notice'] ) && 'pending_payments' === $_GET['dps_notice'] ) {
+                $notice_key  = 'dps_pending_notice_' . get_current_user_id();
+                $notice_data = get_transient( $notice_key );
+                if ( $notice_data && ! empty( $notice_data['transactions'] ) ) {
+                    echo '<div class="dps-alert dps-alert--danger">';
+                    $client_label = ! empty( $notice_data['client_name'] ) ? $notice_data['client_name'] : __( 'o cliente selecionado', 'desi-pet-shower' );
+                    echo '<strong>' . sprintf( esc_html__( 'Pagamentos em aberto para %s.', 'desi-pet-shower' ), esc_html( $client_label ) ) . '</strong>';
+                    echo '<ul>';
+                    foreach ( $notice_data['transactions'] as $row ) {
+                        $date_fmt  = ! empty( $row['data'] ) ? date_i18n( 'd/m/Y', strtotime( $row['data'] ) ) : '';
+                        $value_fmt = number_format_i18n( (float) $row['valor'], 2 );
+                        $desc      = ! empty( $row['descricao'] ) ? $row['descricao'] : __( 'Serviço', 'desi-pet-shower' );
+                        $message   = trim( sprintf( '%s: R$ %s – %s', $date_fmt, $value_fmt, $desc ) );
+                        echo '<li>' . esc_html( $message ) . '</li>';
+                    }
+                    echo '</ul>';
+                    echo '</div>';
+                }
+                delete_transient( $notice_key );
+            }
+            
             echo '<form method="post" class="dps-form">';
             echo '<input type="hidden" name="dps_action" value="save_appointment">';
             wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos' );
@@ -1725,7 +1738,17 @@ class DPS_Base_Frontend {
             
             // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
+            
+            echo '</div>'; // .dps-card__body
+            echo '</div>'; // .dps-card
         }
+        
+        // Título da seção de listagem (aparece para todos os usuários)
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
+        echo '</h2>';
+        
         // Listagem de agendamentos organizados por status
         if ( $include_list ) {
             $args = [
