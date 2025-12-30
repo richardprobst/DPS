@@ -46,6 +46,9 @@ $base_url      = isset( $base_url ) ? $base_url : get_permalink();
 		<span class="dps-section-title__icon">🐾</span>
 		<?php echo esc_html__( 'Cadastro de Pets', 'desi-pet-shower' ); ?>
 	</h2>
+	<p class="dps-section-header__subtitle dps-pets-intro">
+		<?php echo esc_html__( 'Gerencie os cadastros de pets com o mesmo cabeçalho, hierarquia e espaçamentos usados na aba de Agendamentos.', 'desi-pet-shower' ); ?>
+	</p>
 
 	<div class="dps-section-grid">
 		<div class="dps-surface dps-surface--info">
@@ -53,7 +56,7 @@ $base_url      = isset( $base_url ) ? $base_url : get_permalink();
 				<span>📋</span>
 				<?php echo esc_html__( 'Formulário de pets', 'desi-pet-shower' ); ?>
 			</div>
-			<p class="dps-surface__description">
+			<p class="dps-surface__description dps-pets-helper-text">
 				<?php echo esc_html__( 'Cadastre ou edite pets mantendo o mesmo cabeçalho, botões e boxes coloridos da aba Agendamentos.', 'desi-pet-shower' ); ?>
 			</p>
 			<?php
@@ -77,7 +80,7 @@ $base_url      = isset( $base_url ) ? $base_url : get_permalink();
 				<span>🐶</span>
 				<?php echo esc_html__( 'Lista de pets', 'desi-pet-shower' ); ?>
 			</div>
-			<p class="dps-surface__description">
+			<p class="dps-surface__description dps-pets-helper-text">
 				<?php echo esc_html__( 'Listagem unificada com espaçamentos e bordas inspirados na seção de Agendamentos.', 'desi-pet-shower' ); ?>
 			</p>
 			<?php
