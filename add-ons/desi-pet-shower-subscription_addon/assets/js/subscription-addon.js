@@ -55,10 +55,17 @@
      * Configura eventos e estado inicial dos formulários.
      */
     DPSSubscription.init = function() {
+        // Vincula eventos de extras SEMPRE no início, antes de qualquer return.
+        // Isso garante que o binding funcione mesmo ao navegar da listagem
+        // para o formulário, pois usa delegação de eventos $(document).on().
+        // Antes, era chamado após a verificação do $clientSelect, o que impedia
+        // o funcionamento quando o formulário não existia na página inicial.
+        DPSSubscription.bindExtras();
+
         var $clientSelect = $('select[name="subscription_client_id"]');
         
         if ($clientSelect.length === 0) {
-            return; // Não estamos na página de assinaturas
+            return; // Não estamos na página de assinaturas com formulário
         }
         
         var initialClient = $clientSelect.val();
@@ -74,8 +81,6 @@
         $clientSelect.on('change', function() {
             DPSSubscription.filterPetsByClient($(this).val());
         });
-
-        DPSSubscription.bindExtras();
     };
 
     /**
