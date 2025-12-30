@@ -193,6 +193,10 @@ Antes de criar uma nova versão oficial:
 
 - **uninstall.php corrigido**: Agora limpa todas as options criadas pelo add-on e remove cron jobs.
 
+**Subscription Add-on (v1.2.1)**
+
+- **Botão "Adicionar serviço extra" corrigido**: Movida chamada do `bindExtras()` para o início da função `init()`, garantindo que os eventos de clique sejam vinculados mesmo quando o formulário não está presente na página inicial. Antes, se o usuário acessava a listagem de assinaturas e depois navegava para "Nova Assinatura", o botão não funcionava por falta de binding dos eventos.
+
 ---
 
 **AI Add-on (v1.9.0) - Edição de Regras de Sistema (System Prompts)**
