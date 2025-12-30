@@ -3153,6 +3153,50 @@
     font-size: 1.1em;
 }
 
+/* Ajustes específicos da aba Pets */
+#dps-section-pets .dps-section-title__icon {
+    font-size: 1.2em;
+}
+
+#dps-section-pets .dps-section-header__subtitle.dps-pets-intro {
+    margin: -6px 0 22px 0;
+    max-width: 920px;
+    line-height: 1.6;
+}
+
+#dps-section-pets .dps-section-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+#dps-section-pets .dps-surface {
+    height: 100%;
+}
+
+#dps-section-pets .dps-pets-helper-text {
+    max-width: 880px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+#dps-section-pets .dps-pets-helper-text + .dps-list-header {
+    margin-top: 10px;
+}
+
+@media (min-width: 1200px) {
+    #dps-section-pets .dps-section-header__subtitle.dps-pets-intro {
+        margin-bottom: 26px;
+    }
+
+    #dps-section-pets .dps-section-grid {
+        gap: 24px;
+    }
+
+    #dps-section-pets .dps-pets-helper-text {
+        margin-bottom: 22px;
+    }
+}
+
 /* Células especiais na tabela */
 .dps-pet-cell {
     display: flex;
