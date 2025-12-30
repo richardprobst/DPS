@@ -163,9 +163,12 @@ class DPS_Base_Plugin {
                 $existing_reception->add_cap( $capability );
             }
         } else {
+            // Note: Role names are stored in the database and translated via
+            // translate_user_role() when displayed. Using a translatable string
+            // here triggers "translation too early" warnings in WP 6.7+.
             add_role(
                 'dps_reception',
-                __( 'Recepção DPS', 'desi-pet-shower' ),
+                'Recepção DPS',
                 $reception_caps
             );
         }

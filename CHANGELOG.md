@@ -187,6 +187,8 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+- **Base Plugin (v1.1.1)**: Corrigido PHP Notice "Translation loading for the desi-pet-shower domain was triggered too early" no WordPress 6.7+. A função `add_role()` no hook de ativação agora usa string literal em vez de `__()` para evitar carregamento prematuro do text domain.
+
 - **Base Plugin (v1.0.4)**: Cache dos assets CSS/JS agora usa `filemtime` para versionar automaticamente o layout modernizado do Painel de Gestão DPS, evitando exibição do modelo antigo em navegadores com cache. 
 
 **Push Add-on (v1.2.0)**
