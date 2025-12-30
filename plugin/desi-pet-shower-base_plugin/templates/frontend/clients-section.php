@@ -38,26 +38,48 @@ $base_url = isset( $base_url ) ? $base_url : '';
 		<span class="dps-section-title__icon">👥</span>
 		<?php echo esc_html__( 'Cadastro de Clientes', 'desi-pet-shower' ); ?>
 	</h2>
-	
-	<?php
-	// Renderizar formulário de cliente usando template
-	dps_get_template(
-		'forms/client-form.php',
-		[
-			'edit_id' => $edit_id,
-			'editing' => $editing,
-			'meta'    => $meta,
-			'api_key' => $api_key,
-		]
-	);
-	
-	// Renderizar listagem de clientes usando template
-	dps_get_template(
-		'lists/clients-list.php',
-		[
-			'clients'  => $clients,
-			'base_url' => $base_url,
-		]
-	);
-	?>
+
+	<div class="dps-section-grid">
+		<div class="dps-surface dps-surface--info">
+			<div class="dps-surface__title">
+				<span>📝</span>
+				<?php echo esc_html__( 'Formulário de cadastro', 'desi-pet-shower' ); ?>
+			</div>
+			<p class="dps-surface__description">
+				<?php echo esc_html__( 'Preencha ou edite dados do cliente com o mesmo padrão visual da aba Agendamentos.', 'desi-pet-shower' ); ?>
+			</p>
+			<?php
+			// Renderizar formulário de cliente usando template
+			dps_get_template(
+				'forms/client-form.php',
+				[
+					'edit_id' => $edit_id,
+					'editing' => $editing,
+					'meta'    => $meta,
+					'api_key' => $api_key,
+				]
+			);
+			?>
+		</div>
+
+		<div class="dps-surface dps-surface--neutral">
+			<div class="dps-surface__title">
+				<span>📋</span>
+				<?php echo esc_html__( 'Lista de clientes', 'desi-pet-shower' ); ?>
+			</div>
+			<p class="dps-surface__description">
+				<?php echo esc_html__( 'Visualize, filtre e exporte clientes com a mesma hierarquia e espaçamentos da aba Agendamentos.', 'desi-pet-shower' ); ?>
+			</p>
+			<?php
+			// Renderizar listagem de clientes usando template
+			dps_get_template(
+				'lists/clients-list.php',
+				[
+					'clients'  => $clients,
+					'base_url' => $base_url,
+				]
+			);
+			?>
+		</div>
+	</div>
 </div>
