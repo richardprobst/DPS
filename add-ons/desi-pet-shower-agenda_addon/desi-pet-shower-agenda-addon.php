@@ -1140,20 +1140,6 @@ class DPS_Agenda_Addon {
         echo '<header class="dps-agenda-header">';
         echo '<div class="dps-agenda-title">';
         echo '<h3>' . __( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '<p class="dps-agenda-subtitle">' . esc_html__( 'Visual limpo para navegar e agir rapidamente na agenda.', 'dps-agenda-addon' ) . '</p>';
-        echo '</div>';
-        
-        // NOTA: "Resumo do Dia" movido para o final da página (render_admin_dashboard chamado após as abas)
-        
-        // FASE 5: Barra de ações em lote (oculta inicialmente, exibida via JS)
-        echo '<div class="dps-agenda-header-actions">';
-        echo '<div class="dps-bulk-actions">';
-        echo '<span class="dps-bulk-count">0 ' . esc_html__( 'selecionados', 'dps-agenda-addon' ) . '</span>';
-        echo '<button type="button" class="dps-bulk-btn" data-action="update_status" data-status="' . esc_attr( self::STATUS_FINISHED ) . '">✅ ' . esc_html__( 'Finalizar', 'dps-agenda-addon' ) . '</button>';
-        echo '<button type="button" class="dps-bulk-btn" data-action="update_status" data-status="' . esc_attr( self::STATUS_PAID ) . '">💰 ' . esc_html__( 'Marcar Pago', 'dps-agenda-addon' ) . '</button>';
-        echo '<button type="button" class="dps-bulk-btn dps-bulk-btn--danger" data-action="update_status" data-status="' . esc_attr( self::STATUS_CANCELED ) . '">❌ ' . esc_html__( 'Cancelar', 'dps-agenda-addon' ) . '</button>';
-        echo '<button type="button" class="dps-bulk-close">✕ ' . esc_html__( 'Limpar seleção', 'dps-agenda-addon' ) . '</button>';
-        echo '</div>';
         echo '</div>';
         echo '</header>';
         
@@ -1862,6 +1848,15 @@ class DPS_Agenda_Addon {
         if ( ! $show_all && $view !== 'calendar' ) {
             $this->render_admin_dashboard( $selected_date );
         }
+        
+        // FASE 5: Barra de ações em lote flutuante no rodapé (oculta inicialmente, exibida via JS ao selecionar itens)
+        echo '<div class="dps-bulk-actions">';
+        echo '<span class="dps-bulk-count">0 ' . esc_html__( 'selecionados', 'dps-agenda-addon' ) . '</span>';
+        echo '<button type="button" class="dps-bulk-btn" data-action="update_status" data-status="' . esc_attr( self::STATUS_FINISHED ) . '">✅ ' . esc_html__( 'Finalizar', 'dps-agenda-addon' ) . '</button>';
+        echo '<button type="button" class="dps-bulk-btn" data-action="update_status" data-status="' . esc_attr( self::STATUS_PAID ) . '">💰 ' . esc_html__( 'Marcar Pago', 'dps-agenda-addon' ) . '</button>';
+        echo '<button type="button" class="dps-bulk-btn dps-bulk-btn--danger" data-action="update_status" data-status="' . esc_attr( self::STATUS_CANCELED ) . '">❌ ' . esc_html__( 'Cancelar', 'dps-agenda-addon' ) . '</button>';
+        echo '<button type="button" class="dps-bulk-close">✕ ' . esc_html__( 'Limpar seleção', 'dps-agenda-addon' ) . '</button>';
+        echo '</div>';
         
         echo '</div>';
         return ob_get_clean();
