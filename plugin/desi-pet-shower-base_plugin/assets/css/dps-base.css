@@ -133,12 +133,16 @@
 
 /* Containers reutilizáveis para manter o padrão visual da aba Agendamentos em todo o sistema */
 .dps-section-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
+    align-items: start;
 }
 
 .dps-surface {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-left: 4px solid #0ea5e9;
@@ -186,6 +190,12 @@
     margin: 0 0 16px 0;
     color: #6b7280;
     font-size: 14px;
+}
+
+@media (min-width: 1024px) {
+    .dps-section-grid {
+        grid-template-columns: 1.05fr 0.95fr;
+    }
 }
 
 /* ================================================
@@ -3084,8 +3094,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 40px 0 20px 0;
-    padding-top: 24px;
+    margin: 24px 0 20px 0;
+    padding-top: 16px;
     border-top: 1px solid #e5e7eb;
     font-size: 18px;
     font-weight: 600;
@@ -3129,13 +3139,14 @@
 .dps-section-title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin: 0 0 24px 0;
     padding-bottom: 16px;
     border-bottom: 2px solid #e5e7eb;
-    font-size: 22px;
-    font-weight: 600;
-    color: #374151;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
 }
 
 .dps-section-title__icon {
