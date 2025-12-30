@@ -8,6 +8,124 @@
  */
 
 /* ==========================================================================
+   Layout geral e cabeçalho (alinhado à aba Agendamentos)
+   ========================================================================== */
+
+.dps-subscription-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 12px 24px;
+}
+
+.dps-subscription-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dps-subscription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.dps-subscription-title h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    color: #0f172a;
+}
+
+.dps-subscription-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dps-subscription-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+#dps-section-assinaturas h4 {
+    margin: 0 0 12px;
+    color: #0f172a;
+}
+
+/* ==========================================================================
+   Botões padronizados (seguindo padrão da aba Agendamentos)
+   ========================================================================== */
+
+#dps-section-assinaturas .dps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.1;
+    text-decoration: none;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    color: #374151;
+}
+
+#dps-section-assinaturas .dps-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+}
+
+#dps-section-assinaturas .dps-btn--primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+#dps-section-assinaturas .dps-btn--primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+#dps-section-assinaturas .dps-btn--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+#dps-section-assinaturas .dps-btn--soft {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+#dps-section-assinaturas .dps-btn--soft:hover {
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+    background: #f9fafb;
+}
+
+#dps-section-assinaturas .dps-btn--icon .dps-btn-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(14, 165, 233, 0.12);
+}
+
+/* ==========================================================================
    Status de Pagamento nas Tabelas
    ========================================================================== */
 
@@ -522,6 +640,27 @@ table.dps-table tr.dps-canceled-row {
    ========================================================================== */
 
 @media (max-width: 768px) {
+    .dps-subscription-wrapper {
+        padding: 8px 8px 20px;
+    }
+
+    .dps-subscription-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .dps-subscription-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dps-subscription-header-actions .dps-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .dps-subscription-dashboard {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -651,6 +790,18 @@ table.dps-table tr.dps-canceled-row {
 }
 
 @media (max-width: 480px) {
+    .dps-subscription-header {
+        padding: 14px;
+    }
+
+    .dps-subscription-title h3 {
+        font-size: 18px;
+    }
+
+    .dps-subscription-subtitle {
+        font-size: 13px;
+    }
+
     .dps-subscription-dashboard {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
