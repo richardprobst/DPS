@@ -834,9 +834,31 @@ class DPS_Subscription_Addon {
             'orderby'        => 'date',
             'order'          => 'DESC',
         ] );
+        $base_url = get_permalink();
+        $list_url = add_query_arg( [ 'tab' => 'assinaturas' ], $base_url );
         ob_start();
-        echo '<div class="dps-section" id="dps-section-assinaturas">';
+        echo '<div class="dps-section dps-subscription-wrapper" id="dps-section-assinaturas">';
+        echo '<header class="dps-subscription-header">';
+        echo '<div class="dps-subscription-title">';
         echo '<h3>' . esc_html__( 'Assinaturas Mensais', 'dps-subscription-addon' ) . '</h3>';
+        echo '<p class="dps-subscription-subtitle">' . esc_html__( 'Gerencie planos recorrentes com o mesmo visual da aba Agendamentos.', 'dps-subscription-addon' ) . '</p>';
+        echo '</div>';
+        echo '<div class="dps-subscription-header-actions">';
+        if ( $edit_id || $is_new ) {
+            echo '<a href="' . esc_url( $list_url ) . '" class="dps-btn dps-btn--soft dps-btn--icon">';
+            echo '<span class="dps-btn-icon">←</span>';
+            echo '<span>' . esc_html__( 'Voltar para listagem', 'dps-subscription-addon' ) . '</span>';
+            echo '</a>';
+        } else {
+            $new_url = add_query_arg( [ 'tab' => 'assinaturas', 'dps_new' => 'subscription' ], $base_url );
+            echo '<a href="' . esc_url( $new_url ) . '" class="dps-btn dps-btn--primary dps-btn--icon dps-btn-new-subscription">';
+            echo '<span class="dps-btn-icon">➕</span>';
+            echo '<span>' . esc_html__( 'Nova Assinatura', 'dps-subscription-addon' ) . '</span>';
+            echo '</a>';
+        }
+        echo '</div>';
+        echo '</header>';
+        echo '<div class="dps-subscription-content">';
         
         // Exibe formulário se estiver editando OU criando nova assinatura
         if ( $edit_id || $is_new ) {
@@ -979,9 +1001,7 @@ class DPS_Subscription_Addon {
             echo '<span class="dps-btn-icon">' . $submit_icon . '</span>';
             echo '<span>' . $button_text . '</span>';
             echo '</button>';
-            $base_url = get_permalink();
-            $back_url = add_query_arg( [ 'tab' => 'assinaturas' ], $base_url );
-            echo '<a href="' . esc_url( $back_url ) . '" class="dps-btn-cancel">';
+            echo '<a href="' . esc_url( $list_url ) . '" class="dps-btn-cancel">';
             echo '<span class="dps-btn-icon">✕</span>';
             echo '<span>' . esc_html__( 'Cancelar', 'dps-subscription-addon' ) . '</span>';
             echo '</a>';
@@ -1035,16 +1055,6 @@ class DPS_Subscription_Addon {
             echo '</div>';
             
             echo '</div>'; // .dps-subscription-dashboard
-            
-            // Botão para criar nova assinatura
-            $base_url = get_permalink();
-            $new_url  = add_query_arg( [ 'tab' => 'assinaturas', 'dps_new' => 'subscription' ], $base_url );
-            echo '<div class="dps-subscription-actions">';
-            echo '<a href="' . esc_url( $new_url ) . '" class="dps-btn-new-subscription">';
-            echo '<span class="dps-btn-icon">➕</span>';
-            echo '<span>' . esc_html__( 'Nova Assinatura', 'dps-subscription-addon' ) . '</span>';
-            echo '</a>';
-            echo '</div>';
         }
         
         // Exibe lista de assinaturas ativas
@@ -1180,7 +1190,6 @@ class DPS_Subscription_Addon {
                 // Ações: editar, cancelar, renovar e cobrar
                 echo '<td data-label="' . $lbl_acoes . '" class="dps-col-actions">';
                 echo '<div class="dps-action-buttons">';
-                $base_url = get_permalink();
                 
                 // Editar
                 echo '<a href="' . esc_url( add_query_arg( [ 'tab' => 'assinaturas', 'dps_edit' => 'subscription', 'id' => $sub->ID ], $base_url ) ) . '" class="dps-action-btn" title="' . esc_attr__( 'Editar assinatura', 'dps-subscription-addon' ) . '">✏️</a>';
@@ -1278,7 +1287,6 @@ class DPS_Subscription_Addon {
                 // Ações: restaurar ou excluir permanentemente
                 echo '<td data-label="' . $lbl_acoes . '" class="dps-col-actions">';
                 echo '<div class="dps-action-buttons">';
-                $base_url = get_permalink();
                 
                 // Restaurar com nonce
                 $restore_url = wp_nonce_url(
@@ -1303,6 +1311,7 @@ class DPS_Subscription_Addon {
         } else {
             echo '<p class="dps-empty-state dps-empty-state--muted">' . esc_html__( 'Nenhuma assinatura cancelada.', 'dps-subscription-addon' ) . '</p>';
         }
+        echo '</div>'; // .dps-subscription-content
         echo '</div>'; // .dps-section
         return ob_get_clean();
     }
