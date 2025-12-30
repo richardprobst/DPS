@@ -10,6 +10,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.9
  * Requires PHP:      8.4
+ * Update URI:        https://github.com/richardprobst/DPS
  *
  * Este add-on cria um portal de autoatendimento para clientes.  Ele registra
  * automaticamente um usuário WordPress para cada cliente cadastrado (quando

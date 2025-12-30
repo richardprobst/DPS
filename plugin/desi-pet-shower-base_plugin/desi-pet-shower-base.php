@@ -10,6 +10,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.9
  * Requires PHP:      8.4
+ * Update URI:        https://github.com/richardprobst/DPS
  */
 
 // Impede acesso direto
@@ -64,6 +65,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-tools-hub.php';
 
 // Gerenciador de Add-ons
 require_once DPS_BASE_DIR . 'includes/class-dps-addon-manager.php';
+
+// GitHub Updater - Atualizações automáticas via GitHub
+require_once DPS_BASE_DIR . 'includes/class-dps-github-updater.php';
 
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';

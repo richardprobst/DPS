@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Base Plugin (v1.2.0) - Atualizações via GitHub**
+
+- **Atualizações automáticas via GitHub**: Nova classe `DPS_GitHub_Updater` que verifica e notifica atualizações disponíveis diretamente do repositório GitHub.
+- **Suporte a todos os plugins DPS**: O sistema verifica atualizações para o plugin base e todos os 15 add-ons oficiais automaticamente.
+- **Integração nativa com WordPress**: Utiliza os hooks `pre_set_site_transient_update_plugins` e `plugins_api` para exibir atualizações no painel de Plugins padrão do WordPress.
+- **Cache inteligente**: Verificações são cacheadas por 12 horas para evitar chamadas excessivas à API do GitHub.
+- **Notificações no admin**: Aviso visual na página de Plugins quando há atualizações DPS disponíveis.
+- **Header Update URI**: Adicionado header `Update URI` em todos os plugins para desabilitar verificação no wordpress.org.
+- **Verificação forçada**: Parâmetro `?dps_force_update_check=1` permite forçar nova verificação de atualizações.
+
 **Base Plugin (v1.1.0) - Gerenciador de Add-ons**
 
 - **Gerenciador centralizado de add-ons**: Nova página administrativa (DPS by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
