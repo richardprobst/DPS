@@ -3814,6 +3814,33 @@ class DPS_Agenda_Addon {
         echo '</details>'; // .dps-summary-report
     }
 
+    /**
+     * Retorna a URL da página atual.
+     *
+     * @since 1.5.0
+     * @return string
+     */
+    private static function get_current_page_url() {
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+            $request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+            if ( is_string( $request_uri ) && '' !== $request_uri ) {
+                return esc_url_raw( home_url( $request_uri ) );
+            }
+        }
+
+        $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+        if ( $queried_id ) {
+            return get_permalink( $queried_id );
+        }
+
+        global $post;
+        if ( isset( $post->ID ) ) {
+            return get_permalink( $post->ID );
+        }
+
+        return home_url();
+    }
+
 
 }
 
