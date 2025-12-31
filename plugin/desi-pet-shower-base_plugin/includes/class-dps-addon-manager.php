@@ -956,9 +956,9 @@ class DPS_Addon_Manager {
     }
 }
 
-// Inicializa o gerenciador de add-ons
-add_action( 'plugins_loaded', function() {
+// Inicializa o gerenciador de add-ons após o carregamento do text domain.
+add_action( 'init', function() {
     if ( is_admin() ) {
         DPS_Addon_Manager::get_instance();
     }
-}, 20 );
+}, 5 );
