@@ -55,6 +55,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-message-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-phone-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-clients-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
 
