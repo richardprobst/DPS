@@ -507,6 +507,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **Backup & Restauração** (`dps-backup`) - Backup Add-on (exportar/importar dados)
 - **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (listagem de campanhas)
 - **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configurações de pontos e indicações)
+- **Clientes** (`dps-clients-settings`) - Plugin Base (define a URL da página dedicada de cadastro exibida nos atalhos da aba Clientes)
 - **Comunicações** (`dps-communications`) - Communications Add-on (templates e gateways)
 - **Formulário de Cadastro** (`dps-registration-settings`) - Registration Add-on (configurações do formulário público para clientes se cadastrarem)
 - **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)

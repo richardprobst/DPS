@@ -80,6 +80,11 @@ $base_url         = isset( $base_url ) ? $base_url : '';
 						<?php echo esc_html__( 'Abrir página de cadastro dedicada', 'desi-pet-shower' ); ?>
 					</a>
 				<?php else : ?>
+					<?php if ( current_user_can( 'manage_options' ) ) : ?>
+						<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=dps-clients-settings' ) ); ?>">
+							<?php echo esc_html__( 'Configurar página de cadastro', 'desi-pet-shower' ); ?>
+						</a>
+					<?php endif; ?>
 					<span class="dps-text-muted">
 						<?php echo esc_html__( 'Configure a URL da página de cadastro em Configurações → DPS by PRObst → Clientes.', 'desi-pet-shower' ); ?>
 					</span>
