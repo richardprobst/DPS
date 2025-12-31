@@ -57,6 +57,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-clients-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-admin-menu-cleaner.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
 
 // Hubs centralizados (Fase 2 - Reorganização de Menus)
@@ -929,5 +930,8 @@ add_action( 'init', function() {
     }
     if ( class_exists( 'DPS_Tools_Hub' ) ) {
         DPS_Tools_Hub::get_instance();
+    }
+    if ( class_exists( 'DPS_Admin_Menu_Cleaner' ) ) {
+        DPS_Admin_Menu_Cleaner::get_instance();
     }
 }, 5 );
