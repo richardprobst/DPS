@@ -1297,24 +1297,26 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
+        echo '</h2>';
         
-        // Formulário de agendamento com estrutura de Card
+        // Formulário de agendamento com estrutura alinhada ao padrão dos demais cards
         if ( ! $visitor_only ) {
             // Título do formulário: Novo ou Editar
             $form_title = $edit_id
                 ? esc_html__( 'Editar Agendamento', 'desi-pet-shower' )
                 : esc_html__( 'Novo Agendamento', 'desi-pet-shower' );
             
-            echo '<div class="dps-card dps-card--form">';
-            echo '<div class="dps-card__header">';
-            echo '<div>';
-            echo '<p class="dps-card__eyebrow">' . esc_html__( 'Agendar serviço', 'desi-pet-shower' ) . '</p>';
-            echo '<h4 class="dps-card__title">' . $form_title . '</h4>';
-            echo '<p class="dps-card__hint">' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' ) . '</p>';
+            echo '<div class="dps-surface dps-surface--info">';
+            echo '<div class="dps-surface__title">';
+            echo '<span aria-hidden="true">📅</span>';
+            echo esc_html__( 'Agendar serviço', 'desi-pet-shower' );
             echo '</div>';
-            echo '</div>'; // .dps-card__header
-            
-            echo '<div class="dps-card__body">';
+            echo '<p class="dps-surface__description">';
+            echo esc_html( $form_title ) . ' — ' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' );
+            echo '</p>';
             
             // Mensagem de duplicação
             if ( $is_duplicate ) {
@@ -1738,16 +1740,8 @@ class DPS_Base_Frontend {
             
             // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
-            
-            echo '</div>'; // .dps-card__body
-            echo '</div>'; // .dps-card
+            echo '</div>'; // .dps-surface
         }
-        
-        // Título da seção de listagem (aparece para todos os usuários)
-        echo '<h2 class="dps-section-title">';
-        echo '<span class="dps-section-title__icon">📅</span>';
-        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
-        echo '</h2>';
         
         // Listagem de agendamentos organizados por status
         if ( $include_list ) {
