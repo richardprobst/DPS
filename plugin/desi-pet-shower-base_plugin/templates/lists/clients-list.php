@@ -8,6 +8,7 @@
  * @package DesiPetShower
  * @since 1.0.0
  * @since 1.0.4 Adicionadas colunas Email e Pets, melhorado layout visual
+ * @since 1.0.6 Filtros administrativos e uso de metadados pré-carregados
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,36 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Extrai variáveis passadas para o template
-$clients  = isset( $clients ) && is_array( $clients ) ? $clients : [];
-$base_url = isset( $base_url ) ? $base_url : get_permalink();
+$clients        = isset( $clients ) && is_array( $clients ) ? $clients : [];
+$client_meta    = isset( $client_meta ) && is_array( $client_meta ) ? $client_meta : [];
+$pets_counts    = isset( $pets_counts ) && is_array( $pets_counts ) ? $pets_counts : [];
+$current_filter = isset( $current_filter ) ? $current_filter : 'all';
+$base_url       = isset( $base_url ) ? $base_url : get_permalink();
 
-// Pré-carregar contagem de pets para todos os clientes (evita N+1 queries)
-$pets_counts = [];
-if ( ! empty( $clients ) ) {
-	global $wpdb;
-	$client_ids = array_map( function( $c ) { return $c->ID; }, $clients );
-	$placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
-	
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$results = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT meta_value AS owner_id, COUNT(*) AS pet_count
-			 FROM {$wpdb->postmeta} pm
-			 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-			 WHERE pm.meta_key = 'owner_id'
-			 AND p.post_type = 'dps_pet'
-			 AND p.post_status = 'publish'
-			 AND pm.meta_value IN ($placeholders)
-			 GROUP BY pm.meta_value",
-			...$client_ids
-		),
-		ARRAY_A
-	);
-	
-	foreach ( $results as $row ) {
-		$pets_counts[ $row['owner_id'] ] = (int) $row['pet_count'];
-	}
-}
+$filter_options = [
+	'all'             => esc_html__( 'Todos', 'desi-pet-shower' ),
+	'without_pets'    => esc_html__( 'Sem pets', 'desi-pet-shower' ),
+	'missing_contact' => esc_html__( 'Sem telefone/e-mail', 'desi-pet-shower' ),
+];
+$filter_url_base = add_query_arg( 'tab', 'clientes', $base_url );
 ?>
 
 <h3 class="dps-list-header">
@@ -57,6 +40,24 @@ if ( ! empty( $clients ) ) {
 
 <div class="dps-list-toolbar">
 	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar por nome, telefone ou email...', 'desi-pet-shower' ); ?>">
+	
+	<div class="dps-filter-control">
+		<label for="dps-clients-filter" class="screen-reader-text"><?php echo esc_html__( 'Filtrar clientes', 'desi-pet-shower' ); ?></label>
+		<select id="dps-clients-filter" onchange="if (this.value) { window.location.href = this.value; }">
+			<?php foreach ( $filter_options as $filter_key => $label ) : ?>
+				<?php
+				$url = add_query_arg(
+					'dps_clients_filter',
+					$filter_key,
+					$filter_url_base
+				);
+				?>
+				<option value="<?php echo esc_url( $url ); ?>" <?php selected( $current_filter, $filter_key ); ?>>
+					<?php echo esc_html( $label ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+	</div>
 	
 	<?php if ( ! empty( $clients ) && ( current_user_can( 'dps_manage_clients' ) || current_user_can( 'manage_options' ) ) ) : ?>
 		<?php
@@ -86,8 +87,10 @@ if ( ! empty( $clients ) ) {
 			<tbody>
 				<?php foreach ( $clients as $client ) : ?>
 					<?php
-					$phone_raw   = get_post_meta( $client->ID, 'client_phone', true );
-					$email       = get_post_meta( $client->ID, 'client_email', true );
+					$client_id   = (int) $client->ID;
+					$meta        = isset( $client_meta[ $client_id ] ) ? $client_meta[ $client_id ] : [ 'phone' => '', 'email' => '' ];
+					$phone_raw   = isset( $meta['phone'] ) ? $meta['phone'] : '';
+					$email       = isset( $meta['email'] ) ? $meta['email'] : '';
 					$wa_url      = '';
 
 					// Gera link do WhatsApp se houver telefone usando helper centralizado
@@ -100,7 +103,7 @@ if ( ! empty( $clients ) ) {
 					}
 
 					// Usa contagem pré-carregada (evita N+1 queries)
-					$pets_count = isset( $pets_counts[ (string) $client->ID ] ) ? $pets_counts[ (string) $client->ID ] : 0;
+					$pets_count = isset( $pets_counts[ (string) $client_id ] ) ? $pets_counts[ (string) $client_id ] : 0;
 
 					$edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
 					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
@@ -112,6 +115,16 @@ if ( ! empty( $clients ) ) {
 						<td class="dps-table__col--name">
 							<a href="<?php echo esc_url( $view_url ); ?>" class="dps-client-link">
 								<?php echo esc_html( $client->post_title ); ?>
+								<?php if ( empty( $phone_raw ) && empty( $email ) ) : ?>
+									<span class="dps-status-badge dps-status-badge--pending">
+										<?php echo esc_html__( 'Contato faltando', 'desi-pet-shower' ); ?>
+									</span>
+								<?php endif; ?>
+								<?php if ( 0 === $pets_count ) : ?>
+									<span class="dps-status-badge dps-status-badge--scheduled">
+										<?php echo esc_html__( 'Sem pets', 'desi-pet-shower' ); ?>
+									</span>
+								<?php endif; ?>
 							</a>
 						</td>
 						<td class="dps-table__col--phone">
@@ -168,7 +181,7 @@ if ( ! empty( $clients ) ) {
 		<span class="dps-empty-state__icon">👤</span>
 		<h4 class="dps-empty-state__title"><?php echo esc_html__( 'Nenhum cliente cadastrado', 'desi-pet-shower' ); ?></h4>
 		<p class="dps-empty-state__description">
-			<?php echo esc_html__( 'Comece cadastrando seu primeiro cliente usando o formulário acima. Após o cadastro, você poderá adicionar pets e agendar serviços.', 'desi-pet-shower' ); ?>
+			<?php echo esc_html__( 'Use a página dedicada de cadastro para incluir o primeiro cliente. Após o cadastro, você poderá adicionar pets e agendar serviços.', 'desi-pet-shower' ); ?>
 		</p>
 	</div>
 <?php endif; ?>

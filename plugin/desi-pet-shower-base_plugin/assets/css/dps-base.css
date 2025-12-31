@@ -3135,6 +3135,29 @@
     margin-bottom: 0;
 }
 
+.dps-filter-control select {
+    min-width: 180px;
+}
+
+.dps-inline-stats {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px 0;
+    display: grid;
+    gap: 10px;
+}
+
+.dps-inline-stats li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #374151;
+}
+
+.dps-inline-stats li strong {
+    font-size: 16px;
+}
+
 /* Título da seção */
 .dps-section-title {
     display: flex;
