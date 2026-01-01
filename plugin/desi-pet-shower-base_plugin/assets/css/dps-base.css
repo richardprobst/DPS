@@ -3325,33 +3325,105 @@
     font-size: 1.2em;
 }
 
-#dps-section-pets .dps-section-header__subtitle.dps-pets-intro {
+#dps-section-pets .dps-section-header__subtitle {
     margin: -6px 0 22px 0;
     max-width: 920px;
     line-height: 1.6;
 }
 
+/* Layout empilhado como na aba Clientes */
 #dps-section-pets .dps-section-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: 1fr;
     gap: 20px;
 }
 
 #dps-section-pets .dps-surface {
-    height: 100%;
+    padding: 24px;
 }
 
-#dps-section-pets .dps-pets-helper-text {
-    max-width: 880px;
-    line-height: 1.6;
-    margin-bottom: 18px;
+/* Card de status e estatísticas */
+#dps-section-pets .dps-pets-status-card .dps-inline-stats {
+    margin-bottom: 20px;
 }
 
-#dps-section-pets .dps-pets-helper-text + .dps-list-header {
-    margin-top: 10px;
+/* Estatísticas por espécie */
+.dps-pets-species-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-pets-species-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-width: 100px;
+}
+
+.dps-pets-species-stat__icon {
+    font-size: 24px;
+}
+
+.dps-pets-species-stat__count {
+    font-size: 20px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.dps-pets-species-stat__label {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Seção do formulário ao final */
+#dps-section-pets .dps-pets-form-section {
+    margin-top: 24px;
+}
+
+/* Card de edição de pet */
+#dps-section-pets .dps-pets-edit-card .dps-surface__description {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Estatísticas de agendamentos na lista de pets */
+.dps-pet-appointments-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-pet-appointments-count {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.dps-pet-last-appointment {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dps-pet-no-appointments {
+    font-size: 13px;
+}
+
+/* Card de lista de pets */
+#dps-section-pets .dps-pets-list-card .dps-surface__description {
+    margin-bottom: 4px;
 }
 
 @media (min-width: 1200px) {
-    #dps-section-pets .dps-section-header__subtitle.dps-pets-intro {
+    #dps-section-pets .dps-section-header__subtitle {
         margin-bottom: 26px;
     }
 
@@ -3359,8 +3431,8 @@
         gap: 24px;
     }
 
-    #dps-section-pets .dps-pets-helper-text {
-        margin-bottom: 22px;
+    .dps-pets-species-stats {
+        gap: 20px;
     }
 }
 

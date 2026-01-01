@@ -122,6 +122,8 @@ class DPS_Base_Plugin {
         
         // Handler para exportação de clientes
         add_action( 'admin_post_dps_export_clients', [ $this, 'export_clients_csv' ] );
+        // Handler para exportação de pets
+        add_action( 'admin_post_dps_export_pets', [ $this, 'export_pets_csv' ] );
     }
 
     /**
@@ -882,6 +884,124 @@ class DPS_Base_Plugin {
                     get_post_meta( $client->ID, 'client_address', true ),
                     get_post_meta( $client->ID, 'client_birth', true ),
                     get_post_meta( $client->ID, 'client_instagram', true ),
+                ],
+                ';'
+            );
+        }
+
+        fclose( $output );
+        exit;
+    }
+
+    /**
+     * Exporta lista de pets para CSV.
+     *
+     * @since 1.0.5
+     * @return void
+     */
+    public function export_pets_csv() {
+        // Verifica permissões.
+        if ( ! current_user_can( 'dps_manage_pets' ) && ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Você não tem permissão para exportar pets.', 'desi-pet-shower' ) );
+        }
+
+        // Verifica nonce.
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_pets' ) ) {
+            wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ) );
+        }
+
+        // Obtém todos os pets.
+        $pets = DPS_Query_Helper::get_all_posts_by_type( 'dps_pet' );
+
+        // Pré-carrega cache de tutores para evitar N+1 queries.
+        $owner_ids = [];
+        foreach ( $pets as $pet ) {
+            $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
+            if ( $owner_id ) {
+                $owner_ids[] = (int) $owner_id;
+            }
+        }
+        if ( ! empty( $owner_ids ) ) {
+            $owner_ids = array_unique( $owner_ids );
+            // Pre-carrega posts dos tutores
+            get_posts( [
+                'post_type'      => 'dps_cliente',
+                'include'        => $owner_ids,
+                'posts_per_page' => count( $owner_ids ),
+            ] );
+        }
+
+        // Define headers para download do CSV.
+        $filename = 'pets-dps-' . wp_date( 'Y-m-d' ) . '.csv';
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename=' . $filename );
+        header( 'Pragma: no-cache' );
+        header( 'Expires: 0' );
+
+        // Abre stream de saída.
+        $output = fopen( 'php://output', 'w' );
+
+        // Adiciona BOM para Excel reconhecer UTF-8.
+        fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
+
+        // Labels traduzidas para espécie e porte.
+        $species_labels = [
+            'cao'   => __( 'Cachorro', 'desi-pet-shower' ),
+            'gato'  => __( 'Gato', 'desi-pet-shower' ),
+            'outro' => __( 'Outro', 'desi-pet-shower' ),
+        ];
+        $size_labels = [
+            'pequeno' => __( 'Pequeno', 'desi-pet-shower' ),
+            'medio'   => __( 'Médio', 'desi-pet-shower' ),
+            'grande'  => __( 'Grande', 'desi-pet-shower' ),
+        ];
+        $sex_labels = [
+            'macho' => __( 'Macho', 'desi-pet-shower' ),
+            'femea' => __( 'Fêmea', 'desi-pet-shower' ),
+        ];
+
+        // Cabeçalhos do CSV.
+        // Nota: Usa ponto-e-vírgula como delimitador para compatibilidade com Excel
+        // em países que usam vírgula como separador decimal (Brasil, Europa).
+        fputcsv(
+            $output,
+            [
+                __( 'Nome', 'desi-pet-shower' ),
+                __( 'Tutor', 'desi-pet-shower' ),
+                __( 'Espécie', 'desi-pet-shower' ),
+                __( 'Raça', 'desi-pet-shower' ),
+                __( 'Porte', 'desi-pet-shower' ),
+                __( 'Sexo', 'desi-pet-shower' ),
+                __( 'Peso (kg)', 'desi-pet-shower' ),
+                __( 'Data de Nascimento', 'desi-pet-shower' ),
+                __( 'Agressivo', 'desi-pet-shower' ),
+                __( 'Cuidados Especiais', 'desi-pet-shower' ),
+            ],
+            ';'
+        );
+
+        // Dados dos pets.
+        foreach ( $pets as $pet ) {
+            $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
+            $owner      = $owner_id ? get_post( $owner_id ) : null;
+            $species    = get_post_meta( $pet->ID, 'pet_species', true );
+            $size       = get_post_meta( $pet->ID, 'pet_size', true );
+            $sex        = get_post_meta( $pet->ID, 'pet_sex', true );
+            $aggressive = get_post_meta( $pet->ID, 'pet_aggressive', true );
+
+            fputcsv(
+                $output,
+                [
+                    $pet->post_title,
+                    $owner ? $owner->post_title : '',
+                    isset( $species_labels[ $species ] ) ? $species_labels[ $species ] : $species,
+                    get_post_meta( $pet->ID, 'pet_breed', true ),
+                    isset( $size_labels[ $size ] ) ? $size_labels[ $size ] : $size,
+                    isset( $sex_labels[ $sex ] ) ? $sex_labels[ $sex ] : $sex,
+                    get_post_meta( $pet->ID, 'pet_weight', true ),
+                    get_post_meta( $pet->ID, 'pet_birth', true ),
+                    $aggressive ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' ),
+                    get_post_meta( $pet->ID, 'pet_care', true ),
                 ],
                 ';'
             );
