@@ -416,9 +416,9 @@ class DPS_AI_Addon {
             [ $this, 'render_admin_page' ]
         );
 
-        // Página de Analytics (oculta)
+        // Página de Analytics (oculta do menu - acessível via hub e URL)
         add_submenu_page(
-            'desi-pet-shower',
+            null,
             __( 'Analytics de IA', 'dps-ai' ),
             __( 'Analytics de IA', 'dps-ai' ),
             'manage_options',

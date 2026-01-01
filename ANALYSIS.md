@@ -8,6 +8,7 @@
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis. A classe principal é inicializada no hook `init` com prioridade 5, após o carregamento do text domain em prioridade 1.
 - A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
 - A criação de tabelas do núcleo (ex.: `dps_logs`) é registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versão não exista ou esteja desatualizada, `dbDelta` é chamado uma única vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificação em todos os ciclos de `init`.
+- **Organização do menu admin**: o menu pai `desi-pet-shower` apresenta apenas hubs e itens principais. Um limpador dedicado (`DPS_Admin_Menu_Cleaner`) remove submenus duplicados que já estão cobertos por hubs (Integrações, Sistema, Ferramentas, Agenda, IA, Portal). As páginas continuam acessíveis via URL direta e pelas abas dos hubs, evitando poluição visual na navegação.
 
 ### Helpers globais do núcleo
 
@@ -507,6 +508,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - **Backup & Restauração** (`dps-backup`) - Backup Add-on (exportar/importar dados)
 - **Campanhas** (`edit.php?post_type=dps_campaign`) - Loyalty Add-on (listagem de campanhas)
 - **Campanhas & Fidelidade** (`dps-loyalty`) - Loyalty Add-on (configurações de pontos e indicações)
+- **Clientes** (`dps-clients-settings`) - Plugin Base (define a URL da página dedicada de cadastro exibida nos atalhos da aba Clientes)
 - **Comunicações** (`dps-communications`) - Communications Add-on (templates e gateways)
 - **Formulário de Cadastro** (`dps-registration-settings`) - Registration Add-on (configurações do formulário público para clientes se cadastrarem)
 - **Logins de Clientes** (`dps-client-logins`) - Client Portal Add-on (gerenciar tokens de acesso)

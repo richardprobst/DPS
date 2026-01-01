@@ -3135,6 +3135,143 @@
     margin-bottom: 0;
 }
 
+.dps-filter-control select {
+    min-width: 180px;
+}
+
+.dps-inline-stats {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px 0;
+    display: grid;
+    gap: 10px;
+}
+
+.dps-inline-stats li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #374151;
+}
+
+.dps-inline-stats li strong {
+    font-size: 16px;
+}
+
+/* Ajustes específicos da aba Clientes */
+#dps-section-clientes .dps-section-grid {
+    grid-template-columns: 1fr;
+}
+
+#dps-section-clientes .dps-surface {
+    padding: 24px;
+}
+
+#dps-section-clientes .dps-inline-stats--panel {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-bottom: 16px;
+}
+
+#dps-section-clientes .dps-inline-stats--panel li {
+    align-items: flex-start;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+    gap: 12px;
+}
+
+#dps-section-clientes .dps-inline-stats__label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+#dps-section-clientes .dps-inline-stats__value {
+    font-size: 22px;
+    color: #0f172a;
+    line-height: 1;
+}
+
+#dps-section-clientes .dps-actions--stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+#dps-section-clientes .dps-actions--stacked .button {
+    width: 100%;
+    justify-content: center;
+}
+
+#dps-section-clientes .dps-actions__note {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+#dps-section-clientes .dps-clients-list-card {
+    gap: 16px;
+}
+
+#dps-section-clientes .dps-clients-list-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#dps-section-clientes .dps-clients-list-card .dps-surface__description {
+    margin-bottom: 4px;
+}
+
+#dps-section-clientes .dps-list-header {
+    margin: 0;
+    padding-top: 0;
+}
+
+#dps-section-clientes .dps-list-toolbar {
+    margin-bottom: 0;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+#dps-section-clientes .dps-table-wrapper {
+    margin-top: 4px;
+}
+
+#dps-section-clientes .dps-table--clients th,
+#dps-section-clientes .dps-table--clients td {
+    vertical-align: middle;
+}
+
+#dps-section-clientes .dps-table--clients th {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+#dps-section-clientes .dps-table--clients td {
+    color: #1f2937;
+    font-size: 14px;
+}
+
+#dps-section-clientes .dps-table__col--actions {
+    text-align: right;
+}
+
+#dps-section-clientes .dps-table__col--actions .dps-actions {
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#dps-section-clientes .dps-table__col--name .dps-status-badge {
+    margin-left: 8px;
+}
+
 /* Título da seção */
 .dps-section-title {
     display: flex;

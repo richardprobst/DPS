@@ -889,10 +889,7 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Seção de clientes: formulário e listagem
-     */
-    /**
-     * Seção de clientes: formulário e listagem.
+     * Seção de clientes: listagem e atalhos administrativos.
      * 
      * REFATORADO: Separa preparação de dados da renderização.
      * A lógica de dados permanece aqui, a renderização foi movida para o template.
@@ -915,53 +912,180 @@ class DPS_Base_Frontend {
      * @return array {
      *     Dados estruturados para o template.
      *     
-     *     @type array       $clients  Lista de posts de clientes (WP_Post[]).
-     *     @type int         $edit_id  ID do cliente sendo editado (0 se novo).
-     *     @type WP_Post|null $editing Post do cliente em edição (null se novo).
-     *     @type array       $meta     Metadados do cliente (cpf, phone, email, etc.).
-     *     @type string      $api_key  Chave da API do Google Maps.
-     *     @type string      $base_url URL base da página atual.
+     *     @type array       $clients          Lista de posts de clientes (WP_Post[]).
+     *     @type array       $client_meta      Metadados principais dos clientes.
+     *     @type array       $pets_counts      Contagem de pets por cliente.
+     *     @type array       $summary          Resumo de métricas da lista de clientes.
+     *     @type string      $current_filter   Filtro ativo (all|without_pets|missing_contact).
+     *     @type string      $registration_url URL da página dedicada de cadastro.
+     *     @type string      $base_url         URL base da página atual.
      * }
      */
     private static function prepare_clients_section_data() {
         $clients = self::get_clients();
-        
-        // Detecta edição via parâmetros GET
-        $edit_id = ( isset( $_GET['dps_edit'] ) && 'client' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) 
-                   ? intval( $_GET['id'] ) 
-                   : 0;
-        
-        $editing = null;
-        $meta    = [];
-        
-        if ( $edit_id ) {
-            $editing = get_post( $edit_id );
-            if ( $editing ) {
-                // Carrega metadados do cliente para edição
-                $meta = [
-                    'cpf'        => get_post_meta( $edit_id, 'client_cpf', true ),
-                    'phone'      => get_post_meta( $edit_id, 'client_phone', true ),
-                    'email'      => get_post_meta( $edit_id, 'client_email', true ),
-                    'birth'      => get_post_meta( $edit_id, 'client_birth', true ),
-                    'instagram'  => get_post_meta( $edit_id, 'client_instagram', true ),
-                    'facebook'   => get_post_meta( $edit_id, 'client_facebook', true ),
-                    'photo_auth' => get_post_meta( $edit_id, 'client_photo_auth', true ),
-                    'address'    => get_post_meta( $edit_id, 'client_address', true ),
-                    'referral'   => get_post_meta( $edit_id, 'client_referral', true ),
-                    'lat'        => get_post_meta( $edit_id, 'client_lat', true ),
-                    'lng'        => get_post_meta( $edit_id, 'client_lng', true ),
-                ];
+        $client_meta = self::build_clients_meta( $clients );
+        $pets_counts = self::get_clients_pets_counts( $clients );
+        $summary     = self::summarize_clients_data( $clients, $client_meta, $pets_counts );
+
+        $filter = isset( $_GET['dps_clients_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_clients_filter'] ) ) : 'all';
+        $allowed_filters = [ 'all', 'without_pets', 'missing_contact' ];
+        if ( ! in_array( $filter, $allowed_filters, true ) ) {
+            $filter = 'all';
+        }
+
+        $registration_url = get_option( 'dps_clients_registration_url', '' );
+        $registration_url = apply_filters( 'dps_clients_registration_url', $registration_url );
+
+        return [
+            'clients'          => self::filter_clients_list( $clients, $client_meta, $pets_counts, $filter ),
+            'client_meta'      => $client_meta,
+            'pets_counts'      => $pets_counts,
+            'summary'          => $summary,
+            'current_filter'   => $filter,
+            'registration_url' => $registration_url,
+            'base_url'         => get_permalink(),
+        ];
+    }
+
+    /**
+     * Pré-carrega metadados críticos dos clientes para evitar consultas repetidas.
+     *
+     * @since 1.0.0
+     * @param array $clients Lista de posts de clientes.
+     * @return array
+     */
+    private static function build_clients_meta( $clients ) {
+        $meta = [];
+
+        foreach ( $clients as $client ) {
+            $id = (int) $client->ID;
+            $meta[ $id ] = [
+                'phone' => get_post_meta( $id, 'client_phone', true ),
+                'email' => get_post_meta( $id, 'client_email', true ),
+            ];
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Retorna contagem de pets para cada cliente informado.
+     *
+     * @since 1.0.0
+     * @param array $clients Lista de posts de clientes.
+     * @return array
+     */
+    private static function get_clients_pets_counts( $clients ) {
+        $pets_counts = [];
+
+        if ( empty( $clients ) ) {
+            return $pets_counts;
+        }
+
+        $client_ids   = array_map( 'intval', wp_list_pluck( $clients, 'ID' ) );
+        $placeholders = implode( ',', array_fill( 0, count( $client_ids ), '%d' ) );
+
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT meta_value AS owner_id, COUNT(*) AS pet_count
+                 FROM {$wpdb->postmeta} pm
+                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                 WHERE pm.meta_key = 'owner_id'
+                 AND p.post_type = 'dps_pet'
+                 AND p.post_status = 'publish'
+                 AND pm.meta_value IN ($placeholders)
+                 GROUP BY pm.meta_value",
+                ...$client_ids
+            ),
+            ARRAY_A
+        );
+
+        foreach ( $results as $row ) {
+            $pets_counts[ $row['owner_id'] ] = (int) $row['pet_count'];
+        }
+
+        return $pets_counts;
+    }
+
+    /**
+     * Calcula métricas administrativas da lista de clientes.
+     *
+     * @since 1.0.0
+     * @param array $clients     Lista de posts de clientes.
+     * @param array $client_meta Metadados principais dos clientes.
+     * @param array $pets_counts Contagem de pets por cliente.
+     * @return array
+     */
+    private static function summarize_clients_data( $clients, $client_meta, $pets_counts ) {
+        $missing_contact = 0;
+        $without_pets    = 0;
+
+        foreach ( $clients as $client ) {
+            $id    = (int) $client->ID;
+            $meta  = isset( $client_meta[ $id ] ) ? $client_meta[ $id ] : [ 'phone' => '', 'email' => '' ];
+            $phone = isset( $meta['phone'] ) ? $meta['phone'] : '';
+            $email = isset( $meta['email'] ) ? $meta['email'] : '';
+
+            if ( empty( $phone ) && empty( $email ) ) {
+                $missing_contact++;
+            }
+
+            $pets_for_client = isset( $pets_counts[ (string) $id ] ) ? (int) $pets_counts[ (string) $id ] : 0;
+            if ( 0 === $pets_for_client ) {
+                $without_pets++;
             }
         }
-        
+
         return [
-            'clients'  => $clients,
-            'edit_id'  => $edit_id,
-            'editing'  => $editing,
-            'meta'     => $meta,
-            'api_key'  => get_option( 'dps_google_api_key', '' ),
-            'base_url' => get_permalink(),
+            'total'            => count( $clients ),
+            'missing_contact'  => $missing_contact,
+            'without_pets'     => $without_pets,
         ];
+    }
+
+    /**
+     * Filtra lista de clientes conforme necessidade administrativa.
+     *
+     * @since 1.0.0
+     * @param array  $clients     Lista de posts de clientes.
+     * @param array  $client_meta Metadados principais dos clientes.
+     * @param array  $pets_counts Contagem de pets por cliente.
+     * @param string $filter      Filtro ativo.
+     * @return array
+     */
+    private static function filter_clients_list( $clients, $client_meta, $pets_counts, $filter ) {
+        if ( 'without_pets' === $filter ) {
+            return array_values(
+                array_filter(
+                    $clients,
+                    function( $client ) use ( $pets_counts ) {
+                        $client_id = (string) $client->ID;
+                        $count     = isset( $pets_counts[ $client_id ] ) ? (int) $pets_counts[ $client_id ] : 0;
+                        return 0 === $count;
+                    }
+                )
+            );
+        }
+
+        if ( 'missing_contact' === $filter ) {
+            return array_values(
+                array_filter(
+                    $clients,
+                    function( $client ) use ( $client_meta ) {
+                        $client_id = (int) $client->ID;
+                        $meta      = isset( $client_meta[ $client_id ] ) ? $client_meta[ $client_id ] : [ 'phone' => '', 'email' => '' ];
+                        $phone     = isset( $meta['phone'] ) ? $meta['phone'] : '';
+                        $email     = isset( $meta['email'] ) ? $meta['email'] : '';
+
+                        return empty( $phone ) && empty( $email );
+                    }
+                )
+            );
+        }
+
+        return $clients;
     }
     
     /**
@@ -971,12 +1095,13 @@ class DPS_Base_Frontend {
      * @param array $data {
      *     Dados preparados para renderização.
      *     
-     *     @type array       $clients  Lista de posts de clientes.
-     *     @type int         $edit_id  ID do cliente sendo editado.
-     *     @type WP_Post|null $editing Post do cliente em edição.
-     *     @type array       $meta     Metadados do cliente.
-     *     @type string      $api_key  Chave da API do Google Maps.
-     *     @type string      $base_url URL base da página.
+     *     @type array       $clients          Lista de posts de clientes.
+     *     @type array       $client_meta      Metadados principais dos clientes.
+     *     @type array       $pets_counts      Contagem de pets por cliente.
+     *     @type array       $summary          Resumo de métricas da lista de clientes.
+     *     @type string      $current_filter   Filtro ativo (all|without_pets|missing_contact).
+     *     @type string      $registration_url URL da página dedicada de cadastro.
+     *     @type string      $base_url         URL base da página.
      * }
      * @return string HTML da seção.
      */
@@ -1297,6 +1422,10 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
+        echo '</h2>';
         
         // Título da seção (aparece para todos os usuários)
         echo '<h2 class="dps-section-title">';
