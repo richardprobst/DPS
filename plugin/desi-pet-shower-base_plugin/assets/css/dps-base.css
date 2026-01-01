@@ -3272,6 +3272,36 @@
     margin-left: 8px;
 }
 
+/* Card de edição de cliente */
+#dps-section-clientes .dps-clients-edit-card {
+    max-width: 800px;
+}
+
+#dps-section-clientes .dps-clients-edit-card .dps-surface__description {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+#dps-section-clientes .dps-cancel-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 10px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#dps-section-clientes .dps-cancel-edit:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
 /* Título da seção */
 .dps-section-title {
     display: flex;
