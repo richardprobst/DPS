@@ -4,9 +4,13 @@
  * Estilos responsivos e minimalistas para campos de serviços
  * injetados no formulário de agendamento e painel de gestão.
  * 
+ * Atualizado para seguir o padrão visual das abas Clientes e Pets
+ * utilizando o sistema .dps-surface para cards e .dps-section-grid para layout.
+ * 
  * @package DesiPetShower
  * @subpackage ServicesAddon
  * @since 1.4.0
+ * @since 1.5.0 Integração com padrão visual das abas Clientes/Pets
  */
 
 /* ============================================
@@ -19,49 +23,88 @@
     margin: 0 auto;
 }
 
-.dps-services-header {
-    margin-bottom: 8px;
-}
+/* ============================================
+   CARDS SURFACE - SERVIÇOS
+   ============================================ */
 
-.dps-services-header .dps-section-header__subtitle {
-    margin: 0;
-}
-
-.dps-services-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-}
-
-@media (min-width: 1024px) {
-    .dps-services-grid {
-        grid-template-columns: minmax(0, 0.58fr) minmax(0, 0.42fr);
-        align-items: start;
-    }
-}
-
-/* === Container do Formulário === */
-.dps-form-container {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
+#dps-section-servicos .dps-surface {
     padding: 24px;
-    margin-bottom: 32px;
 }
 
-.dps-form-title {
+/* Card de Status e Estatísticas */
+#dps-section-servicos .dps-services-status-card .dps-inline-stats {
+    margin-bottom: 20px;
+}
+
+/* Estatísticas por tipo de serviço */
+.dps-services-type-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-services-type-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-width: 100px;
+}
+
+.dps-services-type-stat__icon {
+    font-size: 24px;
+}
+
+.dps-services-type-stat__count {
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
     color: #374151;
-    margin: 0 0 8px 0;
-    padding: 0;
-    border: none;
 }
 
-.dps-form-subtitle {
-    font-size: 14px;
+.dps-services-type-stat__label {
+    font-size: 13px;
     color: #6b7280;
-    margin: 0 0 20px 0;
+}
+
+/* Seção do formulário ao final */
+#dps-section-servicos .dps-services-form-section {
+    margin-top: 24px;
+}
+
+/* Card de edição de serviço */
+#dps-section-servicos .dps-services-edit-card .dps-surface__description {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Link de cancelar edição */
+.dps-cancel-edit {
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.dps-cancel-edit:hover {
+    color: #dc2626;
+    text-decoration: underline;
+}
+
+/* Card de lista de serviços */
+#dps-section-servicos .dps-services-list-card {
+    gap: 16px;
+}
+
+#dps-section-servicos .dps-services-list-card .dps-surface__description {
+    margin-bottom: 8px;
 }
 
 /* === Formulário de Serviços === */
@@ -575,11 +618,40 @@
     text-decoration: none;
 }
 
-/* === Estado Vazio === */
+/* === Estado Vazio Moderno === */
 .dps-empty-state {
     text-align: center;
     padding: 48px 24px;
     color: #6b7280;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px dashed #e5e7eb;
+}
+
+.dps-empty-state__icon {
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.dps-empty-state__title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-empty-state__description {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.dps-empty-state__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dps-empty-state p {

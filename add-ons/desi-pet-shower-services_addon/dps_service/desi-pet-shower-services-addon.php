@@ -6,7 +6,7 @@
  * O header oficial está em desi-pet-shower-services.php (arquivo wrapper).
  *
  * @package DPS_Services_Addon
- * @version 1.4.0
+ * @version 1.5.0
  */
 
 // Impede acesso direto
@@ -285,6 +285,29 @@ class DPS_Services_Addon {
             'orderby'        => 'title',
             'order'          => 'ASC',
         ] );
+        
+        // Calcula estatísticas dos serviços
+        $summary = [
+            'total'    => count( $services ),
+            'active'   => 0,
+            'inactive' => 0,
+            'padrao'   => 0,
+            'extra'    => 0,
+            'package'  => 0,
+        ];
+        foreach ( $services as $srv ) {
+            $active = get_post_meta( $srv->ID, 'service_active', true );
+            $type   = get_post_meta( $srv->ID, 'service_type', true );
+            if ( '0' !== $active ) {
+                $summary['active']++;
+            } else {
+                $summary['inactive']++;
+            }
+            if ( isset( $summary[ $type ] ) ) {
+                $summary[ $type ]++;
+            }
+        }
+        
         // Tipos e categorias
         $types = [
             'padrao'  => __( 'Serviço padrão', 'dps-services-addon' ),
@@ -301,28 +324,163 @@ class DPS_Services_Addon {
             'cuidados'           => __( 'Cuidados adicionais', 'dps-services-addon' ),
             'pelagem'            => __( 'Tratamento da pelagem e pele', 'dps-services-addon' ),
         ];
+        $base_url = get_permalink();
         ob_start();
         echo '<div class="dps-section dps-services-section" id="dps-section-servicos">';
-        echo '<div class="dps-section-header dps-services-header">';
-        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">🧼</span>' . esc_html__( 'Gestão de Serviços', 'dps-services-addon' ) . '</h2>';
-        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Gerencie valores, duração e disponibilidade com o mesmo cabeçalho utilizado na aba de Agendamentos.', 'dps-services-addon' ) . '</p>';
-        echo '</div>';
+        
+        // Header padronizado como nas abas Clientes e Pets
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">🧼</span>';
+        echo esc_html__( 'Gestão de Serviços', 'dps-services-addon' );
+        echo '</h2>';
+        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Gerencie valores, duração e disponibilidade dos serviços oferecidos pelo seu pet shop.', 'dps-services-addon' ) . '</p>';
+        
         // Exibe mensagens de feedback
         if ( class_exists( 'DPS_Message_Helper' ) ) {
             echo DPS_Message_Helper::display_messages();
         }
-
-        echo '<div class="dps-services-grid">';
-        // --- FORMULÁRIO DE CADASTRO ---
+        
+        // Modo de edição: formulário em card único
+        if ( $edit_id && $editing ) {
+            $cancel_url = add_query_arg( 'tab', 'servicos', $base_url );
+            echo '<div class="dps-surface dps-surface--info dps-services-edit-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>✏️</span>';
+            echo esc_html__( 'Editar Serviço', 'dps-services-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            printf(
+                /* translators: %s: Nome do serviço sendo editado */
+                esc_html__( 'Editando: %s', 'dps-services-addon' ),
+                esc_html( $editing->post_title )
+            );
+            echo ' <a href="' . esc_url( $cancel_url ) . '" class="dps-cancel-edit">';
+            echo esc_html__( 'Cancelar edição', 'dps-services-addon' );
+            echo '</a>';
+            echo '</p>';
+            
+            // Renderiza o formulário de edição
+            $this->render_service_form( $edit_id, $editing, $meta, $types, $categories );
+            
+            echo '</div>'; // .dps-services-edit-card
+        } else {
+            // Modo normal: grid com cards de status e listagem
+            echo '<div class="dps-section-grid">';
+            
+            // Card de Status e Estatísticas
+            echo '<div class="dps-surface dps-surface--info dps-services-status-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>🗂️</span>';
+            echo esc_html__( 'Status e estatísticas', 'dps-services-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Acompanhe rapidamente os serviços cadastrados e suas métricas.', 'dps-services-addon' );
+            echo '</p>';
+            
+            // Painel de estatísticas
+            echo '<ul class="dps-inline-stats dps-inline-stats--panel">';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--scheduled">' . esc_html__( 'Total de serviços', 'dps-services-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Serviços cadastrados no sistema', 'dps-services-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $summary['total'] ) . '</strong>';
+            echo '</li>';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--paid">' . esc_html__( 'Serviços ativos', 'dps-services-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Disponíveis para agendamento', 'dps-services-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $summary['active'] ) . '</strong>';
+            echo '</li>';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--pending">' . esc_html__( 'Serviços inativos', 'dps-services-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Temporariamente indisponíveis', 'dps-services-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $summary['inactive'] ) . '</strong>';
+            echo '</li>';
+            echo '</ul>';
+            
+            // Estatísticas por tipo
+            echo '<div class="dps-services-type-stats">';
+            echo '<span class="dps-services-type-stat">';
+            echo '<span class="dps-services-type-stat__icon">🧴</span>';
+            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['padrao'] ) . '</span>';
+            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Padrão', 'dps-services-addon' ) . '</span>';
+            echo '</span>';
+            echo '<span class="dps-services-type-stat">';
+            echo '<span class="dps-services-type-stat__icon">✨</span>';
+            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['extra'] ) . '</span>';
+            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Extras', 'dps-services-addon' ) . '</span>';
+            echo '</span>';
+            echo '<span class="dps-services-type-stat">';
+            echo '<span class="dps-services-type-stat__icon">📦</span>';
+            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['package'] ) . '</span>';
+            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Pacotes', 'dps-services-addon' ) . '</span>';
+            echo '</span>';
+            echo '</div>';
+            
+            // Ações
+            echo '<div class="dps-actions dps-actions--stacked">';
+            echo '<a class="button button-primary" href="#dps-services-form-section">';
+            echo esc_html__( 'Cadastrar novo serviço', 'dps-services-addon' );
+            echo '</a>';
+            echo '<p class="dps-actions__note">';
+            echo esc_html__( 'O formulário de cadastro está disponível ao final desta página.', 'dps-services-addon' );
+            echo '</p>';
+            echo '</div>';
+            echo '</div>'; // .dps-services-status-card
+            
+            // Card de Lista de Serviços
+            echo '<div class="dps-surface dps-surface--neutral dps-services-list-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>📋</span>';
+            echo esc_html__( 'Lista de serviços', 'dps-services-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Visualize, edite e gerencie todos os serviços cadastrados no sistema.', 'dps-services-addon' );
+            echo '</p>';
+            
+            // Renderiza listagem de serviços
+            $this->render_services_list( $services, $types, $categories, $base_url );
+            
+            echo '</div>'; // .dps-services-list-card
+            echo '</div>'; // .dps-section-grid
+            
+            // Formulário de Cadastro ao final (apenas em modo não-edição)
+            echo '<div class="dps-surface dps-surface--info dps-services-form-section" id="dps-services-form-section">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>➕</span>';
+            echo esc_html__( 'Cadastrar novo serviço', 'dps-services-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Preencha os dados abaixo para cadastrar um novo serviço. Defina preços e duração por porte de pet.', 'dps-services-addon' );
+            echo '</p>';
+            
+            // Renderiza o formulário de cadastro
+            $this->render_service_form( 0, null, [], $types, $categories );
+            
+            echo '</div>'; // .dps-services-form-section
+        }
+        
+        echo '</div>'; // .dps-section
+        return ob_get_clean();
+    }
+    
+    /**
+     * Renderiza o formulário de cadastro/edição de serviço.
+     *
+     * @param int         $edit_id    ID do serviço sendo editado (0 para novo).
+     * @param WP_Post|null $editing   Post do serviço sendo editado.
+     * @param array       $meta       Metadados do serviço.
+     * @param array       $types      Tipos de serviço disponíveis.
+     * @param array       $categories Categorias disponíveis.
+     */
+    private function render_service_form( $edit_id, $editing, $meta, $types, $categories ) {
         $form_title = $edit_id 
             ? sprintf( __( 'Editar Serviço: %s', 'dps-services-addon' ), esc_html( $editing->post_title ) )
             : __( 'Novo Serviço', 'dps-services-addon' );
-        echo '<div class="dps-form-container">';
-        echo '<h3 class="dps-form-title">' . esc_html( $form_title ) . '</h3>';
-        
-        if ( $edit_id ) {
-            echo '<p class="dps-form-subtitle">' . esc_html__( 'Altere os dados abaixo e clique em Atualizar.', 'dps-services-addon' ) . '</p>';
-        }
         
         echo '<form method="post" class="dps-form dps-services-form">';
         echo '<input type="hidden" name="dps_service_action" value="save_service">';
@@ -560,7 +718,6 @@ class DPS_Services_Addon {
         echo '</div>';
         
         echo '</form>';
-        echo '</div>'; // .dps-form-container
 
         // Script para ocultar/mostrar campos de categoria e pacote dependendo do tipo
         echo '<script>(function($){$(document).ready(function(){
@@ -588,13 +745,18 @@ class DPS_Services_Addon {
                 });
             });
         });})(jQuery);</script>';
-
-        // --- LISTAGEM DE SERVIÇOS ---
-        echo '<div class="dps-list-container">';
-        echo '<div class="dps-list-header">';
-        echo '<h3 class="dps-list-title">' . esc_html__( 'Serviços Cadastrados', 'dps-services-addon' ) . '</h3>';
-        
-        // Barra de ferramentas: busca e contador
+    }
+    
+    /**
+     * Renderiza a listagem de serviços.
+     *
+     * @param array  $services   Lista de posts de serviços.
+     * @param array  $types      Tipos de serviço.
+     * @param array  $categories Categorias de serviço.
+     * @param string $base_url   URL base da página.
+     */
+    private function render_services_list( $services, $types, $categories, $base_url ) {
+        // Toolbar de busca
         echo '<div class="dps-list-toolbar">';
         echo '<div class="dps-search-wrapper">';
         echo '<input type="text" class="dps-search-input" placeholder="' . esc_attr__( 'Buscar serviço...', 'dps-services-addon' ) . '">';
@@ -613,10 +775,8 @@ class DPS_Services_Addon {
             echo '</div>';
         }
         echo '</div>'; // .dps-list-toolbar
-        echo '</div>'; // .dps-list-header
         
-        if ( $services ) {
-            $base_url = get_permalink();
+        if ( ! empty( $services ) ) {
             echo '<div class="dps-table-wrapper">';
             echo '<table class="dps-table dps-services-table"><thead><tr>';
             echo '<th class="dps-col-name">' . esc_html__( 'Serviço', 'dps-services-addon' ) . '</th>';
@@ -741,15 +901,16 @@ class DPS_Services_Addon {
             echo '</tbody></table>';
             echo '</div>'; // .dps-table-wrapper
         } else {
+            // Empty state moderno
             echo '<div class="dps-empty-state">';
-            echo '<p>' . esc_html__( 'Nenhum serviço cadastrado ainda.', 'dps-services-addon' ) . '</p>';
-            echo '<p class="dps-empty-hint">' . esc_html__( 'Use o formulário acima para cadastrar seu primeiro serviço.', 'dps-services-addon' ) . '</p>';
+            echo '<span class="dps-empty-state__icon">🧼</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum serviço cadastrado', 'dps-services-addon' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Cadastre seu primeiro serviço usando o formulário ao final desta página.', 'dps-services-addon' ) . '</p>';
+            echo '<a href="#dps-services-form-section" class="button button-primary dps-empty-state__action">';
+            echo esc_html__( 'Cadastrar serviço', 'dps-services-addon' );
+            echo '</a>';
             echo '</div>';
         }
-        echo '</div>'; // .dps-list-container
-        echo '</div>'; // .dps-services-grid
-        echo '</div>'; // .dps-section
-        return ob_get_clean();
     }
 
     /**
@@ -1780,8 +1941,8 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.4.0' );
-        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.4.0', true );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.0' );
+        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.5.0', true );
     }
 
     /**

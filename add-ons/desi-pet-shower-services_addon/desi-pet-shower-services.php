@@ -3,7 +3,7 @@
  * Plugin Name:       DPS by PRObst – Serviços Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Catálogo de serviços com preços por porte. Cadastre banhos, tosas, extras e pacotes com cálculo automático.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-services-addon
