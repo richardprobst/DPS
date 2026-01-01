@@ -5,12 +5,13 @@
  * injetados no formulário de agendamento e painel de gestão.
  * 
  * Atualizado para seguir o padrão visual das abas Clientes e Pets
- * utilizando o sistema .dps-surface para cards e .dps-section-grid para layout.
+ * utilizando o sistema .dps-surface para cards empilhados verticalmente.
  * 
  * @package DesiPetShower
  * @subpackage ServicesAddon
  * @since 1.4.0
  * @since 1.5.0 Integração com padrão visual das abas Clientes/Pets
+ * @since 1.5.1 Layout empilhado vertical (cards um abaixo do outro)
  */
 
 /* ============================================
@@ -21,6 +22,13 @@
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
+}
+
+/* Layout empilhado: cards um abaixo do outro */
+.dps-services-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 /* ============================================

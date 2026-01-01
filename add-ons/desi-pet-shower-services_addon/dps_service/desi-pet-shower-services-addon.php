@@ -364,8 +364,8 @@ class DPS_Services_Addon {
             
             echo '</div>'; // .dps-services-edit-card
         } else {
-            // Modo normal: grid com cards de status e listagem
-            echo '<div class="dps-section-grid">';
+            // Modo normal: cards empilhados verticalmente
+            echo '<div class="dps-services-stacked">';
             
             // Card de Status e Estatísticas
             echo '<div class="dps-surface dps-surface--info dps-services-status-card">';
@@ -446,7 +446,7 @@ class DPS_Services_Addon {
             $this->render_services_list( $services, $types, $categories, $base_url );
             
             echo '</div>'; // .dps-services-list-card
-            echo '</div>'; // .dps-section-grid
+            echo '</div>'; // .dps-services-stacked
             
             // Formulário de Cadastro ao final (apenas em modo não-edição)
             echo '<div class="dps-surface dps-surface--info dps-services-form-section" id="dps-services-form-section">';
@@ -1941,7 +1941,7 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.0' );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.1' );
         wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.5.0', true );
     }
 
