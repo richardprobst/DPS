@@ -1698,7 +1698,6 @@ class DPS_Base_Frontend {
             echo '<span>📝</span>';
             echo esc_html__( 'Agendar serviço', 'desi-pet-shower' );
             echo '</div>';
-            echo '<p class="dps-surface__description">' . esc_html( $form_title ) . ' — ' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' ) . '</p>';
             
             // Mensagem de duplicação
             if ( $is_duplicate ) {

@@ -217,17 +217,23 @@
 }
 
 /* === Grid de Porte (3 colunas) === */
-.dps-porte-grid {
+#dps-section-servicos .dps-porte-grid,
+.dps-services-form .dps-porte-grid,
+.dps-fieldset-pricing .dps-porte-grid,
+.dps-fieldset-duration .dps-porte-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     align-items: start;
+    width: 100%;
 }
 
 .dps-porte-item {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
+    min-width: 0;
 }
 
 .dps-porte-item label {
@@ -988,8 +994,11 @@
         grid-template-columns: 1fr;
     }
     
-    .dps-porte-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    #dps-section-servicos .dps-porte-grid,
+    .dps-services-form .dps-porte-grid,
+    .dps-fieldset-pricing .dps-porte-grid,
+    .dps-fieldset-duration .dps-porte-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
     
     .dps-list-header {
@@ -1013,7 +1022,10 @@
         padding: 16px;
     }
     
-    .dps-porte-grid {
+    #dps-section-servicos .dps-porte-grid,
+    .dps-services-form .dps-porte-grid,
+    .dps-fieldset-pricing .dps-porte-grid,
+    .dps-fieldset-duration .dps-porte-grid {
         grid-template-columns: 1fr;
         gap: 12px;
     }
