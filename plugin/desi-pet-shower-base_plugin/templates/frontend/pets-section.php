@@ -132,27 +132,6 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 					</li>
 				</ul>
 
-				<!-- Estatísticas por espécie -->
-				<div class="dps-pets-species-stats">
-					<span class="dps-pets-species-stat">
-						<span class="dps-pets-species-stat__icon">🐕</span>
-						<span class="dps-pets-species-stat__count"><?php echo esc_html( (string) $summary['dogs'] ); ?></span>
-						<span class="dps-pets-species-stat__label"><?php echo esc_html__( 'Cães', 'desi-pet-shower' ); ?></span>
-					</span>
-					<span class="dps-pets-species-stat">
-						<span class="dps-pets-species-stat__icon">🐈</span>
-						<span class="dps-pets-species-stat__count"><?php echo esc_html( (string) $summary['cats'] ); ?></span>
-						<span class="dps-pets-species-stat__label"><?php echo esc_html__( 'Gatos', 'desi-pet-shower' ); ?></span>
-					</span>
-					<?php if ( $summary['others'] > 0 ) : ?>
-						<span class="dps-pets-species-stat">
-							<span class="dps-pets-species-stat__icon">🐾</span>
-							<span class="dps-pets-species-stat__count"><?php echo esc_html( (string) $summary['others'] ); ?></span>
-							<span class="dps-pets-species-stat__label"><?php echo esc_html__( 'Outros', 'desi-pet-shower' ); ?></span>
-						</span>
-					<?php endif; ?>
-				</div>
-
 				<div class="dps-actions dps-actions--stacked">
 					<a class="button button-primary" href="#dps-pets-form-section">
 						<?php echo esc_html__( 'Cadastrar novo pet', 'desi-pet-shower' ); ?>
