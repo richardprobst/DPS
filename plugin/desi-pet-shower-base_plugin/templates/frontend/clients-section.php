@@ -53,7 +53,10 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 	</p>
 
 	<?php if ( $edit_id && $editing ) : ?>
-		<?php // Modo de edição: exibe formulário de edição do cliente ?>
+		<?php 
+		// Modo de edição: exibe formulário de edição do cliente
+		$cancel_url = add_query_arg( 'tab', 'clientes', $base_url );
+		?>
 		<div class="dps-surface dps-surface--info dps-clients-edit-card">
 			<div class="dps-surface__title">
 				<span>✏️</span>
@@ -67,7 +70,7 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 					esc_html( $editing->post_title )
 				);
 				?>
-				<a href="<?php echo esc_url( add_query_arg( 'tab', 'clientes', remove_query_arg( [ 'dps_edit', 'id' ] ) ) ); ?>" class="dps-cancel-edit">
+				<a href="<?php echo esc_url( $cancel_url ); ?>" class="dps-cancel-edit">
 					<?php echo esc_html__( 'Cancelar edição', 'desi-pet-shower' ); ?>
 				</a>
 			</p>

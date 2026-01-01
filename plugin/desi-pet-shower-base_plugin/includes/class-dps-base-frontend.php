@@ -940,11 +940,12 @@ class DPS_Base_Frontend {
         $registration_url = get_option( 'dps_clients_registration_url', '' );
         $registration_url = apply_filters( 'dps_clients_registration_url', $registration_url );
 
-        // Detecta edição via parâmetros GET
-        $edit_id  = ( isset( $_GET['dps_edit'] ) && 'client' === $_GET['dps_edit'] && isset( $_GET['id'] ) )
-                    ? intval( $_GET['id'] )
-                    : 0;
-        $editing  = null;
+        // Detecta edição via parâmetros GET (com sanitização adequada)
+        $edit_type = isset( $_GET['dps_edit'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_edit'] ) ) : '';
+        $edit_id   = ( 'client' === $edit_type && isset( $_GET['id'] ) )
+                     ? absint( $_GET['id'] )
+                     : 0;
+        $editing   = null;
         $edit_meta = [];
 
         if ( $edit_id ) {
