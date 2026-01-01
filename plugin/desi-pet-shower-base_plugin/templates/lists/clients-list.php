@@ -106,7 +106,7 @@ $filter_url_base = add_query_arg( 'tab', 'clientes', $base_url );
 					$pets_count = isset( $pets_counts[ (string) $client_id ] ) ? $pets_counts[ (string) $client_id ] : 0;
 
 					$edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
-					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
+					$delete_url   = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID, 'dps_nonce' => wp_create_nonce( 'dps_delete' ) ], $base_url );
 					$view_url     = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
 					$schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client->ID ], $base_url );
 					$add_pet_url  = add_query_arg( [ 'tab' => 'pets', 'pref_owner' => $client->ID ], $base_url );

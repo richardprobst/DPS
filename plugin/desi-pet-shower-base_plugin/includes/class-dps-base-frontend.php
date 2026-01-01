@@ -919,6 +919,10 @@ class DPS_Base_Frontend {
      *     @type string      $current_filter   Filtro ativo (all|without_pets|missing_contact).
      *     @type string      $registration_url URL da página dedicada de cadastro.
      *     @type string      $base_url         URL base da página atual.
+     *     @type int         $edit_id          ID do cliente sendo editado (0 se não estiver editando).
+     *     @type WP_Post|null $editing         Post do cliente sendo editado (null se não estiver editando).
+     *     @type array       $edit_meta        Metadados do cliente sendo editado.
+     *     @type string      $api_key          Chave da API do Google Maps.
      * }
      */
     private static function prepare_clients_section_data() {
@@ -936,6 +940,38 @@ class DPS_Base_Frontend {
         $registration_url = get_option( 'dps_clients_registration_url', '' );
         $registration_url = apply_filters( 'dps_clients_registration_url', $registration_url );
 
+        // Detecta edição via parâmetros GET (com sanitização adequada)
+        $edit_type = isset( $_GET['dps_edit'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_edit'] ) ) : '';
+        $edit_id   = ( 'client' === $edit_type && isset( $_GET['id'] ) )
+                     ? absint( $_GET['id'] )
+                     : 0;
+        $editing   = null;
+        $edit_meta = [];
+
+        if ( $edit_id ) {
+            $editing = get_post( $edit_id );
+            if ( $editing && 'dps_cliente' === $editing->post_type ) {
+                // Carrega metadados do cliente para edição
+                $edit_meta = [
+                    'cpf'        => get_post_meta( $edit_id, 'client_cpf', true ),
+                    'phone'      => get_post_meta( $edit_id, 'client_phone', true ),
+                    'email'      => get_post_meta( $edit_id, 'client_email', true ),
+                    'birth'      => get_post_meta( $edit_id, 'client_birth', true ),
+                    'instagram'  => get_post_meta( $edit_id, 'client_instagram', true ),
+                    'facebook'   => get_post_meta( $edit_id, 'client_facebook', true ),
+                    'photo_auth' => get_post_meta( $edit_id, 'client_photo_auth', true ),
+                    'address'    => get_post_meta( $edit_id, 'client_address', true ),
+                    'referral'   => get_post_meta( $edit_id, 'client_referral', true ),
+                    'lat'        => get_post_meta( $edit_id, 'client_lat', true ),
+                    'lng'        => get_post_meta( $edit_id, 'client_lng', true ),
+                ];
+            } else {
+                // ID inválido ou post_type incorreto
+                $edit_id = 0;
+                $editing = null;
+            }
+        }
+
         return [
             'clients'          => self::filter_clients_list( $clients, $client_meta, $pets_counts, $filter ),
             'client_meta'      => $client_meta,
@@ -944,6 +980,10 @@ class DPS_Base_Frontend {
             'current_filter'   => $filter,
             'registration_url' => $registration_url,
             'base_url'         => get_permalink(),
+            'edit_id'          => $edit_id,
+            'editing'          => $editing,
+            'edit_meta'        => $edit_meta,
+            'api_key'          => get_option( 'dps_google_api_key', '' ),
         ];
     }
 
