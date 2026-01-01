@@ -1679,10 +1679,6 @@ class DPS_Base_Frontend {
 
         ob_start();
         echo '<div class="' . esc_attr( implode( ' ', $section_classes ) ) . '" id="' . esc_attr( $section_id ) . '">';
-        echo '<h2 class="dps-section-title">';
-        echo '<span class="dps-section-title__icon">📅</span>';
-        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
-        echo '</h2>';
         
         // Título da seção (aparece para todos os usuários)
         echo '<h2 class="dps-section-title">';
@@ -5180,7 +5176,9 @@ class DPS_Base_Frontend {
     public static function ajax_render_appointment_form() {
         check_ajax_referer( 'dps_modal_appointment', 'nonce' );
 
-        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+        // Aceita tanto a capability customizada quanto manage_options (admin)
+        // para manter consistência com a verificação da página de agenda
+        if ( ! current_user_can( 'dps_manage_appointments' ) && ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( [ 'message' => __( 'Acesso negado.', 'desi-pet-shower' ) ], 403 );
         }
 
@@ -5234,7 +5232,9 @@ class DPS_Base_Frontend {
             );
         }
 
-        if ( ! current_user_can( 'dps_manage_appointments' ) ) {
+        // Aceita tanto a capability customizada quanto manage_options (admin)
+        // para manter consistência com a verificação da página de agenda
+        if ( ! current_user_can( 'dps_manage_appointments' ) && ! current_user_can( 'manage_options' ) ) {
             self::send_ajax_response(
                 false,
                 [
