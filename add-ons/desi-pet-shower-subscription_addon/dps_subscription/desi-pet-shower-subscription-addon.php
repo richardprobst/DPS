@@ -873,12 +873,15 @@ class DPS_Subscription_Addon {
     }
 
     /**
-     * Renderiza a seção de assinaturas: formulário e listagem
+     * Renderiza a seção de assinaturas: listagem e formulário de edição
+     * 
+     * O formulário de criação de nova assinatura foi removido pois a criação
+     * de assinaturas é feita na aba Agendamentos, selecionando o tipo "Assinatura".
+     * Esta aba agora foca apenas na gestão e acompanhamento das assinaturas existentes.
      */
     private function section_subscriptions() {
-        // Detecta se estamos em modo de edição ou criação
+        // Detecta se estamos em modo de edição
         $edit_id = ( isset( $_GET['dps_edit'] ) && 'subscription' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
-        $is_new  = isset( $_GET['dps_new'] ) && 'subscription' === $_GET['dps_new'];
         $meta    = [];
         if ( $edit_id ) {
             $meta = [
@@ -917,300 +920,23 @@ class DPS_Subscription_Addon {
         $base_url = get_permalink();
         $list_url = add_query_arg( [ 'tab' => 'assinaturas' ], $base_url );
         ob_start();
+        
         echo '<div class="dps-section dps-subscription-wrapper" id="dps-section-assinaturas">';
-        echo '<header class="dps-subscription-header">';
-        echo '<div class="dps-subscription-title">';
-        echo '<h3>' . esc_html__( 'Assinaturas Mensais', 'dps-subscription-addon' ) . '</h3>';
-        echo '<p class="dps-subscription-subtitle">' . esc_html__( 'Gerencie planos recorrentes com o mesmo visual da aba Agendamentos.', 'dps-subscription-addon' ) . '</p>';
-        echo '</div>';
-        echo '<div class="dps-subscription-header-actions">';
-        if ( ! $edit_id && ! $is_new ) {
-            $new_url = add_query_arg( [ 'tab' => 'assinaturas', 'dps_new' => 'subscription' ], $base_url );
-            echo '<a href="' . esc_url( $new_url ) . '" class="dps-btn dps-btn--primary dps-btn--icon dps-btn-new-subscription">';
-            echo '<span class="dps-btn-icon">➕</span>';
-            echo '<span>' . esc_html__( 'Nova Assinatura', 'dps-subscription-addon' ) . '</span>';
-            echo '</a>';
-        }
-        echo '</div>';
-        echo '</header>';
-        echo '<div class="dps-subscription-content">';
         
-        // Exibe formulário se estiver editando OU criando nova assinatura
-        if ( $edit_id || $is_new ) {
-            // Carrega listas de clientes e pets
-            $clients = get_posts( [
-                'post_type'      => 'dps_cliente',
-                'posts_per_page' => -1,
-                'post_status'    => 'publish',
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-            ] );
-            $pets = get_posts( [
-                'post_type'      => 'dps_pet',
-                'posts_per_page' => -1,
-                'post_status'    => 'publish',
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-            ] );
-            $service_options = [];
-            $service_posts   = get_posts( [
-                'post_type'      => 'dps_service',
-                'posts_per_page' => -1,
-                'post_status'    => 'publish',
-                'orderby'        => 'title',
-                'order'          => 'ASC',
-                'meta_query'     => [
-                    [
-                        'key'     => 'service_active',
-                        'value'   => '1',
-                        'compare' => '=',
-                    ],
-                ],
-            ] );
-            if ( $service_posts ) {
-                foreach ( $service_posts as $srv ) {
-                    $service_options[ $srv->post_title ] = $srv->post_title;
-                }
-            } else {
-                $service_options = [
-                    'Banho'        => __( 'Banho', 'dps-subscription-addon' ),
-                    'Banho e Tosa' => __( 'Banho e Tosa', 'dps-subscription-addon' ),
-                ];
-            }
-            // Título do formulário: Nova ou Editar
-            $form_title = $edit_id
-                ? esc_html__( 'Editar Assinatura', 'dps-subscription-addon' )
-                : esc_html__( 'Nova Assinatura', 'dps-subscription-addon' );
-            $button_text = $edit_id
-                ? esc_html__( 'Atualizar Assinatura', 'dps-subscription-addon' )
-                : esc_html__( 'Criar Assinatura', 'dps-subscription-addon' );
-
-            $extras_list = [];
-            if ( ! empty( $meta['extras'] ) && is_array( $meta['extras'] ) ) {
-                $extras_list = $meta['extras'];
-            }
-            if ( empty( $extras_list ) && $edit_id ) {
-                $legacy_desc = get_post_meta( $edit_id, 'subscription_extra_description', true );
-                $legacy_val  = get_post_meta( $edit_id, 'subscription_extra_value', true );
-                if ( '' !== $legacy_desc || '' !== $legacy_val ) {
-                    $extras_list[] = [
-                        'description' => $legacy_desc,
-                        'value'       => floatval( $legacy_val ),
-                    ];
-                }
-            }
-            $has_extras = ! empty( $extras_list );
-
-            echo '<div class="dps-card dps-card--form">';
-            echo '<div class="dps-card__header">';
-            echo '<div>';
-            echo '<p class="dps-card__eyebrow">' . esc_html__( 'Agendar serviço', 'dps-subscription-addon' ) . '</p>';
-            echo '<h4 class="dps-card__title">' . $form_title . '</h4>';
-            echo '<p class="dps-card__hint">' . esc_html__( 'Configure uma assinatura recorrente com os mesmos passos do agendamento.', 'dps-subscription-addon' ) . '</p>';
-            echo '</div>';
-            echo '<div class="dps-card__actions">';
-            echo '<a href="' . esc_url( $list_url ) . '" class="dps-btn dps-btn--soft dps-btn--icon">';
-            echo '<span class="dps-btn-icon">←</span>';
-            echo '<span>' . esc_html__( 'Voltar para listagem', 'dps-subscription-addon' ) . '</span>';
-            echo '</a>';
-            echo '</div>';
-            echo '</div>';
-
-            echo '<div class="dps-card__body">';
-            echo '<form method="post" class="dps-form dps-subscription-form">';
-            echo '<input type="hidden" name="dps_subscription_action" value="save_subscription">';
-            wp_nonce_field( 'dps_subscription_action', 'dps_subscription_nonce' );
-            if ( $edit_id ) {
-                echo '<input type="hidden" name="subscription_id" value="' . esc_attr( $edit_id ) . '">';
-            }
-
-            // Fieldset: Tipo de Agendamento
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Tipo de Agendamento', 'dps-subscription-addon' ) . '</legend>';
-            echo '<p class="dps-field-hint">' . esc_html__( 'Assinaturas geram 2 ou 4 atendimentos por ciclo e mantêm o histórico organizado.', 'dps-subscription-addon' ) . '</p>';
-            echo '<div class="dps-badge-row">';
-            echo '<span class="dps-badge dps-badge--primary">' . esc_html__( 'Assinatura recorrente', 'dps-subscription-addon' ) . '</span>';
-            echo '</div>';
-            $freq_val = $meta['frequency'] ?? '';
-            echo '<div class="dps-form-row dps-form-row--2col dps-form-row--stacked">';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_frequency">' . esc_html__( 'Frequência', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<select name="subscription_frequency" id="subscription_frequency" required>';
-            echo '<option value="">' . esc_html__( 'Selecione a frequência...', 'dps-subscription-addon' ) . '</option>';
-            foreach ( $freq_options as $val => $label ) {
-                $sel = ( $freq_val === $val ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
-            }
-            echo '</select>';
-            echo '</div>';
-            echo '<div class="dps-form-field dps-form-field--muted">';
-            echo '<label>' . esc_html__( 'Modelo', 'dps-subscription-addon' ) . '</label>';
-            echo '<p class="dps-inline-text">' . esc_html__( 'Ciclos fixos com geração automática de atendimentos.', 'dps-subscription-addon' ) . '</p>';
-            echo '</div>';
-            echo '</div>';
-            echo '</fieldset>';
-
-            // Fieldset: Cliente e Pets
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Cliente e Pet(s)', 'dps-subscription-addon' ) . '</legend>';
-            echo '<div class="dps-form-row dps-form-row--2col">';
-
-            // Cliente
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_client_id">' . esc_html__( 'Cliente', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<select name="subscription_client_id" id="subscription_client_id" required onchange="DPSSubscription.filterPetsByClient(this.value)">';
-            echo '<option value="">' . esc_html__( 'Selecione o cliente...', 'dps-subscription-addon' ) . '</option>';
-            foreach ( $clients as $cli ) {
-                $sel = ( $meta['client_id'] ?? '' ) == $cli->ID ? 'selected' : '';
-                echo '<option value="' . esc_attr( $cli->ID ) . '" ' . $sel . '>' . esc_html( $cli->post_title ) . '</option>';
-            }
-            echo '</select>';
-            echo '</div>';
-
-            // Pet
-            echo '<div class="dps-form-field">';
-            echo '<label for="dps-subscription-pet-select">' . esc_html__( 'Pet', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<select name="subscription_pet_id" id="dps-subscription-pet-select" required>';
-            echo '<option value="">' . esc_html__( 'Selecione o pet...', 'dps-subscription-addon' ) . '</option>';
-            foreach ( $pets as $pet ) {
-                $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
-                $sel = ( $meta['pet_id'] ?? '' ) == $pet->ID ? 'selected' : '';
-                echo '<option value="' . esc_attr( $pet->ID ) . '" data-owner="' . esc_attr( $owner_id ) . '" ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
-            }
-            echo '</select>';
-            echo '</div>';
-
-            echo '</div>'; // .dps-form-row
-            echo '</fieldset>';
-
-            // Fieldset: Data e Horário
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Data e Horário', 'dps-subscription-addon' ) . '</legend>';
-            echo '<div class="dps-form-row dps-form-row--2col">';
-
-            // Data
-            $date_val = $meta['start_date'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_start_date">' . esc_html__( 'Data de início', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<input type="date" name="subscription_start_date" id="subscription_start_date" value="' . esc_attr( $date_val ) . '" required>';
-            echo '</div>';
-
-            // Horário
-            $time_val = $meta['start_time'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_start_time">' . esc_html__( 'Horário', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<input type="time" name="subscription_start_time" id="subscription_start_time" value="' . esc_attr( $time_val ) . '" required>';
-            echo '</div>';
-
-            echo '</div>'; // .dps-form-row
-            echo '</fieldset>';
-
-            // Fieldset: Serviços e Extras
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Serviços e Extras', 'dps-subscription-addon' ) . '</legend>';
-            echo '<div class="dps-form-row dps-form-row--2col">';
-
-            // Serviço
-            $srv_val = $meta['service'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_service">' . esc_html__( 'Serviço principal', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<select name="subscription_service" id="subscription_service" required>';
-            echo '<option value="">' . esc_html__( 'Selecione o serviço...', 'dps-subscription-addon' ) . '</option>';
-            foreach ( $service_options as $val => $label ) {
-                $sel = ( $srv_val === $val ) ? 'selected' : '';
-                echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
-            }
-            echo '</select>';
-            echo '</div>';
-
-            // Valor
-            $price_val = $meta['price'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_price">' . esc_html__( 'Valor do pacote (R$)', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-            echo '<input type="number" step="0.01" min="0" name="subscription_price" id="subscription_price" value="' . esc_attr( $price_val ) . '" required placeholder="0,00">';
-            echo '</div>';
-
-            echo '</div>'; // .dps-form-row
-
-            // Extras
-            echo '<div class="dps-extras-section">';
-            echo '<div class="dps-extras-header">';
-            echo '<h5 class="dps-extras-title">' . esc_html__( 'Serviços extras do plano', 'dps-subscription-addon' ) . '</h5>';
-            echo '<p class="dps-extras-hint">' . esc_html__( 'Inclua complementos com descrição e valor para serem replicados nos atendimentos.', 'dps-subscription-addon' ) . '</p>';
-            echo '</div>';
-            echo '<div id="dps-subscription-extras-list" class="dps-extras-list" ' . ( $has_extras ? '' : 'data-empty="true"' ) . '>';
-            if ( $extras_list ) {
-                foreach ( $extras_list as $idx => $extra_item ) {
-                    $desc  = isset( $extra_item['description'] ) ? $extra_item['description'] : '';
-                    $value = isset( $extra_item['value'] ) ? $extra_item['value'] : '';
-                    echo '<div class="dps-extra-row" data-index="' . esc_attr( $idx ) . '">';
-                    echo '<div class="dps-extra-row-fields">';
-                    echo '<div class="dps-extra-description-field">';
-                    echo '<input type="text" name="subscription_extras_descriptions[]" value="' . esc_attr( $desc ) . '" placeholder="' . esc_attr__( 'Descrição do serviço', 'dps-subscription-addon' ) . '" class="dps-extra-description-input">';
-                    echo '</div>';
-                    echo '<div class="dps-extra-value-field">';
-                    echo '<div class="dps-input-with-prefix">';
-                    echo '<span class="dps-input-prefix">R$</span>';
-                    echo '<input type="number" step="0.01" min="0" name="subscription_extras_values[]" value="' . esc_attr( $value ) . '" placeholder="0,00" class="dps-extra-value-input">';
-                    echo '</div>';
-                    echo '</div>';
-                    echo '<button type="button" class="dps-btn dps-btn--icon dps-remove-extra-btn" title="' . esc_attr__( 'Remover', 'dps-subscription-addon' ) . '">';
-                    echo '<span>✕</span>';
-                    echo '</button>';
-                    echo '</div>';
-                    echo '</div>';
-                }
-            }
-            echo '</div>'; // extras list
-            echo '<button type="button" class="dps-btn dps-btn--outline dps-add-extra-btn" data-list="#dps-subscription-extras-list">';
-            echo '<span class="dps-btn-icon">➕</span>';
-            echo '<span>' . esc_html__( 'Adicionar serviço extra', 'dps-subscription-addon' ) . '</span>';
-            echo '</button>';
-            echo '</div>'; // extras section
-
-            echo '</fieldset>';
-
-            // Fieldset: Atribuição
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Atribuição', 'dps-subscription-addon' ) . '</legend>';
-            $assignee_val = $meta['assignee'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_assignee">' . esc_html__( 'Responsável pelo atendimento', 'dps-subscription-addon' ) . '</label>';
-            echo '<input type="text" name="subscription_assignee" id="subscription_assignee" value="' . esc_attr( $assignee_val ) . '" placeholder="' . esc_attr__( 'Nome do profissional ou equipe', 'dps-subscription-addon' ) . '">';
-            echo '<p class="dps-field-hint">' . esc_html__( 'Use este campo para sinalizar quem cuidará das visitas recorrentes.', 'dps-subscription-addon' ) . '</p>';
-            echo '</div>';
-            echo '</fieldset>';
-
-            // Fieldset: Observações e Notas
-            echo '<fieldset class="dps-fieldset">';
-            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Observações e Notas', 'dps-subscription-addon' ) . '</legend>';
-            $notes_val = $meta['notes'] ?? '';
-            echo '<div class="dps-form-field">';
-            echo '<label for="subscription_notes">' . esc_html__( 'Observações gerais', 'dps-subscription-addon' ) . '</label>';
-            echo '<textarea id="subscription_notes" name="subscription_notes" rows="3" placeholder="' . esc_attr__( 'Instruções especiais, preferências ou lembretes para a equipe.', 'dps-subscription-addon' ) . '">' . esc_textarea( $notes_val ) . '</textarea>';
-            echo '</div>';
-            echo '</fieldset>';
-
-            // Botões de ação - estilo moderno
-            $submit_icon = $edit_id ? '💾' : '✓';
-            echo '<div class="dps-form-actions">';
-            echo '<button type="submit" class="dps-btn-submit">';
-            echo '<span class="dps-btn-icon">' . $submit_icon . '</span>';
-            echo '<span>' . $button_text . '</span>';
-            echo '</button>';
-            echo '<a href="' . esc_url( $list_url ) . '" class="dps-btn-cancel">';
-            echo '<span class="dps-btn-icon">✕</span>';
-            echo '<span>' . esc_html__( 'Cancelar', 'dps-subscription-addon' ) . '</span>';
-            echo '</a>';
-            echo '</div>';
-
-            echo '</form>';
-            echo '</div>'; // card body
-            echo '</div>'; // card
-        }
+        // Header padronizado como na aba Serviços
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📋</span>';
+        echo esc_html__( 'Gestão de Assinaturas', 'dps-subscription-addon' );
+        echo '</h2>';
+        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Acompanhe e gerencie as assinaturas mensais de serviços recorrentes.', 'dps-subscription-addon' ) . '</p>';
         
-        // Dashboard de métricas (aparece apenas na listagem, não no formulário)
-        if ( ! $edit_id && ! $is_new ) {
+        // Layout empilhado verticalmente (como na aba Serviços)
+        echo '<div class="dps-subscriptions-stacked">';
+        
+        // Exibe formulário APENAS se estiver editando
+        if ( $edit_id ) {
+            $this->render_subscription_edit_form( $edit_id, $meta, $freq_options, $list_url );
+        } else {
             // Calcular métricas
             $total_active    = count( $active_subs );
             $total_canceled  = count( $canceled_subs );
@@ -1227,37 +953,71 @@ class DPS_Subscription_Addon {
                 $monthly_revenue += $price;
             }
             
-            echo '<div class="dps-subscription-dashboard">';
-            
-            echo '<div class="dps-stat-card">';
-            echo '<span class="dps-stat-number">' . esc_html( $total_active ) . '</span>';
-            echo '<span class="dps-stat-label">' . esc_html__( 'Assinaturas Ativas', 'dps-subscription-addon' ) . '</span>';
+            // Card de Status e Estatísticas (padrão da aba Serviços)
+            echo '<div class="dps-surface dps-surface--info dps-subscription-status-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>📊</span>';
+            echo esc_html__( 'Status e estatísticas', 'dps-subscription-addon' );
             echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Resumo das assinaturas ativas e métricas de pagamento.', 'dps-subscription-addon' );
+            echo '</p>';
             
-            echo '<div class="dps-stat-card dps-stat-success">';
-            echo '<span class="dps-stat-number">R$ ' . esc_html( number_format( $monthly_revenue, 2, ',', '.' ) ) . '</span>';
-            echo '<span class="dps-stat-label">' . esc_html__( 'Valor dos Pacotes', 'dps-subscription-addon' ) . '</span>';
+            // Painel de estatísticas
+            echo '<ul class="dps-inline-stats dps-inline-stats--panel">';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--scheduled">' . esc_html__( 'Assinaturas Ativas', 'dps-subscription-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Planos recorrentes ativos', 'dps-subscription-addon' ) . '</small>';
             echo '</div>';
-            
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $total_active ) . '</strong>';
+            echo '</li>';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--paid">' . esc_html__( 'Valor dos Pacotes', 'dps-subscription-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Receita mensal estimada', 'dps-subscription-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">R$ ' . esc_html( number_format( $monthly_revenue, 2, ',', '.' ) ) . '</strong>';
+            echo '</li>';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
             if ( $pending_payment > 0 ) {
-                echo '<div class="dps-stat-card dps-stat-warning">';
+                echo '<span class="dps-status-badge dps-status-badge--pending">' . esc_html__( 'Pagamentos Pendentes', 'dps-subscription-addon' ) . '</span>';
             } else {
-                echo '<div class="dps-stat-card">';
+                echo '<span class="dps-status-badge dps-status-badge--paid">' . esc_html__( 'Pagamentos Pendentes', 'dps-subscription-addon' ) . '</span>';
             }
-            echo '<span class="dps-stat-number">' . esc_html( $pending_payment ) . '</span>';
-            echo '<span class="dps-stat-label">' . esc_html__( 'Pagamentos Pendentes', 'dps-subscription-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Aguardando confirmação', 'dps-subscription-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $pending_payment ) . '</strong>';
+            echo '</li>';
+            echo '<li>';
+            echo '<div class="dps-inline-stats__label">';
+            echo '<span class="dps-status-badge dps-status-badge--cancelled">' . esc_html__( 'Canceladas', 'dps-subscription-addon' ) . '</span>';
+            echo '<small>' . esc_html__( 'Assinaturas inativas', 'dps-subscription-addon' ) . '</small>';
+            echo '</div>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( (string) $total_canceled ) . '</strong>';
+            echo '</li>';
+            echo '</ul>';
+            
+            // Nota sobre criação de assinaturas
+            echo '<div class="dps-info-notice">';
+            echo '<span class="dps-info-notice__icon">💡</span>';
+            echo '<p class="dps-info-notice__text">';
+            echo esc_html__( 'Para criar uma nova assinatura, acesse a aba Agendamentos e selecione o tipo "Assinatura" no formulário.', 'dps-subscription-addon' );
+            echo '</p>';
             echo '</div>';
             
-            echo '<div class="dps-stat-card">';
-            echo '<span class="dps-stat-number">' . esc_html( $total_canceled ) . '</span>';
-            echo '<span class="dps-stat-label">' . esc_html__( 'Canceladas', 'dps-subscription-addon' ) . '</span>';
-            echo '</div>';
+            echo '</div>'; // .dps-subscription-status-card
             
-            echo '</div>'; // .dps-subscription-dashboard
-        }
-        
-        // Exibe lista de assinaturas ativas
-        echo '<h4>' . esc_html__( 'Assinaturas Ativas', 'dps-subscription-addon' ) . '</h4>';
+            // Card de Lista de Assinaturas Ativas
+            echo '<div class="dps-surface dps-surface--neutral dps-subscription-list-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>📋</span>';
+            echo esc_html__( 'Assinaturas Ativas', 'dps-subscription-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Visualize, edite e gerencie todas as assinaturas ativas no sistema.', 'dps-subscription-addon' );
+            echo '</p>';
         // Os estilos de status de pagamento agora são carregados via assets/css/subscription-addon.css
         if ( $active_subs ) {
             // Labels para data-label em mobile
@@ -1434,11 +1194,26 @@ class DPS_Subscription_Addon {
             echo '</tbody></table>';
             echo '</div>'; // .dps-subscription-table-wrapper
         } else {
-            echo '<p class="dps-empty-state">' . esc_html__( 'Nenhuma assinatura ativa no momento.', 'dps-subscription-addon' ) . '</p>';
+            // Empty state moderno
+            echo '<div class="dps-empty-state">';
+            echo '<span class="dps-empty-state__icon">📋</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhuma assinatura ativa', 'dps-subscription-addon' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Para criar uma nova assinatura, acesse a aba Agendamentos e selecione o tipo "Assinatura".', 'dps-subscription-addon' ) . '</p>';
+            echo '</div>';
         }
-        // Assinaturas canceladas
-        echo '<h4 class="dps-section-title">' . esc_html__( 'Assinaturas Canceladas', 'dps-subscription-addon' ) . '</h4>';
+        echo '</div>'; // .dps-subscription-list-card
+        
+        // Card de Assinaturas Canceladas (se houver)
         if ( $canceled_subs ) {
+            echo '<div class="dps-surface dps-surface--neutral dps-subscription-canceled-card">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>🗑️</span>';
+            echo esc_html__( 'Assinaturas Canceladas', 'dps-subscription-addon' );
+            echo '</div>';
+            echo '<p class="dps-surface__description">';
+            echo esc_html__( 'Assinaturas inativas que podem ser restauradas ou excluídas permanentemente.', 'dps-subscription-addon' );
+            echo '</p>';
+            
             // Labels para data-label em mobile
             $lbl_cliente_pet  = esc_attr__( 'Cliente / Pet', 'dps-subscription-addon' );
             $lbl_servico      = esc_attr__( 'Serviço', 'dps-subscription-addon' );
@@ -1507,12 +1282,251 @@ class DPS_Subscription_Addon {
             }
             echo '</tbody></table>';
             echo '</div>'; // .dps-subscription-table-wrapper
-        } else {
-            echo '<p class="dps-empty-state dps-empty-state--muted">' . esc_html__( 'Nenhuma assinatura cancelada.', 'dps-subscription-addon' ) . '</p>';
+            echo '</div>'; // .dps-subscription-canceled-card
         }
-        echo '</div>'; // .dps-subscription-content
+        }
+        
+        echo '</div>'; // .dps-subscriptions-stacked
         echo '</div>'; // .dps-section
         return ob_get_clean();
+    }
+    
+    /**
+     * Renderiza o formulário de edição de assinatura.
+     *
+     * @param int    $edit_id      ID da assinatura sendo editada.
+     * @param array  $meta         Metadados da assinatura.
+     * @param array  $freq_options Opções de frequência disponíveis.
+     * @param string $list_url     URL de retorno para a listagem.
+     */
+    private function render_subscription_edit_form( $edit_id, $meta, $freq_options, $list_url ) {
+        // Carrega listas de clientes e pets
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+        $service_options = [];
+        $service_posts   = get_posts( [
+            'post_type'      => 'dps_service',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'meta_query'     => [
+                [
+                    'key'     => 'service_active',
+                    'value'   => '1',
+                    'compare' => '=',
+                ],
+            ],
+        ] );
+        if ( $service_posts ) {
+            foreach ( $service_posts as $srv ) {
+                $service_options[ $srv->post_title ] = $srv->post_title;
+            }
+        } else {
+            $service_options = [
+                'Banho'        => __( 'Banho', 'dps-subscription-addon' ),
+                'Banho e Tosa' => __( 'Banho e Tosa', 'dps-subscription-addon' ),
+            ];
+        }
+
+        $extras_list = [];
+        if ( ! empty( $meta['extras'] ) && is_array( $meta['extras'] ) ) {
+            $extras_list = $meta['extras'];
+        }
+        if ( empty( $extras_list ) ) {
+            $legacy_desc = get_post_meta( $edit_id, 'subscription_extra_description', true );
+            $legacy_val  = get_post_meta( $edit_id, 'subscription_extra_value', true );
+            if ( '' !== $legacy_desc || '' !== $legacy_val ) {
+                $extras_list[] = [
+                    'description' => $legacy_desc,
+                    'value'       => floatval( $legacy_val ),
+                ];
+            }
+        }
+        $has_extras = ! empty( $extras_list );
+
+        // Card de edição
+        echo '<div class="dps-surface dps-surface--info dps-subscription-edit-card">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>✏️</span>';
+        echo esc_html__( 'Editar Assinatura', 'dps-subscription-addon' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">';
+        echo esc_html__( 'Altere os dados da assinatura abaixo.', 'dps-subscription-addon' );
+        echo ' <a href="' . esc_url( $list_url ) . '" class="dps-cancel-edit">';
+        echo esc_html__( 'Cancelar edição', 'dps-subscription-addon' );
+        echo '</a>';
+        echo '</p>';
+
+        echo '<form method="post" class="dps-form dps-subscription-form">';
+        echo '<input type="hidden" name="dps_subscription_action" value="save_subscription">';
+        wp_nonce_field( 'dps_subscription_action', 'dps_subscription_nonce' );
+        echo '<input type="hidden" name="subscription_id" value="' . esc_attr( $edit_id ) . '">';
+
+        // Fieldset: Frequência
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend>' . esc_html__( 'Configuração', 'dps-subscription-addon' ) . '</legend>';
+        $freq_val = $meta['frequency'] ?? '';
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_frequency">' . esc_html__( 'Frequência', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="subscription_frequency" id="subscription_frequency" required>';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-subscription-addon' ) . '</option>';
+        foreach ( $freq_options as $val => $label ) {
+            $sel = ( $freq_val === $val ) ? 'selected' : '';
+            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        echo '<div class="dps-form-field">';
+        echo '<label>' . esc_html__( 'Tipo', 'dps-subscription-addon' ) . '</label>';
+        echo '<p class="dps-badge dps-badge--primary" style="margin:8px 0 0;">' . esc_html__( 'Assinatura recorrente', 'dps-subscription-addon' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+
+        // Fieldset: Cliente e Pet
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend>' . esc_html__( 'Cliente e Pet', 'dps-subscription-addon' ) . '</legend>';
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_client_id">' . esc_html__( 'Cliente', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="subscription_client_id" id="subscription_client_id" required onchange="DPSSubscription.filterPetsByClient(this.value)">';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-subscription-addon' ) . '</option>';
+        foreach ( $clients as $cli ) {
+            $sel = ( $meta['client_id'] ?? '' ) == $cli->ID ? 'selected' : '';
+            echo '<option value="' . esc_attr( $cli->ID ) . '" ' . $sel . '>' . esc_html( $cli->post_title ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        echo '<div class="dps-form-field">';
+        echo '<label for="dps-subscription-pet-select">' . esc_html__( 'Pet', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="subscription_pet_id" id="dps-subscription-pet-select" required>';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-subscription-addon' ) . '</option>';
+        foreach ( $pets as $pet ) {
+            $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
+            $sel = ( $meta['pet_id'] ?? '' ) == $pet->ID ? 'selected' : '';
+            echo '<option value="' . esc_attr( $pet->ID ) . '" data-owner="' . esc_attr( $owner_id ) . '" ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+
+        // Fieldset: Data e Horário
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend>' . esc_html__( 'Data e Horário', 'dps-subscription-addon' ) . '</legend>';
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        $date_val = $meta['start_date'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_start_date">' . esc_html__( 'Data de início', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<input type="date" name="subscription_start_date" id="subscription_start_date" value="' . esc_attr( $date_val ) . '" required>';
+        echo '</div>';
+        $time_val = $meta['start_time'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_start_time">' . esc_html__( 'Horário', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<input type="time" name="subscription_start_time" id="subscription_start_time" value="' . esc_attr( $time_val ) . '" required>';
+        echo '</div>';
+        echo '</div>';
+        echo '</fieldset>';
+
+        // Fieldset: Serviços e Valor
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend>' . esc_html__( 'Serviço e Valor', 'dps-subscription-addon' ) . '</legend>';
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        $srv_val = $meta['service'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_service">' . esc_html__( 'Serviço', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="subscription_service" id="subscription_service" required>';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-subscription-addon' ) . '</option>';
+        foreach ( $service_options as $val => $label ) {
+            $sel = ( $srv_val === $val ) ? 'selected' : '';
+            echo '<option value="' . esc_attr( $val ) . '" ' . $sel . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        $price_val = $meta['price'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_price">' . esc_html__( 'Valor (R$)', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<input type="number" step="0.01" min="0" name="subscription_price" id="subscription_price" value="' . esc_attr( $price_val ) . '" required placeholder="0,00">';
+        echo '</div>';
+        echo '</div>';
+
+        // Extras
+        echo '<div class="dps-extras-section">';
+        echo '<div class="dps-extras-header">';
+        echo '<h5 class="dps-extras-title">' . esc_html__( 'Serviços extras', 'dps-subscription-addon' ) . '</h5>';
+        echo '</div>';
+        echo '<div id="dps-subscription-extras-list" class="dps-extras-list" ' . ( $has_extras ? '' : 'data-empty="true"' ) . '>';
+        if ( $extras_list ) {
+            foreach ( $extras_list as $idx => $extra_item ) {
+                $desc  = isset( $extra_item['description'] ) ? $extra_item['description'] : '';
+                $value = isset( $extra_item['value'] ) ? $extra_item['value'] : '';
+                echo '<div class="dps-extra-row" data-index="' . esc_attr( $idx ) . '">';
+                echo '<div class="dps-extra-row-fields">';
+                echo '<div class="dps-extra-description-field">';
+                echo '<input type="text" name="subscription_extras_descriptions[]" value="' . esc_attr( $desc ) . '" placeholder="' . esc_attr__( 'Descrição', 'dps-subscription-addon' ) . '" class="dps-extra-description-input">';
+                echo '</div>';
+                echo '<div class="dps-extra-value-field">';
+                echo '<div class="dps-input-with-prefix">';
+                echo '<span class="dps-input-prefix">R$</span>';
+                echo '<input type="number" step="0.01" min="0" name="subscription_extras_values[]" value="' . esc_attr( $value ) . '" placeholder="0,00" class="dps-extra-value-input">';
+                echo '</div>';
+                echo '</div>';
+                echo '<button type="button" class="dps-btn dps-btn--icon dps-remove-extra-btn" title="' . esc_attr__( 'Remover', 'dps-subscription-addon' ) . '"><span>✕</span></button>';
+                echo '</div>';
+                echo '</div>';
+            }
+        }
+        echo '</div>';
+        echo '<button type="button" class="dps-btn dps-btn--outline dps-add-extra-btn" data-list="#dps-subscription-extras-list">';
+        echo '<span class="dps-btn-icon">➕</span>';
+        echo '<span>' . esc_html__( 'Adicionar extra', 'dps-subscription-addon' ) . '</span>';
+        echo '</button>';
+        echo '</div>';
+        echo '</fieldset>';
+
+        // Fieldset: Atribuição e Notas
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend>' . esc_html__( 'Detalhes adicionais', 'dps-subscription-addon' ) . '</legend>';
+        $assignee_val = $meta['assignee'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_assignee">' . esc_html__( 'Responsável', 'dps-subscription-addon' ) . '</label>';
+        echo '<input type="text" name="subscription_assignee" id="subscription_assignee" value="' . esc_attr( $assignee_val ) . '" placeholder="' . esc_attr__( 'Nome do profissional', 'dps-subscription-addon' ) . '">';
+        echo '</div>';
+        $notes_val = $meta['notes'] ?? '';
+        echo '<div class="dps-form-field">';
+        echo '<label for="subscription_notes">' . esc_html__( 'Observações', 'dps-subscription-addon' ) . '</label>';
+        echo '<textarea id="subscription_notes" name="subscription_notes" rows="3" placeholder="' . esc_attr__( 'Instruções especiais...', 'dps-subscription-addon' ) . '">' . esc_textarea( $notes_val ) . '</textarea>';
+        echo '</div>';
+        echo '</fieldset>';
+
+        // Botões de ação
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="dps-btn-submit">';
+        echo '<span class="dps-btn-icon">💾</span>';
+        echo '<span>' . esc_html__( 'Salvar Alterações', 'dps-subscription-addon' ) . '</span>';
+        echo '</button>';
+        echo '<a href="' . esc_url( $list_url ) . '" class="dps-btn-cancel">';
+        echo '<span class="dps-btn-icon">✕</span>';
+        echo '<span>' . esc_html__( 'Cancelar', 'dps-subscription-addon' ) . '</span>';
+        echo '</a>';
+        echo '</div>';
+
+        echo '</form>';
+        echo '</div>'; // .dps-subscription-edit-card
     }
 }
 

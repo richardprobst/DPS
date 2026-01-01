@@ -5,17 +5,196 @@
  * @since 1.1.0
  * @updated 1.2.0 - Melhorias de layout e UX
  * @updated 1.2.1 - Botões modernos e melhorias de formulário
+ * @updated 1.3.0 - Layout de cards empilhados verticalmente (padrão Serviços)
  */
 
 /* ==========================================================================
-   Layout geral e cabeçalho (alinhado à aba Agendamentos)
+   Layout geral e cabeçalho (alinhado à aba Serviços)
    ========================================================================== */
 
 .dps-subscription-wrapper {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
-    padding: 12px 12px 24px;
+    padding: 0;
 }
+
+/* Layout empilhado: cards um abaixo do outro */
+.dps-subscriptions-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Header padronizado como na aba Serviços */
+#dps-section-assinaturas .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px;
+    padding: 0;
+    border: none;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+#dps-section-assinaturas .dps-section-title__icon {
+    font-size: 28px;
+}
+
+#dps-section-assinaturas .dps-section-header__subtitle {
+    margin: 0 0 24px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* ==========================================================================
+   Cards Surface - Assinaturas (padrão Serviços)
+   ========================================================================== */
+
+#dps-section-assinaturas .dps-surface {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+#dps-section-assinaturas .dps-surface--info {
+    border-left: 4px solid #0ea5e9;
+}
+
+#dps-section-assinaturas .dps-surface--neutral {
+    border-left: 4px solid #6b7280;
+}
+
+#dps-section-assinaturas .dps-surface__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+#dps-section-assinaturas .dps-surface__description {
+    margin: 0 0 20px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Painel de estatísticas inline */
+#dps-section-assinaturas .dps-inline-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 0;
+    list-style: none;
+}
+
+#dps-section-assinaturas .dps-inline-stats--panel {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+#dps-section-assinaturas .dps-inline-stats li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 160px;
+}
+
+#dps-section-assinaturas .dps-inline-stats__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#dps-section-assinaturas .dps-inline-stats__label small {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+#dps-section-assinaturas .dps-inline-stats__value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #374151;
+}
+
+/* Status badges para estatísticas */
+#dps-section-assinaturas .dps-status-badge--scheduled {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+#dps-section-assinaturas .dps-status-badge--paid {
+    background: #d1fae5;
+    color: #047857;
+}
+
+#dps-section-assinaturas .dps-status-badge--pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+#dps-section-assinaturas .dps-status-badge--cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Aviso informativo */
+.dps-info-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.dps-info-notice__icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.dps-info-notice__text {
+    margin: 0;
+    font-size: 14px;
+    color: #1e40af;
+    line-height: 1.5;
+}
+
+/* Card de edição */
+#dps-section-assinaturas .dps-subscription-edit-card .dps-surface__description {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Link de cancelar edição */
+.dps-cancel-edit {
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.dps-cancel-edit:hover {
+    color: #dc2626;
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Mantém compatibilidade com layout antigo
+   ========================================================================== */
 
 .dps-subscription-content {
     display: flex;
@@ -24,15 +203,7 @@
 }
 
 .dps-subscription-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px 24px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    display: none; /* Oculta header antigo, usa o novo padrão */
 }
 
 .dps-subscription-title h3 {
@@ -786,12 +957,32 @@ table.dps-table tr.dps-canceled-row {
    ========================================================================== */
 
 .dps-empty-state {
-    padding: 32px 20px;
+    padding: 48px 24px;
     text-align: center;
     color: #6b7280;
     background: #f9fafb;
     border-radius: 8px;
     border: 1px dashed #e5e7eb;
+}
+
+.dps-empty-state__icon {
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.dps-empty-state__title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-empty-state__description {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
 }
 
 .dps-empty-state--muted {
@@ -801,23 +992,42 @@ table.dps-table tr.dps-canceled-row {
     text-align: left;
 }
 
-#dps-section-assinaturas .dps-section-title {
-    margin-top: 32px;
-    margin-bottom: 16px;
-    padding-top: 24px;
-    border-top: 1px solid #e5e7eb;
-    color: #374151;
-    font-size: 16px;
-    font-weight: 600;
-}
-
 /* ==========================================================================
    Responsividade
    ========================================================================== */
 
 @media (max-width: 768px) {
     .dps-subscription-wrapper {
-        padding: 8px 8px 20px;
+        padding: 0;
+    }
+    
+    #dps-section-assinaturas .dps-section-title {
+        font-size: 20px;
+        gap: 8px;
+    }
+    
+    #dps-section-assinaturas .dps-surface {
+        padding: 16px;
+    }
+    
+    #dps-section-assinaturas .dps-inline-stats {
+        flex-direction: column;
+    }
+    
+    #dps-section-assinaturas .dps-inline-stats li {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 100%;
+    }
+    
+    #dps-section-assinaturas .dps-inline-stats__value {
+        font-size: 20px;
+    }
+    
+    .dps-info-notice {
+        flex-direction: column;
+        gap: 8px;
     }
 
     .dps-subscription-header {
