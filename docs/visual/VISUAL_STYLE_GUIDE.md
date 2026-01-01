@@ -1,7 +1,7 @@
 # Guia de Estilo Visual DPS
 
-**Versão:** 1.1  
-**Última atualização:** 28/12/2024  
+**Versão:** 1.2  
+**Última atualização:** 01/01/2026  
 **Princípio:** Minimalista/Clean com Destaques Modernos
 
 ---
@@ -484,7 +484,102 @@ textarea:focus {
 
 ---
 
-## 9. Checklist de Implementação
+## 9. Padrões de Layout para Seções/Abas
+
+### Layout Empilhado (Padrão Recomendado)
+
+Para seções administrativas como Serviços, Clientes, Pets, use o padrão de **cards empilhados verticalmente**:
+
+```css
+/* Container de cards empilhados */
+.dps-[secao]-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+```
+
+### Estrutura HTML Padrão
+
+```html
+<div class="dps-section" id="dps-section-[nome]">
+    <!-- Header padronizado -->
+    <h2 class="dps-section-title">
+        <span class="dps-section-title__icon">[emoji]</span>
+        Gestão de [Nome]
+    </h2>
+    <p class="dps-section-header__subtitle">[Descrição da seção]</p>
+    
+    <!-- Cards empilhados -->
+    <div class="dps-[secao]-stacked">
+        <!-- Card de Status/Estatísticas -->
+        <div class="dps-surface dps-surface--info">
+            <div class="dps-surface__title">
+                <span>🗂️</span>
+                Status e estatísticas
+            </div>
+            <p class="dps-surface__description">[Descrição]</p>
+            <!-- Conteúdo -->
+        </div>
+        
+        <!-- Card de Listagem -->
+        <div class="dps-surface dps-surface--neutral">
+            <div class="dps-surface__title">
+                <span>📋</span>
+                Lista de [items]
+            </div>
+            <p class="dps-surface__description">[Descrição]</p>
+            <!-- Tabela ou listagem -->
+        </div>
+    </div>
+    
+    <!-- Formulário de Cadastro (ao final) -->
+    <div class="dps-surface dps-surface--info" id="dps-[secao]-form-section">
+        <div class="dps-surface__title">
+            <span>➕</span>
+            Cadastrar novo [item]
+        </div>
+        <!-- Formulário -->
+    </div>
+</div>
+```
+
+### Classes de Surface
+
+| Classe | Uso | Cor da borda |
+|--------|-----|--------------|
+| `.dps-surface--info` | Cards de ação, estatísticas, formulários | Azul (#0ea5e9) |
+| `.dps-surface--neutral` | Listagens, conteúdo passivo | Cinza (#e5e7eb) |
+| `.dps-surface--success` | Confirmações, status positivo | Verde (#10b981) |
+| `.dps-surface--warning` | Alertas, pendências | Amarelo (#f59e0b) |
+| `.dps-surface--danger` | Erros, ações destrutivas | Vermelho (#ef4444) |
+
+### Padrão de Estatísticas
+
+Use `.dps-inline-stats--panel` para exibir métricas:
+
+```html
+<ul class="dps-inline-stats dps-inline-stats--panel">
+    <li>
+        <div class="dps-inline-stats__label">
+            <span class="dps-status-badge dps-status-badge--scheduled">[Label]</span>
+            <small>[Descrição]</small>
+        </div>
+        <strong class="dps-inline-stats__value">[Valor]</strong>
+    </li>
+</ul>
+```
+
+### Responsividade
+
+- Cards sempre ocupam 100% da largura em qualquer resolução
+- Estatísticas em grid responsivo: `grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))`
+- Em mobile (< 768px): estatísticas empilham em coluna única
+- Tabelas usam `overflow-x: auto` para scroll horizontal
+
+---
+
+## 10. Checklist de Implementação
 
 Ao criar nova interface DPS, verificar:
 
@@ -498,10 +593,12 @@ Ao criar nova interface DPS, verificar:
 - [ ] **Tabelas**: Headers uppercase 13px, hover suave, wrapper responsivo
 - [ ] **Feedback**: Notices com borda lateral colorida, ícones discretos
 - [ ] **Responsivo**: Testado em 375px, 768px, 1024px, 1920px
+- [ ] **Layout**: Cards empilhados verticalmente usando `.dps-surface`
+- [ ] **Seções**: Header padronizado com título + subtítulo
 
 ---
 
-## 10. Anti-padrões (evitar)
+## 11. Anti-padrões (evitar)
 
 ❌ **Não fazer:**
 - Usar mais de 3 cores diferentes em uma tela
@@ -528,7 +625,7 @@ Ao criar nova interface DPS, verificar:
 
 ---
 
-## 11. Manutenção do Guia
+## 12. Manutenção do Guia
 
 **Atualizar este documento quando:**
 - Adicionar novo componente visual
@@ -544,4 +641,4 @@ Ao criar nova interface DPS, verificar:
 
 ---
 
-**Fim do Guia de Estilo Visual DPS v1.0**
+**Fim do Guia de Estilo Visual DPS v1.2**
