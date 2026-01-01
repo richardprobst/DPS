@@ -1427,7 +1427,13 @@ class DPS_Base_Frontend {
         echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
         echo '</h2>';
         
-        // Formulário de agendamento com estrutura alinhada ao padrão dos demais cards
+        // Título da seção (aparece para todos os usuários)
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'desi-pet-shower' );
+        echo '</h2>';
+        
+        // Formulário de agendamento com estrutura Surface (mesmo padrão da aba CLIENTES)
         if ( ! $visitor_only ) {
             // Título do formulário: Novo ou Editar
             $form_title = $edit_id
@@ -1436,12 +1442,10 @@ class DPS_Base_Frontend {
             
             echo '<div class="dps-surface dps-surface--info">';
             echo '<div class="dps-surface__title">';
-            echo '<span aria-hidden="true">📅</span>';
+            echo '<span>📝</span>';
             echo esc_html__( 'Agendar serviço', 'desi-pet-shower' );
             echo '</div>';
-            echo '<p class="dps-surface__description">';
-            echo esc_html( $form_title ) . ' — ' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' );
-            echo '</p>';
+            echo '<p class="dps-surface__description">' . esc_html( $form_title ) . ' — ' . esc_html__( 'Preencha os dados do agendamento nos campos abaixo.', 'desi-pet-shower' ) . '</p>';
             
             // Mensagem de duplicação
             if ( $is_duplicate ) {
@@ -1865,6 +1869,7 @@ class DPS_Base_Frontend {
             
             // Script inline REMOVED - agora em dps-appointment-form.js
             echo '</form>';
+            
             echo '</div>'; // .dps-surface
         }
         
