@@ -48,9 +48,6 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 		<span class="dps-section-title__icon">👥</span>
 		<?php echo esc_html__( 'Gestão de Clientes', 'desi-pet-shower' ); ?>
 	</h2>
-	<p class="dps-section-header__subtitle">
-		<?php echo esc_html__( 'Visão consolidada para acompanhar cadastros e manter os dados organizados.', 'desi-pet-shower' ); ?>
-	</p>
 
 	<?php if ( $edit_id && $editing ) : ?>
 		<?php 
@@ -93,11 +90,8 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 			<div class="dps-surface dps-surface--info dps-clients-status-card">
 				<div class="dps-surface__title">
 					<span>🗂️</span>
-					<?php echo esc_html__( 'Status e atalhos', 'desi-pet-shower' ); ?>
+					<?php echo esc_html__( 'Informações', 'desi-pet-shower' ); ?>
 				</div>
-				<p class="dps-surface__description">
-					<?php echo esc_html__( 'Acompanhe rapidamente cadastros que precisam de atenção e acesse o formulário dedicado quando necessário.', 'desi-pet-shower' ); ?>
-				</p>
 				<ul class="dps-inline-stats dps-inline-stats--panel">
 					<li>
 						<div class="dps-inline-stats__label">
@@ -131,7 +125,7 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 				<div class="dps-actions dps-actions--stacked">
 					<?php if ( ! empty( $registration_url ) ) : ?>
 						<a class="button button-primary" href="<?php echo esc_url( $registration_url ); ?>" target="_blank" rel="noopener noreferrer">
-							<?php echo esc_html__( 'Abrir página de cadastro dedicada', 'desi-pet-shower' ); ?>
+							<?php echo esc_html__( 'Cadastrar novo cliente', 'desi-pet-shower' ); ?>
 						</a>
 					<?php else : ?>
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
@@ -140,20 +134,14 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 							</a>
 						<?php endif; ?>
 					<?php endif; ?>
-					<p class="dps-actions__note">
-						<?php echo esc_html__( 'Configure ou abra o formulário dedicado para manter os cadastros sempre alinhados ao padrão DPS.', 'desi-pet-shower' ); ?>
-					</p>
 				</div>
 			</div>
 
 			<div class="dps-surface dps-surface--neutral dps-clients-list-card">
 				<div class="dps-surface__title">
 					<span>📋</span>
-					<?php echo esc_html__( 'Lista de clientes', 'desi-pet-shower' ); ?>
+					<?php echo esc_html__( 'Lista de clientes cadastrados', 'desi-pet-shower' ); ?>
 				</div>
-				<p class="dps-surface__description">
-					<?php echo esc_html__( 'Visualize, filtre e exporte clientes mantendo alinhamento consistente e leitura facilitada.', 'desi-pet-shower' ); ?>
-				</p>
 				<div class="dps-clients-list-card__body">
 					<?php
 					// Renderizar listagem de clientes usando template

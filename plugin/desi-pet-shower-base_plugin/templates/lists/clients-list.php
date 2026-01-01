@@ -30,14 +30,6 @@ $filter_options = [
 $filter_url_base = add_query_arg( 'tab', 'clientes', $base_url );
 ?>
 
-<h3 class="dps-list-header">
-	<span class="dps-list-header__icon">👥</span>
-	<?php echo esc_html__( 'Clientes Cadastrados', 'desi-pet-shower' ); ?>
-	<?php if ( ! empty( $clients ) ) : ?>
-		<span class="dps-list-header__count"><?php echo count( $clients ); ?></span>
-	<?php endif; ?>
-</h3>
-
 <div class="dps-list-toolbar">
 	<input type="text" class="dps-search" placeholder="<?php echo esc_attr__( 'Buscar por nome, telefone ou email...', 'desi-pet-shower' ); ?>">
 	
@@ -180,8 +172,5 @@ $filter_url_base = add_query_arg( 'tab', 'clientes', $base_url );
 	<div class="dps-empty-state">
 		<span class="dps-empty-state__icon">👤</span>
 		<h4 class="dps-empty-state__title"><?php echo esc_html__( 'Nenhum cliente cadastrado', 'desi-pet-shower' ); ?></h4>
-		<p class="dps-empty-state__description">
-			<?php echo esc_html__( 'Use a página dedicada de cadastro para incluir o primeiro cliente. Após o cadastro, você poderá adicionar pets e agendar serviços.', 'desi-pet-shower' ); ?>
-		</p>
 	</div>
 <?php endif; ?>

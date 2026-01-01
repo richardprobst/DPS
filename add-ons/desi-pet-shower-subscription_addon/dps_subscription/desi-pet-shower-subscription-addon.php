@@ -923,12 +923,11 @@ class DPS_Subscription_Addon {
         
         echo '<div class="dps-section dps-subscription-wrapper" id="dps-section-assinaturas">';
         
-        // Header padronizado como na aba Serviços
+        // Header padronizado como nas outras abas
         echo '<h2 class="dps-section-title">';
         echo '<span class="dps-section-title__icon">📋</span>';
         echo esc_html__( 'Gestão de Assinaturas', 'dps-subscription-addon' );
         echo '</h2>';
-        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Acompanhe e gerencie as assinaturas mensais de serviços recorrentes.', 'dps-subscription-addon' ) . '</p>';
         
         // Layout empilhado verticalmente (como na aba Serviços)
         echo '<div class="dps-subscriptions-stacked">';
@@ -953,15 +952,12 @@ class DPS_Subscription_Addon {
                 $monthly_revenue += $price;
             }
             
-            // Card de Status e Estatísticas (padrão da aba Serviços)
+            // Card de Informações (padrão das outras abas)
             echo '<div class="dps-surface dps-surface--info dps-subscription-status-card">';
             echo '<div class="dps-surface__title">';
             echo '<span>📊</span>';
-            echo esc_html__( 'Status e estatísticas', 'dps-subscription-addon' );
+            echo esc_html__( 'Informações', 'dps-subscription-addon' );
             echo '</div>';
-            echo '<p class="dps-surface__description">';
-            echo esc_html__( 'Resumo das assinaturas ativas e métricas de pagamento.', 'dps-subscription-addon' );
-            echo '</p>';
             
             // Painel de estatísticas
             echo '<ul class="dps-inline-stats dps-inline-stats--panel">';
@@ -999,14 +995,6 @@ class DPS_Subscription_Addon {
             echo '</li>';
             echo '</ul>';
             
-            // Nota sobre criação de assinaturas
-            echo '<div class="dps-info-notice">';
-            echo '<span class="dps-info-notice__icon">💡</span>';
-            echo '<p class="dps-info-notice__text">';
-            echo esc_html__( 'Para criar uma nova assinatura, acesse a aba Agendamentos e selecione o tipo "Assinatura" no formulário.', 'dps-subscription-addon' );
-            echo '</p>';
-            echo '</div>';
-            
             echo '</div>'; // .dps-subscription-status-card
             
             // Card de Lista de Assinaturas Ativas
@@ -1015,9 +1003,6 @@ class DPS_Subscription_Addon {
             echo '<span>📋</span>';
             echo esc_html__( 'Assinaturas Ativas', 'dps-subscription-addon' );
             echo '</div>';
-            echo '<p class="dps-surface__description">';
-            echo esc_html__( 'Visualize, edite e gerencie todas as assinaturas ativas no sistema.', 'dps-subscription-addon' );
-            echo '</p>';
         // Os estilos de status de pagamento agora são carregados via assets/css/subscription-addon.css
         if ( $active_subs ) {
             // Labels para data-label em mobile

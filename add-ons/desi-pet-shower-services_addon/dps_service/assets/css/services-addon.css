@@ -218,16 +218,20 @@
 
 /* === Grid de Porte (3 colunas) === */
 .dps-porte-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 16px;
     align-items: start;
+    width: 100%;
 }
 
 .dps-porte-item {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 8px;
+    position: relative !important;
+    width: 100%;
+    min-width: 0;
 }
 
 .dps-porte-item label {
@@ -989,7 +993,7 @@
     }
     
     .dps-porte-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(3, 1fr) !important;
     }
     
     .dps-list-header {
@@ -1014,7 +1018,7 @@
     }
     
     .dps-porte-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 12px;
     }
     

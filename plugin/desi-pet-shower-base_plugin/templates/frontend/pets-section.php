@@ -55,9 +55,6 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 		<span class="dps-section-title__icon">🐾</span>
 		<?php echo esc_html__( 'Gestão de Pets', 'desi-pet-shower' ); ?>
 	</h2>
-	<p class="dps-section-header__subtitle">
-		<?php echo esc_html__( 'Visão consolidada para acompanhar cadastros de pets e manter os dados organizados.', 'desi-pet-shower' ); ?>
-	</p>
 
 	<?php if ( $edit_id && $editing ) : ?>
 		<?php 
@@ -99,15 +96,12 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 	<?php else : ?>
 		<?php // Modo normal: exibe cards de status, listagem e formulário ao final ?>
 		<div class="dps-section-grid">
-			<!-- Card de Status e Estatísticas -->
+			<!-- Card de Informações -->
 			<div class="dps-surface dps-surface--info dps-pets-status-card">
 				<div class="dps-surface__title">
 					<span>🗂️</span>
-					<?php echo esc_html__( 'Status e estatísticas', 'desi-pet-shower' ); ?>
+					<?php echo esc_html__( 'Informações', 'desi-pet-shower' ); ?>
 				</div>
-				<p class="dps-surface__description">
-					<?php echo esc_html__( 'Acompanhe rapidamente os cadastros que precisam de atenção e visualize métricas dos pets.', 'desi-pet-shower' ); ?>
-				</p>
 				<ul class="dps-inline-stats dps-inline-stats--panel">
 					<li>
 						<div class="dps-inline-stats__label">
@@ -163,9 +157,6 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 					<a class="button button-primary" href="#dps-pets-form-section">
 						<?php echo esc_html__( 'Cadastrar novo pet', 'desi-pet-shower' ); ?>
 					</a>
-					<p class="dps-actions__note">
-						<?php echo esc_html__( 'O formulário de cadastro está disponível ao final desta página.', 'desi-pet-shower' ); ?>
-					</p>
 				</div>
 			</div>
 
@@ -175,9 +166,6 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 					<span>📋</span>
 					<?php echo esc_html__( 'Lista de pets', 'desi-pet-shower' ); ?>
 				</div>
-				<p class="dps-surface__description">
-					<?php echo esc_html__( 'Visualize, filtre e gerencie todos os pets cadastrados no sistema.', 'desi-pet-shower' ); ?>
-				</p>
 				<div class="dps-pets-list-card__body">
 					<?php
 					// Renderizar listagem de pets usando template
