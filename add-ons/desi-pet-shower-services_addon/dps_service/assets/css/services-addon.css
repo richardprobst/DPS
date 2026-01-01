@@ -4,14 +4,15 @@
  * Estilos responsivos e minimalistas para campos de serviços
  * injetados no formulário de agendamento e painel de gestão.
  * 
- * Atualizado para seguir o padrão visual das abas Clientes e Pets
- * utilizando o sistema .dps-surface para cards empilhados verticalmente.
+ * Atualizado para seguir o padrão visual exato da aba Clientes,
+ * utilizando o sistema .dps-section-grid para layout consistente.
  * 
  * @package DesiPetShower
  * @subpackage ServicesAddon
  * @since 1.4.0
  * @since 1.5.0 Integração com padrão visual das abas Clientes/Pets
  * @since 1.5.1 Layout empilhado vertical (cards um abaixo do outro)
+ * @since 1.6.0 Layout grid seguindo exatamente o padrão da aba Clientes
  */
 
 /* ============================================
@@ -24,60 +25,35 @@
     margin: 0 auto;
 }
 
-/* Layout empilhado: cards um abaixo do outro */
-.dps-services-stacked {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+/* Ajustes específicos da aba Serviços - seguindo padrão da aba Clientes */
+#dps-section-servicos .dps-section-grid {
+    grid-template-columns: 1fr;
+}
+
+#dps-section-servicos .dps-surface {
+    padding: 24px;
+}
+
+#dps-section-servicos .dps-actions__note {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
 }
 
 /* ============================================
    CARDS SURFACE - SERVIÇOS
    ============================================ */
 
-#dps-section-servicos .dps-surface {
-    padding: 24px;
-}
-
-/* Card de Status e Estatísticas */
+/* Card de Status e Estatísticas - seguindo padrão da aba Clientes */
 #dps-section-servicos .dps-services-status-card .dps-inline-stats {
     margin-bottom: 20px;
 }
 
-/* Estatísticas por tipo de serviço */
-.dps-services-type-stats {
+/* Body do card de lista */
+.dps-services-list-card__body {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 16px;
-    padding: 16px 0;
-    margin-bottom: 16px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.dps-services-type-stat {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    min-width: 100px;
-}
-
-.dps-services-type-stat__icon {
-    font-size: 24px;
-}
-
-.dps-services-type-stat__count {
-    font-size: 20px;
-    font-weight: 700;
-    color: #374151;
-}
-
-.dps-services-type-stat__label {
-    font-size: 13px;
-    color: #6b7280;
 }
 
 /* Seção do formulário ao final */
