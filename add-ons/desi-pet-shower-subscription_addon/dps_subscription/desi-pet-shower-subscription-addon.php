@@ -1284,7 +1284,7 @@ class DPS_Subscription_Addon {
             echo '</div>'; // .dps-subscription-table-wrapper
             echo '</div>'; // .dps-subscription-canceled-card
         }
-        } // end of else (not editing)
+        }
         
         echo '</div>'; // .dps-subscriptions-stacked
         echo '</div>'; // .dps-section
