@@ -1183,7 +1183,6 @@ class DPS_Subscription_Addon {
             echo '<div class="dps-empty-state">';
             echo '<span class="dps-empty-state__icon">📋</span>';
             echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhuma assinatura ativa', 'dps-subscription-addon' ) . '</h4>';
-            echo '<p class="dps-empty-state__description">' . esc_html__( 'Para criar uma nova assinatura, acesse a aba Agendamentos e selecione o tipo "Assinatura".', 'dps-subscription-addon' ) . '</p>';
             echo '</div>';
         }
         echo '</div>'; // .dps-subscription-list-card
