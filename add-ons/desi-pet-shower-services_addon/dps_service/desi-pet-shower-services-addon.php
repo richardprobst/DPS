@@ -363,17 +363,17 @@ class DPS_Services_Addon {
             
             echo '</div>'; // .dps-services-edit-card
         } else {
-            // Modo normal: cards empilhados verticalmente
-            echo '<div class="dps-services-stacked">';
+            // Modo normal: layout grid similar à aba Clientes
+            echo '<div class="dps-section-grid">';
             
-            // Card de Informações
+            // Card de Informações (padrão visual da aba Clientes)
             echo '<div class="dps-surface dps-surface--info dps-services-status-card">';
             echo '<div class="dps-surface__title">';
             echo '<span>🗂️</span>';
             echo esc_html__( 'Informações', 'dps-services-addon' );
             echo '</div>';
             
-            // Painel de estatísticas
+            // Painel de estatísticas (seguindo o padrão da aba Clientes)
             echo '<ul class="dps-inline-stats dps-inline-stats--panel">';
             echo '<li>';
             echo '<div class="dps-inline-stats__label">';
@@ -398,26 +398,7 @@ class DPS_Services_Addon {
             echo '</li>';
             echo '</ul>';
             
-            // Estatísticas por tipo
-            echo '<div class="dps-services-type-stats">';
-            echo '<span class="dps-services-type-stat">';
-            echo '<span class="dps-services-type-stat__icon">🧴</span>';
-            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['padrao'] ) . '</span>';
-            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Padrão', 'dps-services-addon' ) . '</span>';
-            echo '</span>';
-            echo '<span class="dps-services-type-stat">';
-            echo '<span class="dps-services-type-stat__icon">✨</span>';
-            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['extra'] ) . '</span>';
-            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Extras', 'dps-services-addon' ) . '</span>';
-            echo '</span>';
-            echo '<span class="dps-services-type-stat">';
-            echo '<span class="dps-services-type-stat__icon">📦</span>';
-            echo '<span class="dps-services-type-stat__count">' . esc_html( (string) $summary['package'] ) . '</span>';
-            echo '<span class="dps-services-type-stat__label">' . esc_html__( 'Pacotes', 'dps-services-addon' ) . '</span>';
-            echo '</span>';
-            echo '</div>';
-            
-            // Ações
+            // Ações (seguindo o padrão da aba Clientes)
             echo '<div class="dps-actions dps-actions--stacked">';
             echo '<a class="button button-primary" href="#dps-services-form-section">';
             echo esc_html__( 'Cadastrar novo serviço', 'dps-services-addon' );
@@ -431,12 +412,14 @@ class DPS_Services_Addon {
             echo '<span>📋</span>';
             echo esc_html__( 'Lista de serviços', 'dps-services-addon' );
             echo '</div>';
+            echo '<div class="dps-services-list-card__body">';
             
             // Renderiza listagem de serviços
             $this->render_services_list( $services, $types, $categories, $base_url );
             
+            echo '</div>'; // .dps-services-list-card__body
             echo '</div>'; // .dps-services-list-card
-            echo '</div>'; // .dps-services-stacked
+            echo '</div>'; // .dps-section-grid
             
             // Formulário de Cadastro ao final (apenas em modo não-edição)
             echo '<div class="dps-surface dps-surface--info dps-services-form-section" id="dps-services-form-section">';
