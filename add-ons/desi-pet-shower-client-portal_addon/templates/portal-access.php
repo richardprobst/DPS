@@ -94,46 +94,131 @@ if ( ! defined( 'ABSPATH' ) ) {
                     $whatsapp_url = '';
                 }
             }
-            
-            if ( $whatsapp_url ) :
             ?>
             
-            <a href="<?php echo esc_url( $whatsapp_url ); ?>" 
-               class="dps-portal-access__button" 
-               id="dps-request-access-btn"
-               target="_blank" 
-               rel="noopener noreferrer">
-                <?php echo esc_html__( 'Quero acesso ao meu portal', 'dps-client-portal' ); ?>
-            </a>
+            <!-- Formulário para solicitar link por email (auto-envio) -->
+            <div class="dps-portal-access__email-section">
+                <h2 class="dps-portal-access__subtitle">
+                    <?php echo esc_html__( '📧 Receba seu link por e-mail', 'dps-client-portal' ); ?>
+                </h2>
+                <p class="dps-portal-access__email-description">
+                    <?php echo esc_html__( 'Se você tem e-mail cadastrado, digite abaixo para receber o link automaticamente:', 'dps-client-portal' ); ?>
+                </p>
+                
+                <form id="dps-email-access-form" class="dps-portal-access__email-form">
+                    <div class="dps-portal-access__email-input-group">
+                        <input 
+                            type="email" 
+                            id="dps-access-email" 
+                            name="email" 
+                            placeholder="<?php echo esc_attr__( 'seu@email.com', 'dps-client-portal' ); ?>"
+                            class="dps-portal-access__email-input"
+                            required
+                            autocomplete="email"
+                        >
+                        <button type="submit" class="dps-portal-access__email-button" id="dps-email-submit-btn">
+                            <?php echo esc_html__( 'Enviar Link', 'dps-client-portal' ); ?>
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="dps-email-feedback" class="dps-portal-access__feedback" style="display:none;"></div>
+            </div>
             
-            <div id="dps-access-request-feedback" class="dps-portal-access__feedback" style="display:none;"></div>
+            <?php if ( $whatsapp_url ) : ?>
+            <!-- Seção de WhatsApp (para quem não tem email cadastrado) -->
+            <div class="dps-portal-access__whatsapp-section" id="dps-whatsapp-section">
+                <p class="dps-portal-access__divider">
+                    <?php echo esc_html__( 'ou', 'dps-client-portal' ); ?>
+                </p>
+                <p class="dps-portal-access__whatsapp-description">
+                    <?php echo esc_html__( 'Não tem e-mail cadastrado? Solicite via WhatsApp:', 'dps-client-portal' ); ?>
+                </p>
+                
+                <a href="<?php echo esc_url( $whatsapp_url ); ?>" 
+                   class="dps-portal-access__button dps-portal-access__button--secondary" 
+                   id="dps-request-access-btn"
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                    <?php echo esc_html__( '📱 Solicitar via WhatsApp', 'dps-client-portal' ); ?>
+                </a>
+            </div>
+            <?php endif; ?>
             
             <script>
-            // Fase 1.4: Notifica admin quando cliente solicita acesso
             (function() {
-                var btn = document.getElementById('dps-request-access-btn');
-                var feedback = document.getElementById('dps-access-request-feedback');
+                var form = document.getElementById('dps-email-access-form');
+                var emailInput = document.getElementById('dps-access-email');
+                var submitBtn = document.getElementById('dps-email-submit-btn');
+                var feedback = document.getElementById('dps-email-feedback');
+                var whatsappSection = document.getElementById('dps-whatsapp-section');
+                var whatsappBtn = document.getElementById('dps-request-access-btn');
                 
-                if (btn && feedback) {
-                    btn.addEventListener('click', function(e) {
-                        // Envia notificação em background (não bloqueia WhatsApp)
+                if (form && emailInput && submitBtn && feedback) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        var email = emailInput.value.trim();
+                        if (!email) {
+                            feedback.textContent = '<?php echo esc_js( __( 'Por favor, informe seu e-mail.', 'dps-client-portal' ) ); ?>';
+                            feedback.style.display = 'block';
+                            feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
+                            return;
+                        }
+                        
+                        // Desabilita botão durante envio
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = '<?php echo esc_js( __( 'Enviando...', 'dps-client-portal' ) ); ?>';
+                        feedback.style.display = 'none';
+                        
+                        fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'action=dps_request_access_link_by_email&email=' + encodeURIComponent(email)
+                        })
+                        .then(function(response) { return response.json(); })
+                        .then(function(data) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '<?php echo esc_js( __( 'Enviar Link', 'dps-client-portal' ) ); ?>';
+                            
+                            if (data.success) {
+                                feedback.textContent = data.data.message;
+                                feedback.style.display = 'block';
+                                feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--success';
+                                emailInput.value = '';
+                            } else {
+                                feedback.textContent = data.data.message;
+                                feedback.style.display = 'block';
+                                feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
+                                
+                                // Destaca a seção de WhatsApp se o email não foi encontrado
+                                if (data.data.show_whatsapp && whatsappSection) {
+                                    whatsappSection.classList.add('dps-portal-access__whatsapp-section--highlight');
+                                }
+                            }
+                        })
+                        .catch(function(error) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '<?php echo esc_js( __( 'Enviar Link', 'dps-client-portal' ) ); ?>';
+                            feedback.textContent = '<?php echo esc_js( __( 'Erro ao processar solicitação. Tente novamente.', 'dps-client-portal' ) ); ?>';
+                            feedback.style.display = 'block';
+                            feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
+                        });
+                    });
+                }
+                
+                // Notifica admin quando cliente clica no WhatsApp
+                if (whatsappBtn) {
+                    whatsappBtn.addEventListener('click', function(e) {
                         fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
                             body: 'action=dps_request_portal_access'
-                        })
-                        .then(function(response) { return response.json(); })
-                        .then(function(data) {
-                            if (data.success && data.data && data.data.message) {
-                                feedback.textContent = data.data.message;
-                                feedback.style.display = 'block';
-                                feedback.style.color = '#10b981';
-                            }
-                        })
-                        .catch(function(error) {
-                            // Silenciosamente ignora erros para não atrapalhar a experiência
+                        }).catch(function(error) {
                             console.log('Access request notification failed:', error);
                         });
                     });
@@ -141,18 +226,6 @@ if ( ! defined( 'ABSPATH' ) ) {
             })();
             </script>
             
-            <?php else : ?>
-            
-            <button class="dps-portal-access__button dps-portal-access__button--disabled" disabled>
-                <?php echo esc_html__( 'Quero acesso ao meu portal', 'dps-client-portal' ); ?>
-            </button>
-            
-            <p class="dps-portal-access__note dps-portal-access__note--error">
-                <?php echo esc_html__( 'Configuração de WhatsApp não encontrada. Entre em contato com a equipe.', 'dps-client-portal' ); ?>
-            </p>
-            
-            <?php endif; // Fim da seção de contato ?>
-
             <?php endif; // Fim da condicional $show_contact_section ?>
 
             <p class="dps-portal-access__note">

@@ -83,6 +83,14 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Client Portal Add-on (v2.4.3) - Auto-envio de Link de Acesso por E-mail**
+
+- **Formulário de solicitação de link por e-mail**: Clientes podem agora informar seu e-mail cadastrado na tela de acesso ao portal para receber automaticamente o link de acesso. Não é mais necessário aguardar envio manual pela equipe para quem tem e-mail cadastrado.
+- **AJAX endpoint `dps_request_access_link_by_email`**: Novo endpoint que busca cliente por e-mail, gera token de acesso e envia automaticamente. Inclui rate limiting (3 solicitações/hora por IP ou e-mail).
+- **Fallback para WhatsApp**: Clientes sem e-mail cadastrado são orientados a solicitar via WhatsApp (comportamento anterior mantido como alternativa).
+- **Feedback visual em tempo real**: Mensagens de sucesso/erro exibidas no formulário sem recarregar a página.
+- **Proteção contra brute force**: Rate limiting duplo (por IP e por e-mail) para evitar abuso do endpoint.
+
 **Base Plugin (v1.2.0) - Card "Agendar serviço" na aba Agendamentos**
 
 - **Card "Agendar serviço" no formulário de agendamentos**: Formulário de agendamento agora está envolvido por um card visual com header contendo eyebrow "AGENDAR SERVIÇO", título dinâmico (Novo Agendamento/Editar Agendamento) e hint descritivo. Estrutura idêntica ao implementado na aba Assinaturas.

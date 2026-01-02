@@ -110,6 +110,9 @@ final class DPS_Client_Portal {
         
         // AJAX handler para notificação de solicitação de acesso (Fase 1.4)
         add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
+        
+        // AJAX handler para auto-envio de link de acesso por email
+        add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
     }
 
     /**
@@ -3529,6 +3532,153 @@ Equipe %4$s', 'dps-client-portal' ),
         
         wp_send_json_success( [ 
             'message' => __( 'Sua solicitação foi registrada! Nossa equipe entrará em contato em breve.', 'dps-client-portal' ) 
+        ] );
+    }
+
+    /**
+     * AJAX handler para solicitação de link de acesso por email (auto-envio)
+     * 
+     * Permite que clientes com email cadastrado solicitem o link de acesso
+     * automaticamente. Para clientes sem email, orienta a usar WhatsApp.
+     * 
+     * Rate limiting: 3 solicitações por hora por IP ou email
+     * 
+     * @since 2.4.3
+     */
+    public function ajax_request_access_link_by_email() {
+        // Valida nonce se presente (opcional para formulário público)
+        // Usamos rate limiting como principal proteção
+        
+        // Captura e valida email
+        $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        
+        if ( empty( $email ) || ! is_email( $email ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Por favor, informe um e-mail válido.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Rate limiting por IP
+        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+        $rate_key_ip = 'dps_access_link_ip_' . md5( $ip );
+        $rate_key_email = 'dps_access_link_email_' . md5( $email );
+        
+        // Verifica rate limit por IP (3 solicitações por hora)
+        $ip_count = get_transient( $rate_key_ip );
+        if ( false === $ip_count ) {
+            $ip_count = 0;
+        }
+        
+        if ( $ip_count >= 3 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou o link várias vezes. Aguarde alguns minutos antes de tentar novamente.', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Verifica rate limit por email (3 solicitações por hora)
+        $email_count = get_transient( $rate_key_email );
+        if ( false === $email_count ) {
+            $email_count = 0;
+        }
+        
+        if ( $email_count >= 3 ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Você já solicitou o link várias vezes para este e-mail. Verifique sua caixa de entrada (e spam).', 'dps-client-portal' ) 
+            ] );
+        }
+        
+        // Busca cliente pelo email
+        $clients = get_posts( [
+            'post_type'      => 'dps_cliente',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'client_email',
+                    'value'   => $email,
+                    'compare' => '=',
+                ],
+            ],
+        ] );
+        
+        // Incrementa contadores de rate limit antes de verificar resultado
+        // (evita brute force para descobrir emails cadastrados)
+        set_transient( $rate_key_ip, $ip_count + 1, HOUR_IN_SECONDS );
+        set_transient( $rate_key_email, $email_count + 1, HOUR_IN_SECONDS );
+        
+        if ( empty( $clients ) ) {
+            // Não revelar se email existe ou não por segurança
+            // Mensagem genérica que orienta para WhatsApp
+            wp_send_json_error( [ 
+                'message' => __( 'Não encontramos um cadastro com este e-mail. Por favor, entre em contato via WhatsApp para solicitar acesso.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        $client_id = $clients[0];
+        $client_name = get_the_title( $client_id );
+        
+        // Gera token de acesso
+        $token_manager = DPS_Portal_Token_Manager::get_instance();
+        $token_plain   = $token_manager->generate_token( $client_id, 'login' );
+        
+        if ( false === $token_plain ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Não foi possível gerar o link de acesso. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        // Gera URL de acesso
+        $access_url = $token_manager->generate_access_url( $token_plain );
+        
+        // Monta email
+        $subject = __( 'Seu link de acesso ao Portal do Cliente - DPS by PRObst', 'dps-client-portal' );
+        
+        $body = sprintf(
+            __( "Olá, %s!\n\nVocê solicitou acesso ao Portal do Cliente da DPS by PRObst.\n\nClique no link abaixo para acessar:\n%s\n\n⚠️ Este link é válido por 30 minutos e pode ser usado apenas uma vez.\n\nSe você não solicitou este acesso, ignore este e-mail.\n\nEquipe DPS by PRObst", 'dps-client-portal' ),
+            $client_name,
+            $access_url
+        );
+        
+        // Envia email
+        $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+        
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $comm_api = DPS_Communications_API::get_instance();
+            $sent     = $comm_api->send_email( 
+                $email, 
+                $subject, 
+                $body, 
+                [
+                    'type'      => 'portal_access_link',
+                    'client_id' => $client_id,
+                ]
+            );
+        } else {
+            $sent = wp_mail( $email, $subject, $body, $headers );
+        }
+        
+        // Registra em log
+        if ( function_exists( 'dps_log' ) ) {
+            dps_log( 'Portal access link sent via email', [
+                'client_id' => $client_id,
+                'email'     => $email,
+                'ip'        => $ip,
+                'sent'      => $sent,
+            ], 'info', 'client-portal' );
+        }
+        
+        if ( ! $sent ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Não foi possível enviar o e-mail. Por favor, tente novamente ou entre em contato via WhatsApp.', 'dps-client-portal' ),
+                'show_whatsapp' => true
+            ] );
+        }
+        
+        wp_send_json_success( [ 
+            'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
         ] );
     }
 

@@ -178,6 +178,130 @@
     line-height: 1.5;
 }
 
+.dps-portal-access__feedback--success {
+    background-color: var(--dps-success-bg);
+    color: var(--dps-success);
+}
+
+.dps-portal-access__feedback--error {
+    background-color: var(--dps-error-bg);
+    color: var(--dps-error);
+}
+
+/* Seção de email para solicitar acesso */
+.dps-portal-access__email-section {
+    margin-bottom: 24px;
+}
+
+.dps-portal-access__subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.dps-portal-access__email-description {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.dps-portal-access__email-form {
+    width: 100%;
+}
+
+.dps-portal-access__email-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-portal-access__email-input {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1px solid var(--dps-border-color);
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-portal-access__email-input:focus {
+    border-color: var(--dps-primary);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.dps-portal-access__email-button {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: var(--dps-primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.dps-portal-access__email-button:hover {
+    background-color: var(--dps-primary-hover);
+}
+
+.dps-portal-access__email-button:disabled {
+    background-color: var(--dps-gray-300);
+    cursor: not-allowed;
+}
+
+/* Seção de WhatsApp */
+.dps-portal-access__whatsapp-section {
+    padding-top: 16px;
+    transition: all 0.3s ease;
+}
+
+.dps-portal-access__whatsapp-section--highlight {
+    background-color: var(--dps-warning-bg);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.dps-portal-access__divider {
+    font-size: 14px;
+    color: var(--dps-gray-400);
+    text-align: center;
+    margin: 8px 0 16px;
+    position: relative;
+}
+
+.dps-portal-access__whatsapp-description {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.dps-portal-access__button--secondary {
+    background-color: #25d366;
+}
+
+.dps-portal-access__button--secondary:hover {
+    background-color: #1fb355;
+}
+
+/* Responsivo para formulário de email */
+@media (max-width: 480px) {
+    .dps-portal-access__email-input-group {
+        flex-direction: column;
+    }
+    
+    .dps-portal-access__email-button {
+        width: 100%;
+    }
+}
+
 /* ========================================
    PORTAL PRINCIPAL
    ======================================== */
