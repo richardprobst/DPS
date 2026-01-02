@@ -97,6 +97,13 @@
     font-size: 24px;
 }
 
+.dps-ai-assistant__avatar-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .dps-ai-assistant__status-dot {
     position: absolute;
     bottom: 2px;
@@ -765,10 +772,18 @@
 }
 
 .dps-ai-assistant__fab-icon,
-.dps-ai-assistant__fab-close {
+.dps-ai-assistant__fab-close,
+.dps-ai-assistant__fab-logo {
     font-size: 28px;
     transition: all 0.3s ease;
     position: absolute;
+}
+
+.dps-ai-assistant__fab-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .dps-ai-assistant__fab-close {
@@ -778,7 +793,8 @@
     font-size: 24px;
 }
 
-.dps-ai-assistant--floating.is-open .dps-ai-assistant__fab-icon {
+.dps-ai-assistant--floating.is-open .dps-ai-assistant__fab-icon,
+.dps-ai-assistant--floating.is-open .dps-ai-assistant__fab-logo {
     opacity: 0;
     transform: rotate(90deg);
 }

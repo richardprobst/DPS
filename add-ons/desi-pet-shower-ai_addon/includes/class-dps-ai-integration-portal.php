@@ -86,6 +86,10 @@ class DPS_AI_Integration_Portal {
         $floating_position = $settings['floating_position'] ?? 'bottom-right';
         $enable_feedback   = ! empty( $settings['enable_feedback'] );
 
+        // Nome e logo do assistente configuráveis
+        $assistant_name = $settings['assistant_name'] ?? __( 'Assistente desi.pet', 'dps-ai' );
+        $assistant_logo = $settings['assistant_logo'] ?? ''; // URL da logo personalizada
+
         // FAQs sugeridas
         $faq_suggestions = DPS_AI_Knowledge_Base::get_faq_suggestions( 4 );
 
@@ -108,7 +112,11 @@ class DPS_AI_Integration_Portal {
             <?php if ( 'floating' === $widget_mode ) : ?>
                 <!-- Botão flutuante -->
                 <button id="dps-ai-fab" class="dps-ai-assistant__fab" aria-label="<?php esc_attr_e( 'Abrir assistente', 'dps-ai' ); ?>">
-                    <span class="dps-ai-assistant__fab-icon">🤖</span>
+                    <?php if ( $assistant_logo ) : ?>
+                        <img src="<?php echo esc_url( $assistant_logo ); ?>" alt="" class="dps-ai-assistant__fab-logo">
+                    <?php else : ?>
+                        <span class="dps-ai-assistant__fab-icon">🤖</span>
+                    <?php endif; ?>
                     <span class="dps-ai-assistant__fab-close">✕</span>
                 </button>
             <?php endif; ?>
@@ -118,11 +126,15 @@ class DPS_AI_Integration_Portal {
                 <header class="dps-ai-assistant__header" id="dps-ai-header">
                     <div class="dps-ai-assistant__header-content">
                         <div class="dps-ai-assistant__avatar">
-                            <span class="dps-ai-assistant__avatar-icon">🤖</span>
+                            <?php if ( $assistant_logo ) : ?>
+                                <img src="<?php echo esc_url( $assistant_logo ); ?>" alt="" class="dps-ai-assistant__avatar-logo">
+                            <?php else : ?>
+                                <span class="dps-ai-assistant__avatar-icon">🤖</span>
+                            <?php endif; ?>
                             <span class="dps-ai-assistant__status-dot"></span>
                         </div>
                         <div class="dps-ai-assistant__header-info">
-                            <h3 class="dps-ai-assistant__title"><?php esc_html_e( 'Assistente Virtual DPS', 'dps-ai' ); ?></h3>
+                            <h3 class="dps-ai-assistant__title"><?php echo esc_html( $assistant_name ); ?></h3>
                             <span class="dps-ai-assistant__subtitle"><?php esc_html_e( 'Online • Resposta instantânea', 'dps-ai' ); ?></span>
                         </div>
                     </div>
