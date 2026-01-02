@@ -10,7 +10,7 @@
 ### 1. Estrutura de Templates Criada
 
 ```
-plugin/desi-pet-shower-base_plugin/templates/
+plugins/desi-pet-shower-base/templates/
 ├── appointments-list.php (pré-existente)
 ├── forms/
 │   └── client-form.php ✨ NOVO
@@ -20,7 +20,7 @@ plugin/desi-pet-shower-base_plugin/templates/
 
 ### 2. Código Refatorado
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
 
 **Método refatorado:** `section_clients()` (linhas 645-702)
 
@@ -208,7 +208,7 @@ A **Fase 1 foi concluída com sucesso**, estabelecendo:
 
 - **Documentação detalhada:** `docs/refactoring/PHASE1_TEMPLATE_SEPARATION.md`
 - **Templates criados:**
-  - `plugin/desi-pet-shower-base_plugin/templates/forms/client-form.php`
-  - `plugin/desi-pet-shower-base_plugin/templates/lists/clients-list.php`
-- **Código refatorado:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
-- **Helper de templates:** `plugin/desi-pet-shower-base_plugin/includes/template-functions.php`
+  - `plugins/desi-pet-shower-base/templates/forms/client-form.php`
+  - `plugins/desi-pet-shower-base/templates/lists/clients-list.php`
+- **Código refatorado:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
+- **Helper de templates:** `plugins/desi-pet-shower-base/includes/template-functions.php`

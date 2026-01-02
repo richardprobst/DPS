@@ -90,7 +90,7 @@ O **Groomers Add-on** é um add-on do desi.pet by PRObst para gestão de profiss
 ### 2.1 Estrutura Atual
 
 ```
-add-ons/desi-pet-shower-groomers_addon/
+plugins/desi-pet-shower-groomers/
 ├── desi-pet-shower-groomers-addon.php   # 572 linhas (arquivo único)
 ├── README.md                             # Documentação completa
 └── uninstall.php                         # Limpeza na desinstalação
@@ -310,7 +310,7 @@ A interface do add-on é **funcional mas básica**, sem os refinamentos visuais 
    - Seguir padrão do Client Portal Add-on
 
    ```
-   add-ons/desi-pet-shower-groomers_addon/
+   plugins/desi-pet-shower-groomers/
    ├── desi-pet-shower-groomers-addon.php  # Apenas bootstrapping
    ├── includes/
    │   ├── class-dps-groomers-admin.php    # Formulários e CRUD
@@ -584,4 +584,4 @@ A refatoração proposta seguirá os padrões já estabelecidos no DPS, especial
 - [ANALYSIS.md](/ANALYSIS.md) - Documentação arquitetural
 - [VISUAL_STYLE_GUIDE.md](/docs/visual/VISUAL_STYLE_GUIDE.md) - Guia de estilo visual
 - [REFACTORING_ANALYSIS.md](/docs/refactoring/REFACTORING_ANALYSIS.md) - Análise de refatoração geral
-- [Client Portal Add-on](/add-ons/desi-pet-shower-client-portal_addon/) - Exemplo de estrutura modular
+- [Client Portal Add-on](/plugins/desi-pet-shower-client-portal/) - Exemplo de estrutura modular

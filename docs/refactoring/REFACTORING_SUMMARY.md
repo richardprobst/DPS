@@ -40,7 +40,7 @@ Este documento resume o trabalho de análise e refatoração realizado no projet
 
 ### 1. Classes Helper Criadas (4 classes)
 
-Todas as classes estão em `plugin/desi-pet-shower-base_plugin/includes/`
+Todas as classes estão em `plugins/desi-pet-shower-base/includes/`
 
 #### 📦 `DPS_Money_Helper` (3.5 KB)
 

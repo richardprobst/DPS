@@ -9,15 +9,15 @@
 ## 1. Formulários Identificados
 
 ### 1.1. Admin - Cadastro de Cliente
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (linhas 647-810)  
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (linhas 647-810)  
 **Método:** `section_clients()`
 
 ### 1.2. Admin - Cadastro de Pet
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (linhas 815-1030)  
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (linhas 815-1030)  
 **Método:** `section_pets()`
 
 ### 1.3. Portal do Cliente - Atualizar Dados
-**Localização:** `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (linhas 990-1100)  
+**Localização:** `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php` (linhas 990-1100)  
 **Método:** `render_update_forms()`
 
 ---

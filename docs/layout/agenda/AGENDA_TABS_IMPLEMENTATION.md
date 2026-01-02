@@ -198,5 +198,5 @@ Isso garante que o usuário sempre consiga identificar rapidamente o atendimento
 
 - Análise de UX: `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`
 - Guia de Estilo Visual: `docs/visual/VISUAL_STYLE_GUIDE.md`
-- Código Principal: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
-- Trait de Renderização: `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
+- Código Principal: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
+- Trait de Renderização: `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`

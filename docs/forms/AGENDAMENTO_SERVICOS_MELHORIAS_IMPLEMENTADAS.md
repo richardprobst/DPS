@@ -23,7 +23,7 @@ A tela de **Agendamento de Serviços** passou por uma investigação completa e 
 O resumo dinâmico (`updateAppointmentSummary()`) apenas considerava TaxiDog e Tosa, ignorando os serviços do Services Add-on. Resultado: valor total sempre zerado ou incompleto.
 
 **Solução implementada:**  
-`plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`
+`plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`
 
 ```javascript
 // Coleta serviços do Services Add-on (se existirem)
@@ -77,7 +77,7 @@ Inputs de preço tinham `style="width:80px;"` inline, causando quebra de layout 
 
 **Solução implementada:**
 
-**Arquivo criado:** `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css`
+**Arquivo criado:** `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css`
 
 ```css
 /* === Inputs de Preço de Serviços === */
@@ -116,7 +116,7 @@ Inputs de preço tinham `style="width:80px;"` inline, causando quebra de layout 
 ```
 
 **Enfileiramento do CSS:**
-`add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`
+`plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`
 
 ```php
 public function enqueue_scripts() {
@@ -150,7 +150,7 @@ echo '<input ... >)';
 Lista de pets ocupava muito espaço vertical em mobile. Se cliente tivesse 50+ pets, formulário ficava com scroll infinito.
 
 **Solução implementada:**  
-`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+`plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 ```css
 /* Pet Picker com scroll vertical em mobile/tablet */
@@ -213,19 +213,19 @@ Lista de pets ocupava muito espaço vertical em mobile. Se cliente tivesse 50+ p
 ## Arquivos Modificados
 
 ### JavaScript
-- `plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`
+- `plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`
   - Linhas 145-195: integração de serviços do add-on no resumo
   - Linhas 44-45: eventos de atualização do resumo
 
 ### CSS
-- `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+- `plugins/desi-pet-shower-base/assets/css/dps-base.css`
   - Linhas 693-710: scroll vertical do Pet Picker em mobile
 
-- `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css` **(NOVO)**
+- `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css` **(NOVO)**
   - 135 linhas de estilos responsivos para inputs de preço e fieldsets
 
 ### PHP
-- `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`
+- `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`
   - Linha 1149: enqueue do novo CSS
   - Linhas 736, 773, 798: remoção de inline styles
 

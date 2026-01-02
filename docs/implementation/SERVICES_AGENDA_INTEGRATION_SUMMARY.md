@@ -16,7 +16,7 @@ Centralizar lógica de serviços e cálculo de preços no **Services Add-on**, m
 
 #### Nova API Pública: `DPS_Services_API`
 
-Classe criada em `add-ons/desi-pet-shower-services_addon/dps_service/includes/class-dps-services-api.php`
+Classe criada em `plugins/desi-pet-shower-services/dps_service/includes/class-dps-services-api.php`
 
 **Métodos disponíveis**:
 
@@ -49,7 +49,7 @@ Classe criada em `add-ons/desi-pet-shower-services_addon/dps_service/includes/cl
 
 #### Delegação Implementada
 
-**Arquivo**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+**Arquivo**: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 
 **Método deprecado mas mantido**:
 - `get_services_details_ajax()` (linhas 936-1003)

@@ -23,7 +23,7 @@ Este guia ajuda a diagnosticar e resolver problemas quando clientes não consegu
 
 ```bash
 # Opção 1: Via WP-CLI
-wp eval-file add-ons/desi-pet-shower-client-portal_addon/test-portal-access.php
+wp eval-file plugins/desi-pet-shower-client-portal/test-portal-access.php
 
 # Opção 2: Reativar o add-on (dispara criação automática)
 wp plugin deactivate desi-pet-shower-client-portal
@@ -162,7 +162,7 @@ Execute o script de diagnóstico completo:
 
 ```bash
 # Via WP-CLI
-wp eval-file add-ons/desi-pet-shower-client-portal_addon/test-portal-access.php
+wp eval-file plugins/desi-pet-shower-client-portal/test-portal-access.php
 
 # Via HTTP (apenas administradores)
 https://seusite.com/?dps_test_portal=1

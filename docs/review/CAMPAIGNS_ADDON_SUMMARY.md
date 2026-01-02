@@ -2,7 +2,7 @@
 
 **Versão analisada:** 1.2.0  
 **Data da análise:** 09/12/2024  
-**Diretório:** `add-ons/desi-pet-shower-loyalty_addon`  
+**Diretório:** `plugins/desi-pet-shower-loyalty`  
 **Total de linhas de código:** ~2.800 (PHP: ~2.460 + CSS: ~490 + JS: ~220)
 
 ---

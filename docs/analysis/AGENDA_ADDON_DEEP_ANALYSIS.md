@@ -982,7 +982,7 @@ Este hook é ouvido pelo Payment Add-on que gera o link automaticamente.
 
 ### 6.3 Payment Add-on (Integração Mercado Pago)
 
-**Arquivo**: `/add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php`
+**Arquivo**: `/plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php`
 
 #### 6.3.1 Configurações (linhas 113-180)
 

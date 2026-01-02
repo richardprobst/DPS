@@ -56,7 +56,7 @@ Cliente relatou: "Em Documentos Financeiros, o cliente aparece na pagina mas ao 
 - `docs/review/finance-addon-analysis-2025-12-06.md`: Análise completa com 10 sugestões futuras
 
 ### Arquivos Atualizados
-- `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`: Todas as correções
+- `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`: Todas as correções
 - `CHANGELOG.md`: Seções Fixed e Security atualizadas
 
 ### Memórias Armazenadas

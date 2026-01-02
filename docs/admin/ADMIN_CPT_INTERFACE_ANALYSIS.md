@@ -24,7 +24,7 @@ Este documento analisa a viabilidade e impacto de **habilitar a interface admin 
 | `dps_pet` | `false` | N/A | CRUD via `[dps_base]` |
 | `dps_agendamento` | `false` | N/A | CRUD via `[dps_base]` |
 
-**Localização**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (linhas 120-194)
+**Localização**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php` (linhas 120-194)
 
 ### CPTs de Add-ons
 
@@ -39,7 +39,7 @@ Este documento analisa a viabilidade e impacto de **habilitar a interface admin 
 O Loyalty Add-on já criou um menu "desi.pet by PRObst" unificado:
 
 ```php
-// add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php:174
+// plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php:174
 if ( ! isset( $GLOBALS['admin_page_hooks']['desi-pet-shower'] ) ) {
     add_menu_page(
         __( 'desi.pet by PRObst', 'desi-pet-shower' ),
@@ -90,7 +90,7 @@ Submenus existentes:
 
 ### 1. Plugin Base - Registro de CPTs
 
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+**Arquivo**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 
 #### 1.1 dps_cliente
 
@@ -215,7 +215,7 @@ $args = [
 
 ### 2. Mover Criação do Menu Principal para o Plugin Base
 
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+**Arquivo**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 
 ```php
 // ADICIONAR no __construct() após linha 71
@@ -248,7 +248,7 @@ public function register_unified_menu() {
 
 ### 3. Atualizar Loyalty Add-on
 
-**Arquivo**: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+**Arquivo**: `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 
 ```php
 // REMOVER criação do menu principal (linhas 174-183)
@@ -277,7 +277,7 @@ public function register_menu() {
 
 #### 4.1 Clientes (dps_cliente)
 
-**Arquivo**: Novo arquivo `plugin/desi-pet-shower-base_plugin/includes/admin/class-dps-cliente-admin-columns.php`
+**Arquivo**: Novo arquivo `plugins/desi-pet-shower-base/includes/admin/class-dps-cliente-admin-columns.php`
 
 ```php
 <?php
@@ -377,7 +377,7 @@ if ( is_admin() ) {
 
 #### 4.2 Pets (dps_pet)
 
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/includes/admin/class-dps-pet-admin-columns.php`
+**Arquivo**: `plugins/desi-pet-shower-base/includes/admin/class-dps-pet-admin-columns.php`
 
 ```php
 public function set_columns( $columns ) {
@@ -423,7 +423,7 @@ public function render_column( $column, $post_id ) {
 
 #### 4.3 Agendamentos (dps_agendamento)
 
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/includes/admin/class-dps-agendamento-admin-columns.php`
+**Arquivo**: `plugins/desi-pet-shower-base/includes/admin/class-dps-agendamento-admin-columns.php`
 
 ```php
 public function set_columns( $columns ) {
@@ -466,7 +466,7 @@ public function render_column( $column, $post_id ) {
 
 #### 5.1 Cliente - Metabox de Dados
 
-**Arquivo**: Novo arquivo `plugin/desi-pet-shower-base_plugin/includes/admin/class-dps-cliente-metaboxes.php`
+**Arquivo**: Novo arquivo `plugins/desi-pet-shower-base/includes/admin/class-dps-cliente-metaboxes.php`
 
 ```php
 <?php
@@ -616,7 +616,7 @@ Similar aos anteriores, com campos:
 
 ### 6. Filtros na Listagem
 
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/includes/admin/class-dps-agendamento-filters.php`
+**Arquivo**: `plugins/desi-pet-shower-base/includes/admin/class-dps-agendamento-filters.php`
 
 ```php
 public function __construct() {
@@ -721,7 +721,7 @@ O sistema usa hooks (`save_post_dps_agendamento`, `updated_post_meta`) para sinc
 
 **Finance Add-on** escuta `updated_post_meta` quando `appointment_status` muda:
 ```php
-// add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php:1126
+// plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php:1126
 add_action( 'updated_post_meta', [ $this, 'sync_status_to_finance' ], 10, 4 );
 ```
 
@@ -1016,8 +1016,8 @@ Antes de implementar, responder:
 
 - **SYSTEM_ANALYSIS_COMPLETE.md**: Seção 1.3 (CPTs atuais)
 - **SYSTEM_ANALYSIS_SUMMARY.md**: Seção "Sem Interface Admin Nativa"
-- **plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php**: Registro de CPTs (linhas 120-194)
-- **add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php**: Exemplo de menu unificado (linhas 173-201)
+- **plugins/desi-pet-shower-base/desi-pet-shower-base.php**: Registro de CPTs (linhas 120-194)
+- **plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php**: Exemplo de menu unificado (linhas 173-201)
 - **WordPress Codex**: [register_post_type()](https://developer.wordpress.org/reference/functions/register_post_type/)
 - **WordPress Codex**: [Custom Columns](https://developer.wordpress.org/reference/hooks/manage_post_type_posts_columns/)
 

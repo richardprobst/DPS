@@ -228,8 +228,8 @@ Este é um arquivo de **demonstração estática**. No sistema real:
 - **UX Analysis**: `/docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md`
 - **Implementation Summary**: `/docs/layout/client-portal/CLIENT_PORTAL_IMPLEMENTATION_SUMMARY.md`
 - **Visual Style Guide**: `/docs/visual/VISUAL_STYLE_GUIDE.md`
-- **CSS Source**: `/add-ons/desi-pet-shower-client-portal_addon/assets/css/client-portal.css`
-- **PHP Source**: `/add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+- **CSS Source**: `/plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+- **PHP Source**: `/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 
 ## 🔮 Próximos Passos
 

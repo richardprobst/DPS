@@ -3,7 +3,7 @@
 **Data:** 03/12/2024  
 **Autor:** Copilot Agent  
 **Versão:** 1.0  
-**Escopo:** Plugin base (`plugin/desi-pet-shower-base_plugin`)
+**Escopo:** Plugin base (`plugins/desi-pet-shower-base`)
 
 ---
 
@@ -36,7 +36,7 @@ Este documento apresenta uma análise profunda e abrangente do plugin base desi.
 ### 2.1 Estrutura de Arquivos
 
 ```
-plugin/desi-pet-shower-base_plugin/
+plugins/desi-pet-shower-base/
 ├── desi-pet-shower-base.php           # Arquivo principal (~200 linhas)
 ├── includes/
 │   ├── class-dps-base-frontend.php    # Classe principal frontend (~2.600 linhas)

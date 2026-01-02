@@ -283,7 +283,7 @@ O método `activate()` agora é completamente idempotente através de:
 
 ## Arquivos Alterados
 
-1. **`add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`**
+1. **`plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`**
    - Método `activate()` refatorado (agora static, com criação de tabelas)
    - Construtor simplificado (removidas chamadas a `init`)
    - Métodos `maybe_create_*_table()` removidos

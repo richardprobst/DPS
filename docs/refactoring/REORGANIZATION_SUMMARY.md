@@ -16,7 +16,7 @@ Centralizar **TODA** a lógica financeira no Finance Add-on, eliminando duplica�
 
 ### 1. Nova API Financeira (Finance Add-on)
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php`
+**Arquivo**: `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php`
 
 **9 métodos públicos**:
 - `create_or_update_charge()` - Criar/atualizar cobrança

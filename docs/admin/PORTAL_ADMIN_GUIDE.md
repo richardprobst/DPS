@@ -276,11 +276,11 @@ Se tiver dificuldades:
 1. **Consulte primeiro:**
    - Este guia
    - `docs/fixes/PORTAL_ACCESS_TROUBLESHOOTING.md` (para problemas técnicos)
-   - `add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md` (documentação técnica completa)
+   - `plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md` (documentação técnica completa)
 
 2. **Execute o teste automático:**
    ```bash
-   wp eval-file add-ons/desi-pet-shower-client-portal_addon/test-portal-access.php
+   wp eval-file plugins/desi-pet-shower-client-portal/test-portal-access.php
    ```
 
 3. **Entre em contato:**

@@ -162,13 +162,13 @@ Manter **gradientes leves apenas em botões primários** de ação principal, in
 ## 6. Arquivos a Modificar
 
 ### Plugin Base
-- `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+- `plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 ### Add-ons
-- `add-ons/desi-pet-shower-groomers_addon/assets/css/groomers-admin.css`
-- `add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css`
-- `add-ons/desi-pet-shower-registration_addon/assets/css/registration-addon.css`
-- `add-ons/desi-pet-shower-communications_addon/assets/css/communications-addon.css`
+- `plugins/desi-pet-shower-groomers/assets/css/groomers-admin.css`
+- `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- `plugins/desi-pet-shower-registration/assets/css/registration-addon.css`
+- `plugins/desi-pet-shower-communications/assets/css/communications-addon.css`
 - `add-ons/desi-pet-shower-debugging_addon/assets/css/debugging-admin.css`
 - `add-ons/desi-pet-shower-whitelabel_addon/assets/css/whitelabel-admin.css`
 

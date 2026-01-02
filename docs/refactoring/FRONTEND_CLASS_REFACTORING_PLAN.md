@@ -46,7 +46,7 @@ A classe `DPS_Base_Frontend` (~3000 linhas) atualmente concentra múltiplas resp
 ### 2.1. Arquitetura de Classes
 
 ```
-plugin/desi-pet-shower-base_plugin/includes/frontend/
+plugins/desi-pet-shower-base/includes/frontend/
 ├── class-dps-frontend-app.php          # Gerenciamento de app, abas, navegação
 ├── class-dps-frontend-clients.php      # Seção de clientes (dados + handlers)
 ├── class-dps-frontend-pets.php         # Seção de pets (dados + handlers)
@@ -59,7 +59,7 @@ plugin/desi-pet-shower-base_plugin/includes/frontend/
 ### 2.2. Templates Correspondentes
 
 ```
-plugin/desi-pet-shower-base_plugin/templates/frontend/
+plugins/desi-pet-shower-base/templates/frontend/
 ├── clients-section.php      # ✅ CRIADO - Template completo da seção clientes
 ├── pets-section.php         # TODO - Template completo da seção pets
 ├── appointments-section.php # TODO - Template completo da seção agendamentos
@@ -239,7 +239,7 @@ private static function render_clients_section( $data ) {
 
 1. **Criar o template**:
    ```bash
-   touch plugin/desi-pet-shower-base_plugin/templates/frontend/NOME-section.php
+   touch plugins/desi-pet-shower-base/templates/frontend/NOME-section.php
    ```
 
 2. **No template, incluir**:
@@ -415,7 +415,7 @@ Antes de marcar qualquer fase como concluída, executar:
 ## 8. REFERÊNCIAS
 
 - `docs/refactoring/REFACTORING_ANALYSIS.md` - Análise detalhada de problemas de código
-- `plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php` - Exemplos de helpers
+- `plugins/desi-pet-shower-base/includes/refactoring-examples.php` - Exemplos de helpers
 - `AGENTS.md` - Diretrizes de desenvolvimento
 - `ANALYSIS.md` - Arquitetura e fluxos do sistema
 

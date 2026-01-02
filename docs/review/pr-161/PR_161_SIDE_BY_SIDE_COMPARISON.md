@@ -200,7 +200,7 @@ Antes de submeter as correções:
 
 ```bash
 # 1. Validar sintaxe PHP
-php -l add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php
+php -l plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php
 
 # 2. Verificar mudanças CSS (apenas 7 linhas para ajustar)
 # - Linha ~16: gap: 8px
@@ -238,7 +238,7 @@ Fact: Inputs de preço de serviços devem usar wrapper .dps-service-price-wrappe
       (.dps-service-price) segue padrão .dps-input-money: width 120px desktop, 
       max-width 180px tablet, 150px mobile, sempre text-align right.
 
-Citations: add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css 
+Citations: plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css 
            linhas 12-75 (wrapper e responsividade), PR #161
 
 Reason: Estabelece padrão de wrapper para inputs monetários em contextos inline 

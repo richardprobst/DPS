@@ -206,11 +206,11 @@ Para visualizar as mudanças, acesse o Painel de Gestão DPS > aba Financeiro co
 
 ## Arquivos Modificados
 
-1. `add-ons/desi-pet-shower-finance_addon/assets/css/finance-addon.css`
+1. `plugins/desi-pet-shower-finance/assets/css/finance-addon.css`
    - Adicionados ~460 linhas de novos estilos
    - Reorganização de seções existentes
 
-2. `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`
+2. `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
    - Método `section_financeiro()` refatorado
    - Formulário de nova transação simplificado
    - Tabela de transações consolidada

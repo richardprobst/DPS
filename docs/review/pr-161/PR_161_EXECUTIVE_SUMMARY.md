@@ -274,11 +274,11 @@ echo ')</span>';
 - ✅ `PR_161_CORRECTED_CSS.css` - Versão corrigida do CSS
 - ✅ `docs/visual/VISUAL_STYLE_GUIDE.md` - Guia de estilo oficial
 - ✅ `docs/forms/APPOINTMENT_FORM_LAYOUT_FIXES.md` - Padrões de inputs
-- ✅ `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css` - Classe `.dps-input-money`
+- ✅ `plugins/desi-pet-shower-base/assets/css/dps-base.css` - Classe `.dps-input-money`
 
 ### Para Aplicar Correções
-- 📝 `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css`
-- 📝 `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php` (HTML OK)
+- 📝 `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css`
+- 📝 `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php` (HTML OK)
 
 ---
 

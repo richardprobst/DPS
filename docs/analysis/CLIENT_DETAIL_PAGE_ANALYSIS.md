@@ -2,7 +2,7 @@
 
 **Versão:** 1.0  
 **Data:** 2024-12-04  
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (método `render_client_page()`)
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (método `render_client_page()`)
 
 ---
 

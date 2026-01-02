@@ -17,10 +17,10 @@ A reorganização dos menus foi **95% concluída**. Existem 5 pendências identi
 O menu "Backup & Restauração" (`dps-backup`) não foi oculto do menu principal como os demais menus individuais, permanecendo visível.
 
 ### Causa Raiz
-Durante a implementação automática, houve uma tentativa de editar o arquivo `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`, mas o pattern matching falhou devido a espaçamento inconsistente nos comentários DocBlock.
+Durante a implementação automática, houve uma tentativa de editar o arquivo `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`, mas o pattern matching falhou devido a espaçamento inconsistente nos comentários DocBlock.
 
 **Localização:** Linha 152-161  
-**Arquivo:** `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`
+**Arquivo:** `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`
 
 **Código Atual:**
 ```php
@@ -101,11 +101,11 @@ Durante a implementação automática, houve uma tentativa de editar o arquivo `
 Implementada **Opção A** - Criar Hub Ferramentas completo.
 
 **Arquivos Criados:**
-- `plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php`
+- `plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php`
 
 **Arquivos Modificados:**
-- `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (include + inicialização)
-- `add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php` (parent=null)
+- `plugins/desi-pet-shower-base/desi-pet-shower-base.php` (include + inicialização)
+- `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php` (parent=null)
 
 ### Estrutura Implementada
 
@@ -144,7 +144,7 @@ O hub "Painel Inicial" (`dps-dashboard-main`) não foi implementado conforme pla
 ### Status Atual
 A página principal do plugin (`desi-pet-shower`) permanece como menu de topo sem modificações.
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`  
+**Arquivo:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php`  
 **Linha:** 167  
 **Slug:** `desi-pet-shower`
 

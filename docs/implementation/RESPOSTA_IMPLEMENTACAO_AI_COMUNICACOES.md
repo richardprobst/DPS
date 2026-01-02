@@ -8,7 +8,7 @@ Criei um sistema completo de assistente de IA para gerar sugestões de mensagens
 
 ## 📋 1. Classe DPS_AI_Message_Assistant
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-message-assistant.php`
+**Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-message-assistant.php`
 
 ### Métodos Públicos
 
@@ -60,7 +60,7 @@ DPS_AI_Message_Assistant::suggest_email_message( array $context ): ?array
 
 ## 📡 2. Handlers AJAX
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php`
+**Arquivo:** `plugins/desi-pet-shower-ai/desi-pet-shower-ai-addon.php`
 
 ### Handler: wp_ajax_dps_ai_suggest_whatsapp_message
 
@@ -122,7 +122,7 @@ Mesma estrutura do WhatsApp, mas retorna:
 
 ## 💻 3. Interface JavaScript
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/assets/js/dps-ai-communications.js`
+**Arquivo:** `plugins/desi-pet-shower-ai/assets/js/dps-ai-communications.js`
 
 ### Uso: Sugestão de WhatsApp
 
@@ -197,7 +197,7 @@ Mesma estrutura do WhatsApp, mas retorna:
 
 ## 🎨 4. Estilos CSS
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/assets/css/dps-ai-communications.css`
+**Arquivo:** `plugins/desi-pet-shower-ai/assets/css/dps-ai-communications.css`
 
 - Modal de pré-visualização com overlay
 - Formulários editáveis dentro do modal

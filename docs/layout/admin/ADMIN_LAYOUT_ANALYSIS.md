@@ -338,7 +338,7 @@
 
 ### 5.2 Melhorias Específicas por Arquivo
 
-#### **A) `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`**
+#### **A) `plugins/desi-pet-shower-base/assets/css/dps-base.css`**
 
 **Problema:** Sobrecarga visual, cores demais, estilos complexos.
 
@@ -432,7 +432,7 @@
 
 ---
 
-#### **B) `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`**
+#### **B) `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`**
 
 **Problema:** Formulários longos sem agrupamento, falta feedback, títulos inadequados.
 
@@ -525,7 +525,7 @@
 
 ---
 
-#### **C) `plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php`**
+#### **C) `plugins/desi-pet-shower-base/includes/class-dps-logs-admin-page.php`**
 
 **Problema:** Falta ordenação, tabela pode ficar muito larga, filtros sem indicação de estado ativo.
 
@@ -588,7 +588,7 @@
 **Mudanças propostas:**
 
 1. **Adicionar CSS global para admin pages:**
-   - Criar `/plugin/desi-pet-shower-base_plugin/assets/css/dps-admin.css`
+   - Criar `/plugins/desi-pet-shower-base/assets/css/dps-admin.css`
    - Enfileirar apenas em páginas admin do DPS
    - Estender estilos padrão do WP com paleta minimalista:
    ```css
@@ -715,7 +715,7 @@ echo '<th>' . esc_html__( 'Ações', 'desi-pet-shower' ) . '</th>';
 
 **Criar helper de mensagens:**
 
-Arquivo: `/plugin/desi-pet-shower-base_plugin/includes/class-dps-message-helper.php`
+Arquivo: `/plugins/desi-pet-shower-base/includes/class-dps-message-helper.php`
 
 ```php
 <?php

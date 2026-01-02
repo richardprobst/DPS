@@ -120,7 +120,7 @@ O **Push Notifications Add-on** é um add-on do desi.pet by PRObst para envio de
 ### 2.1 Estrutura Atual (v1.1.0)
 
 ```
-add-ons/desi-pet-shower-push_addon/
+plugins/desi-pet-shower-push/
 ├── desi-pet-shower-push-addon.php   # ~1100 linhas (arquivo principal)
 ├── assets/
 │   ├── css/
@@ -444,7 +444,7 @@ A interface administrativa é **funcional mas básica**, usando apenas estilos n
 
 4. **Modularizar estrutura de arquivos**
    ```
-   add-ons/desi-pet-shower-push_addon/
+   plugins/desi-pet-shower-push/
    ├── desi-pet-shower-push-addon.php  # Apenas bootstrapping
    ├── includes/
    │   ├── class-dps-push-admin.php    # Interface administrativa
@@ -684,6 +684,6 @@ A refatoração proposta seguirá os padrões estabelecidos no DPS, especialment
 
 - [AGENTS.md](/AGENTS.md) - Diretrizes de desenvolvimento
 - [ANALYSIS.md](/ANALYSIS.md) - Documentação arquitetural
-- [Communications Add-on](/add-ons/desi-pet-shower-communications_addon/) - Exemplo de integração de mensageria
-- [Client Portal Add-on](/add-ons/desi-pet-shower-client-portal_addon/) - Exemplo de estrutura modular
+- [Communications Add-on](/plugins/desi-pet-shower-communications/) - Exemplo de integração de mensageria
+- [Client Portal Add-on](/plugins/desi-pet-shower-client-portal/) - Exemplo de estrutura modular
 - [Telegram Bot API](https://core.telegram.org/bots/api) - Documentação oficial

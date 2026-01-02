@@ -490,8 +490,8 @@ A refatoração do código principal permanece como oportunidade de melhoria té
 - `docs/analysis/AGENDA_ADDON_ANALYSIS.md` - Análise técnica completa
 - `docs/layout/agenda/AGENDA_LAYOUT_ANALYSIS.md` - Análise de layout
 - `docs/layout/agenda/AGENDA_IMPLEMENTATION_SUMMARY.md` - Resumo de implementações
-- `add-ons/desi-pet-shower-agenda_addon/CODE_REVIEW_REPORT.md` - Revisão de código
-- `add-ons/desi-pet-shower-agenda_addon/README.md` - Documentação do add-on
+- `plugins/desi-pet-shower-agenda/CODE_REVIEW_REPORT.md` - Revisão de código
+- `plugins/desi-pet-shower-agenda/README.md` - Documentação do add-on
 
 ---
 

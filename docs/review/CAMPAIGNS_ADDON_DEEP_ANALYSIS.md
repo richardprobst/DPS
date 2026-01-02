@@ -29,7 +29,7 @@
 ### 1.1 Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-loyalty_addon/
+plugins/desi-pet-shower-loyalty/
 ├── desi-pet-shower-loyalty.php      # Plugin principal (~1.860 linhas)
 │   ├── class DPS_Loyalty_Addon      # Orquestração, CPT, menus, renderização
 │   ├── class DPS_Loyalty_Referrals  # Sistema Indique e Ganhe

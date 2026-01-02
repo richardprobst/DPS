@@ -167,8 +167,8 @@ Este índice organiza toda a documentação da refatoração da classe `DPS_Base
 
 ### Código Refatorado
 
-- [class-dps-base-frontend.php](../../plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php)
-- [clients-section.php](../../plugin/desi-pet-shower-base_plugin/templates/frontend/clients-section.php)
+- [class-dps-base-frontend.php](../../plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php)
+- [clients-section.php](../../plugins/desi-pet-shower-base/templates/frontend/clients-section.php)
 
 ### Documentação Geral do Projeto
 

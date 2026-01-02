@@ -186,7 +186,7 @@ EXPOR funções:
 #### 6. Criar Sistema de Templates
 ```php
 // Separar HTML de lógica PHP
-plugin/desi-pet-shower-base_plugin/
+plugins/desi-pet-shower-base/
 └── templates/
     ├── forms/
     │   ├── client-form.php

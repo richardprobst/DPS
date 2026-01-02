@@ -39,7 +39,7 @@ Após análise do código e documentação existente (`docs/forms/APPOINTMENT_FO
 
 ### 1. CSS Responsivo Completo
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 **Mudanças:** 58 linhas de CSS adicionadas/modificadas
 

@@ -137,8 +137,8 @@ add_action( 'plugins_loaded', function() {
 ### 1. Verificação de Sintaxe PHP
 ```bash
 # Resultado: 0 erros em todos os arquivos
-php -l plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php
-php -l plugin/desi-pet-shower-base_plugin/includes/*.php
+php -l plugins/desi-pet-shower-base/desi-pet-shower-base.php
+php -l plugins/desi-pet-shower-base/includes/*.php
 find add-ons -name "*.php" -exec php -l {} \;
 ```
 

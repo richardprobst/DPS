@@ -219,7 +219,7 @@ Fase 1 ✅ │ Fase 2 ⏳ │ Fase 3 ⏳ │ Fase 4 ⏳ │ Fase 5 ⏳ │ Fase 
 ## Estrutura de Arquivos
 
 ```
-plugin/desi-pet-shower-base_plugin/
+plugins/desi-pet-shower-base/
 │
 ├── includes/
 │   ├── class-dps-base-frontend.php

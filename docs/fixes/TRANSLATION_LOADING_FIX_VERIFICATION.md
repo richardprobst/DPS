@@ -109,13 +109,13 @@ Este documento fornece um checklist de verificação manual para confirmar que a
 ### Arquivos Modificados
 
 1. **Services Add-on**:
-   - `add-ons/desi-pet-shower-services_addon/desi-pet-shower-services.php`
+   - `plugins/desi-pet-shower-services/desi-pet-shower-services.php`
      - Linha 30: `add_action('init', 'dps_services_load_textdomain', 1)`
-   - `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`
+   - `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`
      - Linha 1167: `add_action('init', 'dps_services_addon_init', 5)`
 
 2. **Loyalty Add-on**:
-   - `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+   - `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
      - Linha 25: `add_action('init', 'dps_loyalty_load_textdomain', 1)`
      - Linha 911: `add_action('init', 'dps_loyalty_init', 5)` (antes: `plugins_loaded`)
 

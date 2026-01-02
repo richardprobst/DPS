@@ -63,7 +63,7 @@ Todos os plugins declaram `Requires PHP: 7.4`, o que significa compatibilidade c
 ### Funções deprecadas corrigidas
 
 #### `get_page_by_title()` (Deprecada WP 6.2)
-**Arquivo afetado**: `add-ons/desi-pet-shower-client-portal_addon/includes/functions-portal-helpers.php`
+**Arquivo afetado**: `plugins/desi-pet-shower-client-portal/includes/functions-portal-helpers.php`
 
 **Correção implementada**: Criada função `dps_get_page_by_title_compat()` que utiliza `$wpdb->get_var()` com query SQL direta para correspondência exata de título, conforme recomendação oficial do WordPress.
 

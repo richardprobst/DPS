@@ -343,7 +343,7 @@ updateRadioStyles: function($modal) {
 ### Suporte
 Para dúvidas ou problemas, consulte:
 1. Documentação inline (comentários no código)
-2. README do add-on (`add-ons/desi-pet-shower-client-portal_addon/README.md`)
+2. README do add-on (`plugins/desi-pet-shower-client-portal/README.md`)
 3. Issue tracker do repositório
 
 ---

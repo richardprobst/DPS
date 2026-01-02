@@ -28,7 +28,7 @@
 ### 1.1 Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-finance_addon/
+plugins/desi-pet-shower-finance/
 ├── desi-pet-shower-finance-addon.php (2.526 linhas) ⚠️ MUITO GRANDE
 │   ├── class DPS_Finance_Addon
 │   ├── activate() - Cria tabelas dps_transacoes e dps_parcelas

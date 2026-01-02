@@ -3,7 +3,7 @@
 **Data da Análise**: 2025-12-03  
 **Versão Analisada**: 1.0.1  
 **Analista**: GitHub Copilot Agent  
-**Diretório**: `add-ons/desi-pet-shower-agenda_addon/`
+**Diretório**: `plugins/desi-pet-shower-agenda/`
 
 ---
 
@@ -675,13 +675,13 @@ Priorizar **ações em lote** e **dashboard de KPIs** para melhorar a produtivid
 
 ## 15. Referências
 
-- **Código fonte**: `add-ons/desi-pet-shower-agenda_addon/`
+- **Código fonte**: `plugins/desi-pet-shower-agenda/`
 - **Documentação existente**:
   - `docs/layout/agenda/AGENDA_LAYOUT_ANALYSIS.md`
   - `docs/layout/agenda/AGENDA_EXECUTIVE_SUMMARY.md`
   - `docs/analysis/AGENDA_ADMIN_IMPROVEMENTS_ANALYSIS.md` **(NOVO)**
-  - `add-ons/desi-pet-shower-agenda_addon/CODE_REVIEW_REPORT.md`
-  - `add-ons/desi-pet-shower-agenda_addon/README.md`
+  - `plugins/desi-pet-shower-agenda/CODE_REVIEW_REPORT.md`
+  - `plugins/desi-pet-shower-agenda/README.md`
 - **Padrões de desenvolvimento**: `AGENTS.md` (seção "Convenções de código")
 - **Arquitetura do sistema**: `ANALYSIS.md` (seção "Agenda Add-on")
 

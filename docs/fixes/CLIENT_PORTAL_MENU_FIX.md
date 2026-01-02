@@ -69,7 +69,7 @@ Removido o registro duplicado do CPT em `DPS_Client_Portal`, mantendo apenas em 
 
 ### Alteração no Código
 
-**Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 
 ```php
 // ANTES (linha 67-72)

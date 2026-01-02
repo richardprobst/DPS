@@ -701,7 +701,7 @@ O plugin atualmente **não possui estrutura de testes automatizados** (PHPUnit /
 | # | Descrição | Risco | Arquivo | Linha |
 |---|-----------|-------|---------|-------|
 | D1 | Alguns métodos privados sem DocBlocks | Baixo | class-dps-base-frontend.php | vários |
-| D2 | README.md do plugin base é básico | Baixo | plugin/desi-pet-shower-base_plugin/README.md | - |
+| D2 | README.md do plugin base é básico | Baixo | plugins/desi-pet-shower-base/README.md | - |
 | D3 | Falta documentação de hooks disponíveis | Médio | - | - |
 
 ### Sugestões de Correção

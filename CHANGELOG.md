@@ -96,18 +96,24 @@ Antes de criar uma nova versão oficial:
   - Prefixos de código (`dps_`, `DPS_`)
   - Text domains para internacionalização
   - Nomes de Custom Post Types e tabelas de banco de dados
-  - Nomes de arquivos e pastas (ver nota abaixo)
   - Hooks e filtros existentes
 
-**Decisão sobre estrutura de pastas**
+**Reorganização de pastas para estrutura unificada**
 
-- **Análise de reorganização**: Foi avaliada a possibilidade de reorganizar todos os plugins (base + add-ons) em uma pasta única.
-- **Decisão**: A estrutura atual foi mantida (`plugin/` + `add-ons/`) pelos seguintes motivos:
-  - Quebraria o sistema de atualizações automáticas via GitHub (GitHub Updater)
-  - Exigiria alteração em dezenas de referências de caminhos (`require_once`, `plugin_dir_path()`, etc.)
-  - O WordPress espera cada plugin em sua própria pasta em `wp-content/plugins/`
-  - A estrutura atual permite instalação independente de cada add-on
-- **Recomendação futura**: Para uma eventual migração, seria necessário um plano de migração completo com testes extensivos e período de transição para usuários existentes.
+- **Nova estrutura**: Todos os plugins (base + 15 add-ons) foram movidos para uma única pasta `plugins/`:
+  - `plugin/desi-pet-shower-base_plugin/` → `plugins/desi-pet-shower-base/`
+  - `add-ons/desi-pet-shower-*_addon/` → `plugins/desi-pet-shower-*/`
+- **Benefícios**:
+  - Estrutura mais limpa e organizada
+  - Todos os 16 plugins em um único local identificável
+  - Nomenclatura simplificada (remoção dos sufixos `_addon` e `_plugin`)
+- **Atualizações realizadas**:
+  - GitHub Updater atualizado com novos caminhos
+  - Addon Manager atualizado com novos caminhos de arquivos
+  - Documentação (README.md, AGENTS.md, ANALYSIS.md) atualizada
+- **IMPORTANTE para instalações existentes**: Os plugins devem ser reinstalados a partir das novas pastas. O WordPress espera cada plugin em sua própria pasta em `wp-content/plugins/`, portanto:
+  - Copie cada pasta de `plugins/desi-pet-shower-*` para `wp-content/plugins/`
+  - Reative os plugins no painel do WordPress
 
 #### Added (Adicionado)
 
@@ -1101,7 +1107,7 @@ Antes de criar uma nova versão oficial:
     - Adicionada tradução onde a constante é usada para criar páginas (linha 443): `__( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' )`
     - Busca de páginas existentes usa título não traduzido para consistência entre idiomas
   - **Impacto**: Elimina avisos de carregamento prematuro de traduções nos logs; páginas criadas usam título traduzido conforme idioma do site
-  - **Arquivos Alterados**: `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php`
+  - **Arquivos Alterados**: `plugins/desi-pet-shower-client-portal/desi-pet-shower-client-portal.php`
   - **Compatibilidade**: Mantida retrocompatibilidade - constante ainda existe e funciona normalmente
 - **AGENDA Add-on (v1.4.1)**: Correção de PHP Warning - Undefined array key "payment"
   - **Problema**: Avisos PHP "Undefined array key 'payment'" na linha 455 de `trait-dps-agenda-renderer.php`
@@ -1112,8 +1118,8 @@ Antes de criar uma nova versão oficial:
     - `desi-pet-shower-agenda-addon.php`: 6 ocorrências corrigidas nos cabeçalhos de tabela
   - **Impacto**: Elimina warnings PHP nos logs e previne erros futuros caso array incompleto seja passado
   - **Arquivos Alterados**: 
-    - `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
-    - `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+    - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+    - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
   - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido
   - **Causa Raiz**: Sintaxe incorreta do `setcookie()` com array associativo (incompatível com PHP 7.3+)
@@ -1124,8 +1130,8 @@ Antes de criar uma nova versão oficial:
     - Removidas chamadas deprecadas a `maybe_start_session()` que não faziam nada
   - **Impacto**: Clientes agora conseguem acessar o portal via magic link sem serem redirecionados para login
   - **Arquivos Alterados**:
-    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-session-manager.php`
-    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+    - `plugins/desi-pet-shower-client-portal/includes/class-dps-portal-session-manager.php`
+    - `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
   - **Commit**: Corrigir sintaxe setcookie() e ordem de execução de hooks
 - **AI Add-on (v1.6.1)**: Tabelas de Banco de Dados Não Criadas em Atualizações
   - **Problema**: Usuários que atualizaram de v1.4.0 para v1.5.0+ sem desativar/reativar o plugin não tinham as tabelas `wp_dps_ai_metrics` e `wp_dps_ai_feedback` criadas, causando erros na página de analytics
@@ -1893,8 +1899,8 @@ Antes de criar uma nova versão oficial:
   - Interface JavaScript com botões de sugestão e modal de pré-visualização para e-mails
   - Suporta 6 tipos de mensagens: lembrete, confirmação, pós-atendimento, cobrança suave, cancelamento, reagendamento
   - **IMPORTANTE**: IA NUNCA envia automaticamente - apenas gera sugestões que o usuário revisa antes de enviar
-  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/AI_COMMUNICATIONS.md`
-  - Exemplos de integração em `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
+  - Documentação completa em `plugins/desi-pet-shower-ai/AI_COMMUNICATIONS.md`
+  - Exemplos de integração em `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
 - **Services Add-on**: Nova API pública (`DPS_Services_API`) para centralizar lógica de serviços e cálculo de preços (v1.2.0)
   - `DPS_Services_API::get_service($service_id)` - Retornar dados completos de um serviço
   - `DPS_Services_API::calculate_price($service_id, $pet_size, $context)` - Calcular preço por porte do pet
@@ -1947,7 +1953,7 @@ Antes de criar uma nova versão oficial:
   - Endpoint AJAX `dps_ai_portal_ask` com validação de nonce e cliente logado
   - Interface administrativa para configuração (API key, modelo, temperatura, timeout, max_tokens)
   - Sistema autocontido: falhas não afetam funcionamento do Portal
-  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/README.md`
+  - Documentação completa em `plugins/desi-pet-shower-ai/README.md`
 - **Client Portal Add-on**: Novo hook `dps_client_portal_after_content` para permitir add-ons adicionarem conteúdo ao final do portal (usado pelo AI Add-on)
   - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
@@ -2098,7 +2104,7 @@ Antes de criar uma nova versão oficial:
   - **Causa raiz**: Verificação `class_exists('DPS_Finance_API')` no construtor executava antes do Finance carregar (ordem alfabética de plugins)
   - **Solução**: Movida verificação do construtor para hook `plugins_loaded` (novo método `check_finance_dependency()`)
   - **Impacto**: Aviso agora aparece apenas quando Finance realmente não está ativo
-  - **Arquivo alterado**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+  - **Arquivo alterado**: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Plugin Base**: Corrigido erro "Falha ao atualizar. A resposta não é um JSON válido" ao inserir shortcode `[dps_base]` no Block Editor
   - **Causa raiz**: Método `render_app()` processava logout e POST requests ANTES de iniciar output buffering (`ob_start()`)
   - **Sintoma**: Block Editor falhava ao validar shortcode porque redirects/exits causavam conflito com resposta JSON esperada
@@ -2106,15 +2112,15 @@ Antes de criar uma nova versão oficial:
   - **Solução**: Removida chamada redundante a `handle_request()` dentro de `render_app()` (já processado via `init`)
   - **Impacto**: Shortcode `[dps_base]` agora é método puro de renderização sem side-effects, compatível com Block Editor
   - **Arquivos alterados**: 
-    - `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (adicionado logout ao `maybe_handle_request()`)
-    - `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (novo método `handle_logout()`, `render_app()` simplificado)
+    - `plugins/desi-pet-shower-base/desi-pet-shower-base.php` (adicionado logout ao `maybe_handle_request()`)
+    - `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (novo método `handle_logout()`, `render_app()` simplificado)
   - **Verificação**: Todos os outros shortcodes (`[dps_agenda_page]`, `[dps_client_portal]`, `[dps_registration_form]`, etc.) já seguem o padrão correto
 - **Client Portal Add-on**: Corrigido problema de layout onde o card "Portal do Cliente" aparecia antes do cabeçalho do tema
   - **Causa raiz**: Método `render_portal_shortcode()` estava chamando `ob_end_clean()` seguido de `include`, causando output direto em vez de retornar HTML via shortcode
   - **Sintoma**: Card do portal aparecia ANTES do menu principal do tema YOOtheme, como se estivesse "encaixado no header"
   - **Solução**: Substituído `ob_end_clean() + include + return ''` por `ob_start() + include + return ob_get_clean()`
   - **Impacto**: Portal agora renderiza corretamente DENTRO da área de conteúdo da página, respeitando header/footer do tema
-  - **Arquivos alterados**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (linhas 710-723)
+  - **Arquivos alterados**: `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php` (linhas 710-723)
 - **Groomers Add-on**: Corrigido fatal error ao renderizar seção no front-end via shortcode [dps_base]
   - Problema: função `add_settings_error()` só existe no contexto admin (wp-admin)
   - Solução: adicionada verificação `function_exists('add_settings_error')` antes de todas as chamadas

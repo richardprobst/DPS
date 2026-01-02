@@ -295,10 +295,10 @@ Todas as melhorias identificadas foram implementadas.
 ## 12. Referências
 
 - **Guia de Estilo:** `docs/visual/VISUAL_STYLE_GUIDE.md`
-- **CSS Principal:** `add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css`
-- **Trait de Renderização:** `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
-- **JavaScript:** `add-ons/desi-pet-shower-agenda_addon/assets/js/agenda-addon.js`
-- **Modal de Serviços:** `add-ons/desi-pet-shower-agenda_addon/assets/js/services-modal.js`
+- **CSS Principal:** `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`
+- **Trait de Renderização:** `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+- **JavaScript:** `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
+- **Modal de Serviços:** `plugins/desi-pet-shower-agenda/assets/js/services-modal.js`
 - **Análise de Layout:** `docs/layout/agenda/AGENDA_LAYOUT_ANALYSIS.md`
 - **Reorganização de Abas:** `docs/improvements/AGENDA_TABS_REORGANIZATION.md`
 

@@ -11,7 +11,7 @@ Usuário relatou erro ao usar o shortcode `[dps_base]` com o tema YooTheme PRO:
 ### Análise Realizada
 
 1. **Verificação do código DPS**: ✅
-   - Shortcode registrado corretamente em `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php:73`
+   - Shortcode registrado corretamente em `plugins/desi-pet-shower-base/desi-pet-shower-base.php:73`
    - Método `render_app()` implementado seguindo padrões WordPress
    - Nenhum conflito detectado com page builders
 
@@ -83,7 +83,7 @@ A mensagem de erro é gerada pelo construtor visual do YooTheme PRO quando detec
 - Descrição do guia de compatibilidade com YooTheme PRO
 
 #### README do Plugin Base
-**Arquivo**: `plugin/desi-pet-shower-base_plugin/README.md`
+**Arquivo**: `plugins/desi-pet-shower-base/README.md`
 
 **Mudanças:**
 - Aviso destacado na documentação do shortcode `[dps_base]`
@@ -112,7 +112,7 @@ A mensagem de erro é gerada pelo construtor visual do YooTheme PRO quando detec
 ### Arquivos Atualizados
 3. `README.md` - Adicionada seção de compatibilidade
 4. `docs/README.md` - Nova seção de documentação
-5. `plugin/desi-pet-shower-base_plugin/README.md` - Aviso no shortcode
+5. `plugins/desi-pet-shower-base/README.md` - Aviso no shortcode
 
 **Total**: 5 arquivos (2 novos, 3 atualizados)
 

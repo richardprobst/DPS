@@ -10,7 +10,7 @@
 
 ### 1.1. Admin - Formulário de Agendamento Principal
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`  
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`  
 **Método:** `section_agendas()` (linhas 1095-1424)  
 **Contexto de uso:** Interface administrativa WordPress (wp-admin ou área protegida)  
 **Shortcode:** `[dps_base]` (aba "Agendamentos")
@@ -24,7 +24,7 @@
 
 ### 1.2. Portal do Cliente - Visualização (não-formulário)
 
-**Localização:** `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`  
+**Localização:** `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`  
 **Método:** `render_next_appointment()` (linhas 607-690)  
 **Contexto de uso:** Área pública para clientes logados  
 **Shortcode:** `[dps_client_portal]`

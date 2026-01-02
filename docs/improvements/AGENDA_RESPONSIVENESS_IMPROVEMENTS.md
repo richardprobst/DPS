@@ -16,7 +16,7 @@ A página `/agenda-de-atendimentos/` apresentava problemas de responsividade em 
 
 ### 1. Wrapper Rolável para Tabelas
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/templates/appointments-list.php`
+**Arquivo:** `plugins/desi-pet-shower-base/templates/appointments-list.php`
 
 Envolvemos cada tabela de agendamentos com um container rolável:
 
@@ -28,7 +28,7 @@ Envolvemos cada tabela de agendamentos com um container rolável:
 </div>
 ```
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
 
 Aplicamos o mesmo wrapper na tabela de histórico (método `section_history()`).
 
@@ -45,7 +45,7 @@ Marcamos colunas menos importantes com a classe `hide-mobile` para escondê-las 
 
 ### 3. CSS Responsivo
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 #### Media Query: Tablets (≤1024px)
 
@@ -156,15 +156,15 @@ Marcamos colunas menos importantes com a classe `hide-mobile` para escondê-las 
 
 ## Arquivos Modificados
 
-1. **plugin/desi-pet-shower-base_plugin/templates/appointments-list.php**
+1. **plugins/desi-pet-shower-base/templates/appointments-list.php**
    - Adicionado wrapper `.dps-table-wrapper`
    - Adicionada classe `hide-mobile` na coluna "Cobrança"
 
-2. **plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php**
+2. **plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php**
    - Adicionado wrapper `.dps-table-wrapper` na tabela de histórico
    - Adicionada classe `hide-mobile` nas colunas "Serviços" e "Cobrança"
 
-3. **plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css**
+3. **plugins/desi-pet-shower-base/assets/css/dps-base.css**
    - Expandidas media queries existentes
    - Adicionadas regras para `.dps-table-wrapper` e `.hide-mobile`
    - Otimizados filtros e toolbar para mobile

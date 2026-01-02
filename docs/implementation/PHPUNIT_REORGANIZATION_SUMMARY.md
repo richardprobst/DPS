@@ -325,7 +325,7 @@ jobs:
 
 #### 1. Instalação de Dependências
 ```bash
-cd add-ons/desi-pet-shower-ai_addon
+cd plugins/desi-pet-shower-ai
 composer install
 ```
 

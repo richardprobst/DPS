@@ -11,21 +11,21 @@ Analisar templates, scripts e estilos relacionados à AGENDA (calendário, lista
 ## 1. INVENTÁRIO DE ARQUIVOS
 
 ### Agenda Add-on
-- **Arquivo principal**: `/add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+- **Arquivo principal**: `/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - Contém a classe `DPS_Agenda_Addon`
   - Renderiza shortcode `[dps_agenda_page]` com HTML e CSS inline (linhas 183-487)
   - 487 linhas de CSS inline embutidas no PHP
   
 - **Scripts JavaScript**:
-  - `/add-ons/desi-pet-shower-agenda_addon/agenda-addon.js` (126 linhas) - Atualização AJAX de status
-  - `/add-ons/desi-pet-shower-agenda_addon/agenda.js` (20 linhas) - Calendário FullCalendar (NÃO UTILIZADO)
+  - `/plugins/desi-pet-shower-agenda/agenda-addon.js` (126 linhas) - Atualização AJAX de status
+  - `/plugins/desi-pet-shower-agenda/agenda.js` (20 linhas) - Calendário FullCalendar (NÃO UTILIZADO)
 
 ### Plugin Base
-- **Template**: `/plugin/desi-pet-shower-base_plugin/templates/appointments-list.php`
+- **Template**: `/plugins/desi-pet-shower-base/templates/appointments-list.php`
   - Template alternativo para listagem de agendamentos
   - Usado em outras partes do sistema
   
-- **Estilos base**: `/plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+- **Estilos base**: `/plugins/desi-pet-shower-base/assets/css/dps-base.css`
   - Estilos compartilhados para tabelas, formulários e componentes
   - Define cores de status (linhas 205-217)
 
@@ -323,7 +323,7 @@ Analisar templates, scripts e estilos relacionados à AGENDA (calendário, lista
 
 **Mudança**:
 ```
-Criar arquivo: /add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css
+Criar arquivo: /plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css
 Mover todo CSS inline para arquivo dedicado
 Enfileirar com wp_enqueue_style no método enqueue_assets()
 ```
@@ -619,16 +619,16 @@ echo '<div class="dps-agenda-summary" role="status" aria-live="polite">';
 ## 10. ARQUIVOS A MODIFICAR
 
 ### Criação necessária
-- [ ] `/add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css` (novo)
+- [ ] `/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css` (novo)
 
 ### Modificação necessária
-- [ ] `/add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+- [ ] `/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
   - Extrair CSS inline (linhas 184-487)
   - Adicionar botão "Novo Agendamento" (linha ~567)
   - Melhorar flags e tooltips (linhas 859, 867, 920, 935)
   - Adicionar ARIA labels
   
-- [ ] `/add-ons/desi-pet-shower-agenda_addon/agenda-addon.js`
+- [ ] `/plugins/desi-pet-shower-agenda/agenda-addon.js`
   - Substituir `alert()` por modal (linha 94)
   - Adicionar função `showServicesModal()`
 

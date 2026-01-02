@@ -56,7 +56,7 @@ O **Stats Add-on** é um componente do desi.pet by PRObst que fornece um dashboa
 ### Estrutura Atual
 
 ```
-add-ons/desi-pet-shower-stats_addon/
+plugins/desi-pet-shower-stats/
 ├── desi-pet-shower-stats-addon.php   # Arquivo único (599 linhas)
 ├── README.md                          # Documentação
 └── uninstall.php                      # Limpeza na desinstalação
@@ -69,7 +69,7 @@ O add-on não segue a estrutura modular recomendada no ANALYSIS.md. Todo o códi
 ### Estrutura Recomendada
 
 ```
-add-ons/desi-pet-shower-stats_addon/
+plugins/desi-pet-shower-stats/
 ├── desi-pet-shower-stats-addon.php    # Apenas bootstrapping
 ├── includes/
 │   ├── class-dps-stats-api.php        # API pública para métricas
@@ -852,5 +852,5 @@ A refatoração proposta seguirá os padrões estabelecidos no DPS, especialment
 - [ANALYSIS.md](/ANALYSIS.md) - Documentação arquitetural
 - [VISUAL_STYLE_GUIDE.md](/docs/visual/VISUAL_STYLE_GUIDE.md) - Guia de estilo visual
 - [REFACTORING_ANALYSIS.md](/docs/refactoring/REFACTORING_ANALYSIS.md) - Análise de refatoração geral
-- [Services Add-on](/add-ons/desi-pet-shower-services_addon/) - Exemplo de estrutura com API
+- [Services Add-on](/plugins/desi-pet-shower-services/) - Exemplo de estrutura com API
 - [Groomers Add-on Analysis](/docs/analysis/GROOMERS_ADDON_ANALYSIS.md) - Modelo de análise similar

@@ -1,19 +1,20 @@
 # Diretrizes para agentes do desi.pet by PRObst
 
 **Autor:** PRObst  
-**Site:** [www.probst.pro](https://www.probst.pro)
+**Site:** <a href="https://www.probst.pro">www.probst.pro</a>
 
 ## Escopo
-Estas orientações cobrem todo o repositório desi.pet by PRObst, incluindo o plugin base em `plugin/` e os complementos em `add-ons/`. Caso exista um `AGENTS.md` mais específico em subdiretórios, ele prevalece para arquivos dentro de seu escopo.
+Estas orientações cobrem todo o repositório desi.pet by PRObst, incluindo todos os plugins em `plugins/`. Caso exista um `AGENTS.md` mais específico em subdiretórios, ele prevalece para arquivos dentro de seu escopo.
 
 ## Estrutura do repositório
-- **plugin/**: plugin WordPress principal (`desi-pet-shower-base_plugin`) com ponto de entrada, includes e assets compartilhados.
-- **add-ons/**: add-ons opcionais, cada um com arquivo principal próprio e subpastas por funcionalidade.
+- **plugins/**: Pasta única contendo todos os plugins (base + add-ons), cada um em sua própria subpasta:
+  - `desi-pet-shower-base/` - Plugin núcleo com ponto de entrada, includes e assets compartilhados.
+  - `desi-pet-shower-*` - Add-ons opcionais, cada um com arquivo principal próprio e subpastas por funcionalidade.
 - **docs/**: documentação detalhada de UX, layout, refatoração e planos de implementação (veja `/docs/README.md` para índice completo).
 - **ANALYSIS.md**: visão arquitetural, fluxos de integração e contratos entre núcleo e extensões.
 - **CHANGELOG.md**: histórico de versões e lançamentos. Deve ser atualizado em cada release.
 - **docs/refactoring/REFACTORING_ANALYSIS.md**: análise detalhada de problemas de código conhecidos e padrões de refatoração recomendados.
-- **plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
+- **plugins/desi-pet-shower-base/includes/refactoring-examples.php**: exemplos práticos de uso correto das classes helper globais.
 - Pastas adicionais podem surgir para ferramentas de build, exemplos ou documentação; mantenha-as descritas nesta seção quando adicionadas.
 
 ## Organização de arquivos
@@ -191,7 +192,7 @@ O repositório mantém recursos específicos para orientar refatorações de có
 - Sugere versões refatoradas com nomes melhores e quebra em métodos menores
 - Deve ser consultado antes de iniciar refatorações significativas
 
-### plugin/desi-pet-shower-base_plugin/includes/refactoring-examples.php
+### plugins/desi-pet-shower-base/includes/refactoring-examples.php
 - Coleção de exemplos práticos de uso correto das classes helper globais
 - Demonstra padrões de refatoração recomendados (conversão de valores monetários, construção de URLs, validação de requisições)
 - Mostra comparações "antes/depois" para ilustrar melhorias de código

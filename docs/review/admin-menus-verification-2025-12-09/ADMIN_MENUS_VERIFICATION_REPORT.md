@@ -30,7 +30,7 @@ desi.pet by PRObst (Menu Principal)
 
 #### 📅 Agenda Hub (`dps-agenda-hub`)
 - ✅ Implementado: `DPS_Agenda_Hub`
-- ✅ Arquivo: `add-ons/desi-pet-shower-agenda_addon/includes/class-dps-agenda-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-hub.php`
 - ✅ Abas:
   - Dashboard
   - Configurações
@@ -38,7 +38,7 @@ desi.pet by PRObst (Menu Principal)
 
 #### 🤖 Assistente de IA Hub (`dps-ai-hub`)
 - ✅ Implementado: `DPS_AI_Hub`
-- ✅ Arquivo: `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-ai/includes/class-dps-ai-hub.php`
 - ✅ Abas (7 funcionalidades):
   - Configurações
   - Analytics
@@ -50,7 +50,7 @@ desi.pet by PRObst (Menu Principal)
 
 #### 👤 Portal do Cliente Hub (`dps-portal-hub`)
 - ✅ Implementado: `DPS_Portal_Hub`
-- ✅ Arquivo: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php`
 - ✅ Abas:
   - Configurações
   - Logins
@@ -58,7 +58,7 @@ desi.pet by PRObst (Menu Principal)
 
 #### 🔌 Integrações Hub (`dps-integrations-hub`)
 - ✅ Implementado: `DPS_Integrations_Hub`
-- ✅ Arquivo: `plugin/desi-pet-shower-base_plugin/includes/class-dps-integrations-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-base/includes/class-dps-integrations-hub.php`
 - ✅ Abas (dinâmicas):
   - Comunicações
   - Pagamentos
@@ -66,7 +66,7 @@ desi.pet by PRObst (Menu Principal)
 
 #### ⚙️ Sistema Hub (`dps-system-hub`)
 - ✅ Implementado: `DPS_System_Hub`
-- ✅ Arquivo: `plugin/desi-pet-shower-base_plugin/includes/class-dps-system-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-base/includes/class-dps-system-hub.php`
 - ✅ Abas (dinâmicas):
   - Logs
   - Backup
@@ -75,13 +75,13 @@ desi.pet by PRObst (Menu Principal)
 
 #### 🛠️ Ferramentas Hub (`dps-tools-hub`)
 - ✅ Implementado: `DPS_Tools_Hub`
-- ✅ Arquivo: `plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php`
 - ✅ Abas:
   - Formulário de Cadastro
 
 #### 🎁 Fidelidade & Campanhas (`dps-loyalty`)
 - ✅ Implementado: Estrutura própria com abas
-- ✅ Arquivo: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+- ✅ Arquivo: `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 - ✅ Abas:
   - Dashboard
   - Indicações
@@ -98,7 +98,7 @@ desi.pet by PRObst (Menu Principal)
 O add-on de Notificações Push (`desi-pet-shower-push-addon.php`) ainda registrava um menu visível no painel administrativo com `parent='desi-pet-shower'`, quando deveria estar oculto (parent=null) conforme o padrão estabelecido para todos os outros add-ons integrados aos Hubs.
 
 **Arquivo afetado:**
-- `add-ons/desi-pet-shower-push_addon/desi-pet-shower-push-addon.php` linha 138
+- `plugins/desi-pet-shower-push/desi-pet-shower-push-addon.php` linha 138
 
 **Status anterior:**
 ```php

@@ -2,7 +2,7 @@
 
 **Versão analisada**: 1.1.0  
 **Data da análise**: 05/12/2024  
-**Diretório**: `add-ons/desi-pet-shower-loyalty_addon`  
+**Diretório**: `plugins/desi-pet-shower-loyalty`  
 **Total de linhas de código**: ~1.667 (principal) + ~360 (API) + ~486 (CSS) + ~217 (JS)  
 **Última atualização**: Reanálise completa com foco em código, funcionalidades e layout
 
@@ -56,7 +56,7 @@ O Add-on Campanhas & Fidelidade oferece três módulos integrados para engajamen
 
 ### Estrutura Atual (v1.1.0)
 ```
-add-ons/desi-pet-shower-loyalty_addon/
+plugins/desi-pet-shower-loyalty/
 ├── desi-pet-shower-loyalty.php      # Plugin principal (~1667 linhas)
 ├── includes/
 │   └── class-dps-loyalty-api.php    # API pública centralizada (~360 linhas)
@@ -341,7 +341,7 @@ Nenhum problema crítico de segurança identificado.
 **Proposta**: Dividir arquivo principal em módulos
 
 ```
-add-ons/desi-pet-shower-loyalty_addon/
+plugins/desi-pet-shower-loyalty/
 ├── desi-pet-shower-loyalty.php              # Bootstrapping (~100 linhas)
 ├── includes/
 │   ├── class-dps-loyalty-addon.php          # Classe principal

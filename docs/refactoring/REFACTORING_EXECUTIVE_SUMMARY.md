@@ -46,7 +46,7 @@ DEPOIS (60 linhas, responsabilidades separadas):
 ### 3. Arquivos Modificados
 
 ```
-plugin/desi-pet-shower-base_plugin/
+plugins/desi-pet-shower-base/
 ├── includes/
 │   └── class-dps-base-frontend.php [MODIFICADO]
 │       ├── section_clients() refatorado
@@ -216,7 +216,7 @@ $items = isset( $items ) ? $items : [];
 2. **Iniciar Fase 2** (Seção Pets)
    ```bash
    # 1. Criar template
-   touch plugin/desi-pet-shower-base_plugin/templates/frontend/pets-section.php
+   touch plugins/desi-pet-shower-base/templates/frontend/pets-section.php
    
    # 2. Copiar HTML inline de section_pets() para o template
    
@@ -262,19 +262,19 @@ $items = isset( $items ) ? $items : [];
 ### Validar Sintaxe
 ```bash
 # Classe principal
-php -l plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+php -l plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 
 # Template criado
-php -l plugin/desi-pet-shower-base_plugin/templates/frontend/clients-section.php
+php -l plugins/desi-pet-shower-base/templates/frontend/clients-section.php
 ```
 
 ### Verificar Linhas de Código
 ```bash
 # Contar linhas da classe
-wc -l plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+wc -l plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 
 # Listar métodos e suas linhas
-grep -n "private static function" plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+grep -n "private static function" plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 ```
 
 ---

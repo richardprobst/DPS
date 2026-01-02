@@ -158,14 +158,14 @@ Validar se as modificações implementadas no PR #161 estão corretas e em confo
 #### Passo 1: Aplicar correções obrigatórias
 ```bash
 # Editar arquivo
-nano add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css
+nano plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css
 
 # Mudanças obrigatórias:
 # - Linha ~29: text-align: left → right
 # - Linha ~67: max-width: 200px → 150px
 
 # Validar sintaxe
-php -l add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php
+php -l plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php
 ```
 
 #### Passo 2: Aplicar melhorias recomendadas
@@ -316,7 +316,7 @@ O PR #161 apresenta uma **solução tecnicamente sólida** para o problema de al
 Para dúvidas sobre esta verificação:
 - **Documentos de referência:** PR_161_*.md (neste repositório)
 - **Guias consultados:** docs/visual/, docs/forms/
-- **Padrões base:** plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css
+- **Padrões base:** plugins/desi-pet-shower-base/assets/css/dps-base.css
 
 ---
 

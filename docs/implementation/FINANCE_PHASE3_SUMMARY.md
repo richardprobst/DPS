@@ -263,7 +263,7 @@ Novos estilos em `assets/css/finance-addon.css`:
 ## Arquivos Modificados
 
 ```
-add-ons/desi-pet-shower-finance_addon/
+plugins/desi-pet-shower-finance/
 ├── desi-pet-shower-finance-addon.php  (versão 1.5.0)
 │   ├── Atualizado header do plugin (Version: 1.5.0)
 │   ├── Adicionados 5 novos métodos privados (F3.3, F3.4, F3.5)

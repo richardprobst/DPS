@@ -32,10 +32,10 @@ O sistema DPS implementa uma arquitetura modular baseada em APIs centralizadas q
 
 | API | Propósito | Localização |
 |-----|-----------|-------------|
-| `DPS_Communications_API` | Envio centralizado de WhatsApp, e-mail, SMS | `add-ons/desi-pet-shower-communications_addon/includes/class-dps-communications-api.php` |
-| `DPS_Finance_API` | Operações financeiras (cobranças, transações) | `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php` |
-| `DPS_Services_API` | Cálculo de preços, catálogo de serviços | `add-ons/desi-pet-shower-services_addon/dps_service/includes/class-dps-services-api.php` |
-| `DPS_Stats_API` | Métricas, relatórios, estatísticas | `add-ons/desi-pet-shower-stats_addon/includes/class-dps-stats-api.php` |
+| `DPS_Communications_API` | Envio centralizado de WhatsApp, e-mail, SMS | `plugins/desi-pet-shower-communications/includes/class-dps-communications-api.php` |
+| `DPS_Finance_API` | Operações financeiras (cobranças, transações) | `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php` |
+| `DPS_Services_API` | Cálculo de preços, catálogo de serviços | `plugins/desi-pet-shower-services/dps_service/includes/class-dps-services-api.php` |
+| `DPS_Stats_API` | Métricas, relatórios, estatísticas | `plugins/desi-pet-shower-stats/includes/class-dps-stats-api.php` |
 
 ---
 
@@ -43,7 +43,7 @@ O sistema DPS implementa uma arquitetura modular baseada em APIs centralizadas q
 
 ### 1. DPS_Communications_API
 
-**Arquivo**: `add-ons/desi-pet-shower-communications_addon/includes/class-dps-communications-api.php`
+**Arquivo**: `plugins/desi-pet-shower-communications/includes/class-dps-communications-api.php`
 
 **Propósito**: Centralizar todas as comunicações do sistema (WhatsApp, e-mail, SMS). Outros add-ons devem delegar envios para esta API ao invés de implementar lógica própria de comunicação.
 
@@ -109,7 +109,7 @@ Armazenadas em `wp_options` com chave `dps_comm_settings`:
 
 ### 2. DPS_Finance_API
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php`
+**Arquivo**: `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php`
 
 **Propósito**: Centralizar operações financeiras. TODOS os add-ons que precisam criar, atualizar ou consultar transações financeiras devem usar esta API em vez de fazer queries diretas na tabela `dps_transacoes`.
 
@@ -187,7 +187,7 @@ echo 'Valor: R$ ' . number_format( $charge->value_cents / 100, 2, ',', '.' );
 
 ### 3. DPS_Services_API
 
-**Arquivo**: `add-ons/desi-pet-shower-services_addon/dps_service/includes/class-dps-services-api.php`
+**Arquivo**: `plugins/desi-pet-shower-services/dps_service/includes/class-dps-services-api.php`
 
 **Propósito**: Centralizar toda a lógica de serviços, cálculo de preços e informações detalhadas. Outros add-ons (Agenda, Finance, Portal) devem usar esta API para cálculos de preços.
 
@@ -266,7 +266,7 @@ echo 'Total: R$ ' . number_format( $total['total'], 2, ',', '.' );
 
 ### 4. DPS_Stats_API
 
-**Arquivo**: `add-ons/desi-pet-shower-stats_addon/includes/class-dps-stats-api.php`
+**Arquivo**: `plugins/desi-pet-shower-stats/includes/class-dps-stats-api.php`
 
 **Propósito**: Centralizar lógica de estatísticas e métricas para reutilização por outros add-ons e facilitar manutenção.
 

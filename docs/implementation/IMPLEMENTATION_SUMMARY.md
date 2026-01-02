@@ -25,7 +25,7 @@ Este documento resume as melhorias de layout e usabilidade implementadas no sist
 ## 2. Arquivos Criados
 
 ### 2.1 CSS Administrativo Minimalista
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-admin.css`  
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-admin.css`  
 **Linhas:** 265  
 **Propósito:** Estender estilos nativos do WordPress com paleta DPS
 

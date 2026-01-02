@@ -199,8 +199,8 @@ Após 1-2 versões e validação em produção:
 
 ```bash
 # Remover arquivos legados da raiz
-rm add-ons/desi-pet-shower-agenda_addon/agenda-addon.js
-rm add-ons/desi-pet-shower-agenda_addon/agenda.js
+rm plugins/desi-pet-shower-agenda/agenda-addon.js
+rm plugins/desi-pet-shower-agenda/agenda.js
 ```
 
 ### Atualização de Versão

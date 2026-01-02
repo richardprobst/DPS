@@ -59,7 +59,7 @@ traduza o conteúdo conforme necessário.
 
 ## 📁 ARQUIVOS MODIFICADOS
 
-### 1. `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-assistant.php`
+### 1. `plugins/desi-pet-shower-ai/includes/class-dps-ai-assistant.php`
 
 **Mudanças:**
 - Linhas 63-114: Modificado `answer_portal_question()`
@@ -72,7 +72,7 @@ traduza o conteúdo conforme necessário.
   - Adiciona instrução de idioma ao system prompt
   - Mapeia códigos de idioma para instruções claras
 
-### 2. `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-public-chat.php`
+### 2. `plugins/desi-pet-shower-ai/includes/class-dps-ai-public-chat.php`
 
 **Mudanças:**
 - Linhas 355-414: Modificado `get_ai_response()`
@@ -83,7 +83,7 @@ traduza o conteúdo conforme necessário.
 - Linhas 429-462: Novo método `get_public_system_prompt_with_language()`
   - Similar ao do Assistant, mas para contexto público
 
-### 3. `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-message-assistant.php`
+### 3. `plugins/desi-pet-shower-ai/includes/class-dps-ai-message-assistant.php`
 
 **Mudanças:**
 - Linhas 65-104: Modificado `suggest_whatsapp_message()`

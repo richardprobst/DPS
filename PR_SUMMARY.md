@@ -137,7 +137,7 @@ Documenta funcionalidade de conversas (Fase 5):
 - Próximos passos
 
 ### 2. Guia de Testes Atualizado
-`add-ons/desi-pet-shower-ai_addon/tests/README.md`
+`plugins/desi-pet-shower-ai/tests/README.md`
 - Como executar testes
 - Estrutura e convenções
 - Troubleshooting
@@ -148,7 +148,7 @@ Documenta funcionalidade de conversas (Fase 5):
 
 ### Localmente
 ```bash
-cd add-ons/desi-pet-shower-ai_addon
+cd plugins/desi-pet-shower-ai
 composer install
 composer test                                    # Todos
 vendor/bin/phpunit --testsuite "Unit Tests"     # Unitários
@@ -273,7 +273,7 @@ $this->markTestIncomplete('Waiting for method extraction');
 
 - [Documento de Análise](../docs/review/ai-addon-deep-analysis-2025-12-07.md)
 - [Resumo Completo](../docs/implementation/PHPUNIT_REORGANIZATION_SUMMARY.md)
-- [Guia de Testes](../add-ons/desi-pet-shower-ai_addon/tests/README.md)
+- [Guia de Testes](../plugins/desi-pet-shower-ai/tests/README.md)
 
 ---
 

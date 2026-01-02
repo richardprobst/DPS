@@ -36,7 +36,7 @@
 Nova estrutura com separação de responsabilidades:
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Arquivo principal (~700 linhas)
 ├── includes/
 │   ├── class-dps-backup-settings.php   # Configurações
@@ -110,7 +110,7 @@ O **Backup & Restauração Add-on** permite exportar e restaurar dados completos
 ### 2.1 Estrutura Atual
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Arquivo único (1338 linhas)
 ├── README.md                            # Documentação (199 linhas)
 └── uninstall.php                        # Limpeza (50 linhas)
@@ -128,7 +128,7 @@ add-ons/desi-pet-shower-backup_addon/
 ### 2.3 Estrutura Recomendada
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Wrapper (bootstrapping, ~100 linhas)
 ├── includes/
 │   ├── class-dps-backup-exporter.php   # Lógica de exportação

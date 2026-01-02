@@ -187,7 +187,7 @@ Este documento foca em:
 **Objetivo**: Resolver problemas críticos em 1 semana (~5.5 horas)
 
 **Passos**:
-1. Criar diretório `add-ons/desi-pet-shower-agenda_addon/assets/`
+1. Criar diretório `plugins/desi-pet-shower-agenda/assets/`
 2. Criar `assets/css/agenda-addon.css` e copiar CSS inline
 3. Criar `assets/js/services-modal.js` para modal de serviços
 4. Modificar `desi-pet-shower-agenda-addon.php`:

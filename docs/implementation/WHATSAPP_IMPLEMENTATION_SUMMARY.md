@@ -7,7 +7,7 @@ Este documento resume a implementação do sistema centralizado de comunicação
 ## Helper Centralizado: DPS_WhatsApp_Helper
 
 ### Localização
-`plugin/desi-pet-shower-base_plugin/includes/class-dps-whatsapp-helper.php`
+`plugins/desi-pet-shower-base/includes/class-dps-whatsapp-helper.php`
 
 ### Principais Métodos
 
@@ -269,7 +269,7 @@ if ( $whatsapp_url ) {
 
 ## Referências
 
-- **Código**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-whatsapp-helper.php`
-- **Configuração**: `add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php`
+- **Código**: `plugins/desi-pet-shower-base/includes/class-dps-whatsapp-helper.php`
+- **Configuração**: `plugins/desi-pet-shower-communications/desi-pet-shower-communications-addon.php`
 - **Documentação**: `ANALYSIS.md` (seção DPS_WhatsApp_Helper)
 - **Changelog**: `CHANGELOG.md` (seção [Unreleased])

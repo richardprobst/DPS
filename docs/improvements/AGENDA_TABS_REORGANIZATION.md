@@ -29,7 +29,7 @@ Este documento descreve as correções críticas e melhorias implementadas no si
 
 ### 1. Erro JavaScript Crítico
 
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/assets/js/agenda-addon.js`
+**Arquivo:** `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
 
 #### Problema
 
@@ -272,7 +272,7 @@ Este documento descreve as correções críticas e melhorias implementadas no si
 
 ### 1. JavaScript
 
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/assets/js/agenda-addon.js`
+**Arquivo:** `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`
 
 - Removido bloco `$(document).ready()` duplicado
 - Removido fechamento `})(jQuery);` duplicado
@@ -280,7 +280,7 @@ Este documento descreve as correções críticas e melhorias implementadas no si
 
 ### 2. Renderização de Abas
 
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
+**Arquivo:** `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
 
 #### `render_appointment_row_tab1()`
 - ✅ Adicionado checkbox para seleção em lote
@@ -298,7 +298,7 @@ Este documento descreve as correções críticas e melhorias implementadas no si
 
 ### 3. Cabeçalhos de Tabelas
 
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+**Arquivo:** `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 
 Atualizados cabeçalhos das três tabelas para refletir as novas colunas.
 

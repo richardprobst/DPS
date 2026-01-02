@@ -1604,8 +1604,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 - [Responsividade Geral](layout/RESPONSIVENESS_ANALYSIS.md) - Análise completa de responsividade
 
 ### Configuração de Integrações
-- [Configuração de Webhook](../add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md) - Mercado Pago
-- [Sistema de Tokens](../add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md) - Autenticação do portal
+- [Configuração de Webhook](../plugins/desi-pet-shower-payment/WEBHOOK_CONFIGURATION.md) - Mercado Pago
+- [Sistema de Tokens](../plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md) - Autenticação do portal
 - [Compatibilidade YooTheme](compatibility/YOOTHEME_COMPATIBILITY.md) - Page builder YooTheme
 - [Guia de Shortcodes no Editor](compatibility/EDITOR_SHORTCODE_GUIDE.md) - Como inserir shortcodes corretamente
 

@@ -236,8 +236,8 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 ## Navegação Rápida
 
 - [Voltar para raiz do repositório](../)
-- [Plugin Base](../plugin/desi-pet-shower-base_plugin/)
-- [Add-ons](../add-ons/)
+- [Plugin Base](../plugins/desi-pet-shower-base/)
+- [Add-ons](../plugins/)
 - [AGENTS.md](../AGENTS.md) - Regras de desenvolvimento
 - [ANALYSIS.md](../ANALYSIS.md) - Arquitetura
 - [CHANGELOG.md](../CHANGELOG.md) - Histórico

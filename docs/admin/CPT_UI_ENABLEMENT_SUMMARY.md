@@ -11,7 +11,7 @@ Habilitada a interface administrativa nativa do WordPress para os três Custom P
 ## Mudanças Implementadas
 
 ### Arquivo Modificado
-`plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+`plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 
 ### CPT: dps_cliente (Clientes)
 

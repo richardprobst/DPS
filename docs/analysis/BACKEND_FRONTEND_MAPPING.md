@@ -12,14 +12,14 @@
 
 #### 1.1.1 DPS Logs (Plugin Base)
 - **Tipo**: CONFIG
-- **Local**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php`
+- **Local**: `plugins/desi-pet-shower-base/includes/class-dps-logs-admin-page.php`
 - **Acesso**: Menu próprio "DPS Logs" (via `add_menu_page`)
 - **Funcionalidade**: Visualização de logs técnicos do sistema (debug, erros, avisos)
 - **Observações**: Menu admin nativo correto. Puramente configuração/debug.
 
 #### 1.1.2 Campanhas & Fidelidade - Configurações (Loyalty Add-on)
 - **Tipo**: CONFIG
-- **Local**: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+- **Local**: `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 - **Acesso**: Menu principal "desi.pet by PRObst" + Submenu "Campanhas & Fidelidade" (linhas 175-192)
 - **Funcionalidade**: 
   - Definir valor por ponto (R$/ponto)
@@ -30,14 +30,14 @@
 
 #### 1.1.3 Campanhas - Lista (Loyalty Add-on)
 - **Tipo**: CONFIG/OPERAÇÃO MISTA
-- **Local**: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` (linha 194-200)
+- **Local**: `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php` (linha 194-200)
 - **Acesso**: Submenu "Campanhas" → redirecionamento para `edit.php?post_type=dps_campaign`
 - **Funcionalidade**: Interface admin nativa do CPT `dps_campaign` para criar/editar campanhas de marketing
 - **Observações**: Mix de configuração (criar template de campanha) e operação (executar campanha). Correto estar no admin.
 
 #### 1.1.4 Pagamentos - Configuração Mercado Pago (Payment Add-on)
 - **Tipo**: CONFIG
-- **Local**: `add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php`
+- **Local**: `plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php`
 - **Acesso**: Submenu em "Configurações → DPS Pagamentos" (via `add_options_page`, linha 70)
 - **Funcionalidade**:
   - Configurar Access Token do Mercado Pago
@@ -47,7 +47,7 @@
 
 #### 1.1.5 Cadastro Público - Configuração Google Maps (Registration Add-on)
 - **Tipo**: CONFIG
-- **Local**: `add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php`
+- **Local**: `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
 - **Acesso**: Submenu em "Configurações → DPS Cadastro" (via `add_options_page`, linha 64)
 - **Funcionalidade**: Configurar Google Maps API Key para autocomplete de endereços
 - **Observações**: Configuração pura. Correto estar no admin.
@@ -72,7 +72,7 @@
 
 #### 2.1.1 Painel Principal de Gestão - [dps_base]
 - **Exposição**: Shortcode `[dps_base]`
-- **Local**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (método `render_app`)
+- **Local**: `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (método `render_app`)
 - **Tipo**: OPERAÇÃO
 - **Funcionalidades**:
   - **Seção Clientes**: CRUD completo de clientes (criar, editar, listar, excluir)
@@ -88,7 +88,7 @@
 
 #### 2.1.2 Portal do Cliente - [dps_client_portal]
 - **Exposição**: Shortcode `[dps_client_portal]`
-- **Local**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+- **Local**: `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 - **Tipo**: OPERAÇÃO
 - **Funcionalidades**:
   - Área autenticada para clientes (não usa WP users, usa sessão PHP própria)
@@ -101,14 +101,14 @@
 
 #### 2.1.3 Login do Cliente - [dps_client_login]
 - **Exposição**: Shortcode `[dps_client_login]`
-- **Local**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+- **Local**: `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 - **Tipo**: OPERAÇÃO
 - **Funcionalidade**: Formulário de login para clientes acessarem o portal
 - **Observações**: Operação pura. Correto estar no front.
 
 #### 2.1.4 Cadastro Público - [dps_registration_form]
 - **Exposição**: Shortcode `[dps_registration_form]`
-- **Local**: `add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php`
+- **Local**: `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
 - **Tipo**: OPERAÇÃO
 - **Funcionalidades**:
   - Formulário público para clientes se cadastrarem antes do primeiro atendimento
@@ -120,7 +120,7 @@
 
 #### 2.1.5 Visualização de Agenda - [dps_agenda_page]
 - **Exposição**: Shortcode `[dps_agenda_page]`
-- **Local**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+- **Local**: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Tipo**: OPERAÇÃO
 - **Funcionalidades**:
   - Visualizar agendamentos do dia/semana
@@ -133,14 +133,14 @@
 
 #### 2.1.6 Cobranças e Notas - [dps_charges_notes] (DEPRECATED)
 - **Exposição**: Shortcode `[dps_charges_notes]`
-- **Local**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` (linha 35)
+- **Local**: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php` (linha 35)
 - **Tipo**: OPERAÇÃO
 - **Funcionalidade**: Exibir lista de cobranças pendentes e permitir gerar notas/boletos
 - **Observações**: Marcado como DEPRECATED no código. Operação, mas deveria estar no Finance Add-on.
 
 #### 2.1.7 Documentos Financeiros - [dps_fin_docs]
 - **Exposição**: Shortcode `[dps_fin_docs]`
-- **Local**: `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php` (linha 107)
+- **Local**: `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php` (linha 107)
 - **Tipo**: OPERAÇÃO
 - **Funcionalidade**: Visualizar e baixar documentos financeiros (notas, recibos)
 - **Observações**: Operação. Correto estar no front para acesso tanto de staff quanto de clientes via portal.
@@ -151,7 +151,7 @@
 
 #### 2.2.1 🔴 Configurações Gerais - [dps_configuracoes]
 - **Exposição**: Shortcode `[dps_configuracoes]`
-- **Local**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (método `render_settings`)
+- **Local**: `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (método `render_settings`)
 - **Tipo**: ⚠️ **CONFIGURAÇÃO EXPOSTA NO FRONT**
 - **Funcionalidades configuráveis**:
   
@@ -227,7 +227,7 @@
 - **Como**: 
   1. Plugin base cria `add_menu_page('desi.pet by PRObst', ..., 'desi-pet-shower', ...)`
   2. Loyalty add-on usa `add_submenu_page('desi-pet-shower', ...)` em vez de criar menu próprio
-- **Arquivo**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+- **Arquivo**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 - **Benefício**: Centraliza todos os menus/submenus DPS em um único local
 
 #### Ação 2: Mover Backup & Restauração do front para admin
@@ -236,7 +236,7 @@
   1. Remover hooks `add_action('dps_settings_nav_tabs', ...)` do Backup Add-on
   2. Criar `add_submenu_page('desi-pet-shower', 'Backup & Restauração', ...)`
   3. Implementar página admin própria com mesma UI
-- **Arquivo**: `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`
+- **Arquivo**: `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`
 - **Justificativa**: Operação crítica de infraestrutura, não deve estar acessível em página pública
 
 #### Ação 3: Mover Comunicações do front para admin
@@ -245,7 +245,7 @@
   1. Remover hooks `add_action('dps_settings_nav_tabs', ...)` do Communications Add-on
   2. Criar `add_submenu_page('desi-pet-shower', 'Comunicações', ...)`
   3. Mover toda UI de configuração para página admin
-- **Arquivo**: `add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php`
+- **Arquivo**: `plugins/desi-pet-shower-communications/desi-pet-shower-communications-addon.php`
 - **Justificativa**: Chaves de API e templates são configurações sensíveis e globais
 
 #### Ação 4: Mover Notificações do front para admin
@@ -254,7 +254,7 @@
   1. Remover hooks `add_action('dps_settings_nav_tabs', ...)` do Push Add-on
   2. Criar `add_submenu_page('desi-pet-shower', 'Notificações', ...)`
   3. Mover configurações de Telegram, destinatários e horários para admin
-- **Arquivo**: `add-ons/desi-pet-shower-push_addon/desi-pet-shower-push-addon.php`
+- **Arquivo**: `plugins/desi-pet-shower-push/desi-pet-shower-push-addon.php`
 - **Justificativa**: Configurações globais de infraestrutura (bot tokens, chat IDs)
 
 #### Ação 5: Mover Logins de Clientes do front para admin
@@ -263,7 +263,7 @@
   1. Já existe `add_submenu_page('options-general.php', ...)` comentado no código (linha 1206)
   2. Descomentar e ativar submenu em "Configurações" ou mover para "DPS → Logins"
   3. Remover hooks `dps_settings_nav_tabs` e `dps_settings_sections`
-- **Arquivo**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+- **Arquivo**: `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 - **Justificativa**: Gerenciamento de credenciais é tarefa administrativa
 
 ---
@@ -279,7 +279,7 @@
   1. Catálogo base (criar/excluir serviços): admin
   2. Ajuste rápido de preços: front (aba "Serviços" do `[dps_base]`)
 - **Arquivos**: 
-  - `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`
+  - `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`
   - Considerar habilitar `show_ui => true` para CPT `dps_service`
 
 #### Ação 7: Centralizar funcionalidades financeiras no Finance Add-on
@@ -289,8 +289,8 @@
   2. Integrar via hooks: Agenda dispara `do_action('dps_finance_generate_charge', $appointment_id)`
   3. Finance renderiza UI de cobranças
 - **Arquivos**:
-  - `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` (remover)
-  - `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php` (adicionar)
+  - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php` (remover)
+  - `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php` (adicionar)
 - **Justificativa**: Finance deve ser dono de TUDO relacionado a dinheiro (conforme ANALYSIS.md)
 
 #### Ação 8: Remover configurações duplicadas
@@ -299,7 +299,7 @@
   1. Testar se conteúdo da aba front é igual ao menu admin
   2. Se sim, remover do front e manter apenas admin
   3. Se não, documentar diferenças
-- **Arquivo**: `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+- **Arquivo**: `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 
 ---
 
@@ -314,7 +314,7 @@
   1. Alterar `show_ui => true` em `dps_cliente`, `dps_pet`, `dps_agendamento`
   2. Definir `show_in_menu => 'desi-pet-shower'` para agrupar tudo
   3. Customizar colunas e metaboxes para UI admin
-- **Arquivo**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+- **Arquivo**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 - **Benefício**: Flexibilidade de acesso (admin para alguns, front para outros)
 
 #### Ação 10: Documentar contratos de configuração vs operação

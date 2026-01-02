@@ -229,7 +229,7 @@
 
 ### 2.1 Novo Helper: `DPS_Message_Helper`
 
-**Arquivo criado:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-message-helper.php`
+**Arquivo criado:** `plugins/desi-pet-shower-base/includes/class-dps-message-helper.php`
 
 **Funcionalidades:**
 - Armazena mensagens temporárias via transients do WordPress
@@ -483,19 +483,19 @@ echo '<h2>...'
 
 ## 8. Arquivos Modificados
 
-1. **`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`**
+1. **`plugins/desi-pet-shower-base/assets/css/dps-base.css`**
    - Simplificação de `.dps-alert` (linhas 230-245)
    - Redução de cores de status (linhas 205-213)
    - Simplificação de `.dps-appointments-group` (linhas 181-189)
    - Adição de media queries (linhas 247-295)
 
-2. **`plugin/desi-pet-shower-base_plugin/includes/class-dps-message-helper.php`** (NOVO)
+2. **`plugins/desi-pet-shower-base/includes/class-dps-message-helper.php`** (NOVO)
    - Helper completo para gerenciamento de mensagens
 
-3. **`plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`**
+3. **`plugins/desi-pet-shower-base/desi-pet-shower-base.php`**
    - Inclusão do helper de mensagens (linha 37)
 
-4. **`plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`**
+4. **`plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`**
    - Adição de H1 em `render_app()` (linha ~576)
    - Mensagens de sucesso em `save_client()` (linha ~1778)
    - Mensagens de sucesso em `save_pet()` (linha ~1871)

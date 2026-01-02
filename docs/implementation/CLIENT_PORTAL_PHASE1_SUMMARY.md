@@ -395,7 +395,7 @@ add_filter( 'dps_portal_pre_ownership_check', function( $pre_check, $client_id, 
 ### 5.1 Add-on Cliente Portal
 
 ```
-add-ons/desi-pet-shower-client-portal_addon/
+plugins/desi-pet-shower-client-portal/
 ├── desi-pet-shower-client-portal.php
 │   └── Versão: 2.3.0 → 2.4.0
 │   └── Descrição: Atualizada para refletir autenticação exclusiva por token

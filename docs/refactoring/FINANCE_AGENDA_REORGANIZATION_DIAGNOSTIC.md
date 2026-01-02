@@ -52,7 +52,7 @@ Análise dos arquivos:
 
 **Helper oficial disponível (NÃO está sendo usado)**:
 ```php
-// plugin/desi-pet-shower-base_plugin/includes/class-dps-money-helper.php
+// plugins/desi-pet-shower-base/includes/class-dps-money-helper.php
 DPS_Money_Helper::parse_brazilian_format( $str )  // equivale a dps_parse_money_br()
 DPS_Money_Helper::format_to_brazilian( $cents )   // equivale a dps_format_money_br()
 ```
@@ -182,7 +182,7 @@ Subscription .......... ⚠️ INSERT direto (cobranças recorrentes)
 
 ### 2.1 Localização e Estrutura
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php`
+**Arquivo**: `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php`
 
 **Namespace**: Global (classe estática sem namespace)
 
@@ -380,7 +380,7 @@ stdClass {
 
 ### 3.1 Arquivo a modificar
 
-**`add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`**
+**`plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`**
 
 ### 3.2 Mudanças necessárias
 
@@ -690,7 +690,7 @@ Finance NÃO tem problema:
 
 ### Fase 1: Criar API Financeira (PRIORIDADE ALTA)
 
-- [ ] **1.1** Criar arquivo `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php`
+- [ ] **1.1** Criar arquivo `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php`
 - [ ] **1.2** Implementar métodos CRUD:
   - [ ] `create_or_update_charge()`
   - [ ] `mark_as_paid()`
@@ -783,11 +783,11 @@ function dps_format_money_br( $int ) {
   - [ ] Categoria "Deprecated": Funções `dps_*_money_br()` e shortcode `[dps_charges_notes]`
   - [ ] Categoria "Changed": Agenda agora depende de Finance
   - [ ] Categoria "Refactoring": Lógica financeira centralizada
-- [ ] **5.3** Atualizar `add-ons/desi-pet-shower-finance_addon/README.md`:
+- [ ] **5.3** Atualizar `plugins/desi-pet-shower-finance/README.md`:
   - [ ] Adicionar seção "API Pública" com exemplos
   - [ ] Documentar métodos da classe `DPS_Finance_API`
   - [ ] Listar add-ons que devem usar a API
-- [ ] **5.4** Atualizar `add-ons/desi-pet-shower-agenda_addon/README.md`:
+- [ ] **5.4** Atualizar `plugins/desi-pet-shower-agenda/README.md`:
   - [ ] Adicionar Finance como dependência obrigatória
   - [ ] Documentar mudança de shortcode
   - [ ] Explicar que lógica financeira foi movida

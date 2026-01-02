@@ -1,6 +1,6 @@
 # Análise funcional do desi.pet by PRObst
 
-## Plugin base (`plugin/desi-pet-shower-base_plugin`)
+## Plugin base (`plugins/desi-pet-shower-base`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
 - `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rótulos e argumentos padrão; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opções comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
 - **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estão registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizáveis pelos add-ons via abas. Para análise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/admin/ADMIN_CPT_INTERFACE_ANALYSIS.md` e `docs/admin/ADMIN_CPT_INTERFACE_SUMMARY.md`.
@@ -12,7 +12,7 @@
 
 ### Helpers globais do núcleo
 
-O plugin base oferece classes utilitárias para padronizar operações comuns e evitar duplicação de lógica. Estes helpers estão disponíveis em `plugin/desi-pet-shower-base_plugin/includes/` e podem ser usados tanto pelo núcleo quanto pelos add-ons.
+O plugin base oferece classes utilitárias para padronizar operações comuns e evitar duplicação de lógica. Estes helpers estão disponíveis em `plugins/desi-pet-shower-base/includes/` e podem ser usados tanto pelo núcleo quanto pelos add-ons.
 
 #### DPS_Money_Helper
 **Propósito**: Manipulação consistente de valores monetários com conversão entre formato brasileiro e centavos.
@@ -363,22 +363,22 @@ Para que o updater reconheça uma nova versão:
 
 | Plugin | Arquivo | Caminho no Repositório |
 |--------|---------|------------------------|
-| Base Plugin | `desi-pet-shower-base_plugin/desi-pet-shower-base.php` | `plugin/desi-pet-shower-base_plugin` |
-| Agenda | `desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` | `add-ons/desi-pet-shower-agenda_addon` |
-| AI | `desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php` | `add-ons/desi-pet-shower-ai_addon` |
-| Backup | `desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php` | `add-ons/desi-pet-shower-backup_addon` |
-| Client Portal | `desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php` | `add-ons/desi-pet-shower-client-portal_addon` |
-| Communications | `desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php` | `add-ons/desi-pet-shower-communications_addon` |
-| Finance | `desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php` | `add-ons/desi-pet-shower-finance_addon` |
-| Groomers | `desi-pet-shower-groomers_addon/desi-pet-shower-groomers-addon.php` | `add-ons/desi-pet-shower-groomers_addon` |
-| Loyalty | `desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` | `add-ons/desi-pet-shower-loyalty_addon` |
-| Payment | `desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php` | `add-ons/desi-pet-shower-payment_addon` |
-| Push | `desi-pet-shower-push_addon/desi-pet-shower-push-addon.php` | `add-ons/desi-pet-shower-push_addon` |
-| Registration | `desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php` | `add-ons/desi-pet-shower-registration_addon` |
-| Services | `desi-pet-shower-services_addon/desi-pet-shower-services.php` | `add-ons/desi-pet-shower-services_addon` |
-| Stats | `desi-pet-shower-stats_addon/desi-pet-shower-stats-addon.php` | `add-ons/desi-pet-shower-stats_addon` |
-| Stock | `desi-pet-shower-stock_addon/desi-pet-shower-stock.php` | `add-ons/desi-pet-shower-stock_addon` |
-| Subscription | `desi-pet-shower-subscription_addon/desi-pet-shower-subscription.php` | `add-ons/desi-pet-shower-subscription_addon` |
+| Base Plugin | `desi-pet-shower-base_plugin/desi-pet-shower-base.php` | `plugins/desi-pet-shower-base` |
+| Agenda | `desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` | `plugins/desi-pet-shower-agenda` |
+| AI | `desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php` | `plugins/desi-pet-shower-ai` |
+| Backup | `desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php` | `plugins/desi-pet-shower-backup` |
+| Client Portal | `desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php` | `plugins/desi-pet-shower-client-portal` |
+| Communications | `desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php` | `plugins/desi-pet-shower-communications` |
+| Finance | `desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php` | `plugins/desi-pet-shower-finance` |
+| Groomers | `desi-pet-shower-groomers_addon/desi-pet-shower-groomers-addon.php` | `plugins/desi-pet-shower-groomers` |
+| Loyalty | `desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` | `plugins/desi-pet-shower-loyalty` |
+| Payment | `desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php` | `plugins/desi-pet-shower-payment` |
+| Push | `desi-pet-shower-push_addon/desi-pet-shower-push-addon.php` | `plugins/desi-pet-shower-push` |
+| Registration | `desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php` | `plugins/desi-pet-shower-registration` |
+| Services | `desi-pet-shower-services_addon/desi-pet-shower-services.php` | `plugins/desi-pet-shower-services` |
+| Stats | `desi-pet-shower-stats_addon/desi-pet-shower-stats-addon.php` | `plugins/desi-pet-shower-stats` |
+| Stock | `desi-pet-shower-stock_addon/desi-pet-shower-stock.php` | `plugins/desi-pet-shower-stock` |
+| Subscription | `desi-pet-shower-subscription_addon/desi-pet-shower-subscription.php` | `plugins/desi-pet-shower-subscription` |
 
 ### Tipos de Agendamento
 
@@ -558,7 +558,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ### Agenda (`desi-pet-shower-agenda_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-agenda_addon`
+**Diretório**: `plugins/desi-pet-shower-agenda`
 
 **Propósito e funcionalidades principais**:
 - Gerenciar agenda de atendimentos e cobranças pendentes
@@ -607,7 +607,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ### Backup & Restauração (`desi-pet-shower-backup_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-backup_addon`
+**Diretório**: `plugins/desi-pet-shower-backup`
 
 **Propósito e funcionalidades principais**:
 - Exportar todo o conteúdo do sistema em formato JSON (CPTs, metadados, options, tabelas, anexos)
@@ -659,7 +659,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ### Campanhas & Fidelidade (`desi-pet-shower-loyalty_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-loyalty_addon`
+**Diretório**: `plugins/desi-pet-shower-loyalty`
 
 **Propósito e funcionalidades principais**:
 - Gerenciar programa de pontos por faturamento
@@ -696,7 +696,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 ### Comunicações (`desi-pet-shower-communications_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-communications_addon`
+**Diretório**: `plugins/desi-pet-shower-communications`
 
 **Propósito e funcionalidades principais**:
 - **Centralizar TODAS as comunicações do sistema** via API pública `DPS_Communications_API`
@@ -767,13 +767,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Introduzido em**: v0.1.0  
 **Refatorado em**: v0.2.0 (API centralizada)
 
-**Documentação completa**: `add-ons/desi-pet-shower-communications_addon/README.md`
+**Documentação completa**: `plugins/desi-pet-shower-communications/README.md`
 
 ---
 
 ### Groomers (`desi-pet-shower-groomers_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-groomers_addon`
+**Diretório**: `plugins/desi-pet-shower-groomers`
 
 **Propósito e funcionalidades principais**:
 - Cadastrar e gerenciar profissionais (groomers) via role customizada
@@ -821,7 +821,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Portal do Cliente (`desi-pet-shower-client-portal_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-client-portal_addon`
+**Diretório**: `plugins/desi-pet-shower-client-portal`
 
 **Propósito e funcionalidades principais**:
 - Fornecer área autenticada para clientes
@@ -893,7 +893,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Assistente de IA (`desi-pet-shower-ai_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-ai_addon`
+**Diretório**: `plugins/desi-pet-shower-ai`
 
 **Propósito e funcionalidades principais**:
 - Fornecer assistente virtual inteligente no Portal do Cliente
@@ -971,13 +971,13 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Observações**:
 - Sistema totalmente autocontido: falhas não afetam funcionamento do Portal
 - Custo por requisição varia conforme modelo escolhido (GPT-3.5 Turbo recomendado para custo/benefício)
-- Consulte `add-ons/desi-pet-shower-ai_addon/README.md` para documentação completa de uso e manutenção
+- Consulte `plugins/desi-pet-shower-ai/README.md` para documentação completa de uso e manutenção
 
 ---
 
 ### Financeiro (`desi-pet-shower-finance_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-finance_addon`
+**Diretório**: `plugins/desi-pet-shower-finance`
 
 **Propósito e funcionalidades principais**:
 - Gerenciar transações financeiras e cobranças
@@ -1013,7 +1013,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Pagamentos (`desi-pet-shower-payment_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-payment_addon`
+**Diretório**: `plugins/desi-pet-shower-payment`
 
 **Propósito e funcionalidades principais**:
 - Integrar com Mercado Pago para geração de links de pagamento
@@ -1074,7 +1074,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Observações**:
 - Validação de webhook aplicada apenas quando requisição traz indicadores de notificação do MP
 - Requer token de acesso e chave PIX configurados (via constantes ou options)
-- **IMPORTANTE**: Configuração do webhook secret é obrigatória para processamento automático de pagamentos. Veja documentação completa em `add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md`
+- **IMPORTANTE**: Configuração do webhook secret é obrigatória para processamento automático de pagamentos. Veja documentação completa em `plugins/desi-pet-shower-payment/WEBHOOK_CONFIGURATION.md`
 - **SEGURANÇA**: Em produção, sempre defina credenciais via constantes em wp-config.php para evitar armazenamento em texto plano no banco de dados
 - Logs de erro incluem contexto completo para debugging (HTTP code, response body, timestamps)
 - Flags de status permitem rastreamento e retry de falhas na geração de links
@@ -1083,7 +1083,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Push Notifications (`desi-pet-shower-push_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-push_addon`
+**Diretório**: `plugins/desi-pet-shower-push`
 
 **Propósito e funcionalidades principais**:
 - Enviar resumo diário de agendamentos para equipe administrativa
@@ -1155,7 +1155,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Cadastro Público (`desi-pet-shower-registration_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-registration_addon`
+**Diretório**: `plugins/desi-pet-shower-registration`
 
 **Propósito e funcionalidades principais**:
 - Permitir cadastro público de clientes e pets via formulário web
@@ -1188,7 +1188,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 ### Serviços (`desi-pet-shower-services_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-services_addon`
+**Diretório**: `plugins/desi-pet-shower-services`
 
 **Propósito e funcionalidades principais**:
 - Gerenciar catálogo de serviços oferecidos
@@ -1259,7 +1259,7 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 ### Estatísticas (`desi-pet-shower-stats_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-stats_addon`
+**Diretório**: `plugins/desi-pet-shower-stats`
 
 **Propósito e funcionalidades principais**:
 - Exibir métricas de uso do sistema (atendimentos, receita, despesas, lucro)
@@ -1313,7 +1313,7 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 ### Estoque (`desi-pet-shower-stock_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-stock_addon`
+**Diretório**: `plugins/desi-pet-shower-stock`
 
 **Propósito e funcionalidades principais**:
 - Controlar estoque de insumos utilizados nos atendimentos
@@ -1349,7 +1349,7 @@ $details = DPS_Services_API::get_services_details( $appointment_id );
 
 ### Assinaturas (`desi-pet-shower-subscription_addon`)
 
-**Diretório**: `add-ons/desi-pet-shower-subscription_addon`
+**Diretório**: `plugins/desi-pet-shower-subscription`
 
 **Propósito e funcionalidades principais**:
 - Gerenciar pacotes mensais de banho e tosa com frequências semanal (4 atendimentos) ou quinzenal (2 atendimentos)
@@ -1943,7 +1943,7 @@ Consulte: `docs/analysis/WHITELABEL_ACCESS_CONTROL_ANALYSIS.md`
 
 ## Add-on: AI (Assistente Virtual)
 
-**Diretório**: `add-ons/desi-pet-shower-ai_addon/`
+**Diretório**: `plugins/desi-pet-shower-ai/`
 
 **Versão**: 1.6.0 (schema DB: 1.5.0)
 
@@ -2217,9 +2217,9 @@ Armazenadas em `dps_ai_settings`:
 
 ### Documentação Adicional
 
-- **Manual completo**: `add-ons/desi-pet-shower-ai_addon/AI_COMMUNICATIONS.md`
-- **Exemplos de código**: `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
-- **Comportamento da IA**: `add-ons/desi-pet-shower-ai_addon/BEHAVIOR_EXAMPLES.md`
+- **Manual completo**: `plugins/desi-pet-shower-ai/AI_COMMUNICATIONS.md`
+- **Exemplos de código**: `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
+- **Comportamento da IA**: `plugins/desi-pet-shower-ai/BEHAVIOR_EXAMPLES.md`
 
 ### Hooks Expostos
 
@@ -2386,7 +2386,7 @@ CREATE TABLE wp_dps_ai_feedback (
 
 ### Exemplos de Uso
 
-Ver arquivo completo de exemplos: `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
+Ver arquivo completo de exemplos: `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
 
 **Exemplo rápido:**
 

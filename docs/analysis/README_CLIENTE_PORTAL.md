@@ -125,16 +125,16 @@ Este diretório contém a análise completa e profunda do **Cliente Portal Add-o
 ## 🔗 Links Úteis
 
 ### Código Fonte do Add-on:
-- **Diretório:** `add-ons/desi-pet-shower-client-portal_addon/`
+- **Diretório:** `plugins/desi-pet-shower-client-portal/`
 - **Arquivo Principal:** `desi-pet-shower-client-portal.php`
 - **Classes:** `includes/class-dps-*.php`
 - **Assets:** `assets/css/` e `assets/js/`
 - **Templates:** `templates/*.php`
 
 ### Documentação Oficial:
-- **README:** `add-ons/desi-pet-shower-client-portal_addon/README.md`
-- **Sistema de Tokens:** `add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md`
-- **Hooks:** `add-ons/desi-pet-shower-client-portal_addon/HOOKS.md`
+- **README:** `plugins/desi-pet-shower-client-portal/README.md`
+- **Sistema de Tokens:** `plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md`
+- **Hooks:** `plugins/desi-pet-shower-client-portal/HOOKS.md`
 
 ### Análises Relacionadas:
 - **Análise UX Anterior:** `docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md`

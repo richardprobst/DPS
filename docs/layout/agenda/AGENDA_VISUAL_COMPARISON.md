@@ -6,7 +6,7 @@
 
 #### ANTES
 ```
-add-ons/desi-pet-shower-agenda_addon/
+plugins/desi-pet-shower-agenda/
 ├── desi-pet-shower-agenda-addon.php  (2376 linhas)
 │   └── <style> inline (487 linhas de CSS)
 ├── agenda-addon.js                   (126 linhas)
@@ -21,7 +21,7 @@ add-ons/desi-pet-shower-agenda_addon/
 
 #### DEPOIS
 ```
-add-ons/desi-pet-shower-agenda_addon/
+plugins/desi-pet-shower-agenda/
 ├── desi-pet-shower-agenda-addon.php  (1920 linhas)
 ├── agenda-addon.js                   (129 linhas)
 ├── agenda.js                         (20 linhas - não utilizado)
