@@ -22,12 +22,16 @@
     --dps-background: #f8fafc;
     --dps-border: #e2e8f0;
     --dps-muted: #64748b;
+    --dps-text-primary: #0f172a;
+    --dps-text-secondary: #374151;
+    --dps-btn-gradient-start: #0ea5e9;
+    --dps-btn-gradient-end: #0284c7;
     --dps-status-pending: #f59e0b;
     --dps-status-finished: #0ea5e9;
     --dps-status-paid: #22c55e;
     --dps-status-cancelled: #ef4444;
     max-width: 100%;
-    color: #0f172a;
+    color: var(--dps-text-primary);
 }
 
 .dps-agenda-wrapper * {
@@ -82,14 +86,13 @@
 .dps-agenda-wrapper .dps-agenda-nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.75rem 1rem;
     align-items: center;
     margin-bottom: 1.25rem;
     padding: 1rem 1.25rem;
     background: var(--dps-surface);
     border: 1px solid var(--dps-border);
     border-radius: 0.75rem;
-    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.03);
     /* Estilo minimalista: sem sombras decorativas */
 }
 
@@ -102,6 +105,11 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
+}
+
+/* Grupo de ações principais (Novo, Exportar) - destaque visual */
+.dps-agenda-nav-group--actions {
+    margin-left: auto;
 }
 
 /* Separador visual entre grupos de navegação - oculto em mobile */
@@ -274,6 +282,21 @@
     background: #f9fafb;
 }
 
+/* Botão Novo na barra de navegação - destaque especial */
+.dps-agenda-nav-group--actions .dps-btn--primary {
+    white-space: nowrap;
+    min-width: auto;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Estado de carregamento do botão */
+.dps-btn.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: wait;
+}
+
 /* === Resumo de Atendimentos === */
 .dps-agenda-summary {
     display: flex;
@@ -391,9 +414,10 @@
 .dps-agenda-wrapper table.dps-table tbody td {
     padding: 0.85rem 1rem;
     border-top: 1px solid var(--dps-border);
-    vertical-align: top;
+    vertical-align: middle;
     color: #0f172a;
     font-size: 0.95rem;
+    line-height: 1.4;
 }
 
 .dps-agenda-wrapper table.dps-table tbody tr:first-child td {
@@ -676,6 +700,86 @@
     margin-top: 0;
 }
 
+/* Melhoria visual do formulário no modal */
+.dps-section--modal .dps-surface {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.dps-section--modal .dps-surface__title {
+    display: none; /* O título do modal já está no header */
+}
+
+.dps-section--modal .dps-fieldset {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--dps-background, #f8fafc);
+    border-radius: 8px;
+    border: 1px solid var(--dps-border, #e2e8f0);
+}
+
+.dps-section--modal .dps-fieldset__legend {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--dps-text-secondary, #374151);
+    margin-bottom: 1rem;
+}
+
+.dps-section--modal .dps-form-field {
+    margin-bottom: 1rem;
+}
+
+.dps-section--modal .dps-form-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dps-text-secondary, #374151);
+}
+
+.dps-section--modal select,
+.dps-section--modal input[type="text"],
+.dps-section--modal input[type="date"],
+.dps-section--modal input[type="time"],
+.dps-section--modal textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--dps-border, #e2e8f0);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-section--modal select:focus,
+.dps-section--modal input:focus,
+.dps-section--modal textarea:focus {
+    outline: none;
+    border-color: var(--dps-accent, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Botão de submit no modal */
+.dps-section--modal .dps-appointment-submit,
+.dps-section--modal .button-primary {
+    background: linear-gradient(135deg, var(--dps-btn-gradient-start, #0ea5e9) 0%, var(--dps-btn-gradient-end, #0284c7) 100%);
+    color: #ffffff;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.dps-section--modal .dps-appointment-submit:hover,
+.dps-section--modal .button-primary:hover {
+    background: linear-gradient(135deg, var(--dps-btn-gradient-end, #0284c7) 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+}
+
 .dps-modal-open {
     overflow: hidden;
 }
@@ -692,10 +796,21 @@
 @media (max-width: 768px) {
     .dps-appointment-modal__content {
         width: 100%;
+        max-height: 95vh;
+        margin: 0.5rem;
     }
     .dps-appointment-modal__body,
     .dps-appointment-modal__messages {
-        padding: 1.1rem;
+        padding: 1rem;
+    }
+    
+    .dps-section--modal .dps-fieldset {
+        padding: 0.85rem;
+    }
+    
+    .dps-section--modal .dps-appointment-submit,
+    .dps-section--modal .button-primary {
+        width: 100%;
     }
 }
 
@@ -718,12 +833,23 @@
         flex: 1 1 100%;
         justify-content: center;
     }
+    
+    /* Grupo de ações alinhado à direita em tablets */
+    .dps-agenda-nav-group--actions {
+        margin-left: auto;
+    }
 }
 
 /* Telas médias (até 860px) */
 @media (max-width: 860px) {
     .dps-agenda-context-bar {
+        flex-direction: column;
         align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .dps-context-actions {
+        width: 100%;
     }
 }
 
@@ -731,6 +857,18 @@
 @media (max-width: 768px) {
     .dps-agenda-wrapper .dps-agenda-nav {
         padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-agenda-nav-group {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-agenda-nav-group--actions {
+        margin-left: 0;
+        justify-content: center;
     }
     
     .dps-agenda-context-bar {
@@ -770,7 +908,7 @@
         border-radius: 0.75rem;
         background: var(--dps-surface);
         padding: 1rem;
-        box-shadow: 0 6px 18px rgba(17, 24, 39, 0.06);
+        /* Estilo minimalista: sem sombras em cards */
     }
     
     .dps-agenda-empty {
