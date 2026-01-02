@@ -7,7 +7,7 @@ Versão: 1.0.0
 
 ### Sistema Implementado
 
-**Assistente Virtual Inteligente para o Portal do Cliente do DPS by PRObst**
+**Assistente Virtual Inteligente para o Portal do Cliente do desi.pet by PRObst**
 
 Focado EXCLUSIVAMENTE em:
 - Banho e Tosa
@@ -75,7 +75,7 @@ add-ons/desi-pet-shower-ai_addon/
 ### 1. System Prompt Restritivo
 
 ```
-Você é um assistente virtual especializado em Banho e Tosa do sistema "DPS by PRObst".
+Você é um assistente virtual especializado em Banho e Tosa do sistema "desi.pet by PRObst".
 Seu trabalho é responder SOMENTE sobre:
 - Agendamentos, serviços, histórico do pet
 - Dados do cliente/pets
@@ -129,7 +129,7 @@ Para cada pergunta, sistema monta contexto com:
 
 ## 📊 Configurações Disponíveis
 
-Menu: **DPS by PRObst > Assistente de IA**
+Menu: **desi.pet by PRObst > Assistente de IA**
 
 | Campo            | Opções                                  | Padrão          |
 |------------------|-----------------------------------------|-----------------|

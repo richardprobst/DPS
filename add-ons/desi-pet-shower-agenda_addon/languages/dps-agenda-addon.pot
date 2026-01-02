@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: DPS by PRObst - Agenda Add-on 1.0.1\n"
+"Project-Id-Version: desi.pet by PRObst - Agenda Add-on 1.0.1\n"
 "Report-Msgid-Bugs-To: https://www.probst.pro\n"
 "POT-Creation-Date: 2025-12-03 17:30+0000\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Domain: dps-agenda-addon\n"
 
 #: desi-pet-shower-agenda-addon.php
-msgid "O add-on Agenda requer o plugin base DPS by PRObst para funcionar."
+msgid "O add-on Agenda requer o plugin base desi.pet by PRObst para funcionar."
 msgstr ""
 
 #: desi-pet-shower-agenda-addon.php

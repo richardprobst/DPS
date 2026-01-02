@@ -1,4 +1,4 @@
-# DPS by PRObst – Assinaturas Add-on
+# desi.pet by PRObst – Assinaturas Add-on
 
 Gestão de planos de assinatura recorrentes para clientes.
 
@@ -27,7 +27,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior
+- **desi.pet by PRObst Base**: v1.0.0 ou superior
 - **Finance Add-on**: obrigatório para criar transações recorrentes
 - **Payment Add-on**: obrigatório para gerar links de renovação Mercado Pago
 - **WordPress**: 6.0 ou superior

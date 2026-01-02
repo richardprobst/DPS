@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Página administrativa para visualização de logs do DPS by PRObst.
+ * Página administrativa para visualização de logs do desi.pet by PRObst.
  */
 class DPS_Logs_Admin_Page {
 
@@ -15,7 +15,7 @@ class DPS_Logs_Admin_Page {
     }
 
     /**
-     * Registra a página de Logs do sistema como submenu de "DPS by PRObst".
+     * Registra a página de Logs do sistema como submenu de "desi.pet by PRObst".
      * 
      * NOTA: A partir da v1.1.0, este menu está oculto (parent=null) para backward compatibility.
      * Use o novo hub unificado em dps-system-hub para acessar via aba "Logs".

@@ -245,7 +245,7 @@ apply_filters( 'dps_comm_whatsapp_message', string $message, string $to, array $
 ```php
 add_filter( 'dps_comm_whatsapp_message', function( $message, $to, $context ) {
     // Adiciona assinatura a todas as mensagens
-    return $message . "\n\n--\nDPS by PRObst";
+    return $message . "\n\n--\ndesi.pet by PRObst";
 }, 10, 3 );
 ```
 

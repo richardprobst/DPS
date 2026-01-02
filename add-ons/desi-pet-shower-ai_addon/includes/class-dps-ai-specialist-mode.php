@@ -52,7 +52,7 @@ class DPS_AI_Specialist_Mode {
     /**
      * Registra a página de modo especialista no menu admin.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-ai-hub (aba "Modo Especialista").
      */
     public function register_menu() {
@@ -480,7 +480,7 @@ class DPS_AI_Specialist_Mode {
      * @return string
      */
     private function get_specialist_system_prompt() {
-        return "Você é um assistente técnico especializado para a equipe interna do DPS by PRObst.
+        return "Você é um assistente técnico especializado para a equipe interna do desi.pet by PRObst.
 
 Seu propósito é ajudar administradores com:
 - Análise de dados e métricas do sistema

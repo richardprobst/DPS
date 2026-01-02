@@ -9,7 +9,7 @@
 
 ## 1. Visão Geral em Alto Nível
 
-O **Stats Add-on** é o módulo de **inteligência de negócio** do DPS by PRObst. Fornece ao dono do pet shop uma **visão consolidada** do desempenho operacional e financeiro através de:
+O **Stats Add-on** é o módulo de **inteligência de negócio** do desi.pet by PRObst. Fornece ao dono do pet shop uma **visão consolidada** do desempenho operacional e financeiro através de:
 
 - Dashboard visual com métricas-chave
 - Comparativos de período (variação % vs período anterior)

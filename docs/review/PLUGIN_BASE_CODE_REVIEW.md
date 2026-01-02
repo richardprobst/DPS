@@ -1,8 +1,8 @@
-# Revisão de Código - DPS by PRObst Base Plugin
+# Revisão de Código - desi.pet by PRObst Base Plugin
 
 ## Resumo Geral
 
-O plugin **DPS by PRObst Base** apresenta uma estrutura bem organizada com boa separação de responsabilidades através de classes helpers especializadas. O código demonstra preocupação com segurança (nonces, sanitização, escape) e internacionalização. No entanto, existem oportunidades de melhoria em termos de refatoração de métodos extensos, otimização de queries e padronização de nomenclatura.
+O plugin **desi.pet by PRObst Base** apresenta uma estrutura bem organizada com boa separação de responsabilidades através de classes helpers especializadas. O código demonstra preocupação com segurança (nonces, sanitização, escape) e internacionalização. No entanto, existem oportunidades de melhoria em termos de refatoração de métodos extensos, otimização de queries e padronização de nomenclatura.
 
 ### Pontuação Geral por Categoria
 
@@ -505,11 +505,11 @@ let errorHtml = '<strong>' + (dpsAppointmentData.l10n.formErrorsTitle || 'Por fa
 
 ```php
 // ANTES (hard-coded)
-$html .= '<p>Banho e Tosa DPS by PRObst – Rua Água Marinha, 45...</p>';
+$html .= '<p>Banho e Tosa desi.pet by PRObst – Rua Água Marinha, 45...</p>';
 
 // DEPOIS (configurável via options)
 $store_info = get_option( 'dps_store_info', [
-    'name' => 'Banho e Tosa DPS by PRObst',
+    'name' => 'Banho e Tosa desi.pet by PRObst',
     'address' => 'Rua Água Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP',
     'phone' => '15 9 9160-6299',
     'email' => 'contato@desi.pet',
@@ -777,7 +777,7 @@ Estas são refatorações mais profundas que requerem planejamento:
 
 ## Conclusão
 
-O plugin DPS by PRObst Base demonstra uma base sólida com boas práticas de segurança e internacionalização. Os principais pontos de melhoria estão na arquitetura (métodos muito extensos) e performance (queries em loops). As recomendações priorizadas neste relatório visam melhorar a manutenibilidade e escalabilidade do código sem quebrar funcionalidades existentes.
+O plugin desi.pet by PRObst Base demonstra uma base sólida com boas práticas de segurança e internacionalização. Os principais pontos de melhoria estão na arquitetura (métodos muito extensos) e performance (queries em loops). As recomendações priorizadas neste relatório visam melhorar a manutenibilidade e escalabilidade do código sem quebrar funcionalidades existentes.
 
 **Autor**: Revisão automatizada  
 **Data**: 2025-11-25  

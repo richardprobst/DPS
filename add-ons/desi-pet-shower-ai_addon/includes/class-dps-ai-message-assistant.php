@@ -90,7 +90,7 @@ class DPS_AI_Message_Assistant {
         if ( $extra_instructions !== '' ) {
             $messages[] = [
                 'role'    => 'system',
-                'content' => 'Instruções adicionais definidas pelo administrador do DPS by PRObst: ' . $extra_instructions,
+                'content' => 'Instruções adicionais definidas pelo administrador do desi.pet by PRObst: ' . $extra_instructions,
             ];
         }
 
@@ -165,7 +165,7 @@ class DPS_AI_Message_Assistant {
         if ( $extra_instructions !== '' ) {
             $messages[] = [
                 'role'    => 'system',
-                'content' => 'Instruções adicionais definidas pelo administrador do DPS by PRObst: ' . $extra_instructions,
+                'content' => 'Instruções adicionais definidas pelo administrador do desi.pet by PRObst: ' . $extra_instructions,
             ];
         }
 
@@ -200,7 +200,7 @@ class DPS_AI_Message_Assistant {
         $parsed = DPS_AI_Email_Parser::parse(
             $response,
             [
-                'default_subject'    => 'Comunicado do DPS by PRObst',
+                'default_subject'    => 'Comunicado do desi.pet by PRObst',
                 'max_subject_length' => 200,
                 'strip_html'         => false,
                 'format_hint'        => 'labeled', // IA deve retornar com rótulos

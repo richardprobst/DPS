@@ -1,4 +1,4 @@
-# Documentação do DPS by PRObst (DPS)
+# Documentação do desi.pet by PRObst (DPS)
 
 Este diretório contém a documentação detalhada de UX, layout, refatoração e planos de implementação do sistema DPS.
 

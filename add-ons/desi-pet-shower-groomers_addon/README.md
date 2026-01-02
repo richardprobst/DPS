@@ -1,4 +1,4 @@
-# DPS by PRObst – Groomers Add-on
+# desi.pet by PRObst – Groomers Add-on
 
 Cadastro de profissionais, vinculação a atendimentos e relatórios de produtividade.
 
@@ -99,7 +99,7 @@ add-ons/desi-pet-shower-groomers_addon/
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
+- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

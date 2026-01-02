@@ -2,7 +2,7 @@
 
 ## O Que Foi Implementado
 
-Criei um sistema completo de assistente de IA para gerar sugestões de mensagens de WhatsApp e e-mail no DPS by PRObst, seguindo rigorosamente a regra de **NUNCA ENVIAR AUTOMATICAMENTE**.
+Criei um sistema completo de assistente de IA para gerar sugestões de mensagens de WhatsApp e e-mail no desi.pet by PRObst, seguindo rigorosamente a regra de **NUNCA ENVIAR AUTOMATICAMENTE**.
 
 ---
 
@@ -337,7 +337,7 @@ Usa mesmas configurações de `dps_ai_settings`:
 
 ### Teste 1: Com IA Ativada e API Key Válida
 
-1. Configure API key da OpenAI em "DPS by PRObst > Assistente de IA"
+1. Configure API key da OpenAI em "desi.pet by PRObst > Assistente de IA"
 2. Marque "Ativar Assistente de IA"
 3. Abra qualquer página com botões de sugestão
 4. Clique em "Sugerir com IA"

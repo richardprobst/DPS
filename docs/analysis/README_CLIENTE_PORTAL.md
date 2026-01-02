@@ -1,6 +1,6 @@
 # Análise do Cliente Portal Add-on - Índice de Documentos
 
-Este diretório contém a análise completa e profunda do **Cliente Portal Add-on** do sistema DPS by PRObst, realizada em 07/12/2024.
+Este diretório contém a análise completa e profunda do **Cliente Portal Add-on** do sistema desi.pet by PRObst, realizada em 07/12/2024.
 
 ---
 

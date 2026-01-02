@@ -112,7 +112,7 @@ class DPS_Portal_Admin {
     /**
      * Registra menu administrativo.
      * 
-     * NOTA: Menus exibidos como submenus de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menus exibidos como submenus de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessíveis pelo hub em dps-portal-hub via abas.
      */
     public function register_admin_menu() {
@@ -418,9 +418,9 @@ class DPS_Portal_Admin {
         }
 
         // Monta assunto e corpo do e-mail
-        $subject = __( 'Nova mensagem da equipe DPS by PRObst para você', 'dps-client-portal' );
+        $subject = __( 'Nova mensagem da equipe desi.pet by PRObst para você', 'dps-client-portal' );
         $body    = sprintf(
-            __( "Olá %s,\n\nVocê recebeu uma nova mensagem da equipe DPS by PRObst:\n\n%s\n\nAcesse seu portal para responder:\n%s", 'dps-client-portal' ),
+            __( "Olá %s,\n\nVocê recebeu uma nova mensagem da equipe desi.pet by PRObst:\n\n%s\n\nAcesse seu portal para responder:\n%s", 'dps-client-portal' ),
             $client_name,
             wp_strip_all_tags( $post->post_content ),
             dps_get_portal_page_url()

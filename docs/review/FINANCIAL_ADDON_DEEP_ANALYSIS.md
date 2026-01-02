@@ -1,6 +1,6 @@
-# Análise Profunda do Add-on Financeiro - DPS by PRObst
+# Análise Profunda do Add-on Financeiro - desi.pet by PRObst
 
-**Plugin:** DPS by PRObst – Financeiro  
+**Plugin:** desi.pet by PRObst – Financeiro  
 **Versão Analisada:** 1.3.0  
 **Data da Análise:** 09/12/2025  
 **Autor:** Agente de Análise de Código  
@@ -317,7 +317,7 @@ if ( is_wp_error( $result ) ) {
 
 ```php
 private static $defaults = [
-    'store_name'       => 'Banho e Tosa DPS by PRObst',
+    'store_name'       => 'Banho e Tosa desi.pet by PRObst',
     'store_address'    => 'Rua Água Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP',
     'store_phone'      => '15 99160-6299',
     'store_email'      => 'contato@desi.pet',
@@ -704,7 +704,7 @@ if ( $trans_id && $value > 0 ) {
 7. Monta HTML do documento:
    ┌─────────────────────────────────────────┐
    │           [Logo da Loja]                │
-   │      Banho e Tosa DPS by PRObst         │
+   │      Banho e Tosa desi.pet by PRObst         │
    │  Rua Água Marinha, 45 – Cerquilho, SP  │
    │      15 99160-6299 - contato@desi.pet  │
    ├─────────────────────────────────────────┤

@@ -92,83 +92,83 @@ class DPS_GitHub_Updater {
         $this->plugins = array(
             // Plugin Base
             'desi-pet-shower-base_plugin/desi-pet-shower-base.php' => array(
-                'name'        => 'DPS by PRObst – Base',
+                'name'        => 'desi.pet by PRObst – Base',
                 'repo_path'   => 'plugin/desi-pet-shower-base_plugin',
                 'slug'        => 'desi-pet-shower-base_plugin',
             ),
             // Add-ons
             'desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php' => array(
-                'name'        => 'DPS by PRObst – Agenda Add-on',
+                'name'        => 'desi.pet by PRObst – Agenda Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-agenda_addon',
                 'slug'        => 'desi-pet-shower-agenda_addon',
             ),
             'desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php' => array(
-                'name'        => 'DPS by PRObst – AI Add-on',
+                'name'        => 'desi.pet by PRObst – AI Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-ai_addon',
                 'slug'        => 'desi-pet-shower-ai_addon',
             ),
             'desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php' => array(
-                'name'        => 'DPS by PRObst – Backup Add-on',
+                'name'        => 'desi.pet by PRObst – Backup Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-backup_addon',
                 'slug'        => 'desi-pet-shower-backup_addon',
             ),
             'desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php' => array(
-                'name'        => 'DPS by PRObst – Client Portal Add-on',
+                'name'        => 'desi.pet by PRObst – Client Portal Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-client-portal_addon',
                 'slug'        => 'desi-pet-shower-client-portal_addon',
             ),
             'desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php' => array(
-                'name'        => 'DPS by PRObst – Communications Add-on',
+                'name'        => 'desi.pet by PRObst – Communications Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-communications_addon',
                 'slug'        => 'desi-pet-shower-communications_addon',
             ),
             'desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php' => array(
-                'name'        => 'DPS by PRObst – Financeiro Add-on',
+                'name'        => 'desi.pet by PRObst – Financeiro Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-finance_addon',
                 'slug'        => 'desi-pet-shower-finance_addon',
             ),
             'desi-pet-shower-groomers_addon/desi-pet-shower-groomers-addon.php' => array(
-                'name'        => 'DPS by PRObst – Groomers Add-on',
+                'name'        => 'desi.pet by PRObst – Groomers Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-groomers_addon',
                 'slug'        => 'desi-pet-shower-groomers_addon',
             ),
             'desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php' => array(
-                'name'        => 'DPS by PRObst – Loyalty Add-on',
+                'name'        => 'desi.pet by PRObst – Loyalty Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-loyalty_addon',
                 'slug'        => 'desi-pet-shower-loyalty_addon',
             ),
             'desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php' => array(
-                'name'        => 'DPS by PRObst – Payment Add-on',
+                'name'        => 'desi.pet by PRObst – Payment Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-payment_addon',
                 'slug'        => 'desi-pet-shower-payment_addon',
             ),
             'desi-pet-shower-push_addon/desi-pet-shower-push-addon.php' => array(
-                'name'        => 'DPS by PRObst – Push Add-on',
+                'name'        => 'desi.pet by PRObst – Push Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-push_addon',
                 'slug'        => 'desi-pet-shower-push_addon',
             ),
             'desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php' => array(
-                'name'        => 'DPS by PRObst – Registration Add-on',
+                'name'        => 'desi.pet by PRObst – Registration Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-registration_addon',
                 'slug'        => 'desi-pet-shower-registration_addon',
             ),
             'desi-pet-shower-services_addon/desi-pet-shower-services.php' => array(
-                'name'        => 'DPS by PRObst – Services Add-on',
+                'name'        => 'desi.pet by PRObst – Services Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-services_addon',
                 'slug'        => 'desi-pet-shower-services_addon',
             ),
             'desi-pet-shower-stats_addon/desi-pet-shower-stats-addon.php' => array(
-                'name'        => 'DPS by PRObst – Stats Add-on',
+                'name'        => 'desi.pet by PRObst – Stats Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-stats_addon',
                 'slug'        => 'desi-pet-shower-stats_addon',
             ),
             'desi-pet-shower-stock_addon/desi-pet-shower-stock.php' => array(
-                'name'        => 'DPS by PRObst – Stock Add-on',
+                'name'        => 'desi.pet by PRObst – Stock Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-stock_addon',
                 'slug'        => 'desi-pet-shower-stock_addon',
             ),
             'desi-pet-shower-subscription_addon/desi-pet-shower-subscription.php' => array(
-                'name'        => 'DPS by PRObst – Subscription Add-on',
+                'name'        => 'desi.pet by PRObst – Subscription Add-on',
                 'repo_path'   => 'add-ons/desi-pet-shower-subscription_addon',
                 'slug'        => 'desi-pet-shower-subscription_addon',
             ),
@@ -519,7 +519,7 @@ class DPS_GitHub_Updater {
         if ( $dps_updates > 0 ) {
             printf(
                 '<div class="notice notice-info is-dismissible">
-                    <p><strong>DPS by PRObst:</strong> %s</p>
+                    <p><strong>desi.pet by PRObst:</strong> %s</p>
                 </div>',
                 sprintf(
                     /* translators: %d: number of updates */

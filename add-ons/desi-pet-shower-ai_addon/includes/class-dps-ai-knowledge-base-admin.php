@@ -54,7 +54,7 @@ class DPS_AI_Knowledge_Base_Admin {
 	/**
 	 * Registra página administrativa.
 	 * 
-		 * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+		 * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
 		 * Também acessível pelo hub em dps-ai-hub (aba "Base de Conhecimento").
 		 */
 		public function register_admin_page() {

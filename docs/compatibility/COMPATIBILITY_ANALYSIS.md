@@ -1,11 +1,11 @@
-# Análise de Compatibilidade DPS by PRObst
+# Análise de Compatibilidade desi.pet by PRObst
 
 **Data da análise:** Dezembro 2024  
 **Versão do sistema:** 1.0.1 (plugin base)
 
 ## Resumo Executivo
 
-O sistema DPS by PRObst foi analisado quanto à compatibilidade com:
+O sistema desi.pet by PRObst foi analisado quanto à compatibilidade com:
 - **PHP 8.3+** (incluindo futuro PHP 8.4)
 - **WordPress 6.9**
 - **Tema Astra**

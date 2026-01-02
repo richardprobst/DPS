@@ -1,9 +1,9 @@
-# DPS by PRObst — CHANGELOG
+# desi.pet by PRObst — CHANGELOG
 
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
-Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do DPS by PRObst. Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
+Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do desi.pet by PRObst. Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
 
 ## Relação com outros documentos
 
@@ -81,6 +81,24 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Changed (Alterado)
+
+**Renomeação do Sistema - desi.pet by PRObst**
+
+- **Rebranding completo**: O sistema foi renomeado de "DPS by PRObst" para "desi.pet by PRObst" em todas as interfaces visíveis ao usuário.
+- **Plugin Names atualizados**: Todos os 16 plugins (1 base + 15 add-ons) tiveram seus headers "Plugin Name" atualizados para refletir o novo nome.
+- **Menu administrativo**: O menu principal do WordPress agora exibe "desi.pet by PRObst" em vez de "DPS by PRObst".
+- **Comunicações e e-mails**: Todos os templates de e-mail, mensagens do portal e notificações foram atualizados para usar o novo nome.
+- **Documentação**: README.md, AGENTS.md, ANALYSIS.md, CHANGELOG.md e toda a documentação em `/docs` foram atualizados.
+- **Prompts de IA**: System prompts do AI Add-on foram atualizados para refletir o novo nome do sistema.
+- **IMPORTANTE - Integridade mantida**: Para garantir a estabilidade do sistema, os seguintes elementos NÃO foram alterados:
+  - Slugs internos (ex: `desi-pet-shower`, `dps-*`)
+  - Prefixos de código (`dps_`, `DPS_`)
+  - Text domains para internacionalização
+  - Nomes de Custom Post Types e tabelas de banco de dados
+  - Nomes de arquivos e pastas
+  - Hooks e filtros existentes
+
 #### Added (Adicionado)
 
 **Client Portal Add-on (v2.4.3) - Auto-envio de Link de Acesso por E-mail**
@@ -109,7 +127,7 @@ Antes de criar uma nova versão oficial:
 
 **Base Plugin (v1.1.0) - Gerenciador de Add-ons**
 
-- **Gerenciador centralizado de add-ons**: Nova página administrativa (DPS by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
+- **Gerenciador centralizado de add-ons**: Nova página administrativa (desi.pet by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
 - **Resolução automática de dependências**: Sistema ordena add-ons por suas dependências e ativa na ordem correta automaticamente.
 - **Visualização de ordem de ativação**: Painel exibe ordem recomendada de ativação baseada nas dependências de cada add-on.
 - **Ativação/desativação em lote**: Seleção múltipla de add-ons com ativação respeitando ordem de dependências.
@@ -185,7 +203,7 @@ Antes de criar uma nova versão oficial:
 
 **Push Add-on (v1.2.0) - Melhorias de Interface e Correções**
 
-- **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações" (antes estava oculto).
+- **Menu admin visível**: Menu agora registrado sob "desi.pet by PRObst > Notificações" (antes estava oculto).
 - **Botões de teste de relatórios**: Botões "Enviar Teste" para cada tipo de relatório (Agenda, Financeiro, Semanal).
 - **Botão de teste de conexão Telegram**: Valida configuração e envia mensagem de teste.
 - **AJAX handlers**: Novos handlers `dps_push_test_report` e `dps_push_test_telegram` para testes via AJAX.
@@ -1336,7 +1354,7 @@ Antes de criar uma nova versão oficial:
     - Mudanças de status (`dps_appointment_status_changed`)
     - Reagendamentos (`dps_appointment_rescheduled`)
   - **Interface administrativa**:
-    - Página de configurações em DPS by PRObst > Push Notifications
+    - Página de configurações em desi.pet by PRObst > Push Notifications
     - Indicador de status com cores (inscrito/não inscrito/negado)
     - Botão para ativar notificações no navegador atual
     - Botão para enviar notificação de teste
@@ -1605,7 +1623,7 @@ Antes de criar uma nova versão oficial:
   - Constante padrão `TEAM_PHONE = '5515991606299'` (+55 15 99160-6299)
 - **Configuração de WhatsApp**: Campo "Número do WhatsApp da Equipe" nas configurações de Comunicações
   - Option `dps_whatsapp_number` para armazenar número da equipe (padrão: +55 15 99160-6299)
-  - Número configurável centralmente em Admin → DPS by PRObst → Comunicações
+  - Número configurável centralmente em Admin → desi.pet by PRObst → Comunicações
   - Suporte a filtro `dps_team_whatsapp_number` para customização programática
 - **Plugin Base**: Nova opção "Agendamento Passado" no formulário de agendamentos
   - Adicionada terceira opção de tipo de agendamento para registrar atendimentos já realizados
@@ -1618,7 +1636,7 @@ Antes de criar uma nova versão oficial:
   - TaxiDog e Tosa ocultados automaticamente para agendamentos passados (não aplicável)
   - **Impacto**: Permite registrar no sistema atendimentos realizados anteriormente e controlar pagamentos pendentes
 - **Client Portal Add-on (v2.2.0)**: Menu administrativo e tokens permanentes
-  - Adicionado menu "Portal do Cliente" sob "DPS by PRObst" com dois submenus:
+  - Adicionado menu "Portal do Cliente" sob "desi.pet by PRObst" com dois submenus:
     - "Portal do Cliente": configurações gerais do portal
     - "Logins de Clientes": gerenciamento de tokens de acesso
   - Implementado suporte a tokens permanentes (válidos até revogação manual)
@@ -1759,15 +1777,15 @@ Antes de criar uma nova versão oficial:
   - Atualizada mensagem de erro de login para refletir que não apenas administradores podem acessar
   - Adicionada documentação explicando modelo de permissões: painel visível para qualquer capability DPS, mas ações protegidas individualmente
 - **Menus Administrativos**: Corrigido registro de menus em add-ons
-  - Backup Add-on: submenu agora aparece corretamente sob "DPS by PRObst" (corrigida ordem de carregamento)
-  - Loyalty Add-on: menus agora aparecem sob "DPS by PRObst" em vez de criar menu próprio separado
-  - Logs do Sistema: migrado de menu separado para submenu sob "DPS by PRObst" (melhor organização)
-  - Mensagens do Portal: migrado de menu separado para submenu sob "DPS by PRObst" (CPT com show_in_menu)
+  - Backup Add-on: submenu agora aparece corretamente sob "desi.pet by PRObst" (corrigida ordem de carregamento)
+  - Loyalty Add-on: menus agora aparecem sob "desi.pet by PRObst" em vez de criar menu próprio separado
+  - Logs do Sistema: migrado de menu separado para submenu sob "desi.pet by PRObst" (melhor organização)
+  - Mensagens do Portal: migrado de menu separado para submenu sob "desi.pet by PRObst" (CPT com show_in_menu)
   - Cadastro Público renomeado para "Formulário de Cadastro" (nome mais intuitivo)
   - Todos os add-ons com menus agora usam prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe
   - Estrutura de menus documentada em `ANALYSIS.md` na seção "Estrutura de Menus Administrativos"
   - Adicionadas diretrizes de nomenclatura para melhorar usabilidade (nomes descritivos, sem prefixos redundantes)
-  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "DPS by PRObst" para facilitar gerenciamento
+  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "desi.pet by PRObst" para facilitar gerenciamento
 - **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
   - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
   - Ajustado tamanho de inputs e selects para mobile (`padding: 8px` em ≤768px, `10px 8px` em ≤480px)

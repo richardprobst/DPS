@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Communications Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Communications Add-on
  *
  * Remove options de configuração de comunicações e cron jobs.
  *

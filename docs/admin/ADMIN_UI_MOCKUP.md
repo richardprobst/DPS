@@ -8,7 +8,7 @@
 ├─────────────────────────────────┤
 │ 📊 Dashboard                     │
 │                                  │
-│ 🐾 DPS by PRObst              │ ← Menu principal do DPS
+│ 🐾 desi.pet by PRObst              │ ← Menu principal do DPS
 │                                  │
 │ 👥 Clientes                 NEW! │ ← dps_cliente (dashicons-groups)
 │   ├─ Todos os Clientes           │

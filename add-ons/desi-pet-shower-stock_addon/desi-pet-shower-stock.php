@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Estoque Add-on
+ * Plugin Name:       desi.pet by PRObst – Estoque Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle de estoque de insumos. Gerencie produtos, movimentações e baixas automáticas por atendimento.
  * Version:           0.1.0
@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_stock_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Estoque requer o plugin base DPS by PRObst para funcionar.', 'dps-stock-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-stock-addon' );
             echo '</p></div>';
         } );
         return false;

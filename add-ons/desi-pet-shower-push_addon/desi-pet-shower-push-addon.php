@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Push Notifications Add-on
+ * Plugin Name:       desi.pet by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
  * Version:           1.2.0
@@ -20,13 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  */
 function dps_push_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Push Notifications requer o plugin base DPS by PRObst para funcionar.', 'dps-push-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-push-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -140,14 +140,14 @@ class DPS_Push_Addon {
     /**
      * Registra submenu admin para Push Notifications.
      * 
-     * Registra submenu sob o menu principal "DPS by PRObst".
+     * Registra submenu sob o menu principal "desi.pet by PRObst".
      *
      * @since 1.0.0
-     * @since 1.2.0 Menu agora visível sob "DPS by PRObst" (antes estava oculto).
+     * @since 1.2.0 Menu agora visível sob "desi.pet by PRObst" (antes estava oculto).
      */
     public function register_admin_menu() {
         add_submenu_page(
-            'desi-pet-shower', // Menu pai: DPS by PRObst.
+            'desi-pet-shower', // Menu pai: desi.pet by PRObst.
             __( 'Notificações', 'dps-push-addon' ),
             __( 'Notificações', 'dps-push-addon' ),
             'manage_options',
@@ -403,7 +403,7 @@ class DPS_Push_Addon {
 
         $test_message = sprintf(
             /* translators: %s: blog name */
-            __( '🔔 Teste de conexão do DPS by PRObst (%s). Conexão funcionando!', 'dps-push-addon' ),
+            __( '🔔 Teste de conexão do desi.pet by PRObst (%s). Conexão funcionando!', 'dps-push-addon' ),
             get_bloginfo( 'name' )
         );
 

@@ -13,7 +13,7 @@ Este guia ensina como gerar e enviar links de acesso ao Portal do Cliente para s
 ### 1. Acessar o Gerenciamento de Logins
 
 1. Faça login no painel administrativo do WordPress
-2. No menu lateral, clique em **DPS by PRObst**
+2. No menu lateral, clique em **desi.pet by PRObst**
 3. Selecione **Logins de Clientes**
 
 Ou acesse diretamente: `https://seusite.com/wp-admin/admin.php?page=dps-client-logins`

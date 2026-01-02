@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Stats Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Stats Add-on
  *
  * Remove transients de cache de estatísticas e options.
  *

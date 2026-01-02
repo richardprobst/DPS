@@ -2,7 +2,7 @@
 
 ## Resumo das Correções
 
-Este documento apresenta as correções de segurança implementadas no Finance Add-on do DPS by PRObst, conforme solicitado.
+Este documento apresenta as correções de segurança implementadas no Finance Add-on do desi.pet by PRObst, conforme solicitado.
 
 **Data da Revisão**: 2025-11-23  
 **Arquivos Modificados**:

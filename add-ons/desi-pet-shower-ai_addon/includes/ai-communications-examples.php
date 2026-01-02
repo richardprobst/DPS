@@ -322,7 +322,7 @@ function example_programmatic_usage() {
         error_log( 'E-mail sugerido - Assunto: ' . $subject );
     } else {
         // IA indisponível, usar template padrão
-        $subject = 'Confirmação de Agendamento - DPS by PRObst';
+        $subject = 'Confirmação de Agendamento - desi.pet by PRObst';
         $body    = sprintf(
             "Olá %s,\n\nSeu agendamento para %s está confirmado!\n\nData: %s\nHora: %s\nServiços: %s",
             $context['client_name'],

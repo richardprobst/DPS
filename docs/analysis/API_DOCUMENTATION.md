@@ -1,6 +1,6 @@
 # Documentação das APIs do DPS
 
-Este documento descreve todas as APIs implementadas no sistema DPS by PRObst (DPS), seus propósitos, métodos públicos, endpoints AJAX e endpoints REST.
+Este documento descreve todas as APIs implementadas no sistema desi.pet by PRObst (DPS), seus propósitos, métodos públicos, endpoints AJAX e endpoints REST.
 
 ---
 

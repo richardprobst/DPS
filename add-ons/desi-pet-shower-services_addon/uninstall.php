@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Services Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Services Add-on
  *
  * Remove CPT de serviços e post meta relacionado.
  *

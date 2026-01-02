@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Helper centralizado para logs do DPS by PRObst.
+ * Helper centralizado para logs do desi.pet by PRObst.
  */
 class DPS_Logger {
 

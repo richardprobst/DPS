@@ -1,4 +1,4 @@
-# DPS by PRObst – Estatísticas Add-on
+# desi.pet by PRObst – Estatísticas Add-on
 
 Dashboard visual de métricas operacionais e financeiras do sistema.
 
@@ -50,7 +50,7 @@ add-ons/desi-pet-shower-stats_addon/
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
+- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

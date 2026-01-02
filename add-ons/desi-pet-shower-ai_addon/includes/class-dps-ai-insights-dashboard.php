@@ -53,7 +53,7 @@ class DPS_AI_Insights_Dashboard {
     /**
      * Registra a página de insights no menu admin.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-ai-hub (aba "Insights").
      */
     public function register_menu() {

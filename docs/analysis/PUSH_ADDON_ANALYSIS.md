@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-O **Push Notifications Add-on** é um add-on do DPS by PRObst para envio de notificações automáticas via e-mail e Telegram para a equipe administrativa. Gerencia lembretes de agendamentos, relatórios financeiros diários e alertas de pets inativos.
+O **Push Notifications Add-on** é um add-on do desi.pet by PRObst para envio de notificações automáticas via e-mail e Telegram para a equipe administrativa. Gerencia lembretes de agendamentos, relatórios financeiros diários e alertas de pets inativos.
 
 ### Pontos Fortes
 - ✅ Implementação correta de cron jobs com limpeza na desativação
@@ -71,7 +71,7 @@ O **Push Notifications Add-on** é um add-on do DPS by PRObst para envio de noti
 ### 1.2 Fluxo de Uso Atual (v1.1.0)
 
 ```
-1. Admin acessa menu "DPS by PRObst > Notificações"
+1. Admin acessa menu "desi.pet by PRObst > Notificações"
    └── Visualiza status card com próximos envios
    └── Habilita/desabilita tipos de notificação
    └── Configura destinatários (emails separados por vírgula)

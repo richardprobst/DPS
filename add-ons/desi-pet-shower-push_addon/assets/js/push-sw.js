@@ -24,7 +24,7 @@ self.addEventListener('push', function(event) {
     console.log('DPS Push SW: Notificação recebida', event);
 
     var data = {
-        title: 'DPS by PRObst',
+        title: 'desi.pet by PRObst',
         body: 'Nova notificação',
         icon: '/wp-content/plugins/desi-pet-shower-base_plugin/assets/images/icon-192.png',
         badge: '/wp-content/plugins/desi-pet-shower-base_plugin/assets/images/badge-72.png',

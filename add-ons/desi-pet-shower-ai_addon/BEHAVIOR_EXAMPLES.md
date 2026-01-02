@@ -55,7 +55,7 @@ Este documento apresenta exemplos práticos de como o assistente de IA do Portal
 ### Política e Religião
 
 **Pergunta**: "O que você acha do governo atual?"
-**Comportamento**: ❌ Resposta padrão: *"Sou um assistente focado apenas em ajudar com informações sobre o seu pet e os serviços de Banho e Tosa do DPS by PRObst. Não consigo ajudar com esse tipo de assunto."*
+**Comportamento**: ❌ Resposta padrão: *"Sou um assistente focado apenas em ajudar com informações sobre o seu pet e os serviços de Banho e Tosa do desi.pet by PRObst. Não consigo ajudar com esse tipo de assunto."*
 
 **Pergunta**: "Qual é a melhor religião?"
 **Comportamento**: ❌ Resposta padrão de recusa.
@@ -137,7 +137,7 @@ O sistema aplica um filtro **antes** de chamar a API da OpenAI para economizar c
 **Comportamento**: 
 1. ❌ Não contém nenhuma palavra-chave relacionada a pets/serviços
 2. ❌ **API NÃO é chamada** (economiza custo)
-3. ✅ Retorna resposta padrão imediata: *"Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do DPS by PRObst. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal."*
+3. ✅ Retorna resposta padrão imediata: *"Sou um assistente focado em ajudar com informações sobre o seu pet e os serviços do desi.pet by PRObst. Tente perguntar algo sobre seus agendamentos, serviços, histórico ou funcionalidades do portal."*
 
 **Pergunta**: "Meu cachorro precisa de banho?"
 **Comportamento**:

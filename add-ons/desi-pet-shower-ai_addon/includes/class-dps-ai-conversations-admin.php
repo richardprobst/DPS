@@ -50,7 +50,7 @@ class DPS_AI_Conversations_Admin {
     /**
      * Registra submenu admin para histórico de conversas.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-ai-hub (aba "Conversas").
      */
     public function register_admin_menu() {

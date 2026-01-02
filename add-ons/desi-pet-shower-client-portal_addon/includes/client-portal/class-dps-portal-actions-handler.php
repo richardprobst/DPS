@@ -341,7 +341,7 @@ class DPS_Portal_Actions_Handler {
         $client_name = get_the_title( $client_id );
         $client_mail = get_post_meta( $client_id, 'client_email', true );
         $client_phone = get_post_meta( $client_id, 'client_phone', true );
-        $desc        = $trans->descricao ? $trans->descricao : __( 'Serviço DPS by PRObst', 'dps-client-portal' );
+        $desc        = $trans->descricao ? $trans->descricao : __( 'Serviço desi.pet by PRObst', 'dps-client-portal' );
         $valor       = (float) $trans->valor;
         
         // Usa Finance API se disponível (Fase 2.3)

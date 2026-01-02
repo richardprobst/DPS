@@ -201,8 +201,8 @@
 
 ### Antes da Reorganização
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst
 ├── Logs do Sistema
 ├── Dashboard (Agenda)
 ├── Configurações (Agenda)
@@ -235,8 +235,8 @@ Mensagens do Portal (CPT - fora da hierarquia)
 
 ### Depois da Reorganização
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst (Painel Inicial)
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst (Painel Inicial)
 ├── Agenda
 │   ├── [Dashboard]
 │   ├── [Configurações]

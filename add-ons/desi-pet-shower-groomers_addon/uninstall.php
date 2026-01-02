@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Groomers Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Groomers Add-on
  *
  * Remove role de groomer e post meta relacionado.
  *

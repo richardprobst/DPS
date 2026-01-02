@@ -221,7 +221,7 @@ class DPS_Shortcodes_Admin_Page {
             'summary'         => __( 'Shortcode legado para configurações, mantido apenas para retrocompatibilidade.', 'desi-pet-shower' ),
             'details'         => __( 'Exibe um aviso direcionando para o painel admin do WordPress. Evite usar em novas páginas.', 'desi-pet-shower' ),
             'attributes'      => [],
-            'recommendations' => __( 'Substitua pelo acesso direto ao menu “DPS by PRObst” no admin.', 'desi-pet-shower' ),
+            'recommendations' => __( 'Substitua pelo acesso direto ao menu “desi.pet by PRObst” no admin.', 'desi-pet-shower' ),
             'deprecated'      => true,
             'is_active'       => true,
         ];

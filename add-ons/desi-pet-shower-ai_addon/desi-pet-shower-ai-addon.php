@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – AI Add-on
+ * Plugin Name:       desi.pet by PRObst – AI Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Assistente virtual inteligente para o Portal do Cliente e chat público para visitantes. Responde sobre agendamentos, serviços e histórico. Sugere mensagens para WhatsApp e e-mail. Inclui FAQs, feedback, analytics, agendamento via chat e chat público via shortcode.
  * Version:           1.6.1
@@ -45,14 +45,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_ai_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on AI requer o plugin base DPS by PRObst para funcionar.', 'dps-ai' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-ai' );
             echo '</p></div>';
         } );
         return false;
@@ -402,7 +402,7 @@ class DPS_AI_Addon {
     /**
      * Registra submenu admin para configurações de IA.
      * 
-     * NOTA: Menus exibidos como submenus de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menus exibidos como submenus de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessíveis pelo hub em dps-ai-hub para navegação por abas.
      */
     public function register_admin_menu() {
@@ -548,7 +548,7 @@ class DPS_AI_Addon {
                             <td>
                                 <textarea id="dps_ai_additional_instructions" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[additional_instructions]" rows="6" class="large-text" maxlength="2000"><?php echo esc_textarea( $options['additional_instructions'] ?? '' ); ?></textarea>
                                 <p class="description">
-                                    <?php esc_html_e( 'Use este campo para adicionar regras específicas de como a IA deve se comunicar com os clientes, dentro do contexto de Banho e Tosa e do DPS by PRObst.', 'dps-ai' ); ?>
+                                    <?php esc_html_e( 'Use este campo para adicionar regras específicas de como a IA deve se comunicar com os clientes, dentro do contexto de Banho e Tosa e do desi.pet by PRObst.', 'dps-ai' ); ?>
                                     <br />
                                     <strong><?php esc_html_e( 'Importante:', 'dps-ai' ); ?></strong>
                                     <?php esc_html_e( 'As regras principais de segurança e escopo do sistema já são aplicadas automaticamente. Não remova ou contradiga essas regras.', 'dps-ai' ); ?>

@@ -8,7 +8,7 @@
 
 ## 🎯 OBJETIVO
 
-Realizar auditoria completa da estrutura de menus administrativos do DPS by PRObst para garantir:
+Realizar auditoria completa da estrutura de menus administrativos do desi.pet by PRObst para garantir:
 - Ausência de duplicações
 - Ausência de menus órfãos
 - Consistência de nomenclatura
@@ -68,8 +68,8 @@ O add-on Push Notifications ainda exibia menu standalone visível no painel admi
 ### Menu Principal (10 itens)
 
 ```
-DPS by PRObst
-├── 🏠 DPS by PRObst (Dashboard)
+desi.pet by PRObst
+├── 🏠 desi.pet by PRObst (Dashboard)
 ├── 📅 Agenda (Hub com 3 abas)
 ├── 🤖 Assistente de IA (Hub com 7 abas)
 ├── 👤 Portal do Cliente (Hub com 3 abas)

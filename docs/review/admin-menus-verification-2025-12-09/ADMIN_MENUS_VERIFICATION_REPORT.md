@@ -11,8 +11,8 @@
 
 #### Menu Principal
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst (Dashboard)
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst (Dashboard)
 ├── Agenda
 ├── Assistente de IA
 ├── Portal do Cliente

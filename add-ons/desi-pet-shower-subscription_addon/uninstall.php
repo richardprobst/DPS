@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Subscription Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Subscription Add-on
  *
  * Remove CPT de assinaturas e post meta relacionado.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Client Portal Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Client Portal Add-on
  *
  * Remove tabela de tokens, post meta de autenticação de clientes, options,
  * transients e cron jobs.

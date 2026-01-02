@@ -62,7 +62,7 @@ final class DPS_Calendar_Helper {
         // Monta conteúdo .ics
         $ics  = "BEGIN:VCALENDAR\r\n";
         $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//DPS by PRObst//Portal do Cliente//PT\r\n";
+        $ics .= "PRODID:-//desi.pet by PRObst//Portal do Cliente//PT\r\n";
         $ics .= "CALSCALE:GREGORIAN\r\n";
         $ics .= "METHOD:PUBLISH\r\n";
         $ics .= "BEGIN:VEVENT\r\n";

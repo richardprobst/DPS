@@ -1,4 +1,4 @@
-# Diretrizes de Logging e i18n do DPS by PRObst
+# Diretrizes de Logging e i18n do desi.pet by PRObst
 
 ## Logging centralizado
 - Classe: `DPS_Logger` (`includes/class-dps-logger.php`). Níveis: `info`, `warning`, `error`.

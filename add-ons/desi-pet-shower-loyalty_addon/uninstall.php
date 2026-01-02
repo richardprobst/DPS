@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Loyalty Add-on
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Loyalty Add-on
  *
  * Remove tabela de referrals, CPT de campanhas, post meta de pontos e créditos, e options.
  *

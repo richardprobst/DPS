@@ -279,7 +279,7 @@ class DPS_AI_Prompts {
 	 * @return string Prompt de fallback.
 	 */
 	private static function get_fallback_prompt() {
-		return 'Você é um assistente virtual especializado em Banho e Tosa do sistema DPS by PRObst. ' .
+		return 'Você é um assistente virtual especializado em Banho e Tosa do sistema desi.pet by PRObst. ' .
 		       'Responda apenas sobre serviços de pet shop, agendamentos e funcionalidades do sistema. ' .
 		       'Seja educado e profissional.';
 	}

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Campanhas & Fidelidade
+ * Plugin Name:       desi.pet by PRObst – Campanhas & Fidelidade
  * Plugin URI:        https://www.probst.pro
  * Description:       Programa de fidelidade e campanhas promocionais. Fidelize seus clientes com pontos e benefícios exclusivos.
  * Version:           1.5.0
@@ -23,14 +23,14 @@ define( 'DPS_LOYALTY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_LOYALTY_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_loyalty_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Campanhas & Fidelidade requer o plugin base DPS by PRObst para funcionar.', 'dps-loyalty-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-loyalty-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -439,7 +439,7 @@ class DPS_Loyalty_Addon {
     }
 
     public function register_menu() {
-        // Submenu dentro do menu principal "DPS by PRObst" (criado pelo plugin base)
+        // Submenu dentro do menu principal "desi.pet by PRObst" (criado pelo plugin base)
         add_submenu_page(
             'desi-pet-shower',
             __( 'Campanhas & Fidelidade', 'dps-loyalty-addon' ),

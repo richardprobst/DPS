@@ -1,4 +1,4 @@
-# DPS by PRObst – Base
+# desi.pet by PRObst – Base
 
 Plugin núcleo do sistema de gestão para pet shops.
 
@@ -7,7 +7,7 @@ Plugin núcleo do sistema de gestão para pet shops.
 
 ## Visão geral
 
-O **DPS by PRObst Base** é o plugin principal que fornece a infraestrutura completa para cadastro de clientes, pets e agendamentos. Ele serve como fundação para todo o ecossistema DPS, expondo pontos de extensão (hooks) que permitem aos add-ons complementares adicionar funcionalidades como financeiro, comunicações, portal do cliente, entre outros.
+O **desi.pet by PRObst Base** é o plugin principal que fornece a infraestrutura completa para cadastro de clientes, pets e agendamentos. Ele serve como fundação para todo o ecossistema DPS, expondo pontos de extensão (hooks) que permitem aos add-ons complementares adicionar funcionalidades como financeiro, comunicações, portal do cliente, entre outros.
 
 Este plugin oferece:
 - Sistema de cadastro de clientes e pets com relacionamento 1:N

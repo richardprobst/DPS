@@ -1013,13 +1013,13 @@ final class DPS_Client_Portal {
 
         // Monta assunto e corpo do e-mail
         $subject = sprintf(
-            __( 'Nova mensagem da equipe DPS by PRObst para você', 'dps-client-portal' )
+            __( 'Nova mensagem da equipe desi.pet by PRObst para você', 'dps-client-portal' )
         );
 
         $portal_url = dps_get_portal_page_url();
 
         $body = sprintf(
-            __( "Olá, %s!\n\nA equipe DPS by PRObst enviou uma nova mensagem para você.\n\nAssunto: %s\n\nPara ver a mensagem completa, acesse seu portal:\n%s\n\nEquipe DPS by PRObst", 'dps-client-portal' ),
+            __( "Olá, %s!\n\nA equipe desi.pet by PRObst enviou uma nova mensagem para você.\n\nAssunto: %s\n\nPara ver a mensagem completa, acesse seu portal:\n%s\n\nEquipe desi.pet by PRObst", 'dps-client-portal' ),
             $client_name,
             $post->post_title,
             $portal_url
@@ -2067,7 +2067,7 @@ final class DPS_Client_Portal {
                     $img_url = wp_get_attachment_image_url( $photo_id, 'medium' );
                     if ( $img_url ) {
                         // Link para compartilhar via WhatsApp usando helper centralizado
-                        $share_message = sprintf( __( 'Olha que fofo estou após o banho/tosa no DPS by PRObst! %s', 'dps-client-portal' ), $img_url );
+                        $share_message = sprintf( __( 'Olha que fofo estou após o banho/tosa no desi.pet by PRObst! %s', 'dps-client-portal' ), $img_url );
                         if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
                             $wa_link = DPS_WhatsApp_Helper::get_share_link( $share_message );
                         } else {
@@ -3640,10 +3640,10 @@ Equipe %4$s', 'dps-client-portal' ),
         
         // Monta email (escapando nome do cliente para prevenir injeção)
         $safe_client_name = wp_strip_all_tags( $client_name );
-        $subject = __( 'Seu link de acesso ao Portal do Cliente - DPS by PRObst', 'dps-client-portal' );
+        $subject = __( 'Seu link de acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' );
         
         $body = sprintf(
-            __( "Olá, %s!\n\nVocê solicitou acesso ao Portal do Cliente da DPS by PRObst.\n\nClique no link abaixo para acessar:\n%s\n\n⚠️ Este link é válido por 30 minutos e pode ser usado apenas uma vez.\n\nSe você não solicitou este acesso, ignore este e-mail.\n\nEquipe DPS by PRObst", 'dps-client-portal' ),
+            __( "Olá, %s!\n\nVocê solicitou acesso ao Portal do Cliente da desi.pet by PRObst.\n\nClique no link abaixo para acessar:\n%s\n\n⚠️ Este link é válido por 30 minutos e pode ser usado apenas uma vez.\n\nSe você não solicitou este acesso, ignore este e-mail.\n\nEquipe desi.pet by PRObst", 'dps-client-portal' ),
             $safe_client_name,
             esc_url( $access_url )
         );

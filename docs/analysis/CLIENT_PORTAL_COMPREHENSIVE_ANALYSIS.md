@@ -1,4 +1,4 @@
-# Análise Completa e Profunda do Add-on Cliente Portal - DPS by PRObst
+# Análise Completa e Profunda do Add-on Cliente Portal - desi.pet by PRObst
 
 **Data da Análise:** 07/12/2024  
 **Versão do Add-on:** 2.3.0  
@@ -9,7 +9,7 @@
 
 ## SUMÁRIO EXECUTIVO
 
-O **Cliente Portal Add-on** é um componente essencial do sistema DPS by PRObst que oferece aos clientes finais (donos de pets) uma área autenticada para consultar histórico de atendimentos, visualizar galeria de fotos dos pets, verificar pendências financeiras e atualizar dados cadastrais de forma autônoma.
+O **Cliente Portal Add-on** é um componente essencial do sistema desi.pet by PRObst que oferece aos clientes finais (donos de pets) uma área autenticada para consultar histórico de atendimentos, visualizar galeria de fotos dos pets, verificar pendências financeiras e atualizar dados cadastrais de forma autônoma.
 
 ### Principais Características
 
@@ -1067,7 +1067,7 @@ $wa_link = "https://wa.me/{$whatsapp_number}?text=" . urlencode( $message );
 // Sistema usa wp_mail() ou Communications API
 
 $to = $client_email;
-$subject = "Acesso ao seu Portal - DPS by PRObst";
+$subject = "Acesso ao seu Portal - desi.pet by PRObst";
 $body = "Olá {$client_name}!\n\nClique no link para acessar: {$access_url}\n\n" .
         "Link válido por 30 minutos.\n\nEquipe DPS";
         
@@ -2172,7 +2172,7 @@ FASE 4 (Novas Features)
 
 ### Resumo da Análise
 
-O **Cliente Portal Add-on** é um componente essencial e funcional do sistema DPS by PRObst, oferecendo aos clientes uma área completa de autoatendimento. A arquitetura é sólida, com separação clara de responsabilidades e implementação moderna de autenticação via tokens (magic links).
+O **Cliente Portal Add-on** é um componente essencial e funcional do sistema desi.pet by PRObst, oferecendo aos clientes uma área completa de autoatendimento. A arquitetura é sólida, com separação clara de responsabilidades e implementação moderna de autenticação via tokens (magic links).
 
 **Principais Forças:**
 - ✅ Sistema de autenticação seguro e moderno

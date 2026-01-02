@@ -78,11 +78,11 @@ Durante a implementação automática, houve uma tentativa de editar o arquivo `
 ### Validação Pós-Correção
 ```bash
 # Verificar que o menu não aparece mais
-# Navegar para: wp-admin → DPS by PRObst
+# Navegar para: wp-admin → desi.pet by PRObst
 # Confirmar: "Backup & Restauração" não está na lista
 
 # Verificar acesso via hub
-# Navegar para: DPS by PRObst → Sistema → Aba "Backup"
+# Navegar para: desi.pet by PRObst → Sistema → Aba "Backup"
 # Confirmar: Interface de backup carrega corretamente
 
 # Verificar backward compatibility
@@ -224,7 +224,7 @@ Os documentos de análise originais não foram atualizados para refletir a nova 
 
 **Nova estrutura a documentar:**
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Painel Inicial (desi-pet-shower)
 ├── Agenda (dps-agenda-hub) [3 abas]
 ├── Assistente de IA (dps-ai-hub) [7 abas]
@@ -325,7 +325,7 @@ Capturar cada hub:
 ```bash
 # 1. Ativar todos os add-ons necessários
 # 2. Navegar para wp-admin
-# 3. Expandir menu "DPS by PRObst"
+# 3. Expandir menu "desi.pet by PRObst"
 # 4. Capturar menu completo (antes: se tiver backup, depois: com correção)
 
 # 5. Para cada hub:

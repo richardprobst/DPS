@@ -1,4 +1,4 @@
-# Análise funcional do DPS by PRObst
+# Análise funcional do desi.pet by PRObst
 
 ## Plugin base (`plugin/desi-pet-shower-base_plugin`)
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
@@ -172,7 +172,7 @@ echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
 ```
 
 **Configuração**:
-- Número da equipe configurável em: Admin → DPS by PRObst → Comunicações
+- Número da equipe configurável em: Admin → desi.pet by PRObst → Comunicações
 - Option: `dps_whatsapp_number` (padrão: +55 15 99160-6299)
 - Fallback automático para constante `TEAM_PHONE` se option não existir
 - Filtro disponível: `dps_team_whatsapp_number` para customização programática
@@ -237,7 +237,7 @@ O plugin base inclui um gerenciador de add-ons centralizado (`DPS_Addon_Manager`
 
 **Classe**: `includes/class-dps-addon-manager.php`
 
-**Menu administrativo**: DPS by PRObst → Add-ons (`dps-addons`)
+**Menu administrativo**: desi.pet by PRObst → Add-ons (`dps-addons`)
 
 #### Categorias de Add-ons
 
@@ -495,7 +495,7 @@ Todos os plugins e add-ons do DPS seguem o padrão WordPress de text domains par
 
 ### Estrutura de Menus Administrativos
 
-Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu principal **"DPS by PRObst"** (slug: `desi-pet-shower`) para manter a interface administrativa organizada e unificada.
+Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu principal **"desi.pet by PRObst"** (slug: `desi-pet-shower`) para manter a interface administrativa organizada e unificada.
 
 **Menu Principal** (criado pelo plugin base):
 - Slug: `desi-pet-shower`
@@ -520,7 +520,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 
 **Nomenclatura de Menus - Diretrizes de Usabilidade**:
 - Use nomes curtos e descritivos que indiquem claramente a função
-- Evite prefixos redundantes como "DPS" ou "DPS by PRObst" nos nomes de submenu
+- Evite prefixos redundantes como "DPS" ou "desi.pet by PRObst" nos nomes de submenu
 - Use verbos ou substantivos que descrevam a ação/entidade gerenciada
 - Exemplos de nomes descritivos:
   - ✅ "Logs do Sistema" (indica claramente que são logs técnicos)
@@ -547,9 +547,9 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
 
 **Histórico de correções**:
-- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do DPS by PRObst (CPT com show_in_menu)
+- **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do desi.pet by PRObst (CPT com show_in_menu)
 - **2025-12-01**: Cadastro Público renomeado para "Formulário de Cadastro" (mais intuitivo)
-- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do DPS by PRObst
+- **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do desi.pet by PRObst
 - **2025-11-24**: Adicionado menu administrativo ao Client Portal Add-on (Portal do Cliente e Logins de Clientes)
 - **2024-11-24**: Corrigida prioridade de registro de menus em todos os add-ons (de 10 para 20)
 - **2024-11-24**: Loyalty Add-on migrado de menu próprio (`dps-loyalty-addon`) para submenu unificado (`desi-pet-shower`)
@@ -626,7 +626,7 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
 - Options de histórico (planejado): `dps_backup_history`, `dps_backup_settings`
 
 **Hooks consumidos**:
-- `admin_menu` (prioridade 20): registra submenu sob "DPS by PRObst"
+- `admin_menu` (prioridade 20): registra submenu sob "desi.pet by PRObst"
 - `admin_post_dps_backup_export`: processa exportação de backup
 - `admin_post_dps_backup_import`: processa importação de backup
 
@@ -964,7 +964,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Logs de erro apenas no server (error_log, não expostos ao cliente)
 
 **Interface Administrativa**:
-- Menu: **DPS by PRObst > Assistente de IA**
+- Menu: **desi.pet by PRObst > Assistente de IA**
 - Configurações: ativar/desativar IA, API key, modelo GPT, temperatura, timeout, max_tokens
 - Documentação inline sobre comportamento do assistente
 
@@ -1146,7 +1146,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Emails enviados em formato HTML com headers `Content-Type: text/html; charset=UTF-8`
 - Integração Telegram envia mensagens em texto plano com `parse_mode` HTML
 - Threshold de inatividade configurável via interface admin (padrão: 30 dias)
-- Interface administrativa integrada na página de Notificações sob menu DPS by PRObst
+- Interface administrativa integrada na página de Notificações sob menu desi.pet by PRObst
 - **v1.2.0**: Menu admin visível, botões de teste para relatórios e Telegram, uninstall.php atualizado
 
 **Análise completa**: Consulte `docs/analysis/PUSH_ADDON_ANALYSIS.md` para análise detalhada de código, funcionalidades e melhorias propostas
@@ -1835,7 +1835,7 @@ Nenhuma tabela própria. Todas as configurações são armazenadas como options 
 
 ### Interface Administrativa
 
-**Menu Principal:** DPS by PRObst → White Label
+**Menu Principal:** desi.pet by PRObst → White Label
 
 **Abas de Configuração:**
 1. **Branding** - Logo, cores, nome da marca, contatos
@@ -2103,7 +2103,7 @@ Gera sugestão de e-mail via AJAX.
 {
     success: true,
     data: {
-        subject: 'Lembrete de Agendamento - DPS by PRObst',
+        subject: 'Lembrete de Agendamento - desi.pet by PRObst',
         body: 'Olá João,\n\nEste é um lembrete...'
     }
 }

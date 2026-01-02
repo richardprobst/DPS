@@ -1,10 +1,10 @@
-# Análise de Refatoração do Código - DPS by PRObst
+# Análise de Refatoração do Código - desi.pet by PRObst
 
 ## Data: 2025-11-21
 
 ## Sumário Executivo
 
-Este documento apresenta uma análise detalhada do código do projeto DPS by PRObst, identificando:
+Este documento apresenta uma análise detalhada do código do projeto desi.pet by PRObst, identificando:
 1. Funções muito grandes ou complexas
 2. Nomes de funções, métodos e variáveis pouco descritivos
 3. Trechos duplicados que poderiam virar funções reutilizáveis
@@ -1115,7 +1115,7 @@ if ( $status === DPS_Appointment_Status::FINISHED ) { }
 
 ## Conclusão
 
-Este documento identificou oportunidades significativas de melhoria no código do projeto DPS by PRObst. As refatorações propostas:
+Este documento identificou oportunidades significativas de melhoria no código do projeto desi.pet by PRObst. As refatorações propostas:
 
 1. **Reduzem a complexidade** de funções muito grandes
 2. **Melhoram a legibilidade** com nomes mais descritivos

@@ -1,4 +1,4 @@
-# DPS by PRObst – Comunicações Add-on
+# desi.pet by PRObst – Comunicações Add-on
 
 Gerenciamento de comunicações automatizadas via WhatsApp, SMS e e-mail.
 
@@ -26,7 +26,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
+- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

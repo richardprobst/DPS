@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Groomers Add-on
+ * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
  * Version:           1.8.0
@@ -24,14 +24,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-token-man
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-groomer-session-manager.php';
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_groomers_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Groomers requer o plugin base DPS by PRObst para funcionar.', 'dps-groomers-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-groomers-addon' );
             echo '</p></div>';
         } );
         return false;

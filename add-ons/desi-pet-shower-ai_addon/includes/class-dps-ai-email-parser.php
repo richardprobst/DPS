@@ -87,7 +87,7 @@ class DPS_AI_Email_Parser {
 		$options = wp_parse_args(
 			$options,
 			[
-				'default_subject'    => 'Comunicado do DPS by PRObst',
+				'default_subject'    => 'Comunicado do desi.pet by PRObst',
 				'max_subject_length' => 200,
 				'strip_html'         => false,
 				'format_hint'        => null,
@@ -413,7 +413,7 @@ class DPS_AI_Email_Parser {
 
 		// Se body vazio, usa mensagem de fallback
 		if ( empty( $body ) ) {
-			$body = 'Olá! Esta é uma comunicação do DPS by PRObst.';
+			$body = 'Olá! Esta é uma comunicação do desi.pet by PRObst.';
 			dps_ai_log_warning( 'Email Parser: Using default body (original was empty)' );
 		}
 

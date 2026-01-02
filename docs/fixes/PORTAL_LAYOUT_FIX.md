@@ -10,7 +10,7 @@ Este documento registra as correções aplicadas ao Portal do Cliente para resol
 
 ### Problema
 
-O card "Portal do Cliente – DPS by PRObst" aparecia ANTES do cabeçalho do tema (menu principal), quebrando completamente a estrutura visual da página `/portal-do-cliente/`.
+O card "Portal do Cliente – desi.pet by PRObst" aparecia ANTES do cabeçalho do tema (menu principal), quebrando completamente a estrutura visual da página `/portal-do-cliente/`.
 
 **Sintomas:**
 - O box do "Portal do Cliente" aparecia visualmente ANTES do conteúdo da página
@@ -123,7 +123,7 @@ public function render_portal_shortcode() {
 O Portal do Cliente estava com layout quebrado no front-end quando acessado via página `/portal-do-cliente/`.
 
 **Sintomas:**
-- O card do "Portal do Cliente – DPS by PRObst" aparecia à esquerda
+- O card do "Portal do Cliente – desi.pet by PRObst" aparecia à esquerda
 - O resto da área de conteúdo ficava branca
 - O menu principal do site (tema YOOtheme) aparecia lá embaixo, como se a estrutura da página estivesse quebrada
 
@@ -137,7 +137,7 @@ O template `add-ons/desi-pet-shower-client-portal_addon/templates/portal-access.
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal do Cliente – DPS by PRObst</title>
+    <title>Portal do Cliente – desi.pet by PRObst</title>
     <?php wp_head(); ?>
 </head>
 <body class="dps-portal-access-page">
@@ -242,7 +242,7 @@ body.dps-portal-access-page {
 
 ### 3. Ajustar hierarquia de títulos
 
-- Mudado de `<h2>` para `<h1>` no título principal "Portal do Cliente – DPS by PRObst"
+- Mudado de `<h2>` para `<h1>` no título principal "Portal do Cliente – desi.pet by PRObst"
 - Mantém semântica correta pois é o título principal do conteúdo do shortcode
 
 ## Arquivos Modificados

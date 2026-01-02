@@ -169,7 +169,7 @@ Após esta mudança, os CPTs aparecerão na barra lateral do WordPress:
 
 ```
 Dashboard
-├── DPS by PRObst (menu principal)
+├── desi.pet by PRObst (menu principal)
 ├── Clientes          ← NOVO (ícone: dashicons-groups)
 ├── Pets              ← NOVO (ícone: dashicons-pets)
 ├── Agendamentos      ← NOVO (ícone: dashicons-calendar-alt)

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Agenda Add-on
+ * Plugin Name:       desi.pet by PRObst – Agenda Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cria página automática com agenda de atendimentos. Visualize e gerencie compromissos de forma prática.
  * Version:           1.1.0
@@ -20,14 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_agenda_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Agenda requer o plugin base DPS by PRObst para funcionar.', 'dps-agenda-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-agenda-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -319,7 +319,7 @@ class DPS_Agenda_Addon {
     /**
      * FASE 4: Registra página de Dashboard no admin.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-agenda-hub (aba "Dashboard").
      *
      * @since 1.3.0
@@ -383,7 +383,7 @@ class DPS_Agenda_Addon {
     /**
      * FASE 5: Registra página de Configurações no admin.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-agenda-hub (aba "Configurações").
      *
      * @since 1.5.0
@@ -2218,7 +2218,7 @@ class DPS_Agenda_Addon {
                 $time    = $time ? $time : '';
                 $subject = sprintf( __( 'Lembrete de agendamento para %s', 'dps-agenda-addon' ), $client_name );
                 $message = sprintf(
-                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\nDPS by PRObst', 'dps-agenda-addon' ),
+                    __( 'Olá %s,\n\nEste é um lembrete do agendamento para %s no dia %s às %s.\n\nEstamos aguardando você!\n\nAtenciosamente,\ndesi.pet by PRObst', 'dps-agenda-addon' ),
                     $client_name,
                     $pet_name ? $pet_name : __( 'seu pet', 'dps-agenda-addon' ),
                     date_i18n( 'd-m-Y', strtotime( $date ) ),

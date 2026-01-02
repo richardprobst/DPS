@@ -1,4 +1,4 @@
-# DPS by PRObst – Estoque Add-on
+# desi.pet by PRObst – Estoque Add-on
 
 Controle de estoque de insumos com baixa automática em atendimentos.
 
@@ -29,7 +29,7 @@ Funcionalidades principais:
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
+- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior
 

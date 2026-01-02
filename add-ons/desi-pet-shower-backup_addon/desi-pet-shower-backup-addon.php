@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Backup & Restauração Add-on
+ * Plugin Name:       desi.pet by PRObst – Backup & Restauração Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Gere backups completos dos dados do sistema e restaure em outro ambiente. Exportação e importação simplificadas.
  * Version:           1.1.0
@@ -30,14 +30,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-exporter.p
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-dps-backup-comparator.php';
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_backup_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Backup & Restauração requer o plugin base DPS by PRObst para funcionar.', 'dps-backup-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-backup-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -64,7 +64,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
     /**
      * Classe principal do add-on de Backup & Restauração.
      *
-     * Permite exportar e importar dados completos do sistema DPS by PRObst
+     * Permite exportar e importar dados completos do sistema desi.pet by PRObst
      * em formato JSON, incluindo clientes, pets, agendamentos, transações e arquivos.
      *
      * @package    DesiPetShower
@@ -169,7 +169,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         /**
      * Registra submenu admin para backup & restauração.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-system-hub (aba "Backup").
      *
      * @since 1.0.0
@@ -213,7 +213,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             wp_localize_script( 'dps-backup-addon', 'dpsBackupL10n', [
                 'nonce'            => wp_create_nonce( 'dps_backup_ajax' ),
-                'confirmRestore'   => __( 'ATENÇÃO: Esta ação irá substituir todos os dados do DPS by PRObst. Deseja continuar?', 'dps-backup-addon' ),
+                'confirmRestore'   => __( 'ATENÇÃO: Esta ação irá substituir todos os dados do desi.pet by PRObst. Deseja continuar?', 'dps-backup-addon' ),
                 'confirmDelete'    => __( 'Tem certeza que deseja excluir este backup?', 'dps-backup-addon' ),
                 'confirmRequired'  => __( 'Você precisa confirmar que entende as consequências da restauração.', 'dps-backup-addon' ),
                 'comparing'        => __( 'Comparando...', 'dps-backup-addon' ),
@@ -255,7 +255,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             <div class="wrap dps-backup-wrap">
                 <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
                 
-                <p class="page-description"><?php esc_html_e( 'Gerencie backups completos do DPS by PRObst: exporte, restaure, agende e compare versões.', 'dps-backup-addon' ); ?></p>
+                <p class="page-description"><?php esc_html_e( 'Gerencie backups completos do desi.pet by PRObst: exporte, restaure, agende e compare versões.', 'dps-backup-addon' ); ?></p>
                 
                 <?php if ( $status && $message ) : ?>
                     <div class="notice notice-<?php echo ( 'success' === $status ) ? 'success' : 'error'; ?> is-dismissible">
@@ -327,7 +327,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                             
                             <div class="dps-danger-box">
                                 <span class="dashicons dashicons-warning"></span>
-                                <p><?php esc_html_e( 'ATENÇÃO: A restauração irá substituir TODOS os dados atuais do DPS by PRObst. Esta ação não pode ser desfeita.', 'dps-backup-addon' ); ?></p>
+                                <p><?php esc_html_e( 'ATENÇÃO: A restauração irá substituir TODOS os dados atuais do desi.pet by PRObst. Esta ação não pode ser desfeita.', 'dps-backup-addon' ); ?></p>
                             </div>
                             
                             <p>
@@ -859,7 +859,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function validate_import_payload( $data ) {
             if ( empty( $data['plugin'] ) || 'desi-pet-shower' !== $data['plugin'] ) {
-                return new WP_Error( 'dps_backup_plugin', __( 'O arquivo não parece ser um backup do DPS by PRObst.', 'dps-backup-addon' ) );
+                return new WP_Error( 'dps_backup_plugin', __( 'O arquivo não parece ser um backup do desi.pet by PRObst.', 'dps-backup-addon' ) );
             }
 
             $schema_version = isset( $data['schema_version'] ) ? absint( $data['schema_version'] ) : 0;

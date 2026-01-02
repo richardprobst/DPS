@@ -8,10 +8,10 @@
 
 ## Sumário Executivo
 
-Este documento apresenta um mapeamento completo da organização atual dos menus administrativos do sistema DPS by PRObst. O sistema possui **1 menu principal** e **21 submenus** distribuídos entre o plugin base e 17 add-ons ativos.
+Este documento apresenta um mapeamento completo da organização atual dos menus administrativos do sistema desi.pet by PRObst. O sistema possui **1 menu principal** e **21 submenus** distribuídos entre o plugin base e 17 add-ons ativos.
 
 ### Estatísticas Gerais
-- **Menu Principal:** 1 (DPS by PRObst)
+- **Menu Principal:** 1 (desi.pet by PRObst)
 - **Submenus Diretos:** 21
 - **Custom Post Types visíveis:** 5 (Clientes, Pets, Agendamentos, Base de Conhecimento IA, Mensagens do Portal)
 - **Add-ons com configuração:** 14
@@ -19,11 +19,11 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 
 ---
 
-## 1. PLUGIN BASE - DPS by PRObst
+## 1. PLUGIN BASE - desi.pet by PRObst
 
 ### Menu Principal
-- **Page Title:** DPS by PRObst
-- **Menu Title:** DPS by PRObst
+- **Page Title:** desi.pet by PRObst
+- **Menu Title:** desi.pet by PRObst
 - **Slug:** `desi-pet-shower`
 - **Parent Slug:** (nenhum - menu de topo)
 - **Capability:** `manage_options`
@@ -460,8 +460,8 @@ Os seguintes add-ons **NÃO** possuem menu próprio no admin:
 
 #### Estrutura Hierárquica Atual:
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst (Página inicial)
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst (Página inicial)
 ├── Logs do Sistema
 ├── Dashboard (Agenda)
 ├── Configurações (Agenda)
@@ -482,7 +482,7 @@ DPS by PRObst (Menu Principal)
 ├── Backup & Restauração
 └── Debugging
 
-Conhecimento IA (CPT - sob DPS by PRObst)
+Conhecimento IA (CPT - sob desi.pet by PRObst)
 ├── Todos os Artigos
 ├── Adicionar Novo
 └── Categorias de Conhecimento
@@ -574,7 +574,7 @@ Mensagens do Portal (CPT - Menu Independente) ⚠️
 
 ### Estrutura Proposta (Exemplo)
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Painel Inicial
 ├── Agenda (com abas: Dashboard, Configurações, Capacidade)
 ├── Assistente de IA (com abas: Configurações, Analytics, Conversas, Base de Conhecimento, Modo Especialista, Insights)
@@ -597,7 +597,7 @@ DPS by PRObst
 
 | Add-on/Módulo | Nível | Page Title | Menu Title | Slug | Parent Slug | Capability | Arquivo | Função/Linha |
 |---------------|-------|------------|------------|------|-------------|------------|---------|--------------|
-| **Base** | Menu Principal | DPS by PRObst | DPS by PRObst | desi-pet-shower | - | manage_options | plugin/.../desi-pet-shower-base.php | DPS_Base_Plugin::register_admin_menu():167 |
+| **Base** | Menu Principal | desi.pet by PRObst | desi.pet by PRObst | desi-pet-shower | - | manage_options | plugin/.../desi-pet-shower-base.php | DPS_Base_Plugin::register_admin_menu():167 |
 | Base | Submenu | Logs do Sistema | Logs do Sistema | dps-logs | desi-pet-shower | manage_options | plugin/.../class-dps-logs-admin-page.php | DPS_Logs_Admin_Page::register_page():20 |
 | **Agenda** | Submenu | Dashboard da Agenda | Dashboard | dps-agenda-dashboard | desi-pet-shower | manage_options | add-ons/.../desi-pet-shower-agenda-addon.php | DPS_Agenda_Addon::register_dashboard_admin_page():291 |
 | Agenda | Submenu | Configurações da Agenda | Configurações | dps-agenda-settings | desi-pet-shower | manage_options | add-ons/.../desi-pet-shower-agenda-addon.php | DPS_Agenda_Addon::register_settings_admin_page():345 |

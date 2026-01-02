@@ -1,6 +1,6 @@
 {
     "name": "richardprobst/dps-ai-addon",
-    "description": "AI Add-on for DPS by PRObst - WordPress plugin for AI-powered chat and communications",
+    "description": "AI Add-on for desi.pet by PRObst - WordPress plugin for AI-powered chat and communications",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [

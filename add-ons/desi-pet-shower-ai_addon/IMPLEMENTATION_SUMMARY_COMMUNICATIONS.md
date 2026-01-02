@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Implementado assistente inteligente para gerar sugestões de mensagens de WhatsApp e e-mail no DPS by PRObst, seguindo rigorosamente o princípio de **NUNCA ENVIAR AUTOMATICAMENTE**.
+Implementado assistente inteligente para gerar sugestões de mensagens de WhatsApp e e-mail no desi.pet by PRObst, seguindo rigorosamente o princípio de **NUNCA ENVIAR AUTOMATICAMENTE**.
 
 ## Arquitetura
 

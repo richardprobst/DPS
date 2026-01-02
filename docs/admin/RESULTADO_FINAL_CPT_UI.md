@@ -116,7 +116,7 @@ Cada CPT agora mapeia **todas as 7 ações** para sua capability específica:
 ┌─────────────────────────────┐
 │ Dashboard                    │
 │                              │
-│ 🐾 DPS by PRObst          │
+│ 🐾 desi.pet by PRObst          │
 │                              │
 │ 👥 Clientes            ← NOVO│
 │ 🐶 Pets                ← NOVO│
@@ -336,6 +336,6 @@ Implementação **CONCLUÍDA COM SUCESSO** 🎉
 
 ---
 
-**Desenvolvido para:** DPS by PRObst (DPS)
+**Desenvolvido para:** desi.pet by PRObst (DPS)
 **Por:** GitHub Copilot Agent
 **Status:** ✅ PRONTO PARA PRODUÇÃO

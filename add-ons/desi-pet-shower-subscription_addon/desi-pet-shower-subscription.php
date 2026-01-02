@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Assinaturas Add-on
+ * Plugin Name:       desi.pet by PRObst – Assinaturas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Pacotes mensais de banho com frequência semanal ou quinzenal. Agendamentos automáticos e controle de renovação.
  * Version:           1.2.1
@@ -20,14 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_subscription_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Assinaturas requer o plugin base DPS by PRObst para funcionar.', 'dps-subscription-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-subscription-addon' );
             echo '</p></div>';
         } );
         return false;

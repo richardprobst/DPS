@@ -1,6 +1,6 @@
 # 📋 Índice de Documentação - Mapeamento de Menus Administrativos
 
-Esta pasta contém o mapeamento completo da estrutura de menus do painel administrativo do DPS by PRObst.
+Esta pasta contém o mapeamento completo da estrutura de menus do painel administrativo do desi.pet by PRObst.
 
 ## 📄 Documentos Disponíveis
 

@@ -1,8 +1,8 @@
-# Resumo da Refatoração de Código - DPS by PRObst
+# Resumo da Refatoração de Código - desi.pet by PRObst
 
 ## 📋 Resumo Executivo
 
-Este documento resume o trabalho de análise e refatoração realizado no projeto DPS by PRObst, conforme solicitado no issue. O objetivo era identificar e corrigir:
+Este documento resume o trabalho de análise e refatoração realizado no projeto desi.pet by PRObst, conforme solicitado no issue. O objetivo era identificar e corrigir:
 
 1. ✅ Funções muito grandes ou complexas
 2. ✅ Nomes de funções, métodos e variáveis pouco descritivos
@@ -442,7 +442,7 @@ $delete_url = DPS_URL_Builder::build_delete_url( 'client', $client->ID, 'cliente
 
 ## 🏆 Conclusão
 
-Este trabalho estabeleceu uma **base sólida** para melhorias contínuas no código do DPS by PRObst:
+Este trabalho estabeleceu uma **base sólida** para melhorias contínuas no código do desi.pet by PRObst:
 
 - ✅ **4 classes helper** prontas para uso imediato
 - ✅ **35 KB de documentação** com análises e exemplos

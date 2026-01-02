@@ -3,9 +3,9 @@
 ## ANTES da Reorganização (21 itens)
 
 ```
-┌─ DPS by PRObst ───────────────────────────┐
+┌─ desi.pet by PRObst ───────────────────────────┐
 │                                            │
-│  ├─ DPS by PRObst                         │
+│  ├─ desi.pet by PRObst                         │
 │  ├─ Logs do Sistema                       │
 │  ├─ Dashboard (Agenda)                    │
 │  ├─ Configurações (Agenda)                │
@@ -49,9 +49,9 @@ PROBLEMAS:
 ## DEPOIS da Reorganização (10 itens) + Correção Push
 
 ```
-┌─ DPS by PRObst ───────────────────────────┐
+┌─ desi.pet by PRObst ───────────────────────────┐
 │                                            │
-│  🏠 DPS by PRObst (Dashboard)             │
+│  🏠 desi.pet by PRObst (Dashboard)             │
 │     └─ Painel central com métricas        │
 │                                            │
 │  📅 Agenda                                 │
@@ -115,7 +115,7 @@ MELHORIAS:
 
 ### ANTES (menu visível duplicado)
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├─ Integrações
 │  ├─ [Comunicações] ✅ oculto
 │  ├─ [Pagamentos] ✅ oculto
@@ -125,7 +125,7 @@ DPS by PRObst
 
 ### DEPOIS (integração correta)
 ```
-DPS by PRObst
+desi.pet by PRObst
 └─ Integrações
    ├─ [Comunicações] ✅
    ├─ [Pagamentos] ✅
@@ -252,7 +252,7 @@ Usuário admin:
 
 ```
 ┌─────────────────────────────────────────┐
-│  DPS by PRObst - Menu Administrativo    │
+│  desi.pet by PRObst - Menu Administrativo    │
 │  Status: ✅ EXCELENTE                   │
 ├─────────────────────────────────────────┤
 │                                          │

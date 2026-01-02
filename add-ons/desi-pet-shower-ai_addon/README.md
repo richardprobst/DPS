@@ -1,11 +1,11 @@
-# DPS by PRObst – AI Add-on
+# desi.pet by PRObst – AI Add-on
 
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Visão Geral
 
-O **AI Add-on** implementa um assistente virtual inteligente no Portal do Cliente do DPS by PRObst, focado EXCLUSIVAMENTE em responder perguntas sobre:
+O **AI Add-on** implementa um assistente virtual inteligente no Portal do Cliente do desi.pet by PRObst, focado EXCLUSIVAMENTE em responder perguntas sobre:
 
 - Serviços de Banho e Tosa
 - Agendamentos e histórico de atendimentos
@@ -54,7 +54,7 @@ Ative o plugin no WordPress em **Plugins > Plugins Instalados**.
 
 ### 3. Configurar o Assistente
 
-1. No WordPress, vá em **DPS by PRObst > Assistente de IA**
+1. No WordPress, vá em **desi.pet by PRObst > Assistente de IA**
 2. Marque **"Ativar Assistente de IA"**
 3. Cole a **Chave de API da OpenAI**
 4. Escolha o **Modelo GPT**:
@@ -192,7 +192,7 @@ if ( $result['success'] ) {
 
 - **WordPress**: 6.0+
 - **PHP**: 7.4+
-- **Plugin Base**: DPS by PRObst Base Plugin ativo
+- **Plugin Base**: desi.pet by PRObst Base Plugin ativo
 - **Add-on**: Client Portal ativo
 - **Conta OpenAI**: Com créditos e API key válida
 
@@ -260,7 +260,7 @@ O Chat Público é uma funcionalidade que permite visitantes do site (não logad
 
 ### Configuração
 
-1. Acesse **DPS by PRObst > Assistente de IA**
+1. Acesse **desi.pet by PRObst > Assistente de IA**
 2. Na seção **"Chat Público para Visitantes"**, marque "Habilitar Chat Público"
 3. Configure as FAQs personalizadas (uma por linha)
 4. Adicione informações do seu negócio (horários, endereço, formas de pagamento)
@@ -320,4 +320,4 @@ Nenhum filtro exposto atualmente. Sistema é autocontido.
 
 ## Licença
 
-Proprietário. Uso restrito ao sistema DPS by PRObst.
+Proprietário. Uso restrito ao sistema desi.pet by PRObst.

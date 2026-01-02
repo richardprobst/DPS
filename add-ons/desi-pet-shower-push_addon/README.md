@@ -1,4 +1,4 @@
-# DPS by PRObst – Push Notifications Add-on
+# desi.pet by PRObst – Push Notifications Add-on
 
 Notificações push nativas do navegador e relatórios automáticos por email/Telegram para administradores do DPS. Receba alertas em tempo real sobre novos agendamentos, mudanças de status e reagendamentos.
 
@@ -38,7 +38,7 @@ Notificações push nativas do navegador e relatórios automáticos por email/Te
 
 1. Faça upload da pasta `desi-pet-shower-push_addon` para `/wp-content/plugins/`
 2. Ative o plugin no WordPress
-3. Acesse **DPS by PRObst > Notificações**
+3. Acesse **desi.pet by PRObst > Notificações**
 4. Clique em "Ativar Notificações" e permita no navegador
 5. Configure quais eventos devem gerar notificações
 6. Configure destinatários e horários para relatórios por email
@@ -137,7 +137,7 @@ add_filter( 'dps_push_payload', function( $payload, $event_type ) {
 
 ### v1.2.0 (2025-12-17)
 
-- **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações"
+- **Menu admin visível**: Menu agora registrado sob "desi.pet by PRObst > Notificações"
 - **Botões de teste**: Botões "Enviar Teste" para cada tipo de relatório (Agenda, Financeiro, Semanal)
 - **Teste de conexão Telegram**: Valida configuração e envia mensagem de teste
 - **Carregamento de assets otimizado**: CSS/JS carregados apenas em páginas DPS relevantes

@@ -1,13 +1,13 @@
-# DPS by PRObst – Backup & Restauração Add-on
+# desi.pet by PRObst – Backup & Restauração Add-on
 
-Exportação e restauração completa de dados do sistema DPS by PRObst, com suporte a backup seletivo, agendado e diferencial.
+Exportação e restauração completa de dados do sistema desi.pet by PRObst, com suporte a backup seletivo, agendado e diferencial.
 
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
 ## Visão geral
 
-O **Backup & Restauração Add-on** permite aos administradores exportar todo o conteúdo do sistema DPS by PRObst em formato JSON e restaurar esses dados em outro ambiente WordPress. É ideal para migrações, cópias de segurança e testes em ambientes de staging.
+O **Backup & Restauração Add-on** permite aos administradores exportar todo o conteúdo do sistema desi.pet by PRObst em formato JSON e restaurar esses dados em outro ambiente WordPress. É ideal para migrações, cópias de segurança e testes em ambientes de staging.
 
 ### Funcionalidades principais (v1.1.0)
 
@@ -24,7 +24,7 @@ O **Backup & Restauração Add-on** permite aos administradores exportar todo o 
 - Restauração reversa de backups anteriores com mapeamento inteligente de IDs
 - Proteção com nonces e validação de capabilities
 - Transações SQL para garantir atomicidade da restauração
-- Interface administrativa integrada ao menu DPS by PRObst
+- Interface administrativa integrada ao menu desi.pet by PRObst
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
@@ -60,7 +60,7 @@ add-ons/desi-pet-shower-backup_addon/
 ## Dependências e compatibilidade
 
 ### Dependências obrigatórias
-- **DPS by PRObst Base**: v1.0.0 ou superior (obrigatório)
+- **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
 - **WordPress**: 6.0 ou superior
 - **PHP**: 7.4 ou superior (com extensão JSON ativada)
 
@@ -138,7 +138,7 @@ Antes de restaurar, visualize:
 Este add-on não expõe shortcodes próprios. A interface é acessada através do menu administrativo do WordPress.
 
 ### Menus administrativos
-- **Backup & Restauração** (`dps-backup`): submenu sob "DPS by PRObst"
+- **Backup & Restauração** (`dps-backup`): submenu sob "desi.pet by PRObst"
 
 ### Endpoints admin_post
 
@@ -157,7 +157,7 @@ Este add-on não expõe shortcodes próprios. A interface é acessada através d
 ### Hooks CONSUMIDOS por este add-on
 
 #### `admin_menu` (action, prioridade 20)
-- **Propósito**: registra submenu "Backup & Restauração" sob o menu principal DPS by PRObst
+- **Propósito**: registra submenu "Backup & Restauração" sob o menu principal desi.pet by PRObst
 - **Implementação**: método `register_admin_menu()`
 
 ### Hooks DISPARADOS por este add-on
@@ -215,7 +215,7 @@ Este add-on exporta/importa options prefixadas com `dps_`. Não armazena options
 ### Para administradores
 
 1. **Acessar backup**:
-   - No menu WordPress, acesse "DPS by PRObst" → "Backup & Restauração"
+   - No menu WordPress, acesse "desi.pet by PRObst" → "Backup & Restauração"
 
 2. **Exportar dados**:
    - Clique no botão "Baixar backup completo"
@@ -322,7 +322,7 @@ Consulte a análise detalhada em `docs/analysis/BACKUP_ADDON_ANALYSIS.md` para o
 
 - **v1.0.0**: Lançamento inicial com exportação/importação completa via JSON
   - Suporte a CPTs, metadados, tabelas customizadas, opções e arquivos
-  - Interface administrativa sob menu DPS by PRObst
+  - Interface administrativa sob menu desi.pet by PRObst
   - Proteção de segurança com nonces e capabilities
   - Mapeamento inteligente de IDs entre entidades
   - Transações SQL para atomicidade

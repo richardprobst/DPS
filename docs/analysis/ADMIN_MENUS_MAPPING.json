@@ -7,8 +7,8 @@
     "total_cpts_visible": 5
   },
   "main_menu": {
-    "page_title": "DPS by PRObst",
-    "menu_title": "DPS by PRObst",
+    "page_title": "desi.pet by PRObst",
+    "menu_title": "desi.pet by PRObst",
     "slug": "desi-pet-shower",
     "parent_slug": null,
     "capability": "manage_options",

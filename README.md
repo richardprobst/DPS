@@ -1,4 +1,4 @@
-# DPS by PRObst – Sistema de Gestão para Pet Shops
+# desi.pet by PRObst – Sistema de Gestão para Pet Shops
 
 Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente. Desenvolvido como monorepo contendo o plugin WordPress principal e diversos add-ons complementares.
 
@@ -31,7 +31,7 @@ DPS/
 
 ## 🎯 Visão Geral
 
-O **DPS by PRObst** é um sistema modular composto por:
+O **desi.pet by PRObst** é um sistema modular composto por:
 
 ### Plugin Núcleo (`/plugin/desi-pet-shower-base_plugin`)
 
@@ -210,6 +210,6 @@ Software proprietário - todos os direitos reservados.
 
 ---
 
-**DPS by PRObst** - Sistema completo de gestão para pet shops.
+**desi.pet by PRObst** - Sistema completo de gestão para pet shops.
 
 *Desenvolvido por [PRObst](https://www.probst.pro)*

@@ -9,7 +9,7 @@
 
 ## 1. Sumário Executivo
 
-Este documento apresenta uma análise profunda e abrangente do plugin base DPS by PRObst, avaliando:
+Este documento apresenta uma análise profunda e abrangente do plugin base desi.pet by PRObst, avaliando:
 - Arquitetura e estrutura de código
 - Funcionalidades existentes
 - Interface de usuário e layout
@@ -549,7 +549,7 @@ Criar testes para helpers e funções críticas.
 
 ## 10. Conclusão
 
-O plugin base DPS by PRObst possui uma arquitetura sólida com helpers bem organizados e um sistema de hooks extensível. As principais oportunidades de melhoria estão em:
+O plugin base desi.pet by PRObst possui uma arquitetura sólida com helpers bem organizados e um sistema de hooks extensível. As principais oportunidades de melhoria estão em:
 
 1. **Refatoração de código**: Quebrar métodos grandes em funções menores
 2. **Funcionalidades**: Adicionar upload de fotos, duplicação de agendamentos

@@ -68,7 +68,7 @@ class DPS_Dashboard {
                 );
                 ?>
             </h2>
-            <p><?php esc_html_e( 'Aqui está um resumo do seu sistema DPS by PRObst.', 'desi-pet-shower' ); ?></p>
+            <p><?php esc_html_e( 'Aqui está um resumo do seu sistema desi.pet by PRObst.', 'desi-pet-shower' ); ?></p>
         </div>
         <?php
     }

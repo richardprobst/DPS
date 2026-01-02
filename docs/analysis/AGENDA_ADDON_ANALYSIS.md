@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-O **Agenda Add-on** é um componente essencial do sistema DPS by PRObst, responsável pela visualização e gerenciamento da agenda de atendimentos. Esta análise profunda examina a funcionalidade atual, qualidade do código, layout/UX, performance e identifica oportunidades de melhoria e novas funcionalidades.
+O **Agenda Add-on** é um componente essencial do sistema desi.pet by PRObst, responsável pela visualização e gerenciamento da agenda de atendimentos. Esta análise profunda examina a funcionalidade atual, qualidade do código, layout/UX, performance e identifica oportunidades de melhoria e novas funcionalidades.
 
 ### Avaliação Geral
 

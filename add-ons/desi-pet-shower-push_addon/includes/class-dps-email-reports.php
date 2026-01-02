@@ -427,7 +427,7 @@ class DPS_Email_Reports {
             $html .= '</table>';
         }
 
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo DPS by PRObst.</p>';
+        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
         $html .= '</body></html>';
 
         return $html;
@@ -519,7 +519,7 @@ class DPS_Email_Reports {
             $html .= '</table>';
         }
 
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo DPS by PRObst.</p>';
+        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
         $html .= '</body></html>';
 
         return $html;
@@ -581,7 +581,7 @@ class DPS_Email_Reports {
         }
 
         $html .= '</table>';
-        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo DPS by PRObst.</p>';
+        $html .= '<p style="margin-top: 30px; color: #6b7280; font-size: 12px;">Este email foi enviado automaticamente pelo desi.pet by PRObst.</p>';
         $html .= '</body></html>';
 
         return $html;

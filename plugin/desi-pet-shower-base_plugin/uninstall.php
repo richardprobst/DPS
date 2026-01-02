@@ -1,6 +1,6 @@
 <?php
 /**
- * Rotina de desinstalação do plugin DPS by PRObst - Base
+ * Rotina de desinstalação do plugin desi.pet by PRObst - Base
  *
  * Este arquivo é executado quando o plugin é desinstalado via WordPress admin.
  * Remove todos os dados criados pelo plugin, incluindo CPTs, tabelas, options, roles e capabilities.

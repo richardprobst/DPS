@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Communications Add-on
+ * Plugin Name:       desi.pet by PRObst – Communications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Comunicações integradas via WhatsApp, SMS e e-mail. Notifique clientes automaticamente sobre agendamentos e eventos.
  * Version:           0.2.0
@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_communications_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Communications requer o plugin base DPS by PRObst para funcionar.', 'dps-communications-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-communications-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -112,7 +112,7 @@ class DPS_Communications_Addon {
     /**
      * Registra submenu admin para comunicações.
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-integrations-hub (aba "Comunicações").
      */
     public function register_admin_menu() {
@@ -162,7 +162,7 @@ class DPS_Communications_Addon {
                             </th>
                             <td>
                                 <input type="text" id="dps_whatsapp_number" name="dps_whatsapp_number" value="<?php echo esc_attr( get_option( 'dps_whatsapp_number', '+55 15 99160-6299' ) ); ?>" class="regular-text" />
-                                <p class="description"><?php esc_html_e( 'Número de telefone da equipe DPS by PRObst (formato: +55 15 99160-6299). Este número será usado em todos os botões que permitem o cliente entrar em contato com a equipe.', 'dps-communications-addon' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'Número de telefone da equipe desi.pet by PRObst (formato: +55 15 99160-6299). Este número será usado em todos os botões que permitem o cliente entrar em contato com a equipe.', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
 

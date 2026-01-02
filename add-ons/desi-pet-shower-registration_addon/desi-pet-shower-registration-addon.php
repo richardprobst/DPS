@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       DPS by PRObst – Cadastro Add-on
+ * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
  * Version:           1.2.1
@@ -20,14 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_registration_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on Cadastro requer o plugin base DPS by PRObst para funcionar.', 'dps-registration-addon' );
+            echo esc_html__( 'O add-on requer o plugin base desi.pet by PRObst para funcionar.', 'dps-registration-addon' );
             echo '</p></div>';
         } );
         return false;
@@ -730,9 +730,9 @@ class DPS_Registration_Addon {
     }
 
     /**
-     * Adiciona a página de configurações no menu principal "DPS by PRObst"
+     * Adiciona a página de configurações no menu principal "desi.pet by PRObst"
      * 
-     * NOTA: Menu exibido como submenu de "DPS by PRObst" para alinhamento com a navegação unificada.
+     * NOTA: Menu exibido como submenu de "desi.pet by PRObst" para alinhamento com a navegação unificada.
      * Também acessível pelo hub em dps-tools-hub (aba "Formulário de Cadastro").
      */
     public function add_settings_page() {
@@ -1321,7 +1321,7 @@ class DPS_Registration_Addon {
             return;
         }
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'Configurações de Cadastro DPS by PRObst', 'dps-registration-addon' ) . '</h1>';
+        echo '<h1>' . esc_html__( 'Configurações de Cadastro desi.pet by PRObst', 'dps-registration-addon' ) . '</h1>';
         echo '<form method="post" action="options.php">';
         settings_fields( 'dps_registration_settings' );
         do_settings_sections( 'dps_registration_settings' );
@@ -2005,7 +2005,7 @@ class DPS_Registration_Addon {
         if ( ! empty( $client_email ) && is_email( $client_email ) && method_exists( $communications, 'send_email' ) ) {
             $communications->send_email(
                 $client_email,
-                __( 'Bem-vindo ao DPS by PRObst', 'dps-registration-addon' ),
+                __( 'Bem-vindo ao desi.pet by PRObst', 'dps-registration-addon' ),
                 $welcome_message,
                 $context
             );
@@ -2106,7 +2106,7 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook"></label></p>';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DPS by PRObst', 'dps-registration-addon' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do desi.pet by PRObst', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
@@ -2251,13 +2251,13 @@ class DPS_Registration_Addon {
 
         $subject = $subject_option
             ? $this->replace_placeholders( $subject_option, $placeholders )
-            : __( 'Confirme seu email - DPS by PRObst', 'desi-pet-shower' );
+            : __( 'Confirme seu email - desi.pet by PRObst', 'desi-pet-shower' );
 
         if ( $body_option ) {
             $body = $this->replace_placeholders( $body_option, $placeholders );
         } else {
             $body_parts = array();
-            $body_parts[] = '<p>' . esc_html__( 'Olá! Recebemos seu cadastro no DPS by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ) . '</p>';
+            $body_parts[] = '<p>' . esc_html__( 'Olá! Recebemos seu cadastro no desi.pet by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ) . '</p>';
             $body_parts[] = '<p><a href="' . esc_url( $confirmation_link ) . '">' . esc_html( $confirmation_link ) . '</a></p>';
             $body_parts[] = '<p>' . esc_html__( 'Este link é válido por 48 horas.', 'dps-registration-addon' ) . '</p>';
             $body_parts[] = '<p>' . esc_html__( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' ) . '</p>';
@@ -2535,7 +2535,7 @@ class DPS_Registration_Addon {
         $message = sprintf(
             "%s %s %s\n%s",
             $greeting,
-            __( 'Lembrete: confirme seu cadastro no DPS by PRObst para ativar sua conta.', 'dps-registration-addon' ),
+            __( 'Lembrete: confirme seu cadastro no desi.pet by PRObst para ativar sua conta.', 'dps-registration-addon' ),
             __( 'Use o link abaixo para finalizar a confirmação.', 'dps-registration-addon' ),
             esc_url_raw( $confirm_url )
         );
