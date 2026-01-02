@@ -26,27 +26,11 @@
     gap: 24px;
 }
 
-/* Header padronizado como na aba Serviços */
-#dps-section-assinaturas .dps-section-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 8px;
-    padding: 0;
-    border: none;
-    font-size: 24px;
-    font-weight: 600;
-    color: #0f172a;
-}
+/* Header padronizado como na aba Clientes - herda estilos globais do base plugin */
+/* A classe .dps-section-title herda do dps-base.css com border-bottom e margin corretos */
 
 #dps-section-assinaturas .dps-section-title__icon {
-    font-size: 28px;
-}
-
-#dps-section-assinaturas .dps-section-header__subtitle {
-    margin: 0 0 24px;
-    color: #6b7280;
-    font-size: 15px;
+    font-size: 1.2em;
 }
 
 /* ==========================================================================
