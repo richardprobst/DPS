@@ -114,6 +114,7 @@ Qualquer agente (humano ou IA) que implemente mudanças no código deve seguir e
    - Aplicar as políticas de segurança obrigatórias (nonces, escape, sanitização, capabilities)
    - Considerar performance (carregamento condicional de assets, otimização de queries)
    - Reutilizar helpers globais quando disponíveis (DPS_Money_Helper, DPS_URL_Builder, etc.)
+   - **Corrigir bugs identificados**: ao identificar bugs ou problemas durante o trabalho (via code review, testes ou análise), corrija-os mesmo que sejam pré-existentes, desde que a correção seja segura e não introduza novos riscos
 
 3. **Atualizar ANALYSIS.md quando necessário**:
    - Mudanças em fluxos de integração ou contratos de hooks
@@ -210,6 +211,7 @@ O repositório mantém recursos específicos para orientar refatorações de có
 
 O agente tem liberdade para melhorar o código dentro dos seguintes limites:
 
+- ✅ **Corrigir bugs pré-existentes**: ao identificar problemas durante code review, testes ou análise, o agente DEVE corrigi-los, mesmo que não estejam diretamente relacionados à tarefa atual
 - ✅ **Quebrar funções grandes em métodos menores**: seguir sugestões do `docs/refactoring/REFACTORING_ANALYSIS.md`
 - ✅ **Extrair helpers reutilizáveis**: centralizar lógica duplicada em classes utilitárias
 - ✅ **Melhorar DocBlocks e nomenclatura**: tornar código mais legível e autodocumentado
@@ -218,6 +220,7 @@ O agente tem liberdade para melhorar o código dentro dos seguintes limites:
 - ✅ **Refatorar lógica de formulários**: usar `DPS_Request_Validator` para nonces/sanitização, `DPS_Money_Helper` para valores monetários
 - ✅ **Adicionar hooks novos**: desde que documentados em ANALYSIS.md com assinatura, propósito e exemplos
 - ✅ **Melhorar segurança**: reforçar validações, escape e sanitização conforme políticas deste documento
+- ✅ **Completar implementações incompletas**: substituir placeholders, stubs ou código temporário por implementações funcionais
 
 ### O que o agente NÃO deve fazer sem documentação e validação extra
 
