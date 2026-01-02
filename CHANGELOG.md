@@ -96,8 +96,18 @@ Antes de criar uma nova versão oficial:
   - Prefixos de código (`dps_`, `DPS_`)
   - Text domains para internacionalização
   - Nomes de Custom Post Types e tabelas de banco de dados
-  - Nomes de arquivos e pastas
+  - Nomes de arquivos e pastas (ver nota abaixo)
   - Hooks e filtros existentes
+
+**Decisão sobre estrutura de pastas**
+
+- **Análise de reorganização**: Foi avaliada a possibilidade de reorganizar todos os plugins (base + add-ons) em uma pasta única.
+- **Decisão**: A estrutura atual foi mantida (`plugin/` + `add-ons/`) pelos seguintes motivos:
+  - Quebraria o sistema de atualizações automáticas via GitHub (GitHub Updater)
+  - Exigiria alteração em dezenas de referências de caminhos (`require_once`, `plugin_dir_path()`, etc.)
+  - O WordPress espera cada plugin em sua própria pasta em `wp-content/plugins/`
+  - A estrutura atual permite instalação independente de cada add-on
+- **Recomendação futura**: Para uma eventual migração, seria necessário um plano de migração completo com testes extensivos e período de transição para usuários existentes.
 
 #### Added (Adicionado)
 
