@@ -12,6 +12,7 @@
  * @since 1.4.0
  * @since 1.5.0 Integração com padrão visual das abas Clientes/Pets
  * @since 1.5.1 Layout empilhado vertical (cards um abaixo do outro)
+ * @since 1.5.2 Correção do layout responsivo de Valores por Porte - mantém 3 colunas em tablets
  * @since 1.6.0 Layout grid seguindo exatamente o padrão da aba Clientes
  */
 
@@ -998,13 +999,8 @@
         padding: 16px;
     }
     
-    #dps-section-servicos .dps-porte-grid,
-    .dps-services-form .dps-porte-grid,
-    .dps-fieldset-pricing .dps-porte-grid,
-    .dps-fieldset-duration .dps-porte-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
+    /* Mantém layout de 3 colunas para Valores por Porte em tablets */
+    /* A mudança para 1 coluna ocorre apenas em mobile (< 480px) */
     
     .dps-search-input {
         width: 100%;
@@ -1042,6 +1038,15 @@
     .dps-form-title,
     .dps-list-title {
         font-size: 18px;
+    }
+    
+    /* Campos de Valores por Porte empilhados em 1 coluna apenas em mobile */
+    #dps-section-servicos .dps-porte-grid,
+    .dps-services-form .dps-porte-grid,
+    .dps-fieldset-pricing .dps-porte-grid,
+    .dps-fieldset-duration .dps-porte-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
     
     .dps-services-table th,
