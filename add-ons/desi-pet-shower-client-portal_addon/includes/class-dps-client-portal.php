@@ -3638,13 +3638,14 @@ Equipe %4$s', 'dps-client-portal' ),
         // Gera URL de acesso
         $access_url = $token_manager->generate_access_url( $token_plain );
         
-        // Monta email
+        // Monta email (escapando nome do cliente para prevenir injeção)
+        $safe_client_name = wp_strip_all_tags( $client_name );
         $subject = __( 'Seu link de acesso ao Portal do Cliente - DPS by PRObst', 'dps-client-portal' );
         
         $body = sprintf(
             __( "Olá, %s!\n\nVocê solicitou acesso ao Portal do Cliente da DPS by PRObst.\n\nClique no link abaixo para acessar:\n%s\n\n⚠️ Este link é válido por 30 minutos e pode ser usado apenas uma vez.\n\nSe você não solicitou este acesso, ignore este e-mail.\n\nEquipe DPS by PRObst", 'dps-client-portal' ),
-            $client_name,
-            $access_url
+            $safe_client_name,
+            esc_url( $access_url )
         );
         
         // Envia email
@@ -3706,22 +3707,24 @@ Equipe %4$s', 'dps-client-portal' ),
         
         foreach ( $headers as $header ) {
             if ( ! empty( $_SERVER[ $header ] ) ) {
-                $ip_list = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
+                $raw_ip = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
                 
                 // X-Forwarded-For pode ter múltiplos IPs (client, proxy1, proxy2)
                 // Pega o primeiro (cliente real)
-                if ( strpos( (string) $ip_list, ',' ) !== false ) {
-                    $ips = explode( ',', $ip_list );
-                    $ip_list = trim( $ips[0] );
+                if ( strpos( (string) $raw_ip, ',' ) !== false ) {
+                    $ips = explode( ',', $raw_ip );
+                    $client_ip = trim( $ips[0] );
+                } else {
+                    $client_ip = $raw_ip;
                 }
                 
                 // Valida IPv4 ou IPv6
-                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
-                    return $ip_list;
+                if ( filter_var( $client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+                    return $client_ip;
                 }
                 
-                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
-                    return $ip_list;
+                if ( filter_var( $client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+                    return $client_ip;
                 }
             }
         }
