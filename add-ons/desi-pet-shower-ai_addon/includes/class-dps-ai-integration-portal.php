@@ -91,13 +91,17 @@ class DPS_AI_Integration_Portal {
 
         // Cliente nome para personalização
         $client_name = get_the_title( $client_id );
-        $first_name  = explode( ' ', $client_name )[0] ?? $client_name;
+        $name_parts  = explode( ' ', $client_name );
+        $first_name  = ! empty( $name_parts[0] ) ? $name_parts[0] : $client_name;
 
         // Classes do widget
         $widget_classes = 'dps-ai-assistant';
         if ( 'floating' === $widget_mode ) {
             $widget_classes .= ' dps-ai-assistant--floating dps-ai-assistant--' . $floating_position;
         }
+
+        // Estado inicial: inline mode começa expandido, floating mode começa fechado
+        $initial_expanded = 'floating' !== $widget_mode;
 
         ?>
         <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo $enable_feedback ? 'true' : 'false'; ?>">
@@ -122,7 +126,7 @@ class DPS_AI_Integration_Portal {
                             <span class="dps-ai-assistant__subtitle"><?php esc_html_e( 'Online • Resposta instantânea', 'dps-ai' ); ?></span>
                         </div>
                     </div>
-                    <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="true">
+                    <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="<?php echo $initial_expanded ? 'true' : 'false'; ?>">
                         <svg class="dps-ai-assistant__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
