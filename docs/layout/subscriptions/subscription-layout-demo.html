@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DPS - Aba Assinaturas - Demonstração de Layout v1.3.0</title>
+    <title>DPS - Aba Assinaturas - Demonstração de Layout v1.3.1</title>
     <style>
         /* Reset básico */
         * {
@@ -57,25 +57,22 @@
             margin-bottom: 24px;
         }
         
-        /* Header da seção - Padrão Serviços */
+        /* Header da seção - Padrão Clientes (herda do base plugin) */
         .dps-section-title {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 0 0 8px;
+            margin: 0 0 24px 0;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
             font-size: 24px;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1.3;
         }
         
         .dps-section-title__icon {
-            font-size: 28px;
-        }
-        
-        .dps-section-header__subtitle {
-            margin: 0 0 24px;
-            color: #6b7280;
-            font-size: 15px;
+            font-size: 1.2em;
         }
         
         /* Layout empilhado */
@@ -475,17 +472,16 @@
 <body>
     <div class="demo-header">
         <h1>🐾 DPS by PRObst - Aba Assinaturas</h1>
-        <p>Layout moderno com cards empilhados verticalmente (padrão Serviços)</p>
-        <span class="demo-version">v1.3.0 - Janeiro 2026</span>
+        <p>Layout com header padronizado igual à aba Clientes (border-bottom) e cards empilhados verticalmente</p>
+        <span class="demo-version">v1.3.1 - Janeiro 2026</span>
     </div>
     
     <div class="dps-section">
-        <!-- Header padronizado -->
+        <!-- Header padronizado (padrão Clientes - com border-bottom) -->
         <h2 class="dps-section-title">
             <span class="dps-section-title__icon">📋</span>
             Gestão de Assinaturas
         </h2>
-        <p class="dps-section-header__subtitle">Acompanhe e gerencie as assinaturas mensais de serviços recorrentes.</p>
         
         <!-- Layout empilhado -->
         <div class="dps-subscriptions-stacked">
@@ -529,10 +525,6 @@
                     </li>
                 </ul>
                 
-                <div class="dps-info-notice">
-                    <span class="dps-info-notice__icon">💡</span>
-                    <p class="dps-info-notice__text">Para criar uma nova assinatura, acesse a aba Agendamentos e selecione o tipo "Assinatura" no formulário.</p>
-                </div>
             </div>
             
             <!-- Card de Lista de Assinaturas Ativas -->
