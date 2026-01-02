@@ -3546,8 +3546,13 @@ Equipe %4$s', 'dps-client-portal' ),
      * @since 2.4.3
      */
     public function ajax_request_access_link_by_email() {
-        // Valida nonce se presente (opcional para formulário público)
-        // Usamos rate limiting como principal proteção
+        // Verifica nonce para proteção CSRF
+        $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_request_access_link' ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Sessão expirada. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ) 
+            ] );
+        }
         
         // Captura e valida email
         $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
@@ -3558,8 +3563,8 @@ Equipe %4$s', 'dps-client-portal' ),
             ] );
         }
         
-        // Rate limiting por IP
-        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+        // Rate limiting por IP (usa método com suporte a proxy)
+        $ip = $this->get_client_ip_with_proxy_support();
         $rate_key_ip = 'dps_access_link_ip_' . md5( $ip );
         $rate_key_email = 'dps_access_link_email_' . md5( $email );
         
@@ -3680,6 +3685,48 @@ Equipe %4$s', 'dps-client-portal' ),
         wp_send_json_success( [ 
             'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
         ] );
+    }
+    
+    /**
+     * Obtém o IP do cliente com suporte a proxies
+     *
+     * Verifica headers de proxy (Cloudflare, AWS, Nginx) e valida IPv4/IPv6
+     *
+     * @since 2.4.3
+     * @return string IP do cliente ou 'unknown'
+     */
+    private function get_client_ip_with_proxy_support() {
+        // Headers a verificar, em ordem de prioridade
+        $headers = [
+            'HTTP_CF_CONNECTING_IP', // Cloudflare
+            'HTTP_X_REAL_IP',        // Nginx proxy
+            'HTTP_X_FORWARDED_FOR',  // Proxy padrão
+            'REMOTE_ADDR',           // Direto
+        ];
+        
+        foreach ( $headers as $header ) {
+            if ( ! empty( $_SERVER[ $header ] ) ) {
+                $ip_list = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
+                
+                // X-Forwarded-For pode ter múltiplos IPs (client, proxy1, proxy2)
+                // Pega o primeiro (cliente real)
+                if ( strpos( (string) $ip_list, ',' ) !== false ) {
+                    $ips = explode( ',', $ip_list );
+                    $ip_list = trim( $ips[0] );
+                }
+                
+                // Valida IPv4 ou IPv6
+                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+                    return $ip_list;
+                }
+                
+                if ( filter_var( $ip_list, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+                    return $ip_list;
+                }
+            }
+        }
+        
+        return 'unknown';
     }
 
     /**

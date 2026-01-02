@@ -106,6 +106,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </p>
                 
                 <form id="dps-email-access-form" class="dps-portal-access__email-form">
+                    <?php wp_nonce_field( 'dps_request_access_link', '_dps_access_nonce', false ); ?>
                     <div class="dps-portal-access__email-input-group">
                         <input 
                             type="email" 
@@ -153,12 +154,15 @@ if ( ! defined( 'ABSPATH' ) ) {
                 var feedback = document.getElementById('dps-email-feedback');
                 var whatsappSection = document.getElementById('dps-whatsapp-section');
                 var whatsappBtn = document.getElementById('dps-request-access-btn');
+                var nonceField = document.getElementById('_dps_access_nonce');
                 
-                if (form && emailInput && submitBtn && feedback) {
+                if (form && emailInput && submitBtn && feedback && nonceField) {
                     form.addEventListener('submit', function(e) {
                         e.preventDefault();
                         
                         var email = emailInput.value.trim();
+                        var nonce = nonceField.value;
+                        
                         if (!email) {
                             feedback.textContent = '<?php echo esc_js( __( 'Por favor, informe seu e-mail.', 'dps-client-portal' ) ); ?>';
                             feedback.style.display = 'block';
@@ -176,7 +180,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: 'action=dps_request_access_link_by_email&email=' + encodeURIComponent(email)
+                            body: 'action=dps_request_access_link_by_email&email=' + encodeURIComponent(email) + '&_wpnonce=' + encodeURIComponent(nonce)
                         })
                         .then(function(response) { return response.json(); })
                         .then(function(data) {
