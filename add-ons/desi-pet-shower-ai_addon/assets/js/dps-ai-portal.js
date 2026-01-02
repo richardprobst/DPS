@@ -1,11 +1,10 @@
 /**
- * JavaScript do widget de IA no Portal do Cliente.
+ * JavaScript do Assistente de IA no Portal do Cliente.
  *
+ * Design v2.0.0: Interface moderna e integrada
  * Gerencia interações do usuário com o assistente virtual,
  * incluindo envio de perguntas, exibição de respostas e
  * controle de estado do widget.
- *
- * v1.5.0 - FAQs sugeridas, feedback, widget flutuante, analytics
  */
 
 (function($) {
@@ -13,7 +12,8 @@
 
     // Aguarda o DOM estar pronto
     $(document).ready(function() {
-        const $widget = $('#dps-ai-widget');
+        // Seletores para a nova estrutura
+        const $widget = $('#dps-ai-assistant');
         const $header = $('#dps-ai-header');
         const $toggle = $('#dps-ai-toggle');
         const $content = $('#dps-ai-content');
@@ -23,13 +23,17 @@
         const $loading = $('#dps-ai-loading');
         const $fab = $('#dps-ai-fab');
 
+        // Compatibilidade com seletores antigos
+        const $widgetLegacy = $('#dps-ai-widget');
+        const widgetElement = $widget.length ? $widget : $widgetLegacy;
+
         // Verifica se o widget existe na página
-        if (!$widget.length) {
+        if (!widgetElement.length) {
             return;
         }
 
         // Configurações
-        const clientId = $widget.data('client-id') || 0;
+        const clientId = widgetElement.data('client-id') || 0;
         const enableFeedback = dpsAI.enableFeedback || false;
         const isFloating = dpsAI.widgetMode === 'floating';
 
@@ -87,8 +91,8 @@
         // Widget flutuante - FAB button
         if (isFloating && $fab.length) {
             $fab.on('click', function() {
-                $widget.toggleClass('is-open');
-                if ($widget.hasClass('is-open')) {
+                widgetElement.toggleClass('is-open');
+                if (widgetElement.hasClass('is-open')) {
                     $question.focus();
                 }
             });
@@ -97,7 +101,7 @@
         // Toggle do widget (modo inline)
         if (!isFloating) {
             $header.on('click', function(e) {
-                if ($(e.target).closest('.dps-ai-toggle').length) {
+                if ($(e.target).closest('.dps-ai-assistant__toggle, #dps-ai-toggle').length) {
                     return;
                 }
                 toggleWidget();
@@ -110,23 +114,26 @@
         }
 
         function toggleWidget() {
-            const isVisible = $content.is(':visible');
+            const isCollapsed = widgetElement.hasClass('is-collapsed');
             
-            if (isVisible) {
-                $content.slideUp(250);
-                $widget.removeClass('is-expanded');
-                $toggle.attr('aria-expanded', 'false');
-            } else {
-                $content.slideDown(250, function() {
+            if (isCollapsed) {
+                // Expandir
+                widgetElement.removeClass('is-collapsed');
+                $content.slideDown(300, function() {
                     $question.focus();
                 });
-                $widget.addClass('is-expanded');
                 $toggle.attr('aria-expanded', 'true');
+            } else {
+                // Colapsar
+                $content.slideUp(300, function() {
+                    widgetElement.addClass('is-collapsed');
+                });
+                $toggle.attr('aria-expanded', 'false');
             }
         }
 
-        // Clique nos botões de FAQ
-        $(document).on('click', '.dps-ai-faq-btn', function() {
+        // Clique nos botões de sugestão/FAQ
+        $(document).on('click', '.dps-ai-assistant__suggestion-btn, .dps-ai-faq-btn', function() {
             const faqQuestion = $(this).data('question');
             if (faqQuestion) {
                 $question.val(faqQuestion);
@@ -168,7 +175,7 @@
             // Desabilita inputs durante o processamento
             $question.prop('disabled', true);
             $submit.prop('disabled', true);
-            $loading.slideDown(150);
+            $loading.slideDown(200);
 
             // Salva pergunta para feedback
             lastQuestion = question;
@@ -207,7 +214,7 @@
                 complete: function() {
                     $question.prop('disabled', false);
                     $submit.prop('disabled', false);
-                    $loading.slideUp(150);
+                    $loading.slideUp(200);
                     $question.focus();
                 }
             });
