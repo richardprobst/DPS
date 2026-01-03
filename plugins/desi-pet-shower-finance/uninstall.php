@@ -14,6 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // Remove tabelas customizadas
+// Nota: $wpdb->prefix é seguro (definido pelo WordPress core)
 $tables = [
     $wpdb->prefix . 'dps_transacoes',
     $wpdb->prefix . 'dps_parcelas',
@@ -21,7 +22,8 @@ $tables = [
 ];
 
 foreach ( $tables as $table ) {
-    $wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+    // Backticks protegem identificadores com caracteres especiais
+    $wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 }
 
 // Remove pages criadas pelo plugin (opcional - comentado para preservar)

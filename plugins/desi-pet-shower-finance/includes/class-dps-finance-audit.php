@@ -87,15 +87,26 @@ class DPS_Finance_Audit {
      * @return string IP address ou 'unknown'.
      */
     private static function get_client_ip() {
-        $ip = 'unknown';
+        $ip = '';
 
+        // REMOTE_ADDR é a fonte mais confiável (não pode ser falsificado pelo cliente)
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-        } elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+        }
+        
+        // Valida REMOTE_ADDR - se inválido, tenta fallback
+        if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+            // HTTP_X_FORWARDED_FOR pode ser falsificado, então usamos apenas como fallback
+            // Nota: X_FORWARDED_FOR pode conter múltiplos IPs - usamos apenas o primeiro
+            if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+                $forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+                // Pega apenas o primeiro IP se houver múltiplos (separados por vírgula)
+                $forwarded_parts = explode( ',', $forwarded );
+                $ip = trim( $forwarded_parts[0] );
+            }
         }
 
-        // Valida formato de IP
+        // Validação final do IP
         if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
             return $ip;
         }
