@@ -6,6 +6,7 @@
  * @package DPS_Push_Addon
  * @since 1.0.0
  * @since 1.2.0 Adicionados botões de teste de relatórios e Telegram.
+ * @since 1.3.0 Adicionada prevenção de duplo clique e validação client-side.
  */
 
 (function($) {
@@ -13,6 +14,11 @@
 
     var DPSPush = {
         
+        /**
+         * Flag para evitar duplo clique no formulário.
+         */
+        isSubmitting: false,
+
         /**
          * Inicializa o módulo de push.
          */
@@ -33,6 +39,158 @@
             
             // Botão de teste de conexão Telegram.
             $('#dps-test-telegram').on('click', this.testTelegram.bind(this));
+
+            // Toggle de visibilidade do token Telegram.
+            $('#dps-toggle-token').on('click', this.toggleTokenVisibility.bind(this));
+
+            // Prevenção de duplo clique no formulário de configurações.
+            $('#dps-push-settings-form').on('submit', this.handleFormSubmit.bind(this));
+
+            // Validação de emails em tempo real.
+            $('#dps_push_emails_agenda, #dps_push_emails_report').on('blur', this.validateEmailField.bind(this));
+
+            // Validação de campo numérico.
+            $('#dps_push_inactive_days').on('change', this.validateInactiveDays.bind(this));
+
+            // Validação do formato do token Telegram.
+            $('#dps_push_telegram_token').on('blur', this.validateTelegramToken.bind(this));
+        },
+
+        /**
+         * Toggle visibilidade do token Telegram.
+         */
+        toggleTokenVisibility: function(e) {
+            e.preventDefault();
+            var $field = $('#dps_push_telegram_token');
+            var isPassword = $field.attr('type') === 'password';
+            $field.attr('type', isPassword ? 'text' : 'password');
+            $(e.currentTarget).text(isPassword ? '🔒' : '👁️');
+        },
+
+        /**
+         * Valida o formato do token Telegram.
+         * Nota: O regex é flexível para acomodar variações no tamanho do token.
+         */
+        validateTelegramToken: function(e) {
+            var $field = $(e.currentTarget);
+            var value = $field.val().trim();
+            var $wrapper = $field.closest('.dps-telegram-token-wrapper');
+            
+            // Remover erro existente (procura pelo próximo sibling com a classe)
+            $wrapper.next('.dps-token-error').remove();
+
+            if (!value) {
+                return true; // Campo vazio é válido
+            }
+
+            // Formato esperado: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
+            // O token tem 8-12 dígitos, seguido de :, seguido de 35 caracteres alfanuméricos/underscores/hyphens
+            var tokenRegex = /^\d{8,12}:[A-Za-z0-9_-]{35}$/;
+            if (!tokenRegex.test(value)) {
+                $wrapper.after(
+                    '<span class="dps-token-error">' +
+                    (DPS_Push.messages.invalid_token || 'Formato de token inválido. Exemplo: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ') +
+                    '</span>'
+                );
+                return false;
+            }
+
+            return true;
+        },
+
+        /**
+         * Manipula submit do formulário com prevenção de duplo clique.
+         */
+        handleFormSubmit: function(e) {
+            var self = this;
+            var $form = $(e.currentTarget);
+            var $btn = $('#dps-push-save-btn');
+            var $spinner = $('#dps-push-save-spinner');
+
+            // Prevenir duplo clique
+            if (this.isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Validar emails antes do submit
+            var emailsValid = true;
+            $('#dps_push_emails_agenda, #dps_push_emails_report').each(function() {
+                if (!self.validateEmailField({ currentTarget: this })) {
+                    emailsValid = false;
+                }
+            });
+
+            if (!emailsValid) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Marcar como submetendo
+            this.isSubmitting = true;
+
+            // Alterar estado visual do botão
+            $btn.prop('disabled', true)
+                .text(DPS_Push.messages.saving || 'Salvando...');
+            $spinner.addClass('is-active');
+
+            // Não bloqueamos o submit normal, apenas sinalizamos visualmente
+            return true;
+        },
+
+        /**
+         * Valida campo de email separado por vírgula.
+         * Usa regex básico para validação client-side. Validação definitiva é feita server-side.
+         */
+        validateEmailField: function(e) {
+            var $field = $(e.currentTarget);
+            var value = $field.val().trim();
+            var $error = $field.siblings('.dps-email-error');
+
+            // Remover erro existente
+            if ($error.length) {
+                $error.remove();
+            }
+
+            if (!value) {
+                return true; // Campo vazio é válido (usa admin_email)
+            }
+
+            var emails = value.split(',');
+            var invalidEmails = [];
+            // Regex mais permissivo para client-side, validação rigorosa é feita no servidor com is_email()
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+            for (var i = 0; i < emails.length; i++) {
+                var email = emails[i].trim();
+                if (email && !emailRegex.test(email)) {
+                    invalidEmails.push(email);
+                }
+            }
+
+            if (invalidEmails.length > 0) {
+                var msg = (DPS_Push.messages.invalid_email || 'Email inválido: ') + invalidEmails.join(', ');
+                $field.after('<span class="dps-email-error" style="color: #ef4444; display: block; margin-top: 5px; font-size: 12px;">' + msg + '</span>');
+                return false;
+            }
+
+            return true;
+        },
+
+        /**
+         * Valida campo de dias de inatividade.
+         */
+        validateInactiveDays: function(e) {
+            var $field = $(e.currentTarget);
+            var value = parseInt($field.val(), 10);
+            var min = parseInt($field.attr('min'), 10) || 7;
+            var max = parseInt($field.attr('max'), 10) || 365;
+
+            if (isNaN(value) || value < min) {
+                $field.val(min);
+            } else if (value > max) {
+                $field.val(max);
+            }
         },
 
         /**
@@ -104,6 +262,11 @@
             var self = this;
             var $btn = $('#dps-push-subscribe');
 
+            // Prevenir duplo clique
+            if ($btn.prop('disabled')) {
+                return;
+            }
+
             $btn.prop('disabled', true).text(DPS_Push.messages.subscribing);
 
             // Registrar Service Worker (usa scope padrão do diretório do SW)
@@ -157,7 +320,13 @@
             e.preventDefault();
             var $btn = $('#dps-push-test');
 
-            $btn.prop('disabled', true).text('Enviando...');
+            // Prevenir duplo clique
+            if ($btn.prop('disabled')) {
+                return;
+            }
+
+            var originalText = $btn.text();
+            $btn.prop('disabled', true).text(DPS_Push.messages.sending || 'Enviando...');
 
             $.ajax({
                 url: DPS_Push.ajax_url,
@@ -175,7 +344,7 @@
             }).fail(function() {
                 alert(DPS_Push.messages.error);
             }).always(function() {
-                $btn.prop('disabled', false).text('Testar Notificação');
+                $btn.prop('disabled', false).text(originalText);
             });
         },
 
@@ -187,11 +356,17 @@
         testReport: function(e) {
             e.preventDefault();
             var $btn = $(e.currentTarget);
+
+            // Prevenir duplo clique
+            if ($btn.prop('disabled')) {
+                return;
+            }
+
             var type = $btn.data('type');
             var $result = $('.dps-test-result[data-type="' + type + '"]');
             var originalText = $btn.html();
 
-            $btn.prop('disabled', true).html('⏳ Enviando...');
+            $btn.prop('disabled', true).html('⏳ ' + (DPS_Push.messages.sending || 'Enviando...'));
             $result.removeClass('success error').text('');
 
             $.ajax({
@@ -223,10 +398,16 @@
         testTelegram: function(e) {
             e.preventDefault();
             var $btn = $('#dps-test-telegram');
+
+            // Prevenir duplo clique
+            if ($btn.prop('disabled')) {
+                return;
+            }
+
             var $result = $('#dps-telegram-result');
             var originalText = $btn.html();
 
-            $btn.prop('disabled', true).html('⏳ Testando...');
+            $btn.prop('disabled', true).html('⏳ ' + (DPS_Push.messages.testing || 'Testando...'));
             $result.removeClass('success error').text('');
 
             $.ajax({
