@@ -593,22 +593,22 @@
     var modal = $('<div class="dps-reschedule-modal">' +
       '<div class="dps-reschedule-content">' +
         '<div class="dps-reschedule-header">' +
-          '<h3 class="dps-reschedule-title">📅 ' + escapeHtml(getMessage('reschedule_title', 'Reagendar')) + '</h3>' +
+          '<h3 class="dps-reschedule-title">📅 ' + getMessage('reschedule_title', 'Reagendar') + '</h3>' +
           '<button type="button" class="dps-reschedule-close">&times;</button>' +
         '</div>' +
         '<div class="dps-reschedule-body">' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + escapeHtml(getMessage('new_date', 'Nova data')) + '</label>' +
+            '<label>' + getMessage('new_date', 'Nova data') + '</label>' +
             '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
-            '<label>' + escapeHtml(getMessage('new_time', 'Novo horário')) + '</label>' +
+            '<label>' + getMessage('new_time', 'Novo horário') + '</label>' +
             '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
         '</div>' +
         '<div class="dps-reschedule-footer">' +
-          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--cancel">' + escapeHtml(getMessage('cancel', 'Cancelar')) + '</button>' +
-          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + parseInt(apptId, 10) + '">' + escapeHtml(getMessage('save', 'Salvar')) + '</button>' +
+          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--cancel">' + getMessage('cancel', 'Cancelar') + '</button>' +
+          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + parseInt(apptId, 10) + '">' + getMessage('save', 'Salvar') + '</button>' +
         '</div>' +
       '</div>' +
     '</div>');
@@ -1078,7 +1078,8 @@
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
     
     // Monta o HTML do modal
-    // XSS FIX: Escape de todos os dados inseridos no HTML
+    // XSS FIX: Escape de dados de texto inseridos no HTML
+    // URLs em href não precisam de escapeHtml (já são URL-encoded), mas data-attributes sim
     var modalHtml = '<div class="dps-payment-modal">' +
       '<div class="dps-payment-modal-content">' +
         '<div class="dps-payment-modal-header">' +
@@ -1092,7 +1093,7 @@
             '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor:</span><span class="dps-payment-info-value">R$ ' + escapeHtml(totalValue) + '</span></div>' +
           '</div>' +
           '<div class="dps-payment-actions">' +
-            '<a href="' + escapeHtml(whatsappUrl) + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
+            '<a href="' + whatsappUrl + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
               '📱 Enviar por WhatsApp' +
             '</a>' +
             '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + escapeHtml(paymentLink) + '">' +
