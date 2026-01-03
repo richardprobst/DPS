@@ -83,6 +83,20 @@ Antes de criar uma nova versão oficial:
 
 #### Security (Segurança)
 
+**Registration Add-on - Auditoria de Segurança Completa (v1.2.2)**
+
+- **Sanitização de entrada aprimorada**: Adicionado `wp_unslash()` antes de `sanitize_*` em todos os campos do formulário de cadastro para tratamento correto de magic quotes.
+- **Validação de coordenadas**: Coordenadas de latitude (-90 a 90) e longitude (-180 a 180) agora são validadas como valores numéricos antes de serem salvas.
+- **Whitelist para campos de seleção**: Campos de espécie, porte e sexo do pet agora são validados contra lista branca de valores permitidos.
+- **Validação de peso do pet**: Campo de peso valida se é número positivo e razoável (máximo 500kg).
+- **Validação de data de nascimento**: Data de nascimento do pet é validada como data válida e não-futura.
+- **Escape de placeholders em email**: Placeholders `{client_name}` e `{business_name}` no template de email de confirmação agora são escapados com `esc_html()` para prevenir XSS.
+- **Dados sanitizados em filter**: O filter `dps_registration_spam_check` agora recebe um array com dados sanitizados em vez do `$_POST` bruto.
+- **wp_safe_redirect**: Substituído `wp_redirect()` por `wp_safe_redirect()` no redirecionamento após cadastro bem-sucedido.
+- **Header Retry-After em rate limit**: Resposta 429 da REST API agora inclui header `Retry-After` com tempo de espera em segundos.
+- **Sanitização de arrays de pets**: Campos de pets enviados como arrays agora aplicam `wp_unslash()` antes de sanitizar.
+- **uninstall.php atualizado**: Arquivo de desinstalação agora remove todas as options, transients e cron jobs criados pelo add-on.
+
 **Payment Add-on - Auditoria de Segurança Completa (v1.2.0)**
 
 - **Access Token em URL da API**: Corrigida vulnerabilidade onde o access token do Mercado Pago era enviado como query parameter em chamadas `wp_remote_get()`. Agora utiliza header `Authorization: Bearer` conforme boas práticas de segurança.

@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -872,20 +872,7 @@ class DPS_Registration_Addon {
                 'ip_hash'  => $ip_hash,
             ) );
 
-            $error = new WP_Error(
-                'rate_limited',
-                __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ),
-                array(
-                    'status'      => 429,
-                    'retry_after' => HOUR_IN_SECONDS,
-                )
-            );
-            // Adiciona header Retry-After para clientes HTTP
-            add_filter( 'rest_post_dispatch', function( $result ) {
-                $result->header( 'Retry-After', HOUR_IN_SECONDS );
-                return $result;
-            }, 10, 1 );
-            return $error;
+            return $this->create_rate_limit_error();
         }
 
         if ( ! $this->bump_api_rate_counter( $ip_token, $ip_limit ) ) {
@@ -894,23 +881,50 @@ class DPS_Registration_Addon {
                 'ip_hash'  => $ip_hash,
             ) );
 
-            $error = new WP_Error(
-                'rate_limited',
-                __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ),
-                array(
-                    'status'      => 429,
-                    'retry_after' => HOUR_IN_SECONDS,
-                )
-            );
-            // Adiciona header Retry-After para clientes HTTP
-            add_filter( 'rest_post_dispatch', function( $result ) {
-                $result->header( 'Retry-After', HOUR_IN_SECONDS );
-                return $result;
-            }, 10, 1 );
-            return $error;
+            return $this->create_rate_limit_error();
         }
 
         return true;
+    }
+
+    /**
+     * Cria erro de rate limit com header Retry-After.
+     *
+     * @since 1.6.0
+     *
+     * @return WP_Error
+     */
+    private function create_rate_limit_error() {
+        // Adiciona header Retry-After apenas uma vez
+        static $header_added = false;
+        if ( ! $header_added ) {
+            add_filter( 'rest_post_dispatch', array( $this, 'add_retry_after_header' ), 10, 1 );
+            $header_added = true;
+        }
+
+        return new WP_Error(
+            'rate_limited',
+            __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ),
+            array(
+                'status'      => 429,
+                'retry_after' => HOUR_IN_SECONDS,
+            )
+        );
+    }
+
+    /**
+     * Callback para adicionar header Retry-After na resposta REST.
+     *
+     * @since 1.6.0
+     *
+     * @param WP_REST_Response $result Resposta da API.
+     * @return WP_REST_Response
+     */
+    public function add_retry_after_header( $result ) {
+        if ( $result instanceof WP_REST_Response ) {
+            $result->header( 'Retry-After', HOUR_IN_SECONDS );
+        }
+        return $result;
     }
 
     /**
@@ -1771,7 +1785,8 @@ class DPS_Registration_Addon {
         $pet_births     = isset( $_POST['pet_birth'] ) && is_array( $_POST['pet_birth'] ) ? array_map( 'wp_unslash', $_POST['pet_birth'] ) : [];
         $pet_sexes      = isset( $_POST['pet_sex'] ) && is_array( $_POST['pet_sex'] ) ? array_map( 'wp_unslash', $_POST['pet_sex'] ) : [];
         $pet_cares      = isset( $_POST['pet_care'] ) && is_array( $_POST['pet_care'] ) ? array_map( 'wp_unslash', $_POST['pet_care'] ) : [];
-        $pet_aggs       = isset( $_POST['pet_aggressive'] ) && is_array( $_POST['pet_aggressive'] ) ? $_POST['pet_aggressive'] : [];
+        // pet_aggressive é checkbox - valor é só "1", não precisa wp_unslash mas aplicamos por consistência
+        $pet_aggs       = isset( $_POST['pet_aggressive'] ) && is_array( $_POST['pet_aggressive'] ) ? array_map( 'wp_unslash', $_POST['pet_aggressive'] ) : [];
         // phpcs:enable
 
         if ( is_array( $pet_names ) ) {
@@ -1808,12 +1823,17 @@ class DPS_Registration_Addon {
                 }
 
                 // Validar peso como número positivo (se preenchido)
+                // Aceita apenas dígitos, vírgula e ponto para prevenir input malformado
                 if ( '' !== $weight ) {
-                    $weight_float = (float) str_replace( ',', '.', $weight );
-                    if ( $weight_float <= 0 || $weight_float > 500 ) {
-                        $weight = ''; // Valor inválido ou implausível
+                    if ( ! preg_match( '/^[\d.,]+$/', $weight ) ) {
+                        $weight = '';
                     } else {
-                        $weight = (string) $weight_float;
+                        $weight_float = (float) str_replace( ',', '.', $weight );
+                        if ( $weight_float <= 0 || $weight_float > 500 ) {
+                            $weight = ''; // Valor inválido ou implausível
+                        } else {
+                            $weight = (string) $weight_float;
+                        }
                     }
                 }
 
@@ -2321,19 +2341,25 @@ class DPS_Registration_Addon {
         $portal_url      = $this->get_portal_url();
         $business_name   = get_bloginfo( 'name' );
 
+        // Escapar valores que serão inseridos em HTML para prevenir XSS
         $placeholders = array(
-            '{client_name}'     => $client_name,
-            '{confirm_url}'     => esc_url_raw( $confirmation_link ),
-            '{registration_url}' => esc_url_raw( $registration_url ),
-            '{portal_url}'      => $portal_url ? esc_url_raw( $portal_url ) : '',
-            '{business_name}'   => $business_name,
+            '{client_name}'     => esc_html( $client_name ),
+            '{confirm_url}'     => esc_url( $confirmation_link ),
+            '{registration_url}' => esc_url( $registration_url ),
+            '{portal_url}'      => $portal_url ? esc_url( $portal_url ) : '',
+            '{business_name}'   => esc_html( $business_name ),
         );
 
         $subject_option = get_option( 'dps_registration_confirm_email_subject', '' );
         $body_option    = get_option( 'dps_registration_confirm_email_body', '' );
 
+        // Subject não precisa de escape HTML pois é texto puro
+        $subject_placeholders = array(
+            '{client_name}'     => $client_name,
+            '{business_name}'   => $business_name,
+        );
         $subject = $subject_option
-            ? $this->replace_placeholders( $subject_option, $placeholders )
+            ? $this->replace_placeholders( $subject_option, $subject_placeholders )
             : __( 'Confirme seu email - desi.pet by PRObst', 'desi-pet-shower' );
 
         if ( $body_option ) {
