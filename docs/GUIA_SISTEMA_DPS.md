@@ -7,7 +7,7 @@
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
-*Versão 1.3 | Última atualização: 09 de Dezembro de 2024*
+*Versão 1.4 | Última atualização: 03 de Janeiro de 2026*
 
 ---
 
@@ -73,6 +73,9 @@
 7. [Manutenção e Atualizações](#-manutenção-e-atualizações)
    - [Backup do Sistema](#backup-do-sistema)
    - [Atualizações](#atualizações)
+   - [Guia Passo a Passo do GitHub Updater](#-guia-passo-a-passo-como-atualizar-o-sistema-dps)
+   - [Forçar Verificação de Atualizações](#-forçar-verificação-de-atualizações)
+   - [Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
    - [Resolução de Problemas](#resolução-de-problemas)
 
 8. [Referência Técnica](#-referência-técnica)
@@ -1368,22 +1371,160 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 
 ### Atualizações
 
-**Processo de Atualização:**
+O sistema DPS possui um **atualizador automático integrado** chamado **GitHub Updater**. Ele verifica automaticamente se há novas versões disponíveis no repositório GitHub e avisa você diretamente no painel do WordPress — sem precisar baixar arquivos manualmente!
 
-1. **Antes de atualizar:**
-   - Faça backup completo do banco de dados
-   - Exporte dados pelo add-on de Backup
-   - Teste em ambiente de staging (se disponível)
+---
 
-2. **Durante a atualização:**
-   - Acesse **Plugins**
-   - Atualize plugin base primeiro
-   - Depois atualize os add-ons
+#### 🚀 Guia Passo a Passo: Como Atualizar o Sistema DPS
 
-3. **Após atualizar:**
-   - Verifique se o painel carrega corretamente
-   - Teste criação de agendamento
-   - Verifique integrações (pagamentos, WhatsApp)
+Este guia foi criado pensando em quem não tem experiência técnica. Siga cada passo com calma.
+
+##### Passo 1: Verificar se há atualizações disponíveis
+
+1. **Acesse o painel administrativo do WordPress**
+   - Digite na barra de endereço do navegador: `seusite.com.br/wp-admin` *(substitua "seusite.com.br" pelo endereço real do seu site)*
+   - Faça login com seu usuário e senha de administrador
+
+2. **Vá até a página de Plugins**
+   - No menu lateral esquerdo, clique em **"Plugins"**
+   - Ou acesse diretamente: `seusite.com.br/wp-admin/plugins.php` *(substitua pelo seu domínio)*
+
+3. **Observe se há avisos de atualização**
+   - Se houver atualizações do DPS disponíveis, você verá:
+     - Um aviso azul no topo da página: *"desi.pet by PRObst: X atualizações disponíveis via GitHub"*
+     - Abaixo de cada plugin com atualização, uma mensagem em fundo amarelo claro indicando a nova versão
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│ ℹ️ desi.pet by PRObst: 3 atualizações disponíveis via GitHub. │
+└────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 🔌 desi.pet by PRObst – Base                                            │
+│    Descrição do plugin...                                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│ ⚠️ Há uma nova versão disponível: 1.3.0 (sua versão: 1.2.0)             │
+│    [Ver detalhes da versão 1.3.0] [Atualizar agora]                     │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+##### Passo 2: Fazer backup ANTES de atualizar (muito importante!)
+
+> ⚠️ **NUNCA atualize sem fazer backup primeiro!** Se algo der errado, você poderá restaurar tudo.
+
+1. **Backup pelo add-on DPS (recomendado):**
+   - Acesse **desi.pet by PRObst > Backup & Restauração** no menu lateral
+   - Clique em **"Exportar Todos os Dados"**
+   - Salve o arquivo `.json` no seu computador em local seguro
+
+2. **Backup do banco de dados (extra segurança):**
+   - Se você usa um plugin como UpdraftPlus, execute um backup completo
+   - Ou peça ao seu provedor de hospedagem para fazer um snapshot
+
+##### Passo 3: Atualizar os plugins
+
+**Método A: Atualizar um por vez (mais seguro)**
+
+1. Na página de Plugins, localize o plugin DPS que deseja atualizar
+2. Clique no link **"Atualizar agora"** que aparece abaixo do plugin
+3. Aguarde a mensagem *"Plugin atualizado com sucesso"*
+4. Repita para cada plugin DPS
+
+> 💡 **Dica**: Sempre atualize o **Plugin Base** primeiro, depois os add-ons.
+
+**Método B: Atualizar todos de uma vez**
+
+1. Na página de Plugins, marque a caixa de seleção ☐ ao lado de cada plugin DPS com atualização
+2. No menu suspenso **"Ações em massa"** (no topo), selecione **"Atualizar"**
+3. Clique em **"Aplicar"**
+4. Aguarde todos serem atualizados
+
+```
+Ordem recomendada de atualização:
+  1º → desi.pet by PRObst – Base (SEMPRE primeiro)
+  2º → Demais add-ons (qualquer ordem)
+```
+
+##### Passo 4: Verificar se tudo está funcionando
+
+Após atualizar, faça uma verificação rápida:
+
+| O que verificar | Como verificar |
+|-----------------|----------------|
+| Painel carrega? | Acesse a página com `[dps_base]` |
+| Dados estão lá? | Veja se clientes e pets aparecem |
+| Agenda funciona? | Tente criar um agendamento de teste |
+| Financeiro OK? | Verifique se transações aparecem |
+
+Se algo não funcionar, restaure o backup feito no Passo 2.
+
+---
+
+#### 🔄 Forçar Verificação de Atualizações
+
+Normalmente, o sistema verifica atualizações automaticamente a cada 12 horas. Se você quiser verificar agora:
+
+1. Na barra de endereço do navegador, acesse:
+   ```
+   seusite.com.br/wp-admin/?dps_force_update_check=1
+   ```
+   *(substitua "seusite.com.br" pelo endereço real do seu site)*
+2. Você será redirecionado para a página de Plugins
+3. Se houver atualizações, elas aparecerão
+
+---
+
+#### ❓ Perguntas Frequentes (FAQ)
+
+**P: Preciso instalar alguma coisa para o atualizador funcionar?**
+> Não! O GitHub Updater já vem embutido no plugin base. Basta ter o plugin base ativo.
+
+**P: As atualizações são gratuitas?**
+> Sim! Todas as atualizações são incluídas automaticamente para quem já possui o sistema.
+
+**P: E se a atualização der erro?**
+> Restaure o backup que você fez no Passo 2. Depois, entre em contato com o suporte para investigar o problema.
+
+**P: O sistema atualiza sozinho automaticamente?**
+> Não. As atualizações automáticas estão **desativadas por segurança**. Você sempre precisa clicar para atualizar manualmente, assim pode fazer backup antes.
+
+**P: Posso desabilitar o verificador de atualizações?**
+> Sim, mas não é recomendado. Se precisar, adicione esta linha no arquivo `wp-config.php`:
+> ```php
+> add_filter( 'dps_github_updater_enabled', '__return_false' );
+> ```
+
+**P: Onde vejo o que mudou em cada versão?**
+> Ao clicar em **"Ver detalhes da versão X.X.X"** você verá as notas de lançamento. Também pode consultar o arquivo `CHANGELOG.md` no repositório.
+
+---
+
+#### 📋 Resumo do Processo de Atualização
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   ATUALIZAÇÃO DO DPS                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. 📦 Backup                                                │
+│     └─→ Exporte dados via DPS > Backup                      │
+│                                                              │
+│  2. 🔍 Verificar atualizações                                │
+│     └─→ Plugins → veja avisos azuis/amarelos                │
+│                                                              │
+│  3. ⬆️ Atualizar                                             │
+│     └─→ Plugin Base primeiro, depois add-ons               │
+│                                                              │
+│  4. ✅ Testar                                                │
+│     └─→ Painel, clientes, agenda, financeiro                │
+│                                                              │
+│  5. 🎉 Pronto!                                               │
+│     └─→ Sistema atualizado e funcionando                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
 
 **⚠️ Importante:**
 - Sempre leia o CHANGELOG.md antes de atualizar

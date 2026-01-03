@@ -11,6 +11,7 @@ O guia inclui:
 - Instalação do plugin base e add-ons
 - Configuração detalhada de cada componente
 - Instruções de uso passo a passo
+- **🆕 Guia Passo a Passo do GitHub Updater** - Como atualizar o sistema de forma fácil
 - Resolução de problemas comuns
 - Referência técnica (shortcodes, roles, estrutura de dados)
 

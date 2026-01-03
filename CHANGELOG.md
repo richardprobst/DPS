@@ -125,6 +125,13 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Documentação - Guia Passo a Passo do GitHub Updater (v1.4)**
+
+- **Guia completo para usuários leigos**: Adicionado guia detalhado explicando como usar o sistema de atualizações automáticas via GitHub no arquivo `docs/GUIA_SISTEMA_DPS.md`.
+- **Instruções visuais**: Incluídos diagramas ASCII e representações visuais de como os avisos de atualização aparecem no WordPress.
+- **FAQ de atualizações**: Adicionadas perguntas frequentes sobre o processo de atualização, como forçar verificação e desabilitar o atualizador.
+- **Passo a passo estruturado**: Documentados os 4 passos principais: Verificar atualizações → Fazer backup → Atualizar → Testar.
+
 **Client Portal Add-on (v2.4.3) - Auto-envio de Link de Acesso por E-mail**
 
 - **Formulário de solicitação de link por e-mail**: Clientes podem agora informar seu e-mail cadastrado na tela de acesso ao portal para receber automaticamente o link de acesso. Não é mais necessário aguardar envio manual pela equipe para quem tem e-mail cadastrado.
