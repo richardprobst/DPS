@@ -729,7 +729,14 @@ class DPS_Services_Addon {
                     }
                 }
                 $form.data("submitting", true);
-                $btn.prop("disabled", true).css("opacity", "0.6");
+                $btn.prop("disabled", true).addClass("dps-btn-submitting");
+            });
+            // Reset form state on back/forward navigation (bfcache)
+            $(window).on("pageshow", function(event){
+                if(event.originalEvent.persisted){
+                    $(".dps-services-form").data("submitting", false);
+                    $(".dps-services-form button[type=submit]").prop("disabled", false).removeClass("dps-btn-submitting");
+                }
             });
             // Pesquisa simples na listagem de serviços
             $(".dps-search-input").on("keyup", function(){
@@ -1937,7 +1944,7 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.2' );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.3' );
         wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.5.1', true );
     }
 
