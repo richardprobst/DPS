@@ -138,6 +138,11 @@ class DPS_Portal_Actions_Handler {
     private function handle_pet_photo_upload( $pet_id, $redirect_url ) {
         $file = $_FILES['pet_photo'];
         
+        // Valida que o upload foi bem-sucedido
+        if ( ! isset( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) || UPLOAD_ERR_OK !== $file['error'] ) {
+            return add_query_arg( 'portal_msg', 'upload_error', $redirect_url );
+        }
+        
         // Valida tipos MIME permitidos para imagens
         $allowed_mimes = [
             'jpg|jpeg|jpe' => 'image/jpeg',
@@ -169,7 +174,8 @@ class DPS_Portal_Actions_Handler {
         
         // Validação adicional de MIME type real usando getimagesize()
         // Isso previne uploads de arquivos maliciosos com extensão de imagem
-        $image_info = @getimagesize( $file['tmp_name'] );
+        // Nota: Validação de is_uploaded_file() já foi feita acima
+        $image_info = getimagesize( $file['tmp_name'] );
         if ( false === $image_info || ! isset( $image_info['mime'] ) ) {
             return add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
         }
@@ -401,13 +407,18 @@ class DPS_Portal_Actions_Handler {
             'payer' => [
                 'name'  => wp_strip_all_tags( $client_name ),
                 'email' => $client_mail && is_email( $client_mail ) ? $client_mail : 'cliente@example.com',
-                'phone' => [
-                    'number' => preg_replace( '/\D/', '', (string) $client_phone ),
-                ],
             ],
             'external_reference' => 'DPS_TRANS_' . absint( $trans_id ),
             'notification_url'   => home_url( '/mercadopago/webhook/' ),
         ];
+        
+        // Adiciona telefone apenas se for válido (após sanitização)
+        $clean_phone = preg_replace( '/\D/', '', (string) $client_phone );
+        if ( ! empty( $clean_phone ) && strlen( $clean_phone ) >= 8 ) {
+            $preference_data['payer']['phone'] = [
+                'number' => $clean_phone,
+            ];
+        }
         
         $response = wp_remote_post( 'https://api.mercadopago.com/checkout/preferences', [
             'headers' => [

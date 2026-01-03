@@ -25,11 +25,11 @@ O add-on apresentou boa qualidade de código com proteções de segurança imple
 | 3 | ALTO | Vazamento de $_POST via hook | ✅ Corrigido |
 | 4 | MÉDIO | Falta de wp_unslash em campos AJAX | ✅ Corrigido |
 | 5 | MÉDIO | Tratamento de erros na API Mercado Pago | ✅ Melhorado |
-| 6 | BAIXO | wp_update_attachment_metadata com parâmetro errado | ✅ Corrigido |
-| 7 | OK | Proteção CSRF/nonce em formulários | ✅ Adequado |
-| 8 | OK | Autorização com current_user_can() | ✅ Adequado |
-| 9 | OK | Escape de saída em templates | ✅ Adequado |
-| 10 | OK | Rate limiting em endpoints públicos | ✅ Adequado |
+| 6 | MÉDIO | Validação de upload bem-sucedido antes de processar | ✅ Corrigido |
+| 7 | BAIXO | wp_update_attachment_metadata com parâmetro errado | ✅ Corrigido |
+| 8 | BAIXO | Validação de telefone na API Mercado Pago | ✅ Corrigido |
+| 9 | OK | Proteção CSRF/nonce em formulários | ✅ Adequado |
+| 10 | OK | Autorização com current_user_can() | ✅ Adequado |
 
 ---
 

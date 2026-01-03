@@ -504,6 +504,11 @@ final class DPS_Client_Portal {
             if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                 $file = $_FILES['pet_photo'];
                 
+                // Valida que o upload foi bem-sucedido
+                if ( ! isset( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) || UPLOAD_ERR_OK !== $file['error'] ) {
+                    $redirect_url = add_query_arg( 'portal_msg', 'upload_error', $redirect_url );
+                } else {
+                
                 // Valida tipos MIME permitidos para imagens
                 $allowed_mimes = [
                     'jpg|jpeg|jpe' => 'image/jpeg',
@@ -533,7 +538,8 @@ final class DPS_Client_Portal {
                     } else {
                         // Validação adicional de MIME type real usando getimagesize()
                         // Isso previne uploads de arquivos maliciosos com extensão de imagem
-                        $image_info = @getimagesize( $file['tmp_name'] );
+                        // Nota: Validação de is_uploaded_file() já foi feita acima
+                        $image_info = getimagesize( $file['tmp_name'] );
                         if ( false === $image_info || ! isset( $image_info['mime'] ) || ! in_array( $image_info['mime'], $allowed_mimes, true ) ) {
                             $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
                         } else {
@@ -567,6 +573,7 @@ final class DPS_Client_Portal {
                             }
                         }
                     }
+                }
                 }
             }
 
