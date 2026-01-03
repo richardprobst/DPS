@@ -690,6 +690,7 @@ class DPS_Services_Addon {
         echo '</form>';
 
         // Script para ocultar/mostrar campos de categoria e pacote dependendo do tipo
+        // Inclui prevenção de duplo clique no submit, validação de preços e pesquisa na listagem
         echo '<script>(function($){$(document).ready(function(){
             function toggleFields(){
                 var type = $("#service_type").val();
@@ -706,6 +707,37 @@ class DPS_Services_Addon {
             }
             toggleFields();
             $(document).on("change", "#service_type", toggleFields);
+            // Prevenção de duplo clique e validação no formulário de serviços
+            $(".dps-services-form").on("submit", function(e){
+                var $form = $(this);
+                var $btn = $form.find("button[type=submit]");
+                // Evita duplo clique
+                if($form.data("submitting")) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Validação client-side: pelo menos um preço deve ser informado para não-pacotes
+                var type = $("#service_type").val();
+                if(type !== "package") {
+                    var priceSmall = parseFloat($("#service_price_small").val()) || 0;
+                    var priceMedium = parseFloat($("#service_price_medium").val()) || 0;
+                    var priceLarge = parseFloat($("#service_price_large").val()) || 0;
+                    if(priceSmall === 0 && priceMedium === 0 && priceLarge === 0) {
+                        alert("' . esc_js( __( 'Informe pelo menos um valor de preço para o serviço.', 'dps-services-addon' ) ) . '");
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                $form.data("submitting", true);
+                $btn.prop("disabled", true).addClass("dps-btn-submitting");
+            });
+            // Reset form state on back/forward navigation (bfcache)
+            $(window).on("pageshow", function(event){
+                if(event.originalEvent.persisted){
+                    $(".dps-services-form").data("submitting", false);
+                    $(".dps-services-form button[type=submit]").prop("disabled", false).removeClass("dps-btn-submitting");
+                }
+            });
             // Pesquisa simples na listagem de serviços
             $(".dps-search-input").on("keyup", function(){
                 var term = $(this).val().toLowerCase();
@@ -1183,12 +1215,9 @@ class DPS_Services_Addon {
                             [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $new_id ],
                             $current_url ? remove_query_arg( [ 'dps_duplicate_service', '_wpnonce' ], $current_url ) : home_url()
                         );
+                        // Usa mensagem simples sem HTML (DPS_Message_Helper escapa o texto)
                         DPS_Message_Helper::add_success(
-                            sprintf(
-                                /* translators: %s: link para editar o serviço duplicado */
-                                __( 'Serviço duplicado com sucesso! O novo serviço está inativo. <a href="%s">Editar cópia</a>', 'dps-services-addon' ),
-                                esc_url( $edit_url )
-                            )
+                            __( 'Serviço duplicado com sucesso! O novo serviço está inativo. Use o botão Editar na tabela.', 'dps-services-addon' )
                         );
                     }
                 } else {
@@ -1628,6 +1657,10 @@ class DPS_Services_Addon {
         if ( ! isset( $_POST['appointment_services_executed'] ) && ! isset( $_POST['appointment_extra_names'] ) ) {
             return;
         }
+        // Defesa em profundidade: verifica se o usuário pode editar este post
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
         // Serviços executados
         if ( isset( $_POST['appointment_services_executed'] ) && is_array( $_POST['appointment_services_executed'] ) ) {
             $executed_raw = array_map( 'intval', (array) $_POST['appointment_services_executed'] );
@@ -1679,6 +1712,10 @@ class DPS_Services_Addon {
             return;
         }
         if ( 'dps_agendamento' !== $post->post_type ) {
+            return;
+        }
+        // Defesa em profundidade: verifica se o usuário pode editar este post
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
             return;
         }
         // Verifica se há dados de serviços no POST
@@ -1907,7 +1944,7 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.2' );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.3' );
         wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.5.1', true );
     }
 
@@ -2037,7 +2074,7 @@ class DPS_Services_Addon {
 
         ob_start();
         ?>
-        <div class="dps-catalog-item <?php echo $is_package ? 'dps-catalog-package' : ''; ?>">
+        <div class="dps-catalog-item <?php echo esc_attr( $is_package ? 'dps-catalog-package' : '' ); ?>">
             <div class="dps-catalog-item-content">
                 <h4 class="dps-catalog-item-title">
                     <?php echo esc_html( $service['title'] ); ?>
