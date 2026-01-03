@@ -97,6 +97,19 @@ Antes de criar uma nova versão oficial:
 - **Token oculto na UI**: Campo de token do Telegram agora usa `type="password"` para evitar exposição casual.
 - **phpcs annotations**: Adicionadas anotações de ignorar para queries diretas necessárias com justificativas.
 
+#### Added (Adicionado)
+
+**Push Notifications Add-on - Verificação Funcional e UX (v1.3.0)**
+
+- **Prevenção de duplo clique**: Botão de salvar configurações é desabilitado durante envio e exibe spinner "Salvando..." para evitar submissões duplicadas.
+- **Validação de emails client-side**: Campos de email são validados em tempo real ao perder foco, exibindo mensagens de erro específicas para emails inválidos.
+- **Validação de dias de inatividade**: Campo numérico valida e corrige valores fora do intervalo (7-365 dias) tanto no client quanto no servidor.
+- **Mensagens de feedback visuais**: Adicionado `settings_errors('dps_push')` para exibir mensagens de sucesso/erro após salvar configurações.
+- **Strings internacionalizadas em JS**: Estados de loading ("Salvando...", "Enviando...", "Testando...") agora são traduzíveis via `wp_localize_script()`.
+- **Service Worker melhorado**: Removidos caminhos hardcoded de ícones. Ícones agora são definidos dinamicamente pelo payload da notificação.
+- **Estilos de acessibilidade**: Adicionado `:focus-visible` para navegação por teclado em campos de formulário.
+- **Hook corrigido**: Movido `maybe_handle_save` de `init` para `admin_init` para garantir exibição correta de `settings_errors()`.
+
 **Registration Add-on - Auditoria de Segurança Completa (v1.2.2)**
 
 - **Sanitização de entrada aprimorada**: Adicionado `wp_unslash()` antes de `sanitize_*` em todos os campos do formulário de cadastro para tratamento correto de magic quotes.

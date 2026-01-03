@@ -26,8 +26,8 @@ self.addEventListener('push', function(event) {
     var data = {
         title: 'desi.pet by PRObst',
         body: 'Nova notificação',
-        icon: '/wp-content/plugins/desi-pet-shower-base_plugin/assets/images/icon-192.png',
-        badge: '/wp-content/plugins/desi-pet-shower-base_plugin/assets/images/badge-72.png',
+        icon: '',  // Será definido pelo payload ou usa default do navegador
+        badge: '',
         tag: 'dps-notification',
         requireInteraction: false,
         data: {}
@@ -45,8 +45,6 @@ self.addEventListener('push', function(event) {
 
     var options = {
         body: data.body,
-        icon: data.icon,
-        badge: data.badge,
         tag: data.tag,
         requireInteraction: data.requireInteraction,
         data: data.data,
@@ -62,6 +60,14 @@ self.addEventListener('push', function(event) {
             }
         ]
     };
+
+    // Adicionar ícone e badge apenas se fornecidos
+    if (data.icon) {
+        options.icon = data.icon;
+    }
+    if (data.badge) {
+        options.badge = data.badge;
+    }
 
     event.waitUntil(
         self.registration.showNotification(data.title, options)

@@ -147,6 +147,15 @@ add_filter( 'dps_push_payload', function( $payload, $event_type ) {
 - **Log Security**: Whitelist de níveis de log para prevenir execução de métodos arbitrários
 - **Data Validation**: Validação de formato de datas antes de queries
 
+**Verificação Funcional e UX**
+
+- **Prevenção de duplo clique**: Botão de salvar com spinner e estado desabilitado
+- **Validação client-side**: Emails validados em tempo real, dias de inatividade com limites
+- **Feedback visual**: Mensagens de sucesso/erro após salvar configurações
+- **Strings internacionalizadas**: Estados de loading traduzíveis
+- **Service Worker**: Removidos caminhos hardcoded de ícones
+- **Acessibilidade**: Estilos :focus-visible para navegação por teclado
+
 ### v1.2.0 (2025-12-17)
 
 - **Menu admin visível**: Menu agora registrado sob "desi.pet by PRObst > Notificações"

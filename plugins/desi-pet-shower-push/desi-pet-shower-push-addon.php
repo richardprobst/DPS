@@ -98,7 +98,7 @@ class DPS_Push_Addon {
     public function __construct() {
         // Menu admin
         add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
-        add_action( 'init', [ $this, 'maybe_handle_save' ] );
+        add_action( 'admin_init', [ $this, 'maybe_handle_save' ] );
 
         // Assets
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -212,6 +212,11 @@ class DPS_Push_Addon {
                 'not_supported'     => __( 'Seu navegador não suporta notificações push.', 'dps-push-addon' ),
                 'permission_denied' => __( 'Permissão negada. Habilite nas configurações do navegador.', 'dps-push-addon' ),
                 'test_sent'         => __( 'Notificação de teste enviada!', 'dps-push-addon' ),
+                'saving'            => __( 'Salvando...', 'dps-push-addon' ),
+                'save_settings'     => __( 'Salvar Configurações', 'dps-push-addon' ),
+                'sending'           => __( 'Enviando...', 'dps-push-addon' ),
+                'testing'           => __( 'Testando...', 'dps-push-addon' ),
+                'invalid_email'     => __( 'Email inválido: ', 'dps-push-addon' ),
             ],
         ] );
     }
@@ -708,6 +713,12 @@ class DPS_Push_Addon {
         $weekly_day = in_array( $weekly_day_raw, $allowed_days, true ) ? $weekly_day_raw : 'monday';
         
         $inactive_days = isset( $_POST['dps_push_inactive_days'] ) ? absint( $_POST['dps_push_inactive_days'] ) : 30;
+        // Validar intervalo (mínimo 7, máximo 365 dias).
+        if ( $inactive_days < 7 ) {
+            $inactive_days = 7;
+        } elseif ( $inactive_days > 365 ) {
+            $inactive_days = 365;
+        }
         $telegram_token = isset( $_POST['dps_push_telegram_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_token'] ) ) : '';
         $telegram_chat  = isset( $_POST['dps_push_telegram_chat'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_chat'] ) ) : '';
 
@@ -785,6 +796,8 @@ class DPS_Push_Addon {
         ?>
         <div class="wrap dps-push-settings">
             <h1><?php echo esc_html__( 'Notificações Push', 'dps-push-addon' ); ?></h1>
+
+            <?php settings_errors( 'dps_push' ); ?>
 
             <div class="dps-push-container">
                 <!-- Status Card -->
@@ -963,9 +976,10 @@ class DPS_Push_Addon {
                         </table>
 
                         <p class="submit">
-                            <button type="submit" name="dps_push_save" class="button button-primary">
+                            <button type="submit" name="dps_push_save" id="dps-push-save-btn" class="button button-primary">
                                 <?php echo esc_html__( 'Salvar Configurações', 'dps-push-addon' ); ?>
                             </button>
+                            <span id="dps-push-save-spinner" class="spinner" style="float: none; vertical-align: middle;"></span>
                         </p>
                     </form>
                 </div>

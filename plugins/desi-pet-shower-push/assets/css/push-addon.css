@@ -286,3 +286,38 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+/* === Save Button States (v1.3.0) === */
+#dps-push-save-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#dps-push-save-spinner.is-active {
+    visibility: visible;
+    margin-left: 10px;
+}
+
+/* Email validation errors */
+.dps-email-error {
+    color: #ef4444;
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Focus visible for accessibility */
+.dps-push-card input:focus-visible,
+.dps-push-card textarea:focus-visible,
+.dps-push-card select:focus-visible,
+.dps-push-card button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
