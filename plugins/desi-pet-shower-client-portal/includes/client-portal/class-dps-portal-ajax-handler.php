@@ -511,14 +511,14 @@ class DPS_Portal_AJAX_Handler {
             wp_send_json_error( [ 'message' => __( 'Cliente não autenticado', 'dps-client-portal' ) ] );
         }
 
-        // Extrai dados do formulário
-        $request_type            = isset( $_POST['request_type'] ) ? sanitize_key( $_POST['request_type'] ) : 'new';
+        // Extrai dados do formulário (wp_unslash para remover magic quotes)
+        $request_type            = isset( $_POST['request_type'] ) ? sanitize_key( wp_unslash( $_POST['request_type'] ) ) : 'new';
         $pet_id                  = isset( $_POST['pet_id'] ) ? absint( $_POST['pet_id'] ) : 0;
-        $desired_date            = isset( $_POST['desired_date'] ) ? sanitize_text_field( $_POST['desired_date'] ) : '';
-        $desired_period          = isset( $_POST['desired_period'] ) ? sanitize_key( $_POST['desired_period'] ) : '';
-        $services                = isset( $_POST['services'] ) && is_array( $_POST['services'] ) ? array_map( 'sanitize_text_field', $_POST['services'] ) : [];
+        $desired_date            = isset( $_POST['desired_date'] ) ? sanitize_text_field( wp_unslash( $_POST['desired_date'] ) ) : '';
+        $desired_period          = isset( $_POST['desired_period'] ) ? sanitize_key( wp_unslash( $_POST['desired_period'] ) ) : '';
+        $services                = isset( $_POST['services'] ) && is_array( $_POST['services'] ) ? array_map( 'sanitize_text_field', array_map( 'wp_unslash', $_POST['services'] ) ) : [];
         $original_appointment_id = isset( $_POST['original_appointment_id'] ) ? absint( $_POST['original_appointment_id'] ) : 0;
-        $notes                   = isset( $_POST['notes'] ) ? sanitize_textarea_field( $_POST['notes'] ) : '';
+        $notes                   = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
 
         // Validações básicas
         if ( empty( $desired_date ) || empty( $desired_period ) ) {

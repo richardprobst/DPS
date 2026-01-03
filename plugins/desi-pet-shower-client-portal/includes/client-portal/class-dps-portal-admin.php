@@ -774,24 +774,42 @@ class DPS_Portal_Admin {
             delete_option( 'dps_portal_logo_id' );
         }
         
+        // Tipos MIME permitidos para uploads de branding
+        $allowed_mimes = [
+            'jpg|jpeg|jpe' => 'image/jpeg',
+            'gif'          => 'image/gif',
+            'png'          => 'image/png',
+            'webp'         => 'image/webp',
+            'svg'          => 'image/svg+xml',
+        ];
+        
         // Upload de logo
         if ( ! empty( $_FILES['portal_logo']['name'] ) ) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-            require_once ABSPATH . 'wp-admin/includes/image.php';
+            $file = $_FILES['portal_logo'];
             
-            $upload = wp_handle_upload( $_FILES['portal_logo'], [ 'test_form' => false ] );
-            
-            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                $attachment = [
-                    'post_title'     => 'Portal Logo',
-                    'post_mime_type' => $upload['type'],
-                    'post_status'    => 'inherit',
-                ];
-                $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
-                if ( ! is_wp_error( $attach_id ) ) {
-                    $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
-                    wp_update_attachment_metadata( $attach_id, $attach_data );
-                    update_option( 'dps_portal_logo_id', $attach_id );
+            // Valida MIME type real do arquivo
+            $image_info = @getimagesize( $file['tmp_name'] );
+            if ( false !== $image_info && isset( $image_info['mime'] ) && in_array( $image_info['mime'], $allowed_mimes, true ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                
+                $upload = wp_handle_upload( $file, [ 
+                    'test_form' => false,
+                    'mimes'     => $allowed_mimes,
+                ] );
+                
+                if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                    $attachment = [
+                        'post_title'     => 'Portal Logo',
+                        'post_mime_type' => $upload['type'],
+                        'post_status'    => 'inherit',
+                    ];
+                    $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
+                    if ( ! is_wp_error( $attach_id ) ) {
+                        $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
+                        wp_update_attachment_metadata( $attach_id, $attach_data );
+                        update_option( 'dps_portal_logo_id', $attach_id );
+                    }
                 }
             }
         }
@@ -803,22 +821,31 @@ class DPS_Portal_Admin {
         
         // Upload de hero
         if ( ! empty( $_FILES['portal_hero']['name'] ) ) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-            require_once ABSPATH . 'wp-admin/includes/image.php';
+            $file = $_FILES['portal_hero'];
             
-            $upload = wp_handle_upload( $_FILES['portal_hero'], [ 'test_form' => false ] );
-            
-            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                $attachment = [
-                    'post_title'     => 'Portal Hero Image',
-                    'post_mime_type' => $upload['type'],
-                    'post_status'    => 'inherit',
-                ];
-                $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
-                if ( ! is_wp_error( $attach_id ) ) {
-                    $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
-                    wp_update_attachment_metadata( $attach_id, $attach_data );
-                    update_option( 'dps_portal_hero_id', $attach_id );
+            // Valida MIME type real do arquivo
+            $image_info = @getimagesize( $file['tmp_name'] );
+            if ( false !== $image_info && isset( $image_info['mime'] ) && in_array( $image_info['mime'], $allowed_mimes, true ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                
+                $upload = wp_handle_upload( $file, [ 
+                    'test_form' => false,
+                    'mimes'     => $allowed_mimes,
+                ] );
+                
+                if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                    $attachment = [
+                        'post_title'     => 'Portal Hero Image',
+                        'post_mime_type' => $upload['type'],
+                        'post_status'    => 'inherit',
+                    ];
+                    $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
+                    if ( ! is_wp_error( $attach_id ) ) {
+                        $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
+                        wp_update_attachment_metadata( $attach_id, $upload['file'] );
+                        update_option( 'dps_portal_hero_id', $attach_id );
+                    }
                 }
             }
         }

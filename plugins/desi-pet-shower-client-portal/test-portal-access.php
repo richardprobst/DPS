@@ -59,12 +59,14 @@ echo "   ✓ URL retornada: {$portal_url}\n";
 echo "\n3. Verificando tabela de tokens...\n";
 global $wpdb;
 $table_name = $wpdb->prefix . 'dps_portal_tokens';
-$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Script de diagnóstico
+$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
 
 if ( $table_exists ) {
     echo "   ✓ Tabela {$table_name} existe\n";
     
-    $count = $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Script de diagnóstico
+    $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}dps_portal_tokens WHERE 1=%d", 1 ) );
     echo "   ✓ Total de tokens: {$count}\n";
     
     $active = $wpdb->get_var( 
