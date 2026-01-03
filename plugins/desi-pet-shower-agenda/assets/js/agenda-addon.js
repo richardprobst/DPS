@@ -1,4 +1,18 @@
 (function($){
+  /**
+   * Escapa caracteres especiais HTML para prevenir XSS.
+   * @param {string} str String a ser escapada.
+   * @return {string} String escapada.
+   */
+  function escapeHtml(str) {
+    if (str === null || str === undefined) {
+      return '';
+    }
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   $(document).ready(function(){
     var reloadDelay = parseInt(DPS_AG_Addon.reloadDelay, 10) || 600;
 
@@ -575,6 +589,7 @@
     var currentDate = btn.data('date');
     var currentTime = btn.data('time');
     
+    // XSS FIX: Escape dos valores que serão inseridos no HTML
     var modal = $('<div class="dps-reschedule-modal">' +
       '<div class="dps-reschedule-content">' +
         '<div class="dps-reschedule-header">' +
@@ -584,16 +599,16 @@
         '<div class="dps-reschedule-body">' +
           '<div class="dps-reschedule-field">' +
             '<label>' + getMessage('new_date', 'Nova data') + '</label>' +
-            '<input type="date" id="dps-reschedule-date" value="' + currentDate + '" required>' +
+            '<input type="date" id="dps-reschedule-date" value="' + escapeHtml(currentDate) + '" required>' +
           '</div>' +
           '<div class="dps-reschedule-field">' +
             '<label>' + getMessage('new_time', 'Novo horário') + '</label>' +
-            '<input type="time" id="dps-reschedule-time" value="' + currentTime + '" required>' +
+            '<input type="time" id="dps-reschedule-time" value="' + escapeHtml(currentTime) + '" required>' +
           '</div>' +
         '</div>' +
         '<div class="dps-reschedule-footer">' +
           '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--cancel">' + getMessage('cancel', 'Cancelar') + '</button>' +
-          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + apptId + '">' + getMessage('save', 'Salvar') + '</button>' +
+          '<button type="button" class="dps-reschedule-btn dps-reschedule-btn--save" data-appt-id="' + parseInt(apptId, 10) + '">' + getMessage('save', 'Salvar') + '</button>' +
         '</div>' +
       '</div>' +
     '</div>');
@@ -989,7 +1004,8 @@
             // Verifica se é TaxiDog para adicionar ícone especial
             var icon = srv.is_taxidog ? '🚐 ' : '';
             var itemClass = srv.is_taxidog ? ' class="dps-service-taxidog"' : '';
-            modalHtml += '<li' + itemClass + '><span class="service-name">' + icon + srv.name + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
+            // XSS FIX: Escape do nome do serviço
+            modalHtml += '<li' + itemClass + '><span class="service-name">' + icon + escapeHtml(srv.name) + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
           }
           modalHtml += '<li style="font-weight:700; border-top:2px solid #e2e8f0; padding-top:1rem;"><span>Total</span><span class="service-price">R$ ' + total.toFixed(2).replace('.', ',') + '</span></li>';
           modalHtml += '</ul>';
@@ -998,9 +1014,11 @@
         }
         
         if (notes) {
+          // XSS FIX: Escape das observações antes de substituir \n por <br>
+          var escapedNotes = escapeHtml(notes).replace(/\n/g, '<br>');
           modalHtml += '<div class="dps-services-notes">' +
             '<div class="dps-services-notes-title">📝 Observações</div>' +
-            '<div class="dps-services-notes-content">' + notes.replace(/\n/g, '<br>') + '</div>' +
+            '<div class="dps-services-notes-content">' + escapedNotes + '</div>' +
           '</div>';
         }
         
@@ -1060,6 +1078,8 @@
     var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMsg);
     
     // Monta o HTML do modal
+    // XSS FIX: Escape de dados de texto inseridos no HTML
+    // URLs em href não precisam de escapeHtml (já são URL-encoded), mas data-attributes sim
     var modalHtml = '<div class="dps-payment-modal">' +
       '<div class="dps-payment-modal-content">' +
         '<div class="dps-payment-modal-header">' +
@@ -1068,15 +1088,15 @@
         '</div>' +
         '<div class="dps-payment-modal-body">' +
           '<div class="dps-payment-info">' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Cliente:</span><span class="dps-payment-info-value">' + clientName + '</span></div>' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet:</span><span class="dps-payment-info-value">' + petName + '</span></div>' +
-            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor:</span><span class="dps-payment-info-value">R$ ' + totalValue + '</span></div>' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Cliente:</span><span class="dps-payment-info-value">' + escapeHtml(clientName) + '</span></div>' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Pet:</span><span class="dps-payment-info-value">' + escapeHtml(petName) + '</span></div>' +
+            '<div class="dps-payment-info-item"><span class="dps-payment-info-label">Valor:</span><span class="dps-payment-info-value">R$ ' + escapeHtml(totalValue) + '</span></div>' +
           '</div>' +
           '<div class="dps-payment-actions">' +
             '<a href="' + whatsappUrl + '" target="_blank" class="dps-payment-action-btn dps-payment-action-btn--whatsapp">' +
               '📱 Enviar por WhatsApp' +
             '</a>' +
-            '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + paymentLink + '">' +
+            '<button type="button" class="dps-payment-action-btn dps-payment-action-btn--copy" data-link="' + escapeHtml(paymentLink) + '">' +
               '📋 Copiar Link de Pagamento' +
             '</button>' +
           '</div>' +
