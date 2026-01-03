@@ -440,7 +440,15 @@ final class DPS_Client_Portal {
             }
 
             // Hook: Após atualizar dados do cliente (Fase 2.3)
-            do_action( 'dps_portal_after_update_client', $client_id, $_POST );
+            // Passa apenas dados sanitizados para evitar vazamento de dados sensíveis
+            $sanitized_data = [
+                'phone'     => $phone,
+                'address'   => $address,
+                'instagram' => $insta,
+                'facebook'  => $fb,
+                'email'     => $email,
+            ];
+            do_action( 'dps_portal_after_update_client', $client_id, $sanitized_data );
             
             $redirect_url = add_query_arg( 'portal_msg', 'updated', $redirect_url );
         } elseif ( 'update_pet' === $action && isset( $_POST['pet_id'] ) ) {
@@ -496,6 +504,11 @@ final class DPS_Client_Portal {
             if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                 $file = $_FILES['pet_photo'];
                 
+                // Valida que o upload foi bem-sucedido
+                if ( ! isset( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) || UPLOAD_ERR_OK !== $file['error'] ) {
+                    $redirect_url = add_query_arg( 'portal_msg', 'upload_error', $redirect_url );
+                } else {
+                
                 // Valida tipos MIME permitidos para imagens
                 $allowed_mimes = [
                     'jpg|jpeg|jpe' => 'image/jpeg',
@@ -523,35 +536,45 @@ final class DPS_Client_Portal {
                     if ( $file['size'] > $max_size ) {
                         $redirect_url = add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
                     } else {
-                        require_once ABSPATH . 'wp-admin/includes/file.php';
-                        require_once ABSPATH . 'wp-admin/includes/image.php';
+                        // Validação adicional de MIME type real usando getimagesize()
+                        // Isso previne uploads de arquivos maliciosos com extensão de imagem
+                        // Nota: Validação de is_uploaded_file() já foi feita acima
+                        // @ para suprimir warnings em arquivos corrompidos (evita vazamento de info do servidor)
+                        $image_info = @getimagesize( $file['tmp_name'] );
+                        if ( false === $image_info || ! isset( $image_info['mime'] ) || ! in_array( $image_info['mime'], $allowed_mimes, true ) ) {
+                            $redirect_url = add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+                        } else {
+                            require_once ABSPATH . 'wp-admin/includes/file.php';
+                            require_once ABSPATH . 'wp-admin/includes/image.php';
 
-                        $upload = wp_handle_upload( $file, [ 
-                            'test_form' => false,
-                            'mimes'     => $allowed_mimes,
-                        ] );
-                        
-                        if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
-                            $file_path  = $upload['file'];
-                            $file_name  = basename( $file_path );
-                            $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
+                            $upload = wp_handle_upload( $file, [ 
+                                'test_form' => false,
+                                'mimes'     => $allowed_mimes,
+                            ] );
                             
-                            // Valida MIME type real do arquivo
-                            if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
-                                $attachment = [
-                                    'post_title'     => sanitize_file_name( $file_name ),
-                                    'post_mime_type' => $file_type['type'],
-                                    'post_status'    => 'inherit',
-                                ];
-                                $attach_id = wp_insert_attachment( $attachment, $file_path );
-                                if ( ! is_wp_error( $attach_id ) ) {
-                                    $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
-                                    wp_update_attachment_metadata( $attach_id, $attach_data );
-                                    update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
+                            if ( ! isset( $upload['error'] ) && isset( $upload['file'] ) ) {
+                                $file_path  = $upload['file'];
+                                $file_name  = basename( $file_path );
+                                $file_type  = wp_check_filetype( $file_name, $allowed_mimes );
+                                
+                                // Valida MIME type real do arquivo
+                                if ( ! empty( $file_type['type'] ) && 0 === strpos( $file_type['type'], 'image/' ) ) {
+                                    $attachment = [
+                                        'post_title'     => sanitize_file_name( $file_name ),
+                                        'post_mime_type' => $file_type['type'],
+                                        'post_status'    => 'inherit',
+                                    ];
+                                    $attach_id = wp_insert_attachment( $attachment, $file_path );
+                                    if ( ! is_wp_error( $attach_id ) ) {
+                                        $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+                                        wp_update_attachment_metadata( $attach_id, $attach_data );
+                                        update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
+                                    }
                                 }
                             }
                         }
                     }
+                }
                 }
             }
 

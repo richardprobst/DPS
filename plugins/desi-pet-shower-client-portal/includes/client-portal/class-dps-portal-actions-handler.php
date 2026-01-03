@@ -71,7 +71,15 @@ class DPS_Portal_Actions_Handler {
         }
 
         // Hook: Após atualizar dados do cliente (Fase 2.3)
-        do_action( 'dps_portal_after_update_client', $client_id, $_POST );
+        // Passa apenas dados sanitizados para evitar vazamento de dados sensíveis
+        $sanitized_data = [
+            'phone'     => $phone,
+            'address'   => $address,
+            'instagram' => $insta,
+            'facebook'  => $fb,
+            'email'     => $email,
+        ];
+        do_action( 'dps_portal_after_update_client', $client_id, $sanitized_data );
         
         return add_query_arg( 'portal_msg', 'updated', wp_get_referer() ?: home_url() );
     }
@@ -138,6 +146,11 @@ class DPS_Portal_Actions_Handler {
     private function handle_pet_photo_upload( $pet_id, $redirect_url ) {
         $file = $_FILES['pet_photo'];
         
+        // Valida que o upload foi bem-sucedido
+        if ( ! isset( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) || UPLOAD_ERR_OK !== $file['error'] ) {
+            return add_query_arg( 'portal_msg', 'upload_error', $redirect_url );
+        }
+        
         // Valida tipos MIME permitidos para imagens
         $allowed_mimes = [
             'jpg|jpeg|jpe' => 'image/jpeg',
@@ -165,6 +178,20 @@ class DPS_Portal_Actions_Handler {
         $max_size = min( wp_max_upload_size(), 5 * MB_IN_BYTES );
         if ( $file['size'] > $max_size ) {
             return add_query_arg( 'portal_msg', 'file_too_large', $redirect_url );
+        }
+        
+        // Validação adicional de MIME type real usando getimagesize()
+        // Isso previne uploads de arquivos maliciosos com extensão de imagem
+        // Nota: Validação de is_uploaded_file() já foi feita acima
+        // @ para suprimir warnings em arquivos corrompidos (evita vazamento de info do servidor)
+        $image_info = @getimagesize( $file['tmp_name'] );
+        if ( false === $image_info || ! isset( $image_info['mime'] ) ) {
+            return add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
+        }
+        
+        // Verifica se o MIME type real está na lista permitida
+        if ( ! in_array( $image_info['mime'], $allowed_mimes, true ) ) {
+            return add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
         }
         
         require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -376,25 +403,31 @@ class DPS_Portal_Actions_Handler {
             return false;
         }
         
+        // Sanitiza dados para a API
         $preference_data = [
             'items' => [
                 [
-                    'title'        => $desc,
+                    'title'        => wp_strip_all_tags( $desc ),
                     'quantity'     => 1,
-                    'unit_price'   => $valor,
+                    'unit_price'   => (float) $valor,
                     'currency_id'  => 'BRL',
                 ],
             ],
             'payer' => [
-                'name'  => $client_name,
-                'email' => $client_mail ? $client_mail : 'cliente@example.com',
-                'phone' => [
-                    'number' => $client_phone,
-                ],
+                'name'  => wp_strip_all_tags( $client_name ),
+                'email' => $client_mail && is_email( $client_mail ) ? $client_mail : 'cliente@example.com',
             ],
-            'external_reference' => 'DPS_TRANS_' . $trans_id,
+            'external_reference' => 'DPS_TRANS_' . absint( $trans_id ),
             'notification_url'   => home_url( '/mercadopago/webhook/' ),
         ];
+        
+        // Adiciona telefone apenas se for válido (após sanitização)
+        $clean_phone = preg_replace( '/\D/', '', (string) $client_phone );
+        if ( ! empty( $clean_phone ) && strlen( $clean_phone ) >= 8 ) {
+            $preference_data['payer']['phone'] = [
+                'number' => $clean_phone,
+            ];
+        }
         
         $response = wp_remote_post( 'https://api.mercadopago.com/checkout/preferences', [
             'headers' => [
@@ -406,6 +439,25 @@ class DPS_Portal_Actions_Handler {
         ] );
         
         if ( is_wp_error( $response ) ) {
+            // Log erro sem expor token
+            if ( function_exists( 'dps_log' ) ) {
+                dps_log( 'MercadoPago API error', [
+                    'error' => $response->get_error_message(),
+                    'trans_id' => $trans_id,
+                ], 'error', 'client-portal' );
+            }
+            return false;
+        }
+        
+        // Verifica status HTTP
+        $status_code = wp_remote_retrieve_response_code( $response );
+        if ( $status_code < 200 || $status_code >= 300 ) {
+            if ( function_exists( 'dps_log' ) ) {
+                dps_log( 'MercadoPago API HTTP error', [
+                    'status_code' => $status_code,
+                    'trans_id' => $trans_id,
+                ], 'error', 'client-portal' );
+            }
             return false;
         }
         
@@ -413,7 +465,7 @@ class DPS_Portal_Actions_Handler {
         $data = json_decode( $body, true );
         
         if ( isset( $data['init_point'] ) ) {
-            return $data['init_point'];
+            return esc_url_raw( $data['init_point'] );
         }
         
         return false;
