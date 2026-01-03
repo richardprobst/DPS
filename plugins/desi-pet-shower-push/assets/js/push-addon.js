@@ -40,14 +40,62 @@
             // Botão de teste de conexão Telegram.
             $('#dps-test-telegram').on('click', this.testTelegram.bind(this));
 
+            // Toggle de visibilidade do token Telegram.
+            $('#dps-toggle-token').on('click', this.toggleTokenVisibility.bind(this));
+
             // Prevenção de duplo clique no formulário de configurações.
-            $('.dps-push-settings form').on('submit', this.handleFormSubmit.bind(this));
+            $('#dps-push-settings-form').on('submit', this.handleFormSubmit.bind(this));
 
             // Validação de emails em tempo real.
             $('#dps_push_emails_agenda, #dps_push_emails_report').on('blur', this.validateEmailField.bind(this));
 
             // Validação de campo numérico.
             $('#dps_push_inactive_days').on('change', this.validateInactiveDays.bind(this));
+
+            // Validação do formato do token Telegram.
+            $('#dps_push_telegram_token').on('blur', this.validateTelegramToken.bind(this));
+        },
+
+        /**
+         * Toggle visibilidade do token Telegram.
+         */
+        toggleTokenVisibility: function(e) {
+            e.preventDefault();
+            var $field = $('#dps_push_telegram_token');
+            var isPassword = $field.attr('type') === 'password';
+            $field.attr('type', isPassword ? 'text' : 'password');
+            $(e.currentTarget).text(isPassword ? '🔒' : '👁️');
+        },
+
+        /**
+         * Valida o formato do token Telegram.
+         */
+        validateTelegramToken: function(e) {
+            var $field = $(e.currentTarget);
+            var value = $field.val().trim();
+            var $error = $field.closest('.dps-telegram-token-wrapper').siblings('.dps-token-error');
+
+            // Remover erro existente
+            if ($error.length) {
+                $error.remove();
+            }
+
+            if (!value) {
+                return true; // Campo vazio é válido
+            }
+
+            // Formato esperado: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ (8-12 dígitos : 30-50 caracteres alfanuméricos)
+            var tokenRegex = /^\d{8,12}:[A-Za-z0-9_-]{30,50}$/;
+            if (!tokenRegex.test(value)) {
+                $field.closest('.dps-telegram-token-wrapper').after(
+                    '<span class="dps-token-error" style="color: #ef4444; display: block; margin-top: 5px; font-size: 12px;">' +
+                    (DPS_Push.messages.invalid_token || 'Formato de token inválido. Exemplo: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ') +
+                    '</span>'
+                );
+                return false;
+            }
+
+            return true;
         },
 
         /**

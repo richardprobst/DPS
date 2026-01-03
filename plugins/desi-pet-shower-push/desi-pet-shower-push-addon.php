@@ -217,6 +217,7 @@ class DPS_Push_Addon {
                 'sending'           => __( 'Enviando...', 'dps-push-addon' ),
                 'testing'           => __( 'Testando...', 'dps-push-addon' ),
                 'invalid_email'     => __( 'Email inválido: ', 'dps-push-addon' ),
+                'invalid_token'     => __( 'Formato de token inválido. Exemplo: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ', 'dps-push-addon' ),
             ],
         ] );
     }
@@ -793,6 +794,14 @@ class DPS_Push_Addon {
         $report_enabled  = get_option( 'dps_push_report_enabled', true );
         $weekly_enabled  = get_option( 'dps_push_weekly_enabled', true );
 
+        // Próximos envios agendados.
+        $next_agenda = wp_next_scheduled( 'dps_send_agenda_notification' );
+        $next_report = wp_next_scheduled( 'dps_send_daily_report' );
+        $next_weekly = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
+
+        // Status do Telegram.
+        $telegram_configured = ! empty( $telegram_token ) && ! empty( $telegram_chat );
+
         ?>
         <div class="wrap dps-push-settings">
             <h1><?php echo esc_html__( 'Notificações Push', 'dps-push-addon' ); ?></h1>
@@ -830,11 +839,65 @@ class DPS_Push_Addon {
                     </div>
                 </div>
 
+                <!-- Próximos Envios Card -->
+                <div class="dps-push-card dps-push-schedule-card">
+                    <h2>📅 <?php echo esc_html__( 'Próximos Envios', 'dps-push-addon' ); ?></h2>
+                    
+                    <table class="dps-schedule-table">
+                        <tr>
+                            <td><strong><?php echo esc_html__( 'Agenda Diária', 'dps-push-addon' ); ?></strong></td>
+                            <td>
+                                <?php if ( $agenda_enabled && $next_agenda ) : ?>
+                                    <span class="dps-schedule-active">✓ <?php echo esc_html( date_i18n( 'd/m/Y H:i', $next_agenda ) ); ?></span>
+                                <?php elseif ( $agenda_enabled ) : ?>
+                                    <span class="dps-schedule-pending"><?php echo esc_html__( 'Aguardando agendamento', 'dps-push-addon' ); ?></span>
+                                <?php else : ?>
+                                    <span class="dps-schedule-disabled"><?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php echo esc_html__( 'Relatório Financeiro', 'dps-push-addon' ); ?></strong></td>
+                            <td>
+                                <?php if ( $report_enabled && $next_report ) : ?>
+                                    <span class="dps-schedule-active">✓ <?php echo esc_html( date_i18n( 'd/m/Y H:i', $next_report ) ); ?></span>
+                                <?php elseif ( $report_enabled ) : ?>
+                                    <span class="dps-schedule-pending"><?php echo esc_html__( 'Aguardando agendamento', 'dps-push-addon' ); ?></span>
+                                <?php else : ?>
+                                    <span class="dps-schedule-disabled"><?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php echo esc_html__( 'Relatório Semanal', 'dps-push-addon' ); ?></strong></td>
+                            <td>
+                                <?php if ( $weekly_enabled && $next_weekly ) : ?>
+                                    <span class="dps-schedule-active">✓ <?php echo esc_html( date_i18n( 'd/m/Y H:i', $next_weekly ) ); ?></span>
+                                <?php elseif ( $weekly_enabled ) : ?>
+                                    <span class="dps-schedule-pending"><?php echo esc_html__( 'Aguardando agendamento', 'dps-push-addon' ); ?></span>
+                                <?php else : ?>
+                                    <span class="dps-schedule-disabled"><?php echo esc_html__( 'Desativado', 'dps-push-addon' ); ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong><?php echo esc_html__( 'Telegram', 'dps-push-addon' ); ?></strong></td>
+                            <td>
+                                <?php if ( $telegram_configured ) : ?>
+                                    <span class="dps-schedule-active">✓ <?php echo esc_html__( 'Configurado', 'dps-push-addon' ); ?></span>
+                                <?php else : ?>
+                                    <span class="dps-schedule-disabled"><?php echo esc_html__( 'Não configurado', 'dps-push-addon' ); ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <!-- Settings Card -->
-                <div class="dps-push-card">
+                <div class="dps-push-card dps-push-settings-card">
                     <h2>⚙️ <?php echo esc_html__( 'Configurações', 'dps-push-addon' ); ?></h2>
 
-                    <form method="post">
+                    <form method="post" id="dps-push-settings-form">
                         <?php wp_nonce_field( 'dps_push_settings' ); ?>
 
                         <table class="form-table">
@@ -932,11 +995,12 @@ class DPS_Push_Addon {
                                         </select>
                                         <br><br>
                                         <label for="dps_push_weekly_time"><?php echo esc_html__( 'Horário de envio:', 'dps-push-addon' ); ?></label>
-                                        <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>">
+                                        <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>" aria-describedby="dps_push_weekly_time_desc">
                                         <br><br>
                                         <label for="dps_push_inactive_days"><?php echo esc_html__( 'Considerar inativo após (dias):', 'dps-push-addon' ); ?></label>
-                                        <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" style="width: 80px;">
-                                        <br><br>
+                                        <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" style="width: 80px;" aria-describedby="dps_push_inactive_days_desc">
+                                        <p class="description" id="dps_push_inactive_days_desc"><?php echo esc_html__( 'Pets sem atendimento por mais de X dias serão listados.', 'dps-push-addon' ); ?></p>
+                                        <br>
                                         <button type="button" class="button dps-test-report-btn" data-type="weekly">
                                             📤 <?php echo esc_html__( 'Enviar Teste', 'dps-push-addon' ); ?>
                                         </button>
@@ -950,18 +1014,20 @@ class DPS_Push_Addon {
 
                         <table class="form-table">
                             <tr>
-                                <th scope="row"><?php echo esc_html__( 'Token do Bot', 'dps-push-addon' ); ?></th>
+                                <th scope="row"><label for="dps_push_telegram_token"><?php echo esc_html__( 'Token do Bot', 'dps-push-addon' ); ?></label></th>
                                 <td>
-                                    <input type="password" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" autocomplete="off">
-                                    <button type="button" class="button" onclick="var f=document.getElementById('dps_push_telegram_token');f.type=f.type==='password'?'text':'password';">👁️</button>
-                                    <p class="description"><?php echo esc_html__( 'Obtenha um token criando um bot via @BotFather no Telegram.', 'dps-push-addon' ); ?></p>
+                                    <div class="dps-telegram-token-wrapper">
+                                        <input type="password" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" autocomplete="off" aria-describedby="dps_push_telegram_token_desc">
+                                        <button type="button" id="dps-toggle-token" class="button" aria-label="<?php echo esc_attr__( 'Mostrar/ocultar token', 'dps-push-addon' ); ?>">👁️</button>
+                                    </div>
+                                    <p class="description" id="dps_push_telegram_token_desc"><?php echo esc_html__( 'Obtenha um token criando um bot via @BotFather no Telegram.', 'dps-push-addon' ); ?></p>
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"><?php echo esc_html__( 'Chat ID', 'dps-push-addon' ); ?></th>
+                                <th scope="row"><label for="dps_push_telegram_chat"><?php echo esc_html__( 'Chat ID', 'dps-push-addon' ); ?></label></th>
                                 <td>
-                                    <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890">
-                                    <p class="description"><?php echo esc_html__( 'ID do chat ou grupo onde os relatórios serão enviados.', 'dps-push-addon' ); ?></p>
+                                    <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890" aria-describedby="dps_push_telegram_chat_desc">
+                                    <p class="description" id="dps_push_telegram_chat_desc"><?php echo esc_html__( 'ID do chat ou grupo onde os relatórios serão enviados.', 'dps-push-addon' ); ?></p>
                                 </td>
                             </tr>
                             <tr>

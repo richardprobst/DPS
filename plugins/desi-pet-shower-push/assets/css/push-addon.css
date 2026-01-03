@@ -322,3 +322,54 @@
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
+
+/* === Schedule Card (v1.3.0) === */
+.dps-push-schedule-card {
+    border-left: 4px solid #10b981;
+}
+
+.dps-schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dps-schedule-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.dps-schedule-table tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-schedule-active {
+    color: #10b981;
+    font-weight: 500;
+}
+
+.dps-schedule-pending {
+    color: #f59e0b;
+    font-style: italic;
+}
+
+.dps-schedule-disabled {
+    color: #9ca3af;
+}
+
+/* === Telegram Token Wrapper === */
+.dps-telegram-token-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-telegram-token-wrapper input {
+    flex: 1;
+    max-width: 350px;
+}
+
+/* === Settings Card === */
+.dps-push-settings-card {
+    grid-column: 1 / -1; /* Full width */
+}
