@@ -197,11 +197,21 @@ class DPS_AI_WhatsApp_Webhook {
             $webhook_url = rest_url( 'dps-ai/v1/whatsapp-webhook' );
 
             // Obtém parâmetros do POST para validação Twilio
+            // NOTA: Esta implementação básica funciona para mensagens de texto simples.
+            // Para produção com estruturas complexas (arrays, MediaUrl, etc.),
+            // considere usar o SDK oficial Twilio: https://www.twilio.com/docs/php/install
             $params = $request->get_body_params();
             ksort( $params );
             $data = $webhook_url;
             foreach ( $params as $key => $value ) {
-                $data .= $key . $value;
+                // Trata arrays em parâmetros (ex: MediaUrl0, MediaUrl1)
+                if ( is_array( $value ) ) {
+                    foreach ( $value as $sub_value ) {
+                        $data .= $key . $sub_value;
+                    }
+                } else {
+                    $data .= $key . $value;
+                }
             }
 
             // Calcula assinatura esperada usando HMAC-SHA1 com Base64
@@ -316,11 +326,20 @@ class DPS_AI_WhatsApp_Webhook {
      */
     private function mask_phone( $phone ) {
         $length = strlen( $phone );
+        
+        // Telefones muito curtos: mascara completamente
         if ( $length <= 6 ) {
             return str_repeat( '*', $length );
         }
+        
+        // Telefones de 7 caracteres: mostra apenas 3 primeiros e 1 último
+        if ( 7 === $length ) {
+            return substr( $phone, 0, 3 ) . '***' . substr( $phone, -1 );
+        }
+        
         // Mantém os 3 primeiros e 4 últimos dígitos
-        return substr( $phone, 0, 3 ) . str_repeat( '*', $length - 7 ) . substr( $phone, -4 );
+        $middle_count = max( 1, $length - 7 ); // Garante pelo menos 1 asterisco
+        return substr( $phone, 0, 3 ) . str_repeat( '*', $middle_count ) . substr( $phone, -4 );
     }
 
     /**

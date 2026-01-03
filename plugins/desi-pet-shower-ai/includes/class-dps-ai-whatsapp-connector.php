@@ -458,25 +458,40 @@ class DPS_AI_WhatsApp_Connector {
             return false;
         }
 
-        // Bloqueia IPs de rede privada (RFC 1918)
-        $ip = gethostbyname( $host );
-        if ( $ip !== $host ) { // Se resolveu para IP
-            // Verifica se é IP privado ou reservado
-            if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-                return false;
-            }
-        }
-
-        // Bloqueia domínios internos comuns
+        // Bloqueia domínios internos comuns ANTES da resolução DNS
+        // (evita delay de DNS e possíveis ataques de DNS rebinding)
         $internal_patterns = [
             '/\.local$/',
             '/\.internal$/',
             '/\.localhost$/',
             '/\.localdomain$/',
+            '/\.home$/',
+            '/\.corp$/',
+            '/\.lan$/',
         ];
 
         foreach ( $internal_patterns as $pattern ) {
             if ( preg_match( $pattern, $host ) ) {
+                return false;
+            }
+        }
+
+        // Se o host já é um IP, valida diretamente sem DNS
+        if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+            // Verifica se é IP privado ou reservado
+            if ( ! filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+                return false;
+            }
+            return true;
+        }
+
+        // Para domínios: resolve DNS e valida IP resultante
+        // NOTA: gethostbyname pode ter delay. Em produção com alto volume,
+        // considere usar cache de DNS ou validação assíncrona.
+        $ip = gethostbyname( $host );
+        if ( $ip !== $host ) { // Se resolveu para IP
+            // Verifica se é IP privado ou reservado
+            if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
                 return false;
             }
         }
