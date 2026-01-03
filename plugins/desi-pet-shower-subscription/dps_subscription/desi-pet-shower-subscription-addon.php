@@ -54,13 +54,50 @@ class DPS_Subscription_Addon {
     }
 
     /**
+     * Adiciona uma mensagem de feedback ao usuário.
+     * Usa DPS_Message_Helper se disponível, caso contrário usa transient.
+     *
+     * @param string $message Mensagem a exibir.
+     * @param string $type    Tipo: 'success', 'error', 'warning', 'info'.
+     */
+    private function add_user_message( $message, $type = 'info' ) {
+        if ( class_exists( 'DPS_Message_Helper' ) ) {
+            switch ( $type ) {
+                case 'error':
+                    DPS_Message_Helper::add_error( $message );
+                    break;
+                case 'success':
+                    DPS_Message_Helper::add_success( $message );
+                    break;
+                case 'warning':
+                    DPS_Message_Helper::add_warning( $message );
+                    break;
+                default:
+                    DPS_Message_Helper::add_info( $message );
+                    break;
+            }
+        } else {
+            // Fallback: armazena em transient para exibição posterior
+            $messages = get_transient( 'dps_subscription_messages' );
+            if ( ! is_array( $messages ) ) {
+                $messages = [];
+            }
+            $messages[] = [
+                'message' => $message,
+                'type'    => $type,
+            ];
+            set_transient( 'dps_subscription_messages', $messages, 60 );
+        }
+    }
+
+    /**
      * Enfileira CSS e JS do add-on de assinaturas.
      * Carrega apenas quando necessário (aba de assinaturas ativa).
      */
     public function enqueue_assets() {
         // Obtém o diretório do add-on (usa __DIR__ em vez de dirname(__FILE__) para modernidade)
         $addon_url = plugin_dir_url( __DIR__ );
-        $version   = '1.2.1';
+        $version   = '1.3.0';
 
         // CSS - carrega sempre que disponível (leve e necessário para tabelas)
         wp_enqueue_style(
@@ -78,6 +115,20 @@ class DPS_Subscription_Addon {
             $version,
             true
         );
+        
+        // Localiza strings para JavaScript (i18n)
+        wp_localize_script( 'dps-subscription-addon', 'dpsSubscriptionStrings', [
+            'description'        => __( 'Descrição do serviço', 'dps-subscription-addon' ),
+            'remove'             => __( 'Remover', 'dps-subscription-addon' ),
+            'saving'             => __( 'Salvando...', 'dps-subscription-addon' ),
+            'save_changes'       => __( 'Salvar Alterações', 'dps-subscription-addon' ),
+            'confirm_cancel'     => __( 'Tem certeza que deseja cancelar esta assinatura?', 'dps-subscription-addon' ),
+            'confirm_delete'     => __( 'Tem certeza que deseja excluir permanentemente? Esta ação não pode ser desfeita.', 'dps-subscription-addon' ),
+            'required_fields'    => __( 'Por favor, preencha todos os campos obrigatórios.', 'dps-subscription-addon' ),
+            'invalid_date'       => __( 'Por favor, insira uma data válida.', 'dps-subscription-addon' ),
+            'invalid_time'       => __( 'Por favor, insira um horário válido.', 'dps-subscription-addon' ),
+            'updating_status'    => __( 'Atualizando...', 'dps-subscription-addon' ),
+        ] );
     }
 
     /**
@@ -504,42 +555,49 @@ class DPS_Subscription_Addon {
         $extras_val   = isset( $_POST['subscription_extras_values'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['subscription_extras_values'] ) ) : [];
         $extras_list  = $this->parse_extras_from_request( $extras_desc, $extras_val );
         
-        // Valida campos obrigatórios
+        // Valida campos obrigatórios com feedback ao usuário
         if ( ! $client_id || ! $pet_id || ! $service || ! $frequency || ! $start_date || ! $start_time ) {
+            $this->add_user_message( __( 'Por favor, preencha todos os campos obrigatórios.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida frequência permitida
         $allowed_frequencies = [ 'semanal', 'quinzenal' ];
         if ( ! in_array( $frequency, $allowed_frequencies, true ) ) {
+            $this->add_user_message( __( 'Frequência inválida. Selecione Semanal ou Quinzenal.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida formato de data (Y-m-d)
         if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start_date ) ) {
+            $this->add_user_message( __( 'Formato de data inválido. Use o formato AAAA-MM-DD.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida que a data é válida
         $date_parts = explode( '-', $start_date );
         if ( ! checkdate( (int) $date_parts[1], (int) $date_parts[2], (int) $date_parts[0] ) ) {
+            $this->add_user_message( __( 'Data inválida. Verifique o dia, mês e ano.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida formato de horário (H:i)
         if ( ! preg_match( '/^\d{2}:\d{2}$/', $start_time ) ) {
+            $this->add_user_message( __( 'Formato de horário inválido. Use o formato HH:MM.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida que cliente existe e é do tipo correto
         $client_post = get_post( $client_id );
         if ( ! $client_post || 'dps_cliente' !== $client_post->post_type ) {
+            $this->add_user_message( __( 'Cliente selecionado não existe ou é inválido.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
         // Valida que pet existe e é do tipo correto
         $pet_post = get_post( $pet_id );
         if ( ! $pet_post || 'dps_pet' !== $pet_post->post_type ) {
+            $this->add_user_message( __( 'Pet selecionado não existe ou é inválido.', 'dps-subscription-addon' ), 'error' );
             return;
         }
         
@@ -554,6 +612,7 @@ class DPS_Subscription_Addon {
         if ( $sub_id ) {
             $existing = get_post( $sub_id );
             if ( ! $existing || 'dps_subscription' !== $existing->post_type ) {
+                $this->add_user_message( __( 'Assinatura não encontrada para edição.', 'dps-subscription-addon' ), 'error' );
                 return;
             }
         }

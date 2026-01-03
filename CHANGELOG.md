@@ -97,6 +97,18 @@ Antes de criar uma nova versão oficial:
 - **Formatos de insert/update wpdb**: Adicionados arrays de formato (`%d`, `%s`, `%f`) em todas as chamadas `$wpdb->insert()` e `$wpdb->update()` para prevenir SQL injection.
 - **absint vs intval**: Substituídos todos os usos de `intval()` por `absint()` para IDs de posts, garantindo valores não-negativos.
 
+#### Added (Adicionado)
+
+**Subscription Add-on - Melhorias Funcionais e UX (v1.3.0)**
+
+- **Feedback de validação**: Formulário agora exibe mensagens de erro específicas quando validação falha no servidor (campos obrigatórios, formato de data/hora, cliente/pet inválido).
+- **Prevenção de duplo clique**: Botões de submit são desabilitados durante o envio do formulário para evitar submissões duplicadas.
+- **Estado de loading visual**: Botões exibem animação de spinner e texto "Salvando..." durante operações.
+- **Validação client-side**: JavaScript valida campos obrigatórios, formato de data e horário antes do envio.
+- **Internacionalização de strings JS**: Strings do JavaScript agora são traduzíveis via `wp_localize_script()`.
+- **Foco em campo com erro**: Formulário faz scroll automático para o primeiro campo com erro de validação.
+- **Estilos de acessibilidade**: Adicionados estilos para `:focus-visible` e classe `.dps-sr-only` para leitores de tela.
+
 **Base Plugin - Auditoria de Segurança Completa (v1.1.1)**
 
 - **CSRF em GitHub Updater**: Adicionada verificação de nonce na função `maybe_force_check()` que permite forçar verificação de atualizações. Anteriormente, atacantes podiam forçar limpeza de cache via link malicioso.
