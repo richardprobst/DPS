@@ -175,7 +175,8 @@ class DPS_Portal_Actions_Handler {
         // Validação adicional de MIME type real usando getimagesize()
         // Isso previne uploads de arquivos maliciosos com extensão de imagem
         // Nota: Validação de is_uploaded_file() já foi feita acima
-        $image_info = getimagesize( $file['tmp_name'] );
+        // @ para suprimir warnings em arquivos corrompidos (evita vazamento de info do servidor)
+        $image_info = @getimagesize( $file['tmp_name'] );
         if ( false === $image_info || ! isset( $image_info['mime'] ) ) {
             return add_query_arg( 'portal_msg', 'invalid_file_type', $redirect_url );
         }
