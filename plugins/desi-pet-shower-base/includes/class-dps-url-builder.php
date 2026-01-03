@@ -139,18 +139,18 @@ class DPS_URL_Builder {
      * Prevents PHP 8.1+ deprecation warnings caused by passing null/false
      * to functions like strpos(), str_replace(), add_query_arg(), etc.
      *
-     * @param int|WP_Post|null $post Optional. Post ID or post object. Default is the global `$post`.
+     * @param int|WP_Post|null $post_param Optional. Post ID or post object. Default is the global `$post`.
      * @return string The permalink URL or home_url() as fallback.
      */
-    public static function safe_get_permalink( $post = null ) {
-        $permalink = get_permalink( $post );
+    public static function safe_get_permalink( $post_param = null ) {
+        $permalink = get_permalink( $post_param );
 
         if ( $permalink && is_string( $permalink ) ) {
             return $permalink;
         }
 
         // Fallback: try queried object
-        if ( null === $post ) {
+        if ( null === $post_param ) {
             $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
             if ( $queried_id ) {
                 $permalink = get_permalink( $queried_id );

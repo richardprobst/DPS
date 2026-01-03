@@ -64,7 +64,7 @@ class DPS_Refactoring_Examples_URL {
     /**
      * ANTES: Construção manual de URLs (pode causar avisos em PHP 8.1+ se get_permalink() retornar false)
      *
-     * @deprecated Use DPS_URL_Builder::safe_get_permalink() ou os métodos build_*_url() para PHP 8.1+ compatibility
+     * @deprecated Use DPS_URL_Builder::safe_get_permalink() or the build_*_url() methods for PHP 8.1+ compatibility
      */
     public static function render_client_actions_old_way( $client ) {
         // Problema: get_permalink() pode retornar false em alguns contextos, causando avisos em PHP 8.1+
