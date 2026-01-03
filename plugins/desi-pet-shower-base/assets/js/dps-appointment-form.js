@@ -403,7 +403,8 @@
                         var $errorOption = $('<option></option>')
                             .attr('value', '')
                             .text(dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários');
-                        $timeSelect.append($errorOption).prop('disabled', false);
+                        $timeSelect.append($errorOption);
+                        $timeSelect.prop('disabled', false);
                     }
                 },
                 error: function() {
@@ -411,7 +412,8 @@
                     var $errorOption = $('<option></option>')
                         .attr('value', '')
                         .text(dpsAppointmentData.l10n.loadError || 'Erro ao carregar horários');
-                    $timeSelect.append($errorOption).prop('disabled', false);
+                    $timeSelect.append($errorOption);
+                    $timeSelect.prop('disabled', false);
                 }
             });
         },

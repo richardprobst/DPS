@@ -2901,7 +2901,9 @@ class DPS_Base_Frontend {
                         update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
                     } else {
                         // Remove arquivo se não for imagem válida
-                        @unlink( $uploaded['file'] );
+                        if ( file_exists( $uploaded['file'] ) ) {
+                            wp_delete_file( $uploaded['file'] );
+                        }
                         DPS_Message_Helper::add_error( __( 'O arquivo enviado não é uma imagem válida.', 'desi-pet-shower' ) );
                     }
                 } elseif ( ! empty( $uploaded['error'] ) ) {
@@ -3892,7 +3894,8 @@ class DPS_Base_Frontend {
             if ( $doc_url ) {
                 // Envio por email se solicitado
                 if ( isset( $_GET['send_email'] ) && '1' === $_GET['send_email'] ) {
-                    $to_email = isset( $_GET['to_email'] ) && is_email( sanitize_email( wp_unslash( $_GET['to_email'] ) ) ) ? sanitize_email( wp_unslash( $_GET['to_email'] ) ) : '';
+                    $raw_email = isset( $_GET['to_email'] ) ? wp_unslash( $_GET['to_email'] ) : '';
+                    $to_email  = is_email( sanitize_email( $raw_email ) ) ? sanitize_email( $raw_email ) : '';
                     self::send_client_history_email( $client_id, $doc_url, $to_email );
                     $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'sent' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'sent', '_wpnonce' ] ) );
                     wp_safe_redirect( $redirect );
