@@ -790,7 +790,8 @@ class DPS_Portal_Admin {
             // Valida que o upload foi bem-sucedido
             if ( isset( $file['tmp_name'] ) && is_uploaded_file( $file['tmp_name'] ) && UPLOAD_ERR_OK === $file['error'] ) {
                 // Valida MIME type real do arquivo
-                $image_info = getimagesize( $file['tmp_name'] );
+                // @ para suprimir warnings em arquivos corrompidos (evita vazamento de info do servidor)
+                $image_info = @getimagesize( $file['tmp_name'] );
                 if ( false !== $image_info && isset( $image_info['mime'] ) && in_array( $image_info['mime'], $allowed_mimes, true ) ) {
                     require_once ABSPATH . 'wp-admin/includes/file.php';
                     require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -829,7 +830,8 @@ class DPS_Portal_Admin {
             // Valida que o upload foi bem-sucedido
             if ( isset( $file['tmp_name'] ) && is_uploaded_file( $file['tmp_name'] ) && UPLOAD_ERR_OK === $file['error'] ) {
                 // Valida MIME type real do arquivo
-                $image_info = getimagesize( $file['tmp_name'] );
+                // @ para suprimir warnings em arquivos corrompidos (evita vazamento de info do servidor)
+                $image_info = @getimagesize( $file['tmp_name'] );
                 if ( false !== $image_info && isset( $image_info['mime'] ) && in_array( $image_info['mime'], $allowed_mimes, true ) ) {
                     require_once ABSPATH . 'wp-admin/includes/file.php';
                     require_once ABSPATH . 'wp-admin/includes/image.php';
