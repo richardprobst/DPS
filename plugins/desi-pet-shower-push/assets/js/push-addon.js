@@ -92,6 +92,7 @@
 
         /**
          * Valida campo de email separado por vírgula.
+         * Usa regex básico para validação client-side. Validação definitiva é feita server-side.
          */
         validateEmailField: function(e) {
             var $field = $(e.currentTarget);
@@ -109,7 +110,8 @@
 
             var emails = value.split(',');
             var invalidEmails = [];
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            // Regex mais permissivo para client-side, validação rigorosa é feita no servidor com is_email()
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
 
             for (var i = 0; i < emails.length; i++) {
                 var email = emails[i].trim();
