@@ -211,10 +211,11 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 20px;
     font-size: 13px;
     font-weight: 500;
+    margin: 16px 0;
 }
 
 .dps-payment-status--configured {
@@ -228,7 +229,40 @@
 }
 
 /* ==========================================================================
-   9. Responsividade
+   9. Acessibilidade
+   ========================================================================== */
+
+/* Screen reader only text */
+.dps-payment-wrap .screen-reader-text {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    word-wrap: normal !important;
+}
+
+/* Focus visible para navegação por teclado */
+.dps-payment-wrap input:focus-visible,
+.dps-payment-wrap a:focus-visible,
+.dps-payment-wrap button:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+/* Garante que links tenham estilo de foco visível */
+.dps-payment-wrap .description a:focus {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ==========================================================================
+   10. Responsividade
    ========================================================================== */
 
 /* Tablet (768px) */

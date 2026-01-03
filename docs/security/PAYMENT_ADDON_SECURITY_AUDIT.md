@@ -185,7 +185,21 @@ if ( ! $this->transactions_table_exists() ) {
 
 ---
 
-### 3.3 Performance
+### 3.3 Melhorias de UX/Acessibilidade
+
+| ID | Problema | Correção | Impacto |
+|----|----------|----------|---------|
+| UX-001 | Falta classe wrapper CSS na página de configurações | Adicionada classe `dps-payment-wrap` | Estilos responsivos agora aplicam corretamente |
+| UX-002 | Sem indicador de status de configuração | Badge "Integração configurada" ou "Configuração pendente" | Usuário sabe se precisa configurar algo |
+| UX-003 | Sem prevenção de duplo clique | Botão desabilitado + texto "Salvando..." durante submit | Evita submissões duplicadas |
+| UX-004 | Campos sem atributos de acessibilidade | Adicionados `id`, `aria-describedby`, `rel="noopener"` | Conformidade A11y básica |
+| UX-005 | Sem placeholder no campo PIX | Adicionado placeholder de exemplo | Orienta o usuário sobre formato esperado |
+| UX-006 | Links externos sem `rel="noopener"` | Adicionado atributo | Segurança e performance |
+| UX-007 | Sem estilos de foco para navegação por teclado | Adicionado CSS `:focus-visible` | Navegação por teclado visível |
+
+---
+
+### 3.4 Performance
 
 Nenhum problema de performance crítico identificado. Algumas observações:
 
@@ -195,7 +209,7 @@ Nenhum problema de performance crítico identificado. Algumas observações:
 
 ---
 
-### 3.4 Manutenção
+### 3.5 Manutenção
 
 | Item | Status | Observação |
 |------|--------|------------|
@@ -218,6 +232,13 @@ Nenhum problema de performance crítico identificado. Algumas observações:
 - [x] Secrets via Authorization header (não em URL)
 - [x] Rate Limiting em webhooks (10 tentativas/5 min)
 - [x] Logging de tentativas inválidas para auditoria
+
+### Funcionalidade e UX
+- [x] Indicador de status de configuração
+- [x] Prevenção de duplo clique em formulário
+- [x] Acessibilidade A11y básica (labels, aria, foco)
+- [x] Estilos responsivos aplicados corretamente
+- [x] Links externos com `rel="noopener"`
 
 ### Funcionalidade
 - [x] Geração de links de pagamento funcional

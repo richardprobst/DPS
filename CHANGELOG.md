@@ -94,6 +94,17 @@ Antes de criar uma nova versão oficial:
 - **Webhook secret obrigatório**: Requisições de webhook são rejeitadas se o secret não estiver configurado, em vez de falhar silenciosamente.
 - **Registro duplicado removido**: Removidas chamadas duplicadas de `register_setting()` que poderiam causar conflito de callbacks de sanitização.
 
+#### Added (Adicionado)
+
+**Payment Add-on - Verificação Funcional e UX (v1.2.0)**
+
+- **Indicador de status de configuração**: Página de configurações exibe badge "Integração configurada" ou "Configuração pendente" com informações sobre o que falta configurar.
+- **Prevenção de duplo clique**: Botão de salvar é desabilitado durante o envio e exibe texto "Salvando..." para evitar submissões duplicadas.
+- **Classe wrapper CSS**: Página de configurações usa classe `dps-payment-wrap` para estilos responsivos e consistentes.
+- **Acessibilidade A11y**: Campos de formulário com atributos `id`, `aria-describedby`, e `rel="noopener"` em links externos. Adicionada classe `screen-reader-text` para textos apenas para leitores de tela.
+- **Focus visible**: Estilos CSS para navegação por teclado com outline visível em elementos focados.
+- **Placeholder no campo PIX**: Campo de chave PIX agora exibe placeholder de exemplo para orientar o usuário.
+
 **Subscription Add-on - Auditoria de Segurança Completa (v1.3.0)**
 
 - **Path Traversal em exclusão de arquivos**: Corrigida vulnerabilidade em `delete_finance_records()` onde a conversão de URL para path do sistema poderia ser manipulada. Agora valida que o arquivo está dentro do diretório de uploads usando `realpath()` e `wp_delete_file()`.

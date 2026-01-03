@@ -267,14 +267,15 @@ class DPS_Payment_Addon {
      */
     public function render_access_token_field() {
         $is_from_constant = DPS_MercadoPago_Config::is_access_token_from_constant();
+        $field_id = 'dps_mercadopago_access_token';
         
         if ( $is_from_constant ) {
             // Token definido via constante: exibe apenas últimos 4 caracteres
             $token = DPS_MercadoPago_Config::get_access_token();
             $masked = DPS_MercadoPago_Config::get_masked_credential( $token );
             
-            echo '<input type="text" value="' . esc_attr( $masked ) . '" style="width: 400px;" disabled />';
-            echo '<p class="description">';
+            echo '<input type="text" id="' . esc_attr( $field_id ) . '" value="' . esc_attr( $masked ) . '" class="regular-text" disabled aria-describedby="' . esc_attr( $field_id ) . '-description" />';
+            echo '<p class="description" id="' . esc_attr( $field_id ) . '-description">';
             echo '<strong style="color: #10b981;">' . esc_html__( '✓ Definido em wp-config.php', 'dps-payment-addon' ) . '</strong><br>';
             echo esc_html__( 'O Access Token está configurado via constante DPS_MERCADOPAGO_ACCESS_TOKEN em wp-config.php. Esta é a forma recomendada para produção.', 'dps-payment-addon' );
             echo '<br><small>' . esc_html__( 'Para alterar o token, edite o arquivo wp-config.php no servidor.', 'dps-payment-addon' ) . '</small>';
@@ -282,8 +283,8 @@ class DPS_Payment_Addon {
         } else {
             // Token vem do banco de dados: campo editável
             $token = esc_attr( get_option( 'dps_mercadopago_access_token', '' ) );
-            echo '<input type="text" name="dps_mercadopago_access_token" value="' . $token . '" style="width: 400px;" />';
-            echo '<p class="description">';
+            echo '<input type="text" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_id ) . '" value="' . $token . '" class="regular-text" autocomplete="off" aria-describedby="' . esc_attr( $field_id ) . '-description" />';
+            echo '<p class="description" id="' . esc_attr( $field_id ) . '-description">';
             echo esc_html__( 'Cole aqui o Access Token gerado em sua conta do Mercado Pago. Este valor é utilizado para criar links de pagamento automaticamente.', 'dps-payment-addon' );
             echo '<br><br><strong>' . esc_html__( 'Recomendação de segurança:', 'dps-payment-addon' ) . '</strong> ';
             echo esc_html__( 'Para ambientes de produção, é recomendado definir o token via constante no arquivo wp-config.php:', 'dps-payment-addon' );
@@ -300,9 +301,10 @@ class DPS_Payment_Addon {
      * um valor padrão configurado no código.
      */
     public function render_pix_key_field() {
-        $pix = esc_attr( get_option( 'dps_pix_key', '' ) );
-        echo '<input type="text" name="dps_pix_key" value="' . $pix . '" style="width: 400px;" />';
-        echo '<p class="description">' . esc_html__( 'Informe sua chave PIX (telefone, CPF ou chave aleatória) para incluir nas mensagens de pagamento.', 'dps-payment-addon' ) . '</p>';
+        $field_id = 'dps_pix_key';
+        $pix = esc_attr( get_option( $field_id, '' ) );
+        echo '<input type="text" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_id ) . '" value="' . $pix . '" class="regular-text" placeholder="' . esc_attr__( 'Ex: 11999999999', 'dps-payment-addon' ) . '" aria-describedby="' . esc_attr( $field_id ) . '-description" />';
+        echo '<p class="description" id="' . esc_attr( $field_id ) . '-description">' . esc_html__( 'Informe sua chave PIX (telefone, CPF ou chave aleatória) para incluir nas mensagens de pagamento.', 'dps-payment-addon' ) . '</p>';
     }
 
     /**
@@ -312,28 +314,30 @@ class DPS_Payment_Addon {
      * o campo como readonly com apenas os últimos 4 caracteres visíveis.
      *
      * @since 1.1.0 Adicionado suporte para constantes.
+     * @since 1.2.0 Adicionados atributos de acessibilidade.
      */
     public function render_webhook_secret_field() {
         $is_from_constant = DPS_MercadoPago_Config::is_webhook_secret_from_constant();
         $site_url = home_url( '?secret=SUA_CHAVE_AQUI' );
+        $field_id = 'dps_mercadopago_webhook_secret';
         
         if ( $is_from_constant ) {
             // Secret definido via constante: exibe apenas últimos 4 caracteres
             $secret = DPS_MercadoPago_Config::get_webhook_secret();
             $masked = DPS_MercadoPago_Config::get_masked_credential( $secret );
             
-            echo '<input type="text" value="' . esc_attr( $masked ) . '" style="width: 400px;" disabled />';
-            echo '<p class="description">';
+            echo '<input type="text" id="' . esc_attr( $field_id ) . '" value="' . esc_attr( $masked ) . '" class="regular-text" disabled aria-describedby="' . esc_attr( $field_id ) . '-description" />';
+            echo '<p class="description" id="' . esc_attr( $field_id ) . '-description">';
             echo '<strong style="color: #10b981;">' . esc_html__( '✓ Definido em wp-config.php', 'dps-payment-addon' ) . '</strong><br>';
             echo esc_html__( 'O Webhook Secret está configurado via constante DPS_MERCADOPAGO_WEBHOOK_SECRET em wp-config.php.', 'dps-payment-addon' );
             echo '<br><small>' . esc_html__( 'Para alterar o secret, edite o arquivo wp-config.php no servidor.', 'dps-payment-addon' ) . '</small>';
             echo '</p>';
         } else {
             // Secret vem do banco de dados: campo editável
-            $secret = esc_attr( get_option( 'dps_mercadopago_webhook_secret', '' ) );
+            $secret = esc_attr( get_option( $field_id, '' ) );
             
-            echo '<input type="password" name="dps_mercadopago_webhook_secret" value="' . $secret . '" style="width: 400px;" autocomplete="off" />';
-            echo '<p class="description">';
+            echo '<input type="password" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $field_id ) . '" value="' . $secret . '" class="regular-text" autocomplete="off" aria-describedby="' . esc_attr( $field_id ) . '-description" />';
+            echo '<p class="description" id="' . esc_attr( $field_id ) . '-description">';
             echo esc_html__( 'Chave de segurança para validar notificações do Mercado Pago. Gere uma senha forte (mínimo 20 caracteres) e configure no painel do Mercado Pago.', 'dps-payment-addon' );
             echo '<br><br>';
             
@@ -353,10 +357,10 @@ class DPS_Payment_Addon {
             // Link para documentação completa - usando path relativo do plugin
             $doc_url = plugins_url( 'WEBHOOK_CONFIGURATION.md', __FILE__ );
             echo '<strong>';
-            echo '<a href="' . esc_url( $doc_url ) . '" target="_blank">';
+            echo '<a href="' . esc_url( $doc_url ) . '" target="_blank" rel="noopener">';
             echo esc_html__( 'Veja o guia completo de configuração', 'dps-payment-addon' );
             echo '</a></strong>';
-            echo ' ' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' );
+            echo ' <span class="screen-reader-text">' . esc_html__( '(abre em nova aba)', 'dps-payment-addon' ) . '</span>';
             
             echo '</p>';
         }
@@ -364,19 +368,88 @@ class DPS_Payment_Addon {
 
     /**
      * Renderiza a página de configurações.
+     *
+     * @since 1.0.0
+     * @since 1.2.0 Adicionada classe wrapper CSS, indicador de status e acessibilidade.
      */
     public function render_settings_page() {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        echo '<div class="wrap">';
+        
+        // Verifica status de configuração
+        $has_token = (bool) DPS_MercadoPago_Config::get_access_token();
+        $has_secret = (bool) DPS_MercadoPago_Config::get_webhook_secret();
+        $is_configured = $has_token && $has_secret;
+        
+        echo '<div class="wrap dps-payment-wrap">';
         echo '<h1>' . esc_html__( 'Configurações de Pagamentos - desi.pet by PRObst', 'dps-payment-addon' ) . '</h1>';
-        echo '<form method="post" action="options.php">';
+        
+        // Indicador de status de configuração
+        if ( $is_configured ) {
+            echo '<div class="dps-payment-status dps-payment-status--configured" role="status">';
+            echo '<span aria-hidden="true">✓</span> ';
+            echo esc_html__( 'Integração configurada', 'dps-payment-addon' );
+            echo '</div>';
+        } else {
+            echo '<div class="dps-payment-status dps-payment-status--pending" role="status">';
+            echo '<span aria-hidden="true">⚠</span> ';
+            echo esc_html__( 'Configuração pendente', 'dps-payment-addon' );
+            if ( ! $has_token ) {
+                echo ' - ' . esc_html__( 'Access Token não configurado', 'dps-payment-addon' );
+            } elseif ( ! $has_secret ) {
+                echo ' - ' . esc_html__( 'Webhook Secret não configurado', 'dps-payment-addon' );
+            }
+            echo '</div>';
+        }
+        
+        echo '<form method="post" action="options.php" id="dps-payment-settings-form">';
         settings_fields( 'dps_payment_options' );
         do_settings_sections( 'dps-payment-settings' );
-        submit_button();
+        submit_button( __( 'Salvar configurações', 'dps-payment-addon' ), 'primary', 'submit', true, [ 'id' => 'dps-payment-submit' ] );
         echo '</form>';
         echo '</div>';
+        
+        // Script inline para prevenção de duplo clique e feedback visual
+        $this->render_settings_page_scripts();
+    }
+    
+    /**
+     * Renderiza scripts inline para a página de configurações.
+     *
+     * @since 1.2.0
+     */
+    private function render_settings_page_scripts() {
+        ?>
+        <script>
+        (function($) {
+            'use strict';
+            $(document).ready(function() {
+                var $form = $('#dps-payment-settings-form');
+                var $submitBtn = $('#dps-payment-submit');
+                var originalText = $submitBtn.val();
+                
+                // Previne duplo clique e mostra estado de loading
+                $form.on('submit', function(e) {
+                    if ($submitBtn.prop('disabled')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    $submitBtn.prop('disabled', true);
+                    $submitBtn.val('<?php echo esc_js( __( 'Salvando...', 'dps-payment-addon' ) ); ?>');
+                    $submitBtn.css('opacity', '0.7');
+                });
+                
+                // Restaura botão se houver erro de validação
+                $(window).on('beforeunload', function() {
+                    $submitBtn.prop('disabled', false);
+                    $submitBtn.val(originalText);
+                    $submitBtn.css('opacity', '1');
+                });
+            });
+        })(jQuery);
+        </script>
+        <?php
     }
 
     /**
