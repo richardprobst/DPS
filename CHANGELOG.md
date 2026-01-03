@@ -83,6 +83,20 @@ Antes de criar uma nova versão oficial:
 
 #### Security (Segurança)
 
+**Push Notifications Add-on - Auditoria de Segurança Completa (v1.3.0)**
+
+- **SQL Injection em uninstall.php**: Corrigido uso de query direta sem `$wpdb->prepare()` na exclusão de user meta durante desinstalação.
+- **SSRF em Push API**: Adicionada validação de whitelist de hosts permitidos para endpoints de push (FCM, Mozilla, Windows, Apple) antes de enviar requisições. Endpoints não reconhecidos são rejeitados.
+- **SSRF em Telegram API**: Implementada validação de formato do token do bot e chat ID antes de construir URLs da API Telegram. Token validado com regex rigoroso.
+- **Sanitização de Subscription JSON**: Adicionada validação de JSON com `json_last_error()`, validação de estrutura do objeto subscription, e sanitização de chaves criptográficas (p256dh, auth).
+- **Validação de Endpoint Push**: Endpoints de push agora são validados contra lista de hosts conhecidos e devem usar HTTPS.
+- **Autorização em unsubscribe AJAX**: Adicionada verificação de capability `manage_options` para cancelar inscrições push (antes qualquer usuário logado podia cancelar).
+- **Log Level Injection**: Adicionada whitelist de níveis de log permitidos (info, error, warning, debug) para evitar execução de métodos arbitrários via `call_user_func()`.
+- **Sanitização de data em transações**: Validação de formato de data (Y-m-d) antes de consultas ao banco de dados.
+- **Escape de erro Telegram**: Descrição de erro retornada pela API Telegram agora é sanitizada com `sanitize_text_field()`.
+- **Token oculto na UI**: Campo de token do Telegram agora usa `type="password"` para evitar exposição casual.
+- **phpcs annotations**: Adicionadas anotações de ignorar para queries diretas necessárias com justificativas.
+
 **Registration Add-on - Auditoria de Segurança Completa (v1.2.2)**
 
 - **Sanitização de entrada aprimorada**: Adicionado `wp_unslash()` antes de `sanitize_*` em todos os campos do formulário de cadastro para tratamento correto de magic quotes.

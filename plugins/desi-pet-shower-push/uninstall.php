@@ -45,6 +45,10 @@ foreach ( $options as $option ) {
 // Remover user meta de todos os usuários (inscrições push).
 global $wpdb;
 
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->query(
-    "DELETE FROM {$wpdb->usermeta} WHERE meta_key = '_dps_push_subscriptions'"
+    $wpdb->prepare(
+        "DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s",
+        '_dps_push_subscriptions'
+    )
 );

@@ -135,6 +135,18 @@ add_filter( 'dps_push_payload', function( $payload, $event_type ) {
 
 ## Changelog
 
+### v1.3.0 (2026-01-03)
+
+**Auditoria de Segurança Completa**
+
+- **SSRF Protection**: Validação de whitelist para endpoints de push (FCM, Mozilla, Windows, Apple) e Telegram API
+- **SQL Injection Fix**: Corrigido uso de query direta em uninstall.php
+- **Input Validation**: Sanitização completa de subscription JSON e validação de formato
+- **Authorization**: Verificação de capability em todas as ações AJAX
+- **Token Protection**: Campo de token Telegram agora usa `type="password"`
+- **Log Security**: Whitelist de níveis de log para prevenir execução de métodos arbitrários
+- **Data Validation**: Validação de formato de datas antes de queries
+
 ### v1.2.0 (2025-12-17)
 
 - **Menu admin visível**: Menu agora registrado sob "desi.pet by PRObst > Notificações"

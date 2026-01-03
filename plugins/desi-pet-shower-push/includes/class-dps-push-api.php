@@ -144,6 +144,50 @@ class DPS_Push_API {
             return false;
         }
 
+        $endpoint = esc_url_raw( $subscription['endpoint'] );
+        if ( empty( $endpoint ) ) {
+            return false;
+        }
+
+        // Validar que o endpoint é de um serviço push conhecido (SSRF protection).
+        $allowed_hosts = [
+            'fcm.googleapis.com',
+            'updates.push.services.mozilla.com',
+            'notify.windows.com',
+            'web.push.apple.com',
+        ];
+
+        $parsed = wp_parse_url( $endpoint );
+        if ( ! isset( $parsed['host'] ) || ! isset( $parsed['scheme'] ) ) {
+            return false;
+        }
+
+        // Verificar se é HTTPS.
+        if ( $parsed['scheme'] !== 'https' ) {
+            return false;
+        }
+
+        $is_valid_host = false;
+        foreach ( $allowed_hosts as $host ) {
+            if ( $parsed['host'] === $host || str_ends_with( $parsed['host'], '.' . $host ) ) {
+                $is_valid_host = true;
+                break;
+            }
+        }
+
+        if ( ! $is_valid_host ) {
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::warning(
+                    'Endpoint push não reconhecido rejeitado',
+                    [ 'host' => $parsed['host'] ],
+                    'push'
+                );
+            }
+            return false;
+        }
+
+        $audience = $parsed['scheme'] . '://' . $parsed['host'];
+
         // Preparar payload JSON
         $json_payload = wp_json_encode( $payload );
 
@@ -151,10 +195,6 @@ class DPS_Push_API {
         // seria necessário usar biblioteca como minishlink/web-push.
         // Esta é uma implementação simplificada que funciona com o
         // endpoint e headers básicos.
-        
-        $endpoint = $subscription['endpoint'];
-        $parsed   = wp_parse_url( $endpoint );
-        $audience = $parsed['scheme'] . '://' . $parsed['host'];
 
         // Gerar JWT para VAPID
         $jwt = self::generate_vapid_jwt( $audience, $vapid_keys );
@@ -186,7 +226,7 @@ class DPS_Push_API {
             if ( class_exists( 'DPS_Logger' ) ) {
                 DPS_Logger::error(
                     'Erro ao enviar push notification: ' . $response->get_error_message(),
-                    [ 'endpoint' => $endpoint ],
+                    [ 'endpoint_host' => $parsed['host'] ],
                     'push'
                 );
             }
@@ -211,8 +251,8 @@ class DPS_Push_API {
             DPS_Logger::warning(
                 sprintf( 'Push notification retornou status %d', $status_code ),
                 [ 
-                    'endpoint' => $endpoint,
-                    'body'     => wp_remote_retrieve_body( $response ),
+                    'endpoint_host' => $parsed['host'],
+                    'status'        => $status_code,
                 ],
                 'push'
             );

@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Push Notifications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Notificações push e relatórios por email para administradores e equipe. Receba alertas em tempo real e relatórios diários/semanais automáticos.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-push-addon
@@ -179,7 +179,7 @@ class DPS_Push_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.0';
+        $version   = '1.3.0';
 
         wp_enqueue_style(
             'dps-push-addon',
@@ -246,10 +246,49 @@ class DPS_Push_Addon {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
         }
 
-        $subscription = isset( $_POST['subscription'] ) ? json_decode( stripslashes( $_POST['subscription'] ), true ) : null;
+        // Validar e sanitizar dados de inscrição.
+        $subscription_raw = isset( $_POST['subscription'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription'] ) ) : '';
+        
+        if ( empty( $subscription_raw ) ) {
+            wp_send_json_error( [ 'message' => __( 'Dados de inscrição ausentes.', 'dps-push-addon' ) ] );
+        }
 
-        if ( ! $subscription || empty( $subscription['endpoint'] ) ) {
+        $subscription = json_decode( stripslashes( $subscription_raw ), true );
+
+        // Verificar erro de JSON decode.
+        if ( json_last_error() !== JSON_ERROR_NONE ) {
+            wp_send_json_error( [ 'message' => __( 'Dados de inscrição com formato inválido.', 'dps-push-addon' ) ] );
+        }
+
+        if ( ! is_array( $subscription ) || empty( $subscription['endpoint'] ) ) {
             wp_send_json_error( [ 'message' => __( 'Dados de inscrição inválidos.', 'dps-push-addon' ) ] );
+        }
+
+        // Validar que endpoint é uma URL válida de serviço push.
+        $endpoint = esc_url_raw( $subscription['endpoint'] );
+        if ( empty( $endpoint ) ) {
+            wp_send_json_error( [ 'message' => __( 'Endpoint inválido.', 'dps-push-addon' ) ] );
+        }
+
+        // Verificar que o endpoint é de um serviço push conhecido.
+        $allowed_hosts = [
+            'fcm.googleapis.com',
+            'updates.push.services.mozilla.com',
+            'notify.windows.com',
+            'web.push.apple.com',
+        ];
+
+        $parsed_url = wp_parse_url( $endpoint );
+        $is_valid_host = false;
+        foreach ( $allowed_hosts as $host ) {
+            if ( isset( $parsed_url['host'] ) && ( $parsed_url['host'] === $host || str_ends_with( $parsed_url['host'], '.' . $host ) ) ) {
+                $is_valid_host = true;
+                break;
+            }
+        }
+
+        if ( ! $is_valid_host ) {
+            wp_send_json_error( [ 'message' => __( 'Serviço de push não reconhecido.', 'dps-push-addon' ) ] );
         }
 
         $user_id = get_current_user_id();
@@ -261,17 +300,29 @@ class DPS_Push_Addon {
         }
 
         // Evitar duplicatas baseado no endpoint
-        $endpoint_hash = md5( $subscription['endpoint'] );
+        $endpoint_hash = md5( $endpoint );
+        
+        // Sanitizar keys (p256dh e auth são base64url encoded)
+        $keys = [];
+        if ( isset( $subscription['keys'] ) && is_array( $subscription['keys'] ) ) {
+            if ( isset( $subscription['keys']['p256dh'] ) ) {
+                $keys['p256dh'] = preg_replace( '/[^A-Za-z0-9_-]/', '', $subscription['keys']['p256dh'] );
+            }
+            if ( isset( $subscription['keys']['auth'] ) ) {
+                $keys['auth'] = preg_replace( '/[^A-Za-z0-9_-]/', '', $subscription['keys']['auth'] );
+            }
+        }
+
         $subscriptions[ $endpoint_hash ] = [
-            'endpoint' => $subscription['endpoint'],
-            'keys'     => $subscription['keys'] ?? [],
-            'created'  => current_time( 'mysql' ),
+            'endpoint'   => $endpoint,
+            'keys'       => $keys,
+            'created'    => current_time( 'mysql' ),
             'user_agent' => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
         ];
 
         update_user_meta( $user_id, '_dps_push_subscriptions', $subscriptions );
 
-        // Log
+        // Log (sem expor dados sensíveis).
         if ( class_exists( 'DPS_Logger' ) ) {
             DPS_Logger::info(
                 sprintf( 'Usuário #%d inscrito para notificações push', $user_id ),
@@ -289,13 +340,13 @@ class DPS_Push_Addon {
     public function unsubscribe_ajax() {
         check_ajax_referer( 'dps_push_subscribe', 'nonce' );
 
-        if ( ! is_user_logged_in() ) {
+        if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-push-addon' ) ] );
         }
 
-        $endpoint = isset( $_POST['endpoint'] ) ? sanitize_text_field( wp_unslash( $_POST['endpoint'] ) ) : '';
+        $endpoint = isset( $_POST['endpoint'] ) ? esc_url_raw( wp_unslash( $_POST['endpoint'] ) ) : '';
         
-        if ( ! $endpoint ) {
+        if ( empty( $endpoint ) ) {
             wp_send_json_error( [ 'message' => __( 'Endpoint inválido.', 'dps-push-addon' ) ] );
         }
 
@@ -306,6 +357,15 @@ class DPS_Push_Addon {
             $endpoint_hash = md5( $endpoint );
             unset( $subscriptions[ $endpoint_hash ] );
             update_user_meta( $user_id, '_dps_push_subscriptions', $subscriptions );
+
+            // Log
+            if ( class_exists( 'DPS_Logger' ) ) {
+                DPS_Logger::info(
+                    sprintf( 'Usuário #%d cancelou inscrição push', $user_id ),
+                    [ 'endpoint_hash' => $endpoint_hash ],
+                    'push'
+                );
+            }
         }
 
         wp_send_json_success( [ 'message' => __( 'Inscrição cancelada.', 'dps-push-addon' ) ] );
@@ -398,8 +458,22 @@ class DPS_Push_Addon {
             ] );
         }
 
-        // Testar enviando mensagem.
-        $url = "https://api.telegram.org/bot{$token}/sendMessage";
+        // Validar formato do token (formato: 123456789:ABCdefGHI...).
+        if ( ! preg_match( '/^\d{8,12}:[A-Za-z0-9_-]{30,50}$/', $token ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Formato de token inválido. Verifique o token do bot.', 'dps-push-addon' ),
+            ] );
+        }
+
+        // Validar chat_id (número ou número negativo para grupos).
+        if ( ! preg_match( '/^-?\d+$/', $chat_id ) ) {
+            wp_send_json_error( [ 
+                'message' => __( 'Chat ID deve ser um número válido.', 'dps-push-addon' ),
+            ] );
+        }
+
+        // Construir URL segura usando apenas o host fixo da API Telegram.
+        $url = 'https://api.telegram.org/bot' . urlencode( $token ) . '/sendMessage';
 
         $test_message = sprintf(
             /* translators: %s: blog name */
@@ -434,7 +508,7 @@ class DPS_Push_Addon {
                 'message' => __( 'Conexão com Telegram funcionando! Mensagem de teste enviada.', 'dps-push-addon' ),
             ] );
         } else {
-            $error_desc = isset( $data['description'] ) ? $data['description'] : __( 'Erro desconhecido.', 'dps-push-addon' );
+            $error_desc = isset( $data['description'] ) ? sanitize_text_field( $data['description'] ) : __( 'Erro desconhecido.', 'dps-push-addon' );
             wp_send_json_error( [ 
                 'message' => sprintf( 
                     /* translators: %s: error description */
@@ -865,7 +939,8 @@ class DPS_Push_Addon {
                             <tr>
                                 <th scope="row"><?php echo esc_html__( 'Token do Bot', 'dps-push-addon' ); ?></th>
                                 <td>
-                                    <input type="text" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ">
+                                    <input type="password" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( $telegram_token ); ?>" class="regular-text" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" autocomplete="off">
+                                    <button type="button" class="button" onclick="var f=document.getElementById('dps_push_telegram_token');f.type=f.type==='password'?'text':'password';">👁️</button>
                                     <p class="description"><?php echo esc_html__( 'Obtenha um token criando um bot via @BotFather no Telegram.', 'dps-push-addon' ); ?></p>
                                 </td>
                             </tr>

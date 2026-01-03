@@ -324,14 +324,23 @@ class DPS_Email_Reports {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
 
-        // Verificar se tabela existe
+        // Verificar se tabela existe (usando prepare para evitar SQL Injection).
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
         if ( ! $exists ) {
             return [];
         }
 
+        // Sanitizar a data para garantir formato válido.
+        $sanitized_date = sanitize_text_field( $date );
+        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $sanitized_date ) ) {
+            return [];
+        }
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is prefixed and safe.
         return $wpdb->get_results(
-            $wpdb->prepare( "SELECT * FROM {$table} WHERE DATE(data) = %s ORDER BY data ASC", $date )
+            $wpdb->prepare( "SELECT * FROM {$table} WHERE DATE(data) = %s ORDER BY data ASC", $sanitized_date )
         );
     }
 
@@ -344,7 +353,13 @@ class DPS_Email_Reports {
     private function get_inactive_pets( $days ) {
         global $wpdb;
 
-        $cutoff_date = date( 'Y-m-d', strtotime( "-{$days} days" ) );
+        // Sanitizar e validar dias (deve ser um inteiro positivo).
+        $days = absint( $days );
+        if ( $days < 1 ) {
+            $days = 30;
+        }
+
+        $cutoff_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
 
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
@@ -355,6 +370,7 @@ class DPS_Email_Reports {
 
         $inactive = [];
         foreach ( $pets as $pet_id ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $last_appt = $wpdb->get_var( $wpdb->prepare(
                 "SELECT MAX(pm.meta_value) FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
@@ -638,14 +654,27 @@ class DPS_Email_Reports {
      * @param string $context Contexto (agenda, report, weekly).
      */
     public function send_to_telegram( $message, $context = '' ) {
-        $token = get_option( 'dps_push_telegram_token' );
+        $token   = get_option( 'dps_push_telegram_token' );
         $chat_id = get_option( 'dps_push_telegram_chat' );
 
         if ( empty( $token ) || empty( $chat_id ) ) {
             return;
         }
 
-        $url = "https://api.telegram.org/bot{$token}/sendMessage";
+        // Validar formato do token (formato: 123456789:ABCdefGHI...).
+        if ( ! preg_match( '/^\d{8,12}:[A-Za-z0-9_-]{30,50}$/', $token ) ) {
+            $this->log( 'error', 'Token do Telegram com formato inválido', [ 'context' => $context ] );
+            return;
+        }
+
+        // Validar chat_id (número ou número negativo para grupos).
+        if ( ! preg_match( '/^-?\d+$/', $chat_id ) ) {
+            $this->log( 'error', 'Chat ID do Telegram com formato inválido', [ 'context' => $context ] );
+            return;
+        }
+
+        // Construir URL segura.
+        $url = 'https://api.telegram.org/bot' . urlencode( $token ) . '/sendMessage';
 
         $response = wp_remote_post( $url, [
             'body' => [
@@ -659,7 +688,15 @@ class DPS_Email_Reports {
         if ( is_wp_error( $response ) ) {
             $this->log( 'error', 'Erro ao enviar para Telegram: ' . $response->get_error_message(), [ 'context' => $context ] );
         } else {
-            $this->log( 'info', 'Mensagem enviada para Telegram', [ 'context' => $context ] );
+            $body = wp_remote_retrieve_body( $response );
+            $data = json_decode( $body, true );
+            
+            if ( isset( $data['ok'] ) && $data['ok'] ) {
+                $this->log( 'info', 'Mensagem enviada para Telegram', [ 'context' => $context ] );
+            } else {
+                $error_desc = isset( $data['description'] ) ? sanitize_text_field( $data['description'] ) : 'Erro desconhecido';
+                $this->log( 'error', 'Telegram retornou erro: ' . $error_desc, [ 'context' => $context ] );
+            }
         }
     }
 
@@ -672,7 +709,12 @@ class DPS_Email_Reports {
      */
     private function log( $level, $message, $context = [] ) {
         if ( class_exists( 'DPS_Logger' ) ) {
-            DPS_Logger::$level( $message, $context, 'email-reports' );
+            // Validar nível de log para evitar execução de métodos arbitrários.
+            $allowed_levels = [ 'info', 'error', 'warning', 'debug' ];
+            if ( ! in_array( $level, $allowed_levels, true ) ) {
+                $level = 'info';
+            }
+            call_user_func( [ 'DPS_Logger', $level ], $message, $context, 'email-reports' );
         }
     }
 
