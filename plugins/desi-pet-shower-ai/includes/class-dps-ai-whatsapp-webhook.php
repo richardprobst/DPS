@@ -183,24 +183,59 @@ class DPS_AI_WhatsApp_Webhook {
             return hash_equals( $expected_signature, $signature );
         }
 
-        // Twilio: valida assinatura
+        // Twilio: valida assinatura usando X-Twilio-Signature
         if ( 'twilio' === $provider ) {
-            // Twilio usa X-Twilio-Signature
-            // Implementação simplificada - em produção, usar biblioteca oficial
-            return true; // TODO: implementar validação Twilio
+            $signature   = $request->get_header( 'x-twilio-signature' );
+            $auth_token  = $settings['whatsapp_twilio_auth_token'] ?? '';
+
+            if ( empty( $signature ) || empty( $auth_token ) ) {
+                dps_ai_log( 'Twilio webhook: assinatura ou auth_token ausente', 'warning' );
+                return false;
+            }
+
+            // Reconstrói a URL completa do webhook
+            $webhook_url = rest_url( 'dps-ai/v1/whatsapp-webhook' );
+
+            // Obtém parâmetros do POST para validação Twilio
+            $params = $request->get_body_params();
+            ksort( $params );
+            $data = $webhook_url;
+            foreach ( $params as $key => $value ) {
+                $data .= $key . $value;
+            }
+
+            // Calcula assinatura esperada usando HMAC-SHA1 com Base64
+            $expected_signature = base64_encode( hash_hmac( 'sha1', $data, $auth_token, true ) );
+
+            // Usa hash_equals para comparação segura timing-safe
+            if ( ! hash_equals( $expected_signature, $signature ) ) {
+                dps_ai_log( 'Twilio webhook: assinatura inválida', 'warning' );
+                return false;
+            }
+
+            return true;
         }
 
-        // Custom: valida token
+        // Custom: valida token obrigatoriamente
         if ( 'custom' === $provider ) {
             $api_key = $settings['whatsapp_custom_api_key'] ?? '';
+
+            // SEGURANÇA: Exige API key configurada para webhooks customizados
             if ( empty( $api_key ) ) {
-                return true; // Sem validação se não configurado
+                dps_ai_log( 'Custom webhook: API key não configurada - requisição rejeitada', 'warning' );
+                return false;
             }
 
             $auth_header = $request->get_header( 'authorization' );
             $expected    = 'Bearer ' . $api_key;
 
-            return $auth_header === $expected;
+            // Usa hash_equals para comparação segura timing-safe
+            if ( empty( $auth_header ) || ! hash_equals( $expected, $auth_header ) ) {
+                dps_ai_log( 'Custom webhook: autorização inválida', 'warning' );
+                return false;
+            }
+
+            return true;
         }
 
         return false;
@@ -215,14 +250,15 @@ class DPS_AI_WhatsApp_Webhook {
      * @param string $provider Provider usado.
      */
     private function process_message( $phone, $message, $metadata, $provider ) {
-        // Log da mensagem recebida
-        dps_ai_log( "WhatsApp recebido de {$phone}: {$message}" );
+        // Log da mensagem recebida (mascara telefone e mensagem para LGPD/privacidade)
+        $masked_phone = $this->mask_phone( $phone );
+        dps_ai_log( "WhatsApp recebido de {$masked_phone}", 'info' );
 
         // Obtém ou cria conversa
         $conversation_id = $this->get_or_create_conversation( $phone );
 
         if ( ! $conversation_id ) {
-            dps_ai_log( "Erro ao criar conversa WhatsApp para {$phone}", 'error' );
+            dps_ai_log( "Erro ao criar conversa WhatsApp para {$masked_phone}", 'error' );
             return;
         }
 
@@ -263,10 +299,28 @@ class DPS_AI_WhatsApp_Webhook {
         $result = DPS_AI_WhatsApp_Connector::send_message( $phone, $answer, $provider );
 
         if ( ! $result['success'] ) {
-            dps_ai_log( "Erro ao enviar resposta WhatsApp para {$phone}: " . ( $result['error'] ?? 'desconhecido' ), 'error' );
+            dps_ai_log( "Erro ao enviar resposta WhatsApp para {$masked_phone}: " . ( $result['error'] ?? 'desconhecido' ), 'error' );
         } else {
-            dps_ai_log( "Resposta WhatsApp enviada para {$phone}" );
+            dps_ai_log( "Resposta WhatsApp enviada para {$masked_phone}", 'info' );
         }
+    }
+
+    /**
+     * Mascara número de telefone para logs (LGPD/privacidade).
+     *
+     * Exemplo: +5511999887766 -> +55***7766
+     *
+     * @param string $phone Número de telefone.
+     *
+     * @return string Número mascarado.
+     */
+    private function mask_phone( $phone ) {
+        $length = strlen( $phone );
+        if ( $length <= 6 ) {
+            return str_repeat( '*', $length );
+        }
+        // Mantém os 3 primeiros e 4 últimos dígitos
+        return substr( $phone, 0, 3 ) . str_repeat( '*', $length - 7 ) . substr( $phone, -4 );
     }
 
     /**
