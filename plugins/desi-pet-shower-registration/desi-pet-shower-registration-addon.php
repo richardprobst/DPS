@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.2
+ * Version:           1.2.3
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -649,7 +649,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.2';
+        $version   = '1.2.3';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -1424,6 +1424,10 @@ class DPS_Registration_Addon {
         echo '<script type="text/javascript">(function(){
             const btn = document.getElementById("dps_registration_generate_api_key");
             const input = document.getElementById("dps_registration_api_key_hash");
+            const form = document.querySelector(".wrap form");
+            const submitBtn = form ? form.querySelector("input[type=submit], button[type=submit]") : null;
+
+            // Gera API key
             if(btn && input){
                 btn.addEventListener("click", function(){
                     const cryptoObj = window.crypto || window.msCrypto;
@@ -1433,6 +1437,20 @@ class DPS_Registration_Addon {
                     }
                     const randomKey = Array.from(cryptoObj.getRandomValues(new Uint32Array(8)), function(v){ return v.toString(16); }).join("");
                     input.value = randomKey;
+                });
+            }
+
+            // Prevenção de duplo clique e estado de loading no submit
+            if(form && submitBtn){
+                form.addEventListener("submit", function(e){
+                    if(submitBtn.disabled){
+                        e.preventDefault();
+                        return false;
+                    }
+                    submitBtn.disabled = true;
+                    submitBtn.value = "' . esc_js( __( 'Salvando...', 'dps-registration-addon' ) ) . '";
+                    submitBtn.style.opacity = "0.7";
+                    submitBtn.style.cursor = "wait";
                 });
             }
         })();</script>';
@@ -1454,7 +1472,9 @@ class DPS_Registration_Addon {
 
         $paged       = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
         $search_term = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+        // Remove caracteres especiais de LIKE para prevenir wildcard injection
         $phone_term  = preg_replace( '/\D+/', '', $search_term );
+        $phone_term  = $this->escape_like_wildcards( $phone_term );
 
         $meta_query = [
             [
@@ -1557,7 +1577,7 @@ class DPS_Registration_Addon {
                 }
             }
         } else {
-            echo '<p>' . esc_html__( 'Nenhum cadastro pendente encontrado.', 'dps-registration-addon' ) . '</p>';
+            echo '<div class="notice notice-info inline" style="margin-top: 10px;"><p>' . esc_html__( 'Nenhum cadastro pendente encontrado.', 'dps-registration-addon' ) . '</p></div>';
         }
 
         wp_reset_postdata();
@@ -2400,6 +2420,18 @@ class DPS_Registration_Addon {
      */
     private function replace_placeholders( $template, $replacements ) {
         return strtr( $template, $replacements );
+    }
+
+    /**
+     * Escapa caracteres especiais de LIKE (%, _) para prevenir wildcard injection.
+     *
+     * @since 1.2.3
+     *
+     * @param string $value Valor a escapar.
+     * @return string Valor com wildcards escapados.
+     */
+    private function escape_like_wildcards( $value ) {
+        return addcslashes( (string) $value, '%_' );
     }
 
     /**

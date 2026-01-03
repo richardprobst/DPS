@@ -96,19 +96,16 @@ Antes de criar uma nova versão oficial:
 - **Header Retry-After em rate limit**: Resposta 429 da REST API agora inclui header `Retry-After` com tempo de espera em segundos.
 - **Sanitização de arrays de pets**: Campos de pets enviados como arrays agora aplicam `wp_unslash()` antes de sanitizar.
 - **uninstall.php atualizado**: Arquivo de desinstalação agora remove todas as options, transients e cron jobs criados pelo add-on.
-
-**Payment Add-on - Auditoria de Segurança Completa (v1.2.0)**
-
-- **Access Token em URL da API**: Corrigida vulnerabilidade onde o access token do Mercado Pago era enviado como query parameter em chamadas `wp_remote_get()`. Agora utiliza header `Authorization: Bearer` conforme boas práticas de segurança.
-- **Sanitização de credenciais**: Adicionados callbacks de sanitização em `register_setting()` para Access Token, PIX Key e Webhook Secret, removendo caracteres potencialmente perigosos.
-- **Rate Limiting em webhooks**: Implementada proteção contra brute force no endpoint de webhook. IPs são bloqueados após 10 tentativas falhas em 5 minutos.
-- **Verificação de existência de tabela**: Adicionada validação `SHOW TABLES LIKE` antes de operações SQL em `mark_appointment_paid()` e `mark_subscription_paid()` para prevenir erros quando Finance Add-on não está ativo.
-- **Logging de tentativas de webhook inválidas**: Requisições de webhook com secret inválido agora são registradas com IP do cliente para auditoria de segurança.
-- **Helper para obtenção de IP do cliente**: Implementado método `get_client_ip()` que considera headers de proxy reverso (Cloudflare, X-Forwarded-For) com validação de formato.
-- **Webhook secret obrigatório**: Requisições de webhook são rejeitadas se o secret não estiver configurado, em vez de falhar silenciosamente.
-- **Registro duplicado removido**: Removidas chamadas duplicadas de `register_setting()` que poderiam causar conflito de callbacks de sanitização.
+- **Escape de wildcards LIKE**: Busca de cadastros pendentes agora escapa caracteres especiais (%, _) para prevenir wildcard injection.
 
 #### Added (Adicionado)
+
+**Registration Add-on - Verificação Funcional e UX (v1.2.3)**
+
+- **Prevenção de duplo clique no admin**: Botão de salvar configurações é desabilitado durante o envio e exibe texto "Salvando..." para evitar submissões duplicadas.
+- **Estilos para botão desabilitado**: CSS atualizado com estilos visuais para botões desabilitados e estado de loading com spinner animado.
+- **Mensagem de "sem resultados" melhorada**: Página de cadastros pendentes agora exibe mensagem estilizada como notice quando não há resultados.
+- **Estilos de erros JS animados**: Container de erros de validação client-side agora inclui animação shake para maior visibilidade.
 
 **Payment Add-on - Verificação Funcional e UX (v1.2.0)**
 
