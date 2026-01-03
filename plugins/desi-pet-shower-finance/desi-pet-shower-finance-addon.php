@@ -583,7 +583,16 @@ class DPS_Finance_Addon {
         }
 
         // Exportação CSV - processa antes das outras ações
+        // SEGURANÇA: Adicionada verificação de nonce e permissão
         if ( isset( $_GET['dps_fin_export'] ) && '1' === $_GET['dps_fin_export'] ) {
+            // Verifica nonce
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_csv' ) ) {
+                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
+            }
+            // Verifica permissão
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Você não tem permissão para exportar.', 'dps-finance-addon' ) );
+            }
             $this->export_transactions_csv();
             exit;
         }
@@ -694,6 +703,13 @@ class DPS_Finance_Addon {
             $value_cents = DPS_Money_Helper::parse_brazilian_format( $raw_value );
             $value       = $value_cents / 100;
             $method    = isset( $_POST['partial_method'] ) ? sanitize_text_field( wp_unslash( $_POST['partial_method'] ) ) : '';
+            
+            // SEGURANÇA: Valida método de pagamento - apenas valores permitidos
+            $valid_methods = [ 'pix', 'cartao', 'dinheiro', 'outro', 'credito_fidelidade', '' ];
+            if ( ! in_array( $method, $valid_methods, true ) ) {
+                $method = 'outro';
+            }
+            
             $credit_raw = isset( $_POST['loyalty_credit_to_use'] ) ? sanitize_text_field( wp_unslash( $_POST['loyalty_credit_to_use'] ) ) : '0';
             $credit_cents = DPS_Money_Helper::parse_brazilian_format( $credit_raw );
             $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
@@ -833,18 +849,32 @@ class DPS_Finance_Addon {
             $status     = isset( $_POST['finance_status'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_status'] ) ) : 'em_aberto';
             $desc       = isset( $_POST['finance_desc'] ) ? sanitize_text_field( wp_unslash( $_POST['finance_desc'] ) ) : '';
             $client_id  = isset( $_POST['finance_client_id'] ) ? intval( $_POST['finance_client_id'] ) : 0;
+            
+            // SEGURANÇA: Validação de tipo - apenas valores permitidos
+            $valid_types = [ 'receita', 'despesa' ];
+            if ( ! in_array( $type, $valid_types, true ) ) {
+                $type = 'receita';
+            }
+            
+            // SEGURANÇA: Validação de status - apenas valores permitidos
+            $valid_statuses = [ 'em_aberto', 'pago', 'cancelado' ];
+            if ( ! in_array( $status, $valid_statuses, true ) ) {
+                $status = 'em_aberto';
+            }
+            
             // Insere no banco
+            // SEGURANÇA: Especifica formato de tipos para prevenir injeção
             $wpdb->insert( $table, [
                 'cliente_id'    => $client_id ?: null,
                 'agendamento_id'=> null,
                 'plano_id'      => null,
-                'data'          => $date ?: current_time( 'mysql' ),
+                'data'          => $date ?: current_time( 'Y-m-d' ),
                 'valor'         => $value,
                 'categoria'     => $category,
                 'tipo'          => $type,
                 'status'        => $status,
                 'descricao'     => $desc,
-            ] );
+            ], [ '%d', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s' ] );
             
             $new_trans_id = $wpdb->insert_id;
             
@@ -886,7 +916,13 @@ class DPS_Finance_Addon {
             exit;
         }
         // Atualizar status de transação
+        // SEGURANÇA: Adicionada verificação de nonce e validação de status
         if ( isset( $_POST['dps_update_trans_status'] ) && isset( $_POST['trans_id'] ) ) {
+            // Verifica nonce
+            if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'dps_update_status' ) ) {
+                wp_die( esc_html__( 'Ação de segurança inválida.', 'dps-finance-addon' ) );
+            }
+            
             // Verifica permissão
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( esc_html__( 'Você não tem permissão para acessar esta funcionalidade.', 'dps-finance-addon' ) );
@@ -894,6 +930,12 @@ class DPS_Finance_Addon {
             
             $id     = intval( $_POST['trans_id'] );
             $status = isset( $_POST['trans_status'] ) ? sanitize_text_field( wp_unslash( $_POST['trans_status'] ) ) : 'em_aberto';
+            
+            // SEGURANÇA: Valida que status é um valor permitido
+            $valid_statuses = [ 'em_aberto', 'pago', 'cancelado' ];
+            if ( ! in_array( $status, $valid_statuses, true ) ) {
+                $status = 'em_aberto';
+            }
             
             // F4.4: FASE 4 - Busca status anterior para auditoria
             $old_status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM $table WHERE id = %d", $id ) );
@@ -2060,25 +2102,27 @@ class DPS_Finance_Addon {
         
         // Botões de exportação
         echo '<div class="dps-finance-actions-group">';
-        $nonce = wp_create_nonce( 'dps_export_pdf' );
+        $nonce_pdf = wp_create_nonce( 'dps_export_pdf' );
+        $nonce_csv = wp_create_nonce( 'dps_export_csv' );
         
-        // Exportar CSV
+        // Exportar CSV - SEGURANÇA: Adicionado nonce
         $export_params = $_GET;
         $export_params['dps_fin_export'] = '1';
+        $export_params['_wpnonce'] = $nonce_csv;
         $export_link = add_query_arg( $export_params, $this->get_current_url() ) . '#financeiro';
         echo '<a href="' . esc_url( $export_link ) . '" class="button" title="' . esc_attr__( 'Exportar transações em CSV', 'dps-finance-addon' ) . '">📥 CSV</a>';
         
         // Exportar DRE em PDF
         $dre_params = $_GET;
         $dre_params['dps_finance_export_pdf'] = 'dre';
-        $dre_params['_wpnonce'] = $nonce;
+        $dre_params['_wpnonce'] = $nonce_pdf;
         $dre_link = add_query_arg( $dre_params, $this->get_current_url() );
         echo '<a href="' . esc_url( $dre_link ) . '" class="button" target="_blank" title="' . esc_attr__( 'Relatório DRE para impressão', 'dps-finance-addon' ) . '">📄 DRE</a>';
         
         // Exportar Resumo Mensal em PDF
         $summary_params = $_GET;
         $summary_params['dps_finance_export_pdf'] = 'monthly_summary';
-        $summary_params['_wpnonce'] = $nonce;
+        $summary_params['_wpnonce'] = $nonce_pdf;
         $summary_link = add_query_arg( $summary_params, $this->get_current_url() );
         echo '<a href="' . esc_url( $summary_link ) . '" class="button" target="_blank" title="' . esc_attr__( 'Resumo mensal para impressão', 'dps-finance-addon' ) . '">📊 Resumo</a>';
         echo '</div>';
@@ -2257,8 +2301,10 @@ class DPS_Finance_Addon {
                 echo '</span>';
                 
                 // Select para alterar status (mais discreto)
+                // SEGURANÇA: Adicionado nonce ao formulário
                 echo '<span class="dps-status-select-wrapper">';
                 echo '<form method="post" style="display:inline;">';
+                wp_nonce_field( 'dps_update_status', '_wpnonce', false );
                 echo '<input type="hidden" name="dps_update_trans_status" value="1">';
                 echo '<input type="hidden" name="trans_id" value="' . esc_attr( $tr->id ) . '">';
                 echo '<select name="trans_status" class="dps-status-select" data-current="' . esc_attr( $tr->status ) . '" onchange="this.form.submit()" title="' . esc_attr__( 'Alterar status', 'dps-finance-addon' ) . '">';
