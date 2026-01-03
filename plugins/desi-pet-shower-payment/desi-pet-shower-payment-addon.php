@@ -110,9 +110,10 @@ class DPS_Payment_Addon {
     }
 
     /**
-     * Enfileira CSS responsivo do add-on na página de configurações.
+     * Enfileira CSS e JS do add-on na página de configurações.
      *
      * @since 1.0.0
+     * @since 1.2.0 Adicionado enfileiramento de JavaScript com wp_localize_script.
      * @param string $hook Hook da página atual.
      */
     public function enqueue_admin_assets( $hook ) {
@@ -122,13 +123,32 @@ class DPS_Payment_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.0.0';
+        $version   = '1.2.0';
 
+        // CSS
         wp_enqueue_style(
             'dps-payment-addon',
             $addon_url . 'assets/css/payment-addon.css',
             [],
             $version
+        );
+        
+        // JavaScript
+        wp_enqueue_script(
+            'dps-payment-settings',
+            $addon_url . 'assets/js/payment-settings.js',
+            [ 'jquery' ],
+            $version,
+            true // Load in footer
+        );
+        
+        // Localize script for translated strings
+        wp_localize_script(
+            'dps-payment-settings',
+            'dpsPaymentSettings',
+            [
+                'savingText' => __( 'Salvando...', 'dps-payment-addon' ),
+            ]
         );
     }
 
@@ -409,47 +429,7 @@ class DPS_Payment_Addon {
         submit_button( __( 'Salvar configurações', 'dps-payment-addon' ), 'primary', 'submit', true, [ 'id' => 'dps-payment-submit' ] );
         echo '</form>';
         echo '</div>';
-        
-        // Script inline para prevenção de duplo clique e feedback visual
-        $this->render_settings_page_scripts();
-    }
-    
-    /**
-     * Renderiza scripts inline para a página de configurações.
-     *
-     * @since 1.2.0
-     */
-    private function render_settings_page_scripts() {
-        ?>
-        <script>
-        (function($) {
-            'use strict';
-            $(document).ready(function() {
-                var $form = $('#dps-payment-settings-form');
-                var $submitBtn = $('#dps-payment-submit');
-                var originalText = $submitBtn.val();
-                
-                // Previne duplo clique e mostra estado de loading
-                $form.on('submit', function(e) {
-                    if ($submitBtn.prop('disabled')) {
-                        e.preventDefault();
-                        return false;
-                    }
-                    $submitBtn.prop('disabled', true);
-                    $submitBtn.val('<?php echo esc_js( __( 'Salvando...', 'dps-payment-addon' ) ); ?>');
-                    $submitBtn.css('opacity', '0.7');
-                });
-                
-                // Restaura botão se houver erro de validação
-                $(window).on('beforeunload', function() {
-                    $submitBtn.prop('disabled', false);
-                    $submitBtn.val(originalText);
-                    $submitBtn.css('opacity', '1');
-                });
-            });
-        })(jQuery);
-        </script>
-        <?php
+        // JavaScript is loaded via wp_enqueue_script in enqueue_admin_assets()
     }
 
     /**
