@@ -760,13 +760,18 @@ class DPS_Base_Frontend {
         // em builders ou pré-visualizações).
         DPS_Base_Plugin::enqueue_frontend_assets();
 
+        $can_manage = self::can_manage();
+
         // Verifica se há visualização específica (detalhes do cliente)
+        // Verificação de permissão movida para ANTES da chamada para prevenir acesso não autorizado
         if ( isset( $_GET['dps_view'] ) && 'client' === $_GET['dps_view'] && isset( $_GET['id'] ) ) {
+            if ( ! is_user_logged_in() || ! $can_manage ) {
+                $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
+                return '<p>' . esc_html__( 'Você precisa estar logado com as permissões adequadas para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
+            }
             $client_id = intval( $_GET['id'] );
             return self::render_client_page( $client_id );
         }
-        
-        $can_manage = self::can_manage();
 
         // Verifica se o usuário atual está logado e possui permissão para gerenciar o painel
         if ( ! is_user_logged_in() || ! $can_manage ) {
@@ -2563,7 +2568,11 @@ class DPS_Base_Frontend {
                 echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
-                $delete_url = add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url );
+                $delete_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url ),
+                    'dps_delete',
+                    'dps_nonce'
+                );
                 echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
                 echo '</tr>';
             }
@@ -3857,11 +3866,19 @@ class DPS_Base_Frontend {
             }
         }
 
-        // 2. Exclusão de documentos
+        // 2. Exclusão de documentos (requer nonce para proteção CSRF)
         if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) ) {
+            // Verifica nonce para proteção CSRF
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_doc' ) ) {
+                DPS_Message_Helper::add_error( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
+                $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file', '_wpnonce' ] ) );
+                wp_redirect( $redirect );
+                exit;
+            }
             $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             self::delete_document( $file );
-            $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file' ] ) );
+            DPS_Message_Helper::add_success( __( 'Documento excluído com sucesso.', 'desi-pet-shower' ) );
+            $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file', '_wpnonce' ] ) );
             wp_redirect( $redirect );
             exit;
         }

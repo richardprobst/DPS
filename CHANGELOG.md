@@ -81,6 +81,14 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Security (Segurança)
+
+**Base Plugin - Correções de Segurança Críticas**
+
+- **Verificação de permissão em visualização de cliente**: Corrigida vulnerabilidade onde a verificação `can_manage()` era executada APÓS a chamada de `render_client_page()`, permitindo potencial acesso não autorizado a dados de clientes. A verificação agora é feita ANTES de processar a requisição.
+- **Nonce em exclusão de agendamentos na seção de histórico**: Adicionada proteção CSRF ao link de exclusão de agendamentos na tabela de histórico. O link agora utiliza `wp_nonce_url()` com a action `dps_delete`.
+- **Nonce em exclusão de documentos**: Implementada verificação de nonce na ação de exclusão de documentos (`dps_delete_doc`). Requisições sem nonce válido agora retornam erro "Ação não autorizada" e feedback visual ao usuário.
+
 #### Changed (Alterado)
 
 **Renomeação do Sistema - desi.pet by PRObst**
