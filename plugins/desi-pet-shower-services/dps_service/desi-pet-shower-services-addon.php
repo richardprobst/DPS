@@ -1183,12 +1183,9 @@ class DPS_Services_Addon {
                             [ 'tab' => 'servicos', 'dps_edit' => 'service', 'id' => $new_id ],
                             $current_url ? remove_query_arg( [ 'dps_duplicate_service', '_wpnonce' ], $current_url ) : home_url()
                         );
+                        // Usa mensagem simples sem HTML (DPS_Message_Helper escapa o texto)
                         DPS_Message_Helper::add_success(
-                            sprintf(
-                                /* translators: %s: link para editar o serviço duplicado */
-                                __( 'Serviço duplicado com sucesso! O novo serviço está inativo. <a href="%s">Editar cópia</a>', 'dps-services-addon' ),
-                                esc_url( $edit_url )
-                            )
+                            __( 'Serviço duplicado com sucesso! O novo serviço está inativo. Use o botão Editar na tabela.', 'dps-services-addon' )
                         );
                     }
                 } else {
@@ -1628,6 +1625,10 @@ class DPS_Services_Addon {
         if ( ! isset( $_POST['appointment_services_executed'] ) && ! isset( $_POST['appointment_extra_names'] ) ) {
             return;
         }
+        // Defesa em profundidade: verifica se o usuário pode editar este post
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
         // Serviços executados
         if ( isset( $_POST['appointment_services_executed'] ) && is_array( $_POST['appointment_services_executed'] ) ) {
             $executed_raw = array_map( 'intval', (array) $_POST['appointment_services_executed'] );
@@ -1679,6 +1680,10 @@ class DPS_Services_Addon {
             return;
         }
         if ( 'dps_agendamento' !== $post->post_type ) {
+            return;
+        }
+        // Defesa em profundidade: verifica se o usuário pode editar este post
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
             return;
         }
         // Verifica se há dados de serviços no POST
@@ -2037,7 +2042,7 @@ class DPS_Services_Addon {
 
         ob_start();
         ?>
-        <div class="dps-catalog-item <?php echo $is_package ? 'dps-catalog-package' : ''; ?>">
+        <div class="dps-catalog-item <?php echo esc_attr( $is_package ? 'dps-catalog-package' : '' ); ?>">
             <div class="dps-catalog-item-content">
                 <h4 class="dps-catalog-item-title">
                     <?php echo esc_html( $service['title'] ); ?>
