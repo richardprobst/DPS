@@ -62,10 +62,13 @@ class DPS_Refactoring_Examples_Validator {
 class DPS_Refactoring_Examples_URL {
 
     /**
-     * ANTES: Construção manual de URLs
+     * ANTES: Construção manual de URLs (pode causar avisos em PHP 8.1+ se get_permalink() retornar false)
+     *
+     * @deprecated Use DPS_URL_Builder::safe_get_permalink() or the build_*_url() methods for PHP 8.1+ compatibility
      */
     public static function render_client_actions_old_way( $client ) {
-        $base_url = get_permalink();
+        // Problema: get_permalink() pode retornar false em alguns contextos, causando avisos em PHP 8.1+
+        $base_url = DPS_URL_Builder::safe_get_permalink(); // Agora usa o método seguro
         $edit_url = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client->ID ], $base_url );
         $delete_url = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'id' => $client->ID ], $base_url );
         $view_url = add_query_arg( [ 'dps_view' => 'client', 'id' => $client->ID ], $base_url );
@@ -78,7 +81,10 @@ class DPS_Refactoring_Examples_URL {
     }
 
     /**
-     * DEPOIS: Usando DPS_URL_Builder
+     * DEPOIS: Usando DPS_URL_Builder (recomendado)
+     *
+     * Os métodos build_*_url() já usam safe_get_permalink() internamente,
+     * garantindo compatibilidade com PHP 8.1+ automaticamente.
      */
     public static function render_client_actions_new_way( $client ) {
         $edit_url = DPS_URL_Builder::build_edit_url( 'client', $client->ID, 'clientes' );

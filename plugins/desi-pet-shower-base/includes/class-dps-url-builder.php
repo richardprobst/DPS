@@ -129,8 +129,48 @@ class DPS_URL_Builder {
     public static function remove_action_params( $url ) {
         return remove_query_arg(
             [ 'dps_delete', 'id', 'dps_edit', 'dps_view', 'tab', 'dps_action', 'dps_nonce' ],
-            $url
+            (string) $url
         );
+    }
+
+    /**
+     * Safe wrapper for get_permalink() that always returns a string.
+     *
+     * Prevents PHP 8.1+ deprecation warnings caused by passing null/false
+     * to functions like strpos(), str_replace(), add_query_arg(), etc.
+     *
+     * @param int|WP_Post|null $post_param Optional. Post ID or post object. Default is the global `$post`.
+     * @return string The permalink URL or home_url() as fallback.
+     */
+    public static function safe_get_permalink( $post_param = null ) {
+        $permalink = get_permalink( $post_param );
+
+        if ( $permalink && is_string( $permalink ) ) {
+            return $permalink;
+        }
+
+        // Fallback: try queried object
+        if ( null === $post_param ) {
+            $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
+            if ( $queried_id ) {
+                $permalink = get_permalink( $queried_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    return $permalink;
+                }
+            }
+
+            // Fallback: try global $post
+            global $post;
+            if ( isset( $post->ID ) ) {
+                $permalink = get_permalink( $post->ID );
+                if ( $permalink && is_string( $permalink ) ) {
+                    return $permalink;
+                }
+            }
+        }
+
+        // Final fallback: home URL (always a valid string)
+        return home_url();
     }
 
     /**
@@ -149,10 +189,11 @@ class DPS_URL_Builder {
         }
 
         if ( empty( $current_url ) ) {
-            $current_url = get_permalink();
+            $current_url = self::safe_get_permalink();
         }
 
-        if ( empty( $current_url ) ) {
+        // Ensure we always return a string, never null/false
+        if ( empty( $current_url ) || ! is_string( $current_url ) ) {
             $current_url = home_url();
         }
 

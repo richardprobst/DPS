@@ -324,7 +324,7 @@ class DPS_Services_Addon {
             'cuidados'           => __( 'Cuidados adicionais', 'dps-services-addon' ),
             'pelagem'            => __( 'Tratamento da pelagem e pele', 'dps-services-addon' ),
         ];
-        $base_url = get_permalink();
+        $base_url = DPS_URL_Builder::safe_get_permalink();
         ob_start();
         echo '<div class="dps-section dps-services-section" id="dps-section-servicos">';
         

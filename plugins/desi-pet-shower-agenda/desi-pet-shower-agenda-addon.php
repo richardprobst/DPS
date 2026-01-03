@@ -1083,7 +1083,7 @@ class DPS_Agenda_Addon {
          * capacidade de administrador, exibimos um link de login.
          */
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            $login_url = wp_login_url( get_permalink() );
+            $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
             return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
         }
         // Nenhum controle adicional de cookies é necessário; o acesso é controlado por permissões do usuário.

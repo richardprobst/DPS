@@ -310,7 +310,7 @@ class DPS_Subscription_Addon {
             if ( $sub_id ) {
                 wp_trash_post( $sub_id );
             }
-            $base_url = get_permalink();
+            $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_cancel', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
             wp_redirect( $redirect_url );
@@ -327,7 +327,7 @@ class DPS_Subscription_Addon {
             if ( $sub_id ) {
                 wp_untrash_post( $sub_id );
             }
-            $base_url = get_permalink();
+            $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_restore', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
             wp_redirect( $redirect_url );
@@ -345,7 +345,7 @@ class DPS_Subscription_Addon {
             wp_delete_post( $sub_id, true );
             // Remove quaisquer transações financeiras associadas a esta assinatura
             $this->delete_finance_records( $sub_id );
-            $base_url     = get_permalink();
+            $base_url     = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_delete', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
             wp_redirect( $redirect_url );
@@ -360,7 +360,7 @@ class DPS_Subscription_Addon {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             $this->renew_subscription( $sub_id );
-            $base_url = get_permalink();
+            $base_url = DPS_URL_Builder::safe_get_permalink();
             // Remove o parâmetro de renovação para evitar redirecionamentos em loop
             $redirect_url = remove_query_arg( [ 'dps_renew', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
@@ -376,7 +376,7 @@ class DPS_Subscription_Addon {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             $this->delete_all_appointments( $sub_id );
-            $base_url = get_permalink();
+            $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_delete_appts', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
             wp_redirect( $redirect_url );
@@ -399,7 +399,7 @@ class DPS_Subscription_Addon {
             $this->mark_cycle_status( $sub_id, $cycle_key, $status );
             $this->create_or_update_finance_record( $sub_id, $cycle_key );
             // Redireciona sem parametros
-            $base_url = get_permalink();
+            $base_url = DPS_URL_Builder::safe_get_permalink();
             wp_redirect( add_query_arg( [ 'tab' => 'assinaturas' ], $base_url ) );
             exit;
         }
@@ -917,7 +917,7 @@ class DPS_Subscription_Addon {
             'orderby'        => 'date',
             'order'          => 'DESC',
         ] );
-        $base_url = get_permalink();
+        $base_url = DPS_URL_Builder::safe_get_permalink();
         $list_url = add_query_arg( [ 'tab' => 'assinaturas' ], $base_url );
         ob_start();
         

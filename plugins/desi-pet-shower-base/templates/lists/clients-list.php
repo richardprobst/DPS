@@ -20,7 +20,7 @@ $clients        = isset( $clients ) && is_array( $clients ) ? $clients : [];
 $client_meta    = isset( $client_meta ) && is_array( $client_meta ) ? $client_meta : [];
 $pets_counts    = isset( $pets_counts ) && is_array( $pets_counts ) ? $pets_counts : [];
 $current_filter = isset( $current_filter ) ? $current_filter : 'all';
-$base_url       = isset( $base_url ) ? $base_url : get_permalink();
+$base_url       = isset( $base_url ) ? $base_url : DPS_URL_Builder::safe_get_permalink();
 
 $filter_options = [
 	'all'             => esc_html__( 'Todos', 'desi-pet-shower' ),
