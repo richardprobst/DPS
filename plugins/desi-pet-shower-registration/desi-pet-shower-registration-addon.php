@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.1
+ * Version:           1.2.3
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -649,7 +649,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.2';
+        $version   = '1.2.3';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -872,7 +872,7 @@ class DPS_Registration_Addon {
                 'ip_hash'  => $ip_hash,
             ) );
 
-            return new WP_Error( 'rate_limited', __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ), array( 'status' => 429 ) );
+            return $this->create_rate_limit_error();
         }
 
         if ( ! $this->bump_api_rate_counter( $ip_token, $ip_limit ) ) {
@@ -881,10 +881,50 @@ class DPS_Registration_Addon {
                 'ip_hash'  => $ip_hash,
             ) );
 
-            return new WP_Error( 'rate_limited', __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ), array( 'status' => 429 ) );
+            return $this->create_rate_limit_error();
         }
 
         return true;
+    }
+
+    /**
+     * Cria erro de rate limit com header Retry-After.
+     *
+     * @since 1.6.0
+     *
+     * @return WP_Error
+     */
+    private function create_rate_limit_error() {
+        // Adiciona header Retry-After apenas uma vez
+        static $header_added = false;
+        if ( ! $header_added ) {
+            add_filter( 'rest_post_dispatch', array( $this, 'add_retry_after_header' ), 10, 1 );
+            $header_added = true;
+        }
+
+        return new WP_Error(
+            'rate_limited',
+            __( 'Muitas requisições. Tente novamente em breve.', 'dps-registration-addon' ),
+            array(
+                'status'      => 429,
+                'retry_after' => HOUR_IN_SECONDS,
+            )
+        );
+    }
+
+    /**
+     * Callback para adicionar header Retry-After na resposta REST.
+     *
+     * @since 1.6.0
+     *
+     * @param WP_REST_Response $result Resposta da API.
+     * @return WP_REST_Response
+     */
+    public function add_retry_after_header( $result ) {
+        if ( $result instanceof WP_REST_Response ) {
+            $result->header( 'Retry-After', HOUR_IN_SECONDS );
+        }
+        return $result;
     }
 
     /**
@@ -1384,6 +1424,10 @@ class DPS_Registration_Addon {
         echo '<script type="text/javascript">(function(){
             const btn = document.getElementById("dps_registration_generate_api_key");
             const input = document.getElementById("dps_registration_api_key_hash");
+            const form = document.querySelector(".wrap form");
+            const submitBtn = form ? form.querySelector("input[type=submit], button[type=submit]") : null;
+
+            // Gera API key
             if(btn && input){
                 btn.addEventListener("click", function(){
                     const cryptoObj = window.crypto || window.msCrypto;
@@ -1393,6 +1437,20 @@ class DPS_Registration_Addon {
                     }
                     const randomKey = Array.from(cryptoObj.getRandomValues(new Uint32Array(8)), function(v){ return v.toString(16); }).join("");
                     input.value = randomKey;
+                });
+            }
+
+            // Prevenção de duplo clique e estado de loading no submit
+            if(form && submitBtn){
+                form.addEventListener("submit", function(e){
+                    if(submitBtn.disabled){
+                        e.preventDefault();
+                        return false;
+                    }
+                    submitBtn.disabled = true;
+                    submitBtn.value = "' . esc_js( __( 'Salvando...', 'dps-registration-addon' ) ) . '";
+                    submitBtn.style.opacity = "0.7";
+                    submitBtn.style.cursor = "wait";
                 });
             }
         })();</script>';
@@ -1414,7 +1472,9 @@ class DPS_Registration_Addon {
 
         $paged       = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
         $search_term = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+        // Remove caracteres especiais de LIKE para prevenir wildcard injection
         $phone_term  = preg_replace( '/\D+/', '', $search_term );
+        $phone_term  = $this->escape_like_wildcards( $phone_term );
 
         $meta_query = [
             [
@@ -1517,7 +1577,7 @@ class DPS_Registration_Addon {
                 }
             }
         } else {
-            echo '<p>' . esc_html__( 'Nenhum cadastro pendente encontrado.', 'dps-registration-addon' ) . '</p>';
+            echo '<div class="notice notice-info inline" style="margin-top: 10px;"><p>' . esc_html__( 'Nenhum cadastro pendente encontrado.', 'dps-registration-addon' ) . '</p></div>';
         }
 
         wp_reset_postdata();
@@ -1582,28 +1642,49 @@ class DPS_Registration_Addon {
         }
 
         // F1.8: Hook para validações adicionais (ex.: reCAPTCHA)
-        $spam_check = apply_filters( 'dps_registration_spam_check', true, $_POST );
+        // Nota: o filtro recebe uma cópia sanitizada de campos selecionados, NÃO o $_POST bruto
+        $sanitized_context = array(
+            'client_name'  => isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '',
+            'client_email' => isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '',
+            'ip_hash'      => $this->get_client_ip_hash(),
+        );
+        $spam_check = apply_filters( 'dps_registration_spam_check', true, $sanitized_context );
         if ( true !== $spam_check ) {
             $this->add_error( __( 'Verificação de segurança falhou. Por favor, tente novamente.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }
 
-        // Sanitiza dados do cliente
-        $client_name     = sanitize_text_field( $_POST['client_name'] ?? '' );
-        $client_cpf_raw  = sanitize_text_field( $_POST['client_cpf'] ?? '' );
-        $client_phone_raw = sanitize_text_field( $_POST['client_phone'] ?? '' );
-        $client_email    = sanitize_email( $_POST['client_email'] ?? '' );
-        $client_birth    = sanitize_text_field( $_POST['client_birth'] ?? '' );
-        $client_instagram = sanitize_text_field( $_POST['client_instagram'] ?? '' );
-        $client_facebook = sanitize_text_field( $_POST['client_facebook'] ?? '' );
+        // Sanitiza dados do cliente - wp_unslash antes de sanitize para tratar magic quotes
+        $client_name     = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
+        $client_cpf_raw  = isset( $_POST['client_cpf'] ) ? sanitize_text_field( wp_unslash( $_POST['client_cpf'] ) ) : '';
+        $client_phone_raw = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
+        $client_email    = isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '';
+        $client_birth    = isset( $_POST['client_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['client_birth'] ) ) : '';
+        $client_instagram = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
+        $client_facebook = isset( $_POST['client_facebook'] ) ? sanitize_text_field( wp_unslash( $_POST['client_facebook'] ) ) : '';
         $client_photo_auth = isset( $_POST['client_photo_auth'] ) ? 1 : 0;
-        $client_address  = sanitize_textarea_field( $_POST['client_address'] ?? '' );
-        $client_referral = sanitize_text_field( $_POST['client_referral'] ?? '' );
-        $referral_code   = sanitize_text_field( $_POST['dps_referral_code'] ?? '' );
+        $client_address  = isset( $_POST['client_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['client_address'] ) ) : '';
+        $client_referral = isset( $_POST['client_referral'] ) ? sanitize_text_field( wp_unslash( $_POST['client_referral'] ) ) : '';
+        $referral_code   = isset( $_POST['dps_referral_code'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_referral_code'] ) ) : '';
 
-        // Coordenadas de latitude e longitude (podem estar vazias)
-        $client_lat  = sanitize_text_field( $_POST['client_lat'] ?? '' );
-        $client_lng  = sanitize_text_field( $_POST['client_lng'] ?? '' );
+        // Coordenadas de latitude e longitude (podem estar vazias) - validar formato numérico
+        $client_lat_raw  = isset( $_POST['client_lat'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lat'] ) ) : '';
+        $client_lng_raw  = isset( $_POST['client_lng'] ) ? sanitize_text_field( wp_unslash( $_POST['client_lng'] ) ) : '';
+        // Validar que são coordenadas numéricas válidas (latitude: -90 a 90, longitude: -180 a 180)
+        $client_lat = '';
+        $client_lng = '';
+        if ( '' !== $client_lat_raw && is_numeric( $client_lat_raw ) ) {
+            $lat_val = (float) $client_lat_raw;
+            if ( $lat_val >= -90 && $lat_val <= 90 ) {
+                $client_lat = (string) $lat_val;
+            }
+        }
+        if ( '' !== $client_lng_raw && is_numeric( $client_lng_raw ) ) {
+            $lng_val = (float) $client_lng_raw;
+            if ( $lng_val >= -180 && $lng_val <= 180 ) {
+                $client_lng = (string) $lng_val;
+            }
+        }
 
         // =====================================================================
         // F1.1: Validação de campos obrigatórios no backend
@@ -1712,18 +1793,21 @@ class DPS_Registration_Addon {
 
         $pets_created = 0;
 
-        // Lê pets submetidos (campos em arrays)
-        $pet_names      = $_POST['pet_name'] ?? [];
-        $pet_species    = $_POST['pet_species'] ?? [];
-        $pet_breeds     = $_POST['pet_breed'] ?? [];
-        $pet_sizes      = $_POST['pet_size'] ?? [];
-        $pet_weights    = $_POST['pet_weight'] ?? [];
-        $pet_coats      = $_POST['pet_coat'] ?? [];
-        $pet_colors     = $_POST['pet_color'] ?? [];
-        $pet_births     = $_POST['pet_birth'] ?? [];
-        $pet_sexes      = $_POST['pet_sex'] ?? [];
-        $pet_cares      = $_POST['pet_care'] ?? [];
-        $pet_aggs       = $_POST['pet_aggressive'] ?? [];
+        // Lê pets submetidos (campos em arrays) - aplica wp_unslash em arrays
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitização aplicada individualmente
+        $pet_names      = isset( $_POST['pet_name'] ) && is_array( $_POST['pet_name'] ) ? array_map( 'wp_unslash', $_POST['pet_name'] ) : [];
+        $pet_species    = isset( $_POST['pet_species'] ) && is_array( $_POST['pet_species'] ) ? array_map( 'wp_unslash', $_POST['pet_species'] ) : [];
+        $pet_breeds     = isset( $_POST['pet_breed'] ) && is_array( $_POST['pet_breed'] ) ? array_map( 'wp_unslash', $_POST['pet_breed'] ) : [];
+        $pet_sizes      = isset( $_POST['pet_size'] ) && is_array( $_POST['pet_size'] ) ? array_map( 'wp_unslash', $_POST['pet_size'] ) : [];
+        $pet_weights    = isset( $_POST['pet_weight'] ) && is_array( $_POST['pet_weight'] ) ? array_map( 'wp_unslash', $_POST['pet_weight'] ) : [];
+        $pet_coats      = isset( $_POST['pet_coat'] ) && is_array( $_POST['pet_coat'] ) ? array_map( 'wp_unslash', $_POST['pet_coat'] ) : [];
+        $pet_colors     = isset( $_POST['pet_color'] ) && is_array( $_POST['pet_color'] ) ? array_map( 'wp_unslash', $_POST['pet_color'] ) : [];
+        $pet_births     = isset( $_POST['pet_birth'] ) && is_array( $_POST['pet_birth'] ) ? array_map( 'wp_unslash', $_POST['pet_birth'] ) : [];
+        $pet_sexes      = isset( $_POST['pet_sex'] ) && is_array( $_POST['pet_sex'] ) ? array_map( 'wp_unslash', $_POST['pet_sex'] ) : [];
+        $pet_cares      = isset( $_POST['pet_care'] ) && is_array( $_POST['pet_care'] ) ? array_map( 'wp_unslash', $_POST['pet_care'] ) : [];
+        // pet_aggressive é checkbox - valor é só "1", não precisa wp_unslash mas aplicamos por consistência
+        $pet_aggs       = isset( $_POST['pet_aggressive'] ) && is_array( $_POST['pet_aggressive'] ) ? array_map( 'wp_unslash', $_POST['pet_aggressive'] ) : [];
+        // phpcs:enable
 
         if ( is_array( $pet_names ) ) {
             foreach ( $pet_names as $index => $pname ) {
@@ -1742,6 +1826,45 @@ class DPS_Registration_Addon {
                 $sex      = is_array( $pet_sexes )   && isset( $pet_sexes[ $index ] )   ? sanitize_text_field( $pet_sexes[ $index ] )   : '';
                 $care     = is_array( $pet_cares )   && isset( $pet_cares[ $index ] )   ? sanitize_textarea_field( $pet_cares[ $index ] )   : '';
                 $agg      = is_array( $pet_aggs )    && isset( $pet_aggs[ $index ] )    ? 1 : 0;
+
+                // Whitelist validation para campos com valores predefinidos
+                $valid_species = array( 'cao', 'gato', 'outro' );
+                $valid_sizes   = array( 'pequeno', 'medio', 'grande' );
+                $valid_sexes   = array( 'macho', 'femea' );
+
+                if ( ! in_array( $species, $valid_species, true ) ) {
+                    $species = '';
+                }
+                if ( ! in_array( $size, $valid_sizes, true ) ) {
+                    $size = '';
+                }
+                if ( ! in_array( $sex, $valid_sexes, true ) ) {
+                    $sex = '';
+                }
+
+                // Validar peso como número positivo (se preenchido)
+                // Aceita apenas dígitos, vírgula e ponto para prevenir input malformado
+                if ( '' !== $weight ) {
+                    if ( ! preg_match( '/^[\d.,]+$/', $weight ) ) {
+                        $weight = '';
+                    } else {
+                        $weight_float = (float) str_replace( ',', '.', $weight );
+                        if ( $weight_float <= 0 || $weight_float > 500 ) {
+                            $weight = ''; // Valor inválido ou implausível
+                        } else {
+                            $weight = (string) $weight_float;
+                        }
+                    }
+                }
+
+                // Validar data de nascimento (formato Y-m-d, não futura)
+                if ( '' !== $birth ) {
+                    $birth_time = strtotime( $birth );
+                    if ( false === $birth_time || $birth_time > time() ) {
+                        $birth = ''; // Data inválida ou futura
+                    }
+                }
+
                 // Cria pet
                 $pet_id = wp_insert_post( [
                     'post_type'   => 'dps_pet',
@@ -1776,8 +1899,8 @@ class DPS_Registration_Addon {
             'ip_hash'   => $this->get_client_ip_hash(),
         ) );
 
-        // Redireciona e indica sucesso
-        wp_redirect( add_query_arg( 'registered', '1', $this->get_registration_page_url() ) );
+        // Redireciona e indica sucesso - usa wp_safe_redirect para segurança
+        wp_safe_redirect( add_query_arg( 'registered', '1', $this->get_registration_page_url() ) );
         exit;
     }
 
@@ -2238,19 +2361,25 @@ class DPS_Registration_Addon {
         $portal_url      = $this->get_portal_url();
         $business_name   = get_bloginfo( 'name' );
 
+        // Escapar valores que serão inseridos em HTML para prevenir XSS
         $placeholders = array(
-            '{client_name}'     => $client_name,
-            '{confirm_url}'     => esc_url_raw( $confirmation_link ),
-            '{registration_url}' => esc_url_raw( $registration_url ),
-            '{portal_url}'      => $portal_url ? esc_url_raw( $portal_url ) : '',
-            '{business_name}'   => $business_name,
+            '{client_name}'     => esc_html( $client_name ),
+            '{confirm_url}'     => esc_url( $confirmation_link ),
+            '{registration_url}' => esc_url( $registration_url ),
+            '{portal_url}'      => $portal_url ? esc_url( $portal_url ) : '',
+            '{business_name}'   => esc_html( $business_name ),
         );
 
         $subject_option = get_option( 'dps_registration_confirm_email_subject', '' );
         $body_option    = get_option( 'dps_registration_confirm_email_body', '' );
 
+        // Subject não precisa de escape HTML pois é texto puro
+        $subject_placeholders = array(
+            '{client_name}'     => $client_name,
+            '{business_name}'   => $business_name,
+        );
         $subject = $subject_option
-            ? $this->replace_placeholders( $subject_option, $placeholders )
+            ? $this->replace_placeholders( $subject_option, $subject_placeholders )
             : __( 'Confirme seu email - desi.pet by PRObst', 'desi-pet-shower' );
 
         if ( $body_option ) {
@@ -2291,6 +2420,18 @@ class DPS_Registration_Addon {
      */
     private function replace_placeholders( $template, $replacements ) {
         return strtr( $template, $replacements );
+    }
+
+    /**
+     * Escapa caracteres especiais de LIKE (%, _) para prevenir wildcard injection.
+     *
+     * @since 1.2.3
+     *
+     * @param string $value Valor a escapar.
+     * @return string Valor com wildcards escapados.
+     */
+    private function escape_like_wildcards( $value ) {
+        return addcslashes( (string) $value, '%_' );
     }
 
     /**
