@@ -9,6 +9,13 @@
 (function($) {
     'use strict';
 
+    // Configuration constants
+    var CONFIG = {
+        AJAX_TIMEOUT: 15000,        // 15 seconds timeout for AJAX requests
+        FORM_SUBMIT_TIMEOUT: 10000, // 10 seconds to re-enable form after submit
+        MODAL_FOCUS_DELAY: 250      // Delay before focusing modal elements
+    };
+
     /**
      * Format currency value to Brazilian format
      * @param {number} value - Value to format
@@ -214,7 +221,7 @@
             $.ajax({
                 url: dpsFinance.ajaxUrl,
                 type: 'POST',
-                timeout: 15000, // 15 second timeout
+                timeout: CONFIG.AJAX_TIMEOUT,
                 data: {
                     action: 'dps_get_services_details',
                     appt_id: apptId,
@@ -388,7 +395,7 @@
             $.ajax({
                 url: dpsFinance.ajaxUrl,
                 type: 'POST',
-                timeout: 15000,
+                timeout: CONFIG.AJAX_TIMEOUT,
                 data: {
                     action: 'dps_get_partial_history',
                     trans_id: transId,
@@ -587,7 +594,7 @@
                 if ($modal.length) {
                     $modal.find('.dps-modal-close').first().focus();
                 }
-            }, 250);
+            }, CONFIG.MODAL_FOCUS_DELAY);
         });
     }
 
@@ -618,7 +625,7 @@
                 $form.data('submitting', false);
                 $btn.prop('disabled', false);
                 $btn.text($btn.data('original-text') || originalText);
-            }, 10000);
+            }, CONFIG.FORM_SUBMIT_TIMEOUT);
             
             return true;
         });
