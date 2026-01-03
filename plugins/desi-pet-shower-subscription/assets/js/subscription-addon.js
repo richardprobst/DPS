@@ -3,6 +3,7 @@
  *
  * @package Desi_Pet_Shower_Subscription
  * @since 1.1.0
+ * @updated 1.3.0 - Prevenção de duplo clique, feedback visual, validação client-side
  */
 
 (function($) {
@@ -11,7 +12,15 @@
     window.DPSSubscription = window.DPSSubscription || {};
     window.dpsSubscriptionStrings = window.dpsSubscriptionStrings || {
         description: 'Descrição do serviço',
-        remove: 'Remover'
+        remove: 'Remover',
+        saving: 'Salvando...',
+        save_changes: 'Salvar Alterações',
+        confirm_cancel: 'Tem certeza que deseja cancelar esta assinatura?',
+        confirm_delete: 'Tem certeza que deseja excluir permanentemente? Esta ação não pode ser desfeita.',
+        required_fields: 'Por favor, preencha todos os campos obrigatórios.',
+        invalid_date: 'Por favor, insira uma data válida.',
+        invalid_time: 'Por favor, insira um horário válido.',
+        updating_status: 'Atualizando...'
     };
 
     /**
@@ -51,6 +60,86 @@
     };
 
     /**
+     * Valida o formulário de assinatura antes do envio
+     * 
+     * @param {jQuery} $form Formulário a validar
+     * @return {boolean} True se válido
+     */
+    DPSSubscription.validateForm = function($form) {
+        var isValid = true;
+        var $requiredFields = $form.find('[required]');
+        
+        // Remove marcações de erro anteriores
+        $form.find('.dps-field-error').removeClass('dps-field-error');
+        $form.find('.dps-error-message').remove();
+        
+        $requiredFields.each(function() {
+            var $field = $(this);
+            var value = $field.val();
+            
+            if (!value || value === '') {
+                $field.addClass('dps-field-error');
+                isValid = false;
+            }
+        });
+        
+        // Valida formato de data (Y-m-d)
+        var $dateField = $form.find('input[name="subscription_start_date"]');
+        if ($dateField.length && $dateField.val()) {
+            var dateVal = $dateField.val();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+                $dateField.addClass('dps-field-error');
+                isValid = false;
+            }
+        }
+        
+        // Valida formato de horário (H:i)
+        var $timeField = $form.find('input[name="subscription_start_time"]');
+        if ($timeField.length && $timeField.val()) {
+            var timeVal = $timeField.val();
+            if (!/^\d{2}:\d{2}$/.test(timeVal)) {
+                $timeField.addClass('dps-field-error');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            // Exibe mensagem de erro
+            var $firstError = $form.find('.dps-field-error').first();
+            $firstError.focus();
+            
+            // Scroll para o campo com erro
+            if ($firstError.length) {
+                $('html, body').animate({
+                    scrollTop: $firstError.offset().top - 100
+                }, 300);
+            }
+        }
+        
+        return isValid;
+    };
+
+    /**
+     * Desabilita botão durante o envio para prevenir duplo clique
+     * 
+     * @param {jQuery} $button Botão a desabilitar
+     * @param {boolean} disable True para desabilitar
+     */
+    DPSSubscription.toggleSubmitButton = function($button, disable) {
+        if (disable) {
+            $button.prop('disabled', true)
+                   .addClass('dps-btn-loading')
+                   .data('original-text', $button.find('span:last').text())
+                   .find('span:last').text(dpsSubscriptionStrings.saving);
+        } else {
+            var originalText = $button.data('original-text') || dpsSubscriptionStrings.save_changes;
+            $button.prop('disabled', false)
+                   .removeClass('dps-btn-loading')
+                   .find('span:last').text(originalText);
+        }
+    };
+
+    /**
      * Inicialização do módulo de assinaturas.
      * Configura eventos e estado inicial dos formulários.
      */
@@ -58,9 +147,10 @@
         // Vincula eventos de extras SEMPRE no início, antes de qualquer return.
         // Isso garante que o binding funcione mesmo ao navegar da listagem
         // para o formulário, pois usa delegação de eventos $(document).on().
-        // Antes, era chamado após a verificação do $clientSelect, o que impedia
-        // o funcionamento quando o formulário não existia na página inicial.
         DPSSubscription.bindExtras();
+        DPSSubscription.bindFormSubmit();
+        DPSSubscription.bindPaymentStatusChange();
+        DPSSubscription.bindConfirmActions();
 
         var $clientSelect = $('select[name="subscription_client_id"]');
         
@@ -81,6 +171,62 @@
         $clientSelect.on('change', function() {
             DPSSubscription.filterPetsByClient($(this).val());
         });
+    };
+
+    /**
+     * Vincula handler de submit do formulário com validação e prevenção de duplo clique
+     */
+    DPSSubscription.bindFormSubmit = function() {
+        $(document).on('submit', '.dps-subscription-form', function(event) {
+            var $form = $(this);
+            var $submitBtn = $form.find('.dps-btn-submit');
+            
+            // Previne duplo clique
+            if ($submitBtn.prop('disabled')) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Valida formulário
+            if (!DPSSubscription.validateForm($form)) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Desabilita botão durante envio
+            DPSSubscription.toggleSubmitButton($submitBtn, true);
+            
+            return true;
+        });
+    };
+
+    /**
+     * Vincula handler para mudança de status de pagamento com feedback visual
+     */
+    DPSSubscription.bindPaymentStatusChange = function() {
+        $(document).on('change', '.dps-select-payment', function() {
+            var $select = $(this);
+            var $form = $select.closest('form');
+            
+            // Previne múltiplas submissões
+            if ($select.prop('disabled')) {
+                return false;
+            }
+            
+            // Desabilita e mostra feedback
+            $select.prop('disabled', true);
+            $form.addClass('dps-form-loading');
+            
+            // Submit é feito pelo onchange no HTML - a classe visual indica loading
+        });
+    };
+
+    /**
+     * Vincula confirmações para ações destrutivas
+     */
+    DPSSubscription.bindConfirmActions = function() {
+        // Confirmações já estão inline nos links via onclick
+        // Este método pode ser expandido para modais de confirmação mais elaborados
     };
 
     /**
@@ -112,6 +258,9 @@
         ].join('');
         $list.append(row);
         $list.removeAttr('data-empty');
+        
+        // Foca no novo campo
+        $list.find('.dps-extra-row:last .dps-extra-description-input').focus();
     };
 
     /**

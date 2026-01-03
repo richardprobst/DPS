@@ -83,6 +83,32 @@ Antes de criar uma nova versão oficial:
 
 #### Security (Segurança)
 
+**Subscription Add-on - Auditoria de Segurança Completa (v1.3.0)**
+
+- **Path Traversal em exclusão de arquivos**: Corrigida vulnerabilidade em `delete_finance_records()` onde a conversão de URL para path do sistema poderia ser manipulada. Agora valida que o arquivo está dentro do diretório de uploads usando `realpath()` e `wp_delete_file()`.
+- **Verificação de existência de tabela SQL**: Adicionada verificação `SHOW TABLES LIKE` antes de operações SQL em `create_or_update_finance_record()` e `delete_finance_records()` para prevenir erros quando a tabela `dps_transacoes` não existe.
+- **Validação de tipo de post em todas as ações**: Todas as ações GET e POST (cancel, restore, delete, renew, delete_appts, update_payment) agora validam que o ID corresponde a um post do tipo `dps_subscription` antes de executar operações.
+- **wp_redirect vs wp_safe_redirect**: Substituídos todos os usos de `wp_redirect()` por `wp_safe_redirect()` para prevenir vulnerabilidades de open redirect.
+- **Sanitização reforçada em save_subscription**: Implementada validação completa de formato de data (Y-m-d), horário (H:i), frequência (whitelist), existência de cliente/pet, e preço positivo.
+- **Validação de nonces melhorada**: Substituído operador `??` por `isset()` com `wp_unslash()` e `sanitize_text_field()` em todas as verificações de nonce.
+- **Validação de status de pagamento**: Adicionada whitelist de status permitidos (pendente, pago, em_atraso) na atualização de status de pagamento.
+- **API Mercado Pago**: Adicionada validação de URL retornada (`filter_var(..., FILTER_VALIDATE_URL)`), verificação de código de resposta HTTP, e logging seguro sem expor token de acesso.
+- **hook handle_subscription_payment_status**: Adicionada validação de existência e tipo de assinatura, formato de cycle_key (regex `^\d{4}-\d{2}$`), e cast para string antes de `strtolower()`.
+- **Formatos de insert/update wpdb**: Adicionados arrays de formato (`%d`, `%s`, `%f`) em todas as chamadas `$wpdb->insert()` e `$wpdb->update()` para prevenir SQL injection.
+- **absint vs intval**: Substituídos todos os usos de `intval()` por `absint()` para IDs de posts, garantindo valores não-negativos.
+
+#### Added (Adicionado)
+
+**Subscription Add-on - Melhorias Funcionais e UX (v1.3.0)**
+
+- **Feedback de validação**: Formulário agora exibe mensagens de erro específicas quando validação falha no servidor (campos obrigatórios, formato de data/hora, cliente/pet inválido).
+- **Prevenção de duplo clique**: Botões de submit são desabilitados durante o envio do formulário para evitar submissões duplicadas.
+- **Estado de loading visual**: Botões exibem animação de spinner e texto "Salvando..." durante operações.
+- **Validação client-side**: JavaScript valida campos obrigatórios, formato de data e horário antes do envio.
+- **Internacionalização de strings JS**: Strings do JavaScript agora são traduzíveis via `wp_localize_script()`.
+- **Foco em campo com erro**: Formulário faz scroll automático para o primeiro campo com erro de validação.
+- **Estilos de acessibilidade**: Adicionados estilos para `:focus-visible` e classe `.dps-sr-only` para leitores de tela.
+
 **Base Plugin - Auditoria de Segurança Completa (v1.1.1)**
 
 - **CSRF em GitHub Updater**: Adicionada verificação de nonce na função `maybe_force_check()` que permite forçar verificação de atualizações. Anteriormente, atacantes podiam forçar limpeza de cache via link malicioso.
