@@ -65,10 +65,11 @@ $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_na
 if ( $table_exists ) {
     echo "   ✓ Tabela {$table_name} existe\n";
     
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Script de diagnóstico
-    $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}dps_portal_tokens WHERE 1=%d", 1 ) );
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Script de diagnóstico, nome de tabela interno
+    $count = $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
     echo "   ✓ Total de tokens: {$count}\n";
     
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Script de diagnóstico
     $active = $wpdb->get_var( 
         $wpdb->prepare(
             "SELECT COUNT(*) FROM {$table_name} 

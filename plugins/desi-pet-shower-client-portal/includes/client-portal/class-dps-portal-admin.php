@@ -843,7 +843,7 @@ class DPS_Portal_Admin {
                     $attach_id = wp_insert_attachment( $attachment, $upload['file'] );
                     if ( ! is_wp_error( $attach_id ) ) {
                         $attach_data = wp_generate_attachment_metadata( $attach_id, $upload['file'] );
-                        wp_update_attachment_metadata( $attach_id, $upload['file'] );
+                        wp_update_attachment_metadata( $attach_id, $attach_data );
                         update_option( 'dps_portal_hero_id', $attach_id );
                     }
                 }
