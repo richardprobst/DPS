@@ -328,7 +328,7 @@ class DPS_Stock_Addon {
 
         $alerts    = get_option( self::ALERT_OPTION, [] );
         $alerts    = is_array( $alerts ) ? $alerts : [];
-        $base_link = add_query_arg( 'tab', 'estoque', get_permalink() );
+        $base_link = add_query_arg( 'tab', 'estoque', DPS_URL_Builder::safe_get_permalink() );
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-estoque">';

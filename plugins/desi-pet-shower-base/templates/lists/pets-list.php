@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $pets               = isset( $pets ) && is_array( $pets ) ? $pets : [];
 $pets_page          = isset( $pets_page ) ? (int) $pets_page : 1;
 $pets_pages         = isset( $pets_pages ) ? (int) $pets_pages : 1;
-$base_url           = isset( $base_url ) ? $base_url : get_permalink();
+$base_url           = isset( $base_url ) ? $base_url : DPS_URL_Builder::safe_get_permalink();
 $current_filter     = isset( $current_filter ) ? $current_filter : 'all';
 $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_stats ) ? $appointments_stats : [];
 

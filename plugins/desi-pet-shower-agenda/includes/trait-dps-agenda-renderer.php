@@ -27,7 +27,7 @@ trait DPS_Agenda_Renderer {
      * @return string HTML da mensagem de acesso negado.
      */
     private function render_access_denied() {
-        $login_url = wp_login_url( get_permalink() );
+        $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
         return '<p>' . esc_html__( 'Você precisa estar logado como administrador para acessar a agenda.', 'dps-agenda-addon' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'dps-agenda-addon' ) . '</a></p>';
     }
 

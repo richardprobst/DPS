@@ -770,7 +770,7 @@ class DPS_Base_Frontend {
 
         // Verifica se o usuário atual está logado e possui permissão para gerenciar o painel
         if ( ! is_user_logged_in() || ! $can_manage ) {
-            $login_url = wp_login_url( get_permalink() );
+            $login_url = wp_login_url( DPS_URL_Builder::safe_get_permalink() );
             return '<p>' . esc_html__( 'Você precisa estar logado com as permissões adequadas para acessar este painel.', 'desi-pet-shower' ) . ' <a href="' . esc_url( $login_url ) . '">' . esc_html__( 'Fazer login', 'desi-pet-shower' ) . '</a></p>';
         }
         
@@ -979,7 +979,7 @@ class DPS_Base_Frontend {
             'summary'          => $summary,
             'current_filter'   => $filter,
             'registration_url' => $registration_url,
-            'base_url'         => get_permalink(),
+            'base_url'         => DPS_URL_Builder::safe_get_permalink(),
             'edit_id'          => $edit_id,
             'editing'          => $editing,
             'edit_meta'        => $edit_meta,
@@ -1281,7 +1281,7 @@ class DPS_Base_Frontend {
             'meta'               => $meta,
             'breed_options'      => $breed_options,
             'breed_data'         => $breed_data,
-            'base_url'           => get_permalink(),
+            'base_url'           => DPS_URL_Builder::safe_get_permalink(),
             'current_filter'     => $filter,
             'summary'            => $pets_stats,
             'appointments_stats' => $appointments_stats,
@@ -1613,7 +1613,7 @@ class DPS_Base_Frontend {
 
         $override_base_url    = isset( $overrides['base_url'] ) ? esc_url_raw( $overrides['base_url'] ) : '';
         $override_current_url = isset( $overrides['current_url'] ) ? esc_url_raw( $overrides['current_url'] ) : '';
-        $base_url             = $override_base_url ? $override_base_url : get_permalink();
+        $base_url             = $override_base_url ? $override_base_url : DPS_URL_Builder::safe_get_permalink();
         $current_url          = $override_current_url ? $override_current_url : self::get_current_page_url();
 
         return [
@@ -1658,7 +1658,7 @@ class DPS_Base_Frontend {
         $pref_client  = $data['pref_client'];
         $pref_pet     = $data['pref_pet'];
         $is_duplicate = isset( $data['is_duplicate'] ) ? $data['is_duplicate'] : false;
-        $base_url     = isset( $data['base_url'] ) ? $data['base_url'] : get_permalink();
+        $base_url     = isset( $data['base_url'] ) ? $data['base_url'] : DPS_URL_Builder::safe_get_permalink();
         $current_url  = isset( $data['current_url'] ) ? $data['current_url'] : self::get_current_page_url();
 
         $options      = wp_parse_args(
@@ -2272,7 +2272,7 @@ class DPS_Base_Frontend {
 
         $history_data   = self::get_history_appointments_data();
         $appointments   = $history_data['appointments'];
-        $base_url       = get_permalink();
+        $base_url       = DPS_URL_Builder::safe_get_permalink();
         $timeline_data   = self::get_history_timeline_groups();
         $timeline_groups = $timeline_data['groups'];
         $timeline_counts = $timeline_data['counts'];
@@ -3931,7 +3931,7 @@ class DPS_Base_Frontend {
             'pets'           => $pets,
             'appointments'   => $appointments,
             'pending_amount' => $pending_amount,
-            'base_url'       => get_permalink(),
+            'base_url'       => DPS_URL_Builder::safe_get_permalink(),
         ];
     }
 
