@@ -260,7 +260,8 @@ class DPS_AI_Public_Chat {
         $ip_address = $this->get_client_ip();
         if ( ! $this->check_rate_limit( $ip_address ) ) {
             wp_send_json_error( [
-                'message' => __( 'Você atingiu o limite de perguntas. Por favor, aguarde alguns minutos antes de tentar novamente.', 'dps-ai' ),
+                'message'    => __( 'Você atingiu o limite de perguntas. Por favor, aguarde alguns minutos antes de tentar novamente.', 'dps-ai' ),
+                'error_type' => 'rate_limit', // Permite ao frontend diferenciar tipo de erro
             ] );
         }
 

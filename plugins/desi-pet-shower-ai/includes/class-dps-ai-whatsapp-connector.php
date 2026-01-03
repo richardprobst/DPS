@@ -361,6 +361,16 @@ class DPS_AI_WhatsApp_Connector {
             ];
         }
 
+        // SEGURANÇA: Valida URL para prevenir SSRF
+        // Permite apenas URLs HTTPS externas (não localhost ou IPs internos)
+        if ( ! self::is_safe_url( $webhook_url ) ) {
+            dps_ai_log( 'Webhook URL customizado rejeitado por validação de segurança', 'warning' );
+            return [
+                'success' => false,
+                'error'   => 'URL de webhook inválida ou não segura',
+            ];
+        }
+
         $body = [
             'phone'   => $phone,
             'message' => $message,
@@ -402,5 +412,90 @@ class DPS_AI_WhatsApp_Connector {
             'success' => false,
             'error'   => 'Erro ao enviar mensagem',
         ];
+    }
+
+    /**
+     * Valida se uma URL é segura para requisições externas (previne SSRF).
+     *
+     * @param string $url URL a validar.
+     *
+     * @return bool True se a URL é segura, false caso contrário.
+     */
+    private static function is_safe_url( $url ) {
+        // Valida formato básico da URL
+        if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+            return false;
+        }
+
+        $parsed = wp_parse_url( $url );
+
+        // Exige HTTPS em produção
+        $allowed_schemes = [ 'https' ];
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // Permite HTTP em ambiente de desenvolvimento
+            $allowed_schemes[] = 'http';
+        }
+
+        if ( empty( $parsed['scheme'] ) || ! in_array( strtolower( $parsed['scheme'] ), $allowed_schemes, true ) ) {
+            return false;
+        }
+
+        // Verifica host
+        $host = strtolower( $parsed['host'] ?? '' );
+        if ( empty( $host ) ) {
+            return false;
+        }
+
+        // Bloqueia localhost e IPs internos (SSRF protection)
+        $blocked_hosts = [
+            'localhost',
+            '127.0.0.1',
+            '0.0.0.0',
+            '::1',
+        ];
+
+        if ( in_array( $host, $blocked_hosts, true ) ) {
+            return false;
+        }
+
+        // Bloqueia domínios internos comuns ANTES da resolução DNS
+        // (evita delay de DNS e possíveis ataques de DNS rebinding)
+        $internal_patterns = [
+            '/\.local$/',
+            '/\.internal$/',
+            '/\.localhost$/',
+            '/\.localdomain$/',
+            '/\.home$/',
+            '/\.corp$/',
+            '/\.lan$/',
+        ];
+
+        foreach ( $internal_patterns as $pattern ) {
+            if ( preg_match( $pattern, $host ) ) {
+                return false;
+            }
+        }
+
+        // Se o host já é um IP, valida diretamente sem DNS
+        if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+            // Verifica se é IP privado ou reservado
+            if ( ! filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+                return false;
+            }
+            return true;
+        }
+
+        // Para domínios: resolve DNS e valida IP resultante
+        // NOTA: gethostbyname pode ter delay. Em produção com alto volume,
+        // considere usar cache de DNS ou validação assíncrona.
+        $ip = gethostbyname( $host );
+        if ( $ip !== $host ) { // Se resolveu para IP
+            // Verifica se é IP privado ou reservado
+            if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

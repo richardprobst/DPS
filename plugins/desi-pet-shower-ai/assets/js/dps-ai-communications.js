@@ -279,6 +279,25 @@
     // Inicializa quando o DOM estiver pronto
     $(document).ready(function() {
         DPSAICommunications.init();
+        
+        // Handler genérico para formulários de exportação CSV
+        // Previne duplo clique e mostra spinner durante processamento
+        $(document).on('submit', '.dps-ai-export-form', function() {
+            var $form = $(this);
+            var $button = $form.find('button[type="submit"]');
+            
+            // Previne duplo submit
+            if ($button.prop('disabled')) {
+                return false;
+            }
+            
+            // Desabilita botão e mostra spinner
+            $button.prop('disabled', true);
+            $button.html('<span class="dashicons dashicons-update-alt spinning" style="vertical-align: middle; margin-right: 5px;"></span> ' + (dpsAiComm.i18n.exporting || 'Exportando...'));
+            
+            // Permite o submit continuar
+            return true;
+        });
     });
 
 })(jQuery);

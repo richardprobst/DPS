@@ -123,7 +123,9 @@ class DPS_AI_Hub {
             // Remove o H1 duplicado
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
+            // O wp_kses_post é usado aqui para permitir HTML seguro (formulários, inputs, etc.)
+            echo wp_kses_post( $content );
         }
     }
 
@@ -141,7 +143,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_analytics_page() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 
@@ -159,7 +162,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_conversations_list_page() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 
@@ -177,7 +181,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 
@@ -195,7 +200,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 
@@ -213,7 +219,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_interface() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 
@@ -231,7 +238,8 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            echo $content;
+            // SEGURANÇA: O conteúdo vem de render_dashboard() que já aplica escape adequado
+            echo wp_kses_post( $content );
         }
     }
 }
