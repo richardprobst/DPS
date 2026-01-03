@@ -299,7 +299,8 @@
 }
 
 /* Email validation errors */
-.dps-email-error {
+.dps-email-error,
+.dps-token-error {
     color: #ef4444;
     display: block;
     margin-top: 5px;
