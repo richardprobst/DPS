@@ -482,15 +482,28 @@ class DPS_GitHub_Updater {
 
     /**
      * Verifica se deve forçar checagem de atualizações.
+     * 
+     * Requer nonce válido para proteção CSRF.
      */
     public function maybe_force_check() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if ( isset( $_GET['dps_force_update_check'] ) && current_user_can( 'manage_options' ) ) {
-            delete_transient( $this->cache_key );
-            delete_site_transient( 'update_plugins' );
-            wp_redirect( admin_url( 'plugins.php' ) );
-            exit;
+        if ( ! isset( $_GET['dps_force_update_check'] ) ) {
+            return;
         }
+
+        // Verifica capability primeiro
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        // Verifica nonce para proteção CSRF
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_force_update_check' ) ) {
+            wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ), 403 );
+        }
+
+        delete_transient( $this->cache_key );
+        delete_site_transient( 'update_plugins' );
+        wp_safe_redirect( admin_url( 'plugins.php' ) );
+        exit;
     }
 
     /**

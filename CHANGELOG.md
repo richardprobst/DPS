@@ -83,6 +83,17 @@ Antes de criar uma nova versão oficial:
 
 #### Security (Segurança)
 
+**Base Plugin - Auditoria de Segurança Completa (v1.1.1)**
+
+- **CSRF em GitHub Updater**: Adicionada verificação de nonce na função `maybe_force_check()` que permite forçar verificação de atualizações. Anteriormente, atacantes podiam forçar limpeza de cache via link malicioso.
+- **CSRF em Geração de Histórico do Cliente**: Implementada proteção CSRF na geração de histórico do cliente e envio de email. A ação `dps_client_history` agora requer nonce válido.
+- **Validação de MIME em Upload de Foto do Pet**: Implementada lista branca de MIME types permitidos (jpg, png, gif, webp) e validação adicional de tipo de imagem no upload de foto do pet.
+- **Endpoint AJAX Exposto**: Removido o endpoint `wp_ajax_nopriv_dps_get_available_times` que permitia consulta de horários sem autenticação.
+- **XSS em Resposta AJAX**: Substituído uso de `.html()` com concatenação de strings por APIs DOM seguras (`.text()` e `.attr()`) no carregamento de horários disponíveis.
+- **wp_redirect vs wp_safe_redirect**: Substituídos todos os usos de `wp_redirect()` por `wp_safe_redirect()` para prevenir vulnerabilidades de open redirect.
+- **Supressão de erro em unlink**: Substituído `@unlink()` por `wp_delete_file()` com verificação prévia de existência do arquivo.
+- **Sanitização de parâmetro GET**: Adicionado `wp_unslash()` antes de `sanitize_text_field()` em `class-dps-admin-tabs-helper.php`.
+
 **Base Plugin - Correções de Segurança Críticas**
 
 - **Verificação de permissão em visualização de cliente**: Corrigida vulnerabilidade onde a verificação `can_manage()` era executada APÓS a chamada de `render_client_page()`, permitindo potencial acesso não autorizado a dados de clientes. A verificação agora é feita ANTES de processar a requisição.

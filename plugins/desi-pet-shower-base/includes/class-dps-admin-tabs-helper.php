@@ -52,7 +52,8 @@ class DPS_Admin_Tabs_Helper {
      * @return string Slug da aba ativa
      */
     public static function get_active_tab( $default_tab = '' ) {
-        return isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $default_tab;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Parâmetro de navegação apenas para leitura
+        return isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : $default_tab;
     }
 
     /**
