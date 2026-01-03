@@ -71,7 +71,15 @@ class DPS_Portal_Actions_Handler {
         }
 
         // Hook: Após atualizar dados do cliente (Fase 2.3)
-        do_action( 'dps_portal_after_update_client', $client_id, $_POST );
+        // Passa apenas dados sanitizados para evitar vazamento de dados sensíveis
+        $sanitized_data = [
+            'phone'     => $phone,
+            'address'   => $address,
+            'instagram' => $insta,
+            'facebook'  => $fb,
+            'email'     => $email,
+        ];
+        do_action( 'dps_portal_after_update_client', $client_id, $sanitized_data );
         
         return add_query_arg( 'portal_msg', 'updated', wp_get_referer() ?: home_url() );
     }
