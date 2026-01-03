@@ -1599,7 +1599,7 @@ class DPS_AI_Addon {
 
             <!-- Botão de exportação CSV -->
             <div style="margin-bottom: 20px;">
-                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display: inline;" onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='<?php echo esc_js( '<span class=\'dashicons dashicons-update-alt spinning\' style=\'vertical-align: middle; margin-right: 5px;\'></span> ' . __( 'Exportando...', 'dps-ai' ) ); ?>';">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dps-ai-export-form" style="display: inline;">
                     <input type="hidden" name="action" value="dps_ai_export_metrics" />
                     <input type="hidden" name="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
                     <input type="hidden" name="end_date" value="<?php echo esc_attr( $end_date ); ?>" />
@@ -1695,7 +1695,7 @@ class DPS_AI_Addon {
             <!-- Feedback Recente -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2 style="margin: 0;"><?php esc_html_e( 'Feedback Recente', 'dps-ai' ); ?></h2>
-                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin: 0;" onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='<?php echo esc_js( '<span class=\'dashicons dashicons-update-alt spinning\' style=\'vertical-align: middle; margin-right: 5px;\'></span> ' . __( 'Exportando...', 'dps-ai' ) ); ?>';">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dps-ai-export-form" style="margin: 0;">
                     <input type="hidden" name="action" value="dps_ai_export_feedback" />
                     <?php wp_nonce_field( 'dps_ai_export_feedback', 'dps_ai_export_feedback_nonce' ); ?>
                     <button type="submit" class="button button-secondary">
@@ -2766,6 +2766,7 @@ class DPS_AI_Addon {
                     'emailPreviewTitle' => __( 'Pré-visualização do E-mail', 'dps-ai' ),
                     'subject'           => __( 'Assunto', 'dps-ai' ),
                     'body'              => __( 'Mensagem', 'dps-ai' ),
+                    'exporting'         => __( 'Exportando...', 'dps-ai' ),
                 ],
             ]
         );
