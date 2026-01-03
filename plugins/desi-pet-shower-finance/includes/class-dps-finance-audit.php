@@ -91,8 +91,16 @@ class DPS_Finance_Audit {
 
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-        } elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+        }
+        
+        // HTTP_X_FORWARDED_FOR pode ser falsificado, então usamos apenas como fallback
+        // e sempre validamos contra REMOTE_ADDR se disponível
+        // Nota: HTTP_X_FORWARDED_FOR pode conter múltiplos IPs - usamos apenas o primeiro
+        if ( $ip === 'unknown' && isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+            $forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+            // Pega apenas o primeiro IP se houver múltiplos (separados por vírgula)
+            $forwarded_parts = explode( ',', $forwarded );
+            $ip = trim( $forwarded_parts[0] );
         }
 
         // Valida formato de IP

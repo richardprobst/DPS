@@ -14,7 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // Remove tabelas customizadas
-// SEGURANÇA: Usa esc_sql para evitar SQL Injection potencial em nomes de tabelas
+// Nota: $wpdb->prefix é seguro (definido pelo WordPress core)
 $tables = [
     $wpdb->prefix . 'dps_transacoes',
     $wpdb->prefix . 'dps_parcelas',
@@ -22,10 +22,8 @@ $tables = [
 ];
 
 foreach ( $tables as $table ) {
-    // O identificador é baseado em wpdb->prefix que é seguro, mas
-    // usamos backticks para garantir que nomes com caracteres especiais funcionem
-    $safe_table = esc_sql( $table );
-    $wpdb->query( "DROP TABLE IF EXISTS `{$safe_table}`" );
+    // Backticks protegem identificadores com caracteres especiais
+    $wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 }
 
 // Remove pages criadas pelo plugin (opcional - comentado para preservar)
