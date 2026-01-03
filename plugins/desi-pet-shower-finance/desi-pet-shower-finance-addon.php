@@ -225,6 +225,9 @@ class DPS_Finance_Addon {
                     'valueRequired'        => __( 'O valor deve ser maior que zero.', 'dps-finance-addon' ),
                     'dateRequired'         => __( 'A data é obrigatória.', 'dps-finance-addon' ),
                     'categoryRequired'     => __( 'A categoria é obrigatória.', 'dps-finance-addon' ),
+                    // Mensagens de erro de rede
+                    'offline'              => __( 'Você está offline. Verifique sua conexão.', 'dps-finance-addon' ),
+                    'timeout'              => __( 'Tempo limite excedido. Tente novamente.', 'dps-finance-addon' ),
                 ],
             ] );
         }
@@ -1884,7 +1887,10 @@ class DPS_Finance_Addon {
                 
                 echo '<div class="dps-field">';
                 echo '<label for="partial_value">' . esc_html__( 'Valor (R$)', 'dps-finance-addon' ) . '</label>';
-                echo '<input type="number" id="partial_value" step="0.01" name="partial_value" placeholder="0,00" required>';
+                echo '<div class="dps-input-money-wrapper">';
+                echo '<span class="dps-input-prefix">R$</span>';
+                echo '<input type="text" id="partial_value" name="partial_value" class="dps-input-money" placeholder="0,00" required>';
+                echo '</div>';
                 echo '</div>';
                 
                 echo '<div class="dps-field">';

@@ -74,6 +74,8 @@
         initPartialHistory();
         initMoneyMask();
         initFormValidation();
+        initModalKeyboardNav();
+        initFormSubmitProtection();
     }
 
     /**
@@ -200,30 +202,47 @@
                 return;
             }
 
+            // Check offline status
+            if (!navigator.onLine) {
+                showMessage(dpsFinance.i18n.offline || 'Você está offline. Verifique sua conexão.', 'error');
+                return;
+            }
+
             // Show loading state
             $link.addClass('loading').text(dpsFinance.i18n.loading || 'Carregando...');
 
-            $.post(dpsFinance.ajaxUrl, {
-                action: 'dps_get_services_details',
-                appt_id: apptId,
-                nonce: dpsFinance.servicesNonce
-            }, function(resp) {
-                $link.removeClass('loading').text(dpsFinance.i18n.view || 'Ver');
-                
-                if (resp && resp.success) {
-                    var services = resp.data.services || [];
-                    if (services.length > 0) {
-                        showServicesModal(services, resp.data.total || 0);
+            $.ajax({
+                url: dpsFinance.ajaxUrl,
+                type: 'POST',
+                timeout: 15000, // 15 second timeout
+                data: {
+                    action: 'dps_get_services_details',
+                    appt_id: apptId,
+                    nonce: dpsFinance.servicesNonce
+                },
+                success: function(resp) {
+                    $link.removeClass('loading').text(dpsFinance.i18n.view || 'Ver');
+                    
+                    if (resp && resp.success) {
+                        var services = resp.data.services || [];
+                        if (services.length > 0) {
+                            showServicesModal(services, resp.data.total || 0);
+                        } else {
+                            showMessage(dpsFinance.i18n.noServices || 'Nenhum serviço encontrado.', 'warning');
+                        }
                     } else {
-                        showMessage(dpsFinance.i18n.noServices || 'Nenhum serviço encontrado.', 'warning');
+                        var msg = resp.data ? resp.data.message : (dpsFinance.i18n.error || 'Erro ao buscar serviços.');
+                        showMessage(msg, 'error');
                     }
-                } else {
-                    var msg = resp.data ? resp.data.message : (dpsFinance.i18n.error || 'Erro ao buscar serviços.');
-                    showMessage(msg, 'error');
+                },
+                error: function(xhr, status) {
+                    $link.removeClass('loading').text(dpsFinance.i18n.view || 'Ver');
+                    if (status === 'timeout') {
+                        showMessage(dpsFinance.i18n.timeout || 'Tempo limite excedido. Tente novamente.', 'error');
+                    } else {
+                        showMessage(dpsFinance.i18n.error || 'Erro ao buscar serviços.', 'error');
+                    }
                 }
-            }).fail(function() {
-                $link.removeClass('loading').text(dpsFinance.i18n.view || 'Ver');
-                showMessage(dpsFinance.i18n.error || 'Erro ao buscar serviços.', 'error');
             });
         });
     }
@@ -292,12 +311,14 @@
         }
 
         var styles = '<style id="dps-modal-styles">' +
-            '.dps-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000; align-items: center; justify-content: center; }' +
-            '.dps-modal-content { background: #fff; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }' +
+            '.dps-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000; }' +
+            '.dps-modal-overlay.show { display: flex; align-items: center; justify-content: center; }' +
+            '.dps-modal-content { background: #fff; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); margin: auto; position: relative; top: 50%; transform: translateY(-50%); }' +
             '.dps-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }' +
             '.dps-modal-header h3 { margin: 0; font-size: 18px; color: #111827; }' +
             '.dps-modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; line-height: 1; }' +
             '.dps-modal-close:hover { color: #111827; }' +
+            '.dps-modal-close:focus { outline: 2px solid #0ea5e9; outline-offset: 2px; }' +
             '.dps-modal-body { padding: 20px; overflow-y: auto; max-height: 50vh; }' +
             '.dps-modal-footer { padding: 16px 20px; border-top: 1px solid #e5e7eb; text-align: right; }' +
             '.dps-modal-table { width: 100%; border-collapse: collapse; }' +
@@ -355,25 +376,42 @@
                 return;
             }
 
+            // Check offline status
+            if (!navigator.onLine) {
+                showMessage(dpsFinance.i18n.offline || 'Você está offline. Verifique sua conexão.', 'error');
+                return;
+            }
+
             // Show loading state
             $link.addClass('loading').text(dpsFinance.i18n.loading || 'Carregando...');
 
-            $.post(dpsFinance.ajaxUrl, {
-                action: 'dps_get_partial_history',
-                trans_id: transId,
-                nonce: dpsFinance.partialHistoryNonce
-            }, function(resp) {
-                $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
-                
-                if (resp && resp.success) {
-                    showPartialHistoryModal(transId, resp.data);
-                } else {
-                    var msg = resp.data ? resp.data.message : (dpsFinance.i18n.error || 'Erro ao buscar histórico.');
-                    showMessage(msg, 'error');
+            $.ajax({
+                url: dpsFinance.ajaxUrl,
+                type: 'POST',
+                timeout: 15000,
+                data: {
+                    action: 'dps_get_partial_history',
+                    trans_id: transId,
+                    nonce: dpsFinance.partialHistoryNonce
+                },
+                success: function(resp) {
+                    $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
+                    
+                    if (resp && resp.success) {
+                        showPartialHistoryModal(transId, resp.data);
+                    } else {
+                        var msg = resp.data ? resp.data.message : (dpsFinance.i18n.error || 'Erro ao buscar histórico.');
+                        showMessage(msg, 'error');
+                    }
+                },
+                error: function(xhr, status) {
+                    $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
+                    if (status === 'timeout') {
+                        showMessage(dpsFinance.i18n.timeout || 'Tempo limite excedido. Tente novamente.', 'error');
+                    } else {
+                        showMessage(dpsFinance.i18n.error || 'Erro ao buscar histórico.', 'error');
+                    }
                 }
-            }).fail(function() {
-                $link.removeClass('loading').text(dpsFinance.i18n.history || 'Histórico');
-                showMessage(dpsFinance.i18n.error || 'Erro ao buscar histórico.', 'error');
             });
         });
 
@@ -524,6 +562,66 @@
         var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Initialize keyboard navigation for modals (ESC to close, focus trap)
+     */
+    function initModalKeyboardNav() {
+        $(document).on('keydown', function(e) {
+            // ESC key closes any open modal
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                var $modal = $('.dps-modal-overlay:visible');
+                if ($modal.length) {
+                    $modal.fadeOut(200, function() {
+                        $(this).remove();
+                    });
+                }
+            }
+        });
+        
+        // Focus first focusable element when modal opens
+        $(document).on('click', '.dps-view-partials, .dps-trans-services', function() {
+            setTimeout(function() {
+                var $modal = $('.dps-modal-overlay:visible');
+                if ($modal.length) {
+                    $modal.find('.dps-modal-close').first().focus();
+                }
+            }, 250);
+        });
+    }
+
+    /**
+     * Prevent double form submission
+     */
+    function initFormSubmitProtection() {
+        $(document).on('submit', '#dps-finance-new-form, .dps-partial-form form', function() {
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            
+            // If already submitting, prevent
+            if ($form.data('submitting')) {
+                return false;
+            }
+            
+            // Mark as submitting
+            $form.data('submitting', true);
+            
+            // Disable button and show loading state
+            $btn.prop('disabled', true);
+            var originalText = $btn.text();
+            $btn.data('original-text', originalText);
+            $btn.text(dpsFinance.i18n.loading || 'Carregando...');
+            
+            // Re-enable after timeout (in case of error)
+            setTimeout(function() {
+                $form.data('submitting', false);
+                $btn.prop('disabled', false);
+                $btn.text($btn.data('original-text') || originalText);
+            }, 10000);
+            
+            return true;
+        });
     }
 
     // Initialize when DOM is ready
