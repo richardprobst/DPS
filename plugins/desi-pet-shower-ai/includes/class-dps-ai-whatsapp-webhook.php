@@ -204,13 +204,18 @@ class DPS_AI_WhatsApp_Webhook {
             ksort( $params );
             $data = $webhook_url;
             foreach ( $params as $key => $value ) {
+                // Sanitiza chave e valor para evitar bypass via caracteres especiais
+                $safe_key = is_string( $key ) ? preg_replace( '/[^\w.-]/', '', $key ) : '';
+                
                 // Trata arrays em parâmetros (ex: MediaUrl0, MediaUrl1)
                 if ( is_array( $value ) ) {
                     foreach ( $value as $sub_value ) {
-                        $data .= $key . $sub_value;
+                        $safe_value = is_string( $sub_value ) ? $sub_value : '';
+                        $data .= $safe_key . $safe_value;
                     }
                 } else {
-                    $data .= $key . $value;
+                    $safe_value = is_string( $value ) ? $value : '';
+                    $data .= $safe_key . $safe_value;
                 }
             }
 

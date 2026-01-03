@@ -78,11 +78,15 @@ if ( empty( $api_key ) ) {
 
 #### S3: Validação Twilio Não Implementada (Alto)
 - **Arquivo:** `includes/class-dps-ai-whatsapp-webhook.php`
-- **Linhas:** 187-217
+- **Linhas:** 187-227
 - **Impacto:** Webhooks Twilio não eram validados, permitindo spoofing
-- **Correção:** Implementado HMAC-SHA1 conforme especificação Twilio
+- **Correção:** Implementado HMAC-SHA1 conforme especificação Twilio com sanitização de parâmetros
 
 ```php
+// Sanitiza chave e valor para evitar bypass via caracteres especiais
+$safe_key = is_string( $key ) ? preg_replace( '/[^\w.-]/', '', $key ) : '';
+$safe_value = is_string( $value ) ? $value : '';
+
 // Calcula assinatura esperada usando HMAC-SHA1 com Base64
 $expected_signature = base64_encode( hash_hmac( 'sha1', $data, $auth_token, true ) );
 
