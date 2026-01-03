@@ -91,50 +91,89 @@ class DPS_Subscription_Addon {
      * @return string URL de pagamento
      */
     private function get_subscription_payment_link( $sub_id, $amount ) {
-        $link = get_post_meta( $sub_id, 'dps_subscription_payment_link', true );
-        if ( ! empty( $link ) ) {
-            return $link;
-        }
-        $token = trim( get_option( 'dps_mercadopago_access_token' ) );
-        if ( ! $token || ! $amount ) {
-            // Retorna link padrão caso não haja token ou valor
+        $sub_id = absint( $sub_id );
+        $amount = floatval( $amount );
+        
+        if ( ! $sub_id || $amount <= 0 ) {
             return 'https://link.mercadopago.com.br/desipetshower';
         }
-        $description = 'Renovação assinatura ID ' . $sub_id;
+        
+        $link = get_post_meta( $sub_id, 'dps_subscription_payment_link', true );
+        if ( ! empty( $link ) ) {
+            return esc_url( $link );
+        }
+        
+        // Obtém token de forma segura (pode ser constante ou option)
+        $token = '';
+        if ( defined( 'DPS_MERCADOPAGO_ACCESS_TOKEN' ) ) {
+            $token = DPS_MERCADOPAGO_ACCESS_TOKEN;
+        } else {
+            $token = get_option( 'dps_mercadopago_access_token', '' );
+        }
+        $token = trim( (string) $token );
+        
+        if ( ! $token ) {
+            // Retorna link padrão caso não haja token configurado
+            return 'https://link.mercadopago.com.br/desipetshower';
+        }
+        
+        $description = sprintf(
+            /* translators: %d: subscription ID */
+            __( 'Renovação assinatura ID %d', 'dps-subscription-addon' ),
+            $sub_id
+        );
+        
         // Monta payload conforme a API de preferências do Mercado Pago
         $body = [
             'items' => [
                 [
                     'title'       => sanitize_text_field( $description ),
                     'quantity'    => 1,
-                    'unit_price'  => (float) $amount,
+                    'unit_price'  => $amount,
                     'currency_id' => 'BRL',
                 ],
             ],
             // Define uma referência externa previsível para rastreamento do pagamento.
             // Usamos apenas o ID da assinatura para que o webhook possa localizar a
-            // assinatura correspondente sem depender de timestamps. O plugin de
-            // pagamentos interpreta este formato para atualizar o status.
+            // assinatura correspondente sem depender de timestamps.
             'external_reference' => 'dps_subscription_' . $sub_id,
         ];
+        
         $args = [
             'body'    => wp_json_encode( $body ),
             'headers' => [
                 'Content-Type'  => 'application/json',
                 'Authorization' => 'Bearer ' . $token,
             ],
-            'timeout' => 20,
+            'timeout' => 30,
+            'sslverify' => true,
         ];
+        
         $response = wp_remote_post( 'https://api.mercadopago.com/checkout/preferences', $args );
+        
         if ( is_wp_error( $response ) ) {
+            // Log do erro sem expor token
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( '[DPS Subscription] Erro ao criar preferência Mercado Pago: ' . $response->get_error_message() );
+            }
             return 'https://link.mercadopago.com.br/desipetshower';
         }
+        
+        $response_code = wp_remote_retrieve_response_code( $response );
+        if ( $response_code < 200 || $response_code >= 300 ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( '[DPS Subscription] Resposta inesperada da API Mercado Pago. Código: ' . $response_code );
+            }
+            return 'https://link.mercadopago.com.br/desipetshower';
+        }
+        
         $data = json_decode( wp_remote_retrieve_body( $response ), true );
-        if ( isset( $data['init_point'] ) ) {
+        if ( isset( $data['init_point'] ) && filter_var( $data['init_point'], FILTER_VALIDATE_URL ) ) {
             $link = esc_url_raw( $data['init_point'] );
             update_post_meta( $sub_id, 'dps_subscription_payment_link', $link );
             return $link;
         }
+        
         return 'https://link.mercadopago.com.br/desipetshower';
     }
 
@@ -149,23 +188,31 @@ class DPS_Subscription_Addon {
         $cid   = get_post_meta( $sub->ID, 'subscription_client_id', true );
         $pid   = get_post_meta( $sub->ID, 'subscription_pet_id', true );
         $price = get_post_meta( $sub->ID, 'subscription_price', true );
-        $client_post = $cid ? get_post( $cid ) : null;
-        $pet_post    = $pid ? get_post( $pid ) : null;
-        $client_name = $client_post ? $client_post->post_title : '';
-        $pet_name    = $pet_post ? $pet_post->post_title : '';
-        $valor_fmt   = $price ? number_format( (float) $price, 2, ',', '.' ) : '';
-        // Obtém a chave PIX configurada ou utiliza padrão. Reaproveita a opção do módulo de pagamentos
+        $client_post = $cid ? get_post( absint( $cid ) ) : null;
+        $pet_post    = $pid ? get_post( absint( $pid ) ) : null;
+        $client_name = $client_post ? sanitize_text_field( $client_post->post_title ) : '';
+        $pet_name    = $pet_post ? sanitize_text_field( $pet_post->post_title ) : '';
+        $valor_fmt   = $price ? number_format( floatval( $price ), 2, ',', '.' ) : '0,00';
+        
+        // Obtém a chave PIX configurada ou utiliza padrão
+        // Reaproveita a opção do módulo de pagamentos
         $pix_option  = get_option( 'dps_pix_key', '' );
-        $pix_display = $pix_option ? $pix_option : '15 99160‑6299';
+        $pix_display = $pix_option ? sanitize_text_field( $pix_option ) : '15 99160-6299';
+        
+        // Garante que o link de pagamento é válido
+        $payment_link = esc_url( $payment_link );
+        
         // Mensagem padrão para renovação da assinatura
         $msg = sprintf(
-            'Olá %s! A assinatura do pet %s foi concluída. O valor da renovação de R$ %s está pendente. Você pode pagar via PIX (%s) ou pelo link: %s. Obrigado!',
+            /* translators: %1$s: client name, %2$s: pet name, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
+            __( 'Olá %1$s! A assinatura do pet %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
             $client_name,
             $pet_name,
             $valor_fmt,
             $pix_display,
             $payment_link
         );
+        
         // Permite customização via filtro
         return apply_filters( 'dps_subscription_whatsapp_message', $msg, $sub, $payment_link );
     }
@@ -269,6 +316,7 @@ class DPS_Subscription_Addon {
         if ( $visitor_only ) {
             return;
         }
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- section_subscriptions() escapa internamente
         echo $this->section_subscriptions();
     }
 
@@ -302,95 +350,127 @@ class DPS_Subscription_Addon {
 
         // Cancelar assinatura: move para lixeira sem excluir transações
         if ( isset( $_GET['dps_cancel'] ) && 'subscription' === $_GET['dps_cancel'] && isset( $_GET['id'] ) ) {
-            $sub_id = intval( $_GET['id'] );
+            $sub_id = absint( $_GET['id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'dps_cancel_subscription_' . $sub_id ) ) {
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_cancel_subscription_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
-            if ( $sub_id ) {
+            // Valida que é uma assinatura válida
+            $subscription = get_post( $sub_id );
+            if ( $sub_id && $subscription && 'dps_subscription' === $subscription->post_type ) {
                 wp_trash_post( $sub_id );
             }
             $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_cancel', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
 
         // Restaurar assinatura cancelada
         if ( isset( $_GET['dps_restore'] ) && 'subscription' === $_GET['dps_restore'] && isset( $_GET['id'] ) ) {
-            $sub_id = intval( $_GET['id'] );
+            $sub_id = absint( $_GET['id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'dps_restore_subscription_' . $sub_id ) ) {
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_restore_subscription_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
-            if ( $sub_id ) {
+            // Valida que é uma assinatura válida
+            $subscription = get_post( $sub_id );
+            if ( $sub_id && $subscription && 'dps_subscription' === $subscription->post_type ) {
                 wp_untrash_post( $sub_id );
             }
             $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_restore', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
 
         // Excluir assinatura via GET (permanente)
         if ( isset( $_GET['dps_delete'] ) && 'subscription' === $_GET['dps_delete'] && isset( $_GET['id'] ) ) {
-            $sub_id = intval( $_GET['id'] );
+            $sub_id = absint( $_GET['id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'dps_delete_subscription_' . $sub_id ) ) {
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_delete_subscription_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
-            // Exclui permanentemente
-            wp_delete_post( $sub_id, true );
-            // Remove quaisquer transações financeiras associadas a esta assinatura
-            $this->delete_finance_records( $sub_id );
+            // Valida que é uma assinatura válida antes de excluir
+            $subscription = get_post( $sub_id );
+            if ( $sub_id && $subscription && 'dps_subscription' === $subscription->post_type ) {
+                // Exclui permanentemente
+                wp_delete_post( $sub_id, true );
+                // Remove quaisquer transações financeiras associadas a esta assinatura
+                $this->delete_finance_records( $sub_id );
+            }
             $base_url     = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_delete', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
 
         // Renovar assinatura
         if ( isset( $_GET['dps_renew'] ) && isset( $_GET['id'] ) ) {
-            $sub_id = intval( $_GET['id'] );
+            $sub_id = absint( $_GET['id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'dps_renew_subscription_' . $sub_id ) ) {
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_renew_subscription_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
-            $this->renew_subscription( $sub_id );
+            // Valida que é uma assinatura válida
+            $subscription = get_post( $sub_id );
+            if ( $sub_id && $subscription && 'dps_subscription' === $subscription->post_type ) {
+                $this->renew_subscription( $sub_id );
+            }
             $base_url = DPS_URL_Builder::safe_get_permalink();
             // Remove o parâmetro de renovação para evitar redirecionamentos em loop
             $redirect_url = remove_query_arg( [ 'dps_renew', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
 
         // Excluir todos os agendamentos vinculados a uma assinatura
         if ( isset( $_GET['dps_delete_appts'] ) && isset( $_GET['id'] ) ) {
-            $sub_id = intval( $_GET['id'] );
+            $sub_id = absint( $_GET['id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'dps_delete_appts_subscription_' . $sub_id ) ) {
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_delete_appts_subscription_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
-            $this->delete_all_appointments( $sub_id );
+            // Valida que é uma assinatura válida
+            $subscription = get_post( $sub_id );
+            if ( $sub_id && $subscription && 'dps_subscription' === $subscription->post_type ) {
+                $this->delete_all_appointments( $sub_id );
+            }
             $base_url = DPS_URL_Builder::safe_get_permalink();
             $redirect_url = remove_query_arg( [ 'dps_delete_appts', 'id', '_wpnonce' ], $base_url );
             $redirect_url = add_query_arg( [ 'tab' => 'assinaturas' ], $redirect_url );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
 
         // Atualizar status de pagamento
         if ( isset( $_POST['dps_update_payment'] ) && isset( $_POST['subscription_id'] ) ) {
-            $sub_id = intval( $_POST['subscription_id'] );
+            $sub_id = absint( $_POST['subscription_id'] );
             // Verificar nonce para proteção CSRF
-            if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'dps_update_payment_' . $sub_id ) ) {
+            $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+            if ( ! wp_verify_nonce( $nonce, 'dps_update_payment_' . $sub_id ) ) {
                 wp_die( esc_html__( 'Ação não autorizada.', 'dps-subscription-addon' ) );
             }
-            $status = sanitize_text_field( $_POST['payment_status'] );
+            // Valida que é uma assinatura válida
+            $subscription = get_post( $sub_id );
+            if ( ! $subscription || 'dps_subscription' !== $subscription->post_type ) {
+                wp_die( esc_html__( 'Assinatura inválida.', 'dps-subscription-addon' ) );
+            }
+            // Valida status permitido
+            $allowed_statuses = [ 'pendente', 'pago', 'em_atraso' ];
+            $status = isset( $_POST['payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_status'] ) ) : '';
+            if ( ! in_array( $status, $allowed_statuses, true ) ) {
+                $status = 'pendente';
+            }
             update_post_meta( $sub_id, 'subscription_payment_status', $status );
             // Se há primeira consulta deste ciclo, atualiza status do primeiro agendamento correspondente
             $this->update_first_appointment_status( $sub_id, $status );
@@ -400,7 +480,7 @@ class DPS_Subscription_Addon {
             $this->create_or_update_finance_record( $sub_id, $cycle_key );
             // Redireciona sem parametros
             $base_url = DPS_URL_Builder::safe_get_permalink();
-            wp_redirect( add_query_arg( [ 'tab' => 'assinaturas' ], $base_url ) );
+            wp_safe_redirect( add_query_arg( [ 'tab' => 'assinaturas' ], $base_url ) );
             exit;
         }
     }
@@ -409,22 +489,75 @@ class DPS_Subscription_Addon {
      * Salva ou atualiza uma assinatura
      */
     private function save_subscription() {
-        $client_id    = intval( $_POST['subscription_client_id'] ?? 0 );
-        $pet_id       = intval( $_POST['subscription_pet_id'] ?? 0 );
-        $service      = sanitize_text_field( $_POST['subscription_service'] ?? '' );
-        $frequency    = sanitize_text_field( $_POST['subscription_frequency'] ?? '' );
-        $price        = floatval( str_replace( ',', '.', $_POST['subscription_price'] ?? '0' ) );
-        $start_date   = sanitize_text_field( $_POST['subscription_start_date'] ?? '' );
-        $start_time   = sanitize_text_field( $_POST['subscription_start_time'] ?? '' );
+        // Sanitiza e valida todos os campos de entrada
+        $client_id    = isset( $_POST['subscription_client_id'] ) ? absint( $_POST['subscription_client_id'] ) : 0;
+        $pet_id       = isset( $_POST['subscription_pet_id'] ) ? absint( $_POST['subscription_pet_id'] ) : 0;
+        $service      = isset( $_POST['subscription_service'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_service'] ) ) : '';
+        $frequency    = isset( $_POST['subscription_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_frequency'] ) ) : '';
+        $price_raw    = isset( $_POST['subscription_price'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_price'] ) ) : '0';
+        $price        = floatval( str_replace( ',', '.', $price_raw ) );
+        $start_date   = isset( $_POST['subscription_start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_start_date'] ) ) : '';
+        $start_time   = isset( $_POST['subscription_start_time'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_start_time'] ) ) : '';
         $notes        = isset( $_POST['subscription_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['subscription_notes'] ) ) : '';
         $assignee     = isset( $_POST['subscription_assignee'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_assignee'] ) ) : '';
-        $extras_desc  = isset( $_POST['subscription_extras_descriptions'] ) ? (array) wp_unslash( $_POST['subscription_extras_descriptions'] ) : [];
+        $extras_desc  = isset( $_POST['subscription_extras_descriptions'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['subscription_extras_descriptions'] ) ) : [];
         $extras_val   = isset( $_POST['subscription_extras_values'] ) ? (array) wp_unslash( $_POST['subscription_extras_values'] ) : [];
         $extras_list  = $this->parse_extras_from_request( $extras_desc, $extras_val );
+        
+        // Valida campos obrigatórios
         if ( ! $client_id || ! $pet_id || ! $service || ! $frequency || ! $start_date || ! $start_time ) {
             return;
         }
-        $sub_id = isset( $_POST['subscription_id'] ) ? intval( $_POST['subscription_id'] ) : 0;
+        
+        // Valida frequência permitida
+        $allowed_frequencies = [ 'semanal', 'quinzenal' ];
+        if ( ! in_array( $frequency, $allowed_frequencies, true ) ) {
+            return;
+        }
+        
+        // Valida formato de data (Y-m-d)
+        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start_date ) ) {
+            return;
+        }
+        
+        // Valida que a data é válida
+        $date_parts = explode( '-', $start_date );
+        if ( ! checkdate( (int) $date_parts[1], (int) $date_parts[2], (int) $date_parts[0] ) ) {
+            return;
+        }
+        
+        // Valida formato de horário (H:i)
+        if ( ! preg_match( '/^\d{2}:\d{2}$/', $start_time ) ) {
+            return;
+        }
+        
+        // Valida que cliente existe e é do tipo correto
+        $client_post = get_post( $client_id );
+        if ( ! $client_post || 'dps_cliente' !== $client_post->post_type ) {
+            return;
+        }
+        
+        // Valida que pet existe e é do tipo correto
+        $pet_post = get_post( $pet_id );
+        if ( ! $pet_post || 'dps_pet' !== $pet_post->post_type ) {
+            return;
+        }
+        
+        // Valida preço positivo
+        if ( $price < 0 ) {
+            $price = 0;
+        }
+        
+        $sub_id = isset( $_POST['subscription_id'] ) ? absint( $_POST['subscription_id'] ) : 0;
+        
+        // Se editando, valida que a assinatura existe
+        if ( $sub_id ) {
+            $existing = get_post( $sub_id );
+            if ( ! $existing || 'dps_subscription' !== $existing->post_type ) {
+                return;
+            }
+        }
+        
         $title  = $start_date . ' ' . $start_time . ' - ' . $service;
         if ( $sub_id ) {
             wp_update_post( [
@@ -438,7 +571,7 @@ class DPS_Subscription_Addon {
                 'post_status' => 'publish',
             ] );
         }
-        if ( ! $sub_id ) {
+        if ( ! $sub_id || is_wp_error( $sub_id ) ) {
             return;
         }
         update_post_meta( $sub_id, 'subscription_client_id', $client_id );
@@ -683,8 +816,15 @@ class DPS_Subscription_Addon {
         }
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Verifica se a tabela existe antes de operações SQL
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( ! $table_exists ) {
+            return;
+        }
+        
         // Prepara valores
-        $date_db   = $cycle_key ? $cycle_key . '-01' : $start_date; // armazenamos somente a data (YYYY-mm-dd)
+        $date_db   = $cycle_key ? sanitize_text_field( $cycle_key ) . '-01' : $start_date; // armazenamos somente a data (YYYY-mm-dd)
         $status_map = [
             'pago'      => 'pago',
             'em_atraso' => 'em_atraso',
@@ -693,56 +833,83 @@ class DPS_Subscription_Addon {
         $status    = $status_map[ $pay_status ] ?? 'em_aberto';
         $category  = __( 'Assinatura', 'dps-subscription-addon' );
         $type      = 'receita';
-        $desc      = sprintf( __( 'Assinatura: %s (%s)', 'dps-subscription-addon' ), $service, $freq );
+        $desc      = sprintf( __( 'Assinatura: %s (%s)', 'dps-subscription-addon' ), sanitize_text_field( $service ), sanitize_text_field( $freq ) );
         // Verifica se já existe transação para este plano e data
-        $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE plano_id = %d AND data = %s", $sub_id, $date_db ) );
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table usa $wpdb->prefix seguro
+        $existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE plano_id = %d AND data = %s", $sub_id, $date_db ) );
         if ( $existing_id ) {
             // Atualiza valores principais e status
-            $wpdb->update( $table, [
-                'cliente_id' => $client_id ?: null,
-                'valor'      => (float) $price,
-                'status'     => $status,
-                'categoria'  => $category,
-                'tipo'       => $type,
-                'descricao'  => $desc,
-            ], [ 'id' => $existing_id ] );
+            $wpdb->update(
+                $table,
+                [
+                    'cliente_id' => $client_id ? absint( $client_id ) : null,
+                    'valor'      => (float) $price,
+                    'status'     => $status,
+                    'categoria'  => $category,
+                    'tipo'       => $type,
+                    'descricao'  => $desc,
+                ],
+                [ 'id' => $existing_id ],
+                [ '%d', '%f', '%s', '%s', '%s', '%s' ],
+                [ '%d' ]
+            );
         } else {
             // Insere nova transação
-            $wpdb->insert( $table, [
-                'cliente_id'     => $client_id ?: null,
-                'agendamento_id' => null,
-                'plano_id'       => $sub_id,
-                'data'           => $date_db,
-                'valor'          => (float) $price,
-                'categoria'      => $category,
-                'tipo'           => $type,
-                'status'         => $status,
-                'descricao'      => $desc,
-            ] );
+            $wpdb->insert(
+                $table,
+                [
+                    'cliente_id'     => $client_id ? absint( $client_id ) : null,
+                    'agendamento_id' => null,
+                    'plano_id'       => $sub_id,
+                    'data'           => $date_db,
+                    'valor'          => (float) $price,
+                    'categoria'      => $category,
+                    'tipo'           => $type,
+                    'status'         => $status,
+                    'descricao'      => $desc,
+                ],
+                [ '%d', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s' ]
+            );
         }
     }
 
     /**
-     * Integração fictícia de status de pagamento proveniente de um gateway externo.
+     * Integração de status de pagamento proveniente de um gateway externo.
      * Use a ação dps_subscription_payment_status para informar o resultado do pagamento
      * do ciclo atual. Exemplo de uso: do_action( 'dps_subscription_payment_status', $sub_id, '2025-11', 'paid' );
+     *
+     * NOTA DE SEGURANÇA: Este hook é chamado por integrações de gateway de pagamento.
+     * A validação de autenticidade deve ser feita pelo add-on de pagamentos antes de disparar este hook.
+     * Este método valida apenas a existência da assinatura e o formato dos parâmetros.
      *
      * @param int    $sub_id         ID da assinatura.
      * @param string $cycle_key      Ciclo (Y-m). Se vazio, usa o ciclo da data de início.
      * @param string $payment_status Status recebido do gateway (paid|failed|pending).
      */
     public function handle_subscription_payment_status( $sub_id, $cycle_key = '', $payment_status = '' ) {
-        $sub_id = intval( $sub_id );
+        $sub_id = absint( $sub_id );
         if ( ! $sub_id ) {
             return;
         }
+        
+        // Valida que a assinatura existe e é do tipo correto
+        $subscription = get_post( $sub_id );
+        if ( ! $subscription || 'dps_subscription' !== $subscription->post_type ) {
+            return;
+        }
+        
         $start_date = get_post_meta( $sub_id, 'subscription_start_date', true );
-        $cycle_key  = $cycle_key ? $cycle_key : $this->get_cycle_key( $start_date );
+        $cycle_key  = $cycle_key ? sanitize_text_field( $cycle_key ) : $this->get_cycle_key( $start_date );
         if ( ! $cycle_key ) {
             return;
         }
+        
+        // Valida formato do cycle_key (deve ser Y-m)
+        if ( ! preg_match( '/^\d{4}-\d{2}$/', $cycle_key ) ) {
+            return;
+        }
 
-        $normalized = strtolower( sanitize_text_field( $payment_status ) );
+        $normalized = strtolower( sanitize_text_field( (string) $payment_status ) );
         if ( in_array( $normalized, [ 'paid', 'approved', 'success' ], true ) ) {
             update_post_meta( $sub_id, 'subscription_payment_status', 'pago' );
             $this->mark_cycle_status( $sub_id, $cycle_key, 'pago' );
@@ -770,25 +937,40 @@ class DPS_Subscription_Addon {
         }
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
+        
+        // Verifica se a tabela existe antes de operações SQL
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( ! $table_exists ) {
+            return;
+        }
+        
         // Obtém todas as transações para este plano e remove também opções de documento
-        $trans_rows = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM $table WHERE plano_id = %d", $sub_id ) );
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table usa $wpdb->prefix seguro
+        $trans_rows = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM {$table} WHERE plano_id = %d", $sub_id ) );
         if ( $trans_rows ) {
+            // Define o diretório de uploads como base segura para exclusão de arquivos
+            $upload_dir = wp_upload_dir();
+            $base_path  = realpath( $upload_dir['basedir'] );
+            
             foreach ( $trans_rows as $row ) {
                 // Apaga arquivo de documento associado, se existir
-                $opt_key = 'dps_fin_doc_' . $row->id;
+                $opt_key = 'dps_fin_doc_' . intval( $row->id );
                 $doc_url = get_option( $opt_key );
                 if ( $doc_url ) {
                     delete_option( $opt_key );
-                    // Remove arquivo físico
-                    $file_path = str_replace( home_url( '/' ), ABSPATH, $doc_url );
-                    if ( file_exists( $file_path ) ) {
-                        @unlink( $file_path );
+                    // Remove arquivo físico com validação de path traversal
+                    // Converte URL para caminho absoluto e valida que está dentro do diretório de uploads
+                    $file_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $doc_url );
+                    $real_path = realpath( $file_path );
+                    // Segurança: só exclui se o arquivo está dentro do diretório de uploads
+                    if ( $real_path && $base_path && strpos( $real_path, $base_path ) === 0 && file_exists( $real_path ) ) {
+                        wp_delete_file( $real_path );
                     }
                 }
             }
         }
         // Exclui as transações do banco
-        $wpdb->delete( $table, [ 'plano_id' => $sub_id ] );
+        $wpdb->delete( $table, [ 'plano_id' => $sub_id ], [ '%d' ] );
     }
 
     /**
