@@ -501,7 +501,7 @@ class DPS_Subscription_Addon {
         $notes        = isset( $_POST['subscription_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['subscription_notes'] ) ) : '';
         $assignee     = isset( $_POST['subscription_assignee'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_assignee'] ) ) : '';
         $extras_desc  = isset( $_POST['subscription_extras_descriptions'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['subscription_extras_descriptions'] ) ) : [];
-        $extras_val   = isset( $_POST['subscription_extras_values'] ) ? (array) wp_unslash( $_POST['subscription_extras_values'] ) : [];
+        $extras_val   = isset( $_POST['subscription_extras_values'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['subscription_extras_values'] ) ) : [];
         $extras_list  = $this->parse_extras_from_request( $extras_desc, $extras_val );
         
         // Valida campos obrigatórios
@@ -954,7 +954,7 @@ class DPS_Subscription_Addon {
             
             foreach ( $trans_rows as $row ) {
                 // Apaga arquivo de documento associado, se existir
-                $opt_key = 'dps_fin_doc_' . intval( $row->id );
+                $opt_key = 'dps_fin_doc_' . absint( $row->id );
                 $doc_url = get_option( $opt_key );
                 if ( $doc_url ) {
                     delete_option( $opt_key );
