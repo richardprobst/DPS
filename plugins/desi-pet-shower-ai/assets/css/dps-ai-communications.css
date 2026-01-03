@@ -191,3 +191,14 @@
         justify-content: center;
     }
 }
+
+/* Spinner animation para botão de exportação */
+@keyframes dps-ai-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.dashicons.spinning,
+.dashicons-update-alt.spinning {
+    animation: dps-ai-spin 1s linear infinite;
+}
