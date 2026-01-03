@@ -5194,7 +5194,17 @@ class DPS_Base_Frontend {
         if ( $is_allowed_path ) {
             $attachments[] = $file_path;
         }
-        @wp_mail( $to, $subject, $message, $headers, $attachments );
+        $mail_sent = wp_mail( $to, $subject, $message, $headers, $attachments );
+        if ( ! $mail_sent ) {
+            DPS_Logger::warning(
+                __( 'Falha ao enviar email com histórico do cliente', 'desi-pet-shower' ),
+                [
+                    'to'        => $to,
+                    'client_id' => $client_id,
+                ],
+                'email'
+            );
+        }
     }
 
     /**
@@ -5211,7 +5221,7 @@ class DPS_Base_Frontend {
         $doc_dir = trailingslashit( $uploads['basedir'] ) . 'dps_docs';
         $file_path = $doc_dir . '/' . basename( $filename );
         if ( file_exists( $file_path ) ) {
-            @unlink( $file_path );
+            wp_delete_file( $file_path );
         }
         // Remover opções que apontam para este arquivo
         // Financeiro armazena URL em dps_fin_doc_{id} e base armazena nada específico, então busca geral
