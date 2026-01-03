@@ -8,7 +8,7 @@
 
 ## 1. Visão Geral
 
-O **AI Add-on** é um componente do DPS by PRObst que implementa um assistente virtual inteligente baseado na API da OpenAI. O assistente está disponível no Portal do Cliente e também oferece funcionalidades de geração de mensagens para WhatsApp e e-mail no painel administrativo.
+O **AI Add-on** é um componente do desi.pet by PRObst que implementa um assistente virtual inteligente baseado na API da OpenAI. O assistente está disponível no Portal do Cliente e também oferece funcionalidades de geração de mensagens para WhatsApp e e-mail no painel administrativo.
 
 ### 1.1 Propósito
 

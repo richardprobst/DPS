@@ -1,4 +1,4 @@
-# Análise Detalhada dos Add-ons do DPS by PRObst (DPS)
+# Análise Detalhada dos Add-ons do desi.pet by PRObst (DPS)
 
 **Data da Análise**: 23/11/2025  
 **Versão do Sistema**: Base Plugin v1.0 + 15 Add-ons  
@@ -8,7 +8,7 @@
 
 ## Sumário Executivo
 
-Este documento apresenta uma análise detalhada de **todos os 15 add-ons** do sistema DPS by PRObst (DPS), seguindo uma estrutura padronizada de 13 tópicos para cada componente.
+Este documento apresenta uma análise detalhada de **todos os 15 add-ons** do sistema desi.pet by PRObst (DPS), seguindo uma estrutura padronizada de 13 tópicos para cada componente.
 
 ### Metodologia de Análise
 
@@ -56,7 +56,7 @@ Cada add-on foi analisado sob os seguintes aspectos:
 
 ### 1. Visão Geral do Add-on
 
-**Nome**: DPS by PRObst – Agenda Add-on  
+**Nome**: desi.pet by PRObst – Agenda Add-on  
 **Arquivo principal**: `desi-pet-shower-agenda-addon.php` (1.152 linhas)  
 **Versão**: 1.0.0
 
@@ -491,7 +491,7 @@ O Agenda Add-on é o **centro operacional** do sistema DPS, fornecendo a interfa
 
 ### 1. Visão Geral do Add-on
 
-**Nome**: DPS by PRObst – Financeiro Add-on  
+**Nome**: desi.pet by PRObst – Financeiro Add-on  
 **Arquivo principal**: `desi-pet-shower-finance-addon.php` (1.296 linhas)  
 **Versão**: 1.0.0
 

@@ -379,7 +379,7 @@ echo $dps_script;
 
 ### 6.1. PHP
 
-**`plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`**
+**`plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`**
 - Linhas refatoradas: 1166-1500 (~334 linhas)
 - Mudanças principais:
   - Adicionados 5 fieldsets
@@ -388,13 +388,13 @@ echo $dps_script;
   - Asteriscos em campos obrigatórios
   - Tooltips em checkboxes
 
-**`plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`**
+**`plugins/desi-pet-shower-base/desi-pet-shower-base.php`**
 - Linha modificada: 212
 - Mudança: Enqueue de `dps-appointment-form.js`
 
 ### 6.2. JavaScript
 
-**`plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`** (NOVO)
+**`plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`** (NOVO)
 - 110 linhas
 - Módulo `DPSAppointmentForm` com 7 métodos
 - Inicialização condicional
@@ -402,7 +402,7 @@ echo $dps_script;
 
 ### 6.3. CSS
 
-**`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`**
+**`plugins/desi-pet-shower-base/assets/css/dps-base.css`**
 - Linhas adicionadas: ~180
 - Classes novas:
   - `.dps-field-hint`

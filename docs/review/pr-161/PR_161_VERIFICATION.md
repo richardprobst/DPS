@@ -17,8 +17,8 @@ O PR propõe ajustar o alinhamento dos campos de preço dos serviços no formul�
 4. **Ajustes responsivos** nos breakpoints 768px e 480px
 
 ### Arquivos Modificados
-- `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css` (+47, -28 linhas)
-- `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php` (estrutura HTML)
+- `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css` (+47, -28 linhas)
+- `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php` (estrutura HTML)
 
 ---
 
@@ -88,7 +88,7 @@ echo ')</span>';
 
 **📋 Evidência do Código Base:**
 ```css
-/* plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css linha 642 */
+/* plugins/desi-pet-shower-base/assets/css/dps-base.css linha 642 */
 .dps-form input.dps-input-money {
     width: 120px;
     max-width: 100%;
@@ -122,7 +122,7 @@ echo ')</span>';
 
 **📋 Evidência do Código Base:**
 ```css
-/* plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css linha 645 */
+/* plugins/desi-pet-shower-base/assets/css/dps-base.css linha 645 */
 .dps-form input.dps-input-money {
     text-align: right;  /* ← Padrão DPS */
 }
@@ -261,7 +261,7 @@ echo ')</span>';
 
 ### ✅ Teste 1: Sintaxe PHP
 ```bash
-php -l add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php
+php -l plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php
 ```
 **Resultado:** ✅ Sem erros de sintaxe
 

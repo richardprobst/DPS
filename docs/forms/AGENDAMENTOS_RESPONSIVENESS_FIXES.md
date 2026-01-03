@@ -212,7 +212,7 @@ Estas correções complementam as melhorias anteriores documentadas em `APPOINTM
 ## Arquivos Modificados
 
 ### CSS Principal
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 **Mudanças:**
 

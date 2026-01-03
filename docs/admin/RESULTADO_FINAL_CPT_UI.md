@@ -16,7 +16,7 @@
 
 ### Alterações no Código
 
-**Arquivo modificado:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+**Arquivo modificado:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 
 **Método alterado:** `register_post_types()`
 
@@ -116,7 +116,7 @@ Cada CPT agora mapeia **todas as 7 ações** para sua capability específica:
 ┌─────────────────────────────┐
 │ Dashboard                    │
 │                              │
-│ 🐾 DPS by PRObst          │
+│ 🐾 desi.pet by PRObst          │
 │                              │
 │ 👥 Clientes            ← NOVO│
 │ 🐶 Pets                ← NOVO│
@@ -195,7 +195,7 @@ Criado script em `/tmp/test_cpt_registration.php` que valida:
 
 ### Arquivos Modificados
 
-1. **`plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`**
+1. **`plugins/desi-pet-shower-base/desi-pet-shower-base.php`**
    - Registro dos 3 CPTs atualizado
    - ~60 linhas modificadas
 
@@ -336,6 +336,6 @@ Implementação **CONCLUÍDA COM SUCESSO** 🎉
 
 ---
 
-**Desenvolvido para:** DPS by PRObst (DPS)
+**Desenvolvido para:** desi.pet by PRObst (DPS)
 **Por:** GitHub Copilot Agent
 **Status:** ✅ PRONTO PARA PRODUÇÃO

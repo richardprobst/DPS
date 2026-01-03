@@ -12,42 +12,42 @@
 
 #### Plugin Base (Core)
 - **Formulário HTML:**  
-  `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`  
+  `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`  
   Método: `section_agendas()` (linhas 1082-1500+)
 
 - **CSS Principal:**  
-  `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css` (691 linhas)  
+  `plugins/desi-pet-shower-base/assets/css/dps-base.css` (691 linhas)  
   Contém: estilos de formulário, fieldsets, resumo, responsividade
 
 - **JavaScript Base:**  
-  `plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js` (344 linhas)  
+  `plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js` (344 linhas)  
   Funcionalidades: validação, campos condicionais, resumo dinâmico, horários disponíveis
 
 - **Template de Listagem:**  
-  `plugin/desi-pet-shower-base_plugin/templates/appointments-list.php`  
+  `plugins/desi-pet-shower-base/templates/appointments-list.php`  
   Renderiza tabela de agendamentos próximos
 
 #### Add-on de Agenda
 - **Funcionalidades extras:**  
-  `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`  
+  `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`  
   Shortcode `[dps_agenda_page]`, AJAX de status, lembretes
 
 - **CSS da Agenda:**  
-  `add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css` (581 linhas)  
+  `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css` (581 linhas)  
   Estilo minimalista para visualização da agenda completa
 
 - **JavaScript da Agenda:**  
-  `add-ons/desi-pet-shower-agenda_addon/assets/js/agenda-addon.js`  
+  `plugins/desi-pet-shower-agenda/assets/js/agenda-addon.js`  
   Modal de serviços, atualização de status inline
 
 #### Add-on de Serviços (Integração via Hook)
 - **Injeção de Campos:**  
-  `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`  
+  `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`  
   Método: `appointment_service_fields()` (linha 660+)  
   Hook: `dps_base_appointment_fields` (prioridade 10)
 
 - **JavaScript de Cálculo:**  
-  `add-ons/desi-pet-shower-services_addon/dps_service/assets/js/dps-services-addon.js`  
+  `plugins/desi-pet-shower-services/dps_service/assets/js/dps-services-addon.js`  
   Funções: `updateSimpleTotal()`, `updateSubscriptionTotal()`, `applyPricesByPetSize()`
 
 ### 1.2. Documentação Consultada
@@ -823,7 +823,7 @@ Não foi verificada nesta análise, mas assumindo que existe no método `save_ap
 
 #### 🔴 CRÍTICO 1: Resumo não inclui serviços do Services Add-on
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`  
+**Localização:** `plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`  
 **Método:** `updateAppointmentSummary()` (linhas 129-192)
 
 **Descrição:**  
@@ -851,13 +851,13 @@ $('.dps-service-checkbox:checked').each(function() {
 ```
 
 **Arquivo a modificar:**  
-`plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`
+`plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`
 
 ---
 
 #### 🟡 MÉDIO 1: Inputs de preço com width inline (não responsivo)
 
-**Localização:** `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`  
+**Localização:** `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`  
 **Método:** `appointment_service_fields()` (linha 660+)
 
 **Descrição:**
@@ -892,14 +892,14 @@ Remover `style="width:80px;"` e adicionar CSS responsivo:
 ```
 
 **Arquivo a modificar:**  
-- `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php` (remover inline style)
-- `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css` (adicionar classes responsivas)
+- `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php` (remover inline style)
+- `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css` (adicionar classes responsivas)
 
 ---
 
 #### 🟡 MÉDIO 2: Pet Picker pode ficar pesado em mobile com muitos pets
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`  
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`  
 **Método:** `section_agendas()` (linhas 1288-1331)
 
 **Descrição:**  
@@ -925,13 +925,13 @@ Adicionar altura máxima e scroll vertical em mobile:
 ```
 
 **Arquivo a modificar:**  
-`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+`plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 ---
 
 #### 🟢 BAIXO 1: Alertas de pendência com borda 4px (vs 3px em outras partes)
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css` (linha 219)
+**Localização:** `plugins/desi-pet-shower-base/assets/css/dps-base.css` (linha 219)
 
 **Descrição:**
 ```css
@@ -953,7 +953,7 @@ Nenhum (decisão de design, não é bug).
 
 #### 🟢 BAIXO 2: Checkbox Tosa/TaxiDog com tooltip ℹ️ pode não ser óbvio
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (linhas 1376, 1398)
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (linhas 1376, 1398)
 
 **Descrição:**
 ```html
@@ -967,7 +967,7 @@ Usuários podem não saber que o emoji é interativo (hover para ver tooltip).
 Trocar ℹ️ por ícone SVG com `cursor: help` mais visível, ou adicionar texto "(?" ao lado do label.
 
 **Arquivo a modificar:**  
-`plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (opcional)
+`plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (opcional)
 
 ---
 
@@ -979,7 +979,7 @@ Trocar ℹ️ por ícone SVG com `cursor: help` mais visível, ou adicionar text
 **Esforço:** BAIXO (15 minutos)
 
 **Mudança em:**  
-`plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`
+`plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`
 
 **Código:**
 ```javascript
@@ -1019,7 +1019,7 @@ if ($('.dps-service-checkbox').length > 0) {
 **Esforço:** BAIXO (10 minutos)
 
 **Mudança em:**  
-`add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`
+`plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`
 
 **Antes (linha ~730):**
 ```php
@@ -1037,7 +1037,7 @@ echo '<input type="number" class="dps-service-price"
 ```
 
 **CSS em:**  
-`add-ons/desi-pet-shower-services_addon/dps_service/assets/css/` (criar `services-addon.css` se não existir)
+`plugins/desi-pet-shower-services/dps_service/assets/css/` (criar `services-addon.css` se não existir)
 
 ```css
 .dps-service-price {
@@ -1081,7 +1081,7 @@ public function enqueue_scripts() {
 **Esforço:** BAIXO (5 minutos)
 
 **Mudança em:**  
-`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+`plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 **Adicionar antes do final (linha ~691):**
 ```css
@@ -1124,7 +1124,7 @@ public function enqueue_scripts() {
 Atualmente, o campo `#dps-appointment-total` existe apenas para assinaturas (`#dps-subscription-total`). Para agendamentos simples, o total é calculado mas não exibido no formulário (apenas no resumo).
 
 **Mudança em:**  
-`plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
+`plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
 
 **Adicionar após linha 1405 (após TaxiDog):**
 ```php
@@ -1204,25 +1204,25 @@ $('#dps-appointment-total').val(total.toFixed(2));
 ### FASE 1: Correções Críticas (1-2 horas)
 
 - [ ] **1.1** Integrar serviços do Services Add-on no resumo dinâmico  
-  Arquivo: `plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`  
+  Arquivo: `plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`  
   Esforço: 15 min
 
 - [ ] **1.2** Remover inline styles de inputs de preço  
-  Arquivos: `add-ons/desi-pet-shower-services_addon/dps_service/desi-pet-shower-services-addon.php`  
+  Arquivos: `plugins/desi-pet-shower-services/dps_service/desi-pet-shower-services-addon.php`  
   Esforço: 10 min
 
 - [ ] **1.3** Criar CSS responsivo para inputs de preço  
-  Arquivo: `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css`  
+  Arquivo: `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css`  
   Esforço: 10 min
 
 - [ ] **1.4** Adicionar scroll vertical ao Pet Picker em mobile  
-  Arquivo: `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`  
+  Arquivo: `plugins/desi-pet-shower-base/assets/css/dps-base.css`  
   Esforço: 5 min
 
 ### FASE 2: Melhorias de UX (1 hora)
 
 - [ ] **2.1** Adicionar campo de total visível em agendamentos simples  
-  Arquivo: `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`  
+  Arquivo: `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`  
   Esforço: 20 min
 
 - [ ] **2.2** Testar responsividade em diferentes dispositivos (Chrome DevTools)  

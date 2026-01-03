@@ -1,6 +1,6 @@
-# Resumo Executivo do Add-on Financeiro - DPS by PRObst
+# Resumo Executivo do Add-on Financeiro - desi.pet by PRObst
 
-**Plugin:** DPS by PRObst – Financeiro  
+**Plugin:** desi.pet by PRObst – Financeiro  
 **Versão Analisada:** 1.3.0  
 **Data da Análise:** 09/12/2025  
 **Contexto:** Sistema de Banho e Tosa / Pet Shop

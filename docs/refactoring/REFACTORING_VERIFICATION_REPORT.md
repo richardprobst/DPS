@@ -57,14 +57,14 @@ Todos os 15 add-ons agora incluem verificação de dependência no início do ar
 
 ```php
 /**
- * Verifica se o plugin base DPS by PRObst está ativo.
+ * Verifica se o plugin base desi.pet by PRObst está ativo.
  * Se não estiver, exibe aviso e interrompe carregamento do add-on.
  */
 function dps_ADDON_check_base_plugin() {
     if ( ! class_exists( 'DPS_Base_Plugin' ) ) {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'O add-on NOME requer o plugin base DPS by PRObst para funcionar.', 'text-domain' );
+            echo esc_html__( 'O add-on NOME requer o plugin base desi.pet by PRObst para funcionar.', 'text-domain' );
             echo '</p></div>';
         } );
         return false;
@@ -137,8 +137,8 @@ add_action( 'plugins_loaded', function() {
 ### 1. Verificação de Sintaxe PHP
 ```bash
 # Resultado: 0 erros em todos os arquivos
-php -l plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php
-php -l plugin/desi-pet-shower-base_plugin/includes/*.php
+php -l plugins/desi-pet-shower-base/desi-pet-shower-base.php
+php -l plugins/desi-pet-shower-base/includes/*.php
 find add-ons -name "*.php" -exec php -l {} \;
 ```
 

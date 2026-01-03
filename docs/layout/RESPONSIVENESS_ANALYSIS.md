@@ -9,7 +9,7 @@
 
 ## 1. Sumário Executivo
 
-Este documento apresenta uma análise completa de responsividade de todo o sistema DPS by PRObst (DPS), incluindo o plugin base e todos os 15 add-ons complementares. O objetivo é identificar problemas, bugs e oportunidades de melhoria para garantir uma experiência de usuário consistente em PC, Tablet e Celular.
+Este documento apresenta uma análise completa de responsividade de todo o sistema desi.pet by PRObst (DPS), incluindo o plugin base e todos os 15 add-ons complementares. O objetivo é identificar problemas, bugs e oportunidades de melhoria para garantir uma experiência de usuário consistente em PC, Tablet e Celular.
 
 ### ✅ Resultado Final: Sistema 100% Responsivo
 
@@ -69,7 +69,7 @@ Todas as 3 fases do plano de implementação foram executadas com sucesso:
 
 ### 2.1 Plugin Base (`dps-base.css`)
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`  
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-base.css`  
 **Linhas:** 1110 linhas  
 **Status:** ✅ Bom
 
@@ -96,7 +96,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.2 Client Portal Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/assets/css/client-portal.css`  
+**Arquivo:** `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`  
 **Linhas:** 943 linhas  
 **Status:** ⚠️ Parcial
 
@@ -158,7 +158,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.3 Agenda Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css`  
 **Linhas:** 581 linhas  
 **Status:** ✅ Bom
 
@@ -185,7 +185,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.4 Finance Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-finance_addon/assets/css/finance-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-finance/assets/css/finance-addon.css`  
 **Linhas:** 380 linhas  
 **Status:** ✅ Bom
 
@@ -208,7 +208,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.5 Stats Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-stats_addon/assets/css/stats-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-stats/assets/css/stats-addon.css`  
 **Linhas:** 450 linhas  
 **Status:** ✅ Bom
 
@@ -234,7 +234,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.6 Groomers Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-groomers_addon/assets/css/groomers-admin.css`  
+**Arquivo:** `plugins/desi-pet-shower-groomers/assets/css/groomers-admin.css`  
 **Linhas:** 1510 linhas  
 **Status:** ✅ Bom
 
@@ -259,7 +259,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.7 Services Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-services_addon/dps_service/assets/css/services-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-services/dps_service/assets/css/services-addon.css`  
 **Linhas:** 267 linhas  
 **Status:** ✅ Bom
 
@@ -283,7 +283,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.8 Subscription Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-subscription_addon/assets/css/subscription-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-subscription/assets/css/subscription-addon.css`  
 **Linhas:** 190 linhas  
 **Status:** ⚠️ Parcial
 
@@ -346,7 +346,7 @@ Nenhum problema crítico encontrado.
 
 ### 2.9 Loyalty Add-on
 
-**Arquivo:** `add-ons/desi-pet-shower-loyalty_addon/assets/css/loyalty-addon.css`  
+**Arquivo:** `plugins/desi-pet-shower-loyalty/assets/css/loyalty-addon.css`  
 **Linhas:** 486 linhas  
 **Status:** ✅ Bom
 

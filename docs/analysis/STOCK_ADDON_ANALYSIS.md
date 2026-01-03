@@ -92,7 +92,7 @@ Aba "Serviços" → Formulário de Cadastro:
 
 Feito na interface administrativa do WordPress (fora do shortcode):
 
-**Caminho**: Admin WP → DPS by PRObst → (interface de itens de estoque via CPT)
+**Caminho**: Admin WP → desi.pet by PRObst → (interface de itens de estoque via CPT)
 
 Cada item possui:
 
@@ -191,7 +191,7 @@ A seção "Consumo de estoque" aparece dentro do formulário de Serviços porque
 
 ### Passo 1: Cadastrar Itens de Estoque
 
-**Onde**: Admin WP → DPS by PRObst → Itens de Estoque
+**Onde**: Admin WP → desi.pet by PRObst → Itens de Estoque
 
 1. Clique em "Adicionar Novo"
 2. Preencha: Nome, Unidade, Quantidade atual, Quantidade mínima
@@ -246,7 +246,7 @@ Ao marcar o agendamento como finalizado:
 ### Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-stock_addon/
+plugins/desi-pet-shower-stock/
 ├── desi-pet-shower-stock.php    # Arquivo principal (432 linhas)
 ├── uninstall.php                # Limpeza na desinstalação
 └── README.md                    # Documentação técnica
@@ -389,7 +389,7 @@ O Add-on Estoque é um módulo **separado e independente** do Add-on Serviços. 
 
 ## Referências
 
-- **README do Add-on**: `add-ons/desi-pet-shower-stock_addon/README.md`
-- **Arquivo principal**: `add-ons/desi-pet-shower-stock_addon/desi-pet-shower-stock.php`
+- **README do Add-on**: `plugins/desi-pet-shower-stock/README.md`
+- **Arquivo principal**: `plugins/desi-pet-shower-stock/desi-pet-shower-stock.php`
 - **Documentação geral**: `ANALYSIS.md` (seção "Estoque")
 - **Guia do Sistema**: `docs/GUIA_SISTEMA_DPS.md`

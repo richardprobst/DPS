@@ -1,6 +1,6 @@
 # Análise Profunda do Add-on Campanhas & Fidelidade
 
-**Plugin:** DPS by PRObst – Campanhas & Fidelidade  
+**Plugin:** desi.pet by PRObst – Campanhas & Fidelidade  
 **Versão Analisada:** 1.2.0  
 **Data da Análise:** 09/12/2024  
 **Autor da Análise:** Agente de Análise de Código  
@@ -29,7 +29,7 @@
 ### 1.1 Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-loyalty_addon/
+plugins/desi-pet-shower-loyalty/
 ├── desi-pet-shower-loyalty.php      # Plugin principal (~1.860 linhas)
 │   ├── class DPS_Loyalty_Addon      # Orquestração, CPT, menus, renderização
 │   ├── class DPS_Loyalty_Referrals  # Sistema Indique e Ganhe
@@ -735,7 +735,7 @@ $clients_query = new WP_Query( [
 
 **Menu no Admin:**
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Campanhas & Fidelidade
     ├── Aba: Dashboard
     ├── Aba: Indicações

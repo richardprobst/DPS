@@ -6,7 +6,7 @@
 
 ## 1. Sumário Executivo
 
-Este documento analisa a viabilidade, segurança e funcionalidades de uma implementação White Label para o sistema DPS by PRObst. O objetivo é permitir que parceiros e revendedores personalizem o sistema com sua própria marca, mantendo a funcionalidade e a segurança do sistema base.
+Este documento analisa a viabilidade, segurança e funcionalidades de uma implementação White Label para o sistema desi.pet by PRObst. O objetivo é permitir que parceiros e revendedores personalizem o sistema com sua própria marca, mantendo a funcionalidade e a segurança do sistema base.
 
 ### 1.1 Definição de White Label
 
@@ -315,7 +315,7 @@ apply_filters( 'dps_whitelabel_maintenance_can_access', $can_access, $user );
 
 | Funcionalidade | Descrição | Complexidade | Prioridade |
 |----------------|-----------|--------------|------------|
-| **Logo personalizado** | Substituir logo "DPS by PRObst" por logo do parceiro | Baixa | Alta |
+| **Logo personalizado** | Substituir logo "desi.pet by PRObst" por logo do parceiro | Baixa | Alta |
 | **Paleta de cores** | Alterar cores primária, secundária e de destaque | Média | Alta |
 | **Favicon customizado** | Substituir favicon padrão | Baixa | Média |
 | **CSS customizado** | Campo para CSS adicional/sobrescrito | Baixa | Média |
@@ -370,7 +370,7 @@ class DPS_WhiteLabel_Assets {
 
 | Funcionalidade | Descrição | Complexidade | Prioridade |
 |----------------|-----------|--------------|------------|
-| **Nome da marca** | Substituir "DPS by PRObst" em todo o sistema | Baixa | Alta |
+| **Nome da marca** | Substituir "desi.pet by PRObst" em todo o sistema | Baixa | Alta |
 | **Tagline/slogan** | Texto personalizado de apresentação | Baixa | Média |
 | **Textos de e-mail** | Personalizar remetente e rodapé de e-mails | Baixa | Alta |
 | **Mensagens WhatsApp** | Personalizar assinatura de mensagens | Baixa | Alta |
@@ -560,7 +560,7 @@ class DPS_WhiteLabel_SMTP {
      */
     public static function send_test_email( $to ) {
         $settings = get_option( 'dps_whitelabel_settings', [] );
-        $brand    = $settings['brand_name'] ?? 'DPS by PRObst';
+        $brand    = $settings['brand_name'] ?? 'desi.pet by PRObst';
         
         $subject = sprintf(
             /* translators: %s: Nome da marca */
@@ -1255,7 +1255,7 @@ graph TD
 ### 7.3 Considerações Jurídicas
 
 1. **Contrato de licenciamento**: Definir termos claros de uso
-2. **Marca registrada**: Proteger "DPS by PRObst" e permitir uso limitado
+2. **Marca registrada**: Proteger "desi.pet by PRObst" e permitir uso limitado
 3. **Responsabilidade**: Definir limites de responsabilidade do licenciador
 4. **Revogação**: Condições para cancelamento de licença
 
@@ -1339,7 +1339,7 @@ graph TD
 ```php
 <?php
 /**
- * Plugin Name:       DPS by PRObst – White Label
+ * Plugin Name:       desi.pet by PRObst – White Label
  * Plugin URI:        https://www.probst.pro
  * Description:       Personalize o sistema DPS com sua própria marca, cores e identidade visual.
  * Version:           1.0.0
@@ -1394,7 +1394,7 @@ function dps_whitelabel_missing_base_notice() {
     ?>
     <div class="notice notice-error">
         <p>
-            <?php esc_html_e( 'O add-on DPS White Label requer o plugin base DPS by PRObst para funcionar.', 'dps-whitelabel-addon' ); ?>
+            <?php esc_html_e( 'O add-on DPS White Label requer o plugin base desi.pet by PRObst para funcionar.', 'dps-whitelabel-addon' ); ?>
         </p>
     </div>
     <?php
@@ -1437,7 +1437,7 @@ class DPS_WhiteLabel_Settings {
     }
     
     /**
-     * Registra submenu sob DPS by PRObst.
+     * Registra submenu sob desi.pet by PRObst.
      */
     public function register_admin_menu() {
         add_submenu_page(
@@ -1583,9 +1583,9 @@ class DPS_WhiteLabel_Settings {
 7. [PHPMailer Documentation](https://github.com/PHPMailer/PHPMailer)
 
 ### Documentação DPS
-8. [DPS by PRObst - ANALYSIS.md](../ANALYSIS.md)
-9. [DPS by PRObst - AGENTS.md](../../AGENTS.md)
-10. [DPS by PRObst - API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+8. [desi.pet by PRObst - ANALYSIS.md](../ANALYSIS.md)
+9. [desi.pet by PRObst - AGENTS.md](../../AGENTS.md)
+10. [desi.pet by PRObst - API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ---
 

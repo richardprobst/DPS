@@ -1,11 +1,11 @@
-# Análise de Compatibilidade DPS by PRObst
+# Análise de Compatibilidade desi.pet by PRObst
 
 **Data da análise:** Dezembro 2024  
 **Versão do sistema:** 1.0.1 (plugin base)
 
 ## Resumo Executivo
 
-O sistema DPS by PRObst foi analisado quanto à compatibilidade com:
+O sistema desi.pet by PRObst foi analisado quanto à compatibilidade com:
 - **PHP 8.3+** (incluindo futuro PHP 8.4)
 - **WordPress 6.9**
 - **Tema Astra**
@@ -63,7 +63,7 @@ Todos os plugins declaram `Requires PHP: 7.4`, o que significa compatibilidade c
 ### Funções deprecadas corrigidas
 
 #### `get_page_by_title()` (Deprecada WP 6.2)
-**Arquivo afetado**: `add-ons/desi-pet-shower-client-portal_addon/includes/functions-portal-helpers.php`
+**Arquivo afetado**: `plugins/desi-pet-shower-client-portal/includes/functions-portal-helpers.php`
 
 **Correção implementada**: Criada função `dps_get_page_by_title_compat()` que utiliza `$wpdb->get_var()` com query SQL direta para correspondência exata de título, conforme recomendação oficial do WordPress.
 

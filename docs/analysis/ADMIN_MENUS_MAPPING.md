@@ -8,10 +8,10 @@
 
 ## Sumário Executivo
 
-Este documento apresenta um mapeamento completo da organização atual dos menus administrativos do sistema DPS by PRObst. O sistema possui **1 menu principal** e **21 submenus** distribuídos entre o plugin base e 17 add-ons ativos.
+Este documento apresenta um mapeamento completo da organização atual dos menus administrativos do sistema desi.pet by PRObst. O sistema possui **1 menu principal** e **21 submenus** distribuídos entre o plugin base e 17 add-ons ativos.
 
 ### Estatísticas Gerais
-- **Menu Principal:** 1 (DPS by PRObst)
+- **Menu Principal:** 1 (desi.pet by PRObst)
 - **Submenus Diretos:** 21
 - **Custom Post Types visíveis:** 5 (Clientes, Pets, Agendamentos, Base de Conhecimento IA, Mensagens do Portal)
 - **Add-ons com configuração:** 14
@@ -19,17 +19,17 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 
 ---
 
-## 1. PLUGIN BASE - DPS by PRObst
+## 1. PLUGIN BASE - desi.pet by PRObst
 
 ### Menu Principal
-- **Page Title:** DPS by PRObst
-- **Menu Title:** DPS by PRObst
+- **Page Title:** desi.pet by PRObst
+- **Menu Title:** desi.pet by PRObst
 - **Slug:** `desi-pet-shower`
 - **Parent Slug:** (nenhum - menu de topo)
 - **Capability:** `manage_options`
 - **Ícone:** `dashicons-pets`
 - **Posição:** 56
-- **Arquivo:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`
+- **Arquivo:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php`
 - **Função:** `DPS_Base_Plugin::register_admin_menu()` (linha 167)
 
 **Observação:** Este é o menu principal que agrupa todos os add-ons do sistema. A página principal exibe uma mensagem de boas-vindas e lista as funcionalidades disponíveis.
@@ -42,7 +42,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-logs`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php`
+- **Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-logs-admin-page.php`
 - **Função:** `DPS_Logs_Admin_Page::register_page()` (linha 20)
 - **Prioridade de Hook:** 20
 
@@ -55,18 +55,18 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 #### CPT: Clientes (dps_cliente)
 - **Visível no Admin:** Não (configurado com `show_in_menu => false`)
 - **Capability Type:** `dps_client` (mapeado para `dps_manage_clients`)
-- **Registro:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` linha 253
+- **Registro:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php` linha 253
 - **Observação:** Gerenciado através do shortcode [dps_base] no frontend
 
 #### CPT: Pets (dps_pet)
 - **Visível no Admin:** Não (configurado com `show_in_menu => false`)
 - **Capability Type:** `dps_pet` (mapeado para `dps_manage_pets`)
-- **Registro:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` linha 294
+- **Registro:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php` linha 294
 
 #### CPT: Agendamentos (dps_agendamento)
 - **Visível no Admin:** Não (configurado com `show_in_menu => false`)
 - **Capability Type:** `dps_appointment` (mapeado para `dps_manage_appointments`)
-- **Registro:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` linha 334
+- **Registro:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php` linha 334
 
 ---
 
@@ -78,7 +78,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-agenda-dashboard`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Função:** `DPS_Agenda_Addon::register_dashboard_admin_page()` (linha 291)
 
 **Funcionalidade:** Dashboard operacional com métricas de agendamentos, gráficos de performance e indicadores-chave.
@@ -91,7 +91,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-agenda-settings`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Função:** `DPS_Agenda_Addon::register_settings_admin_page()` (linha 345)
 
 **Funcionalidade:** Configurações do sistema de agendamento (horários, capacidade, regras de confirmação).
@@ -110,7 +110,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-settings`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/desi-pet-shower-ai-addon.php`
 - **Função:** `DPS_AI_Addon::register_admin_menu()` (linha 402)
 
 **Funcionalidade:** Configuração da API OpenAI, modelo GPT, prompts do sistema e canais de integração.
@@ -123,7 +123,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-analytics`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/desi-pet-shower-ai-addon.php`
 - **Função:** `DPS_AI_Addon::register_admin_menu()` (linha 412)
 
 **Funcionalidade:** Métricas de uso da IA, análise de conversas e performance do assistente.
@@ -136,7 +136,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-conversations`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-conversations-admin.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-conversations-admin.php`
 - **Função:** `DPS_AI_Conversations_Admin::register_admin_menu()` (linha 53)
 - **Prioridade de Hook:** 25
 
@@ -150,7 +150,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-knowledge-base`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `edit_posts`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-admin.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-knowledge-base-admin.php`
 - **Função:** `DPS_AI_Knowledge_Base_Admin::register_admin_page()` (linha 57)
 - **Prioridade de Hook:** 25
 
@@ -164,7 +164,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-kb-tester`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `edit_posts`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-tester.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-knowledge-base-tester.php`
 - **Função:** `DPS_AI_Knowledge_Base_Tester::register_admin_page()` (linha 59)
 - **Prioridade de Hook:** 25
 
@@ -178,7 +178,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-specialist`
 - **Parent Slug:** `dps-gestao` ⚠️
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-specialist-mode.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-specialist-mode.php`
 - **Função:** `DPS_AI_Specialist_Mode::register_menu()` (linha 55)
 - **Prioridade de Hook:** 21
 
@@ -192,7 +192,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-ai-insights`
 - **Parent Slug:** `dps-gestao` ⚠️
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-insights-dashboard.php`
+- **Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-insights-dashboard.php`
 - **Função:** `DPS_AI_Insights_Dashboard::register_menu()` (linha 56)
 - **Prioridade de Hook:** 20
 
@@ -205,7 +205,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Parent Menu:** `desi-pet-shower`
 - **Label:** Base de Conhecimento IA
 - **Capability Type:** `post`
-- **Registro:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base.php` linha 67
+- **Registro:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-knowledge-base.php` linha 67
 - **Taxonomia:** `dps_ai_knowledge_cat` (Categorias de Conhecimento)
 
 **Shortcodes relacionados:**
@@ -221,7 +221,7 @@ Este documento apresenta um mapeamento completo da organização atual dos menus
 - **Slug:** `dps-client-portal-settings`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php`
+- **Arquivo:** `plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-admin.php`
 - **Função:** `DPS_Portal_Admin::register_admin_menu()` (linha 111)
 
 **⚠️ DUPLICAÇÃO:** Este mesmo menu é registrado em DOIS arquivos diferentes:
@@ -240,7 +240,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-client-logins`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php`
+- **Arquivo:** `plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-admin.php`
 - **Função:** `DPS_Portal_Admin::register_admin_menu()` (linha 121)
 
 **⚠️ DUPLICAÇÃO:** Mesmo problema - registrado em dois arquivos:
@@ -256,7 +256,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Parent Menu:** Nenhum (menu independente)
 - **Label:** Mensagens do Portal
 - **Capability Type:** `post`
-- **Registro:** `add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php` linha 104
+- **Registro:** `plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-admin.php` linha 104
 
 **Observação:** Este CPT não está configurado para aparecer sob `desi-pet-shower`, então cria seu próprio item de menu no admin.
 
@@ -273,7 +273,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-communications`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-communications/desi-pet-shower-communications-addon.php`
 - **Função:** `DPS_Communications_Addon::register_admin_menu()` (linha 95)
 
 **Funcionalidade:** Configurações de WhatsApp, e-mail, templates de mensagens e automações de comunicação.
@@ -288,7 +288,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-payment-settings`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php`
 - **Função:** `DPS_Payment_Addon::add_settings_page()` (linha 129)
 
 **Funcionalidade:** Configuração de integração com Mercado Pago (Access Token, Chave PIX, Webhook Secret).
@@ -320,7 +320,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-loyalty`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+- **Arquivo:** `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 - **Função:** `DPS_Loyalty_Addon::register_menu()` (linha 282)
 
 **Funcionalidade:** Dashboard de pontos de fidelidade, configurações do programa de pontos e gestão de campanhas.
@@ -335,7 +335,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `edit.php?post_type=dps_campaign`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+- **Arquivo:** `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 - **Função:** `DPS_Loyalty_Addon::register_menu()` (linha 291)
 
 **Observação:** Este é um link direto para a listagem do CPT dps_campaign. Cria duplicação porque o CPT já aparece no menu (show_in_menu = false mas acessível via este submenu).
@@ -346,7 +346,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Visível no Admin:** Não diretamente (show_in_menu = false)
 - **Acesso:** Via submenu acima
 - **Capability Type:** `post`
-- **Registro:** `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` linha 145
+- **Registro:** `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php` linha 145
 
 ---
 
@@ -358,7 +358,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-registration-settings`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php`
 - **Função:** `DPS_Registration_Addon::add_settings_page()` (linha 123)
 
 **Funcionalidade:** Configuração da API do Google Maps para geolocalização automática no formulário de cadastro.
@@ -376,7 +376,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-push-notifications`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-push_addon/desi-pet-shower-push-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-push/desi-pet-shower-push-addon.php`
 - **Função:** `DPS_Push_Addon::register_admin_menu()` (linha 118)
 
 **Funcionalidade:** Configuração de notificações push via Web Push (VAPID keys, relatórios Telegram).
@@ -391,7 +391,7 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 - **Slug:** `dps-backup`
 - **Parent Slug:** `desi-pet-shower`
 - **Capability:** `manage_options`
-- **Arquivo:** `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`
+- **Arquivo:** `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`
 - **Função:** `DPS_Backup_Addon::register_admin_menu()` (linha 152)
 
 **Funcionalidade:** Backup manual e automático, restauração de dados, histórico de backups.
@@ -420,34 +420,34 @@ Ambos usam o mesmo slug e parent, o que causa sobrescrita. Apenas um deles será
 Os seguintes add-ons **NÃO** possuem menu próprio no admin:
 
 ### Finance Add-on
-- **Diretório:** `add-ons/desi-pet-shower-finance_addon/`
+- **Diretório:** `plugins/desi-pet-shower-finance/`
 - **Funcionalidade:** Gestão financeira integrada ao sistema de agendamentos
 - **Interface:** Apenas shortcodes e integrações via hooks
 - **Shortcodes:** `[dps_fin_docs]` - Documentos financeiros
 
 ### Services Add-on
-- **Diretório:** `add-ons/desi-pet-shower-services_addon/`
+- **Diretório:** `plugins/desi-pet-shower-services/`
 - **Funcionalidade:** Gestão de serviços oferecidos
 - **Interface:** Gerenciado via frontend
 
 ### Stock Add-on
-- **Diretório:** `add-ons/desi-pet-shower-stock_addon/`
+- **Diretório:** `plugins/desi-pet-shower-stock/`
 - **Funcionalidade:** Controle de estoque
 - **Interface:** Integração via hooks com outros módulos
 
 ### Groomers Add-on
-- **Diretório:** `add-ons/desi-pet-shower-groomers_addon/`
+- **Diretório:** `plugins/desi-pet-shower-groomers/`
 - **Funcionalidade:** Gestão de profissionais (groomers)
 - **Interface:** Frontend via shortcode
 - **CPT:** `dps_groomer_review` (show_in_menu = false)
 
 ### Stats Add-on
-- **Diretório:** `add-ons/desi-pet-shower-stats_addon/`
+- **Diretório:** `plugins/desi-pet-shower-stats/`
 - **Funcionalidade:** Estatísticas e relatórios
 - **Interface:** Provavelmente widgets ou relatórios integrados
 
 ### Subscription Add-on
-- **Diretório:** `add-ons/desi-pet-shower-subscription_addon/`
+- **Diretório:** `plugins/desi-pet-shower-subscription/`
 - **Funcionalidade:** Sistema de assinaturas/planos recorrentes
 - **Interface:** Gerenciamento via frontend
 - **CPT:** `dps_subscription` (show_ui = false)
@@ -460,8 +460,8 @@ Os seguintes add-ons **NÃO** possuem menu próprio no admin:
 
 #### Estrutura Hierárquica Atual:
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst (Página inicial)
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst (Página inicial)
 ├── Logs do Sistema
 ├── Dashboard (Agenda)
 ├── Configurações (Agenda)
@@ -482,7 +482,7 @@ DPS by PRObst (Menu Principal)
 ├── Backup & Restauração
 └── Debugging
 
-Conhecimento IA (CPT - sob DPS by PRObst)
+Conhecimento IA (CPT - sob desi.pet by PRObst)
 ├── Todos os Artigos
 ├── Adicionar Novo
 └── Categorias de Conhecimento
@@ -574,7 +574,7 @@ Mensagens do Portal (CPT - Menu Independente) ⚠️
 
 ### Estrutura Proposta (Exemplo)
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Painel Inicial
 ├── Agenda (com abas: Dashboard, Configurações, Capacidade)
 ├── Assistente de IA (com abas: Configurações, Analytics, Conversas, Base de Conhecimento, Modo Especialista, Insights)
@@ -597,7 +597,7 @@ DPS by PRObst
 
 | Add-on/Módulo | Nível | Page Title | Menu Title | Slug | Parent Slug | Capability | Arquivo | Função/Linha |
 |---------------|-------|------------|------------|------|-------------|------------|---------|--------------|
-| **Base** | Menu Principal | DPS by PRObst | DPS by PRObst | desi-pet-shower | - | manage_options | plugin/.../desi-pet-shower-base.php | DPS_Base_Plugin::register_admin_menu():167 |
+| **Base** | Menu Principal | desi.pet by PRObst | desi.pet by PRObst | desi-pet-shower | - | manage_options | plugin/.../desi-pet-shower-base.php | DPS_Base_Plugin::register_admin_menu():167 |
 | Base | Submenu | Logs do Sistema | Logs do Sistema | dps-logs | desi-pet-shower | manage_options | plugin/.../class-dps-logs-admin-page.php | DPS_Logs_Admin_Page::register_page():20 |
 | **Agenda** | Submenu | Dashboard da Agenda | Dashboard | dps-agenda-dashboard | desi-pet-shower | manage_options | add-ons/.../desi-pet-shower-agenda-addon.php | DPS_Agenda_Addon::register_dashboard_admin_page():291 |
 | Agenda | Submenu | Configurações da Agenda | Configurações | dps-agenda-settings | desi-pet-shower | manage_options | add-ons/.../desi-pet-shower-agenda-addon.php | DPS_Agenda_Addon::register_settings_admin_page():345 |

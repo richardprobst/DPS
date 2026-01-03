@@ -17,10 +17,10 @@ A reorganização dos menus foi **95% concluída**. Existem 5 pendências identi
 O menu "Backup & Restauração" (`dps-backup`) não foi oculto do menu principal como os demais menus individuais, permanecendo visível.
 
 ### Causa Raiz
-Durante a implementação automática, houve uma tentativa de editar o arquivo `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`, mas o pattern matching falhou devido a espaçamento inconsistente nos comentários DocBlock.
+Durante a implementação automática, houve uma tentativa de editar o arquivo `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`, mas o pattern matching falhou devido a espaçamento inconsistente nos comentários DocBlock.
 
 **Localização:** Linha 152-161  
-**Arquivo:** `add-ons/desi-pet-shower-backup_addon/desi-pet-shower-backup-addon.php`
+**Arquivo:** `plugins/desi-pet-shower-backup/desi-pet-shower-backup-addon.php`
 
 **Código Atual:**
 ```php
@@ -78,11 +78,11 @@ Durante a implementação automática, houve uma tentativa de editar o arquivo `
 ### Validação Pós-Correção
 ```bash
 # Verificar que o menu não aparece mais
-# Navegar para: wp-admin → DPS by PRObst
+# Navegar para: wp-admin → desi.pet by PRObst
 # Confirmar: "Backup & Restauração" não está na lista
 
 # Verificar acesso via hub
-# Navegar para: DPS by PRObst → Sistema → Aba "Backup"
+# Navegar para: desi.pet by PRObst → Sistema → Aba "Backup"
 # Confirmar: Interface de backup carrega corretamente
 
 # Verificar backward compatibility
@@ -101,11 +101,11 @@ Durante a implementação automática, houve uma tentativa de editar o arquivo `
 Implementada **Opção A** - Criar Hub Ferramentas completo.
 
 **Arquivos Criados:**
-- `plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php`
+- `plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php`
 
 **Arquivos Modificados:**
-- `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (include + inicialização)
-- `add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php` (parent=null)
+- `plugins/desi-pet-shower-base/desi-pet-shower-base.php` (include + inicialização)
+- `plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php` (parent=null)
 
 ### Estrutura Implementada
 
@@ -144,7 +144,7 @@ O hub "Painel Inicial" (`dps-dashboard-main`) não foi implementado conforme pla
 ### Status Atual
 A página principal do plugin (`desi-pet-shower`) permanece como menu de topo sem modificações.
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php`  
+**Arquivo:** `plugins/desi-pet-shower-base/desi-pet-shower-base.php`  
 **Linha:** 167  
 **Slug:** `desi-pet-shower`
 
@@ -224,7 +224,7 @@ Os documentos de análise originais não foram atualizados para refletir a nova 
 
 **Nova estrutura a documentar:**
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Painel Inicial (desi-pet-shower)
 ├── Agenda (dps-agenda-hub) [3 abas]
 ├── Assistente de IA (dps-ai-hub) [7 abas]
@@ -325,7 +325,7 @@ Capturar cada hub:
 ```bash
 # 1. Ativar todos os add-ons necessários
 # 2. Navegar para wp-admin
-# 3. Expandir menu "DPS by PRObst"
+# 3. Expandir menu "desi.pet by PRObst"
 # 4. Capturar menu completo (antes: se tiver backup, depois: com correção)
 
 # 5. Para cada hub:

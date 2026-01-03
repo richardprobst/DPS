@@ -28,7 +28,7 @@ O Services Add-on é um componente essencial do sistema DPS que gerencia o catá
 
 ### Estrutura Atual
 ```
-add-ons/desi-pet-shower-services_addon/
+plugins/desi-pet-shower-services/
 ├── desi-pet-shower-services.php      # Wrapper com header do plugin
 ├── README.md                          # Documentação básica
 ├── uninstall.php                      # Limpeza na desinstalação

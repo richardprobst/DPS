@@ -227,9 +227,9 @@ Avaliar a experiência de uso do portal do cliente (`[dps_client_portal]`) sob a
 ## 📁 Arquivos Principais Identificados
 
 ### Portal do Cliente
-- `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php` (45 linhas – bootstrap)
-- `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (1528 linhas – lógica)
-- `add-ons/desi-pet-shower-client-portal_addon/assets/css/client-portal.css` (349 linhas)
+- `plugins/desi-pet-shower-client-portal/desi-pet-shower-client-portal.php` (45 linhas – bootstrap)
+- `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php` (1528 linhas – lógica)
+- `plugins/desi-pet-shower-client-portal/assets/css/client-portal.css` (349 linhas)
 
 ### Documentação de Referência
 - `VISUAL_STYLE_GUIDE.md` (guia de estilo minimalista)

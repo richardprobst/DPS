@@ -2,7 +2,7 @@
 
 ## 📄 Sobre este arquivo
 
-`portal-cliente-demo.html` é um arquivo HTML estático que simula o Portal do Cliente do DPS by PRObst (DPS) com dados fictícios para fins de análise de UX, layout e apresentação.
+`portal-cliente-demo.html` é um arquivo HTML estático que simula o Portal do Cliente do desi.pet by PRObst (DPS) com dados fictícios para fins de análise de UX, layout e apresentação.
 
 ## 🎯 Objetivo
 
@@ -228,8 +228,8 @@ Este é um arquivo de **demonstração estática**. No sistema real:
 - **UX Analysis**: `/docs/layout/client-portal/CLIENT_PORTAL_UX_ANALYSIS.md`
 - **Implementation Summary**: `/docs/layout/client-portal/CLIENT_PORTAL_IMPLEMENTATION_SUMMARY.md`
 - **Visual Style Guide**: `/docs/visual/VISUAL_STYLE_GUIDE.md`
-- **CSS Source**: `/add-ons/desi-pet-shower-client-portal_addon/assets/css/client-portal.css`
-- **PHP Source**: `/add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+- **CSS Source**: `/plugins/desi-pet-shower-client-portal/assets/css/client-portal.css`
+- **PHP Source**: `/plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 
 ## 🔮 Próximos Passos
 
@@ -250,4 +250,4 @@ Este é um arquivo de **demonstração estática**. No sistema real:
 **Criado por**: Sistema DPS  
 **Data**: Novembro 2024  
 **Versão**: 1.0.0  
-**Licença**: Uso interno - DPS by PRObst
+**Licença**: Uso interno - desi.pet by PRObst

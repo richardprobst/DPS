@@ -36,7 +36,7 @@
 Nova estrutura com separação de responsabilidades:
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Arquivo principal (~700 linhas)
 ├── includes/
 │   ├── class-dps-backup-settings.php   # Configurações
@@ -71,7 +71,7 @@ add-ons/desi-pet-shower-backup_addon/
 
 ## 1. Visão Geral
 
-O **Backup & Restauração Add-on** permite exportar e restaurar dados completos do sistema DPS by PRObst em formato JSON. É uma ferramenta crítica para migrações, recuperação de desastres e manutenção do sistema.
+O **Backup & Restauração Add-on** permite exportar e restaurar dados completos do sistema desi.pet by PRObst em formato JSON. É uma ferramenta crítica para migrações, recuperação de desastres e manutenção do sistema.
 
 ### 1.1 Propósito Principal
 
@@ -110,7 +110,7 @@ O **Backup & Restauração Add-on** permite exportar e restaurar dados completos
 ### 2.1 Estrutura Atual
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Arquivo único (1338 linhas)
 ├── README.md                            # Documentação (199 linhas)
 └── uninstall.php                        # Limpeza (50 linhas)
@@ -128,7 +128,7 @@ add-ons/desi-pet-shower-backup_addon/
 ### 2.3 Estrutura Recomendada
 
 ```
-add-ons/desi-pet-shower-backup_addon/
+plugins/desi-pet-shower-backup/
 ├── desi-pet-shower-backup-addon.php    # Wrapper (bootstrapping, ~100 linhas)
 ├── includes/
 │   ├── class-dps-backup-exporter.php   # Lógica de exportação
@@ -739,7 +739,7 @@ A interface atual é funcional mas minimalista:
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │ ⚠️ ATENÇÃO: Esta ação irá substituir todos os dados     │
-│ atuais do DPS by PRObst. Esta operação não pode ser   │
+│ atuais do desi.pet by PRObst. Esta operação não pode ser   │
 │ desfeita.                                               │
 │                                                         │
 │ Selecione o arquivo de backup:                          │

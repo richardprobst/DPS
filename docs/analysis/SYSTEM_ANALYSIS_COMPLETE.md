@@ -1,5 +1,5 @@
 # Mapeamento Completo – Back-End e Front-End
-## Sistema DPS by PRObst (DPS)
+## Sistema desi.pet by PRObst (DPS)
 
 **Data da Análise**: 2025-11-22  
 **Baseado em**: Código-fonte real (não documentação)
@@ -28,7 +28,7 @@ O sistema DPS consiste em:
 |------|------|-----------|---------|----------|
 | DPS Logs | `dps-logs` | `manage_options` | `class-dps-logs-admin-page.php` | `render_logs_page()` |
 
-- **Localização**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php`
+- **Localização**: `plugins/desi-pet-shower-base/includes/class-dps-logs-admin-page.php`
 - **Hook**: `admin_menu`
 - **Funcionalidade**: Visualização de logs do sistema com filtros por nível e período
 
@@ -98,7 +98,7 @@ Os add-ons se conectam ao base usando hooks de navegação e seções:
 |-------|--------|--------------|---------|
 | CSS Admin | `dps-admin-style` | Páginas com slug `dps` | `assets/css/dps-admin.css` |
 
-**Localização do hook**: `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php:267`
+**Localização do hook**: `plugins/desi-pet-shower-base/desi-pet-shower-base.php:267`
 
 ```php
 public function enqueue_admin_assets( $hook ) {
@@ -130,7 +130,7 @@ public function enqueue_admin_assets( $hook ) {
 ### 2.2 Templates Front-End
 
 **Template identificado**:
-- `plugin/desi-pet-shower-base_plugin/templates/appointments-list.php`
+- `plugins/desi-pet-shower-base/templates/appointments-list.php`
   - Renderiza lista de agendamentos
 
 **Método de carregamento**:
@@ -283,7 +283,7 @@ $should_enqueue = ( $post instanceof WP_Post ) &&
 
 #### ❌ Finance Add-on - DUPLICAÇÃO COMPLETA
 ```
-add-ons/desi-pet-shower-finance_addon/
+plugins/desi-pet-shower-finance/
 ├── desi-pet-shower-finance-addon.php  ← PLUGIN PRINCIPAL (tem header de plugin)
 └── desi-pet-shower-finance.php        ← ARQUIVO DE COMPATIBILIDADE (sem header)
 ```
@@ -296,7 +296,7 @@ add-ons/desi-pet-shower-finance_addon/
 
 #### ❌ Services Add-on - ESTRUTURA DUPLICADA
 ```
-add-ons/desi-pet-shower-services_addon/
+plugins/desi-pet-shower-services/
 ├── desi-pet-shower-services.php         ← PLUGIN v1.1.0 (tem header)
 └── dps_service/
     └── desi-pet-shower-services-addon.php ← OUTRO PLUGIN v1.0.0 (tem header)
@@ -305,11 +305,11 @@ add-ons/desi-pet-shower-services_addon/
 **Análise**:
 ```bash
 # desi-pet-shower-services.php
-Plugin Name: DPS by PRObst – Serviços Add-on
+Plugin Name: desi.pet by PRObst – Serviços Add-on
 Version: 1.1.0
 
 # dps_service/desi-pet-shower-services-addon.php
-Plugin Name: DPS by PRObst – Serviços Add-on
+Plugin Name: desi.pet by PRObst – Serviços Add-on
 Version: 1.0.0
 ```
 
@@ -326,7 +326,7 @@ Version: 1.0.0
 
 #### ❌ Subscription Add-on - ESTRUTURA DUPLICADA
 ```
-add-ons/desi-pet-shower-subscription_addon/
+plugins/desi-pet-shower-subscription/
 ├── desi-pet-shower-subscription.php         ← PLUGIN (tem header)
 └── dps_subscription/
     └── desi-pet-shower-subscription-addon.php ← OUTRO PLUGIN (tem header)
@@ -335,12 +335,12 @@ add-ons/desi-pet-shower-subscription_addon/
 **Análise**:
 ```bash
 # desi-pet-shower-subscription.php
-Plugin Name: DPS by PRObst – Assinaturas Add-on
+Plugin Name: desi.pet by PRObst – Assinaturas Add-on
 Version: 1.0.0
 # Inclui o arquivo da subpasta
 
 # dps_subscription/desi-pet-shower-subscription-addon.php
-Plugin Name: DPS by PRObst – Assinaturas Add-on
+Plugin Name: desi.pet by PRObst – Assinaturas Add-on
 Version: 1.0.0
 ```
 
@@ -356,7 +356,7 @@ Version: 1.0.0
 
 #### ❌ Agenda Add-on - ARQUIVOS JS DUPLICADOS
 ```
-add-ons/desi-pet-shower-agenda_addon/
+plugins/desi-pet-shower-agenda/
 ├── agenda-addon.js     ← FORA da pasta assets
 ├── agenda.js           ← FORA da pasta assets
 └── assets/
@@ -376,8 +376,8 @@ add-ons/desi-pet-shower-agenda_addon/
 #### ❌ Função `dps_format_money_br()` - DUPLICADA 2x
 
 **Ocorrências**:
-1. `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php:69`
-2. `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php:966`
+1. `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php:69`
+2. `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php:966`
 
 **Análise**:
 ```php
@@ -415,7 +415,7 @@ if ( ! function_exists( 'dps_format_money_br' ) ) {
 #### ❌ Função `dps_parse_money_br()` - DUPLICADA
 
 **Ocorrências**:
-1. `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php:47`
+1. `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php:47`
 
 **PROBLEMA**:
 - **EXISTE helper oficial**: `DPS_Money_Helper::parse_brazilian_format()`
@@ -634,7 +634,7 @@ DPS_Money_Helper::parse_brazilian_format( $money_string );
 **WhatsApp Formatting**:
 ```php
 // CRIAR novo helper global:
-// plugin/desi-pet-shower-base_plugin/includes/class-dps-phone-helper.php
+// plugins/desi-pet-shower-base/includes/class-dps-phone-helper.php
 
 class DPS_Phone_Helper {
     public static function format_for_whatsapp( $phone ) {
@@ -698,7 +698,7 @@ EXPOR funções:
 
 **Proposta**:
 ```
-plugin/desi-pet-shower-base_plugin/
+plugins/desi-pet-shower-base/
 └── templates/
     ├── forms/
     │   ├── client-form.php

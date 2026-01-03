@@ -11,9 +11,9 @@ WordPress Admin
 ├── Páginas (WordPress)
 ├── Comentários (WordPress)
 │
-├── 🐾 DPS by PRObst ⭐ (Menu Principal - Posição 56)
+├── 🐾 desi.pet by PRObst ⭐ (Menu Principal - Posição 56)
 │   │
-│   ├── DPS by PRObst (Página inicial com boas-vindas)
+│   ├── desi.pet by PRObst (Página inicial com boas-vindas)
 │   ├── Logs do Sistema
 │   ├── Dashboard (Agenda Add-on)
 │   ├── Configurações (Agenda Add-on)
@@ -57,13 +57,13 @@ WordPress Admin
 
 ### 📦 PLUGIN BASE
 ```
-DPS by PRObst (Menu Principal)
+desi.pet by PRObst (Menu Principal)
 └── Logs do Sistema
 ```
 
 ### 📅 ADD-ON: AGENDA
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Dashboard
 └── Configurações
 ```
@@ -71,7 +71,7 @@ DPS by PRObst
 
 ### 🤖 ADD-ON: ASSISTENTE DE IA
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Assistente de IA (Configurações)
 ├── Analytics de IA
 ├── Conversas IA
@@ -88,7 +88,7 @@ DPS by PRObst
 
 ### 👤 ADD-ON: CLIENTE PORTAL
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Portal do Cliente ⚠️ (registrado 2x)
 └── Logins de Clientes ⚠️ (registrado 2x)
 
@@ -99,19 +99,19 @@ Mensagens do Portal ⚠️ (Menu Independente)
 
 ### 📱 ADD-ON: COMUNICAÇÕES
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Comunicações
 ```
 
 ### 💳 ADD-ON: PAGAMENTOS
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Pagamentos
 ```
 
 ### 🎨 ADD-ON: WHITE LABEL
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── White Label (com abas internas)
     ├── [Branding]
     ├── [Access Control]
@@ -120,7 +120,7 @@ DPS by PRObst
 
 ### 🎁 ADD-ON: CAMPANHAS & FIDELIDADE
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── Campanhas & Fidelidade (com abas internas)
 │   ├── [Dashboard]
 │   ├── [Configurações]
@@ -131,20 +131,20 @@ DPS by PRObst
 
 ### 📝 ADD-ON: FORMULÁRIO DE CADASTRO
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Formulário de Cadastro
 ```
 **Shortcodes:** `[dps_registration_form]`
 
 ### 🔔 ADD-ON: NOTIFICAÇÕES PUSH
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Push Notifications ⚠️ (em inglês)
 ```
 
 ### 💾 ADD-ON: BACKUP & RESTAURAÇÃO
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Backup & Restauração (com abas internas)
     ├── [Manual]
     ├── [Automático]
@@ -153,7 +153,7 @@ DPS by PRObst
 
 ### 🐛 ADD-ON: DEBUGGING
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Debugging
 ```
 
@@ -173,7 +173,7 @@ DPS by PRObst
 ```
 21 itens no menu principal = Difícil de navegar
 
-DPS by PRObst
+desi.pet by PRObst
 ├── Item 1
 ├── Item 2
 ├── Item 3
@@ -201,7 +201,7 @@ DPS by PRObst
 
 **IA - 5 submenus separados:**
 ```
-DPS by PRObst
+desi.pet by PRObst
 ├── ...
 ├── Assistente de IA         ← IA #1
 ├── ...
@@ -214,7 +214,7 @@ DPS by PRObst
 
 **Melhor seria:**
 ```
-DPS by PRObst
+desi.pet by PRObst
 └── Assistente de IA
     ├── [Configurações]
     ├── [Analytics]
@@ -236,7 +236,7 @@ DPS by PRObst
 
 ```
 WordPress Admin
-├── DPS by PRObst
+├── desi.pet by PRObst
 │   └── ...
 ├── Mensagens do Portal  ← Deveria estar dentro de DPS
 └── ...
@@ -249,7 +249,7 @@ WordPress Admin
 ### ✅ De 21 Itens para 8 Itens Principais
 
 ```
-DPS by PRObst (Menu Principal)
+desi.pet by PRObst (Menu Principal)
 │
 ├── 🏠 Painel Inicial
 │   └── Dashboard com resumo geral, links rápidos e widgets

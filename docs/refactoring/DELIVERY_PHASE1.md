@@ -11,13 +11,13 @@
 ### 1. Código Refatorado
 
 #### Arquivo Modificado
-- ✅ `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
+- ✅ `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
   - Método `section_clients()` refatorado em 3 métodos especializados
   - Separação clara entre preparação de dados e renderização
   - Compatibilidade 100% mantida
 
 #### Arquivos Criados
-- ✅ `plugin/desi-pet-shower-base_plugin/templates/frontend/clients-section.php`
+- ✅ `plugins/desi-pet-shower-base/templates/frontend/clients-section.php`
   - Template completo da seção de clientes
   - Reutiliza templates existentes de forms e lists
   - Customizável por temas
@@ -149,7 +149,7 @@ Este padrão pode ser aplicado em **todas as outras seções**:
 
 1. **Criar template**
    ```bash
-   touch plugin/desi-pet-shower-base_plugin/templates/frontend/NOME-section.php
+   touch plugins/desi-pet-shower-base/templates/frontend/NOME-section.php
    ```
 
 2. **Mover HTML inline para template**
@@ -188,7 +188,7 @@ Este padrão pode ser aplicado em **todas as outras seções**:
 
 ```bash
 # 1. Criar template
-touch plugin/desi-pet-shower-base_plugin/templates/frontend/pets-section.php
+touch plugins/desi-pet-shower-base/templates/frontend/pets-section.php
 
 # 2. Copiar padrão da Fase 1
 # - Consultar docs/refactoring/FRONTEND_CLASS_REFACTORING_PLAN.md
@@ -200,8 +200,8 @@ touch plugin/desi-pet-shower-base_plugin/templates/frontend/pets-section.php
 # - Simplificar section_pets()
 
 # 4. Testar
-php -l plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
-php -l plugin/desi-pet-shower-base_plugin/templates/frontend/pets-section.php
+php -l plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
+php -l plugins/desi-pet-shower-base/templates/frontend/pets-section.php
 
 # 5. Commit
 git add .
@@ -240,20 +240,20 @@ Fase 1 ✅ │ Fase 2 ⏳ │ Fase 3 ⏳ │ Fase 4 ⏳ │ Fase 5 ⏳ │ Fase 
 - 📄 `docs/refactoring/VISUAL_DIAGRAM.md` - Diagramas visuais
 
 ### Arquivos Modificados
-- 💾 `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
-- 💾 `plugin/desi-pet-shower-base_plugin/templates/frontend/clients-section.php`
+- 💾 `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
+- 💾 `plugins/desi-pet-shower-base/templates/frontend/clients-section.php`
 
 ### Comandos Úteis
 
 ```bash
 # Validar sintaxe
-php -l plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+php -l plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 
 # Contar linhas
-wc -l plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+wc -l plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 
 # Listar métodos
-grep -n "private static function" plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
+grep -n "private static function" plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 ```
 
 ---

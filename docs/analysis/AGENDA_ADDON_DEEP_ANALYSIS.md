@@ -1,4 +1,4 @@
-# Análise Profunda do Add-on AGENDA - DPS by PRObst
+# Análise Profunda do Add-on AGENDA - desi.pet by PRObst
 
 **Data da análise**: 2025-12-08  
 **Autor**: Análise técnica automatizada  
@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-O add-on **AGENDA** é o coração operacional do sistema de Banho e Tosa no DPS by PRObst. Ele gerencia todos os atendimentos do dia, permitindo à equipe visualizar, confirmar, acompanhar e finalizar serviços de forma ágil e intuitiva. Este documento apresenta uma análise profunda de todos os aspectos técnicos, operacionais e de usabilidade do add-on, além de propor um plano de implementação em fases para melhorias prioritárias.
+O add-on **AGENDA** é o coração operacional do sistema de Banho e Tosa no desi.pet by PRObst. Ele gerencia todos os atendimentos do dia, permitindo à equipe visualizar, confirmar, acompanhar e finalizar serviços de forma ágil e intuitiva. Este documento apresenta uma análise profunda de todos os aspectos técnicos, operacionais e de usabilidade do add-on, além de propor um plano de implementação em fases para melhorias prioritárias.
 
 ### Principais Funcionalidades Atuais
 - ✅ Visualização de agenda diária, semanal, mensal (calendário) e completa
@@ -982,7 +982,7 @@ Este hook é ouvido pelo Payment Add-on que gera o link automaticamente.
 
 ### 6.3 Payment Add-on (Integração Mercado Pago)
 
-**Arquivo**: `/add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php`
+**Arquivo**: `/plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php`
 
 #### 6.3.1 Configurações (linhas 113-180)
 
@@ -993,7 +993,7 @@ dps_mercadopago_webhook_secret  // Secret para validar webhooks
 dps_pix_key                     // Chave PIX (fallback)
 ```
 
-**Tela de configuração**: `wp-admin → DPS by PRObst → Pagamentos`
+**Tela de configuração**: `wp-admin → desi.pet by PRObst → Pagamentos`
 
 #### 6.3.2 Geração de Link (hook)
 

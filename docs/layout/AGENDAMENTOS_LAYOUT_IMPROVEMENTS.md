@@ -76,7 +76,7 @@ As linhas da tabela agora possuem bordas laterais coloridas além do fundo:
 
 ## Arquivos Modificados
 
-1. **`plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`**
+1. **`plugins/desi-pet-shower-base/assets/css/dps-base.css`**
    - Novos estilos para grupos de agendamentos
    - Cores de status nas linhas
    - Campo de busca estilizado
@@ -84,7 +84,7 @@ As linhas da tabela agora possuem bordas laterais coloridas além do fundo:
    - Estilos de ações da tabela
    - Media queries para responsividade
 
-2. **`plugin/desi-pet-shower-base_plugin/templates/appointments-list.php`**
+2. **`plugins/desi-pet-shower-base/templates/appointments-list.php`**
    - Adicionado badge de contagem (`dps-group-badge`)
 
 ---

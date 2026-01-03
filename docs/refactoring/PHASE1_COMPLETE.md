@@ -56,9 +56,9 @@ Novos arquivos:
 
 ### Código
 ```diff
-+ plugin/desi-pet-shower-base_plugin/templates/forms/client-form.php
-+ plugin/desi-pet-shower-base_plugin/templates/lists/clients-list.php
-M plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
++ plugins/desi-pet-shower-base/templates/forms/client-form.php
++ plugins/desi-pet-shower-base/templates/lists/clients-list.php
+M plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php
 ```
 
 ### Documentação
@@ -73,7 +73,7 @@ M plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php
 ## 🏗️ Estrutura de Templates Criada
 
 ```
-plugin/desi-pet-shower-base_plugin/templates/
+plugins/desi-pet-shower-base/templates/
 ├── appointments-list.php (pré-existente)
 ├── forms/
 │   └── client-form.php ✨ NOVO

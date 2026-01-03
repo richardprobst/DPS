@@ -1,6 +1,6 @@
 # Análise Profunda — Add-on Registration (Cadastro Público)
 
-**Plugin:** DPS by PRObst – Cadastro Add-on  
+**Plugin:** desi.pet by PRObst – Cadastro Add-on  
 **Versão Analisada:** 1.0.1  
 **Data da Análise:** 2024-12-12  
 **Analista:** Copilot Coding Agent  
@@ -32,7 +32,7 @@
 ### 1.1 Localização e Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-registration_addon/
+plugins/desi-pet-shower-registration/
 ├── desi-pet-shower-registration-addon.php   # Arquivo principal (737 linhas)
 ├── assets/
 │   └── css/
@@ -42,9 +42,9 @@ add-ons/desi-pet-shower-registration_addon/
 ```
 
 **Arquivos relacionados em outros diretórios:**
-- `plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php` (renderiza aba de configurações)
-- `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php` (consome hooks)
-- `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (usa `dps_registration_page_id`)
+- `plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php` (renderiza aba de configurações)
+- `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php` (consome hooks)
+- `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php` (usa `dps_registration_page_id`)
 
 ### 1.2 Classe Principal
 

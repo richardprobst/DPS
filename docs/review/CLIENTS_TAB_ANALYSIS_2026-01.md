@@ -16,7 +16,7 @@ Foi realizada uma verificação completa da aba CLIENTES do painel DPS, analisan
 
 **Severidade:** ALTA (afeta segurança)
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/templates/lists/clients-list.php`
+**Arquivo:** `plugins/desi-pet-shower-base/templates/lists/clients-list.php`
 
 **Problema:**
 ```php
@@ -37,8 +37,8 @@ $delete_url = add_query_arg( [ 'tab' => 'clientes', 'dps_delete' => 'client', 'i
 **Severidade:** ALTA (funcionalidade core não funcionava)
 
 **Arquivos afetados:**
-- `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
-- `plugin/desi-pet-shower-base_plugin/templates/frontend/clients-section.php`
+- `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
+- `plugins/desi-pet-shower-base/templates/frontend/clients-section.php`
 
 **Problema:**
 

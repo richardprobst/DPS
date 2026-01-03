@@ -299,14 +299,14 @@
 - `docs/review/STATS_ADDON_DEEP_ANALYSIS.md`
 - `docs/implementation/STATS_PHASE3B_IMPLEMENTATION_GUIDE.md`
 - `docs/implementation/STATS_COMPLETE_IMPLEMENTATION_SUMMARY.md` (this file)
-- `add-ons/desi-pet-shower-stats_addon/includes/class-dps-stats-cache-invalidator.php`
-- `add-ons/desi-pet-shower-stats_addon/assets/js/chart.min.js` (placeholder)
+- `plugins/desi-pet-shower-stats/includes/class-dps-stats-cache-invalidator.php`
+- `plugins/desi-pet-shower-stats/assets/js/chart.min.js` (placeholder)
 
 ### Modified
-- `add-ons/desi-pet-shower-stats_addon/desi-pet-shower-stats-addon.php` (version 1.1.0 → 1.4.0)
-- `add-ons/desi-pet-shower-stats_addon/includes/class-dps-stats-api.php` (5 new KPI methods)
-- `add-ons/desi-pet-shower-stats_addon/assets/css/stats-addon.css` (tooltip styles)
-- `add-ons/desi-pet-shower-stats_addon/README.md` (testing checklists)
+- `plugins/desi-pet-shower-stats/desi-pet-shower-stats-addon.php` (version 1.1.0 → 1.4.0)
+- `plugins/desi-pet-shower-stats/includes/class-dps-stats-api.php` (5 new KPI methods)
+- `plugins/desi-pet-shower-stats/assets/css/stats-addon.css` (tooltip styles)
+- `plugins/desi-pet-shower-stats/README.md` (testing checklists)
 
 ---
 

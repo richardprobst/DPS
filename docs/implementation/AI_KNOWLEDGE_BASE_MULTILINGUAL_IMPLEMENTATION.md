@@ -8,7 +8,7 @@
 
 ## RESUMO EXECUTIVO
 
-Esta implementação adiciona funcionalidade completa de **matching inteligente da base de conhecimento** e **suporte real a multiidioma** no AI Add-on do DPS by PRObst.
+Esta implementação adiciona funcionalidade completa de **matching inteligente da base de conhecimento** e **suporte real a multiidioma** no AI Add-on do desi.pet by PRObst.
 
 ### O que foi implementado:
 

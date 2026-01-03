@@ -2,15 +2,15 @@
 
 ## Resumo das Correções
 
-Este documento apresenta as correções de segurança implementadas no Finance Add-on do DPS by PRObst, conforme solicitado.
+Este documento apresenta as correções de segurança implementadas no Finance Add-on do desi.pet by PRObst, conforme solicitado.
 
 **Data da Revisão**: 2025-11-23  
 **Arquivos Modificados**:
-- `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`
+- `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
 
 **Arquivos Verificados (já estavam seguros)**:
-- `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-api.php` ✅
-- `add-ons/desi-pet-shower-finance_addon/includes/class-dps-finance-revenue-query.php` ✅
+- `plugins/desi-pet-shower-finance/includes/class-dps-finance-api.php` ✅
+- `plugins/desi-pet-shower-finance/includes/class-dps-finance-revenue-query.php` ✅
 
 ---
 

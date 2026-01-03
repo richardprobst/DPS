@@ -2,13 +2,13 @@
 
 ## O Que Foi Implementado
 
-Criei um sistema completo de assistente de IA para gerar sugestões de mensagens de WhatsApp e e-mail no DPS by PRObst, seguindo rigorosamente a regra de **NUNCA ENVIAR AUTOMATICAMENTE**.
+Criei um sistema completo de assistente de IA para gerar sugestões de mensagens de WhatsApp e e-mail no desi.pet by PRObst, seguindo rigorosamente a regra de **NUNCA ENVIAR AUTOMATICAMENTE**.
 
 ---
 
 ## 📋 1. Classe DPS_AI_Message_Assistant
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-message-assistant.php`
+**Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-message-assistant.php`
 
 ### Métodos Públicos
 
@@ -60,7 +60,7 @@ DPS_AI_Message_Assistant::suggest_email_message( array $context ): ?array
 
 ## 📡 2. Handlers AJAX
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php`
+**Arquivo:** `plugins/desi-pet-shower-ai/desi-pet-shower-ai-addon.php`
 
 ### Handler: wp_ajax_dps_ai_suggest_whatsapp_message
 
@@ -122,7 +122,7 @@ Mesma estrutura do WhatsApp, mas retorna:
 
 ## 💻 3. Interface JavaScript
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/assets/js/dps-ai-communications.js`
+**Arquivo:** `plugins/desi-pet-shower-ai/assets/js/dps-ai-communications.js`
 
 ### Uso: Sugestão de WhatsApp
 
@@ -197,7 +197,7 @@ Mesma estrutura do WhatsApp, mas retorna:
 
 ## 🎨 4. Estilos CSS
 
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/assets/css/dps-ai-communications.css`
+**Arquivo:** `plugins/desi-pet-shower-ai/assets/css/dps-ai-communications.css`
 
 - Modal de pré-visualização com overlay
 - Formulários editáveis dentro do modal
@@ -337,7 +337,7 @@ Usa mesmas configurações de `dps_ai_settings`:
 
 ### Teste 1: Com IA Ativada e API Key Válida
 
-1. Configure API key da OpenAI em "DPS by PRObst > Assistente de IA"
+1. Configure API key da OpenAI em "desi.pet by PRObst > Assistente de IA"
 2. Marque "Ativar Assistente de IA"
 3. Abra qualquer página com botões de sugestão
 4. Clique em "Sugerir com IA"

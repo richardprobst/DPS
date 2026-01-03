@@ -26,7 +26,7 @@
 ### 1.1 Estrutura de Arquivos
 
 ```
-add-ons/desi-pet-shower-stats_addon/
+plugins/desi-pet-shower-stats/
 ├── desi-pet-shower-stats-addon.php      403 linhas (bootstrapping + classe principal)
 ├── includes/
 │   └── class-dps-stats-api.php          750 linhas (API pública com 14 métodos estáticos)

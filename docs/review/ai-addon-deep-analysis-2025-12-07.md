@@ -1,4 +1,4 @@
-# Análise Profunda do AI Add-on - DPS by PRObst
+# Análise Profunda do AI Add-on - desi.pet by PRObst
 
 **Data:** 07/12/2024  
 **Versão Analisada:** 1.6.0  
@@ -26,7 +26,7 @@
 
 ### 1.1 Objetivo do Plugin/Add-on
 
-O **AI Add-on** implementa um assistente virtual inteligente alimentado pela API da OpenAI (GPT) no sistema DPS by PRObst.
+O **AI Add-on** implementa um assistente virtual inteligente alimentado pela API da OpenAI (GPT) no sistema desi.pet by PRObst.
 
 **Principais Funcionalidades:**
 
@@ -810,7 +810,7 @@ Interface para administrador "treinar" a IA com pares pergunta-resposta.
 
 **Nota Final: ⭐⭐⭐⭐½ (4.5/5)**
 
-O AI Add-on do DPS by PRObst demonstra **qualidade excelente** em termos de:
+O AI Add-on do desi.pet by PRObst demonstra **qualidade excelente** em termos de:
 - ✅ Segurança (5/5)
 - ✅ Arquitetura (4/5)
 - ✅ Funcionalidades (5/5)

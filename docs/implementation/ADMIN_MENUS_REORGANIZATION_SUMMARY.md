@@ -46,7 +46,7 @@
 ## ✅ FASE 2 – REORGANIZAÇÃO EM MÓDULOS COM ABAS (COMPLETA)
 
 ### 2.0 Helper Reutilizável Criado
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-admin-tabs-helper.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-admin-tabs-helper.php`
 
 **Funcionalidades:**
 - `render_nav_tabs()` - Renderiza navegação de abas padrão WordPress
@@ -56,7 +56,7 @@
 
 ### 2.1 Módulo: 📅 Agenda
 **Hub:** `DPS_Agenda_Hub` (slug: `dps-agenda-hub`)  
-**Arquivo:** `add-ons/desi-pet-shower-agenda_addon/includes/class-dps-agenda-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-hub.php`
 
 **Abas:**
 1. **Dashboard** - Métricas e gráficos operacionais
@@ -69,7 +69,7 @@
 
 ### 2.2 Módulo: 🤖 Assistente de IA
 **Hub:** `DPS_AI_Hub` (slug: `dps-ai-hub`)  
-**Arquivo:** `add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-ai/includes/class-dps-ai-hub.php`
 
 **Abas (7 funcionalidades consolidadas):**
 1. **Configurações** - API OpenAI, modelo GPT, prompts
@@ -91,7 +91,7 @@
 
 ### 2.3 Módulo: 👤 Portal do Cliente
 **Hub:** `DPS_Portal_Hub` (slug: `dps-portal-hub`)  
-**Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php`
 
 **Abas:**
 1. **Configurações** - Cores, logo, termos de uso
@@ -104,7 +104,7 @@
 
 ### 2.4 Módulo: 🔌 Integrações
 **Hub:** `DPS_Integrations_Hub` (slug: `dps-integrations-hub`)  
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-integrations-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-integrations-hub.php`
 
 **Abas (dinâmicas - aparecem conforme add-ons ativos):**
 1. **Comunicações** - WhatsApp, Email, templates
@@ -119,7 +119,7 @@
 ### 2.5 Módulo: 🎁 Fidelidade & Campanhas
 **Status:** JÁ EXISTIA COM ABAS  
 **Slug:** `dps-loyalty`  
-**Arquivo:** `add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php`
+**Arquivo:** `plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php`
 
 **Abas (mantidas):**
 1. **Dashboard** - Visão geral de pontos
@@ -131,7 +131,7 @@
 
 ### 2.6 Módulo: ⚙️ Sistema
 **Hub:** `DPS_System_Hub` (slug: `dps-system-hub`)  
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-system-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-system-hub.php`
 
 **Abas (dinâmicas - aparecem conforme add-ons ativos):**
 1. **Logs** - Visualização de logs do sistema (sempre disponível)
@@ -147,7 +147,7 @@
 
 ### 2.7 Módulo: 🛠️ Ferramentas
 **Hub:** `DPS_Tools_Hub` (slug: `dps-tools-hub`)  
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php`
 
 **Abas:**
 1. **Formulário de Cadastro** - Configuração da API do Google Maps para geolocalização
@@ -159,8 +159,8 @@
 
 ### 2.8 Módulo: 🏠 Painel Central (Dashboard)
 **Classe:** `DPS_Dashboard`  
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-dashboard.php`  
-**CSS:** `plugin/desi-pet-shower-base_plugin/assets/css/dashboard.css`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-dashboard.php`  
+**CSS:** `plugins/desi-pet-shower-base/assets/css/dashboard.css`
 
 **Funcionalidades Implementadas:**
 
@@ -201,8 +201,8 @@
 
 ### Antes da Reorganização
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst
 ├── Logs do Sistema
 ├── Dashboard (Agenda)
 ├── Configurações (Agenda)
@@ -235,8 +235,8 @@ Mensagens do Portal (CPT - fora da hierarquia)
 
 ### Depois da Reorganização
 ```
-DPS by PRObst (Menu Principal)
-├── DPS by PRObst (Painel Inicial)
+desi.pet by PRObst (Menu Principal)
+├── desi.pet by PRObst (Painel Inicial)
 ├── Agenda
 │   ├── [Dashboard]
 │   ├── [Configurações]
@@ -371,48 +371,48 @@ public function render_config_tab() {
 
 ### Arquivos Modificados (Commits)
 **Commit 1 - Fase 1:**
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-insights-dashboard.php
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-specialist-mode.php
-- add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php
-- add-ons/desi-pet-shower-loyalty_addon/desi-pet-shower-loyalty.php
-- add-ons/desi-pet-shower-push_addon/desi-pet-shower-push-addon.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-insights-dashboard.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-specialist-mode.php
+- plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php
+- plugins/desi-pet-shower-loyalty/desi-pet-shower-loyalty.php
+- plugins/desi-pet-shower-push/desi-pet-shower-push-addon.php
 
 **Commit 2 - AI Hub:**
-- add-ons/desi-pet-shower-ai_addon/desi-pet-shower-ai-addon.php
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-conversations-admin.php
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-admin.php
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-knowledge-base-tester.php
-- add-ons/desi-pet-shower-ai_addon/includes/class-dps-ai-hub.php (NOVO)
-- plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-admin-tabs-helper.php (NOVO)
+- plugins/desi-pet-shower-ai/desi-pet-shower-ai-addon.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-conversations-admin.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-knowledge-base-admin.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-knowledge-base-tester.php
+- plugins/desi-pet-shower-ai/includes/class-dps-ai-hub.php (NOVO)
+- plugins/desi-pet-shower-base/desi-pet-shower-base.php
+- plugins/desi-pet-shower-base/includes/class-dps-admin-tabs-helper.php (NOVO)
 
 **Commit 3 - Agenda e Portal Hubs:**
-- add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php
-- add-ons/desi-pet-shower-agenda_addon/includes/class-dps-agenda-hub.php (NOVO)
-- add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php
-- add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-hub.php (NOVO)
-- add-ons/desi-pet-shower-client-portal_addon/includes/client-portal/class-dps-portal-admin.php
+- plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php
+- plugins/desi-pet-shower-agenda/includes/class-dps-agenda-hub.php (NOVO)
+- plugins/desi-pet-shower-client-portal/desi-pet-shower-client-portal.php
+- plugins/desi-pet-shower-client-portal/includes/class-dps-portal-hub.php (NOVO)
+- plugins/desi-pet-shower-client-portal/includes/client-portal/class-dps-portal-admin.php
 
 **Commit 4 - Integrações e Sistema Hubs:**
-- add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php
+- plugins/desi-pet-shower-communications/desi-pet-shower-communications-addon.php
 - add-ons/desi-pet-shower-debugging_addon/desi-pet-shower-debugging-addon.php
-- add-ons/desi-pet-shower-payment_addon/desi-pet-shower-payment-addon.php
+- plugins/desi-pet-shower-payment/desi-pet-shower-payment-addon.php
 - add-ons/desi-pet-shower-whitelabel_addon/desi-pet-shower-whitelabel-addon.php
-- plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-logs-admin-page.php
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-integrations-hub.php (NOVO)
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-system-hub.php (NOVO)
+- plugins/desi-pet-shower-base/desi-pet-shower-base.php
+- plugins/desi-pet-shower-base/includes/class-dps-logs-admin-page.php
+- plugins/desi-pet-shower-base/includes/class-dps-integrations-hub.php (NOVO)
+- plugins/desi-pet-shower-base/includes/class-dps-system-hub.php (NOVO)
 
 **Commit 5 - Tools Hub:**
-- plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-tools-hub.php (NOVO)
-- add-ons/desi-pet-shower-registration_addon/desi-pet-shower-registration-addon.php
+- plugins/desi-pet-shower-base/desi-pet-shower-base.php
+- plugins/desi-pet-shower-base/includes/class-dps-tools-hub.php (NOVO)
+- plugins/desi-pet-shower-registration/desi-pet-shower-registration-addon.php
 - docs/implementation/ADMIN_MENUS_REORGANIZATION_SUMMARY.md (ATUALIZADO)
 
 **Commit 6 - Painel Central (Dashboard):**
-- plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php (integração com dashboard)
-- plugin/desi-pet-shower-base_plugin/includes/class-dps-dashboard.php (NOVO)
-- plugin/desi-pet-shower-base_plugin/assets/css/dashboard.css (NOVO)
+- plugins/desi-pet-shower-base/desi-pet-shower-base.php (integração com dashboard)
+- plugins/desi-pet-shower-base/includes/class-dps-dashboard.php (NOVO)
+- plugins/desi-pet-shower-base/assets/css/dashboard.css (NOVO)
 - docs/implementation/ADMIN_MENUS_REORGANIZATION_SUMMARY.md (ATUALIZADO)
 
 ---

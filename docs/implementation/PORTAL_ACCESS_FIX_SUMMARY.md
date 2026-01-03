@@ -141,7 +141,7 @@ endif;
 **Uso:**
 ```bash
 # Via WP-CLI
-wp eval-file add-ons/desi-pet-shower-client-portal_addon/test-portal-access.php
+wp eval-file plugins/desi-pet-shower-client-portal/test-portal-access.php
 
 # Via HTTP (admin only)
 https://seusite.com/?dps_test_portal=1
@@ -298,12 +298,12 @@ endif;
 ## Arquivos Modificados/Criados
 
 ### Modificados
-- ✅ `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php`
-- ✅ `add-ons/desi-pet-shower-client-portal_addon/templates/portal-access.php`
+- ✅ `plugins/desi-pet-shower-client-portal/desi-pet-shower-client-portal.php`
+- ✅ `plugins/desi-pet-shower-client-portal/templates/portal-access.php`
 - ✅ `CHANGELOG.md`
 
 ### Criados
-- ✅ `add-ons/desi-pet-shower-client-portal_addon/test-portal-access.php`
+- ✅ `plugins/desi-pet-shower-client-portal/test-portal-access.php`
 - ✅ `docs/fixes/PORTAL_ACCESS_TROUBLESHOOTING.md`
 - ✅ `docs/admin/PORTAL_ADMIN_GUIDE.md`
 
@@ -326,7 +326,7 @@ endif;
 
 ## Referências
 
-- **Documentação Técnica:** `add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md`
+- **Documentação Técnica:** `plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md`
 - **Troubleshooting:** `docs/fixes/PORTAL_ACCESS_TROUBLESHOOTING.md`
 - **Guia Admin:** `docs/admin/PORTAL_ADMIN_GUIDE.md`
 - **Análise Arquitetural:** `ANALYSIS.md` (seção Client Portal)

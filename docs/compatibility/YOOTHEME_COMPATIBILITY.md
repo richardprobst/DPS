@@ -207,7 +207,7 @@ Crie um template PHP específico para o DPS (veja "Método 3" acima) que não de
 ### Recursos Adicionais
 
 - [Documentação Principal do DPS](../../README.md)
-- [Guia de Shortcodes](../../plugin/desi-pet-shower-base_plugin/README.md#shortcodes)
+- [Guia de Shortcodes](../../plugins/desi-pet-shower-base/README.md#shortcodes)
 - [Documentação do YooTheme PRO](https://yootheme.com/support)
 
 ### Reportar Problemas

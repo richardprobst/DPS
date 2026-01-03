@@ -349,7 +349,7 @@ Rex <span class="dps-aggressive-flag" title="Pet agressivo - cuidado no manejo">
 
 ### 6.1 Antes (CSS inline)
 ```
-add-ons/desi-pet-shower-agenda_addon/
+plugins/desi-pet-shower-agenda/
 ├── desi-pet-shower-agenda-addon.php  (2376 linhas, 487 de CSS inline)
 ├── agenda-addon.js
 └── agenda.js
@@ -357,7 +357,7 @@ add-ons/desi-pet-shower-agenda_addon/
 
 ### 6.2 Depois (CSS separado)
 ```
-add-ons/desi-pet-shower-agenda_addon/
+plugins/desi-pet-shower-agenda/
 ├── desi-pet-shower-agenda-addon.php  (1889 linhas, sem CSS inline)
 ├── assets/
 │   ├── css/

@@ -1,9 +1,9 @@
-# DPS by PRObst — CHANGELOG
+# desi.pet by PRObst — CHANGELOG
 
 **Autor:** PRObst  
 **Site:** [www.probst.pro](https://www.probst.pro)
 
-Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do DPS by PRObst. Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
+Este documento registra, em ordem cronológica inversa, todas as alterações lançadas do desi.pet by PRObst. Mantenha-o sempre atualizado para que equipe, parceiros e clientes tenham clareza sobre evoluções, correções e impactos.
 
 ## Relação com outros documentos
 
@@ -81,6 +81,40 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Changed (Alterado)
+
+**Renomeação do Sistema - desi.pet by PRObst**
+
+- **Rebranding completo**: O sistema foi renomeado de "DPS by PRObst" para "desi.pet by PRObst" em todas as interfaces visíveis ao usuário.
+- **Plugin Names atualizados**: Todos os 16 plugins (1 base + 15 add-ons) tiveram seus headers "Plugin Name" atualizados para refletir o novo nome.
+- **Menu administrativo**: O menu principal do WordPress agora exibe "desi.pet by PRObst" em vez de "DPS by PRObst".
+- **Comunicações e e-mails**: Todos os templates de e-mail, mensagens do portal e notificações foram atualizados para usar o novo nome.
+- **Documentação**: README.md, AGENTS.md, ANALYSIS.md, CHANGELOG.md e toda a documentação em `/docs` foram atualizados.
+- **Prompts de IA**: System prompts do AI Add-on foram atualizados para refletir o novo nome do sistema.
+- **IMPORTANTE - Integridade mantida**: Para garantir a estabilidade do sistema, os seguintes elementos NÃO foram alterados:
+  - Slugs internos (ex: `desi-pet-shower`, `dps-*`)
+  - Prefixos de código (`dps_`, `DPS_`)
+  - Text domains para internacionalização
+  - Nomes de Custom Post Types e tabelas de banco de dados
+  - Hooks e filtros existentes
+
+**Reorganização de pastas para estrutura unificada**
+
+- **Nova estrutura**: Todos os plugins (base + 15 add-ons) foram movidos para uma única pasta `plugins/`:
+  - `plugin/desi-pet-shower-base_plugin/` → `plugins/desi-pet-shower-base/`
+  - `add-ons/desi-pet-shower-*_addon/` → `plugins/desi-pet-shower-*/`
+- **Benefícios**:
+  - Estrutura mais limpa e organizada
+  - Todos os 16 plugins em um único local identificável
+  - Nomenclatura simplificada (remoção dos sufixos `_addon` e `_plugin`)
+- **Atualizações realizadas**:
+  - GitHub Updater atualizado com novos caminhos
+  - Addon Manager atualizado com novos caminhos de arquivos
+  - Documentação (README.md, AGENTS.md, ANALYSIS.md) atualizada
+- **IMPORTANTE para instalações existentes**: Os plugins devem ser reinstalados a partir das novas pastas. O WordPress espera cada plugin em sua própria pasta em `wp-content/plugins/`, portanto:
+  - Copie cada pasta de `plugins/desi-pet-shower-*` para `wp-content/plugins/`
+  - Reative os plugins no painel do WordPress
+
 #### Added (Adicionado)
 
 **Client Portal Add-on (v2.4.3) - Auto-envio de Link de Acesso por E-mail**
@@ -109,7 +143,7 @@ Antes de criar uma nova versão oficial:
 
 **Base Plugin (v1.1.0) - Gerenciador de Add-ons**
 
-- **Gerenciador centralizado de add-ons**: Nova página administrativa (DPS by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
+- **Gerenciador centralizado de add-ons**: Nova página administrativa (desi.pet by PRObst → Add-ons) para visualizar, ativar e desativar add-ons do ecossistema DPS.
 - **Resolução automática de dependências**: Sistema ordena add-ons por suas dependências e ativa na ordem correta automaticamente.
 - **Visualização de ordem de ativação**: Painel exibe ordem recomendada de ativação baseada nas dependências de cada add-on.
 - **Ativação/desativação em lote**: Seleção múltipla de add-ons com ativação respeitando ordem de dependências.
@@ -185,7 +219,7 @@ Antes de criar uma nova versão oficial:
 
 **Push Add-on (v1.2.0) - Melhorias de Interface e Correções**
 
-- **Menu admin visível**: Menu agora registrado sob "DPS by PRObst > Notificações" (antes estava oculto).
+- **Menu admin visível**: Menu agora registrado sob "desi.pet by PRObst > Notificações" (antes estava oculto).
 - **Botões de teste de relatórios**: Botões "Enviar Teste" para cada tipo de relatório (Agenda, Financeiro, Semanal).
 - **Botão de teste de conexão Telegram**: Valida configuração e envia mensagem de teste.
 - **AJAX handlers**: Novos handlers `dps_push_test_report` e `dps_push_test_telegram` para testes via AJAX.
@@ -1073,7 +1107,7 @@ Antes de criar uma nova versão oficial:
     - Adicionada tradução onde a constante é usada para criar páginas (linha 443): `__( DPS_CLIENT_PORTAL_PAGE_TITLE, 'dps-client-portal' )`
     - Busca de páginas existentes usa título não traduzido para consistência entre idiomas
   - **Impacto**: Elimina avisos de carregamento prematuro de traduções nos logs; páginas criadas usam título traduzido conforme idioma do site
-  - **Arquivos Alterados**: `add-ons/desi-pet-shower-client-portal_addon/desi-pet-shower-client-portal.php`
+  - **Arquivos Alterados**: `plugins/desi-pet-shower-client-portal/desi-pet-shower-client-portal.php`
   - **Compatibilidade**: Mantida retrocompatibilidade - constante ainda existe e funciona normalmente
 - **AGENDA Add-on (v1.4.1)**: Correção de PHP Warning - Undefined array key "payment"
   - **Problema**: Avisos PHP "Undefined array key 'payment'" na linha 455 de `trait-dps-agenda-renderer.php`
@@ -1084,8 +1118,8 @@ Antes de criar uma nova versão oficial:
     - `desi-pet-shower-agenda-addon.php`: 6 ocorrências corrigidas nos cabeçalhos de tabela
   - **Impacto**: Elimina warnings PHP nos logs e previne erros futuros caso array incompleto seja passado
   - **Arquivos Alterados**: 
-    - `add-ons/desi-pet-shower-agenda_addon/includes/trait-dps-agenda-renderer.php`
-    - `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+    - `plugins/desi-pet-shower-agenda/includes/trait-dps-agenda-renderer.php`
+    - `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Client Portal Add-on (v2.4.1)**: Correção Crítica no Login por Token
   - **Problema**: Links de acesso mágico (magic links) redirecionavam para tela de login mesmo com token válido
   - **Causa Raiz**: Sintaxe incorreta do `setcookie()` com array associativo (incompatível com PHP 7.3+)
@@ -1096,8 +1130,8 @@ Antes de criar uma nova versão oficial:
     - Removidas chamadas deprecadas a `maybe_start_session()` que não faziam nada
   - **Impacto**: Clientes agora conseguem acessar o portal via magic link sem serem redirecionados para login
   - **Arquivos Alterados**:
-    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-portal-session-manager.php`
-    - `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+    - `plugins/desi-pet-shower-client-portal/includes/class-dps-portal-session-manager.php`
+    - `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
   - **Commit**: Corrigir sintaxe setcookie() e ordem de execução de hooks
 - **AI Add-on (v1.6.1)**: Tabelas de Banco de Dados Não Criadas em Atualizações
   - **Problema**: Usuários que atualizaram de v1.4.0 para v1.5.0+ sem desativar/reativar o plugin não tinham as tabelas `wp_dps_ai_metrics` e `wp_dps_ai_feedback` criadas, causando erros na página de analytics
@@ -1336,7 +1370,7 @@ Antes de criar uma nova versão oficial:
     - Mudanças de status (`dps_appointment_status_changed`)
     - Reagendamentos (`dps_appointment_rescheduled`)
   - **Interface administrativa**:
-    - Página de configurações em DPS by PRObst > Push Notifications
+    - Página de configurações em desi.pet by PRObst > Push Notifications
     - Indicador de status com cores (inscrito/não inscrito/negado)
     - Botão para ativar notificações no navegador atual
     - Botão para enviar notificação de teste
@@ -1605,7 +1639,7 @@ Antes de criar uma nova versão oficial:
   - Constante padrão `TEAM_PHONE = '5515991606299'` (+55 15 99160-6299)
 - **Configuração de WhatsApp**: Campo "Número do WhatsApp da Equipe" nas configurações de Comunicações
   - Option `dps_whatsapp_number` para armazenar número da equipe (padrão: +55 15 99160-6299)
-  - Número configurável centralmente em Admin → DPS by PRObst → Comunicações
+  - Número configurável centralmente em Admin → desi.pet by PRObst → Comunicações
   - Suporte a filtro `dps_team_whatsapp_number` para customização programática
 - **Plugin Base**: Nova opção "Agendamento Passado" no formulário de agendamentos
   - Adicionada terceira opção de tipo de agendamento para registrar atendimentos já realizados
@@ -1618,7 +1652,7 @@ Antes de criar uma nova versão oficial:
   - TaxiDog e Tosa ocultados automaticamente para agendamentos passados (não aplicável)
   - **Impacto**: Permite registrar no sistema atendimentos realizados anteriormente e controlar pagamentos pendentes
 - **Client Portal Add-on (v2.2.0)**: Menu administrativo e tokens permanentes
-  - Adicionado menu "Portal do Cliente" sob "DPS by PRObst" com dois submenus:
+  - Adicionado menu "Portal do Cliente" sob "desi.pet by PRObst" com dois submenus:
     - "Portal do Cliente": configurações gerais do portal
     - "Logins de Clientes": gerenciamento de tokens de acesso
   - Implementado suporte a tokens permanentes (válidos até revogação manual)
@@ -1759,15 +1793,15 @@ Antes de criar uma nova versão oficial:
   - Atualizada mensagem de erro de login para refletir que não apenas administradores podem acessar
   - Adicionada documentação explicando modelo de permissões: painel visível para qualquer capability DPS, mas ações protegidas individualmente
 - **Menus Administrativos**: Corrigido registro de menus em add-ons
-  - Backup Add-on: submenu agora aparece corretamente sob "DPS by PRObst" (corrigida ordem de carregamento)
-  - Loyalty Add-on: menus agora aparecem sob "DPS by PRObst" em vez de criar menu próprio separado
-  - Logs do Sistema: migrado de menu separado para submenu sob "DPS by PRObst" (melhor organização)
-  - Mensagens do Portal: migrado de menu separado para submenu sob "DPS by PRObst" (CPT com show_in_menu)
+  - Backup Add-on: submenu agora aparece corretamente sob "desi.pet by PRObst" (corrigida ordem de carregamento)
+  - Loyalty Add-on: menus agora aparecem sob "desi.pet by PRObst" em vez de criar menu próprio separado
+  - Logs do Sistema: migrado de menu separado para submenu sob "desi.pet by PRObst" (melhor organização)
+  - Mensagens do Portal: migrado de menu separado para submenu sob "desi.pet by PRObst" (CPT com show_in_menu)
   - Cadastro Público renomeado para "Formulário de Cadastro" (nome mais intuitivo)
   - Todos os add-ons com menus agora usam prioridade 20 no hook `admin_menu` para garantir que o menu pai já existe
   - Estrutura de menus documentada em `ANALYSIS.md` na seção "Estrutura de Menus Administrativos"
   - Adicionadas diretrizes de nomenclatura para melhorar usabilidade (nomes descritivos, sem prefixos redundantes)
-  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "DPS by PRObst" para facilitar gerenciamento
+  - **Impacto**: Todos os menus e submenus agora estão agrupados no mesmo menu principal "desi.pet by PRObst" para facilitar gerenciamento
 - **Formulário de Agendamentos**: Melhorias de responsividade para telas pequenas
   - Corrigido overflow horizontal em mobile e tablet (adicionado `overflow-x: hidden` em `.dps-form`)
   - Ajustado tamanho de inputs e selects para mobile (`padding: 8px` em ≤768px, `10px 8px` em ≤480px)
@@ -1865,8 +1899,8 @@ Antes de criar uma nova versão oficial:
   - Interface JavaScript com botões de sugestão e modal de pré-visualização para e-mails
   - Suporta 6 tipos de mensagens: lembrete, confirmação, pós-atendimento, cobrança suave, cancelamento, reagendamento
   - **IMPORTANTE**: IA NUNCA envia automaticamente - apenas gera sugestões que o usuário revisa antes de enviar
-  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/AI_COMMUNICATIONS.md`
-  - Exemplos de integração em `add-ons/desi-pet-shower-ai_addon/includes/ai-communications-examples.php`
+  - Documentação completa em `plugins/desi-pet-shower-ai/AI_COMMUNICATIONS.md`
+  - Exemplos de integração em `plugins/desi-pet-shower-ai/includes/ai-communications-examples.php`
 - **Services Add-on**: Nova API pública (`DPS_Services_API`) para centralizar lógica de serviços e cálculo de preços (v1.2.0)
   - `DPS_Services_API::get_service($service_id)` - Retornar dados completos de um serviço
   - `DPS_Services_API::calculate_price($service_id, $pet_size, $context)` - Calcular preço por porte do pet
@@ -1919,7 +1953,7 @@ Antes de criar uma nova versão oficial:
   - Endpoint AJAX `dps_ai_portal_ask` com validação de nonce e cliente logado
   - Interface administrativa para configuração (API key, modelo, temperatura, timeout, max_tokens)
   - Sistema autocontido: falhas não afetam funcionamento do Portal
-  - Documentação completa em `add-ons/desi-pet-shower-ai_addon/README.md`
+  - Documentação completa em `plugins/desi-pet-shower-ai/README.md`
 - **Client Portal Add-on**: Novo hook `dps_client_portal_after_content` para permitir add-ons adicionarem conteúdo ao final do portal (usado pelo AI Add-on)
   - `docs/layout/admin/ADMIN_LAYOUT_ANALYSIS.md`: análise detalhada de usabilidade e layout das telas administrativas
   - `docs/visual/VISUAL_STYLE_GUIDE.md`: guia oficial de estilo visual minimalista
@@ -2070,7 +2104,7 @@ Antes de criar uma nova versão oficial:
   - **Causa raiz**: Verificação `class_exists('DPS_Finance_API')` no construtor executava antes do Finance carregar (ordem alfabética de plugins)
   - **Solução**: Movida verificação do construtor para hook `plugins_loaded` (novo método `check_finance_dependency()`)
   - **Impacto**: Aviso agora aparece apenas quando Finance realmente não está ativo
-  - **Arquivo alterado**: `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+  - **Arquivo alterado**: `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
 - **Plugin Base**: Corrigido erro "Falha ao atualizar. A resposta não é um JSON válido" ao inserir shortcode `[dps_base]` no Block Editor
   - **Causa raiz**: Método `render_app()` processava logout e POST requests ANTES de iniciar output buffering (`ob_start()`)
   - **Sintoma**: Block Editor falhava ao validar shortcode porque redirects/exits causavam conflito com resposta JSON esperada
@@ -2078,15 +2112,15 @@ Antes de criar uma nova versão oficial:
   - **Solução**: Removida chamada redundante a `handle_request()` dentro de `render_app()` (já processado via `init`)
   - **Impacto**: Shortcode `[dps_base]` agora é método puro de renderização sem side-effects, compatível com Block Editor
   - **Arquivos alterados**: 
-    - `plugin/desi-pet-shower-base_plugin/desi-pet-shower-base.php` (adicionado logout ao `maybe_handle_request()`)
-    - `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php` (novo método `handle_logout()`, `render_app()` simplificado)
+    - `plugins/desi-pet-shower-base/desi-pet-shower-base.php` (adicionado logout ao `maybe_handle_request()`)
+    - `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` (novo método `handle_logout()`, `render_app()` simplificado)
   - **Verificação**: Todos os outros shortcodes (`[dps_agenda_page]`, `[dps_client_portal]`, `[dps_registration_form]`, etc.) já seguem o padrão correto
 - **Client Portal Add-on**: Corrigido problema de layout onde o card "Portal do Cliente" aparecia antes do cabeçalho do tema
   - **Causa raiz**: Método `render_portal_shortcode()` estava chamando `ob_end_clean()` seguido de `include`, causando output direto em vez de retornar HTML via shortcode
   - **Sintoma**: Card do portal aparecia ANTES do menu principal do tema YOOtheme, como se estivesse "encaixado no header"
   - **Solução**: Substituído `ob_end_clean() + include + return ''` por `ob_start() + include + return ob_get_clean()`
   - **Impacto**: Portal agora renderiza corretamente DENTRO da área de conteúdo da página, respeitando header/footer do tema
-  - **Arquivos alterados**: `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php` (linhas 710-723)
+  - **Arquivos alterados**: `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php` (linhas 710-723)
 - **Groomers Add-on**: Corrigido fatal error ao renderizar seção no front-end via shortcode [dps_base]
   - Problema: função `add_settings_error()` só existe no contexto admin (wp-admin)
   - Solução: adicionada verificação `function_exists('add_settings_error')` antes de todas as chamadas

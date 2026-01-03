@@ -1,10 +1,10 @@
-# Análise de Refatoração do Código - DPS by PRObst
+# Análise de Refatoração do Código - desi.pet by PRObst
 
 ## Data: 2025-11-21
 
 ## Sumário Executivo
 
-Este documento apresenta uma análise detalhada do código do projeto DPS by PRObst, identificando:
+Este documento apresenta uma análise detalhada do código do projeto desi.pet by PRObst, identificando:
 1. Funções muito grandes ou complexas
 2. Nomes de funções, métodos e variáveis pouco descritivos
 3. Trechos duplicados que poderiam virar funções reutilizáveis
@@ -17,7 +17,7 @@ Para cada caso, são sugeridas versões mais claras, com nomes melhores e, quand
 
 ### 1.1. `DPS_Base_Frontend::save_appointment()` - 383 linhas
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php:1898-2280`
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php:1898-2280`
 
 **Problemas:**
 - Responsabilidade múltipla: validação, sanitização, cálculos, criação de posts, atualização de metadados
@@ -186,7 +186,7 @@ private static function save_simple_or_update_appointment( $data ) {
 
 ### 1.2. `DPS_Base_Frontend::render_client_page()` - 279 linhas
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php:2330-2608`
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php:2330-2608`
 
 **Problemas:**
 - Mistura lógica de consulta de dados com renderização HTML
@@ -401,7 +401,7 @@ private static function render_client_appointments_section( $client_id, $appoint
 
 ### 1.3. `DPS_Base_Frontend::section_agendas()` - 264 linhas
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php:1019-1282`
+**Localização:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php:1019-1282`
 
 **Problemas:**
 - Mistura renderização de formulário com listagem
@@ -1115,7 +1115,7 @@ if ( $status === DPS_Appointment_Status::FINISHED ) { }
 
 ## Conclusão
 
-Este documento identificou oportunidades significativas de melhoria no código do projeto DPS by PRObst. As refatorações propostas:
+Este documento identificou oportunidades significativas de melhoria no código do projeto desi.pet by PRObst. As refatorações propostas:
 
 1. **Reduzem a complexidade** de funções muito grandes
 2. **Melhoram a legibilidade** com nomes mais descritivos

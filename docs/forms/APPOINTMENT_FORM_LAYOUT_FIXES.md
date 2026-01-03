@@ -374,7 +374,7 @@ $('#appointment_notes').on('input', this.updateAppointmentSummary.bind(this));
 
 ### 1. CSS Principal
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css`
+**Arquivo:** `plugins/desi-pet-shower-base/assets/css/dps-base.css`
 
 **Mudanças:**
 
@@ -437,7 +437,7 @@ $('#appointment_notes').on('input', this.updateAppointmentSummary.bind(this));
 
 ### 2. HTML do Formulário
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/includes/class-dps-base-frontend.php`
+**Arquivo:** `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php`
 
 **Linha 1386 - Input de Tosa:**
 ```php
@@ -467,7 +467,7 @@ echo '<li class="dps-appointment-summary__notes" style="display:none;"><strong>'
 
 ### 3. JavaScript do Formulário
 
-**Arquivo:** `plugin/desi-pet-shower-base_plugin/assets/js/dps-appointment-form.js`
+**Arquivo:** `plugins/desi-pet-shower-base/assets/js/dps-appointment-form.js`
 
 **Linha 44 - Evento de Input:**
 ```javascript

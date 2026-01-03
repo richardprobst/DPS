@@ -1,0 +1,361 @@
+# Copyright (C) 2025 PRObst
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: desi.pet by PRObst - Agenda Add-on 1.0.1\n"
+"Report-Msgid-Bugs-To: https://www.probst.pro\n"
+"POT-Creation-Date: 2025-12-03 17:30+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Copilot\n"
+"X-Domain: dps-agenda-addon\n"
+
+#: desi-pet-shower-agenda-addon.php
+msgid "O add-on Agenda requer o plugin base desi.pet by PRObst para funcionar."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Agenda de Atendimentos"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cobranças e Notas"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Agenda Add-on:"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "O Finance Add-on é recomendado para funcionalidade completa de cobranças. Algumas funcionalidades financeiras podem não estar disponíveis."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Pendente"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Finalizado"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Finalizado e pago"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cancelado"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Atualizando status..."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Status atualizado!"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Não foi possível atualizar o status."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Você precisa estar logado como administrador para acessar a agenda."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Fazer login"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver semana anterior"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver dia anterior"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Anterior"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver agendamentos de hoje"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Hoje"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver próxima semana"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver próximo dia"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Próximo"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver lista diária"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Dia"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver lista semanal"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Semana"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver todos os agendamentos"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Todos"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Criar novo agendamento"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Novo Agendamento"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Selecione a data"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cliente"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Status"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Serviço"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Filtrar por cliente"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Filtrar por status do agendamento"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Filtrar por serviço"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Aplicar filtros"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Limpar filtros"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Todos os status"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Todos os Atendimentos"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Agendamentos do dia"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Data"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Hora"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Pet (Cliente)"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Mapa"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Confirmação"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cobrança"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "atendimento pendente"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "atendimentos pendentes"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "atendimento finalizado"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "atendimentos finalizados"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "agendamentos no total"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Próximos Atendimentos"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Atendimentos Finalizados"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Nenhum agendamento."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Página %d"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Página anterior"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Próxima página"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Pet agressivo - cuidado no manejo"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Assinatura"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver detalhes dos serviços"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Ver serviços"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Alterar status do agendamento"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "TaxiDog"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Confirmar"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Enviar mensagem de confirmação via WhatsApp"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cobrar"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Enviar cobrança via WhatsApp"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Cobrança conjunta"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Enviar cobrança conjunta via WhatsApp"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Atenção:"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Este shortcode foi movido para o Finance Add-on. Por favor, use [dps_fin_docs] ou ative o Finance Add-on."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Permissão negada."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Falha na verificação de segurança."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Dados inválidos."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "ID inválido."
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "Lembrete de agendamento para %s"
+msgstr ""
+
+#: desi-pet-shower-agenda-addon.php
+msgid "seu pet"
+msgstr ""
+
+#: assets/js/services-modal.js
+msgid "Serviços do Agendamento"
+msgstr ""
+
+#: assets/js/services-modal.js
+msgid "Nenhum serviço encontrado"
+msgstr ""
+
+#: assets/js/services-modal.js
+msgid "Fechar modal"
+msgstr ""
+
+#: assets/js/services-modal.js
+msgid "Total"
+msgstr ""
+
+#: assets/js/services-modal.js
+msgid "Fechar"
+msgstr ""

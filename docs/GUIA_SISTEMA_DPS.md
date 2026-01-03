@@ -1,4 +1,4 @@
-# 🐾 Guia Completo do Sistema DPS by PRObst
+# 🐾 Guia Completo do Sistema desi.pet by PRObst
 
 <div align="center">
 
@@ -86,7 +86,7 @@
 
 ### O que é o DPS?
 
-O **DPS by PRObst (DPS)** é um sistema completo de gestão desenvolvido especificamente para pet shops especializados em serviços de banho e tosa. Construído como uma extensão modular do WordPress, o DPS oferece todas as ferramentas necessárias para gerenciar clientes, pets, agendamentos, finanças e comunicações em um único lugar.
+O **desi.pet by PRObst (DPS)** é um sistema completo de gestão desenvolvido especificamente para pet shops especializados em serviços de banho e tosa. Construído como uma extensão modular do WordPress, o DPS oferece todas as ferramentas necessárias para gerenciar clientes, pets, agendamentos, finanças e comunicações em um único lugar.
 
 ### Principais Funcionalidades
 
@@ -227,7 +227,7 @@ O plugin base é **obrigatório** e deve ser instalado primeiro.
 
 **Passo 3: Verificação**
 - Acesse o painel WordPress
-- Você verá o menu **DPS by PRObst** na barra lateral
+- Você verá o menu **desi.pet by PRObst** na barra lateral
 - Se aparecer, a instalação foi bem-sucedida!
 
 ### Instalação dos Add-ons
@@ -267,7 +267,7 @@ Para evitar problemas de dependência, siga esta ordem:
 
 Após instalar todos os componentes desejados:
 
-1. Acesse **DPS by PRObst** no menu lateral
+1. Acesse **desi.pet by PRObst** no menu lateral
 2. Verifique se todos os submenus dos add-ons aparecem
 3. Crie uma página de teste com o shortcode `[dps_base]`
 4. Acesse a página e confirme que o painel é exibido corretamente
@@ -372,7 +372,7 @@ O sistema possui capabilities personalizadas:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Agenda > Configurações**
+1. Acesse **desi.pet by PRObst > Agenda > Configurações**
 2. Configure:
    - **Horário de funcionamento**: início e fim do expediente
    - **Intervalo entre agendamentos**: tempo mínimo entre atendimentos
@@ -483,7 +483,7 @@ A interface de lista de agendamentos foi reorganizada em **3 abas especializadas
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Pagamentos**
+1. Acesse **desi.pet by PRObst > Pagamentos**
 2. Configure as credenciais:
 
 | Campo | Onde Obter |
@@ -554,7 +554,7 @@ O add-on agora registra detalhadamente todos os erros de geração de link de pa
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Comunicações**
+1. Acesse **desi.pet by PRObst > Comunicações**
 2. Configure cada canal:
 
 **WhatsApp:**
@@ -607,7 +607,7 @@ Todos os envios de mensagens são processados pela `DPS_Communications_API`, gar
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Portal do Cliente > Configurações**
+1. Acesse **desi.pet by PRObst > Portal do Cliente > Configurações**
 2. Configure:
 
 | Opção | Descrição |
@@ -629,7 +629,7 @@ O portal usa "magic links" em vez de senhas:
 4. Tokens podem ser temporários (30min) ou permanentes (até revogação)
 
 **Gerenciamento de Acessos:**
-- Acesse **DPS by PRObst > Portal do Cliente > Logins**
+- Acesse **desi.pet by PRObst > Portal do Cliente > Logins**
 - Gere tokens, revogue acessos, visualize histórico
 
 **🆕 Funcionalidades Avançadas (v2.4.0+):**
@@ -682,7 +682,7 @@ O portal usa "magic links" em vez de senhas:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Assistente de IA > Configurações**
+1. Acesse **desi.pet by PRObst > Assistente de IA > Configurações**
 2. Configure:
 
 | Campo | Descrição | Recomendação |
@@ -790,7 +790,7 @@ A IA responde APENAS sobre:
    [dps_registration_form]
    ```
 
-2. Configure em **DPS by PRObst > Cadastro Público**:
+2. Configure em **desi.pet by PRObst > Cadastro Público**:
 
 | Opção | Descrição |
 |-------|-----------|
@@ -815,7 +815,7 @@ A IA responde APENAS sobre:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Campanhas & Fidelidade**
+1. Acesse **desi.pet by PRObst > Campanhas & Fidelidade**
 2. Configure o programa de pontos:
 
 | Opção | Descrição | Exemplo |
@@ -842,7 +842,7 @@ A IA responde APENAS sobre:
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Notificações**
+1. Acesse **desi.pet by PRObst > Notificações**
 2. Configure canais:
 
 **Telegram:**
@@ -985,7 +985,7 @@ O groomer possui um portal exclusivo para acompanhar sua agenda e desempenho:
 **Funcionalidades:**
 
 **Exportação:**
-1. Acesse **DPS by PRObst > Backup & Restauração**
+1. Acesse **desi.pet by PRObst > Backup & Restauração**
 2. Clique em **Exportar Dados**
 3. Sistema gera arquivo JSON com todos os dados:
    - Clientes
@@ -1015,7 +1015,7 @@ Este add-on é essencial para desenvolvedores e administradores que precisam dia
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > Debugging**
+1. Acesse **desi.pet by PRObst > Debugging**
 2. Configure as constantes de debug:
 
 | Constante | Descrição | Padrão |
@@ -1048,16 +1048,16 @@ Este add-on é essencial para desenvolvedores e administradores que precisam dia
 
 **Propósito:** Personalizar o sistema DPS com sua própria marca, cores e identidade visual
 
-Este add-on permite que parceiros e revendedores personalizem completamente o sistema, substituindo a marca "DPS by PRObst" pela marca do cliente ou empresa.
+Este add-on permite que parceiros e revendedores personalizem completamente o sistema, substituindo a marca "desi.pet by PRObst" pela marca do cliente ou empresa.
 
 **Configuração:**
 
-1. Acesse **DPS by PRObst > White Label**
+1. Acesse **desi.pet by PRObst > White Label**
 2. Configure a identidade visual:
 
 | Campo | Descrição |
 |-------|-----------|
-| Nome da Marca | Substitui "DPS by PRObst" em todo o sistema |
+| Nome da Marca | Substitui "desi.pet by PRObst" em todo o sistema |
 | Tagline/Slogan | Texto de apresentação personalizado |
 | Logo | URL do logo personalizado (usa biblioteca de mídia) |
 | Favicon | Ícone personalizado para abas do navegador |
@@ -1127,12 +1127,12 @@ Os menus administrativos do DPS foram reorganizados de 21 itens espalhados para 
 
 **Módulos Principais:**
 
-1. **📅 Agenda** (`DPS by PRObst > Agenda`)
+1. **📅 Agenda** (`desi.pet by PRObst > Agenda`)
    - Aba: Dashboard - Métricas e gráficos operacionais
    - Aba: Configurações - Horários, capacidade, regras
    - Aba: Capacidade - Gestão de capacidade (futuro)
 
-2. **🤖 Assistente de IA** (`DPS by PRObst > Assistente de IA`)
+2. **🤖 Assistente de IA** (`desi.pet by PRObst > Assistente de IA`)
    - Aba: Configurações - API OpenAI, modelo GPT, prompts
    - Aba: Analytics - Métricas de uso da IA
    - Aba: Conversas - Histórico completo de conversas
@@ -1141,21 +1141,21 @@ Os menus administrativos do DPS foram reorganizados de 21 itens espalhados para 
    - Aba: Modo Especialista - Chat interno para admin
    - Aba: Insights - Dashboard de insights
 
-3. **👤 Portal do Cliente** (`DPS by PRObst > Portal do Cliente`)
+3. **👤 Portal do Cliente** (`desi.pet by PRObst > Portal do Cliente`)
    - Aba: Configurações - Cores, logo, branding
    - Aba: Logins - Credenciais de acesso
    - Aba: Mensagens - Mensagens do portal (integração com CPT)
 
-4. **🎁 Fidelidade & Campanhas** (`DPS by PRObst > Fidelidade & Campanhas`)
+4. **🎁 Fidelidade & Campanhas** (`desi.pet by PRObst > Fidelidade & Campanhas`)
    - Aba: Fidelidade - Programa de pontos
    - Aba: Campanhas - Gerenciamento de campanhas
 
-5. **🔧 Sistema** (`DPS by PRObst > Sistema`)
+5. **🔧 Sistema** (`desi.pet by PRObst > Sistema`)
    - Aba: Dashboard - Visão geral do sistema
    - Aba: Logs - Visualizar logs de sistema
    - Aba: Integrações - Status de integrações
 
-6. **🛠️ Ferramentas** (`DPS by PRObst > Ferramentas`)
+6. **🛠️ Ferramentas** (`desi.pet by PRObst > Ferramentas`)
    - Aba: Backup & Restauração
    - Aba: Debugging - Constantes de debug e visualizador de logs
 
@@ -1345,7 +1345,7 @@ O sistema suporta três tipos de agendamento:
 // Exemplo de uso do DPS_WhatsApp_Helper
 $url = DPS_WhatsApp_Helper::get_link_to_client(
     $client_phone,
-    "Olá! Aqui é da DPS by PRObst..."
+    "Olá! Aqui é da desi.pet by PRObst..."
 );
 ```
 
@@ -1361,7 +1361,7 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 3. Configure backup semanal dos arquivos
 
 **Backup Manual (DPS):**
-1. Acesse **DPS by PRObst > Backup**
+1. Acesse **desi.pet by PRObst > Backup**
 2. Clique em **Exportar Todos os Dados**
 3. Salve o arquivo JSON em local seguro
 4. Faça isso ANTES de atualizações
@@ -1604,8 +1604,8 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 - [Responsividade Geral](layout/RESPONSIVENESS_ANALYSIS.md) - Análise completa de responsividade
 
 ### Configuração de Integrações
-- [Configuração de Webhook](../add-ons/desi-pet-shower-payment_addon/WEBHOOK_CONFIGURATION.md) - Mercado Pago
-- [Sistema de Tokens](../add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md) - Autenticação do portal
+- [Configuração de Webhook](../plugins/desi-pet-shower-payment/WEBHOOK_CONFIGURATION.md) - Mercado Pago
+- [Sistema de Tokens](../plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md) - Autenticação do portal
 - [Compatibilidade YooTheme](compatibility/YOOTHEME_COMPATIBILITY.md) - Page builder YooTheme
 - [Guia de Shortcodes no Editor](compatibility/EDITOR_SHORTCODE_GUIDE.md) - Como inserir shortcodes corretamente
 
@@ -1618,7 +1618,7 @@ $url = DPS_WhatsApp_Helper::get_link_to_client(
 
 <div align="center">
 
-**DPS by PRObst** - Sistema completo de gestão para pet shops
+**desi.pet by PRObst** - Sistema completo de gestão para pet shops
 
 *Desenvolvido com 💜 para facilitar o dia a dia do seu pet shop*
 

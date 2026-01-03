@@ -11,7 +11,7 @@ Separar HTML de lógica no arquivo `class-dps-base-frontend.php` sem alterar com
 ## Estrutura de Templates Criada
 
 ```
-plugin/desi-pet-shower-base_plugin/templates/
+plugins/desi-pet-shower-base/templates/
 ├── appointments-list.php (já existia)
 ├── forms/
 │   └── client-form.php (NOVO - 194 linhas)

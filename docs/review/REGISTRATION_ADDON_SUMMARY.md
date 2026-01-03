@@ -1,6 +1,6 @@
 # Resumo Executivo — Add-on Registration (Cadastro Público)
 
-**Plugin:** DPS by PRObst – Cadastro Add-on  
+**Plugin:** desi.pet by PRObst – Cadastro Add-on  
 **Versão Analisada:** 1.0.1  
 **Data da Análise:** 2024-12-12  
 **Analista:** Copilot Coding Agent  

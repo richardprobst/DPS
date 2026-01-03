@@ -1,4 +1,4 @@
-# Análise Profunda do Add-on Client Portal - DPS by PRObst
+# Análise Profunda do Add-on Client Portal - desi.pet by PRObst
 
 **Autor:** Análise Técnica Automatizada  
 **Data:** 06 de dezembro de 2024  
@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-O **Client Portal Add-on** é uma extensão robusta do sistema DPS by PRObst que fornece uma área autenticada completa para clientes do pet shop. Permite consultar histórico de atendimentos, visualizar galeria de fotos, verificar pendências financeiras e atualizar dados cadastrais de forma autônoma.
+O **Client Portal Add-on** é uma extensão robusta do sistema desi.pet by PRObst que fornece uma área autenticada completa para clientes do pet shop. Permite consultar histórico de atendimentos, visualizar galeria de fotos, verificar pendências financeiras e atualizar dados cadastrais de forma autônoma.
 
 **Principais Características:**
 - ✅ Sistema moderno de autenticação via magic links (tokens únicos)
@@ -1815,7 +1815,7 @@ function dps_generate_ical( $appointment_id ) {
     
     $ical  = "BEGIN:VCALENDAR\r\n";
     $ical .= "VERSION:2.0\r\n";
-    $ical .= "PRODID:-//DPS by PRObst//NONSGML v1.0//EN\r\n";
+    $ical .= "PRODID:-//desi.pet by PRObst//NONSGML v1.0//EN\r\n";
     $ical .= "BEGIN:VEVENT\r\n";
     $ical .= "UID:" . $appointment_id . "@dpsbyprobst.com\r\n";
     $ical .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";

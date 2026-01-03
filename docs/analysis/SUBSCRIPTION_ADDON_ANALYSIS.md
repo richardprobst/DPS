@@ -2,7 +2,7 @@
 
 **Versão analisada**: 1.0.0  
 **Data da análise**: 02/12/2024  
-**Diretório**: `add-ons/desi-pet-shower-subscription_addon`
+**Diretório**: `plugins/desi-pet-shower-subscription`
 
 ---
 
@@ -46,7 +46,7 @@ O Add-on de Assinaturas permite gerenciar pacotes mensais de banho e tosa com fr
 
 ### Estrutura Atual
 ```
-add-ons/desi-pet-shower-subscription_addon/
+plugins/desi-pet-shower-subscription/
 ├── desi-pet-shower-subscription.php          # Wrapper principal (52 linhas)
 ├── dps_subscription/
 │   └── desi-pet-shower-subscription-addon.php # Toda lógica (995 linhas)
@@ -65,7 +65,7 @@ add-ons/desi-pet-shower-subscription_addon/
 
 ### Estrutura Recomendada
 ```
-add-ons/desi-pet-shower-subscription_addon/
+plugins/desi-pet-shower-subscription/
 ├── desi-pet-shower-subscription.php          # Wrapper (bootstrapping)
 ├── includes/
 │   ├── class-dps-subscription-cpt.php        # Registro do CPT

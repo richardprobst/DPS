@@ -244,9 +244,9 @@ Total de Linhas: ~4.500 (todos os arquivos)
 ## Links Úteis
 
 - **Análise Completa:** [CLIENT_PORTAL_COMPREHENSIVE_ANALYSIS.md](./CLIENT_PORTAL_COMPREHENSIVE_ANALYSIS.md) (2249 linhas)
-- **Código Fonte:** `add-ons/desi-pet-shower-client-portal_addon/`
-- **Documentação Oficial:** `add-ons/desi-pet-shower-client-portal_addon/README.md`
-- **Sistema de Tokens:** `add-ons/desi-pet-shower-client-portal_addon/TOKEN_AUTH_SYSTEM.md`
+- **Código Fonte:** `plugins/desi-pet-shower-client-portal/`
+- **Documentação Oficial:** `plugins/desi-pet-shower-client-portal/README.md`
+- **Sistema de Tokens:** `plugins/desi-pet-shower-client-portal/TOKEN_AUTH_SYSTEM.md`
 
 ---
 

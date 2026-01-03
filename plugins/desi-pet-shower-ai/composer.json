@@ -1,0 +1,33 @@
+{
+    "name": "richardprobst/dps-ai-addon",
+    "description": "AI Add-on for desi.pet by PRObst - WordPress plugin for AI-powered chat and communications",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Ricardo Probst",
+            "email": "contato@probst.pro"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "yoast/phpunit-polyfills": "^1.0"
+    },
+    "autoload": {
+        "classmap": [
+            "includes/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DPS\\AI\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage"
+    }
+}

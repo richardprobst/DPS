@@ -29,7 +29,7 @@ Implementar melhorias de FASE 1 e FASE 2 da Agenda de Atendimentos conforme docu
 - Sem cache do navegador, sem minificação possível, dificulta manutenção
 
 **Solução implementada:**
-- ✅ Criado diretório `/add-ons/desi-pet-shower-agenda_addon/assets/css/`
+- ✅ Criado diretório `/plugins/desi-pet-shower-agenda/assets/css/`
 - ✅ Criado arquivo `agenda-addon.css` (513 linhas) com todo o CSS extraído
 - ✅ Atualizado `enqueue_assets()` para carregar CSS externo via `wp_enqueue_style()`
 - ✅ Removido bloco `<style>` inline do PHP
@@ -42,7 +42,7 @@ Implementar melhorias de FASE 1 e FASE 2 da Agenda de Atendimentos conforme docu
 
 **Arquivo criado:**
 ```
-/add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css
+/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css
 ```
 
 ---
@@ -125,7 +125,7 @@ if ( services.length > 0 ) {
 
 **Arquivo criado:**
 ```
-/add-ons/desi-pet-shower-agenda_addon/assets/js/services-modal.js
+/plugins/desi-pet-shower-agenda/assets/js/services-modal.js
 ```
 
 ---
@@ -254,18 +254,18 @@ $links[] = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurl
 ## 📊 Resumo de Arquivos
 
 ### Novos Arquivos Criados
-1. `/add-ons/desi-pet-shower-agenda_addon/assets/css/agenda-addon.css` (513 linhas)
+1. `/plugins/desi-pet-shower-agenda/assets/css/agenda-addon.css` (513 linhas)
    - CSS extraído e melhorado com comentários
    - Estilos de modal incluídos
    - Border de 3px, sem sombras, sem transform
 
-2. `/add-ons/desi-pet-shower-agenda_addon/assets/js/services-modal.js` (174 linhas)
+2. `/plugins/desi-pet-shower-agenda/assets/js/services-modal.js` (174 linhas)
    - Componente modal acessível
    - Exibição de lista de serviços
    - Suporte a fechamento múltiplo (X, botão, fora, ESC)
 
 ### Arquivos Modificados
-1. `/add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php`
+1. `/plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php`
    - Atualizado `enqueue_assets()` para carregar CSS/JS externos
    - Removido CSS inline (487 linhas → 0)
    - Navegação simplificada (7 → 6 botões, 3 grupos)
@@ -273,7 +273,7 @@ $links[] = '<a href="' . esc_url( 'https://wa.me/' . $digits . '?text=' . rawurl
    - Ícones e tooltips em todos os links
    - Flag de pet agressivo melhorada
 
-2. `/add-ons/desi-pet-shower-agenda_addon/agenda-addon.js`
+2. `/plugins/desi-pet-shower-agenda/agenda-addon.js`
    - Integração com modal customizado
    - Fallback para alert() mantido
 

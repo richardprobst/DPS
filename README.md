@@ -1,4 +1,4 @@
-# DPS by PRObst – Sistema de Gestão para Pet Shops
+# desi.pet by PRObst – Sistema de Gestão para Pet Shops
 
 Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendamentos de forma simples e eficiente. Desenvolvido como monorepo contendo o plugin WordPress principal e diversos add-ons complementares.
 
@@ -9,13 +9,23 @@ Sistema completo de gestão para pet shops. Gerencie clientes, pets e agendament
 
 ```
 DPS/
-├── plugin/
-│   └── desi-pet-shower-base_plugin/    # Plugin núcleo (base do sistema)
-├── add-ons/                             # Add-ons oficiais (plugins complementares)
-│   ├── desi-pet-shower-agenda_addon/
-│   ├── desi-pet-shower-finance_addon/
-│   ├── desi-pet-shower-client-portal_addon/
-│   └── ... (16 add-ons no total)
+├── plugins/                              # Todos os plugins (base + add-ons)
+│   ├── desi-pet-shower-base/            # Plugin núcleo (base do sistema)
+│   ├── desi-pet-shower-agenda/          # Add-on de agenda
+│   ├── desi-pet-shower-ai/              # Add-on de IA
+│   ├── desi-pet-shower-backup/          # Add-on de backup
+│   ├── desi-pet-shower-client-portal/   # Add-on portal do cliente
+│   ├── desi-pet-shower-communications/  # Add-on de comunicações
+│   ├── desi-pet-shower-finance/         # Add-on financeiro
+│   ├── desi-pet-shower-groomers/        # Add-on de groomers
+│   ├── desi-pet-shower-loyalty/         # Add-on de fidelidade
+│   ├── desi-pet-shower-payment/         # Add-on de pagamentos
+│   ├── desi-pet-shower-push/            # Add-on de notificações push
+│   ├── desi-pet-shower-registration/    # Add-on de cadastro público
+│   ├── desi-pet-shower-services/        # Add-on de serviços
+│   ├── desi-pet-shower-stats/           # Add-on de estatísticas
+│   ├── desi-pet-shower-stock/           # Add-on de estoque
+│   └── desi-pet-shower-subscription/    # Add-on de assinaturas
 ├── docs/                                # Documentação detalhada
 │   ├── layout/                         # Análises de layout (admin, agenda, portal, forms)
 │   ├── forms/                          # Docs do formulário de agendamento
@@ -31,9 +41,9 @@ DPS/
 
 ## 🎯 Visão Geral
 
-O **DPS by PRObst** é um sistema modular composto por:
+O **desi.pet by PRObst** é um sistema modular composto por:
 
-### Plugin Núcleo (`/plugin/desi-pet-shower-base_plugin`)
+### Plugin Núcleo (`/plugins/desi-pet-shower-base`)
 
 O plugin base fornece a infraestrutura fundamental:
 - Sistema de cadastro de clientes e pets
@@ -43,7 +53,7 @@ O plugin base fornece a infraestrutura fundamental:
 - Pontos de extensão (hooks) para add-ons
 - Sistema de logging centralizado
 
-**[Ver documentação do plugin base →](plugin/desi-pet-shower-base_plugin/README.md)**
+**[Ver documentação do plugin base →](plugins/desi-pet-shower-base/README.md)**
 
 ### Add-ons Oficiais (`/add-ons`)
 
@@ -58,7 +68,7 @@ Plugins complementares que estendem o sistema com funcionalidades específicas:
 - **Stats** - Estatísticas e relatórios
 - E mais 6 add-ons adicionais
 
-**[Ver documentação dos add-ons →](add-ons/README.md)**
+**[Ver documentação dos add-ons →](plugins/README.md)**
 
 ## 📚 Documentação
 
@@ -187,8 +197,8 @@ Software proprietário - todos os direitos reservados.
 - [**Guia Completo do Sistema**](docs/GUIA_SISTEMA_DPS.md) - Instalação, configuração e uso
 
 ### Código e Estrutura
-- [Plugin Base](plugin/desi-pet-shower-base_plugin/README.md)
-- [Add-ons](add-ons/README.md)
+- [Plugin Base](plugins/desi-pet-shower-base/README.md)
+- [Add-ons](plugins/README.md)
 - [Documentação Completa](docs/README.md)
 
 ### Desenvolvimento
@@ -210,6 +220,6 @@ Software proprietário - todos os direitos reservados.
 
 ---
 
-**DPS by PRObst** - Sistema completo de gestão para pet shops.
+**desi.pet by PRObst** - Sistema completo de gestão para pet shops.
 
 *Desenvolvido por [PRObst](https://www.probst.pro)*

@@ -2,12 +2,12 @@
 
 ## Visão Geral
 
-Este documento resume a implementação do sistema centralizado de comunicação via WhatsApp no DPS by PRObst (DPS), garantindo que todos os botões WhatsApp usem o número correto da equipe (+55 15 99160-6299) e números personalizados dos clientes.
+Este documento resume a implementação do sistema centralizado de comunicação via WhatsApp no desi.pet by PRObst (DPS), garantindo que todos os botões WhatsApp usem o número correto da equipe (+55 15 99160-6299) e números personalizados dos clientes.
 
 ## Helper Centralizado: DPS_WhatsApp_Helper
 
 ### Localização
-`plugin/desi-pet-shower-base_plugin/includes/class-dps-whatsapp-helper.php`
+`plugins/desi-pet-shower-base/includes/class-dps-whatsapp-helper.php`
 
 ### Principais Métodos
 
@@ -38,7 +38,7 @@ Helper inclui métodos para mensagens contextualizadas:
 
 ## Configuração
 
-### Admin → DPS by PRObst → Comunicações
+### Admin → desi.pet by PRObst → Comunicações
 
 Campo adicionado: **"Número do WhatsApp da Equipe"**
 - Option: `dps_whatsapp_number`
@@ -109,7 +109,7 @@ Campo adicionado: **"Número do WhatsApp da Equipe"**
 3. Se não autenticado, renderiza `portal-access.php`
 4. Template exibe:
    - Logo 🐾
-   - Título "Portal do Cliente – DPS by PRObst"
+   - Título "Portal do Cliente – desi.pet by PRObst"
    - Descrição explicativa
    - **Mensagens de erro** (se token inválido/expirado):
      - `token_error=invalid`: "Esse link não é mais válido"
@@ -269,7 +269,7 @@ if ( $whatsapp_url ) {
 
 ## Referências
 
-- **Código**: `plugin/desi-pet-shower-base_plugin/includes/class-dps-whatsapp-helper.php`
-- **Configuração**: `add-ons/desi-pet-shower-communications_addon/desi-pet-shower-communications-addon.php`
+- **Código**: `plugins/desi-pet-shower-base/includes/class-dps-whatsapp-helper.php`
+- **Configuração**: `plugins/desi-pet-shower-communications/desi-pet-shower-communications-addon.php`
 - **Documentação**: `ANALYSIS.md` (seção DPS_WhatsApp_Helper)
 - **Changelog**: `CHANGELOG.md` (seção [Unreleased])

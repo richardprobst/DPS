@@ -8,7 +8,7 @@
 
 ## 📋 Visão Geral
 
-Este documento resume a análise completa de layout e usabilidade da **Agenda de Atendimentos** do sistema DPS by PRObst (DPS). A análise examinou templates, scripts, estilos e interações com foco em:
+Este documento resume a análise completa de layout e usabilidade da **Agenda de Atendimentos** do sistema desi.pet by PRObst (DPS). A análise examinou templates, scripts, estilos e interações com foco em:
 
 1. Visualização dos agendamentos
 2. Interação do usuário

@@ -187,7 +187,7 @@ max-width: 150px;
 font-size: 16px;
 ```
 
-**Localização:** `plugin/desi-pet-shower-base_plugin/assets/css/dps-base.css` linhas 642-954
+**Localização:** `plugins/desi-pet-shower-base/assets/css/dps-base.css` linhas 642-954
 
 ---
 

@@ -253,7 +253,7 @@ Vista mobile do portal demonstrando a adaptação responsiva.
 
 O Portal do Cliente é implementado como um add-on no sistema DPS:
 
-**Localização:** `add-ons/desi-pet-shower-client-portal_addon/`
+**Localização:** `plugins/desi-pet-shower-client-portal/`
 
 **Arquivos principais:**
 - `desi-pet-shower-client-portal.php` - Plugin principal
@@ -357,7 +357,7 @@ wp plugin activate desi-pet-shower-client-portal
 
 ### Código Fonte
 ```
-add-ons/desi-pet-shower-client-portal_addon/
+plugins/desi-pet-shower-client-portal/
 ├── desi-pet-shower-client-portal.php  # Plugin principal
 ├── assets/
 │   ├── css/

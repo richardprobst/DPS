@@ -21,8 +21,8 @@ Corrigido erro crítico que impedia o acesso ao menu **AGENDA** no painel admini
 O `DPS_Agenda_Hub` (criado na reorganização de menus v1.4.0) chamava `DPS_Agenda_Addon::get_instance()` nas linhas 93 e 112, mas a classe `DPS_Agenda_Addon` não implementava o padrão singleton. Todos os outros add-ons integrados aos Hubs do DPS já implementavam esse padrão, mas o Agenda Add-on foi esquecido durante a refatoração.
 
 ### Arquivos Afetados
-- `add-ons/desi-pet-shower-agenda_addon/includes/class-dps-agenda-hub.php` (linhas 93, 112)
-- `add-ons/desi-pet-shower-agenda_addon/desi-pet-shower-agenda-addon.php` (classe sem singleton)
+- `plugins/desi-pet-shower-agenda/includes/class-dps-agenda-hub.php` (linhas 93, 112)
+- `plugins/desi-pet-shower-agenda/desi-pet-shower-agenda-addon.php` (classe sem singleton)
 
 ## Análise Completa do Sistema
 

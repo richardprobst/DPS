@@ -69,7 +69,7 @@ Removido o registro duplicado do CPT em `DPS_Client_Portal`, mantendo apenas em 
 
 ### Alteração no Código
 
-**Arquivo:** `add-ons/desi-pet-shower-client-portal_addon/includes/class-dps-client-portal.php`
+**Arquivo:** `plugins/desi-pet-shower-client-portal/includes/class-dps-client-portal.php`
 
 ```php
 // ANTES (linha 67-72)
@@ -136,20 +136,20 @@ Nenhuma outra parte do código chama este método diretamente.
 
 #### 1. Menu Painel Central
 - [ ] Desativar Client Portal Add-on
-- [ ] Verificar que menu "DPS by PRObst" > "Painel Central" existe
+- [ ] Verificar que menu "desi.pet by PRObst" > "Painel Central" existe
 - [ ] Ativar Client Portal Add-on
 - [ ] **CRÍTICO:** Verificar que menu "Painel Central" continua visível
 - [ ] Clicar em "Painel Central" e verificar que dashboard carrega
 
 #### 2. CPT Mensagens do Portal
-- [ ] Verificar que submenu "Mensagens Portal" aparece em "DPS by PRObst"
+- [ ] Verificar que submenu "Mensagens Portal" aparece em "desi.pet by PRObst"
 - [ ] Acessar "Mensagens Portal" e verificar listagem
 - [ ] Criar nova mensagem do portal
 - [ ] Editar mensagem existente
 - [ ] Verificar metaboxes e colunas customizadas
 
 #### 3. Portal Hub
-- [ ] Acessar "DPS by PRObst" > "Portal do Cliente"
+- [ ] Acessar "desi.pet by PRObst" > "Portal do Cliente"
 - [ ] Verificar 3 abas: Configurações, Logins, Mensagens
 - [ ] Testar funcionalidade de cada aba
 

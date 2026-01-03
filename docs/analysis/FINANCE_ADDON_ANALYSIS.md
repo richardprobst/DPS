@@ -575,7 +575,7 @@ private function render_pending_charges_summary() { /* ... */ }
 **Problema:** Linhas 645-648 contêm dados fixos:
 
 ```php
-$store_name    = 'Banho e Tosa DPS by PRObst';
+$store_name    = 'Banho e Tosa desi.pet by PRObst';
 $store_address = 'Rua Água Marinha, 45 – Residencial Galo de Ouro, Cerquilho, SP';
 $store_phone   = '15 9 9160-6299';
 $store_email   = 'contato@desi.pet';

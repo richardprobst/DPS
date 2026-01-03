@@ -12,7 +12,7 @@
 
 ### ✅ Bug #1: Página sem shortcode quando já existe (CRÍTICO)
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`  
+**Arquivo**: `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`  
 **Linhas afetadas**: 356-381 (antes da correção)
 
 **Problema**:
@@ -47,7 +47,7 @@ if ( strpos( $page->post_content, '[dps_fin_docs]' ) === false ) {
 
 ### ✅ Bug #2: Falta de controle de acesso no shortcode (SEGURANÇA)
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`  
+**Arquivo**: `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`  
 **Linhas afetadas**: 931-950 (após correção)
 
 **Problema**:
@@ -84,7 +84,7 @@ if ( ! $allow_public_view && ! current_user_can( 'manage_options' ) ) {
 
 ### ✅ Bug #3: CSRF em ações de documentos (SEGURANÇA CRÍTICA)
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`  
+**Arquivo**: `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`  
 **Linhas afetadas**: 605-676, 1054-1082
 
 **Problema**:
@@ -140,7 +140,7 @@ $del_link = wp_nonce_url(
 
 ### ✅ Melhoria #1: Listagem de documentos em tabela estruturada
 
-**Arquivo**: `add-ons/desi-pet-shower-finance_addon/desi-pet-shower-finance-addon.php`  
+**Arquivo**: `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`  
 **Linhas**: 996-1095
 
 **Antes**:

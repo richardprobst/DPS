@@ -27,7 +27,7 @@
 ### 1.1 Arquivos e Classes
 
 ```
-add-ons/desi-pet-shower-groomers_addon/
+plugins/desi-pet-shower-groomers/
 ├── desi-pet-shower-groomers-addon.php   # 3087 linhas - Classe DPS_Groomers_Addon
 ├── includes/
 │   ├── class-dps-groomer-token-manager.php  # 484 linhas - Gerenciamento de tokens
