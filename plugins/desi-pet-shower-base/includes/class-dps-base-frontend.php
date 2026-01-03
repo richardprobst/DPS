@@ -2853,7 +2853,7 @@ class DPS_Base_Frontend {
         if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
             $file = $_FILES['pet_photo'];
             
-            // Validação de MIME type antes do upload para prevenir upload de arquivos maliciosos
+            // Lista de MIME types permitidos para imagens
             $allowed_mimes = [
                 'jpg'  => 'image/jpeg',
                 'jpeg' => 'image/jpeg',
@@ -2862,32 +2862,33 @@ class DPS_Base_Frontend {
                 'webp' => 'image/webp',
             ];
             
-            // Verifica extensão do arquivo
-            $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
-            if ( ! array_key_exists( $file_ext, $allowed_mimes ) ) {
+            // Carrega funções de upload do WordPress
+            if ( ! function_exists( 'wp_handle_upload' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
+                require_once ABSPATH . 'wp-includes/functions.php';
+            }
+            
+            // Validação primária usando wp_check_filetype_and_ext (mais segura que extensão)
+            $wp_filetype = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'], $allowed_mimes );
+            
+            // Verifica se o tipo MIME retornado está na lista de permitidos
+            if ( empty( $wp_filetype['type'] ) || ! in_array( $wp_filetype['type'], $allowed_mimes, true ) ) {
                 DPS_Message_Helper::add_error( __( 'Tipo de arquivo não permitido. Use apenas imagens (JPG, PNG, GIF, WebP).', 'desi-pet-shower' ) );
             } else {
-                // Carrega funções de upload do WordPress
-                if ( ! function_exists( 'wp_handle_upload' ) ) {
-                    require_once ABSPATH . 'wp-admin/includes/file.php';
-                }
-                if ( ! function_exists( 'wp_check_filetype' ) ) {
-                    require_once ABSPATH . 'wp-includes/functions.php';
-                }
-                
-                // Restringe MIME types permitidos
+                // Restringe MIME types permitidos no upload
                 $overrides = [
                     'test_form' => false,
                     'mimes'     => $allowed_mimes,
                 ];
                 $uploaded  = wp_handle_upload( $file, $overrides );
+                
                 if ( isset( $uploaded['file'] ) && isset( $uploaded['type'] ) && empty( $uploaded['error'] ) ) {
-                    $filetype = wp_check_filetype( basename( $uploaded['file'] ), $allowed_mimes );
-                    
-                    // Validação adicional: verifica se o MIME type é realmente uma imagem
-                    if ( $filetype['type'] && strpos( $filetype['type'], 'image/' ) === 0 ) {
+                    // Validação final: verifica se o MIME type do arquivo salvo está na lista permitida
+                    if ( in_array( $uploaded['type'], $allowed_mimes, true ) ) {
                         $attachment = [
-                            'post_mime_type' => $filetype['type'],
+                            'post_mime_type' => $uploaded['type'],
                             'post_title'     => sanitize_file_name( basename( $uploaded['file'] ) ),
                             'post_content'   => '',
                             'post_status'    => 'inherit',
