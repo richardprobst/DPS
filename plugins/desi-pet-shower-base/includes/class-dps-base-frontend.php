@@ -2852,30 +2852,61 @@ class DPS_Base_Frontend {
         // Lida com upload da foto do pet, se houver
         if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
             $file = $_FILES['pet_photo'];
-            // Carrega funções de upload do WordPress
-            if ( ! function_exists( 'wp_handle_upload' ) ) {
-                require_once ABSPATH . 'wp-admin/includes/file.php';
-            }
-            if ( ! function_exists( 'wp_check_filetype' ) ) {
-                require_once ABSPATH . 'wp-includes/functions.php';
-            }
-            $overrides = [ 'test_form' => false ];
-            $uploaded  = wp_handle_upload( $file, $overrides );
-            if ( isset( $uploaded['file'] ) && isset( $uploaded['type'] ) && empty( $uploaded['error'] ) ) {
-                $filetype = wp_check_filetype( basename( $uploaded['file'] ), null );
-                $attachment = [
-                    'post_mime_type' => $filetype['type'],
-                    'post_title'     => sanitize_file_name( basename( $uploaded['file'] ) ),
-                    'post_content'   => '',
-                    'post_status'    => 'inherit',
-                ];
-                $attach_id = wp_insert_attachment( $attachment, $uploaded['file'] );
-                if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
-                    require_once ABSPATH . 'wp-admin/includes/image.php';
+            
+            // Validação de MIME type antes do upload para prevenir upload de arquivos maliciosos
+            $allowed_mimes = [
+                'jpg'  => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'gif'  => 'image/gif',
+                'png'  => 'image/png',
+                'webp' => 'image/webp',
+            ];
+            
+            // Verifica extensão do arquivo
+            $file_ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
+            if ( ! array_key_exists( $file_ext, $allowed_mimes ) ) {
+                DPS_Message_Helper::add_error( __( 'Tipo de arquivo não permitido. Use apenas imagens (JPG, PNG, GIF, WebP).', 'desi-pet-shower' ) );
+            } else {
+                // Carrega funções de upload do WordPress
+                if ( ! function_exists( 'wp_handle_upload' ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/file.php';
                 }
-                $attach_data = wp_generate_attachment_metadata( $attach_id, $uploaded['file'] );
-                wp_update_attachment_metadata( $attach_id, $attach_data );
-                update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
+                if ( ! function_exists( 'wp_check_filetype' ) ) {
+                    require_once ABSPATH . 'wp-includes/functions.php';
+                }
+                
+                // Restringe MIME types permitidos
+                $overrides = [
+                    'test_form' => false,
+                    'mimes'     => $allowed_mimes,
+                ];
+                $uploaded  = wp_handle_upload( $file, $overrides );
+                if ( isset( $uploaded['file'] ) && isset( $uploaded['type'] ) && empty( $uploaded['error'] ) ) {
+                    $filetype = wp_check_filetype( basename( $uploaded['file'] ), $allowed_mimes );
+                    
+                    // Validação adicional: verifica se o MIME type é realmente uma imagem
+                    if ( $filetype['type'] && strpos( $filetype['type'], 'image/' ) === 0 ) {
+                        $attachment = [
+                            'post_mime_type' => $filetype['type'],
+                            'post_title'     => sanitize_file_name( basename( $uploaded['file'] ) ),
+                            'post_content'   => '',
+                            'post_status'    => 'inherit',
+                        ];
+                        $attach_id = wp_insert_attachment( $attachment, $uploaded['file'] );
+                        if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+                            require_once ABSPATH . 'wp-admin/includes/image.php';
+                        }
+                        $attach_data = wp_generate_attachment_metadata( $attach_id, $uploaded['file'] );
+                        wp_update_attachment_metadata( $attach_id, $attach_data );
+                        update_post_meta( $pet_id, 'pet_photo_id', $attach_id );
+                    } else {
+                        // Remove arquivo se não for imagem válida
+                        @unlink( $uploaded['file'] );
+                        DPS_Message_Helper::add_error( __( 'O arquivo enviado não é uma imagem válida.', 'desi-pet-shower' ) );
+                    }
+                } elseif ( ! empty( $uploaded['error'] ) ) {
+                    DPS_Message_Helper::add_error( $uploaded['error'] );
+                }
             }
         }
         // Adiciona mensagem de sucesso
@@ -3847,21 +3878,29 @@ class DPS_Base_Frontend {
      * @param int $client_id ID do cliente.
      */
     private static function handle_client_page_actions( $client_id ) {
-        // 1. Gerar histórico HTML
+        // 1. Gerar histórico HTML (requer nonce para proteção CSRF)
         if ( isset( $_GET['dps_client_history'] ) && '1' === $_GET['dps_client_history'] ) {
+            // Verifica nonce para proteção CSRF
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_client_history' ) ) {
+                DPS_Message_Helper::add_error( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
+                $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', '_wpnonce' ] ) );
+                wp_safe_redirect( $redirect );
+                exit;
+            }
+            
             $doc_url = self::generate_client_history_doc( $client_id );
             if ( $doc_url ) {
                 // Envio por email se solicitado
                 if ( isset( $_GET['send_email'] ) && '1' === $_GET['send_email'] ) {
-                    $to_email = isset( $_GET['to_email'] ) && is_email( sanitize_email( $_GET['to_email'] ) ) ? sanitize_email( $_GET['to_email'] ) : '';
+                    $to_email = isset( $_GET['to_email'] ) && is_email( sanitize_email( wp_unslash( $_GET['to_email'] ) ) ) ? sanitize_email( wp_unslash( $_GET['to_email'] ) ) : '';
                     self::send_client_history_email( $client_id, $doc_url, $to_email );
-                    $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'sent' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'sent' ] ) );
-                    wp_redirect( $redirect );
+                    $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'sent' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'sent', '_wpnonce' ] ) );
+                    wp_safe_redirect( $redirect );
                     exit;
                 }
                 $file_name = basename( $doc_url );
-                $redirect  = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'history_file' => $file_name ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'history_file' ] ) );
-                wp_redirect( $redirect );
+                $redirect  = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'history_file' => $file_name ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', 'history_file', '_wpnonce' ] ) );
+                wp_safe_redirect( $redirect );
                 exit;
             }
         }
@@ -3872,14 +3911,14 @@ class DPS_Base_Frontend {
             if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_doc' ) ) {
                 DPS_Message_Helper::add_error( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
                 $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file', '_wpnonce' ] ) );
-                wp_redirect( $redirect );
+                wp_safe_redirect( $redirect );
                 exit;
             }
             $file = sanitize_file_name( wp_unslash( $_GET['file'] ) );
             self::delete_document( $file );
             DPS_Message_Helper::add_success( __( 'Documento excluído com sucesso.', 'desi-pet-shower' ) );
             $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file', '_wpnonce' ] ) );
-            wp_redirect( $redirect );
+            wp_safe_redirect( $redirect );
             exit;
         }
     }
@@ -4433,8 +4472,9 @@ class DPS_Base_Frontend {
      */
     private static function render_client_appointments_section( $appointments, $base_url, $client_id ) {
         $appt_count   = count( $appointments );
-        $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
-        $email_base   = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', 'send_email' => '1' ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email' ] ) );
+        $history_nonce = wp_create_nonce( 'dps_client_history' );
+        $history_link = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', '_wpnonce' => $history_nonce ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', '_wpnonce' ] ) );
+        $email_base   = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id, 'dps_client_history' => '1', 'send_email' => '1', '_wpnonce' => $history_nonce ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', '_wpnonce' ] ) );
 
         echo '<div class="dps-client-section">';
         echo '<div class="dps-client-section__header">';

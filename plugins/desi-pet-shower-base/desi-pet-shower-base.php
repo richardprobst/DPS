@@ -118,7 +118,7 @@ class DPS_Base_Plugin {
         add_action( 'wp_ajax_dps_render_appointment_form', [ 'DPS_Base_Frontend', 'ajax_render_appointment_form' ] );
         add_action( 'wp_ajax_dps_modal_save_appointment', [ 'DPS_Base_Frontend', 'ajax_save_appointment_modal' ] );
         add_action( 'wp_ajax_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
-        add_action( 'wp_ajax_nopriv_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
+        // Nota: Endpoint nopriv removido - busca de horários requer autenticação para prevenir enumeração de dados
         
         // Handler para exportação de clientes
         add_action( 'admin_post_dps_export_clients', [ $this, 'export_clients_csv' ] );
