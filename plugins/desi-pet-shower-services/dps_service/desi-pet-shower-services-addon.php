@@ -690,6 +690,7 @@ class DPS_Services_Addon {
         echo '</form>';
 
         // Script para ocultar/mostrar campos de categoria e pacote dependendo do tipo
+        // Inclui prevenção de duplo clique no submit, validação de preços e pesquisa na listagem
         echo '<script>(function($){$(document).ready(function(){
             function toggleFields(){
                 var type = $("#service_type").val();
@@ -706,6 +707,30 @@ class DPS_Services_Addon {
             }
             toggleFields();
             $(document).on("change", "#service_type", toggleFields);
+            // Prevenção de duplo clique e validação no formulário de serviços
+            $(".dps-services-form").on("submit", function(e){
+                var $form = $(this);
+                var $btn = $form.find("button[type=submit]");
+                // Evita duplo clique
+                if($form.data("submitting")) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Validação client-side: pelo menos um preço deve ser informado para não-pacotes
+                var type = $("#service_type").val();
+                if(type !== "package") {
+                    var priceSmall = parseFloat($("#service_price_small").val()) || 0;
+                    var priceMedium = parseFloat($("#service_price_medium").val()) || 0;
+                    var priceLarge = parseFloat($("#service_price_large").val()) || 0;
+                    if(priceSmall === 0 && priceMedium === 0 && priceLarge === 0) {
+                        alert("' . esc_js( __( 'Informe pelo menos um valor de preço para o serviço.', 'dps-services-addon' ) ) . '");
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                $form.data("submitting", true);
+                $btn.prop("disabled", true).css("opacity", "0.6");
+            });
             // Pesquisa simples na listagem de serviços
             $(".dps-search-input").on("keyup", function(){
                 var term = $(this).val().toLowerCase();
