@@ -429,7 +429,6 @@ class DPS_Payment_Addon {
         submit_button( __( 'Salvar configurações', 'dps-payment-addon' ), 'primary', 'submit', true, [ 'id' => 'dps-payment-submit' ] );
         echo '</form>';
         echo '</div>';
-        // JavaScript is loaded via wp_enqueue_script in enqueue_admin_assets()
     }
 
     /**

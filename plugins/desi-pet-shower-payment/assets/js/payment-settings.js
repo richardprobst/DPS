@@ -22,24 +22,19 @@
         }
 
         var originalText = $submitBtn.val();
+        var isSubmitting = false;
 
         // Prevent double click and show loading state
         $form.on('submit', function(e) {
-            if ($submitBtn.prop('disabled')) {
+            if (isSubmitting) {
                 e.preventDefault();
                 return false;
             }
             
+            isSubmitting = true;
             $submitBtn.prop('disabled', true);
             $submitBtn.val(dpsPaymentSettings.savingText);
             $submitBtn.css('opacity', '0.7');
-        });
-
-        // Restore button if there's a validation error (page didn't navigate away)
-        $(window).on('beforeunload', function() {
-            $submitBtn.prop('disabled', false);
-            $submitBtn.val(originalText);
-            $submitBtn.css('opacity', '1');
         });
     }
 
