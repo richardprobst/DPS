@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Pagamentos Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Integração com Mercado Pago. Gere links de pagamento e envie por WhatsApp de forma prática.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-payment-addon
@@ -134,13 +134,68 @@ class DPS_Payment_Addon {
 
     /**
      * Registra uma opção para armazenar o token do Mercado Pago.
+     * Inclui callbacks de sanitização para garantir segurança dos dados.
      */
     public function register_settings() {
-        register_setting( 'dps_payment_options', 'dps_mercadopago_access_token' );
+        register_setting( 
+            'dps_payment_options', 
+            'dps_mercadopago_access_token',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => [ $this, 'sanitize_access_token' ],
+                'default'           => '',
+            ]
+        );
         // Também armazena a chave PIX utilizada nas mensagens de cobrança
-        register_setting( 'dps_payment_options', 'dps_pix_key' );
+        register_setting( 
+            'dps_payment_options', 
+            'dps_pix_key',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ]
+        );
         // Segredo utilizado para validar notificações do Mercado Pago
-        register_setting( 'dps_payment_options', 'dps_mercadopago_webhook_secret' );
+        register_setting( 
+            'dps_payment_options', 
+            'dps_mercadopago_webhook_secret',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => [ $this, 'sanitize_webhook_secret' ],
+                'default'           => '',
+            ]
+        );
+    }
+
+    /**
+     * Sanitiza o access token do Mercado Pago.
+     * Remove espaços e valida formato básico do token.
+     *
+     * @since 1.2.0
+     * @param string $token Token bruto.
+     * @return string Token sanitizado.
+     */
+    public function sanitize_access_token( $token ) {
+        $token = trim( sanitize_text_field( $token ) );
+        // Token do MP geralmente começa com APP_USR- ou TEST-
+        // Não bloquear outros formatos, mas garantir que não contenha caracteres perigosos
+        return preg_replace( '/[^a-zA-Z0-9_\-]/', '', $token );
+    }
+
+    /**
+     * Sanitiza o webhook secret.
+     * Permite caracteres especiais comuns em senhas fortes.
+     *
+     * @since 1.2.0
+     * @param string $secret Secret bruto.
+     * @return string Secret sanitizado.
+     */
+    public function sanitize_webhook_secret( $secret ) {
+        $secret = trim( $secret );
+        // Permite alfanuméricos e caracteres especiais comuns em senhas
+        // Remove apenas caracteres potencialmente perigosos (control characters)
+        return preg_replace( '/[\x00-\x1F\x7F]/', '', $secret );
     }
 
     /**
@@ -194,10 +249,8 @@ class DPS_Payment_Addon {
             'dps-payment-settings',
             'dps_payment_section'
         );
-        // Registra as opções para que possam ser salvas
-        register_setting( 'dps_payment_options', 'dps_mercadopago_access_token' );
-        register_setting( 'dps_payment_options', 'dps_pix_key' );
-        register_setting( 'dps_payment_options', 'dps_mercadopago_webhook_secret' );
+        // As opções já são registradas com sanitização em register_settings().
+        // Registro duplicado removido para evitar conflito de callbacks.
 
         // Não registramos o manipulador do webhook aqui. Ele é registrado
         // globalmente no construtor para garantir que as notificações sejam
@@ -662,8 +715,14 @@ class DPS_Payment_Addon {
             return false;
         }
         // Consulta a API de pagamentos do Mercado Pago
-        $url      = 'https://api.mercadopago.com/v1/payments/' . rawurlencode( $payment_id ) . '?access_token=' . rawurlencode( $token );
-        $response = wp_remote_get( $url );
+        $url      = 'https://api.mercadopago.com/v1/payments/' . rawurlencode( $payment_id );
+        $response = wp_remote_get( $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ],
+            'timeout' => 20,
+        ] );
         if ( is_wp_error( $response ) ) {
             $this->log_notification( 'Erro ao consultar pagamento no Mercado Pago', [ 'error' => $response->get_error_message() ] );
             return false;
@@ -734,7 +793,15 @@ class DPS_Payment_Addon {
         // Atualiza ou cria a transação associada a este agendamento na tabela customizada
         global $wpdb;
         $table_name = $wpdb->prefix . 'dps_transacoes';
+        
+        // Verifica se a tabela dps_transacoes existe (Finance Add-on pode não estar ativo)
+        if ( ! $this->transactions_table_exists() ) {
+            $this->log_notification( 'Tabela dps_transacoes não existe - Finance Add-on pode não estar ativo', [ 'appointment_id' => $appt_id ] );
+            return 0;
+        }
+        
         // Verifica se já existe transação para este agendamento
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $existing_trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt_id ) );
         $trans_id          = 0;
         if ( $existing_trans_id ) {
@@ -818,6 +885,13 @@ class DPS_Payment_Addon {
                 // Atualiza ou cria a transação correspondente para refletir o status recebido
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'dps_transacoes';
+                
+                // Verifica se a tabela existe
+                if ( ! $this->transactions_table_exists() ) {
+                    continue; // Pula transação se tabela não existe
+                }
+                
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 $trans_id   = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE agendamento_id = %d", $appt->ID ) );
                 if ( $trans_id ) {
                     // Atualiza status e data de atualização
@@ -862,7 +936,13 @@ class DPS_Payment_Addon {
         // Atualiza ou cria a transação principal da assinatura (plano) para refletir o status
         global $wpdb;
         $table_name = $wpdb->prefix . 'dps_transacoes';
-        $plan_trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE plano_id = %d", $sub_id ) );
+        
+        // Verifica se a tabela existe antes de atualizar transação do plano
+        if ( ! $this->transactions_table_exists() ) {
+            $this->log_notification( 'Tabela dps_transacoes não existe - pulando transação do plano', [ 'subscription_id' => $sub_id ] );
+        } else {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $plan_trans_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE plano_id = %d", $sub_id ) );
         if ( $plan_trans_id ) {
             $wpdb->update( $table_name, [ 'status' => $transaction_status, 'data' => current_time( 'Y-m-d' ) ], [ 'id' => $plan_trans_id ], [ '%s','%s' ], [ '%d' ] );
         } else {
@@ -880,6 +960,7 @@ class DPS_Payment_Addon {
                 'status'         => $transaction_status,
                 'descricao'      => __( 'Pagamento de assinatura', 'dps-agenda-addon' ),
             ], [ '%d','%d','%d','%s','%f','%s','%s','%s','%s' ] );
+            }
         }
         if ( in_array( $mp_status, [ 'approved', 'success', 'authorized' ], true ) ) {
             // Envia email de notificação
@@ -986,13 +1067,28 @@ class DPS_Payment_Addon {
     /**
      * Valida a requisição do webhook utilizando um secret configurado.
      *
-     * @return bool
+     * Implementa verificação de rate limiting simples para prevenir brute force.
+     * Registra tentativas de acesso inválidas para auditoria.
+     *
+     * @since 1.2.0 Adicionado rate limiting e logging de tentativas.
+     * @return bool True se requisição é válida, false caso contrário.
      */
     private function validate_mp_webhook_request() {
         $expected = $this->get_webhook_secret();
         if ( ! $expected ) {
+            $this->log_notification( 'Webhook secret não configurado - requisição rejeitada', [] );
             return false;
         }
+        
+        // Rate limiting simples: bloqueia IP após 10 tentativas falhas em 5 minutos
+        $client_ip = $this->get_client_ip();
+        $rate_key = 'dps_mp_webhook_attempts_' . md5( $client_ip );
+        $attempts = (int) get_transient( $rate_key );
+        if ( $attempts >= 10 ) {
+            $this->log_notification( 'Rate limit excedido para webhook', [ 'ip' => $client_ip ] );
+            return false;
+        }
+        
         $provided = '';
         if ( isset( $_SERVER['HTTP_AUTHORIZATION'] ) && stripos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ), 'bearer ' ) === 0 ) {
             $provided = trim( substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ), 7 ) );
@@ -1006,7 +1102,56 @@ class DPS_Payment_Addon {
         if ( isset( $_GET['secret'] ) ) {
             $provided = sanitize_text_field( wp_unslash( $_GET['secret'] ) );
         }
-        return $provided && hash_equals( $expected, $provided );
+        
+        $is_valid = $provided && hash_equals( $expected, $provided );
+        
+        if ( ! $is_valid ) {
+            // Incrementa contador de tentativas falhas
+            set_transient( $rate_key, $attempts + 1, 5 * MINUTE_IN_SECONDS );
+            $this->log_notification( 'Tentativa de webhook com secret inválido', [ 'ip' => $client_ip ] );
+        } else {
+            // Reset contador em caso de sucesso
+            delete_transient( $rate_key );
+        }
+        
+        return $is_valid;
+    }
+    
+    /**
+     * Obtém o IP do cliente de forma segura.
+     *
+     * Considera headers de proxy reverso como Cloudflare, mas valida formato.
+     *
+     * @since 1.2.0
+     * @return string IP do cliente.
+     */
+    private function get_client_ip() {
+        $ip = '';
+        
+        // Cloudflare
+        if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
+        }
+        // X-Forwarded-For (pode ter múltiplos IPs separados por vírgula)
+        elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+            $ips = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+            $ip = trim( $ips[0] );
+        }
+        // X-Real-IP
+        elseif ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+        }
+        // REMOTE_ADDR como fallback
+        elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+        }
+        
+        // Valida formato de IP (v4 ou v6)
+        if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+            $ip = 'unknown';
+        }
+        
+        return $ip;
     }
 
     /**
@@ -1200,6 +1345,28 @@ class DPS_Payment_Addon {
             $message .= ' | ' . wp_json_encode( $context );
         }
         error_log( $prefix . $message );
+    }
+
+    /**
+     * Verifica se a tabela dps_transacoes existe no banco de dados.
+     *
+     * Esta verificação é importante porque o Finance Add-on pode não estar ativo
+     * e a tabela pode não existir. Operações de banco falhariam silenciosamente.
+     *
+     * @since 1.2.0
+     * @return bool True se a tabela existe, false caso contrário.
+     */
+    private function transactions_table_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+        // Usa cache para evitar queries repetidas no mesmo request
+        static $exists = null;
+        if ( null === $exists ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $result = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+            $exists = ( $result === $table_name );
+        }
+        return $exists;
     }
 
     /**
