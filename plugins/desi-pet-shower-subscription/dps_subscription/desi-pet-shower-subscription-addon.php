@@ -199,8 +199,8 @@ class DPS_Subscription_Addon {
         $pix_option  = get_option( 'dps_pix_key', '' );
         $pix_display = $pix_option ? sanitize_text_field( $pix_option ) : '15 99160-6299';
         
-        // Garante que o link de pagamento é válido
-        $payment_link = esc_url( $payment_link );
+        // O $payment_link já vem escapado de get_subscription_payment_link()
+        // Não fazer escape adicional para evitar duplo escape
         
         // Mensagem padrão para renovação da assinatura
         $msg = sprintf(
