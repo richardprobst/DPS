@@ -83,6 +83,33 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Finance Add-on - Modernização Visual da Aba Financeiro (v1.8.0)**
+
+- **Layout moderno padronizado**: Aba Financeiro agora segue o padrão visual global do sistema DPS com classes `dps-surface` e `dps-section-title`.
+- **Título com ícone e subtítulo**: Header da seção usa estrutura padronizada com emoji 💰 e descrição explicativa.
+- **Dashboard de resumo encapsulado**: Cards de receitas, despesas, pendentes e saldo agora estão dentro de `dps-surface--info` com título e descrição.
+- **Formulário de pagamento parcial moderno**: Novo grid `dps-partial-summary` com destaque visual para valor restante.
+- **Estado vazio amigável**: Quando não há transações, exibe mensagem com ícone 📭 e dica para criar primeira transação.
+- **Demo HTML**: Criado arquivo `docs/layout/admin/demo/finance-layout-demo.html` para visualização offline do layout.
+- **~200 linhas de CSS**: Novas seções 21-25 no `finance-addon.css` com estilos para grid, surfaces e componentes modernos.
+
+#### Changed (Alterado)
+
+**Finance Add-on - Reorganização de Estrutura (v1.8.0)**
+
+- **Formulário de nova transação**: Agora usa `dps-surface--info` com descrição explicativa e estrutura colapsável.
+- **Lista de transações**: Usa `dps-surface--neutral` com título 📋, descrição e filtros visuais melhorados.
+- **Seção de cobrança rápida**: Usa `dps-surface--warning` (destaque amarelo) com descrição sobre WhatsApp.
+- **Toolbar de configurações**: Botão de configurações agora fica em toolbar dedicada ao invés de inline.
+- **Documentação atualizada**: `docs/layout/admin/FINANCE_LAYOUT_IMPROVEMENTS.md` reescrito para v1.8.0 com todas as novas classes e estruturas.
+
+#### Fixed (Corrigido)
+
+**Finance Add-on - Acessibilidade (v1.8.0)**
+
+- **Removidos emojis de selects de formulário**: Melhora compatibilidade com leitores de tela (acessibilidade).
+- **Comentários CSS explicativos**: Adicionados comentários no CSS sobre comportamento do grid layout.
+
 **Registration Add-on - Modernização Visual e Funcionalidades Admin (v1.3.0)**
 
 - **Cards de resumo completos**: Agora exibem todos os campos preenchidos pelo usuário (CPF, data de nascimento, Instagram, Facebook, autorização de foto, como conheceu) no resumo do tutor, e todos os campos do pet (espécie, peso, pelagem, cor, nascimento, sexo, alerta de pet agressivo) no resumo dos pets.
