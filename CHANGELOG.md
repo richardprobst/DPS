@@ -186,6 +186,14 @@ Antes de criar uma nova versão oficial:
 - **Mensagem de "sem resultados" melhorada**: Página de cadastros pendentes agora exibe mensagem estilizada como notice quando não há resultados.
 - **Estilos de erros JS animados**: Container de erros de validação client-side agora inclui animação shake para maior visibilidade.
 
+**Registration Add-on - Template de Email e Gerenciamento (v1.2.4)**
+
+- **Template de email moderno**: Redesenhado template padrão do email de confirmação de cadastro com layout responsivo, cores vibrantes, botão de CTA destacado e visual profissional seguindo padrão dos outros emails do sistema.
+- **Seção de gerenciamento de emails**: Reorganizada interface de configurações com nova seção dedicada "📧 Gerenciamento de Emails" com dicas claras e exemplos de placeholders.
+- **Funcionalidade de teste de email**: Nova seção "🧪 Teste de Envio de Emails" permite enviar emails de teste (confirmação ou lembrete) para qualquer endereço, facilitando validação de configurações e verificação visual do template.
+- **AJAX para envio de teste**: Endpoint seguro `wp_ajax_dps_registration_send_test_email` com verificação de nonce e capability para envio de emails de teste.
+- **Aviso visual em emails de teste**: Emails de teste incluem banner de aviso destacado informando que se trata de teste e que links não são funcionais.
+
 **Payment Add-on - Verificação Funcional e UX (v1.2.0)**
 
 - **Indicador de status de configuração**: Página de configurações exibe badge "Integração configurada" ou "Configuração pendente" com informações sobre o que falta configurar.
