@@ -1535,9 +1535,20 @@ class DPS_Registration_Addon {
                     var email = emailInput.value.trim();
                     var emailType = typeSelect.value;
 
+                    // Validação de email vazio
                     if(!email){
-                        resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>' . esc_js( __( 'Por favor, insira um email válido.', 'dps-registration-addon' ) ) . '</p></div>\';
+                        resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>' . esc_js( __( 'Por favor, insira um email.', 'dps-registration-addon' ) ) . '</p></div>\';
                         resultDiv.style.display = "block";
+                        emailInput.focus();
+                        return;
+                    }
+
+                    // Validação de formato de email
+                    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if(!emailRegex.test(email)){
+                        resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>' . esc_js( __( 'Formato de email inválido. Por favor, insira um email válido.', 'dps-registration-addon' ) ) . '</p></div>\';
+                        resultDiv.style.display = "block";
+                        emailInput.focus();
                         return;
                     }
 
@@ -2608,7 +2619,7 @@ class DPS_Registration_Addon {
         $html .= esc_html__( 'Este email foi enviado automaticamente pelo', 'dps-registration-addon' ) . ' <strong>' . esc_html( $business_name ) . '</strong>';
         $html .= '</p>';
         $html .= '<p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px; text-align: center;">';
-        $html .= '© ' . date( 'Y' ) . ' ' . esc_html( $business_name ) . ' – ' . esc_html__( 'Todos os direitos reservados.', 'dps-registration-addon' );
+        $html .= '© ' . wp_date( 'Y' ) . ' ' . esc_html( $business_name ) . ' – ' . esc_html__( 'Todos os direitos reservados.', 'dps-registration-addon' );
         $html .= '</p>';
         $html .= '</td></tr>';
 
@@ -2701,15 +2712,7 @@ class DPS_Registration_Addon {
         if ( 'reminder' === $email_type ) {
             $subject = __( '[TESTE] Lembrete: confirme seu cadastro', 'dps-registration-addon' );
             $greeting = sprintf( __( 'Olá %s!', 'dps-registration-addon' ), $test_client_name );
-            $body = sprintf(
-                "%s %s %s\n%s\n\n%s",
-                $greeting,
-                __( 'Lembrete: confirme seu cadastro no desi.pet by PRObst para ativar sua conta.', 'dps-registration-addon' ),
-                __( 'Use o link abaixo para finalizar a confirmação.', 'dps-registration-addon' ),
-                esc_url_raw( $test_confirm_link ),
-                __( 'Se você já confirmou, pode ignorar este lembrete.', 'dps-registration-addon' )
-            );
-            // Converte texto simples para HTML básico
+            // Constrói HTML do email de lembrete
             $body = '<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">';
             $body .= '<p>' . esc_html( $greeting ) . '</p>';
             $body .= '<p>' . esc_html__( 'Lembrete: confirme seu cadastro no desi.pet by PRObst para ativar sua conta.', 'dps-registration-addon' ) . '</p>';
