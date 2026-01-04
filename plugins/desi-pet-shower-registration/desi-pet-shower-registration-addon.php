@@ -1910,10 +1910,13 @@ class DPS_Registration_Addon {
         $admin_send_welcome      = ! empty( $_POST['dps_admin_send_welcome'] ) && current_user_can( 'manage_options' );
 
         if ( $admin_skip_confirmation ) {
+            // Admin optou por ativar cadastro imediatamente - pula confirmação de email
             update_post_meta( $client_id, 'dps_email_confirmed', 1 );
             update_post_meta( $client_id, 'dps_is_active', 1 );
             update_post_meta( $client_id, 'dps_registration_source', 'admin_quick' );
         } else {
+            // Fluxo padrão de cadastro público - cliente precisa confirmar email
+            // Email não confirmado e cadastro inativo até confirmação
             update_post_meta( $client_id, 'dps_email_confirmed', 0 );
             update_post_meta( $client_id, 'dps_is_active', 0 );
             update_post_meta( $client_id, 'dps_registration_source', 'public' );

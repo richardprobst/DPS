@@ -723,9 +723,9 @@
      * @return {string} Selected option text or empty string.
      */
     function getSelectText(select) {
-        if (!select) return '';
+        if (!select || !select.options) return '';
         var selectedOption = select.options[select.selectedIndex];
-        return selectedOption ? selectedOption.text.trim() : select.value.trim();
+        return selectedOption ? selectedOption.text.trim() : (select.value ? select.value.trim() : '');
     }
 
     /**

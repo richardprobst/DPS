@@ -305,6 +305,7 @@
     margin-top: 16px;
     padding: 16px;
     border: 1px solid #e5e7eb;
+    border-left: 4px solid #0ea5e9;
     border-radius: 8px;
     background: #f9fafb;
 }
@@ -700,10 +701,6 @@
 /* ==========================================================================
    15. Summary Box Enhancements
    ========================================================================== */
-
-.dps-summary-box {
-    border-left: 4px solid #0ea5e9;
-}
 
 .dps-summary-section h5 {
     display: flex;
