@@ -1,7 +1,7 @@
 # Verificação de Configurações - Groomers Add-on
 
 **Data**: 2026-01-04  
-**Versão**: 1.8.2  
+**Versão**: 1.8.3  
 **Status**: ✅ Pronto para Produção
 
 ---
