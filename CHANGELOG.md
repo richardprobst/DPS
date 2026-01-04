@@ -89,13 +89,23 @@ Antes de criar uma nova versão oficial:
 - **Retry com Exponential Backoff**: Sistema automático de retry para mensagens que falham. Máximo de 5 tentativas com delays exponenciais (1min, 2min, 4min, 8min, 16min) + jitter aleatório para evitar thundering herd. Cap máximo de 1 hora.
 - **REST API de Webhooks**: Endpoints para receber status de entrega de gateways externos:
   - `POST /wp-json/dps-communications/v1/webhook/{provider}` - Recebe webhooks de Evolution API, Twilio ou formato genérico
-  - `GET /wp-json/dps-communications/v1/webhook-url` - Retorna URLs e secret para configuração (admin only)
+  - `GET /wp-json/dps-communications/v1/webhook-url` - Retorna URLs e preview do secret para configuração (admin only)
   - `GET /wp-json/dps-communications/v1/stats` - Estatísticas de comunicações e retries (admin only)
   - `GET /wp-json/dps-communications/v1/history` - Histórico de comunicações com filtros (admin only)
 - **Suporte a múltiplos providers**: Webhooks suportam Evolution API, Twilio e formato genérico, com mapeamento automático de status.
 - **Webhook Secret**: Secret automático gerado para autenticação de webhooks via header `Authorization: Bearer` ou `X-Webhook-Secret`.
 - **Limpeza automática**: Cron job diário para limpeza de transients de retry expirados e método para limpar histórico antigo (padrão 90 dias).
 - **Classes modulares**: Novas classes `DPS_Communications_History`, `DPS_Communications_Retry` e `DPS_Communications_Webhook` seguindo padrão singleton.
+
+**Communications Add-on - Verificação Funcional (v0.3.0)**
+
+- **JavaScript para UX**: Novo arquivo `communications-addon.js` com prevenção de duplo clique, validação client-side de e-mail e URL, e feedback visual durante submissão.
+- **Seção de Webhooks na UI**: Nova seção na página admin exibindo URLs de webhook e secret com botões para mostrar/ocultar e copiar para clipboard.
+- **Validação client-side**: Campos de e-mail e URL do gateway agora são validados em tempo real no navegador, com mensagens de erro em português.
+- **Prevenção de duplo clique**: Botão de salvar é desabilitado durante submissão e exibe spinner "Salvando..." para evitar envios duplicados.
+- **Melhorias de acessibilidade**: Adicionados `aria-describedby` nos campos, `:focus-visible` para navegação por teclado, e feedback visual em rows com foco.
+- **settings_errors() exibido**: Mensagens de erro de nonce/permissão agora são exibidas corretamente na página admin.
+- **Secret mascarado no REST**: Endpoint `/webhook-url` agora retorna apenas preview mascarado do secret (`abc***xyz`) em vez do valor completo.
 
 #### Security (Segurança)
 
@@ -110,6 +120,12 @@ Antes de criar uma nova versão oficial:
 - **Validação de URL dupla**: Gateway WhatsApp valida URL novamente antes do envio (`filter_var()`) como double-check de segurança.
 
 #### Fixed (Corrigido)
+
+**Communications Add-on - Correções Funcionais (v0.3.0)**
+
+- **CSS class do container**: Corrigida classe CSS do container (`wrap` → `wrap dps-communications-wrap`) para aplicar estilos customizados.
+- **Estilos para password**: Adicionados estilos para `input[type="password"]` que estavam faltando no CSS responsivo.
+- **ID do formulário**: Adicionado `id="dps-comm-settings-form"` para permitir binding de eventos JavaScript.
 
 **Communications Add-on - Correções de Bugs (v0.2.1)**
 

@@ -449,20 +449,38 @@ class DPS_Communications_Webhook {
     }
 
     /**
+     * Mascara o secret para exibição segura
+     *
+     * @since 0.3.0
+     * @param string $secret Secret completo
+     * @return string Secret mascarado (ex: "abc***xyz")
+     */
+    private function mask_secret( $secret ) {
+        $length = strlen( $secret );
+        if ( $length <= 8 ) {
+            return str_repeat( '*', $length );
+        }
+        return substr( $secret, 0, 4 ) . str_repeat( '*', $length - 8 ) . substr( $secret, -4 );
+    }
+
+    /**
      * Retorna informações do webhook para configuração
      *
      * @param WP_REST_Request $request Requisição
      * @return WP_REST_Response
      */
     public function get_webhook_info( $request ) {
+        $secret = self::get_secret();
+        
         return new WP_REST_Response( [
             'urls' => [
                 'generic'   => self::get_webhook_url( 'generic' ),
                 'evolution' => self::get_webhook_url( 'evolution' ),
                 'twilio'    => self::get_webhook_url( 'twilio' ),
             ],
-            'secret'       => self::get_secret(),
-            'instructions' => __( 'Use o secret no header Authorization: Bearer <secret> ou X-Webhook-Secret: <secret>', 'dps-communications-addon' ),
+            'secret_preview' => $this->mask_secret( $secret ),
+            'secret_length'  => strlen( $secret ),
+            'instructions'   => __( 'O secret completo está disponível na página de configurações do admin. Use no header Authorization: Bearer <secret> ou X-Webhook-Secret: <secret>', 'dps-communications-addon' ),
         ], 200 );
     }
 

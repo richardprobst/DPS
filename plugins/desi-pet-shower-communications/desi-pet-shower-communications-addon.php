@@ -115,7 +115,7 @@ class DPS_Communications_Addon {
     }
 
     /**
-     * Enfileira CSS responsivo do add-on na página de configurações.
+     * Enfileira CSS e JS do add-on na página de configurações.
      *
      * @since 1.0.0
      * @param string $hook Hook da página atual.
@@ -127,13 +127,34 @@ class DPS_Communications_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.0.0';
+        $version   = '0.3.0';
 
+        // CSS
         wp_enqueue_style(
             'dps-communications-addon',
             $addon_url . 'assets/css/communications-addon.css',
             [],
             $version
+        );
+
+        // JavaScript
+        wp_enqueue_script(
+            'dps-communications-addon',
+            $addon_url . 'assets/js/communications-addon.js',
+            [ 'jquery' ],
+            $version,
+            true // In footer
+        );
+
+        // Strings localizadas para JS
+        wp_localize_script(
+            'dps-communications-addon',
+            'dpsCommL10n',
+            [
+                'saving'       => __( 'Salvando...', 'dps-communications-addon' ),
+                'invalidEmail' => __( 'Por favor, insira um e-mail válido.', 'dps-communications-addon' ),
+                'invalidUrl'   => __( 'A URL deve usar HTTPS para segurança.', 'dps-communications-addon' ),
+            ]
         );
     }
 
@@ -166,9 +187,14 @@ class DPS_Communications_Addon {
         $status  = isset( $_GET['updated'] ) ? sanitize_text_field( wp_unslash( $_GET['updated'] ) ) : '';
 
         ?>
-        <div class="wrap">
+        <div class="wrap dps-communications-wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
             <p><?php echo esc_html__( 'Configure integrações e mensagens automáticas para WhatsApp, SMS ou e-mail.', 'dps-communications-addon' ); ?></p>
+
+            <?php
+            // Exibe mensagens de erro de settings (nonce, permissão, etc.)
+            settings_errors( 'dps_communications' );
+            ?>
 
             <?php if ( '1' === $status ) : ?>
                 <div class="notice notice-success is-dismissible">
@@ -176,7 +202,7 @@ class DPS_Communications_Addon {
                 </div>
             <?php endif; ?>
 
-            <form method="post" action="">
+            <form method="post" action="" id="dps-comm-settings-form">
                 <input type="hidden" name="dps_comm_action" value="save_settings" />
                 <?php wp_nonce_field( 'dps_comm_save', 'dps_comm_nonce' ); ?>
 
@@ -270,7 +296,65 @@ class DPS_Communications_Addon {
 
                 <?php submit_button( __( 'Salvar configurações', 'dps-communications-addon' ) ); ?>
             </form>
+
+            <?php $this->render_webhook_info_section(); ?>
         </div>
+        <?php
+    }
+
+    /**
+     * Renderiza seção de informações de webhook
+     *
+     * @since 0.3.0
+     */
+    private function render_webhook_info_section() {
+        // Só exibe se a classe de webhook existir
+        if ( ! class_exists( 'DPS_Communications_Webhook' ) ) {
+            return;
+        }
+
+        $webhook_secret = DPS_Communications_Webhook::get_secret();
+        ?>
+        <h2><?php esc_html_e( 'Configuração de Webhooks', 'dps-communications-addon' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'Use estas informações para configurar webhooks de status de entrega em seu gateway de mensagens.', 'dps-communications-addon' ); ?></p>
+
+        <table class="form-table" role="presentation">
+            <tbody>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'URL do Webhook (Evolution API)', 'dps-communications-addon' ); ?></th>
+                    <td>
+                        <code><?php echo esc_html( DPS_Communications_Webhook::get_webhook_url( 'evolution' ) ); ?></code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'URL do Webhook (Twilio)', 'dps-communications-addon' ); ?></th>
+                    <td>
+                        <code><?php echo esc_html( DPS_Communications_Webhook::get_webhook_url( 'twilio' ) ); ?></code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'URL do Webhook (Genérico)', 'dps-communications-addon' ); ?></th>
+                    <td>
+                        <code><?php echo esc_html( DPS_Communications_Webhook::get_webhook_url( 'generic' ) ); ?></code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Secret de Autenticação', 'dps-communications-addon' ); ?></th>
+                    <td>
+                        <div class="dps-secret-wrapper">
+                            <input type="password" id="dps_webhook_secret" value="<?php echo esc_attr( $webhook_secret ); ?>" class="regular-text" readonly />
+                            <button type="button" class="button button-secondary" id="dps-toggle-secret" aria-label="<?php esc_attr_e( 'Mostrar/ocultar secret', 'dps-communications-addon' ); ?>">
+                                <span class="dashicons dashicons-visibility"></span>
+                            </button>
+                            <button type="button" class="button button-secondary" id="dps-copy-secret" aria-label="<?php esc_attr_e( 'Copiar secret', 'dps-communications-addon' ); ?>">
+                                <span class="dashicons dashicons-clipboard"></span>
+                            </button>
+                        </div>
+                        <p class="description"><?php esc_html_e( 'Use no header: Authorization: Bearer <secret> ou X-Webhook-Secret: <secret>', 'dps-communications-addon' ); ?></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <?php
     }
 

@@ -73,7 +73,8 @@
 
 .dps-communications-wrap .form-table input[type="text"],
 .dps-communications-wrap .form-table input[type="email"],
-.dps-communications-wrap .form-table input[type="url"] {
+.dps-communications-wrap .form-table input[type="url"],
+.dps-communications-wrap .form-table input[type="password"] {
     width: 100%;
     max-width: 400px;
     padding: 8px 12px;
@@ -88,6 +89,13 @@
     outline: none;
     border-color: #0ea5e9;
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Focus visible para navegação por teclado */
+.dps-communications-wrap .form-table input:focus-visible,
+.dps-communications-wrap .form-table textarea:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
 }
 
 /* ==========================================================================
@@ -134,6 +142,25 @@
     color: #374151;
 }
 
+/* Erros de validação */
+.dps-communications-wrap .form-table .dps-field-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.dps-communications-wrap .form-table .dps-field-error {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ef4444;
+    line-height: 1.4;
+}
+
+/* Row com foco (para navegação por teclado) */
+.dps-communications-wrap .form-table tr.is-focused {
+    background-color: #f8fafc;
+}
+
 /* ==========================================================================
    6. Botão de Envio
    ========================================================================== */
@@ -175,6 +202,32 @@
     box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
 }
 
+/* Estado de loading/disabled do botão */
+.dps-communications-wrap .submit .button-primary:disabled,
+.dps-communications-wrap .submit .button-primary.is-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+}
+
+.dps-communications-wrap .submit .button-primary .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: dps-spin 0.8s linear infinite;
+}
+
+@keyframes dps-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* ==========================================================================
    7. Notices
    ========================================================================== */
@@ -193,6 +246,50 @@
 .dps-communications-wrap .notice-error {
     background: #fee2e2;
     border-left: 4px solid #ef4444;
+}
+
+/* ==========================================================================
+   7.5. Seção de Webhook
+   ========================================================================== */
+
+.dps-communications-wrap .form-table code {
+    display: inline-block;
+    background: #f3f4f6;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #374151;
+    word-break: break-all;
+    max-width: 100%;
+}
+
+.dps-communications-wrap .dps-secret-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dps-communications-wrap .dps-secret-wrapper input {
+    flex: 1;
+    min-width: 200px;
+    background: #f9fafb;
+}
+
+.dps-communications-wrap .dps-secret-wrapper .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    min-width: 36px;
+}
+
+.dps-communications-wrap .dps-secret-wrapper .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
 }
 
 /* ==========================================================================
@@ -221,7 +318,8 @@
     
     .dps-communications-wrap .form-table input[type="text"],
     .dps-communications-wrap .form-table input[type="email"],
-    .dps-communications-wrap .form-table input[type="url"] {
+    .dps-communications-wrap .form-table input[type="url"],
+    .dps-communications-wrap .form-table input[type="password"] {
         max-width: 100%;
     }
     
@@ -237,6 +335,7 @@
     .dps-communications-wrap .form-table input[type="text"],
     .dps-communications-wrap .form-table input[type="email"],
     .dps-communications-wrap .form-table input[type="url"],
+    .dps-communications-wrap .form-table input[type="password"],
     .dps-communications-wrap .form-table textarea {
         font-size: 16px; /* Evita zoom automático no iOS */
         padding: 12px;
