@@ -3703,3 +3703,274 @@
         font-size: 18px;
     }
 }
+
+/* ================================================
+   HISTÓRICO - MELHORIAS DE LAYOUT v2.0
+   ================================================ */
+
+/* Container de métricas fora do grid */
+.dps-history-metrics {
+    margin-bottom: 24px;
+}
+
+/* Grid de 5 cards */
+.dps-history-cards--five {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* Card de pendências (a receber) */
+.dps-history-card--pending {
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-history-card--pending .dps-history-card__icon {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.dps-history-card--pending .dps-history-card__value {
+    color: #d97706;
+}
+
+/* Card de pagos (recebido) */
+.dps-history-card--paid {
+    border-left: 4px solid #10b981;
+}
+
+.dps-history-card--paid .dps-history-card__icon {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.dps-history-card--paid .dps-history-card__value {
+    color: #059669;
+}
+
+/* Valor na tabela com destaque */
+.dps-history-value {
+    font-weight: 600;
+    color: #059669;
+}
+
+/* Links de ação na tabela de histórico */
+.dps-history-actions {
+    white-space: nowrap;
+}
+
+.dps-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    margin: 0 2px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dps-action-link .dps-action-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.dps-action-link .dps-action-text {
+    display: none;
+}
+
+.dps-action-link--edit {
+    color: #0284c7;
+}
+
+.dps-action-link--edit:hover {
+    background: #eff6ff;
+    color: #0369a1;
+}
+
+.dps-action-link--duplicate {
+    color: #7c3aed;
+}
+
+.dps-action-link--duplicate:hover {
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+.dps-action-link--delete {
+    color: #dc2626;
+}
+
+.dps-action-link--delete:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* Tooltip para ícones em desktop */
+@media (min-width: 1200px) {
+    .dps-action-link .dps-action-text {
+        display: inline;
+    }
+    
+    .dps-action-link .dps-action-icon {
+        display: none;
+    }
+}
+
+/* Responsividade dos 5 cards */
+@media (max-width: 1200px) {
+    .dps-history-cards--five {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .dps-history-cards--five {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-history-cards--five {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-action-link .dps-action-text {
+        display: none !important;
+    }
+    
+    .dps-action-link .dps-action-icon {
+        display: inline !important;
+    }
+}
+
+/* Resumo dinâmico melhorado */
+.dps-history-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #0ea5e9;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.dps-history-summary__content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-history-summary__separator {
+    color: #9ca3af;
+}
+
+.dps-history-summary__count strong,
+.dps-history-summary__total strong {
+    color: #0284c7;
+}
+
+.dps-history-summary__pending {
+    color: #d97706;
+}
+
+.dps-history-summary__pending strong {
+    color: #b45309;
+}
+
+.dps-history-summary__filtered {
+    display: flex;
+    align-items: center;
+}
+
+.dps-history-summary__filtered-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+/* Título da toolbar com ícone */
+.dps-history-toolbar__title .dps-section-title__icon {
+    margin-right: 6px;
+}
+
+/* Botões na toolbar com ícone */
+.dps-history-toolbar__actions .button span {
+    margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+    .dps-history-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dps-history-summary__content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .dps-history-summary__separator {
+        display: none;
+    }
+}
+
+/* Destaque para linhas com pagamento pendente */
+#dps-history-table tbody tr[data-paid="0"] {
+    background: linear-gradient(90deg, #fef3c7 0%, transparent 30%);
+}
+
+#dps-history-table tbody tr[data-paid="0"]:hover {
+    background: linear-gradient(90deg, #fde68a 0%, #f9fafb 30%);
+}
+
+/* Linha de status cancelado */
+#dps-history-table tbody tr[data-status="cancelado"] {
+    opacity: 0.7;
+}
+
+#dps-history-table tbody tr[data-status="cancelado"] .dps-history-value {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+/* Seção de timeline de histórico */
+.dps-history-timeline-section {
+    margin-bottom: 24px;
+}
+
+.dps-history-timeline-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-history-timeline-title {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-history-timeline-description {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+}
