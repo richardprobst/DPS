@@ -51,8 +51,8 @@ class DPS_Tools_Hub {
     public function register_hub_menu() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Ferramentas', 'dps-base' ),
-            __( 'Ferramentas', 'dps-base' ),
+            __( 'Ferramentas', 'desi-pet-shower' ),
+            __( 'Ferramentas', 'desi-pet-shower' ),
             'manage_options',
             'dps-tools-hub',
             [ $this, 'render_hub_page' ]
@@ -68,19 +68,19 @@ class DPS_Tools_Hub {
 
         // Aba Formulário de Cadastro (se add-on ativo e atualizado)
         if ( class_exists( 'DPS_Registration_Addon' ) && method_exists( 'DPS_Registration_Addon', 'get_instance' ) ) {
-            $tabs['registration'] = __( 'Formulário de Cadastro', 'dps-base' );
+            $tabs['registration'] = __( 'Formulário de Cadastro', 'desi-pet-shower' );
             $callbacks['registration'] = [ $this, 'render_registration_tab' ];
         }
 
         // Se nenhuma ferramenta está disponível
         if ( empty( $tabs ) ) {
-            echo '<div class="wrap"><h1>' . esc_html__( 'Ferramentas', 'dps-base' ) . '</h1>';
-            echo '<p>' . esc_html__( 'Nenhuma ferramenta administrativa está ativa no momento.', 'dps-base' ) . '</p></div>';
+            echo '<div class="wrap"><h1>' . esc_html__( 'Ferramentas', 'desi-pet-shower' ) . '</h1>';
+            echo '<p>' . esc_html__( 'Nenhuma ferramenta administrativa está ativa no momento.', 'desi-pet-shower' ) . '</p></div>';
             return;
         }
 
         DPS_Admin_Tabs_Helper::render_tabbed_page(
-            __( 'Ferramentas', 'dps-base' ),
+            __( 'Ferramentas', 'desi-pet-shower' ),
             $tabs,
             $callbacks,
             'dps-tools-hub',
@@ -105,7 +105,7 @@ class DPS_Tools_Hub {
             echo $content;
         } else {
             echo '<div class="notice notice-warning"><p>';
-            esc_html_e( 'O add-on de Cadastro precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            esc_html_e( 'O add-on de Cadastro precisa ser atualizado para a versão mais recente.', 'desi-pet-shower' );
             echo '</p></div>';
         }
     }

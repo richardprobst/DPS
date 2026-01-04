@@ -142,7 +142,7 @@ class DPS_Dashboard {
             <div class="dps-modules-grid">
                 <?php foreach ( $modules as $module ) : ?>
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $module['slug'] ) ); ?>" class="dps-module-card">
-                    <div class="dps-module-card__icon"><?php echo $module['icon']; ?></div>
+                    <div class="dps-module-card__icon"><?php echo esc_html( $module['icon'] ); ?></div>
                     <div class="dps-module-card__title"><?php echo esc_html( $module['title'] ); ?></div>
                     <div class="dps-module-card__description"><?php echo esc_html( $module['description'] ); ?></div>
                 </a>
