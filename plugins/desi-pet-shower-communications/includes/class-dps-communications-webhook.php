@@ -452,10 +452,15 @@ class DPS_Communications_Webhook {
      * Mascara o secret para exibição segura
      *
      * @since 0.3.0
-     * @param string $secret Secret completo
-     * @return string Secret mascarado (ex: "abc***xyz")
+     * @param string|null $secret Secret completo
+     * @return string Secret mascarado (ex: "abc***xyz") ou string vazia se inválido
      */
     private function mask_secret( $secret ) {
+        // Valida que é uma string não vazia
+        if ( ! is_string( $secret ) || '' === $secret ) {
+            return '';
+        }
+
         $length = strlen( $secret );
         if ( $length <= 8 ) {
             return str_repeat( '*', $length );

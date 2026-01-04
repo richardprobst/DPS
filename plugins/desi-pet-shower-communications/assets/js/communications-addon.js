@@ -82,7 +82,6 @@
             if (emailValue && !isValidEmail(emailValue)) {
                 isValid = false;
                 $emailField.trigger('blur');
-                $emailField.focus();
             }
             
             // Valida URL
@@ -90,12 +89,14 @@
             if (urlValue && !isValidHttpsUrl(urlValue)) {
                 isValid = false;
                 $urlField.trigger('blur');
-                if (isValid) { // Só foca se email estava válido
-                    $urlField.focus();
-                }
             }
             
+            // Foca no primeiro campo inválido
             if (!isValid) {
+                var $firstInvalid = $form.find('.dps-field-invalid').first();
+                if ($firstInvalid.length) {
+                    $firstInvalid.focus();
+                }
                 e.preventDefault();
                 return false;
             }
@@ -252,14 +253,24 @@
     /**
      * Fallback para copiar ao clipboard (browsers antigos)
      * 
+     * Usa document.execCommand('copy') que é deprecated mas ainda funciona
+     * em browsers mais antigos que não suportam Clipboard API.
+     * 
      * @param {string} text Texto a copiar
+     * @deprecated Usar navigator.clipboard.writeText() quando disponível
      */
     function fallbackCopyToClipboard(text) {
-        var $temp = $('<input>');
-        $('body').append($temp);
-        $temp.val(text).select();
-        document.execCommand('copy');
-        $temp.remove();
+        try {
+            var $temp = $('<input>');
+            $('body').append($temp);
+            $temp.val(text).select();
+            // eslint-disable-next-line no-restricted-syntax
+            document.execCommand('copy');
+            $temp.remove();
+        } catch (e) {
+            // Silently fail - user will need to copy manually
+            console.warn('Clipboard fallback failed:', e);
+        }
     }
 
     // Inicializa quando DOM estiver pronto

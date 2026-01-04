@@ -228,6 +228,15 @@
     }
 }
 
+/* Respeita preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    .dps-communications-wrap .submit .button-primary .spinner {
+        animation: none;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-top-color: #ffffff;
+    }
+}
+
 /* ==========================================================================
    7. Notices
    ========================================================================== */
