@@ -516,12 +516,49 @@
       var $end       = $('#dps-history-end');
       var $pending   = $('#dps-history-pending');
       var $summary   = $('#dps-history-summary');
-      var baseText   = $summary.find('strong').text();
+      var $summaryContent = $summary.find('.dps-history-summary__content');
+      var $summaryFiltered = $summary.find('.dps-history-summary__filtered');
+      var totalRecords = parseInt($summary.data('total-records')) || 0;
+      var totalValue = parseFloat($summary.data('total-value')) || 0;
       var $clearBtn  = $('#dps-history-clear');
       var $exportBtn = $('#dps-history-export');
 
       function formatCurrencyBR(value){
         return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function updateSummaryDisplay(count, total, isFiltered) {
+        // Se temos o novo layout de resumo
+        if ($summaryContent.length) {
+          var $countEl = $summaryContent.find('.dps-history-summary__count strong');
+          var $totalEl = $summaryContent.find('.dps-history-summary__total strong');
+          
+          if ($countEl.length) {
+            $countEl.text(count.toLocaleString('pt-BR'));
+          }
+          if ($totalEl.length) {
+            $totalEl.text('R$ ' + formatCurrencyBR(total));
+          }
+          
+          // Mostrar/ocultar badge de filtrado
+          if ($summaryFiltered.length) {
+            if (isFiltered && count !== totalRecords) {
+              $summaryFiltered.show();
+            } else {
+              $summaryFiltered.hide();
+            }
+          }
+        } else {
+          // Fallback para layout antigo
+          if (count) {
+            var summaryText = dpsBaseL10n.historySummary
+              .replace('%1$s', count.toLocaleString('pt-BR'))
+              .replace('%2$s', formatCurrencyBR(total));
+            $summary.find('strong').first().text(summaryText);
+          } else {
+            $summary.find('strong').first().text(dpsBaseL10n.historyEmpty);
+          }
+        }
       }
 
       function applyHistoryFilters(){
@@ -534,6 +571,7 @@
         var pendingOnly = $pending.is(':checked');
         var visibleCount = 0;
         var visibleTotal = 0;
+        var hasActiveFilter = searchTerm || clientVal || petVal || statusVal || startVal || endVal || pendingOnly;
 
         $rows.each(function(){
           var $row = $(this);
@@ -569,14 +607,7 @@
           }
         });
 
-        if (visibleCount) {
-          var summaryText = dpsBaseL10n.historySummary
-            .replace('%1$s', visibleCount.toLocaleString('pt-BR'))
-            .replace('%2$s', formatCurrencyBR(visibleTotal));
-          $summary.find('strong').text(summaryText);
-        } else {
-          $summary.find('strong').text(dpsBaseL10n.historyEmpty);
-        }
+        updateSummaryDisplay(visibleCount, visibleTotal, hasActiveFilter);
       }
 
       function exportHistory(){
@@ -620,8 +651,9 @@
         $start.val('');
         $end.val('');
         $pending.prop('checked', false);
-        $summary.find('strong').text(baseText);
         $('.dps-history-quick-btn').removeClass('active');
+        // Restaurar valores originais
+        updateSummaryDisplay(totalRecords, totalValue, false);
         applyHistoryFilters();
       }
 

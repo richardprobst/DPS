@@ -130,10 +130,15 @@ class DPS_Base_Frontend {
         $batch_size = (int) apply_filters( 'dps_history_batch_size', 200 );
         $batch_size = $batch_size > 0 ? $batch_size : 50;
 
-        $appointments = [];
-        $total_amount = 0;
-        $total_count  = 0;
-        $paged        = 1;
+        $appointments    = [];
+        $total_amount    = 0;
+        $total_count     = 0;
+        $pending_count   = 0;
+        $pending_amount  = 0;
+        $paid_count      = 0;
+        $paid_amount     = 0;
+        $cancelled_count = 0;
+        $paged           = 1;
 
         do {
             $query = new WP_Query(
@@ -163,10 +168,24 @@ class DPS_Base_Frontend {
 
             foreach ( $batch_ids as $appt_id ) {
                 $status_meta = get_post_meta( $appt_id, 'appointment_status', true );
+                $status_key  = strtolower( str_replace( ' ', '_', (string) $status_meta ) );
+                if ( 'finalizado_e_pago' === $status_key ) {
+                    $status_key = 'finalizado_pago';
+                }
                 $total_count++;
+                $appt_value = (float) get_post_meta( $appt_id, 'appointment_total_value', true );
 
-                if ( 'cancelado' !== $status_meta ) {
-                    $total_amount += (float) get_post_meta( $appt_id, 'appointment_total_value', true );
+                if ( 'cancelado' === $status_key ) {
+                    $cancelled_count++;
+                } elseif ( 'finalizado_pago' === $status_key ) {
+                    $paid_count++;
+                    $paid_amount  += $appt_value;
+                    $total_amount += $appt_value;
+                } else {
+                    // Finalizado (pendente de pagamento)
+                    $pending_count++;
+                    $pending_amount += $appt_value;
+                    $total_amount   += $appt_value;
                 }
 
                 $appointments[] = (object) [ 'ID' => (int) $appt_id ];
@@ -180,9 +199,14 @@ class DPS_Base_Frontend {
         }
 
         return [
-            'appointments' => $appointments,
-            'total_amount' => $total_amount,
-            'total_count'  => $total_count,
+            'appointments'    => $appointments,
+            'total_amount'    => $total_amount,
+            'total_count'     => $total_count,
+            'pending_count'   => $pending_count,
+            'pending_amount'  => $pending_amount,
+            'paid_count'      => $paid_count,
+            'paid_amount'     => $paid_amount,
+            'cancelled_count' => $cancelled_count,
         ];
     }
 
@@ -2326,23 +2350,29 @@ class DPS_Base_Frontend {
             'cancelado'       => __( 'Cancelado', 'desi-pet-shower' ),
         ];
 
-        $total_count  = $history_data['total_count'];
-        $total_amount = $history_data['total_amount'];
-        $summary_value = number_format_i18n( $total_amount, 2 );
+        $total_count     = $history_data['total_count'];
+        $total_amount    = $history_data['total_amount'];
+        $pending_count   = $history_data['pending_count'];
+        $pending_amount  = $history_data['pending_amount'];
+        $paid_count      = $history_data['paid_count'];
+        $paid_amount     = $history_data['paid_amount'];
+        $cancelled_count = $history_data['cancelled_count'];
+        $summary_value   = number_format_i18n( $total_amount, 2 );
 
         ob_start();
         echo '<div class="dps-section" id="dps-section-historico">';
-        echo '<div class="dps-section-grid">';
 
-        echo '<div class="dps-surface dps-surface--neutral">';
+        // Cabeçalho da seção
         echo '<div class="dps-history-header">';
         echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">📚</span>' . esc_html__( 'Histórico de Atendimentos', 'desi-pet-shower' ) . '</h2>';
-        echo '<p class="dps-history-header__description">' . esc_html__( 'Visualize, filtre e exporte todos os atendimentos registrados no sistema.', 'desi-pet-shower' ) . '</p>';
+        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Visualize, filtre e exporte todos os atendimentos registrados no sistema.', 'desi-pet-shower' ) . '</p>';
         echo '</div>';
 
-        // Cards de métricas rápidas
-        echo '<div class="dps-history-overview">';
-        echo '<div class="dps-history-cards">';
+        // Cards de métricas - grid de 5 cards
+        echo '<div class="dps-history-metrics">';
+        echo '<div class="dps-history-cards dps-history-cards--five">';
+
+        // Card: Atendimentos Hoje
         echo '<div class="dps-history-card dps-history-card--today">';
         echo '<span class="dps-history-card__icon" aria-hidden="true">📅</span>';
         echo '<div class="dps-history-card__content">';
@@ -2350,6 +2380,8 @@ class DPS_Base_Frontend {
         echo '<span class="dps-history-card__label">' . esc_html__( 'Hoje', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
         echo '</div>';
+
+        // Card: Agendamentos Futuros
         echo '<div class="dps-history-card dps-history-card--upcoming">';
         echo '<span class="dps-history-card__icon" aria-hidden="true">🗓️</span>';
         echo '<div class="dps-history-card__content">';
@@ -2357,23 +2389,40 @@ class DPS_Base_Frontend {
         echo '<span class="dps-history-card__label">' . esc_html__( 'Futuros', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
         echo '</div>';
-        echo '<div class="dps-history-card dps-history-card--past">';
+
+        // Card: Recebido (Pago)
+        echo '<div class="dps-history-card dps-history-card--paid">';
         echo '<span class="dps-history-card__icon" aria-hidden="true">✓</span>';
         echo '<div class="dps-history-card__content">';
-        echo '<strong class="dps-history-card__value">' . esc_html( number_format_i18n( $timeline_counts['past'] ?? 0 ) ) . '</strong>';
-        echo '<span class="dps-history-card__label">' . esc_html__( 'Passados', 'desi-pet-shower' ) . '</span>';
+        echo '<strong class="dps-history-card__value">R$ ' . esc_html( number_format_i18n( $paid_amount, 2 ) ) . '</strong>';
+        echo '<span class="dps-history-card__label">' . sprintf( esc_html__( '%s pagos', 'desi-pet-shower' ), number_format_i18n( $paid_count ) ) . '</span>';
         echo '</div>';
         echo '</div>';
+
+        // Card: A Receber (Pendente)
+        echo '<div class="dps-history-card dps-history-card--pending">';
+        echo '<span class="dps-history-card__icon" aria-hidden="true">⏳</span>';
+        echo '<div class="dps-history-card__content">';
+        echo '<strong class="dps-history-card__value">R$ ' . esc_html( number_format_i18n( $pending_amount, 2 ) ) . '</strong>';
+        echo '<span class="dps-history-card__label">' . sprintf( esc_html__( '%s pendentes', 'desi-pet-shower' ), number_format_i18n( $pending_count ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Receita Total
         echo '<div class="dps-history-card dps-history-card--total">';
         echo '<span class="dps-history-card__icon" aria-hidden="true">💰</span>';
         echo '<div class="dps-history-card__content">';
         echo '<strong class="dps-history-card__value">R$ ' . esc_html( $summary_value ) . '</strong>';
-        echo '<span class="dps-history-card__label">' . esc_html__( 'Receita', 'desi-pet-shower' ) . '</span>';
+        echo '<span class="dps-history-card__label">' . esc_html__( 'Receita total', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
         echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
+
+        echo '</div>'; // .dps-history-cards
+        echo '</div>'; // .dps-history-metrics
+
+        echo '<div class="dps-section-grid">';
+
+        echo '<div class="dps-surface dps-surface--neutral">';
 
         $timeline_status_selector = function( $appt_id, $status ) use ( $status_labels ) {
             return self::render_status_selector( $appt_id, $status, $status_labels, false );
@@ -2404,17 +2453,28 @@ class DPS_Base_Frontend {
         
         // Cabeçalho da seção de tabela com título e ações
         echo '<div class="dps-history-toolbar__header">';
-        echo '<h3 class="dps-history-toolbar__title">' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
+        echo '<h3 class="dps-history-toolbar__title"><span class="dps-section-title__icon">📋</span>' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
         echo '<div class="dps-history-toolbar__actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear">' . esc_html__( 'Limpar', 'desi-pet-shower' ) . '</button>';
-        echo '<button type="button" class="button button-primary" id="dps-history-export">' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-secondary" id="dps-history-clear"><span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-primary" id="dps-history-export"><span aria-hidden="true">📥</span> ' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
         echo '</div>';
         echo '</div>';
 
         // Resumo dinâmico dos filtros aplicados (atualizado via JavaScript)
-        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '">';
+        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '" data-pending-count="' . esc_attr( $pending_count ) . '" data-pending-amount="' . esc_attr( $pending_amount ) . '">';
         if ( $total_count ) {
-            echo '<strong>' . sprintf( esc_html__( '%1$s atendimentos • R$ %2$s', 'desi-pet-shower' ), number_format_i18n( $total_count ), $summary_value ) . '</strong>';
+            echo '<div class="dps-history-summary__content">';
+            echo '<span class="dps-history-summary__count"><strong>' . esc_html( number_format_i18n( $total_count ) ) . '</strong> ' . esc_html__( 'atendimentos', 'desi-pet-shower' ) . '</span>';
+            echo '<span class="dps-history-summary__separator">•</span>';
+            echo '<span class="dps-history-summary__total"><strong>R$ ' . esc_html( $summary_value ) . '</strong></span>';
+            if ( $pending_count > 0 ) {
+                echo '<span class="dps-history-summary__separator">•</span>';
+                echo '<span class="dps-history-summary__pending">' . sprintf( esc_html__( '%s pendente(s) de pagamento', 'desi-pet-shower' ), '<strong>' . number_format_i18n( $pending_count ) . '</strong>' ) . '</span>';
+            }
+            echo '</div>';
+            echo '<div class="dps-history-summary__filtered" style="display: none;">';
+            echo '<span class="dps-history-summary__filtered-badge">🔍 ' . esc_html__( 'Filtrado', 'desi-pet-shower' ) . '</span>';
+            echo '</div>';
         } else {
             echo '<strong>' . esc_html__( 'Nenhum atendimento registrado.', 'desi-pet-shower' ) . '</strong>';
         }
@@ -2568,6 +2628,15 @@ class DPS_Base_Frontend {
                 $total_display = $total_val > 0 ? 'R$ ' . number_format_i18n( $total_val, 2 ) : '—';
                 $paid_flag = ( 'finalizado' === $status_key ) ? '0' : '1';
                 $date_attr = $date ? $date : '';
+
+                // Determinar classe do badge de status
+                $badge_class = 'dps-status-badge--pending';
+                if ( 'finalizado_pago' === $status_key ) {
+                    $badge_class = 'dps-status-badge--paid';
+                } elseif ( 'cancelado' === $status_key ) {
+                    $badge_class = 'dps-status-badge--cancelled';
+                }
+
                 echo '<tr data-date="' . esc_attr( $date_attr ) . '" data-status="' . esc_attr( $status_key ) . '" data-client="' . esc_attr( $client_id ) . '" data-pet="' . esc_attr( $pet_ids_attr ) . '" data-total="' . esc_attr( $total_val ) . '" data-paid="' . esc_attr( $paid_flag ) . '">';
                 $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
@@ -2575,9 +2644,10 @@ class DPS_Base_Frontend {
                 echo '<td>' . esc_html( $client_name ) . '</td>';
                 echo '<td>' . esc_html( $pet_display ) . '</td>';
                 echo '<td class="hide-mobile">' . esc_html( $services_text ) . '</td>';
-                echo '<td>' . esc_html( $total_display ) . '</td>';
-                echo '<td>' . esc_html( $status_label ) . '</td>';
+                echo '<td class="dps-history-value">' . esc_html( $total_display ) . '</td>';
+                echo '<td><span class="dps-status-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $status_label ) . '</span></td>';
                 echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
+
                 $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $delete_url = wp_nonce_url(
@@ -2585,13 +2655,21 @@ class DPS_Base_Frontend {
                     'dps_delete',
                     'dps_nonce'
                 );
-                echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $duplicate_url ) . '" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</a> | <a href="' . esc_url( $delete_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</a></td>';
+                echo '<td class="dps-history-actions">';
+                echo '<a href="' . esc_url( $edit_url ) . '" class="dps-action-link dps-action-link--edit" title="' . esc_attr__( 'Editar agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">✏️</span><span class="dps-action-text">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</span></a>';
+                echo '<a href="' . esc_url( $duplicate_url ) . '" class="dps-action-link dps-action-link--duplicate" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">📋</span><span class="dps-action-text">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</span></a>';
+                echo '<a href="' . esc_url( $delete_url ) . '" class="dps-action-link dps-action-link--delete" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');" title="' . esc_attr__( 'Excluir agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">🗑️</span><span class="dps-action-text">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</span></a>';
+                echo '</td>';
                 echo '</tr>';
             }
             echo '</tbody></table>';
             echo '</div>';
         } else {
-            echo '<p>' . esc_html__( 'Nenhum atendimento finalizado foi encontrado.', 'desi-pet-shower' ) . '</p>';
+            echo '<div class="dps-empty-state">';
+            echo '<span class="dps-empty-state__icon">📋</span>';
+            echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum atendimento finalizado', 'desi-pet-shower' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Quando você finalizar atendimentos, eles aparecerão aqui com todos os detalhes.', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
         }
 
         echo '</div>'; // dps-surface--neutral (toolbar + tabela)
