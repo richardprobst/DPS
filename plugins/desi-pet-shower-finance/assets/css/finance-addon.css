@@ -167,7 +167,8 @@
     align-items: center;
 }
 
-.dps-input-prefix {
+/* Estilo para .dps-input-prefix dentro do wrapper de dinheiro do Finance */
+.dps-input-money-wrapper .dps-input-prefix {
     position: absolute;
     left: 12px;
     color: #6b7280;

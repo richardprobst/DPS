@@ -566,7 +566,8 @@ table.dps-table tr.dps-canceled-row {
     gap: 6px;
 }
 
-.dps-input-prefix {
+/* Estilo para .dps-input-prefix como span DENTRO de .dps-input-with-prefix */
+.dps-input-with-prefix .dps-input-prefix {
     background: #f3f4f6;
     color: #6b7280;
     border: 1px solid #e5e7eb;
