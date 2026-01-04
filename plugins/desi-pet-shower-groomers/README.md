@@ -30,7 +30,7 @@ O **Groomers Add-on** permite cadastrar e gerenciar profissionais de banho e tos
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
-**Versão atual**: 1.8.1
+**Versão atual**: 1.8.2
 
 ## Shortcodes disponíveis
 
@@ -169,6 +169,20 @@ Post type para armazenar avaliações de clientes.
 | `_dps_review_appointment_id` | int | ID do agendamento relacionado (opcional) |
 
 ## Changelog
+
+### [1.8.2] - 2026-01-04
+
+#### Fixed
+- **Modal de Edição**: Corrigida tag HTML `</div>` faltante que quebrava o layout do modal
+- **Handler Update**: `handle_update_groomer()` agora fornece feedback quando dados do formulário são inválidos
+- **Handler Export**: `handle_export_csv()` agora fornece feedback quando parâmetros de segurança estão ausentes
+- **Handler Logout**: `handle_logout_request()` agora redireciona com erro quando nonce falha (não retorna silenciosamente)
+- **Handler Toggle Status**: Validação adicional de groomer_id e feedback quando parâmetros ausentes
+- **Handler Delete**: Validação adicional de groomer_id e feedback quando parâmetros ausentes
+
+#### Added
+- Documentação de verificação funcional (QA) em `docs/qa/GROOMERS_FUNCTIONAL_QA.md`
+- Plano de testes manuais e sugestões de E2E
 
 ### [1.8.1] - 2026-01-04
 

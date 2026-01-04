@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.8.1
+ * Version:           1.8.2
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -63,7 +63,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.8.1';
+    const VERSION = '1.8.2';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -1250,7 +1250,9 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_update_groomer() {
+        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
         if ( ! isset( $_POST['dps_edit_groomer_nonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Dados do formulário inválidos.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -1323,7 +1325,9 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_export_csv() {
+        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
         if ( ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros de segurança ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -2293,6 +2297,7 @@ class DPS_Groomers_Addon {
                                     <label for="edit_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
                                     <input type="number" name="dps_groomer_commission" id="edit_groomer_commission" class="regular-text" min="0" max="100" step="0.5" />
                                 </div>
+                            </div>
                         </div>
                         
                         <div class="dps-modal-footer">
