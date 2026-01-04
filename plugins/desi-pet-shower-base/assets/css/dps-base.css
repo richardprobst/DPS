@@ -3928,3 +3928,49 @@
         display: none;
     }
 }
+
+/* Destaque para linhas com pagamento pendente */
+#dps-history-table tbody tr[data-paid="0"] {
+    background: linear-gradient(90deg, #fef3c7 0%, transparent 30%);
+}
+
+#dps-history-table tbody tr[data-paid="0"]:hover {
+    background: linear-gradient(90deg, #fde68a 0%, #f9fafb 30%);
+}
+
+/* Linha de status cancelado */
+#dps-history-table tbody tr[data-status="cancelado"] {
+    opacity: 0.7;
+}
+
+#dps-history-table tbody tr[data-status="cancelado"] .dps-history-value {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+/* Seção de timeline de histórico */
+.dps-history-timeline-section {
+    margin-bottom: 24px;
+}
+
+.dps-history-timeline-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-history-timeline-title {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dps-history-timeline-description {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+}

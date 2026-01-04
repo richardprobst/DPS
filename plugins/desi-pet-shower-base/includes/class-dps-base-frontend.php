@@ -2422,8 +2422,6 @@ class DPS_Base_Frontend {
 
         echo '<div class="dps-section-grid">';
 
-        echo '<div class="dps-surface dps-surface--neutral">';
-
         $timeline_status_selector = function( $appt_id, $status ) use ( $status_labels ) {
             return self::render_status_selector( $appt_id, $status, $status_labels, false );
         };
@@ -2432,7 +2430,12 @@ class DPS_Base_Frontend {
             return self::build_charge_html( $appt_id, 'historico' );
         };
 
-        echo '<div class="dps-surface dps-surface--info">';
+        // Seção: Linha do tempo de agendamentos
+        echo '<div class="dps-surface dps-surface--info dps-history-timeline-section">';
+        echo '<div class="dps-history-timeline-header">';
+        echo '<h3 class="dps-history-timeline-title"><span class="dps-section-title__icon">📆</span>' . esc_html__( 'Visão Geral dos Agendamentos', 'desi-pet-shower' ) . '</h3>';
+        echo '<p class="dps-history-timeline-description">' . esc_html__( 'Agendamentos organizados por data: hoje, futuros e passados.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
         dps_get_template(
             'appointments-list.php',
             [
@@ -2442,7 +2445,7 @@ class DPS_Base_Frontend {
                 'status_labels'    => $status_labels,
                 'status_selector'  => $timeline_status_selector,
                 'charge_renderer'  => $history_charge_renderer,
-                'list_title'       => __( 'Linha do tempo de agendamentos', 'desi-pet-shower' ),
+                'list_title'       => '',
             ]
         );
         echo '</div>';
