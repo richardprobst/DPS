@@ -1,184 +1,129 @@
 # Melhorias de Layout - Aba FINANCEIRO
 
-**Data:** 2025-12-28  
-**Versão:** 1.7.0  
-**Escopo:** Reorganização completa do layout da aba Financeiro no Painel de Gestão DPS
+**Data:** 2026-01-04  
+**Versão:** 1.8.0  
+**Escopo:** Reorganização completa do layout da aba Financeiro para consistência com o padrão visual do sistema DPS
 
 ---
 
 ## Resumo das Melhorias
 
-Esta atualização traz uma reorganização significativa do layout da aba FINANCEIRO, seguindo as diretrizes do `VISUAL_STYLE_GUIDE.md` e focando em:
+Esta atualização traz uma modernização significativa do layout da aba FINANCEIRO, alinhando-a com o padrão visual global do sistema DPS conforme definido em `VISUAL_STYLE_GUIDE.md`:
 
-1. **Redução de bagunça visual** - menos colunas, mais consolidação
-2. **Melhor hierarquia** - seções colapsáveis, títulos claros
-3. **Usabilidade** - filtros agrupados logicamente, ações mais acessíveis
-4. **Responsividade** - layout adaptável para diferentes tamanhos de tela
-
----
-
-## Problemas Identificados (Antes)
-
-### Formulário de Nova Transação
-- ❌ Três fieldsets separados ocupando muito espaço vertical
-- ❌ Hierarquia visual não clara
-- ❌ Legends pequenos comparados ao espaço
-
-### Área de Filtros
-- ❌ Filtros e botões de ação misturados em uma única linha
-- ❌ 8 elementos horizontais sem separação visual
-- ❌ Botões de exportação longos (ex: "Exportar DRE (PDF)")
-- ❌ Difícil identificar quais filtros estão ativos
-
-### Tabela de Transações
-- ❌ 11 colunas: Data, Valor, Categoria, Tipo, Status, Pagamentos, Cliente, Pet, Serviços, Cobrança, Ações
-- ❌ Dropdown de status inline muito pequeno
-- ❌ Colunas redundantes (Cliente + Pet poderiam ser consolidadas)
-- ❌ Ações como texto ("Cobrar via WhatsApp", "Reenviar link", "Excluir")
-
-### Seção de Cobrança de Pendências
-- ❌ Fica no final, pouco destacada
-- ❌ Tabela simples sem informação de quantidade
+1. **Consistência visual** - Uso de classes `.dps-surface` e `.dps-section-title` padrão do sistema
+2. **Hierarquia clara** - Título principal, subtítulo e seções organizadas em cards
+3. **Melhor organização** - Dashboard de resumo, rankings e transações em layout estruturado
+4. **Usabilidade aprimorada** - Formulários com feedback visual e estados vazios amigáveis
+5. **Responsividade completa** - Layout adaptável para diferentes tamanhos de tela
 
 ---
 
-## Soluções Implementadas
+## Mudanças Implementadas (v1.8.0)
 
-### 1. Formulário de Nova Transação
+### 1. Título e Header da Seção
 
-**Mudanças:**
-- ✅ Formulário em **seção colapsável** (pode ser recolhido para economizar espaço)
-- ✅ Todos os campos em **grid horizontal único**
-- ✅ Eliminados os três fieldsets separados
-- ✅ Emojis nos selects para identificação rápida (📈 Receita, 📉 Despesa)
-
-**Estrutura HTML:**
+**Antes:**
 ```html
-<div class="dps-finance-section">
-    <div class="dps-finance-section-header">
-        <h4>➕ Nova Transação</h4>
-        <span class="dps-finance-section-toggle">▼</span>
-    </div>
-    <div class="dps-finance-section-content">
-        <form class="dps-finance-form-compact">
-            <!-- Campos em grid único -->
-        </form>
-    </div>
-</div>
+<h3>Controle Financeiro</h3>
 ```
 
-### 2. Área de Filtros Reorganizada
+**Depois:**
+```html
+<h2 class="dps-section-title">
+    <span class="dps-section-title__icon">💰</span>
+    Controle Financeiro
+</h2>
+<p class="dps-section-header__subtitle">Gerencie receitas, despesas e cobranças...</p>
+```
 
-**Mudanças:**
-- ✅ **Indicador de filtros ativos** quando há filtros aplicados
-- ✅ Filtros agrupados em **grupos visuais**:
-  - 📅 Período (De, Até)
-  - 🏷️ Classificação (Categoria, Status)
-  - 🔍 Busca (Cliente)
-- ✅ **Linha de ações separada** dos filtros
-- ✅ Botões de exportação **compactos** (📥 CSV, 📄 DRE, 📊 Resumo)
-- ✅ **Separador visual** entre grupos de botões
+### 2. Dashboard de Resumo
 
-**Classes CSS:**
-- `.dps-finance-filters-row` - Linha de filtros
-- `.dps-finance-filters-group` - Grupo de filtros relacionados
-- `.dps-finance-filters-group-title` - Título do grupo
-- `.dps-finance-actions-row` - Linha de ações
-- `.dps-finance-actions-separator` - Separador vertical
+**Antes:** Cards simples sem container
+**Depois:** Encapsulado em `.dps-surface--info` com título e descrição
 
-### 3. Tabela de Transações Consolidada
+### 3. Formulário de Nova Transação
 
-**Antes: 11 colunas**
-| Data | Valor | Categoria | Tipo | Status | Pagamentos | Cliente | Pet | Serviços | Cobrança | Ações |
+**Antes:** Seção colapsável com `.dps-finance-section`
+**Depois:** 
+- Usa `.dps-surface--info` com título `.dps-surface__title`
+- Descrição explicativa
+- Emojis nos selects de tipo (📈 Receita, 📉 Despesa)
+- Botão de salvar com ícone 💾
 
-**Depois: 6 colunas**
-| Data | Descrição | Valor | Status | Pagamentos | Ações |
+### 4. Lista de Transações
 
-**Coluna "Descrição" consolida:**
-- Categoria + Badge de tipo (Receita/Despesa)
-- Nome do cliente + Pet (se houver)
-- Link para ver serviços (se for agendamento)
+**Antes:** Título h4 simples
+**Depois:**
+- Encapsulada em `.dps-surface--neutral`
+- Título com ícone 📋
+- Descrição explicativa
+- Estado vazio com ícone 📭 e dica
 
-**Coluna "Ações" usa ícones:**
-- 📱 WhatsApp (cobrança)
-- ✉️ Reenviar link
-- 🗑️ Excluir
+### 5. Formulário de Pagamento Parcial
 
-**Benefícios:**
-- Tabela cabe melhor em telas menores
-- Informação mais scaneável
-- Ações mais compactas e reconhecíveis
+**Antes:** Div simples com estilos inline
+**Depois:**
+- Usa `.dps-surface--info`
+- Resumo em grid com `.dps-partial-summary`
+- Cards visuais para Total/Pago/Restante
+- Item de destaque para valor restante
 
-### 4. Formulário de Pagamento Parcial
+### 6. Cobrança Rápida
 
-**Mudanças:**
-- ✅ **Resumo visual** da transação no topo (Total, Pago, Restante)
-- ✅ Campos em **grid organizado**
-- ✅ Estilo destacado (borda azul, fundo azulado)
-- ✅ Emojis nos métodos de pagamento (💠 PIX, 💳 Cartão, 💵 Dinheiro)
+**Antes:** Seção colapsável com `.dps-finance-section`
+**Depois:**
+- Usa `.dps-surface--warning` (destaque amarelo)
+- Título com ícone 📞
+- Descrição explicativa
+- Estado vazio amigável com ícone ✅
 
-### 5. Alertas de Pendências
+### 7. Configurações
 
-**Mudanças:**
-- ✅ Novos estilos CSS dedicados
-- ✅ Layout em **cards lado a lado**
-- ✅ Ícones maiores (28px)
-- ✅ Classes semânticas (`.dps-finance-alert-danger`, `.dps-finance-alert-warning`)
-
-### 6. Seção de Cobrança Rápida
-
-**Mudanças:**
-- ✅ Seção **colapsável**
-- ✅ Tabela agora inclui **quantidade de pendências** por cliente
-- ✅ Botões compactos para WhatsApp
-- ✅ Mensagem amigável quando não há pendências
+**Antes:** Botão inline com estilos inline
+**Depois:**
+- Botão na toolbar dedicada `.dps-finance-toolbar`
+- Quando aberto, usa `.dps-surface--warning`
+- Link para auditoria com estilo dedicado
 
 ---
 
-## Novos Arquivos/Classes CSS
+## Novas Classes CSS
 
-### Seções Colapsáveis
+### Layout e Estrutura
 ```css
-.dps-finance-section
-.dps-finance-section-header
-.dps-finance-section-toggle
-.dps-finance-section-content
-.dps-finance-section.collapsed
+.dps-finance-grid                    /* Grid responsivo para seções */
+.dps-finance-summary-surface         /* Surface do resumo */
+.dps-finance-dre-surface             /* Surface do DRE */
+.dps-finance-ranking-surface         /* Surface do ranking */
+.dps-finance-new-trans-surface       /* Surface do formulário */
+.dps-finance-transactions-surface    /* Surface das transações */
+.dps-finance-cobrancas-surface       /* Surface das cobranças */
+.dps-finance-settings-surface        /* Surface das configurações */
+.dps-finance-toolbar                 /* Barra de ferramentas */
 ```
 
-### Filtros Reorganizados
+### Formulário de Pagamento Parcial
 ```css
-.dps-finance-filters-row
-.dps-finance-filters-group
-.dps-finance-filters-group-title
-.dps-finance-actions-row
-.dps-finance-actions-group
-.dps-finance-actions-separator
-.dps-finance-filters-active
+.dps-partial-summary                 /* Grid do resumo */
+.dps-partial-summary__item           /* Item individual */
+.dps-partial-summary__item--highlight /* Destaque (restante) */
+.dps-partial-summary__label          /* Label do item */
+.dps-partial-summary__value          /* Valor do item */
 ```
 
-### Tabela Melhorada
+### Estado Vazio
 ```css
-.dps-finance-table-wrapper
-.dps-col-valor
-.dps-col-data
-.dps-col-status
-.dps-col-pagamentos
-.dps-status-select-wrapper
-.dps-actions-group
+.dps-finance-empty-state             /* Container do estado vazio */
+.dps-finance-empty-state__icon       /* Ícone grande */
+.dps-finance-empty-state__hint       /* Dica secundária */
 ```
 
-### Alertas e Formulários
+### Badges Modernos
 ```css
-.dps-finance-alert
-.dps-finance-alert-danger
-.dps-finance-alert-warning
-.dps-finance-alert-content
-.dps-finance-alert-icon
-.dps-finance-alert-info
-.dps-finance-alert-value
-.dps-partial-form
-.dps-partial-actions
+.dps-badge--success                  /* Verde (Receita, Pago) */
+.dps-badge--warning                  /* Amarelo (Em aberto) */
+.dps-badge--danger                   /* Vermelho (Despesa, Cancelado) */
+.dps-badge--info                     /* Azul (Informativo) */
 ```
 
 ---
@@ -186,6 +131,8 @@ Esta atualização traz uma reorganização significativa do layout da aba FINAN
 ## Compatibilidade
 
 - ✅ Responsivo para telas de 480px, 768px e 1024px+
+- ✅ Consistente com padrão visual de Clientes, Pets, Serviços e Agenda
+- ✅ Usa classes globais `.dps-surface` do núcleo
 - ✅ Mantém funcionalidade existente de:
   - Filtros de data, categoria e status
   - Busca por cliente
@@ -198,22 +145,18 @@ Esta atualização traz uma reorganização significativa do layout da aba FINAN
 
 ---
 
-## Capturas de Tela
-
-Para visualizar as mudanças, acesse o Painel de Gestão DPS > aba Financeiro com dados de exemplo.
-
----
-
 ## Arquivos Modificados
 
-1. `plugins/desi-pet-shower-finance/assets/css/finance-addon.css`
-   - Adicionados ~460 linhas de novos estilos
-   - Reorganização de seções existentes
+1. `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
+   - Método `section_financeiro()` modernizado
+   - Uso de `.dps-surface` e `.dps-section-title`
+   - Formulários com estrutura padronizada
+   - Estados vazios amigáveis
 
-2. `plugins/desi-pet-shower-finance/desi-pet-shower-finance-addon.php`
-   - Método `section_financeiro()` refatorado
-   - Formulário de nova transação simplificado
-   - Tabela de transações consolidada
-   - Área de filtros reorganizada
-   - Formulário de pagamento parcial melhorado
-   - Método `render_pending_alerts()` atualizado
+2. `plugins/desi-pet-shower-finance/assets/css/finance-addon.css`
+   - Seções 21-25 adicionadas (~200 linhas)
+   - Estilos para novas estruturas visuais
+   - Responsividade aprimorada
+
+3. `docs/layout/admin/FINANCE_LAYOUT_IMPROVEMENTS.md`
+   - Documentação atualizada para v1.8.0
