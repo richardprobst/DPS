@@ -192,7 +192,18 @@ class DPS_Communications_Addon {
             <p><?php echo esc_html__( 'Configure integrações e mensagens automáticas para WhatsApp, SMS ou e-mail.', 'dps-communications-addon' ); ?></p>
 
             <?php
-            // Exibe mensagens de erro de settings (nonce, permissão, etc.)
+            // Exibe mensagens de erro persistidas via transient
+            $transient_error = get_transient( 'dps_comm_settings_error' );
+            if ( $transient_error ) {
+                delete_transient( 'dps_comm_settings_error' );
+                ?>
+                <div class="notice notice-error is-dismissible">
+                    <p><?php echo esc_html( $transient_error ); ?></p>
+                </div>
+                <?php
+            }
+            
+            // Exibe mensagens de erro de settings (fallback)
             settings_errors( 'dps_communications' );
             ?>
 
@@ -297,7 +308,62 @@ class DPS_Communications_Addon {
                 <?php submit_button( __( 'Salvar configurações', 'dps-communications-addon' ) ); ?>
             </form>
 
-            <?php $this->render_webhook_info_section(); ?>
+            <?php 
+            $this->render_statistics_section();
+            $this->render_webhook_info_section(); 
+            ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * Renderiza seção de estatísticas de comunicações
+     *
+     * @since 0.3.0
+     */
+    private function render_statistics_section() {
+        // Só exibe se a classe de histórico existir
+        if ( ! class_exists( 'DPS_Communications_History' ) ) {
+            return;
+        }
+
+        $history = DPS_Communications_History::get_instance();
+        $stats   = $history->get_stats();
+
+        if ( empty( $stats ) ) {
+            return;
+        }
+        ?>
+        <h2><?php esc_html_e( 'Estatísticas de Comunicações', 'dps-communications-addon' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'Resumo das mensagens enviadas pelo sistema.', 'dps-communications-addon' ); ?></p>
+
+        <div class="dps-comm-stats-grid">
+            <?php
+            $status_labels = [
+                'pending'   => [ 'label' => __( 'Pendentes', 'dps-communications-addon' ), 'icon' => '⏳', 'color' => '#f59e0b' ],
+                'sent'      => [ 'label' => __( 'Enviadas', 'dps-communications-addon' ), 'icon' => '📤', 'color' => '#3b82f6' ],
+                'delivered' => [ 'label' => __( 'Entregues', 'dps-communications-addon' ), 'icon' => '✅', 'color' => '#10b981' ],
+                'read'      => [ 'label' => __( 'Lidas', 'dps-communications-addon' ), 'icon' => '👁️', 'color' => '#8b5cf6' ],
+                'failed'    => [ 'label' => __( 'Falhas', 'dps-communications-addon' ), 'icon' => '❌', 'color' => '#ef4444' ],
+                'retrying'  => [ 'label' => __( 'Reenviando', 'dps-communications-addon' ), 'icon' => '🔄', 'color' => '#f97316' ],
+            ];
+
+            foreach ( $stats as $status => $count ) {
+                if ( ! isset( $status_labels[ $status ] ) ) {
+                    continue;
+                }
+                $info = $status_labels[ $status ];
+                ?>
+                <div class="dps-comm-stat-card" style="border-left-color: <?php echo esc_attr( $info['color'] ); ?>;">
+                    <span class="dps-comm-stat-icon"><?php echo esc_html( $info['icon'] ); ?></span>
+                    <div class="dps-comm-stat-content">
+                        <span class="dps-comm-stat-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
+                        <span class="dps-comm-stat-label"><?php echo esc_html( $info['label'] ); ?></span>
+                    </div>
+                </div>
+                <?php
+            }
+            ?>
         </div>
         <?php
     }
@@ -447,19 +513,16 @@ class DPS_Communications_Addon {
 
         // Verifica nonce e dá feedback adequado
         if ( ! isset( $_POST['dps_comm_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_comm_nonce'] ) ), 'dps_comm_save' ) ) {
-            if ( function_exists( 'add_settings_error' ) ) {
-                add_settings_error( 'dps_communications', 'nonce_failed', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-communications-addon' ), 'error' );
-            }
-            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
+            // Usa transient para persistir mensagem de erro entre redirects
+            set_transient( 'dps_comm_settings_error', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-communications-addon' ), 30 );
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications', 'error' => 'nonce' ], admin_url( 'admin.php' ) ) );
             exit;
         }
 
         // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
-            if ( function_exists( 'add_settings_error' ) ) {
-                add_settings_error( 'dps_communications', 'permission_denied', __( 'Você não tem permissão para alterar estas configurações.', 'dps-communications-addon' ), 'error' );
-            }
-            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
+            set_transient( 'dps_comm_settings_error', __( 'Você não tem permissão para alterar estas configurações.', 'dps-communications-addon' ), 30 );
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications', 'error' => 'permission' ], admin_url( 'admin.php' ) ) );
             exit;
         }
 
@@ -468,9 +531,11 @@ class DPS_Communications_Addon {
 
         update_option( self::OPTION_KEY, $settings );
 
-        // Salva o número do WhatsApp da equipe separadamente
+        // Salva o número do WhatsApp da equipe separadamente (com validação)
         if ( isset( $_POST['dps_whatsapp_number'] ) ) {
             $whatsapp_number = sanitize_text_field( wp_unslash( $_POST['dps_whatsapp_number'] ) );
+            // Remove caracteres não numéricos exceto + e espaço para validação
+            $whatsapp_number = preg_replace( '/[^0-9\+\s\-\(\)]/', '', $whatsapp_number );
             update_option( 'dps_whatsapp_number', $whatsapp_number );
         }
 

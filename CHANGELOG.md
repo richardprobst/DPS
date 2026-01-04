@@ -101,10 +101,11 @@ Antes de criar uma nova versão oficial:
 
 - **JavaScript para UX**: Novo arquivo `communications-addon.js` com prevenção de duplo clique, validação client-side de e-mail e URL, e feedback visual durante submissão.
 - **Seção de Webhooks na UI**: Nova seção na página admin exibindo URLs de webhook e secret com botões para mostrar/ocultar e copiar para clipboard.
+- **Seção de Estatísticas**: Dashboard com cards visuais mostrando contagem de mensagens por status (pendentes, enviadas, entregues, lidas, falhas, reenviando) com ícones e cores temáticas.
 - **Validação client-side**: Campos de e-mail e URL do gateway agora são validados em tempo real no navegador, com mensagens de erro em português.
 - **Prevenção de duplo clique**: Botão de salvar é desabilitado durante submissão e exibe spinner "Salvando..." para evitar envios duplicados.
 - **Melhorias de acessibilidade**: Adicionados `aria-describedby` nos campos, `:focus-visible` para navegação por teclado, e feedback visual em rows com foco.
-- **settings_errors() exibido**: Mensagens de erro de nonce/permissão agora são exibidas corretamente na página admin.
+- **Mensagens de erro persistidas**: Erros de nonce/permissão agora são persistidos via transient e exibidos corretamente após redirect.
 - **Secret mascarado no REST**: Endpoint `/webhook-url` agora retorna apenas preview mascarado do secret (`abc***xyz`) em vez do valor completo.
 
 #### Security (Segurança)
@@ -126,6 +127,8 @@ Antes de criar uma nova versão oficial:
 - **CSS class do container**: Corrigida classe CSS do container (`wrap` → `wrap dps-communications-wrap`) para aplicar estilos customizados.
 - **Estilos para password**: Adicionados estilos para `input[type="password"]` que estavam faltando no CSS responsivo.
 - **ID do formulário**: Adicionado `id="dps-comm-settings-form"` para permitir binding de eventos JavaScript.
+- **Validação de número WhatsApp**: Número do WhatsApp da equipe agora é sanitizado removendo caracteres inválidos.
+- **Grid de estatísticas responsivo**: Grid de cards de estatísticas adapta-se automaticamente a diferentes tamanhos de tela.
 
 **Communications Add-on - Correções de Bugs (v0.2.1)**
 
