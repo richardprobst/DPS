@@ -76,6 +76,9 @@ class DPS_AI_Knowledge_Base_Tester {
 	 * @param string $hook Hook da página atual.
 	 */
 	public function enqueue_assets( $hook ) {
+		// Cast para string para compatibilidade com PHP 8.1+
+		$hook = (string) $hook;
+
 		// Carrega apenas na página de teste
 		if ( 'desi-pet-shower_page_dps-ai-kb-tester' !== $hook ) {
 			return;

@@ -45,7 +45,7 @@ add_action( 'plugins_loaded', function() {
  * Usa prioridade 1 para garantir que rode antes da inicialização da classe (prioridade 5).
  */
 function dps_subscription_load_textdomain() {
-    load_plugin_textdomain( 'dps-subscription-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/../languages' );
+    load_plugin_textdomain( 'dps-subscription-addon', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'init', 'dps_subscription_load_textdomain', 1 );
 

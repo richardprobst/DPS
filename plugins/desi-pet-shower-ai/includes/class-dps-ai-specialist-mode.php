@@ -72,6 +72,9 @@ class DPS_AI_Specialist_Mode {
      * @param string $hook Current admin page hook.
      */
     public function enqueue_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.1+
+        $hook = (string) $hook;
+
         if ( 'desi-pet-shower_page_dps-ai-specialist' !== $hook ) {
             return;
         }

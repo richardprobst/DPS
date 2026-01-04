@@ -73,6 +73,9 @@ class DPS_AI_Insights_Dashboard {
      * @param string $hook Current admin page hook.
      */
     public function enqueue_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.1+
+        $hook = (string) $hook;
+
         if ( 'desi-pet-shower_page_dps-ai-insights' !== $hook ) {
             return;
         }

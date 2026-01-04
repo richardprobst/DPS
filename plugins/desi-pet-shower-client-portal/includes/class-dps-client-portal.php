@@ -2762,7 +2762,7 @@ final class DPS_Client_Portal {
             return false;
         }
         // Necessita de token do Mercado Pago
-        $token = trim( get_option( 'dps_mercadopago_access_token' ) );
+        $token = trim( (string) get_option( 'dps_mercadopago_access_token', '' ) );
         if ( ! $token ) {
             return false;
         }
