@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS - Aba Financeiro - Layout Demo</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 20px;
+            color: #374151;
+        }
+        
+        /* Container principal */
+        .dps-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Título padronizado */
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 8px 0;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .dps-section-header__subtitle {
+            margin: 0 0 24px 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Surfaces */
+        .dps-surface {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        
+        .dps-surface--info {
+            border-left-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+        }
+        
+        .dps-surface--neutral {
+            border-left-color: #e5e7eb;
+            background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+        }
+        
+        .dps-surface--warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+        }
+        
+        .dps-surface__title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .dps-surface__description {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Grid de resumo */
+        .dps-finance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .dps-finance-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .dps-finance-card h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            margin: 0 0 8px 0;
+        }
+        
+        .dps-finance-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .dps-finance-card-revenue { border-left: 4px solid #10b981; }
+        .dps-finance-card-expense { border-left: 4px solid #ef4444; }
+        .dps-finance-card-pending { border-left: 4px solid #f59e0b; }
+        .dps-finance-card-balance { border-left: 4px solid #0ea5e9; }
+        
+        /* Form compacto */
+        .dps-finance-form-compact {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            padding: 16px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .dps-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dps-field label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .dps-field input,
+        .dps-field select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .dps-form-actions {
+            margin-top: 16px;
+        }
+        
+        /* Botões */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #fff;
+            color: #374151;
+            text-decoration: none;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+        }
+        
+        /* Filtros */
+        .dps-finance-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .dps-finance-filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .dps-finance-filters-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            padding: 12px 16px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .dps-finance-filters-group-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        
+        /* Tabela */
+        .dps-finance-table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .dps-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .dps-table th {
+            background: #f9fafb;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .dps-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .dps-table tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Badges */
+        .dps-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .dps-badge--success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .dps-badge--warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .dps-badge--danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Partial Summary */
+        .dps-partial-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .dps-partial-summary__item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .dps-partial-summary__item--highlight {
+            padding: 8px 12px;
+            background: #d1fae5;
+            border-radius: 6px;
+        }
+        
+        .dps-partial-summary__label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+        
+        .dps-partial-summary__value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        /* Empty state */
+        .dps-finance-empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+        
+        .dps-finance-empty-state__icon {
+            display: block;
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+        
+        /* Alertas */
+        .dps-finance-alerts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .dps-finance-alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+        }
+        
+        .dps-finance-alert-danger {
+            border: 1px solid #fecaca;
+            border-left: 4px solid #ef4444;
+            background: #fef2f2;
+        }
+        
+        .dps-finance-alert-warning {
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .dps-finance-alert-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .dps-finance-alert-icon {
+            font-size: 28px;
+        }
+        
+        .dps-finance-alert-info h5 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .dps-finance-alert-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .dps-finance-alert-link {
+            font-size: 13px;
+            color: #0ea5e9;
+            text-decoration: none;
+        }
+        
+        /* Toolbar */
+        .dps-finance-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin: 16px 0;
+            padding: 12px 0;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Demo header */
+        .demo-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 8px;
+        }
+        
+        .demo-header h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .demo-header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🎨 DPS - Demonstração do Layout da Aba FINANCEIRO</h1>
+        <p>Versão 1.8.0 - Layout modernizado com padrão visual do sistema</p>
+    </div>
+
+    <div class="dps-section" id="dps-section-financeiro">
+        <!-- Título padronizado -->
+        <h2 class="dps-section-title">
+            <span>💰</span>
+            Controle Financeiro
+        </h2>
+        <p class="dps-section-header__subtitle">Gerencie receitas, despesas e cobranças do seu negócio.</p>
+
+        <!-- Alertas de pendências -->
+        <div class="dps-finance-alerts">
+            <div class="dps-finance-alert dps-finance-alert-danger">
+                <div class="dps-finance-alert-content">
+                    <span class="dps-finance-alert-icon">🚨</span>
+                    <div class="dps-finance-alert-info">
+                        <h5>3 pendências vencidas</h5>
+                        <div class="dps-finance-alert-value">R$ 450,00</div>
+                        <a href="#" class="dps-finance-alert-link">Ver detalhes →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="dps-finance-alert dps-finance-alert-warning">
+                <div class="dps-finance-alert-content">
+                    <span class="dps-finance-alert-icon">⚠️</span>
+                    <div class="dps-finance-alert-info">
+                        <h5>2 pendências de hoje</h5>
+                        <div class="dps-finance-alert-value">R$ 180,00</div>
+                        <a href="#" class="dps-finance-alert-link">Ver detalhes →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard de resumo -->
+        <div class="dps-surface dps-surface--info">
+            <div class="dps-surface__title">
+                <span>📊</span>
+                Resumo Financeiro
+            </div>
+            <p class="dps-surface__description">Visão geral do período selecionado.</p>
+            
+            <div class="dps-finance-summary">
+                <div class="dps-finance-card dps-finance-card-revenue">
+                    <h4>Receitas</h4>
+                    <span class="dps-finance-card-value">R$ 12.450,00</span>
+                </div>
+                <div class="dps-finance-card dps-finance-card-expense">
+                    <h4>Despesas</h4>
+                    <span class="dps-finance-card-value">R$ 3.280,00</span>
+                </div>
+                <div class="dps-finance-card dps-finance-card-pending">
+                    <h4>Pendente</h4>
+                    <span class="dps-finance-card-value">R$ 630,00</span>
+                </div>
+                <div class="dps-finance-card dps-finance-card-balance">
+                    <h4>Saldo</h4>
+                    <span class="dps-finance-card-value">R$ 9.170,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de pagamento parcial (exemplo) -->
+        <div class="dps-surface dps-surface--info">
+            <div class="dps-surface__title">
+                <span>💰</span>
+                Registrar Pagamento Parcial
+            </div>
+            
+            <div class="dps-partial-summary">
+                <div class="dps-partial-summary__item">
+                    <span class="dps-partial-summary__label">Transação</span>
+                    <span class="dps-partial-summary__value">#1234</span>
+                </div>
+                <div class="dps-partial-summary__item">
+                    <span class="dps-partial-summary__label">Total</span>
+                    <span class="dps-partial-summary__value">R$ 280,00</span>
+                </div>
+                <div class="dps-partial-summary__item">
+                    <span class="dps-partial-summary__label">Pago</span>
+                    <span class="dps-partial-summary__value">R$ 100,00</span>
+                </div>
+                <div class="dps-partial-summary__item dps-partial-summary__item--highlight">
+                    <span class="dps-partial-summary__label">Restante</span>
+                    <span class="dps-partial-summary__value">R$ 180,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nova Transação -->
+        <div class="dps-surface dps-surface--info">
+            <div class="dps-surface__title">
+                <span>➕</span>
+                Nova Transação
+            </div>
+            <p class="dps-surface__description">Registre uma nova receita ou despesa manualmente.</p>
+            
+            <div class="dps-finance-form-compact">
+                <div class="dps-field">
+                    <label>Data *</label>
+                    <input type="date" value="2026-01-04">
+                </div>
+                <div class="dps-field">
+                    <label>Valor *</label>
+                    <input type="text" placeholder="R$ 0,00">
+                </div>
+                <div class="dps-field">
+                    <label>Categoria *</label>
+                    <input type="text" placeholder="Ex: Serviço...">
+                </div>
+                <div class="dps-field">
+                    <label>Tipo *</label>
+                    <select>
+                        <option>Receita</option>
+                        <option>Despesa</option>
+                    </select>
+                </div>
+                <div class="dps-field">
+                    <label>Status *</label>
+                    <select>
+                        <option>Em aberto</option>
+                        <option>Pago</option>
+                    </select>
+                </div>
+                <div class="dps-field">
+                    <label>Cliente</label>
+                    <select>
+                        <option>-- Nenhum --</option>
+                        <option>Maria Silva</option>
+                        <option>João Santos</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="dps-form-actions">
+                <button class="button button-primary">💾 Salvar Transação</button>
+            </div>
+        </div>
+
+        <!-- Lista de transações -->
+        <div class="dps-surface dps-surface--neutral">
+            <div class="dps-surface__title">
+                <span>📋</span>
+                Transações Registradas
+            </div>
+            <p class="dps-surface__description">Lista de todas as transações. Use os filtros para refinar a busca.</p>
+            
+            <div class="dps-finance-filters">
+                <div class="dps-finance-filters-row">
+                    <div class="dps-finance-filters-group">
+                        <span class="dps-finance-filters-group-title">📅 Período</span>
+                        <label>De <input type="date"></label>
+                        <label>Até <input type="date"></label>
+                    </div>
+                    <div class="dps-finance-filters-group">
+                        <span class="dps-finance-filters-group-title">🏷️ Classificação</span>
+                        <label>Categoria <select><option>Todas</option></select></label>
+                        <label>Status <select><option>Todos</option></select></label>
+                    </div>
+                    <div class="dps-finance-filters-group">
+                        <span class="dps-finance-filters-group-title">🔍 Busca</span>
+                        <label>Cliente <input type="text" placeholder="Nome do cliente..."></label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                    <button class="button button-primary">Aplicar Filtros</button>
+                    <button class="button">7 dias</button>
+                    <button class="button">30 dias</button>
+                    <button class="button">Limpar</button>
+                    <span style="width: 1px; height: 24px; background: #e5e7eb; margin: 0 8px;"></span>
+                    <button class="button">📥 CSV</button>
+                    <button class="button">📄 DRE</button>
+                    <button class="button">📊 Resumo</button>
+                </div>
+            </div>
+            
+            <div class="dps-finance-table-wrapper">
+                <table class="dps-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Pagamentos</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>04/01/2026</td>
+                            <td>
+                                <div><strong>Banho e Tosa</strong> <span class="dps-badge dps-badge--success">Receita</span></div>
+                                <div style="font-size: 12px; color: #6b7280;">👤 Maria Silva 🐕 Rex</div>
+                            </td>
+                            <td style="font-weight: 600;">R$ 120,00</td>
+                            <td><span class="dps-badge dps-badge--success">✅ Pago</span></td>
+                            <td>R$ 120,00 / R$ 120,00</td>
+                            <td><button class="button" style="padding: 4px 8px; font-size: 12px;">🗑️</button></td>
+                        </tr>
+                        <tr style="background: #fffbeb;">
+                            <td><span style="color: #f59e0b; font-weight: 600;">⚠️ 04/01/2026</span></td>
+                            <td>
+                                <div><strong>Hidratação</strong> <span class="dps-badge dps-badge--success">Receita</span></div>
+                                <div style="font-size: 12px; color: #6b7280;">👤 João Santos 🐕 Luna</div>
+                            </td>
+                            <td style="font-weight: 600;">R$ 80,00</td>
+                            <td><span class="dps-badge dps-badge--warning">⏳ Em aberto</span></td>
+                            <td>R$ 0,00 / R$ 80,00 <a href="#" style="font-size: 12px; color: #10b981;">+ Registrar</a></td>
+                            <td>
+                                <button class="button" style="padding: 4px 8px; font-size: 12px;">📱</button>
+                                <button class="button" style="padding: 4px 8px; font-size: 12px;">🗑️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>03/01/2026</td>
+                            <td>
+                                <div><strong>Ração Premium</strong> <span class="dps-badge dps-badge--danger">Despesa</span></div>
+                            </td>
+                            <td style="font-weight: 600;">R$ 250,00</td>
+                            <td><span class="dps-badge dps-badge--success">✅ Pago</span></td>
+                            <td>R$ 250,00 / R$ 250,00</td>
+                            <td><button class="button" style="padding: 4px 8px; font-size: 12px;">🗑️</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cobrança rápida -->
+        <div class="dps-surface dps-surface--warning">
+            <div class="dps-surface__title">
+                <span>📞</span>
+                Cobrança Rápida por Cliente
+            </div>
+            <p class="dps-surface__description">Envie cobranças via WhatsApp para clientes com pendências.</p>
+            
+            <div class="dps-finance-table-wrapper">
+                <table class="dps-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Qtd. Pendências</th>
+                            <th>Valor Total</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>João Santos</strong></td>
+                            <td>2</td>
+                            <td style="font-weight: 600;">R$ 180,00</td>
+                            <td><button class="button" style="padding: 4px 12px; font-size: 12px;">📱 WhatsApp</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ana Costa</strong></td>
+                            <td>1</td>
+                            <td style="font-weight: 600;">R$ 450,00</td>
+                            <td><button class="button" style="padding: 4px 12px; font-size: 12px;">📱 WhatsApp</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="dps-finance-toolbar">
+            <button class="button">⚙️ Configurações</button>
+        </div>
+    </div>
+</body>
+</html>

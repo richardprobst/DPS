@@ -1788,7 +1788,13 @@ class DPS_Finance_Addon {
         ] );
         ob_start();
         echo '<div class="dps-section" id="dps-section-financeiro">';
-        echo '<h3>' . esc_html__( 'Controle Financeiro', 'dps-finance-addon' ) . '</h3>';
+        
+        // Título padronizado com ícone (padrão do sistema)
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">💰</span>';
+        echo esc_html__( 'Controle Financeiro', 'dps-finance-addon' );
+        echo '</h2>';
+        echo '<p class="dps-section-header__subtitle">' . esc_html__( 'Gerencie receitas, despesas e cobranças do seu negócio.', 'dps-finance-addon' ) . '</p>';
 
         // Exibe mensagens de feedback
         $this->render_feedback_messages();
@@ -1796,23 +1802,62 @@ class DPS_Finance_Addon {
         // F2.1: FASE 2 - UX: Card de pendências de hoje e vencidas
         $this->render_pending_alerts();
         
+        // Container grid para organização visual
+        echo '<div class="dps-finance-grid">';
+        
+        // Dashboard de resumo financeiro com comparativo mensal (usa todos os registros, não paginados)
+        echo '<div class="dps-surface dps-surface--info dps-finance-summary-surface">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>📊</span>';
+        echo esc_html__( 'Resumo Financeiro', 'dps-finance-addon' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Visão geral do período selecionado.', 'dps-finance-addon' ) . '</p>';
+        
+        $this->render_finance_summary( $all_trans );
+        
         // F3.4: FASE 3 - Comparativo mensal (mês atual vs anterior)
         $this->render_monthly_comparison();
-
-        // Dashboard de resumo financeiro (usa todos os registros, não paginados)
-        $this->render_finance_summary( $all_trans );
+        
+        echo '</div>'; // .dps-surface
         
         // Relatório DRE simplificado (mostra quando há filtro de data aplicado ou quando solicitado)
         $show_dre = isset( $_GET['show_dre'] ) || ( $start_date && $end_date );
         if ( $show_dre && ! empty( $all_trans ) ) {
+            echo '<div class="dps-surface dps-surface--neutral dps-finance-dre-surface">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>📈</span>';
+            echo esc_html__( 'Demonstrativo de Resultado', 'dps-finance-addon' );
+            echo '</div>';
             $this->render_dre_report( $all_trans );
+            echo '</div>';
         }
         
         // F3.5: FASE 3 - Top 10 clientes por receita (usa período filtrado ou mês atual)
+        echo '<div class="dps-surface dps-surface--neutral dps-finance-ranking-surface">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>🏆</span>';
+        echo esc_html__( 'Ranking de Clientes', 'dps-finance-addon' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Top 10 clientes por receita no período.', 'dps-finance-addon' ) . '</p>';
         $this->render_top_clients( $start_date, $end_date );
+        echo '</div>'; // .dps-surface
+        
+        echo '</div>'; // .dps-finance-grid
+        
+        // Barra de ferramentas com ações e configurações
+        echo '<div class="dps-finance-toolbar">';
+        echo '<div class="dps-finance-toolbar__actions">';
         
         // F4.2: FASE 4 - Configurações de Lembretes (se usuário solicitar via parâmetro)
         if ( isset( $_GET['show_settings'] ) && $_GET['show_settings'] === '1' ) {
+            echo '</div></div>'; // Fecha toolbar
+            
+            echo '<div class="dps-surface dps-surface--warning dps-finance-settings-surface">';
+            echo '<div class="dps-surface__title">';
+            echo '<span>⚙️</span>';
+            echo esc_html__( 'Configurações Avançadas', 'dps-finance-addon' );
+            echo '</div>';
+            
             echo '<form method="post" action="">';
             wp_nonce_field( 'dps_finance_settings', 'dps_finance_settings_nonce' );
             echo '<input type="hidden" name="dps_finance_save_reminder_settings" value="1">';
@@ -1821,22 +1866,27 @@ class DPS_Finance_Addon {
                 DPS_Finance_Reminders::render_settings_section();
             }
             
-            echo '<p class="submit"><button type="submit" class="button button-primary">' . esc_html__( 'Salvar Configurações', 'dps-finance-addon' ) . '</button></p>';
+            echo '<div class="dps-form-actions">';
+            echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Configurações', 'dps-finance-addon' ) . '</button>';
+            echo ' <a href="' . esc_url( remove_query_arg( 'show_settings' ) . '#financeiro' ) . '" class="button">' . esc_html__( 'Voltar', 'dps-finance-addon' ) . '</a>';
+            echo '</div>';
             echo '</form>';
             
             // Link para visualizar auditoria
             if ( class_exists( 'DPS_Finance_Audit' ) ) {
-                echo '<div style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-left: 4px solid #0ea5e9;">';
-                echo '<h4>' . esc_html__( 'Auditoria de Alterações', 'dps-finance-addon' ) . '</h4>';
+                echo '<div class="dps-finance-audit-link">';
+                echo '<h5>' . esc_html__( 'Auditoria de Alterações', 'dps-finance-addon' ) . '</h5>';
                 echo '<p>' . esc_html__( 'Veja o histórico completo de todas as alterações nas transações financeiras.', 'dps-finance-addon' ) . '</p>';
-                echo '<a href="' . esc_url( admin_url( 'admin.php?page=dps-finance-audit' ) ) . '" class="button">' . esc_html__( 'Ver Histórico de Auditoria', 'dps-finance-addon' ) . '</a>';
+                echo '<a href="' . esc_url( admin_url( 'admin.php?page=dps-finance-audit' ) ) . '" class="button button-secondary">' . esc_html__( '📋 Ver Histórico de Auditoria', 'dps-finance-addon' ) . '</a>';
                 echo '</div>';
             }
+            
+            echo '</div>'; // .dps-surface
         } else {
-            // Link para mostrar configurações
-            echo '<div style="margin: 20px 0;">';
-            echo '<a href="' . esc_url( add_query_arg( 'show_settings', '1' ) . '#financeiro' ) . '" class="button">' . esc_html__( '⚙️ Configurações Avançadas', 'dps-finance-addon' ) . '</a>';
-            echo '</div>';
+            // Link para mostrar configurações na toolbar
+            echo '<a href="' . esc_url( add_query_arg( 'show_settings', '1' ) . '#financeiro' ) . '" class="button button-secondary dps-finance-settings-btn">' . esc_html__( '⚙️ Configurações', 'dps-finance-addon' ) . '</a>';
+            echo '</div>'; // .dps-finance-toolbar__actions
+            echo '</div>'; // .dps-finance-toolbar
         }
 
         // Se um ID de transação foi passado via query para registrar pagamento parcial, exibe formulário especializado
@@ -1860,15 +1910,31 @@ class DPS_Finance_Addon {
                 $credit_limit      = min( $credit_limit, $outstanding_cents );
                 $credit_limit_display = DPS_Money_Helper::format_to_brazilian( $credit_limit );
                 
-                echo '<div class="dps-partial-form">';
-                echo '<h4>💰 ' . esc_html__( 'Registrar Pagamento Parcial', 'dps-finance-addon' ) . '</h4>';
+                // Formulário de pagamento parcial usando padrão visual moderno
+                echo '<div class="dps-surface dps-surface--info dps-partial-form">';
+                echo '<div class="dps-surface__title">';
+                echo '<span>💰</span>';
+                echo esc_html__( 'Registrar Pagamento Parcial', 'dps-finance-addon' );
+                echo '</div>';
                 
-                // Resumo da transação
-                echo '<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: #fff; border-radius: 6px;">';
-                echo '<div><strong>' . esc_html__( 'Transação', 'dps-finance-addon' ) . ':</strong> #' . esc_html( $partial_id ) . '</div>';
-                echo '<div><strong>' . esc_html__( 'Total', 'dps-finance-addon' ) . ':</strong> R$ ' . esc_html( $desc_value ) . '</div>';
-                echo '<div><strong>' . esc_html__( 'Pago', 'dps-finance-addon' ) . ':</strong> R$ ' . esc_html( $paid_value ) . '</div>';
-                echo '<div><strong style="color: #10b981;">' . esc_html__( 'Restante', 'dps-finance-addon' ) . ':</strong> R$ ' . esc_html( $outstanding_value ) . '</div>';
+                // Resumo da transação em cards
+                echo '<div class="dps-partial-summary">';
+                echo '<div class="dps-partial-summary__item">';
+                echo '<span class="dps-partial-summary__label">' . esc_html__( 'Transação', 'dps-finance-addon' ) . '</span>';
+                echo '<span class="dps-partial-summary__value">#' . esc_html( $partial_id ) . '</span>';
+                echo '</div>';
+                echo '<div class="dps-partial-summary__item">';
+                echo '<span class="dps-partial-summary__label">' . esc_html__( 'Total', 'dps-finance-addon' ) . '</span>';
+                echo '<span class="dps-partial-summary__value">R$ ' . esc_html( $desc_value ) . '</span>';
+                echo '</div>';
+                echo '<div class="dps-partial-summary__item">';
+                echo '<span class="dps-partial-summary__label">' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</span>';
+                echo '<span class="dps-partial-summary__value">R$ ' . esc_html( $paid_value ) . '</span>';
+                echo '</div>';
+                echo '<div class="dps-partial-summary__item dps-partial-summary__item--highlight">';
+                echo '<span class="dps-partial-summary__label">' . esc_html__( 'Restante', 'dps-finance-addon' ) . '</span>';
+                echo '<span class="dps-partial-summary__value">R$ ' . esc_html( $outstanding_value ) . '</span>';
+                echo '</div>';
                 echo '</div>';
                 
                 echo '<form method="post" class="dps-form">';
@@ -1921,16 +1987,18 @@ class DPS_Finance_Addon {
                 echo '</div>';
                 
                 echo '</form>';
-                echo '</div>';
+                echo '</div>'; // .dps-surface
             }
         }
         
-        // Formulário de nova transação em seção colapsável
-        echo '<div class="dps-finance-section" id="dps-finance-form-section">';
-        echo '<div class="dps-finance-section-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
-        echo '<h4>➕ ' . esc_html__( 'Nova Transação', 'dps-finance-addon' ) . '</h4>';
+        // Formulário de nova transação usando padrão visual moderno
+        echo '<div class="dps-surface dps-surface--info dps-finance-new-trans-surface" id="dps-finance-form-section">';
+        echo '<div class="dps-surface__title dps-finance-section-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
+        echo '<span>➕</span>';
+        echo esc_html__( 'Nova Transação', 'dps-finance-addon' );
         echo '<span class="dps-finance-section-toggle">▼</span>';
         echo '</div>';
+        echo '<p class="dps-surface__description dps-finance-section-content">' . esc_html__( 'Registre uma nova receita ou despesa manualmente.', 'dps-finance-addon' ) . '</p>';
         echo '<div class="dps-finance-section-content">';
         
         echo '<form method="post" class="dps-form dps-finance-new-form" id="dps-finance-new-form">';
@@ -2003,19 +2071,25 @@ class DPS_Finance_Addon {
         echo '<input type="text" id="finance_desc" name="finance_desc" placeholder="' . esc_attr__( 'Opcional...', 'dps-finance-addon' ) . '">';
         echo '</div>';
         
-        // Botão de salvar
-        echo '<div class="dps-field" style="display: flex; align-items: flex-end;">';
-        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Transação', 'dps-finance-addon' ) . '</button>';
+        echo '</div>'; // .dps-finance-form-compact
+        
+        // Botão de salvar com estilo moderno
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary">💾 ' . esc_html__( 'Salvar Transação', 'dps-finance-addon' ) . '</button>';
         echo '</div>';
         
-        echo '</div>'; // .dps-finance-form-compact
         echo '</form>';
         
         echo '</div>'; // .dps-finance-section-content
-        echo '</div>'; // .dps-finance-section
+        echo '</div>'; // .dps-surface
         
-        // Lista de transações
-        echo '<h4>' . esc_html__( 'Transações Registradas', 'dps-finance-addon' ) . '</h4>';
+        // Lista de transações usando padrão visual moderno
+        echo '<div class="dps-surface dps-surface--neutral dps-finance-transactions-surface">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>📋</span>';
+        echo esc_html__( 'Transações Registradas', 'dps-finance-addon' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Lista de todas as transações. Use os filtros para refinar a busca.', 'dps-finance-addon' ) . '</p>';
         
         // Formulário de filtro reorganizado
         echo '<form method="get" class="dps-finance-filters">';
@@ -2452,14 +2526,18 @@ class DPS_Finance_Addon {
             // Removido: gráficos financeiros não são exibidos
             echo '</div>';
             // Script inline removido - funcionalidade movida para assets/js/finance-addon.js
+            
+            echo '</div>'; // .dps-surface (transações)
 
             // ============== Cobrança de pendências ==============
-            // Colapsável para não ocupar muito espaço
-            echo '<div class="dps-finance-section dps-finance-cobrancas">';
-            echo '<div class="dps-finance-section-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
-            echo '<h4>📞 ' . esc_html__( 'Cobrança Rápida por Cliente', 'dps-finance-addon' ) . '</h4>';
+            // Seção de cobrança rápida usando padrão visual moderno
+            echo '<div class="dps-surface dps-surface--warning dps-finance-cobrancas-surface">';
+            echo '<div class="dps-surface__title dps-finance-section-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
+            echo '<span>📞</span>';
+            echo esc_html__( 'Cobrança Rápida por Cliente', 'dps-finance-addon' );
             echo '<span class="dps-finance-section-toggle">▼</span>';
             echo '</div>';
+            echo '<p class="dps-surface__description dps-finance-section-content">' . esc_html__( 'Envie cobranças via WhatsApp para clientes com pendências.', 'dps-finance-addon' ) . '</p>';
             echo '<div class="dps-finance-section-content">';
             
             // Agrupa transações em aberto por cliente, considerando pagamentos parciais
@@ -2544,12 +2622,16 @@ class DPS_Finance_Addon {
             }
             
             echo '</div>'; // .dps-finance-section-content
-            echo '</div>'; // .dps-finance-section
+            echo '</div>'; // .dps-surface
         } else {
+            echo '<div class="dps-finance-empty-state">';
+            echo '<span class="dps-finance-empty-state__icon">📭</span>';
             echo '<p>' . esc_html__( 'Nenhuma transação registrada.', 'dps-finance-addon' ) . '</p>';
+            echo '<p class="dps-finance-empty-state__hint">' . esc_html__( 'Use o formulário acima para registrar sua primeira transação.', 'dps-finance-addon' ) . '</p>';
+            echo '</div>';
         }
         // Seções adicionais removidas: cobranças/notas e documentos não são exibidos nesta versão
-        echo '</div>';
+        echo '</div>'; // .dps-surface (transações)
         return ob_get_clean();
     }
 
