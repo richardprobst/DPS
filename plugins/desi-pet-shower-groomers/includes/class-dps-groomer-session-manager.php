@@ -88,14 +88,21 @@ final class DPS_Groomer_Session_Manager {
             return;
         }
 
+        // SECURITY: Não iniciar sessão em requisições de cron
+        if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+            return;
+        }
+
         if ( ! session_id() ) {
-            // Configura parâmetros seguros de sessão ANTES de iniciar
+            // SECURITY FIX: Configurar parâmetros seguros de sessão ANTES de iniciar
             // Essas configurações devem ser feitas antes do session_start()
             $session_options = [
                 'cookie_httponly' => true,
                 'cookie_secure'   => is_ssl(),
                 'cookie_samesite' => 'Strict',
                 'use_strict_mode' => true,
+                'cookie_lifetime' => 0, // Session cookie (expires when browser closes)
+                'gc_maxlifetime'  => self::SESSION_LIFETIME,
             ];
             
             session_start( $session_options );
@@ -194,9 +201,12 @@ final class DPS_Groomer_Session_Manager {
             return;
         }
 
-        // Verifica nonce
+        // FUNCTIONAL FIX: Fornecer feedback quando nonce falha
         if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_groomer_logout' ) ) {
-            return;
+            // Redireciona com mensagem de erro em vez de retornar silenciosamente
+            $redirect_url = add_query_arg( 'groomer_logout_error', 'nonce_failed', home_url() );
+            wp_safe_redirect( $redirect_url );
+            exit;
         }
 
         $this->logout();

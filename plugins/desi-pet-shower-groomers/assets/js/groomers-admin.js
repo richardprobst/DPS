@@ -278,9 +278,14 @@
          * @param {string} type Tipo: success, error, warning
          */
         showNotice: function(message, type) {
-            type = type || 'info';
+            // SECURITY: Whitelist de tipos válidos para prevenir classes CSS inesperadas
+            var validTypes = ['success', 'error', 'warning', 'info'];
+            var safeType = validTypes.indexOf(type) !== -1 ? type : 'info';
             
-            var $notice = $('<div class="dps-groomers-notice dps-groomers-notice--' + type + '">' + message + '</div>');
+            // SECURITY FIX: Escapar mensagem para prevenir XSS
+            var escapedMessage = $('<div>').text(message).html();
+            
+            var $notice = $('<div class="dps-groomers-notice dps-groomers-notice--' + safeType + '">' + escapedMessage + '</div>');
             
             $('.dps-section#dps-section-groomers').prepend($notice);
             

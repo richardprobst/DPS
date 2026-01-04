@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.8.0
+ * Version:           1.8.3
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -63,7 +63,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.7.0';
+    const VERSION = '1.8.3';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -202,12 +202,19 @@ class DPS_Groomers_Addon {
     public function get_portal_page_url() {
         // Busca uma página com o shortcode [dps_groomer_portal]
         global $wpdb;
+        
+        // SECURITY FIX: Usar $wpdb->prepare() para a cláusula LIKE
+        $like_pattern = '%' . $wpdb->esc_like( '[dps_groomer_portal' ) . '%';
+        
         $page_id = $wpdb->get_var(
-            "SELECT ID FROM {$wpdb->posts} 
-            WHERE post_type = 'page' 
-            AND post_status = 'publish' 
-            AND post_content LIKE '%[dps_groomer_portal%' 
-            LIMIT 1"
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} 
+                WHERE post_type = 'page' 
+                AND post_status = 'publish' 
+                AND post_content LIKE %s 
+                LIMIT 1",
+                $like_pattern
+            )
         );
 
         if ( $page_id ) {
@@ -237,7 +244,11 @@ class DPS_Groomers_Addon {
             return;
         }
 
+        // SECURITY FIX: Verificar capability e fornecer feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
+            if ( class_exists( 'DPS_Message_Helper' ) ) {
+                DPS_Message_Helper::add_error( __( 'Você não tem permissão para realizar esta ação.', 'dps-groomers-addon' ) );
+            }
             return;
         }
 
@@ -253,6 +264,12 @@ class DPS_Groomers_Addon {
             case 'revoke_all':
                 $this->handle_revoke_all_tokens();
                 break;
+            default:
+                // SECURITY: Log de ação desconhecida (mensagem genérica sem input do usuário para prevenir log injection)
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( 'DPS Groomers: Unknown token action attempted' );
+                }
+                break;
         }
     }
 
@@ -262,7 +279,9 @@ class DPS_Groomers_Addon {
      * @since 1.4.0
      */
     private function handle_generate_token() {
+        // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
         if ( ! isset( $_POST['groomer_id'] ) || ! isset( $_POST['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -272,6 +291,12 @@ class DPS_Groomers_Addon {
 
         if ( ! wp_verify_nonce( $nonce, 'dps_generate_groomer_token_' . $groomer_id ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        // SECURITY: Validar que o groomer_id é válido
+        if ( ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -288,7 +313,8 @@ class DPS_Groomers_Addon {
 
             DPS_Message_Helper::add_success( __( 'Token gerado com sucesso! Copie o link abaixo.', 'dps-groomers-addon' ) );
         } else {
-            DPS_Message_Helper::add_error( __( 'Erro ao gerar token.', 'dps-groomers-addon' ) );
+            // SECURITY: Mensagem genérica para não revelar informações sobre existência do groomer
+            DPS_Message_Helper::add_error( __( 'Erro ao gerar token. Tente novamente.', 'dps-groomers-addon' ) );
         }
     }
 
@@ -298,13 +324,21 @@ class DPS_Groomers_Addon {
      * @since 1.4.0
      */
     private function handle_revoke_token() {
+        // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
         if ( ! isset( $_GET['token_id'] ) || ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $token_id   = absint( $_GET['token_id'] );
         $groomer_id = absint( $_GET['groomer_id'] );
         $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        // SECURITY: Validar que os IDs são válidos
+        if ( ! $token_id || ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'IDs inválidos.', 'dps-groomers-addon' ) );
+            return;
+        }
 
         if ( ! wp_verify_nonce( $nonce, 'dps_revoke_groomer_token_' . $token_id ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
@@ -327,12 +361,20 @@ class DPS_Groomers_Addon {
      * @since 1.4.0
      */
     private function handle_revoke_all_tokens() {
+        // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
         if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
         $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        // SECURITY: Validar que o groomer_id é válido
+        if ( ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
+            return;
+        }
 
         if ( ! wp_verify_nonce( $nonce, 'dps_revoke_all_groomer_tokens_' . $groomer_id ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
@@ -840,6 +882,17 @@ class DPS_Groomers_Addon {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
         
+        // SECURITY FIX: Verificar se a tabela existe antes de fazer a query
+        $table_exists = $wpdb->get_var( 
+            $wpdb->prepare( 
+                "SHOW TABLES LIKE %s", 
+                $table 
+            ) 
+        );
+        if ( ! $table_exists ) {
+            return;
+        }
+        
         $transaction = $wpdb->get_row( $wpdb->prepare(
             "SELECT agendamento_id FROM {$table} WHERE id = %d",
             absint( $charge_id )
@@ -1046,12 +1099,20 @@ class DPS_Groomers_Addon {
      * @since 1.3.0
      */
     private function handle_toggle_status() {
+        // FUNCTIONAL FIX: Fornecer feedback quando parâmetros estão ausentes
         if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
         $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        // FUNCTIONAL FIX: Validar que groomer_id é válido
+        if ( ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
+            return;
+        }
 
         if ( ! wp_verify_nonce( $nonce, 'dps_toggle_status_' . $groomer_id ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
@@ -1095,12 +1156,20 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_delete_groomer() {
+        // FUNCTIONAL FIX: Fornecer feedback quando parâmetros estão ausentes
         if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
         $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+
+        // FUNCTIONAL FIX: Validar que groomer_id é válido
+        if ( ! $groomer_id ) {
+            DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
+            return;
+        }
 
         if ( ! wp_verify_nonce( $nonce, 'dps_delete_groomer_' . $groomer_id ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
@@ -1181,7 +1250,9 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_update_groomer() {
+        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
         if ( ! isset( $_POST['dps_edit_groomer_nonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Dados do formulário inválidos.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -1254,7 +1325,9 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_export_csv() {
+        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
         if ( ! isset( $_GET['_wpnonce'] ) ) {
+            DPS_Message_Helper::add_error( __( 'Parâmetros de segurança ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -1418,6 +1491,17 @@ class DPS_Groomers_Addon {
     private function get_appointment_value( $appointment_id ) {
         global $wpdb;
         $table = $wpdb->prefix . 'dps_transacoes';
+
+        // SECURITY FIX: Verificar se a tabela existe antes de fazer a query
+        $table_exists = $wpdb->get_var( 
+            $wpdb->prepare( 
+                "SHOW TABLES LIKE %s", 
+                $table 
+            ) 
+        );
+        if ( ! $table_exists ) {
+            return 0.0;
+        }
 
         $valor = $wpdb->get_var(
             $wpdb->prepare(
@@ -2116,14 +2200,16 @@ class DPS_Groomers_Addon {
                                                             data-groomer-commission="<?php echo esc_attr( $groomer_commission ); ?>"
                                                             data-staff-type="<?php echo esc_attr( $staff_type ); ?>"
                                                             data-is-freelancer="<?php echo esc_attr( $is_freelancer ); ?>"
-                                                            title="<?php echo esc_attr__( 'Editar', 'dps-groomers-addon' ); ?>">
+                                                            title="<?php echo esc_attr__( 'Editar', 'dps-groomers-addon' ); ?>"
+                                                            aria-label="<?php echo esc_attr__( 'Editar profissional', 'dps-groomers-addon' ); ?>">
                                                             ✏️
                                                         </button>
                                                         <a href="<?php echo esc_url( $delete_url ); ?>" 
                                                             class="dps-action-btn dps-action-btn--danger dps-delete-groomer"
                                                             data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
                                                             data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
-                                                            title="<?php echo esc_attr__( 'Excluir', 'dps-groomers-addon' ); ?>">
+                                                            title="<?php echo esc_attr__( 'Excluir', 'dps-groomers-addon' ); ?>"
+                                                            aria-label="<?php echo esc_attr__( 'Excluir profissional', 'dps-groomers-addon' ); ?>">
                                                             🗑️
                                                         </a>
                                                     </div>
@@ -2213,6 +2299,7 @@ class DPS_Groomers_Addon {
                                     <label for="edit_groomer_commission"><?php echo esc_html__( 'Comissão (%)', 'dps-groomers-addon' ); ?></label>
                                     <input type="number" name="dps_groomer_commission" id="edit_groomer_commission" class="regular-text" min="0" max="100" step="0.5" />
                                 </div>
+                            </div>
                         </div>
                         
                         <div class="dps-modal-footer">
@@ -3032,8 +3119,20 @@ class DPS_Groomers_Addon {
             return 0.0;
         }
         
+        $table_name = $wpdb->prefix . 'dps_transacoes';
+
+        // SECURITY FIX: Verificar se a tabela existe antes de fazer a query
+        $table_exists = $wpdb->get_var( 
+            $wpdb->prepare( 
+                "SHOW TABLES LIKE %s", 
+                $table_name 
+            ) 
+        );
+        if ( ! $table_exists ) {
+            return 0.0;
+        }
+        
         $placeholders = implode( ',', array_fill( 0, count( $sanitized_ids ), '%d' ) );
-        $table_name   = $wpdb->prefix . 'dps_transacoes';
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholders são gerados dinamicamente mas de forma segura
         $total = $wpdb->get_var(
