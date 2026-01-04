@@ -515,14 +515,14 @@ class DPS_Communications_Addon {
         if ( ! isset( $_POST['dps_comm_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_comm_nonce'] ) ), 'dps_comm_save' ) ) {
             // Usa transient para persistir mensagem de erro entre redirects
             set_transient( 'dps_comm_settings_error', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-communications-addon' ), 30 );
-            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications', 'error' => 'nonce' ], admin_url( 'admin.php' ) ) );
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
             exit;
         }
 
         // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
             set_transient( 'dps_comm_settings_error', __( 'Você não tem permissão para alterar estas configurações.', 'dps-communications-addon' ), 30 );
-            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications', 'error' => 'permission' ], admin_url( 'admin.php' ) ) );
+            wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );
             exit;
         }
 
@@ -534,7 +534,7 @@ class DPS_Communications_Addon {
         // Salva o número do WhatsApp da equipe separadamente (com validação)
         if ( isset( $_POST['dps_whatsapp_number'] ) ) {
             $whatsapp_number = sanitize_text_field( wp_unslash( $_POST['dps_whatsapp_number'] ) );
-            // Remove caracteres não numéricos exceto + e espaço para validação
+            // Remove caracteres não numéricos exceto +, espaços, hífens e parênteses
             $whatsapp_number = preg_replace( '/[^0-9\+\s\-\(\)]/', '', $whatsapp_number );
             update_option( 'dps_whatsapp_number', $whatsapp_number );
         }
