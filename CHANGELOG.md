@@ -81,7 +81,59 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+
+**Communications Add-on - Funcionalidades Avançadas (v0.3.0)**
+
+- **Histórico de Comunicações**: Nova tabela `dps_comm_history` para registro de todas as mensagens enviadas (WhatsApp, e-mail, SMS). Inclui status de entrega, metadata, cliente/agendamento associado e timestamps de criação/atualização/entrega/leitura.
+- **Retry com Exponential Backoff**: Sistema automático de retry para mensagens que falham. Máximo de 5 tentativas com delays exponenciais (1min, 2min, 4min, 8min, 16min) + jitter aleatório para evitar thundering herd. Cap máximo de 1 hora.
+- **REST API de Webhooks**: Endpoints para receber status de entrega de gateways externos:
+  - `POST /wp-json/dps-communications/v1/webhook/{provider}` - Recebe webhooks de Evolution API, Twilio ou formato genérico
+  - `GET /wp-json/dps-communications/v1/webhook-url` - Retorna URLs e preview do secret para configuração (admin only)
+  - `GET /wp-json/dps-communications/v1/stats` - Estatísticas de comunicações e retries (admin only)
+  - `GET /wp-json/dps-communications/v1/history` - Histórico de comunicações com filtros (admin only)
+- **Suporte a múltiplos providers**: Webhooks suportam Evolution API, Twilio e formato genérico, com mapeamento automático de status.
+- **Webhook Secret**: Secret automático gerado para autenticação de webhooks via header `Authorization: Bearer` ou `X-Webhook-Secret`.
+- **Limpeza automática**: Cron job diário para limpeza de transients de retry expirados e método para limpar histórico antigo (padrão 90 dias).
+- **Classes modulares**: Novas classes `DPS_Communications_History`, `DPS_Communications_Retry` e `DPS_Communications_Webhook` seguindo padrão singleton.
+
+**Communications Add-on - Verificação Funcional (v0.3.0)**
+
+- **JavaScript para UX**: Novo arquivo `communications-addon.js` com prevenção de duplo clique, validação client-side de e-mail e URL, e feedback visual durante submissão.
+- **Seção de Webhooks na UI**: Nova seção na página admin exibindo URLs de webhook e secret com botões para mostrar/ocultar e copiar para clipboard.
+- **Seção de Estatísticas**: Dashboard com cards visuais mostrando contagem de mensagens por status (pendentes, enviadas, entregues, lidas, falhas, reenviando) com ícones e cores temáticas.
+- **Validação client-side**: Campos de e-mail e URL do gateway agora são validados em tempo real no navegador, com mensagens de erro em português.
+- **Prevenção de duplo clique**: Botão de salvar é desabilitado durante submissão e exibe spinner "Salvando..." para evitar envios duplicados.
+- **Melhorias de acessibilidade**: Adicionados `aria-describedby` nos campos, `:focus-visible` para navegação por teclado, e feedback visual em rows com foco.
+- **Mensagens de erro persistidas**: Erros de nonce/permissão agora são persistidos via transient e exibidos corretamente após redirect.
+- **Secret mascarado no REST**: Endpoint `/webhook-url` agora retorna apenas preview mascarado do secret (`abc***xyz`) em vez do valor completo.
+
 #### Security (Segurança)
+
+**Communications Add-on - Auditoria de Segurança Completa (v0.2.1)**
+
+- **Chave de API exposta**: Campo de API key do WhatsApp alterado de `type="text"` para `type="password"` com `autocomplete="off"` para evitar exposição casual.
+- **SSRF Prevention**: Implementada validação rigorosa de URL do gateway WhatsApp bloqueando endereços internos (localhost, IPs privados 10.x, 172.16-31.x, 192.168.x, metadata endpoints de cloud). URLs HTTP só são aceitas em modo debug.
+- **PII Leak em Logs**: Removida exposição de dados pessoais (telefones, mensagens, emails) em logs. Implementado método `safe_log()` que mascara dados sensíveis antes de logar.
+- **PII Leak em error_log**: Funções legadas `dps_comm_send_whatsapp()` e `dps_comm_send_sms()` não expõem mais telefones e mensagens no error_log do PHP.
+- **Verificação de DPS_Logger**: Adicionada verificação de existência da classe `DPS_Logger` antes de usar, evitando fatal errors quando o plugin base não está ativo.
+- **Timeout preparado**: Adicionada constante `REQUEST_TIMEOUT` (30s) e exemplo de implementação segura de `wp_remote_post()` com timeout, sslverify e tratamento de erro para futura integração com gateway.
+- **Validação de URL dupla**: Gateway WhatsApp valida URL novamente antes do envio (`filter_var()`) como double-check de segurança.
+
+#### Fixed (Corrigido)
+
+**Communications Add-on - Correções Funcionais (v0.3.0)**
+
+- **CSS class do container**: Corrigida classe CSS do container (`wrap` → `wrap dps-communications-wrap`) para aplicar estilos customizados.
+- **Estilos para password**: Adicionados estilos para `input[type="password"]` que estavam faltando no CSS responsivo.
+- **ID do formulário**: Adicionado `id="dps-comm-settings-form"` para permitir binding de eventos JavaScript.
+- **Validação de número WhatsApp**: Número do WhatsApp da equipe agora é sanitizado removendo caracteres inválidos.
+- **Grid de estatísticas responsivo**: Grid de cards de estatísticas adapta-se automaticamente a diferentes tamanhos de tela.
+
+**Communications Add-on - Correções de Bugs (v0.2.1)**
+
+- **uninstall.php corrigido**: Arquivo de desinstalação agora remove corretamente a option `dps_comm_settings` (principal) além de `dps_whatsapp_number` e options legadas.
+- **Log context sanitizado**: Contexto de logs agora mascara chaves sensíveis (phone, to, email, message, body, subject, api_key) para compliance com LGPD/GDPR.
 
 **Push Notifications Add-on - Auditoria de Segurança Completa (v1.3.0)**
 
