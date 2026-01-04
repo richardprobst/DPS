@@ -220,18 +220,37 @@
 }
 
 /* === Input com Prefixo/Sufixo === */
-.dps-input-prefix,
-.dps-input-suffix {
-    display: flex;
+/* Increased specificity to override dps-base.css which uses .dps-input-prefix differently */
+.dps-porte-item .dps-input-prefix,
+.dps-porte-item .dps-input-suffix,
+.dps-fieldset-pricing .dps-input-prefix,
+.dps-fieldset-pricing .dps-input-suffix,
+.dps-fieldset-duration .dps-input-prefix,
+.dps-fieldset-duration .dps-input-suffix,
+.dps-services-form .dps-input-prefix,
+.dps-services-form .dps-input-suffix,
+#dps-section-servicos .dps-input-prefix,
+#dps-section-servicos .dps-input-suffix {
+    display: flex !important;
     align-items: center;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     overflow: hidden;
+    padding: 0;
+    border-right: none;
 }
 
-.dps-input-prefix span,
-.dps-input-suffix span {
+.dps-porte-item .dps-input-prefix span,
+.dps-porte-item .dps-input-suffix span,
+.dps-fieldset-pricing .dps-input-prefix span,
+.dps-fieldset-pricing .dps-input-suffix span,
+.dps-fieldset-duration .dps-input-prefix span,
+.dps-fieldset-duration .dps-input-suffix span,
+.dps-services-form .dps-input-prefix span,
+.dps-services-form .dps-input-suffix span,
+#dps-section-servicos .dps-input-prefix span,
+#dps-section-servicos .dps-input-suffix span {
     padding: 10px 12px;
     background: #f3f4f6;
     color: #6b7280;
@@ -241,8 +260,16 @@
     flex-shrink: 0;
 }
 
-.dps-input-prefix input,
-.dps-input-suffix input {
+.dps-porte-item .dps-input-prefix input,
+.dps-porte-item .dps-input-suffix input,
+.dps-fieldset-pricing .dps-input-prefix input,
+.dps-fieldset-pricing .dps-input-suffix input,
+.dps-fieldset-duration .dps-input-prefix input,
+.dps-fieldset-duration .dps-input-suffix input,
+.dps-services-form .dps-input-prefix input,
+.dps-services-form .dps-input-suffix input,
+#dps-section-servicos .dps-input-prefix input,
+#dps-section-servicos .dps-input-suffix input {
     flex: 1;
     min-width: 0;
     width: 100%;
@@ -255,8 +282,16 @@
     color: #374151;
 }
 
-.dps-input-prefix input:focus,
-.dps-input-suffix input:focus {
+.dps-porte-item .dps-input-prefix input:focus,
+.dps-porte-item .dps-input-suffix input:focus,
+.dps-fieldset-pricing .dps-input-prefix input:focus,
+.dps-fieldset-pricing .dps-input-suffix input:focus,
+.dps-fieldset-duration .dps-input-prefix input:focus,
+.dps-fieldset-duration .dps-input-suffix input:focus,
+.dps-services-form .dps-input-prefix input:focus,
+.dps-services-form .dps-input-suffix input:focus,
+#dps-section-servicos .dps-input-prefix input:focus,
+#dps-section-servicos .dps-input-suffix input:focus {
     outline: none;
     background: #f9fafb;
 }
