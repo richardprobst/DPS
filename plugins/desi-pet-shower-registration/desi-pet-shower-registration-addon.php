@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.3
+ * Version:           1.2.4
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -180,6 +180,9 @@ class DPS_Registration_Addon {
 
         // F4.2: API segura de cadastro
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+
+        // AJAX para envio de email de teste
+        add_action( 'wp_ajax_dps_registration_send_test_email', [ $this, 'ajax_send_test_email' ] );
     }
 
     // =========================================================================
@@ -649,7 +652,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.3';
+        $version   = '1.2.4';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -1391,14 +1394,21 @@ class DPS_Registration_Addon {
         echo '<tr><th scope="row"><label for="dps_registration_recaptcha_threshold">' . esc_html__( 'Score mínimo (0-1)', 'dps-registration-addon' ) . '</label></th>';
         echo '<td><input type="number" id="dps_registration_recaptcha_threshold" name="dps_registration_recaptcha_threshold" value="' . esc_attr( $recaptcha_threshold ) . '" min="0" max="1" step="0.1">';
         echo '<p class="description">' . esc_html__( 'Cadastros com score abaixo deste valor serão bloqueados.', 'dps-registration-addon' ) . '</p></td></tr>';
+        echo '</table>';
 
+        // Seção de gerenciamento de emails
+        echo '<h2 style="margin-top: 30px;">📧 ' . esc_html__( 'Gerenciamento de Emails', 'dps-registration-addon' ) . '</h2>';
+        echo '<p class="description" style="margin-bottom: 20px;">' . esc_html__( 'Configure o conteúdo dos emails enviados pelo sistema e teste o envio.', 'dps-registration-addon' ) . '</p>';
+
+        echo '<table class="form-table">';
         echo '<tr><th scope="row"><label for="dps_registration_confirm_email_subject">' . esc_html__( 'Assunto do email de confirmação', 'dps-registration-addon' ) . '</label></th>';
-        echo '<td><input type="text" id="dps_registration_confirm_email_subject" name="dps_registration_confirm_email_subject" value="' . esc_attr( $email_subject ) . '" class="regular-text">';
-        echo '<p class="description">' . esc_html__( 'Deixe vazio para usar o padrão.', 'dps-registration-addon' ) . '</p></td></tr>';
+        echo '<td><input type="text" id="dps_registration_confirm_email_subject" name="dps_registration_confirm_email_subject" value="' . esc_attr( $email_subject ) . '" class="regular-text" placeholder="' . esc_attr__( 'Confirme seu email - desi.pet by PRObst', 'dps-registration-addon' ) . '">';
+        echo '<p class="description">' . esc_html__( 'Deixe vazio para usar o padrão. Suporta: {client_name}, {business_name}', 'dps-registration-addon' ) . '</p></td></tr>';
 
-        echo '<tr><th scope="row"><label for="dps_registration_confirm_email_body">' . esc_html__( 'Corpo do email de confirmação', 'dps-registration-addon' ) . '</label></th>';
-        echo '<td><textarea id="dps_registration_confirm_email_body" name="dps_registration_confirm_email_body" rows="6" class="large-text code">' . esc_textarea( $email_body ) . '</textarea>';
-        echo '<p class="description">' . esc_html__( 'Suporta HTML básico e os placeholders {client_name}, {confirm_url}, {registration_url}, {portal_url}, {business_name}. Deixe vazio para usar o modelo padrão.', 'dps-registration-addon' ) . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="dps_registration_confirm_email_body">' . esc_html__( 'Corpo personalizado (opcional)', 'dps-registration-addon' ) . '</label></th>';
+        echo '<td><textarea id="dps_registration_confirm_email_body" name="dps_registration_confirm_email_body" rows="8" class="large-text code">' . esc_textarea( $email_body ) . '</textarea>';
+        echo '<p class="description">' . esc_html__( 'Suporta HTML e os placeholders: {client_name}, {confirm_url}, {registration_url}, {portal_url}, {business_name}', 'dps-registration-addon' ) . '</p>';
+        echo '<p class="description"><strong>' . esc_html__( 'Dica:', 'dps-registration-addon' ) . '</strong> ' . esc_html__( 'Deixe vazio para usar o template padrão com design moderno e responsivo.', 'dps-registration-addon' ) . '</p></td></tr>';
         echo '</table>';
 
         echo '<h2>' . esc_html__( 'API de Cadastro (Fase 4)', 'dps-registration-addon' ) . '</h2>';
@@ -1457,6 +1467,117 @@ class DPS_Registration_Addon {
 
         submit_button();
         echo '</form>';
+
+        // Seção de Teste de Email (fora do form principal)
+        $this->render_email_test_section();
+
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de teste de emails na página de configurações.
+     *
+     * @since 1.2.4
+     */
+    private function render_email_test_section() {
+        $admin_email = get_option( 'admin_email' );
+        $nonce       = wp_create_nonce( 'dps_registration_test_email' );
+
+        echo '<div class="dps-email-test-section" style="background: #ffffff; border: 1px solid #c3c4c7; border-radius: 8px; padding: 25px; margin-top: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">';
+
+        echo '<h2 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">';
+        echo '<span style="font-size: 24px;">🧪</span>';
+        echo esc_html__( 'Teste de Envio de Emails', 'dps-registration-addon' );
+        echo '</h2>';
+
+        echo '<p style="color: #50575e; margin-bottom: 20px;">' . esc_html__( 'Envie um email de teste para verificar se o layout e configurações estão corretos. O email será enviado com dados simulados.', 'dps-registration-addon' ) . '</p>';
+
+        echo '<div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">';
+
+        // Campo de email
+        echo '<div style="flex: 1; min-width: 250px;">';
+        echo '<label for="dps_test_email" style="display: block; font-weight: 600; margin-bottom: 5px;">' . esc_html__( 'Email de destino', 'dps-registration-addon' ) . '</label>';
+        echo '<input type="email" id="dps_test_email" value="' . esc_attr( $admin_email ) . '" class="regular-text" style="width: 100%;" placeholder="email@exemplo.com">';
+        echo '</div>';
+
+        // Tipo de email
+        echo '<div style="min-width: 200px;">';
+        echo '<label for="dps_test_email_type" style="display: block; font-weight: 600; margin-bottom: 5px;">' . esc_html__( 'Tipo de email', 'dps-registration-addon' ) . '</label>';
+        echo '<select id="dps_test_email_type" style="width: 100%;">';
+        echo '<option value="confirmation">' . esc_html__( 'Confirmação de Cadastro', 'dps-registration-addon' ) . '</option>';
+        echo '<option value="reminder">' . esc_html__( 'Lembrete de Confirmação', 'dps-registration-addon' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+
+        // Botão de envio
+        echo '<div>';
+        echo '<button type="button" id="dps_send_test_email" class="button button-primary" style="height: 32px;">';
+        echo '<span class="dashicons dashicons-email-alt" style="margin-top: 3px;"></span> ';
+        echo esc_html__( 'Enviar Email de Teste', 'dps-registration-addon' );
+        echo '</button>';
+        echo '</div>';
+
+        echo '</div>';
+
+        // Área de feedback
+        echo '<div id="dps_test_email_result" style="margin-top: 15px; display: none;"></div>';
+
+        // JavaScript para o envio de teste
+        echo '<script type="text/javascript">
+        (function(){
+            var sendBtn = document.getElementById("dps_send_test_email");
+            var emailInput = document.getElementById("dps_test_email");
+            var typeSelect = document.getElementById("dps_test_email_type");
+            var resultDiv = document.getElementById("dps_test_email_result");
+
+            if(sendBtn && emailInput && typeSelect && resultDiv){
+                sendBtn.addEventListener("click", function(){
+                    var email = emailInput.value.trim();
+                    var emailType = typeSelect.value;
+
+                    if(!email){
+                        resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>' . esc_js( __( 'Por favor, insira um email válido.', 'dps-registration-addon' ) ) . '</p></div>\';
+                        resultDiv.style.display = "block";
+                        return;
+                    }
+
+                    sendBtn.disabled = true;
+                    sendBtn.innerHTML = \'<span class="spinner" style="visibility: visible; float: none; margin: 0 5px 0 0;"></span> ' . esc_js( __( 'Enviando...', 'dps-registration-addon' ) ) . '\';
+
+                    var formData = new FormData();
+                    formData.append("action", "dps_registration_send_test_email");
+                    formData.append("nonce", "' . esc_js( $nonce ) . '");
+                    formData.append("email", email);
+                    formData.append("email_type", emailType);
+
+                    fetch(ajaxurl, {
+                        method: "POST",
+                        body: formData,
+                        credentials: "same-origin"
+                    })
+                    .then(function(response){ return response.json(); })
+                    .then(function(data){
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = \'<span class="dashicons dashicons-email-alt" style="margin-top: 3px;"></span> ' . esc_js( __( 'Enviar Email de Teste', 'dps-registration-addon' ) ) . '\';
+
+                        if(data.success){
+                            resultDiv.innerHTML = \'<div class="notice notice-success" style="padding: 10px; margin: 0;"><p>✓ \' + data.data.message + \'</p></div>\';
+                        } else {
+                            resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>✗ \' + (data.data && data.data.message ? data.data.message : "' . esc_js( __( 'Erro desconhecido.', 'dps-registration-addon' ) ) . '") + \'</p></div>\';
+                        }
+                        resultDiv.style.display = "block";
+                    })
+                    .catch(function(error){
+                        sendBtn.disabled = false;
+                        sendBtn.innerHTML = \'<span class="dashicons dashicons-email-alt" style="margin-top: 3px;"></span> ' . esc_js( __( 'Enviar Email de Teste', 'dps-registration-addon' ) ) . '\';
+                        resultDiv.innerHTML = \'<div class="notice notice-error" style="padding: 10px; margin: 0;"><p>✗ ' . esc_js( __( 'Erro de conexão. Tente novamente.', 'dps-registration-addon' ) ) . '</p></div>\';
+                        resultDiv.style.display = "block";
+                    });
+                });
+            }
+        })();
+        </script>';
+
         echo '</div>';
     }
 
@@ -2385,28 +2506,118 @@ class DPS_Registration_Addon {
         if ( $body_option ) {
             $body = $this->replace_placeholders( $body_option, $placeholders );
         } else {
-            $body_parts = array();
-            $body_parts[] = '<p>' . esc_html__( 'Olá! Recebemos seu cadastro no desi.pet by PRObst. Para ativar sua conta, confirme seu email clicando no link abaixo:', 'desi-pet-shower' ) . '</p>';
-            $body_parts[] = '<p><a href="' . esc_url( $confirmation_link ) . '">' . esc_html( $confirmation_link ) . '</a></p>';
-            $body_parts[] = '<p>' . esc_html__( 'Este link é válido por 48 horas.', 'dps-registration-addon' ) . '</p>';
-            $body_parts[] = '<p>' . esc_html__( 'Se você não fez este cadastro, ignore esta mensagem.', 'desi-pet-shower' ) . '</p>';
-
-            if ( $portal_url ) {
-                $body_parts[] = '<p>' . sprintf(
-                    '%s <a href="%s">%s</a>',
-                    esc_html__( 'Após confirmar, acesse o Portal por aqui:', 'dps-registration-addon' ),
-                    esc_url( $portal_url ),
-                    esc_html( $portal_url )
-                ) . '</p>';
-            }
-
-            $body = implode( '', $body_parts );
+            $body = $this->build_default_confirmation_email_html( $client_name, $confirmation_link, $portal_url, $business_name );
         }
 
         return array(
             'subject' => $subject,
             'body'    => $body,
         );
+    }
+
+    /**
+     * Constrói o HTML padrão do email de confirmação com design moderno.
+     *
+     * @since 1.2.4
+     *
+     * @param string $client_name       Nome do cliente.
+     * @param string $confirmation_link URL de confirmação.
+     * @param string $portal_url        URL do portal (pode ser vazia).
+     * @param string $business_name     Nome do negócio.
+     * @return string HTML completo do email.
+     */
+    private function build_default_confirmation_email_html( $client_name, $confirmation_link, $portal_url, $business_name ) {
+        $greeting = $client_name
+            ? sprintf( esc_html__( 'Olá, %s!', 'dps-registration-addon' ), esc_html( $client_name ) )
+            : esc_html__( 'Olá!', 'dps-registration-addon' );
+
+        $html = '<!DOCTYPE html>';
+        $html .= '<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>';
+        $html .= '<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f3f4f6; line-height: 1.6;">';
+
+        // Container principal
+        $html .= '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f3f4f6; padding: 40px 20px;">';
+        $html .= '<tr><td align="center">';
+
+        // Card do email
+        $html .= '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">';
+
+        // Header com logo/título
+        $html .= '<tr><td style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">';
+        $html .= '<h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">🐾 ' . esc_html( $business_name ) . '</h1>';
+        $html .= '<p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">' . esc_html__( 'Confirmação de Cadastro', 'dps-registration-addon' ) . '</p>';
+        $html .= '</td></tr>';
+
+        // Corpo do email
+        $html .= '<tr><td style="padding: 40px;">';
+
+        // Saudação
+        $html .= '<h2 style="margin: 0 0 20px 0; color: #374151; font-size: 22px; font-weight: 600;">' . $greeting . '</h2>';
+
+        // Mensagem principal
+        $html .= '<p style="margin: 0 0 25px 0; color: #4b5563; font-size: 16px;">';
+        $html .= esc_html__( 'Recebemos seu cadastro e estamos muito felizes em ter você conosco! Para ativar sua conta e garantir que receba nossas comunicações, confirme seu email clicando no botão abaixo:', 'dps-registration-addon' );
+        $html .= '</p>';
+
+        // Botão de confirmação
+        $html .= '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 30px 0;">';
+        $html .= '<tr><td align="center">';
+        $html .= '<a href="' . esc_url( $confirmation_link ) . '" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">';
+        $html .= '✓ ' . esc_html__( 'Confirmar meu email', 'dps-registration-addon' );
+        $html .= '</a>';
+        $html .= '</td></tr>';
+        $html .= '</table>';
+
+        // Link alternativo
+        $html .= '<p style="margin: 0 0 25px 0; color: #6b7280; font-size: 14px;">';
+        $html .= esc_html__( 'Ou copie e cole este link no seu navegador:', 'dps-registration-addon' );
+        $html .= '</p>';
+        $html .= '<p style="margin: 0 0 25px 0; background-color: #f3f4f6; padding: 12px 16px; border-radius: 6px; word-break: break-all;">';
+        $html .= '<a href="' . esc_url( $confirmation_link ) . '" style="color: #0ea5e9; text-decoration: none; font-size: 14px;">' . esc_html( $confirmation_link ) . '</a>';
+        $html .= '</p>';
+
+        // Aviso de expiração
+        $html .= '<div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 0 6px 6px 0; margin: 25px 0;">';
+        $html .= '<p style="margin: 0; color: #92400e; font-size: 14px;">';
+        $html .= '<strong>⏰ ' . esc_html__( 'Atenção:', 'dps-registration-addon' ) . '</strong> ';
+        $html .= esc_html__( 'Este link é válido por 48 horas. Após esse período, você precisará solicitar um novo link de confirmação.', 'dps-registration-addon' );
+        $html .= '</p>';
+        $html .= '</div>';
+
+        // Link do portal (se disponível)
+        if ( $portal_url ) {
+            $html .= '<div style="background-color: #dbeafe; border-left: 4px solid #0ea5e9; padding: 15px 20px; border-radius: 0 6px 6px 0; margin: 25px 0;">';
+            $html .= '<p style="margin: 0; color: #1e40af; font-size: 14px;">';
+            $html .= '<strong>🌐 ' . esc_html__( 'Portal do Cliente:', 'dps-registration-addon' ) . '</strong> ';
+            $html .= esc_html__( 'Após confirmar seu email, acesse o Portal para gerenciar seus agendamentos:', 'dps-registration-addon' );
+            $html .= ' <a href="' . esc_url( $portal_url ) . '" style="color: #0ea5e9;">' . esc_html( $portal_url ) . '</a>';
+            $html .= '</p>';
+            $html .= '</div>';
+        }
+
+        // Aviso de não cadastro
+        $html .= '<p style="margin: 25px 0 0 0; color: #9ca3af; font-size: 13px; font-style: italic;">';
+        $html .= esc_html__( 'Se você não realizou este cadastro, pode ignorar esta mensagem com segurança.', 'dps-registration-addon' );
+        $html .= '</p>';
+
+        $html .= '</td></tr>';
+
+        // Footer
+        $html .= '<tr><td style="background-color: #f9fafb; padding: 25px 40px; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb;">';
+        $html .= '<p style="margin: 0; color: #6b7280; font-size: 13px; text-align: center;">';
+        $html .= esc_html__( 'Este email foi enviado automaticamente pelo', 'dps-registration-addon' ) . ' <strong>' . esc_html( $business_name ) . '</strong>';
+        $html .= '</p>';
+        $html .= '<p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px; text-align: center;">';
+        $html .= '© ' . date( 'Y' ) . ' ' . esc_html( $business_name ) . ' – ' . esc_html__( 'Todos os direitos reservados.', 'dps-registration-addon' );
+        $html .= '</p>';
+        $html .= '</td></tr>';
+
+        $html .= '</table>';
+        $html .= '</td></tr>';
+        $html .= '</table>';
+        $html .= '</body></html>';
+
+        return $html;
     }
 
     /**
@@ -2420,6 +2631,139 @@ class DPS_Registration_Addon {
      */
     private function replace_placeholders( $template, $replacements ) {
         return strtr( $template, $replacements );
+    }
+
+    /**
+     * Processa requisição AJAX para envio de email de teste.
+     *
+     * @since 1.2.4
+     */
+    public function ajax_send_test_email() {
+        // Verifica nonce
+        if ( ! check_ajax_referer( 'dps_registration_test_email', 'nonce', false ) ) {
+            wp_send_json_error( array( 'message' => __( 'Sessão expirada. Recarregue a página.', 'dps-registration-addon' ) ) );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-registration-addon' ) ) );
+        }
+
+        $email_to   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        $email_type = isset( $_POST['email_type'] ) ? sanitize_text_field( wp_unslash( $_POST['email_type'] ) ) : 'confirmation';
+
+        if ( ! is_email( $email_to ) ) {
+            wp_send_json_error( array( 'message' => __( 'Email inválido. Por favor, insira um email válido.', 'dps-registration-addon' ) ) );
+        }
+
+        $result = $this->send_test_email( $email_to, $email_type );
+
+        if ( $result ) {
+            wp_send_json_success( array( 'message' => sprintf( __( 'Email de teste enviado com sucesso para %s', 'dps-registration-addon' ), $email_to ) ) );
+        } else {
+            wp_send_json_error( array( 'message' => __( 'Falha ao enviar email. Verifique as configurações de email do WordPress.', 'dps-registration-addon' ) ) );
+        }
+    }
+
+    /**
+     * Envia email de teste com dados simulados.
+     *
+     * @since 1.2.4
+     *
+     * @param string $email_to   Email de destino.
+     * @param string $email_type Tipo de email (confirmation, reminder).
+     * @return bool True se enviado, false caso contrário.
+     */
+    private function send_test_email( $email_to, $email_type ) {
+        $test_client_name    = __( 'Cliente de Teste', 'dps-registration-addon' );
+        $test_confirm_link   = add_query_arg( 'dps_confirm_email', 'TESTE-UUID-' . wp_generate_password( 8, false ), $this->get_registration_page_url() );
+        $portal_url          = $this->get_portal_url();
+        $business_name       = get_bloginfo( 'name' );
+
+        $subject_option = get_option( 'dps_registration_confirm_email_subject', '' );
+        $body_option    = get_option( 'dps_registration_confirm_email_body', '' );
+
+        // Placeholders para subject
+        $subject_placeholders = array(
+            '{client_name}'   => $test_client_name,
+            '{business_name}' => $business_name,
+        );
+
+        // Placeholders para body (com escape HTML)
+        $body_placeholders = array(
+            '{client_name}'      => esc_html( $test_client_name ),
+            '{confirm_url}'      => esc_url( $test_confirm_link ),
+            '{registration_url}' => esc_url( $this->get_registration_page_url() ),
+            '{portal_url}'       => $portal_url ? esc_url( $portal_url ) : '',
+            '{business_name}'    => esc_html( $business_name ),
+        );
+
+        if ( 'reminder' === $email_type ) {
+            $subject = __( '[TESTE] Lembrete: confirme seu cadastro', 'dps-registration-addon' );
+            $greeting = sprintf( __( 'Olá %s!', 'dps-registration-addon' ), $test_client_name );
+            $body = sprintf(
+                "%s %s %s\n%s\n\n%s",
+                $greeting,
+                __( 'Lembrete: confirme seu cadastro no desi.pet by PRObst para ativar sua conta.', 'dps-registration-addon' ),
+                __( 'Use o link abaixo para finalizar a confirmação.', 'dps-registration-addon' ),
+                esc_url_raw( $test_confirm_link ),
+                __( 'Se você já confirmou, pode ignorar este lembrete.', 'dps-registration-addon' )
+            );
+            // Converte texto simples para HTML básico
+            $body = '<html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">';
+            $body .= '<p>' . esc_html( $greeting ) . '</p>';
+            $body .= '<p>' . esc_html__( 'Lembrete: confirme seu cadastro no desi.pet by PRObst para ativar sua conta.', 'dps-registration-addon' ) . '</p>';
+            $body .= '<p>' . esc_html__( 'Use o link abaixo para finalizar a confirmação:', 'dps-registration-addon' ) . '</p>';
+            $body .= '<p><a href="' . esc_url( $test_confirm_link ) . '" style="display: inline-block; background-color: #10b981; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px;">' . esc_html__( 'Confirmar cadastro', 'dps-registration-addon' ) . '</a></p>';
+            $body .= '<p style="color: #6b7280; font-size: 14px;">' . esc_html__( 'Se você já confirmou, pode ignorar este lembrete.', 'dps-registration-addon' ) . '</p>';
+            $body .= '<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">';
+            $body .= '<p style="color: #9ca3af; font-size: 12px;">' . esc_html__( 'Este é um email de TESTE enviado pelo painel administrativo.', 'dps-registration-addon' ) . '</p>';
+            $body .= '</body></html>';
+        } else {
+            // Email de confirmação
+            $subject = $subject_option
+                ? '[TESTE] ' . $this->replace_placeholders( $subject_option, $subject_placeholders )
+                : '[TESTE] ' . __( 'Confirme seu email - desi.pet by PRObst', 'dps-registration-addon' );
+
+            if ( $body_option ) {
+                $body = $this->replace_placeholders( $body_option, $body_placeholders );
+                // Adiciona aviso de teste
+                $body .= '<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">';
+                $body .= '<p style="color: #9ca3af; font-size: 12px; text-align: center;">' . esc_html__( '⚠️ Este é um email de TESTE enviado pelo painel administrativo. Os links não estão funcionais.', 'dps-registration-addon' ) . '</p>';
+            } else {
+                $body = $this->build_default_confirmation_email_html( $test_client_name, $test_confirm_link, $portal_url, $business_name );
+                // Adiciona aviso de teste antes do fechamento do body
+                $body = str_replace(
+                    '</body></html>',
+                    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 20px auto 0 auto;"><tr><td style="background-color: #fef3c7; padding: 15px 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #92400e; font-size: 13px;"><strong>⚠️ ' . esc_html__( 'EMAIL DE TESTE', 'dps-registration-addon' ) . '</strong><br>' . esc_html__( 'Este email foi enviado pelo painel administrativo. Os links de confirmação não estão funcionais.', 'dps-registration-addon' ) . '</p></td></tr></table></body></html>',
+                    $body
+                );
+            }
+        }
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+
+        $sent = false;
+
+        if ( class_exists( 'DPS_Communications_API' ) ) {
+            $communications = DPS_Communications_API::get_instance();
+            if ( $communications && method_exists( $communications, 'send_email' ) ) {
+                $context = array( 'source' => 'registration', 'type' => 'test' );
+                $sent    = $communications->send_email( $email_to, $subject, $body, $context );
+            }
+        }
+
+        if ( ! $sent ) {
+            $sent = wp_mail( $email_to, $subject, $body, $headers );
+        }
+
+        $this->log_event( 'info', 'Email de teste enviado', array(
+            'email_type' => $email_type,
+            'email_hash' => $this->get_safe_hash( $email_to ),
+            'sent'       => $sent,
+        ) );
+
+        return $sent;
     }
 
     /**
