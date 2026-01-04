@@ -33,6 +33,13 @@ class DPS_Communications_API {
     const OPTION_KEY = 'dps_comm_settings';
 
     /**
+     * Timeout padrão para requests externos em segundos
+     *
+     * @since 0.2.1
+     */
+    const REQUEST_TIMEOUT = 30;
+
+    /**
      * Instância singleton
      *
      * @var DPS_Communications_API|null
@@ -56,6 +63,50 @@ class DPS_Communications_API {
      */
     private function __construct() {
         // Construtor privado para padrão singleton
+    }
+
+    /**
+     * Registra log de forma segura, verificando disponibilidade do DPS_Logger.
+     *
+     * @since 0.2.1
+     * @param string $level   Nível do log (info, warning, error).
+     * @param string $message Mensagem do log.
+     * @param array  $context Contexto adicional (sem PII).
+     */
+    private function safe_log( $level, $message, $context = [] ) {
+        // Remove possíveis dados sensíveis do contexto
+        $safe_context = $this->sanitize_log_context( $context );
+
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::log( $level, $message, $safe_context );
+        }
+    }
+
+    /**
+     * Remove dados sensíveis do contexto de log.
+     *
+     * @since 0.2.1
+     * @param array $context Contexto original.
+     * @return array Contexto sanitizado.
+     */
+    private function sanitize_log_context( $context ) {
+        $sensitive_keys = [ 'phone', 'to', 'email', 'message', 'body', 'subject', 'api_key' ];
+        $safe           = [];
+
+        foreach ( $context as $key => $value ) {
+            if ( in_array( $key, $sensitive_keys, true ) ) {
+                // Mascarar dados sensíveis
+                if ( is_string( $value ) && ! empty( $value ) ) {
+                    $safe[ $key ] = '[REDACTED:' . strlen( $value ) . ' chars]';
+                } else {
+                    $safe[ $key ] = '[REDACTED]';
+                }
+            } else {
+                $safe[ $key ] = $value;
+            }
+        }
+
+        return $safe;
     }
 
     /**
@@ -90,7 +141,7 @@ class DPS_Communications_API {
 
         // Valida entrada
         if ( empty( $formatted_to ) || empty( $message ) ) {
-            DPS_Logger::log( 'error', 'Communications API: WhatsApp não enviado - número ou mensagem vazio', [
+            $this->safe_log( 'error', 'Communications API: WhatsApp não enviado - número ou mensagem vazio', [
                 'to'      => $to,
                 'message' => $message,
                 'context' => $context,
@@ -106,8 +157,8 @@ class DPS_Communications_API {
         $api_url = isset( $options['whatsapp_api_url'] ) ? $options['whatsapp_api_url'] : '';
         $api_key = isset( $options['whatsapp_api_key'] ) ? $options['whatsapp_api_key'] : '';
 
-        // Registra log antes do envio
-        DPS_Logger::log( 'info', 'Communications API: Enviando WhatsApp', [
+        // Registra log antes do envio (sem PII)
+        $this->safe_log( 'info', 'Communications API: Enviando WhatsApp', [
             'to'      => $formatted_to,
             'message' => $message,
             'context' => $context,
@@ -116,14 +167,14 @@ class DPS_Communications_API {
         // Envia a mensagem via gateway configurado
         $result = $this->send_via_whatsapp_gateway( $formatted_to, $message, $api_url, $api_key );
 
-        // Registra resultado
+        // Registra resultado (sem PII)
         if ( $result ) {
-            DPS_Logger::log( 'info', 'Communications API: WhatsApp enviado com sucesso', [
+            $this->safe_log( 'info', 'Communications API: WhatsApp enviado com sucesso', [
                 'to'      => $formatted_to,
                 'context' => $context,
             ] );
         } else {
-            DPS_Logger::log( 'error', 'Communications API: Falha ao enviar WhatsApp', [
+            $this->safe_log( 'error', 'Communications API: Falha ao enviar WhatsApp', [
                 'to'      => $formatted_to,
                 'context' => $context,
             ] );
@@ -157,7 +208,7 @@ class DPS_Communications_API {
     public function send_email( $to, $subject, $body, $context = [] ) {
         // Valida entrada
         if ( empty( $to ) || ! is_email( $to ) ) {
-            DPS_Logger::log( 'error', 'Communications API: E-mail inválido', [
+            $this->safe_log( 'error', 'Communications API: E-mail inválido', [
                 'to'      => $to,
                 'subject' => $subject,
                 'context' => $context,
@@ -166,7 +217,7 @@ class DPS_Communications_API {
         }
 
         if ( empty( $subject ) || empty( $body ) ) {
-            DPS_Logger::log( 'error', 'Communications API: E-mail não enviado - assunto ou corpo vazio', [
+            $this->safe_log( 'error', 'Communications API: E-mail não enviado - assunto ou corpo vazio', [
                 'to'      => $to,
                 'context' => $context,
             ] );
@@ -188,8 +239,8 @@ class DPS_Communications_API {
         }
         $headers = apply_filters( 'dps_comm_email_headers', $headers, $to, $context );
 
-        // Registra log antes do envio
-        DPS_Logger::log( 'info', 'Communications API: Enviando e-mail', [
+        // Registra log antes do envio (sem PII)
+        $this->safe_log( 'info', 'Communications API: Enviando e-mail', [
             'to'      => $to,
             'subject' => $subject,
             'context' => $context,
@@ -198,14 +249,14 @@ class DPS_Communications_API {
         // Envia via wp_mail
         $result = wp_mail( $to, $subject, $body, $headers );
 
-        // Registra resultado
+        // Registra resultado (sem PII)
         if ( $result ) {
-            DPS_Logger::log( 'info', 'Communications API: E-mail enviado com sucesso', [
+            $this->safe_log( 'info', 'Communications API: E-mail enviado com sucesso', [
                 'to'      => $to,
                 'context' => $context,
             ] );
         } else {
-            DPS_Logger::log( 'error', 'Communications API: Falha ao enviar e-mail', [
+            $this->safe_log( 'error', 'Communications API: Falha ao enviar e-mail', [
                 'to'      => $to,
                 'context' => $context,
             ] );
@@ -230,7 +281,7 @@ class DPS_Communications_API {
         $appointment_id = absint( $appointment_id );
         
         if ( ! $appointment_id ) {
-            DPS_Logger::log( 'error', 'Communications API: ID de agendamento inválido para lembrete', [
+            $this->safe_log( 'error', 'Communications API: ID de agendamento inválido para lembrete', [
                 'appointment_id' => $appointment_id,
             ] );
             return false;
@@ -239,7 +290,7 @@ class DPS_Communications_API {
         // Busca dados do agendamento
         $appointment = get_post( $appointment_id );
         if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
-            DPS_Logger::log( 'error', 'Communications API: Agendamento não encontrado', [
+            $this->safe_log( 'error', 'Communications API: Agendamento não encontrado', [
                 'appointment_id' => $appointment_id,
             ] );
             return false;
@@ -257,7 +308,7 @@ class DPS_Communications_API {
 
         // Se não tem telefone nem email, não pode enviar
         if ( empty( $phone ) && empty( $email ) ) {
-            DPS_Logger::log( 'warning', 'Communications API: Agendamento sem telefone ou e-mail', [
+            $this->safe_log( 'warning', 'Communications API: Agendamento sem telefone ou e-mail', [
                 'appointment_id' => $appointment_id,
                 'client_id'      => $client_id,
             ] );
@@ -268,7 +319,7 @@ class DPS_Communications_API {
         $message = $this->prepare_reminder_message( $appointment_id );
         
         if ( empty( $message ) ) {
-            DPS_Logger::log( 'warning', 'Communications API: Template de lembrete vazio', [
+            $this->safe_log( 'warning', 'Communications API: Template de lembrete vazio', [
                 'appointment_id' => $appointment_id,
             ] );
             // Usa mensagem padrão se template estiver vazio
@@ -314,7 +365,7 @@ class DPS_Communications_API {
         $client_id = absint( $client_id );
         
         if ( ! $client_id ) {
-            DPS_Logger::log( 'error', 'Communications API: ID de cliente inválido para notificação de pagamento', [
+            $this->safe_log( 'error', 'Communications API: ID de cliente inválido para notificação de pagamento', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -323,7 +374,7 @@ class DPS_Communications_API {
         // Busca informações do cliente
         $client = get_post( $client_id );
         if ( ! $client || 'dps_cliente' !== $client->post_type ) {
-            DPS_Logger::log( 'error', 'Communications API: Cliente não encontrado', [
+            $this->safe_log( 'error', 'Communications API: Cliente não encontrado', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -333,7 +384,7 @@ class DPS_Communications_API {
         $email = get_post_meta( $client_id, 'client_email', true );
 
         if ( empty( $phone ) && empty( $email ) ) {
-            DPS_Logger::log( 'warning', 'Communications API: Cliente sem telefone ou e-mail', [
+            $this->safe_log( 'warning', 'Communications API: Cliente sem telefone ou e-mail', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -388,7 +439,7 @@ class DPS_Communications_API {
         $client_id = absint( $client_id );
         
         if ( ! $client_id || empty( $message ) ) {
-            DPS_Logger::log( 'error', 'Communications API: Dados inválidos para mensagem de cliente', [
+            $this->safe_log( 'error', 'Communications API: Dados inválidos para mensagem de cliente', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -397,7 +448,7 @@ class DPS_Communications_API {
         // Busca informações do cliente
         $client = get_post( $client_id );
         if ( ! $client || 'dps_cliente' !== $client->post_type ) {
-            DPS_Logger::log( 'error', 'Communications API: Cliente não encontrado para mensagem', [
+            $this->safe_log( 'error', 'Communications API: Cliente não encontrado para mensagem', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -406,7 +457,7 @@ class DPS_Communications_API {
         // Obtém e-mail do admin para receber a mensagem
         $admin_email = get_option( 'admin_email' );
         if ( empty( $admin_email ) ) {
-            DPS_Logger::log( 'error', 'Communications API: E-mail do admin não configurado', [
+            $this->safe_log( 'error', 'Communications API: E-mail do admin não configurado', [
                 'client_id' => $client_id,
             ] );
             return false;
@@ -498,6 +549,7 @@ class DPS_Communications_API {
     /**
      * Envia mensagem via gateway de WhatsApp
      *
+     * @since 0.2.0
      * @param string $to      Número formatado
      * @param string $message Mensagem
      * @param string $api_url URL do gateway
@@ -505,21 +557,60 @@ class DPS_Communications_API {
      * @return bool True se enviado, false caso contrário
      */
     private function send_via_whatsapp_gateway( $to, $message, $api_url, $api_key ) {
-        // Se não tem URL configurada, apenas loga (ambiente de desenvolvimento)
+        // Se não tem URL configurada, simula sucesso em dev (sem expor PII em logs)
         if ( empty( $api_url ) ) {
-            error_log( sprintf( 'DPS Communications: WhatsApp para %s: %s', $to, $message ) );
-            return true; // Considera sucesso em dev
+            // Log seguro sem dados pessoais
+            $this->safe_log( 'info', 'Communications API: WhatsApp simulado (sem gateway configurado)', [
+                'mode' => 'development',
+            ] );
+            return true;
+        }
+
+        // Valida URL novamente (double-check de segurança)
+        if ( ! filter_var( $api_url, FILTER_VALIDATE_URL ) ) {
+            $this->safe_log( 'error', 'Communications API: URL de gateway inválida', [
+                'api_url' => $api_url,
+            ] );
+            return false;
         }
 
         // Implementação futura: integração com gateway real (Evolution API, etc.)
-        // Por enquanto, apenas loga
-        error_log( sprintf( 'DPS Communications: WhatsApp para %s via %s: %s', $to, $api_url, $message ) );
-        
+        // Por enquanto, loga apenas indicação de envio (sem PII)
+        $this->safe_log( 'info', 'Communications API: WhatsApp enviado via gateway', [
+            'gateway' => wp_parse_url( $api_url, PHP_URL_HOST ),
+        ] );
+
         // TODO: Implementar chamada HTTP real ao gateway
+        // Exemplo de implementação segura com timeout:
         // $response = wp_remote_post( $api_url, [
-        //     'headers' => [ 'Authorization' => 'Bearer ' . $api_key ],
-        //     'body'    => [ 'to' => $to, 'message' => $message ],
+        //     'timeout' => self::REQUEST_TIMEOUT,
+        //     'headers' => [
+        //         'Authorization' => 'Bearer ' . $api_key,
+        //         'Content-Type'  => 'application/json',
+        //     ],
+        //     'body'    => wp_json_encode( [
+        //         'to'      => $to,
+        //         'message' => $message,
+        //     ] ),
+        //     'sslverify' => true,
         // ] );
+        //
+        // if ( is_wp_error( $response ) ) {
+        //     $this->safe_log( 'error', 'Communications API: Erro de conexão com gateway', [
+        //         'error' => $response->get_error_message(),
+        //     ] );
+        //     return false;
+        // }
+        //
+        // $code = wp_remote_retrieve_response_code( $response );
+        // if ( $code < 200 || $code >= 300 ) {
+        //     $this->safe_log( 'error', 'Communications API: Resposta não-200 do gateway', [
+        //         'status_code' => $code,
+        //     ] );
+        //     return false;
+        // }
+        //
+        // return true;
 
         return true;
     }

@@ -83,6 +83,23 @@ Antes de criar uma nova versão oficial:
 
 #### Security (Segurança)
 
+**Communications Add-on - Auditoria de Segurança Completa (v0.2.1)**
+
+- **Chave de API exposta**: Campo de API key do WhatsApp alterado de `type="text"` para `type="password"` com `autocomplete="off"` para evitar exposição casual.
+- **SSRF Prevention**: Implementada validação rigorosa de URL do gateway WhatsApp bloqueando endereços internos (localhost, IPs privados 10.x, 172.16-31.x, 192.168.x, metadata endpoints de cloud). URLs HTTP só são aceitas em modo debug.
+- **PII Leak em Logs**: Removida exposição de dados pessoais (telefones, mensagens, emails) em logs. Implementado método `safe_log()` que mascara dados sensíveis antes de logar.
+- **PII Leak em error_log**: Funções legadas `dps_comm_send_whatsapp()` e `dps_comm_send_sms()` não expõem mais telefones e mensagens no error_log do PHP.
+- **Verificação de DPS_Logger**: Adicionada verificação de existência da classe `DPS_Logger` antes de usar, evitando fatal errors quando o plugin base não está ativo.
+- **Timeout preparado**: Adicionada constante `REQUEST_TIMEOUT` (30s) e exemplo de implementação segura de `wp_remote_post()` com timeout, sslverify e tratamento de erro para futura integração com gateway.
+- **Validação de URL dupla**: Gateway WhatsApp valida URL novamente antes do envio (`filter_var()`) como double-check de segurança.
+
+#### Fixed (Corrigido)
+
+**Communications Add-on - Correções de Bugs (v0.2.1)**
+
+- **uninstall.php corrigido**: Arquivo de desinstalação agora remove corretamente a option `dps_comm_settings` (principal) além de `dps_whatsapp_number` e options legadas.
+- **Log context sanitizado**: Contexto de logs agora mascara chaves sensíveis (phone, to, email, message, body, subject, api_key) para compliance com LGPD/GDPR.
+
 **Push Notifications Add-on - Auditoria de Segurança Completa (v1.3.0)**
 
 - **SQL Injection em uninstall.php**: Corrigido uso de query direta sem `$wpdb->prepare()` na exclusão de user meta durante desinstalação.

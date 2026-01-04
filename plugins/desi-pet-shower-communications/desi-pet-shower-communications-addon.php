@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Communications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Comunicações integradas via WhatsApp, SMS e e-mail. Notifique clientes automaticamente sobre agendamentos e eventos.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-communications-addon
@@ -171,7 +171,7 @@ class DPS_Communications_Addon {
                                 <label for="dps_comm_whatsapp_api_key"><?php echo esc_html__( 'Chave de API do WhatsApp', 'dps-communications-addon' ); ?></label>
                             </th>
                             <td>
-                                <input type="text" id="dps_comm_whatsapp_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_key]" value="<?php echo esc_attr( $options['whatsapp_api_key'] ?? '' ); ?>" class="regular-text" />
+                                <input type="password" id="dps_comm_whatsapp_api_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[whatsapp_api_key]" value="<?php echo esc_attr( $options['whatsapp_api_key'] ?? '' ); ?>" class="regular-text" autocomplete="off" />
                                 <p class="description"><?php esc_html_e( 'Token de autenticação para o gateway de WhatsApp (Evolution API, etc.).', 'dps-communications-addon' ); ?></p>
                             </td>
                         </tr>
@@ -250,13 +250,82 @@ class DPS_Communications_Addon {
         $output = [];
 
         $output['whatsapp_api_key']      = isset( $input['whatsapp_api_key'] ) ? sanitize_text_field( $input['whatsapp_api_key'] ) : '';
-        $output['whatsapp_api_url']      = isset( $input['whatsapp_api_url'] ) ? esc_url_raw( $input['whatsapp_api_url'] ) : '';
+        $output['whatsapp_api_url']      = isset( $input['whatsapp_api_url'] ) ? $this->sanitize_api_url( $input['whatsapp_api_url'] ) : '';
         $output['default_email_from']    = isset( $input['default_email_from'] ) ? sanitize_email( $input['default_email_from'] ) : '';
         $output['template_confirmation'] = isset( $input['template_confirmation'] ) ? sanitize_textarea_field( $input['template_confirmation'] ) : '';
         $output['template_reminder']     = isset( $input['template_reminder'] ) ? sanitize_textarea_field( $input['template_reminder'] ) : '';
         $output['template_post_service'] = isset( $input['template_post_service'] ) ? sanitize_textarea_field( $input['template_post_service'] ) : '';
 
         return $output;
+    }
+
+    /**
+     * Sanitiza e valida URL da API do WhatsApp para prevenção de SSRF.
+     *
+     * @since 0.2.1
+     * @param string $url URL a validar.
+     * @return string URL sanitizada ou vazio se inválida.
+     */
+    private function sanitize_api_url( $url ) {
+        $url = esc_url_raw( $url );
+        
+        if ( empty( $url ) ) {
+            return '';
+        }
+
+        // Parse URL para validação de host
+        $parsed = wp_parse_url( $url );
+        
+        // Só aceita HTTPS em produção
+        if ( ! isset( $parsed['scheme'] ) || 'https' !== $parsed['scheme'] ) {
+            // Permite HTTP apenas em ambiente de desenvolvimento
+            if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || 'http' !== ( $parsed['scheme'] ?? '' ) ) {
+                return '';
+            }
+        }
+
+        // Bloqueia endereços internos (SSRF prevention)
+        if ( isset( $parsed['host'] ) ) {
+            $host = strtolower( $parsed['host'] );
+            
+            // Bloqueia localhost, IPs privados e metadados de cloud
+            $blocked_patterns = [
+                'localhost',
+                '127.0.0.1',
+                '0.0.0.0',
+                '::1',
+                '169.254.',      // Link-local
+                '10.',           // Private Class A
+                '172.16.',       // Private Class B
+                '172.17.',
+                '172.18.',
+                '172.19.',
+                '172.20.',
+                '172.21.',
+                '172.22.',
+                '172.23.',
+                '172.24.',
+                '172.25.',
+                '172.26.',
+                '172.27.',
+                '172.28.',
+                '172.29.',
+                '172.30.',
+                '172.31.',
+                '192.168.',      // Private Class C
+                'metadata.google.internal',
+                'metadata.google',
+                '169.254.169.254', // AWS/GCP metadata
+            ];
+
+            foreach ( $blocked_patterns as $pattern ) {
+                if ( str_starts_with( $host, $pattern ) ) {
+                    return '';
+                }
+            }
+        }
+
+        return $url;
     }
 
     public function maybe_handle_save() {
@@ -442,9 +511,9 @@ if ( ! function_exists( 'dps_comm_send_whatsapp' ) ) {
             return $api->send_whatsapp( $phone, $message, [ 'source' => 'legacy_function' ] );
         }
 
-        // Fallback se API não estiver disponível
-        $log_message = sprintf( 'DPS Communications: enviar WhatsApp para %s com mensagem: %s', $phone, $message );
-        error_log( $log_message );
+        // Fallback: log apenas indicação de envio, sem expor dados pessoais (PII)
+        // @codingStandardsIgnoreLine
+        error_log( 'DPS Communications: tentativa de envio WhatsApp via função legada (API não disponível)' );
         return true;
     }
 }
@@ -481,9 +550,10 @@ if ( ! function_exists( 'dps_comm_send_sms' ) ) {
      * @param string $message Mensagem
      * @return bool
      */
-    function dps_comm_send_sms( $phone, $message ) {
-        $log_message = sprintf( 'DPS Communications: SMS não implementado. Telefone: %s, Mensagem: %s', $phone, $message );
-        error_log( $log_message );
+    function dps_comm_send_sms( $phone, $message ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed
+        // Log apenas indicação de funcionalidade não implementada, sem expor PII
+        // @codingStandardsIgnoreLine
+        error_log( 'DPS Communications: tentativa de envio SMS (funcionalidade não implementada)' );
         return false;
     }
 }
