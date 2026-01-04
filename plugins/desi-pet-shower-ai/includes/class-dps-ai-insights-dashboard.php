@@ -68,17 +68,29 @@ class DPS_AI_Insights_Dashboard {
     }
 
     /**
-     * Carrega assets (Chart.js já incluído na Fase 2).
+     * Carrega assets do dashboard de insights.
      *
      * @param string $hook Current admin page hook.
      */
     public function enqueue_assets( $hook ) {
-        if ( 'dps_page_dps-ai-insights' !== $hook ) {
+        if ( 'desi-pet-shower_page_dps-ai-insights' !== $hook ) {
             return;
         }
 
-        // Chart.js já está registrado pelo plugin base ou analytics
-        wp_enqueue_script( 'chart-js' );
+        // Registra Chart.js via CDN se ainda não estiver registrado
+        if ( ! wp_script_is( 'chartjs', 'registered' ) && ! wp_script_is( 'chart-js', 'registered' ) ) {
+            wp_register_script(
+                'chartjs',
+                'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+                [],
+                '4.4.0',
+                true
+            );
+        }
+
+        // Tenta usar 'chartjs' (padrão do projeto), fallback para 'chart-js'
+        $chartjs_handle = wp_script_is( 'chartjs', 'registered' ) ? 'chartjs' : 'chart-js';
+        wp_enqueue_script( $chartjs_handle );
         
         // CSS do dashboard de insights
         wp_enqueue_style(
@@ -98,14 +110,14 @@ class DPS_AI_Insights_Dashboard {
         }
 
         // Filtros de período
-        $period = isset( $_GET['period'] ) ? sanitize_text_field( $_GET['period'] ) : '30';
+        $period = isset( $_GET['period'] ) ? sanitize_text_field( wp_unslash( $_GET['period'] ) ) : '30';
         $allowed_periods = [ '7', '30', 'custom' ];
         if ( ! in_array( $period, $allowed_periods, true ) ) {
             $period = '30';
         }
 
-        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( $_GET['start_date'] ) : '';
-        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( $_GET['end_date'] ) : '';
+        $start_date = isset( $_GET['start_date'] ) ? sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) : '';
+        $end_date   = isset( $_GET['end_date'] ) ? sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) : '';
 
         // Validar formato de data
         if ( $period === 'custom' ) {
@@ -152,7 +164,7 @@ class DPS_AI_Insights_Dashboard {
                         <option value="custom" <?php selected( $period, 'custom' ); ?>><?php esc_html_e( 'Período customizado', 'dps-ai' ); ?></option>
                     </select>
 
-                    <span id="custom-dates" style="<?php echo $period === 'custom' ? '' : 'display:none;'; ?>">
+                    <span id="custom-dates" style="<?php echo esc_attr( $period === 'custom' ? '' : 'display:none;' ); ?>">
                         <label for="start_date"><?php esc_html_e( 'De:', 'dps-ai' ); ?></label>
                         <input type="date" name="start_date" id="start_date" value="<?php echo esc_attr( $start_date ); ?>" />
                         
@@ -532,7 +544,7 @@ class DPS_AI_Insights_Dashboard {
         }
 
         $positive = $wpdb->get_var( $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$feedback_table} WHERE is_positive = 1 AND DATE(created_at) BETWEEN %s AND %s",
+            "SELECT COUNT(*) FROM {$feedback_table} WHERE feedback = 'positive' AND DATE(created_at) BETWEEN %s AND %s",
             $date_from,
             $date_to
         ) );

@@ -72,7 +72,7 @@ class DPS_AI_Specialist_Mode {
      * @param string $hook Current admin page hook.
      */
     public function enqueue_assets( $hook ) {
-        if ( 'dps_page_dps-ai-specialist' !== $hook ) {
+        if ( 'desi-pet-shower_page_dps-ai-specialist' !== $hook ) {
             return;
         }
 
@@ -178,7 +178,7 @@ class DPS_AI_Specialist_Mode {
             wp_send_json_error( [ 'message' => __( 'Permissão negada.', 'dps-ai' ) ] );
         }
 
-        $query = isset( $_POST['query'] ) ? sanitize_textarea_field( $_POST['query'] ) : '';
+        $query = isset( $_POST['query'] ) ? sanitize_textarea_field( wp_unslash( $_POST['query'] ) ) : '';
 
         if ( empty( $query ) ) {
             wp_send_json_error( [ 'message' => __( 'Consulta vazia.', 'dps-ai' ) ] );
