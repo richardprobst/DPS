@@ -643,6 +643,9 @@ class DPS_Addon_Manager {
      * @param string $hook Hook da página atual.
      */
     public function enqueue_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.1+
+        $hook = (string) $hook;
+
         // O hook é formado pelo slug do menu pai + '_page_' + slug da página
         // Para 'desi-pet-shower' como parent e 'dps-addons' como slug da página
         if ( false === strpos( $hook, 'dps-addons' ) ) {

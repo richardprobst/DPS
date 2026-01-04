@@ -192,6 +192,9 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @param string $hook Hook da página atual.
          */
         public function enqueue_admin_assets( $hook ) {
+            // Cast para string para compatibilidade com PHP 8.1+
+            $hook = (string) $hook;
+
             if ( 'desi-pet-shower_page_dps-backup' !== $hook ) {
                 return;
             }

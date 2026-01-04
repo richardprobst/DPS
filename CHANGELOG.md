@@ -130,6 +130,12 @@ Antes de criar uma nova versão oficial:
 - **Validação de número WhatsApp**: Número do WhatsApp da equipe agora é sanitizado removendo caracteres inválidos.
 - **Grid de estatísticas responsivo**: Grid de cards de estatísticas adapta-se automaticamente a diferentes tamanhos de tela.
 
+**Compatibilidade PHP 8.1+ - Múltiplos Add-ons**
+
+- **Deprecation warnings em strpos/str_replace/trim**: Corrigidos warnings do PHP 8.1+ que ocorriam durante ativação dos plugins. Adicionado cast `(string)` para parâmetros `$hook` em 10 métodos `enqueue_*_assets()` nos add-ons: Agenda, AI, Backup, Base, Client Portal, Communications, Payment.
+- **trim(get_option()) sem valor padrão**: Corrigido em `class-dps-client-portal.php` para usar valor padrão vazio e cast `(string)`.
+- **Domain Path incorreto**: Corrigido caminho do text domain no plugin Subscription de `/../languages` para `/languages`.
+
 **Communications Add-on - Correções de Bugs (v0.2.1)**
 
 - **uninstall.php corrigido**: Arquivo de desinstalação agora remove corretamente a option `dps_comm_settings` (principal) além de `dps_whatsapp_number` e options legadas.

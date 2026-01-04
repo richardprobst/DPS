@@ -341,6 +341,9 @@ class DPS_Agenda_Addon {
      * @since 1.3.0
      */
     public function enqueue_dashboard_assets( $hook ) {
+        // Cast para string para compatibilidade com PHP 8.1+
+        $hook = (string) $hook;
+
         // Carrega apenas na página do dashboard ou na aba Dashboard do hub
         $is_dashboard_page = 'desi-pet-shower_page_dps-agenda-dashboard' === $hook;
 
