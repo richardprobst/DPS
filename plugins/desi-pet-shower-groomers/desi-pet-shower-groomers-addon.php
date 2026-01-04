@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.8.2
+ * Version:           1.8.3
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -63,7 +63,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.8.2';
+    const VERSION = '1.8.3';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -2200,14 +2200,16 @@ class DPS_Groomers_Addon {
                                                             data-groomer-commission="<?php echo esc_attr( $groomer_commission ); ?>"
                                                             data-staff-type="<?php echo esc_attr( $staff_type ); ?>"
                                                             data-is-freelancer="<?php echo esc_attr( $is_freelancer ); ?>"
-                                                            title="<?php echo esc_attr__( 'Editar', 'dps-groomers-addon' ); ?>">
+                                                            title="<?php echo esc_attr__( 'Editar', 'dps-groomers-addon' ); ?>"
+                                                            aria-label="<?php echo esc_attr__( 'Editar profissional', 'dps-groomers-addon' ); ?>">
                                                             ✏️
                                                         </button>
                                                         <a href="<?php echo esc_url( $delete_url ); ?>" 
                                                             class="dps-action-btn dps-action-btn--danger dps-delete-groomer"
                                                             data-groomer-name="<?php echo esc_attr( $groomer->display_name ? $groomer->display_name : $groomer->user_login ); ?>"
                                                             data-appointments="<?php echo esc_attr( $appointments_count ); ?>"
-                                                            title="<?php echo esc_attr__( 'Excluir', 'dps-groomers-addon' ); ?>">
+                                                            title="<?php echo esc_attr__( 'Excluir', 'dps-groomers-addon' ); ?>"
+                                                            aria-label="<?php echo esc_attr__( 'Excluir profissional', 'dps-groomers-addon' ); ?>">
                                                             🗑️
                                                         </a>
                                                     </div>
