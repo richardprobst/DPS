@@ -16,7 +16,7 @@
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    padding: 0;
+    /* padding is inherited from .dps-section (24px) - do not override */
 }
 
 /* Layout empilhado: cards um abaixo do outro */
@@ -982,9 +982,7 @@ table.dps-table tr.dps-canceled-row {
    ========================================================================== */
 
 @media (max-width: 768px) {
-    .dps-subscription-wrapper {
-        padding: 0;
-    }
+    /* Padding is inherited from .dps-section - no override needed */
     
     #dps-section-assinaturas .dps-section-title {
         font-size: 20px;
