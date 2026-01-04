@@ -53,8 +53,8 @@ class DPS_System_Hub {
     public function register_hub_menu() {
         add_submenu_page(
             'desi-pet-shower',
-            __( 'Sistema', 'dps-base' ),
-            __( 'Sistema', 'dps-base' ),
+            __( 'Sistema', 'desi-pet-shower' ),
+            __( 'Sistema', 'desi-pet-shower' ),
             'manage_options',
             'dps-system-hub',
             [ $this, 'render_hub_page' ]
@@ -69,29 +69,29 @@ class DPS_System_Hub {
         $callbacks = [];
 
         // Aba Logs (sempre disponível - do base plugin)
-        $tabs['logs'] = __( 'Logs', 'dps-base' );
+        $tabs['logs'] = __( 'Logs', 'desi-pet-shower' );
         $callbacks['logs'] = [ $this, 'render_logs_tab' ];
 
         // Aba Backup (se add-on ativo e atualizado)
         if ( class_exists( 'DPS_Backup_Addon' ) && method_exists( 'DPS_Backup_Addon', 'get_instance' ) ) {
-            $tabs['backup'] = __( 'Backup', 'dps-base' );
+            $tabs['backup'] = __( 'Backup', 'desi-pet-shower' );
             $callbacks['backup'] = [ $this, 'render_backup_tab' ];
         }
 
         // Aba Debugging (se add-on ativo e atualizado)
         if ( class_exists( 'DPS_Debugging_Addon' ) && method_exists( 'DPS_Debugging_Addon', 'get_instance' ) ) {
-            $tabs['debugging'] = __( 'Debugging', 'dps-base' );
+            $tabs['debugging'] = __( 'Debugging', 'desi-pet-shower' );
             $callbacks['debugging'] = [ $this, 'render_debugging_tab' ];
         }
 
         // Aba White Label (se add-on ativo e atualizado)
         if ( class_exists( 'DPS_WhiteLabel_Addon' ) && method_exists( 'DPS_WhiteLabel_Addon', 'get_instance' ) ) {
-            $tabs['whitelabel'] = __( 'White Label', 'dps-base' );
+            $tabs['whitelabel'] = __( 'White Label', 'desi-pet-shower' );
             $callbacks['whitelabel'] = [ $this, 'render_whitelabel_tab' ];
         }
 
         DPS_Admin_Tabs_Helper::render_tabbed_page(
-            __( 'Sistema', 'dps-base' ),
+            __( 'Sistema', 'desi-pet-shower' ),
             $tabs,
             $callbacks,
             'dps-system-hub',
@@ -133,7 +133,7 @@ class DPS_System_Hub {
             echo $content;
         } else {
             echo '<div class="notice notice-warning"><p>';
-            esc_html_e( 'O add-on de Backup precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            esc_html_e( 'O add-on de Backup precisa ser atualizado para a versão mais recente.', 'desi-pet-shower' );
             echo '</p></div>';
         }
     }
@@ -155,7 +155,7 @@ class DPS_System_Hub {
             echo $content;
         } else {
             echo '<div class="notice notice-warning"><p>';
-            esc_html_e( 'O add-on de Debugging precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            esc_html_e( 'O add-on de Debugging precisa ser atualizado para a versão mais recente.', 'desi-pet-shower' );
             echo '</p></div>';
         }
     }
@@ -177,7 +177,7 @@ class DPS_System_Hub {
             echo $content;
         } else {
             echo '<div class="notice notice-warning"><p>';
-            esc_html_e( 'O add-on de White Label precisa ser atualizado para a versão mais recente.', 'dps-base' );
+            esc_html_e( 'O add-on de White Label precisa ser atualizado para a versão mais recente.', 'desi-pet-shower' );
             echo '</p></div>';
         }
     }

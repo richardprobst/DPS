@@ -90,7 +90,7 @@ class DPS_Admin_Tabs_Helper {
      */
     public static function render_tabbed_page( $page_title, $tabs, $callbacks, $page_slug, $default_tab = '' ) {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Você não tem permissão para acessar esta página.', 'dps-base' ) );
+            wp_die( __( 'Você não tem permissão para acessar esta página.', 'desi-pet-shower' ) );
         }
 
         if ( empty( $default_tab ) ) {
