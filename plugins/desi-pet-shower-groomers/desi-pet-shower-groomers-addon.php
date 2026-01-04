@@ -265,9 +265,9 @@ class DPS_Groomers_Addon {
                 $this->handle_revoke_all_tokens();
                 break;
             default:
-                // SECURITY: Log de ação desconhecida (sem expor ao usuário)
+                // SECURITY: Log de ação desconhecida (mensagem genérica sem input do usuário para prevenir log injection)
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                    error_log( sprintf( 'DPS Groomers: Unknown token action attempted: %s', esc_html( $action ) ) );
+                    error_log( 'DPS Groomers: Unknown token action attempted' );
                 }
                 break;
         }
@@ -313,7 +313,8 @@ class DPS_Groomers_Addon {
 
             DPS_Message_Helper::add_success( __( 'Token gerado com sucesso! Copie o link abaixo.', 'dps-groomers-addon' ) );
         } else {
-            DPS_Message_Helper::add_error( __( 'Erro ao gerar token. Verifique se o groomer existe e está ativo.', 'dps-groomers-addon' ) );
+            // SECURITY: Mensagem genérica para não revelar informações sobre existência do groomer
+            DPS_Message_Helper::add_error( __( 'Erro ao gerar token. Tente novamente.', 'dps-groomers-addon' ) );
         }
     }
 
