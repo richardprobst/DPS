@@ -108,7 +108,7 @@ class DPS_AI_Integration_Portal {
         $initial_expanded = 'floating' !== $widget_mode;
 
         ?>
-        <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo $enable_feedback ? 'true' : 'false'; ?>">
+        <section id="dps-ai-assistant" class="<?php echo esc_attr( $widget_classes ); ?>" data-client-id="<?php echo esc_attr( $client_id ); ?>" data-feedback="<?php echo esc_attr( $enable_feedback ? 'true' : 'false' ); ?>">
             <?php if ( 'floating' === $widget_mode ) : ?>
                 <!-- Botão flutuante -->
                 <button id="dps-ai-fab" class="dps-ai-assistant__fab" aria-label="<?php esc_attr_e( 'Abrir assistente', 'dps-ai' ); ?>">
@@ -121,7 +121,7 @@ class DPS_AI_Integration_Portal {
                 </button>
             <?php endif; ?>
 
-            <div class="dps-ai-assistant__container <?php echo 'floating' === $widget_mode ? 'dps-ai-assistant__container--floating' : ''; ?>">
+            <div class="dps-ai-assistant__container <?php echo esc_attr( 'floating' === $widget_mode ? 'dps-ai-assistant__container--floating' : '' ); ?>">
                 <!-- Header com gradiente moderno -->
                 <header class="dps-ai-assistant__header" id="dps-ai-header">
                     <div class="dps-ai-assistant__header-content">
@@ -138,7 +138,7 @@ class DPS_AI_Integration_Portal {
                             <span class="dps-ai-assistant__subtitle"><?php esc_html_e( 'Online • Resposta instantânea', 'dps-ai' ); ?></span>
                         </div>
                     </div>
-                    <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="<?php echo $initial_expanded ? 'true' : 'false'; ?>">
+                    <button id="dps-ai-toggle" class="dps-ai-assistant__toggle" aria-label="<?php esc_attr_e( 'Expandir/Recolher assistente', 'dps-ai' ); ?>" aria-expanded="<?php echo esc_attr( $initial_expanded ? 'true' : 'false' ); ?>">
                         <svg class="dps-ai-assistant__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
