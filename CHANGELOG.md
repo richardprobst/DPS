@@ -81,6 +81,22 @@ Antes de criar uma nova versão oficial:
 
 ### [Unreleased]
 
+#### Added (Adicionado)
+
+**Communications Add-on - Funcionalidades Avançadas (v0.3.0)**
+
+- **Histórico de Comunicações**: Nova tabela `dps_comm_history` para registro de todas as mensagens enviadas (WhatsApp, e-mail, SMS). Inclui status de entrega, metadata, cliente/agendamento associado e timestamps de criação/atualização/entrega/leitura.
+- **Retry com Exponential Backoff**: Sistema automático de retry para mensagens que falham. Máximo de 5 tentativas com delays exponenciais (1min, 2min, 4min, 8min, 16min) + jitter aleatório para evitar thundering herd. Cap máximo de 1 hora.
+- **REST API de Webhooks**: Endpoints para receber status de entrega de gateways externos:
+  - `POST /wp-json/dps-communications/v1/webhook/{provider}` - Recebe webhooks de Evolution API, Twilio ou formato genérico
+  - `GET /wp-json/dps-communications/v1/webhook-url` - Retorna URLs e secret para configuração (admin only)
+  - `GET /wp-json/dps-communications/v1/stats` - Estatísticas de comunicações e retries (admin only)
+  - `GET /wp-json/dps-communications/v1/history` - Histórico de comunicações com filtros (admin only)
+- **Suporte a múltiplos providers**: Webhooks suportam Evolution API, Twilio e formato genérico, com mapeamento automático de status.
+- **Webhook Secret**: Secret automático gerado para autenticação de webhooks via header `Authorization: Bearer` ou `X-Webhook-Secret`.
+- **Limpeza automática**: Cron job diário para limpeza de transients de retry expirados e método para limpar histórico antigo (padrão 90 dias).
+- **Classes modulares**: Novas classes `DPS_Communications_History`, `DPS_Communications_Retry` e `DPS_Communications_Webhook` seguindo padrão singleton.
+
 #### Security (Segurança)
 
 **Communications Add-on - Auditoria de Segurança Completa (v0.2.1)**

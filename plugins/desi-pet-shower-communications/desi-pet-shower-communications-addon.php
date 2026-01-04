@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Communications Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Comunicações integradas via WhatsApp, SMS e e-mail. Notifique clientes automaticamente sobre agendamentos e eventos.
- * Version:           0.2.1
+ * Version:           0.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-communications-addon
@@ -47,8 +47,11 @@ function dps_communications_load_textdomain() {
 }
 add_action( 'init', 'dps_communications_load_textdomain', 1 );
 
-// Carrega a API centralizada de comunicações
+// Carrega as classes do add-on
 require_once __DIR__ . '/includes/class-dps-communications-api.php';
+require_once __DIR__ . '/includes/class-dps-communications-history.php';
+require_once __DIR__ . '/includes/class-dps-communications-retry.php';
+require_once __DIR__ . '/includes/class-dps-communications-webhook.php';
 
 class DPS_Communications_Addon {
 
@@ -84,6 +87,31 @@ class DPS_Communications_Addon {
         add_action( 'dps_base_after_save_appointment', [ $this, 'handle_after_save_appointment' ], 10, 2 );
         add_action( 'dps_comm_send_appointment_reminder', [ $this, 'send_appointment_reminder' ], 10, 1 );
         add_action( 'dps_comm_send_post_service', [ $this, 'send_post_service_message' ], 10, 1 );
+
+        // Inicializa componentes adicionais
+        $this->init_components();
+    }
+
+    /**
+     * Inicializa componentes adicionais (Histórico, Retry, Webhook)
+     *
+     * @since 0.3.0
+     */
+    private function init_components() {
+        // Inicializa histórico de comunicações
+        if ( class_exists( 'DPS_Communications_History' ) ) {
+            DPS_Communications_History::get_instance();
+        }
+
+        // Inicializa sistema de retry
+        if ( class_exists( 'DPS_Communications_Retry' ) ) {
+            DPS_Communications_Retry::get_instance();
+        }
+
+        // Inicializa webhooks
+        if ( class_exists( 'DPS_Communications_Webhook' ) ) {
+            DPS_Communications_Webhook::get_instance();
+        }
     }
 
     /**

@@ -164,8 +164,16 @@ class DPS_Communications_API {
             'context' => $context,
         ] );
 
+        // Registra no histórico
+        $history_id = $this->log_to_history( 
+            DPS_Communications_History::CHANNEL_WHATSAPP,
+            $formatted_to,
+            $message,
+            $context
+        );
+
         // Envia a mensagem via gateway configurado
-        $result = $this->send_via_whatsapp_gateway( $formatted_to, $message, $api_url, $api_key );
+        $result = $this->send_via_whatsapp_gateway( $formatted_to, $message, $api_url, $api_key, $history_id );
 
         // Registra resultado (sem PII)
         if ( $result ) {
@@ -173,11 +181,18 @@ class DPS_Communications_API {
                 'to'      => $formatted_to,
                 'context' => $context,
             ] );
+            $this->update_history_status( $history_id, DPS_Communications_History::STATUS_SENT );
         } else {
             $this->safe_log( 'error', 'Communications API: Falha ao enviar WhatsApp', [
                 'to'      => $formatted_to,
                 'context' => $context,
             ] );
+
+            // Tenta agendar retry se não for já um retry
+            $is_retry = isset( $context['is_retry'] ) && $context['is_retry'];
+            if ( ! $is_retry && $history_id ) {
+                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_WHATSAPP, $formatted_to, $message, $context );
+            }
         }
 
         // Dispara hook após envio (sucesso ou falha)
@@ -246,6 +261,16 @@ class DPS_Communications_API {
             'context' => $context,
         ] );
 
+        // Registra no histórico
+        $email_context            = $context;
+        $email_context['subject'] = $subject;
+        $history_id               = $this->log_to_history(
+            DPS_Communications_History::CHANNEL_EMAIL,
+            $to,
+            $body,
+            $email_context
+        );
+
         // Envia via wp_mail
         $result = wp_mail( $to, $subject, $body, $headers );
 
@@ -255,11 +280,18 @@ class DPS_Communications_API {
                 'to'      => $to,
                 'context' => $context,
             ] );
+            $this->update_history_status( $history_id, DPS_Communications_History::STATUS_SENT );
         } else {
             $this->safe_log( 'error', 'Communications API: Falha ao enviar e-mail', [
                 'to'      => $to,
                 'context' => $context,
             ] );
+
+            // Tenta agendar retry se não for já um retry
+            $is_retry = isset( $context['is_retry'] ) && $context['is_retry'];
+            if ( ! $is_retry && $history_id ) {
+                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_EMAIL, $to, $body, $email_context );
+            }
         }
 
         // Dispara hook após envio
@@ -550,13 +582,14 @@ class DPS_Communications_API {
      * Envia mensagem via gateway de WhatsApp
      *
      * @since 0.2.0
-     * @param string $to      Número formatado
-     * @param string $message Mensagem
-     * @param string $api_url URL do gateway
-     * @param string $api_key Chave de API
+     * @param string   $to         Número formatado
+     * @param string   $message    Mensagem
+     * @param string   $api_url    URL do gateway
+     * @param string   $api_key    Chave de API
+     * @param int|null $history_id ID do registro no histórico (opcional)
      * @return bool True se enviado, false caso contrário
      */
-    private function send_via_whatsapp_gateway( $to, $message, $api_url, $api_key ) {
+    private function send_via_whatsapp_gateway( $to, $message, $api_url, $api_key, $history_id = null ) {
         // Se não tem URL configurada, simula sucesso em dev (sem expor PII em logs)
         if ( empty( $api_url ) ) {
             // Log seguro sem dados pessoais
@@ -613,5 +646,71 @@ class DPS_Communications_API {
         // return true;
 
         return true;
+    }
+
+    /**
+     * Registra comunicação no histórico
+     *
+     * @since 0.3.0
+     * @param string $channel   Canal de comunicação
+     * @param string $recipient Destinatário
+     * @param string $message   Mensagem
+     * @param array  $context   Contexto adicional
+     * @return int|false ID do registro ou false
+     */
+    private function log_to_history( $channel, $recipient, $message, $context = [] ) {
+        if ( ! class_exists( 'DPS_Communications_History' ) ) {
+            return false;
+        }
+
+        $history = DPS_Communications_History::get_instance();
+        return $history->log_communication( $channel, $recipient, $message, $context );
+    }
+
+    /**
+     * Atualiza status no histórico
+     *
+     * @since 0.3.0
+     * @param int    $history_id ID do registro
+     * @param string $status     Novo status
+     * @param array  $extra_data Dados extras
+     * @return bool
+     */
+    private function update_history_status( $history_id, $status, $extra_data = [] ) {
+        if ( ! $history_id || ! class_exists( 'DPS_Communications_History' ) ) {
+            return false;
+        }
+
+        $history = DPS_Communications_History::get_instance();
+        return $history->update_status( $history_id, $status, $extra_data );
+    }
+
+    /**
+     * Agenda retry para comunicação que falhou
+     *
+     * @since 0.3.0
+     * @param int    $history_id ID do registro no histórico
+     * @param string $channel    Canal
+     * @param string $recipient  Destinatário
+     * @param string $message    Mensagem
+     * @param array  $context    Contexto
+     * @return bool
+     */
+    private function schedule_retry( $history_id, $channel, $recipient, $message, $context ) {
+        if ( ! class_exists( 'DPS_Communications_Retry' ) ) {
+            return false;
+        }
+
+        $retry       = DPS_Communications_Retry::get_instance();
+        $retry_count = isset( $context['retry_count'] ) ? absint( $context['retry_count'] ) : 0;
+
+        return $retry->schedule_retry(
+            $history_id,
+            $channel,
+            $recipient,
+            $message,
+            $context,
+            $retry_count
+        );
     }
 }
