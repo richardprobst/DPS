@@ -957,7 +957,9 @@
     overflow: hidden;
 }
 
-.dps-input-prefix {
+/* Estilo para .dps-input-prefix como span DENTRO de .dps-input-with-prefix */
+/* NÃO confundir com .dps-input-prefix como container flex em .dps-porte-item (ver linhas 223-297) */
+.dps-input-with-prefix .dps-input-prefix {
     padding: 10px 8px 10px 12px;
     background: #f3f4f6;
     color: #6b7280;
