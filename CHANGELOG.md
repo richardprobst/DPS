@@ -83,6 +83,25 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Registration Add-on - Modernização Visual e Funcionalidades Admin (v1.3.0)**
+
+- **Cards de resumo completos**: Agora exibem todos os campos preenchidos pelo usuário (CPF, data de nascimento, Instagram, Facebook, autorização de foto, como conheceu) no resumo do tutor, e todos os campos do pet (espécie, peso, pelagem, cor, nascimento, sexo, alerta de pet agressivo) no resumo dos pets.
+- **Indicadores de campo obrigatório**: Adicionado asterisco vermelho (*) nos campos obrigatórios (Nome e Telefone) com legenda explicativa no topo do formulário.
+- **Banner informativo para admin**: Quando um administrador acessa o formulário público, é exibido um banner informativo com links rápidos para configurações e cadastros pendentes.
+- **Opções de cadastro rápido para admin**: Administradores podem ativar cadastros imediatamente (pulando confirmação de email) e escolher se desejam enviar email de boas-vindas.
+- **Ícones de espécie nos cards de pet**: O resumo agora exibe emoji correspondente à espécie selecionada (🐶 Cachorro, 🐱 Gato, 🐾 Outro).
+- **Formatação de datas no resumo**: Datas de nascimento são formatadas para exibição brasileira (DD/MM/AAAA).
+- **Documentação de análise visual**: Criado documento `docs/forms/REGISTRATION_FORM_VISUAL_ANALYSIS.md` com análise profunda do visual do formulário e plano de melhorias.
+
+#### Changed (Alterado)
+
+**Registration Add-on - Melhorias Visuais (v1.3.0)**
+
+- **Summary box com destaque**: Adicionada borda lateral azul (#0ea5e9) seguindo padrão do guia de estilo visual para chamar atenção do usuário.
+- **Grid responsivo no resumo**: Campos do resumo agora são exibidos em grid de 2 colunas que adapta-se automaticamente a telas menores.
+- **Transição suave entre steps**: Adicionada animação de opacidade (0.2s) para transição mais fluida entre passos do formulário.
+- **Títulos de seção com emoji**: Seções do resumo agora têm emojis (👤 Tutor, 🐾 Pets) para melhor identificação visual.
+
 **Communications Add-on - Funcionalidades Avançadas (v0.3.0)**
 
 - **Histórico de Comunicações**: Nova tabela `dps_comm_history` para registro de todas as mensagens enviadas (WhatsApp, e-mail, SMS). Inclui status de entrega, metadata, cliente/agendamento associado e timestamps de criação/atualização/entrega/leitura.
