@@ -88,14 +88,21 @@ final class DPS_Groomer_Session_Manager {
             return;
         }
 
+        // SECURITY: Não iniciar sessão em requisições de cron
+        if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+            return;
+        }
+
         if ( ! session_id() ) {
-            // Configura parâmetros seguros de sessão ANTES de iniciar
+            // SECURITY FIX: Configurar parâmetros seguros de sessão ANTES de iniciar
             // Essas configurações devem ser feitas antes do session_start()
             $session_options = [
                 'cookie_httponly' => true,
                 'cookie_secure'   => is_ssl(),
                 'cookie_samesite' => 'Strict',
                 'use_strict_mode' => true,
+                'cookie_lifetime' => 0, // Session cookie (expires when browser closes)
+                'gc_maxlifetime'  => self::SESSION_LIFETIME,
             ];
             
             session_start( $session_options );

@@ -280,7 +280,11 @@
         showNotice: function(message, type) {
             type = type || 'info';
             
-            var $notice = $('<div class="dps-groomers-notice dps-groomers-notice--' + type + '">' + message + '</div>');
+            // SECURITY FIX: Escapar mensagem para prevenir XSS
+            var escapedMessage = $('<div>').text(message).html();
+            var escapedType = type.replace(/[^a-z]/gi, '');
+            
+            var $notice = $('<div class="dps-groomers-notice dps-groomers-notice--' + escapedType + '">' + escapedMessage + '</div>');
             
             $('.dps-section#dps-section-groomers').prepend($notice);
             
