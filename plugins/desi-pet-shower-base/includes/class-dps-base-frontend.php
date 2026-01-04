@@ -29,6 +29,24 @@ class DPS_Base_Frontend {
             || current_user_can( 'dps_manage_appointments' );
     }
 
+    /**
+     * Normaliza a chave de status do agendamento para uso consistente no sistema.
+     *
+     * @param string $status Status bruto do agendamento.
+     * @return string Status normalizado.
+     */
+    private static function normalize_status_key( $status ) {
+        $normalized = strtolower( str_replace( ' ', '_', (string) $status ) );
+        
+        // Mapeamento de status legados ou variações
+        $status_map = [
+            'finalizado_e_pago' => 'finalizado_pago',
+            'finalizado e pago' => 'finalizado_pago',
+        ];
+        
+        return $status_map[ $normalized ] ?? $normalized;
+    }
+
 
 
     /**
@@ -168,10 +186,7 @@ class DPS_Base_Frontend {
 
             foreach ( $batch_ids as $appt_id ) {
                 $status_meta = get_post_meta( $appt_id, 'appointment_status', true );
-                $status_key  = strtolower( str_replace( ' ', '_', (string) $status_meta ) );
-                if ( 'finalizado_e_pago' === $status_key ) {
-                    $status_key = 'finalizado_pago';
-                }
+                $status_key  = self::normalize_status_key( $status_meta );
                 $total_count++;
                 $appt_value = (float) get_post_meta( $appt_id, 'appointment_total_value', true );
 
@@ -2458,21 +2473,41 @@ class DPS_Base_Frontend {
         echo '<div class="dps-history-toolbar__header">';
         echo '<h3 class="dps-history-toolbar__title"><span class="dps-section-title__icon">📋</span>' . esc_html__( 'Tabela de Atendimentos Finalizados', 'desi-pet-shower' ) . '</h3>';
         echo '<div class="dps-history-toolbar__actions">';
-        echo '<button type="button" class="button button-secondary" id="dps-history-clear"><span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' ) . '</button>';
-        echo '<button type="button" class="button button-primary" id="dps-history-export"><span aria-hidden="true">📥</span> ' . esc_html__( 'Exportar CSV', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-secondary" id="dps-history-clear">';
+        echo '<span aria-hidden="true">🔄</span> ' . esc_html__( 'Limpar filtros', 'desi-pet-shower' );
+        echo '</button>';
+        echo '<button type="button" class="button button-primary" id="dps-history-export">';
+        echo '<span aria-hidden="true">📥</span> ' . esc_html__( 'Exportar CSV', 'desi-pet-shower' );
+        echo '</button>';
         echo '</div>';
         echo '</div>';
 
         // Resumo dinâmico dos filtros aplicados (atualizado via JavaScript)
-        echo '<div id="dps-history-summary" class="dps-history-summary" data-total-records="' . esc_attr( $total_count ) . '" data-total-value="' . esc_attr( $total_amount ) . '" data-pending-count="' . esc_attr( $pending_count ) . '" data-pending-amount="' . esc_attr( $pending_amount ) . '">';
+        $summary_attrs = sprintf(
+            'data-total-records="%s" data-total-value="%s" data-pending-count="%s" data-pending-amount="%s"',
+            esc_attr( $total_count ),
+            esc_attr( $total_amount ),
+            esc_attr( $pending_count ),
+            esc_attr( $pending_amount )
+        );
+        echo '<div id="dps-history-summary" class="dps-history-summary" ' . $summary_attrs . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         if ( $total_count ) {
             echo '<div class="dps-history-summary__content">';
-            echo '<span class="dps-history-summary__count"><strong>' . esc_html( number_format_i18n( $total_count ) ) . '</strong> ' . esc_html__( 'atendimentos', 'desi-pet-shower' ) . '</span>';
+            echo '<span class="dps-history-summary__count">';
+            echo '<strong>' . esc_html( number_format_i18n( $total_count ) ) . '</strong> ';
+            echo esc_html__( 'atendimentos', 'desi-pet-shower' );
+            echo '</span>';
             echo '<span class="dps-history-summary__separator">•</span>';
             echo '<span class="dps-history-summary__total"><strong>R$ ' . esc_html( $summary_value ) . '</strong></span>';
             if ( $pending_count > 0 ) {
                 echo '<span class="dps-history-summary__separator">•</span>';
-                echo '<span class="dps-history-summary__pending">' . sprintf( esc_html__( '%s pendente(s) de pagamento', 'desi-pet-shower' ), '<strong>' . number_format_i18n( $pending_count ) . '</strong>' ) . '</span>';
+                echo '<span class="dps-history-summary__pending">';
+                printf(
+                    /* translators: %s: number of pending appointments */
+                    esc_html__( '%s pendente(s) de pagamento', 'desi-pet-shower' ),
+                    '<strong>' . esc_html( number_format_i18n( $pending_count ) ) . '</strong>'
+                );
+                echo '</span>';
             }
             echo '</div>';
             echo '<div class="dps-history-summary__filtered" style="display: none;">';
@@ -2486,10 +2521,14 @@ class DPS_Base_Frontend {
         // Botões de período rápido
         echo '<div class="dps-history-quick-filters">';
         echo '<span class="dps-history-quick-label">' . esc_html__( 'Período:', 'desi-pet-shower' ) . '</span>';
-        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="today">' . esc_html__( 'Hoje', 'desi-pet-shower' ) . '</button>';
-        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="7days">' . esc_html__( '7 dias', 'desi-pet-shower' ) . '</button>';
-        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="30days">' . esc_html__( '30 dias', 'desi-pet-shower' ) . '</button>';
-        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="month">' . esc_html__( 'Este mês', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="today">';
+        echo esc_html__( 'Hoje', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="7days">';
+        echo esc_html__( '7 dias', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="30days">';
+        echo esc_html__( '30 dias', 'desi-pet-shower' ) . '</button>';
+        echo '<button type="button" class="button button-small dps-history-quick-btn" data-period="month">';
+        echo esc_html__( 'Este mês', 'desi-pet-shower' ) . '</button>';
         echo '</div>';
 
         // Filtros organizados em grid
@@ -2586,11 +2625,8 @@ class DPS_Base_Frontend {
                 $client_post = $client_id ? ( $clients_cache[ $client_id ] ?? null ) : null;
                 $client_name = $client_post ? $client_post->post_title : '-';
 
-                $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
-                $status_key  = strtolower( str_replace( ' ', '_', (string) $status_meta ) );
-                if ( 'finalizado_e_pago' === $status_key ) {
-                    $status_key = 'finalizado_pago';
-                }
+                $status_meta  = get_post_meta( $appt->ID, 'appointment_status', true );
+                $status_key   = self::normalize_status_key( $status_meta );
                 $status_label = self::get_status_label( $status_meta );
                 $pet_display  = '-';
                 $pet_ids_attr = '';
@@ -2640,7 +2676,18 @@ class DPS_Base_Frontend {
                     $badge_class = 'dps-status-badge--cancelled';
                 }
 
-                echo '<tr data-date="' . esc_attr( $date_attr ) . '" data-status="' . esc_attr( $status_key ) . '" data-client="' . esc_attr( $client_id ) . '" data-pet="' . esc_attr( $pet_ids_attr ) . '" data-total="' . esc_attr( $total_val ) . '" data-paid="' . esc_attr( $paid_flag ) . '">';
+                // Montar atributos data-* da linha
+                $row_attrs = sprintf(
+                    'data-date="%s" data-status="%s" data-client="%s" data-pet="%s" data-total="%s" data-paid="%s"',
+                    esc_attr( $date_attr ),
+                    esc_attr( $status_key ),
+                    esc_attr( $client_id ),
+                    esc_attr( $pet_ids_attr ),
+                    esc_attr( $total_val ),
+                    esc_attr( $paid_flag )
+                );
+
+                echo '<tr ' . $row_attrs . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 $date_fmt = $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '';
                 echo '<td>' . esc_html( $date_fmt ) . '</td>';
                 echo '<td>' . esc_html( $time ) . '</td>';
@@ -2651,17 +2698,44 @@ class DPS_Base_Frontend {
                 echo '<td><span class="dps-status-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $status_label ) . '</span></td>';
                 echo '<td class="hide-mobile">' . self::build_charge_html( $appt->ID, 'historico' ) . '</td>';
 
-                $edit_url   = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
+                // URLs de ações
+                $edit_url      = add_query_arg( [ 'tab' => 'agendas', 'dps_edit' => 'appointment', 'id' => $appt->ID ], $base_url );
                 $duplicate_url = add_query_arg( [ 'tab' => 'agendas', 'dps_duplicate' => 'appointment', 'id' => $appt->ID ], $base_url );
-                $delete_url = wp_nonce_url(
+                $delete_url    = wp_nonce_url(
                     add_query_arg( [ 'tab' => 'agendas', 'dps_delete' => 'appointment', 'id' => $appt->ID ], $base_url ),
                     'dps_delete',
                     'dps_nonce'
                 );
+
+                // Textos de ações (para i18n)
+                $edit_title      = esc_attr__( 'Editar agendamento', 'desi-pet-shower' );
+                $edit_text       = esc_html__( 'Editar', 'desi-pet-shower' );
+                $duplicate_title = esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' );
+                $duplicate_text  = esc_html__( 'Duplicar', 'desi-pet-shower' );
+                $delete_title    = esc_attr__( 'Excluir agendamento', 'desi-pet-shower' );
+                $delete_text     = esc_html__( 'Excluir', 'desi-pet-shower' );
+                $delete_confirm  = esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) );
+
                 echo '<td class="dps-history-actions">';
-                echo '<a href="' . esc_url( $edit_url ) . '" class="dps-action-link dps-action-link--edit" title="' . esc_attr__( 'Editar agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">✏️</span><span class="dps-action-text">' . esc_html__( 'Editar', 'desi-pet-shower' ) . '</span></a>';
-                echo '<a href="' . esc_url( $duplicate_url ) . '" class="dps-action-link dps-action-link--duplicate" title="' . esc_attr__( 'Duplicar agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">📋</span><span class="dps-action-text">' . esc_html__( 'Duplicar', 'desi-pet-shower' ) . '</span></a>';
-                echo '<a href="' . esc_url( $delete_url ) . '" class="dps-action-link dps-action-link--delete" onclick="return confirm(\'' . esc_js( __( 'Tem certeza de que deseja excluir?', 'desi-pet-shower' ) ) . '\');" title="' . esc_attr__( 'Excluir agendamento', 'desi-pet-shower' ) . '"><span class="dps-action-icon" aria-hidden="true">🗑️</span><span class="dps-action-text">' . esc_html__( 'Excluir', 'desi-pet-shower' ) . '</span></a>';
+                printf(
+                    '<a href="%s" class="dps-action-link dps-action-link--edit" title="%s"><span class="dps-action-icon" aria-hidden="true">✏️</span><span class="dps-action-text">%s</span></a>',
+                    esc_url( $edit_url ),
+                    $edit_title,
+                    $edit_text
+                );
+                printf(
+                    '<a href="%s" class="dps-action-link dps-action-link--duplicate" title="%s"><span class="dps-action-icon" aria-hidden="true">📋</span><span class="dps-action-text">%s</span></a>',
+                    esc_url( $duplicate_url ),
+                    $duplicate_title,
+                    $duplicate_text
+                );
+                printf(
+                    '<a href="%s" class="dps-action-link dps-action-link--delete" onclick="return confirm(\'%s\');" title="%s"><span class="dps-action-icon" aria-hidden="true">🗑️</span><span class="dps-action-text">%s</span></a>',
+                    esc_url( $delete_url ),
+                    $delete_confirm,
+                    $delete_title,
+                    $delete_text
+                );
                 echo '</td>';
                 echo '</tr>';
             }
