@@ -716,6 +716,24 @@
         list.appendChild(li);
     }
 
+    /**
+     * Helper to get selected text from a select element.
+     *
+     * @param {HTMLSelectElement} select - Select element.
+     * @return {string} Selected option text or empty string.
+     */
+    function getSelectText(select) {
+        if (!select || !select.options) return '';
+        var selectedOption = select.options[select.selectedIndex];
+        return selectedOption ? selectedOption.text.trim() : (select.value ? select.value.trim() : '');
+    }
+
+    /**
+     * Build summary of all form data before submission.
+     * Displays tutor and pet information in the summary box.
+     *
+     * @param {HTMLFormElement} form - The registration form.
+     */
     function buildSummary(form) {
         var summaryContent = document.getElementById('dps-summary-content');
 
@@ -725,28 +743,60 @@
 
         summaryContent.innerHTML = '';
 
+        // =====================================================================
+        // Tutor Section - All client fields
+        // =====================================================================
         var tutorSection = document.createElement('div');
         tutorSection.className = 'dps-summary-section';
         var tutorTitle = document.createElement('h5');
-        tutorTitle.textContent = 'Tutor';
+        tutorTitle.textContent = '👤 Tutor';
         tutorSection.appendChild(tutorTitle);
         var tutorList = document.createElement('ul');
 
+        // Client fields
         var nameInput = form.querySelector('input[name="client_name"]');
+        var cpfInput = form.querySelector('input[name="client_cpf"]');
         var phoneInput = form.querySelector('input[name="client_phone"]');
         var emailInput = form.querySelector('input[name="client_email"]');
+        var birthInput = form.querySelector('input[name="client_birth"]');
+        var instagramInput = form.querySelector('input[name="client_instagram"]');
+        var facebookInput = form.querySelector('input[name="client_facebook"]');
+        var photoAuthInput = form.querySelector('input[name="client_photo_auth"]');
         var addressInput = form.querySelector('textarea[name="client_address"]');
+        var referralInput = form.querySelector('input[name="client_referral"]');
 
         addSummaryItem(tutorList, 'Nome', nameInput ? nameInput.value.trim() : '');
+        addSummaryItem(tutorList, 'CPF', cpfInput ? cpfInput.value.trim() : '');
         addSummaryItem(tutorList, 'Telefone', phoneInput ? phoneInput.value.trim() : '');
         addSummaryItem(tutorList, 'Email', emailInput ? emailInput.value.trim() : '');
+        
+        // Format birth date for display
+        if (birthInput && birthInput.value) {
+            var birthParts = birthInput.value.split('-');
+            if (birthParts.length === 3) {
+                var formattedBirth = birthParts[2] + '/' + birthParts[1] + '/' + birthParts[0];
+                addSummaryItem(tutorList, 'Data de nascimento', formattedBirth);
+            }
+        }
+        
+        addSummaryItem(tutorList, 'Instagram', instagramInput ? instagramInput.value.trim() : '');
+        addSummaryItem(tutorList, 'Facebook', facebookInput ? facebookInput.value.trim() : '');
+        
+        if (photoAuthInput && photoAuthInput.checked) {
+            addSummaryItem(tutorList, 'Autorização de foto', '✓ Autorizado');
+        }
+        
         addSummaryItem(tutorList, 'Endereço', addressInput ? addressInput.value.trim() : '');
+        addSummaryItem(tutorList, 'Como conheceu', referralInput ? referralInput.value.trim() : '');
 
         if (tutorList.children.length) {
             tutorSection.appendChild(tutorList);
             summaryContent.appendChild(tutorSection);
         }
 
+        // =====================================================================
+        // Pets Section - All pet fields
+        // =====================================================================
         var petsWrapper = document.getElementById('dps-pets-wrapper');
         var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
 
@@ -754,32 +804,64 @@
             var petsContainer = document.createElement('div');
             petsContainer.className = 'dps-summary-section';
             var petsTitle = document.createElement('h5');
-            petsTitle.textContent = 'Pets';
+            petsTitle.textContent = '🐾 Pets';
             petsContainer.appendChild(petsTitle);
 
             for (var i = 0; i < petFieldsets.length; i++) {
+                var fieldset = petFieldsets[i];
                 var petBox = document.createElement('div');
                 petBox.className = 'dps-summary-pet';
+                
+                // Get species for pet icon
+                var petSpecies = fieldset.querySelector('select[name="pet_species[]"]');
+                var speciesValue = petSpecies ? petSpecies.value : '';
+                var speciesIcon = speciesValue === 'cao' ? '🐶' : (speciesValue === 'gato' ? '🐱' : '🐾');
+                
                 var petTitle = document.createElement('h6');
-                petTitle.textContent = 'Pet ' + (i + 1);
+                petTitle.textContent = speciesIcon + ' Pet ' + (i + 1);
                 petBox.appendChild(petTitle);
 
                 var petList = document.createElement('ul');
-                var petName = petFieldsets[i].querySelector('input[name="pet_name[]"]');
-                var petBreed = petFieldsets[i].querySelector('input[name="pet_breed[]"]');
-                var petSize = petFieldsets[i].querySelector('select[name="pet_size[]"]');
-                var petNotes = petFieldsets[i].querySelector('textarea[name="pet_care[]"]');
-
-                var petSizeText = '';
-                if (petSize) {
-                    var selectedOption = petSize.options[petSize.selectedIndex];
-                    petSizeText = selectedOption ? selectedOption.text.trim() : petSize.value.trim();
-                }
+                
+                // Pet fields
+                var petName = fieldset.querySelector('input[name="pet_name[]"]');
+                var petBreed = fieldset.querySelector('input[name="pet_breed[]"]');
+                var petSize = fieldset.querySelector('select[name="pet_size[]"]');
+                var petWeight = fieldset.querySelector('input[name="pet_weight[]"]');
+                var petCoat = fieldset.querySelector('input[name="pet_coat[]"]');
+                var petColor = fieldset.querySelector('input[name="pet_color[]"]');
+                var petBirth = fieldset.querySelector('input[name="pet_birth[]"]');
+                var petSex = fieldset.querySelector('select[name="pet_sex[]"]');
+                var petNotes = fieldset.querySelector('textarea[name="pet_care[]"]');
+                var petAggressive = fieldset.querySelector('input[name^="pet_aggressive"]');
 
                 addSummaryItem(petList, 'Nome', petName ? petName.value.trim() : '');
+                addSummaryItem(petList, 'Espécie', getSelectText(petSpecies));
                 addSummaryItem(petList, 'Raça', petBreed ? petBreed.value.trim() : '');
-                addSummaryItem(petList, 'Porte', petSizeText);
-                addSummaryItem(petList, 'Observações', petNotes ? petNotes.value.trim() : '');
+                addSummaryItem(petList, 'Porte', getSelectText(petSize));
+                
+                if (petWeight && petWeight.value) {
+                    addSummaryItem(petList, 'Peso', petWeight.value.trim() + ' kg');
+                }
+                
+                addSummaryItem(petList, 'Pelagem', petCoat ? petCoat.value.trim() : '');
+                addSummaryItem(petList, 'Cor', petColor ? petColor.value.trim() : '');
+                
+                // Format pet birth date
+                if (petBirth && petBirth.value) {
+                    var petBirthParts = petBirth.value.split('-');
+                    if (petBirthParts.length === 3) {
+                        var formattedPetBirth = petBirthParts[2] + '/' + petBirthParts[1] + '/' + petBirthParts[0];
+                        addSummaryItem(petList, 'Nascimento', formattedPetBirth);
+                    }
+                }
+                
+                addSummaryItem(petList, 'Sexo', getSelectText(petSex));
+                addSummaryItem(petList, 'Cuidados especiais', petNotes ? petNotes.value.trim() : '');
+                
+                if (petAggressive && petAggressive.checked) {
+                    addSummaryItem(petList, 'Alerta', '⚠️ Pet agressivo');
+                }
 
                 if (petList.children.length) {
                     petBox.appendChild(petList);

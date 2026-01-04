@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Cadastro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página pública de cadastro para clientes e pets. Envie o link e deixe o cliente preencher seus dados.
- * Version:           1.2.4
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-registration-addon
@@ -652,7 +652,7 @@ class DPS_Registration_Addon {
         }
 
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.2.4';
+        $version   = '1.3.0';
 
         $recaptcha_settings = $this->get_recaptcha_settings();
         $should_load_recaptcha = $recaptcha_settings['enabled'] && ! empty( $recaptcha_settings['site_key'] );
@@ -1904,9 +1904,23 @@ class DPS_Registration_Addon {
         update_post_meta( $client_id, 'client_photo_auth', $client_photo_auth );
         update_post_meta( $client_id, 'client_address', $client_address );
         update_post_meta( $client_id, 'client_referral', $client_referral );
-        update_post_meta( $client_id, 'dps_email_confirmed', 0 );
-        update_post_meta( $client_id, 'dps_is_active', 0 );
-        update_post_meta( $client_id, 'dps_registration_source', 'public' );
+
+        // F3: Opções administrativas - permite ativação imediata para admins
+        $admin_skip_confirmation = ! empty( $_POST['dps_admin_skip_confirmation'] ) && current_user_can( 'manage_options' );
+        $admin_send_welcome      = ! empty( $_POST['dps_admin_send_welcome'] ) && current_user_can( 'manage_options' );
+
+        if ( $admin_skip_confirmation ) {
+            // Admin optou por ativar cadastro imediatamente - pula confirmação de email
+            update_post_meta( $client_id, 'dps_email_confirmed', 1 );
+            update_post_meta( $client_id, 'dps_is_active', 1 );
+            update_post_meta( $client_id, 'dps_registration_source', 'admin_quick' );
+        } else {
+            // Fluxo padrão de cadastro público - cliente precisa confirmar email
+            // Email não confirmado e cadastro inativo até confirmação
+            update_post_meta( $client_id, 'dps_email_confirmed', 0 );
+            update_post_meta( $client_id, 'dps_is_active', 0 );
+            update_post_meta( $client_id, 'dps_registration_source', 'public' );
+        }
         if ( ! empty( $referral_code ) ) {
             update_post_meta( $client_id, 'dps_registration_ref', $referral_code );
         }
@@ -1917,8 +1931,14 @@ class DPS_Registration_Addon {
             update_post_meta( $client_id, 'client_lng', $client_lng );
         }
 
-        if ( $client_email ) {
+        // Envia email de confirmação apenas se não foi pulado pelo admin
+        if ( $client_email && ! $admin_skip_confirmation ) {
             $this->send_confirmation_email( $client_id, $client_email );
+        }
+
+        // F3: Se admin optou por enviar boas-vindas mesmo com ativação imediata
+        if ( $admin_skip_confirmation && $admin_send_welcome ) {
+            $this->send_welcome_messages( $client_phone, $client_email, $client_name );
         }
 
         do_action( 'dps_registration_after_client_created', $referral_code, $client_id, $client_email, $client_phone );
@@ -2349,14 +2369,28 @@ class DPS_Registration_Addon {
         echo '</div>';
         echo '</div>';
 
+        // F3: Funcionalidades para Administradores Logados
+        $is_admin = current_user_can( 'manage_options' );
+        if ( $is_admin ) {
+            echo '<div class="dps-admin-preview-banner">';
+            echo '<span class="dashicons dashicons-visibility" style="margin-right: 8px;"></span>';
+            echo esc_html__( 'Você está visualizando o formulário como administrador.', 'dps-registration-addon' ) . ' ';
+            echo '<a href="' . esc_url( admin_url( 'admin.php?page=dps-registration-settings' ) ) . '">' . esc_html__( 'Configurar formulário', 'dps-registration-addon' ) . '</a>';
+            echo ' | <a href="' . esc_url( admin_url( 'admin.php?page=dps-registration-pending' ) ) . '">' . esc_html__( 'Ver cadastros pendentes', 'dps-registration-addon' ) . '</a>';
+            echo '</div>';
+        }
+
+        // Legenda de campos obrigatórios
+        echo '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-registration-addon' ) . '</p>';
+
         echo '<div class="dps-steps">';
         echo '<div class="dps-step dps-step-active" data-step="1">';
         echo '<h4>' . esc_html__( 'Dados do Cliente', 'dps-registration-addon' ) . '</h4>';
         // Campos do cliente agrupados para melhor distribuição
         echo '<div class="dps-client-fields">';
-        echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . '<br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
         echo '<p><label>CPF<br><input type="text" name="client_cpf"></label></p>';
-        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . '<br><input type="text" name="client_phone" required></label></p>';
+        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_phone" required></label></p>';
         echo '<p><label>Email<br><input type="email" name="client_email"></label></p>';
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>';
@@ -2366,6 +2400,15 @@ class DPS_Registration_Addon {
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
         echo '</div>';
+
+        // F3.2: Opções administrativas para cadastro rápido
+        if ( $is_admin ) {
+            echo '<div class="dps-admin-options" style="margin-top: 16px;">';
+            echo '<h5 style="margin: 0 0 12px 0; font-size: 14px; color: #6b7280;">' . esc_html__( '🔧 Opções Administrativas', 'dps-registration-addon' ) . '</h5>';
+            echo '<p><label><input type="checkbox" name="dps_admin_skip_confirmation" value="1"> ' . esc_html__( 'Ativar cadastro imediatamente (pular confirmação de email)', 'dps-registration-addon' ) . '</label></p>';
+            echo '<p><label><input type="checkbox" name="dps_admin_send_welcome" value="1" checked> ' . esc_html__( 'Enviar email de boas-vindas', 'dps-registration-addon' ) . '</label></p>';
+            echo '</div>';
+        }
         echo '<div class="dps-step-actions">';
         echo '<button type="button" id="dps-next-step" class="button button-primary dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
         echo '</div>';

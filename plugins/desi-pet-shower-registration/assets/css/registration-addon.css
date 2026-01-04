@@ -305,6 +305,7 @@
     margin-top: 16px;
     padding: 16px;
     border: 1px solid #e5e7eb;
+    border-left: 4px solid #0ea5e9;
     border-radius: 8px;
     background: #f9fafb;
 }
@@ -641,4 +642,127 @@
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-4px); }
     40%, 80% { transform: translateX(4px); }
+}
+
+/* ==========================================================================
+   14. Admin Preview Features
+   ========================================================================== */
+
+/* Banner informativo para administrador */
+.dps-admin-preview-banner {
+    background: #eff6ff;
+    border-left: 4px solid #0ea5e9;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-admin-preview-banner a {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dps-admin-preview-banner a:hover {
+    text-decoration: underline;
+}
+
+/* Opções administrativas */
+.dps-admin-options {
+    background: #fefce8;
+    border-left: 4px solid #facc15;
+    padding: 16px 20px;
+    border-radius: 0 6px 6px 0;
+}
+
+.dps-admin-options p {
+    margin: 8px 0 !important;
+    flex: 1 1 100% !important;
+}
+
+.dps-admin-options label {
+    font-weight: 400 !important;
+    color: #713f12;
+}
+
+/* Legenda de campos obrigatórios */
+.dps-required-legend {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 16px 0;
+}
+
+/* ==========================================================================
+   15. Summary Box Enhancements
+   ========================================================================== */
+
+.dps-summary-section h5 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #374151;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-summary-pet h6 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dps-summary-section ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-summary-section li {
+    margin: 0;
+    font-size: 13px;
+    color: #374151;
+}
+
+.dps-summary-section li strong {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   16. Step Transitions
+   ========================================================================== */
+
+.dps-step {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.dps-step-active {
+    opacity: 1;
+}
+
+/* Responsive adjustments for admin options */
+@media (max-width: 768px) {
+    .dps-admin-preview-banner {
+        font-size: 12px;
+    }
+    
+    .dps-summary-section ul {
+        grid-template-columns: 1fr;
+    }
 }
