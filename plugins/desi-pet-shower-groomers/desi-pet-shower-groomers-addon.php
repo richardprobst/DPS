@@ -218,7 +218,10 @@ class DPS_Groomers_Addon {
         );
 
         if ( $page_id ) {
-            return get_permalink( $page_id );
+            $permalink = get_permalink( $page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         return home_url( '/portal-groomer/' );

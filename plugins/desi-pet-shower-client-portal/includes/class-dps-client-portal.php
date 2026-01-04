@@ -204,9 +204,15 @@ final class DPS_Client_Portal {
     private function redirect_to_access_screen( $error_type = 'invalid' ) {
         $portal_page_id = dps_get_portal_page_id();
         
+        $redirect_url = '';
         if ( $portal_page_id ) {
-            $redirect_url = get_permalink( $portal_page_id );
-        } else {
+            $permalink = get_permalink( $portal_page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                $redirect_url = $permalink;
+            }
+        }
+        
+        if ( empty( $redirect_url ) ) {
             $redirect_url = home_url( '/portal-cliente/' );
         }
 
@@ -2528,7 +2534,16 @@ final class DPS_Client_Portal {
         } else {
             // Fallback se a API não estiver disponível
             $page_id  = (int) get_option( 'dps_registration_page_id', 0 );
-            $base_url = $page_id ? get_permalink( $page_id ) : site_url( '/cadastro/' );
+            $base_url = '';
+            if ( $page_id > 0 ) {
+                $permalink = get_permalink( $page_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    $base_url = $permalink;
+                }
+            }
+            if ( empty( $base_url ) ) {
+                $base_url = site_url( '/cadastro/' );
+            }
             $share_url = add_query_arg( 'ref', rawurlencode( $code ), $base_url );
         }
 
@@ -2839,7 +2854,12 @@ final class DPS_Client_Portal {
                 $base_url = menu_page_url( 'dps-client-logins', false );
             } else {
                 $page_id  = get_queried_object_id();
-                $base_url = $page_id ? get_permalink( $page_id ) : home_url();
+                if ( $page_id ) {
+                    $permalink = get_permalink( $page_id );
+                    $base_url = ( $permalink && is_string( $permalink ) ) ? $permalink : home_url();
+                } else {
+                    $base_url = home_url();
+                }
             }
         }
 
@@ -2998,7 +3018,13 @@ final class DPS_Client_Portal {
         
         echo '<div class="dps-section" id="dps-section-portal">';
         $page_id   = get_queried_object_id();
-        $page_link = $page_id ? get_permalink( $page_id ) : home_url();
+        $page_link = home_url();
+        if ( $page_id ) {
+            $permalink = get_permalink( $page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                $page_link = $permalink;
+            }
+        }
         $page_link = add_query_arg( 'tab', 'portal', $page_link );
         $this->render_portal_settings_page( $page_link );
         echo '</div>';
@@ -3115,7 +3141,13 @@ final class DPS_Client_Portal {
         }
         echo '<div class="dps-section" id="dps-section-logins">';
         $page_id   = get_queried_object_id();
-        $page_link = $page_id ? get_permalink( $page_id ) : home_url();
+        $page_link = home_url();
+        if ( $page_id ) {
+            $permalink = get_permalink( $page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                $page_link = $permalink;
+            }
+        }
         $page_link = add_query_arg( 'tab', 'logins', $page_link );
         $this->render_client_logins_page( 'frontend', $page_link );
         echo '</div>';

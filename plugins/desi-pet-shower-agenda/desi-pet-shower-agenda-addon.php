@@ -726,12 +726,15 @@ class DPS_Agenda_Addon {
                 <?php
                 $agenda_page_id = get_option( 'dps_agenda_page_id' );
                 if ( $agenda_page_id ) {
-                    $agenda_url = add_query_arg( 'dps_date', $selected_date, get_permalink( $agenda_page_id ) );
+                    $agenda_permalink = get_permalink( $agenda_page_id );
+                    if ( $agenda_permalink && is_string( $agenda_permalink ) ) {
+                        $agenda_url = add_query_arg( 'dps_date', $selected_date, $agenda_permalink );
                     ?>
                     <a href="<?php echo esc_url( $agenda_url ); ?>" class="button button-primary button-large">
                         <?php esc_html_e( 'Ver Agenda Completa', 'dps-agenda-addon' ); ?>
                     </a>
                     <?php
+                    }
                 }
                 ?>
             </div>
@@ -1241,7 +1244,16 @@ class DPS_Agenda_Addon {
         
         // Botão Novo Agendamento
         $base_page_id = get_option( 'dps_base_page_id' );
-        $new_appt_page = $base_page_id ? get_permalink( $base_page_id ) : self::get_current_page_url();
+        $new_appt_page = '';
+        if ( $base_page_id ) {
+            $permalink = get_permalink( $base_page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                $new_appt_page = $permalink;
+            }
+        }
+        if ( empty( $new_appt_page ) ) {
+            $new_appt_page = self::get_current_page_url();
+        }
         if ( $new_appt_page ) {
             $new_appt_url = add_query_arg(
                 [
@@ -3831,12 +3843,18 @@ class DPS_Agenda_Addon {
 
         $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
         if ( $queried_id ) {
-            return get_permalink( $queried_id );
+            $permalink = get_permalink( $queried_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         global $post;
         if ( isset( $post->ID ) ) {
-            return get_permalink( $post->ID );
+            $permalink = get_permalink( $post->ID );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         return home_url();

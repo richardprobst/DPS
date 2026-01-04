@@ -117,7 +117,10 @@ class DPS_Loyalty_API {
         if ( ! empty( $settings['referral_page_id'] ) ) {
             $page_id = (int) $settings['referral_page_id'];
             if ( $page_id > 0 ) {
-                $base_url = get_permalink( $page_id );
+                $permalink = get_permalink( $page_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    $base_url = $permalink;
+                }
             }
         }
 
@@ -125,7 +128,10 @@ class DPS_Loyalty_API {
         if ( empty( $base_url ) ) {
             $registration_page_id = (int) get_option( 'dps_registration_page_id', 0 );
             if ( $registration_page_id > 0 ) {
-                $base_url = get_permalink( $registration_page_id );
+                $permalink = get_permalink( $registration_page_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    $base_url = $permalink;
+                }
             }
         }
 
