@@ -268,14 +268,14 @@ class DPS_Communications_Retry {
     public function cleanup_expired_retries() {
         global $wpdb;
 
-        // Remove transients de retry expirados
-        $like_pattern = $wpdb->esc_like( '_transient_dps_comm_retry_' ) . '%';
+        // Remove transients de retry expirados (timeout já passou)
+        $timeout_pattern = $wpdb->esc_like( '_transient_timeout_dps_comm_retry_' ) . '%';
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %s",
-                $wpdb->esc_like( '_transient_timeout_dps_comm_retry_' ) . '%',
+                $timeout_pattern,
                 time()
             )
         );

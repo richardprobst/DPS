@@ -344,20 +344,23 @@ class DPS_Communications_History {
         }
 
         $table = self::get_table_name();
-        $where = '1=1';
-        $args  = [];
+
+        // Constrói condições de forma segura
+        $conditions = [ '1=1' ];
+        $args       = [];
 
         if ( $channel ) {
-            $where .= ' AND channel = %s';
-            $args[] = sanitize_text_field( $channel );
+            $conditions[] = 'channel = %s';
+            $args[]       = sanitize_text_field( $channel );
         }
 
         if ( $status ) {
-            $where .= ' AND status = %s';
-            $args[] = sanitize_text_field( $status );
+            $conditions[] = 'status = %s';
+            $args[]       = sanitize_text_field( $status );
         }
 
         $args[] = absint( $limit );
+        $where  = implode( ' AND ', $conditions );
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         return $wpdb->get_results(

@@ -192,8 +192,10 @@ class DPS_Communications_Webhook {
                         [ 'status' => 401 ]
                     );
                 }
-                // Para Twilio, precisaríamos do AuthToken específico
-                // Por enquanto, valida contra secret geral
+                // NOTA: Para validação completa do Twilio, precisaríamos do AuthToken específico
+                // e implementar HMAC-SHA1. Por enquanto, Twilio webhooks usam o secret geral.
+                // @see https://www.twilio.com/docs/usage/webhooks/webhooks-security
+                // TODO: Implementar validação HMAC quando AuthToken estiver disponível nas options
                 $header_secret = $signature;
                 break;
 
@@ -201,7 +203,8 @@ class DPS_Communications_Webhook {
             default:
                 // Provider genérico usa header Authorization: Bearer <secret>
                 $auth_header = $request->get_header( 'Authorization' );
-                if ( $auth_header && preg_match( '/^Bearer\s+(.+)$/i', $auth_header, $matches ) ) {
+                // Regex mais restritiva: apenas caracteres não-whitespace no token
+                if ( $auth_header && preg_match( '/^Bearer\s+(\S+)$/i', $auth_header, $matches ) ) {
                     $header_secret = $matches[1];
                 } else {
                     // Também aceita X-Webhook-Secret

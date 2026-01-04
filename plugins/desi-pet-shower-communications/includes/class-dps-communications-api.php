@@ -47,6 +47,14 @@ class DPS_Communications_API {
     private static $instance = null;
 
     /**
+     * Último erro ocorrido durante envio
+     *
+     * @since 0.3.0
+     * @var string
+     */
+    private $last_error = '';
+
+    /**
      * Obtém instância singleton
      *
      * @return DPS_Communications_API
@@ -63,6 +71,16 @@ class DPS_Communications_API {
      */
     private function __construct() {
         // Construtor privado para padrão singleton
+    }
+
+    /**
+     * Obtém o último erro ocorrido
+     *
+     * @since 0.3.0
+     * @return string
+     */
+    public function get_last_error() {
+        return $this->last_error;
     }
 
     /**
@@ -173,6 +191,7 @@ class DPS_Communications_API {
         );
 
         // Envia a mensagem via gateway configurado
+        $this->last_error = '';
         $result = $this->send_via_whatsapp_gateway( $formatted_to, $message, $api_url, $api_key, $history_id );
 
         // Registra resultado (sem PII)
@@ -183,15 +202,17 @@ class DPS_Communications_API {
             ] );
             $this->update_history_status( $history_id, DPS_Communications_History::STATUS_SENT );
         } else {
+            $error_msg = $this->last_error ?: __( 'Falha no envio via gateway', 'dps-communications-addon' );
             $this->safe_log( 'error', 'Communications API: Falha ao enviar WhatsApp', [
                 'to'      => $formatted_to,
                 'context' => $context,
+                'error'   => $error_msg,
             ] );
 
             // Tenta agendar retry se não for já um retry
             $is_retry = isset( $context['is_retry'] ) && $context['is_retry'];
             if ( ! $is_retry && $history_id ) {
-                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_WHATSAPP, $formatted_to, $message, $context );
+                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_WHATSAPP, $formatted_to, $message, $context, $error_msg );
             }
         }
 
@@ -282,15 +303,17 @@ class DPS_Communications_API {
             ] );
             $this->update_history_status( $history_id, DPS_Communications_History::STATUS_SENT );
         } else {
+            $error_msg = __( 'Falha no wp_mail - verifique configurações de SMTP', 'dps-communications-addon' );
             $this->safe_log( 'error', 'Communications API: Falha ao enviar e-mail', [
                 'to'      => $to,
                 'context' => $context,
+                'error'   => $error_msg,
             ] );
 
             // Tenta agendar retry se não for já um retry
             $is_retry = isset( $context['is_retry'] ) && $context['is_retry'];
             if ( ! $is_retry && $history_id ) {
-                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_EMAIL, $to, $body, $email_context );
+                $this->schedule_retry( $history_id, DPS_Communications_History::CHANNEL_EMAIL, $to, $body, $email_context, $error_msg );
             }
         }
 
@@ -601,6 +624,7 @@ class DPS_Communications_API {
 
         // Valida URL novamente (double-check de segurança)
         if ( ! filter_var( $api_url, FILTER_VALIDATE_URL ) ) {
+            $this->last_error = __( 'URL de gateway inválida', 'dps-communications-addon' );
             $this->safe_log( 'error', 'Communications API: URL de gateway inválida', [
                 'api_url' => $api_url,
             ] );
@@ -629,14 +653,16 @@ class DPS_Communications_API {
         // ] );
         //
         // if ( is_wp_error( $response ) ) {
+        //     $this->last_error = $response->get_error_message();
         //     $this->safe_log( 'error', 'Communications API: Erro de conexão com gateway', [
-        //         'error' => $response->get_error_message(),
+        //         'error' => $this->last_error,
         //     ] );
         //     return false;
         // }
         //
         // $code = wp_remote_retrieve_response_code( $response );
         // if ( $code < 200 || $code >= 300 ) {
+        //     $this->last_error = sprintf( 'HTTP %d', $code );
         //     $this->safe_log( 'error', 'Communications API: Resposta não-200 do gateway', [
         //         'status_code' => $code,
         //     ] );
@@ -694,9 +720,10 @@ class DPS_Communications_API {
      * @param string $recipient  Destinatário
      * @param string $message    Mensagem
      * @param array  $context    Contexto
+     * @param string $last_error Último erro ocorrido
      * @return bool
      */
-    private function schedule_retry( $history_id, $channel, $recipient, $message, $context ) {
+    private function schedule_retry( $history_id, $channel, $recipient, $message, $context, $last_error = '' ) {
         if ( ! class_exists( 'DPS_Communications_Retry' ) ) {
             return false;
         }
@@ -710,7 +737,8 @@ class DPS_Communications_API {
             $recipient,
             $message,
             $context,
-            $retry_count
+            $retry_count,
+            $last_error
         );
     }
 }
