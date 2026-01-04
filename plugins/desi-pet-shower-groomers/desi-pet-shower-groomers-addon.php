@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.8.3
+ * Version:           1.8.4
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -63,7 +63,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.8.3';
+    const VERSION = '1.8.4';
 
     /**
      * Tipos de profissionais disponíveis.
@@ -1876,29 +1876,44 @@ class DPS_Groomers_Addon {
         ob_start();
         ?>
         <div class="dps-section" id="dps-section-groomers">
-            <div class="dps-section-header">
-                <h2 class="dps-section-title"><?php echo esc_html__( 'Equipe', 'dps-groomers-addon' ); ?></h2>
-                <p class="dps-section-description"><?php echo esc_html__( 'Gerencie profissionais, acompanhe produtividade e calcule comissões.', 'dps-groomers-addon' ); ?></p>
+            <div class="dps-section-header dps-section-header--groomers">
+                <h2 class="dps-section-title">
+                    <span class="dps-section-title__icon">👥</span>
+                    <?php echo esc_html__( 'Gestão de Equipe', 'dps-groomers-addon' ); ?>
+                </h2>
+                <p class="dps-section-header__subtitle"><?php echo esc_html__( 'Cadastre profissionais, acompanhe produtividade e gerencie comissões da sua equipe.', 'dps-groomers-addon' ); ?></p>
             </div>
 
-            <?php echo DPS_Message_Helper::display_messages(); ?>
+            <?php echo DPS_Message_Helper::display_messages(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-            <!-- Navegação por sub-abas -->
-            <nav class="dps-groomers-subnav">
-                <ul class="dps-subnav-list">
-                    <li class="dps-subnav-item <?php echo ( 'equipe' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
-                        <a href="?tab=groomers&groomers_subtab=equipe" class="dps-subnav-link">
-                            👥 <?php echo esc_html__( 'Equipe', 'dps-groomers-addon' ); ?>
+            <!-- Navegação por sub-abas (estilo card moderno) -->
+            <nav class="dps-groomers-subnav dps-groomers-subnav--cards">
+                <ul class="dps-subnav-list dps-subnav-list--cards">
+                    <li class="dps-subnav-item dps-subnav-item--card <?php echo ( 'equipe' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=equipe" class="dps-subnav-link dps-subnav-link--card">
+                            <span class="dps-subnav-link__icon">👥</span>
+                            <span class="dps-subnav-link__content">
+                                <span class="dps-subnav-link__title"><?php echo esc_html__( 'Equipe', 'dps-groomers-addon' ); ?></span>
+                                <span class="dps-subnav-link__desc"><?php echo esc_html__( 'Cadastro e listagem', 'dps-groomers-addon' ); ?></span>
+                            </span>
                         </a>
                     </li>
-                    <li class="dps-subnav-item <?php echo ( 'relatorios' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
-                        <a href="?tab=groomers&groomers_subtab=relatorios" class="dps-subnav-link">
-                            📊 <?php echo esc_html__( 'Relatórios', 'dps-groomers-addon' ); ?>
+                    <li class="dps-subnav-item dps-subnav-item--card <?php echo ( 'relatorios' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=relatorios" class="dps-subnav-link dps-subnav-link--card">
+                            <span class="dps-subnav-link__icon">📊</span>
+                            <span class="dps-subnav-link__content">
+                                <span class="dps-subnav-link__title"><?php echo esc_html__( 'Relatórios', 'dps-groomers-addon' ); ?></span>
+                                <span class="dps-subnav-link__desc"><?php echo esc_html__( 'Produtividade individual', 'dps-groomers-addon' ); ?></span>
+                            </span>
                         </a>
                     </li>
-                    <li class="dps-subnav-item <?php echo ( 'comissoes' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
-                        <a href="?tab=groomers&groomers_subtab=comissoes" class="dps-subnav-link">
-                            💰 <?php echo esc_html__( 'Comissões', 'dps-groomers-addon' ); ?>
+                    <li class="dps-subnav-item dps-subnav-item--card <?php echo ( 'comissoes' === $active_subtab ) ? 'dps-subnav-item--active' : ''; ?>">
+                        <a href="?tab=groomers&groomers_subtab=comissoes" class="dps-subnav-link dps-subnav-link--card">
+                            <span class="dps-subnav-link__icon">💰</span>
+                            <span class="dps-subnav-link__content">
+                                <span class="dps-subnav-link__title"><?php echo esc_html__( 'Comissões', 'dps-groomers-addon' ); ?></span>
+                                <span class="dps-subnav-link__desc"><?php echo esc_html__( 'Cálculo de pagamentos', 'dps-groomers-addon' ); ?></span>
+                            </span>
                         </a>
                     </li>
                 </ul>
@@ -1906,6 +1921,12 @@ class DPS_Groomers_Addon {
 
             <!-- Sub-aba: Equipe (Cadastro + Listagem) -->
             <div class="dps-groomers-subtab <?php echo ( 'equipe' === $active_subtab ) ? 'dps-groomers-subtab--active' : ''; ?>" id="groomers-subtab-equipe" <?php echo ( 'equipe' !== $active_subtab ) ? 'style="display:none;"' : ''; ?>>
+                
+                <?php 
+                // Calcula estatísticas da equipe
+                $team_stats = $this->get_team_stats( $groomers );
+                echo $this->render_team_stats_cards( $team_stats ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                ?>
                 
                 <div class="dps-groomers-layout">
                     <!-- Coluna: Cadastro -->
@@ -2495,6 +2516,118 @@ class DPS_Groomers_Addon {
             $status = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
             return empty( $status ) || $status === 'active';
         } );
+    }
+
+    /**
+     * Calcula estatísticas da equipe para exibição no dashboard.
+     *
+     * @since 1.8.4
+     *
+     * @param WP_User[] $groomers Lista de profissionais.
+     * @return array Array com estatísticas: total, ativos, inativos, freelancers, por tipo.
+     */
+    private function get_team_stats( $groomers ) {
+        $stats = [
+            'total'       => count( $groomers ),
+            'active'      => 0,
+            'inactive'    => 0,
+            'freelancers' => 0,
+            'by_type'     => [],
+        ];
+
+        foreach ( self::get_staff_types() as $type_slug => $type_label ) {
+            $stats['by_type'][ $type_slug ] = 0;
+        }
+
+        foreach ( $groomers as $groomer ) {
+            $status       = get_user_meta( $groomer->ID, '_dps_groomer_status', true );
+            $is_freelancer = get_user_meta( $groomer->ID, '_dps_is_freelancer', true );
+            $staff_type   = get_user_meta( $groomer->ID, '_dps_staff_type', true );
+
+            if ( empty( $status ) || 'active' === $status ) {
+                $stats['active']++;
+            } else {
+                $stats['inactive']++;
+            }
+
+            if ( '1' === $is_freelancer ) {
+                $stats['freelancers']++;
+            }
+
+            if ( empty( $staff_type ) ) {
+                $staff_type = 'groomer';
+            }
+            if ( isset( $stats['by_type'][ $staff_type ] ) ) {
+                $stats['by_type'][ $staff_type ]++;
+            }
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Renderiza os cards de estatísticas da equipe.
+     *
+     * @since 1.8.4
+     *
+     * @param array $stats Estatísticas calculadas por get_team_stats().
+     * @return string HTML dos cards.
+     */
+    private function render_team_stats_cards( $stats ) {
+        ob_start();
+        ?>
+        <div class="dps-team-stats">
+            <div class="dps-team-stats__grid">
+                <div class="dps-team-stat-card dps-team-stat-card--total">
+                    <div class="dps-team-stat-card__icon">👥</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value"><?php echo esc_html( $stats['total'] ); ?></span>
+                        <span class="dps-team-stat-card__label"><?php echo esc_html__( 'Total de Profissionais', 'dps-groomers-addon' ); ?></span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--active">
+                    <div class="dps-team-stat-card__icon">✅</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value"><?php echo esc_html( $stats['active'] ); ?></span>
+                        <span class="dps-team-stat-card__label"><?php echo esc_html__( 'Ativos', 'dps-groomers-addon' ); ?></span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--inactive">
+                    <div class="dps-team-stat-card__icon">⏸️</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value"><?php echo esc_html( $stats['inactive'] ); ?></span>
+                        <span class="dps-team-stat-card__label"><?php echo esc_html__( 'Inativos', 'dps-groomers-addon' ); ?></span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--freelancer">
+                    <div class="dps-team-stat-card__icon">🎯</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value"><?php echo esc_html( $stats['freelancers'] ); ?></span>
+                        <span class="dps-team-stat-card__label"><?php echo esc_html__( 'Freelancers', 'dps-groomers-addon' ); ?></span>
+                    </div>
+                </div>
+            </div>
+            
+            <?php if ( $stats['total'] > 0 ) : ?>
+            <div class="dps-team-stats__breakdown">
+                <span class="dps-team-stats__breakdown-label"><?php echo esc_html__( 'Por função:', 'dps-groomers-addon' ); ?></span>
+                <div class="dps-team-stats__breakdown-items">
+                    <?php foreach ( $stats['by_type'] as $type => $count ) : 
+                        if ( 0 === $count ) {
+                            continue;
+                        }
+                        $type_label = self::get_staff_type_label( $type );
+                    ?>
+                        <span class="dps-badge dps-badge--type-<?php echo esc_attr( $type ); ?>">
+                            <?php echo esc_html( $type_label ); ?>: <?php echo esc_html( $count ); ?>
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     /**

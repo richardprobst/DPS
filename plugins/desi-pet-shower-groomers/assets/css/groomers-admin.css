@@ -6,7 +6,7 @@
  * 
  * @package Desi_Pet_Shower_Groomers
  * @since 1.1.0
- * @updated 1.8.0 - Redesign com sub-abas e layout em cards
+ * @updated 1.8.4 - Layout modernizado com cards de estatísticas e sub-abas estilo card
  */
 
 /* ==========================================================================
@@ -2367,4 +2367,413 @@ input[type="time"].dps-time-input,
     border: 1px solid #d1d5db;
     border-radius: 4px;
     font-size: 14px;
+}
+
+/* ==========================================================================
+   20. Header da Seção Modernizado (v1.8.4)
+   ========================================================================== */
+
+.dps-section-header--groomers {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-section-title__icon {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.dps-section-header__subtitle {
+    margin: 8px 0 0;
+    color: var(--dps-groomers-gray-500);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   21. Sub-abas Estilo Card (v1.8.4)
+   ========================================================================== */
+
+.dps-groomers-subnav--cards {
+    margin-bottom: 24px;
+    border-bottom: none;
+    background: transparent;
+}
+
+.dps-subnav-list--cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dps-subnav-item--card {
+    flex: 1;
+    min-width: 180px;
+    max-width: 280px;
+    margin-bottom: 0;
+}
+
+.dps-subnav-link--card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #ffffff;
+    border: 2px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dps-subnav-link--card:hover {
+    border-color: var(--dps-groomers-primary);
+    background: #f0f9ff;
+}
+
+.dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link--card {
+    border-color: var(--dps-groomers-primary);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.1) 100%);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+}
+
+.dps-subnav-link__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    background: var(--dps-groomers-gray-100);
+    border-radius: var(--dps-groomers-radius);
+    flex-shrink: 0;
+}
+
+.dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link__icon {
+    background: rgba(14, 165, 233, 0.15);
+}
+
+.dps-subnav-link__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-subnav-link__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dps-groomers-gray-700);
+}
+
+.dps-subnav-link__desc {
+    font-size: 12px;
+    color: var(--dps-groomers-gray-500);
+    font-weight: 400;
+}
+
+.dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link__title {
+    color: var(--dps-groomers-primary);
+}
+
+/* Responsivo sub-abas cards */
+@media screen and (max-width: 768px) {
+    .dps-subnav-item--card {
+        min-width: 150px;
+        max-width: none;
+    }
+    
+    .dps-subnav-link--card {
+        padding: 12px;
+    }
+    
+    .dps-subnav-link__icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+    
+    .dps-subnav-link__title {
+        font-size: 14px;
+    }
+    
+    .dps-subnav-link__desc {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dps-subnav-list--cards {
+        flex-direction: column;
+    }
+    
+    .dps-subnav-item--card {
+        min-width: 100%;
+    }
+}
+
+/* ==========================================================================
+   22. Cards de Estatísticas da Equipe (v1.8.4)
+   ========================================================================== */
+
+.dps-team-stats {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--dps-groomers-gray-50);
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius);
+}
+
+.dps-team-stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.dps-team-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid var(--dps-groomers-gray-200);
+    border-radius: var(--dps-groomers-radius);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-team-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dps-team-stat-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+    border-radius: var(--dps-groomers-radius);
+    flex-shrink: 0;
+}
+
+.dps-team-stat-card--total .dps-team-stat-card__icon {
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.dps-team-stat-card--active .dps-team-stat-card__icon {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.dps-team-stat-card--inactive .dps-team-stat-card__icon {
+    background: rgba(156, 163, 175, 0.15);
+}
+
+.dps-team-stat-card--freelancer .dps-team-stat-card__icon {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.dps-team-stat-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-team-stat-card__value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--dps-groomers-gray-700);
+}
+
+.dps-team-stat-card--total .dps-team-stat-card__value {
+    color: var(--dps-groomers-primary);
+}
+
+.dps-team-stat-card--active .dps-team-stat-card__value {
+    color: var(--dps-groomers-success);
+}
+
+.dps-team-stat-card--inactive .dps-team-stat-card__value {
+    color: var(--dps-groomers-gray-400);
+}
+
+.dps-team-stat-card--freelancer .dps-team-stat-card__value {
+    color: #8b5cf6;
+}
+
+.dps-team-stat-card__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dps-groomers-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Breakdown por função */
+.dps-team-stats__breakdown {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dps-groomers-gray-200);
+}
+
+.dps-team-stats__breakdown-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dps-groomers-gray-500);
+}
+
+.dps-team-stats__breakdown-items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Responsivo stats cards */
+@media screen and (max-width: 1024px) {
+    .dps-team-stats__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .dps-team-stats__grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-team-stat-card {
+        padding: 12px;
+    }
+    
+    .dps-team-stat-card__icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    
+    .dps-team-stat-card__value {
+        font-size: 24px;
+    }
+    
+    .dps-team-stats__breakdown {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ==========================================================================
+   23. Melhorias no Card de Formulário (v1.8.4)
+   ========================================================================== */
+
+.dps-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-card__header-icon {
+    font-size: 18px;
+}
+
+/* Melhorar visual do accordion/details */
+.dps-form-details {
+    background: #ffffff;
+}
+
+.dps-form-details[open] {
+    border-color: var(--dps-groomers-primary);
+}
+
+.dps-form-details[open] .dps-form-details__summary {
+    border-bottom: 1px solid var(--dps-groomers-gray-200);
+    color: var(--dps-groomers-primary);
+}
+
+/* ==========================================================================
+   24. Melhorias na Tabela de Profissionais (v1.8.4)
+   ========================================================================== */
+
+/* Avatar com cores dinâmicas por tipo */
+.dps-user-avatar--groomer {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.dps-user-avatar--banhista {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.dps-user-avatar--auxiliar {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.dps-user-avatar--recepcao {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+/* Tooltip melhorado para status */
+.dps-status-dot[title] {
+    position: relative;
+}
+
+.dps-status-dot::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    background: var(--dps-groomers-gray-700);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.dps-status-dot:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Empty state melhorado */
+.dps-groomers-table--compact .dps-empty-message {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--dps-groomers-gray-400);
+    font-style: normal;
+}
+
+.dps-empty-state {
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.dps-empty-state__icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.dps-empty-state__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-groomers-gray-700);
+    margin: 0 0 8px;
+}
+
+.dps-empty-state__desc {
+    font-size: 14px;
+    color: var(--dps-groomers-gray-500);
+    margin: 0;
 }
