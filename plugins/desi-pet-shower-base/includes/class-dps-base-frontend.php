@@ -410,12 +410,18 @@ class DPS_Base_Frontend {
 
         $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
         if ( $queried_id ) {
-            return get_permalink( $queried_id );
+            $permalink = get_permalink( $queried_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         global $post;
         if ( isset( $post->ID ) ) {
-            return get_permalink( $post->ID );
+            $permalink = get_permalink( $post->ID );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         return home_url();
@@ -451,12 +457,18 @@ class DPS_Base_Frontend {
 
         $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
         if ( $queried_id ) {
-            return get_permalink( $queried_id );
+            $permalink = get_permalink( $queried_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         global $post;
         if ( isset( $post->ID ) ) {
-            return get_permalink( $post->ID );
+            $permalink = get_permalink( $post->ID );
+            if ( $permalink && is_string( $permalink ) ) {
+                return $permalink;
+            }
         }
 
         return home_url();

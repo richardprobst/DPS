@@ -85,7 +85,10 @@ class DPS_Services_Addon {
         if ( ! $base ) {
             $queried_id = function_exists( 'get_queried_object_id' ) ? get_queried_object_id() : 0;
             if ( $queried_id ) {
-                $base = get_permalink( $queried_id );
+                $permalink = get_permalink( $queried_id );
+                if ( $permalink && is_string( $permalink ) ) {
+                    $base = $permalink;
+                }
             }
         }
         
@@ -93,7 +96,10 @@ class DPS_Services_Addon {
         if ( ! $base ) {
             global $post;
             if ( isset( $post->ID ) ) {
-                $base = get_permalink( $post->ID );
+                $permalink = get_permalink( $post->ID );
+                if ( $permalink && is_string( $permalink ) ) {
+                    $base = $permalink;
+                }
             }
         }
         

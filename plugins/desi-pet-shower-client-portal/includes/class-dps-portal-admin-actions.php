@@ -463,13 +463,19 @@ final class DPS_Portal_Admin_Actions {
         // Fallback: use current page permalink
         $page_id = get_queried_object_id();
         if ( $page_id ) {
-            return add_query_arg( 'tab', 'logins', get_permalink( $page_id ) );
+            $permalink = get_permalink( $page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                return add_query_arg( 'tab', 'logins', $permalink );
+            }
         }
 
         // Secondary fallback: use global $post
         global $post;
         if ( isset( $post->ID ) ) {
-            return add_query_arg( 'tab', 'logins', get_permalink( $post->ID ) );
+            $permalink = get_permalink( $post->ID );
+            if ( $permalink && is_string( $permalink ) ) {
+                return add_query_arg( 'tab', 'logins', $permalink );
+            }
         }
 
         // Tertiary fallback: construct URL from REQUEST_URI

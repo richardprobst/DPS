@@ -29,7 +29,7 @@ function dps_get_portal_page_url() {
     
     if ( $page_id > 0 ) {
         $permalink = get_permalink( $page_id );
-        if ( $permalink ) {
+        if ( $permalink && is_string( $permalink ) ) {
             return $permalink;
         }
     }
@@ -37,7 +37,10 @@ function dps_get_portal_page_url() {
     // Fallback: busca por título usando WP_Query (compatível com WP 6.2+)
     $portal_page = dps_get_page_by_title_compat( 'Portal do Cliente' );
     if ( $portal_page ) {
-        return get_permalink( $portal_page->ID );
+        $permalink = get_permalink( $portal_page->ID );
+        if ( $permalink && is_string( $permalink ) ) {
+            return $permalink;
+        }
     }
     
     // Fallback final: URL genérica

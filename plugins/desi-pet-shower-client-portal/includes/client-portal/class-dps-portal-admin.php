@@ -469,7 +469,12 @@ class DPS_Portal_Admin {
                 $base_url = menu_page_url( 'dps-client-logins', false );
             } else {
                 $page_id  = get_queried_object_id();
-                $base_url = $page_id ? get_permalink( $page_id ) : home_url();
+                if ( $page_id ) {
+                    $permalink = get_permalink( $page_id );
+                    $base_url = ( $permalink && is_string( $permalink ) ) ? $permalink : home_url();
+                } else {
+                    $base_url = home_url();
+                }
             }
         }
 
@@ -573,7 +578,13 @@ class DPS_Portal_Admin {
         
         echo '<div class="dps-section" id="dps-section-portal">';
         $page_id   = get_queried_object_id();
-        $page_link = $page_id ? get_permalink( $page_id ) : home_url();
+        $page_link = home_url();
+        if ( $page_id ) {
+            $permalink = get_permalink( $page_id );
+            if ( $permalink && is_string( $permalink ) ) {
+                $page_link = $permalink;
+            }
+        }
         $page_link = add_query_arg( 'tab', 'portal', $page_link );
         $this->render_portal_settings_page( $page_link );
         echo '</div>';
