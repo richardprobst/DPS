@@ -2040,8 +2040,8 @@ class DPS_Finance_Addon {
         echo '<div class="dps-field">';
         echo '<label for="finance_type">' . esc_html__( 'Tipo', 'dps-finance-addon' ) . ' *</label>';
         echo '<select id="finance_type" name="finance_type" required>';
-        echo '<option value="receita">📈 ' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
-        echo '<option value="despesa">📉 ' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="receita">' . esc_html__( 'Receita', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="despesa">' . esc_html__( 'Despesa', 'dps-finance-addon' ) . '</option>';
         echo '</select>';
         echo '</div>';
         
@@ -2049,8 +2049,8 @@ class DPS_Finance_Addon {
         echo '<div class="dps-field">';
         echo '<label for="finance_status">' . esc_html__( 'Status', 'dps-finance-addon' ) . ' *</label>';
         echo '<select id="finance_status" name="finance_status" required>';
-        echo '<option value="em_aberto">⏳ ' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
-        echo '<option value="pago">✅ ' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="em_aberto">' . esc_html__( 'Em aberto', 'dps-finance-addon' ) . '</option>';
+        echo '<option value="pago">' . esc_html__( 'Pago', 'dps-finance-addon' ) . '</option>';
         echo '</select>';
         echo '</div>';
         

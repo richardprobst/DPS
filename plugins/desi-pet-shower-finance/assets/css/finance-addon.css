@@ -1315,7 +1315,11 @@
     font-size: 14px;
 }
 
-/* Grid de layout para organizar seções */
+/* Grid de layout para organizar seções
+ * Em telas grandes (>1200px), usa layout de 2 colunas
+ * O resumo financeiro (.dps-finance-summary-surface) sempre ocupa
+ * a largura total (grid-column: 1 / -1) ficando acima das demais seções
+ */
 .dps-finance-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -1328,6 +1332,7 @@
         grid-template-columns: 2fr 1fr;
     }
     
+    /* Resumo financeiro ocupa linha inteira para dar destaque ao dashboard */
     .dps-finance-summary-surface {
         grid-column: 1 / -1;
     }
