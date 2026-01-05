@@ -2772,7 +2772,10 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza a seção de galeria de fotos dos pets do cliente.
+     * Layout moderno seguindo padrão das abas Avaliações, Fidelidade e Mensagens.
+     * Exibe fotos de perfil dos pets e fotos de atendimentos (banho/tosa).
      *
+     * @since 3.2.0
      * @param int $client_id ID do cliente.
      */
     private function render_pet_gallery( $client_id ) {
@@ -2791,43 +2794,365 @@ final class DPS_Client_Portal {
             update_meta_cache( 'post', $pet_ids );
         }
         
-        echo '<section id="galeria" class="dps-portal-section dps-portal-gallery">';
-        echo '<h2>' . esc_html__( 'Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
-        if ( $pets ) {
-            echo '<div class="dps-portal-gallery-grid">';
-            foreach ( $pets as $pet ) {
-                // Meta já em cache, sem queries adicionais
-                $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
-                $pet_name = $pet->post_title;
-                echo '<div class="dps-portal-photo-item">';
-                echo '<h4>' . esc_html( $pet_name ) . '</h4>';
-                if ( $photo_id ) {
-                    $img_url = wp_get_attachment_image_url( $photo_id, 'medium' );
-                    if ( $img_url ) {
-                        // Link para compartilhar via WhatsApp usando helper centralizado
-                        $share_message = sprintf( __( 'Olha que fofo estou após o banho/tosa no desi.pet by PRObst! %s', 'dps-client-portal' ), $img_url );
-                        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
-                            $wa_link = DPS_WhatsApp_Helper::get_share_link( $share_message );
-                        } else {
-                            // Fallback
-                            $wa_text = urlencode( $share_message );
-                            $wa_link = 'https://wa.me/?text=' . $wa_text;
-                        }
-                        echo '<a href="' . esc_url( $img_url ) . '" target="_blank"><img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $pet_name ) . '" style="max-width:100%;height:auto;" /></a><br>';
-                        echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" class="dps-share-whatsapp">' . esc_html__( 'Compartilhar via WhatsApp', 'dps-client-portal' ) . '</a>';
-                    } else {
-                        echo '<p>' . esc_html__( 'Sem foto disponível.', 'dps-client-portal' ) . '</p>';
+        // Conta fotos disponíveis (perfil + atendimentos)
+        $total_profile_photos = 0;
+        $total_grooming_photos = 0;
+        $pets_with_photos = [];
+        
+        foreach ( $pets as $pet ) {
+            $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
+            $grooming_photos = get_post_meta( $pet->ID, 'pet_grooming_photos', true );
+            
+            $pet_data = [
+                'id'              => $pet->ID,
+                'name'            => $pet->post_title,
+                'profile_photo'   => $photo_id ? wp_get_attachment_image_url( $photo_id, 'medium' ) : '',
+                'profile_photo_lg' => $photo_id ? wp_get_attachment_image_url( $photo_id, 'large' ) : '',
+                'grooming_photos' => [],
+            ];
+            
+            if ( $pet_data['profile_photo'] ) {
+                $total_profile_photos++;
+            }
+            
+            // Processa fotos de atendimentos (array de IDs ou array de objetos com data)
+            if ( ! empty( $grooming_photos ) && is_array( $grooming_photos ) ) {
+                foreach ( $grooming_photos as $gp ) {
+                    $photo_info = $this->parse_grooming_photo( $gp );
+                    if ( $photo_info ) {
+                        $pet_data['grooming_photos'][] = $photo_info;
+                        $total_grooming_photos++;
                     }
-                } else {
-                    echo '<p>' . esc_html__( 'Sem foto disponível.', 'dps-client-portal' ) . '</p>';
                 }
-                echo '</div>';
+            }
+            
+            $pets_with_photos[] = $pet_data;
+        }
+        
+        $total_photos = $total_profile_photos + $total_grooming_photos;
+        $pets_count = count( $pets );
+        
+        echo '<section id="galeria" class="dps-portal-section dps-portal-gallery">';
+        
+        // Header moderno com ícone + título + subtítulo (padrão das outras abas)
+        echo '<div class="dps-gallery-header">';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">📸</span>' . esc_html__( 'Galeria de Fotos', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Veja as fotos dos seus pets antes e depois dos atendimentos', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        
+        // Cards de métricas (padrão das outras abas)
+        $this->render_gallery_metrics( $pets_count, $total_profile_photos, $total_grooming_photos );
+        
+        // Conteúdo principal
+        if ( $pets ) {
+            // Navegação por pets (filtro)
+            if ( count( $pets ) > 1 ) {
+                $this->render_gallery_pet_filter( $pets_with_photos );
+            }
+            
+            // Grid de fotos por pet
+            echo '<div class="dps-gallery-content">';
+            foreach ( $pets_with_photos as $index => $pet_data ) {
+                $this->render_pet_gallery_card( $pet_data, $index );
             }
             echo '</div>';
+            
+            // Nota informativa sobre envio de fotos
+            echo '<div class="dps-gallery-info">';
+            echo '<p class="dps-gallery-info__text">';
+            echo '<span class="dps-gallery-info__icon">💡</span> ';
+            echo esc_html__( 'Novas fotos são adicionadas pela equipe após cada atendimento. Fique de olho!', 'dps-client-portal' );
+            echo '</p>';
+            echo '</div>';
+            
         } else {
-            echo '<p>' . esc_html__( 'Nenhum pet cadastrado.', 'dps-client-portal' ) . '</p>';
+            // Estado vazio orientador
+            $this->render_gallery_empty_state();
         }
+        
         echo '</section>';
+    }
+
+    /**
+     * Renderiza métricas da galeria de fotos.
+     *
+     * @since 3.2.0
+     * @param int $pets_count          Total de pets.
+     * @param int $profile_photos      Total de fotos de perfil.
+     * @param int $grooming_photos     Total de fotos de atendimentos.
+     */
+    private function render_gallery_metrics( $pets_count, $profile_photos, $grooming_photos ) {
+        $total_photos = $profile_photos + $grooming_photos;
+        
+        echo '<div class="dps-gallery-metrics">';
+        
+        // Card: Total de Pets
+        echo '<div class="dps-gallery-metric-card">';
+        echo '<div class="dps-gallery-metric-card__icon">🐾</div>';
+        echo '<div class="dps-gallery-metric-card__content">';
+        echo '<span class="dps-gallery-metric-card__value">' . esc_html( $pets_count ) . '</span>';
+        echo '<span class="dps-gallery-metric-card__label">' . esc_html( _n( 'Pet', 'Pets', $pets_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Fotos de Perfil
+        echo '<div class="dps-gallery-metric-card">';
+        echo '<div class="dps-gallery-metric-card__icon">👤</div>';
+        echo '<div class="dps-gallery-metric-card__content">';
+        echo '<span class="dps-gallery-metric-card__value">' . esc_html( $profile_photos ) . '</span>';
+        echo '<span class="dps-gallery-metric-card__label">' . esc_html( _n( 'Foto de Perfil', 'Fotos de Perfil', $profile_photos, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Fotos de Atendimentos (destaque se houver)
+        $highlight_class = $grooming_photos > 0 ? ' dps-gallery-metric-card--highlight' : '';
+        echo '<div class="dps-gallery-metric-card' . esc_attr( $highlight_class ) . '">';
+        echo '<div class="dps-gallery-metric-card__icon">✨</div>';
+        echo '<div class="dps-gallery-metric-card__content">';
+        echo '<span class="dps-gallery-metric-card__value">' . esc_html( $grooming_photos ) . '</span>';
+        echo '<span class="dps-gallery-metric-card__label">' . esc_html( _n( 'Foto de Atendimento', 'Fotos de Atendimentos', $grooming_photos, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-gallery-metrics
+    }
+
+    /**
+     * Renderiza filtro por pet na galeria.
+     *
+     * @since 3.2.0
+     * @param array $pets_with_photos Array de pets com dados de fotos.
+     */
+    private function render_gallery_pet_filter( $pets_with_photos ) {
+        echo '<div class="dps-gallery-filter">';
+        echo '<span class="dps-gallery-filter__label">' . esc_html__( 'Filtrar por pet:', 'dps-client-portal' ) . '</span>';
+        echo '<div class="dps-gallery-filter__buttons">';
+        
+        // Botão "Todos"
+        echo '<button type="button" class="dps-gallery-filter__btn is-active" data-filter="all">';
+        echo esc_html__( 'Todos', 'dps-client-portal' );
+        echo '</button>';
+        
+        // Botões por pet
+        foreach ( $pets_with_photos as $pet_data ) {
+            echo '<button type="button" class="dps-gallery-filter__btn" data-filter="pet-' . esc_attr( $pet_data['id'] ) . '">';
+            echo esc_html( $pet_data['name'] );
+            echo '</button>';
+        }
+        
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza card de um pet na galeria.
+     *
+     * @since 3.2.0
+     * @param array $pet_data Dados do pet com fotos.
+     * @param int   $index    Índice do pet na lista.
+     */
+    private function render_pet_gallery_card( $pet_data, $index ) {
+        $has_any_photo = ! empty( $pet_data['profile_photo'] ) || ! empty( $pet_data['grooming_photos'] );
+        
+        echo '<div class="dps-gallery-pet-card" data-pet-id="pet-' . esc_attr( $pet_data['id'] ) . '">';
+        
+        // Header do card com nome do pet
+        echo '<div class="dps-gallery-pet-card__header">';
+        echo '<h3 class="dps-gallery-pet-card__name">';
+        echo '<span class="dps-gallery-pet-card__icon">🐾</span> ';
+        echo esc_html( $pet_data['name'] );
+        echo '</h3>';
+        echo '</div>';
+        
+        // Conteúdo do card
+        echo '<div class="dps-gallery-pet-card__content">';
+        
+        if ( $has_any_photo ) {
+            // Grid de fotos
+            echo '<div class="dps-gallery-photo-grid">';
+            
+            // Foto de perfil
+            if ( ! empty( $pet_data['profile_photo'] ) ) {
+                $this->render_gallery_photo_item( 
+                    $pet_data['profile_photo'], 
+                    $pet_data['profile_photo_lg'] ?: $pet_data['profile_photo'],
+                    $pet_data['name'],
+                    $pet_data['id'],
+                    __( 'Foto de Perfil', 'dps-client-portal' ),
+                    'profile'
+                );
+            }
+            
+            // Fotos de atendimentos
+            foreach ( $pet_data['grooming_photos'] as $gp ) {
+                // Valida data antes de usar strtotime (evita falso em strings inválidas)
+                $date_label = __( 'Foto de Atendimento', 'dps-client-portal' );
+                if ( ! empty( $gp['date'] ) ) {
+                    $timestamp = strtotime( $gp['date'] );
+                    if ( false !== $timestamp ) {
+                        $date_label = sprintf( __( 'Atendimento em %s', 'dps-client-portal' ), date_i18n( 'd/m/Y', $timestamp ) );
+                    }
+                }
+                
+                $this->render_gallery_photo_item( 
+                    $gp['url'], 
+                    $gp['url_lg'] ?: $gp['url'],
+                    $pet_data['name'],
+                    $pet_data['id'],
+                    $date_label,
+                    'grooming'
+                );
+            }
+            
+            echo '</div>'; // .dps-gallery-photo-grid
+            
+        } else {
+            // Pet sem fotos
+            echo '<div class="dps-gallery-pet-card__empty">';
+            echo '<span class="dps-gallery-pet-card__empty-icon">📷</span>';
+            echo '<p class="dps-gallery-pet-card__empty-text">' . esc_html__( 'Ainda não há fotos deste pet.', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-gallery-pet-card__empty-hint">' . esc_html__( 'As fotos serão adicionadas após os próximos atendimentos.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
+        }
+        
+        echo '</div>'; // .dps-gallery-pet-card__content
+        echo '</div>'; // .dps-gallery-pet-card
+    }
+
+    /**
+     * Renderiza um item de foto na galeria.
+     *
+     * @since 3.2.0
+     * @param string $url       URL da imagem (tamanho médio).
+     * @param string $url_lg    URL da imagem grande (para lightbox).
+     * @param string $pet_name  Nome do pet.
+     * @param int    $pet_id    ID do pet (para garantir unicidade no data-lightbox).
+     * @param string $label     Label da foto (ex: "Foto de Perfil", "Atendimento em 01/01/2026").
+     * @param string $type      Tipo de foto: 'profile' ou 'grooming'.
+     */
+    private function render_gallery_photo_item( $url, $url_lg, $pet_name, $pet_id, $label, $type = 'grooming' ) {
+        $type_class = 'profile' === $type ? 'dps-gallery-photo--profile' : 'dps-gallery-photo--grooming';
+        
+        // Monta mensagem de compartilhamento
+        $share_message = sprintf( 
+            __( 'Olha que lindo(a) o(a) %s ficou após o banho/tosa! 🐾✨', 'dps-client-portal' ), 
+            $pet_name 
+        );
+        
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $wa_link = DPS_WhatsApp_Helper::get_share_link( $share_message . ' ' . $url_lg );
+        } else {
+            $wa_text = urlencode( $share_message . ' ' . $url_lg );
+            $wa_link = 'https://wa.me/?text=' . $wa_text;
+        }
+        
+        echo '<div class="dps-gallery-photo ' . esc_attr( $type_class ) . '">';
+        
+        // Imagem com link para lightbox (usa ID do pet para garantir unicidade)
+        $lightbox_group = 'gallery-' . absint( $pet_id );
+        echo '<a href="' . esc_url( $url_lg ) . '" class="dps-gallery-photo__link" data-lightbox="' . esc_attr( $lightbox_group ) . '" title="' . esc_attr( $pet_name . ' - ' . $label ) . '">';
+        echo '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-gallery-photo__img" loading="lazy">';
+        echo '<span class="dps-gallery-photo__overlay">';
+        echo '<span class="dps-gallery-photo__zoom">🔍</span>';
+        echo '</span>';
+        echo '</a>';
+        
+        // Info e ações
+        echo '<div class="dps-gallery-photo__info">';
+        echo '<span class="dps-gallery-photo__label">' . esc_html( $label ) . '</span>';
+        echo '<div class="dps-gallery-photo__actions">';
+        
+        // Botão de compartilhamento
+        echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" rel="noopener noreferrer" class="dps-gallery-photo__action dps-gallery-photo__action--whatsapp" title="' . esc_attr__( 'Compartilhar via WhatsApp', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-gallery-photo__action-icon">💬</span>';
+        echo '</a>';
+        
+        // Botão de download
+        echo '<a href="' . esc_url( $url_lg ) . '" download class="dps-gallery-photo__action dps-gallery-photo__action--download" title="' . esc_attr__( 'Baixar foto', 'dps-client-portal' ) . '">';
+        echo '<span class="dps-gallery-photo__action-icon">⬇️</span>';
+        echo '</a>';
+        
+        echo '</div>'; // .dps-gallery-photo__actions
+        echo '</div>'; // .dps-gallery-photo__info
+        echo '</div>'; // .dps-gallery-photo
+    }
+
+    /**
+     * Renderiza estado vazio da galeria.
+     *
+     * @since 3.2.0
+     */
+    private function render_gallery_empty_state() {
+        echo '<div class="dps-gallery-empty-state">';
+        echo '<div class="dps-gallery-empty-state__icon">📷</div>';
+        echo '<h3 class="dps-gallery-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado ainda', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-gallery-empty-state__message">' . esc_html__( 'Quando você tiver pets cadastrados, as fotos deles aparecerão aqui.', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-gallery-empty-state__hint">' . esc_html__( 'Entre em contato conosco para agendar o primeiro atendimento!', 'dps-client-portal' ) . '</p>';
+        
+        // Botão de ação
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $wa_link = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet e agendar um atendimento.', 'dps-client-portal' ) );
+        } else {
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            // Valida formato básico do número (apenas dígitos e mínimo 10 caracteres)
+            $whatsapp_number = preg_replace( '/[^0-9]/', '', $whatsapp_number );
+            if ( strlen( $whatsapp_number ) >= 10 ) {
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $wa_text = urlencode( __( 'Olá! Gostaria de cadastrar meu pet e agendar um atendimento.', 'dps-client-portal' ) );
+                $wa_link = 'https://wa.me/' . $whatsapp_number . '?text=' . $wa_text;
+            } else {
+                $wa_link = '';
+            }
+        }
+        
+        if ( ! empty( $wa_link ) ) {
+            echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" rel="noopener noreferrer" class="dps-gallery-empty-state__action">';
+            echo '💬 ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
+            echo '</a>';
+        }
+        
+        echo '</div>';
+    }
+
+    /**
+     * Processa dados de uma foto de atendimento.
+     * Pode receber um ID de attachment ou um array com dados adicionais.
+     *
+     * @since 3.2.0
+     * @param mixed $photo_data ID do attachment ou array com 'id', 'date', etc.
+     * @return array|null Array com dados da foto ou null se inválido.
+     */
+    private function parse_grooming_photo( $photo_data ) {
+        $photo_id = 0;
+        $date = '';
+        $service = '';
+        
+        if ( is_numeric( $photo_data ) ) {
+            $photo_id = (int) $photo_data;
+        } elseif ( is_array( $photo_data ) ) {
+            $photo_id = isset( $photo_data['id'] ) ? (int) $photo_data['id'] : 0;
+            $date = isset( $photo_data['date'] ) ? sanitize_text_field( $photo_data['date'] ) : '';
+            $service = isset( $photo_data['service'] ) ? sanitize_text_field( $photo_data['service'] ) : '';
+        }
+        
+        if ( ! $photo_id ) {
+            return null;
+        }
+        
+        $url = wp_get_attachment_image_url( $photo_id, 'medium' );
+        if ( ! $url ) {
+            return null;
+        }
+        
+        return [
+            'id'      => $photo_id,
+            'url'     => $url,
+            'url_lg'  => wp_get_attachment_image_url( $photo_id, 'large' ) ?: $url,
+            'date'    => $date,
+            'service' => $service,
+        ];
     }
 
     /**

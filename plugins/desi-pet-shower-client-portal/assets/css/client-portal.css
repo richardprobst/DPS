@@ -2102,7 +2102,482 @@ html {
     border: 1px solid var(--dps-border-color);
 }
 
-/* Galeria de fotos */
+/* ========================================
+   GALERIA DE FOTOS - LAYOUT MODERNO (Revisão Jan/2026)
+   Refatorado para seguir padrão das abas Avaliações e Fidelidade
+   ======================================== */
+
+/* Container principal */
+.dps-portal-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Header da galeria */
+.dps-gallery-header {
+    margin-bottom: 8px;
+}
+
+.dps-gallery-header .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 8px 0;
+}
+
+.dps-gallery-header .dps-section-title__icon {
+    font-size: 28px;
+}
+
+.dps-gallery-header .dps-section-subtitle {
+    font-size: 15px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+/* Cards de Métricas */
+.dps-gallery-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dps-gallery-metric-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-gallery-metric-card:hover {
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-gallery-metric-card--highlight {
+    background-color: #f0f9ff;
+    border-color: var(--dps-primary);
+    border-left: 4px solid var(--dps-primary);
+}
+
+.dps-gallery-metric-card__icon {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-gallery-metric-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-gallery-metric-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    line-height: 1.2;
+}
+
+.dps-gallery-metric-card__label {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+}
+
+/* Filtro por Pet */
+.dps-gallery-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--dps-gray-50);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+}
+
+.dps-gallery-filter__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dps-gray-700);
+}
+
+.dps-gallery-filter__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-gallery-filter__btn {
+    padding: 8px 16px;
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dps-gray-600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-gallery-filter__btn:hover {
+    background-color: var(--dps-gray-100);
+    color: var(--dps-gray-800);
+}
+
+.dps-gallery-filter__btn.is-active {
+    background-color: var(--dps-primary);
+    border-color: var(--dps-primary);
+    color: var(--dps-white);
+}
+
+/* Container de conteúdo */
+.dps-gallery-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Card de Pet */
+.dps-gallery-pet-card {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-gallery-pet-card:hover {
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-gallery-pet-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background-color: var(--dps-gray-50);
+    border-bottom: 1px solid var(--dps-border-color);
+}
+
+.dps-gallery-pet-card__name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0;
+}
+
+.dps-gallery-pet-card__icon {
+    font-size: 20px;
+}
+
+.dps-gallery-pet-card__content {
+    padding: 20px;
+}
+
+/* Grid de Fotos */
+.dps-gallery-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+/* Item de Foto */
+.dps-gallery-photo {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-gallery-photo:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dps-shadow-md);
+}
+
+.dps-gallery-photo--profile {
+    border-left: 4px solid var(--dps-primary);
+}
+
+.dps-gallery-photo--grooming {
+    border-left: 4px solid var(--dps-success);
+}
+
+.dps-gallery-photo__link {
+    display: block;
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.dps-gallery-photo__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.dps-gallery-photo:hover .dps-gallery-photo__img {
+    transform: scale(1.05);
+}
+
+.dps-gallery-photo__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dps-gallery-photo:hover .dps-gallery-photo__overlay {
+    opacity: 1;
+}
+
+.dps-gallery-photo__zoom {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.dps-gallery-photo__info {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-gallery-photo__label {
+    font-size: 13px;
+    color: var(--dps-gray-600);
+    line-height: 1.3;
+}
+
+.dps-gallery-photo__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.dps-gallery-photo__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: var(--dps-gray-100);
+    color: var(--dps-gray-600);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dps-gallery-photo__action:hover {
+    background-color: var(--dps-gray-200);
+    color: var(--dps-gray-800);
+}
+
+.dps-gallery-photo__action--whatsapp:hover {
+    background-color: #10b981;
+    color: var(--dps-white);
+}
+
+.dps-gallery-photo__action--download:hover {
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+}
+
+.dps-gallery-photo__action-icon {
+    font-size: 18px;
+}
+
+/* Pet sem fotos */
+.dps-gallery-pet-card__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.dps-gallery-pet-card__empty-icon {
+    font-size: 48px;
+    opacity: 0.5;
+    margin-bottom: 16px;
+}
+
+.dps-gallery-pet-card__empty-text {
+    font-size: 16px;
+    color: var(--dps-gray-600);
+    margin: 0 0 8px 0;
+}
+
+.dps-gallery-pet-card__empty-hint {
+    font-size: 14px;
+    color: var(--dps-gray-400);
+    margin: 0;
+}
+
+/* Nota informativa */
+.dps-gallery-info {
+    padding: 16px 20px;
+    background-color: var(--dps-gray-50);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+}
+
+.dps-gallery-info__text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin: 0;
+}
+
+.dps-gallery-info__icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+/* Estado vazio da galeria */
+.dps-gallery-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background-color: var(--dps-gray-50);
+    border: 2px dashed var(--dps-border-color);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.dps-gallery-empty-state__icon {
+    font-size: 64px;
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.dps-gallery-empty-state__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 8px 0;
+}
+
+.dps-gallery-empty-state__message {
+    font-size: 15px;
+    color: var(--dps-gray-500);
+    margin: 0 0 8px 0;
+    max-width: 400px;
+}
+
+.dps-gallery-empty-state__hint {
+    font-size: 14px;
+    color: var(--dps-gray-400);
+    margin: 0 0 24px 0;
+}
+
+.dps-gallery-empty-state__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.dps-gallery-empty-state__action:hover {
+    background-color: var(--dps-primary-hover);
+    color: var(--dps-white);
+}
+
+/* Responsividade da Galeria */
+@media (max-width: 768px) {
+    .dps-gallery-metrics {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .dps-gallery-metric-card {
+        padding: 16px;
+    }
+    
+    .dps-gallery-metric-card__icon {
+        font-size: 28px;
+    }
+    
+    .dps-gallery-metric-card__value {
+        font-size: 20px;
+    }
+    
+    .dps-gallery-filter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dps-gallery-photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .dps-gallery-pet-card__header {
+        padding: 12px 16px;
+    }
+    
+    .dps-gallery-pet-card__content {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-gallery-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-gallery-photo-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .dps-gallery-photo__info {
+        padding: 8px;
+    }
+    
+    .dps-gallery-photo__label {
+        font-size: 12px;
+    }
+    
+    .dps-gallery-photo__action {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .dps-gallery-photo__action-icon {
+        font-size: 16px;
+    }
+}
+
+/* Legado: mantém compatibilidade com estruturas antigas */
 .dps-portal-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2130,6 +2605,118 @@ html {
 
 .dps-share-whatsapp:hover {
     background: #059669;
+}
+
+/* ========================================
+   LIGHTBOX - Visualização ampliada de fotos
+   Galeria de Fotos - Janeiro 2026
+   ======================================== */
+
+.dps-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-lightbox.is-active {
+    display: flex;
+}
+
+.dps-lightbox__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.dps-lightbox__container {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+
+.dps-lightbox__close {
+    position: absolute;
+    top: -48px;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    color: var(--dps-white);
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dps-lightbox__close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dps-lightbox__img {
+    max-width: 100%;
+    max-height: calc(90vh - 80px);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dps-lightbox__caption {
+    margin-top: 16px;
+    font-size: 16px;
+    color: var(--dps-white);
+    text-align: center;
+}
+
+.dps-lightbox__actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.dps-lightbox__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.dps-lightbox__btn:hover {
+    background-color: var(--dps-primary-hover);
+    color: var(--dps-white);
+}
+
+/* Responsividade do Lightbox */
+@media (max-width: 768px) {
+    .dps-lightbox__container {
+        max-width: 95vw;
+    }
+    
+    .dps-lightbox__close {
+        top: -44px;
+        width: 36px;
+        height: 36px;
+        font-size: 28px;
+    }
+    
+    .dps-lightbox__caption {
+        font-size: 14px;
+        padding: 0 16px;
+    }
 }
 
 /* ========================================

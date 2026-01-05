@@ -83,6 +83,23 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Client Portal Add-on - Modernização Completa da Aba Galeria (v3.2.0)**
+
+- **Header moderno padronizado**: Título 📸 com subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).
+- **Cards de métricas**: Três cards exibindo total de pets, fotos de perfil e fotos de atendimentos com destaque visual.
+- **Filtro por pet**: Botões para filtrar galeria por pet específico ou visualizar todos, com estilo pill moderno.
+- **Cards de pet organizados**: Cada pet em card próprio (`.dps-gallery-pet-card`) com header destacado e grid de fotos.
+- **Grid de fotos moderno**: Layout responsivo com cards de foto (`.dps-gallery-photo`) incluindo overlay de zoom ao hover.
+- **Suporte a fotos de atendimento**: Nova meta key `pet_grooming_photos` para armazenar fotos enviadas pelos administradores após banho/tosa.
+- **Diferenciação visual**: Fotos de perfil com borda azul, fotos de atendimento com borda verde.
+- **Ações por foto**: Botões de compartilhamento WhatsApp e download direto em cada item.
+- **Lightbox integrado**: Visualização ampliada de fotos com fechamento por ESC ou clique fora, caption e botão de download.
+- **Estado vazio orientador**: Mensagem amigável com ícone e CTA para WhatsApp quando não há pets cadastrados.
+- **Nota informativa**: Texto explicativo sobre adição de fotos pela equipe após atendimentos.
+- **Oito novos métodos helper**: `render_gallery_metrics()`, `render_gallery_pet_filter()`, `render_pet_gallery_card()`, `render_gallery_photo_item()`, `render_gallery_empty_state()`, `parse_grooming_photo()`.
+- **~400 linhas de CSS**: Novos estilos para métricas, filtros, cards de pet, grid de fotos, lightbox e responsividade mobile.
+- **~170 linhas de JavaScript**: Handlers para filtro de pets (`handleGalleryFilter()`) e lightbox (`handleGalleryLightbox()`).
+
 **Client Portal Add-on - Modernização Completa da Aba Agendamentos (v3.1.0)**
 
 - **Métricas rápidas no topo**: Dois cards destacando número de próximos agendamentos e total de atendimentos realizados.

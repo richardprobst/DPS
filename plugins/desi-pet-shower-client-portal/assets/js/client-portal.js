@@ -1722,4 +1722,142 @@ window.DPSSkeleton = (function() {
             });
         });
     }
+
+    /**
+     * Gerencia filtro de pets na galeria de fotos
+     * Revisão de layout: Janeiro 2026
+     */
+    function handleGalleryFilter() {
+        var filterButtons = document.querySelectorAll('.dps-gallery-filter__btn');
+        var petCards = document.querySelectorAll('.dps-gallery-pet-card');
+
+        if (filterButtons.length === 0 || petCards.length === 0) {
+            return;
+        }
+
+        filterButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var filterValue = this.getAttribute('data-filter');
+
+                // Valida filtro
+                if (!filterValue) {
+                    return;
+                }
+
+                // Remove classe ativa de todos os botões
+                filterButtons.forEach(function(b) {
+                    b.classList.remove('is-active');
+                });
+
+                // Adiciona classe ativa ao botão clicado
+                this.classList.add('is-active');
+
+                // Filtra cards
+                if (filterValue === 'all') {
+                    // Mostra todos
+                    petCards.forEach(function(card) {
+                        card.style.display = '';
+                    });
+                } else {
+                    // Valida que filterValue segue o padrão esperado (pet-123)
+                    if (!/^pet-\d+$/.test(filterValue)) {
+                        return;
+                    }
+
+                    // Filtra por pet específico
+                    petCards.forEach(function(card) {
+                        var cardPetId = card.getAttribute('data-pet-id');
+                        if (cardPetId === filterValue) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    /**
+     * Lightbox simples para galeria de fotos
+     * Revisão de layout: Janeiro 2026
+     */
+    function handleGalleryLightbox() {
+        var lightboxLinks = document.querySelectorAll('.dps-gallery-photo__link');
+
+        if (lightboxLinks.length === 0) {
+            return;
+        }
+
+        // Cria o container do lightbox
+        var lightbox = document.createElement('div');
+        lightbox.className = 'dps-lightbox';
+        lightbox.innerHTML = '' +
+            '<div class="dps-lightbox__overlay"></div>' +
+            '<div class="dps-lightbox__container">' +
+                '<button class="dps-lightbox__close" aria-label="Fechar">&times;</button>' +
+                '<img class="dps-lightbox__img" src="" alt="">' +
+                '<div class="dps-lightbox__caption"></div>' +
+                '<div class="dps-lightbox__actions">' +
+                    '<a href="" class="dps-lightbox__btn dps-lightbox__btn--download" download>⬇️ Baixar</a>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(lightbox);
+
+        var lightboxImg = lightbox.querySelector('.dps-lightbox__img');
+        var lightboxCaption = lightbox.querySelector('.dps-lightbox__caption');
+        var lightboxDownload = lightbox.querySelector('.dps-lightbox__btn--download');
+        var lightboxClose = lightbox.querySelector('.dps-lightbox__close');
+        var lightboxOverlay = lightbox.querySelector('.dps-lightbox__overlay');
+
+        // Abre lightbox ao clicar em foto
+        lightboxLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var imgUrl = this.getAttribute('href');
+                var imgTitle = this.getAttribute('title') || '';
+
+                // Valida URL da imagem
+                if (!imgUrl) {
+                    return;
+                }
+
+                lightboxImg.src = imgUrl;
+                lightboxImg.alt = imgTitle;
+                lightboxCaption.textContent = imgTitle;
+                lightboxDownload.href = imgUrl;
+
+                lightbox.classList.add('is-active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        // Fecha lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('is-active');
+            document.body.style.overflow = '';
+            lightboxImg.src = '';
+        }
+
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxOverlay.addEventListener('click', closeLightbox);
+
+        // Fecha com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox.classList.contains('is-active')) {
+                closeLightbox();
+            }
+        });
+    }
+
+    // Chama os handlers de galeria na inicialização do DOM
+    // Apenas se a galeria existir na página (otimização de performance)
+    document.addEventListener('DOMContentLoaded', function() {
+        var gallerySection = document.querySelector('.dps-portal-gallery');
+        if (gallerySection) {
+            handleGalleryFilter();
+            handleGalleryLightbox();
+        }
+    });
 })();
