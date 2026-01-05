@@ -813,8 +813,219 @@ class DPS_Portal_Renderer {
         }
 
         echo '</div>'; // .dps-metrics-grid
+
+        // Renderiza gráfico de frequência e sugestão de lembrete
+        $this->render_frequency_chart_and_reminder( $pets, $last_service_date );
         
         echo '</section>';
+    }
+
+    /**
+     * Renderiza gráfico de frequência de serviços e sugestão de próximo agendamento.
+     * Funcionalidades 2 e 5: Gráfico de Frequência + Notificações de Lembrete
+     *
+     * @since 2.5.0
+     * @param array    $pets              Array de posts de pets.
+     * @param int|null $last_service_date Timestamp do último serviço.
+     */
+    private function render_frequency_chart_and_reminder( $pets, $last_service_date ) {
+        $pet_history       = DPS_Portal_Pet_History::get_instance();
+        $services_by_month = [];
+        $all_services      = [];
+
+        // Coleta todos os serviços para análise
+        foreach ( $pets as $pet ) {
+            $history = $pet_history->get_pet_service_history( $pet->ID, -1 );
+            foreach ( $history as $service ) {
+                if ( ! empty( $service['date'] ) ) {
+                    $all_services[] = strtotime( $service['date'] );
+                    $month_key      = date( 'Y-m', strtotime( $service['date'] ) );
+                    if ( ! isset( $services_by_month[ $month_key ] ) ) {
+                        $services_by_month[ $month_key ] = 0;
+                    }
+                    $services_by_month[ $month_key ]++;
+                }
+            }
+        }
+
+        // Ordena datas para cálculo de intervalo médio
+        sort( $all_services );
+
+        echo '<div class="dps-history-insights">';
+
+        // === Gráfico de Frequência (Funcionalidade 2) ===
+        $this->render_frequency_chart( $services_by_month );
+
+        // === Sugestão de Próximo Agendamento (Funcionalidade 5) ===
+        $this->render_next_appointment_reminder( $all_services, $last_service_date );
+
+        echo '</div>'; // .dps-history-insights
+    }
+
+    /**
+     * Renderiza gráfico de barras de frequência de serviços por mês.
+     * Funcionalidade 2: Gráfico de Frequência
+     *
+     * @since 2.5.0
+     * @param array $services_by_month Array com contagem de serviços por mês (Y-m => count).
+     */
+    private function render_frequency_chart( $services_by_month ) {
+        // Prepara dados dos últimos 6 meses
+        $chart_data = [];
+        $max_value  = 1;
+
+        for ( $i = 5; $i >= 0; $i-- ) {
+            $month_key   = date( 'Y-m', strtotime( "-$i months" ) );
+            $month_label = date_i18n( 'M/y', strtotime( "-$i months" ) );
+            $count       = isset( $services_by_month[ $month_key ] ) ? $services_by_month[ $month_key ] : 0;
+            $chart_data[] = [
+                'label' => $month_label,
+                'count' => $count,
+            ];
+            if ( $count > $max_value ) {
+                $max_value = $count;
+            }
+        }
+
+        echo '<div class="dps-frequency-chart">';
+        echo '<h4 class="dps-frequency-chart__title">';
+        echo '<span class="dps-frequency-chart__icon">📊</span>';
+        echo esc_html__( 'Frequência de Serviços', 'dps-client-portal' );
+        echo '</h4>';
+        echo '<p class="dps-frequency-chart__subtitle">' . esc_html__( 'Serviços realizados nos últimos 6 meses', 'dps-client-portal' ) . '</p>';
+
+        echo '<div class="dps-chart-container">';
+        echo '<div class="dps-bar-chart">';
+
+        foreach ( $chart_data as $data ) {
+            $height_percent = $max_value > 0 ? ( $data['count'] / $max_value ) * 100 : 0;
+            // Mínimo 5% para visibilidade apenas se count > 0
+            if ( $data['count'] > 0 && $height_percent < 5 ) {
+                $height_percent = 5;
+            }
+
+            echo '<div class="dps-bar-chart__column">';
+            echo '<div class="dps-bar-chart__bar-wrapper">';
+            echo '<div class="dps-bar-chart__bar" style="height: ' . esc_attr( $height_percent ) . '%;" data-count="' . esc_attr( $data['count'] ) . '">';
+            echo '<span class="dps-bar-chart__value">' . esc_html( $data['count'] ) . '</span>';
+            echo '</div>';
+            echo '</div>';
+            echo '<span class="dps-bar-chart__label">' . esc_html( $data['label'] ) . '</span>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // .dps-bar-chart
+        echo '</div>'; // .dps-chart-container
+        echo '</div>'; // .dps-frequency-chart
+    }
+
+    /**
+     * Renderiza sugestão de próximo agendamento baseado na frequência média.
+     * Funcionalidade 5: Notificações de Lembrete
+     *
+     * @since 2.5.0
+     * @param array    $all_services      Array de timestamps de todos os serviços ordenados.
+     * @param int|null $last_service_date Timestamp do último serviço.
+     */
+    private function render_next_appointment_reminder( $all_services, $last_service_date ) {
+        // Precisa de pelo menos 2 serviços para calcular intervalo
+        if ( count( $all_services ) < 2 || null === $last_service_date ) {
+            return;
+        }
+
+        // Calcula intervalo médio entre serviços (em dias)
+        $intervals = [];
+        for ( $i = 1; $i < count( $all_services ); $i++ ) {
+            $diff = ( $all_services[ $i ] - $all_services[ $i - 1 ] ) / DAY_IN_SECONDS;
+            if ( $diff > 0 && $diff < 365 ) { // Ignora intervalos muito longos ou zero
+                $intervals[] = $diff;
+            }
+        }
+
+        if ( empty( $intervals ) ) {
+            return;
+        }
+
+        $avg_interval  = array_sum( $intervals ) / count( $intervals );
+        $avg_interval  = round( $avg_interval );
+        $next_date     = $last_service_date + ( $avg_interval * DAY_IN_SECONDS );
+        $days_until    = ceil( ( $next_date - time() ) / DAY_IN_SECONDS );
+        $next_date_fmt = date_i18n( 'd/m/Y', $next_date );
+
+        // Determina urgência
+        $urgency_class = 'dps-reminder--normal';
+        $urgency_icon  = '📅';
+        if ( $days_until <= 0 ) {
+            $urgency_class = 'dps-reminder--overdue';
+            $urgency_icon  = '⚠️';
+        } elseif ( $days_until <= 7 ) {
+            $urgency_class = 'dps-reminder--soon';
+            $urgency_icon  = '🔔';
+        }
+
+        echo '<div class="dps-next-appointment-reminder ' . esc_attr( $urgency_class ) . '">';
+        echo '<div class="dps-reminder__header">';
+        echo '<span class="dps-reminder__icon">' . $urgency_icon . '</span>';
+        echo '<h4 class="dps-reminder__title">' . esc_html__( 'Sugestão de Próximo Agendamento', 'dps-client-portal' ) . '</h4>';
+        echo '</div>';
+
+        echo '<div class="dps-reminder__content">';
+        echo '<p class="dps-reminder__text">';
+
+        if ( $days_until <= 0 ) {
+            $days_overdue = abs( $days_until );
+            /* translators: %1$d: days overdue, %2$d: average interval */
+            echo esc_html( sprintf(
+                __( 'Baseado na sua frequência média de %2$d dias, seu pet já deveria ter sido atendido há %1$d dia(s).', 'dps-client-portal' ),
+                $days_overdue,
+                $avg_interval
+            ) );
+        } elseif ( $days_until <= 7 ) {
+            /* translators: %1$s: next date, %2$d: days until */
+            echo esc_html( sprintf(
+                __( 'Baseado na sua frequência média, o próximo atendimento está previsto para %1$s (em %2$d dias).', 'dps-client-portal' ),
+                $next_date_fmt,
+                $days_until
+            ) );
+        } else {
+            /* translators: %1$s: next date, %2$d: average interval */
+            echo esc_html( sprintf(
+                __( 'Com base na frequência média de %2$d dias, sugerimos agendar para %1$s.', 'dps-client-portal' ),
+                $next_date_fmt,
+                $avg_interval
+            ) );
+        }
+
+        echo '</p>';
+
+        echo '<div class="dps-reminder__meta">';
+        /* translators: %d: average interval in days */
+        echo '<span class="dps-reminder__interval">📈 ' . esc_html( sprintf( __( 'Frequência média: %d dias', 'dps-client-portal' ), $avg_interval ) ) . '</span>';
+        echo '</div>';
+
+        // CTA para agendar
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_message = sprintf(
+                __( 'Olá! Gostaria de agendar um novo atendimento para meu pet. Minha frequência média é de %d dias.', 'dps-client-portal' ),
+                $avg_interval
+            );
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+        } else {
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+            if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            }
+            /* translators: %d: average interval in days */
+            $whatsapp_message = sprintf( __( 'Olá! Gostaria de agendar um novo atendimento para meu pet. Minha frequência média é de %d dias.', 'dps-client-portal' ), $avg_interval );
+            $whatsapp_url     = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( $whatsapp_message );
+        }
+
+        echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="button button-primary dps-reminder__cta">';
+        echo '📅 ' . esc_html__( 'Agendar Agora', 'dps-client-portal' );
+        echo '</a>';
+
+        echo '</div>'; // .dps-reminder__content
+        echo '</div>'; // .dps-next-appointment-reminder
     }
 
     /**
@@ -908,6 +1119,13 @@ class DPS_Portal_Renderer {
         echo '</div>';
         echo '</div>'; // .dps-pet-info-card
 
+        // Botão Exportar PDF (Funcionalidade 3)
+        echo '<div class="dps-pet-actions-bar">';
+        echo '<button type="button" class="button button-secondary dps-btn-export-pdf" data-pet-id="' . esc_attr( $pet_id ) . '" data-pet-name="' . esc_attr( $pet_name ) . '">';
+        echo '📄 ' . esc_html__( 'Exportar Histórico (PDF)', 'dps-client-portal' );
+        echo '</button>';
+        echo '</div>';
+
         if ( empty( $services ) ) {
             $this->render_pet_timeline_empty_state( $pet_name );
         } else {
@@ -924,6 +1142,210 @@ class DPS_Portal_Renderer {
         }
 
         echo '</section>';
+    }
+
+    /**
+     * Renderiza página de impressão do histórico do pet (para export PDF).
+     * Funcionalidade 3: Export para PDF
+     *
+     * @since 2.5.0
+     * @param int $pet_id    ID do pet.
+     * @param int $client_id ID do cliente.
+     */
+    public function render_pet_history_print_page( $pet_id, $client_id ) {
+        $pet_history = DPS_Portal_Pet_History::get_instance();
+        $services    = $pet_history->get_pet_service_history( $pet_id, -1 ); // Todos os serviços
+        $pet_name    = get_the_title( $pet_id );
+        $pet_species = get_post_meta( $pet_id, 'pet_species', true );
+        $pet_breed   = get_post_meta( $pet_id, 'pet_breed', true );
+        $pet_photo   = get_post_meta( $pet_id, 'pet_photo_id', true );
+        $photo_url   = $pet_photo ? wp_get_attachment_image_url( $pet_photo, 'medium' ) : '';
+
+        // Nome do petshop
+        $shop_name = get_option( 'dps_shop_name', get_bloginfo( 'name' ) );
+
+        ?>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title><?php echo esc_html( sprintf( __( 'Histórico de %s - %s', 'dps-client-portal' ), $pet_name, $shop_name ) ); ?></title>
+            <style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+                    color: #374151;
+                    line-height: 1.5;
+                    padding: 40px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .print-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    border-bottom: 2px solid #0ea5e9;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                }
+                .print-header__logo { font-size: 24px; font-weight: 600; color: #0ea5e9; }
+                .print-header__date { color: #6b7280; font-size: 14px; }
+                .pet-info {
+                    display: flex;
+                    gap: 20px;
+                    background: #f9fafb;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-bottom: 30px;
+                }
+                .pet-info__photo {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 3px solid #fff;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+                .pet-info__placeholder {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    background: #e5e7eb;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 32px;
+                }
+                .pet-info__details h1 { font-size: 22px; margin-bottom: 4px; }
+                .pet-info__details p { color: #6b7280; font-size: 14px; }
+                .services-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                .services-table th {
+                    background: #f3f4f6;
+                    padding: 12px;
+                    text-align: left;
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    border-bottom: 2px solid #e5e7eb;
+                }
+                .services-table td {
+                    padding: 12px;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                }
+                .services-table tr:nth-child(even) { background: #f9fafb; }
+                .print-footer {
+                    text-align: center;
+                    padding-top: 20px;
+                    border-top: 1px solid #e5e7eb;
+                    color: #9ca3af;
+                    font-size: 12px;
+                }
+                .status-badge {
+                    display: inline-block;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: 600;
+                }
+                .status-paid { background: #d1fae5; color: #047857; }
+                .status-completed { background: #f3f4f6; color: #4b5563; }
+                @media print {
+                    body { padding: 20px; }
+                    .no-print { display: none !important; }
+                }
+                .print-actions {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    display: flex;
+                    gap: 10px;
+                }
+                .print-actions button {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                }
+                .btn-print { background: #0ea5e9; color: white; }
+                .btn-close { background: #f3f4f6; color: #374151; }
+            </style>
+        </head>
+        <body>
+            <div class="print-actions no-print">
+                <button type="button" class="btn-print" id="dps-print-btn">🖨️ <?php esc_html_e( 'Imprimir / Salvar PDF', 'dps-client-portal' ); ?></button>
+                <button type="button" class="btn-close" id="dps-close-btn"><?php esc_html_e( 'Fechar', 'dps-client-portal' ); ?></button>
+            </div>
+            <script>
+                document.getElementById('dps-print-btn').addEventListener('click', function() { window.print(); });
+                document.getElementById('dps-close-btn').addEventListener('click', function() { window.close(); });
+            </script>
+
+            <header class="print-header">
+                <div class="print-header__logo">🐾 <?php echo esc_html( $shop_name ); ?></div>
+                <div class="print-header__date"><?php echo esc_html( date_i18n( 'd/m/Y H:i' ) ); ?></div>
+            </header>
+
+            <div class="pet-info">
+                <?php if ( $photo_url ) : ?>
+                    <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $pet_name ); ?>" class="pet-info__photo">
+                <?php else : ?>
+                    <div class="pet-info__placeholder">🐾</div>
+                <?php endif; ?>
+                <div class="pet-info__details">
+                    <h1><?php echo esc_html( $pet_name ); ?></h1>
+                    <?php if ( $pet_species || $pet_breed ) : ?>
+                        <p><?php echo esc_html( trim( $pet_species . ( $pet_breed ? ' • ' . $pet_breed : '' ) ) ); ?></p>
+                    <?php endif; ?>
+                    <p><strong><?php echo esc_html( sprintf( _n( '%d serviço realizado', '%d serviços realizados', count( $services ), 'dps-client-portal' ), count( $services ) ) ); ?></strong></p>
+                </div>
+            </div>
+
+            <?php if ( ! empty( $services ) ) : ?>
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Data', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Serviços', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Profissional', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Valor', 'dps-client-portal' ); ?></th>
+                            <th><?php esc_html_e( 'Status', 'dps-client-portal' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $services as $service ) : 
+                            $appointment_id    = isset( $service['appointment_id'] ) ? absint( $service['appointment_id'] ) : 0;
+                            $appointment_value = $appointment_id > 0 ? get_post_meta( $appointment_id, 'appointment_value', true ) : '';
+                            $status            = ! empty( $service['status'] ) ? $service['status'] : __( 'Concluído', 'dps-client-portal' );
+                            $status_class      = str_contains( strtolower( $status ), 'pago' ) ? 'status-paid' : 'status-completed';
+                        ?>
+                            <tr>
+                                <td>
+                                    <?php echo esc_html( date_i18n( 'd/m/Y', strtotime( $service['date'] ) ) ); ?>
+                                    <?php if ( ! empty( $service['time'] ) ) : ?>
+                                        <br><small><?php echo esc_html( $service['time'] ); ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo esc_html( $service['services'] ); ?></td>
+                                <td><?php echo esc_html( ! empty( $service['professional'] ) ? $service['professional'] : '-' ); ?></td>
+                                <td><?php echo $appointment_value && is_numeric( $appointment_value ) ? 'R$ ' . esc_html( number_format( (float) $appointment_value, 2, ',', '.' ) ) : '-'; ?></td>
+                                <td><span class="status-badge <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status ); ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else : ?>
+                <p><?php esc_html_e( 'Nenhum serviço registrado para este pet.', 'dps-client-portal' ); ?></p>
+            <?php endif; ?>
+
+            <footer class="print-footer">
+                <?php echo esc_html( sprintf( __( 'Documento gerado em %s por %s', 'dps-client-portal' ), date_i18n( 'd/m/Y H:i' ), $shop_name ) ); ?>
+            </footer>
+        </body>
+        </html>
+        <?php
     }
 
     /**

@@ -127,6 +127,10 @@ final class DPS_Client_Portal {
         
         // AJAX handler para auto-envio de link de acesso por email
         add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
+
+        // AJAX handler para export PDF do histórico do pet (Funcionalidade 3)
+        add_action( 'wp_ajax_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
+        add_action( 'wp_ajax_nopriv_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
     }
 
     /**
@@ -1183,6 +1187,7 @@ final class DPS_Client_Portal {
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
             'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
+            'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
             'clientId' => $client_id,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
@@ -4853,6 +4858,38 @@ Equipe %4$s', 'dps-client-portal' ),
         wp_send_json_success( [ 
             'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
         ] );
+    }
+
+    /**
+     * AJAX handler para exportar histórico do pet em formato para impressão/PDF.
+     * Funcionalidade 3: Export para PDF
+     *
+     * @since 2.5.0
+     */
+    public function ajax_export_pet_history_pdf() {
+        // Verifica nonce
+        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_portal_export_pdf' ) ) {
+            wp_die( esc_html__( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ), 403 );
+        }
+
+        // Obtém IDs
+        $pet_id    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
+        $client_id = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
+
+        if ( 0 === $pet_id || 0 === $client_id ) {
+            wp_die( esc_html__( 'Parâmetros inválidos.', 'dps-client-portal' ), 400 );
+        }
+
+        // Verifica se o pet pertence ao cliente (segurança)
+        $pet_client_id = get_post_meta( $pet_id, 'pet_client_id', true );
+        if ( absint( $pet_client_id ) !== $client_id ) {
+            wp_die( esc_html__( 'Acesso não autorizado.', 'dps-client-portal' ), 403 );
+        }
+
+        // Renderiza página de impressão
+        $renderer = DPS_Portal_Renderer::get_instance();
+        $renderer->render_pet_history_print_page( $pet_id, $client_id );
+        exit;
     }
     
     /**

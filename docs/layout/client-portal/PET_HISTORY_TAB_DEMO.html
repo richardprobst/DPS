@@ -479,6 +479,158 @@
         .button-secondary:hover {
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
         }
+
+        /* === NOVAS FUNCIONALIDADES === */
+
+        /* Insights Grid */
+        .dps-history-insights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .dps-history-insights {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Gráfico de Frequência */
+        .dps-frequency-chart {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .dps-frequency-chart__title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            margin: 0 0 4px 0;
+        }
+
+        .dps-frequency-chart__subtitle {
+            font-size: 13px;
+            color: var(--dps-gray-500);
+            margin: 0 0 20px 0;
+        }
+
+        .dps-bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 8px;
+            height: 150px;
+        }
+
+        .dps-bar-chart__column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            height: 100%;
+        }
+
+        .dps-bar-chart__bar-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .dps-bar-chart__bar {
+            width: 100%;
+            max-width: 40px;
+            background: linear-gradient(180deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
+            border-radius: 6px 6px 0 0;
+            min-height: 8px;
+            position: relative;
+        }
+
+        .dps-bar-chart__value {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+        }
+
+        .dps-bar-chart__label {
+            font-size: 11px;
+            color: var(--dps-gray-500);
+        }
+
+        /* Lembrete de Próximo Agendamento */
+        .dps-next-appointment-reminder {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 24px;
+            border-left: 4px solid var(--dps-primary);
+        }
+
+        .dps-next-appointment-reminder.dps-reminder--soon {
+            border-left-color: var(--dps-warning);
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .dps-reminder__header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .dps-reminder__icon { font-size: 24px; }
+
+        .dps-reminder__title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            margin: 0;
+        }
+
+        .dps-reminder__content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dps-reminder__text {
+            font-size: 14px;
+            color: var(--dps-gray-600);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .dps-reminder__interval {
+            display: inline-flex;
+            font-size: 13px;
+            color: var(--dps-gray-500);
+            background: var(--dps-gray-50);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .dps-reminder__cta {
+            align-self: flex-start;
+        }
+
+        /* Barra de Ações */
+        .dps-pet-actions-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -531,6 +683,87 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NOVAS FUNCIONALIDADES: Gráfico + Lembrete -->
+            <div class="dps-history-insights">
+                <!-- Gráfico de Frequência (Funcionalidade 2) -->
+                <div class="dps-frequency-chart">
+                    <h4 class="dps-frequency-chart__title">
+                        <span class="dps-frequency-chart__icon">📊</span>
+                        Frequência de Serviços
+                    </h4>
+                    <p class="dps-frequency-chart__subtitle">Serviços realizados nos últimos 6 meses</p>
+                    <div class="dps-chart-container">
+                        <div class="dps-bar-chart">
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 40%;" data-count="2">
+                                        <span class="dps-bar-chart__value">2</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Ago/25</span>
+                            </div>
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 80%;" data-count="4">
+                                        <span class="dps-bar-chart__value">4</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Set/25</span>
+                            </div>
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 60%;" data-count="3">
+                                        <span class="dps-bar-chart__value">3</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Out/25</span>
+                            </div>
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 100%;" data-count="5">
+                                        <span class="dps-bar-chart__value">5</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Nov/25</span>
+                            </div>
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 60%;" data-count="3">
+                                        <span class="dps-bar-chart__value">3</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Dez/25</span>
+                            </div>
+                            <div class="dps-bar-chart__column">
+                                <div class="dps-bar-chart__bar-wrapper">
+                                    <div class="dps-bar-chart__bar" style="height: 40%;" data-count="2">
+                                        <span class="dps-bar-chart__value">2</span>
+                                    </div>
+                                </div>
+                                <span class="dps-bar-chart__label">Jan/26</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lembrete de Próximo Agendamento (Funcionalidade 5) -->
+                <div class="dps-next-appointment-reminder dps-reminder--soon">
+                    <div class="dps-reminder__header">
+                        <span class="dps-reminder__icon">🔔</span>
+                        <h4 class="dps-reminder__title">Sugestão de Próximo Agendamento</h4>
+                    </div>
+                    <div class="dps-reminder__content">
+                        <p class="dps-reminder__text">
+                            Baseado na sua frequência média, o próximo atendimento está previsto para 10/01/2026 (em 5 dias).
+                        </p>
+                        <div class="dps-reminder__meta">
+                            <span class="dps-reminder__interval">📈 Frequência média: 28 dias</span>
+                        </div>
+                        <a href="#" class="button button-primary dps-reminder__cta">📅 Agendar Agora</a>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Navegação por Pet (Tabs) -->
@@ -563,6 +796,11 @@
                     <p class="dps-pet-info-card__breed">Cachorro • Golden Retriever</p>
                     <span class="dps-pet-info-card__count">12 serviços realizados</span>
                 </div>
+            </div>
+
+            <!-- Botão Export PDF (Funcionalidade 3) -->
+            <div class="dps-pet-actions-bar">
+                <button class="button button-secondary">📄 Exportar Histórico (PDF)</button>
             </div>
 
             <div class="dps-timeline">

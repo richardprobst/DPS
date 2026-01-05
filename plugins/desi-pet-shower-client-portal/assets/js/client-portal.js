@@ -45,6 +45,7 @@
         handleReviewForm(); // Fase 5: Formulário de avaliação interna
         handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
         handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
+        handleExportPdf(); // Funcionalidade 3: Export PDF
     }
 
     /**
@@ -1669,6 +1670,55 @@ window.DPSSkeleton = (function() {
                 // Abre WhatsApp
                 var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message);
                 window.open(whatsappUrl, '_blank');
+            });
+        });
+    }
+
+    /**
+     * Gerencia botão "Exportar Histórico (PDF)"
+     * Funcionalidade 3: Export para PDF
+     */
+    function handleExportPdf() {
+        var exportButtons = document.querySelectorAll('.dps-btn-export-pdf');
+
+        if (exportButtons.length === 0) {
+            return;
+        }
+
+        exportButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var petId = this.getAttribute('data-pet-id');
+                var petName = this.getAttribute('data-pet-name');
+
+                // Valida que petId é um número
+                if (!petId || !/^\d+$/.test(petId)) {
+                    console.warn('Invalid pet ID for export');
+                    return;
+                }
+
+                // Obtém dados do portal
+                var clientId = '';
+                var nonce = '';
+
+                if (typeof dpsPortal !== 'undefined') {
+                    clientId = dpsPortal.clientId;
+                    nonce = dpsPortal.exportPdfNonce;
+                }
+
+                if (!clientId || !nonce) {
+                    console.error('Missing client ID or nonce for export');
+                    return;
+                }
+
+                // Monta URL para a página de impressão
+                var printUrl = dpsPortal.ajaxUrl + 
+                    '?action=dps_export_pet_history_pdf' +
+                    '&pet_id=' + encodeURIComponent(petId) +
+                    '&client_id=' + encodeURIComponent(clientId) +
+                    '&nonce=' + encodeURIComponent(nonce);
+
+                // Abre em nova janela (mantendo controles do browser para acessibilidade)
+                window.open(printUrl, '_blank', 'width=900,height=700');
             });
         });
     }
