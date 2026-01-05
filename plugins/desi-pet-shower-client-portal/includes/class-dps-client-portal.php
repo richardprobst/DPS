@@ -4975,6 +4975,7 @@ Equipe %4$s', 'dps-client-portal' ),
     /**
      * Renderiza timeline de serviços por pet.
      * Fase 4: Timeline de Serviços
+     * Revisão completa do layout: Janeiro 2026
      *
      * @since 2.4.0
      * @param int $client_id ID do cliente.
@@ -4982,22 +4983,49 @@ Equipe %4$s', 'dps-client-portal' ),
     private function render_pets_timeline( $client_id ) {
         $pet_repo = DPS_Pet_Repository::get_instance();
         $pets     = $pet_repo->get_pets_by_client( $client_id );
+        $renderer = DPS_Portal_Renderer::get_instance();
+
+        // Renderiza cabeçalho da aba com métricas globais
+        $renderer->render_pet_history_header( $client_id, $pets );
 
         if ( empty( $pets ) ) {
-            echo '<section class="dps-portal-section">';
-            echo '<div class="dps-empty-state">';
-            echo '<div class="dps-empty-state__icon">🐾</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhum pet cadastrado ainda.', 'dps-client-portal' ) . '</div>';
+            echo '<section class="dps-portal-section dps-portal-pet-history-empty">';
+            echo '<div class="dps-empty-state dps-empty-state--large">';
+            echo '<div class="dps-empty-state__illustration">🐾</div>';
+            echo '<h3 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado ainda', 'dps-client-portal' ) . '</h3>';
+            echo '<p class="dps-empty-state__message">' . esc_html__( 'Cadastre seus pets para acompanhar o histórico de serviços realizados.', 'dps-client-portal' ) . '</p>';
+            // CTA para contato
+            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet.', 'dps-client-portal' ) );
+            } else {
+                $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( 'Olá! Gostaria de cadastrar meu pet.' );
+            }
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action button button-primary">';
+            echo '💬 ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
+            echo '</a>';
             echo '</div>';
             echo '</section>';
             return;
         }
 
-        $renderer = DPS_Portal_Renderer::get_instance();
-
-        foreach ( $pets as $pet ) {
-            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10 );
+        // Renderiza navegação por abas quando há múltiplos pets
+        if ( count( $pets ) > 1 ) {
+            $renderer->render_pet_tabs_navigation( $pets );
         }
+
+        // Container principal com timelines dos pets
+        echo '<div class="dps-pet-timelines-container">';
+        
+        foreach ( $pets as $index => $pet ) {
+            $is_first = ( 0 === $index );
+            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10, $is_first, count( $pets ) > 1 );
+        }
+        
+        echo '</div>';
     }
 
     /**

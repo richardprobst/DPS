@@ -43,6 +43,8 @@
         initChatWidget();
         handleQuickActions(); // Fase 3: Quick Actions na aba Início
         handleReviewForm(); // Fase 5: Formulário de avaliação interna
+        handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
+        handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
     }
 
     /**
@@ -1571,6 +1573,91 @@ window.DPSSkeleton = (function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="dps-btn-icon">⏳</span><span class="dps-btn-text">Enviando...</span>';
             }
+        });
+    }
+
+    /**
+     * Gerencia navegação por tabs de pets na aba Histórico dos Pets
+     * Revisão de layout: Janeiro 2026
+     */
+    function handlePetHistoryTabs() {
+        var petTabs = document.querySelectorAll('.dps-pet-tab');
+        var petPanels = document.querySelectorAll('.dps-pet-timeline-panel');
+
+        if (petTabs.length === 0 || petPanels.length === 0) {
+            return;
+        }
+
+        petTabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var targetPetId = this.getAttribute('data-pet-id');
+
+                // Remove classe ativa de todas as tabs
+                petTabs.forEach(function(t) {
+                    t.classList.remove('dps-pet-tab--active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+
+                // Adiciona classe ativa à tab clicada
+                this.classList.add('dps-pet-tab--active');
+                this.setAttribute('aria-selected', 'true');
+
+                // Esconde todos os painéis
+                petPanels.forEach(function(panel) {
+                    panel.classList.add('dps-pet-timeline-panel--hidden');
+                    panel.setAttribute('aria-hidden', 'true');
+                });
+
+                // Mostra o painel correspondente
+                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + targetPetId + '"]');
+                if (targetPanel) {
+                    targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
+                    targetPanel.setAttribute('aria-hidden', 'false');
+
+                    // Scroll suave para o painel
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+    }
+
+    /**
+     * Gerencia botão "Repetir Serviço" para abrir WhatsApp
+     * Revisão de layout: Janeiro 2026
+     */
+    function handleRepeatService() {
+        // Handler para botões que não são links diretos (fallback)
+        var repeatButtons = document.querySelectorAll('button.dps-btn-repeat-service');
+
+        repeatButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var services = this.getAttribute('data-services');
+                var petId = this.getAttribute('data-pet-id');
+                
+                // Tenta parsear serviços
+                var servicesText = 'serviços';
+                try {
+                    var servicesArray = JSON.parse(services);
+                    if (Array.isArray(servicesArray) && servicesArray.length > 0) {
+                        servicesText = servicesArray.join(', ');
+                    }
+                } catch (e) {
+                    // Mantém texto genérico
+                }
+
+                // Monta mensagem
+                var message = 'Olá! Gostaria de agendar novamente os serviços: ' + servicesText + ' para meu pet.';
+                
+                // Obtém número do WhatsApp (usa valor padrão se não encontrado)
+                var whatsappNumber = '5515991606299'; // Valor padrão
+                if (typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber) {
+                    whatsappNumber = dpsPortal.whatsappNumber;
+                }
+
+                // Abre WhatsApp
+                var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message);
+                window.open(whatsappUrl, '_blank');
+            });
         });
     }
 })();

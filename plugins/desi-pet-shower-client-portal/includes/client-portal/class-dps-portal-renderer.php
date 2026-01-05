@@ -700,28 +700,227 @@ class DPS_Portal_Renderer {
     }
 
     /**
+     * Renderiza o cabeçalho da aba Histórico dos Pets com métricas.
+     * Revisão de layout: Janeiro 2026
+     *
+     * @since 2.5.0
+     * @param int   $client_id ID do cliente.
+     * @param array $pets      Array de posts de pets.
+     */
+    public function render_pet_history_header( $client_id, $pets ) {
+        // Coleta métricas globais de todos os pets
+        $total_services    = 0;
+        $last_service_date = null;
+        $services_count    = [];
+        $pet_history       = DPS_Portal_Pet_History::get_instance();
+
+        foreach ( $pets as $pet ) {
+            $history = $pet_history->get_pet_service_history( $pet->ID, -1 );
+            $total_services += count( $history );
+
+            foreach ( $history as $service ) {
+                // Conta serviços por tipo
+                if ( ! empty( $service['services_array'] ) ) {
+                    foreach ( $service['services_array'] as $svc ) {
+                        if ( ! isset( $services_count[ $svc ] ) ) {
+                            $services_count[ $svc ] = 0;
+                        }
+                        $services_count[ $svc ]++;
+                    }
+                }
+                // Última data de serviço
+                if ( ! empty( $service['date'] ) ) {
+                    $service_date = strtotime( $service['date'] );
+                    if ( null === $last_service_date || $service_date > $last_service_date ) {
+                        $last_service_date = $service_date;
+                    }
+                }
+            }
+        }
+
+        // Determina serviço mais frequente
+        $most_frequent_service = '';
+        if ( ! empty( $services_count ) ) {
+            arsort( $services_count );
+            $most_frequent_service = array_key_first( $services_count );
+        }
+
+        // Renderiza cabeçalho
+        echo '<section class="dps-portal-section dps-portal-pet-history-header">';
+        
+        // Título e subtítulo
+        echo '<div class="dps-pet-history-header">';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📋</span>';
+        echo esc_html__( 'Histórico dos Pets', 'dps-client-portal' );
+        echo '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Acompanhe todos os serviços realizados em seus pets ao longo do tempo.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+
+        // Cards de métricas
+        echo '<div class="dps-metrics-grid dps-metrics-grid--pet-history">';
+
+        // Card: Total de Serviços
+        echo '<div class="dps-metric-card dps-metric-card--primary">';
+        echo '<div class="dps-metric-card__icon">✂️</div>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( $total_services ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Serviço Realizado', 'Serviços Realizados', $total_services, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Pets Atendidos
+        echo '<div class="dps-metric-card">';
+        echo '<div class="dps-metric-card__icon">🐾</div>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( count( $pets ) ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Pet Cadastrado', 'Pets Cadastrados', count( $pets ), 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Último Atendimento
+        if ( $last_service_date ) {
+            $days_since = floor( ( time() - $last_service_date ) / DAY_IN_SECONDS );
+            $last_date_formatted = date_i18n( 'd/m/Y', $last_service_date );
+            
+            echo '<div class="dps-metric-card">';
+            echo '<div class="dps-metric-card__icon">📅</div>';
+            echo '<div class="dps-metric-card__content">';
+            echo '<span class="dps-metric-card__value">' . esc_html( $last_date_formatted ) . '</span>';
+            echo '<span class="dps-metric-card__label">';
+            if ( 0 === $days_since ) {
+                echo esc_html__( 'Hoje', 'dps-client-portal' );
+            } elseif ( 1 === $days_since ) {
+                echo esc_html__( 'Ontem', 'dps-client-portal' );
+            } else {
+                /* translators: %d: number of days */
+                echo esc_html( sprintf( __( 'Há %d dias', 'dps-client-portal' ), $days_since ) );
+            }
+            echo '</span>';
+            echo '</div>';
+            echo '</div>';
+        }
+
+        // Card: Serviço Mais Frequente
+        if ( $most_frequent_service ) {
+            echo '<div class="dps-metric-card dps-metric-card--highlight">';
+            echo '<div class="dps-metric-card__icon">⭐</div>';
+            echo '<div class="dps-metric-card__content">';
+            echo '<span class="dps-metric-card__value dps-metric-card__value--text">' . esc_html( $most_frequent_service ) . '</span>';
+            echo '<span class="dps-metric-card__label">' . esc_html__( 'Serviço Favorito', 'dps-client-portal' ) . '</span>';
+            echo '</div>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // .dps-metrics-grid
+        
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza navegação por abas para múltiplos pets.
+     * Revisão de layout: Janeiro 2026
+     *
+     * @since 2.5.0
+     * @param array $pets Array de posts de pets.
+     */
+    public function render_pet_tabs_navigation( $pets ) {
+        echo '<div class="dps-pet-tabs-nav">';
+        echo '<div class="dps-pet-tabs-nav__label">' . esc_html__( 'Selecione o pet:', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-pet-tabs-nav__tabs" role="tablist">';
+
+        foreach ( $pets as $index => $pet ) {
+            $pet_id    = $pet->ID;
+            $pet_name  = get_the_title( $pet_id );
+            $photo_id  = get_post_meta( $pet_id, 'pet_photo_id', true );
+            $photo_url = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
+            $is_active = ( 0 === $index ) ? ' dps-pet-tab--active' : '';
+
+            echo '<button type="button" class="dps-pet-tab' . esc_attr( $is_active ) . '" role="tab" aria-selected="' . ( 0 === $index ? 'true' : 'false' ) . '" data-pet-id="' . esc_attr( $pet_id ) . '">';
+            
+            if ( $photo_url ) {
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="" class="dps-pet-tab__photo" />';
+            } else {
+                echo '<span class="dps-pet-tab__icon">🐾</span>';
+            }
+            
+            echo '<span class="dps-pet-tab__name">' . esc_html( $pet_name ) . '</span>';
+            echo '</button>';
+        }
+
+        echo '</div>'; // .dps-pet-tabs-nav__tabs
+        echo '</div>'; // .dps-pet-tabs-nav
+    }
+
+    /**
      * Renderiza linha do tempo de serviços para um pet específico.
      * Fase 4: Timeline de Serviços
+     * Revisão de layout: Janeiro 2026
      *
      * @since 2.4.0
-     * @param int    $pet_id    ID do pet.
-     * @param int    $client_id ID do cliente (para validação).
-     * @param int    $limit     Limite de serviços (padrão: 10).
+     * @param int  $pet_id       ID do pet.
+     * @param int  $client_id    ID do cliente (para validação).
+     * @param int  $limit        Limite de serviços (padrão: 10).
+     * @param bool $is_active    Se esta timeline está ativa/visível (padrão: true).
+     * @param bool $has_tabs     Se há navegação por tabs (para atributos ARIA).
      */
-    public function render_pet_service_timeline( $pet_id, $client_id, $limit = 10 ) {
+    public function render_pet_service_timeline( $pet_id, $client_id, $limit = 10, $is_active = true, $has_tabs = false ) {
         $pet_history = DPS_Portal_Pet_History::get_instance();
         $services    = $pet_history->get_pet_service_history( $pet_id, $limit );
         $pet_name    = get_the_title( $pet_id );
+        $pet_photo   = get_post_meta( $pet_id, 'pet_photo_id', true );
+        $pet_species = get_post_meta( $pet_id, 'pet_species', true );
+        $pet_breed   = get_post_meta( $pet_id, 'pet_breed', true );
 
-        echo '<section class="dps-portal-section dps-portal-pet-timeline">';
-        echo '<h3 class="dps-timeline-title">';
-        echo '🐾 ' . esc_html( sprintf( __( 'Histórico de Serviços - %s', 'dps-client-portal' ), $pet_name ) );
-        echo '</h3>';
+        // Classes e atributos para tab panel
+        $panel_class = 'dps-portal-section dps-portal-pet-timeline dps-pet-timeline-panel';
+        if ( ! $is_active && $has_tabs ) {
+            $panel_class .= ' dps-pet-timeline-panel--hidden';
+        }
+
+        echo '<section class="' . esc_attr( $panel_class ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" role="' . ( $has_tabs ? 'tabpanel' : 'region' ) . '" aria-hidden="' . ( $is_active ? 'false' : 'true' ) . '">';
+        
+        // Card de info do pet
+        echo '<div class="dps-pet-info-card">';
+        echo '<div class="dps-pet-info-card__avatar">';
+        if ( $pet_photo ) {
+            $photo_url = wp_get_attachment_image_url( $pet_photo, 'thumbnail' );
+            if ( $photo_url ) {
+                echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" />';
+            } else {
+                echo '<span class="dps-pet-info-card__placeholder">🐾</span>';
+            }
+        } else {
+            echo '<span class="dps-pet-info-card__placeholder">🐾</span>';
+        }
+        echo '</div>';
+        echo '<div class="dps-pet-info-card__details">';
+        echo '<h3 class="dps-pet-info-card__name">' . esc_html( $pet_name ) . '</h3>';
+        if ( $pet_species || $pet_breed ) {
+            echo '<p class="dps-pet-info-card__breed">';
+            echo esc_html( trim( $pet_species . ' ' . ( $pet_breed ? '• ' . $pet_breed : '' ) ) );
+            echo '</p>';
+        }
+        echo '<span class="dps-pet-info-card__count">';
+        /* translators: %d: number of services */
+        echo esc_html( sprintf( _n( '%d serviço realizado', '%d serviços realizados', count( $services ), 'dps-client-portal' ), count( $services ) ) );
+        echo '</span>';
+        echo '</div>';
+        echo '</div>'; // .dps-pet-info-card
 
         if ( empty( $services ) ) {
             $this->render_pet_timeline_empty_state( $pet_name );
         } else {
             $this->render_timeline_items( $services, $client_id, $pet_id );
+            
+            // Botão "Ver mais" se há mais serviços
+            if ( count( $services ) === $limit ) {
+                echo '<div class="dps-timeline-load-more">';
+                echo '<button type="button" class="button button-secondary dps-btn-load-more-services" data-pet-id="' . esc_attr( $pet_id ) . '" data-offset="' . esc_attr( $limit ) . '">';
+                echo '📜 ' . esc_html__( 'Ver mais serviços', 'dps-client-portal' );
+                echo '</button>';
+                echo '</div>';
+            }
         }
 
         echo '</section>';
@@ -780,6 +979,7 @@ class DPS_Portal_Renderer {
 
     /**
      * Renderiza um item individual da timeline.
+     * Revisão de layout: Janeiro 2026
      *
      * @param array $service   Dados do serviço.
      * @param int   $client_id ID do cliente.
@@ -787,42 +987,97 @@ class DPS_Portal_Renderer {
      */
     private function render_timeline_item( $service, $client_id, $pet_id ) {
         $date_formatted = date_i18n( 'd/m/Y', strtotime( $service['date'] ) );
-        $time_info      = ! empty( $service['time'] ) ? ' - ' . $service['time'] : '';
+        $time_info      = ! empty( $service['time'] ) ? $service['time'] : '';
+        $status         = ! empty( $service['status'] ) ? $service['status'] : 'finalizado';
         
+        // Determina badge de status
+        $status_class = 'dps-status-badge--completed';
+        $status_label = __( 'Concluído', 'dps-client-portal' );
+        if ( strpos( strtolower( $status ), 'pago' ) !== false ) {
+            $status_class = 'dps-status-badge--paid';
+            $status_label = __( 'Pago', 'dps-client-portal' );
+        }
+
+        // Busca valor do agendamento se disponível
+        $appointment_value = get_post_meta( $service['appointment_id'], 'appointment_value', true );
+
         echo '<div class="dps-timeline-item">';
         echo '<div class="dps-timeline-marker"></div>';
         echo '<div class="dps-timeline-content">';
         
-        // Data em destaque
+        // Header com data e status
+        echo '<div class="dps-timeline-header">';
         echo '<div class="dps-timeline-date">';
-        echo esc_html( $date_formatted . $time_info );
+        echo '<span class="dps-timeline-date__day">' . esc_html( $date_formatted ) . '</span>';
+        if ( $time_info ) {
+            echo '<span class="dps-timeline-date__time">' . esc_html( $time_info ) . '</span>';
+        }
+        echo '</div>';
+        echo '<span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( $status_label ) . '</span>';
         echo '</div>';
         
         // Tipo de serviço
         echo '<div class="dps-timeline-service">';
-        echo '✂️ ' . esc_html( $service['services'] );
+        echo '<span class="dps-timeline-service__icon">✂️</span>';
+        echo '<span class="dps-timeline-service__text">' . esc_html( $service['services'] ) . '</span>';
         echo '</div>';
         
-        // Observações (se houver)
+        // Meta info row (profissional e valor)
+        $has_meta = ! empty( $service['professional'] ) || ! empty( $appointment_value );
+        if ( $has_meta ) {
+            echo '<div class="dps-timeline-meta">';
+            
+            // Profissional
+            if ( ! empty( $service['professional'] ) ) {
+                echo '<span class="dps-timeline-meta__item">';
+                echo '<span class="dps-timeline-meta__icon">👤</span>';
+                echo esc_html( $service['professional'] );
+                echo '</span>';
+            }
+            
+            // Valor
+            if ( ! empty( $appointment_value ) && is_numeric( $appointment_value ) && (float) $appointment_value > 0 ) {
+                echo '<span class="dps-timeline-meta__item dps-timeline-meta__item--value">';
+                echo '<span class="dps-timeline-meta__icon">💰</span>';
+                echo 'R$ ' . esc_html( number_format( (float) $appointment_value, 2, ',', '.' ) );
+                echo '</span>';
+            }
+            
+            echo '</div>';
+        }
+        
+        // Observações (se houver) - com toggle para expandir
         if ( ! empty( $service['observations'] ) ) {
             echo '<div class="dps-timeline-notes">';
-            echo '<strong>' . esc_html__( 'Observações:', 'dps-client-portal' ) . '</strong> ';
-            echo esc_html( $service['observations'] );
+            echo '<details class="dps-timeline-notes__details">';
+            echo '<summary class="dps-timeline-notes__summary">';
+            echo '<span class="dps-timeline-notes__icon">📝</span>';
+            echo esc_html__( 'Observações', 'dps-client-portal' );
+            echo '</summary>';
+            echo '<p class="dps-timeline-notes__text">' . esc_html( $service['observations'] ) . '</p>';
+            echo '</details>';
             echo '</div>';
         }
         
-        // Profissional (se disponível)
-        if ( ! empty( $service['professional'] ) ) {
-            echo '<div class="dps-timeline-professional">';
-            echo '👤 ' . esc_html( $service['professional'] );
-            echo '</div>';
-        }
+        // Ações
+        echo '<div class="dps-timeline-actions">';
         
         // Botão "Repetir este serviço"
-        echo '<div class="dps-timeline-actions">';
-        echo '<button class="button button-secondary dps-btn-repeat-service" data-appointment-id="' . esc_attr( $service['appointment_id'] ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" data-services="' . esc_attr( wp_json_encode( $service['services_array'] ) ) . '">';
-        echo '🔄 ' . esc_html__( 'Repetir este Serviço', 'dps-client-portal' );
-        echo '</button>';
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_message = sprintf(
+                __( 'Olá! Gostaria de agendar novamente os serviços: %s para meu pet.', 'dps-client-portal' ),
+                $service['services']
+            );
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="button button-primary dps-btn-repeat-service">';
+            echo '🔄 ' . esc_html__( 'Repetir Serviço', 'dps-client-portal' );
+            echo '</a>';
+        } else {
+            echo '<button class="button button-secondary dps-btn-repeat-service" data-appointment-id="' . esc_attr( $service['appointment_id'] ) . '" data-pet-id="' . esc_attr( $pet_id ) . '" data-services="' . esc_attr( wp_json_encode( $service['services_array'] ) ) . '">';
+            echo '🔄 ' . esc_html__( 'Repetir Serviço', 'dps-client-portal' );
+            echo '</button>';
+        }
+        
         echo '</div>';
         
         echo '</div>'; // .dps-timeline-content

@@ -3469,29 +3469,283 @@ html {
 }
 
 /* ========================================
-   FASE 4: TIMELINE DE SERVIÇOS E QUICK ACTIONS
+   ABA HISTÓRICO DOS PETS - Layout Moderno (Revisão Jan/2026)
    ======================================== */
 
-/* Timeline de Serviços */
+/* === Cabeçalho da Aba === */
+.dps-portal-pet-history-header {
+    margin-bottom: 24px;
+    padding-bottom: 0;
+}
+
+.dps-pet-history-header {
+    margin-bottom: 24px;
+}
+
+.dps-pet-history-header .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 8px 0;
+}
+
+.dps-pet-history-header .dps-section-title__icon {
+    font-size: 28px;
+}
+
+.dps-pet-history-header .dps-section-subtitle {
+    font-size: 15px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+/* === Métricas do Histórico === */
+.dps-metrics-grid--pet-history {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 992px) {
+    .dps-metrics-grid--pet-history {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-metrics-grid--pet-history {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+.dps-metric-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-metric-card:hover {
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-metric-card--primary {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-color: #bae6fd;
+}
+
+.dps-metric-card--highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #fcd34d;
+}
+
+.dps-metric-card__icon {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-metric-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-metric-card__value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    line-height: 1.1;
+}
+
+.dps-metric-card__value--text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.dps-metric-card__label {
+    font-size: 13px;
+    color: var(--dps-gray-500);
+    line-height: 1.3;
+}
+
+/* === Navegação por Pet (Tabs) === */
+.dps-pet-tabs-nav {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+}
+
+.dps-pet-tabs-nav__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-600);
+    margin-bottom: 12px;
+}
+
+.dps-pet-tabs-nav__tabs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dps-pet-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--dps-gray-50);
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-pet-tab:hover {
+    background: var(--dps-gray-100);
+}
+
+.dps-pet-tab--active {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-color: var(--dps-primary);
+}
+
+.dps-pet-tab__photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--dps-white);
+    box-shadow: var(--dps-shadow-sm);
+}
+
+.dps-pet-tab__icon {
+    font-size: 24px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dps-white);
+    border-radius: 50%;
+}
+
+.dps-pet-tab__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+}
+
+.dps-pet-tab--active .dps-pet-tab__name {
+    color: var(--dps-primary-active);
+}
+
+/* === Card de Informações do Pet === */
+.dps-pet-info-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.dps-pet-info-card__avatar {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--dps-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--dps-white);
+    box-shadow: var(--dps-shadow);
+}
+
+.dps-pet-info-card__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dps-pet-info-card__placeholder {
+    font-size: 32px;
+}
+
+.dps-pet-info-card__details {
+    flex: 1;
+}
+
+.dps-pet-info-card__name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+    margin: 0 0 4px 0;
+}
+
+.dps-pet-info-card__breed {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0 0 8px 0;
+}
+
+.dps-pet-info-card__count {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: var(--dps-success-bg);
+    color: #047857;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* === Timeline de Serviços (Atualizado) === */
+
+.dps-pet-timeline-panel--hidden {
+    display: none;
+}
+
+.dps-pet-timelines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
 .dps-timeline {
     position: relative;
-    padding: 20px 0;
+    padding: 16px 0;
 }
 
 .dps-timeline-item {
     position: relative;
-    padding-left: 40px;
-    margin-bottom: 30px;
+    padding-left: 44px;
+    margin-bottom: 24px;
 }
 
 .dps-timeline-item::before {
     content: '';
     position: absolute;
-    left: 12px;
-    top: 30px;
-    bottom: -30px;
+    left: 14px;
+    top: 32px;
+    bottom: -24px;
     width: 2px;
-    background-color: var(--dps-gray-200);
+    background: linear-gradient(to bottom, var(--dps-primary), var(--dps-gray-200));
 }
 
 .dps-timeline-item:last-child::before {
@@ -3501,42 +3755,163 @@ html {
 .dps-timeline-marker {
     position: absolute;
     left: 0;
-    top: 5px;
-    width: 24px;
-    height: 24px;
-    background-color: var(--dps-primary);
+    top: 6px;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
     border-radius: 50%;
     border: 3px solid var(--dps-white);
-    box-shadow: 0 0 0 2px var(--dps-gray-200);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-timeline-marker::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .dps-timeline-content {
     background-color: var(--dps-white);
-    border: 1px solid var(--dps-border-color);
-    border-radius: 8px;
-    padding: 16px 20px;
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dps-timeline-content:hover {
+    box-shadow: var(--dps-shadow-md);
+    transform: translateX(4px);
+}
+
+/* Timeline Header (data + status) */
+.dps-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .dps-timeline-date {
-    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-timeline-date__day {
+    font-size: 15px;
     font-weight: 600;
     color: var(--dps-gray-700);
-    margin-bottom: 8px;
 }
 
+.dps-timeline-date__time {
+    font-size: 13px;
+    color: var(--dps-gray-500);
+}
+
+/* Timeline Service */
 .dps-timeline-service {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 16px;
-    font-weight: 500;
-    color: var(--dps-gray-900);
-    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--dps-gray-100);
 }
 
-.dps-timeline-notes {
+.dps-timeline-service__icon {
+    font-size: 18px;
+}
+
+.dps-timeline-service__text {
+    flex: 1;
+}
+
+/* Timeline Meta (profissional, valor) */
+.dps-timeline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.dps-timeline-meta__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 14px;
     color: var(--dps-gray-600);
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-timeline-meta__icon {
+    font-size: 14px;
+}
+
+.dps-timeline-meta__item--value {
+    font-weight: 600;
+    color: var(--dps-success);
+}
+
+/* Timeline Notes (observações com details/summary) */
+.dps-timeline-notes {
+    margin-bottom: 12px;
+}
+
+.dps-timeline-notes__details {
+    background: var(--dps-gray-50);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dps-timeline-notes__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dps-gray-600);
+    transition: background 0.2s ease;
+    list-style: none;
+}
+
+.dps-timeline-notes__summary::-webkit-details-marker {
+    display: none;
+}
+
+.dps-timeline-notes__summary::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+
+.dps-timeline-notes__details[open] .dps-timeline-notes__summary::after {
+    transform: rotate(180deg);
+}
+
+.dps-timeline-notes__summary:hover {
+    background: var(--dps-gray-100);
+}
+
+.dps-timeline-notes__icon {
+    font-size: 14px;
+}
+
+.dps-timeline-notes__text {
+    padding: 0 14px 14px 14px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    line-height: 1.5;
 }
 
 .dps-timeline-professional {
@@ -3545,15 +3920,162 @@ html {
     margin-top: 8px;
 }
 
+/* Timeline Actions */
 .dps-timeline-actions {
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid var(--dps-gray-100);
+    display: flex;
+    gap: 12px;
 }
 
 .dps-btn-repeat-service {
     font-size: 14px;
-    padding: 8px 16px;
+    padding: 10px 20px;
+    flex: 1;
+    justify-content: center;
+}
+
+/* Timeline Load More */
+.dps-timeline-load-more {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.dps-btn-load-more-services {
+    padding: 12px 24px;
+}
+
+/* === Estado Vazio Grande (Empty State) === */
+.dps-empty-state--large {
+    padding: 60px 40px;
+    text-align: center;
+}
+
+.dps-empty-state__illustration {
+    font-size: 80px;
+    margin-bottom: 24px;
+    opacity: 0.7;
+}
+
+.dps-portal-pet-history-empty .dps-empty-state__title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 12px 0;
+}
+
+.dps-portal-pet-history-empty .dps-empty-state__message {
+    font-size: 16px;
+    color: var(--dps-gray-500);
+    margin-bottom: 24px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* === Responsividade Mobile === */
+@media (max-width: 768px) {
+    .dps-pet-history-header .dps-section-title {
+        font-size: 20px;
+    }
+
+    .dps-pet-tabs-nav {
+        padding: 16px;
+    }
+
+    .dps-pet-tabs-nav__tabs {
+        gap: 8px;
+    }
+
+    .dps-pet-tab {
+        padding: 10px 16px;
+    }
+
+    .dps-pet-tab__photo,
+    .dps-pet-tab__icon {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+    }
+
+    .dps-pet-tab__name {
+        font-size: 14px;
+    }
+
+    .dps-pet-info-card {
+        padding: 16px;
+    }
+
+    .dps-pet-info-card__avatar {
+        width: 56px;
+        height: 56px;
+    }
+
+    .dps-pet-info-card__name {
+        font-size: 18px;
+    }
+
+    .dps-timeline-item {
+        padding-left: 36px;
+    }
+
+    .dps-timeline-marker {
+        width: 24px;
+        height: 24px;
+    }
+
+    .dps-timeline-marker::after {
+        font-size: 10px;
+    }
+
+    .dps-timeline-content {
+        padding: 16px;
+    }
+
+    .dps-timeline-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dps-timeline-actions {
+        flex-direction: column;
+    }
+
+    .dps-btn-repeat-service {
+        width: 100%;
+    }
+
+    .dps-metric-card {
+        padding: 16px;
+    }
+
+    .dps-metric-card__value {
+        font-size: 24px;
+    }
+
+    .dps-metric-card__icon {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-pet-tabs-nav__tabs {
+        flex-direction: column;
+    }
+
+    .dps-pet-tab {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dps-empty-state--large {
+        padding: 40px 20px;
+    }
+
+    .dps-empty-state__illustration {
+        font-size: 60px;
+    }
 }
 
 /* Ações Rápidas do Agendamento */
