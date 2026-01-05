@@ -207,7 +207,13 @@
 }
 
 /* ==========================================================================
-   3. Cards de Resumo (deprecated - mantido para retrocompatibilidade)
+   3. Cards de Resumo (deprecated)
+   
+   NOTA DE MIGRAÇÃO:
+   - Estas classes foram substituídas por .dps-surface e .dps-inline-stats a partir da v1.2.0
+   - Mantidas apenas para retrocompatibilidade com customizações de temas
+   - Remoção prevista para v2.0.0
+   - Use .dps-surface--info com .dps-inline-stats para novos desenvolvimentos
    ========================================================================== */
 
 .dps-stock-summary {
