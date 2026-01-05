@@ -3906,3 +3906,92 @@ html {
     white-space: nowrap;
     border: 0;
 }
+
+/* ========================================
+   RESPONSIVIDADE - Aba Início
+   Adaptações para dispositivos móveis
+   ======================================== */
+
+@media (max-width: 767px) {
+    /* Grid empilhado em mobile */
+    .dps-inicio-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Overview cards menores */
+    .dps-overview-card {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .dps-overview-card__icon {
+        font-size: 24px;
+    }
+    
+    .dps-overview-card__value {
+        font-size: 20px;
+    }
+    
+    .dps-overview-card__label {
+        font-size: 12px;
+    }
+    
+    /* Section header responsivo */
+    .dps-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Appointment card responsivo */
+    .dps-appointment-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+    
+    .dps-appointment-card__date {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+        height: auto;
+        padding: 20px;
+    }
+    
+    .dps-appointment-card__details {
+        align-items: center;
+    }
+    
+    .dps-appointment-card__actions {
+        justify-content: center;
+    }
+    
+    .dps-appointment-card__status {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Overview cards ainda menores */
+    .dps-overview-cards {
+        gap: 8px;
+    }
+    
+    .dps-overview-card__label {
+        font-size: 11px;
+    }
+    
+    /* Pets cards empilhados */
+    .dps-pets-cards {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .dps-pet-card {
+        padding: 10px;
+    }
+    
+    .dps-pet-card__photo {
+        width: 48px;
+        height: 48px;
+    }
+}

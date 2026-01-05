@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Cliente - Aba Início (Demo)</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Cores Primárias */
+            --dps-primary: #0ea5e9;
+            --dps-primary-hover: #0284c7;
+            --dps-primary-active: #0369a1;
+            
+            /* Cores de Estado */
+            --dps-success: #10b981;
+            --dps-success-bg: #d1fae5;
+            --dps-warning: #f59e0b;
+            --dps-warning-bg: #fef3c7;
+            --dps-warning-text: #92400e;
+            --dps-danger: #ef4444;
+            --dps-danger-bg: #fee2e2;
+            --dps-info: #3b82f6;
+            
+            /* Cores Neutras */
+            --dps-white: #ffffff;
+            --dps-gray-50: #f9fafb;
+            --dps-gray-100: #f3f4f6;
+            --dps-gray-200: #e5e7eb;
+            --dps-gray-300: #d1d5db;
+            --dps-gray-400: #9ca3af;
+            --dps-gray-500: #6b7280;
+            --dps-gray-600: #4b5563;
+            --dps-gray-700: #374151;
+            --dps-gray-800: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #374151;
+            background: #f3f4f6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--dps-gray-800);
+        }
+
+        .subtitle {
+            color: var(--dps-gray-500);
+            margin-bottom: 24px;
+        }
+
+        /* ========================================
+           OVERVIEW CARDS - Métricas Rápidas
+           ======================================== */
+        .dps-portal-overview {
+            margin-bottom: 24px;
+        }
+
+        .dps-overview-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .dps-overview-cards {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+            }
+        }
+
+        .dps-overview-card {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .dps-overview-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .dps-overview-card__icon {
+            font-size: 28px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .dps-overview-card__content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .dps-overview-card__value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dps-gray-800);
+            line-height: 1.1;
+        }
+
+        .dps-overview-card__label {
+            font-size: 13px;
+            color: var(--dps-gray-500);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Variantes de cor para os cards */
+        .dps-overview-card--appointments { border-left: 4px solid var(--dps-primary); }
+        .dps-overview-card--pets { border-left: 4px solid #8b5cf6; }
+        .dps-overview-card--messages { border-left: 4px solid var(--dps-info); }
+        .dps-overview-card--loyalty { border-left: 4px solid #f59e0b; }
+
+        .dps-overview-card--messages.dps-overview-card--has-badge {
+            border-left-color: var(--dps-danger);
+            background: linear-gradient(to right, var(--dps-danger-bg) 0%, var(--dps-white) 50%);
+        }
+
+        /* ========================================
+           QUICK ACTIONS - Ações Rápidas
+           ======================================== */
+        .dps-portal-quick-actions {
+            margin-bottom: 24px;
+        }
+
+        .dps-quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .dps-quick-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dps-quick-action:hover {
+            background: var(--dps-gray-50);
+            border-color: var(--dps-gray-300);
+            color: var(--dps-gray-800);
+            transform: translateY(-1px);
+        }
+
+        .dps-quick-action--primary {
+            background: linear-gradient(135deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+        }
+
+        .dps-quick-action--primary:hover {
+            background: linear-gradient(135deg, var(--dps-primary-hover) 0%, var(--dps-primary-active) 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+        }
+
+        .dps-quick-action--chat {
+            border-color: var(--dps-primary);
+            color: var(--dps-primary);
+        }
+
+        .dps-quick-action--chat:hover {
+            background: var(--dps-primary);
+            color: #fff;
+        }
+
+        /* ========================================
+           GRID DA ABA INÍCIO
+           ======================================== */
+        .dps-inicio-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .dps-inicio-grid {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .dps-inicio-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ========================================
+           SEÇÕES DO PORTAL
+           ======================================== */
+        .dps-portal-section {
+            background: #fff;
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .dps-portal-section h2 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        /* Seção próximo agendamento */
+        .dps-portal-next {
+            border-color: #0ea5e9;
+            border-width: 2px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f0f9ff 100%);
+        }
+
+        /* ========================================
+           APPOINTMENT CARD
+           ======================================== */
+        .dps-appointment-card {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+        }
+
+        .dps-appointment-card__date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            padding: 16px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #fff;
+            border-radius: 12px;
+        }
+
+        .dps-appointment-card__day {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .dps-appointment-card__month {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .dps-appointment-card__weekday {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .dps-appointment-card__details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .dps-appointment-card__badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            width: fit-content;
+        }
+
+        .dps-appointment-card__badge--today {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .dps-appointment-card__badge--tomorrow {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .dps-appointment-card__time {
+            font-weight: 600;
+            color: var(--dps-gray-800);
+            font-size: 17px;
+        }
+
+        .dps-appointment-card__pet,
+        .dps-appointment-card__services {
+            color: var(--dps-gray-700);
+        }
+
+        .dps-appointment-card__status {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--dps-success-bg);
+            color: #047857;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .dps-appointment-card__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--dps-gray-200);
+        }
+
+        .dps-appointment-card__action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 6px;
+            color: var(--dps-gray-700);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .dps-appointment-card__action-btn:hover {
+            background: var(--dps-gray-50);
+            border-color: var(--dps-primary);
+            color: var(--dps-primary);
+        }
+
+        /* ========================================
+           PETS SUMMARY
+           ======================================== */
+        .dps-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .dps-section-header h2 {
+            margin: 0;
+        }
+
+        .dps-link-button {
+            background: none;
+            border: none;
+            color: var(--dps-primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .dps-pets-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .dps-pet-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--dps-gray-50);
+            border: 1px solid var(--dps-gray-100);
+            border-radius: 10px;
+        }
+
+        .dps-pet-card:hover {
+            background: var(--dps-white);
+            border-color: var(--dps-gray-200);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .dps-pet-card__photo {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--dps-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .dps-pet-card__info {
+            flex: 1;
+        }
+
+        .dps-pet-card__name {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-pet-card__breed {
+            font-size: 12px;
+            color: var(--dps-gray-500);
+        }
+
+        .dps-pet-card__last-service {
+            font-size: 11px;
+            color: var(--dps-gray-400);
+        }
+
+        /* ========================================
+           FINANCIAL SUMMARY
+           ======================================== */
+        .dps-financial-summary {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #d1fae5 0%, #ffffff 100%);
+            border: 2px solid var(--dps-success);
+            border-radius: 12px;
+        }
+
+        .dps-financial-summary__icon {
+            font-size: 48px;
+        }
+
+        .dps-financial-summary__content {
+            flex: 1;
+        }
+
+        .dps-financial-summary__title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-financial-summary__message {
+            color: var(--dps-gray-600);
+        }
+
+        /* ========================================
+           SUGGESTION CARDS
+           ======================================== */
+        .dps-suggestion-card {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--dps-gray-50);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .dps-suggestion-card__icon {
+            font-size: 32px;
+        }
+
+        .dps-suggestion-card__content {
+            flex: 1;
+        }
+
+        .dps-suggestion-card__message {
+            color: var(--dps-gray-700);
+            margin-bottom: 8px;
+        }
+
+        .dps-suggestion-card__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--dps-primary);
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ========================================
+           REFERRAL CARD
+           ======================================== */
+        .dps-referral-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .dps-referral-card__code {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f59e0b;
+            font-family: monospace;
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .dps-appointment-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .dps-appointment-card__details {
+                align-items: center;
+            }
+            .dps-quick-actions {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .dps-quick-action {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐾 Portal do Cliente - Aba Início</h1>
+        <p class="subtitle">Demonstração do novo layout modernizado</p>
+
+        <!-- Overview Cards -->
+        <section class="dps-portal-overview">
+            <h2 class="sr-only">Resumo Rápido</h2>
+            <div class="dps-overview-cards">
+                <div class="dps-overview-card dps-overview-card--appointments">
+                    <div class="dps-overview-card__icon">📅</div>
+                    <div class="dps-overview-card__content">
+                        <span class="dps-overview-card__value">2</span>
+                        <span class="dps-overview-card__label">Agendamentos</span>
+                    </div>
+                </div>
+                <div class="dps-overview-card dps-overview-card--pets">
+                    <div class="dps-overview-card__icon">🐾</div>
+                    <div class="dps-overview-card__content">
+                        <span class="dps-overview-card__value">3</span>
+                        <span class="dps-overview-card__label">Pets</span>
+                    </div>
+                </div>
+                <div class="dps-overview-card dps-overview-card--messages dps-overview-card--has-badge">
+                    <div class="dps-overview-card__icon">💬</div>
+                    <div class="dps-overview-card__content">
+                        <span class="dps-overview-card__value">1</span>
+                        <span class="dps-overview-card__label">Nova Mensagem</span>
+                    </div>
+                </div>
+                <div class="dps-overview-card dps-overview-card--loyalty">
+                    <div class="dps-overview-card__icon">⭐</div>
+                    <div class="dps-overview-card__content">
+                        <span class="dps-overview-card__value">350</span>
+                        <span class="dps-overview-card__label">Pontos</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="dps-portal-quick-actions">
+            <h2 class="sr-only">Ações Rápidas</h2>
+            <div class="dps-quick-actions">
+                <a href="#" class="dps-quick-action dps-quick-action--primary">
+                    <span>📅</span>
+                    <span>Agendar Serviço</span>
+                </a>
+                <button class="dps-quick-action dps-quick-action--chat">
+                    <span>💬</span>
+                    <span>Falar Conosco</span>
+                </button>
+                <a href="#" class="dps-quick-action">
+                    <span>⭐</span>
+                    <span>Avaliar Atendimento</span>
+                </a>
+                <button class="dps-quick-action">
+                    <span>⚙️</span>
+                    <span>Meus Dados</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Grid de conteúdo -->
+        <div class="dps-inicio-grid">
+            <!-- Coluna Esquerda -->
+            <div class="dps-inicio-col">
+                <!-- Próximo Agendamento -->
+                <section class="dps-portal-section dps-portal-next">
+                    <h2>📅 Seu Próximo Horário</h2>
+                    <div class="dps-appointment-card">
+                        <div class="dps-appointment-card__date">
+                            <span class="dps-appointment-card__day">15</span>
+                            <span class="dps-appointment-card__month">Jan</span>
+                            <span class="dps-appointment-card__weekday">Qua</span>
+                        </div>
+                        <div class="dps-appointment-card__details">
+                            <span class="dps-appointment-card__badge dps-appointment-card__badge--tomorrow">Amanhã</span>
+                            <div class="dps-appointment-card__time">⏰ 14:30</div>
+                            <div class="dps-appointment-card__pet">🐾 Thor</div>
+                            <div class="dps-appointment-card__services">✂️ Banho e Tosa</div>
+                            <div class="dps-appointment-card__status">Confirmado</div>
+                            <div class="dps-appointment-card__actions">
+                                <a href="#" class="dps-appointment-card__action-btn">📍 Ver no mapa</a>
+                                <a href="#" class="dps-appointment-card__action-btn">📆 Adicionar ao calendário</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Meus Pets -->
+                <section class="dps-portal-section dps-portal-pets-summary">
+                    <div class="dps-section-header">
+                        <h2>🐾 Meus Pets</h2>
+                        <button class="dps-link-button">Ver Histórico Completo →</button>
+                    </div>
+                    <div class="dps-pets-cards">
+                        <div class="dps-pet-card">
+                            <div class="dps-pet-card__photo">🐕</div>
+                            <div class="dps-pet-card__info">
+                                <h3 class="dps-pet-card__name">Thor</h3>
+                                <span class="dps-pet-card__breed">Golden Retriever</span>
+                                <span class="dps-pet-card__last-service">Último atendimento: 3 dias atrás</span>
+                            </div>
+                        </div>
+                        <div class="dps-pet-card">
+                            <div class="dps-pet-card__photo">🐕</div>
+                            <div class="dps-pet-card__info">
+                                <h3 class="dps-pet-card__name">Luna</h3>
+                                <span class="dps-pet-card__breed">Shih Tzu</span>
+                                <span class="dps-pet-card__last-service">Último atendimento: 15/12</span>
+                            </div>
+                        </div>
+                        <div class="dps-pet-card">
+                            <div class="dps-pet-card__photo">🐈</div>
+                            <div class="dps-pet-card__info">
+                                <h3 class="dps-pet-card__name">Mia</h3>
+                                <span class="dps-pet-card__breed">Persa</span>
+                                <span class="dps-pet-card__last-service" style="color:#f59e0b;font-weight:500;">Ainda não atendido</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Coluna Direita -->
+            <div class="dps-inicio-col">
+                <!-- Pendências Financeiras -->
+                <section class="dps-portal-section">
+                    <h2>💳 Pagamentos Pendentes</h2>
+                    <div class="dps-financial-summary">
+                        <div class="dps-financial-summary__icon">😊</div>
+                        <div class="dps-financial-summary__content">
+                            <div class="dps-financial-summary__title">Tudo em Dia!</div>
+                            <div class="dps-financial-summary__message">Você não tem pagamentos pendentes</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sugestões -->
+                <section class="dps-portal-section">
+                    <h2>💡 Sugestões para Você</h2>
+                    <div class="dps-suggestion-card">
+                        <div class="dps-suggestion-card__icon">🐾</div>
+                        <div class="dps-suggestion-card__content">
+                            <p class="dps-suggestion-card__message">Já faz 32 dias desde o último banho do Thor.</p>
+                            <a href="#" class="dps-suggestion-card__button">📅 Agendar Agora</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Indicações -->
+        <section class="dps-portal-section">
+            <h2>🎁 Indique e Ganhe</h2>
+            <div class="dps-referral-card">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="font-size:48px;">🔗</div>
+                    <div>
+                        <h3 style="margin:0;">Seu Código de Indicação</h3>
+                        <div class="dps-referral-card__code">MARIA2024</div>
+                    </div>
+                </div>
+                <div style="margin-top:16px;display:flex;gap:24px;">
+                    <div>
+                        <div style="font-size:24px;font-weight:700;">5</div>
+                        <div style="color:#6b7280;font-size:13px;">Indicações</div>
+                    </div>
+                    <div>
+                        <div style="font-size:24px;font-weight:700;">R$ 50,00</div>
+                        <div style="color:#6b7280;font-size:13px;">Créditos</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
