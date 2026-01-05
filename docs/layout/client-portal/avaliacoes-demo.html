@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Cliente - Aba Avaliações (Demo)</title>
+    <style>
+        :root {
+            --dps-primary: #0ea5e9;
+            --dps-primary-hover: #0284c7;
+            --dps-gray-50: #f9fafb;
+            --dps-gray-100: #f3f4f6;
+            --dps-gray-200: #e5e7eb;
+            --dps-gray-300: #d1d5db;
+            --dps-gray-500: #6b7280;
+            --dps-gray-600: #4b5563;
+            --dps-gray-700: #374151;
+            --dps-gray-800: #1f2937;
+            --dps-border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+            line-height: 1.5;
+            color: var(--dps-gray-800);
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-header h1 {
+            color: var(--dps-gray-800);
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            color: var(--dps-gray-600);
+        }
+
+        /* Portal Reviews Styles */
+        .dps-portal-reviews {
+            display: grid;
+            gap: 24px;
+        }
+
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 4px;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-section-title__icon {
+            font-size: 28px;
+        }
+
+        .dps-section-subtitle {
+            margin: 0 0 20px;
+            color: var(--dps-gray-600);
+            font-size: 15px;
+        }
+
+        /* Métricas Cards */
+        .dps-reviews-metrics {
+            margin-bottom: 8px;
+        }
+
+        .dps-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .dps-metric-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: #fff;
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dps-metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .dps-metric-card--highlight {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #fcd34d;
+        }
+
+        .dps-metric-card__icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .dps-metric-card__content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .dps-metric-card__value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dps-gray-800);
+            line-height: 1.1;
+        }
+
+        .dps-metric-card__label {
+            font-size: 13px;
+            color: var(--dps-gray-600);
+            font-weight: 500;
+        }
+
+        /* Grid de duas colunas */
+        .dps-reviews-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Card de formulário interno */
+        .dps-review-form-card {
+            background: #fff;
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dps-review-form-card__header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .dps-review-form-card__icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .dps-review-form-card__title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-review-form-card__subtitle {
+            margin: 4px 0 0;
+            font-size: 14px;
+            color: var(--dps-gray-600);
+        }
+
+        /* Formulário de avaliação interna */
+        .dps-review-internal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dps-star-rating-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dps-star-rating-label {
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            font-size: 14px;
+        }
+
+        .dps-star-rating-selector {
+            display: flex;
+            gap: 4px;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .dps-star-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .dps-star-label {
+            font-size: 36px;
+            color: var(--dps-gray-300);
+            cursor: pointer;
+            transition: color 0.15s ease, transform 0.15s ease;
+            line-height: 1;
+        }
+
+        .dps-star-label:hover,
+        .dps-star-label:hover ~ .dps-star-label {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        .dps-star-input:checked ~ .dps-star-label {
+            color: #f59e0b;
+        }
+
+        .dps-star-rating-hint {
+            font-size: 12px;
+            color: var(--dps-gray-500);
+        }
+
+        /* Campo de comentário */
+        .dps-review-comment-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dps-review-comment-field label {
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            font-size: 14px;
+        }
+
+        .dps-review-comment-field textarea {
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+        }
+
+        .dps-review-comment-field textarea:focus {
+            border-color: var(--dps-primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+            outline: none;
+        }
+
+        .dps-char-counter {
+            font-size: 12px;
+            color: var(--dps-gray-500);
+            text-align: right;
+        }
+
+        /* Botão de envio */
+        .dps-btn-submit-review {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .dps-btn-submit-review:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Card do Google Reviews */
+        .dps-review-google-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .dps-review-google-card__header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .dps-review-google-card__logo {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dps-google-g {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4285f4 25%, #ea4335 25%, #ea4335 50%, #fbbc04 50%, #fbbc04 75%, #34a853 75%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dps-review-google-card__title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-review-google-card__subtitle {
+            margin: 4px 0 0;
+            font-size: 14px;
+            color: var(--dps-gray-600);
+        }
+
+        .dps-review-google-card__content {
+            flex: 1;
+        }
+
+        .dps-review-google-card__text {
+            margin: 0 0 16px;
+            color: var(--dps-gray-700);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .dps-review-google-card__steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dps-review-google-card__step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--dps-gray-700);
+        }
+
+        .dps-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--dps-primary);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .dps-review-google-card__actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            margin-top: auto;
+        }
+
+        .dps-review-google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .dps-review-google-btn:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+            color: #fff;
+        }
+
+        .dps-review-google-card__hint {
+            margin: 0;
+            font-size: 13px;
+            color: var(--dps-gray-500);
+        }
+
+        /* Seção de Prova Social */
+        .dps-review-social {
+            background: #fff;
+            border: 1px solid var(--dps-border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .dps-review-social__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dps-review-social__title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-review-social__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #fcd34d;
+            border-radius: 20px;
+        }
+
+        .dps-review-social__badge-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dps-gray-800);
+        }
+
+        .dps-stars {
+            color: #f59e0b;
+            font-size: 20px;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        /* Lista de avaliações */
+        .dps-review-list {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .dps-review-card {
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--dps-gray-50);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dps-review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .dps-review-card__stars {
+            display: flex;
+            align-items: center;
+        }
+
+        .dps-review-card__author {
+            font-weight: 600;
+            color: var(--dps-gray-800);
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .dps-review-card__quote {
+            margin: 0;
+            color: var(--dps-gray-700);
+            line-height: 1.6;
+            font-size: 14px;
+            font-style: italic;
+            border-left: 3px solid var(--dps-primary);
+            padding-left: 12px;
+        }
+
+        .dps-review-card__date {
+            font-size: 12px;
+            color: var(--dps-gray-500);
+            display: block;
+        }
+
+        /* Responsividade */
+        @media (max-width: 900px) {
+            .dps-reviews-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dps-metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dps-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dps-star-label {
+                font-size: 32px;
+            }
+            
+            .dps-review-form-card,
+            .dps-review-google-card {
+                padding: 20px;
+            }
+            
+            .dps-review-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Demo styling */
+        .demo-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <span class="demo-badge">Demo - Novo Layout</span>
+            <h1>🐾 Portal do Cliente - Aba Avaliações</h1>
+            <p>Preview do novo layout moderno com formulário de avaliação interna e métricas visuais</p>
+        </div>
+
+        <section class="dps-portal-reviews">
+            <h2 class="dps-section-title"><span class="dps-section-title__icon">⭐</span>Central de Avaliações</h2>
+            <p class="dps-section-subtitle">Sua opinião nos ajuda a melhorar cada vez mais!</p>
+
+            <!-- Card de métricas -->
+            <div class="dps-reviews-metrics">
+                <div class="dps-metrics-grid">
+                    <div class="dps-metric-card dps-metric-card--highlight">
+                        <div class="dps-metric-card__icon">⭐</div>
+                        <div class="dps-metric-card__content">
+                            <span class="dps-metric-card__value">4.8</span>
+                            <span class="dps-metric-card__label">Nota Média</span>
+                        </div>
+                    </div>
+                    <div class="dps-metric-card">
+                        <div class="dps-metric-card__icon">📝</div>
+                        <div class="dps-metric-card__content">
+                            <span class="dps-metric-card__value">47</span>
+                            <span class="dps-metric-card__label">Avaliações</span>
+                        </div>
+                    </div>
+                    <div class="dps-metric-card">
+                        <div class="dps-metric-card__icon">😊</div>
+                        <div class="dps-metric-card__content">
+                            <span class="dps-metric-card__value">96%</span>
+                            <span class="dps-metric-card__label">Satisfação</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de duas colunas -->
+            <div class="dps-reviews-grid">
+                <!-- Formulário de avaliação interna -->
+                <div class="dps-review-form-card">
+                    <div class="dps-review-form-card__header">
+                        <div class="dps-review-form-card__icon">💬</div>
+                        <div>
+                            <h3 class="dps-review-form-card__title">Avaliação Rápida</h3>
+                            <p class="dps-review-form-card__subtitle">Conte como foi a experiência do seu pet</p>
+                        </div>
+                    </div>
+
+                    <form class="dps-review-internal-form" id="dps-review-internal-form">
+                        <div class="dps-star-rating-input">
+                            <label class="dps-star-rating-label">Como foi a experiência?</label>
+                            <div class="dps-star-rating-selector" role="radiogroup">
+                                <input type="radio" name="review_rating" value="5" id="star-5" class="dps-star-input">
+                                <label for="star-5" class="dps-star-label" title="5 estrelas">★</label>
+                                <input type="radio" name="review_rating" value="4" id="star-4" class="dps-star-input">
+                                <label for="star-4" class="dps-star-label" title="4 estrelas">★</label>
+                                <input type="radio" name="review_rating" value="3" id="star-3" class="dps-star-input">
+                                <label for="star-3" class="dps-star-label" title="3 estrelas">★</label>
+                                <input type="radio" name="review_rating" value="2" id="star-2" class="dps-star-input">
+                                <label for="star-2" class="dps-star-label" title="2 estrelas">★</label>
+                                <input type="radio" name="review_rating" value="1" id="star-1" class="dps-star-input">
+                                <label for="star-1" class="dps-star-label" title="1 estrela">★</label>
+                            </div>
+                            <div class="dps-star-rating-hint">Clique nas estrelas para avaliar</div>
+                        </div>
+
+                        <div class="dps-review-comment-field">
+                            <label for="review_comment">Comentário (opcional)</label>
+                            <textarea name="review_comment" id="review_comment" rows="3" placeholder="Conte como foi a experiência do seu pet..." maxlength="500"></textarea>
+                            <span class="dps-char-counter"><span id="char-count">0</span>/500</span>
+                        </div>
+
+                        <button type="submit" class="dps-btn-submit-review">
+                            <span class="dps-btn-icon">✓</span>
+                            <span class="dps-btn-text">Enviar Avaliação</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Card Google Reviews -->
+                <div class="dps-review-google-card">
+                    <div class="dps-review-google-card__header">
+                        <div class="dps-review-google-card__logo">
+                            <span class="dps-google-g">G</span>
+                        </div>
+                        <div>
+                            <h3 class="dps-review-google-card__title">Avalie no Google</h3>
+                            <p class="dps-review-google-card__subtitle">Ajude outros tutores a nos conhecer</p>
+                        </div>
+                    </div>
+
+                    <div class="dps-review-google-card__content">
+                        <p class="dps-review-google-card__text">Suas 5 estrelas no Google ajudam outros clientes a confiar em nós e nos mostram onde podemos melhorar.</p>
+
+                        <div class="dps-review-google-card__steps">
+                            <div class="dps-review-google-card__step"><span class="dps-step-num">1</span>Clique no botão</div>
+                            <div class="dps-review-google-card__step"><span class="dps-step-num">2</span>Escolha 1-5 estrelas</div>
+                            <div class="dps-review-google-card__step"><span class="dps-step-num">3</span>Comente (opcional)</div>
+                        </div>
+                    </div>
+
+                    <div class="dps-review-google-card__actions">
+                        <a class="dps-review-google-btn" href="#" target="_blank">
+                            <span class="dps-review-google-btn__icon">⭐</span>
+                            <span class="dps-review-google-btn__text">Avaliar no Google</span>
+                        </a>
+                        <p class="dps-review-google-card__hint">Abre em nova aba • Leva menos de 1 minuto</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prova Social -->
+            <div class="dps-review-social">
+                <div class="dps-review-social__header">
+                    <h3 class="dps-review-social__title">O que nossos clientes dizem</h3>
+                    <div class="dps-review-social__badge">
+                        <span class="dps-stars">★★★★★</span>
+                        <span class="dps-review-social__badge-text">4.8</span>
+                    </div>
+                </div>
+
+                <div class="dps-review-list">
+                    <article class="dps-review-card">
+                        <div class="dps-review-card__stars">
+                            <span class="dps-stars">★★★★★</span>
+                        </div>
+                        <p class="dps-review-card__author">Maria Silva</p>
+                        <blockquote class="dps-review-card__quote">"Meu Thor adorou o banho! Equipe super atenciosa e carinhosa com os animais. Recomendo muito!"</blockquote>
+                        <time class="dps-review-card__date">15/12/2025</time>
+                    </article>
+
+                    <article class="dps-review-card">
+                        <div class="dps-review-card__stars">
+                            <span class="dps-stars">★★★★★</span>
+                        </div>
+                        <p class="dps-review-card__author">João Pedro</p>
+                        <blockquote class="dps-review-card__quote">"Melhor pet shop da região! A Luna sempre volta cheirosa e feliz. Atendimento nota 10."</blockquote>
+                        <time class="dps-review-card__date">10/12/2025</time>
+                    </article>
+
+                    <article class="dps-review-card">
+                        <div class="dps-review-card__stars">
+                            <span class="dps-stars">★★★★☆</span>
+                        </div>
+                        <p class="dps-review-card__author">Ana Clara</p>
+                        <blockquote class="dps-review-card__quote">"Ótimo serviço! O Bidu ficou lindo depois da tosa. Preço justo e bom atendimento."</blockquote>
+                        <time class="dps-review-card__date">05/12/2025</time>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Demo: Contador de caracteres
+        var textarea = document.getElementById('review_comment');
+        var charCount = document.getElementById('char-count');
+        
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+        }
+
+        // Demo: Feedback na seleção de estrelas
+        var starInputs = document.querySelectorAll('.dps-star-input');
+        var ratingHint = document.querySelector('.dps-star-rating-hint');
+        
+        var ratingMessages = {
+            1: '😞 Pode melhorar',
+            2: '😕 Razoável',
+            3: '🙂 Bom',
+            4: '😊 Muito bom!',
+            5: '🤩 Excelente!'
+        };
+
+        starInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                var rating = parseInt(this.value, 10);
+                if (ratingHint && ratingMessages[rating]) {
+                    ratingHint.textContent = ratingMessages[rating];
+                    ratingHint.style.fontWeight = '600';
+                    ratingHint.style.color = '#374151';
+                }
+            });
+        });
+
+        // Demo: Prevenir submit
+        document.getElementById('dps-review-internal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Demo: Avaliação enviada com sucesso! 🎉');
+        });
+    </script>
+</body>
+</html>

@@ -1211,115 +1211,446 @@ html {
 
 /* ================================================
    AVALIAÇÕES (CTA + PROVA SOCIAL)
-   Mantém o cliente no portal antes do Google
+   Layout moderno com métricas, formulário e cards
    ================================================ */
 .dps-portal-reviews {
     display: grid;
+    gap: 24px;
+}
+
+.dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+}
+
+.dps-section-title__icon {
+    font-size: 28px;
+}
+
+.dps-section-subtitle {
+    margin: 0 0 20px;
+    color: var(--dps-gray-600);
+    font-size: 15px;
+}
+
+/* Métricas Cards */
+.dps-reviews-metrics {
+    margin-bottom: 8px;
+}
+
+.dps-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.dps-metric-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fff;
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dps-metric-card--highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #fcd34d;
+}
+
+.dps-metric-card__icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-metric-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-metric-card__value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    line-height: 1.1;
+}
+
+.dps-metric-card__label {
+    font-size: 13px;
+    color: var(--dps-gray-600);
+    font-weight: 500;
+}
+
+/* Grid de duas colunas: Formulário + Google CTA */
+.dps-reviews-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-.dps-review-cta {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 24px;
-    align-items: center;
-    background: var(--dps-gray-50);
+/* Card de formulário interno */
+.dps-review-form-card {
+    background: #fff;
     border: 1px solid var(--dps-gray-200);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.dps-review-cta__eyebrow {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--dps-gray-500);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin: 0 0 4px;
+.dps-review-form-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
 }
 
-.dps-review-cta__title {
-    margin: 0 0 8px;
-    font-size: 22px;
-    color: var(--dps-gray-800);
-    letter-spacing: -0.01em;
+.dps-review-form-card__icon {
+    font-size: 36px;
+    line-height: 1;
 }
 
-.dps-review-cta__text {
-    margin: 0 0 12px;
-    color: var(--dps-gray-600);
-    line-height: 1.6;
-}
-
-.dps-review-cta__steps {
+.dps-review-form-card__title {
     margin: 0;
-    padding-left: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+}
+
+.dps-review-form-card__subtitle {
+    margin: 4px 0 0;
+    font-size: 14px;
     color: var(--dps-gray-600);
-    line-height: 1.5;
 }
 
-.dps-review-cta__steps li {
-    margin-bottom: 6px;
+/* Agradecimento para quem já avaliou */
+.dps-review-form-card__thanks {
+    text-align: center;
+    padding: 32px 16px;
 }
 
-.dps-review-cta__actions {
+.dps-review-form-card__thanks-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.dps-review-form-card__thanks-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+    margin: 0 0 8px;
+}
+
+.dps-review-form-card__thanks-hint {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin: 0;
+}
+
+/* Formulário de avaliação interna */
+.dps-review-internal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Seletor de estrelas interativo */
+.dps-star-rating-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-star-rating-label {
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    font-size: 14px;
+}
+
+.dps-star-rating-selector {
+    display: flex;
+    gap: 4px;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.dps-star-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dps-star-label {
+    font-size: 36px;
+    color: var(--dps-gray-300);
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+    line-height: 1;
+}
+
+.dps-star-label:hover,
+.dps-star-label:hover ~ .dps-star-label {
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+.dps-star-input:checked ~ .dps-star-label {
+    color: #f59e0b;
+}
+
+.dps-star-input:focus + .dps-star-label {
+    outline: 2px solid var(--dps-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.dps-star-rating-hint {
+    font-size: 12px;
+    color: var(--dps-gray-500);
+}
+
+/* Campo de comentário */
+.dps-review-comment-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dps-review-comment-field label {
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    font-size: 14px;
+}
+
+.dps-review-comment-field textarea {
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-review-comment-field textarea:focus {
+    border-color: var(--dps-primary);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+    outline: none;
+}
+
+.dps-char-counter {
+    font-size: 12px;
+    color: var(--dps-gray-500);
+    text-align: right;
+}
+
+/* Botão de envio */
+.dps-btn-submit-review {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transition: all 0.2s ease;
+}
+
+.dps-btn-submit-review:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+}
+
+.dps-btn-submit-review .dps-btn-icon {
+    font-size: 18px;
+}
+
+/* Card do Google Reviews */
+.dps-review-google-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dps-review-google-card__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dps-review-google-card__logo {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dps-google-g {
+    font-size: 42px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4285f4 25%, #ea4335 25%, #ea4335 50%, #fbbc04 50%, #fbbc04 75%, #34a853 75%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Product Sans', sans-serif;
+}
+
+.dps-review-google-card__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+}
+
+.dps-review-google-card__subtitle {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+.dps-review-google-card__content {
+    flex: 1;
+}
+
+.dps-review-google-card__text {
+    margin: 0 0 16px;
+    color: var(--dps-gray-700);
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.dps-review-google-card__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-review-google-card__step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--dps-gray-700);
+}
+
+.dps-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--dps-primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.dps-review-google-card__actions {
     display: flex;
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
+    margin-top: auto;
 }
 
-.dps-review-cta__button {
+.dps-review-google-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--dps-primary);
+    gap: 10px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     color: #fff;
     border-radius: 10px;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 15px;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.18);
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+    transition: all 0.2s ease;
 }
 
-.dps-review-cta__button:hover {
-    background: var(--dps-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.24);
+.dps-review-google-btn:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+    color: #fff;
 }
 
-.dps-review-cta__hint {
+.dps-review-google-btn__icon {
+    font-size: 20px;
+}
+
+.dps-review-google-card__hint {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--dps-gray-500);
 }
 
+/* Seção de Prova Social */
 .dps-review-social {
     background: #fff;
     border: 1px solid var(--dps-border-color);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 24px;
     display: grid;
-    gap: 16px;
+    gap: 20px;
 }
 
 .dps-review-social__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
-.dps-review-social__metric {
+.dps-review-social__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+}
+
+.dps-review-social__badge {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    background: var(--dps-gray-50);
-    border: 1px solid var(--dps-gray-200);
-    border-radius: 10px;
+    gap: 8px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fcd34d;
+    border-radius: 20px;
+}
+
+.dps-review-social__badge-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
 }
 
 .dps-stars {
@@ -1329,66 +1660,112 @@ html {
     line-height: 1;
 }
 
-.dps-review-social__metric-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.dps-review-social__value {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--dps-gray-800);
-}
-
-.dps-review-social__label {
-    font-size: 14px;
-    color: var(--dps-gray-600);
-}
-
+/* Lista de avaliações */
 .dps-review-list {
     display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .dps-review-card {
     border: 1px solid var(--dps-gray-200);
-    border-radius: 10px;
-    padding: 16px;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    display: grid;
-    gap: 8px;
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--dps-gray-50);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dps-review-card__header {
+.dps-review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dps-review-card__stars {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.dps-review-card__date {
-    font-size: 13px;
-    color: var(--dps-gray-500);
 }
 
 .dps-review-card__author {
     font-weight: 600;
+    color: var(--dps-gray-800);
+    margin: 0;
+    font-size: 15px;
+}
+
+.dps-review-card__quote {
+    margin: 0;
     color: var(--dps-gray-700);
-    margin: 0;
+    line-height: 1.6;
+    font-size: 14px;
+    font-style: italic;
+    border-left: 3px solid var(--dps-primary);
+    padding-left: 12px;
 }
 
-.dps-review-card__comment {
-    margin: 0;
+.dps-review-card__date {
+    font-size: 12px;
+    color: var(--dps-gray-500);
+    display: block;
+}
+
+/* Empty state compacto */
+.dps-empty-state--compact {
+    padding: 32px 20px;
+    text-align: center;
+}
+
+.dps-empty-state--compact .dps-empty-state__icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.dps-empty-state--compact .dps-empty-state__message {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+}
+
+.dps-empty-state--compact .dps-empty-state__hint {
+    margin-top: 8px;
+    font-size: 14px;
     color: var(--dps-gray-600);
-    line-height: 1.5;
 }
 
+/* Responsividade */
 @media (max-width: 900px) {
-    .dps-review-cta {
+    .dps-reviews-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .dps-metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dps-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-star-label {
+        font-size: 32px;
+    }
+    
+    .dps-review-form-card,
+    .dps-review-google-card {
+        padding: 20px;
+    }
+    
+    .dps-review-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-review-social__header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
@@ -4704,4 +5081,18 @@ html {
     .dps-loyalty-referral-input {
         width: 100%;
     }
+}
+
+/* ================================================
+   ANIMAÇÕES UTILITÁRIAS
+   ================================================ */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
