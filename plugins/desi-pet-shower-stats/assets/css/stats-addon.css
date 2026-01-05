@@ -1,7 +1,7 @@
 /**
  * Stats Add-on - Estilos do Dashboard
  *
- * Segue o padrão visual minimalista do DPS conforme VISUAL_STYLE_GUIDE.md.
+ * Segue o padrão visual minimalista do DPS conforme docs/visual/VISUAL_STYLE_GUIDE.md.
  * Cores: #0ea5e9 (azul primário), #10b981 (verde sucesso), #ef4444 (vermelho erro), #f59e0b (amarelo aviso)
  *
  * @since 1.1.0
@@ -640,8 +640,9 @@
 /* Botão secundário - Estilo Moderno Elegante */
 .dps-stats-btn-secondary,
 #dps-section-estatisticas .button-secondary,
-.dps-stats-filter .button,
-.dps-stats-actions .button:not(.button-primary),
+.dps-stats-filter .button-secondary,
+.dps-stats-actions .button-secondary,
+.dps-stats-cache-form .button-secondary,
 .dps-stats-cache-form .button {
     display: inline-flex;
     align-items: center;
@@ -662,8 +663,9 @@
 
 .dps-stats-btn-secondary:hover,
 #dps-section-estatisticas .button-secondary:hover,
-.dps-stats-filter .button:hover,
-.dps-stats-actions .button:not(.button-primary):hover,
+.dps-stats-filter .button-secondary:hover,
+.dps-stats-actions .button-secondary:hover,
+.dps-stats-cache-form .button-secondary:hover,
 .dps-stats-cache-form .button:hover {
     background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
     border-color: #94a3b8;
@@ -674,8 +676,9 @@
 
 .dps-stats-btn-secondary:active,
 #dps-section-estatisticas .button-secondary:active,
-.dps-stats-filter .button:active,
-.dps-stats-actions .button:not(.button-primary):active,
+.dps-stats-filter .button-secondary:active,
+.dps-stats-actions .button-secondary:active,
+.dps-stats-cache-form .button-secondary:active,
 .dps-stats-cache-form .button:active {
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);

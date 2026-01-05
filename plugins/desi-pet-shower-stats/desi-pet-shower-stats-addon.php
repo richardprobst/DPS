@@ -465,8 +465,23 @@ class DPS_Stats_Addon {
         $today = current_time( 'timestamp' );
         $start = isset( $_GET['stats_start'] ) ? sanitize_text_field( $_GET['stats_start'] ) : '';
         $end   = isset( $_GET['stats_end'] ) ? sanitize_text_field( $_GET['stats_end'] ) : '';
-        if ( ! $start ) $start = date( 'Y-m-d', $today - ( 30 * DAY_IN_SECONDS ) );
-        if ( ! $end ) $end = date( 'Y-m-d', $today );
+        
+        // Valida formato de data (Y-m-d)
+        if ( ! empty( $start ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start ) ) {
+            $start = '';
+        }
+        if ( ! empty( $end ) && ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $end ) ) {
+            $end = '';
+        }
+        
+        // Valores padrão: últimos 30 dias
+        if ( ! $start ) {
+            $start = date( 'Y-m-d', $today - ( 30 * DAY_IN_SECONDS ) );
+        }
+        if ( ! $end ) {
+            $end = date( 'Y-m-d', $today );
+        }
+        
         return [ 'start' => $start, 'end' => $end ];
     }
 
