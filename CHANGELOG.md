@@ -83,6 +83,17 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Stock Add-on - Modernização Completa do Layout da Aba Estoque (v1.2.0)**
+
+- **Header da seção padronizado**: Título com ícone 📦 e subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).
+- **Layout empilhado com cards**: Novo sistema de cards `.dps-surface` empilhados verticalmente, seguindo padrão de outras abas (Pets, Clientes, Serviços).
+- **Card de resumo/estatísticas**: Exibe total de itens, estoque OK e estoque baixo usando `.dps-inline-stats--panel` com badges de status.
+- **Card de alertas críticos**: Lista itens abaixo do mínimo em card destacado `.dps-surface--warning` com nome, quantidade e botão de edição.
+- **Card de inventário completo**: Tabela responsiva de todos os itens com toolbar de filtros e paginação moderna.
+- **Toolbar de filtros**: Botão para alternar entre "Ver todos" e "Mostrar apenas críticos".
+- **Três novos métodos helper**: `calculate_stock_stats()`, `render_critical_items_list()` e `render_stock_table()` para melhor organização do código.
+- **~150 linhas de CSS**: Novos estilos para layout stack, inline-stats, lista de críticos e toolbar.
+
 **Stats Add-on - Modernização Completa do Layout da Aba Estatísticas (v1.5.0)**
 
 - **Header da seção padronizado**: Título com ícone 📊 e subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).
@@ -94,6 +105,14 @@ Antes de criar uma nova versão oficial:
 - **~550 linhas de CSS refatorado**: Novo `stats-addon.css` v1.5.0 com layout stack, cards com hover animation, métricas coloridas por tipo e espaçamento consistente.
 
 #### Changed (Alterado)
+
+**Stock Add-on - Melhorias de UX (v1.2.0)**
+
+- **Descrições explicativas em cada seção**: Todos os cards agora incluem `.dps-surface__description` explicando o propósito.
+- **Tabela responsiva**: Tabela de inventário usa classes `.dps-table` com responsividade mobile (cards em telas < 640px).
+- **Paginação melhorada**: Layout flex com informações à esquerda e botões à direita, empilhando em mobile.
+- **Remoção de estilos inline**: Substituídos todos os `style=""` por classes CSS dedicadas.
+- **Botões com gradiente moderno**: `.button-primary` e `.button-secondary` agora herdam estilos globais do DPS.
 
 **Stats Add-on - Melhorias de UX (v1.5.0)**
 

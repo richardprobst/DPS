@@ -2,7 +2,7 @@
  * Estilos do Stock Add-on - DPS
  * 
  * CSS responsivo para o módulo de estoque de insumos.
- * Segue o padrão visual minimalista do DPS.
+ * Segue o padrão visual moderno do sistema DPS (dps-surface, dps-section-title).
  * 
  * Breakpoints:
  * - 1024px: Tablet grande
@@ -12,54 +12,202 @@
  * 
  * @package Desi_Pet_Shower_Stock
  * @since 1.1.0
+ * @since 1.2.0 Refatorado para seguir padrão moderno do sistema.
  */
 
 /* ==========================================================================
-   1. Layout Principal
+   1. Layout Principal e Header
    ========================================================================== */
 
-#dps-section-estoque {
-    padding: 20px 0;
+#dps-section-estoque .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
 }
 
-#dps-section-estoque h2 {
-    margin-bottom: 20px;
-    color: #374151;
-    font-size: 20px;
-    font-weight: 600;
+#dps-section-estoque .dps-section-title__icon {
+    font-size: 28px;
+}
+
+#dps-section-estoque .dps-section-header__subtitle {
+    margin: 0 0 24px 0;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
 /* ==========================================================================
-   2. Barra de Ações
+   1b. Layout Empilhado (Cards verticais)
    ========================================================================== */
 
-.dps-stock-actions {
+.dps-stock-stacked {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 16px;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Surfaces/Cards específicos do estoque */
+#dps-section-estoque .dps-surface {
+    margin-bottom: 0;
+}
+
+#dps-section-estoque .dps-surface__title {
+    margin-bottom: 8px;
+}
+
+#dps-section-estoque .dps-surface__description {
+    margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   1c. Estatísticas Inline
+   ========================================================================== */
+
+#dps-section-estoque .dps-inline-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+}
+
+#dps-section-estoque .dps-inline-stats--panel {
     background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+#dps-section-estoque .dps-inline-stats li {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
 }
 
-.dps-stock-actions .button {
-    display: inline-flex;
-    align-items: center;
+#dps-section-estoque .dps-inline-stats__label {
+    display: flex;
+    flex-direction: column;
     gap: 4px;
 }
 
-.dps-stock-actions .button .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
+#dps-section-estoque .dps-inline-stats__label small {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+#dps-section-estoque .dps-inline-stats__value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+#dps-section-estoque .dps-status-badge--scheduled {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#dps-section-estoque .dps-status-badge--paid {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#dps-section-estoque .dps-status-badge--pending {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 /* ==========================================================================
-   3. Cards de Resumo
+   1d. Ações
+   ========================================================================== */
+
+#dps-section-estoque .dps-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#dps-section-estoque .dps-actions--stacked {
+    margin-top: 8px;
+}
+
+/* ==========================================================================
+   2. Lista de Itens Críticos
+   ========================================================================== */
+
+.dps-stock-critical-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-stock-critical-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+}
+
+.dps-stock-critical-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-stock-critical-item__info strong {
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.dps-stock-critical-item__qty {
+    color: #92400e;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   2b. Toolbar de Filtros
+   ========================================================================== */
+
+.dps-stock-toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* ==========================================================================
+   3. Cards de Resumo (deprecated - mantido para retrocompatibilidade)
    ========================================================================== */
 
 .dps-stock-summary {
@@ -245,17 +393,29 @@
 
 .dps-stock-pagination {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     gap: 12px;
     margin-top: 20px;
     padding-top: 20px;
     border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
 }
 
 .dps-stock-pagination-info {
     color: #6b7280;
     font-size: 14px;
+}
+
+.dps-stock-pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Data de alerta */
+.dps-stock-alert-date {
+    color: #6b7280;
+    font-size: 11px;
 }
 
 /* ==========================================================================
@@ -264,6 +424,18 @@
 
 /* Tablet (768px) */
 @media (max-width: 768px) {
+    #dps-section-estoque .dps-section-title {
+        font-size: 20px;
+    }
+    
+    #dps-section-estoque .dps-inline-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #dps-section-estoque .dps-inline-stats__value {
+        font-size: 24px;
+    }
+    
     .dps-stock-summary {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -286,10 +458,35 @@
     .dps-stock-table td.dps-col-unit {
         display: none;
     }
+    
+    .dps-stock-critical-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .dps-stock-critical-item .button {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 /* Mobile (640px) - Tabela vira cards */
 @media (max-width: 640px) {
+    #dps-section-estoque .dps-inline-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    #dps-section-estoque .dps-actions {
+        flex-direction: column;
+    }
+    
+    #dps-section-estoque .dps-actions .button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
     .dps-stock-summary {
         grid-template-columns: 1fr;
     }
@@ -381,12 +578,17 @@
 
 /* Mobile pequeno (480px) */
 @media (max-width: 480px) {
-    #dps-section-estoque {
-        padding: 16px 0;
+    #dps-section-estoque .dps-section-title {
+        font-size: 18px;
+        flex-wrap: wrap;
     }
     
-    #dps-section-estoque h2 {
-        font-size: 18px;
+    #dps-section-estoque .dps-section-title__icon {
+        font-size: 22px;
+    }
+    
+    #dps-section-estoque .dps-inline-stats__value {
+        font-size: 22px;
     }
     
     .dps-stock-card {
@@ -404,6 +606,16 @@
     
     .dps-stock-table td::before {
         font-size: 11px;
+    }
+    
+    .dps-stock-pagination-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .dps-stock-pagination-buttons .button {
+        width: 100%;
+        justify-content: center;
     }
 }
 
