@@ -41,6 +41,47 @@
         handlePortalMessages(); // Phase 2: feedback for actions
         handleLoyalty();
         initChatWidget();
+        handleQuickActions(); // Fase 3: Quick Actions na aba Início
+    }
+
+    /**
+     * Gerencia ações rápidas (Quick Actions) na aba Início
+     * Permite abrir chat, navegar para tabs e outras ações rápidas
+     */
+    function handleQuickActions() {
+        // Botões de ação rápida que abrem o chat
+        var chatButtons = document.querySelectorAll('[data-action="open-chat"]');
+        chatButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Abre o chat widget
+                var chatToggle = document.querySelector('.dps-chat-toggle');
+                if (chatToggle) {
+                    chatToggle.click();
+                }
+            });
+        });
+
+        // Botões de ação rápida que navegam para tabs
+        var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab]');
+        tabButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var targetTab = this.getAttribute('data-tab');
+                if (!targetTab) return;
+
+                // Encontra e clica na tab correspondente
+                var tabLink = document.querySelector('.dps-portal-tabs__link[data-tab="' + targetTab + '"]');
+                if (tabLink) {
+                    tabLink.click();
+                    // Scroll suave para o topo do conteúdo
+                    var tabContent = document.querySelector('.dps-portal-tab-content');
+                    if (tabContent) {
+                        tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
     }
 
     /**
