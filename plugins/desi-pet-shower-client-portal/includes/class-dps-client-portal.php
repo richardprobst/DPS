@@ -1240,7 +1240,7 @@ final class DPS_Client_Portal {
                 'badge' => 0,
             ],
             'fidelidade' => [
-                'icon'  => '⭐',
+                'icon'  => '🏆',
                 'label' => __( 'Fidelidade', 'dps-client-portal' ),
                 'active' => false,
                 'badge' => 0,
@@ -2695,8 +2695,15 @@ final class DPS_Client_Portal {
     private function render_loyalty_panel( $client_id ) {
         echo '<section class="dps-portal-section dps-portal-loyalty">';
 
+        // Título da seção com ícone para consistência visual
+        echo '<h2>🏆 ' . esc_html__( 'Programa de Fidelidade', 'dps-client-portal' ) . '</h2>';
+
         if ( ! class_exists( 'DPS_Loyalty_API' ) ) {
-            echo '<p>' . esc_html__( 'O programa de fidelidade não está ativo no momento.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-loyalty-inactive">';
+            echo '<div class="dps-loyalty-inactive__icon">🎁</div>';
+            echo '<p class="dps-loyalty-inactive__message">' . esc_html__( 'O programa de fidelidade não está ativo no momento.', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-loyalty-inactive__hint">' . esc_html__( 'Em breve você poderá acumular pontos e ganhar recompensas!', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
             echo '</section>';
             return;
         }
@@ -2728,54 +2735,117 @@ final class DPS_Client_Portal {
         $max_points_available = min( $points, $max_points_by_cap );
         $max_discount_display = class_exists( 'DPS_Money_Helper' ) ? DPS_Money_Helper::format_to_brazilian( $max_discount_cents ) : number_format( $max_discount_cents / 100, 2, ',', '.' );
 
+        // Hero Section - Tier e Progresso
         echo '<div class="dps-loyalty-hero" data-loyalty-nonce="' . esc_attr( $loyalty_nonce ) . '" data-history-limit="' . esc_attr( $history_limit ) . '">';
         echo '<div class="dps-loyalty-hero__content">';
-        echo '<p class="dps-loyalty-hero__greeting">' . esc_html( sprintf( __( 'Olá, %s! 🐾', 'dps-client-portal' ), $client_name ) ) . '</p>';
-        echo '<h2 class="dps-loyalty-hero__title">' . esc_html__( 'Minha Fidelidade', 'dps-client-portal' ) . '</h2>';
         echo '<div class="dps-loyalty-tier">';
-        echo '<span class="dps-loyalty-tier__icon">' . esc_html( $tier['icon'] ?? '⭐' ) . '</span>';
+        echo '<span class="dps-loyalty-tier__icon">' . esc_html( $tier['icon'] ?? '🏆' ) . '</span>';
         echo '<div class="dps-loyalty-tier__labels">';
-        echo '<span class="dps-loyalty-tier__name">' . esc_html( $tier['label'] ?? '' ) . '</span>';
+        echo '<span class="dps-loyalty-tier__level">' . esc_html__( 'Seu nível atual', 'dps-client-portal' ) . '</span>';
+        echo '<span class="dps-loyalty-tier__name">' . esc_html( $tier['label'] ?? __( 'Bronze', 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-loyalty-progress">';
         if ( $next_points ) {
             $remaining = max( 0, $next_points - $points );
-            echo '<span class="dps-loyalty-tier__hint">' . esc_html( sprintf( __( 'Faltam %d pts para o próximo nível', 'dps-client-portal' ), $remaining ) ) . '</span>';
+            echo '<div class="dps-loyalty-progress__info">';
+            echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
+            echo '<span class="dps-loyalty-progress__next">' . esc_html( number_format( $next_points, 0, ',', '.' ) ) . ' pts</span>';
+            echo '</div>';
+            echo '<div class="dps-loyalty-progress__bar"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
+            echo '<p class="dps-loyalty-progress__hint">' . esc_html( sprintf( __( 'Faltam %s pontos para o próximo nível! 🚀', 'dps-client-portal' ), number_format( $remaining, 0, ',', '.' ) ) ) . '</p>';
+        } else {
+            echo '<div class="dps-loyalty-progress__info">';
+            echo '<span class="dps-loyalty-progress__current">' . esc_html( number_format( $points, 0, ',', '.' ) ) . ' pts</span>';
+            echo '</div>';
+            echo '<div class="dps-loyalty-progress__bar"><span style="width: 100%"></span></div>';
+            echo '<p class="dps-loyalty-progress__hint">' . esc_html__( 'Você está no nível máximo! 🎉', 'dps-client-portal' ) . '</p>';
         }
         echo '</div>';
         echo '</div>';
-        echo '<div class="dps-loyalty-progress">';
-        echo '<div class="dps-loyalty-progress__bar"><span style="width: ' . esc_attr( $progress ) . '%"></span></div>';
-        echo '<div class="dps-loyalty-progress__text">' . esc_html( $points ) . ' / ' . esc_html( $next_points ? $next_points : $points ) . ' pts</div>';
-        echo '</div>';
-        echo '</div>';
         echo '</div>';
 
+        // Cards de Estatísticas
         echo '<div class="dps-loyalty-stats">';
-        echo '<div class="dps-loyalty-card">';
-        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Pontos', 'dps-client-portal' ) . '</p>';
+        
+        // Card: Pontos
+        echo '<div class="dps-loyalty-card dps-loyalty-card--points">';
+        echo '<div class="dps-loyalty-card__header">';
+        echo '<span class="dps-loyalty-card__icon">🎯</span>';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Meus Pontos', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
         echo '<p class="dps-loyalty-card__value" data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</p>';
-        echo '<button class="dps-button-link dps-loyalty-history-trigger" type="button">' . esc_html__( 'Ver histórico', 'dps-client-portal' ) . '</button>';
+        echo '<button class="dps-button-link dps-loyalty-history-trigger" type="button">' . esc_html__( '📋 Ver histórico', 'dps-client-portal' ) . '</button>';
         echo '</div>';
 
-        echo '<div class="dps-loyalty-card">';
-        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Créditos disponíveis', 'dps-client-portal' ) . '</p>';
+        // Card: Créditos
+        echo '<div class="dps-loyalty-card dps-loyalty-card--credits">';
+        echo '<div class="dps-loyalty-card__header">';
+        echo '<span class="dps-loyalty-card__icon">💰</span>';
+        echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Créditos Disponíveis', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
         echo '<p class="dps-loyalty-card__value" data-loyalty-credit>' . esc_html( $credit_display ) . '</p>';
-        echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Utilize para descontos em atendimentos.', 'dps-client-portal' ) . '</small>';
+        echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Use para descontos no próximo atendimento', 'dps-client-portal' ) . '</small>';
         echo '</div>';
 
-        echo '<div class="dps-loyalty-card">';
+        // Card: Indique e Ganhe
+        echo '<div class="dps-loyalty-card dps-loyalty-card--referral">';
+        echo '<div class="dps-loyalty-card__header">';
+        echo '<span class="dps-loyalty-card__icon">🎁</span>';
         echo '<p class="dps-loyalty-card__label">' . esc_html__( 'Indique e Ganhe', 'dps-client-portal' ) . '</p>';
-        echo '<p class="dps-loyalty-card__value">' . esc_html( $referral_code ) . '</p>';
+        echo '</div>';
+        echo '<p class="dps-loyalty-card__code">' . esc_html( $referral_code ) . '</p>';
         if ( $referral_url ) {
             echo '<div class="dps-loyalty-card__actions">';
-            echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" />';
-            echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">' . esc_html__( 'Copiar link', 'dps-client-portal' ) . '</button>';
+            echo '<input type="text" readonly value="' . esc_attr( $referral_url ) . '" class="dps-loyalty-referral-input" aria-label="' . esc_attr__( 'Link de indicação', 'dps-client-portal' ) . '" />';
+            echo '<button class="dps-button-link dps-portal-copy" type="button" data-copy-target="' . esc_attr( $referral_url ) . '">📋 ' . esc_html__( 'Copiar', 'dps-client-portal' ) . '</button>';
             echo '</div>';
+            echo '<small class="dps-loyalty-card__hint">' . esc_html__( 'Compartilhe e ganhe pontos quando indicados agendarem!', 'dps-client-portal' ) . '</small>';
         }
         echo '</div>';
         echo '</div>';
 
+        // Seção: Como Funciona (educacional)
+        echo '<div class="dps-loyalty-how-it-works">';
+        echo '<h3>💡 ' . esc_html__( 'Como Funciona', 'dps-client-portal' ) . '</h3>';
+        echo '<div class="dps-loyalty-how-it-works__grid">';
+        
+        echo '<div class="dps-loyalty-step">';
+        echo '<span class="dps-loyalty-step__number">1</span>';
+        echo '<div class="dps-loyalty-step__content">';
+        echo '<strong>' . esc_html__( 'Agende Serviços', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'A cada banho ou tosa você acumula pontos automaticamente.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-loyalty-step">';
+        echo '<span class="dps-loyalty-step__number">2</span>';
+        echo '<div class="dps-loyalty-step__content">';
+        echo '<strong>' . esc_html__( 'Suba de Nível', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Quanto mais pontos, maior seu nível e multiplicador de bônus.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-loyalty-step">';
+        echo '<span class="dps-loyalty-step__number">3</span>';
+        echo '<div class="dps-loyalty-step__content">';
+        echo '<strong>' . esc_html__( 'Troque por Créditos', 'dps-client-portal' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Converta pontos em créditos e use como desconto.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+
+        // Seção: Conquistas
         echo '<div class="dps-loyalty-achievements">';
-        echo '<h3>' . esc_html__( 'Conquistas', 'dps-client-portal' ) . '</h3>';
+        echo '<h3>🏅 ' . esc_html__( 'Minhas Conquistas', 'dps-client-portal' ) . '</h3>';
+        $unlocked_count = count( $unlocked_achievements );
+        $total_achievements = count( $achievement_definitions );
+        echo '<p class="dps-loyalty-achievements__summary">';
+        echo esc_html( sprintf( __( 'Você desbloqueou %d de %d conquistas', 'dps-client-portal' ), $unlocked_count, $total_achievements ) );
+        echo '</p>';
         echo '<div class="dps-loyalty-achievements__grid">';
         foreach ( $achievement_definitions as $key => $achievement ) {
             $unlocked = in_array( $key, $unlocked_achievements, true );
@@ -2785,16 +2855,17 @@ final class DPS_Client_Portal {
             echo '<div class="dps-loyalty-achievement__text">';
             echo '<p class="dps-loyalty-achievement__title">' . esc_html( $achievement['label'] ) . '</p>';
             echo '<p class="dps-loyalty-achievement__desc">' . esc_html( $achievement['description'] ) . '</p>';
-            echo '<span class="dps-loyalty-achievement__status">' . esc_html( $unlocked ? __( 'Conquistado', 'dps-client-portal' ) : __( 'Em progresso', 'dps-client-portal' ) ) . '</span>';
+            echo '<span class="dps-loyalty-achievement__status">' . esc_html( $unlocked ? __( 'Conquistado ✓', 'dps-client-portal' ) : __( 'Em progresso...', 'dps-client-portal' ) ) . '</span>';
             echo '</div>';
             echo '</div>';
         }
         echo '</div>';
         echo '</div>';
 
+        // Seção: Histórico de Movimentações
         echo '<div class="dps-loyalty-history" data-total="' . esc_attr( $total_logs ) . '" data-limit="' . esc_attr( $history_limit ) . '">';
         echo '<div class="dps-loyalty-history__header">';
-        echo '<h3>' . esc_html__( 'Últimas movimentações', 'dps-client-portal' ) . '</h3>';
+        echo '<h3>📊 ' . esc_html__( 'Histórico de Movimentações', 'dps-client-portal' ) . '</h3>';
         echo '</div>';
         if ( ! empty( $history ) ) {
             echo '<ul class="dps-loyalty-history__list">';
@@ -2802,17 +2873,21 @@ final class DPS_Client_Portal {
                 $context_label = DPS_Loyalty_API::get_context_label( $entry['context'] );
                 $formatted_date = date_i18n( 'd/m/Y H:i', strtotime( $entry['date'] ) );
                 $sign = ( 'add' === $entry['action'] || 'credit_add' === $entry['action'] ) ? '+' : '-';
+                $action_class = ( 'add' === $entry['action'] || 'credit_add' === $entry['action'] ) ? 'add' : 'redeem';
                 echo '<li class="dps-loyalty-history__item">';
-                echo '<div>'; 
+                echo '<div class="dps-loyalty-history__info">';
                 echo '<p class="dps-loyalty-history__context">' . esc_html( $context_label ) . '</p>';
                 echo '<span class="dps-loyalty-history__date">' . esc_html( $formatted_date ) . '</span>';
                 echo '</div>';
-                echo '<span class="dps-loyalty-history__points dps-loyalty-history__points--' . esc_attr( $entry['action'] ) . '">' . esc_html( $sign . $entry['points'] ) . '</span>';
+                echo '<span class="dps-loyalty-history__points dps-loyalty-history__points--' . esc_attr( $action_class ) . '">' . esc_html( $sign . number_format( $entry['points'], 0, ',', '.' ) ) . '</span>';
                 echo '</li>';
             }
             echo '</ul>';
         } else {
-            echo '<p class="dps-loyalty-history__empty">' . esc_html__( 'Sem movimentações ainda.', 'dps-client-portal' ) . '</p>';
+            echo '<div class="dps-loyalty-history__empty">';
+            echo '<span class="dps-loyalty-history__empty-icon">📭</span>';
+            echo '<p>' . esc_html__( 'Nenhuma movimentação ainda. Agende um serviço para começar a acumular pontos!', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
         }
 
         if ( $has_more ) {
@@ -2820,28 +2895,40 @@ final class DPS_Client_Portal {
         }
         echo '</div>';
 
+        // Seção: Resgatar Pontos
         if ( $portal_enabled ) {
             echo '<div class="dps-loyalty-redemption">';
-            echo '<h3>' . esc_html__( 'Resgatar pontos', 'dps-client-portal' ) . '</h3>';
-            echo '<p class="dps-loyalty-redemption__hint">' . esc_html( sprintf( __( 'Cada R$ 1,00 = %d pts. Máximo por resgate: %s', 'dps-client-portal' ), $points_per_real, $max_discount_display ) ) . '</p>';
+            echo '<h3>🎁 ' . esc_html__( 'Resgatar Pontos', 'dps-client-portal' ) . '</h3>';
+            echo '<p class="dps-loyalty-redemption__info">';
+            echo esc_html( sprintf( __( 'Conversão: %d pontos = R$ 1,00', 'dps-client-portal' ), $points_per_real ) );
+            if ( $max_discount_cents > 0 ) {
+                echo ' • ' . esc_html( sprintf( __( 'Máximo por resgate: R$ %s', 'dps-client-portal' ), $max_discount_display ) );
+            }
+            echo '</p>';
 
             if ( $max_points_available < max( $portal_min_points, 1 ) ) {
-                echo '<p class="dps-loyalty-redemption__empty">' . esc_html__( 'Você ainda não possui pontos suficientes para resgate.', 'dps-client-portal' ) . '</p>';
+                echo '<div class="dps-loyalty-redemption__unavailable">';
+                echo '<span class="dps-loyalty-redemption__unavailable-icon">⏳</span>';
+                echo '<p>' . esc_html( sprintf( __( 'Você precisa de pelo menos %d pontos para resgatar. Continue acumulando!', 'dps-client-portal' ), $portal_min_points ) ) . '</p>';
+                echo '</div>';
             } else {
                 $default_value = max( $portal_min_points, 1 );
                 $default_value = min( $default_value, $max_points_available );
                 echo '<form class="dps-loyalty-redemption-form" data-nonce="' . esc_attr( $loyalty_nonce ) . '" data-rate="' . esc_attr( $points_per_real ) . '" data-max-cents="' . esc_attr( $max_discount_cents ) . '" data-min-points="' . esc_attr( $portal_min_points ) . '" data-current-points="' . esc_attr( $points ) . '">';
+                echo '<div class="dps-loyalty-redemption__form-group">';
                 echo '<label for="dps-loyalty-points-input">' . esc_html__( 'Quantidade de pontos para converter', 'dps-client-portal' ) . '</label>';
                 echo '<input type="number" id="dps-loyalty-points-input" name="points_to_redeem" min="' . esc_attr( max( $portal_min_points, 1 ) ) . '" max="' . esc_attr( $max_points_available ) . '" step="1" value="' . esc_attr( $default_value ) . '" />';
-                echo '<button type="submit" class="dps-button-primary dps-loyalty-redeem-btn">' . esc_html__( 'Resgatar pontos', 'dps-client-portal' ) . '</button>';
-                echo '<p class="dps-loyalty-redemption__balance">' . esc_html__( 'Saldo em pontos: ', 'dps-client-portal' ) . '<strong data-loyalty-points>' . esc_html( $points ) . '</strong></p>';
+                echo '<small class="dps-loyalty-redemption__balance">' . esc_html__( 'Saldo disponível: ', 'dps-client-portal' ) . '<strong data-loyalty-points>' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</strong> ' . esc_html__( 'pontos', 'dps-client-portal' ) . '</small>';
+                echo '</div>';
+                echo '<button type="submit" class="dps-button-primary dps-loyalty-redeem-btn">🎁 ' . esc_html__( 'Resgatar Agora', 'dps-client-portal' ) . '</button>';
                 echo '<div class="dps-loyalty-redemption__feedback" aria-live="polite"></div>';
                 echo '</form>';
             }
             echo '</div>';
         } else {
             echo '<div class="dps-loyalty-redemption--disabled">';
-            echo '<p>' . esc_html__( 'Resgates pelo portal estão temporariamente indisponíveis. Fale com a equipe para utilizar seus pontos.', 'dps-client-portal' ) . '</p>';
+            echo '<span class="dps-loyalty-redemption--disabled-icon">ℹ️</span>';
+            echo '<p>' . esc_html__( 'O resgate de pontos pelo portal está temporariamente indisponível. Entre em contato com nossa equipe para utilizar seus pontos.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
 
