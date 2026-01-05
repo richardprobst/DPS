@@ -711,6 +711,9 @@ final class DPS_Client_Portal {
                         update_post_meta( $review_id, '_dps_review_client_id', $client_id );
                         update_post_meta( $review_id, '_dps_review_source', 'portal' );
 
+                        // Invalida cache de satisfação
+                        delete_transient( 'dps_satisfaction_rate' );
+
                         // Hook: Após enviar avaliação interna
                         do_action( 'dps_portal_after_internal_review', $review_id, $client_id, $rating, $comment );
 
@@ -2881,6 +2884,9 @@ final class DPS_Client_Portal {
     /**
      * Calcula taxa de satisfação (avaliações 4-5 estrelas).
      *
+     * Utiliza cache via transient para evitar recálculos frequentes.
+     * Cache é invalidado a cada 10 minutos ou quando uma nova avaliação é adicionada.
+     *
      * @return int Percentual de satisfação (0-100).
      */
     private function calculate_satisfaction_rate() {
@@ -2888,26 +2894,42 @@ final class DPS_Client_Portal {
             return 0;
         }
 
+        // Tenta obter do cache
+        $cache_key = 'dps_satisfaction_rate';
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return (int) $cached;
+        }
+
         $total_reviews = get_posts( [
             'post_type'      => 'dps_groomer_review',
             'post_status'    => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => 200, // Limite razoável para performance
             'fields'         => 'ids',
         ] );
 
         if ( empty( $total_reviews ) ) {
+            set_transient( $cache_key, 0, 10 * MINUTE_IN_SECONDS );
             return 0;
         }
 
         $positive_count = 0;
         foreach ( $total_reviews as $review_id ) {
-            $rating = (int) get_post_meta( $review_id, '_dps_review_rating', true );
+            $rating_raw = get_post_meta( $review_id, '_dps_review_rating', true );
+            // Trata casos onde meta pode ser vazio ou inválido
+            $rating = is_numeric( $rating_raw ) ? (int) $rating_raw : 0;
             if ( $rating >= 4 ) {
                 $positive_count++;
             }
         }
 
-        return (int) round( ( $positive_count / count( $total_reviews ) ) * 100 );
+        $satisfaction = (int) round( ( $positive_count / count( $total_reviews ) ) * 100 );
+
+        // Armazena em cache por 10 minutos
+        set_transient( $cache_key, $satisfaction, 10 * MINUTE_IN_SECONDS );
+
+        return $satisfaction;
     }
 
     /**
