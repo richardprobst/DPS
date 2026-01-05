@@ -43,6 +43,9 @@
         initChatWidget();
         handleQuickActions(); // Fase 3: Quick Actions na aba Início
         handleReviewForm(); // Fase 5: Formulário de avaliação interna
+        handlePetHistoryTabs(); // Revisão Jan/2026: Navegação por pet na aba Histórico
+        handleRepeatService(); // Revisão Jan/2026: Botão repetir serviço via WhatsApp
+        handleExportPdf(); // Funcionalidade 3: Export PDF
     }
 
     /**
@@ -1571,6 +1574,152 @@ window.DPSSkeleton = (function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="dps-btn-icon">⏳</span><span class="dps-btn-text">Enviando...</span>';
             }
+        });
+    }
+
+    /**
+     * Gerencia navegação por tabs de pets na aba Histórico dos Pets
+     * Revisão de layout: Janeiro 2026
+     */
+    function handlePetHistoryTabs() {
+        var petTabs = document.querySelectorAll('.dps-pet-tab');
+        var petPanels = document.querySelectorAll('.dps-pet-timeline-panel');
+
+        if (petTabs.length === 0 || petPanels.length === 0) {
+            return;
+        }
+
+        petTabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var targetPetId = this.getAttribute('data-pet-id');
+
+                // Valida que targetPetId é um número (IDs de post são numéricos)
+                if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+                    return;
+                }
+
+                // Remove classe ativa de todas as tabs
+                petTabs.forEach(function(t) {
+                    t.classList.remove('dps-pet-tab--active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+
+                // Adiciona classe ativa à tab clicada
+                this.classList.add('dps-pet-tab--active');
+                this.setAttribute('aria-selected', 'true');
+
+                // Esconde todos os painéis
+                petPanels.forEach(function(panel) {
+                    panel.classList.add('dps-pet-timeline-panel--hidden');
+                    panel.setAttribute('aria-hidden', 'true');
+                });
+
+                // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
+                var escapedPetId = CSS.escape(targetPetId);
+                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
+                if (targetPanel) {
+                    targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
+                    targetPanel.setAttribute('aria-hidden', 'false');
+
+                    // Scroll suave para o painel
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+    }
+
+    /**
+     * Gerencia botão "Repetir Serviço" para abrir WhatsApp
+     * Revisão de layout: Janeiro 2026
+     */
+    function handleRepeatService() {
+        // Handler para botões que não são links diretos (fallback)
+        var repeatButtons = document.querySelectorAll('button.dps-btn-repeat-service');
+
+        repeatButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var services = this.getAttribute('data-services');
+                var petId = this.getAttribute('data-pet-id');
+                
+                // Tenta parsear serviços
+                var servicesText = 'serviços';
+                try {
+                    var servicesArray = JSON.parse(services);
+                    if (Array.isArray(servicesArray) && servicesArray.length > 0) {
+                        servicesText = servicesArray.join(', ');
+                    }
+                } catch (e) {
+                    // Mantém texto genérico
+                }
+
+                // Monta mensagem
+                var message = 'Olá! Gostaria de agendar novamente os serviços: ' + servicesText + ' para meu pet.';
+                
+                // Obtém número do WhatsApp (usa valor padrão se não encontrado)
+                var whatsappNumber = '5515991606299'; // Valor padrão
+                if (typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber) {
+                    whatsappNumber = dpsPortal.whatsappNumber;
+                }
+
+                // Valida que o número contém apenas dígitos e + (previne URL manipulation)
+                if (!/^[\d+]+$/.test(whatsappNumber)) {
+                    console.warn('WhatsApp number contains invalid characters');
+                    return;
+                }
+
+                // Abre WhatsApp
+                var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message);
+                window.open(whatsappUrl, '_blank');
+            });
+        });
+    }
+
+    /**
+     * Gerencia botão "Exportar Histórico (PDF)"
+     * Funcionalidade 3: Export para PDF
+     */
+    function handleExportPdf() {
+        var exportButtons = document.querySelectorAll('.dps-btn-export-pdf');
+
+        if (exportButtons.length === 0) {
+            return;
+        }
+
+        exportButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var petId = this.getAttribute('data-pet-id');
+                var petName = this.getAttribute('data-pet-name');
+
+                // Valida que petId é um número
+                if (!petId || !/^\d+$/.test(petId)) {
+                    console.warn('Invalid pet ID for export');
+                    return;
+                }
+
+                // Obtém dados do portal
+                var clientId = '';
+                var nonce = '';
+
+                if (typeof dpsPortal !== 'undefined') {
+                    clientId = dpsPortal.clientId;
+                    nonce = dpsPortal.exportPdfNonce;
+                }
+
+                if (!clientId || !nonce) {
+                    console.error('Missing client ID or nonce for export');
+                    return;
+                }
+
+                // Monta URL para a página de impressão
+                var printUrl = dpsPortal.ajaxUrl + 
+                    '?action=dps_export_pet_history_pdf' +
+                    '&pet_id=' + encodeURIComponent(petId) +
+                    '&client_id=' + encodeURIComponent(clientId) +
+                    '&nonce=' + encodeURIComponent(nonce);
+
+                // Abre em nova janela (mantendo controles do browser para acessibilidade)
+                window.open(printUrl, '_blank', 'width=900,height=700');
+            });
         });
     }
 })();

@@ -127,6 +127,10 @@ final class DPS_Client_Portal {
         
         // AJAX handler para auto-envio de link de acesso por email
         add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
+
+        // AJAX handler para export PDF do histórico do pet (Funcionalidade 3)
+        add_action( 'wp_ajax_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
+        add_action( 'wp_ajax_nopriv_dps_export_pet_history_pdf', [ $this, 'ajax_export_pet_history_pdf' ] );
     }
 
     /**
@@ -1183,6 +1187,7 @@ final class DPS_Client_Portal {
             'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
             'chatNonce' => wp_create_nonce( 'dps_portal_chat' ),
             'requestNonce' => wp_create_nonce( 'dps_portal_appointment_request' ),
+            'exportPdfNonce' => wp_create_nonce( 'dps_portal_export_pdf' ),
             'clientId' => $client_id,
             'loyalty' => [
                 'nonce' => wp_create_nonce( 'dps_portal_loyalty' ),
@@ -4854,6 +4859,38 @@ Equipe %4$s', 'dps-client-portal' ),
             'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
         ] );
     }
+
+    /**
+     * AJAX handler para exportar histórico do pet em formato para impressão/PDF.
+     * Funcionalidade 3: Export para PDF
+     *
+     * @since 2.5.0
+     */
+    public function ajax_export_pet_history_pdf() {
+        // Verifica nonce
+        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_portal_export_pdf' ) ) {
+            wp_die( esc_html__( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ), 403 );
+        }
+
+        // Obtém IDs
+        $pet_id    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
+        $client_id = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
+
+        if ( 0 === $pet_id || 0 === $client_id ) {
+            wp_die( esc_html__( 'Parâmetros inválidos.', 'dps-client-portal' ), 400 );
+        }
+
+        // Verifica se o pet pertence ao cliente (segurança)
+        $pet_client_id = get_post_meta( $pet_id, 'pet_client_id', true );
+        if ( absint( $pet_client_id ) !== $client_id ) {
+            wp_die( esc_html__( 'Acesso não autorizado.', 'dps-client-portal' ), 403 );
+        }
+
+        // Renderiza página de impressão
+        $renderer = DPS_Portal_Renderer::get_instance();
+        $renderer->render_pet_history_print_page( $pet_id, $client_id );
+        exit;
+    }
     
     /**
      * Obtém o IP do cliente com suporte a proxies
@@ -4975,6 +5012,7 @@ Equipe %4$s', 'dps-client-portal' ),
     /**
      * Renderiza timeline de serviços por pet.
      * Fase 4: Timeline de Serviços
+     * Revisão completa do layout: Janeiro 2026
      *
      * @since 2.4.0
      * @param int $client_id ID do cliente.
@@ -4982,22 +5020,49 @@ Equipe %4$s', 'dps-client-portal' ),
     private function render_pets_timeline( $client_id ) {
         $pet_repo = DPS_Pet_Repository::get_instance();
         $pets     = $pet_repo->get_pets_by_client( $client_id );
+        $renderer = DPS_Portal_Renderer::get_instance();
+
+        // Renderiza cabeçalho da aba com métricas globais
+        $renderer->render_pet_history_header( $client_id, $pets );
 
         if ( empty( $pets ) ) {
-            echo '<section class="dps-portal-section">';
-            echo '<div class="dps-empty-state">';
-            echo '<div class="dps-empty-state__icon">🐾</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Nenhum pet cadastrado ainda.', 'dps-client-portal' ) . '</div>';
+            echo '<section class="dps-portal-section dps-portal-pet-history-empty">';
+            echo '<div class="dps-empty-state dps-empty-state--large">';
+            echo '<div class="dps-empty-state__illustration">🐾</div>';
+            echo '<h3 class="dps-empty-state__title">' . esc_html__( 'Nenhum pet cadastrado ainda', 'dps-client-portal' ) . '</h3>';
+            echo '<p class="dps-empty-state__message">' . esc_html__( 'Cadastre seus pets para acompanhar o histórico de serviços realizados.', 'dps-client-portal' ) . '</p>';
+            // CTA para contato
+            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet.', 'dps-client-portal' ) );
+            } else {
+                $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . urlencode( 'Olá! Gostaria de cadastrar meu pet.' );
+            }
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action button button-primary">';
+            echo '💬 ' . esc_html__( 'Falar com a Equipe', 'dps-client-portal' );
+            echo '</a>';
             echo '</div>';
             echo '</section>';
             return;
         }
 
-        $renderer = DPS_Portal_Renderer::get_instance();
-
-        foreach ( $pets as $pet ) {
-            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10 );
+        // Renderiza navegação por abas quando há múltiplos pets
+        if ( count( $pets ) > 1 ) {
+            $renderer->render_pet_tabs_navigation( $pets );
         }
+
+        // Container principal com timelines dos pets
+        echo '<div class="dps-pet-timelines-container">';
+        
+        foreach ( $pets as $index => $pet ) {
+            $is_first = ( 0 === $index );
+            $renderer->render_pet_service_timeline( $pet->ID, $client_id, 10, $is_first, count( $pets ) > 1 );
+        }
+        
+        echo '</div>';
     }
 
     /**
