@@ -16,6 +16,20 @@ if ( ! class_exists( 'DPS_Client_Portal' ) ) :
 final class DPS_Client_Portal {
 
     /**
+     * Status que indicam agendamento finalizado ou cancelado.
+     * Usado para separar próximos agendamentos do histórico.
+     *
+     * @since 3.1.0
+     * @var array
+     */
+    private const COMPLETED_STATUSES = [
+        'finalizado',
+        'finalizado e pago',
+        'finalizado_pago',
+        'cancelado',
+    ];
+
+    /**
      * Única instância da classe.
      *
      * @var DPS_Client_Portal|null
@@ -2402,7 +2416,7 @@ final class DPS_Client_Portal {
                 
                 // Agendamentos futuros: data >= hoje E status não finalizado/cancelado
                 if ( $date && strtotime( $date ) >= strtotime( $today ) && 
-                     ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+                     ! in_array( $status, self::COMPLETED_STATUSES, true ) ) {
                     $upcoming[] = $appt;
                 } else {
                     $history[] = $appt;
@@ -2509,13 +2523,8 @@ final class DPS_Client_Portal {
         $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
         $services = get_post_meta( $appt->ID, 'appointment_services', true );
         
-        $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
-        
-        if ( is_array( $services ) ) {
-            $services_text = implode( ', ', array_map( 'esc_html', $services ) );
-        } else {
-            $services_text = '';
-        }
+        $pet_name      = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+        $services_text = $this->format_services_text( $services );
         
         // Determina badge de urgência
         $badge_class = '';
@@ -2550,6 +2559,7 @@ final class DPS_Client_Portal {
             echo '<div class="dps-appointment-card__pet">🐾 ' . esc_html( $pet_name ) . '</div>';
         }
         if ( $services_text ) {
+            // services_text já está escapado via format_services_text()
             echo '<div class="dps-appointment-card__services">✂️ ' . $services_text . '</div>';
         }
         if ( $status ) {
@@ -2664,13 +2674,8 @@ final class DPS_Client_Portal {
         $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
         $services = get_post_meta( $appt->ID, 'appointment_services', true );
         
-        $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
-        
-        if ( is_array( $services ) ) {
-            $services_text = implode( ', ', array_map( 'esc_html', $services ) );
-        } else {
-            $services_text = '';
-        }
+        $pet_name      = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+        $services_text = $this->format_services_text( $services );
         
         $status_class = $this->get_status_class( $status );
         
@@ -2678,6 +2683,7 @@ final class DPS_Client_Portal {
         echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '' ) . '</td>';
         echo '<td data-label="' . esc_attr__( 'Horário', 'dps-client-portal' ) . '">' . esc_html( $time ) . '</td>';
         echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
+        // services_text já está escapado via format_services_text()
         echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services_text . '</td>';
         echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( ucfirst( $status ) ) . '</span></td>';
         
@@ -2743,6 +2749,20 @@ final class DPS_Client_Portal {
         ];
         
         return isset( $status_map[ $status_lower ] ) ? $status_map[ $status_lower ] : 'dps-status-badge--default';
+    }
+    
+    /**
+     * Formata lista de serviços para exibição.
+     *
+     * @since 3.1.0
+     * @param mixed $services Array de serviços ou string vazia.
+     * @return string Serviços formatados e escapados.
+     */
+    private function format_services_text( $services ) {
+        if ( is_array( $services ) && ! empty( $services ) ) {
+            return implode( ', ', array_map( 'esc_html', $services ) );
+        }
+        return '';
     }
 
     /**
