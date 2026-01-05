@@ -83,6 +83,24 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Groomers Add-on - Modernização do Layout da Aba Equipe (v1.8.4)**
+
+- **Header da seção modernizado**: Título com ícone 👥 e subtítulo descritivo seguindo padrão global DPS.
+- **Sub-abas estilo card**: Navegação por sub-abas (Equipe, Relatórios, Comissões) agora usa cards visuais com ícone, título e descrição, similar ao padrão da Agenda.
+- **Cards de estatísticas da equipe**: Novo bloco de métricas exibindo total de profissionais, ativos, inativos e freelancers no topo da sub-aba Equipe.
+- **Breakdown por função**: Exibição de badges com contagem por tipo de profissional (Groomer, Banhista, Auxiliar, Recepção).
+- **~300 linhas de CSS**: Novas seções 20-24 no `groomers-admin.css` com estilos para header, sub-abas card, estatísticas e melhorias visuais.
+- **Métodos helper**: Adicionados `get_team_stats()` e `render_team_stats_cards()` para calcular e renderizar estatísticas da equipe.
+
+#### Changed (Alterado)
+
+**Groomers Add-on - Melhorias Visuais (v1.8.4)**
+
+- **Avatares com cores por função**: Gradientes de cores específicos para cada tipo de profissional (azul=groomer, verde=banhista, amarelo=auxiliar, roxo=recepção).
+- **Tooltip no status dot**: Indicador de status agora exibe tooltip CSS puro ao passar o mouse.
+- **Empty state melhorado**: Mensagem de lista vazia com visual mais limpo e centralizado.
+- **Accordions do formulário**: Melhor feedback visual quando aberto com borda azul.
+
 **Finance Add-on - Modernização Visual da Aba Financeiro (v1.8.0)**
 
 - **Layout moderno padronizado**: Aba Financeiro agora segue o padrão visual global do sistema DPS com classes `dps-surface` e `dps-section-title`.

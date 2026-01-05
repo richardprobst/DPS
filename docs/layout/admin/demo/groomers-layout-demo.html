@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS - Aba Groomers - Demo Layout Modernizado</title>
+    <style>
+        /* Reset e base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 20px;
+            color: #374151;
+        }
+        
+        /* Variáveis CSS */
+        :root {
+            --dps-groomers-primary: #0ea5e9;
+            --dps-groomers-primary-hover: #0284c7;
+            --dps-groomers-success: #10b981;
+            --dps-groomers-warning: #f59e0b;
+            --dps-groomers-danger: #ef4444;
+            --dps-groomers-gray-50: #f9fafb;
+            --dps-groomers-gray-100: #f3f4f6;
+            --dps-groomers-gray-200: #e5e7eb;
+            --dps-groomers-gray-400: #9ca3af;
+            --dps-groomers-gray-500: #6b7280;
+            --dps-groomers-gray-700: #374151;
+            --dps-groomers-radius: 8px;
+            --dps-groomers-radius-sm: 4px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        
+        /* Header da Seção */
+        .dps-section-header--groomers {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--dps-groomers-gray-200);
+        }
+        
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dps-groomers-gray-700);
+            margin: 0 0 8px 0;
+        }
+        
+        .dps-section-title__icon {
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        
+        .dps-section-header__subtitle {
+            margin: 0;
+            color: var(--dps-groomers-gray-500);
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        /* Sub-abas Estilo Card */
+        .dps-groomers-subnav--cards {
+            margin-bottom: 24px;
+        }
+        
+        .dps-subnav-list--cards {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            list-style: none;
+        }
+        
+        .dps-subnav-item--card {
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
+        }
+        
+        .dps-subnav-link--card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #ffffff;
+            border: 2px solid var(--dps-groomers-gray-200);
+            border-radius: var(--dps-groomers-radius);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .dps-subnav-link--card:hover {
+            border-color: var(--dps-groomers-primary);
+            background: #f0f9ff;
+        }
+        
+        .dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link--card {
+            border-color: var(--dps-groomers-primary);
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.1) 100%);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+        }
+        
+        .dps-subnav-link__icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            background: var(--dps-groomers-gray-100);
+            border-radius: var(--dps-groomers-radius);
+            flex-shrink: 0;
+        }
+        
+        .dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link__icon {
+            background: rgba(14, 165, 233, 0.15);
+        }
+        
+        .dps-subnav-link__content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .dps-subnav-link__title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dps-groomers-gray-700);
+        }
+        
+        .dps-subnav-link__desc {
+            font-size: 12px;
+            color: var(--dps-groomers-gray-500);
+            font-weight: 400;
+        }
+        
+        .dps-subnav-item--card.dps-subnav-item--active .dps-subnav-link__title {
+            color: var(--dps-groomers-primary);
+        }
+        
+        /* Cards de Estatísticas */
+        .dps-team-stats {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--dps-groomers-gray-50);
+            border: 1px solid var(--dps-groomers-gray-200);
+            border-radius: var(--dps-groomers-radius);
+        }
+        
+        .dps-team-stats__grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .dps-team-stat-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #ffffff;
+            border: 1px solid var(--dps-groomers-gray-200);
+            border-radius: var(--dps-groomers-radius);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .dps-team-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .dps-team-stat-card__icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            border-radius: var(--dps-groomers-radius);
+            flex-shrink: 0;
+        }
+        
+        .dps-team-stat-card--total .dps-team-stat-card__icon { background: rgba(14, 165, 233, 0.1); }
+        .dps-team-stat-card--active .dps-team-stat-card__icon { background: rgba(16, 185, 129, 0.1); }
+        .dps-team-stat-card--inactive .dps-team-stat-card__icon { background: rgba(156, 163, 175, 0.15); }
+        .dps-team-stat-card--freelancer .dps-team-stat-card__icon { background: rgba(139, 92, 246, 0.1); }
+        
+        .dps-team-stat-card__content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .dps-team-stat-card__value {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        
+        .dps-team-stat-card--total .dps-team-stat-card__value { color: var(--dps-groomers-primary); }
+        .dps-team-stat-card--active .dps-team-stat-card__value { color: var(--dps-groomers-success); }
+        .dps-team-stat-card--inactive .dps-team-stat-card__value { color: var(--dps-groomers-gray-400); }
+        .dps-team-stat-card--freelancer .dps-team-stat-card__value { color: #8b5cf6; }
+        
+        .dps-team-stat-card__label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--dps-groomers-gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .dps-team-stats__breakdown {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--dps-groomers-gray-200);
+        }
+        
+        .dps-team-stats__breakdown-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dps-groomers-gray-500);
+        }
+        
+        .dps-team-stats__breakdown-items {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* Badges */
+        .dps-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 9999px;
+        }
+        
+        .dps-badge--type-groomer { background: #dbeafe; color: #1e40af; }
+        .dps-badge--type-banhista { background: #d1fae5; color: #065f46; }
+        .dps-badge--type-auxiliar { background: #fef3c7; color: #92400e; }
+        .dps-badge--type-recepcao { background: #f3e8ff; color: #6b21a8; }
+        
+        /* Layout de duas colunas */
+        .dps-groomers-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+        }
+        
+        /* Card */
+        .dps-card {
+            background: #ffffff;
+            border: 1px solid var(--dps-groomers-gray-200);
+            border-radius: var(--dps-groomers-radius);
+            overflow: hidden;
+        }
+        
+        .dps-card__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--dps-groomers-gray-50);
+            border-bottom: 1px solid var(--dps-groomers-gray-200);
+        }
+        
+        .dps-card__title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dps-groomers-gray-700);
+        }
+        
+        .dps-card__count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dps-groomers-primary);
+            background: rgba(14, 165, 233, 0.1);
+            border-radius: 12px;
+        }
+        
+        .dps-card__body {
+            padding: 20px;
+        }
+        
+        /* Tabela */
+        .dps-groomers-table--compact {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .dps-groomers-table--compact th {
+            padding: 10px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--dps-groomers-gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--dps-groomers-gray-200);
+            background: var(--dps-groomers-gray-50);
+        }
+        
+        .dps-groomers-table--compact td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--dps-groomers-gray-700);
+            border-bottom: 1px solid var(--dps-groomers-gray-100);
+        }
+        
+        .dps-groomers-table--compact tbody tr:hover {
+            background: var(--dps-groomers-gray-50);
+        }
+        
+        /* User cell */
+        .dps-user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .dps-user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .dps-user-avatar--groomer { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .dps-user-avatar--banhista { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        
+        .dps-user-info {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .dps-user-name {
+            font-weight: 600;
+            color: var(--dps-groomers-gray-700);
+        }
+        
+        .dps-user-commission {
+            font-size: 11px;
+            color: var(--dps-groomers-gray-400);
+            background: var(--dps-groomers-gray-100);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        .dps-tag--freelancer {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        
+        /* Status dot */
+        .dps-status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .dps-status-dot--active {
+            background: var(--dps-groomers-success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        
+        .dps-status-dot--inactive {
+            background: var(--dps-groomers-gray-400);
+            box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.2);
+        }
+        
+        /* Action buttons */
+        .dps-actions-cell {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+        }
+        
+        .dps-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: transparent;
+            border: 1px solid var(--dps-groomers-gray-200);
+            border-radius: var(--dps-groomers-radius-sm);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .dps-action-btn:hover {
+            background: var(--dps-groomers-gray-100);
+            border-color: var(--dps-groomers-gray-400);
+        }
+        
+        .dps-text-center { text-align: center; }
+        .dps-text-right { text-align: right; }
+        
+        /* Responsivo */
+        @media (max-width: 1024px) {
+            .dps-groomers-layout { grid-template-columns: 1fr; }
+            .dps-team-stats__grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 640px) {
+            .dps-team-stats__grid { grid-template-columns: 1fr; }
+            .dps-subnav-list--cards { flex-direction: column; }
+            .dps-subnav-item--card { max-width: none; }
+        }
+        
+        /* Demo info */
+        .demo-info {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--dps-groomers-primary);
+        }
+        
+        .demo-info h3 {
+            margin: 0 0 8px;
+            color: var(--dps-groomers-primary);
+        }
+        
+        .demo-info p {
+            margin: 0;
+            color: var(--dps-groomers-gray-500);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-info">
+        <h3>📐 Demo: Layout Modernizado da Aba Groomers v1.8.4</h3>
+        <p>Esta é uma demonstração offline do novo layout. Mostra o header, sub-abas estilo card, cards de estatísticas e tabela de profissionais.</p>
+    </div>
+    
+    <div class="demo-container">
+        <!-- Header da Seção -->
+        <div class="dps-section-header dps-section-header--groomers">
+            <h2 class="dps-section-title">
+                <span class="dps-section-title__icon">👥</span>
+                Gestão de Equipe
+            </h2>
+            <p class="dps-section-header__subtitle">Cadastre profissionais, acompanhe produtividade e gerencie comissões da sua equipe.</p>
+        </div>
+        
+        <!-- Sub-abas Estilo Card -->
+        <nav class="dps-groomers-subnav dps-groomers-subnav--cards">
+            <ul class="dps-subnav-list dps-subnav-list--cards">
+                <li class="dps-subnav-item dps-subnav-item--card dps-subnav-item--active">
+                    <a href="#" class="dps-subnav-link dps-subnav-link--card">
+                        <span class="dps-subnav-link__icon">👥</span>
+                        <span class="dps-subnav-link__content">
+                            <span class="dps-subnav-link__title">Equipe</span>
+                            <span class="dps-subnav-link__desc">Cadastro e listagem</span>
+                        </span>
+                    </a>
+                </li>
+                <li class="dps-subnav-item dps-subnav-item--card">
+                    <a href="#" class="dps-subnav-link dps-subnav-link--card">
+                        <span class="dps-subnav-link__icon">📊</span>
+                        <span class="dps-subnav-link__content">
+                            <span class="dps-subnav-link__title">Relatórios</span>
+                            <span class="dps-subnav-link__desc">Produtividade individual</span>
+                        </span>
+                    </a>
+                </li>
+                <li class="dps-subnav-item dps-subnav-item--card">
+                    <a href="#" class="dps-subnav-link dps-subnav-link--card">
+                        <span class="dps-subnav-link__icon">💰</span>
+                        <span class="dps-subnav-link__content">
+                            <span class="dps-subnav-link__title">Comissões</span>
+                            <span class="dps-subnav-link__desc">Cálculo de pagamentos</span>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Cards de Estatísticas -->
+        <div class="dps-team-stats">
+            <div class="dps-team-stats__grid">
+                <div class="dps-team-stat-card dps-team-stat-card--total">
+                    <div class="dps-team-stat-card__icon">👥</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value">8</span>
+                        <span class="dps-team-stat-card__label">Total de Profissionais</span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--active">
+                    <div class="dps-team-stat-card__icon">✅</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value">6</span>
+                        <span class="dps-team-stat-card__label">Ativos</span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--inactive">
+                    <div class="dps-team-stat-card__icon">⏸️</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value">2</span>
+                        <span class="dps-team-stat-card__label">Inativos</span>
+                    </div>
+                </div>
+                <div class="dps-team-stat-card dps-team-stat-card--freelancer">
+                    <div class="dps-team-stat-card__icon">🎯</div>
+                    <div class="dps-team-stat-card__content">
+                        <span class="dps-team-stat-card__value">3</span>
+                        <span class="dps-team-stat-card__label">Freelancers</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dps-team-stats__breakdown">
+                <span class="dps-team-stats__breakdown-label">Por função:</span>
+                <div class="dps-team-stats__breakdown-items">
+                    <span class="dps-badge dps-badge--type-groomer">Groomer: 4</span>
+                    <span class="dps-badge dps-badge--type-banhista">Banhista: 2</span>
+                    <span class="dps-badge dps-badge--type-auxiliar">Auxiliar: 1</span>
+                    <span class="dps-badge dps-badge--type-recepcao">Recepção: 1</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Layout de duas colunas (simplificado para demo) -->
+        <div class="dps-groomers-layout">
+            <!-- Card de Formulário (placeholder) -->
+            <div class="dps-card">
+                <div class="dps-card__header">
+                    <h3 class="dps-card__title">➕ Novo Profissional</h3>
+                </div>
+                <div class="dps-card__body">
+                    <p style="color: var(--dps-groomers-gray-500); font-style: italic;">
+                        Formulário de cadastro com campos: nome, função, email, telefone, credenciais e configurações.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Card de Listagem -->
+            <div class="dps-card">
+                <div class="dps-card__header">
+                    <h3 class="dps-card__title">📋 Profissionais</h3>
+                    <span class="dps-card__count">8</span>
+                </div>
+                <div style="padding: 0;">
+                    <table class="dps-groomers-table--compact">
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Função</th>
+                                <th class="dps-text-center">Status</th>
+                                <th class="dps-text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="dps-user-cell">
+                                        <div class="dps-user-avatar dps-user-avatar--groomer">J</div>
+                                        <div class="dps-user-info">
+                                            <strong class="dps-user-name">João Silva</strong>
+                                            <span class="dps-tag dps-tag--freelancer">F</span>
+                                            <span class="dps-user-commission">15%</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dps-badge dps-badge--type-groomer">Groomer</span></td>
+                                <td class="dps-text-center">
+                                    <span class="dps-status-dot dps-status-dot--active" title="Ativo"></span>
+                                </td>
+                                <td class="dps-text-right">
+                                    <div class="dps-actions-cell">
+                                        <button class="dps-action-btn">✏️</button>
+                                        <button class="dps-action-btn">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="dps-user-cell">
+                                        <div class="dps-user-avatar dps-user-avatar--banhista">M</div>
+                                        <div class="dps-user-info">
+                                            <strong class="dps-user-name">Maria Santos</strong>
+                                            <span class="dps-user-commission">10%</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dps-badge dps-badge--type-banhista">Banhista</span></td>
+                                <td class="dps-text-center">
+                                    <span class="dps-status-dot dps-status-dot--active" title="Ativo"></span>
+                                </td>
+                                <td class="dps-text-right">
+                                    <div class="dps-actions-cell">
+                                        <button class="dps-action-btn">✏️</button>
+                                        <button class="dps-action-btn">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr style="opacity: 0.6;">
+                                <td>
+                                    <div class="dps-user-cell">
+                                        <div class="dps-user-avatar dps-user-avatar--groomer">C</div>
+                                        <div class="dps-user-info">
+                                            <strong class="dps-user-name">Carlos Oliveira</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dps-badge dps-badge--type-groomer">Groomer</span></td>
+                                <td class="dps-text-center">
+                                    <span class="dps-status-dot dps-status-dot--inactive" title="Inativo"></span>
+                                </td>
+                                <td class="dps-text-right">
+                                    <div class="dps-actions-cell">
+                                        <button class="dps-action-btn">✏️</button>
+                                        <button class="dps-action-btn">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
