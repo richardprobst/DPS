@@ -1095,6 +1095,7 @@ html {
     background: #fef2f2;
     color: #dc2626;
     animation: pulse-badge 2s ease-in-out infinite;
+    will-change: transform;
 }
 
 .dps-appointment-card__badge--tomorrow {

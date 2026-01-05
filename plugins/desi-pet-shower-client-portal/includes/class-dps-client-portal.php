@@ -1748,7 +1748,7 @@ final class DPS_Client_Portal {
             if ( $address ) {
                 $query = urlencode( $address );
                 $url   = 'https://www.google.com/maps/search/?api=1&query=' . $query;
-                echo '<a href="' . esc_url( $url ) . '" target="_blank" class="dps-appointment-card__action-btn">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
+                echo '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" class="dps-appointment-card__action-btn">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
             }
             
             // Link para adicionar ao calendário
@@ -2084,12 +2084,17 @@ final class DPS_Client_Portal {
             $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
             $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
         } else {
-            $whatsapp_number = get_option( 'dps_whatsapp_number', '5515991606299' );
-            if ( class_exists( 'DPS_Phone_Helper' ) ) {
-                $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            // Usa número configurado nas opções do sistema (sem fallback hardcoded)
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            if ( empty( $whatsapp_number ) ) {
+                $whatsapp_url = '';
+            } else {
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $whatsapp_text = urlencode( __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' ) );
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
             }
-            $whatsapp_text = urlencode( __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' ) );
-            $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
         }
         
         // Link de avaliação
@@ -2100,11 +2105,13 @@ final class DPS_Client_Portal {
         
         echo '<div class="dps-quick-actions">';
         
-        // Botão: Agendar Serviço
-        echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-quick-action dps-quick-action--primary">';
-        echo '<span class="dps-quick-action__icon">📅</span>';
-        echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar Serviço', 'dps-client-portal' ) . '</span>';
-        echo '</a>';
+        // Botão: Agendar Serviço (apenas se WhatsApp configurado)
+        if ( ! empty( $whatsapp_url ) ) {
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action dps-quick-action--primary">';
+            echo '<span class="dps-quick-action__icon">📅</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar Serviço', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
         
         // Botão: Falar Conosco
         echo '<button type="button" class="dps-quick-action dps-quick-action--chat" data-action="open-chat">';
@@ -2114,7 +2121,7 @@ final class DPS_Client_Portal {
         
         // Botão: Avaliar (se configurado)
         if ( $review_url ) {
-            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener" class="dps-quick-action">';
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action">';
             echo '<span class="dps-quick-action__icon">⭐</span>';
             echo '<span class="dps-quick-action__text">' . esc_html__( 'Avaliar Atendimento', 'dps-client-portal' ) . '</span>';
             echo '</a>';
@@ -2131,6 +2138,13 @@ final class DPS_Client_Portal {
     }
 
     /**
+     * Número máximo de pets exibidos no resumo da aba Início.
+     *
+     * @var int
+     */
+    const PETS_SUMMARY_LIMIT = 6;
+
+    /**
      * Renderiza um resumo visual dos pets do cliente.
      * Mostra foto, nome e próximo agendamento de cada pet.
      *
@@ -2142,7 +2156,7 @@ final class DPS_Client_Portal {
         $pets = get_posts( [
             'post_type'      => 'dps_pet',
             'post_status'    => 'publish',
-            'posts_per_page' => 6, // Limita a 6 pets na visão resumida
+            'posts_per_page' => self::PETS_SUMMARY_LIMIT,
             'meta_key'       => 'owner_id',
             'meta_value'     => $client_id,
         ] );

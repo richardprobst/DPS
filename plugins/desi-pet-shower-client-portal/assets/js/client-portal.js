@@ -64,13 +64,20 @@
 
         // Botões de ação rápida que navegam para tabs
         var tabButtons = document.querySelectorAll('.dps-quick-action[data-tab], .dps-link-button[data-tab]');
+        // Lista de tabs válidas para prevenir DOM-based XSS
+        var validTabs = ['inicio', 'fidelidade', 'avaliacoes', 'mensagens', 'agendamentos', 'historico-pets', 'galeria', 'dados'];
+        
         tabButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 var targetTab = this.getAttribute('data-tab');
-                if (!targetTab) return;
+                
+                // Valida se a tab é uma das tabs conhecidas
+                if (!targetTab || validTabs.indexOf(targetTab) === -1) {
+                    return;
+                }
 
-                // Encontra e clica na tab correspondente
+                // Encontra e clica na tab correspondente (selector seguro após validação)
                 var tabLink = document.querySelector('.dps-portal-tabs__link[data-tab="' + targetTab + '"]');
                 if (tabLink) {
                     tabLink.click();
