@@ -83,6 +83,33 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Stats Add-on - Modernização Completa do Layout da Aba Estatísticas (v1.5.0)**
+
+- **Header da seção padronizado**: Título com ícone 📊 e subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).
+- **Layout empilhado com cards**: Substituído `<details>` colapsáveis por cards `.dps-surface` empilhados verticalmente, seguindo padrão de outras abas (Pets, Clientes, Serviços).
+- **Filtro de período em card dedicado**: Seletor de datas agora usa `.dps-surface--neutral` com título 📅 e layout responsivo melhorado.
+- **Métricas financeiras com ícones**: Cards de receita, despesas e lucro agora exibem emojis contextuais (💵, 💸, 📊, 📈/📉).
+- **Estados vazios amigáveis**: Mensagens para dados ausentes agora usam `.dps-stats-empty-state` com ícones centralizados.
+- **Tabela de inativos melhorada**: Botão WhatsApp agora usa estilo pill com background verde (#ecfdf5), melhor legibilidade da data e destaque para pets nunca atendidos.
+- **~550 linhas de CSS refatorado**: Novo `stats-addon.css` v1.5.0 com layout stack, cards com hover animation, métricas coloridas por tipo e espaçamento consistente.
+
+#### Changed (Alterado)
+
+**Stats Add-on - Melhorias de UX (v1.5.0)**
+
+- **Descrições explicativas em cada seção**: Todos os cards de métricas agora incluem `.dps-surface__description` explicando o propósito e fonte dos dados.
+- **Cores semânticas nas métricas**: Assinaturas ativas (verde), pendentes (amarelo), valor em aberto (vermelho) seguindo padrão de cores de status do Visual Style Guide.
+- **Hierarquia visual clara**: Seções organizadas em ordem de importância: Visão Geral → Indicadores Avançados → Financeiro → Assinaturas → Serviços → Pets → Inativos.
+- **Remoção de estilos inline**: Substituídos todos os `style=""` por classes CSS dedicadas para manutenibilidade e performance.
+- **Formatação de código PHP**: Templates HTML agora usam indentação consistente e comentários explicativos.
+
+#### Fixed (Corrigido)
+
+**Stats Add-on - Correções de Compatibilidade (v1.5.0)**
+
+- **Mensagem de erro da API formatada**: Aviso de "API não disponível" agora usa `.dps-surface--warning` em vez de HTML inline.
+- **Botões com estilos consistentes**: `.button-primary` e `.button-secondary` agora herdam corretamente os estilos globais do DPS.
+
 **Groomers Add-on - Modernização do Layout da Aba Equipe (v1.8.4)**
 
 - **Header da seção modernizado**: Título com ícone 👥 e subtítulo descritivo seguindo padrão global DPS.

@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.4.0' );
+define( 'DPS_STATS_VERSION', '1.5.0' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -268,10 +268,17 @@ class DPS_Stats_Addon {
             ob_start();
             ?>
             <div class="dps-section" id="dps-section-estatisticas">
-                <h3><?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?></h3>
-                <div style="padding: 20px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-                    <p style="margin: 0; color: #92400e;">
-                        ⚠️ <?php esc_html_e( 'A API de estatísticas não foi carregada. Verifique se o plugin base DPS está ativo.', 'dps-stats-addon' ); ?>
+                <h2 class="dps-section-title">
+                    <span class="dps-section-title__icon">📊</span>
+                    <?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?>
+                </h2>
+                <div class="dps-surface dps-surface--warning">
+                    <div class="dps-surface__title">
+                        <span>⚠️</span>
+                        <?php esc_html_e( 'API não disponível', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'A API de estatísticas não foi carregada. Verifique se o plugin base DPS está ativo.', 'dps-stats-addon' ); ?>
                     </p>
                 </div>
             </div>
@@ -338,37 +345,117 @@ class DPS_Stats_Addon {
         ob_start();
         ?>
         <div class="dps-section" id="dps-section-estatisticas">
-            <h3><?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?></h3>
+            <!-- Header padronizado seguindo padrão das outras abas -->
+            <h2 class="dps-section-title">
+                <span class="dps-section-title__icon">📊</span>
+                <?php esc_html_e( 'Dashboard de Estatísticas', 'dps-stats-addon' ); ?>
+            </h2>
+            <p class="dps-section-header__subtitle">
+                <?php esc_html_e( 'Acompanhe métricas operacionais e financeiras do seu pet shop. Compare períodos, analise tendências e exporte relatórios.', 'dps-stats-addon' ); ?>
+            </p>
+            
+            <!-- Filtro de período -->
             <?php $this->render_date_filter( $start_date, $end_date ); ?>
-            <?php $this->render_metric_cards( $comparison, $new_clients, $cancel_rate ); ?>
             
-            <h4 style="margin-top: 24px; margin-bottom: 12px; color: #374151; font-size: 18px; font-weight: 600;"><?php esc_html_e( 'Indicadores Avançados', 'dps-stats-addon' ); ?></h4>
-            <?php $this->render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ); ?>
-            
-            <details class="dps-stats-section" open>
-                <summary><span class="dps-stats-section__icon">📊</span> <?php esc_html_e( 'Métricas Financeiras', 'dps-stats-addon' ); ?></summary>
-                <div class="dps-stats-section__content"><?php $this->render_financial_metrics( $comparison ); ?></div>
-            </details>
+            <!-- Cards de métricas principais -->
+            <div class="dps-stats-stacked">
+                <!-- Seção: Visão Geral -->
+                <div class="dps-surface dps-surface--info">
+                    <div class="dps-surface__title">
+                        <span>📈</span>
+                        <?php esc_html_e( 'Visão Geral do Período', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php
+                        printf(
+                            /* translators: %1$s: data inicial, %2$s: data final */
+                            esc_html__( 'Métricas principais de %1$s a %2$s com variação em relação ao período anterior.', 'dps-stats-addon' ),
+                            esc_html( date_i18n( 'd/m/Y', strtotime( $start_date ) ) ),
+                            esc_html( date_i18n( 'd/m/Y', strtotime( $end_date ) ) )
+                        );
+                        ?>
+                    </p>
+                    <?php $this->render_metric_cards( $comparison, $new_clients, $cancel_rate ); ?>
+                </div>
+                
+                <!-- Seção: Indicadores Avançados -->
+                <div class="dps-surface dps-surface--neutral">
+                    <div class="dps-surface__title">
+                        <span>🎯</span>
+                        <?php esc_html_e( 'Indicadores Avançados', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'KPIs detalhados para análise de retenção, conversão e operação do negócio.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_advanced_kpis( $return_rate, $no_show_rate, $overdue_revenue, $conversion_rate, $recurring_clients ); ?>
+                </div>
+                
+                <!-- Seção: Métricas Financeiras -->
+                <div class="dps-surface dps-surface--success">
+                    <div class="dps-surface__title">
+                        <span>💰</span>
+                        <?php esc_html_e( 'Métricas Financeiras', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'Receita, despesas e lucro do período selecionado. Requer o Finance Add-on para dados completos.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_financial_metrics( $comparison ); ?>
+                </div>
 
-            <details class="dps-stats-section" open>
-                <summary><span class="dps-stats-section__icon">📋</span> <?php esc_html_e( 'Assinaturas', 'dps-stats-addon' ); ?></summary>
-                <div class="dps-stats-section__content"><?php $this->render_subscription_metrics( $subs_data ); ?></div>
-            </details>
+                <!-- Seção: Assinaturas -->
+                <div class="dps-surface dps-surface--info">
+                    <div class="dps-surface__title">
+                        <span>📋</span>
+                        <?php esc_html_e( 'Assinaturas', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'Status das assinaturas e planos recorrentes cadastrados no sistema.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_subscription_metrics( $subs_data ); ?>
+                </div>
 
-            <details class="dps-stats-section" open>
-                <summary><span class="dps-stats-section__icon">🛁</span> <?php esc_html_e( 'Serviços Mais Solicitados', 'dps-stats-addon' ); ?></summary>
-                <div class="dps-stats-section__content"><?php $this->render_top_services( $top_services ); ?></div>
-            </details>
+                <!-- Seção: Serviços Mais Solicitados -->
+                <div class="dps-surface dps-surface--neutral">
+                    <div class="dps-surface__title">
+                        <span>🛁</span>
+                        <?php esc_html_e( 'Serviços Mais Solicitados', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'Ranking dos serviços com maior demanda no período, útil para planejamento de estoque e equipe.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_top_services( $top_services ); ?>
+                </div>
 
-            <details class="dps-stats-section" open>
-                <summary><span class="dps-stats-section__icon">🐾</span> <?php esc_html_e( 'Distribuição de Pets', 'dps-stats-addon' ); ?></summary>
-                <div class="dps-stats-section__content"><?php $this->render_pet_distribution( $species, $top_breeds ); ?></div>
-            </details>
+                <!-- Seção: Distribuição de Pets -->
+                <div class="dps-surface dps-surface--neutral">
+                    <div class="dps-surface__title">
+                        <span>🐾</span>
+                        <?php esc_html_e( 'Distribuição de Pets', 'dps-stats-addon' ); ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'Perfil dos pets atendidos por espécie e raça, auxiliando na personalização de serviços.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_pet_distribution( $species, $top_breeds ); ?>
+                </div>
 
-            <details class="dps-stats-section" open>
-                <summary><span class="dps-stats-section__icon">⚠️</span> <?php printf( esc_html__( 'Pets Sem Atendimento (%d)', 'dps-stats-addon' ), count( $inactive_pets ) ); ?></summary>
-                <div class="dps-stats-section__content"><?php $this->render_inactive_pets_table( $inactive_pets ); ?></div>
-            </details>
+                <!-- Seção: Pets Sem Atendimento -->
+                <div class="dps-surface dps-surface--warning">
+                    <div class="dps-surface__title">
+                        <span>⏰</span>
+                        <?php
+                        printf(
+                            /* translators: %d: número de pets inativos */
+                            esc_html__( 'Pets Sem Atendimento (%d)', 'dps-stats-addon' ),
+                            count( $inactive_pets )
+                        );
+                        ?>
+                    </div>
+                    <p class="dps-surface__description">
+                        <?php esc_html_e( 'Pets que não foram atendidos há mais de 30 dias. Use esta lista para campanhas de reengajamento via WhatsApp.', 'dps-stats-addon' ); ?>
+                    </p>
+                    <?php $this->render_inactive_pets_table( $inactive_pets ); ?>
+                </div>
+            </div>
         </div>
         <?php
         return ob_get_clean();
@@ -385,22 +472,36 @@ class DPS_Stats_Addon {
 
     private function render_date_filter( $start_date, $end_date ) {
         ?>
-        <div class="dps-stats-filter">
-            <form method="get" style="display:contents;">
-                <?php foreach ( $_GET as $k => $v ) : if ( in_array( $k, [ 'stats_start', 'stats_end' ], true ) ) continue; ?>
-                    <input type="hidden" name="<?php echo esc_attr( $k ); ?>" value="<?php echo esc_attr( $v ); ?>">
-                <?php endforeach; ?>
-                <label><?php esc_html_e( 'De', 'dps-stats-addon' ); ?> <input type="date" name="stats_start" value="<?php echo esc_attr( $start_date ); ?>"></label>
-                <label><?php esc_html_e( 'Até', 'dps-stats-addon' ); ?> <input type="date" name="stats_end" value="<?php echo esc_attr( $end_date ); ?>"></label>
-                <div class="dps-stats-actions">
-                    <button type="submit" class="button button-primary"><?php esc_html_e( 'Aplicar', 'dps-stats-addon' ); ?></button>
-                </div>
-            </form>
-            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;">
-                <?php wp_nonce_field( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' ); ?>
-                <input type="hidden" name="action" value="dps_clear_stats_cache">
-                <button type="submit" class="button button-secondary"><?php esc_html_e( '🔄 Atualizar dados', 'dps-stats-addon' ); ?></button>
-            </form>
+        <div class="dps-surface dps-surface--neutral dps-stats-filter-card">
+            <div class="dps-surface__title">
+                <span>📅</span>
+                <?php esc_html_e( 'Período de Análise', 'dps-stats-addon' ); ?>
+            </div>
+            <div class="dps-stats-filter">
+                <form method="get" class="dps-stats-filter-form">
+                    <?php foreach ( $_GET as $k => $v ) : if ( in_array( $k, [ 'stats_start', 'stats_end' ], true ) ) continue; ?>
+                        <input type="hidden" name="<?php echo esc_attr( $k ); ?>" value="<?php echo esc_attr( $v ); ?>">
+                    <?php endforeach; ?>
+                    <div class="dps-stats-filter-fields">
+                        <label class="dps-stats-filter-label">
+                            <span><?php esc_html_e( 'De', 'dps-stats-addon' ); ?></span>
+                            <input type="date" name="stats_start" value="<?php echo esc_attr( $start_date ); ?>">
+                        </label>
+                        <label class="dps-stats-filter-label">
+                            <span><?php esc_html_e( 'Até', 'dps-stats-addon' ); ?></span>
+                            <input type="date" name="stats_end" value="<?php echo esc_attr( $end_date ); ?>">
+                        </label>
+                    </div>
+                    <div class="dps-stats-actions">
+                        <button type="submit" class="button button-primary"><?php esc_html_e( '🔍 Aplicar Filtro', 'dps-stats-addon' ); ?></button>
+                    </div>
+                </form>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dps-stats-cache-form">
+                    <?php wp_nonce_field( 'dps_clear_stats_cache', 'dps_clear_stats_cache_nonce' ); ?>
+                    <input type="hidden" name="action" value="dps_clear_stats_cache">
+                    <button type="submit" class="button button-secondary"><?php esc_html_e( '🔄 Atualizar Dados', 'dps-stats-addon' ); ?></button>
+                </form>
+            </div>
         </div>
         <?php
     }
@@ -574,11 +675,11 @@ class DPS_Stats_Addon {
         
         if ( $finance_inactive ) {
             ?>
-            <div style="padding: 16px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 16px;">
-                <p style="margin: 0; color: #92400e; font-weight: 500;">
+            <div class="dps-stats-notice dps-stats-notice--warning">
+                <p class="dps-stats-notice__title">
                     ⚠️ <?php esc_html_e( 'Finance Add-on não está ativo.', 'dps-stats-addon' ); ?>
                 </p>
-                <p style="margin: 8px 0 0; color: #92400e; font-size: 13px;">
+                <p class="dps-stats-notice__text">
                     <?php esc_html_e( 'Ative o Finance Add-on para visualizar métricas financeiras (receita, despesas, lucro).', 'dps-stats-addon' ); ?>
                 </p>
             </div>
@@ -587,13 +688,42 @@ class DPS_Stats_Addon {
         }
         ?>
         <div class="dps-stats-metrics-list">
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['revenue'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Receita Total', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['expenses'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Despesas', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['profit'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Lucro Líquido', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value"><?php echo $variation['profit'] >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation['profit'], 1 ) ); ?>%</span><span class="dps-stats-metric__label"><?php esc_html_e( 'Variação vs. Anterior', 'dps-stats-addon' ); ?></span></div>
+            <div class="dps-stats-metric dps-stats-metric--success">
+                <span class="dps-stats-metric__icon">💵</span>
+                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['revenue'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Receita Total', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--danger">
+                <span class="dps-stats-metric__icon">💸</span>
+                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['expenses'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Despesas', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--primary">
+                <span class="dps-stats-metric__icon">📊</span>
+                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['profit'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Lucro Líquido', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--<?php echo $variation['profit'] >= 0 ? 'success' : 'danger'; ?>">
+                <span class="dps-stats-metric__icon"><?php echo $variation['profit'] >= 0 ? '📈' : '📉'; ?></span>
+                <span class="dps-stats-metric__value"><?php echo $variation['profit'] >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation['profit'], 1 ) ); ?>%</span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Variação vs. Anterior', 'dps-stats-addon' ); ?></span>
+            </div>
         </div>
-        <p style="color: #6b7280; font-size: 13px; margin-top: 12px;"><?php printf( esc_html__( 'Período anterior: %s a %s', 'dps-stats-addon' ), date_i18n( 'd/m/Y', strtotime( $previous['start_date'] ) ), date_i18n( 'd/m/Y', strtotime( $previous['end_date'] ) ) ); ?></p>
-        <div class="dps-stats-export-bar"><a href="<?php echo esc_url( $this->get_export_url( 'metrics' ) ); ?>" class="dps-stats-export-btn">📥 <?php esc_html_e( 'Exportar Métricas CSV', 'dps-stats-addon' ); ?></a></div>
+        <p class="dps-stats-period-note">
+            <?php
+            printf(
+                /* translators: %1$s: data inicial do período anterior, %2$s: data final do período anterior */
+                esc_html__( 'Comparando com período anterior: %1$s a %2$s', 'dps-stats-addon' ),
+                esc_html( date_i18n( 'd/m/Y', strtotime( $previous['start_date'] ) ) ),
+                esc_html( date_i18n( 'd/m/Y', strtotime( $previous['end_date'] ) ) )
+            );
+            ?>
+        </p>
+        <div class="dps-stats-export-bar">
+            <a href="<?php echo esc_url( $this->get_export_url( 'metrics' ) ); ?>" class="dps-stats-export-btn">
+                📥 <?php esc_html_e( 'Exportar Métricas CSV', 'dps-stats-addon' ); ?>
+            </a>
+        </div>
         <?php
     }
 
@@ -662,17 +792,42 @@ class DPS_Stats_Addon {
         $data = $this->ensure_array_defaults( $data, $default_data );
         ?>
         <div class="dps-stats-metrics-list">
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value" style="color: #10b981;"><?php echo esc_html( $data['paid'] ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Ativas', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value" style="color: #f59e0b;"><?php echo esc_html( $data['pending'] ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Pendentes', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $data['revenue'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Receita no Período', 'dps-stats-addon' ); ?></span></div>
-            <div class="dps-stats-metric"><span class="dps-stats-metric__value" style="color: #ef4444;">R$ <?php echo esc_html( number_format( $data['open_value'], 2, ',', '.' ) ); ?></span><span class="dps-stats-metric__label"><?php esc_html_e( 'Valor em Aberto', 'dps-stats-addon' ); ?></span></div>
+            <div class="dps-stats-metric dps-stats-metric--success">
+                <span class="dps-stats-metric__icon">✅</span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( $data['paid'] ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Ativas', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--warning">
+                <span class="dps-stats-metric__icon">⏳</span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( $data['pending'] ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Pendentes', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--primary">
+                <span class="dps-stats-metric__icon">💰</span>
+                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $data['revenue'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Receita no Período', 'dps-stats-addon' ); ?></span>
+            </div>
+            <div class="dps-stats-metric dps-stats-metric--danger">
+                <span class="dps-stats-metric__icon">⚠️</span>
+                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $data['open_value'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__label"><?php esc_html_e( 'Valor em Aberto', 'dps-stats-addon' ); ?></span>
+            </div>
         </div>
         <?php
     }
 
     private function render_top_services( $services ) {
-        if ( empty( $services ) ) { echo '<p>' . esc_html__( 'Nenhum serviço registrado no período.', 'dps-stats-addon' ) . '</p>'; return; }
-        $labels = array_column( $services, 'title' ); $counts = array_column( $services, 'count' );
+        if ( empty( $services ) ) {
+            ?>
+            <div class="dps-stats-empty-state">
+                <span class="dps-stats-empty-state__icon">🛁</span>
+                <p><?php esc_html_e( 'Nenhum serviço registrado no período.', 'dps-stats-addon' ); ?></p>
+            </div>
+            <?php
+            return;
+        }
+        $labels = array_column( $services, 'title' );
+        $counts = array_column( $services, 'count' );
         ?>
         <div class="dps-stats-chart-row">
             <div class="dps-stats-chart-item">
@@ -681,10 +836,28 @@ class DPS_Stats_Addon {
             </div>
             <div class="dps-stats-chart-item">
                 <div class="dps-stats-chart-title"><?php esc_html_e( 'Detalhamento', 'dps-stats-addon' ); ?></div>
-                <ul style="margin:0; padding-left: 20px;"><?php foreach ( $services as $svc ) : ?><li style="margin-bottom: 8px;"><strong><?php echo esc_html( $svc['title'] ); ?>:</strong> <?php echo esc_html( $svc['count'] ); ?> (<?php echo esc_html( $svc['percentage'] ); ?>%)</li><?php endforeach; ?></ul>
+                <ul class="dps-stats-detail-list">
+                    <?php foreach ( $services as $svc ) : ?>
+                        <li class="dps-stats-detail-item">
+                            <span class="dps-stats-detail-name"><?php echo esc_html( $svc['title'] ); ?></span>
+                            <span class="dps-stats-detail-value"><?php echo esc_html( $svc['count'] ); ?> <small>(<?php echo esc_html( $svc['percentage'] ); ?>%)</small></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </div>
-        <script>document.addEventListener('DOMContentLoaded', function() { if (typeof DPSStats !== 'undefined') { DPSStats.initServicesChart('dps-stats-services-chart', <?php echo wp_json_encode( $labels ); ?>, <?php echo wp_json_encode( $counts ); ?>, '<?php echo esc_js( __( 'Atendimentos', 'dps-stats-addon' ) ); ?>'); } });</script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof DPSStats !== 'undefined') {
+                    DPSStats.initServicesChart(
+                        'dps-stats-services-chart',
+                        <?php echo wp_json_encode( $labels ); ?>,
+                        <?php echo wp_json_encode( $counts ); ?>,
+                        '<?php echo esc_js( __( 'Atendimentos', 'dps-stats-addon' ) ); ?>'
+                    );
+                }
+            });
+        </script>
         <?php
     }
 
@@ -695,44 +868,139 @@ class DPS_Stats_Addon {
                 <div class="dps-stats-chart-title"><?php esc_html_e( 'Distribuição por Espécie', 'dps-stats-addon' ); ?></div>
                 <?php if ( ! empty( $species ) ) : ?>
                     <canvas id="dps-stats-species-chart" height="200"></canvas>
-                    <script>document.addEventListener('DOMContentLoaded', function() { if (typeof DPSStats !== 'undefined') { DPSStats.initPieChart('dps-stats-species-chart', <?php echo wp_json_encode( array_column( $species, 'species' ) ); ?>, <?php echo wp_json_encode( array_column( $species, 'count' ) ); ?>); } });</script>
-                <?php else : ?><p><?php esc_html_e( 'Sem dados no período.', 'dps-stats-addon' ); ?></p><?php endif; ?>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            if (typeof DPSStats !== 'undefined') {
+                                DPSStats.initPieChart(
+                                    'dps-stats-species-chart',
+                                    <?php echo wp_json_encode( array_column( $species, 'species' ) ); ?>,
+                                    <?php echo wp_json_encode( array_column( $species, 'count' ) ); ?>
+                                );
+                            }
+                        });
+                    </script>
+                <?php else : ?>
+                    <div class="dps-stats-empty-state dps-stats-empty-state--small">
+                        <span class="dps-stats-empty-state__icon">🐾</span>
+                        <p><?php esc_html_e( 'Sem dados no período.', 'dps-stats-addon' ); ?></p>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="dps-stats-chart-item">
                 <div class="dps-stats-chart-title"><?php esc_html_e( 'Top 5 Raças', 'dps-stats-addon' ); ?></div>
                 <?php if ( ! empty( $breeds ) ) : ?>
-                    <div class="dps-stats-distribution"><?php foreach ( $breeds as $breed ) : ?>
-                        <div class="dps-stats-distribution-item">
-                            <span class="dps-stats-distribution-label"><?php echo esc_html( $breed['breed'] ); ?></span>
-                            <div class="dps-stats-distribution-bar"><div class="dps-stats-distribution-fill" style="width: <?php echo esc_attr( $breed['percentage'] ); ?>%;"></div></div>
-                            <span class="dps-stats-distribution-value"><?php echo esc_html( $breed['count'] ); ?></span>
-                        </div>
-                    <?php endforeach; ?></div>
-                <?php else : ?><p><?php esc_html_e( 'Sem dados no período.', 'dps-stats-addon' ); ?></p><?php endif; ?>
+                    <div class="dps-stats-distribution">
+                        <?php foreach ( $breeds as $breed ) : ?>
+                            <div class="dps-stats-distribution-item">
+                                <span class="dps-stats-distribution-label"><?php echo esc_html( $breed['breed'] ); ?></span>
+                                <div class="dps-stats-distribution-bar">
+                                    <div class="dps-stats-distribution-fill" style="width: <?php echo esc_attr( $breed['percentage'] ); ?>%;"></div>
+                                </div>
+                                <span class="dps-stats-distribution-value"><?php echo esc_html( $breed['count'] ); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else : ?>
+                    <div class="dps-stats-empty-state dps-stats-empty-state--small">
+                        <span class="dps-stats-empty-state__icon">🐕</span>
+                        <p><?php esc_html_e( 'Sem dados no período.', 'dps-stats-addon' ); ?></p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php
     }
 
     private function render_inactive_pets_table( $inactive_pets ) {
-        if ( empty( $inactive_pets ) ) { echo '<p style="color: #10b981;">✅ ' . esc_html__( 'Todos os pets atendidos recentemente!', 'dps-stats-addon' ) . '</p>'; return; }
+        if ( empty( $inactive_pets ) ) {
+            ?>
+            <div class="dps-stats-empty-state dps-stats-empty-state--success">
+                <span class="dps-stats-empty-state__icon">✅</span>
+                <p><?php esc_html_e( 'Excelente! Todos os pets foram atendidos recentemente.', 'dps-stats-addon' ); ?></p>
+            </div>
+            <?php
+            return;
+        }
         ?>
-        <div class="dps-stats-table-wrapper"><table class="dps-stats-table"><thead><tr><th><?php esc_html_e( 'Pet', 'dps-stats-addon' ); ?></th><th><?php esc_html_e( 'Cliente', 'dps-stats-addon' ); ?></th><th><?php esc_html_e( 'Último Atendimento', 'dps-stats-addon' ); ?></th><th><?php esc_html_e( 'Ação', 'dps-stats-addon' ); ?></th></tr></thead><tbody>
-        <?php foreach ( array_slice( $inactive_pets, 0, 20 ) as $item ) : 
-            $pet = $item['pet']; $client = $item['client']; $last_date = $item['last_date'];
-            $last_fmt = $last_date ? date_i18n( 'd/m/Y', strtotime( $last_date ) ) : __( 'Nunca', 'dps-stats-addon' );
-            $phone_raw = get_post_meta( $client->ID, 'client_phone', true ); $whats_url = '';
-            if ( $phone_raw ) {
-                $message = sprintf( __( 'Olá %s! Notamos que %s está há mais de 30 dias sem um banho/tosa. Que tal agendar um horário conosco? 😊', 'dps-stats-addon' ), $client->post_title, $pet->post_title );
-                if ( class_exists( 'DPS_WhatsApp_Helper' ) ) { $whats_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw, $message ); }
-                else { $number = preg_replace( '/\D+/', '', $phone_raw ); if ( strlen( $number ) >= 10 && substr( $number, 0, 2 ) !== '55' ) $number = '55' . $number; $whats_url = 'https://wa.me/' . $number . '?text=' . rawurlencode( $message ); }
-            }
-        ?>
-            <tr><td><?php echo esc_html( $pet->post_title ); ?></td><td><?php echo esc_html( $client->post_title ); ?></td><td><?php echo esc_html( $last_fmt ); ?></td><td><?php if ( $whats_url ) : ?><a href="<?php echo esc_url( $whats_url ); ?>" target="_blank" class="dps-whatsapp-link">💬 WhatsApp</a><?php else : ?>-<?php endif; ?></td></tr>
-        <?php endforeach; ?>
-        </tbody></table></div>
-        <?php if ( count( $inactive_pets ) > 20 ) : ?><p style="color: #6b7280; font-size: 13px;"><?php printf( esc_html__( 'Exibindo 20 de %d pets. Exporte o CSV para ver todos.', 'dps-stats-addon' ), count( $inactive_pets ) ); ?></p><?php endif; ?>
-        <div class="dps-stats-export-bar"><a href="<?php echo esc_url( $this->get_export_url( 'inactive' ) ); ?>" class="dps-stats-export-btn">📥 <?php esc_html_e( 'Exportar Inativos CSV', 'dps-stats-addon' ); ?></a></div>
+        <div class="dps-stats-table-wrapper">
+            <table class="dps-stats-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'Pet', 'dps-stats-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Cliente', 'dps-stats-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Último Atendimento', 'dps-stats-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Ação', 'dps-stats-addon' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( array_slice( $inactive_pets, 0, 20 ) as $item ) :
+                        $pet = $item['pet'];
+                        $client = $item['client'];
+                        $last_date = $item['last_date'];
+                        $last_fmt = $last_date ? date_i18n( 'd/m/Y', strtotime( $last_date ) ) : __( 'Nunca', 'dps-stats-addon' );
+                        $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
+                        $whats_url = '';
+                        
+                        if ( $phone_raw ) {
+                            $message = sprintf(
+                                /* translators: %1$s: nome do cliente, %2$s: nome do pet */
+                                __( 'Olá %1$s! Notamos que %2$s está há mais de 30 dias sem um banho/tosa. Que tal agendar um horário conosco? 😊', 'dps-stats-addon' ),
+                                $client->post_title,
+                                $pet->post_title
+                            );
+                            if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+                                $whats_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw, $message );
+                            } else {
+                                $number = preg_replace( '/\D+/', '', $phone_raw );
+                                if ( strlen( $number ) >= 10 && substr( $number, 0, 2 ) !== '55' ) {
+                                    $number = '55' . $number;
+                                }
+                                $whats_url = 'https://wa.me/' . $number . '?text=' . rawurlencode( $message );
+                            }
+                        }
+                        ?>
+                        <tr>
+                            <td>
+                                <span class="dps-stats-pet-name">🐾 <?php echo esc_html( $pet->post_title ); ?></span>
+                            </td>
+                            <td><?php echo esc_html( $client->post_title ); ?></td>
+                            <td>
+                                <span class="dps-stats-date <?php echo ! $last_date ? 'dps-stats-date--never' : ''; ?>">
+                                    <?php echo esc_html( $last_fmt ); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php if ( $whats_url ) : ?>
+                                    <a href="<?php echo esc_url( $whats_url ); ?>" target="_blank" class="dps-whatsapp-link">
+                                        💬 WhatsApp
+                                    </a>
+                                <?php else : ?>
+                                    <span class="dps-stats-no-action">—</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <?php if ( count( $inactive_pets ) > 20 ) : ?>
+            <p class="dps-stats-table-note">
+                <?php
+                printf(
+                    /* translators: %d: número total de pets inativos */
+                    esc_html__( 'Exibindo 20 de %d pets. Exporte o CSV para ver todos.', 'dps-stats-addon' ),
+                    count( $inactive_pets )
+                );
+                ?>
+            </p>
+        <?php endif; ?>
+        
+        <div class="dps-stats-export-bar">
+            <a href="<?php echo esc_url( $this->get_export_url( 'inactive' ) ); ?>" class="dps-stats-export-btn">
+                📥 <?php esc_html_e( 'Exportar Inativos CSV', 'dps-stats-addon' ); ?>
+            </a>
+        </div>
         <?php
     }
 

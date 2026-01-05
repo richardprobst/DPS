@@ -1,11 +1,44 @@
 /**
  * Stats Add-on - Estilos do Dashboard
  *
- * Segue o padrão visual minimalista do DPS.
+ * Segue o padrão visual minimalista do DPS conforme VISUAL_STYLE_GUIDE.md.
  * Cores: #0ea5e9 (azul primário), #10b981 (verde sucesso), #ef4444 (vermelho erro), #f59e0b (amarelo aviso)
  *
  * @since 1.1.0
+ * @since 1.5.0 Atualizado para seguir padrão moderno do sistema (dps-surface, dps-section-title)
  */
+
+/* ==========================================================================
+   Layout Stack (empilhamento vertical de cards)
+   ========================================================================== */
+
+.dps-stats-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Herança de estilos base do DPS para consistência com outras abas */
+#dps-section-estatisticas .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+#dps-section-estatisticas .dps-section-title__icon {
+    font-size: 28px;
+}
+
+#dps-section-estatisticas .dps-section-header__subtitle {
+    margin: 0 0 24px 0;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.5;
+}
 
 /* ==========================================================================
    Cards de Métricas
@@ -13,19 +46,25 @@
 
 .dps-stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
-    margin-bottom: 24px;
+    margin-top: 16px;
 }
 
 .dps-stats-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dps-stats-card--primary {
@@ -57,6 +96,9 @@
 }
 
 .dps-stats-card__label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font-size: 14px;
     color: #6b7280;
     margin-top: 4px;
@@ -68,7 +110,7 @@
     right: 16px;
     font-size: 13px;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 12px;
 }
 
@@ -88,95 +130,190 @@
 }
 
 /* ==========================================================================
-   Filtro de Datas
+   Filtro de Período
    ========================================================================== */
+
+.dps-stats-filter-card {
+    margin-bottom: 24px;
+}
 
 .dps-stats-filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-    padding: 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 24px;
+    gap: 16px;
+    align-items: flex-end;
 }
 
-.dps-stats-filter label {
+.dps-stats-filter-form {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    flex: 1;
+}
+
+.dps-stats-filter-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.dps-stats-filter-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     font-size: 14px;
+    font-weight: 500;
     color: #374151;
 }
 
-.dps-stats-filter input[type="date"] {
-    padding: 8px 12px;
+.dps-stats-filter-label input[type="date"] {
+    padding: 10px 14px;
     border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 14px;
+    min-width: 150px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dps-stats-filter input[type="date"]:focus {
+.dps-stats-filter-label input[type="date"]:focus {
     border-color: #0ea5e9;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-}
-
-.dps-stats-filter .button {
-    margin-left: auto;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .dps-stats-actions {
     display: flex;
     gap: 8px;
-    margin-left: auto;
+}
+
+.dps-stats-cache-form {
+    margin: 0;
 }
 
 /* ==========================================================================
-   Seções Colapsáveis
+   Métricas com Ícones
    ========================================================================== */
 
-.dps-stats-section {
+.dps-stats-metrics-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.dps-stats-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 20px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+
+.dps-stats-metric:hover {
+    transform: translateY(-1px);
+}
+
+.dps-stats-metric--success {
+    border-left: 3px solid #10b981;
+}
+
+.dps-stats-metric--danger {
+    border-left: 3px solid #ef4444;
+}
+
+.dps-stats-metric--warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.dps-stats-metric--primary {
+    border-left: 3px solid #0ea5e9;
+}
+
+.dps-stats-metric__icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.dps-stats-metric__value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-stats-metric__label {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-stats-period-note {
+    margin: 16px 0 0;
+    padding: 12px 16px;
+    background: #f9fafb;
     border-radius: 8px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   Avisos e Estados Vazios
+   ========================================================================== */
+
+.dps-stats-notice {
+    padding: 16px 20px;
+    border-radius: 10px;
     margin-bottom: 16px;
 }
 
-.dps-stats-section summary {
-    padding: 16px 20px;
-    font-size: 16px;
+.dps-stats-notice--warning {
+    background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+    border: 1px solid #f59e0b;
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-stats-notice__title {
+    margin: 0 0 8px 0;
     font-weight: 600;
-    color: #374151;
-    cursor: pointer;
+    color: #92400e;
+}
+
+.dps-stats-notice__text {
+    margin: 0;
+    font-size: 13px;
+    color: #92400e;
+}
+
+.dps-stats-empty-state {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    list-style: none;
+    justify-content: center;
+    padding: 32px 20px;
+    text-align: center;
+    background: #f9fafb;
+    border-radius: 10px;
 }
 
-.dps-stats-section summary::-webkit-details-marker {
-    display: none;
+.dps-stats-empty-state--small {
+    padding: 24px 16px;
 }
 
-.dps-stats-section summary::before {
-    content: "▶";
-    font-size: 10px;
-    transition: transform 0.2s;
+.dps-stats-empty-state--success {
+    background: linear-gradient(to right, #ecfdf5 0%, #f9fafb 100%);
 }
 
-.dps-stats-section[open] summary::before {
-    transform: rotate(90deg);
+.dps-stats-empty-state__icon {
+    font-size: 36px;
+    margin-bottom: 12px;
 }
 
-.dps-stats-section__content {
-    padding: 0 20px 20px;
-}
-
-.dps-stats-section__icon {
-    font-size: 18px;
+.dps-stats-empty-state p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
 }
 
 /* ==========================================================================
@@ -192,21 +329,58 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
-    margin: 20px 0;
+    margin: 16px 0;
 }
 
 .dps-stats-chart-item {
-    background: #f9fafb;
+    background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 10px;
+    padding: 20px;
 }
 
 .dps-stats-chart-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Lista de detalhamento */
+.dps-stats-detail-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dps-stats-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dps-stats-detail-item:last-child {
+    border-bottom: none;
+}
+
+.dps-stats-detail-name {
+    font-weight: 500;
+    color: #374151;
+}
+
+.dps-stats-detail-value {
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+.dps-stats-detail-value small {
+    color: #6b7280;
+    font-weight: 400;
+    margin-left: 4px;
 }
 
 /* ==========================================================================
@@ -216,6 +390,8 @@
 .dps-stats-table-wrapper {
     overflow-x: auto;
     margin: 16px 0;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
 }
 
 .dps-stats-table {
@@ -228,7 +404,7 @@
     background: #f9fafb;
     font-weight: 600;
     text-align: left;
-    padding: 12px 16px;
+    padding: 14px 16px;
     color: #374151;
     border-bottom: 2px solid #e5e7eb;
     text-transform: uppercase;
@@ -237,13 +413,34 @@
 }
 
 .dps-stats-table td {
-    padding: 12px 16px;
+    padding: 14px 16px;
     border-bottom: 1px solid #e5e7eb;
     color: #374151;
 }
 
 .dps-stats-table tbody tr:hover {
     background: #f9fafb;
+}
+
+.dps-stats-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dps-stats-pet-name {
+    font-weight: 500;
+}
+
+.dps-stats-date {
+    color: #6b7280;
+}
+
+.dps-stats-date--never {
+    color: #f59e0b;
+    font-style: italic;
+}
+
+.dps-stats-no-action {
+    color: #d1d5db;
 }
 
 .dps-stats-table .dps-action-link {
@@ -263,40 +460,23 @@
     color: #10b981;
     text-decoration: none;
     font-weight: 500;
+    padding: 6px 12px;
+    background: #ecfdf5;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
 }
 
 .dps-stats-table .dps-whatsapp-link:hover {
-    text-decoration: underline;
+    background: #d1fae5;
+    text-decoration: none;
 }
 
-/* ==========================================================================
-   Lista de Métricas Simples
-   ========================================================================== */
-
-.dps-stats-metrics-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin: 16px 0;
-}
-
-.dps-stats-metric {
-    display: flex;
-    flex-direction: column;
-    padding: 12px 16px;
-    background: #f9fafb;
-    border-radius: 6px;
-}
-
-.dps-stats-metric__value {
-    font-size: 20px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.dps-stats-metric__label {
-    font-size: 13px;
+.dps-stats-table-note {
+    margin: 12px 0 0;
+    padding: 0;
     color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
 }
 
 /* ==========================================================================
@@ -311,48 +491,53 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.dps-stats-distribution-item:last-child {
+    margin-bottom: 0;
 }
 
 .dps-stats-distribution-label {
     min-width: 100px;
     font-size: 14px;
+    font-weight: 500;
     color: #374151;
 }
 
 .dps-stats-distribution-bar {
     flex: 1;
-    height: 24px;
-    background: #e5e7eb;
-    border-radius: 4px;
+    height: 28px;
+    background: #f3f4f6;
+    border-radius: 6px;
     overflow: hidden;
     position: relative;
 }
 
 .dps-stats-distribution-fill {
     height: 100%;
-    background: #0ea5e9;
-    border-radius: 4px;
+    background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+    border-radius: 6px;
     transition: width 0.3s ease;
 }
 
 .dps-stats-distribution-fill--dog {
-    background: #f59e0b;
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
 }
 
 .dps-stats-distribution-fill--cat {
-    background: #10b981;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
 }
 
 .dps-stats-distribution-fill--other {
-    background: #6b7280;
+    background: linear-gradient(90deg, #6b7280 0%, #9ca3af 100%);
 }
 
 .dps-stats-distribution-value {
-    min-width: 60px;
+    min-width: 50px;
     text-align: right;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     color: #374151;
 }
 
@@ -364,7 +549,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    padding: 12px 0;
+    padding: 16px 0;
     border-top: 1px solid #e5e7eb;
     margin-top: 16px;
 }
@@ -373,83 +558,27 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 10px 18px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: #374151;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .dps-stats-export-btn:hover {
-    background: #f9fafb;
+    background: #f0f9ff;
     border-color: #0ea5e9;
     color: #0ea5e9;
+    transform: translateY(-1px);
 }
 
 /* ==========================================================================
-   Responsividade
-   ========================================================================== */
-
-@media (max-width: 768px) {
-    .dps-stats-cards {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .dps-stats-filter {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .dps-stats-filter label {
-        width: 100%;
-    }
-
-    .dps-stats-filter input[type="date"] {
-        width: 100%;
-    }
-
-    .dps-stats-actions {
-        flex-direction: column;
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .dps-stats-actions .button {
-        width: 100%;
-    }
-
-    .dps-stats-table th:nth-child(3),
-    .dps-stats-table td:nth-child(3) {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .dps-stats-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .dps-stats-card__value {
-        font-size: 24px;
-    }
-
-    .dps-stats-section summary {
-        padding: 12px 16px;
-        font-size: 15px;
-    }
-
-    .dps-stats-section__content {
-        padding: 0 16px 16px;
-    }
-}
-
-/* ==========================================================================
-   F3.1: Tooltips e Info Icons
+   Tooltips e Info Icons
    ========================================================================== */
 
 .dps-stats-card--with-tooltip {
@@ -460,7 +589,7 @@
     display: inline-block;
     font-size: 14px;
     margin-left: 4px;
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: help;
     transition: opacity 0.2s;
 }
@@ -469,14 +598,8 @@
     opacity: 1;
 }
 
-.dps-stats-card__label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
 /* ==========================================================================
-   Botões Modernos - Estilo Consistente
+   Botões Modernos - Estilo Consistente Global
    ========================================================================== */
 
 /* Botão principal para ações do Stats */
@@ -518,7 +641,8 @@
 .dps-stats-btn-secondary,
 #dps-section-estatisticas .button-secondary,
 .dps-stats-filter .button,
-.dps-stats-actions .button {
+.dps-stats-actions .button:not(.button-primary),
+.dps-stats-cache-form .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -539,7 +663,8 @@
 .dps-stats-btn-secondary:hover,
 #dps-section-estatisticas .button-secondary:hover,
 .dps-stats-filter .button:hover,
-.dps-stats-actions .button:hover {
+.dps-stats-actions .button:not(.button-primary):hover,
+.dps-stats-cache-form .button:hover {
     background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
     border-color: #94a3b8;
     color: #334155;
@@ -550,7 +675,86 @@
 .dps-stats-btn-secondary:active,
 #dps-section-estatisticas .button-secondary:active,
 .dps-stats-filter .button:active,
-.dps-stats-actions .button:active {
+.dps-stats-actions .button:not(.button-primary):active,
+.dps-stats-cache-form .button:active {
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .dps-stats-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dps-stats-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dps-stats-filter-form {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .dps-stats-filter-fields {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .dps-stats-filter-label {
+        width: 100%;
+    }
+
+    .dps-stats-filter-label input[type="date"] {
+        width: 100%;
+    }
+
+    .dps-stats-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .dps-stats-actions .button,
+    .dps-stats-cache-form .button {
+        width: 100%;
+    }
+
+    .dps-stats-table th:nth-child(3),
+    .dps-stats-table td:nth-child(3) {
+        display: none;
+    }
+
+    .dps-stats-metrics-list {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-stats-metrics-list {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-stats-card__value {
+        font-size: 24px;
+    }
+
+    #dps-section-estatisticas .dps-section-title {
+        font-size: 20px;
+    }
+
+    #dps-section-estatisticas .dps-section-title__icon {
+        font-size: 24px;
+    }
+
+    .dps-stats-chart-row {
+        grid-template-columns: 1fr;
+    }
 }
