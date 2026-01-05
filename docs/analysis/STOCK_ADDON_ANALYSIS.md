@@ -247,10 +247,22 @@ Ao marcar o agendamento como finalizado:
 
 ```
 plugins/desi-pet-shower-stock/
-├── desi-pet-shower-stock.php    # Arquivo principal (432 linhas)
+├── desi-pet-shower-stock.php    # Arquivo principal (~840 linhas)
+├── assets/
+│   └── css/
+│       └── stock-addon.css      # CSS responsivo (~700 linhas)
 ├── uninstall.php                # Limpeza na desinstalação
 └── README.md                    # Documentação técnica
 ```
+
+### Métodos Principais (v1.2.0)
+
+| Método | Propósito |
+|--------|-----------|
+| `render_stock_page()` | Renderiza a página completa da aba Estoque |
+| `calculate_stock_stats()` | Calcula estatísticas (total, ok, critical) |
+| `render_critical_items_list()` | Lista de itens com estoque baixo |
+| `render_stock_table()` | Tabela de inventário com filtros |
 
 ### Custom Post Type
 
