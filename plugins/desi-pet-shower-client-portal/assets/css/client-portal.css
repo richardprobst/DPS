@@ -3996,3 +3996,712 @@ html {
         height: 48px;
     }
 }
+
+/* ========================================
+   ABA FIDELIDADE - Layout Modernizado
+   Novo design com melhor hierarquia visual
+   ======================================== */
+
+/* Container principal da seção */
+.dps-portal-loyalty {
+    display: grid;
+    gap: 24px;
+}
+
+.dps-portal-loyalty h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+}
+
+/* Estado inativo do programa */
+.dps-loyalty-inactive {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--dps-gray-50);
+    border-radius: 12px;
+    border: 2px dashed var(--dps-gray-300);
+}
+
+.dps-loyalty-inactive__icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.dps-loyalty-inactive__message {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 8px 0;
+}
+
+.dps-loyalty-inactive__hint {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+/* Hero Section - Tier e Progresso (Modernizado) */
+.dps-loyalty-hero {
+    background: linear-gradient(135deg, #f0f9ff 0%, #fef3c7 100%);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dps-loyalty-hero::before {
+    content: '🏆';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    font-size: 120px;
+    opacity: 0.08;
+    transform: rotate(15deg);
+}
+
+.dps-loyalty-hero__content {
+    position: relative;
+    z-index: 1;
+}
+
+.dps-loyalty-tier {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dps-loyalty-tier__icon {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.dps-loyalty-tier__labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-loyalty-tier__level {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dps-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dps-loyalty-tier__name {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dps-gray-900);
+    line-height: 1.1;
+}
+
+/* Barra de Progresso Modernizada */
+.dps-loyalty-progress {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dps-loyalty-progress__info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.dps-loyalty-progress__current {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dps-primary);
+}
+
+.dps-loyalty-progress__next {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-500);
+}
+
+.dps-loyalty-progress__bar {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--dps-gray-200);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dps-loyalty-progress__bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9 0%, #10b981 50%, #f59e0b 100%);
+    border-radius: 999px;
+    transition: width 0.5s ease;
+}
+
+.dps-loyalty-progress__hint {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Cards de Estatísticas Modernizados */
+.dps-loyalty-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .dps-loyalty-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dps-loyalty-card {
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dps-loyalty-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.dps-loyalty-card__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dps-loyalty-card__icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dps-loyalty-card__label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-600);
+}
+
+.dps-loyalty-card__value {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dps-gray-900);
+    line-height: 1.2;
+}
+
+.dps-loyalty-card__code {
+    margin: 0 0 12px 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--dps-primary);
+    font-family: var(--dps-font-mono);
+    letter-spacing: 0.05em;
+}
+
+.dps-loyalty-card__hint {
+    display: block;
+    font-size: 13px;
+    color: var(--dps-gray-500);
+    margin-top: 4px;
+}
+
+/* Variantes de cor para cards */
+.dps-loyalty-card--points {
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-loyalty-card--credits {
+    border-left: 4px solid #10b981;
+}
+
+.dps-loyalty-card--referral {
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-loyalty-card__actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.dps-loyalty-referral-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--dps-gray-50);
+    color: var(--dps-gray-700);
+    font-family: var(--dps-font-mono);
+}
+
+/* Seção: Como Funciona */
+.dps-loyalty-how-it-works {
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.dps-loyalty-how-it-works h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-loyalty-how-it-works__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .dps-loyalty-how-it-works__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dps-loyalty-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.dps-loyalty-step__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
+    color: var(--dps-white);
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.dps-loyalty-step__content {
+    flex: 1;
+}
+
+.dps-loyalty-step__content strong {
+    display: block;
+    font-size: 15px;
+    color: var(--dps-gray-800);
+    margin-bottom: 4px;
+}
+
+.dps-loyalty-step__content p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    line-height: 1.5;
+}
+
+/* Seção: Conquistas Modernizada */
+.dps-loyalty-achievements {
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.dps-loyalty-achievements h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-loyalty-achievements__summary {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+.dps-loyalty-achievements__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.dps-loyalty-achievement {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.dps-loyalty-achievement.is-unlocked {
+    background: linear-gradient(135deg, #d1fae5 0%, #ffffff 100%);
+    border-color: #10b981;
+}
+
+.dps-loyalty-achievement.is-locked {
+    opacity: 0.7;
+    background: var(--dps-gray-50);
+}
+
+.dps-loyalty-achievement__icon {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-loyalty-achievement__text {
+    flex: 1;
+    min-width: 0;
+}
+
+.dps-loyalty-achievement__title {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+}
+
+.dps-loyalty-achievement__desc {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--dps-gray-600);
+    line-height: 1.4;
+}
+
+.dps-loyalty-achievement__status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dps-loyalty-achievement.is-unlocked .dps-loyalty-achievement__status {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-loyalty-achievement.is-locked .dps-loyalty-achievement__status {
+    background: var(--dps-gray-200);
+    color: var(--dps-gray-600);
+}
+
+/* Seção: Histórico Modernizado */
+.dps-loyalty-history {
+    background: var(--dps-white);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.dps-loyalty-history__header {
+    margin-bottom: 16px;
+}
+
+.dps-loyalty-history__header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-loyalty-history__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-loyalty-history__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--dps-gray-50);
+    border: 1px solid var(--dps-gray-100);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.dps-loyalty-history__item:hover {
+    background: var(--dps-white);
+    border-color: var(--dps-gray-200);
+}
+
+.dps-loyalty-history__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-loyalty-history__context {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+}
+
+.dps-loyalty-history__date {
+    font-size: 12px;
+    color: var(--dps-gray-500);
+}
+
+.dps-loyalty-history__points {
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 70px;
+    text-align: right;
+}
+
+.dps-loyalty-history__points--add {
+    color: #16a34a;
+}
+
+.dps-loyalty-history__points--redeem {
+    color: #dc2626;
+}
+
+.dps-loyalty-history__empty {
+    text-align: center;
+    padding: 32px 16px;
+    background: var(--dps-gray-50);
+    border-radius: 10px;
+}
+
+.dps-loyalty-history__empty-icon {
+    display: block;
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.dps-loyalty-history__empty p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+.dps-loyalty-history-more {
+    margin-top: 16px;
+    width: 100%;
+}
+
+/* Seção: Resgate Modernizado */
+.dps-loyalty-redemption {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    border: 2px solid #10b981;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.dps-loyalty-redemption h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dps-gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-loyalty-redemption__info {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid var(--dps-gray-200);
+}
+
+.dps-loyalty-redemption__unavailable {
+    text-align: center;
+    padding: 24px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+}
+
+.dps-loyalty-redemption__unavailable-icon {
+    display: block;
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.dps-loyalty-redemption__unavailable p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+}
+
+.dps-loyalty-redemption-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dps-loyalty-redemption__form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dps-loyalty-redemption__form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+}
+
+.dps-loyalty-redemption__form-group input[type="number"] {
+    padding: 14px 16px;
+    border: 2px solid var(--dps-gray-200);
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.dps-loyalty-redemption__form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #10b981;
+}
+
+.dps-loyalty-redemption__balance {
+    margin: 0;
+    font-size: 13px;
+    color: var(--dps-gray-600);
+    text-align: center;
+}
+
+.dps-loyalty-redeem-btn {
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: var(--dps-white);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.dps-loyalty-redeem-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.dps-loyalty-redemption__feedback {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.dps-loyalty-redemption__feedback.is-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.dps-loyalty-redemption__feedback.is-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+
+.dps-loyalty-redemption--disabled {
+    background: var(--dps-gray-50);
+    border: 1px solid var(--dps-gray-200);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.dps-loyalty-redemption--disabled-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dps-loyalty-redemption--disabled p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    line-height: 1.6;
+}
+
+/* Responsivo - Aba Fidelidade */
+@media (max-width: 768px) {
+    .dps-loyalty-hero {
+        padding: 20px;
+    }
+    
+    .dps-loyalty-tier__icon {
+        font-size: 40px;
+    }
+    
+    .dps-loyalty-tier__name {
+        font-size: 24px;
+    }
+    
+    .dps-loyalty-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-loyalty-card__value {
+        font-size: 24px;
+    }
+    
+    .dps-loyalty-how-it-works__grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .dps-loyalty-achievements__grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-loyalty-card__actions {
+        flex-direction: column;
+    }
+    
+    .dps-loyalty-referral-input {
+        width: 100%;
+    }
+}
