@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Stats Add-on - Layout Demo v1.5.0</title>
+    <style>
+        /* Reset e Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        /* Simula container DPS */
+        .dps-section {
+            background: #ffffff;
+            border-radius: 0 0 8px 8px;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Header da seção */
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .dps-section-title__icon {
+            font-size: 28px;
+        }
+
+        .dps-section-header__subtitle {
+            margin: 0 0 24px 0;
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        /* Surface cards */
+        .dps-surface {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .dps-surface--neutral {
+            border-left-color: #e5e7eb;
+            background: linear-gradient(to right, #f9fafb 0%, #ffffff 100%);
+        }
+
+        .dps-surface--info {
+            border-left-color: #0ea5e9;
+            background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+        }
+
+        .dps-surface--success {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+        }
+
+        .dps-surface--warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+        }
+
+        .dps-surface__title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .dps-surface__description {
+            margin: 0 0 16px 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Layout Stack */
+        .dps-stats-stacked {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Cards de Métricas */
+        .dps-stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .dps-stats-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dps-stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .dps-stats-card--primary { border-left: 4px solid #0ea5e9; }
+        .dps-stats-card--success { border-left: 4px solid #10b981; }
+        .dps-stats-card--warning { border-left: 4px solid #f59e0b; }
+        .dps-stats-card--danger { border-left: 4px solid #ef4444; }
+
+        .dps-stats-card__icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .dps-stats-card__value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .dps-stats-card__label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .dps-stats-card__trend {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .dps-stats-card__trend--up { color: #10b981; background: #d1fae5; }
+        .dps-stats-card__trend--down { color: #ef4444; background: #fee2e2; }
+
+        /* Filtro de Período */
+        .dps-stats-filter-card { margin-bottom: 24px; }
+
+        .dps-stats-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .dps-stats-filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            flex: 1;
+        }
+
+        .dps-stats-filter-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .dps-stats-filter-label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .dps-stats-filter-label input[type="date"] {
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        /* Botões */
+        .button-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+        }
+
+        .button-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Métricas com ícones */
+        .dps-stats-metrics-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .dps-stats-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px 20px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+        }
+
+        .dps-stats-metric--success { border-left: 3px solid #10b981; }
+        .dps-stats-metric--danger { border-left: 3px solid #ef4444; }
+        .dps-stats-metric--warning { border-left: 3px solid #f59e0b; }
+        .dps-stats-metric--primary { border-left: 3px solid #0ea5e9; }
+
+        .dps-stats-metric__icon { font-size: 20px; margin-bottom: 4px; }
+        .dps-stats-metric__value { font-size: 22px; font-weight: 600; color: #374151; }
+        .dps-stats-metric__label { font-size: 13px; color: #6b7280; }
+
+        /* Tabela */
+        .dps-stats-table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .dps-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .dps-stats-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            text-align: left;
+            padding: 14px 16px;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .dps-stats-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dps-whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 6px 12px;
+            background: #ecfdf5;
+            border-radius: 6px;
+        }
+
+        /* Empty State */
+        .dps-stats-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+            text-align: center;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .dps-stats-empty-state--success {
+            background: linear-gradient(to right, #ecfdf5 0%, #f9fafb 100%);
+        }
+
+        .dps-stats-empty-state__icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        /* Export */
+        .dps-stats-export-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 16px 0;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 16px;
+        }
+
+        .dps-stats-export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .dps-stats-cards { grid-template-columns: 1fr 1fr; }
+            .dps-stats-filter { flex-direction: column; }
+        }
+
+        @media (max-width: 480px) {
+            .dps-stats-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dps-section" id="dps-section-estatisticas">
+        <!-- Header padronizado -->
+        <h2 class="dps-section-title">
+            <span class="dps-section-title__icon">📊</span>
+            Dashboard de Estatísticas
+        </h2>
+        <p class="dps-section-header__subtitle">
+            Acompanhe métricas operacionais e financeiras do seu pet shop. Compare períodos, analise tendências e exporte relatórios.
+        </p>
+        
+        <!-- Filtro de período -->
+        <div class="dps-surface dps-surface--neutral dps-stats-filter-card">
+            <div class="dps-surface__title">
+                <span>📅</span>
+                Período de Análise
+            </div>
+            <div class="dps-stats-filter">
+                <form class="dps-stats-filter-form">
+                    <div class="dps-stats-filter-fields">
+                        <label class="dps-stats-filter-label">
+                            <span>De</span>
+                            <input type="date" value="2024-11-01">
+                        </label>
+                        <label class="dps-stats-filter-label">
+                            <span>Até</span>
+                            <input type="date" value="2024-11-30">
+                        </label>
+                    </div>
+                    <div class="dps-stats-actions">
+                        <button type="button" class="button-primary">🔍 Aplicar Filtro</button>
+                    </div>
+                </form>
+                <button type="button" class="button-secondary">🔄 Atualizar Dados</button>
+            </div>
+        </div>
+        
+        <div class="dps-stats-stacked">
+            <!-- Seção: Visão Geral -->
+            <div class="dps-surface dps-surface--info">
+                <div class="dps-surface__title">
+                    <span>📈</span>
+                    Visão Geral do Período
+                </div>
+                <p class="dps-surface__description">
+                    Métricas principais de 01/11/2024 a 30/11/2024 com variação em relação ao período anterior.
+                </p>
+                <div class="dps-stats-cards">
+                    <div class="dps-stats-card dps-stats-card--primary">
+                        <span class="dps-stats-card__icon">📋</span>
+                        <span class="dps-stats-card__value">42</span>
+                        <span class="dps-stats-card__label">Atendimentos</span>
+                        <span class="dps-stats-card__trend dps-stats-card__trend--up">+15.2%</span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--success">
+                        <span class="dps-stats-card__icon">💰</span>
+                        <span class="dps-stats-card__value">R$ 5.200</span>
+                        <span class="dps-stats-card__label">Receita</span>
+                        <span class="dps-stats-card__trend dps-stats-card__trend--up">+8.5%</span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--primary">
+                        <span class="dps-stats-card__icon">📈</span>
+                        <span class="dps-stats-card__value">R$ 123,80</span>
+                        <span class="dps-stats-card__label">Ticket Médio</span>
+                        <span class="dps-stats-card__trend dps-stats-card__trend--down">-5.3%</span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--primary">
+                        <span class="dps-stats-card__icon">👥</span>
+                        <span class="dps-stats-card__value">8</span>
+                        <span class="dps-stats-card__label">Novos Clientes</span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--warning">
+                        <span class="dps-stats-card__icon">❌</span>
+                        <span class="dps-stats-card__value">4.2%</span>
+                        <span class="dps-stats-card__label">Cancelamentos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Indicadores Avançados -->
+            <div class="dps-surface dps-surface--neutral">
+                <div class="dps-surface__title">
+                    <span>🎯</span>
+                    Indicadores Avançados
+                </div>
+                <p class="dps-surface__description">
+                    KPIs detalhados para análise de retenção, conversão e operação do negócio.
+                </p>
+                <div class="dps-stats-cards">
+                    <div class="dps-stats-card dps-stats-card--primary" title="20 de 35 clientes retornaram em até 30 dias">
+                        <span class="dps-stats-card__icon">🔄</span>
+                        <span class="dps-stats-card__value">57%</span>
+                        <span class="dps-stats-card__label">Taxa de Retorno (30d) <span style="opacity:0.5">ℹ️</span></span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--primary">
+                        <span class="dps-stats-card__icon">👻</span>
+                        <span class="dps-stats-card__value">2.1%</span>
+                        <span class="dps-stats-card__label">No-Show <span style="opacity:0.5">ℹ️</span></span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--success">
+                        <span class="dps-stats-card__icon">⚠️</span>
+                        <span class="dps-stats-card__value">R$ 0,00</span>
+                        <span class="dps-stats-card__label">Inadimplência <span style="opacity:0.5">ℹ️</span></span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--success">
+                        <span class="dps-stats-card__icon">✨</span>
+                        <span class="dps-stats-card__value">75%</span>
+                        <span class="dps-stats-card__label">Conversão (30d) <span style="opacity:0.5">ℹ️</span></span>
+                    </div>
+                    <div class="dps-stats-card dps-stats-card--primary">
+                        <span class="dps-stats-card__icon">🔁</span>
+                        <span class="dps-stats-card__value">18</span>
+                        <span class="dps-stats-card__label">Clientes Recorrentes <span style="opacity:0.5">ℹ️</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Métricas Financeiras -->
+            <div class="dps-surface dps-surface--success">
+                <div class="dps-surface__title">
+                    <span>💰</span>
+                    Métricas Financeiras
+                </div>
+                <p class="dps-surface__description">
+                    Receita, despesas e lucro do período selecionado. Requer o Finance Add-on para dados completos.
+                </p>
+                <div class="dps-stats-metrics-list">
+                    <div class="dps-stats-metric dps-stats-metric--success">
+                        <span class="dps-stats-metric__icon">💵</span>
+                        <span class="dps-stats-metric__value">R$ 5.200,00</span>
+                        <span class="dps-stats-metric__label">Receita Total</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--danger">
+                        <span class="dps-stats-metric__icon">💸</span>
+                        <span class="dps-stats-metric__value">R$ 1.200,00</span>
+                        <span class="dps-stats-metric__label">Despesas</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--primary">
+                        <span class="dps-stats-metric__icon">📊</span>
+                        <span class="dps-stats-metric__value">R$ 4.000,00</span>
+                        <span class="dps-stats-metric__label">Lucro Líquido</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--success">
+                        <span class="dps-stats-metric__icon">📈</span>
+                        <span class="dps-stats-metric__value">+23.5%</span>
+                        <span class="dps-stats-metric__label">Variação vs. Anterior</span>
+                    </div>
+                </div>
+                <div class="dps-stats-export-bar">
+                    <a href="#" class="dps-stats-export-btn">📥 Exportar Métricas CSV</a>
+                </div>
+            </div>
+
+            <!-- Seção: Assinaturas -->
+            <div class="dps-surface dps-surface--info">
+                <div class="dps-surface__title">
+                    <span>📋</span>
+                    Assinaturas
+                </div>
+                <p class="dps-surface__description">
+                    Status das assinaturas e planos recorrentes cadastrados no sistema.
+                </p>
+                <div class="dps-stats-metrics-list">
+                    <div class="dps-stats-metric dps-stats-metric--success">
+                        <span class="dps-stats-metric__icon">✅</span>
+                        <span class="dps-stats-metric__value">8</span>
+                        <span class="dps-stats-metric__label">Ativas</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--warning">
+                        <span class="dps-stats-metric__icon">⏳</span>
+                        <span class="dps-stats-metric__value">2</span>
+                        <span class="dps-stats-metric__label">Pendentes</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--primary">
+                        <span class="dps-stats-metric__icon">💰</span>
+                        <span class="dps-stats-metric__value">R$ 1.600,00</span>
+                        <span class="dps-stats-metric__label">Receita no Período</span>
+                    </div>
+                    <div class="dps-stats-metric dps-stats-metric--danger">
+                        <span class="dps-stats-metric__icon">⚠️</span>
+                        <span class="dps-stats-metric__value">R$ 400,00</span>
+                        <span class="dps-stats-metric__label">Valor em Aberto</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Pets Sem Atendimento -->
+            <div class="dps-surface dps-surface--warning">
+                <div class="dps-surface__title">
+                    <span>⏰</span>
+                    Pets Sem Atendimento (5)
+                </div>
+                <p class="dps-surface__description">
+                    Pets que não foram atendidos há mais de 30 dias. Use esta lista para campanhas de reengajamento via WhatsApp.
+                </p>
+                <div class="dps-stats-table-wrapper">
+                    <table class="dps-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Pet</th>
+                                <th>Cliente</th>
+                                <th>Último Atendimento</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span style="font-weight:500">🐾 Rex</span></td>
+                                <td>João Silva</td>
+                                <td><span style="color:#6b7280">15/10/2024</span></td>
+                                <td><a href="#" class="dps-whatsapp-link">💬 WhatsApp</a></td>
+                            </tr>
+                            <tr>
+                                <td><span style="font-weight:500">🐾 Mel</span></td>
+                                <td>Maria Santos</td>
+                                <td><span style="color:#6b7280">01/10/2024</span></td>
+                                <td><a href="#" class="dps-whatsapp-link">💬 WhatsApp</a></td>
+                            </tr>
+                            <tr>
+                                <td><span style="font-weight:500">🐾 Bob</span></td>
+                                <td>Carlos Oliveira</td>
+                                <td><span style="color:#f59e0b;font-style:italic">Nunca</span></td>
+                                <td><a href="#" class="dps-whatsapp-link">💬 WhatsApp</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dps-stats-export-bar">
+                    <a href="#" class="dps-stats-export-btn">📥 Exportar Inativos CSV</a>
+                </div>
+            </div>
+
+            <!-- Estado vazio de exemplo -->
+            <div class="dps-surface dps-surface--neutral">
+                <div class="dps-surface__title">
+                    <span>🛁</span>
+                    Serviços Mais Solicitados (Estado Vazio Demo)
+                </div>
+                <p class="dps-surface__description">
+                    Ranking dos serviços com maior demanda no período.
+                </p>
+                <div class="dps-stats-empty-state">
+                    <span class="dps-stats-empty-state__icon">🛁</span>
+                    <p>Nenhum serviço registrado no período.</p>
+                </div>
+            </div>
+
+            <!-- Estado positivo de exemplo -->
+            <div class="dps-surface dps-surface--success">
+                <div class="dps-surface__title">
+                    <span>✅</span>
+                    Pets Ativos (Estado Positivo Demo)
+                </div>
+                <p class="dps-surface__description">
+                    Exemplo de estado quando todos os pets estão em dia.
+                </p>
+                <div class="dps-stats-empty-state dps-stats-empty-state--success">
+                    <span class="dps-stats-empty-state__icon">✅</span>
+                    <p>Excelente! Todos os pets foram atendidos recentemente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="max-width:1200px; margin:20px auto; padding:20px; text-align:center; color:#6b7280; font-size:13px;">
+        <p>DPS Stats Add-on v1.5.0 - Layout Demo</p>
+        <p>Abra este arquivo em um navegador para visualizar o novo layout da aba Estatísticas.</p>
+    </footer>
+</body>
+</html>
