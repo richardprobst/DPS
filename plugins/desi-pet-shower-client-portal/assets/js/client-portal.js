@@ -1852,8 +1852,12 @@ window.DPSSkeleton = (function() {
     }
 
     // Chama os handlers de galeria na inicialização do DOM
+    // Apenas se a galeria existir na página (otimização de performance)
     document.addEventListener('DOMContentLoaded', function() {
-        handleGalleryFilter();
-        handleGalleryLightbox();
+        var gallerySection = document.querySelector('.dps-portal-gallery');
+        if (gallerySection) {
+            handleGalleryFilter();
+            handleGalleryLightbox();
+        }
     });
 })();

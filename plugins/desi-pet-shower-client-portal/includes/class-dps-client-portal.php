@@ -2976,7 +2976,8 @@ final class DPS_Client_Portal {
                 $this->render_gallery_photo_item( 
                     $pet_data['profile_photo'], 
                     $pet_data['profile_photo_lg'] ?: $pet_data['profile_photo'],
-                    $pet_data['name'], 
+                    $pet_data['name'],
+                    $pet_data['id'],
                     __( 'Foto de Perfil', 'dps-client-portal' ),
                     'profile'
                 );
@@ -2984,14 +2985,20 @@ final class DPS_Client_Portal {
             
             // Fotos de atendimentos
             foreach ( $pet_data['grooming_photos'] as $gp ) {
-                $date_label = ! empty( $gp['date'] ) 
-                    ? sprintf( __( 'Atendimento em %s', 'dps-client-portal' ), date_i18n( 'd/m/Y', strtotime( $gp['date'] ) ) )
-                    : __( 'Foto de Atendimento', 'dps-client-portal' );
+                // Valida data antes de usar strtotime (evita falso em strings inválidas)
+                $date_label = __( 'Foto de Atendimento', 'dps-client-portal' );
+                if ( ! empty( $gp['date'] ) ) {
+                    $timestamp = strtotime( $gp['date'] );
+                    if ( false !== $timestamp ) {
+                        $date_label = sprintf( __( 'Atendimento em %s', 'dps-client-portal' ), date_i18n( 'd/m/Y', $timestamp ) );
+                    }
+                }
                 
                 $this->render_gallery_photo_item( 
                     $gp['url'], 
                     $gp['url_lg'] ?: $gp['url'],
-                    $pet_data['name'], 
+                    $pet_data['name'],
+                    $pet_data['id'],
                     $date_label,
                     'grooming'
                 );
@@ -3019,10 +3026,11 @@ final class DPS_Client_Portal {
      * @param string $url       URL da imagem (tamanho médio).
      * @param string $url_lg    URL da imagem grande (para lightbox).
      * @param string $pet_name  Nome do pet.
+     * @param int    $pet_id    ID do pet (para garantir unicidade no data-lightbox).
      * @param string $label     Label da foto (ex: "Foto de Perfil", "Atendimento em 01/01/2026").
      * @param string $type      Tipo de foto: 'profile' ou 'grooming'.
      */
-    private function render_gallery_photo_item( $url, $url_lg, $pet_name, $label, $type = 'grooming' ) {
+    private function render_gallery_photo_item( $url, $url_lg, $pet_name, $pet_id, $label, $type = 'grooming' ) {
         $type_class = 'profile' === $type ? 'dps-gallery-photo--profile' : 'dps-gallery-photo--grooming';
         
         // Monta mensagem de compartilhamento
@@ -3040,8 +3048,9 @@ final class DPS_Client_Portal {
         
         echo '<div class="dps-gallery-photo ' . esc_attr( $type_class ) . '">';
         
-        // Imagem com link para lightbox
-        echo '<a href="' . esc_url( $url_lg ) . '" class="dps-gallery-photo__link" data-lightbox="gallery-' . esc_attr( sanitize_title( $pet_name ) ) . '" title="' . esc_attr( $pet_name . ' - ' . $label ) . '">';
+        // Imagem com link para lightbox (usa ID do pet para garantir unicidade)
+        $lightbox_group = 'gallery-' . absint( $pet_id );
+        echo '<a href="' . esc_url( $url_lg ) . '" class="dps-gallery-photo__link" data-lightbox="' . esc_attr( $lightbox_group ) . '" title="' . esc_attr( $pet_name . ' - ' . $label ) . '">';
         echo '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-gallery-photo__img" loading="lazy">';
         echo '<span class="dps-gallery-photo__overlay">';
         echo '<span class="dps-gallery-photo__zoom">🔍</span>';
@@ -3085,7 +3094,9 @@ final class DPS_Client_Portal {
             $wa_link = DPS_WhatsApp_Helper::get_link_to_team( __( 'Olá! Gostaria de cadastrar meu pet e agendar um atendimento.', 'dps-client-portal' ) );
         } else {
             $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
-            if ( ! empty( $whatsapp_number ) ) {
+            // Valida formato básico do número (apenas dígitos e mínimo 10 caracteres)
+            $whatsapp_number = preg_replace( '/[^0-9]/', '', $whatsapp_number );
+            if ( strlen( $whatsapp_number ) >= 10 ) {
                 if ( class_exists( 'DPS_Phone_Helper' ) ) {
                     $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
                 }
