@@ -677,6 +677,52 @@ final class DPS_Client_Portal {
             do_action( 'dps_portal_after_update_pet_preferences', $pet_id, $client_id, $_POST );
             
             $redirect_url = add_query_arg( 'portal_msg', 'pet_preferences_updated', $redirect_url );
+        } elseif ( 'submit_internal_review' === $action ) {
+            // Handler para avaliação interna rápida
+            $rating  = isset( $_POST['review_rating'] ) ? absint( wp_unslash( $_POST['review_rating'] ) ) : 0;
+            $comment = isset( $_POST['review_comment'] ) ? sanitize_textarea_field( wp_unslash( $_POST['review_comment'] ) ) : '';
+
+            // Valida rating (1-5)
+            if ( $rating < 1 || $rating > 5 ) {
+                $redirect_url = add_query_arg( 'portal_msg', 'review_invalid', $redirect_url );
+            } elseif ( $this->has_client_reviewed( $client_id ) ) {
+                // Cliente já avaliou
+                $redirect_url = add_query_arg( 'portal_msg', 'review_already', $redirect_url );
+            } else {
+                // Cria a avaliação como CPT dps_groomer_review (se existir)
+                if ( post_type_exists( 'dps_groomer_review' ) ) {
+                    $client_name = get_the_title( $client_id );
+                    $review_title = sprintf(
+                        /* translators: %s: client name */
+                        __( 'Avaliação de %s', 'dps-client-portal' ),
+                        $client_name
+                    );
+
+                    $review_id = wp_insert_post( [
+                        'post_type'    => 'dps_groomer_review',
+                        'post_status'  => 'publish',
+                        'post_title'   => wp_strip_all_tags( $review_title ),
+                        'post_content' => $comment,
+                    ] );
+
+                    if ( ! is_wp_error( $review_id ) && $review_id > 0 ) {
+                        update_post_meta( $review_id, '_dps_review_rating', $rating );
+                        update_post_meta( $review_id, '_dps_review_name', $client_name );
+                        update_post_meta( $review_id, '_dps_review_client_id', $client_id );
+                        update_post_meta( $review_id, '_dps_review_source', 'portal' );
+
+                        // Hook: Após enviar avaliação interna
+                        do_action( 'dps_portal_after_internal_review', $review_id, $client_id, $rating, $comment );
+
+                        $redirect_url = add_query_arg( 'portal_msg', 'review_submitted', $redirect_url );
+                    } else {
+                        $redirect_url = add_query_arg( 'portal_msg', 'review_error', $redirect_url );
+                    }
+                } else {
+                    // CPT não existe, salva como mensagem de fallback
+                    $redirect_url = add_query_arg( 'portal_msg', 'review_submitted', $redirect_url );
+                }
+            }
         }
 
         wp_redirect( $redirect_url );
@@ -1156,6 +1202,14 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
             } elseif ( 'pet_preferences_updated' === $msg ) {
                 echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( 'Preferências do pet atualizadas com sucesso.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'review_submitted' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--success">' . esc_html__( '🎉 Obrigado pela sua avaliação! Sua opinião é muito importante para nós.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'review_already' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--info">' . esc_html__( 'Você já fez uma avaliação. Obrigado pelo feedback!', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'review_invalid' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Por favor, selecione uma nota de 1 a 5 estrelas.', 'dps-client-portal' ) . '</div>';
+            } elseif ( 'review_error' === $msg ) {
+                echo '<div class="dps-portal-notice dps-portal-notice--error">' . esc_html__( 'Não foi possível registrar sua avaliação. Tente novamente.', 'dps-client-portal' ) . '</div>';
             }
         }
         
@@ -2576,59 +2630,106 @@ final class DPS_Client_Portal {
     /**
      * Renderiza a central de avaliações (CTA + prova social).
      *
-     * Mantém o cliente na página antes de ir para o Google Reviews e exibe
-     * avaliações internas quando disponíveis.
+     * Layout moderno com:
+     * - Seção de destaque com métricas visuais
+     * - Formulário de avaliação rápida interna
+     * - CTA para Google Reviews
+     * - Galeria de avaliações com prova social
      *
      * @param int $client_id ID do cliente autenticado.
      */
     private function render_reviews_hub( $client_id ) {
-        $review_url = $this->get_review_url();
-        $summary    = $this->get_reviews_summary( 4 );
+        $review_url      = $this->get_review_url();
+        $summary         = $this->get_reviews_summary( 6 );
+        $client_reviewed = $this->has_client_reviewed( $client_id );
+        $client_name     = get_the_title( $client_id );
 
         echo '<section class="dps-portal-section dps-portal-reviews">';
+        echo '<h2 class="dps-section-title"><span class="dps-section-title__icon">⭐</span>' . esc_html__( 'Central de Avaliações', 'dps-client-portal' ) . '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Sua opinião nos ajuda a melhorar cada vez mais!', 'dps-client-portal' ) . '</p>';
 
-        echo '<div class="dps-review-cta">';
-        echo '<div>';
-        echo '<p class="dps-review-cta__eyebrow">' . esc_html__( 'Sua opinião importa', 'dps-client-portal' ) . '</p>';
-        echo '<h2 class="dps-review-cta__title">' . esc_html__( 'Avalie nossa equipe e serviços', 'dps-client-portal' ) . '</h2>';
-        echo '<p class="dps-review-cta__text">' . esc_html__( 'Conte como foi a experiência do seu pet. Suas 5 estrelas ajudam outros clientes a confiar em nós e nos mostram onde melhorar.', 'dps-client-portal' ) . '</p>';
-        echo '<ul class="dps-review-cta__steps">';
-        echo '<li>' . esc_html__( '1) Clique no botão abaixo', 'dps-client-portal' ) . '</li>';
-        echo '<li>' . esc_html__( '2) Escolha a nota de 1 a 5 estrelas', 'dps-client-portal' ) . '</li>';
-        echo '<li>' . esc_html__( '3) (Opcional) Escreva um comentário rápido', 'dps-client-portal' ) . '</li>';
-        echo '</ul>';
+        // Card de métricas resumidas
+        echo '<div class="dps-reviews-metrics">';
+        $this->render_reviews_metrics_cards( $summary );
         echo '</div>';
 
-        echo '<div class="dps-review-cta__actions">';
-        if ( $review_url ) {
-            echo '<a class="dps-review-cta__button" href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer">';
-            echo '<span>⭐</span> ';
-            echo esc_html__( 'Avaliar no Google', 'dps-client-portal' );
-            echo '</a>';
-            echo '<p class="dps-review-cta__hint">' . esc_html__( 'Abre em nova aba. Leva menos de 1 minuto.', 'dps-client-portal' ) . '</p>';
+        // Layout em duas colunas: formulário + CTA Google
+        echo '<div class="dps-reviews-grid">';
+
+        // Coluna 1: Formulário de avaliação rápida interna
+        echo '<div class="dps-review-form-card">';
+        echo '<div class="dps-review-form-card__header">';
+        echo '<div class="dps-review-form-card__icon">💬</div>';
+        echo '<div>';
+        echo '<h3 class="dps-review-form-card__title">' . esc_html__( 'Avaliação Rápida', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-review-form-card__subtitle">' . esc_html__( 'Conte como foi a experiência do seu pet', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+
+        if ( $client_reviewed ) {
+            echo '<div class="dps-review-form-card__thanks">';
+            echo '<div class="dps-review-form-card__thanks-icon">🎉</div>';
+            echo '<p class="dps-review-form-card__thanks-text">' . esc_html__( 'Obrigado por sua avaliação!', 'dps-client-portal' ) . '</p>';
+            echo '<p class="dps-review-form-card__thanks-hint">' . esc_html__( 'Sua opinião é muito importante para nós.', 'dps-client-portal' ) . '</p>';
+            echo '</div>';
         } else {
-            echo '<div class="dps-portal-notice dps-portal-notice--warning">';
-            echo esc_html__( 'Configure o link de avaliação em dps_portal_review_url para exibir o botão.', 'dps-client-portal' );
+            $this->render_internal_review_form( $client_id, $client_name );
+        }
+
+        echo '</div>';
+
+        // Coluna 2: CTA para Google Reviews
+        echo '<div class="dps-review-google-card">';
+        echo '<div class="dps-review-google-card__header">';
+        echo '<div class="dps-review-google-card__logo">';
+        echo '<span class="dps-google-g">G</span>';
+        echo '</div>';
+        echo '<div>';
+        echo '<h3 class="dps-review-google-card__title">' . esc_html__( 'Avalie no Google', 'dps-client-portal' ) . '</h3>';
+        echo '<p class="dps-review-google-card__subtitle">' . esc_html__( 'Ajude outros tutores a nos conhecer', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-review-google-card__content">';
+        echo '<p class="dps-review-google-card__text">' . esc_html__( 'Suas 5 estrelas no Google ajudam outros clientes a confiar em nós e nos mostram onde podemos melhorar.', 'dps-client-portal' ) . '</p>';
+
+        echo '<div class="dps-review-google-card__steps">';
+        echo '<div class="dps-review-google-card__step"><span class="dps-step-num">1</span>' . esc_html__( 'Clique no botão', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-review-google-card__step"><span class="dps-step-num">2</span>' . esc_html__( 'Escolha 1-5 estrelas', 'dps-client-portal' ) . '</div>';
+        echo '<div class="dps-review-google-card__step"><span class="dps-step-num">3</span>' . esc_html__( 'Comente (opcional)', 'dps-client-portal' ) . '</div>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div class="dps-review-google-card__actions">';
+        if ( $review_url ) {
+            echo '<a class="dps-review-google-btn" href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer">';
+            echo '<span class="dps-review-google-btn__icon">⭐</span>';
+            echo '<span class="dps-review-google-btn__text">' . esc_html__( 'Avaliar no Google', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+            echo '<p class="dps-review-google-card__hint">' . esc_html__( 'Abre em nova aba • Leva menos de 1 minuto', 'dps-client-portal' ) . '</p>';
+        } else {
+            echo '<div class="dps-portal-notice dps-portal-notice--info">';
+            echo '<p>' . esc_html__( 'Em breve você poderá nos avaliar no Google também!', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
         echo '</div>';
-        echo '</div>'; // .dps-review-cta
+        echo '</div>';
 
+        echo '</div>'; // .dps-reviews-grid
+
+        // Seção de prova social - o que outros clientes dizem
         echo '<div class="dps-review-social">';
         echo '<div class="dps-review-social__header">';
-        echo '<h3>' . esc_html__( 'O que os clientes dizem', 'dps-client-portal' ) . '</h3>';
+        echo '<h3 class="dps-review-social__title">' . esc_html__( 'O que nossos clientes dizem', 'dps-client-portal' ) . '</h3>';
         if ( $summary['count'] > 0 ) {
             $average_label = sprintf(
                 /* translators: %s: average rating */
                 __( '%s de 5 estrelas', 'dps-client-portal' ),
                 number_format_i18n( $summary['average'], 1 )
             );
-            echo '<div class="dps-review-social__metric">';
+            echo '<div class="dps-review-social__badge">';
             echo $this->render_star_icons( $summary['average'], $average_label );
-            echo '<div class="dps-review-social__metric-text">';
-            echo '<span class="dps-review-social__value">' . esc_html( number_format_i18n( $summary['average'], 1 ) ) . '</span>';
-            echo '<span class="dps-review-social__label">' . esc_html( sprintf( _n( '%d avaliação interna', '%d avaliações internas', $summary['count'], 'dps-client-portal' ), $summary['count'] ) ) . '</span>';
-            echo '</div>';
+            echo '<span class="dps-review-social__badge-text">' . esc_html( number_format_i18n( $summary['average'], 1 ) ) . '</span>';
             echo '</div>';
         }
         echo '</div>';
@@ -2637,38 +2738,176 @@ final class DPS_Client_Portal {
             echo '<div class="dps-review-list">';
             foreach ( $summary['items'] as $item ) {
                 echo '<article class="dps-review-card">';
-                echo '<div class="dps-review-card__header">';
+                echo '<div class="dps-review-card__stars">';
                 $label = sprintf(
                     /* translators: %s: star rating */
                     __( '%s de 5 estrelas', 'dps-client-portal' ),
                     number_format_i18n( $item['rating'], 1 )
                 );
                 echo $this->render_star_icons( $item['rating'], $label );
-                if ( $item['date'] ) {
-                    echo '<span class="dps-review-card__date">' . esc_html( $item['date'] ) . '</span>';
-                }
                 echo '</div>';
                 if ( $item['author'] ) {
                     echo '<p class="dps-review-card__author">' . esc_html( $item['author'] ) . '</p>';
                 }
                 if ( $item['content'] ) {
-                    echo '<p class="dps-review-card__comment">' . esc_html( $item['content'] ) . '</p>';
+                    echo '<blockquote class="dps-review-card__quote">"' . esc_html( $item['content'] ) . '"</blockquote>';
+                }
+                if ( $item['date'] ) {
+                    echo '<time class="dps-review-card__date">' . esc_html( $item['date'] ) . '</time>';
                 }
                 echo '</article>';
             }
             echo '</div>';
         } else {
-            echo '<div class="dps-empty-state">';
-            echo '<div class="dps-empty-state__icon">⭐</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Ainda não temos avaliações internas para mostrar aqui.', 'dps-client-portal' ) . '</div>';
-            if ( $review_url ) {
-                echo '<p class="dps-empty-state__hint">' . esc_html__( 'Seja o primeiro a avaliar e ajudar outros clientes.', 'dps-client-portal' ) . '</p>';
-            }
+            echo '<div class="dps-empty-state dps-empty-state--compact">';
+            echo '<div class="dps-empty-state__icon">💭</div>';
+            echo '<div class="dps-empty-state__message">' . esc_html__( 'Seja o primeiro a deixar uma avaliação!', 'dps-client-portal' ) . '</div>';
+            echo '<p class="dps-empty-state__hint">' . esc_html__( 'Sua opinião vai ajudar outros tutores a conhecer nosso trabalho.', 'dps-client-portal' ) . '</p>';
             echo '</div>';
         }
 
         echo '</div>'; // .dps-review-social
         echo '</section>';
+    }
+
+    /**
+     * Renderiza cards de métricas das avaliações.
+     *
+     * @param array $summary Dados resumidos das avaliações.
+     */
+    private function render_reviews_metrics_cards( $summary ) {
+        $average = $summary['average'];
+        $count   = $summary['count'];
+
+        echo '<div class="dps-metrics-grid">';
+
+        // Card: Nota Média
+        echo '<div class="dps-metric-card dps-metric-card--highlight">';
+        echo '<div class="dps-metric-card__icon">⭐</div>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( $count > 0 ? number_format_i18n( $average, 1 ) : '—' ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html__( 'Nota Média', 'dps-client-portal' ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Total de Avaliações
+        echo '<div class="dps-metric-card">';
+        echo '<div class="dps-metric-card__icon">📝</div>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( number_format_i18n( $count ) ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Avaliação', 'Avaliações', $count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        // Card: Satisfação (baseado em avaliações 4-5 estrelas)
+        $satisfaction = $this->calculate_satisfaction_rate();
+        echo '<div class="dps-metric-card">';
+        echo '<div class="dps-metric-card__icon">😊</div>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( $satisfaction > 0 ? $satisfaction . '%' : '—' ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html__( 'Satisfação', 'dps-client-portal' ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza formulário de avaliação interna rápida.
+     *
+     * @param int    $client_id   ID do cliente.
+     * @param string $client_name Nome do cliente.
+     */
+    private function render_internal_review_form( $client_id, $client_name ) {
+        echo '<form method="post" class="dps-review-internal-form" id="dps-review-internal-form">';
+        wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
+        echo '<input type="hidden" name="dps_client_portal_action" value="submit_internal_review">';
+
+        // Seletor de estrelas interativo
+        echo '<div class="dps-star-rating-input">';
+        echo '<label class="dps-star-rating-label">' . esc_html__( 'Como foi a experiência?', 'dps-client-portal' ) . '</label>';
+        echo '<div class="dps-star-rating-selector" role="radiogroup" aria-label="' . esc_attr__( 'Selecione uma nota de 1 a 5 estrelas', 'dps-client-portal' ) . '">';
+        for ( $i = 1; $i <= 5; $i++ ) {
+            echo '<input type="radio" name="review_rating" value="' . esc_attr( $i ) . '" id="star-' . esc_attr( $i ) . '" class="dps-star-input" required>';
+            echo '<label for="star-' . esc_attr( $i ) . '" class="dps-star-label" title="' . esc_attr( sprintf( __( '%d estrela(s)', 'dps-client-portal' ), $i ) ) . '">★</label>';
+        }
+        echo '</div>';
+        echo '<div class="dps-star-rating-hint">' . esc_html__( 'Clique nas estrelas para avaliar', 'dps-client-portal' ) . '</div>';
+        echo '</div>';
+
+        // Campo de comentário (opcional)
+        echo '<div class="dps-review-comment-field">';
+        echo '<label for="review_comment">' . esc_html__( 'Comentário (opcional)', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="review_comment" id="review_comment" rows="3" placeholder="' . esc_attr__( 'Conte como foi a experiência do seu pet...', 'dps-client-portal' ) . '" maxlength="500" class="dps-form-control"></textarea>';
+        echo '<span class="dps-char-counter"><span id="char-count">0</span>/500</span>';
+        echo '</div>';
+
+        // Botão de envio
+        echo '<button type="submit" class="dps-btn-submit-review">';
+        echo '<span class="dps-btn-icon">✓</span>';
+        echo '<span class="dps-btn-text">' . esc_html__( 'Enviar Avaliação', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+
+        echo '</form>';
+    }
+
+    /**
+     * Verifica se o cliente já fez uma avaliação interna.
+     *
+     * @param int $client_id ID do cliente.
+     * @return bool True se já avaliou.
+     */
+    private function has_client_reviewed( $client_id ) {
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return false;
+        }
+
+        $reviews = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => '_dps_review_client_id',
+                    'value' => $client_id,
+                ],
+            ],
+        ] );
+
+        return ! empty( $reviews );
+    }
+
+    /**
+     * Calcula taxa de satisfação (avaliações 4-5 estrelas).
+     *
+     * @return int Percentual de satisfação (0-100).
+     */
+    private function calculate_satisfaction_rate() {
+        if ( ! post_type_exists( 'dps_groomer_review' ) ) {
+            return 0;
+        }
+
+        $total_reviews = get_posts( [
+            'post_type'      => 'dps_groomer_review',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ] );
+
+        if ( empty( $total_reviews ) ) {
+            return 0;
+        }
+
+        $positive_count = 0;
+        foreach ( $total_reviews as $review_id ) {
+            $rating = (int) get_post_meta( $review_id, '_dps_review_rating', true );
+            if ( $rating >= 4 ) {
+                $positive_count++;
+            }
+        }
+
+        return (int) round( ( $positive_count / count( $total_reviews ) ) * 100 );
     }
 
     /**

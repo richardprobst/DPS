@@ -42,6 +42,7 @@
         handleLoyalty();
         initChatWidget();
         handleQuickActions(); // Fase 3: Quick Actions na aba Início
+        handleReviewForm(); // Fase 5: Formulário de avaliação interna
     }
 
     /**
@@ -1470,5 +1471,106 @@ window.DPSSkeleton = (function() {
         setTimeout(function() {
             notification.remove();
         }, 5000);
+    }
+
+    /**
+     * Gerencia o formulário de avaliação interna
+     * - Contador de caracteres para o comentário
+     * - Feedback visual na seleção de estrelas
+     * - Validação antes do envio
+     */
+    function handleReviewForm() {
+        var form = document.getElementById('dps-review-internal-form');
+        if (!form) {
+            return;
+        }
+
+        // Contador de caracteres
+        var textarea = form.querySelector('#review_comment');
+        var charCount = document.getElementById('char-count');
+        
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                var count = this.value.length;
+                charCount.textContent = count;
+                
+                // Cor de aviso quando próximo do limite
+                if (count > 450) {
+                    charCount.style.color = '#f59e0b';
+                } else if (count >= 500) {
+                    charCount.style.color = '#ef4444';
+                } else {
+                    charCount.style.color = '';
+                }
+            });
+        }
+
+        // Feedback visual aprimorado para seleção de estrelas
+        var starInputs = form.querySelectorAll('.dps-star-input');
+        var starLabels = form.querySelectorAll('.dps-star-label');
+        var ratingHint = form.querySelector('.dps-star-rating-hint');
+        
+        var ratingMessages = {
+            1: '😞 Pode melhorar',
+            2: '😕 Razoável',
+            3: '🙂 Bom',
+            4: '😊 Muito bom!',
+            5: '🤩 Excelente!'
+        };
+
+        starInputs.forEach(function(input, index) {
+            input.addEventListener('change', function() {
+                var rating = parseInt(this.value, 10);
+                
+                // Atualiza mensagem de feedback
+                if (ratingHint && ratingMessages[rating]) {
+                    ratingHint.textContent = ratingMessages[rating];
+                    ratingHint.style.fontWeight = '600';
+                    ratingHint.style.color = '#374151';
+                }
+                
+                // Animação de confirmação
+                starLabels.forEach(function(label, labelIndex) {
+                    if (labelIndex >= (5 - rating)) {
+                        label.style.transform = 'scale(1.15)';
+                        setTimeout(function() {
+                            label.style.transform = '';
+                        }, 200);
+                    }
+                });
+            });
+        });
+
+        // Validação antes do envio
+        form.addEventListener('submit', function(e) {
+            var selectedRating = form.querySelector('.dps-star-input:checked');
+            
+            if (!selectedRating) {
+                e.preventDefault();
+                
+                // Highlight visual nos stars
+                var starSelector = form.querySelector('.dps-star-rating-selector');
+                if (starSelector) {
+                    starSelector.style.animation = 'shake 0.5s ease';
+                    setTimeout(function() {
+                        starSelector.style.animation = '';
+                    }, 500);
+                }
+                
+                if (ratingHint) {
+                    ratingHint.textContent = '⚠️ Por favor, selecione uma nota';
+                    ratingHint.style.color = '#ef4444';
+                }
+                
+                return false;
+            }
+            
+            // Feedback de envio
+            var submitBtn = form.querySelector('.dps-btn-submit-review');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="dps-btn-icon">⏳</span><span class="dps-btn-text">Enviando...</span>';
+            }
+        });
     }
 })();
