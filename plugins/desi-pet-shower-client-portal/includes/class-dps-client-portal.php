@@ -1318,16 +1318,39 @@ final class DPS_Client_Portal {
         // Container de conteúdo das tabs
         echo '<div class="dps-portal-tab-content">';
         
-        // Panel: Início (Próximo agendamento + Pendências + Fidelidade)
+        // Panel: Início (Layout modernizado)
         echo '<div id="panel-inicio" class="dps-portal-tab-panel is-active" role="tabpanel" aria-hidden="false">';
         do_action( 'dps_portal_before_inicio_content', $client_id ); // Fase 2.3
+        
+        // Novo: Dashboard com métricas rápidas
+        $this->render_quick_overview( $client_id );
+        
+        // Novo: Ações rápidas
+        $this->render_quick_actions( $client_id );
+        
+        // Grid de conteúdo principal
+        echo '<div class="dps-inicio-grid">';
+        
+        // Coluna esquerda: Próximo agendamento e Pets
+        echo '<div class="dps-inicio-col dps-inicio-col--primary">';
         $this->render_next_appointment( $client_id );
-        $this->render_recent_requests( $client_id ); // Fase 4: Solicitações recentes
+        $this->render_pets_summary( $client_id );
+        echo '</div>';
+        
+        // Coluna direita: Pendências e Sugestões
+        echo '<div class="dps-inicio-col dps-inicio-col--secondary">';
         $this->render_financial_pending( $client_id );
+        $this->render_recent_requests( $client_id ); // Fase 4: Solicitações recentes
         $this->render_contextual_suggestions( $client_id ); // Fase 2: Sugestões baseadas em histórico
+        echo '</div>';
+        
+        echo '</div>'; // .dps-inicio-grid
+        
+        // Indicações (se ativo) - ocupa largura total
         if ( function_exists( 'dps_loyalty_get_referral_code' ) ) {
             $this->render_referrals_summary( $client_id );
         }
+        
         do_action( 'dps_portal_after_inicio_content', $client_id ); // Fase 2.3
         echo '</div>';
 
@@ -1686,13 +1709,25 @@ final class DPS_Client_Portal {
             $time      = get_post_meta( $next->ID, 'appointment_time', true );
             $status    = get_post_meta( $next->ID, 'appointment_status', true );
             
+            // Calcula dias restantes
+            $days_until = floor( ( strtotime( $date ) - strtotime( $today ) ) / DAY_IN_SECONDS );
+            
             // Card de destaque para próximo agendamento
             echo '<div class="dps-appointment-card">';
             echo '<div class="dps-appointment-card__date">';
             echo '<span class="dps-appointment-card__day">' . esc_html( date_i18n( 'd', strtotime( $date ) ) ) . '</span>';
             echo '<span class="dps-appointment-card__month">' . esc_html( date_i18n( 'M', strtotime( $date ) ) ) . '</span>';
+            echo '<span class="dps-appointment-card__weekday">' . esc_html( date_i18n( 'D', strtotime( $date ) ) ) . '</span>';
             echo '</div>';
             echo '<div class="dps-appointment-card__details">';
+            
+            // Status badge (se for hoje ou amanhã)
+            if ( $days_until === 0 ) {
+                echo '<span class="dps-appointment-card__badge dps-appointment-card__badge--today">' . esc_html__( 'Hoje!', 'dps-client-portal' ) . '</span>';
+            } elseif ( $days_until === 1 ) {
+                echo '<span class="dps-appointment-card__badge dps-appointment-card__badge--tomorrow">' . esc_html__( 'Amanhã', 'dps-client-portal' ) . '</span>';
+            }
+            
             echo '<div class="dps-appointment-card__time">⏰ ' . esc_html( $time ) . '</div>';
             if ( $pet_name ) {
                 echo '<div class="dps-appointment-card__pet">🐾 ' . esc_html( $pet_name ) . '</div>';
@@ -1701,22 +1736,39 @@ final class DPS_Client_Portal {
                 echo '<div class="dps-appointment-card__services">✂️ ' . $services . '</div>';
             }
             if ( $status ) {
-                echo '<div class="dps-appointment-card__status">' . esc_html( ucfirst( $status ) ) . '</div>';
+                $status_class = 'dps-appointment-card__status--' . sanitize_title( $status );
+                echo '<div class="dps-appointment-card__status ' . esc_attr( $status_class ) . '">' . esc_html( ucfirst( $status ) ) . '</div>';
             }
+            
+            // Ações do agendamento
+            echo '<div class="dps-appointment-card__actions">';
+            
             // Link para mapa
             $address = get_post_meta( $client_id, 'client_address', true );
             if ( $address ) {
                 $query = urlencode( $address );
                 $url   = 'https://www.google.com/maps/search/?api=1&query=' . $query;
-                echo '<a href="' . esc_url( $url ) . '" target="_blank" class="dps-appointment-card__action">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
+                echo '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" class="dps-appointment-card__action-btn">📍 ' . esc_html__( 'Ver no mapa', 'dps-client-portal' ) . '</a>';
             }
-            echo '</div>';
-            echo '</div>';
+            
+            // Link para adicionar ao calendário
+            if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+                $google_url = DPS_Calendar_Helper::get_google_calendar_url( $next->ID );
+                if ( $google_url ) {
+                    echo '<a href="' . esc_url( $google_url ) . '" target="_blank" rel="noopener" class="dps-appointment-card__action-btn">📆 ' . esc_html__( 'Adicionar ao calendário', 'dps-client-portal' ) . '</a>';
+                }
+            }
+            
+            echo '</div>'; // .dps-appointment-card__actions
+            
+            echo '</div>'; // .dps-appointment-card__details
+            echo '</div>'; // .dps-appointment-card
         } else {
-            // Estado vazio amigável
-            echo '<div class="dps-empty-state">';
+            // Estado vazio amigável com melhor UX
+            echo '<div class="dps-empty-state dps-empty-state--appointment">';
             echo '<div class="dps-empty-state__icon">📅</div>';
-            echo '<div class="dps-empty-state__message">' . esc_html__( 'Você não tem agendamentos futuros.', 'dps-client-portal' ) . '</div>';
+            echo '<h3 class="dps-empty-state__title">' . esc_html__( 'Nenhum agendamento futuro', 'dps-client-portal' ) . '</h3>';
+            echo '<p class="dps-empty-state__message">' . esc_html__( 'Você ainda não tem horários marcados. Que tal agendar um banho ou tosa?', 'dps-client-portal' ) . '</p>';
             // Gera link para agendar via WhatsApp usando helper centralizado
             if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
                 $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
@@ -1939,6 +1991,286 @@ final class DPS_Client_Portal {
             
             echo '</section>';
         }
+    }
+
+    /**
+     * Renderiza uma visão rápida (dashboard) com métricas do cliente.
+     * Mostra resumo visual de agendamentos, pendências e fidelidade.
+     *
+     * @since 3.0.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_quick_overview( $client_id ) {
+        // Conta agendamentos futuros
+        $upcoming = $this->count_upcoming_appointments( $client_id );
+        
+        // Conta pets
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_key'       => 'owner_id',
+            'meta_value'     => $client_id,
+            'fields'         => 'ids',
+        ] );
+        $pets_count = count( $pets );
+        
+        // Conta mensagens não lidas
+        $unread = $this->get_unread_messages_count( $client_id );
+        
+        // Pontos de fidelidade (se disponível)
+        $points = 0;
+        if ( function_exists( 'dps_loyalty_get_points' ) ) {
+            $points = dps_loyalty_get_points( $client_id );
+        }
+        
+        echo '<section class="dps-portal-overview">';
+        echo '<h2 class="sr-only">' . esc_html__( 'Resumo Rápido', 'dps-client-portal' ) . '</h2>';
+        
+        echo '<div class="dps-overview-cards">';
+        
+        // Card: Agendamentos
+        echo '<div class="dps-overview-card dps-overview-card--appointments">';
+        echo '<div class="dps-overview-card__icon">📅</div>';
+        echo '<div class="dps-overview-card__content">';
+        echo '<span class="dps-overview-card__value">' . esc_html( $upcoming ) . '</span>';
+        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Agendamento', 'Agendamentos', $upcoming, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Pets
+        echo '<div class="dps-overview-card dps-overview-card--pets">';
+        echo '<div class="dps-overview-card__icon">🐾</div>';
+        echo '<div class="dps-overview-card__content">';
+        echo '<span class="dps-overview-card__value">' . esc_html( $pets_count ) . '</span>';
+        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Pet', 'Pets', $pets_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Mensagens
+        echo '<div class="dps-overview-card dps-overview-card--messages' . ( $unread > 0 ? ' dps-overview-card--has-badge' : '' ) . '">';
+        echo '<div class="dps-overview-card__icon">💬</div>';
+        echo '<div class="dps-overview-card__content">';
+        echo '<span class="dps-overview-card__value">' . esc_html( $unread ) . '</span>';
+        echo '<span class="dps-overview-card__label">' . esc_html( _n( 'Nova Mensagem', 'Novas Mensagens', $unread, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Pontos (se fidelidade ativo)
+        if ( function_exists( 'dps_loyalty_get_points' ) ) {
+            echo '<div class="dps-overview-card dps-overview-card--loyalty">';
+            echo '<div class="dps-overview-card__icon">⭐</div>';
+            echo '<div class="dps-overview-card__content">';
+            echo '<span class="dps-overview-card__value">' . esc_html( number_format( $points, 0, ',', '.' ) ) . '</span>';
+            echo '<span class="dps-overview-card__label">' . esc_html__( 'Pontos', 'dps-client-portal' ) . '</span>';
+            echo '</div>';
+            echo '</div>';
+        }
+        
+        echo '</div>'; // .dps-overview-cards
+        echo '</section>';
+    }
+
+    /**
+     * Renderiza ações rápidas para o cliente.
+     * Atalhos para as ações mais comuns do portal.
+     *
+     * @since 3.0.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_quick_actions( $client_id ) {
+        // Gera link de agendamento via WhatsApp
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+        } else {
+            // Usa número configurado nas opções do sistema (sem fallback hardcoded)
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            if ( empty( $whatsapp_number ) ) {
+                $whatsapp_url = '';
+            } else {
+                if ( class_exists( 'DPS_Phone_Helper' ) ) {
+                    $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+                }
+                $whatsapp_text = urlencode( __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' ) );
+                $whatsapp_url = 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text;
+            }
+        }
+        
+        // Link de avaliação
+        $review_url = $this->get_review_url();
+        
+        echo '<section class="dps-portal-quick-actions">';
+        echo '<h2 class="sr-only">' . esc_html__( 'Ações Rápidas', 'dps-client-portal' ) . '</h2>';
+        
+        echo '<div class="dps-quick-actions">';
+        
+        // Botão: Agendar Serviço (apenas se WhatsApp configurado)
+        if ( ! empty( $whatsapp_url ) ) {
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action dps-quick-action--primary">';
+            echo '<span class="dps-quick-action__icon">📅</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Agendar Serviço', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
+        
+        // Botão: Falar Conosco
+        echo '<button type="button" class="dps-quick-action dps-quick-action--chat" data-action="open-chat">';
+        echo '<span class="dps-quick-action__icon">💬</span>';
+        echo '<span class="dps-quick-action__text">' . esc_html__( 'Falar Conosco', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        
+        // Botão: Avaliar (se configurado)
+        if ( $review_url ) {
+            echo '<a href="' . esc_url( $review_url ) . '" target="_blank" rel="noopener noreferrer" class="dps-quick-action">';
+            echo '<span class="dps-quick-action__icon">⭐</span>';
+            echo '<span class="dps-quick-action__text">' . esc_html__( 'Avaliar Atendimento', 'dps-client-portal' ) . '</span>';
+            echo '</a>';
+        }
+        
+        // Botão: Meus Dados
+        echo '<button type="button" class="dps-quick-action" data-tab="dados">';
+        echo '<span class="dps-quick-action__icon">⚙️</span>';
+        echo '<span class="dps-quick-action__text">' . esc_html__( 'Meus Dados', 'dps-client-portal' ) . '</span>';
+        echo '</button>';
+        
+        echo '</div>'; // .dps-quick-actions
+        echo '</section>';
+    }
+
+    /**
+     * Número máximo de pets exibidos no resumo da aba Início.
+     *
+     * @var int
+     */
+    const PETS_SUMMARY_LIMIT = 6;
+
+    /**
+     * Renderiza um resumo visual dos pets do cliente.
+     * Mostra foto, nome e próximo agendamento de cada pet.
+     *
+     * @since 3.0.0
+     * @param int $client_id ID do cliente.
+     */
+    private function render_pets_summary( $client_id ) {
+        // Busca pets do cliente
+        $pets = get_posts( [
+            'post_type'      => 'dps_pet',
+            'post_status'    => 'publish',
+            'posts_per_page' => self::PETS_SUMMARY_LIMIT,
+            'meta_key'       => 'owner_id',
+            'meta_value'     => $client_id,
+        ] );
+        
+        if ( empty( $pets ) ) {
+            return;
+        }
+        
+        // Pre-load meta cache
+        $pet_ids = wp_list_pluck( $pets, 'ID' );
+        update_meta_cache( 'post', $pet_ids );
+        
+        echo '<section class="dps-portal-section dps-portal-pets-summary">';
+        echo '<div class="dps-section-header">';
+        echo '<h2>🐾 ' . esc_html__( 'Meus Pets', 'dps-client-portal' ) . '</h2>';
+        echo '<button type="button" class="dps-link-button" data-tab="historico-pets">' . esc_html__( 'Ver Histórico Completo →', 'dps-client-portal' ) . '</button>';
+        echo '</div>';
+        
+        echo '<div class="dps-pets-cards">';
+        
+        foreach ( $pets as $pet ) {
+            $photo_id = get_post_meta( $pet->ID, 'pet_photo_id', true );
+            $species  = get_post_meta( $pet->ID, 'pet_species', true );
+            $breed    = get_post_meta( $pet->ID, 'pet_breed', true );
+            
+            // Busca último atendimento do pet
+            $last_appointment = get_posts( [
+                'post_type'      => 'dps_agendamento',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'   => 'appointment_pet_id',
+                        'value' => $pet->ID,
+                    ],
+                    [
+                        'key'     => 'appointment_status',
+                        'value'   => [ 'finalizado', 'finalizado e pago', 'finalizado_pago' ],
+                        'compare' => 'IN',
+                    ],
+                ],
+                'orderby'  => 'meta_value',
+                'meta_key' => 'appointment_date',
+                'order'    => 'DESC',
+                'fields'   => 'ids',
+            ] );
+            
+            $last_date = '';
+            if ( ! empty( $last_appointment ) ) {
+                $last_date = get_post_meta( $last_appointment[0], 'appointment_date', true );
+            }
+            
+            echo '<div class="dps-pet-card">';
+            
+            // Foto do pet
+            echo '<div class="dps-pet-card__photo">';
+            if ( $photo_id ) {
+                $photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
+                if ( $photo_url ) {
+                    echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet->post_title ) . '" loading="lazy">';
+                } else {
+                    echo '<span class="dps-pet-card__placeholder">🐾</span>';
+                }
+            } else {
+                echo '<span class="dps-pet-card__placeholder">🐾</span>';
+            }
+            echo '</div>';
+            
+            // Informações do pet
+            echo '<div class="dps-pet-card__info">';
+            echo '<h3 class="dps-pet-card__name">' . esc_html( $pet->post_title ) . '</h3>';
+            
+            if ( $breed || $species ) {
+                echo '<span class="dps-pet-card__breed">';
+                if ( $breed ) {
+                    echo esc_html( $breed );
+                }
+                if ( $breed && $species ) {
+                    echo ' • ';
+                }
+                if ( $species ) {
+                    echo esc_html( ucfirst( $species ) );
+                }
+                echo '</span>';
+            }
+            
+            if ( $last_date ) {
+                $days_ago = floor( ( time() - strtotime( $last_date ) ) / DAY_IN_SECONDS );
+                $date_text = sprintf(
+                    /* translators: %s: formatted date */
+                    __( 'Último atendimento: %s', 'dps-client-portal' ),
+                    date_i18n( 'd/m', strtotime( $last_date ) )
+                );
+                if ( $days_ago <= 1 ) {
+                    $date_text = __( 'Último atendimento: Hoje', 'dps-client-portal' );
+                } elseif ( $days_ago <= 7 ) {
+                    $date_text = sprintf(
+                        /* translators: %d: number of days */
+                        _n( 'Último atendimento: %d dia atrás', 'Último atendimento: %d dias atrás', $days_ago, 'dps-client-portal' ),
+                        $days_ago
+                    );
+                }
+                echo '<span class="dps-pet-card__last-service">' . esc_html( $date_text ) . '</span>';
+            } else {
+                echo '<span class="dps-pet-card__last-service dps-pet-card__last-service--empty">' . esc_html__( 'Ainda não atendido', 'dps-client-portal' ) . '</span>';
+            }
+            
+            echo '</div>'; // .dps-pet-card__info
+            echo '</div>'; // .dps-pet-card
+        }
+        
+        echo '</div>'; // .dps-pets-cards
+        echo '</section>';
     }
 
     /**
