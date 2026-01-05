@@ -5485,3 +5485,171 @@ html {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
+
+/* ================================================
+   ABA AGENDAMENTOS - Layout Modernizado
+   Métricas, Cards de Próximos, Histórico em Tabela
+   ================================================ */
+
+/* Seção de Métricas de Agendamentos */
+.dps-appointments-metrics {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.dps-metrics-grid--appointments {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 480px) {
+    .dps-metrics-grid--appointments {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+/* Seção de Próximos Agendamentos */
+.dps-portal-upcoming {
+    border-color: var(--dps-primary);
+    border-width: 2px;
+    background: linear-gradient(to bottom, #ffffff 0%, #f0f9ff 100%);
+}
+
+.dps-upcoming-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Seção de Histórico */
+.dps-portal-history {
+    background: var(--dps-white);
+}
+
+.dps-history-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -24px;
+    padding: 0 24px;
+}
+
+@media (min-width: 769px) {
+    .dps-history-table-wrapper {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.dps-history-table {
+    min-width: 600px;
+}
+
+/* Badges de Status */
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.dps-status-badge--default {
+    background: var(--dps-gray-100);
+    color: var(--dps-gray-600);
+}
+
+.dps-status-badge--scheduled {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.dps-status-badge--confirmed {
+    background: var(--dps-success-bg);
+    color: #047857;
+}
+
+.dps-status-badge--in-progress {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status-badge--completed {
+    background: var(--dps-gray-100);
+    color: var(--dps-gray-700);
+}
+
+.dps-status-badge--paid {
+    background: var(--dps-success-bg);
+    color: #047857;
+}
+
+.dps-status-badge--paid::before {
+    content: '✓';
+    font-size: 10px;
+}
+
+.dps-status-badge--cancelled {
+    background: var(--dps-danger-bg);
+    color: #991b1b;
+}
+
+.dps-status-badge--pending {
+    background: var(--dps-warning-bg);
+    color: #92400e;
+}
+
+/* Título de estado vazio */
+.dps-empty-state__title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+}
+
+/* Estilos específicos para mobile na aba agendamentos */
+@media (max-width: 768px) {
+    .dps-portal-upcoming {
+        padding: 16px;
+    }
+    
+    .dps-portal-history {
+        padding: 16px;
+    }
+    
+    .dps-history-table-wrapper {
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+    
+    .dps-appointments-metrics .dps-metric-card {
+        padding: 14px;
+    }
+    
+    .dps-appointments-metrics .dps-metric-card__value {
+        font-size: 22px;
+    }
+    
+    .dps-appointments-metrics .dps-metric-card__label {
+        font-size: 12px;
+    }
+}
+
+/* Cards de próximos agendamentos em destaque */
+.dps-upcoming-cards .dps-appointment-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-upcoming-cards .dps-appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.2);
+}

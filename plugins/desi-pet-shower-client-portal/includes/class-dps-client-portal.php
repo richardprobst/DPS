@@ -2332,10 +2332,20 @@ final class DPS_Client_Portal {
 
     /**
      * Renderiza a seção de histórico de agendamentos do cliente.
+     * 
+     * Layout moderno com:
+     * - Métricas rápidas no topo
+     * - Seção de próximos agendamentos em cards
+     * - Histórico em tabela responsiva
+     * - Estados vazios orientadores
      *
      * @param int $client_id ID do cliente.
+     * @since 3.1.0 Refatorado para layout moderno
      */
     private function render_appointment_history( $client_id ) {
+        $today = current_time( 'Y-m-d' );
+        
+        // Busca todos os agendamentos do cliente
         $args = [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
@@ -2349,18 +2359,22 @@ final class DPS_Client_Portal {
             ],
             'orderby'        => 'meta_value',
             'meta_key'       => 'appointment_date',
-            'order'          => 'DESC',
+            'order'          => 'ASC', // ASC para separar futuros corretamente
         ];
-        $appointments = get_posts( $args );
+        $all_appointments = get_posts( $args );
         
-        // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
-        if ( $appointments ) {
-            $appt_ids = wp_list_pluck( $appointments, 'ID' );
+        // Separa agendamentos futuros e passados
+        $upcoming = [];
+        $history  = [];
+        
+        if ( $all_appointments ) {
+            // OTIMIZAÇÃO: Pre-load meta cache para evitar N+1 queries
+            $appt_ids = wp_list_pluck( $all_appointments, 'ID' );
             update_meta_cache( 'post', $appt_ids );
             
             // OTIMIZAÇÃO: Batch load de pets para evitar queries individuais
             $pet_ids = [];
-            foreach ( $appointments as $appt ) {
+            foreach ( $all_appointments as $appt ) {
                 $pet_id = get_post_meta( $appt->ID, 'appointment_pet_id', true );
                 if ( $pet_id ) {
                     $pet_ids[] = $pet_id;
@@ -2373,81 +2387,362 @@ final class DPS_Client_Portal {
                     'post_type'      => 'dps_pet',
                     'post__in'       => array_unique( $pet_ids ),
                     'posts_per_page' => -1,
-                    'fields'         => 'ids', // Apenas IDs, mais eficiente
+                    'fields'         => 'ids',
                 ] );
                 
-                // Cria cache de nomes de pets
                 foreach ( $pets as $pet_id ) {
                     $pets_cache[ $pet_id ] = get_the_title( $pet_id );
                 }
             }
+            
+            // Separa por data
+            foreach ( $all_appointments as $appt ) {
+                $date   = get_post_meta( $appt->ID, 'appointment_date', true );
+                $status = get_post_meta( $appt->ID, 'appointment_status', true );
+                
+                // Agendamentos futuros: data >= hoje E status não finalizado/cancelado
+                if ( $date && strtotime( $date ) >= strtotime( $today ) && 
+                     ! in_array( $status, [ 'finalizado', 'finalizado e pago', 'finalizado_pago', 'cancelado' ], true ) ) {
+                    $upcoming[] = $appt;
+                } else {
+                    $history[] = $appt;
+                }
+            }
+            
+            // Reordena histórico DESC (mais recentes primeiro)
+            usort( $history, function( $a, $b ) {
+                $date_a = get_post_meta( $a->ID, 'appointment_date', true );
+                $date_b = get_post_meta( $b->ID, 'appointment_date', true );
+                return strtotime( $date_b ) - strtotime( $date_a );
+            } );
         }
         
+        // ========================================
+        // MÉTRICAS RÁPIDAS
+        // ========================================
+        $this->render_appointments_metrics( count( $upcoming ), count( $history ) );
+        
+        // ========================================
+        // PRÓXIMOS AGENDAMENTOS (Cards)
+        // ========================================
+        $this->render_upcoming_appointments_section( $upcoming, $pets_cache ?? [] );
+        
+        // ========================================
+        // HISTÓRICO (Tabela)
+        // ========================================
+        $this->render_history_section( $history, $pets_cache ?? [] );
+    }
+    
+    /**
+     * Renderiza métricas de agendamentos.
+     *
+     * @since 3.1.0
+     * @param int $upcoming_count Contagem de próximos agendamentos.
+     * @param int $history_count  Contagem de histórico.
+     */
+    private function render_appointments_metrics( $upcoming_count, $history_count ) {
+        echo '<section class="dps-portal-section dps-appointments-metrics">';
+        
+        echo '<div class="dps-metrics-grid dps-metrics-grid--appointments">';
+        
+        // Card: Próximos Agendamentos
+        $upcoming_class = $upcoming_count > 0 ? 'dps-metric-card--highlight' : '';
+        echo '<div class="dps-metric-card ' . esc_attr( $upcoming_class ) . '">';
+        echo '<span class="dps-metric-card__icon">📅</span>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( $upcoming_count ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Próximo Agendamento', 'Próximos Agendamentos', $upcoming_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Card: Total de Atendimentos
+        echo '<div class="dps-metric-card">';
+        echo '<span class="dps-metric-card__icon">✅</span>';
+        echo '<div class="dps-metric-card__content">';
+        echo '<span class="dps-metric-card__value">' . esc_html( $history_count ) . '</span>';
+        echo '<span class="dps-metric-card__label">' . esc_html( _n( 'Atendimento Realizado', 'Atendimentos Realizados', $history_count, 'dps-client-portal' ) ) . '</span>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-metrics-grid
+        echo '</section>';
+    }
+    
+    /**
+     * Renderiza seção de próximos agendamentos em cards.
+     *
+     * @since 3.1.0
+     * @param array $upcoming   Array de agendamentos futuros.
+     * @param array $pets_cache Cache de nomes de pets.
+     */
+    private function render_upcoming_appointments_section( $upcoming, $pets_cache ) {
+        echo '<section id="proximos-agendamentos" class="dps-portal-section dps-portal-upcoming">';
+        echo '<h2>' . esc_html__( '📅 Próximos Agendamentos', 'dps-client-portal' ) . '</h2>';
+        
+        if ( ! empty( $upcoming ) ) {
+            echo '<div class="dps-upcoming-cards">';
+            foreach ( $upcoming as $appt ) {
+                $this->render_upcoming_appointment_card( $appt, $pets_cache );
+            }
+            echo '</div>';
+        } else {
+            $this->render_no_upcoming_state();
+        }
+        
+        echo '</section>';
+    }
+    
+    /**
+     * Renderiza um card de próximo agendamento.
+     *
+     * @since 3.1.0
+     * @param WP_Post $appt       Objeto do agendamento.
+     * @param array   $pets_cache Cache de nomes de pets.
+     */
+    private function render_upcoming_appointment_card( $appt, $pets_cache ) {
+        $today    = current_time( 'Y-m-d' );
+        $tomorrow = date( 'Y-m-d', strtotime( '+1 day', strtotime( $today ) ) );
+        
+        $date     = get_post_meta( $appt->ID, 'appointment_date', true );
+        $time     = get_post_meta( $appt->ID, 'appointment_time', true );
+        $status   = get_post_meta( $appt->ID, 'appointment_status', true );
+        $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+        $services = get_post_meta( $appt->ID, 'appointment_services', true );
+        
+        $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+        
+        if ( is_array( $services ) ) {
+            $services_text = implode( ', ', array_map( 'esc_html', $services ) );
+        } else {
+            $services_text = '';
+        }
+        
+        // Determina badge de urgência
+        $badge_class = '';
+        $badge_text  = '';
+        if ( $date === $today ) {
+            $badge_class = 'dps-appointment-card__badge--today';
+            $badge_text  = __( 'Hoje!', 'dps-client-portal' );
+        } elseif ( $date === $tomorrow ) {
+            $badge_class = 'dps-appointment-card__badge--tomorrow';
+            $badge_text  = __( 'Amanhã', 'dps-client-portal' );
+        }
+        
+        // Status class
+        $status_class = $this->get_status_class( $status );
+        
+        echo '<div class="dps-appointment-card">';
+        
+        // Data visual
+        echo '<div class="dps-appointment-card__date">';
+        if ( $badge_text ) {
+            echo '<span class="dps-appointment-card__badge ' . esc_attr( $badge_class ) . '">' . esc_html( $badge_text ) . '</span>';
+        }
+        echo '<span class="dps-appointment-card__day">' . esc_html( date_i18n( 'd', strtotime( $date ) ) ) . '</span>';
+        echo '<span class="dps-appointment-card__month">' . esc_html( date_i18n( 'M', strtotime( $date ) ) ) . '</span>';
+        echo '<span class="dps-appointment-card__weekday">' . esc_html( date_i18n( 'D', strtotime( $date ) ) ) . '</span>';
+        echo '</div>';
+        
+        // Detalhes
+        echo '<div class="dps-appointment-card__details">';
+        echo '<div class="dps-appointment-card__time">⏰ ' . esc_html( $time ) . '</div>';
+        if ( $pet_name ) {
+            echo '<div class="dps-appointment-card__pet">🐾 ' . esc_html( $pet_name ) . '</div>';
+        }
+        if ( $services_text ) {
+            echo '<div class="dps-appointment-card__services">✂️ ' . $services_text . '</div>';
+        }
+        if ( $status ) {
+            echo '<div class="dps-appointment-card__status ' . esc_attr( $status_class ) . '">' . esc_html( ucfirst( $status ) ) . '</div>';
+        }
+        
+        // Ações
+        echo '<div class="dps-appointment-card__actions">';
+        
+        // Adicionar ao calendário
+        $ics_url = wp_nonce_url(
+            add_query_arg( 'dps_download_ics', $appt->ID, home_url( '/' ) ),
+            'dps_download_ics_' . $appt->ID
+        );
+        echo '<a href="' . esc_url( $ics_url ) . '" class="dps-appointment-card__action-btn" title="' . esc_attr__( 'Baixar arquivo .ics', 'dps-client-portal' ) . '">';
+        echo '📅 ' . esc_html__( 'Calendário', 'dps-client-portal' );
+        echo '</a>';
+        
+        // Google Calendar
+        if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+            $google_url = DPS_Calendar_Helper::get_google_calendar_url( $appt->ID );
+            if ( $google_url ) {
+                echo '<a href="' . esc_url( $google_url ) . '" class="dps-appointment-card__action-btn" target="_blank" rel="noopener">';
+                echo '📆 ' . esc_html__( 'Google', 'dps-client-portal' );
+                echo '</a>';
+            }
+        }
+        
+        echo '</div>'; // .dps-appointment-card__actions
+        echo '</div>'; // .dps-appointment-card__details
+        echo '</div>'; // .dps-appointment-card
+    }
+    
+    /**
+     * Renderiza estado vazio para próximos agendamentos.
+     *
+     * @since 3.1.0
+     */
+    private function render_no_upcoming_state() {
+        echo '<div class="dps-empty-state dps-empty-state--appointment">';
+        echo '<div class="dps-empty-state__icon">📅</div>';
+        echo '<p class="dps-empty-state__message">' . esc_html__( 'Você não tem agendamentos futuros no momento.', 'dps-client-portal' ) . '</p>';
+        
+        // CTA para agendar
+        if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
+            $whatsapp_message = __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' );
+            $whatsapp_url = DPS_WhatsApp_Helper::get_link_to_team( $whatsapp_message );
+        } else {
+            $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+            if ( ! empty( $whatsapp_number ) && class_exists( 'DPS_Phone_Helper' ) ) {
+                $whatsapp_number = DPS_Phone_Helper::format_for_whatsapp( $whatsapp_number );
+            }
+            $whatsapp_text = rawurlencode( __( 'Olá! Gostaria de agendar um serviço.', 'dps-client-portal' ) );
+            $whatsapp_url = ! empty( $whatsapp_number ) ? 'https://wa.me/' . $whatsapp_number . '?text=' . $whatsapp_text : '';
+        }
+        
+        if ( ! empty( $whatsapp_url ) ) {
+            echo '<a href="' . esc_url( $whatsapp_url ) . '" target="_blank" class="dps-empty-state__action">';
+            echo '💬 ' . esc_html__( 'Agendar via WhatsApp', 'dps-client-portal' );
+            echo '</a>';
+        }
+        
+        echo '</div>';
+    }
+    
+    /**
+     * Renderiza seção de histórico de atendimentos.
+     *
+     * @since 3.1.0
+     * @param array $history    Array de agendamentos passados.
+     * @param array $pets_cache Cache de nomes de pets.
+     */
+    private function render_history_section( $history, $pets_cache ) {
         echo '<section id="historico" class="dps-portal-section dps-portal-history">';
-        echo '<h2>' . esc_html__( '📋 Histórico de Serviços', 'dps-client-portal' ) . '</h2>';
-        if ( $appointments ) {
-            echo '<table class="dps-table"><thead><tr>';
+        echo '<h2>' . esc_html__( '📋 Histórico de Atendimentos', 'dps-client-portal' ) . '</h2>';
+        
+        if ( ! empty( $history ) ) {
+            echo '<div class="dps-history-table-wrapper">';
+            echo '<table class="dps-table dps-history-table"><thead><tr>';
             echo '<th>' . esc_html__( 'Data', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Horário', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Pet', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Serviços', 'dps-client-portal' ) . '</th>';
             echo '<th>' . esc_html__( 'Status', 'dps-client-portal' ) . '</th>';
-            echo '<th>' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>'; // Fase 2.8
+            echo '<th>' . esc_html__( 'Ações', 'dps-client-portal' ) . '</th>';
             echo '</tr></thead><tbody>';
-            foreach ( $appointments as $appt ) {
-                // Meta já em cache, sem queries adicionais
-                $date     = get_post_meta( $appt->ID, 'appointment_date', true );
-                $time     = get_post_meta( $appt->ID, 'appointment_time', true );
-                $status   = get_post_meta( $appt->ID, 'appointment_status', true );
-                $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
-                $services = get_post_meta( $appt->ID, 'appointment_services', true );
-                
-                // Usa cache de pets ao invés de get_the_title()
-                $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
-                
-                if ( is_array( $services ) ) {
-                    $services = implode( ', ', array_map( 'esc_html', $services ) );
-                } else {
-                    $services = '';
-                }
-                echo '<tr>';
-                echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( $date ? date_i18n( 'd-m-Y', strtotime( $date ) ) : '' ) . '</td>';
-                echo '<td data-label="' . esc_attr__( 'Horário', 'dps-client-portal' ) . '">' . esc_html( $time ) . '</td>';
-                echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
-                echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services . '</td>';
-                echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '">' . esc_html( ucfirst( $status ) ) . '</td>';
-                
-                // Ações - Adicionar ao Calendário (Fase 2.8)
-                echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '" class="dps-table-actions">';
-                
-                // Link para download .ics
-                $ics_url = wp_nonce_url(
-                    add_query_arg( 'dps_download_ics', $appt->ID, home_url( '/' ) ),
-                    'dps_download_ics_' . $appt->ID
-                );
-                
-                echo '<a href="' . esc_url( $ics_url ) . '" class="dps-btn dps-btn--small" title="' . esc_attr__( 'Baixar arquivo .ics', 'dps-client-portal' ) . '">';
-                echo '📅 ' . esc_html__( '.ics', 'dps-client-portal' );
-                echo '</a> ';
-                
-                // Link para Google Calendar
-                if ( class_exists( 'DPS_Calendar_Helper' ) ) {
-                    $google_url = DPS_Calendar_Helper::get_google_calendar_url( $appt->ID );
-                    if ( $google_url ) {
-                        echo '<a href="' . esc_url( $google_url ) . '" class="dps-btn dps-btn--small" target="_blank" rel="noopener" title="' . esc_attr__( 'Adicionar ao Google Calendar', 'dps-client-portal' ) . '">';
-                        echo '📆 ' . esc_html__( 'Google', 'dps-client-portal' );
-                        echo '</a>';
-                    }
-                }
-                
-                echo '</td>';
-                echo '</tr>';
+            
+            foreach ( $history as $appt ) {
+                $this->render_history_row( $appt, $pets_cache );
             }
+            
             echo '</tbody></table>';
+            echo '</div>'; // .dps-history-table-wrapper
         } else {
-            echo '<p>' . esc_html__( 'Nenhum atendimento encontrado.', 'dps-client-portal' ) . '</p>';
+            $this->render_no_history_state();
         }
+        
         echo '</section>';
+    }
+    
+    /**
+     * Renderiza uma linha do histórico de atendimentos.
+     *
+     * @since 3.1.0
+     * @param WP_Post $appt       Objeto do agendamento.
+     * @param array   $pets_cache Cache de nomes de pets.
+     */
+    private function render_history_row( $appt, $pets_cache ) {
+        $date     = get_post_meta( $appt->ID, 'appointment_date', true );
+        $time     = get_post_meta( $appt->ID, 'appointment_time', true );
+        $status   = get_post_meta( $appt->ID, 'appointment_status', true );
+        $pet_id   = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+        $services = get_post_meta( $appt->ID, 'appointment_services', true );
+        
+        $pet_name = isset( $pets_cache[ $pet_id ] ) ? $pets_cache[ $pet_id ] : '';
+        
+        if ( is_array( $services ) ) {
+            $services_text = implode( ', ', array_map( 'esc_html', $services ) );
+        } else {
+            $services_text = '';
+        }
+        
+        $status_class = $this->get_status_class( $status );
+        
+        echo '<tr>';
+        echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( $date ? date_i18n( 'd/m/Y', strtotime( $date ) ) : '' ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Horário', 'dps-client-portal' ) . '">' . esc_html( $time ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-client-portal' ) . '">' . esc_html( $pet_name ) . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Serviços', 'dps-client-portal' ) . '">' . $services_text . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Status', 'dps-client-portal' ) . '"><span class="dps-status-badge ' . esc_attr( $status_class ) . '">' . esc_html( ucfirst( $status ) ) . '</span></td>';
+        
+        // Ações
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-client-portal' ) . '" class="dps-table-actions">';
+        
+        // Link para download .ics
+        $ics_url = wp_nonce_url(
+            add_query_arg( 'dps_download_ics', $appt->ID, home_url( '/' ) ),
+            'dps_download_ics_' . $appt->ID
+        );
+        
+        echo '<a href="' . esc_url( $ics_url ) . '" class="dps-btn dps-btn--small" title="' . esc_attr__( 'Baixar arquivo .ics', 'dps-client-portal' ) . '">';
+        echo '📅 ' . esc_html__( '.ics', 'dps-client-portal' );
+        echo '</a> ';
+        
+        // Link para Google Calendar
+        if ( class_exists( 'DPS_Calendar_Helper' ) ) {
+            $google_url = DPS_Calendar_Helper::get_google_calendar_url( $appt->ID );
+            if ( $google_url ) {
+                echo '<a href="' . esc_url( $google_url ) . '" class="dps-btn dps-btn--small" target="_blank" rel="noopener" title="' . esc_attr__( 'Adicionar ao Google Calendar', 'dps-client-portal' ) . '">';
+                echo '📆 ' . esc_html__( 'Google', 'dps-client-portal' );
+                echo '</a>';
+            }
+        }
+        
+        echo '</td>';
+        echo '</tr>';
+    }
+    
+    /**
+     * Renderiza estado vazio para histórico.
+     *
+     * @since 3.1.0
+     */
+    private function render_no_history_state() {
+        echo '<div class="dps-empty-state">';
+        echo '<div class="dps-empty-state__icon">📋</div>';
+        echo '<p class="dps-empty-state__title">' . esc_html__( 'Sem histórico ainda', 'dps-client-portal' ) . '</p>';
+        echo '<p class="dps-empty-state__message">' . esc_html__( 'Seu histórico de atendimentos aparecerá aqui após realizar seu primeiro serviço conosco.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+    }
+    
+    /**
+     * Retorna a classe CSS para o status do agendamento.
+     *
+     * @since 3.1.0
+     * @param string $status Status do agendamento.
+     * @return string Classe CSS do status.
+     */
+    private function get_status_class( $status ) {
+        $status_lower = strtolower( $status );
+        
+        $status_map = [
+            'agendado'           => 'dps-status-badge--scheduled',
+            'confirmado'         => 'dps-status-badge--confirmed',
+            'em andamento'       => 'dps-status-badge--in-progress',
+            'finalizado'         => 'dps-status-badge--completed',
+            'finalizado e pago'  => 'dps-status-badge--paid',
+            'finalizado_pago'    => 'dps-status-badge--paid',
+            'cancelado'          => 'dps-status-badge--cancelled',
+            'pendente'           => 'dps-status-badge--pending',
+        ];
+        
+        return isset( $status_map[ $status_lower ] ) ? $status_map[ $status_lower ] : 'dps-status-badge--default';
     }
 
     /**
