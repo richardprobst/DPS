@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aba Histórico dos Pets - Demo Layout Moderno</title>
+    <style>
+        /* Reset e Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #374151;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        /* CSS Variables (igual ao portal) */
+        :root {
+            --dps-primary: #0ea5e9;
+            --dps-primary-hover: #0284c7;
+            --dps-primary-active: #0369a1;
+            --dps-success: #10b981;
+            --dps-success-bg: #d1fae5;
+            --dps-warning: #f59e0b;
+            --dps-warning-bg: #fef3c7;
+            --dps-danger: #ef4444;
+            --dps-white: #ffffff;
+            --dps-gray-50: #f9fafb;
+            --dps-gray-100: #f3f4f6;
+            --dps-gray-200: #e5e7eb;
+            --dps-gray-300: #d1d5db;
+            --dps-gray-400: #9ca3af;
+            --dps-gray-500: #6b7280;
+            --dps-gray-600: #4b5563;
+            --dps-gray-700: #374151;
+            --dps-gray-800: #1f2937;
+            --dps-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --dps-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --dps-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .demo-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--dps-gray-700);
+        }
+
+        .demo-title h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .demo-title p {
+            color: var(--dps-gray-500);
+        }
+
+        /* === Estilos da Aba Histórico dos Pets === */
+
+        .dps-portal-section {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Cabeçalho */
+        .dps-pet-history-header {
+            margin-bottom: 24px;
+        }
+
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            margin: 0 0 8px 0;
+        }
+
+        .dps-section-title__icon {
+            font-size: 28px;
+        }
+
+        .dps-section-subtitle {
+            font-size: 15px;
+            color: var(--dps-gray-500);
+            margin: 0;
+        }
+
+        /* Cards de Métricas */
+        .dps-metrics-grid--pet-history {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 992px) {
+            .dps-metrics-grid--pet-history {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dps-metrics-grid--pet-history {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dps-metric-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 20px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .dps-metric-card:hover {
+            box-shadow: var(--dps-shadow-sm);
+        }
+
+        .dps-metric-card--primary {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: #bae6fd;
+        }
+
+        .dps-metric-card--highlight {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #fcd34d;
+        }
+
+        .dps-metric-card__icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .dps-metric-card__content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .dps-metric-card__value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dps-gray-800);
+            line-height: 1.1;
+        }
+
+        .dps-metric-card__value--text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .dps-metric-card__label {
+            font-size: 13px;
+            color: var(--dps-gray-500);
+        }
+
+        /* Navegação por Pet */
+        .dps-pet-tabs-nav {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+        }
+
+        .dps-pet-tabs-nav__label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dps-gray-600);
+            margin-bottom: 12px;
+        }
+
+        .dps-pet-tabs-nav__tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .dps-pet-tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: var(--dps-gray-50);
+            border: 2px solid transparent;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dps-pet-tab:hover {
+            background: var(--dps-gray-100);
+        }
+
+        .dps-pet-tab--active {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: var(--dps-primary);
+        }
+
+        .dps-pet-tab__icon {
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--dps-white);
+            border-radius: 50%;
+        }
+
+        .dps-pet-tab__name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+        }
+
+        .dps-pet-tab--active .dps-pet-tab__name {
+            color: var(--dps-primary-active);
+        }
+
+        /* Card de Info do Pet */
+        .dps-pet-info-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .dps-pet-info-card__avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--dps-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--dps-white);
+            box-shadow: var(--dps-shadow);
+        }
+
+        .dps-pet-info-card__placeholder {
+            font-size: 32px;
+        }
+
+        .dps-pet-info-card__name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+            margin: 0 0 4px 0;
+        }
+
+        .dps-pet-info-card__breed {
+            font-size: 14px;
+            color: var(--dps-gray-500);
+            margin: 0 0 8px 0;
+        }
+
+        .dps-pet-info-card__count {
+            display: inline-flex;
+            padding: 4px 12px;
+            background: var(--dps-success-bg);
+            color: #047857;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Timeline */
+        .dps-timeline {
+            padding: 16px 0;
+        }
+
+        .dps-timeline-item {
+            position: relative;
+            padding-left: 44px;
+            margin-bottom: 24px;
+        }
+
+        .dps-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 32px;
+            bottom: -24px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--dps-primary), var(--dps-gray-200));
+        }
+
+        .dps-timeline-item:last-child::before {
+            display: none;
+        }
+
+        .dps-timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--dps-primary) 0%, var(--dps-primary-hover) 100%);
+            border-radius: 50%;
+            border: 3px solid var(--dps-white);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .dps-timeline-content {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-gray-200);
+            border-radius: 12px;
+            padding: 20px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .dps-timeline-content:hover {
+            box-shadow: var(--dps-shadow-md);
+            transform: translateX(4px);
+        }
+
+        .dps-timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .dps-timeline-date__day {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+        }
+
+        .dps-timeline-date__time {
+            font-size: 13px;
+            color: var(--dps-gray-500);
+            display: block;
+        }
+
+        .dps-status-badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .dps-status-badge--completed {
+            background: var(--dps-gray-100);
+            color: var(--dps-gray-600);
+        }
+
+        .dps-status-badge--paid {
+            background: var(--dps-success-bg);
+            color: #047857;
+        }
+
+        .dps-timeline-service {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dps-gray-800);
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--dps-gray-100);
+        }
+
+        .dps-timeline-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .dps-timeline-meta__item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--dps-gray-600);
+        }
+
+        .dps-timeline-meta__item--value {
+            font-weight: 600;
+            color: var(--dps-success);
+        }
+
+        .dps-timeline-notes__details {
+            background: var(--dps-gray-50);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .dps-timeline-notes__summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dps-gray-600);
+            list-style: none;
+        }
+
+        .dps-timeline-notes__summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .dps-timeline-notes__text {
+            padding: 0 14px 14px 14px;
+            margin: 0;
+            font-size: 14px;
+            color: var(--dps-gray-600);
+        }
+
+        .dps-timeline-actions {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--dps-gray-100);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+        }
+
+        .button-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-1px);
+        }
+
+        .button-secondary {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #cbd5e1;
+            color: #475569;
+        }
+
+        .button-secondary:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-title">
+            <h1>📋 Aba Histórico dos Pets - Layout Moderno</h1>
+            <p>Demonstração visual do novo layout implementado em Janeiro/2026</p>
+        </div>
+
+        <!-- Seção: Cabeçalho com Métricas -->
+        <section class="dps-portal-section">
+            <div class="dps-pet-history-header">
+                <h2 class="dps-section-title">
+                    <span class="dps-section-title__icon">📋</span>
+                    Histórico dos Pets
+                </h2>
+                <p class="dps-section-subtitle">Acompanhe todos os serviços realizados em seus pets ao longo do tempo.</p>
+            </div>
+
+            <div class="dps-metrics-grid dps-metrics-grid--pet-history">
+                <div class="dps-metric-card dps-metric-card--primary">
+                    <div class="dps-metric-card__icon">✂️</div>
+                    <div class="dps-metric-card__content">
+                        <span class="dps-metric-card__value">24</span>
+                        <span class="dps-metric-card__label">Serviços Realizados</span>
+                    </div>
+                </div>
+
+                <div class="dps-metric-card">
+                    <div class="dps-metric-card__icon">🐾</div>
+                    <div class="dps-metric-card__content">
+                        <span class="dps-metric-card__value">3</span>
+                        <span class="dps-metric-card__label">Pets Cadastrados</span>
+                    </div>
+                </div>
+
+                <div class="dps-metric-card">
+                    <div class="dps-metric-card__icon">📅</div>
+                    <div class="dps-metric-card__content">
+                        <span class="dps-metric-card__value">02/01/2026</span>
+                        <span class="dps-metric-card__label">Há 3 dias</span>
+                    </div>
+                </div>
+
+                <div class="dps-metric-card dps-metric-card--highlight">
+                    <div class="dps-metric-card__icon">⭐</div>
+                    <div class="dps-metric-card__content">
+                        <span class="dps-metric-card__value dps-metric-card__value--text">Banho e Tosa</span>
+                        <span class="dps-metric-card__label">Serviço Favorito</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navegação por Pet (Tabs) -->
+        <div class="dps-pet-tabs-nav">
+            <div class="dps-pet-tabs-nav__label">Selecione o pet:</div>
+            <div class="dps-pet-tabs-nav__tabs">
+                <button class="dps-pet-tab dps-pet-tab--active">
+                    <span class="dps-pet-tab__icon">🐕</span>
+                    <span class="dps-pet-tab__name">Thor</span>
+                </button>
+                <button class="dps-pet-tab">
+                    <span class="dps-pet-tab__icon">🐩</span>
+                    <span class="dps-pet-tab__name">Luna</span>
+                </button>
+                <button class="dps-pet-tab">
+                    <span class="dps-pet-tab__icon">🐈</span>
+                    <span class="dps-pet-tab__name">Mia</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Card de Info do Pet + Timeline -->
+        <section class="dps-portal-section">
+            <div class="dps-pet-info-card">
+                <div class="dps-pet-info-card__avatar">
+                    <span class="dps-pet-info-card__placeholder">🐕</span>
+                </div>
+                <div class="dps-pet-info-card__details">
+                    <h3 class="dps-pet-info-card__name">Thor</h3>
+                    <p class="dps-pet-info-card__breed">Cachorro • Golden Retriever</p>
+                    <span class="dps-pet-info-card__count">12 serviços realizados</span>
+                </div>
+            </div>
+
+            <div class="dps-timeline">
+                <!-- Item 1 -->
+                <div class="dps-timeline-item">
+                    <div class="dps-timeline-marker">✓</div>
+                    <div class="dps-timeline-content">
+                        <div class="dps-timeline-header">
+                            <div class="dps-timeline-date">
+                                <span class="dps-timeline-date__day">02/01/2026</span>
+                                <span class="dps-timeline-date__time">14:30</span>
+                            </div>
+                            <span class="dps-status-badge dps-status-badge--paid">✓ Pago</span>
+                        </div>
+                        <div class="dps-timeline-service">
+                            <span>✂️</span>
+                            <span>Banho e Tosa Completa</span>
+                        </div>
+                        <div class="dps-timeline-meta">
+                            <span class="dps-timeline-meta__item">
+                                <span>👤</span> Ana Silva
+                            </span>
+                            <span class="dps-timeline-meta__item dps-timeline-meta__item--value">
+                                <span>💰</span> R$ 120,00
+                            </span>
+                        </div>
+                        <div class="dps-timeline-notes">
+                            <details class="dps-timeline-notes__details">
+                                <summary class="dps-timeline-notes__summary">
+                                    <span>📝</span> Observações
+                                </summary>
+                                <p class="dps-timeline-notes__text">
+                                    Pelo em ótimas condições. Foi aplicado hidratante especial conforme solicitado.
+                                </p>
+                            </details>
+                        </div>
+                        <div class="dps-timeline-actions">
+                            <a href="#" class="button button-primary">🔄 Repetir Serviço</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="dps-timeline-item">
+                    <div class="dps-timeline-marker">✓</div>
+                    <div class="dps-timeline-content">
+                        <div class="dps-timeline-header">
+                            <div class="dps-timeline-date">
+                                <span class="dps-timeline-date__day">15/12/2025</span>
+                                <span class="dps-timeline-date__time">10:00</span>
+                            </div>
+                            <span class="dps-status-badge dps-status-badge--paid">✓ Pago</span>
+                        </div>
+                        <div class="dps-timeline-service">
+                            <span>✂️</span>
+                            <span>Banho Simples</span>
+                        </div>
+                        <div class="dps-timeline-meta">
+                            <span class="dps-timeline-meta__item">
+                                <span>👤</span> João Santos
+                            </span>
+                            <span class="dps-timeline-meta__item dps-timeline-meta__item--value">
+                                <span>💰</span> R$ 80,00
+                            </span>
+                        </div>
+                        <div class="dps-timeline-actions">
+                            <a href="#" class="button button-primary">🔄 Repetir Serviço</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="dps-timeline-item">
+                    <div class="dps-timeline-marker">✓</div>
+                    <div class="dps-timeline-content">
+                        <div class="dps-timeline-header">
+                            <div class="dps-timeline-date">
+                                <span class="dps-timeline-date__day">28/11/2025</span>
+                                <span class="dps-timeline-date__time">16:00</span>
+                            </div>
+                            <span class="dps-status-badge dps-status-badge--completed">Concluído</span>
+                        </div>
+                        <div class="dps-timeline-service">
+                            <span>✂️</span>
+                            <span>Tosa Higiênica</span>
+                        </div>
+                        <div class="dps-timeline-meta">
+                            <span class="dps-timeline-meta__item">
+                                <span>👤</span> Maria Oliveira
+                            </span>
+                            <span class="dps-timeline-meta__item dps-timeline-meta__item--value">
+                                <span>💰</span> R$ 45,00
+                            </span>
+                        </div>
+                        <div class="dps-timeline-actions">
+                            <a href="#" class="button button-primary">🔄 Repetir Serviço</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão Ver Mais -->
+            <div style="text-align: center; padding: 20px 0;">
+                <button class="button button-secondary">📜 Ver mais serviços</button>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

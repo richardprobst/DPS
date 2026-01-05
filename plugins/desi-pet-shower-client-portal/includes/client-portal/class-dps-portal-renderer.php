@@ -740,7 +740,7 @@ class DPS_Portal_Renderer {
 
         // Determina serviço mais frequente
         $most_frequent_service = '';
-        if ( ! empty( $services_count ) ) {
+        if ( ! empty( $services_count ) && is_array( $services_count ) ) {
             arsort( $services_count );
             $most_frequent_service = array_key_first( $services_count );
         }
@@ -993,13 +993,18 @@ class DPS_Portal_Renderer {
         // Determina badge de status
         $status_class = 'dps-status-badge--completed';
         $status_label = __( 'Concluído', 'dps-client-portal' );
-        if ( strpos( strtolower( $status ), 'pago' ) !== false ) {
+        // PHP 8.0+: usa str_contains para verificação mais legível
+        if ( str_contains( strtolower( $status ), 'pago' ) ) {
             $status_class = 'dps-status-badge--paid';
             $status_label = __( 'Pago', 'dps-client-portal' );
         }
 
-        // Busca valor do agendamento se disponível
-        $appointment_value = get_post_meta( $service['appointment_id'], 'appointment_value', true );
+        // Busca valor do agendamento se disponível (valida ID antes de consultar)
+        $appointment_value = '';
+        $appointment_id    = isset( $service['appointment_id'] ) ? absint( $service['appointment_id'] ) : 0;
+        if ( $appointment_id > 0 ) {
+            $appointment_value = get_post_meta( $appointment_id, 'appointment_value', true );
+        }
 
         echo '<div class="dps-timeline-item">';
         echo '<div class="dps-timeline-marker"></div>';

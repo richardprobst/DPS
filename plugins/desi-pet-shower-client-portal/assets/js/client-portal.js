@@ -1592,6 +1592,11 @@ window.DPSSkeleton = (function() {
             tab.addEventListener('click', function() {
                 var targetPetId = this.getAttribute('data-pet-id');
 
+                // Valida que targetPetId é um número (IDs de post são numéricos)
+                if (!targetPetId || !/^\d+$/.test(targetPetId)) {
+                    return;
+                }
+
                 // Remove classe ativa de todas as tabs
                 petTabs.forEach(function(t) {
                     t.classList.remove('dps-pet-tab--active');
@@ -1608,8 +1613,9 @@ window.DPSSkeleton = (function() {
                     panel.setAttribute('aria-hidden', 'true');
                 });
 
-                // Mostra o painel correspondente
-                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + targetPetId + '"]');
+                // Mostra o painel correspondente (usa CSS.escape para prevenir XSS)
+                var escapedPetId = CSS.escape(targetPetId);
+                var targetPanel = document.querySelector('.dps-pet-timeline-panel[data-pet-id="' + escapedPetId + '"]');
                 if (targetPanel) {
                     targetPanel.classList.remove('dps-pet-timeline-panel--hidden');
                     targetPanel.setAttribute('aria-hidden', 'false');
@@ -1652,6 +1658,12 @@ window.DPSSkeleton = (function() {
                 var whatsappNumber = '5515991606299'; // Valor padrão
                 if (typeof dpsPortal !== 'undefined' && dpsPortal.whatsappNumber) {
                     whatsappNumber = dpsPortal.whatsappNumber;
+                }
+
+                // Valida que o número contém apenas dígitos e + (previne URL manipulation)
+                if (!/^[\d+]+$/.test(whatsappNumber)) {
+                    console.warn('WhatsApp number contains invalid characters');
+                    return;
                 }
 
                 // Abre WhatsApp
