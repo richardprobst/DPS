@@ -83,6 +83,17 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Client Portal Add-on - Modernização Completa da Aba Agendamentos (v3.1.0)**
+
+- **Métricas rápidas no topo**: Dois cards destacando número de próximos agendamentos e total de atendimentos realizados.
+- **Seção de Próximos Agendamentos em cards**: Agendamentos futuros exibidos em cards visuais modernos com data destacada, horário, pet, serviços e status.
+- **Badges de urgência**: Labels "Hoje!" e "Amanhã" em destaque visual nos cards de agendamentos próximos.
+- **Separação lógica de conteúdo**: Próximos agendamentos e histórico de atendimentos em seções distintas com hierarquia visual clara.
+- **Oito novos métodos helper**: `render_appointments_metrics()`, `render_upcoming_appointments_section()`, `render_upcoming_appointment_card()`, `render_no_upcoming_state()`, `render_history_section()`, `render_history_row()`, `render_no_history_state()` e `get_status_class()`.
+- **Badges de status coloridos**: Status de agendamentos com cores semânticas (verde para confirmado/pago, amarelo para pendente, vermelho para cancelado).
+- **Estados vazios orientadores**: Mensagens amigáveis com ícones e CTA para WhatsApp quando não há agendamentos.
+- **~170 linhas de CSS**: Novos estilos para métricas, cards de próximos agendamentos, badges de status e responsividade mobile.
+
 **Stock Add-on - Modernização Completa do Layout da Aba Estoque (v1.2.0)**
 
 - **Header da seção padronizado**: Título com ícone 📦 e subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).
