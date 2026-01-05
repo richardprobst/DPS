@@ -2132,56 +2132,443 @@ html {
     background: #059669;
 }
 
-/* Centro de mensagens */
+/* ========================================
+   CENTRAL DE MENSAGENS - LAYOUT MODERNO
+   Refatorado para seguir padrão das abas Avaliações e Fidelidade
+   ======================================== */
+
+/* Container principal */
 .dps-portal-messages {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
-.dps-portal-messages__list {
+/* Cards de Métricas */
+.dps-messages-metrics {
     display: grid;
-    gap: 0.75rem;
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.dps-portal-message {
-    border-left: 4px solid transparent;
-    background: #f9fafb;
-    border-radius: 4px;
-    padding: 0.75rem 1rem;
+.dps-messages-metric-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: var(--dps-white);
     border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.2s ease;
 }
 
-.dps-portal-message--admin {
-    border-left-color: #0ea5e9;
+.dps-messages-metric-card:hover {
+    box-shadow: var(--dps-shadow-sm);
 }
 
-.dps-portal-message--client {
-    border-left-color: #10b981;
+.dps-messages-metric-card--highlight {
+    background-color: #f0f9ff;
+    border-color: var(--dps-primary);
+    border-left: 4px solid var(--dps-primary);
 }
 
+.dps-messages-metric-card__icon {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-messages-metric-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-messages-metric-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    line-height: 1.2;
+}
+
+.dps-messages-metric-card__label {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+}
+
+/* Grid Layout: Caixa de Entrada + Formulário */
+.dps-messages-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .dps-messages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Caixa de Entrada (Inbox) */
+.dps-messages-inbox {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dps-messages-inbox__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background-color: #f9fafb;
+    border-bottom: 1px solid var(--dps-border-color);
+}
+
+.dps-messages-inbox__icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-messages-inbox__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin: 0 0 4px 0;
+}
+
+.dps-messages-inbox__subtitle {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+/* Lista de Mensagens */
+.dps-portal-messages__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Estilo individual de mensagem */
+.dps-portal-message {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    background-color: var(--dps-white);
+    border-bottom: 1px solid var(--dps-gray-100);
+    transition: background-color 0.2s ease;
+}
+
+.dps-portal-message:hover {
+    background-color: #fafafa;
+}
+
+.dps-portal-message:last-child {
+    border-bottom: none;
+}
+
+.dps-portal-message--unread {
+    background-color: #f0f9ff;
+}
+
+.dps-portal-message--unread:hover {
+    background-color: #e0f2fe;
+}
+
+/* Avatar do remetente */
+.dps-portal-message__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    background-color: var(--dps-gray-100);
+}
+
+.dps-portal-message--admin .dps-portal-message__avatar {
+    background-color: #dbeafe;
+}
+
+.dps-portal-message--client .dps-portal-message__avatar {
+    background-color: #d1fae5;
+}
+
+/* Corpo da mensagem */
+.dps-portal-message__body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Badge de não lida */
+.dps-portal-message__unread-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: var(--dps-primary);
+    color: var(--dps-white);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Meta info */
 .dps-portal-message__meta {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    font-size: 0.85rem;
-    color: var(--dps-gray-500);
-    margin-bottom: 0.5rem;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.dps-portal-message__status {
+.dps-portal-message__author {
     font-weight: 600;
+    font-size: 15px;
+    color: var(--dps-gray-900);
 }
 
-.dps-portal-messages__form textarea {
+.dps-portal-message__date {
+    font-size: 13px;
+    color: var(--dps-gray-500);
+}
+
+/* Tipo de mensagem com ícone */
+.dps-portal-message__type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: var(--dps-gray-100);
+    color: var(--dps-gray-700);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.dps-portal-message__type-icon {
+    font-size: 14px;
+}
+
+/* Título da mensagem */
+.dps-portal-message__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dps-gray-800);
+    margin: 0 0 8px 0;
+}
+
+/* Conteúdo da mensagem */
+.dps-portal-message__content {
+    color: var(--dps-gray-700);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.dps-portal-message__content p {
+    margin: 0 0 8px 0;
+}
+
+.dps-portal-message__content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Link de ação */
+.dps-portal-message__action {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-portal-message__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--dps-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.dps-portal-message__link:hover {
+    color: #0284c7;
+    text-decoration: underline;
+}
+
+/* Estado vazio de mensagens */
+.dps-messages-empty {
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.dps-messages-empty__icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.dps-messages-empty__message {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin-bottom: 8px;
+}
+
+.dps-messages-empty__hint {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+/* Formulário de Nova Mensagem (Compose) */
+.dps-messages-compose {
+    background-color: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dps-messages-compose__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background-color: #f0fdf4;
+    border-bottom: 1px solid var(--dps-border-color);
+}
+
+.dps-messages-compose__icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-messages-compose__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-900);
+    margin: 0 0 4px 0;
+}
+
+.dps-messages-compose__subtitle {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0;
+}
+
+.dps-messages-compose__content {
+    padding: 24px;
+}
+
+/* Fieldset do formulário */
+.dps-messages-compose__fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dps-messages-compose__legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dps-gray-700);
+    margin-bottom: 12px;
+    padding: 0;
+    border: none;
+}
+
+.dps-messages-compose__instructions {
+    font-size: 14px;
+    color: var(--dps-gray-600);
+    margin-bottom: 20px;
+    line-height: 1.5;
+    padding: 12px 16px;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border-left: 3px solid var(--dps-primary);
+}
+
+/* Campos de formulário */
+.dps-messages-compose .dps-form-field {
+    margin-bottom: 20px;
+}
+
+.dps-messages-compose .dps-form-field label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--dps-gray-700);
+    margin-bottom: 6px;
+}
+
+.dps-form-optional {
+    font-weight: 400;
+    color: var(--dps-gray-500);
+    font-size: 13px;
+}
+
+.dps-messages-compose .dps-form-control {
     width: 100%;
-    min-height: 120px;
+    padding: 12px 16px;
+    border: 1px solid var(--dps-border-color);
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dps-portal-messages__form button.button {
-    margin-top: 0.75rem;
+.dps-messages-compose .dps-form-control:focus {
+    outline: none;
+    border-color: var(--dps-primary);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.dps-messages-compose textarea.dps-form-control {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.dps-form-hint {
+    font-size: 13px;
+    color: var(--dps-gray-500);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Ações do formulário */
+.dps-messages-compose__actions {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dps-gray-100);
+}
+
+.dps-messages-compose__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-messages-compose__submit-icon {
+    font-size: 16px;
 }
 
 /* ========================================
@@ -3372,123 +3759,9 @@ html {
 }
 
 /* ========================================
-   FASE 4 CONTINUAÇÃO: MENSAGENS, PREFERÊNCIAS E BRANDING
+   FASE 4 CONTINUAÇÃO: PREFERÊNCIAS E BRANDING
+   (Estilos de mensagens movidos para seção dedicada acima)
    ======================================== */
-
-/* Central de Mensagens - Melhorias */
-.dps-portal-messages__list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 32px;
-}
-
-.dps-portal-message {
-    position: relative;
-    background-color: var(--dps-white);
-    border: 1px solid var(--dps-border-color);
-    border-radius: 8px;
-    padding: 20px;
-    transition: box-shadow 0.2s ease;
-}
-
-.dps-portal-message:hover {
-    box-shadow: var(--dps-shadow-sm);
-}
-
-.dps-portal-message--unread {
-    border-left: 4px solid var(--dps-primary);
-    background-color: #f0f9ff;
-}
-
-.dps-portal-message__unread-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    display: inline-block;
-    padding: 4px 12px;
-    background-color: var(--dps-primary);
-    color: var(--dps-white);
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.dps-portal-message__meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 16px;
-}
-
-.dps-portal-message__author {
-    font-weight: 600;
-    color: var(--dps-gray-900);
-}
-
-.dps-portal-message__date {
-    font-size: 14px;
-    color: var(--dps-gray-500);
-}
-
-.dps-portal-message__type {
-    display: inline-block;
-    padding: 4px 12px;
-    background-color: var(--dps-gray-100);
-    color: var(--dps-gray-700);
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 12px;
-}
-
-.dps-portal-message__title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--dps-gray-900);
-    margin-bottom: 12px;
-}
-
-.dps-portal-message__content {
-    color: var(--dps-gray-700);
-    line-height: 1.6;
-}
-
-.dps-portal-message__content p:last-child {
-    margin-bottom: 0;
-}
-
-.dps-portal-message__action {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--dps-gray-100);
-}
-
-.dps-portal-message__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--dps-primary);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.dps-portal-message__link:hover {
-    text-decoration: underline;
-}
-
-.dps-portal-messages__form {
-    margin-top: 40px;
-    padding-top: 32px;
-    border-top: 2px solid var(--dps-gray-200);
-}
-
-.dps-portal-messages__form h3 {
-    margin-bottom: 20px;
-    color: var(--dps-gray-900);
-}
 
 /* Preferências do Cliente e Pet */
 .dps-preferences-section {
@@ -5080,6 +5353,122 @@ html {
     
     .dps-loyalty-referral-input {
         width: 100%;
+    }
+}
+
+/* ================================================
+   CENTRAL DE MENSAGENS - RESPONSIVIDADE MOBILE
+   ================================================ */
+@media (max-width: 768px) {
+    .dps-messages-metrics {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .dps-messages-metric-card {
+        padding: 16px;
+    }
+    
+    .dps-messages-metric-card__icon {
+        font-size: 28px;
+    }
+    
+    .dps-messages-metric-card__value {
+        font-size: 20px;
+    }
+    
+    .dps-messages-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-messages-inbox__header,
+    .dps-messages-compose__header {
+        padding: 16px 20px;
+    }
+    
+    .dps-messages-inbox__title,
+    .dps-messages-compose__title {
+        font-size: 16px;
+    }
+    
+    .dps-messages-inbox__subtitle,
+    .dps-messages-compose__subtitle {
+        font-size: 13px;
+    }
+    
+    .dps-portal-messages__list {
+        max-height: 400px;
+    }
+    
+    .dps-portal-message {
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .dps-portal-message__avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    
+    .dps-portal-message__meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .dps-portal-message__author {
+        font-size: 14px;
+    }
+    
+    .dps-portal-message__date {
+        font-size: 12px;
+    }
+    
+    .dps-messages-compose__content {
+        padding: 16px;
+    }
+    
+    .dps-messages-compose textarea.dps-form-control {
+        min-height: 120px;
+    }
+    
+    .dps-messages-compose__submit {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-messages-metric-card {
+        gap: 12px;
+    }
+    
+    .dps-messages-metric-card__icon {
+        font-size: 24px;
+    }
+    
+    .dps-messages-metric-card__value {
+        font-size: 18px;
+    }
+    
+    .dps-messages-metric-card__label {
+        font-size: 12px;
+    }
+    
+    .dps-messages-inbox__icon,
+    .dps-messages-compose__icon {
+        font-size: 24px;
+    }
+    
+    .dps-portal-message__body {
+        width: 100%;
+    }
+    
+    .dps-portal-message__unread-badge {
+        top: 8px;
+        right: 8px;
+        padding: 3px 8px;
+        font-size: 10px;
     }
 }
 
