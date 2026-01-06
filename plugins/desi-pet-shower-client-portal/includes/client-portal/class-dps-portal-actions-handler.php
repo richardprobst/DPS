@@ -59,6 +59,15 @@ class DPS_Portal_Actions_Handler {
         $address = isset( $_POST['client_address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['client_address'] ) ) : '';
         update_post_meta( $client_id, 'client_address', $address );
 
+        $city = isset( $_POST['client_city'] ) ? sanitize_text_field( wp_unslash( $_POST['client_city'] ) ) : '';
+        update_post_meta( $client_id, 'client_city', $city );
+
+        $state = isset( $_POST['client_state'] ) ? sanitize_text_field( wp_unslash( $_POST['client_state'] ) ) : '';
+        update_post_meta( $client_id, 'client_state', strtoupper( substr( $state, 0, 2 ) ) );
+
+        $zip = isset( $_POST['client_zip'] ) ? sanitize_text_field( wp_unslash( $_POST['client_zip'] ) ) : '';
+        update_post_meta( $client_id, 'client_zip', $zip );
+
         $insta = isset( $_POST['client_instagram'] ) ? sanitize_text_field( wp_unslash( $_POST['client_instagram'] ) ) : '';
         update_post_meta( $client_id, 'client_instagram', $insta );
 
@@ -75,6 +84,9 @@ class DPS_Portal_Actions_Handler {
         $sanitized_data = [
             'phone'     => $phone,
             'address'   => $address,
+            'city'      => $city,
+            'state'     => $state,
+            'zip'       => $zip,
             'instagram' => $insta,
             'facebook'  => $fb,
             'email'     => $email,
@@ -98,18 +110,19 @@ class DPS_Portal_Actions_Handler {
             return add_query_arg( 'portal_msg', 'error', wp_get_referer() ?: home_url() );
         }
 
-        $pet_name  = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
-        $species   = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
-        $breed     = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
-        $size      = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
-        $weight    = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
-        $coat      = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
-        $color     = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
-        $birth     = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
-        $sex       = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
-        $vacc      = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
-        $allergies = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
-        $behavior  = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+        $pet_name     = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
+        $species      = isset( $_POST['pet_species'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_species'] ) ) : '';
+        $breed        = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
+        $size         = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
+        $weight       = isset( $_POST['pet_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_weight'] ) ) : '';
+        $coat         = isset( $_POST['pet_coat'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_coat'] ) ) : '';
+        $color        = isset( $_POST['pet_color'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_color'] ) ) : '';
+        $birth        = isset( $_POST['pet_birth'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_birth'] ) ) : '';
+        $sex          = isset( $_POST['pet_sex'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_sex'] ) ) : '';
+        $vacc         = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
+        $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
+        $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+        $observations = isset( $_POST['pet_observations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_observations'] ) ) : '';
 
         if ( $pet_name ) {
             wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
@@ -126,6 +139,7 @@ class DPS_Portal_Actions_Handler {
         update_post_meta( $pet_id, 'pet_vaccinations', $vacc );
         update_post_meta( $pet_id, 'pet_allergies', $allergies );
         update_post_meta( $pet_id, 'pet_behavior', $behavior );
+        update_post_meta( $pet_id, 'pet_observations', $observations );
 
         // Processa upload de foto se fornecido
         $redirect_url = wp_get_referer() ?: home_url();
