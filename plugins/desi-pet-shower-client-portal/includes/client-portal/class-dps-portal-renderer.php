@@ -593,15 +593,14 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     private function render_client_info_form( $client_id ) {
-        $client_name = get_the_title( $client_id );
-        $phone       = get_post_meta( $client_id, 'client_phone', true );
-        $email       = get_post_meta( $client_id, 'client_email', true );
-        $address     = get_post_meta( $client_id, 'client_address', true );
-        $city        = get_post_meta( $client_id, 'client_city', true );
-        $state       = get_post_meta( $client_id, 'client_state', true );
-        $zip         = get_post_meta( $client_id, 'client_zip', true );
-        $insta       = get_post_meta( $client_id, 'client_instagram', true );
-        $fb          = get_post_meta( $client_id, 'client_facebook', true );
+        $phone   = get_post_meta( $client_id, 'client_phone', true );
+        $email   = get_post_meta( $client_id, 'client_email', true );
+        $address = get_post_meta( $client_id, 'client_address', true );
+        $city    = get_post_meta( $client_id, 'client_city', true );
+        $state   = get_post_meta( $client_id, 'client_state', true );
+        $zip     = get_post_meta( $client_id, 'client_zip', true );
+        $insta   = get_post_meta( $client_id, 'client_instagram', true );
+        $fb      = get_post_meta( $client_id, 'client_facebook', true );
         
         echo '<div class="dps-surface dps-surface--info dps-meus-dados-card">';
         echo '<div class="dps-surface__title">';
@@ -730,6 +729,7 @@ class DPS_Portal_Renderer {
         $color        = get_post_meta( $pet_id, 'pet_color', true );
         $birth        = get_post_meta( $pet_id, 'pet_birth', true );
         $sex          = get_post_meta( $pet_id, 'pet_sex', true );
+        $vaccinations = get_post_meta( $pet_id, 'pet_vaccinations', true );
         $allergies    = get_post_meta( $pet_id, 'pet_allergies', true );
         $behavior     = get_post_meta( $pet_id, 'pet_behavior', true );
         $observations = get_post_meta( $pet_id, 'pet_observations', true );
@@ -857,6 +857,11 @@ class DPS_Portal_Renderer {
         echo '<div class="dps-form-col">';
         echo '<label for="pet_allergies_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Alergias ou Condições de Saúde', 'dps-client-portal' ) . '</label>';
         echo '<textarea name="pet_allergies" id="pet_allergies_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Informe alergias, problemas de pele, medicamentos em uso...', 'dps-client-portal' ) . '">' . esc_textarea( $allergies ) . '</textarea>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_vaccinations_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Vacinações', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_vaccinations" id="pet_vaccinations_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Informe as vacinas em dia ou pendentes...', 'dps-client-portal' ) . '">' . esc_textarea( $vaccinations ) . '</textarea>';
         echo '</div>';
         
         echo '<div class="dps-form-col">';
