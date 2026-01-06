@@ -1731,6 +1731,7 @@ class DPS_Base_Frontend {
         $section_classes = [ 'dps-section' ];
         if ( $is_modal ) {
             $section_classes[] = 'dps-section--modal';
+            $section_classes[] = 'active'; // Garante exibição dentro do modal (base oculta se não estiver ativo).
         }
 
         ob_start();

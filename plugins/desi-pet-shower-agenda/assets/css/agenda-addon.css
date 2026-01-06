@@ -689,6 +689,7 @@
 }
 
 .dps-section--modal {
+    display: block; /* Sobrescreve dps-base (display:none) para exibir conteúdo no modal */
     margin: 0;
 }
 
