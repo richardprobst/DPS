@@ -158,7 +158,6 @@ Antes de criar uma nova versão oficial:
 - **Handler `dps_request_portal_access` corrigido**: Mesmo problema - adicionado `wp_ajax_*` para suportar usuários logados.
 - **Tratamento de erros JavaScript robusto**: Melhorado o código de tratamento de resposta AJAX para verificar `data.data` antes de acessar propriedades, evitando erros silenciosos.
 - **Mensagem de erro mais clara**: Erro de conexão agora exibe "Erro de conexão. Verifique sua internet e tente novamente." em vez de mensagem genérica.
-- **Logging de erros no console**: Erros AJAX agora são registrados no console do navegador para depuração.
 
 **Client Portal Add-on - Melhoria do Email de Link de Acesso (v2.4.4)**
 

@@ -5055,7 +5055,7 @@ Equipe %4$s', 'dps-client-portal' ),
         $escaped_name = esc_html( $client_name );
         $escaped_site = esc_html( $site_name );
         
-        $current_year = date( 'Y' );
+        $current_year = wp_date( 'Y' );
         $validity_text = esc_html__( 'Este link é válido por 30 minutos e pode ser usado apenas uma vez.', 'dps-client-portal' );
         $access_button_text = esc_html__( 'Acessar Meu Portal', 'dps-client-portal' );
         $security_note = esc_html__( 'Se você não solicitou este acesso, ignore este e-mail.', 'dps-client-portal' );

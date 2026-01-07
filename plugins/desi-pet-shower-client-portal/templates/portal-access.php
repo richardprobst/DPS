@@ -209,7 +209,6 @@ if ( ! defined( 'ABSPATH' ) ) {
                             feedback.textContent = '<?php echo esc_js( __( 'Erro de conexão. Verifique sua internet e tente novamente.', 'dps-client-portal' ) ); ?>';
                             feedback.style.display = 'block';
                             feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
-                            console.error('DPS Portal Access Error:', error);
                         });
                     });
                 }
