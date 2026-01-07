@@ -4021,8 +4021,8 @@ final class DPS_Client_Portal {
         // Usa o método refatorado do DPS_Portal_Renderer (PR #433)
         DPS_Portal_Renderer::get_instance()->render_update_forms( $client_id );
         
-        // Seção de Preferências do Cliente (Fase 4 - continuação)
-        // Renderizado separadamente para manter compatibilidade
+        // Seção de Preferências do Cliente (Fase 4)
+        // Renderizado após os formulários principais pois não foi migrado para DPS_Portal_Renderer
         $this->render_client_preferences( $client_id );
     }
 
