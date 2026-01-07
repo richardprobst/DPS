@@ -1036,9 +1036,18 @@
 
 /* Tablets (até 768px) */
 @media (max-width: 768px) {
+    /* Prevenção de overflow */
+    .dps-services-section {
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
     .dps-form-container,
     .dps-list-container {
         padding: 16px;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .dps-fieldset {
@@ -1081,6 +1090,14 @@
 
 /* Mobile (até 480px) */
 @media (max-width: 480px) {
+    /* Prevenção de overflow em mobile */
+    .dps-services-section,
+    #dps-section-servicos {
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
     .dps-form-title,
     .dps-list-title {
         font-size: 18px;
