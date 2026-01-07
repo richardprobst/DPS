@@ -2514,12 +2514,12 @@ input[type="time"].dps-time-input,
     }
 }
 
-/* Conteúdo de sub-abas - estilo base */
+/* 
+ * Conteúdo de sub-abas - estilo base
+ * NOTA: A visibilidade das sub-abas inativas é controlada por style="display:none" inline no PHP.
+ * O CSS aqui define apenas que sub-abas são elementos block-level por padrão.
+ */
 .dps-groomers-subtab {
-    display: block;
-}
-
-.dps-groomers-subtab--active {
     display: block;
 }
 
