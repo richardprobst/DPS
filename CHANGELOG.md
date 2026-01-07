@@ -152,6 +152,11 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Finance Add-on - Correção de Cache Busting (v1.6.1)**
+
+- **Version bump para invalidar cache**: Atualizada versão do add-on de 1.6.0 para 1.6.1 para forçar navegadores e CDNs a carregar o CSS corrigido do PR #439.
+- **Causa raiz identificada**: O PR #439 corrigiu margens da aba FINANCEIRO e visibilidade da aba GROOMER, mas não atualizou a constante `DPS_FINANCE_VERSION`, resultando em cache stale.
+
 **Stats Add-on - Correções de Compatibilidade (v1.5.0)**
 
 - **Mensagem de erro da API formatada**: Aviso de "API não disponível" agora usa `.dps-surface--warning` em vez de HTML inline.
