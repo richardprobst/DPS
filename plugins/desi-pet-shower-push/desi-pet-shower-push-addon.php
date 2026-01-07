@@ -54,6 +54,40 @@ require_once __DIR__ . '/includes/class-dps-push-api.php';
 require_once __DIR__ . '/includes/class-dps-email-reports.php';
 
 /**
+ * Ativa os cron jobs do Email Reports e gera chaves VAPID na ativação do plugin.
+ *
+ * @since 1.3.1
+ */
+function dps_push_activate_plugin() {
+    // Gerar chaves VAPID se não existirem.
+    $vapid_keys = get_option( 'dps_push_vapid_keys' );
+    if ( ! $vapid_keys || empty( $vapid_keys['public'] ) || empty( $vapid_keys['private'] ) ) {
+        $keys = DPS_Push_API::generate_vapid_keys();
+        update_option( 'dps_push_vapid_keys', $keys );
+    }
+
+    // Força a criação da instância para ter acesso ao método.
+    $instance = DPS_Email_Reports::get_instance();
+    if ( method_exists( $instance, 'activate' ) ) {
+        $instance->activate();
+    }
+}
+register_activation_hook( __FILE__, 'dps_push_activate_plugin' );
+
+/**
+ * Desativa os cron jobs do Email Reports na desativação do plugin.
+ *
+ * @since 1.3.1
+ */
+function dps_push_deactivate_plugin() {
+    $instance = DPS_Email_Reports::get_instance();
+    if ( method_exists( $instance, 'deactivate' ) ) {
+        $instance->deactivate();
+    }
+}
+register_deactivation_hook( __FILE__, 'dps_push_deactivate_plugin' );
+
+/**
  * Classe principal do Push Notifications Add-on.
  *
  * Implementa Web Push API nativo do navegador para envio de notificações
@@ -116,16 +150,19 @@ class DPS_Push_Addon {
         add_action( 'dps_appointment_status_changed', [ $this, 'notify_status_change' ], 20, 4 );
         add_action( 'dps_appointment_rescheduled', [ $this, 'notify_rescheduled' ], 20, 5 );
 
-        // Gerar chaves VAPID na ativação
-        register_activation_hook( __FILE__, [ $this, 'generate_vapid_keys' ] );
+        // Fallback: Gerar chaves VAPID se não existirem (caso ativação não tenha sido executada).
+        add_action( 'admin_init', [ $this, 'maybe_generate_vapid_keys' ] );
     }
 
     /**
-     * Gera chaves VAPID na ativação do plugin.
+     * Gera chaves VAPID se não existirem (fallback).
      *
-     * @since 1.0.0
+     * Este método garante que as chaves sejam geradas mesmo que o hook
+     * de ativação não tenha sido executado corretamente.
+     *
+     * @since 1.3.1
      */
-    public function generate_vapid_keys() {
+    public function maybe_generate_vapid_keys() {
         $existing = get_option( self::VAPID_KEY );
         if ( $existing && ! empty( $existing['public'] ) && ! empty( $existing['private'] ) ) {
             return;
