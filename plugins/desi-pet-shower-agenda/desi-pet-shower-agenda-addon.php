@@ -3077,6 +3077,19 @@ class DPS_Agenda_Addon {
         $date = isset( $_GET['date'] ) ? sanitize_text_field( $_GET['date'] ) : '';
         $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'day';
         
+        // Validar formato de data se fornecida
+        if ( ! empty( $date ) ) {
+            $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
+            if ( ! $date_obj || $date_obj->format( 'Y-m-d' ) !== $date ) {
+                $date = ''; // Data inválida, ignora o filtro
+            }
+        }
+        
+        // Validar view
+        if ( ! in_array( $view, [ 'day', 'week' ], true ) ) {
+            $view = 'day';
+        }
+        
         // Buscar agendamentos
         $args = [
             'post_type'      => 'dps_agendamento',

@@ -491,8 +491,12 @@
       '&view=' + encodeURIComponent(view) +
       '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
     
-    // Abre em nova janela
-    window.open(pdfUrl, '_blank', 'width=950,height=700,scrollbars=yes');
+    // Calcula dimensões responsivas para a janela
+    var width = Math.min(950, window.screen.availWidth - 100);
+    var height = Math.min(700, window.screen.availHeight - 100);
+    
+    // Abre em nova janela com dimensões responsivas
+    window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
 
   // =========================================================================
