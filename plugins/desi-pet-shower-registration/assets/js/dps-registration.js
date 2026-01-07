@@ -881,6 +881,362 @@
     }
 
     // =========================================================================
+    // Duplicate Check Modal (Admin Only)
+    // =========================================================================
+
+    /**
+     * Create and inject modal styles if not already present.
+     */
+    function ensureModalStyles() {
+        if (document.getElementById('dps-duplicate-modal-styles')) {
+            return;
+        }
+
+        var styles = document.createElement('style');
+        styles.id = 'dps-duplicate-modal-styles';
+        styles.textContent = [
+            '.dps-modal-overlay {',
+            '  position: fixed;',
+            '  top: 0;',
+            '  left: 0;',
+            '  right: 0;',
+            '  bottom: 0;',
+            '  background: rgba(0, 0, 0, 0.6);',
+            '  display: flex;',
+            '  align-items: center;',
+            '  justify-content: center;',
+            '  z-index: 999999;',
+            '  padding: 20px;',
+            '}',
+            '.dps-modal {',
+            '  background: #fff;',
+            '  border-radius: 8px;',
+            '  max-width: 500px;',
+            '  width: 100%;',
+            '  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);',
+            '  animation: dps-modal-appear 0.2s ease-out;',
+            '}',
+            '@keyframes dps-modal-appear {',
+            '  from { opacity: 0; transform: scale(0.95); }',
+            '  to { opacity: 1; transform: scale(1); }',
+            '}',
+            '.dps-modal-header {',
+            '  padding: 20px 24px;',
+            '  border-bottom: 1px solid #e5e7eb;',
+            '  display: flex;',
+            '  align-items: center;',
+            '  gap: 12px;',
+            '}',
+            '.dps-modal-header .dps-modal-icon {',
+            '  font-size: 24px;',
+            '}',
+            '.dps-modal-header h3 {',
+            '  margin: 0;',
+            '  font-size: 18px;',
+            '  font-weight: 600;',
+            '  color: #374151;',
+            '}',
+            '.dps-modal-body {',
+            '  padding: 20px 24px;',
+            '}',
+            '.dps-modal-body p {',
+            '  margin: 0 0 16px;',
+            '  color: #4b5563;',
+            '  line-height: 1.5;',
+            '}',
+            '.dps-modal-duplicate-fields {',
+            '  display: flex;',
+            '  flex-wrap: wrap;',
+            '  gap: 8px;',
+            '  margin-bottom: 16px;',
+            '}',
+            '.dps-modal-duplicate-fields .dps-duplicate-badge {',
+            '  background: #fef3c7;',
+            '  color: #92400e;',
+            '  padding: 4px 12px;',
+            '  border-radius: 9999px;',
+            '  font-size: 13px;',
+            '  font-weight: 500;',
+            '}',
+            '.dps-modal-client-info {',
+            '  background: #f9fafb;',
+            '  border: 1px solid #e5e7eb;',
+            '  border-radius: 6px;',
+            '  padding: 12px 16px;',
+            '  margin-top: 12px;',
+            '}',
+            '.dps-modal-client-info .dps-client-label {',
+            '  font-size: 12px;',
+            '  color: #6b7280;',
+            '  margin-bottom: 4px;',
+            '}',
+            '.dps-modal-client-info .dps-client-name {',
+            '  font-weight: 600;',
+            '  color: #111827;',
+            '}',
+            '.dps-modal-footer {',
+            '  padding: 16px 24px;',
+            '  border-top: 1px solid #e5e7eb;',
+            '  display: flex;',
+            '  flex-wrap: wrap;',
+            '  gap: 12px;',
+            '  justify-content: flex-end;',
+            '}',
+            '.dps-modal-footer button, .dps-modal-footer a {',
+            '  padding: 10px 20px;',
+            '  border-radius: 6px;',
+            '  font-size: 14px;',
+            '  font-weight: 500;',
+            '  cursor: pointer;',
+            '  text-decoration: none;',
+            '  display: inline-flex;',
+            '  align-items: center;',
+            '  justify-content: center;',
+            '  transition: all 0.15s ease;',
+            '}',
+            '.dps-modal-btn-cancel {',
+            '  background: #f3f4f6;',
+            '  border: 1px solid #d1d5db;',
+            '  color: #374151;',
+            '}',
+            '.dps-modal-btn-cancel:hover {',
+            '  background: #e5e7eb;',
+            '}',
+            '.dps-modal-btn-view {',
+            '  background: #0ea5e9;',
+            '  border: 1px solid #0ea5e9;',
+            '  color: #fff;',
+            '}',
+            '.dps-modal-btn-view:hover {',
+            '  background: #0284c7;',
+            '  border-color: #0284c7;',
+            '}',
+            '.dps-modal-btn-continue {',
+            '  background: #f59e0b;',
+            '  border: 1px solid #f59e0b;',
+            '  color: #fff;',
+            '}',
+            '.dps-modal-btn-continue:hover {',
+            '  background: #d97706;',
+            '  border-color: #d97706;',
+            '}',
+            '@media (max-width: 480px) {',
+            '  .dps-modal-footer {',
+            '    flex-direction: column;',
+            '  }',
+            '  .dps-modal-footer button, .dps-modal-footer a {',
+            '    width: 100%;',
+            '  }',
+            '}'
+        ].join('\n');
+
+        document.head.appendChild(styles);
+    }
+
+    /**
+     * Show duplicate client modal.
+     *
+     * @param {Object} data - Duplicate data from server.
+     * @param {Object} i18n - Internationalized strings.
+     * @param {Function} onContinue - Callback when user chooses to continue.
+     * @param {Function} onCancel - Callback when user cancels.
+     */
+    function showDuplicateModal(data, i18n, onContinue, onCancel) {
+        ensureModalStyles();
+
+        // Remove existing modal if any
+        var existingModal = document.getElementById('dps-duplicate-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Build duplicate fields badges
+        var fieldsHtml = '';
+        if (data.duplicated_fields && data.duplicated_fields.length) {
+            for (var i = 0; i < data.duplicated_fields.length; i++) {
+                fieldsHtml += '<span class="dps-duplicate-badge">' + escapeHtml(data.duplicated_fields[i]) + '</span>';
+            }
+        }
+
+        // Create modal HTML
+        var modalHtml = [
+            '<div class="dps-modal-overlay" id="dps-duplicate-modal">',
+            '  <div class="dps-modal" role="dialog" aria-modal="true" aria-labelledby="dps-modal-title">',
+            '    <div class="dps-modal-header">',
+            '      <span class="dps-modal-icon" aria-hidden="true">⚠️</span>',
+            '      <h3 id="dps-modal-title">' + escapeHtml(i18n.modalTitle) + '</h3>',
+            '    </div>',
+            '    <div class="dps-modal-body">',
+            '      <p>' + escapeHtml(i18n.modalMessage) + '</p>',
+            '      <div class="dps-modal-duplicate-fields">' + fieldsHtml + '</div>',
+            '      <div class="dps-modal-client-info">',
+            '        <div class="dps-client-label">' + escapeHtml(i18n.clientLabel) + '</div>',
+            '        <div class="dps-client-name">' + escapeHtml(data.client_name || 'ID: ' + data.client_id) + '</div>',
+            '      </div>',
+            '    </div>',
+            '    <div class="dps-modal-footer">',
+            '      <button type="button" class="dps-modal-btn-cancel" id="dps-modal-cancel">' + escapeHtml(i18n.cancelButton) + '</button>',
+            '      <a href="#" class="dps-modal-btn-view" id="dps-modal-view">' + escapeHtml(i18n.viewClientButton) + '</a>',
+            '      <button type="button" class="dps-modal-btn-continue" id="dps-modal-continue">' + escapeHtml(i18n.continueButton) + '</button>',
+            '    </div>',
+            '  </div>',
+            '</div>'
+        ].join('\n');
+
+        // Inject modal
+        var container = document.createElement('div');
+        container.innerHTML = modalHtml;
+        document.body.appendChild(container.firstElementChild);
+
+        // Get modal elements
+        var modal = document.getElementById('dps-duplicate-modal');
+        var cancelBtn = document.getElementById('dps-modal-cancel');
+        var continueBtn = document.getElementById('dps-modal-continue');
+        var viewBtn = document.getElementById('dps-modal-view');
+
+        // Set URL safely via DOM API (prevents XSS via href attribute)
+        if (viewBtn && data.view_url) {
+            viewBtn.href = data.view_url;
+        }
+
+        // Event handlers
+        function closeModal() {
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Named function for keydown handler
+        function handleEscapeKey(e) {
+            if (e.key === 'Escape' && document.getElementById('dps-duplicate-modal')) {
+                closeModalWithCleanup();
+                if (typeof onCancel === 'function') {
+                    onCancel();
+                }
+            }
+        }
+
+        // Cleanup function to remove event listener
+        function closeModalWithCleanup() {
+            document.removeEventListener('keydown', handleEscapeKey);
+            closeModal();
+        }
+
+        cancelBtn.addEventListener('click', function() {
+            closeModalWithCleanup();
+            if (typeof onCancel === 'function') {
+                onCancel();
+            }
+        });
+
+        continueBtn.addEventListener('click', function() {
+            closeModalWithCleanup();
+            if (typeof onContinue === 'function') {
+                onContinue();
+            }
+        });
+
+        // Close on overlay click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModalWithCleanup();
+                if (typeof onCancel === 'function') {
+                    onCancel();
+                }
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', handleEscapeKey);
+
+        // Focus the cancel button
+        cancelBtn.focus();
+    }
+
+    /**
+     * Escape HTML to prevent XSS.
+     *
+     * @param {string} str - String to escape.
+     * @return {string} Escaped string.
+     */
+    function escapeHtml(str) {
+        if (!str) return '';
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    /**
+     * Check for duplicate client via AJAX.
+     *
+     * @param {HTMLFormElement} form - The form.
+     * @param {HTMLButtonElement} submitButton - Submit button.
+     * @param {string} email - Client email.
+     * @param {string} phone - Client phone.
+     * @param {string} cpf - Client CPF.
+     * @param {Object} config - Duplicate check config.
+     * @param {Function} callback - Callback(shouldContinue, wasDuplicate).
+     */
+    function checkDuplicate(form, submitButton, email, phone, cpf, config, callback) {
+        // If no data to check, continue
+        if (!email && !phone && !cpf) {
+            callback(true, false);
+            return;
+        }
+
+        // Show checking message
+        if (submitButton) {
+            submitButton.textContent = config.i18n.checkingMessage || 'Verificando...';
+        }
+
+        // Build form data
+        var formData = new FormData();
+        formData.append('action', config.action);
+        formData.append('nonce', config.nonce);
+        formData.append('email', email);
+        formData.append('phone', phone);
+        formData.append('cpf', cpf);
+
+        // AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', config.ajaxUrl, true);
+
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success && response.data && response.data.is_duplicate) {
+                        // Show modal
+                        showDuplicateModal(response.data, config.i18n, function() {
+                            // User chose to continue
+                            callback(true, true);
+                        }, function() {
+                            // User cancelled
+                            callback(false, true);
+                        });
+                    } else {
+                        // No duplicate, continue
+                        callback(true, false);
+                    }
+                } catch (e) {
+                    // Parse error, continue anyway
+                    callback(true, false);
+                }
+            } else {
+                // HTTP error, continue anyway (don't block registration)
+                callback(true, false);
+            }
+        };
+
+        xhr.onerror = function() {
+            // Network error, continue anyway
+            callback(true, false);
+        };
+
+        xhr.send(formData);
+    }
+
+    // =========================================================================
     // Main Initialization
     // =========================================================================
 
@@ -900,6 +1256,10 @@
 
         var recaptchaConfig = (window.dpsRegistrationData && window.dpsRegistrationData.recaptcha) ? window.dpsRegistrationData.recaptcha : null;
         var recaptchaValidated = false;
+
+        // Duplicate check config for admins
+        var duplicateConfig = (window.dpsRegistrationData && window.dpsRegistrationData.duplicateCheck) ? window.dpsRegistrationData.duplicateCheck : null;
+        var duplicateConfirmed = false;
 
         applyCPFMask(cpfInput);
         applyPhoneMask(phoneInput);
@@ -987,6 +1347,50 @@
 
             // Show loading
             showLoading(submitButton);
+
+            // Check for duplicates (admin only) before reCAPTCHA
+            if (duplicateConfig && duplicateConfig.enabled && !duplicateConfirmed) {
+                e.preventDefault();
+
+                var emailInput = form.querySelector('input[name="client_email"]');
+                var phoneInput = form.querySelector('input[name="client_phone"]');
+                var cpfInput = form.querySelector('input[name="client_cpf"]');
+
+                var email = emailInput ? emailInput.value.trim() : '';
+                var phone = phoneInput ? phoneInput.value.trim() : '';
+                var cpf = cpfInput ? cpfInput.value.trim() : '';
+
+                // Call AJAX to check for duplicates
+                checkDuplicate(form, submitButton, email, phone, cpf, duplicateConfig, function(shouldContinue, wasDuplicate) {
+                    if (shouldContinue) {
+                        duplicateConfirmed = true;
+                        // Add hidden field only if there was a duplicate and user confirmed
+                        if (wasDuplicate) {
+                            var confirmInput = form.querySelector('input[name="dps_confirm_duplicate"]');
+                            if (!confirmInput) {
+                                confirmInput = document.createElement('input');
+                                confirmInput.type = 'hidden';
+                                confirmInput.name = 'dps_confirm_duplicate';
+                                form.appendChild(confirmInput);
+                            }
+                            confirmInput.value = '1';
+                        }
+                        // Re-trigger submit - requestSubmit() respects form validation/events, form.submit() bypasses them
+                        // For browsers without requestSubmit (older), we still need the duplicateConfirmed flag to prevent re-checking
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            // Legacy fallback: dispatch event which will trigger our listener again
+                            // The duplicateConfirmed flag ensures we skip the duplicate check
+                            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                        }
+                    } else {
+                        hideLoading(submitButton);
+                    }
+                });
+
+                return false;
+            }
 
             if (recaptchaConfig && recaptchaConfig.enabled) {
                 if (recaptchaValidated) {
