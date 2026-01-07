@@ -6974,3 +6974,302 @@ html {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.2);
 }
+
+/* ========================================
+   ABA MEUS DADOS - Layout Moderno
+   Revisão: Janeiro 2026
+   ======================================== */
+
+/* Header da seção */
+.dps-meus-dados-header {
+    margin-bottom: 24px;
+}
+
+.dps-meus-dados .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+}
+
+.dps-meus-dados .dps-section-title__icon {
+    font-size: 28px;
+}
+
+.dps-meus-dados .dps-section-subtitle {
+    font-size: 15px;
+    color: var(--dps-gray-500);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Cards empilhados */
+.dps-meus-dados-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Surface cards */
+.dps-meus-dados-card.dps-surface {
+    background: var(--dps-white);
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.dps-meus-dados-card.dps-surface--info {
+    border-left: 4px solid var(--dps-primary);
+}
+
+.dps-meus-dados-card.dps-surface--neutral {
+    border-left: 4px solid var(--dps-gray-300);
+}
+
+.dps-meus-dados-card .dps-surface__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    margin: 0 0 8px 0;
+}
+
+.dps-meus-dados-card .dps-surface__title span {
+    font-size: 20px;
+}
+
+.dps-meus-dados-card .dps-surface__description {
+    font-size: 14px;
+    color: var(--dps-gray-500);
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+/* Formulários */
+.dps-meus-dados-form {
+    margin-top: 16px;
+}
+
+.dps-meus-dados-form .dps-fieldset {
+    border: 1px solid var(--dps-border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: var(--dps-gray-50);
+}
+
+.dps-meus-dados-form .dps-fieldset__legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--dps-gray-700);
+    font-size: 15px;
+    padding: 0 8px;
+    background: var(--dps-gray-50);
+}
+
+.dps-meus-dados-form .dps-fieldset__help {
+    font-size: 13px;
+    color: var(--dps-gray-500);
+    margin: 0 0 16px 0;
+    font-style: italic;
+}
+
+.dps-meus-dados-form .dps-form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dps-gray-700);
+    margin-bottom: 6px;
+}
+
+.dps-meus-dados-form .dps-form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--dps-border-color);
+    border-radius: 6px;
+    font-size: 15px;
+    color: var(--dps-gray-700);
+    background: var(--dps-white);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-meus-dados-form .dps-form-control:focus {
+    border-color: var(--dps-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.dps-meus-dados-form .dps-form-control::placeholder {
+    color: var(--dps-gray-400);
+}
+
+.dps-meus-dados-form textarea.dps-form-control {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.dps-meus-dados-form select.dps-form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+/* Grid de formulário */
+.dps-meus-dados-form .dps-form-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-meus-dados-form .dps-form-row--2col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dps-meus-dados-form .dps-form-row--3col {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.dps-meus-dados-form .dps-form-col {
+    margin-bottom: 16px;
+}
+
+.dps-meus-dados-form .dps-form-col:last-child {
+    margin-bottom: 0;
+}
+
+/* Ações do formulário */
+.dps-meus-dados-form .dps-form-actions {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dps-border-color);
+}
+
+.dps-meus-dados-form .dps-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dps-meus-dados-form .dps-btn-submit:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+}
+
+.dps-meus-dados-form .dps-btn-submit:active {
+    transform: translateY(0);
+}
+
+.dps-meus-dados-form .dps-btn-submit span {
+    font-size: 16px;
+}
+
+/* Header do card de pet com foto */
+.dps-pet-form-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--dps-border-color);
+}
+
+.dps-pet-form-header__photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--dps-white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dps-pet-form-header__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--dps-gray-100);
+    font-size: 32px;
+}
+
+.dps-pet-form-header__info {
+    flex: 1;
+}
+
+.dps-pet-form-header__info .dps-surface__title {
+    margin-bottom: 4px;
+}
+
+.dps-pet-form-header__info .dps-surface__description {
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-meus-dados .dps-section-title {
+        font-size: 20px;
+    }
+    
+    .dps-meus-dados-form .dps-form-row--2col,
+    .dps-meus-dados-form .dps-form-row--3col {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-meus-dados-card.dps-surface {
+        padding: 16px;
+    }
+    
+    .dps-meus-dados-form .dps-fieldset {
+        padding: 16px;
+    }
+    
+    .dps-pet-form-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .dps-pet-form-header__info .dps-surface__title {
+        justify-content: center;
+    }
+    
+    .dps-meus-dados-form .dps-btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-meus-dados-header {
+        margin-bottom: 16px;
+    }
+    
+    .dps-meus-dados .dps-section-subtitle {
+        font-size: 14px;
+    }
+    
+    .dps-meus-dados-stacked {
+        gap: 16px;
+    }
+}

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Aba Meus Dados (Portal do Cliente)</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #374151;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CSS Variables */
+        :root {
+            --dps-primary: #0ea5e9;
+            --dps-primary-hover: #0284c7;
+            --dps-white: #ffffff;
+            --dps-gray-50: #f9fafb;
+            --dps-gray-100: #f3f4f6;
+            --dps-gray-200: #e5e7eb;
+            --dps-gray-300: #d1d5db;
+            --dps-gray-400: #9ca3af;
+            --dps-gray-500: #6b7280;
+            --dps-gray-700: #374151;
+            --dps-border-color: #e5e7eb;
+        }
+
+        /* ========================================
+           ABA MEUS DADOS - Layout Moderno
+           ======================================== */
+
+        /* Header da seção */
+        .dps-meus-dados-header {
+            margin-bottom: 24px;
+        }
+
+        .dps-section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+        }
+
+        .dps-section-title__icon {
+            font-size: 28px;
+        }
+
+        .dps-section-subtitle {
+            font-size: 15px;
+            color: var(--dps-gray-500);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Cards empilhados */
+        .dps-meus-dados-stacked {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Surface cards */
+        .dps-surface {
+            background: var(--dps-white);
+            border: 1px solid var(--dps-border-color);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .dps-surface--info {
+            border-left: 4px solid var(--dps-primary);
+        }
+
+        .dps-surface--neutral {
+            border-left: 4px solid var(--dps-gray-300);
+        }
+
+        .dps-surface__title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            margin: 0 0 8px 0;
+        }
+
+        .dps-surface__title span {
+            font-size: 20px;
+        }
+
+        .dps-surface__description {
+            font-size: 14px;
+            color: var(--dps-gray-500);
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+
+        /* Formulários */
+        .dps-meus-dados-form {
+            margin-top: 16px;
+        }
+
+        .dps-fieldset {
+            border: 1px solid var(--dps-border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: var(--dps-gray-50);
+        }
+
+        .dps-fieldset__legend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--dps-gray-700);
+            font-size: 15px;
+            padding: 0 8px;
+            background: var(--dps-gray-50);
+        }
+
+        .dps-fieldset__help {
+            font-size: 13px;
+            color: var(--dps-gray-500);
+            margin: 0 0 16px 0;
+            font-style: italic;
+        }
+
+        .dps-form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dps-gray-700);
+            margin-bottom: 6px;
+        }
+
+        .dps-form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--dps-border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            color: var(--dps-gray-700);
+            background: var(--dps-white);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dps-form-control:focus {
+            border-color: var(--dps-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        .dps-form-control::placeholder {
+            color: var(--dps-gray-400);
+        }
+
+        textarea.dps-form-control {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        select.dps-form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        /* Grid de formulário */
+        .dps-form-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .dps-form-row--2col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dps-form-row--3col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .dps-form-col {
+            margin-bottom: 16px;
+        }
+
+        .dps-form-col:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Ações do formulário */
+        .dps-form-actions {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--dps-border-color);
+        }
+
+        .dps-btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .dps-btn-submit:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .dps-btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .dps-btn-submit span {
+            font-size: 16px;
+        }
+
+        /* Header do card de pet com foto */
+        .dps-pet-form-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--dps-border-color);
+        }
+
+        .dps-pet-form-header__photo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--dps-white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .dps-pet-form-header__placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--dps-gray-100);
+            font-size: 32px;
+        }
+
+        .dps-pet-form-header__info {
+            flex: 1;
+        }
+
+        .dps-pet-form-header__info .dps-surface__title {
+            margin-bottom: 4px;
+        }
+
+        .dps-pet-form-header__info .dps-surface__description {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+
+        /* Demo Note */
+        .demo-note {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+
+        .demo-note h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #92400e;
+        }
+
+        .demo-note p {
+            margin: 0;
+            font-size: 14px;
+            color: #78350f;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .dps-section-title {
+                font-size: 20px;
+            }
+            
+            .dps-form-row--2col,
+            .dps-form-row--3col {
+                grid-template-columns: 1fr;
+            }
+            
+            .dps-surface {
+                padding: 16px;
+            }
+            
+            .dps-fieldset {
+                padding: 16px;
+            }
+            
+            .dps-pet-form-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .dps-pet-form-header__info .dps-surface__title {
+                justify-content: center;
+            }
+            
+            .dps-btn-submit {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .dps-meus-dados-header {
+                margin-bottom: 16px;
+            }
+            
+            .dps-section-subtitle {
+                font-size: 14px;
+            }
+            
+            .dps-meus-dados-stacked {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-note">
+            <h3>📋 Demo: Aba "Meus Dados" - Novo Layout</h3>
+            <p>Esta é uma demonstração do novo layout moderno da aba "Meus Dados" do Portal do Cliente. O layout segue o padrão visual minimalista do DPS com cards empilhados, fieldsets para agrupamento lógico e formulários responsivos.</p>
+        </div>
+
+        <section class="dps-portal-section dps-portal-forms dps-meus-dados">
+            <!-- Header moderno -->
+            <div class="dps-meus-dados-header">
+                <h2 class="dps-section-title">
+                    <span class="dps-section-title__icon">⚙️</span>
+                    Meus Dados
+                </h2>
+                <p class="dps-section-subtitle">Mantenha suas informações de contato e dados dos seus pets sempre atualizados para um atendimento mais personalizado.</p>
+            </div>
+
+            <!-- Cards empilhados -->
+            <div class="dps-meus-dados-stacked">
+                
+                <!-- Card: Dados Pessoais -->
+                <div class="dps-surface dps-surface--info">
+                    <div class="dps-surface__title">
+                        <span>👤</span>
+                        Dados Pessoais
+                    </div>
+                    <p class="dps-surface__description">Informações de contato e endereço para facilitar a comunicação e serviços de leva e traz.</p>
+                    
+                    <form class="dps-meus-dados-form">
+                        <!-- Fieldset: Contato -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">📱 Contato</legend>
+                            
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Telefone / WhatsApp</label>
+                                    <input type="tel" class="dps-form-control" value="(15) 99160-6299" placeholder="(XX) XXXXX-XXXX">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">E-mail</label>
+                                    <input type="email" class="dps-form-control" value="cliente@email.com" placeholder="seu@email.com">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Fieldset: Endereço -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">📍 Endereço</legend>
+                            
+                            <div class="dps-form-col">
+                                <label class="dps-form-label">Endereço completo</label>
+                                <textarea class="dps-form-control" rows="2" placeholder="Rua, número, complemento, bairro...">Rua das Flores, 123 - Centro</textarea>
+                            </div>
+                            
+                            <div class="dps-form-row dps-form-row--3col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Cidade</label>
+                                    <input type="text" class="dps-form-control" value="Sorocaba">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Estado</label>
+                                    <input type="text" class="dps-form-control" value="SP" maxlength="2" placeholder="UF">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">CEP</label>
+                                    <input type="text" class="dps-form-control" value="18035-000" placeholder="XXXXX-XXX">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Fieldset: Redes Sociais -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">🌐 Redes Sociais</legend>
+                            <p class="dps-fieldset__help">Opcional - nos ajuda a compartilhar fotos dos seus pets!</p>
+                            
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Instagram</label>
+                                    <input type="text" class="dps-form-control" value="@meupet" placeholder="@seuinstagram">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Facebook</label>
+                                    <input type="text" class="dps-form-control" placeholder="facebook.com/seuperfil">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <div class="dps-form-actions">
+                            <button type="button" class="dps-btn-submit">
+                                <span>💾</span> Salvar Dados Pessoais
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card: Pet 1 -->
+                <div class="dps-surface dps-surface--neutral">
+                    <!-- Header com foto do pet -->
+                    <div class="dps-pet-form-header">
+                        <span class="dps-pet-form-header__placeholder">🐾</span>
+                        <div class="dps-pet-form-header__info">
+                            <div class="dps-surface__title"><span>🐾</span> Thor</div>
+                            <p class="dps-surface__description">Atualize as informações deste pet para um atendimento mais personalizado.</p>
+                        </div>
+                    </div>
+
+                    <form class="dps-meus-dados-form">
+                        <!-- Fieldset: Identificação -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">🏷️ Identificação</legend>
+                            
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Nome</label>
+                                    <input type="text" class="dps-form-control" value="Thor" required>
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Espécie</label>
+                                    <select class="dps-form-control">
+                                        <option value="">Selecione...</option>
+                                        <option value="Cachorro" selected>Cachorro</option>
+                                        <option value="Gato">Gato</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Raça</label>
+                                    <input type="text" class="dps-form-control" value="Golden Retriever" placeholder="Ex: Labrador, SRD...">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Sexo</label>
+                                    <select class="dps-form-control">
+                                        <option value="">Selecione...</option>
+                                        <option value="M" selected>Macho</option>
+                                        <option value="F">Fêmea</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Fieldset: Características Físicas -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">📏 Características Físicas</legend>
+                            
+                            <div class="dps-form-row dps-form-row--3col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Porte</label>
+                                    <select class="dps-form-control">
+                                        <option value="">Selecione...</option>
+                                        <option value="Mini">Mini (até 5kg)</option>
+                                        <option value="Pequeno">Pequeno (5-10kg)</option>
+                                        <option value="Médio">Médio (10-25kg)</option>
+                                        <option value="Grande" selected>Grande (25-45kg)</option>
+                                        <option value="Gigante">Gigante (+45kg)</option>
+                                    </select>
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Peso (kg)</label>
+                                    <input type="number" class="dps-form-control" value="32" step="0.1" min="0" placeholder="Ex: 8.5">
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Nascimento</label>
+                                    <input type="date" class="dps-form-control" value="2020-05-15">
+                                </div>
+                            </div>
+                            
+                            <div class="dps-form-row dps-form-row--2col">
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Tipo de Pelagem</label>
+                                    <select class="dps-form-control">
+                                        <option value="">Selecione...</option>
+                                        <option value="Curto">Curto</option>
+                                        <option value="Médio" selected>Médio</option>
+                                        <option value="Longo">Longo</option>
+                                        <option value="Crespo">Crespo/Encaracolado</option>
+                                        <option value="Dupla Camada">Dupla Camada</option>
+                                    </select>
+                                </div>
+                                <div class="dps-form-col">
+                                    <label class="dps-form-label">Cor</label>
+                                    <input type="text" class="dps-form-control" value="Dourado" placeholder="Ex: Caramelo, Preto e branco...">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Fieldset: Informações Importantes -->
+                        <fieldset class="dps-fieldset">
+                            <legend class="dps-fieldset__legend">⚠️ Informações Importantes</legend>
+                            <p class="dps-fieldset__help">Essas informações nos ajudam a garantir a segurança e o bem-estar do seu pet durante o atendimento.</p>
+                            
+                            <div class="dps-form-col">
+                                <label class="dps-form-label">Alergias ou Condições de Saúde</label>
+                                <textarea class="dps-form-control" rows="2" placeholder="Informe alergias, problemas de pele, medicamentos em uso...">Nenhuma alergia conhecida</textarea>
+                            </div>
+                            
+                            <div class="dps-form-col">
+                                <label class="dps-form-label">Vacinações</label>
+                                <textarea class="dps-form-control" rows="2" placeholder="Informe as vacinas em dia ou pendentes...">V10 em dia, antirrábica em dia</textarea>
+                            </div>
+                            
+                            <div class="dps-form-col">
+                                <label class="dps-form-label">Comportamento</label>
+                                <textarea class="dps-form-control" rows="2" placeholder="Como seu pet se comporta no banho? Fica nervoso, morde, aceita bem?">Tranquilo, aceita bem o banho</textarea>
+                            </div>
+                            
+                            <div class="dps-form-col">
+                                <label class="dps-form-label">Observações Gerais</label>
+                                <textarea class="dps-form-control" rows="2" placeholder="Outras informações que julgar importantes...">Gosta de carinho na barriga</textarea>
+                            </div>
+                        </fieldset>
+
+                        <div class="dps-form-actions">
+                            <button type="button" class="dps-btn-submit">
+                                <span>💾</span> Salvar Dados de Thor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+    </div>
+</body>
+</html>

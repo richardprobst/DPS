@@ -564,65 +564,132 @@ class DPS_Portal_Renderer {
      * @param int $client_id ID do cliente.
      */
     public function render_update_forms( $client_id ) {
-        echo '<section class="dps-portal-section dps-portal-forms">';
-        echo '<h2>' . esc_html__( '✏️ Atualizar Meus Dados', 'dps-client-portal' ) . '</h2>';
+        echo '<section class="dps-portal-section dps-portal-forms dps-meus-dados">';
+        
+        // Header moderno com título e subtítulo
+        echo '<div class="dps-meus-dados-header">';
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">⚙️</span>';
+        echo esc_html__( 'Meus Dados', 'dps-client-portal' );
+        echo '</h2>';
+        echo '<p class="dps-section-subtitle">' . esc_html__( 'Mantenha suas informações de contato e dados dos seus pets sempre atualizados para um atendimento mais personalizado.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        
+        // Cards empilhados
+        echo '<div class="dps-meus-dados-stacked">';
         
         $this->render_client_info_form( $client_id );
         $this->render_pets_forms( $client_id );
+        
+        echo '</div>'; // .dps-meus-dados-stacked
         
         echo '</section>';
     }
 
     /**
      * Renderiza formulário de informações do cliente.
+     * Revisão de layout: Janeiro 2026
      *
      * @param int $client_id ID do cliente.
      */
     private function render_client_info_form( $client_id ) {
-        $phone    = get_post_meta( $client_id, 'client_phone', true );
-        $email    = get_post_meta( $client_id, 'client_email', true );
-        $address  = get_post_meta( $client_id, 'client_address', true );
-        $insta    = get_post_meta( $client_id, 'client_instagram', true );
-        $fb       = get_post_meta( $client_id, 'client_facebook', true );
+        $phone   = get_post_meta( $client_id, 'client_phone', true );
+        $email   = get_post_meta( $client_id, 'client_email', true );
+        $address = get_post_meta( $client_id, 'client_address', true );
+        $city    = get_post_meta( $client_id, 'client_city', true );
+        $state   = get_post_meta( $client_id, 'client_state', true );
+        $zip     = get_post_meta( $client_id, 'client_zip', true );
+        $insta   = get_post_meta( $client_id, 'client_instagram', true );
+        $fb      = get_post_meta( $client_id, 'client_facebook', true );
         
-        echo '<div class="dps-portal-form-card">';
-        echo '<h3 class="dps-portal-form-card__title">' . esc_html__( '👤 Dados de Contato', 'dps-client-portal' ) . '</h3>';
-        echo '<form method="post" class="dps-portal-form">';
+        echo '<div class="dps-surface dps-surface--info dps-meus-dados-card">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>👤</span>';
+        echo esc_html__( 'Dados Pessoais', 'dps-client-portal' );
+        echo '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Informações de contato e endereço para facilitar a comunicação e serviços de leva e traz.', 'dps-client-portal' ) . '</p>';
+        
+        echo '<form method="post" class="dps-portal-form dps-meus-dados-form">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
         echo '<input type="hidden" name="dps_client_portal_action" value="update_client_info">';
         
-        echo '<div class="dps-form-grid">';
-        echo '<div class="dps-form-field">';
-        echo '<label for="client_phone">' . esc_html__( 'Telefone', 'dps-client-portal' ) . '</label>';
-        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control">';
+        // Fieldset: Contato
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📱 Contato', 'dps-client-portal' ) . '</legend>';
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_phone" class="dps-form-label">' . esc_html__( 'Telefone / WhatsApp', 'dps-client-portal' ) . '</label>';
+        echo '<input type="tel" name="client_phone" id="client_phone" value="' . esc_attr( $phone ) . '" class="dps-form-control" placeholder="(XX) XXXXX-XXXX">';
         echo '</div>';
         
-        echo '<div class="dps-form-field">';
-        echo '<label for="client_email">' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</label>';
-        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="dps-form-field">';
-        echo '<label for="client_address">' . esc_html__( 'Endereço', 'dps-client-portal' ) . '</label>';
-        echo '<textarea name="client_address" id="client_address" rows="2" class="dps-form-control">' . esc_textarea( $address ) . '</textarea>';
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_email" class="dps-form-label">' . esc_html__( 'E-mail', 'dps-client-portal' ) . '</label>';
+        echo '<input type="email" name="client_email" id="client_email" value="' . esc_attr( $email ) . '" class="dps-form-control" placeholder="seu@email.com">';
         echo '</div>';
         
-        echo '<div class="dps-form-grid">';
-        echo '<div class="dps-form-field">';
-        echo '<label for="client_instagram">' . esc_html__( 'Instagram', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_instagram" id="client_instagram" value="' . esc_attr( $insta ) . '" class="dps-form-control">';
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+        
+        // Fieldset: Endereço
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📍 Endereço', 'dps-client-portal' ) . '</legend>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_address" class="dps-form-label">' . esc_html__( 'Endereço completo', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="client_address" id="client_address" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Rua, número, complemento, bairro...', 'dps-client-portal' ) . '">' . esc_textarea( $address ) . '</textarea>';
         echo '</div>';
         
-        echo '<div class="dps-form-field">';
-        echo '<label for="client_facebook">' . esc_html__( 'Facebook', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="client_facebook" id="client_facebook" value="' . esc_attr( $fb ) . '" class="dps-form-control">';
-        echo '</div>';
+        echo '<div class="dps-form-row dps-form-row--3col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_city" class="dps-form-label">' . esc_html__( 'Cidade', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="client_city" id="client_city" value="' . esc_attr( $city ) . '" class="dps-form-control">';
         echo '</div>';
         
-        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Alterações', 'dps-client-portal' ) . '</button>';
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_state" class="dps-form-label">' . esc_html__( 'Estado', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="client_state" id="client_state" value="' . esc_attr( $state ) . '" class="dps-form-control" maxlength="2" placeholder="UF">';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_zip" class="dps-form-label">' . esc_html__( 'CEP', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="client_zip" id="client_zip" value="' . esc_attr( $zip ) . '" class="dps-form-control" placeholder="XXXXX-XXX">';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+        
+        // Fieldset: Redes Sociais
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🌐 Redes Sociais', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__help">' . esc_html__( 'Opcional - nos ajuda a compartilhar fotos dos seus pets!', 'dps-client-portal' ) . '</p>';
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_instagram" class="dps-form-label">' . esc_html__( 'Instagram', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="client_instagram" id="client_instagram" value="' . esc_attr( $insta ) . '" class="dps-form-control" placeholder="@seuinstagram">';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="client_facebook" class="dps-form-label">' . esc_html__( 'Facebook', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="client_facebook" id="client_facebook" value="' . esc_attr( $fb ) . '" class="dps-form-control" placeholder="facebook.com/seuperfil">';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+        
+        // Botão de submit
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary dps-btn-submit">';
+        echo '<span>💾</span> ' . esc_html__( 'Salvar Dados Pessoais', 'dps-client-portal' );
+        echo '</button>';
+        echo '</div>';
+        
         echo '</form>';
-        echo '</div>';
+        echo '</div>'; // .dps-surface
     }
 
     /**
@@ -645,12 +712,15 @@ class DPS_Portal_Renderer {
 
     /**
      * Renderiza formulário de um pet.
+     * Revisão de layout: Janeiro 2026
      *
      * @param WP_Post $pet Post do pet.
      */
     private function render_pet_form( $pet ) {
         $pet_id       = $pet->ID;
         $pet_name     = get_the_title( $pet_id );
+        $photo_id     = get_post_meta( $pet_id, 'pet_photo_id', true );
+        $photo_url    = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
         $species      = get_post_meta( $pet_id, 'pet_species', true );
         $breed        = get_post_meta( $pet_id, 'pet_breed', true );
         $size         = get_post_meta( $pet_id, 'pet_size', true );
@@ -659,44 +729,162 @@ class DPS_Portal_Renderer {
         $color        = get_post_meta( $pet_id, 'pet_color', true );
         $birth        = get_post_meta( $pet_id, 'pet_birth', true );
         $sex          = get_post_meta( $pet_id, 'pet_sex', true );
-        $vacc         = get_post_meta( $pet_id, 'pet_vaccinations', true );
+        $vaccinations = get_post_meta( $pet_id, 'pet_vaccinations', true );
         $allergies    = get_post_meta( $pet_id, 'pet_allergies', true );
         $behavior     = get_post_meta( $pet_id, 'pet_behavior', true );
+        $observations = get_post_meta( $pet_id, 'pet_observations', true );
         
-        echo '<div class="dps-portal-form-card">';
-        echo '<h3 class="dps-portal-form-card__title">🐾 ' . esc_html( $pet_name ) . '</h3>';
-        echo '<form method="post" enctype="multipart/form-data" class="dps-portal-form">';
+        echo '<div class="dps-surface dps-surface--neutral dps-meus-dados-card dps-pet-form-card">';
+        
+        // Header do card com foto do pet
+        echo '<div class="dps-pet-form-header">';
+        if ( $photo_url ) {
+            echo '<img src="' . esc_url( $photo_url ) . '" alt="' . esc_attr( $pet_name ) . '" class="dps-pet-form-header__photo" />';
+        } else {
+            echo '<span class="dps-pet-form-header__placeholder">🐾</span>';
+        }
+        echo '<div class="dps-pet-form-header__info">';
+        echo '<div class="dps-surface__title"><span>🐾</span> ' . esc_html( $pet_name ) . '</div>';
+        echo '<p class="dps-surface__description">' . esc_html__( 'Atualize as informações deste pet para um atendimento mais personalizado.', 'dps-client-portal' ) . '</p>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<form method="post" enctype="multipart/form-data" class="dps-portal-form dps-meus-dados-form">';
         wp_nonce_field( 'dps_client_portal_action', '_dps_client_portal_nonce' );
         echo '<input type="hidden" name="dps_client_portal_action" value="update_pet">';
         echo '<input type="hidden" name="pet_id" value="' . esc_attr( $pet_id ) . '">';
         
-        echo '<div class="dps-form-grid">';
-        echo '<div class="dps-form-field">';
-        echo '<label for="pet_name_' . esc_attr( $pet_id ) . '">' . esc_html__( 'Nome', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control">';
+        // Fieldset: Identificação
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🏷️ Identificação', 'dps-client-portal' ) . '</legend>';
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_name_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nome', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="pet_name" id="pet_name_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $pet_name ) . '" class="dps-form-control" required>';
         echo '</div>';
         
-        echo '<div class="dps-form-field">';
-        echo '<label for="pet_species_' . esc_attr( $pet_id ) . '">' . esc_html__( 'Espécie', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_species" id="pet_species_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $species ) . '" class="dps-form-control">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="dps-form-grid">';
-        echo '<div class="dps-form-field">';
-        echo '<label for="pet_breed_' . esc_attr( $pet_id ) . '">' . esc_html__( 'Raça', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_breed" id="pet_breed_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $breed ) . '" class="dps-form-control">';
-        echo '</div>';
-        
-        echo '<div class="dps-form-field">';
-        echo '<label for="pet_size_' . esc_attr( $pet_id ) . '">' . esc_html__( 'Porte', 'dps-client-portal' ) . '</label>';
-        echo '<input type="text" name="pet_size" id="pet_size_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $size ) . '" class="dps-form-control">';
-        echo '</div>';
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_species_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Espécie', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_species" id="pet_species_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $species_options = [ '' => __( 'Selecione...', 'dps-client-portal' ), 'Cachorro' => __( 'Cachorro', 'dps-client-portal' ), 'Gato' => __( 'Gato', 'dps-client-portal' ), 'Outro' => __( 'Outro', 'dps-client-portal' ) ];
+        foreach ( $species_options as $value => $label ) {
+            $selected = ( $species === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
         echo '</div>';
         
-        echo '<button type="submit" class="button button-primary">' . esc_html__( 'Salvar Dados do Pet', 'dps-client-portal' ) . '</button>';
+        echo '</div>'; // .dps-form-row
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_breed_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Raça', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="pet_breed" id="pet_breed_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $breed ) . '" class="dps-form-control" placeholder="' . esc_attr__( 'Ex: Labrador, SRD...', 'dps-client-portal' ) . '">';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_sex_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Sexo', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_sex" id="pet_sex_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $sex_options = [ '' => __( 'Selecione...', 'dps-client-portal' ), 'M' => __( 'Macho', 'dps-client-portal' ), 'F' => __( 'Fêmea', 'dps-client-portal' ) ];
+        foreach ( $sex_options as $value => $label ) {
+            $selected = ( $sex === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+        
+        // Fieldset: Características Físicas
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '📏 Características Físicas', 'dps-client-portal' ) . '</legend>';
+        
+        echo '<div class="dps-form-row dps-form-row--3col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_size_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Porte', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_size" id="pet_size_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $size_options = [ '' => __( 'Selecione...', 'dps-client-portal' ), 'Mini' => __( 'Mini (até 5kg)', 'dps-client-portal' ), 'Pequeno' => __( 'Pequeno (5-10kg)', 'dps-client-portal' ), 'Médio' => __( 'Médio (10-25kg)', 'dps-client-portal' ), 'Grande' => __( 'Grande (25-45kg)', 'dps-client-portal' ), 'Gigante' => __( 'Gigante (+45kg)', 'dps-client-portal' ) ];
+        foreach ( $size_options as $value => $label ) {
+            $selected = ( $size === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_weight_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Peso (kg)', 'dps-client-portal' ) . '</label>';
+        echo '<input type="number" name="pet_weight" id="pet_weight_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $weight ) . '" class="dps-form-control" step="0.1" min="0" placeholder="Ex: 8.5">';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_birth_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Nascimento', 'dps-client-portal' ) . '</label>';
+        echo '<input type="date" name="pet_birth" id="pet_birth_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $birth ) . '" class="dps-form-control">';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_coat_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Tipo de Pelagem', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_coat" id="pet_coat_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $coat_options = [ '' => __( 'Selecione...', 'dps-client-portal' ), 'Curto' => __( 'Curto', 'dps-client-portal' ), 'Médio' => __( 'Médio', 'dps-client-portal' ), 'Longo' => __( 'Longo', 'dps-client-portal' ), 'Crespo' => __( 'Crespo/Encaracolado', 'dps-client-portal' ), 'Dupla Camada' => __( 'Dupla Camada', 'dps-client-portal' ) ];
+        foreach ( $coat_options as $value => $label ) {
+            $selected = ( $coat === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_color_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Cor', 'dps-client-portal' ) . '</label>';
+        echo '<input type="text" name="pet_color" id="pet_color_' . esc_attr( $pet_id ) . '" value="' . esc_attr( $color ) . '" class="dps-form-control" placeholder="' . esc_attr__( 'Ex: Caramelo, Preto e branco...', 'dps-client-portal' ) . '">';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        echo '</fieldset>';
+        
+        // Fieldset: Informações Importantes
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '⚠️ Informações Importantes', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__help">' . esc_html__( 'Essas informações nos ajudam a garantir a segurança e o bem-estar do seu pet durante o atendimento.', 'dps-client-portal' ) . '</p>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_allergies_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Alergias ou Condições de Saúde', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_allergies" id="pet_allergies_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Informe alergias, problemas de pele, medicamentos em uso...', 'dps-client-portal' ) . '">' . esc_textarea( $allergies ) . '</textarea>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_vaccinations_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Vacinações', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_vaccinations" id="pet_vaccinations_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Informe as vacinas em dia ou pendentes...', 'dps-client-portal' ) . '">' . esc_textarea( $vaccinations ) . '</textarea>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_behavior_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Comportamento', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_behavior" id="pet_behavior_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Como seu pet se comporta no banho? Fica nervoso, morde, aceita bem?', 'dps-client-portal' ) . '">' . esc_textarea( $behavior ) . '</textarea>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_observations_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Observações Gerais', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_observations" id="pet_observations_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Outras informações que julgar importantes...', 'dps-client-portal' ) . '">' . esc_textarea( $observations ) . '</textarea>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+        
+        // Botão de submit
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="button button-primary dps-btn-submit">';
+        echo '<span>💾</span> ' . esc_html( sprintf( __( 'Salvar Dados de %s', 'dps-client-portal' ), $pet_name ) );
+        echo '</button>';
+        echo '</div>';
+        
         echo '</form>';
-        echo '</div>';
+        echo '</div>'; // .dps-surface
     }
 
     /**
