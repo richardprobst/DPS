@@ -3622,6 +3622,16 @@
         font-size: 15px;
         min-height: 44px; /* Área mínima de toque recomendada */
     }
+    
+    /* Cards de estatísticas em 2 colunas para tablet */
+    .dps-inline-stats--panel {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Surface cards ajustados */
+    .dps-surface {
+        padding: 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -3639,6 +3649,52 @@
     .dps-pets-badge {
         font-size: 11px;
         padding: 2px 6px;
+    }
+    
+    /* === CORREÇÕES DE RESPONSIVIDADE PARA MOBILE === */
+    
+    /* Cards de estatísticas empilhados verticalmente em mobile */
+    .dps-inline-stats--panel {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .dps-inline-stats--panel li {
+        flex-direction: row;
+        padding: 12px 14px;
+    }
+    
+    .dps-inline-stats__value {
+        font-size: 18px;
+    }
+    
+    .dps-inline-stats__label small {
+        display: none;
+    }
+    
+    /* Ações de tabela mais compactas */
+    .dps-action-separator {
+        display: none;
+    }
+    
+    .dps-actions {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+    
+    .dps-action-link {
+        padding: 4px 0;
+        font-size: 12px;
+    }
+    
+    /* Surface cards com menos padding */
+    .dps-surface {
+        padding: 16px;
+    }
+    
+    .dps-surface__title {
+        font-size: 14px;
     }
 }
 
