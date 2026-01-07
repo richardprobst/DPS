@@ -19,6 +19,8 @@
 .dps-base-wrapper {
     margin: 20px 0;
     font-family: Arial, sans-serif;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 /* Container de navegação - inclui abas e seletor mobile */
 .dps-nav-container {
@@ -1250,13 +1252,28 @@
 
 @media (max-width: 768px) {
     /* Prevenir overflow horizontal */
+    .dps-base-wrapper {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+    
     .dps-section {
         overflow-x: hidden;
+        max-width: 100%;
     }
     
     .dps-form {
         max-width: 100%;
         overflow-x: hidden;
+    }
+    
+    .dps-surface {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .dps-section-grid {
+        max-width: 100%;
     }
     
     /* === NAVEGAÇÃO RESPONSIVA - DROPDOWN EM MOBILE === */
@@ -3622,9 +3639,30 @@
         font-size: 15px;
         min-height: 44px; /* Área mínima de toque recomendada */
     }
+    
+    /* Cards de estatísticas em 2 colunas para tablet */
+    .dps-inline-stats--panel {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Surface cards ajustados */
+    .dps-surface {
+        padding: 20px;
+    }
 }
 
 @media (max-width: 480px) {
+    /* Reforço de prevenção de overflow para mobile pequeno */
+    /* box-sizing é adicionado aqui pois não está no breakpoint 768px */
+    .dps-base-wrapper,
+    .dps-section,
+    .dps-surface,
+    .dps-section-grid {
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
     .dps-section-title {
         font-size: 18px;
         margin-bottom: 16px;
@@ -3639,6 +3677,67 @@
     .dps-pets-badge {
         font-size: 11px;
         padding: 2px 6px;
+    }
+    
+    /* === CORREÇÕES DE RESPONSIVIDADE PARA MOBILE === */
+    
+    /* Cards de estatísticas empilhados verticalmente em mobile */
+    .dps-inline-stats--panel {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .dps-inline-stats--panel li {
+        flex-direction: row;
+        padding: 12px 14px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .dps-inline-stats__value {
+        font-size: 18px;
+    }
+    
+    .dps-inline-stats__label small {
+        display: none;
+    }
+    
+    /* Ações de tabela mais compactas */
+    .dps-action-separator {
+        display: none;
+    }
+    
+    .dps-actions {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+    
+    .dps-action-link {
+        padding: 4px 0;
+        font-size: 12px;
+    }
+    
+    /* Surface cards com menos padding */
+    .dps-surface {
+        padding: 16px;
+    }
+    
+    .dps-surface__title {
+        font-size: 14px;
+    }
+    
+    /* Lista de toolbar empilhada */
+    .dps-list-toolbar {
+        gap: 8px;
+    }
+    
+    .dps-list-toolbar .dps-search,
+    .dps-list-toolbar .dps-filter-control,
+    .dps-list-toolbar .button {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 }
 
