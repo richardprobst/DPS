@@ -346,7 +346,7 @@ function dps_client_portal_register_appointment_request_cpt() {
         'public'              => false,
         'publicly_queryable'  => false,
         'show_ui'             => true,
-        'show_in_menu'        => 'dps_configuracoes',
+        'show_in_menu'        => 'desi-pet-shower', // Agrupa no menu principal DPS
         'query_var'           => false,
         'capability_type'     => 'post',
         'has_archive'         => false,
