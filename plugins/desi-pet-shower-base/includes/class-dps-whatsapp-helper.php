@@ -149,6 +149,9 @@ class DPS_WhatsApp_Helper {
      * @return bool True se válido, false caso contrário
      */
     public static function validate_portal_link( $portal_url ) {
+        // Cast para string para compatibilidade com PHP 8.1+
+        $portal_url = (string) $portal_url;
+        
         if ( empty( $portal_url ) ) {
             return false;
         }

@@ -267,8 +267,9 @@ class DPS_AI_Analytics {
         $model    = $settings['model'] ?? 'gpt-4o-mini';
 
         // Estima tokens (aproximação simples)
-        $tokens_input  = mb_strlen( $question ) / 4;
-        $tokens_output = mb_strlen( $answer ) / 4;
+        // Cast para string para compatibilidade com PHP 8.1+
+        $tokens_input  = mb_strlen( (string) $question ) / 4;
+        $tokens_output = mb_strlen( (string) $answer ) / 4;
 
         // Registra a interação com client_id = 0 (visitante)
         self::log_interaction(

@@ -225,7 +225,8 @@ class DPS_AI_Knowledge_Base_Tester {
 	 * @return array Artigos com detalhes.
 	 */
 	private function get_relevant_articles_with_details( $question, $limit = 5 ) {
-		$question_lower = mb_strtolower( $question, 'UTF-8' );
+		// Cast para string para compatibilidade com PHP 8.1+
+		$question_lower = mb_strtolower( (string) $question, 'UTF-8' );
 		$relevant       = [];
 
 		// Busca todos os artigos ativos

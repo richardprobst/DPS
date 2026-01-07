@@ -141,7 +141,8 @@ class DPS_Logs_Admin_Page {
             echo '<td>' . esc_html( $item['source'] ) . '</td>';
             
             // Truncar mensagens longas
-            $message = $item['message'];
+            // Cast para string para compatibilidade com PHP 8.1+ (coluna pode ser NULL no banco)
+            $message = (string) ( $item['message'] ?? '' );
             $message_display = esc_html( $message );
             if ( mb_strlen( $message ) > 100 ) {
                 $message_display = '<span class="dps-truncated-text" title="' . esc_attr( $message ) . '">';
@@ -153,7 +154,8 @@ class DPS_Logs_Admin_Page {
             echo '<td>' . $message_display . '</td>';
             
             // Formatar contexto (normalmente JSON)
-            $context = $item['context'];
+            // Cast para string para compatibilidade com PHP 8.1+ (coluna pode ser NULL no banco)
+            $context = (string) ( $item['context'] ?? '' );
             if ( ! empty( $context ) ) {
                 $context_display = '<span class="dps-context-display" title="' . esc_attr( $context ) . '">';
                 $context_display .= esc_html( mb_strlen( $context ) > 80 ? mb_substr( $context, 0, 80 ) . '...' : $context );
