@@ -815,6 +815,68 @@
     }
 }
 
+/* Modal responsivo para telas muito pequenas (até 480px) */
+@media (max-width: 480px) {
+    .dps-appointment-modal {
+        padding: 0;
+    }
+    
+    .dps-appointment-modal__content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .dps-appointment-modal__header {
+        padding: 0.85rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .dps-appointment-modal__title {
+        font-size: 1rem;
+    }
+    
+    .dps-appointment-modal__body {
+        padding: 0.75rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .dps-section--modal .dps-fieldset {
+        padding: 0.65rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dps-section--modal .dps-fieldset__legend {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .dps-section--modal .dps-form-field label {
+        font-size: 0.8rem;
+    }
+    
+    .dps-section--modal select,
+    .dps-section--modal input[type="text"],
+    .dps-section--modal input[type="date"],
+    .dps-section--modal input[type="time"],
+    .dps-section--modal textarea {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.875rem;
+    }
+    
+    .dps-section--modal .dps-appointment-submit,
+    .dps-section--modal .button-primary {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
 /* === Responsividade === */
 
 /* Tablets e telas médias (até 1024px) */

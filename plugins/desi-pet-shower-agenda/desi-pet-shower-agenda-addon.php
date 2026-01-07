@@ -246,8 +246,11 @@ class DPS_Agenda_Addon {
         // AJAX para obter detalhes de serviços de um agendamento (apenas usuários autenticados)
         add_action( 'wp_ajax_dps_get_services_details', [ $this, 'get_services_details_ajax' ] );
 
-        // FASE 2: AJAX para exportação CSV da agenda
+        // FASE 2: AJAX para exportação CSV da agenda (mantido por compatibilidade)
         add_action( 'wp_ajax_dps_agenda_export_csv', [ $this, 'export_csv_ajax' ] );
+        
+        // FASE 2: AJAX para exportação PDF da agenda
+        add_action( 'wp_ajax_dps_agenda_export_pdf', [ $this, 'export_pdf_ajax' ] );
 
         // FASE 4: AJAX para calendário mensal
         add_action( 'wp_ajax_dps_agenda_calendar_events', [ $this, 'calendar_events_ajax' ] );
@@ -1017,6 +1020,7 @@ class DPS_Agenda_Addon {
                 'nonce_status'  => wp_create_nonce( 'dps_update_status' ),
                 'nonce_services'=> wp_create_nonce( 'dps_get_services_details' ),
                 'nonce_export'  => wp_create_nonce( 'dps_agenda_export_csv' ),
+                'nonce_export_pdf' => wp_create_nonce( 'dps_agenda_export_pdf' ),
                 // UX-1: Nonce para ações rápidas
                 'nonce_quick_action' => wp_create_nonce( 'dps_agenda_quick_action' ),
                 // CONF-2: Nonce para confirmação
@@ -1278,10 +1282,10 @@ class DPS_Agenda_Addon {
             echo '</button>';
         }
         
-        // Botão Exportar CSV
+        // Botão Exportar PDF
         $export_date = $show_all ? '' : $selected_date;
-        echo '<button type="button" class="button dps-btn dps-btn--ghost dps-export-csv-btn" data-date="' . esc_attr( $export_date ) . '" data-view="' . esc_attr( $view ) . '" title="' . esc_attr__( 'Exportar agenda para Excel/CSV', 'dps-agenda-addon' ) . '">';
-        echo '📥';
+        echo '<button type="button" class="button dps-btn dps-btn--ghost dps-export-pdf-btn" data-date="' . esc_attr( $export_date ) . '" data-view="' . esc_attr( $view ) . '" title="' . esc_attr__( 'Exportar agenda para PDF', 'dps-agenda-addon' ) . '">';
+        echo '📄';
         echo '</button>';
         
         echo '</div>';
@@ -3049,6 +3053,469 @@ class DPS_Agenda_Addon {
             'filename' => $filename,
             'content'  => base64_encode( $csv_content ),
         ] );
+    }
+
+    /**
+     * FASE 2: Exporta a agenda para PDF (página de impressão).
+     *
+     * Gera uma página HTML otimizada para impressão e salvamento como PDF.
+     * Layout moderno e elegante, sem poluição visual.
+     *
+     * @since 1.4.0
+     */
+    public function export_pdf_ajax() {
+        // Verificar nonce (deve corresponder ao nonce_export_pdf gerado em enqueue_assets)
+        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_agenda_export_pdf' ) ) {
+            wp_die( esc_html__( 'Falha na verificação de segurança. Por favor, recarregue a página e tente novamente.', 'dps-agenda-addon' ), 403 );
+        }
+        
+        // Verificar permissões
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ), 403 );
+        }
+        
+        $date = isset( $_GET['date'] ) ? sanitize_text_field( $_GET['date'] ) : '';
+        $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'day';
+        
+        // Buscar agendamentos
+        $args = [
+            'post_type'      => 'dps_agendamento',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'meta_value',
+            'meta_key'       => 'appointment_date',
+            'order'          => 'ASC',
+        ];
+        
+        if ( ! empty( $date ) ) {
+            if ( $view === 'week' ) {
+                $start_date = $date;
+                $end_date = date( 'Y-m-d', strtotime( $date . ' +6 days' ) );
+                $args['meta_query'] = [
+                    [
+                        'key'     => 'appointment_date',
+                        'value'   => [ $start_date, $end_date ],
+                        'compare' => 'BETWEEN',
+                        'type'    => 'DATE',
+                    ],
+                ];
+            } else {
+                $args['meta_query'] = [
+                    [
+                        'key'   => 'appointment_date',
+                        'value' => $date,
+                    ],
+                ];
+            }
+        }
+        
+        $appointments = get_posts( $args );
+        
+        // Pre-carregar metadados
+        if ( ! empty( $appointments ) ) {
+            $ids = wp_list_pluck( $appointments, 'ID' );
+            update_meta_cache( 'post', $ids );
+            
+            // Coletar IDs relacionados
+            $related_ids = [];
+            foreach ( $appointments as $appt ) {
+                $cid = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                $pid = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                if ( $cid ) {
+                    $related_ids[] = (int) $cid;
+                }
+                if ( $pid ) {
+                    $related_ids[] = (int) $pid;
+                }
+            }
+            if ( ! empty( $related_ids ) ) {
+                _prime_post_caches( array_unique( $related_ids ), false, false );
+            }
+        }
+        
+        // Status labels
+        $status_labels = [
+            'pendente'        => __( 'Pendente', 'dps-agenda-addon' ),
+            'finalizado'      => __( 'Finalizado', 'dps-agenda-addon' ),
+            'finalizado_pago' => __( 'Finalizado e Pago', 'dps-agenda-addon' ),
+            'cancelado'       => __( 'Cancelado', 'dps-agenda-addon' ),
+        ];
+        
+        // Nome do petshop
+        $shop_name = get_option( 'dps_shop_name', get_bloginfo( 'name' ) );
+        
+        // Formatar título do período
+        if ( ! empty( $date ) ) {
+            if ( $view === 'week' ) {
+                $start_date = $date;
+                $end_date = date( 'Y-m-d', strtotime( $date . ' +6 days' ) );
+                $period_title = sprintf(
+                    /* translators: %1$s: start date, %2$s: end date */
+                    __( 'Agenda: %1$s a %2$s', 'dps-agenda-addon' ),
+                    date_i18n( 'd/m/Y', strtotime( $start_date ) ),
+                    date_i18n( 'd/m/Y', strtotime( $end_date ) )
+                );
+            } else {
+                $period_title = sprintf(
+                    /* translators: %s: date */
+                    __( 'Agenda: %s', 'dps-agenda-addon' ),
+                    date_i18n( 'd/m/Y', strtotime( $date ) )
+                );
+            }
+        } else {
+            $period_title = __( 'Agenda Completa', 'dps-agenda-addon' );
+        }
+        
+        // Renderizar página de impressão
+        $this->render_pdf_print_page( $appointments, $period_title, $shop_name, $status_labels );
+        exit;
+    }
+
+    /**
+     * Renderiza a página de impressão PDF da agenda.
+     *
+     * @since 1.4.0
+     * @param array  $appointments   Lista de agendamentos.
+     * @param string $period_title   Título do período.
+     * @param string $shop_name      Nome do petshop.
+     * @param array  $status_labels  Labels de status traduzidos.
+     */
+    private function render_pdf_print_page( $appointments, $period_title, $shop_name, $status_labels ) {
+        ?>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title><?php echo esc_html( $period_title . ' - ' . $shop_name ); ?></title>
+            <style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+                    color: #374151;
+                    line-height: 1.5;
+                    padding: 40px;
+                    max-width: 900px;
+                    margin: 0 auto;
+                    background: #fff;
+                }
+                .print-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    border-bottom: 3px solid #0ea5e9;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                }
+                .print-header__info { flex: 1; }
+                .print-header__logo { 
+                    font-size: 24px; 
+                    font-weight: 700; 
+                    color: #0ea5e9; 
+                    margin-bottom: 4px;
+                }
+                .print-header__period { 
+                    font-size: 18px; 
+                    font-weight: 600; 
+                    color: #374151; 
+                }
+                .print-header__date { 
+                    color: #6b7280; 
+                    font-size: 13px;
+                    margin-top: 8px;
+                }
+                .print-summary {
+                    display: flex;
+                    gap: 24px;
+                    background: #f9fafb;
+                    padding: 16px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 30px;
+                    border: 1px solid #e5e7eb;
+                }
+                .print-summary__item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .print-summary__label {
+                    font-size: 13px;
+                    color: #6b7280;
+                }
+                .print-summary__value {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #374151;
+                }
+                .appointments-table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-bottom: 30px; 
+                }
+                .appointments-table th {
+                    background: #f3f4f6;
+                    padding: 12px 14px;
+                    text-align: left;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    color: #6b7280;
+                    border-bottom: 2px solid #e5e7eb;
+                }
+                .appointments-table td {
+                    padding: 14px;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                    vertical-align: top;
+                }
+                .appointments-table tr:nth-child(even) { 
+                    background: #f9fafb; 
+                }
+                .appointments-table tr:hover {
+                    background: #f3f4f6;
+                }
+                .cell-time {
+                    font-weight: 600;
+                    color: #0ea5e9;
+                    white-space: nowrap;
+                }
+                .cell-date {
+                    color: #6b7280;
+                    font-size: 12px;
+                }
+                .cell-client {
+                    font-weight: 600;
+                    color: #374151;
+                }
+                .cell-pet {
+                    font-size: 13px;
+                    color: #6b7280;
+                }
+                .cell-phone {
+                    font-size: 13px;
+                    color: #6b7280;
+                    font-family: "SF Mono", Consolas, monospace;
+                }
+                .status-badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.02em;
+                }
+                .status-pendente { 
+                    background: #fef3c7; 
+                    color: #92400e; 
+                }
+                .status-finalizado { 
+                    background: #f3f4f6; 
+                    color: #4b5563; 
+                }
+                .status-finalizado_pago { 
+                    background: #d1fae5; 
+                    color: #047857; 
+                }
+                .status-cancelado { 
+                    background: #fee2e2; 
+                    color: #b91c1c; 
+                }
+                .print-footer {
+                    text-align: center;
+                    padding-top: 24px;
+                    border-top: 1px solid #e5e7eb;
+                    color: #9ca3af;
+                    font-size: 12px;
+                }
+                .empty-state {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #6b7280;
+                }
+                .empty-state__icon {
+                    font-size: 48px;
+                    margin-bottom: 16px;
+                }
+                .empty-state__message {
+                    font-size: 16px;
+                }
+                @media print {
+                    body { 
+                        padding: 20px; 
+                        max-width: 100%;
+                    }
+                    .no-print { display: none !important; }
+                    .appointments-table th {
+                        background: #f3f4f6 !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .appointments-table tr:nth-child(even) { 
+                        background: #f9fafb !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .status-badge {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+                .print-actions {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    display: flex;
+                    gap: 10px;
+                    z-index: 1000;
+                }
+                .print-actions button {
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 14px;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+                .btn-print { 
+                    background: #0ea5e9; 
+                    color: white; 
+                }
+                .btn-print:hover { 
+                    background: #0284c7; 
+                }
+                .btn-close { 
+                    background: #f3f4f6; 
+                    color: #374151; 
+                }
+                .btn-close:hover { 
+                    background: #e5e7eb; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-actions no-print">
+                <button type="button" class="btn-print" id="dps-print-btn">🖨️ <?php esc_html_e( 'Imprimir / Salvar PDF', 'dps-agenda-addon' ); ?></button>
+                <button type="button" class="btn-close" id="dps-close-btn"><?php esc_html_e( 'Fechar', 'dps-agenda-addon' ); ?></button>
+            </div>
+            <script>
+                document.getElementById('dps-print-btn').addEventListener('click', function() { window.print(); });
+                document.getElementById('dps-close-btn').addEventListener('click', function() { window.close(); });
+            </script>
+
+            <header class="print-header">
+                <div class="print-header__info">
+                    <div class="print-header__logo">🐾 <?php echo esc_html( $shop_name ); ?></div>
+                    <div class="print-header__period"><?php echo esc_html( $period_title ); ?></div>
+                    <div class="print-header__date"><?php echo esc_html( sprintf( __( 'Gerado em %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y \à\s H:i' ) ) ); ?></div>
+                </div>
+            </header>
+
+            <?php if ( ! empty( $appointments ) ) : 
+                // Contadores de status
+                $status_counts = [
+                    'pendente' => 0,
+                    'finalizado' => 0,
+                    'finalizado_pago' => 0,
+                    'cancelado' => 0,
+                ];
+                foreach ( $appointments as $appt ) {
+                    $status = get_post_meta( $appt->ID, 'appointment_status', true );
+                    if ( ! $status ) {
+                        $status = 'pendente';
+                    }
+                    if ( isset( $status_counts[ $status ] ) ) {
+                        $status_counts[ $status ]++;
+                    }
+                }
+            ?>
+                <div class="print-summary">
+                    <div class="print-summary__item">
+                        <span class="print-summary__label"><?php esc_html_e( 'Total:', 'dps-agenda-addon' ); ?></span>
+                        <span class="print-summary__value"><?php echo esc_html( count( $appointments ) ); ?></span>
+                    </div>
+                    <?php if ( $status_counts['pendente'] > 0 ) : ?>
+                        <div class="print-summary__item">
+                            <span class="print-summary__label">🟡 <?php esc_html_e( 'Pendentes:', 'dps-agenda-addon' ); ?></span>
+                            <span class="print-summary__value"><?php echo esc_html( $status_counts['pendente'] ); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ( $status_counts['finalizado_pago'] > 0 ) : ?>
+                        <div class="print-summary__item">
+                            <span class="print-summary__label">✅ <?php esc_html_e( 'Pagos:', 'dps-agenda-addon' ); ?></span>
+                            <span class="print-summary__value"><?php echo esc_html( $status_counts['finalizado_pago'] ); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <table class="appointments-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Horário', 'dps-agenda-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Cliente', 'dps-agenda-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Contato', 'dps-agenda-addon' ); ?></th>
+                            <th><?php esc_html_e( 'Status', 'dps-agenda-addon' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $appointments as $appt ) : 
+                            $date_val   = get_post_meta( $appt->ID, 'appointment_date', true );
+                            $time_val   = get_post_meta( $appt->ID, 'appointment_time', true );
+                            $client_id  = get_post_meta( $appt->ID, 'appointment_client_id', true );
+                            $pet_id     = get_post_meta( $appt->ID, 'appointment_pet_id', true );
+                            $status     = get_post_meta( $appt->ID, 'appointment_status', true );
+                            if ( ! $status ) {
+                                $status = 'pendente';
+                            }
+                            
+                            $client_post  = $client_id ? get_post( $client_id ) : null;
+                            $pet_post     = $pet_id ? get_post( $pet_id ) : null;
+                            
+                            $client_name  = $client_post ? $client_post->post_title : '';
+                            $pet_name     = $pet_post ? $pet_post->post_title : '';
+                            $client_phone = $client_post ? get_post_meta( $client_post->ID, 'client_phone', true ) : '';
+                            
+                            $status_class = 'status-' . sanitize_html_class( $status );
+                        ?>
+                            <tr>
+                                <td>
+                                    <div class="cell-time"><?php echo esc_html( $time_val ); ?></div>
+                                    <div class="cell-date"><?php echo esc_html( date_i18n( 'd/m/Y', strtotime( $date_val ) ) ); ?></div>
+                                </td>
+                                <td>
+                                    <div class="cell-client"><?php echo esc_html( $client_name ?: '—' ); ?></div>
+                                    <?php if ( $pet_name ) : ?>
+                                        <div class="cell-pet">🐾 <?php echo esc_html( $pet_name ); ?></div>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div class="cell-phone"><?php echo esc_html( $client_phone ?: '—' ); ?></div>
+                                </td>
+                                <td>
+                                    <span class="status-badge <?php echo esc_attr( $status_class ); ?>">
+                                        <?php echo esc_html( $status_labels[ $status ] ?? $status ); ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else : ?>
+                <div class="empty-state">
+                    <div class="empty-state__icon">📋</div>
+                    <div class="empty-state__message"><?php esc_html_e( 'Nenhum agendamento encontrado para este período.', 'dps-agenda-addon' ); ?></div>
+                </div>
+            <?php endif; ?>
+
+            <footer class="print-footer">
+                <?php echo esc_html( sprintf( __( 'Documento gerado em %s por %s', 'dps-agenda-addon' ), date_i18n( 'd/m/Y H:i' ), $shop_name ) ); ?>
+            </footer>
+        </body>
+        </html>
+        <?php
     }
 
     /**
