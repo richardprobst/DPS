@@ -132,7 +132,7 @@ $appointments_stats = isset( $appointments_stats ) && is_array( $appointments_st
 					</li>
 				</ul>
 
-				<div class="dps-actions dps-actions--stacked">
+				<div class="dps-actions dps-actions--inline">
 					<a class="button button-primary" href="#dps-pets-form-section">
 						<?php echo esc_html__( 'Cadastrar novo pet', 'desi-pet-shower' ); ?>
 					</a>

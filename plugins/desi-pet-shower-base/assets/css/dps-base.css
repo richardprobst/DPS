@@ -3492,6 +3492,20 @@
     justify-content: center;
 }
 
+/* Variante inline para botões de ação compactos e elegantes */
+.dps-actions--inline {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.dps-actions--inline .button {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
 .dps-action-separator {
     color: #d1d5db;
     font-size: 12px;
@@ -3600,6 +3614,13 @@
     .dps-action-link {
         font-size: 12px;
         padding: 2px 2px;
+    }
+    
+    /* Botões de ação inline em mobile - manter tamanho adequado para toque */
+    .dps-actions--inline .button {
+        padding: 12px 20px;
+        font-size: 15px;
+        min-height: 44px; /* Área mínima de toque recomendada */
     }
 }
 

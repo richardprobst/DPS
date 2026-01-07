@@ -122,7 +122,7 @@ $api_key          = isset( $api_key ) ? $api_key : '';
 					</li>
 				</ul>
 
-				<div class="dps-actions dps-actions--stacked">
+				<div class="dps-actions dps-actions--inline">
 					<?php if ( ! empty( $registration_url ) ) : ?>
 						<a class="button button-primary" href="<?php echo esc_url( $registration_url ); ?>" target="_blank" rel="noopener noreferrer">
 							<?php echo esc_html__( 'Cadastrar novo cliente', 'desi-pet-shower' ); ?>
