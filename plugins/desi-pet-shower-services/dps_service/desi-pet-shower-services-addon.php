@@ -405,7 +405,7 @@ class DPS_Services_Addon {
             echo '</ul>';
             
             // Ações (seguindo o padrão da aba Clientes)
-            echo '<div class="dps-actions dps-actions--stacked">';
+            echo '<div class="dps-actions dps-actions--inline">';
             echo '<a class="button button-primary" href="#dps-services-form-section">';
             echo esc_html__( 'Cadastrar novo serviço', 'dps-services-addon' );
             echo '</a>';
