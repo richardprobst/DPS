@@ -6,7 +6,7 @@
  * 
  * @package Desi_Pet_Shower_Groomers
  * @since 1.1.0
- * @updated 1.8.4 - Layout modernizado com cards de estatísticas e sub-abas estilo card
+ * @updated 1.8.5 - Adicionado estilos para dps-groomers-subtab
  */
 
 /* ==========================================================================
@@ -2512,6 +2512,15 @@ input[type="time"].dps-time-input,
     .dps-subnav-item--card {
         min-width: 100%;
     }
+}
+
+/* Conteúdo de sub-abas - estilo base */
+.dps-groomers-subtab {
+    display: block;
+}
+
+.dps-groomers-subtab--active {
+    display: block;
 }
 
 /* ==========================================================================
