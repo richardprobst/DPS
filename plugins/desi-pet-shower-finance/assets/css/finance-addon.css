@@ -11,19 +11,15 @@
    1. LAYOUT E ESTRUTURA
    ======================================== */
 
-#dps-section-financeiro {
-    padding: 20px 0;
-}
-
-/* Título principal da seção */
-#dps-section-financeiro > h3 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
-}
+/* 
+ * Removido: Sobrescrita de padding que conflitava com o padrão do sistema.
+ * O .dps-section já define padding: 24px no dps-base.css.
+ * Manter consistência visual com as demais abas do painel.
+ * 
+ * Removido: Estilos específicos para #dps-section-financeiro > h3.
+ * Agora a seção usa .dps-section-header e .dps-section-title que já
+ * possuem estilos consistentes definidos no dps-base.css.
+ */
 
 /* Subtítulos de seção */
 #dps-section-financeiro h4 {
