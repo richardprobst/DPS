@@ -152,10 +152,15 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
-**Registration Add-on - Bypass de Restrições para Administradores (v1.3.1)**
+**Registration Add-on - Modal de Confirmação para Duplicatas (v1.3.1)**
 
+- **Modal de confirmação para admins**: Quando um administrador tenta cadastrar um cliente com dados já existentes (email, telefone ou CPF), um modal é exibido com três opções:
+  - **Cancelar**: Fecha o modal e não prossegue com o cadastro.
+  - **Ver cadastro existente**: Redireciona para a página do cliente já cadastrado.
+  - **Continuar mesmo assim**: Cria o novo cliente com os dados duplicados.
+- **Verificação AJAX**: Os dados são verificados via AJAX antes do envio do formulário, sem recarregar a página.
+- **Identificação de campos duplicados**: O modal mostra exatamente quais campos são duplicados (Email, Telefone, CPF).
 - **Rate limiting bypassed para admins**: Administradores (`manage_options`) não são mais limitados a 3 cadastros por hora.
-- **Detecção de duplicatas bypassed para admins**: Administradores podem criar clientes com email/telefone/CPF já existentes (útil para correções e cadastros manuais).
 - **reCAPTCHA bypassed para admins**: Verificação anti-spam não é aplicada quando o usuário logado é administrador.
 - **Spam check bypassed para admins**: Hooks de validação adicional (`dps_registration_spam_check`) são pulados para administradores.
 - **Causa raiz**: Restrições de segurança do formulário público estavam impedindo administradores de cadastrar múltiplos clientes em sequência.
