@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Groomers Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Cadastro de groomers com vinculação a atendimentos e relatórios por profissional. Portal exclusivo para groomers.
- * Version:           1.8.4
+ * Version:           1.8.5
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-groomers-addon
@@ -63,7 +63,7 @@ class DPS_Groomers_Addon {
      *
      * @var string
      */
-    const VERSION = '1.8.4';
+    const VERSION = '1.8.5';
 
     /**
      * Tipos de profissionais disponíveis.
