@@ -1740,8 +1740,11 @@ class DPS_Registration_Addon {
             $this->redirect_with_error();
         }
 
-        // F1.6: Rate limiting
-        if ( ! $this->check_rate_limit() ) {
+        // Detecta se é administrador para bypass de restrições
+        $is_admin = current_user_can( 'manage_options' );
+
+        // F1.6: Rate limiting - bypass para administradores
+        if ( ! $is_admin && ! $this->check_rate_limit() ) {
             $this->log_event( 'warning', 'Cadastro bloqueado por rate limit', array(
                 'ip_hash' => $this->get_client_ip_hash(),
             ) );
@@ -1750,7 +1753,8 @@ class DPS_Registration_Addon {
         }
 
         $recaptcha_settings = $this->get_recaptcha_settings();
-        if ( $recaptcha_settings['enabled'] ) {
+        // Bypass reCAPTCHA para administradores
+        if ( $recaptcha_settings['enabled'] && ! $is_admin ) {
             $recaptcha_token  = isset( $_POST['dps_recaptcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_recaptcha_token'] ) ) : '';
             $recaptcha_action = isset( $_POST['dps_recaptcha_action'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_recaptcha_action'] ) ) : '';
 
@@ -1775,15 +1779,18 @@ class DPS_Registration_Addon {
 
         // F1.8: Hook para validações adicionais (ex.: reCAPTCHA)
         // Nota: o filtro recebe uma cópia sanitizada de campos selecionados, NÃO o $_POST bruto
-        $sanitized_context = array(
-            'client_name'  => isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '',
-            'client_email' => isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '',
-            'ip_hash'      => $this->get_client_ip_hash(),
-        );
-        $spam_check = apply_filters( 'dps_registration_spam_check', true, $sanitized_context );
-        if ( true !== $spam_check ) {
-            $this->add_error( __( 'Verificação de segurança falhou. Por favor, tente novamente.', 'dps-registration-addon' ) );
-            $this->redirect_with_error();
+        // Bypass spam check para administradores
+        if ( ! $is_admin ) {
+            $sanitized_context = array(
+                'client_name'  => isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '',
+                'client_email' => isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '',
+                'ip_hash'      => $this->get_client_ip_hash(),
+            );
+            $spam_check = apply_filters( 'dps_registration_spam_check', true, $sanitized_context );
+            if ( true !== $spam_check ) {
+                $this->add_error( __( 'Verificação de segurança falhou. Por favor, tente novamente.', 'dps-registration-addon' ) );
+                $this->redirect_with_error();
+            }
         }
 
         // Sanitiza dados do cliente - wp_unslash antes de sanitize para tratar magic quotes
@@ -1865,19 +1872,22 @@ class DPS_Registration_Addon {
         }
 
         // =====================================================================
-        // F1.5: Detecção de duplicatas
+        // F1.5: Detecção de duplicatas - bypass para administradores
+        // Admins podem criar clientes com dados duplicados (útil para correções)
         // =====================================================================
-        $duplicate_id = $this->find_duplicate_client( $client_email, $client_phone, $client_cpf );
-        if ( $duplicate_id > 0 ) {
-            $this->log_event( 'warning', 'Cadastro bloqueado por duplicata', array(
-                'duplicate_id' => $duplicate_id,
-                'email_hash'   => $this->get_safe_hash( $client_email ),
-                'phone_hash'   => $this->get_safe_hash( $client_phone ),
-                'cpf_hash'     => $this->get_safe_hash( $client_cpf ),
-                'ip_hash'      => $this->get_client_ip_hash(),
-            ) );
-            $this->add_error( __( 'Já encontramos um cadastro com esses dados. Se você já se cadastrou, verifique seu e-mail (se informado) ou fale com a equipe do pet shop.', 'dps-registration-addon' ) );
-            $this->redirect_with_error();
+        if ( ! $is_admin ) {
+            $duplicate_id = $this->find_duplicate_client( $client_email, $client_phone, $client_cpf );
+            if ( $duplicate_id > 0 ) {
+                $this->log_event( 'warning', 'Cadastro bloqueado por duplicata', array(
+                    'duplicate_id' => $duplicate_id,
+                    'email_hash'   => $this->get_safe_hash( $client_email ),
+                    'phone_hash'   => $this->get_safe_hash( $client_phone ),
+                    'cpf_hash'     => $this->get_safe_hash( $client_cpf ),
+                    'ip_hash'      => $this->get_client_ip_hash(),
+                ) );
+                $this->add_error( __( 'Já encontramos um cadastro com esses dados. Se você já se cadastrou, verifique seu e-mail (se informado) ou fale com a equipe do pet shop.', 'dps-registration-addon' ) );
+                $this->redirect_with_error();
+            }
         }
 
         // =====================================================================

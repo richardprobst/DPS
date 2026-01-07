@@ -152,6 +152,14 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Registration Add-on - Bypass de Restrições para Administradores (v1.3.1)**
+
+- **Rate limiting bypassed para admins**: Administradores (`manage_options`) não são mais limitados a 3 cadastros por hora.
+- **Detecção de duplicatas bypassed para admins**: Administradores podem criar clientes com email/telefone/CPF já existentes (útil para correções e cadastros manuais).
+- **reCAPTCHA bypassed para admins**: Verificação anti-spam não é aplicada quando o usuário logado é administrador.
+- **Spam check bypassed para admins**: Hooks de validação adicional (`dps_registration_spam_check`) são pulados para administradores.
+- **Causa raiz**: Restrições de segurança do formulário público estavam impedindo administradores de cadastrar múltiplos clientes em sequência.
+
 **Groomers Add-on - Correção de HTML Malformado (v1.8.6)**
 
 - **Aba GROOMERS em branco corrigida**: Removido `</div>` extra na função `render_groomers_section()` que causava HTML malformado e impedia a renderização do conteúdo da aba.
