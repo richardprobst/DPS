@@ -3,65 +3,69 @@
  *
  * @package DPS_Push_Addon
  * @since 1.0.0
+ * @since 1.3.1 Refatorado para usar padrão dps-surface moderno
  */
 
 /* === Container Principal === */
 .dps-push-settings {
-    max-width: 1200px;
+    max-width: 900px;
 }
 
-.dps-push-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-/* === Cards === */
-.dps-push-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-}
-
-.dps-push-card h2 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #0f172a;
+.dps-push-settings .dps-section-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
 }
 
-/* === Status Card === */
-.dps-push-status-card {
-    border-left: 4px solid #3b82f6;
+.dps-push-settings .dps-section-header__subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0 0 24px;
 }
 
-.dps-push-status {
-    margin-bottom: 1.5rem;
+/* === Layout Empilhado === */
+.dps-push-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* === Status Indicator (inline) === */
+.dps-push-status-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .dps-push-indicator {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 0.75rem;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
 }
 
 .dps-push-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .dps-push-status-text {
-    font-weight: 500;
+    font-size: 14px;
+}
+
+.dps-push-devices {
+    font-size: 13px;
+    color: #6b7280;
 }
 
 /* Status: Verificando */
@@ -141,124 +145,185 @@
 
 /* Animação de pulso */
 @keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.4;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
-/* Texto de dispositivos */
-.dps-push-devices {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-/* Ações */
+/* === Ações === */
 .dps-push-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 12px;
     flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
 .dps-push-actions .button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
-/* === Info Card === */
-.dps-push-info-card {
-    background: #f8fafc;
+/* === Seção Push do Navegador === */
+.dps-push-browser-section {
+    margin-top: 16px;
 }
 
-.dps-push-info-card ol {
-    margin: 0;
-    padding-left: 1.25rem;
+.dps-push-events-fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    background: #f9fafb;
+}
+
+.dps-push-events-fieldset legend {
+    font-weight: 600;
+    color: #374151;
+    padding: 0 8px;
+    font-size: 14px;
+}
+
+.dps-push-events-fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 14px;
     color: #374151;
 }
 
-.dps-push-info-card li {
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
+.dps-push-events-fieldset input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
 }
 
-.dps-push-info-card li:last-child {
-    margin-bottom: 0;
+/* === Seção de Configuração de Relatório === */
+.dps-push-report-config {
+    margin-top: 16px;
 }
 
-.dps-push-info-card .description {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    font-size: 0.8rem;
-    color: #64748b;
-}
-
-/* === Form Table === */
-.dps-push-card .form-table {
-    margin-top: 0;
-}
-
-.dps-push-card .form-table th {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    width: auto;
-}
-
-.dps-push-card .form-table td {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-}
-
-.dps-push-card fieldset label {
+.dps-push-toggle-label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 10px;
+    margin-bottom: 16px;
     cursor: pointer;
 }
 
-.dps-push-card fieldset label:last-child {
-    margin-bottom: 0;
-}
-
-.dps-push-card fieldset input[type="checkbox"] {
+.dps-push-toggle-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
     margin: 0;
 }
 
-/* === Responsividade === */
-@media (max-width: 782px) {
-    .dps-push-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .dps-push-card {
-        padding: 1rem;
-    }
-    
-    .dps-push-actions {
-        flex-direction: column;
-    }
-    
-    .dps-push-actions .button {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .dps-push-card .form-table th,
-    .dps-push-card .form-table td {
-        display: block;
-        width: 100%;
-        padding: 0.5rem 0;
-    }
+.dps-push-report-fields {
+    padding-left: 28px;
+    border-left: 3px solid #e5e7eb;
 }
 
-/* === Test Result Messages (v1.2.0) === */
+.dps-push-field-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dps-push-field-row > label {
+    min-width: 140px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+.dps-push-field-row input[type="time"],
+.dps-push-field-row input[type="number"],
+.dps-push-field-row select {
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dps-push-field-row input[type="text"],
+.dps-push-field-row input.regular-text {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.dps-push-field-row .description {
+    width: 100%;
+    margin: 4px 0 0 150px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* === Schedule Badge === */
+.dps-schedule-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.dps-schedule-badge.dps-schedule-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* === Status Badge === */
+.dps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dps-status-badge--success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dps-status-badge--pending {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* === Telegram Config === */
+.dps-push-telegram-config {
+    margin-top: 16px;
+}
+
+.dps-telegram-token-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-telegram-token-wrapper input {
+    flex: 1;
+    max-width: 350px;
+}
+
+.dps-push-telegram-status {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* === Test Results === */
 .dps-test-result {
     display: inline-block;
     margin-left: 10px;
@@ -278,7 +343,7 @@
 /* === Test Buttons === */
 .dps-test-report-btn,
 #dps-test-telegram {
-    margin-top: 5px;
+    margin-top: 12px;
 }
 
 .dps-test-report-btn:disabled,
@@ -287,7 +352,12 @@
     cursor: not-allowed;
 }
 
-/* === Save Button States (v1.3.0) === */
+/* === Save Button === */
+#dps-push-save-btn {
+    font-size: 15px;
+    padding: 10px 24px;
+}
+
 #dps-push-save-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -298,7 +368,7 @@
     margin-left: 10px;
 }
 
-/* Email validation errors */
+/* === Validation Errors === */
 .dps-email-error,
 .dps-token-error {
     color: #ef4444;
@@ -314,63 +384,61 @@
     75% { transform: translateX(5px); }
 }
 
-/* Focus visible for accessibility */
-.dps-push-card input:focus-visible,
-.dps-push-card textarea:focus-visible,
-.dps-push-card select:focus-visible,
-.dps-push-card button:focus-visible {
-    outline: 2px solid #1e40af; /* Azul mais escuro para melhor contraste WCAG */
+/* === Focus Visible === */
+.dps-push-settings input:focus-visible,
+.dps-push-settings textarea:focus-visible,
+.dps-push-settings select:focus-visible,
+.dps-push-settings button:focus-visible {
+    outline: 2px solid #1e40af;
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
 
-/* === Schedule Card (v1.3.0) === */
-.dps-push-schedule-card {
-    border-left: 4px solid #10b981;
-}
+/* === Responsividade === */
+@media (max-width: 782px) {
+    .dps-push-settings {
+        max-width: 100%;
+    }
 
-.dps-schedule-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    .dps-push-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-.dps-schedule-table td {
-    padding: 8px 0;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: middle;
-}
+    .dps-push-actions {
+        flex-direction: column;
+    }
 
-.dps-schedule-table tr:last-child td {
-    border-bottom: none;
-}
+    .dps-push-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
 
-.dps-schedule-active {
-    color: #10b981;
-    font-weight: 500;
-}
+    .dps-push-field-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-.dps-schedule-pending {
-    color: #f59e0b;
-    font-style: italic;
-}
+    .dps-push-field-row > label {
+        min-width: auto;
+    }
 
-.dps-schedule-disabled {
-    color: #9ca3af;
-}
+    .dps-push-field-row input[type="text"],
+    .dps-push-field-row input.regular-text {
+        width: 100%;
+        max-width: 100%;
+    }
 
-/* === Telegram Token Wrapper === */
-.dps-telegram-token-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+    .dps-push-field-row .description {
+        margin-left: 0;
+    }
 
-.dps-telegram-token-wrapper input {
-    flex: 1;
-    max-width: 350px;
-}
+    .dps-push-report-fields {
+        padding-left: 16px;
+    }
 
-/* === Settings Card === */
-.dps-push-settings-card {
-    grid-column: 1 / -1; /* Full width */
+    .dps-push-telegram-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

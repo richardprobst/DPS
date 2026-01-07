@@ -51,10 +51,6 @@ class DPS_Email_Reports {
         // Hook para Telegram
         add_action( 'dps_send_push_notification', [ $this, 'send_to_telegram' ], 10, 2 );
 
-        // Ativação/desativação
-        register_activation_hook( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php', [ $this, 'activate' ] );
-        register_deactivation_hook( dirname( __DIR__ ) . '/desi-pet-shower-push-addon.php', [ $this, 'deactivate' ] );
-
         // Reagendar crons após salvar configurações de horário.
         add_action( 'update_option_dps_push_agenda_time', [ $this, 'reschedule_agenda_cron' ] );
         add_action( 'update_option_dps_push_report_time', [ $this, 'reschedule_report_cron' ] );
@@ -65,6 +61,22 @@ class DPS_Email_Reports {
         add_action( 'update_option_dps_push_agenda_enabled', [ $this, 'reschedule_agenda_cron' ] );
         add_action( 'update_option_dps_push_report_enabled', [ $this, 'reschedule_report_cron' ] );
         add_action( 'update_option_dps_push_weekly_enabled', [ $this, 'reschedule_weekly_cron' ] );
+
+        // Agenda crons que estão faltando (fallback caso ativação não tenha sido executada).
+        // Executado em admin_init para não impactar performance do frontend.
+        add_action( 'admin_init', [ $this, 'maybe_schedule_crons' ] );
+    }
+
+    /**
+     * Agenda crons se estiverem faltando (fallback).
+     * 
+     * Este método garante que os crons sejam agendados mesmo que o hook
+     * de ativação não tenha sido executado corretamente.
+     *
+     * @since 1.3.1
+     */
+    public function maybe_schedule_crons() {
+        $this->schedule_crons();
     }
 
     /**

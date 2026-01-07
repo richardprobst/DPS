@@ -84,8 +84,9 @@
             }
 
             // Formato esperado: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
-            // O token tem 8-12 dígitos, seguido de :, seguido de 35 caracteres alfanuméricos/underscores/hyphens
-            var tokenRegex = /^\d{8,12}:[A-Za-z0-9_-]{35}$/;
+            // O token tem 8-12 dígitos, seguido de :, seguido de 30-50 caracteres alfanuméricos/underscores/hyphens
+            // Regex flexível para acomodar variações no tamanho do token (consistente com server-side)
+            var tokenRegex = /^\d{8,12}:[A-Za-z0-9_-]{30,50}$/;
             if (!tokenRegex.test(value)) {
                 $wrapper.after(
                     '<span class="dps-token-error">' +
