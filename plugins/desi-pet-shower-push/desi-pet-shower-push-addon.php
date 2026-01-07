@@ -66,7 +66,9 @@ function dps_push_activate_plugin() {
         update_option( 'dps_push_vapid_keys', $keys );
     }
 
-    // Força a criação da instância para ter acesso ao método.
+    // O singleton DPS_Email_Reports é normalmente instanciado em `init`, mas durante
+    // a ativação do plugin o hook `init` ainda não foi executado. Forçamos a criação
+    // da instância aqui para garantir que os crons sejam agendados corretamente.
     $instance = DPS_Email_Reports::get_instance();
     if ( method_exists( $instance, 'activate' ) ) {
         $instance->activate();
