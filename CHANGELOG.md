@@ -152,6 +152,32 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Client Portal Add-on - Correção de Solicitação de Link de Acesso (v2.4.4)**
+
+- **Erro "Erro ao processar solicitação" corrigido**: O handler AJAX `dps_request_access_link_by_email` agora funciona tanto para usuários logados quanto não-logados no WordPress. Anteriormente, apenas `wp_ajax_nopriv_*` estava registrado, causando falha para clientes logados no WP.
+- **Handler `dps_request_portal_access` corrigido**: Mesmo problema - adicionado `wp_ajax_*` para suportar usuários logados.
+- **Tratamento de erros JavaScript robusto**: Melhorado o código de tratamento de resposta AJAX para verificar `data.data` antes de acessar propriedades, evitando erros silenciosos.
+- **Mensagem de erro mais clara**: Erro de conexão agora exibe "Erro de conexão. Verifique sua internet e tente novamente." em vez de mensagem genérica.
+- **Logging de erros no console**: Erros AJAX agora são registrados no console do navegador para depuração.
+
+**Client Portal Add-on - Melhoria do Email de Link de Acesso (v2.4.4)**
+
+- **Email em HTML moderno**: O email com link de acesso ao portal agora usa template HTML responsivo com:
+  - Logo e branding do site
+  - Botão CTA azul com gradiente e sombra
+  - Aviso de validade em card amarelo destacado
+  - Link alternativo para copiar/colar
+  - Footer com copyright
+- **Compatibilidade com clientes de email**: Template testado para Gmail, Outlook e outros clientes principais usando estilos inline.
+
+**Base Plugin - Melhoria da Mensagem de WhatsApp (v1.4.0)**
+
+- **Mensagem de solicitação de acesso ao portal melhorada**: Nova mensagem é mais clara e amigável:
+  - Antes: `Olá, gostaria de acesso ao Portal do Cliente. Meu nome é ______ e o nome do meu pet é ______.`
+  - Depois: `Olá! 🐾 Gostaria de receber o link de acesso ao Portal do Cliente para acompanhar os serviços do meu pet. Meu nome: (informe seu nome) | Nome do pet: (informe o nome do pet)`
+- **Emoji adicionado**: 🐾 no início da mensagem para torná-la mais amigável e visual.
+- **Instruções claras**: Campos a preencher agora usam parênteses ao invés de underscores para maior clareza.
+
 **Registration Add-on - Modal de Confirmação para Duplicatas (v1.3.1)**
 
 - **Modal de confirmação para admins**: Quando um administrador tenta cadastrar um cliente com dados já existentes (email, telefone ou CPF), um modal é exibido com três opções:

@@ -123,9 +123,11 @@ final class DPS_Client_Portal {
         add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         
         // AJAX handler para notificação de solicitação de acesso (Fase 1.4)
+        add_action( 'wp_ajax_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         
         // AJAX handler para auto-envio de link de acesso por email
+        add_action( 'wp_ajax_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
         add_action( 'wp_ajax_nopriv_dps_request_access_link_by_email', [ $this, 'ajax_request_access_link_by_email' ] );
 
         // AJAX handler para export PDF do histórico do pet (Funcionalidade 3)
@@ -4988,18 +4990,17 @@ Equipe %4$s', 'dps-client-portal' ),
         // Gera URL de acesso
         $access_url = $token_manager->generate_access_url( $token_plain );
         
-        // Monta email (escapando nome do cliente para prevenir injeção)
+        // Monta email HTML moderno
         $safe_client_name = wp_strip_all_tags( $client_name );
         $subject = __( 'Seu link de acesso ao Portal do Cliente - desi.pet by PRObst', 'dps-client-portal' );
         
-        $body = sprintf(
-            __( "Olá, %s!\n\nVocê solicitou acesso ao Portal do Cliente da desi.pet by PRObst.\n\nClique no link abaixo para acessar:\n%s\n\n⚠️ Este link é válido por 30 minutos e pode ser usado apenas uma vez.\n\nSe você não solicitou este acesso, ignore este e-mail.\n\nEquipe desi.pet by PRObst", 'dps-client-portal' ),
-            $safe_client_name,
-            esc_url( $access_url )
-        );
+        $site_name = get_bloginfo( 'name' );
+        
+        // Template HTML do email
+        $body = $this->get_access_link_email_html( $safe_client_name, $access_url, $site_name );
         
         // Envia email
-        $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
         
         if ( class_exists( 'DPS_Communications_API' ) ) {
             $comm_api = DPS_Communications_API::get_instance();
@@ -5036,6 +5037,117 @@ Equipe %4$s', 'dps-client-portal' ),
         wp_send_json_success( [ 
             'message' => __( 'Link enviado com sucesso! Verifique sua caixa de entrada (e a pasta de spam).', 'dps-client-portal' ) 
         ] );
+    }
+
+    /**
+     * Gera o HTML do email de link de acesso ao portal.
+     *
+     * Template responsivo e moderno para email com link de acesso.
+     *
+     * @since 2.4.4
+     * @param string $client_name Nome do cliente (já sanitizado)
+     * @param string $access_url  URL de acesso com token
+     * @param string $site_name   Nome do site
+     * @return string HTML do email
+     */
+    private function get_access_link_email_html( $client_name, $access_url, $site_name ) {
+        $escaped_url = esc_url( $access_url );
+        $escaped_name = esc_html( $client_name );
+        $escaped_site = esc_html( $site_name );
+        
+        $current_year = date( 'Y' );
+        $validity_text = esc_html__( 'Este link é válido por 30 minutos e pode ser usado apenas uma vez.', 'dps-client-portal' );
+        $access_button_text = esc_html__( 'Acessar Meu Portal', 'dps-client-portal' );
+        $security_note = esc_html__( 'Se você não solicitou este acesso, ignore este e-mail.', 'dps-client-portal' );
+        $greeting = sprintf( esc_html__( 'Olá, %s!', 'dps-client-portal' ), $escaped_name );
+        $intro_text = esc_html__( 'Você solicitou acesso ao Portal do Cliente. Clique no botão abaixo para acessar:', 'dps-client-portal' );
+        $alt_link_text = esc_html__( 'Se o botão não funcionar, copie e cole este link no navegador:', 'dps-client-portal' );
+        $footer_text = sprintf( esc_html__( 'Equipe %s', 'dps-client-portal' ), $escaped_site );
+        
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{$escaped_site}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: 0 auto;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <!-- Card Principal -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+                    <!-- Header com Logo -->
+                    <tr>
+                        <td style="padding: 40px 40px 24px; text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🐾</div>
+                            <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937;">{$escaped_site}</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Conteúdo -->
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #374151;">{$greeting}</p>
+                            <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #6b7280;">{$intro_text}</p>
+                            
+                            <!-- Botão CTA -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">
+                                <tr>
+                                    <td style="text-align: center; padding: 8px 0 24px;">
+                                        <a href="{$escaped_url}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 48px; border-radius: 12px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);">{$access_button_text}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Aviso de Validade -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <tr>
+                                    <td style="padding: 16px;">
+                                        <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
+                                            <strong>⏱️ Atenção:</strong> {$validity_text}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Link alternativo -->
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0 0 8px; font-size: 13px; color: #9ca3af;">{$alt_link_text}</p>
+                            <p style="margin: 0; font-size: 12px; color: #0ea5e9; word-break: break-all;">
+                                <a href="{$escaped_url}" style="color: #0ea5e9; text-decoration: underline;">{$escaped_url}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Aviso de Segurança -->
+                    <tr>
+                        <td style="padding: 0 40px 32px;">
+                            <p style="margin: 0; font-size: 13px; color: #9ca3af; text-align: center;">
+                                🔒 {$security_note}
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 24px 40px; background: #f9fafb; border-radius: 0 0 16px 16px; text-align: center;">
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">{$footer_text}</p>
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #9ca3af;">© {$current_year} {$escaped_site}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
     }
 
     /**
