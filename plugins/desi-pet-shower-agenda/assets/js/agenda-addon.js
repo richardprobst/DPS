@@ -439,7 +439,7 @@
     });
   });
 
-  // FASE 2: Exportação CSV
+  // FASE 2: Exportação CSV (mantido por compatibilidade)
   $(document).on('click', '.dps-export-csv-btn', function(e){
     e.preventDefault();
     var btn = $(this);
@@ -475,6 +475,28 @@
       alert('Erro ao exportar agenda.');
       btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
     });
+  });
+
+  // FASE 2: Exportação PDF (abre página de impressão em nova janela)
+  $(document).on('click', '.dps-export-pdf-btn', function(e){
+    e.preventDefault();
+    var btn = $(this);
+    var date = btn.data('date') || '';
+    var view = btn.data('view') || 'day';
+    
+    // Constrói URL para a página de impressão PDF
+    var pdfUrl = DPS_AG_Addon.ajax + 
+      '?action=dps_agenda_export_pdf' +
+      '&date=' + encodeURIComponent(date) +
+      '&view=' + encodeURIComponent(view) +
+      '&nonce=' + encodeURIComponent(DPS_AG_Addon.nonce_export_pdf);
+    
+    // Calcula dimensões responsivas para a janela
+    var width = Math.min(950, window.screen.availWidth - 100);
+    var height = Math.min(700, window.screen.availHeight - 100);
+    
+    // Abre em nova janela com dimensões responsivas
+    window.open(pdfUrl, '_blank', 'width=' + width + ',height=' + height + ',scrollbars=yes');
   });
 
   // =========================================================================
