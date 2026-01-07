@@ -627,7 +627,8 @@ class DPS_AI_Public_Chat {
             'oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'tudo bem', 'obrigado', 'obrigada',
         ];
 
-        $question_lower = mb_strtolower( $question, 'UTF-8' );
+        // Cast para string para compatibilidade com PHP 8.1+
+        $question_lower = mb_strtolower( (string) $question, 'UTF-8' );
 
         foreach ( $keywords as $keyword ) {
             if ( false !== mb_strpos( $question_lower, $keyword ) ) {

@@ -136,7 +136,8 @@ class DPS_AI_Assistant {
      * @return bool True se a pergunta está no contexto, false caso contrário.
      */
     private static function is_question_in_context( $question ) {
-        $question_lower = mb_strtolower( $question, 'UTF-8' );
+        // Cast para string para compatibilidade com PHP 8.1+
+        $question_lower = mb_strtolower( (string) $question, 'UTF-8' );
 
         foreach ( self::CONTEXT_KEYWORDS as $keyword ) {
             if ( false !== mb_strpos( $question_lower, $keyword ) ) {

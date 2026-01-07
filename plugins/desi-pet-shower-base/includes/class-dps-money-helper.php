@@ -37,7 +37,8 @@ class DPS_Money_Helper {
         }
 
         // Remove caracteres não numéricos, exceto vírgula, ponto e sinal de menos
-        $normalized = preg_replace( '/[^0-9,.-]/', '', $sanitized_string );
+        // Cast para string para compatibilidade com PHP 8.1+ (preg_replace pode retornar null)
+        $normalized = (string) preg_replace( '/[^0-9,.-]/', '', $sanitized_string );
         $normalized = str_replace( ' ', '', $normalized );
 
         // Se houver vírgula, assume formato brasileiro e converte para formato padrão
