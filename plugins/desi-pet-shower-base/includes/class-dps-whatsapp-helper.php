@@ -183,13 +183,14 @@ class DPS_WhatsApp_Helper {
     public static function get_portal_access_request_message( $client_name = '', $pet_name = '' ) {
         if ( ! empty( $client_name ) && ! empty( $pet_name ) ) {
             return sprintf(
-                __( 'Olá, gostaria de acesso ao Portal do Cliente. Meu nome é %s e o nome do meu pet é %s.', 'desi-pet-shower' ),
+                /* translators: 1: client name, 2: pet name */
+                __( 'Olá! 🐾 Sou %1$s e gostaria de receber o link de acesso ao Portal do Cliente para acompanhar os serviços do meu pet %2$s. Podem me enviar, por favor?', 'desi-pet-shower' ),
                 $client_name,
                 $pet_name
             );
         }
 
-        return __( 'Olá, gostaria de acesso ao Portal do Cliente. Meu nome é ______ e o nome do meu pet é ______.', 'desi-pet-shower' );
+        return __( 'Olá! 🐾 Gostaria de receber o link de acesso ao Portal do Cliente para acompanhar os serviços do meu pet. Meu nome: (informe seu nome) | Nome do pet: (informe o nome do pet)', 'desi-pet-shower' );
     }
 
     /**

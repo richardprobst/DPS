@@ -68,6 +68,7 @@ class DPS_Portal_AJAX_Handler {
         add_action( 'wp_ajax_nopriv_dps_chat_send_message', [ $this, 'ajax_send_chat_message' ] );
         add_action( 'wp_ajax_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
         add_action( 'wp_ajax_nopriv_dps_chat_mark_read', [ $this, 'ajax_mark_messages_read' ] );
+        add_action( 'wp_ajax_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         add_action( 'wp_ajax_nopriv_dps_request_portal_access', [ $this, 'ajax_request_portal_access' ] );
         add_action( 'wp_ajax_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4
         add_action( 'wp_ajax_nopriv_dps_create_appointment_request', [ $this, 'ajax_create_appointment_request' ] ); // Fase 4

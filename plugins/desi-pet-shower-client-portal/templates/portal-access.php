@@ -85,9 +85,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         $whatsapp_clean = preg_replace( '/\D/', '', $whatsapp_number );
                     }
                     
-                    $whatsapp_message = sprintf(
-                        __( 'Olá, gostaria de acesso ao Portal do Cliente. Meu nome é ______ e o nome do meu pet é ______.', 'dps-client-portal' )
-                    );
+                    $whatsapp_message = __( 'Olá! 🐾 Gostaria de receber o link de acesso ao Portal do Cliente para acompanhar os serviços do meu pet. Meu nome: (informe seu nome) | Nome do pet: (informe o nome do pet)', 'dps-client-portal' );
                     
                     $whatsapp_url = 'https://wa.me/' . $whatsapp_clean . '?text=' . rawurlencode( $whatsapp_message );
                 } else {
@@ -187,18 +185,20 @@ if ( ! defined( 'ABSPATH' ) ) {
                             submitBtn.disabled = false;
                             submitBtn.textContent = '<?php echo esc_js( __( 'Enviar Link', 'dps-client-portal' ) ); ?>';
                             
-                            if (data.success) {
-                                feedback.textContent = data.data.message;
+                            if (data && data.success) {
+                                var msg = (data.data && data.data.message) ? data.data.message : '<?php echo esc_js( __( 'Link enviado com sucesso!', 'dps-client-portal' ) ); ?>';
+                                feedback.textContent = msg;
                                 feedback.style.display = 'block';
                                 feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--success';
                                 emailInput.value = '';
                             } else {
-                                feedback.textContent = data.data.message;
+                                var errorMsg = (data && data.data && data.data.message) ? data.data.message : '<?php echo esc_js( __( 'Não foi possível processar sua solicitação. Tente novamente.', 'dps-client-portal' ) ); ?>';
+                                feedback.textContent = errorMsg;
                                 feedback.style.display = 'block';
                                 feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
                                 
                                 // Destaca a seção de WhatsApp se o email não foi encontrado
-                                if (data.data.show_whatsapp && whatsappSection) {
+                                if (data && data.data && data.data.show_whatsapp && whatsappSection) {
                                     whatsappSection.classList.add('dps-portal-access__whatsapp-section--highlight');
                                 }
                             }
@@ -206,7 +206,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         .catch(function(error) {
                             submitBtn.disabled = false;
                             submitBtn.textContent = '<?php echo esc_js( __( 'Enviar Link', 'dps-client-portal' ) ); ?>';
-                            feedback.textContent = '<?php echo esc_js( __( 'Erro ao processar solicitação. Tente novamente.', 'dps-client-portal' ) ); ?>';
+                            feedback.textContent = '<?php echo esc_js( __( 'Erro de conexão. Verifique sua internet e tente novamente.', 'dps-client-portal' ) ); ?>';
                             feedback.style.display = 'block';
                             feedback.className = 'dps-portal-access__feedback dps-portal-access__feedback--error';
                         });
