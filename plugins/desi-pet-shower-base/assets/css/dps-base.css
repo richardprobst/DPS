@@ -2733,6 +2733,11 @@
    ABA HISTÓRICO - LAYOUT REDESENHADO
    ================================================ */
 
+/* Grid da seção de histórico - sempre uma coluna para melhor legibilidade */
+#dps-section-historico .dps-section-grid {
+    grid-template-columns: 1fr;
+}
+
 /* Header da seção de histórico */
 .dps-history-header {
     margin-bottom: 24px;
