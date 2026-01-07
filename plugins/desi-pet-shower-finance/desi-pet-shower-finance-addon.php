@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Financeiro Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Controle financeiro completo. Registre receitas e despesas, acompanhe pagamentos, visualize gráficos e relatórios.
- * Version:           1.6.0
+ * Version:           1.6.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-finance-addon
@@ -57,7 +57,7 @@ if ( ! defined( 'DPS_FINANCE_PLUGIN_DIR' ) ) {
     define( 'DPS_FINANCE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'DPS_FINANCE_VERSION' ) ) {
-    define( 'DPS_FINANCE_VERSION', '1.6.0' );
+    define( 'DPS_FINANCE_VERSION', '1.6.1' );
 }
 
 // Constante para limite de meses no gráfico financeiro

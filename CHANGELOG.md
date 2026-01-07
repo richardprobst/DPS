@@ -152,6 +152,16 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Groomers Add-on - Correção de HTML Malformado (v1.8.6)**
+
+- **Aba GROOMERS em branco corrigida**: Removido `</div>` extra na função `render_groomers_section()` que causava HTML malformado e impedia a renderização do conteúdo da aba.
+- **Causa raiz**: Havia 62 tags `</div>` para 61 tags `<div>` abertas, resultando em estrutura HTML quebrada.
+
+**Finance Add-on - Correção de Cache Busting (v1.6.1)**
+
+- **Version bump para invalidar cache**: Atualizada versão do add-on de 1.6.0 para 1.6.1 para forçar navegadores e CDNs a carregar o CSS corrigido do PR #439.
+- **Causa raiz identificada**: O PR #439 corrigiu margens da aba FINANCEIRO e visibilidade da aba GROOMER, mas não atualizou a constante `DPS_FINANCE_VERSION`, resultando em cache stale.
+
 **Stats Add-on - Correções de Compatibilidade (v1.5.0)**
 
 - **Mensagem de erro da API formatada**: Aviso de "API não disponível" agora usa `.dps-surface--warning` em vez de HTML inline.
