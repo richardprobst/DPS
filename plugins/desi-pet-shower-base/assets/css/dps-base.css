@@ -1254,7 +1254,7 @@
     /* Prevenir overflow horizontal */
     .dps-base-wrapper {
         overflow-x: hidden;
-        max-width: 100vw;
+        max-width: 100%;
     }
     
     .dps-section {
@@ -3652,7 +3652,8 @@
 }
 
 @media (max-width: 480px) {
-    /* === PREVENÇÃO DE OVERFLOW EM MOBILE === */
+    /* Reforço de prevenção de overflow para mobile pequeno */
+    /* box-sizing é adicionado aqui pois não está no breakpoint 768px */
     .dps-base-wrapper,
     .dps-section,
     .dps-surface,
