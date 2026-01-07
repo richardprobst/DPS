@@ -841,6 +841,10 @@ class DPS_Push_Addon {
         // Status do Telegram.
         $telegram_configured = ! empty( $telegram_token ) && ! empty( $telegram_chat );
 
+        // Formatar emails para exibição no campo (converter array para string se necessário).
+        $emails_agenda_display = is_array( $emails_agenda ) ? implode( ', ', $emails_agenda ) : $emails_agenda;
+        $emails_report_display = is_array( $emails_report ) ? implode( ', ', $emails_report ) : $emails_report;
+
         ?>
         <div class="wrap dps-push-settings">
             <h1 class="dps-section-title">
@@ -939,7 +943,7 @@ class DPS_Push_Addon {
 
                                 <div class="dps-push-field-row">
                                     <label for="dps_push_emails_agenda"><?php echo esc_html__( 'Destinatários:', 'dps-push-addon' ); ?></label>
-                                    <input type="text" id="dps_push_emails_agenda" name="dps_push_emails_agenda" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( is_array( $emails_agenda ) ? implode( ', ', $emails_agenda ) : $emails_agenda ); ?>">
+                                    <input type="text" id="dps_push_emails_agenda" name="dps_push_emails_agenda" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( $emails_agenda_display ); ?>">
                                     <p class="description"><?php echo esc_html__( 'Separe múltiplos emails por vírgula. Deixe em branco para usar o email do administrador.', 'dps-push-addon' ); ?></p>
                                 </div>
 
@@ -976,7 +980,7 @@ class DPS_Push_Addon {
 
                                 <div class="dps-push-field-row">
                                     <label for="dps_push_emails_report"><?php echo esc_html__( 'Destinatários:', 'dps-push-addon' ); ?></label>
-                                    <input type="text" id="dps_push_emails_report" name="dps_push_emails_report" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( is_array( $emails_report ) ? implode( ', ', $emails_report ) : $emails_report ); ?>">
+                                    <input type="text" id="dps_push_emails_report" name="dps_push_emails_report" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" value="<?php echo esc_attr( $emails_report_display ); ?>">
                                     <p class="description"><?php echo esc_html__( 'Separe múltiplos emails por vírgula. Deixe em branco para usar o email do administrador.', 'dps-push-addon' ); ?></p>
                                 </div>
 
