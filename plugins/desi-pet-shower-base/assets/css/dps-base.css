@@ -1905,6 +1905,16 @@
     font-size: 1.25rem;
 }
 
+/* Detalhamento de valores por pet (para agendamentos multi-pet) */
+.dps-pet-breakdown {
+    display: block;
+    color: #6b7280;
+    font-weight: 400;
+    font-size: 0.875rem;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 .dps-appointment-summary__notes {
     display: none; /* Hidden by default, shown via JS when notes exist */
 }
