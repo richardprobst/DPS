@@ -309,7 +309,7 @@ class DPS_Email_Reports {
      */
     private function get_appointments_for_date( $date ) {
         $args = [
-            'post_type'      => 'dps_appointment',
+            'post_type'      => 'dps_agendamento',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
             'meta_query'     => [
@@ -387,7 +387,7 @@ class DPS_Email_Reports {
                 "SELECT MAX(pm.meta_value) FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
                  WHERE pm.meta_key = 'appointment_date'
-                 AND p.post_type = 'dps_appointment'
+                 AND p.post_type = 'dps_agendamento'
                  AND p.post_status = 'publish'
                  AND EXISTS (
                      SELECT 1 FROM {$wpdb->postmeta} pm2
@@ -764,6 +764,39 @@ class DPS_Email_Reports {
             );
             wp_schedule_event( $time, 'weekly', 'dps_send_weekly_inactive_report' );
         }
+    }
+
+    /**
+     * Reagenda todos os crons de uma vez.
+     *
+     * Este método deve ser chamado após salvar configurações para garantir
+     * que todos os crons sejam reagendados com os novos horários.
+     *
+     * @since 1.3.1
+     */
+    public function reschedule_all_crons() {
+        // Limpar cache de opções para garantir valores atualizados.
+        wp_cache_delete( 'dps_push_agenda_time', 'options' );
+        wp_cache_delete( 'dps_push_agenda_enabled', 'options' );
+        wp_cache_delete( 'dps_push_report_time', 'options' );
+        wp_cache_delete( 'dps_push_report_enabled', 'options' );
+        wp_cache_delete( 'dps_push_weekly_time', 'options' );
+        wp_cache_delete( 'dps_push_weekly_day', 'options' );
+        wp_cache_delete( 'dps_push_weekly_enabled', 'options' );
+
+        $this->reschedule_agenda_cron();
+        $this->reschedule_report_cron();
+        $this->reschedule_weekly_cron();
+
+        $this->log( 'info', 'Todos os crons de relatórios reagendados', [
+            'agenda_time'   => get_option( 'dps_push_agenda_time', '08:00' ),
+            'report_time'   => get_option( 'dps_push_report_time', '19:00' ),
+            'weekly_day'    => get_option( 'dps_push_weekly_day', 'monday' ),
+            'weekly_time'   => get_option( 'dps_push_weekly_time', '08:00' ),
+            'next_agenda'   => wp_next_scheduled( 'dps_send_agenda_notification' ),
+            'next_report'   => wp_next_scheduled( 'dps_send_daily_report' ),
+            'next_weekly'   => wp_next_scheduled( 'dps_send_weekly_inactive_report' ),
+        ] );
     }
 
     /**

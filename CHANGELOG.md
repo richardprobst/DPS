@@ -152,6 +152,13 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Push Add-on - Correção de Relatórios por Email (v1.3.1)**
+
+- **Relatório da manhã vazio corrigido**: A query de agendamentos do dia usava `post_type => 'dps_appointment'` ao invés de `post_type => 'dps_agendamento'`, fazendo com que nenhum agendamento fosse encontrado. Corrigido para usar o post_type correto `dps_agendamento`.
+- **Relatório semanal de pets inativos corrigido**: A query SQL também usava `post_type = 'dps_appointment'`, causando o mesmo problema. Corrigido para `dps_agendamento`.
+- **Horário de envio não respeitando configuração**: Adicionado método `reschedule_all_crons()` que é chamado explicitamente após salvar configurações, garantindo que todos os crons sejam reagendados com os novos horários. Anteriormente, os hooks `update_option_*` podiam não ser disparados se os valores não mudassem, ou podiam haver problemas de cache.
+- **Cache de opções limpo antes de reagendar**: O novo método `reschedule_all_crons()` limpa o cache de todas as opções relevantes antes de reagendar, evitando uso de valores desatualizados.
+
 **Client Portal Add-on - Correção de Solicitação de Link de Acesso (v2.4.4)**
 
 - **Erro "Erro ao processar solicitação" corrigido**: O handler AJAX `dps_request_access_link_by_email` agora funciona tanto para usuários logados quanto não-logados no WordPress. Anteriormente, apenas `wp_ajax_nopriv_*` estava registrado, causando falha para clientes logados no WP.
