@@ -1322,6 +1322,10 @@ class DPS_Services_Addon {
         $has_extras = ! empty( $extras_list );
         
         echo '<div class="dps-simple-fields" style="display:' . esc_attr( $simple_display ) . ';">';
+        
+        // Container para mensagem informativa sobre múltiplos pets (preenchido via JS)
+        echo '<div id="dps-multi-pet-info"></div>';
+        
         if ( ! empty( $grouped['padrao'] ) ) {
             echo '<p><strong>' . esc_html__( 'Serviços padrão', 'dps-services-addon' ) . '</strong></p>';
             foreach ( $grouped['padrao'] as $srv ) {
@@ -1950,8 +1954,8 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.5.4' );
-        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.5.1', true );
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.6.0' );
+        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.6.0', true );
     }
 
     /**
