@@ -265,8 +265,8 @@ jQuery(document).ready(function ($) {
       '<div class="dps-pets-by-size">' + porteSummary.join(' | ') + '</div>' +
       '</div></div>';
     
+    // Fallback: cria container se PHP não o renderizou (compatibilidade com templates customizados)
     if ($infoContainer.length === 0) {
-      // Cria o container se não existir
       $('.dps-services-fields .dps-simple-fields').prepend('<div id="dps-multi-pet-info"></div>');
       $infoContainer = $('#dps-multi-pet-info');
     }
