@@ -54,7 +54,7 @@
 .dps-agenda-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
     padding: 1.25rem 1.5rem;
@@ -80,6 +80,25 @@
     gap: 0.75rem;
     flex-wrap: wrap;
     justify-content: flex-end;
+}
+
+/* Navegação de data no cabeçalho */
+.dps-agenda-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dps-agenda-header .dps-current-date {
+    font-size: 0.9375rem;
+    color: #0f172a;
+}
+
+.dps-agenda-header .dps-date-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 /* === Navegação === */
