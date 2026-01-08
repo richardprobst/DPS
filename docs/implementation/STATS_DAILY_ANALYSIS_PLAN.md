@@ -173,7 +173,7 @@ public static function get_completion_rate( $start_date, $end_date ) {
 
 3. **Internacionalização:** Usar `__()` e `esc_html_e()` para todas as strings
 
-4. **Retrocompatibilidade:** Manter métodos `render_occupancy_report` e `render_admin_dashboard` no Agenda Add-on como deprecated por 1 versão MINOR antes de remover completamente
+4. **Depreciação implementada:** Os métodos `render_occupancy_report` e `render_admin_dashboard` foram marcados como `@deprecated 1.6.0` com chamadas `_deprecated_function()`. A remoção completa está prevista para v1.7.0 ou posterior.
 
 ## Conclusão
 

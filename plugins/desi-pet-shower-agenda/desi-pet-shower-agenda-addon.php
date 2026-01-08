@@ -2592,12 +2592,15 @@ class DPS_Agenda_Addon {
      * FASE 2: Renderiza relatório de ocupação.
      * Exibe métricas como taxa de ocupação, horários mais ocupados e cancelamentos.
      *
+     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
      * @since 1.2.0
      * @param array  $appointments Lista de agendamentos.
      * @param string $selected_date Data selecionada.
      * @param bool   $is_week_view Se é visualização semanal.
      */
     private function render_occupancy_report( $appointments, $selected_date, $is_week_view ) {
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        
         if ( empty( $appointments ) ) {
             return;
         }
@@ -4116,12 +4119,15 @@ class DPS_Agenda_Addon {
     /**
      * Renderiza o dashboard de KPIs como seção colapsável no final da agenda.
      *
+     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
      * @since 1.3.2
      * @since 1.4.1 Modificado para usar <details> colapsável, fechado por padrão
      * @param string $date Data selecionada.
      * @return void
      */
     private function render_admin_dashboard( $date ) {
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        
         $kpis = $this->calculate_admin_kpis( $date );
         $status_config = self::get_status_config();
         $date_formatted = date_i18n( 'd/m/Y', strtotime( $date ) );

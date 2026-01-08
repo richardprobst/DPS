@@ -531,6 +531,13 @@ Antes de criar uma nova versão oficial:
 - **Seção "Resumo do Dia" removida**: Dashboard de KPIs do dia (pendentes, finalizados, faturamento estimado, taxa de cancelamento, média diária) removido do final da agenda. Métricas disponíveis na aba Estatísticas selecionando período de 1 dia.
 - **Plano de implementação criado**: Documento `docs/implementation/STATS_DAILY_ANALYSIS_PLAN.md` criado com plano para adicionar métricas complementares (horário de pico, média por hora ativa) na aba Estatísticas.
 
+#### Deprecated (Depreciado)
+
+**Agenda Add-on - Métodos Depreciados (v1.6.0)**
+
+- **Método `render_occupancy_report()` depreciado**: Método marcado como `@deprecated 1.6.0`. Funcionalidade movida para aba Estatísticas. Remoção completa prevista para v1.7.0.
+- **Método `render_admin_dashboard()` depreciado**: Método marcado como `@deprecated 1.6.0`. Funcionalidade movida para aba Estatísticas. Remoção completa prevista para v1.7.0.
+
 **Add-ons Descontinuados**
 
 - **Debugging Add-on removido**: Add-on de gerenciamento de constantes de debug e visualização de logs removido por complexidade de manutenção.
