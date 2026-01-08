@@ -788,14 +788,19 @@ class DPS_Email_Reports {
         $this->reschedule_report_cron();
         $this->reschedule_weekly_cron();
 
+        // Formatar timestamps para legibilidade no log.
+        $next_agenda = wp_next_scheduled( 'dps_send_agenda_notification' );
+        $next_report = wp_next_scheduled( 'dps_send_daily_report' );
+        $next_weekly = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
+
         $this->log( 'info', 'Todos os crons de relatórios reagendados', [
             'agenda_time'   => get_option( 'dps_push_agenda_time', '08:00' ),
             'report_time'   => get_option( 'dps_push_report_time', '19:00' ),
             'weekly_day'    => get_option( 'dps_push_weekly_day', 'monday' ),
             'weekly_time'   => get_option( 'dps_push_weekly_time', '08:00' ),
-            'next_agenda'   => wp_next_scheduled( 'dps_send_agenda_notification' ),
-            'next_report'   => wp_next_scheduled( 'dps_send_daily_report' ),
-            'next_weekly'   => wp_next_scheduled( 'dps_send_weekly_inactive_report' ),
+            'next_agenda'   => $next_agenda ? date_i18n( 'Y-m-d H:i:s', $next_agenda ) : null,
+            'next_report'   => $next_report ? date_i18n( 'Y-m-d H:i:s', $next_report ) : null,
+            'next_weekly'   => $next_weekly ? date_i18n( 'Y-m-d H:i:s', $next_weekly ) : null,
         ] );
     }
 
