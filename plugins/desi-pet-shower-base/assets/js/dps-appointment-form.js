@@ -204,21 +204,77 @@
                 return parsed;
             };
 
+            // Converte tamanho do pet para chave interna
+            const normalizePetSize = function(sizeAttr) {
+                if (typeof sizeAttr !== 'string') {
+                    return null;
+                }
+                sizeAttr = sizeAttr.toLowerCase();
+                if (sizeAttr === 'pequeno') {
+                    return 'small';
+                } else if (sizeAttr === 'medio' || sizeAttr === 'médio') {
+                    return 'medium';
+                } else if (sizeAttr === 'grande') {
+                    return 'large';
+                }
+                return null;
+            };
+
+            // Obtém preço do serviço para um porte específico
+            const getServicePriceForSize = function($checkbox, size) {
+                const defaultPrice = $checkbox.data('price-default');
+                const priceSmall = $checkbox.data('price-small');
+                const priceMedium = $checkbox.data('price-medium');
+                const priceLarge = $checkbox.data('price-large');
+                let price = defaultPrice;
+
+                if (size === 'small' && priceSmall !== undefined && priceSmall !== null && priceSmall !== '') {
+                    price = priceSmall;
+                } else if (size === 'medium' && priceMedium !== undefined && priceMedium !== null && priceMedium !== '') {
+                    price = priceMedium;
+                } else if (size === 'large' && priceLarge !== undefined && priceLarge !== null && priceLarge !== '') {
+                    price = priceLarge;
+                }
+
+                return parseCurrency(price);
+            };
+
             // Coleta dados do formulário
             const clientText = $('#dps-appointment-cliente option:selected').text();
             const clientId = $('#dps-appointment-cliente').val();
 
-            const selectedPets = $('.dps-pet-checkbox:checked').map(function() {
-                return $(this).closest('.dps-pet-option').find('.dps-pet-name').text();
-            }).get();
+            // Coleta pets selecionados com seus portes
+            const selectedPetsData = [];
+            $('.dps-pet-checkbox:checked').each(function() {
+                const $checkbox = $(this);
+                const $option = $checkbox.closest('.dps-pet-option');
+                const name = $option.find('.dps-pet-name').text().trim();
+                const sizeAttr = $option.data('size') || $option.attr('data-size') || '';
+                const size = normalizePetSize(sizeAttr);
+                const sizeLabel = sizeAttr ? sizeAttr.charAt(0).toUpperCase() + sizeAttr.slice(1).toLowerCase() : '';
+                
+                selectedPetsData.push({
+                    id: $checkbox.val(),
+                    name: name,
+                    size: size,
+                    sizeLabel: sizeLabel
+                });
+            });
+
+            const selectedPetNames = selectedPetsData.map(function(p) {
+                return p.sizeLabel ? p.name + ' (' + p.sizeLabel + ')' : p.name;
+            });
             
             const date = $('#appointment_date').val();
             const time = $('#appointment_time').val();
             const notes = $('#appointment_notes').val();
 
-            // Coleta serviços selecionados
+            // Coleta serviços selecionados e calcula valores por pet
             const services = [];
             let totalValue = 0;
+            const petBreakdown = []; // Detalhamento por pet
+
+            // TaxiDog e Tosa são valores únicos (não por pet)
             if ($('#dps-taxidog-toggle').is(':checked')) {
                 const taxiPrice = parseCurrency($('#dps-taxidog-price').val());
                 services.push('TaxiDog (R$ ' + taxiPrice.toFixed(2) + ')');
@@ -230,26 +286,75 @@
                 totalValue += tosaPrice;
             }
 
-            // Coleta serviços do Services Add-on (se existirem)
+            // Coleta serviços do Services Add-on considerando múltiplos pets
             if ($('.dps-service-checkbox').length > 0) {
-                $('.dps-service-checkbox:checked').each(function() {
-                    const checkbox = $(this);
-                    const label = checkbox.closest('label');
-                    const priceInput = label.find('.dps-service-price');
-                    const sanitizedLabel = label.clone();
-                    sanitizedLabel.find('.dps-service-price').remove();
-
-                    // Extrai nome do serviço (texto antes do "(R$")
-                    const fullText = sanitizedLabel.text().trim();
-                    const serviceName = fullText.split('(R$')[0].trim();
-
-                    const price = parseCurrency(priceInput.val());
-
-                    if (serviceName) {
-                        services.push(serviceName + ' (R$ ' + price.toFixed(2) + ')');
+                const petCount = selectedPetsData.length;
+                
+                if (petCount > 1) {
+                    // Múltiplos pets: calcula valor por pet
+                    selectedPetsData.forEach(function(pet) {
+                        let petTotal = 0;
+                        const petServices = [];
+                        
+                        $('.dps-service-checkbox:checked').each(function() {
+                            const $checkbox = $(this);
+                            const label = $checkbox.closest('label');
+                            const sanitizedLabel = label.clone();
+                            sanitizedLabel.find('.dps-service-price').remove();
+                            const fullText = sanitizedLabel.text().trim();
+                            const serviceName = fullText.split('(R$')[0].trim();
+                            
+                            const price = getServicePriceForSize($checkbox, pet.size);
+                            petTotal += price;
+                            petServices.push(serviceName);
+                        });
+                        
+                        if (petServices.length > 0) {
+                            petBreakdown.push({
+                                pet: pet,
+                                total: petTotal,
+                                services: petServices
+                            });
+                            totalValue += petTotal;
+                        }
+                    });
+                    
+                    // Adiciona os serviços resumidos (para múltiplos pets mostramos no breakdown)
+                    const uniqueServices = [];
+                    $('.dps-service-checkbox:checked').each(function() {
+                        const $checkbox = $(this);
+                        const label = $checkbox.closest('label');
+                        const sanitizedLabel = label.clone();
+                        sanitizedLabel.find('.dps-service-price').remove();
+                        const fullText = sanitizedLabel.text().trim();
+                        const serviceName = fullText.split('(R$')[0].trim();
+                        if (serviceName && uniqueServices.indexOf(serviceName) === -1) {
+                            uniqueServices.push(serviceName);
+                        }
+                    });
+                    if (uniqueServices.length > 0) {
+                        services.push(uniqueServices.join(', ') + ' (x' + petCount + ' pets)');
                     }
-                    totalValue += price;
-                });
+                } else {
+                    // Pet único: comportamento original
+                    $('.dps-service-checkbox:checked').each(function() {
+                        const $checkbox = $(this);
+                        const label = $checkbox.closest('label');
+                        const priceInput = label.find('.dps-service-price');
+                        const sanitizedLabel = label.clone();
+                        sanitizedLabel.find('.dps-service-price').remove();
+
+                        const fullText = sanitizedLabel.text().trim();
+                        const serviceName = fullText.split('(R$')[0].trim();
+
+                        const price = parseCurrency(priceInput.val());
+
+                        if (serviceName) {
+                            services.push(serviceName + ' (R$ ' + price.toFixed(2) + ')');
+                        }
+                        totalValue += price;
+                    });
+                }
             }
 
             if (appointmentType === 'subscription') {
@@ -305,12 +410,12 @@
             }
 
             // Verifica se campos mínimos estão preenchidos
-            const hasMinimumData = clientId && selectedPets.length > 0 && date && time;
+            const hasMinimumData = clientId && selectedPetsData.length > 0 && date && time;
             
             if (hasMinimumData) {
                 // Atualiza os valores no resumo
                 $list.find('[data-summary="client"]').text(clientText);
-                $list.find('[data-summary="pets"]').text(selectedPets.join(', '));
+                $list.find('[data-summary="pets"]').text(selectedPetNames.join(', '));
                 
                 // Formata a data para exibição
                 const dateObj = new Date(date + 'T00:00:00');
@@ -321,7 +426,20 @@
                 $list.find('[data-summary="services"]').text(
                     services.length > 0 ? services.join(', ') : 'Nenhum serviço extra'
                 );
-                $list.find('[data-summary="price"]').text('R$ ' + totalValue.toFixed(2));
+                
+                // Se há múltiplos pets, mostra o detalhamento
+                const $priceEl = $list.find('[data-summary="price"]');
+                if (petBreakdown.length > 1) {
+                    let priceHtml = 'R$ ' + totalValue.toFixed(2) + '<br><small class="dps-pet-breakdown">';
+                    petBreakdown.forEach(function(item, idx) {
+                        if (idx > 0) priceHtml += ' | ';
+                        priceHtml += item.pet.name + ': R$ ' + item.total.toFixed(2);
+                    });
+                    priceHtml += '</small>';
+                    $priceEl.html(priceHtml);
+                } else {
+                    $priceEl.text('R$ ' + totalValue.toFixed(2));
+                }
                 
                 // Atualiza observações (exibe somente se tiver conteúdo)
                 if (notes && notes.trim() !== '') {
