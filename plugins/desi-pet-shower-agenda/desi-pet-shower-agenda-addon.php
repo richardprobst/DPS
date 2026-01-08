@@ -1114,41 +1114,6 @@ class DPS_Agenda_Addon {
         $filter_pending_payment   = isset( $_GET['filter_pending_payment'] ) ? sanitize_text_field( $_GET['filter_pending_payment'] ) : '';
         $filter_staff             = isset( $_GET['filter_staff'] ) ? intval( $_GET['filter_staff'] ) : 0;
 
-        $view_labels = [
-            'day'      => __( 'Visão do dia', 'dps-agenda-addon' ),
-            'week'     => __( 'Visão semanal', 'dps-agenda-addon' ),
-            'calendar' => __( 'Calendário mensal', 'dps-agenda-addon' ),
-        ];
-        $current_view_label = isset( $view_labels[ $view ] ) ? $view_labels[ $view ] : __( 'Agenda', 'dps-agenda-addon' );
-
-        $range_label = '';
-        $selected_date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
-        if ( $selected_date_obj ) {
-            if ( $is_week_view ) {
-                $week_start = ( clone $selected_date_obj )->modify( 'monday this week' );
-                $week_end   = ( clone $selected_date_obj )->modify( 'sunday this week' );
-                $range_label = sprintf(
-                    '%s – %s',
-                    date_i18n( 'd/m', $week_start->getTimestamp() ),
-                    date_i18n( 'd/m', $week_end->getTimestamp() )
-                );
-            } elseif ( $view === 'calendar' ) {
-                $range_label = ucfirst( date_i18n( 'F Y', $selected_date_obj->getTimestamp() ) );
-            } else {
-                $range_label = date_i18n( 'd/m/Y', $selected_date_obj->getTimestamp() );
-            }
-        }
-
-        $context_hint = $show_all
-            ? __( 'Listando todos os agendamentos futuros.', 'dps-agenda-addon' )
-            : __( 'Use a navegação para avançar rapidamente pela agenda.', 'dps-agenda-addon' );
-        // Título simples da agenda
-        echo '<header class="dps-agenda-header">';
-        echo '<div class="dps-agenda-title">';
-        echo '<h3>' . __( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
-        echo '</div>';
-        echo '</header>';
-        
         // Links para dia/semana anterior/próximo, preservando filtros
         $date_obj = DateTime::createFromFormat( 'Y-m-d', $selected_date );
         if ( $is_week_view ) {
@@ -1176,17 +1141,20 @@ class DPS_Agenda_Addon {
         // Ao gerar links, não propague show_all (nav_args não contém show_all)
         $prev_args = array_merge( $nav_args, [ 'dps_date' => $prev_date, 'view' => $view ] );
         $next_args = array_merge( $nav_args, [ 'dps_date' => $next_date, 'view' => $view ] );
+        $today = current_time( 'Y-m-d' );
+        $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
+        unset( $today_args['show_all'] );
+        $all_view_args = array_merge( $nav_args, [ 'show_all' => '1' ] );
+        $focused_view_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => $view ] );
+
+        // Cabeçalho: Título + navegação de data no lado direito
+        echo '<header class="dps-agenda-header">';
+        echo '<div class="dps-agenda-title">';
+        echo '<h3>' . esc_html__( 'Agenda de Atendimentos', 'dps-agenda-addon' ) . '</h3>';
+        echo '</div>';
         
-        // UX-4: Navegação e filtros consolidados em até 2 linhas
-        echo '<div class="dps-agenda-controls-wrapper">';
-        
-        // Linha 1: Navegação principal e data
-        echo '<div class="dps-agenda-nav dps-agenda-nav--primary">';
-        
-        // Grupo 1: Data e navegação temporal
-        echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--date">';
-        
-        // Data atual/selecionada como referência visual
+        // Navegação de data ao lado do título
+        echo '<div class="dps-agenda-header-nav">';
         if ( ! $show_all ) {
             $date_display = date_i18n( 'd/m/Y', strtotime( $selected_date ) );
             echo '<span class="dps-current-date" title="' . esc_attr__( 'Data atual', 'dps-agenda-addon' ) . '">';
@@ -1197,27 +1165,23 @@ class DPS_Agenda_Addon {
             echo '📋 <strong>' . esc_html__( 'Todos os agendamentos', 'dps-agenda-addon' ) . '</strong>';
             echo '</span>';
         }
-        
-        // Navegação anterior/hoje/próximo
         echo '<div class="dps-date-nav">';
         echo '<a href="' . esc_url( add_query_arg( $prev_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--prev" title="' . esc_attr( $is_week_view ? __( 'Ver semana anterior', 'dps-agenda-addon' ) : __( 'Ver dia anterior', 'dps-agenda-addon' ) ) . '">';
         echo '←';
         echo '</a>';
-        
-        $today = current_time( 'Y-m-d' );
-        $today_args = array_merge( $current_args, [ 'dps_date' => $today, 'view' => $view ] );
-        unset( $today_args['show_all'] );
         echo '<a href="' . esc_url( add_query_arg( $today_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--today" title="' . esc_attr__( 'Ver agendamentos de hoje', 'dps-agenda-addon' ) . '">';
         echo esc_html__( 'Hoje', 'dps-agenda-addon' );
         echo '</a>';
-        
         echo '<a href="' . esc_url( add_query_arg( $next_args, $base_url ) ) . '" class="dps-nav-btn dps-nav-btn--next" title="' . esc_attr( $is_week_view ? __( 'Ver próxima semana', 'dps-agenda-addon' ) : __( 'Ver próximo dia', 'dps-agenda-addon' ) ) . '">';
         echo '→';
         echo '</a>';
         echo '</div>';
         echo '</div>';
-
-        // Grupo 2: Visualizações compactas (Dia | Semana | Mês)
+        echo '</header>';
+        
+        // Controles de visualização: Ver: Dia - Semana - Mês - Ver agenda completa
+        echo '<div class="dps-agenda-controls-wrapper">';
+        echo '<div class="dps-agenda-nav dps-agenda-nav--primary">';
         echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--views">';
         echo '<span class="dps-nav-label">' . esc_html__( 'Ver:', 'dps-agenda-addon' ) . '</span>';
         
@@ -1225,49 +1189,30 @@ class DPS_Agenda_Addon {
         
         // Botão Dia
         $day_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'day' ] );
-        $day_active = ( $view === 'day' ) ? ' dps-view-btn--active' : '';
+        $day_active = ( $view === 'day' && ! $show_all ) ? ' dps-view-btn--active' : '';
         $view_buttons[] = '<a href="' . esc_url( add_query_arg( $day_args, $base_url ) ) . '" class="dps-view-btn' . $day_active . '" title="' . esc_attr__( 'Ver lista diária', 'dps-agenda-addon' ) . '">' . esc_html__( 'Dia', 'dps-agenda-addon' ) . '</a>';
         
         // Botão Semana
         $week_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'week' ] );
-        $week_active = ( $view === 'week' ) ? ' dps-view-btn--active' : '';
+        $week_active = ( $view === 'week' && ! $show_all ) ? ' dps-view-btn--active' : '';
         $view_buttons[] = '<a href="' . esc_url( add_query_arg( $week_args, $base_url ) ) . '" class="dps-view-btn' . $week_active . '" title="' . esc_attr__( 'Ver lista semanal', 'dps-agenda-addon' ) . '">' . esc_html__( 'Semana', 'dps-agenda-addon' ) . '</a>';
         
         // Botão Mês/Calendário
         $cal_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => 'calendar' ] );
-        $cal_active = ( $view === 'calendar' ) ? ' dps-view-btn--active' : '';
+        $cal_active = ( $view === 'calendar' && ! $show_all ) ? ' dps-view-btn--active' : '';
         $view_buttons[] = '<a href="' . esc_url( add_query_arg( $cal_args, $base_url ) ) . '" class="dps-view-btn' . $cal_active . '" title="' . esc_attr__( 'Ver calendário mensal', 'dps-agenda-addon' ) . '">' . esc_html__( 'Mês', 'dps-agenda-addon' ) . '</a>';
+        
+        // Botão Ver agenda completa (ou Voltar para data quando show_all)
+        if ( $show_all ) {
+            $all_active = ' dps-view-btn--active';
+            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn' . $all_active . '" title="' . esc_attr__( 'Clique para voltar à visualização por data', 'dps-agenda-addon' ) . '">' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' ) . '</a>';
+        } else {
+            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $all_view_args, $base_url ) ) . '" class="dps-view-btn" title="' . esc_attr__( 'Ver todos os agendamentos futuros', 'dps-agenda-addon' ) . '">' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' ) . '</a>';
+        }
         
         echo '<div class="dps-view-buttons">' . implode( '', $view_buttons ) . '</div>';
         echo '</div>';
-        
         echo '</div>';
-
-        $all_view_args = array_merge( $nav_args, [ 'show_all' => '1' ] );
-        $focused_view_args = array_merge( $nav_args, [ 'dps_date' => $selected_date, 'view' => $view ] );
-
-        echo '<div class="dps-agenda-context-bar">';
-        echo '<div class="dps-context-meta">';
-        echo '<span class="dps-context-pill dps-context-pill--accent">' . esc_html( $current_view_label ) . '</span>';
-        if ( $range_label ) {
-            echo '<span class="dps-context-pill">' . esc_html( $range_label ) . '</span>';
-        }
-        echo '<span class="dps-context-hint">' . esc_html( $context_hint ) . '</span>';
-        echo '</div>';
-
-        echo '<div class="dps-context-actions">';
-        if ( $show_all ) {
-            echo '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="button dps-btn dps-btn--ghost dps-context-btn">';
-            echo '↩️ ' . esc_html__( 'Voltar para data', 'dps-agenda-addon' );
-            echo '</a>';
-        } else {
-            echo '<a href="' . esc_url( add_query_arg( $all_view_args, $base_url ) ) . '" class="button dps-btn dps-btn--soft dps-context-btn">';
-            echo '📋 ' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' );
-            echo '</a>';
-        }
-        echo '</div>';
-        echo '</div>';
-
         echo '</div>'; // Fim da .dps-agenda-controls-wrapper
         
         // Inicializa variáveis de filtro (já foram obtidas acima no formulário unificado)
