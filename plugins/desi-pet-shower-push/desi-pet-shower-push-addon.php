@@ -1143,7 +1143,7 @@ class DPS_Push_Addon {
                 </div><!-- .dps-push-stacked -->
 
                 <p class="submit" style="margin-top: 24px;">
-                    <button type="submit" name="dps_push_save" id="dps-push-save-btn" class="button button-primary button-hero">
+                    <button type="submit" id="dps-push-save-btn" class="button button-primary button-hero">
                         💾 <?php echo esc_html__( 'Salvar Todas as Configurações', 'dps-push-addon' ); ?>
                     </button>
                     <span id="dps-push-save-spinner" class="spinner" style="float: none; vertical-align: middle;"></span>
