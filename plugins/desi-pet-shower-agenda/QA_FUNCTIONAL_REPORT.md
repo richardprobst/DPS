@@ -83,7 +83,6 @@
 | `dps_get_services_details` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_agenda_export_csv` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_agenda_calendar_events` | ✅ | `manage_options` | ✅ | ✅ OK |
-| `dps_bulk_update_status` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_quick_reschedule` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_get_appointment_history` | ✅ | `manage_options` | ✅ | ✅ OK |
 | `dps_get_admin_kpis` | ✅ | `manage_options` | ✅ | ✅ OK |
@@ -152,18 +151,7 @@ O código está bem estruturado e segue boas práticas de desenvolvimento WordPr
 | 4 | Clicar "Salvar" | Modal fecha, feedback visual |
 | 5 | Verificar agendamento | Nova data/hora aplicada |
 
-### Caso de Teste 4: Ações em Lote
-**Pré-condição:** Múltiplos agendamentos existentes
-
-| Passo | Ação | Resultado Esperado |
-|-------|------|---------------------|
-| 1 | Selecionar checkbox "Todos" | Todos selecionados |
-| 2 | Barra de ações aparece | Contador mostra quantidade |
-| 3 | Clicar ação "Finalizar" | Confirmação solicitada |
-| 4 | Confirmar | Todos atualizados |
-| 5 | Página recarrega | Status persistido |
-
-### Caso de Teste 5: Modal de Serviços
+### Caso de Teste 4: Modal de Serviços
 **Pré-condição:** Agendamento com serviços
 
 | Passo | Ação | Resultado Esperado |
