@@ -1205,7 +1205,7 @@ class DPS_Agenda_Addon {
         // Botão Ver agenda completa (ou Voltar para data quando show_all)
         if ( $show_all ) {
             $all_active = ' dps-view-btn--active';
-            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn' . $all_active . '" title="' . esc_attr__( 'Voltar para visualização por data', 'dps-agenda-addon' ) . '">' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' ) . '</a>';
+            $view_buttons[] = '<a href="' . esc_url( add_query_arg( $focused_view_args, $base_url ) ) . '" class="dps-view-btn' . $all_active . '" title="' . esc_attr__( 'Clique para voltar à visualização por data', 'dps-agenda-addon' ) . '">' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' ) . '</a>';
         } else {
             $view_buttons[] = '<a href="' . esc_url( add_query_arg( $all_view_args, $base_url ) ) . '" class="dps-view-btn" title="' . esc_attr__( 'Ver todos os agendamentos futuros', 'dps-agenda-addon' ) . '">' . esc_html__( 'Ver agenda completa', 'dps-agenda-addon' ) . '</a>';
         }
