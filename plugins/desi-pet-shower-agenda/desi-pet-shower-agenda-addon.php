@@ -1241,49 +1241,6 @@ class DPS_Agenda_Addon {
         echo '<div class="dps-view-buttons">' . implode( '', $view_buttons ) . '</div>';
         echo '</div>';
         
-        // Grupo 3: Ações principais
-        echo '<div class="dps-agenda-nav-group dps-agenda-nav-group--actions">';
-        
-        // Botão Novo Agendamento
-        $base_page_id = get_option( 'dps_base_page_id' );
-        $new_appt_page = '';
-        if ( $base_page_id ) {
-            $permalink = get_permalink( $base_page_id );
-            if ( $permalink && is_string( $permalink ) ) {
-                $new_appt_page = $permalink;
-            }
-        }
-        if ( empty( $new_appt_page ) ) {
-            $new_appt_page = self::get_current_page_url();
-        }
-        if ( $new_appt_page ) {
-            $new_appt_url = add_query_arg(
-                [
-                    'tab'    => 'agendas',
-                    'action' => 'new',
-                ],
-                $new_appt_page
-            );
-            $new_button_attrs = ' data-dps-open-appointment-modal="true"';
-            if ( $filter_client ) {
-                $new_button_attrs .= ' data-pref-client="' . esc_attr( $filter_client ) . '"';
-            }
-            echo '<a href="' . esc_url( $new_appt_url ) . '" class="button dps-btn dps-btn--primary" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '"' . $new_button_attrs . '>';
-            echo '➕ ' . esc_html__( 'Novo', 'dps-agenda-addon' );
-            echo '</a>';
-        } else {
-            echo '<button type="button" class="button dps-btn dps-btn--primary" data-dps-open-appointment-modal="true" title="' . esc_attr__( 'Criar novo agendamento', 'dps-agenda-addon' ) . '">';
-            echo '➕ ' . esc_html__( 'Novo', 'dps-agenda-addon' );
-            echo '</button>';
-        }
-        
-        // Botão Exportar PDF
-        $export_date = $show_all ? '' : $selected_date;
-        echo '<button type="button" class="button dps-btn dps-btn--ghost dps-export-pdf-btn" data-date="' . esc_attr( $export_date ) . '" data-view="' . esc_attr( $view ) . '" title="' . esc_attr__( 'Exportar agenda para PDF', 'dps-agenda-addon' ) . '">';
-        echo '📄';
-        echo '</button>';
-        
-        echo '</div>';
         echo '</div>';
 
         $all_view_args = array_merge( $nav_args, [ 'show_all' => '1' ] );
@@ -1848,17 +1805,6 @@ class DPS_Agenda_Addon {
             }
             
             echo '</div>';
-        }
-        
-        // FASE 7: "Resumo do Dia" e "Relatório de Ocupação" movidos para o final da página
-        // Renderiza Relatório de Ocupação como seção colapsável
-        if ( ! $show_all && $view !== 'calendar' && ! empty( $all_filtered_appointments ) ) {
-            $this->render_occupancy_report( $all_filtered_appointments, $selected_date, $is_week_view );
-        }
-        
-        // Renderiza Dashboard de KPIs como seção colapsável no final
-        if ( ! $show_all && $view !== 'calendar' ) {
-            $this->render_admin_dashboard( $selected_date );
         }
         
         echo '</div>';
@@ -2646,12 +2592,15 @@ class DPS_Agenda_Addon {
      * FASE 2: Renderiza relatório de ocupação.
      * Exibe métricas como taxa de ocupação, horários mais ocupados e cancelamentos.
      *
+     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
      * @since 1.2.0
      * @param array  $appointments Lista de agendamentos.
      * @param string $selected_date Data selecionada.
      * @param bool   $is_week_view Se é visualização semanal.
      */
     private function render_occupancy_report( $appointments, $selected_date, $is_week_view ) {
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        
         if ( empty( $appointments ) ) {
             return;
         }
@@ -4170,12 +4119,15 @@ class DPS_Agenda_Addon {
     /**
      * Renderiza o dashboard de KPIs como seção colapsável no final da agenda.
      *
+     * @deprecated 1.6.0 Funcionalidade movida para a aba Estatísticas. Use filtro de período na aba Estatísticas.
      * @since 1.3.2
      * @since 1.4.1 Modificado para usar <details> colapsável, fechado por padrão
      * @param string $date Data selecionada.
      * @return void
      */
     private function render_admin_dashboard( $date ) {
+        _deprecated_function( __METHOD__, '1.6.0', __( 'Aba Estatísticas', 'dps-agenda-addon' ) );
+        
         $kpis = $this->calculate_admin_kpis( $date );
         $status_config = self::get_status_config();
         $date_formatted = date_i18n( 'd/m/Y', strtotime( $date ) );

@@ -523,6 +523,21 @@ Antes de criar uma nova versão oficial:
 
 #### Removed (Removido)
 
+**Agenda Add-on - Simplificação da Interface (v1.6.0)**
+
+- **Botão "Novo Agendamento" removido da agenda**: Botão "➕ Novo" removido do grupo de ações principais da agenda. Novos agendamentos devem ser criados pela aba Agendamentos padrão.
+- **Botão "Exportar PDF" removido**: Botão de exportação para PDF removido do grupo de ações da agenda. Relatórios podem ser acessados pela aba Estatísticas.
+- **Seção "Relatório de Ocupação" removida**: Seção colapsável com métricas de ocupação (taxa de conclusão, cancelamento, horário de pico, média por hora) removida do final da agenda. Métricas similares disponíveis na aba Estatísticas com filtro de período.
+- **Seção "Resumo do Dia" removida**: Dashboard de KPIs do dia (pendentes, finalizados, faturamento estimado, taxa de cancelamento, média diária) removido do final da agenda. Métricas disponíveis na aba Estatísticas selecionando período de 1 dia.
+- **Plano de implementação criado**: Documento `docs/implementation/STATS_DAILY_ANALYSIS_PLAN.md` criado com plano para adicionar métricas complementares (horário de pico, média por hora ativa) na aba Estatísticas.
+
+#### Deprecated (Depreciado)
+
+**Agenda Add-on - Métodos Depreciados (v1.6.0)**
+
+- **Método `render_occupancy_report()` depreciado**: Método marcado como `@deprecated 1.6.0`. Funcionalidade movida para aba Estatísticas. Remoção completa prevista para v1.7.0.
+- **Método `render_admin_dashboard()` depreciado**: Método marcado como `@deprecated 1.6.0`. Funcionalidade movida para aba Estatísticas. Remoção completa prevista para v1.7.0.
+
 **Add-ons Descontinuados**
 
 - **Debugging Add-on removido**: Add-on de gerenciamento de constantes de debug e visualização de logs removido por complexidade de manutenção.
