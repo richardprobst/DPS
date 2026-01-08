@@ -777,6 +777,12 @@ class DPS_Push_Addon {
         update_option( 'dps_push_report_enabled', ! empty( $_POST['dps_push_report_enabled'] ) );
         update_option( 'dps_push_weekly_enabled', ! empty( $_POST['dps_push_weekly_enabled'] ) );
 
+        // Forçar reagendamento de todos os crons para garantir que os novos horários sejam aplicados.
+        // Isso é necessário porque os hooks update_option_* podem não ser disparados
+        // se o valor não mudou, ou podem haver problemas de cache.
+        $email_reports = DPS_Email_Reports::get_instance();
+        $email_reports->reschedule_all_crons();
+
         // Redirect com sucesso
         $this->redirect_after_save( true );
     }
