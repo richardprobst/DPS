@@ -768,6 +768,98 @@
     margin: 12px 0 8px 0;
 }
 
+/* ============================================
+   MENSAGEM INFORMATIVA - MÚLTIPLOS PETS
+   ============================================ */
+
+#dps-multi-pet-info {
+    display: none;
+    margin-bottom: 16px;
+}
+
+.dps-multi-pet-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #7dd3fc;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #0369a1;
+}
+
+.dps-multi-pet-message .dps-info-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.dps-multi-pet-message .dps-info-content {
+    flex: 1;
+}
+
+.dps-multi-pet-message strong {
+    display: block;
+    font-size: 15px;
+    color: #0c4a6e;
+    margin: 0 0 6px 0;
+}
+
+.dps-multi-pet-message p {
+    margin: 0 0 10px 0;
+    color: #0369a1;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dps-pets-by-size {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+}
+
+/* Badges de porte */
+.dps-porte-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dps-porte-badge.dps-porte-small {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.dps-porte-badge.dps-porte-medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.dps-porte-badge.dps-porte-large {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* === Indicador de faixa de preço === */
+.dps-service-price-range {
+    margin-left: 6px;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.dps-service-price-range small {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
 /* === Seção de Extras Redesenhada === */
 .dps-extras-section {
     margin-top: 24px;
