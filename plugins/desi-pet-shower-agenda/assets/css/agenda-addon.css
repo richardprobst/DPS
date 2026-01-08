@@ -1614,110 +1614,6 @@
 .dps-kpi-cancel { border-left-color: #ef4444; }
 .dps-kpi-avg { border-left-color: #8b5cf6; }
 
-/* === FASE 5: Barra de Ações em Lote (Rodapé Flutuante) === */
-.dps-bulk-actions {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    display: none;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    justify-content: center;
-    padding: 0.85rem 1.5rem;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    max-width: calc(100% - 40px);
-}
-
-.dps-bulk-actions.is-visible {
-    display: flex;
-}
-
-.dps-bulk-count {
-    font-weight: 600;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #ffffff;
-}
-
-.dps-bulk-count::before {
-    content: '☑️';
-}
-
-.dps-bulk-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-}
-
-.dps-bulk-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-1px);
-}
-
-.dps-bulk-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.dps-bulk-btn--danger {
-    background: rgba(239, 68, 68, 0.9);
-    border-color: rgba(239, 68, 68, 0.6);
-    color: #ffffff;
-}
-
-.dps-bulk-btn--danger:hover {
-    background: rgba(239, 68, 68, 1);
-    transform: translateY(-1px);
-}
-
-.dps-bulk-close {
-    margin-left: auto;
-    padding: 0.35rem 0.75rem;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.dps-bulk-close:hover {
-    color: #ffffff;
-}
-
-/* === FASE 5: Checkbox de Seleção na Tabela === */
-.dps-select-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: var(--dps-accent);
-}
-
-.dps-select-all-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 /* === FASE 5: Modal de Reagendamento Rápido === */
 .dps-reschedule-modal {
     position: fixed;
@@ -1891,27 +1787,6 @@
 @media (max-width: 768px) {
     .dps-kpi-grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .dps-bulk-actions {
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
-        transform: none;
-        max-width: none;
-        padding: 0.75rem 1rem;
-        gap: 0.5rem;
-    }
-    
-    .dps-bulk-count {
-        text-align: center;
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .dps-bulk-close {
-        margin-left: 0;
-        text-align: center;
     }
 }
 
