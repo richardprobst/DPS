@@ -392,9 +392,6 @@ trait DPS_Agenda_Renderer {
         // Cada linha recebe classes de status e um data attribute para permitir manipulação via JS.
         echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="' . esc_attr( implode( ' ', $row_classes ) ) . '">';
         
-        // FASE 5: Checkbox para seleção em lote
-        echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
-        
         // Mostra a data no formato dia-mês-ano
         echo '<td data-label="' . esc_attr( $column_labels['date'] ?? __( 'Data', 'dps-agenda-addon' ) ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
         echo '<td data-label="' . esc_attr( $column_labels['time'] ?? __( 'Hora', 'dps-agenda-addon' ) ) . '">' . esc_html( $time ) . '</td>';
@@ -856,9 +853,6 @@ trait DPS_Agenda_Renderer {
         
         echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="' . esc_attr( implode( ' ', $row_classes ) ) . '">';
         
-        // Checkbox para seleção em lote
-        echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
-        
         // Horário
         echo '<td data-label="' . esc_attr__( 'Horário', 'dps-agenda-addon' ) . '">' . esc_html( $time ) . '</td>';
         
@@ -963,9 +957,6 @@ trait DPS_Agenda_Renderer {
         ob_start();
         
         echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="' . esc_attr( implode( ' ', $row_classes ) ) . '">';
-        
-        // Checkbox para seleção em lote
-        echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
         
         // Horário
         echo '<td data-label="' . esc_attr__( 'Horário', 'dps-agenda-addon' ) . '">' . esc_html( $time ) . '</td>';
@@ -1102,9 +1093,6 @@ trait DPS_Agenda_Renderer {
         ob_start();
         
         echo '<tr data-appt-id="' . esc_attr( $appt->ID ) . '" class="' . esc_attr( implode( ' ', $row_classes ) ) . '">';
-        
-        // Checkbox para seleção em lote
-        echo '<td><input type="checkbox" class="dps-select-checkbox" data-appt-id="' . esc_attr( $appt->ID ) . '"></td>';
         
         // Horário
         echo '<td data-label="' . esc_attr__( 'Horário', 'dps-agenda-addon' ) . '">' . esc_html( $time ) . '</td>';
