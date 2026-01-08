@@ -706,23 +706,24 @@ class DPS_Push_Addon {
      * Processa salvamento de configurações.
      */
     public function maybe_handle_save() {
-        if ( ! isset( $_POST['dps_push_save'] ) ) {
+        // Usa campo hidden para identificar o formulário (mais confiável que botão submit)
+        if ( ! isset( $_POST['dps_push_action'] ) || 'save_settings' !== $_POST['dps_push_action'] ) {
             return;
         }
 
-        // Verifica nonce e dá feedback adequado
-        if ( ! wp_verify_nonce( $_POST['_wpnonce'] ?? '', 'dps_push_settings' ) ) {
-            if ( function_exists( 'add_settings_error' ) ) {
-                add_settings_error( 'dps_push', 'nonce_failed', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-push-addon' ), 'error' );
-            }
+        // Verifica nonce usando nome de campo específico
+        $nonce = isset( $_POST['dps_push_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'dps_push_settings' ) ) {
+            // Usa transient para persistir mensagem de erro entre redirects
+            set_transient( 'dps_push_settings_error', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-push-addon' ), 30 );
+            $this->redirect_after_save( false );
             return;
         }
 
         // Verifica permissão e dá feedback adequado
         if ( ! current_user_can( 'manage_options' ) ) {
-            if ( function_exists( 'add_settings_error' ) ) {
-                add_settings_error( 'dps_push', 'permission_denied', __( 'Você não tem permissão para alterar estas configurações.', 'dps-push-addon' ), 'error' );
-            }
+            set_transient( 'dps_push_settings_error', __( 'Você não tem permissão para alterar estas configurações.', 'dps-push-addon' ), 30 );
+            $this->redirect_after_save( false );
             return;
         }
 
@@ -776,9 +777,47 @@ class DPS_Push_Addon {
         update_option( 'dps_push_report_enabled', ! empty( $_POST['dps_push_report_enabled'] ) );
         update_option( 'dps_push_weekly_enabled', ! empty( $_POST['dps_push_weekly_enabled'] ) );
 
-        if ( function_exists( 'add_settings_error' ) ) {
-            add_settings_error( 'dps_push', 'settings_saved', __( 'Configurações salvas com sucesso.', 'dps-push-addon' ), 'success' );
+        // Redirect com sucesso
+        $this->redirect_after_save( true );
+    }
+
+    /**
+     * Redireciona após salvar configurações.
+     *
+     * Usa referer ou constrói URL baseada na página atual.
+     * Suporta redirecionamento tanto da página própria quanto do Hub de Integrações.
+     *
+     * @since 1.3.1
+     * @param bool $success Se o salvamento foi bem sucedido.
+     */
+    private function redirect_after_save( $success = true ) {
+        // Determinar URL de redirecionamento
+        $referer = wp_get_referer();
+        
+        if ( $referer ) {
+            // Remove parâmetros antigos de status
+            $redirect_url = remove_query_arg( [ 'updated', 'error' ], $referer );
+        } else {
+            // Fallback: detectar se estamos no Hub de Integrações ou na página própria
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para redirecionamento
+            $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+            
+            if ( 'dps-integrations-hub' === $page ) {
+                $redirect_url = admin_url( 'admin.php?page=dps-integrations-hub&tab=push' );
+            } else {
+                $redirect_url = admin_url( 'admin.php?page=dps-push-notifications' );
+            }
         }
+        
+        // Adicionar parâmetro de status
+        if ( $success ) {
+            $redirect_url = add_query_arg( 'updated', '1', $redirect_url );
+        } else {
+            $redirect_url = add_query_arg( 'error', '1', $redirect_url );
+        }
+        
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
 
     /**
@@ -845,6 +884,18 @@ class DPS_Push_Addon {
         $emails_agenda_display = is_array( $emails_agenda ) ? implode( ', ', $emails_agenda ) : $emails_agenda;
         $emails_report_display = is_array( $emails_report ) ? implode( ', ', $emails_report ) : $emails_report;
 
+        // Verificar status de salvamento via query string
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para exibir mensagem
+        $is_updated = isset( $_GET['updated'] ) && '1' === $_GET['updated'];
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para exibir mensagem
+        $has_error = isset( $_GET['error'] ) && '1' === $_GET['error'];
+        
+        // Verificar mensagem de erro em transient
+        $error_message = get_transient( 'dps_push_settings_error' );
+        if ( $error_message ) {
+            delete_transient( 'dps_push_settings_error' );
+        }
+
         ?>
         <div class="wrap dps-push-settings">
             <h1 class="dps-section-title">
@@ -853,10 +904,23 @@ class DPS_Push_Addon {
             </h1>
             <p class="dps-section-header__subtitle"><?php echo esc_html__( 'Configure notificações push do navegador, relatórios automáticos por email e integração com Telegram.', 'dps-push-addon' ); ?></p>
 
+            <?php if ( $is_updated ) : ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><?php echo esc_html__( 'Configurações salvas com sucesso.', 'dps-push-addon' ); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ( $has_error && $error_message ) : ?>
+                <div class="notice notice-error is-dismissible">
+                    <p><?php echo esc_html( $error_message ); ?></p>
+                </div>
+            <?php endif; ?>
+
             <?php settings_errors( 'dps_push' ); ?>
 
             <form method="post" id="dps-push-settings-form">
-                <?php wp_nonce_field( 'dps_push_settings' ); ?>
+                <input type="hidden" name="dps_push_action" value="save_settings" />
+                <?php wp_nonce_field( 'dps_push_settings', 'dps_push_nonce' ); ?>
 
                 <div class="dps-push-stacked">
 
