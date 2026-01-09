@@ -13,6 +13,96 @@
     return div.innerHTML;
   }
 
+  /**
+   * Obtém o label e ícone do porte do pet.
+   * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
+   * @return {object} Objeto com label e icon.
+   */
+  function getPetSizeInfo(size) {
+    if (!size) return { label: '', icon: '🐕' };
+    
+    var sizeLower = size.toLowerCase();
+    var sizeMap = {
+      'pequeno': { label: 'Pequeno', icon: '🐕' },
+      'small': { label: 'Pequeno', icon: '🐕' },
+      'medio': { label: 'Médio', icon: '🦮' },
+      'médio': { label: 'Médio', icon: '🦮' },
+      'medium': { label: 'Médio', icon: '🦮' },
+      'grande': { label: 'Grande', icon: '🐕‍🦺' },
+      'large': { label: 'Grande', icon: '🐕‍🦺' }
+    };
+    
+    return sizeMap[sizeLower] || { label: '', icon: '🐕' };
+  }
+
+  /**
+   * Obtém informações visuais do serviço (ícone, classe, label).
+   * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
+   * @return {object} Objeto com icon, typeClass, typeLabel.
+   */
+  function getServiceVisualInfo(service) {
+    // Mapas de ícones por tipo e categoria
+    var typeIcons = {
+      'taxidog': { icon: '🚐', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
+    };
+    
+    var categoryIcons = {
+      'banho': '🛁',
+      'tosa': '✂️',
+      'unha': '💅',
+      'ouvido': '👂',
+      'dente': '🦷'
+    };
+    
+    // Verifica TaxiDog primeiro
+    if (service.is_taxidog) {
+      return typeIcons.taxidog;
+    }
+    
+    // Verifica tipo
+    if (service.type && typeIcons[service.type]) {
+      var info = Object.assign({}, typeIcons[service.type]);
+      // Determina ícone pela categoria ou nome
+      info.icon = getCategoryIcon(service, categoryIcons);
+      return info;
+    }
+    
+    // Serviço padrão
+    return {
+      icon: getCategoryIcon(service, categoryIcons),
+      typeClass: 'dps-service-type-padrao',
+      typeLabel: 'Serviço'
+    };
+  }
+
+  /**
+   * Obtém o ícone baseado na categoria ou nome do serviço.
+   * @param {object} service Objeto do serviço.
+   * @param {object} categoryIcons Mapa de ícones por categoria.
+   * @return {string} Ícone emoji.
+   */
+  function getCategoryIcon(service, categoryIcons) {
+    // Verifica categoria diretamente
+    if (service.category && categoryIcons[service.category]) {
+      return categoryIcons[service.category];
+    }
+    
+    // Verifica pelo nome do serviço
+    if (service.name) {
+      var nameLower = service.name.toLowerCase();
+      for (var cat in categoryIcons) {
+        if (nameLower.indexOf(cat) !== -1) {
+          return categoryIcons[cat];
+        }
+      }
+    }
+    
+    // Ícone padrão
+    return '✂️';
+  }
+
   $(document).ready(function(){
     var reloadDelay = parseInt(DPS_AG_Addon.reloadDelay, 10) || 600;
 
@@ -905,46 +995,121 @@
       if (resp && resp.success) {
         var services = resp.data.services || [];
         var notes = resp.data.notes || '';
+        var pet = resp.data.pet || {};
+        var totalDuration = resp.data.total_duration || 0;
         
-        // Monta o HTML do modal
+        // Monta o HTML do modal melhorado para funcionários
         var modalHtml = '<div class="dps-services-modal">' +
           '<div class="dps-services-modal-content">' +
             '<div class="dps-services-modal-header">' +
-              '<h3 class="dps-services-modal-title">📋 Serviços do Atendimento</h3>' +
-              '<button type="button" class="dps-services-modal-close">&times;</button>' +
+              '<h3 class="dps-services-modal-title">🐾 O Que Fazer</h3>' +
+              '<button type="button" class="dps-services-modal-close" aria-label="Fechar">&times;</button>' +
             '</div>' +
             '<div class="dps-services-modal-body">';
         
+        // Seção do pet (se disponível)
+        if (pet && pet.name) {
+          var petSizeInfo = getPetSizeInfo(pet.size);
+          
+          modalHtml += '<div class="dps-services-pet-info">' +
+            '<span class="dps-services-pet-icon">' + petSizeInfo.icon + '</span>' +
+            '<div class="dps-services-pet-details">' +
+              '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
+          
+          var petMeta = [];
+          if (petSizeInfo.label) petMeta.push(petSizeInfo.label);
+          if (pet.breed) petMeta.push(escapeHtml(pet.breed));
+          if (pet.weight) petMeta.push(escapeHtml(pet.weight) + ' kg');
+          
+          if (petMeta.length > 0) {
+            modalHtml += '<span class="dps-services-pet-meta">' + petMeta.join(' • ') + '</span>';
+          }
+          
+          modalHtml += '</div></div>';
+        }
+        
+        // Resumo rápido no topo
+        if (services.length > 0 || totalDuration > 0) {
+          modalHtml += '<div class="dps-services-summary">';
+          modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">📋</span><span class="dps-services-summary-value">' + services.length + '</span><span class="dps-services-summary-label">serviço' + (services.length !== 1 ? 's' : '') + '</span></div>';
+          if (totalDuration > 0) {
+            var hours = Math.floor(totalDuration / 60);
+            var mins = totalDuration % 60;
+            var durationText = hours > 0 ? hours + 'h' + (mins > 0 ? mins + 'min' : '') : mins + 'min';
+            modalHtml += '<div class="dps-services-summary-item"><span class="dps-services-summary-icon">⏱️</span><span class="dps-services-summary-value">' + durationText + '</span><span class="dps-services-summary-label">estimado</span></div>';
+          }
+          modalHtml += '</div>';
+        }
+        
+        // Lista de serviços
         if (services.length > 0) {
-          modalHtml += '<ul class="dps-services-list-modal">';
+          modalHtml += '<div class="dps-services-checklist">';
+          modalHtml += '<h4 class="dps-services-section-title">Serviços a Realizar</h4>';
+          
           var total = 0;
           for (var i = 0; i < services.length; i++) {
             var srv = services[i];
             var price = parseFloat(srv.price) || 0;
             total += price;
             
-            // Verifica se é TaxiDog para adicionar ícone especial
-            var icon = srv.is_taxidog ? '🚐 ' : '';
-            var itemClass = srv.is_taxidog ? ' class="dps-service-taxidog"' : '';
-            // XSS FIX: Escape do nome do serviço
-            modalHtml += '<li' + itemClass + '><span class="service-name">' + icon + escapeHtml(srv.name) + '</span><span class="service-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span></li>';
+            // Usa função helper para obter informações visuais do serviço
+            var visualInfo = getServiceVisualInfo(srv);
+            
+            modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
+              '<div class="dps-service-card-header">' +
+                '<span class="dps-service-card-icon">' + visualInfo.icon + '</span>' +
+                '<div class="dps-service-card-info">' +
+                  '<span class="dps-service-card-name">' + escapeHtml(srv.name) + '</span>' +
+                  '<span class="dps-service-card-meta">';
+            
+            var cardMeta = [];
+            if (visualInfo.typeLabel && srv.type !== 'padrao') cardMeta.push(visualInfo.typeLabel);
+            if (srv.duration && srv.duration > 0) cardMeta.push(srv.duration + ' min');
+            
+            modalHtml += cardMeta.length > 0 ? cardMeta.join(' • ') : '';
+            modalHtml += '</span></div>' +
+                '<span class="dps-service-card-price">R$ ' + price.toFixed(2).replace('.', ',') + '</span>' +
+              '</div>';
+            
+            // Descrição do serviço (instruções para o funcionário)
+            if (srv.description && srv.description.trim()) {
+              var escapedDesc = escapeHtml(srv.description).replace(/\n/g, '<br>');
+              modalHtml += '<div class="dps-service-card-description">' +
+                '<span class="dps-service-card-desc-icon">💡</span>' +
+                '<span>' + escapedDesc + '</span>' +
+              '</div>';
+            }
+            
+            modalHtml += '</div>';
           }
-          modalHtml += '<li style="font-weight:700; border-top:2px solid #e2e8f0; padding-top:1rem;"><span>Total</span><span class="service-price">R$ ' + total.toFixed(2).replace('.', ',') + '</span></li>';
-          modalHtml += '</ul>';
+          
+          // Linha de total
+          modalHtml += '<div class="dps-services-total-row">' +
+            '<span class="dps-services-total-label">Total</span>' +
+            '<span class="dps-services-total-value">R$ ' + total.toFixed(2).replace('.', ',') + '</span>' +
+          '</div>';
+          
+          modalHtml += '</div>'; // .dps-services-checklist
         } else {
-          modalHtml += '<p style="color:#6b7280; text-align:center;">Nenhum serviço registrado.</p>';
+          modalHtml += '<div class="dps-services-empty">' +
+            '<span class="dps-services-empty-icon">📋</span>' +
+            '<span>Nenhum serviço registrado para este atendimento.</span>' +
+          '</div>';
         }
         
+        // Observações do cliente (importante para o funcionário)
         if (notes) {
-          // XSS FIX: Escape das observações antes de substituir \n por <br>
           var escapedNotes = escapeHtml(notes).replace(/\n/g, '<br>');
-          modalHtml += '<div class="dps-services-notes">' +
-            '<div class="dps-services-notes-title">📝 Observações</div>' +
+          modalHtml += '<div class="dps-services-notes dps-services-notes-highlight">' +
+            '<div class="dps-services-notes-title">' +
+              '<span class="dps-services-notes-icon">⚠️</span>' +
+              '<span>Observações do Cliente</span>' +
+            '</div>' +
             '<div class="dps-services-notes-content">' + escapedNotes + '</div>' +
           '</div>';
         }
         
-        modalHtml += '</div></div></div>';
+        modalHtml += '</div></div></div>'; // Fecha body, content, modal
         
         $('body').append(modalHtml);
       } else {

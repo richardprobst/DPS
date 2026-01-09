@@ -3435,6 +3435,266 @@ tr.dps-row-updated {
     line-height: 1.5;
 }
 
+/* === Modal de Serviços Melhorado (para funcionários) === */
+
+/* Seção de informações do pet */
+.dps-services-pet-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.dps-services-pet-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.dps-services-pet-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.dps-services-pet-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1e40af;
+}
+
+.dps-services-pet-meta {
+    font-size: 0.8rem;
+    color: #3b82f6;
+}
+
+/* Resumo rápido */
+.dps-services-summary {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+.dps-services-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-services-summary-icon {
+    font-size: 1rem;
+}
+
+.dps-services-summary-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.dps-services-summary-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+/* Checklist de serviços */
+.dps-services-checklist {
+    margin-bottom: 0.5rem;
+}
+
+.dps-services-section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.75rem 0;
+}
+
+/* Card de serviço individual */
+.dps-service-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.875rem;
+    margin-bottom: 0.5rem;
+    transition: box-shadow 0.15s ease;
+}
+
+.dps-service-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dps-service-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+}
+
+.dps-service-card-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 6px;
+}
+
+.dps-service-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.dps-service-card-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.dps-service-card-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.dps-service-card-price {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #0ea5e9;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Descrição/instruções do serviço */
+.dps-service-card-description {
+    display: flex;
+    gap: 0.375rem;
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 0.8rem;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+.dps-service-card-desc-icon {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+}
+
+/* Estilos por tipo de serviço */
+.dps-service-type-taxidog {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #fcd34d;
+}
+
+.dps-service-type-taxidog .dps-service-card-icon {
+    background: #fbbf24;
+}
+
+.dps-service-type-taxidog .dps-service-card-name {
+    color: #92400e;
+}
+
+.dps-service-type-taxidog .dps-service-card-price {
+    color: #b45309;
+}
+
+.dps-service-type-extra {
+    border-left: 3px solid #8b5cf6;
+}
+
+.dps-service-type-extra .dps-service-card-icon {
+    background: #ede9fe;
+}
+
+.dps-service-type-pacote {
+    border-left: 3px solid #10b981;
+}
+
+.dps-service-type-pacote .dps-service-card-icon {
+    background: #d1fae5;
+}
+
+/* Linha de total */
+.dps-services-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem;
+    background: #0f172a;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+}
+
+.dps-services-total-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+.dps-services-total-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+}
+
+/* Estado vazio */
+.dps-services-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+.dps-services-empty-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+/* Observações destacadas */
+.dps-services-notes-highlight {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fcd34d;
+    border-left: 4px solid #f59e0b;
+}
+
+.dps-services-notes-highlight .dps-services-notes-title {
+    color: #92400e;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.dps-services-notes-highlight .dps-services-notes-icon {
+    font-size: 1rem;
+}
+
+.dps-services-notes-highlight .dps-services-notes-content {
+    color: #78350f;
+    font-size: 0.9rem;
+}
+
 /* === Resumo do Dia Colapsável === */
 .dps-summary-report {
     margin-top: 2rem;
@@ -3509,11 +3769,56 @@ tr.dps-row-updated {
     .dps-taxidog-wrapper {
         align-items: stretch;
     }
+    
+    /* Modal de serviços melhorado - responsivo */
+    .dps-services-summary {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .dps-services-summary-item {
+        justify-content: center;
+    }
+    
+    .dps-service-card-header {
+        flex-wrap: wrap;
+    }
+    
+    .dps-service-card-price {
+        width: 100%;
+        text-align: right;
+        margin-top: 0.25rem;
+    }
 }
 
 @media (max-width: 480px) {
     .dps-payment-action-btn {
         font-size: 0.875rem;
         padding: 0.75rem 0.875rem;
+    }
+    
+    /* Modal de serviços melhorado - mobile pequeno */
+    .dps-services-pet-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .dps-services-pet-details {
+        align-items: center;
+    }
+    
+    .dps-service-card {
+        padding: 0.75rem;
+    }
+    
+    .dps-service-card-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 1rem;
+    }
+    
+    .dps-services-total-row {
+        padding: 0.75rem;
     }
 }
