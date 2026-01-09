@@ -1940,10 +1940,6 @@ class DPS_Base_Frontend {
             $pet_wrapper_attrs .= ' data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '"';
             echo '<div' . $pet_wrapper_attrs . '>';
             echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'desi-pet-shower' ) . ' <span class="dps-required">*</span></strong><span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'desi-pet-shower' ) . '</span></p>';
-            echo '<p class="dps-field-hint">' . esc_html__( 'Selecione os pets do cliente escolhido. É possível marcar mais de um.', 'desi-pet-shower' ) . '</p>';
-            echo '<p id="dps-pet-select-client" class="dps-field-hint">' . esc_html__( 'Escolha um cliente para visualizar os pets disponíveis.', 'desi-pet-shower' ) . '</p>';
-            echo '<p class="dps-pet-search"><label class="screen-reader-text" for="dps-pet-search">' . esc_html__( 'Buscar pets', 'desi-pet-shower' ) . '</label>';
-            echo '<input type="search" id="dps-pet-search" placeholder="' . esc_attr__( 'Buscar pets por nome, tutor ou raça', 'desi-pet-shower' ) . '" aria-label="' . esc_attr__( 'Buscar pets', 'desi-pet-shower' ) . '"></p>';
             echo '<div class="dps-pet-picker-actions">';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'desi-pet-shower' ) . '</button> ';
             echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'desi-pet-shower' ) . '</button>';
@@ -1964,9 +1960,6 @@ class DPS_Base_Frontend {
                 echo '<span class="dps-pet-name">' . esc_html( $pet->post_title ) . '</span>';
                 if ( $breed ) {
                     echo '<span class="dps-pet-breed"> – ' . esc_html( $breed ) . '</span>';
-                }
-                if ( $owner_name ) {
-                    echo '<span class="dps-pet-owner"> (' . esc_html( $owner_name ) . ')</span>';
                 }
                 if ( $size ) {
                     echo '<span class="dps-pet-size"> · ' . esc_html( ucfirst( $size ) ) . '</span>';
@@ -2041,12 +2034,13 @@ class DPS_Base_Frontend {
             echo '</div>';
             echo '</div>';
 
-            // Campo: escolha de TaxiDog (melhorado com feedback visual)
+            // Campo: escolha de TaxiDog (redesenhado como card independente)
             $taxidog = $meta['taxidog'] ?? '';
             $taxidog_price_val = $meta['taxidog_price'] ?? '';
             $taxidog_has_value = ( $taxidog_price_val !== '' && floatval( $taxidog_price_val ) > 0 );
             
-            echo '<div class="dps-taxidog-section">';
+            echo '<div class="dps-taxidog-card" data-taxidog-active="' . ( $taxidog ? '1' : '0' ) . '">';
+            echo '<div class="dps-taxidog-card__header">';
             echo '<label class="dps-checkbox-label dps-taxidog-toggle-label">';
             echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
             echo '<span class="dps-checkbox-text">';
@@ -2055,21 +2049,13 @@ class DPS_Base_Frontend {
             echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Serviço de transporte do pet', 'desi-pet-shower' ) . '">ℹ️</span>';
             echo '</span>';
             echo '</label>';
+            echo '</div>';
             
-            // Área de preço do TaxiDog com feedback visual melhorado
-            echo '<div id="dps-taxidog-extra" class="dps-taxidog-value-section" style="display:' . ( $taxidog ? 'block' : 'none' ) . ';">';
-            echo '<div class="dps-taxidog-value-wrapper">';
-            echo '<label for="dps-taxidog-price">' . esc_html__( 'Valor TaxiDog', 'desi-pet-shower' ) . '</label>';
+            // Área de preço do TaxiDog - mostra apenas o campo de valor sem rótulo
+            echo '<div id="dps-taxidog-extra" class="dps-taxidog-card__value" style="display:' . ( $taxidog ? 'flex' : 'none' ) . ';">';
             echo '<div class="dps-input-with-prefix">';
             echo '<span class="dps-input-prefix">R$</span>';
             echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $taxidog_price_val ) . '" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">';
-            echo '</div>';
-            // Indicador visual do valor preenchido
-            echo '<span id="dps-taxidog-value-indicator" class="dps-value-indicator' . ( $taxidog_has_value ? ' dps-value-filled' : '' ) . '">';
-            if ( $taxidog_has_value ) {
-                echo '<span class="dps-value-badge">✓ R$ ' . esc_html( number_format( floatval( $taxidog_price_val ), 2, ',', '.' ) ) . '</span>';
-            }
-            echo '</span>';
             echo '</div>';
             echo '</div>';
             echo '</div>';

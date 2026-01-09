@@ -1299,3 +1299,273 @@
         max-width: 80px;
     }
 }
+
+/* ============================================
+   ESTILOS PARA EXIBIÇÃO DE SERVIÇOS (v1.5.0)
+   ============================================ */
+
+/* Container de cada item de serviço */
+.dps-service-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.dps-service-item:hover {
+    background: #f3f4f6;
+}
+
+.dps-service-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 150px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.dps-service-name {
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Exibição dos preços (sem campo de edição) */
+.dps-service-prices-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-service-price-single {
+    font-weight: 500;
+    color: #059669;
+}
+
+.dps-service-prices-multi {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dps-price-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.dps-price-size[data-size="small"] {
+    border-color: #fcd34d;
+    background: #fffbeb;
+}
+
+.dps-price-size[data-size="medium"] {
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.dps-price-size[data-size="large"] {
+    border-color: #f87171;
+    background: #fef2f2;
+}
+
+.dps-price-label {
+    font-weight: 700;
+    font-size: 11px;
+    color: #374151;
+}
+
+/* ============================================
+   SEÇÃO DE DESCONTO (v1.5.0)
+   ============================================ */
+
+.dps-discount-section {
+    margin-top: 20px;
+}
+
+.dps-discount-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: transparent;
+    border: 2px dashed #f59e0b;
+    border-radius: 8px;
+    color: #d97706;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-discount-toggle:hover {
+    background: #fffbeb;
+    border-color: #d97706;
+}
+
+.dps-discount-toggle-icon {
+    font-size: 16px;
+}
+
+.dps-discount-container {
+    margin-top: 12px;
+    padding: 16px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+}
+
+.dps-discount-header {
+    margin-bottom: 12px;
+}
+
+.dps-discount-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    margin: 0;
+}
+
+.dps-discount-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dps-discount-description-field {
+    flex: 1;
+    min-width: 150px;
+}
+
+.dps-discount-description-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dps-discount-value-field {
+    flex-shrink: 0;
+}
+
+.dps-input-discount .dps-input-prefix {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+}
+
+.dps-discount-value-input {
+    width: 80px !important;
+    text-align: right;
+}
+
+/* ============================================
+   SEÇÃO DE VALORES POR PET (ASSINATURA v1.5.0)
+   ============================================ */
+
+.dps-subscription-pets-values {
+    margin-bottom: 20px;
+}
+
+.dps-subscription-pets-hint {
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.dps-subscription-pet-value-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.dps-subscription-pet-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dps-subscription-pet-name {
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-subscription-pet-size {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dps-subscription-pet-size-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.dps-subscription-pet-value-field {
+    flex-shrink: 0;
+}
+
+.dps-subscription-total-wrapper {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px solid #e5e7eb;
+}
+
+.dps-subscription-total-wrapper label {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .dps-service-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dps-service-prices-display {
+        margin-left: 24px;
+    }
+    
+    .dps-discount-row {
+        flex-direction: column;
+    }
+    
+    .dps-discount-description-field,
+    .dps-discount-value-field {
+        width: 100%;
+    }
+    
+    .dps-discount-value-input {
+        width: 100% !important;
+    }
+    
+    .dps-subscription-pet-value-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
