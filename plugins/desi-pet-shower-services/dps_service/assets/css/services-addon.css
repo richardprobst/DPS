@@ -1401,19 +1401,31 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
-    background: transparent;
-    border: 2px dashed #f59e0b;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 2px solid #f59e0b;
     border-radius: 8px;
-    color: #d97706;
-    font-weight: 500;
+    color: #b45309;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .dps-discount-toggle:hover {
-    background: #fffbeb;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     border-color: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.dps-discount-toggle[aria-expanded="true"] {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.dps-discount-toggle[aria-expanded="true"]:hover {
+    background: #d97706;
 }
 
 .dps-discount-toggle-icon {
@@ -1421,8 +1433,8 @@
 }
 
 .dps-discount-container {
-    margin-top: 12px;
-    padding: 16px;
+    margin-top: 16px;
+    padding: 20px;
     background: #fffbeb;
     border: 1px solid #fcd34d;
     border-radius: 8px;

@@ -2005,6 +2005,35 @@ class DPS_Base_Frontend {
             
             echo '</fieldset>';
             
+            // SEÇÃO INDEPENDENTE: TaxiDog (fora do fieldset de Serviços)
+            $taxidog = $meta['taxidog'] ?? '';
+            $taxidog_price_val = $meta['taxidog_price'] ?? '';
+            
+            echo '<div class="dps-taxidog-section">';
+            echo '<div class="dps-taxidog-card" data-taxidog-active="' . ( $taxidog ? '1' : '0' ) . '">';
+            echo '<div class="dps-taxidog-card__header">';
+            echo '<div class="dps-taxidog-card__icon-title">';
+            echo '<span class="dps-taxidog-icon" aria-hidden="true">🚗</span>';
+            echo '<span class="dps-taxidog-title">' . esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' ) . '</span>';
+            echo '</div>';
+            echo '<label class="dps-toggle-switch">';
+            echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
+            echo '<span class="dps-toggle-slider"></span>';
+            echo '</label>';
+            echo '</div>';
+            echo '<p class="dps-taxidog-description">' . esc_html__( 'Serviço de transporte para buscar e/ou levar o pet', 'desi-pet-shower' ) . '</p>';
+            
+            // Área de preço do TaxiDog
+            echo '<div id="dps-taxidog-extra" class="dps-taxidog-card__value" style="display:' . ( $taxidog ? 'flex' : 'none' ) . ';">';
+            echo '<label for="dps-taxidog-price" class="dps-taxidog-value-label">' . esc_html__( 'Valor do serviço:', 'desi-pet-shower' ) . '</label>';
+            echo '<div class="dps-input-with-prefix">';
+            echo '<span class="dps-input-prefix">R$</span>';
+            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $taxidog_price_val ) . '" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">';
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            
             // FIELDSET 4: Serviços e Extras
             echo '<fieldset class="dps-fieldset">';
             echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Serviços e Extras', 'desi-pet-shower' ) . '</legend>';
@@ -2031,32 +2060,6 @@ class DPS_Base_Frontend {
             // Ocorrência da tosa (selecionada via JS conforme frequência)
             echo '<label for="appointment_tosa_occurrence" style="margin-left:20px;">' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '</label>';
             echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select>';
-            echo '</div>';
-            echo '</div>';
-
-            // Campo: escolha de TaxiDog (redesenhado como card independente)
-            $taxidog = $meta['taxidog'] ?? '';
-            $taxidog_price_val = $meta['taxidog_price'] ?? '';
-            $taxidog_has_value = ( $taxidog_price_val !== '' && floatval( $taxidog_price_val ) > 0 );
-            
-            echo '<div class="dps-taxidog-card" data-taxidog-active="' . ( $taxidog ? '1' : '0' ) . '">';
-            echo '<div class="dps-taxidog-card__header">';
-            echo '<label class="dps-checkbox-label dps-taxidog-toggle-label">';
-            echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
-            echo '<span class="dps-checkbox-text">';
-            echo '<span class="dps-taxidog-icon">🚗</span> ';
-            echo esc_html__( 'Solicitar TaxiDog?', 'desi-pet-shower' );
-            echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Serviço de transporte do pet', 'desi-pet-shower' ) . '">ℹ️</span>';
-            echo '</span>';
-            echo '</label>';
-            echo '</div>';
-            
-            // Área de preço do TaxiDog - mostra apenas o campo de valor sem rótulo
-            echo '<div id="dps-taxidog-extra" class="dps-taxidog-card__value" style="display:' . ( $taxidog ? 'flex' : 'none' ) . ';">';
-            echo '<div class="dps-input-with-prefix">';
-            echo '<span class="dps-input-prefix">R$</span>';
-            echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $taxidog_price_val ) . '" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">';
-            echo '</div>';
             echo '</div>';
             echo '</div>';
             

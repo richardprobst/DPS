@@ -301,6 +301,97 @@ jQuery(document).ready(function ($) {
   }
 
   /**
+   * Atualiza a exibição de preços dos serviços baseado nos portes dos pets selecionados.
+   * Formato: "serviço - (Porte R$ valor)" para cada porte selecionado
+   */
+  function updateServicePricesDisplay(sizeInfo) {
+    var sizeLabelsMap = {
+      small: 'Pequeno',
+      medium: 'Médio',
+      large: 'Grande'
+    };
+    
+    // Helper para verificar se um preço é válido
+    function hasValidPrice(price) {
+      return price !== undefined && price !== null && price !== '';
+    }
+    
+    $('.dps-service-checkbox').each(function() {
+      var $checkbox = $(this);
+      var $item = $checkbox.closest('.dps-service-item');
+      var $pricesDisplay = $item.find('.dps-service-prices-display');
+      
+      if (!$pricesDisplay.length) {
+        return;
+      }
+      
+      var defaultPrice = parseCurrency($checkbox.data('price-default'));
+      var priceSmall = $checkbox.data('price-small');
+      var priceMedium = $checkbox.data('price-medium');
+      var priceLarge = $checkbox.data('price-large');
+      
+      // Verifica se há preços por porte
+      var hasSmall = hasValidPrice(priceSmall);
+      var hasMedium = hasValidPrice(priceMedium);
+      var hasLarge = hasValidPrice(priceLarge);
+      var hasSizePrices = hasSmall || hasMedium || hasLarge;
+      
+      if (!hasSizePrices) {
+        // Preço único - mostra só o valor padrão
+        $pricesDisplay.html('<span class="dps-service-price-single">R$ ' + defaultPrice.toFixed(2).replace('.', ',') + '</span>');
+        return;
+      }
+      
+      // Se nenhum pet selecionado, mostra todos os portes disponíveis
+      if (sizeInfo.petCount === 0) {
+        var allPrices = [];
+        if (hasSmall) {
+          allPrices.push('<span class="dps-price-size" data-size="small"><span class="dps-price-label">P</span> R$ ' + parseCurrency(priceSmall).toFixed(2).replace('.', ',') + '</span>');
+        }
+        if (hasMedium) {
+          allPrices.push('<span class="dps-price-size" data-size="medium"><span class="dps-price-label">M</span> R$ ' + parseCurrency(priceMedium).toFixed(2).replace('.', ',') + '</span>');
+        }
+        if (hasLarge) {
+          allPrices.push('<span class="dps-price-size" data-size="large"><span class="dps-price-label">G</span> R$ ' + parseCurrency(priceLarge).toFixed(2).replace('.', ',') + '</span>');
+        }
+        $pricesDisplay.html('<span class="dps-service-prices-multi">' + allPrices.join(' ') + '</span>');
+        return;
+      }
+      
+      // Mostra apenas os portes dos pets selecionados
+      var filteredPrices = [];
+      sizeInfo.sizes.forEach(function(size) {
+        var price = 0;
+        var label = '';
+        
+        if (size === 'small' && hasSmall) {
+          price = parseCurrency(priceSmall);
+          label = 'P';
+        } else if (size === 'medium' && hasMedium) {
+          price = parseCurrency(priceMedium);
+          label = 'M';
+        } else if (size === 'large' && hasLarge) {
+          price = parseCurrency(priceLarge);
+          label = 'G';
+        } else {
+          // Usa o preço padrão se não houver preço específico para o porte
+          price = defaultPrice;
+          // Usa a primeira letra do nome do porte como fallback
+          label = sizeLabelsMap[size] ? sizeLabelsMap[size].charAt(0) : '-';
+        }
+        
+        filteredPrices.push('<span class="dps-price-size" data-size="' + size + '"><span class="dps-price-label">' + label + '</span> R$ ' + price.toFixed(2).replace('.', ',') + '</span>');
+      });
+      
+      if (filteredPrices.length > 0) {
+        $pricesDisplay.html('<span class="dps-service-prices-multi">' + filteredPrices.join(' ') + '</span>');
+      } else {
+        $pricesDisplay.html('<span class="dps-service-price-single">R$ ' + defaultPrice.toFixed(2).replace('.', ',') + '</span>');
+      }
+    });
+  }
+
+  /**
    * Aplica preços de acordo com o porte do(s) pet(s) selecionado(s).
    * Se houver múltiplos pets, usa o primeiro selecionado para exibir no campo de preço,
    * mas o cálculo do total considera todos os pets.
@@ -318,6 +409,9 @@ jQuery(document).ready(function ($) {
     // Atualiza mensagem informativa e indicadores visuais
     updateMultiPetInfoMessage(sizeInfo);
     updateServicePriceRangeIndicators(sizeInfo);
+    
+    // Atualiza exibição de preços baseado nos portes selecionados
+    updateServicePricesDisplay(sizeInfo);
     
     // Usa o primeiro pet para atualizar os campos de preço visíveis
     var $selectedPet = $petChoices.filter(':checked').first();
@@ -560,6 +654,13 @@ jQuery(document).ready(function ($) {
   
   // Atualiza valores por pet quando pets são selecionados
   $(document).on('change', '.dps-pet-checkbox', function () {
+    if (getAppointmentType() === 'subscription') {
+      updateSubscriptionPetValues();
+    }
+  });
+  
+  // Also update when custom pet selection event is triggered
+  $(document).on('dps-pet-selection-updated', function () {
     if (getAppointmentType() === 'subscription') {
       updateSubscriptionPetValues();
     }
