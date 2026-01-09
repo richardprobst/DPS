@@ -867,36 +867,43 @@
     border-top: 1px dashed #e5e7eb;
 }
 
-/* Botão toggle de extras */
+/* Botão toggle de extras - Padronizado v1.7.0 */
 .dps-extras-toggle {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
-    border: 2px solid #10b981;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
     border-radius: 8px;
-    color: #047857;
+    color: #ffffff;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .dps-extras-toggle:hover {
-    background: linear-gradient(135deg, #d1fae5 0%, #cffafe 100%);
-    border-color: #059669;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    color: #ffffff;
+}
+
+.dps-extras-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
 }
 
 .dps-extras-toggle[aria-expanded="true"] {
-    background: #10b981;
-    color: #fff;
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    color: #ffffff;
 }
 
 .dps-extras-toggle[aria-expanded="true"]:hover {
-    background: #059669;
+    background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
 }
 
 .dps-extras-toggle-icon {
@@ -1017,26 +1024,77 @@
     color: #dc2626;
 }
 
-/* Botão adicionar extra */
+/* Botão adicionar extra - Padronizado v1.7.0 */
 .dps-add-extra-btn {
     margin-top: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
-    background: #fff;
-    border: 1px dashed #d1d5db;
-    border-radius: 6px;
-    color: #6b7280;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #475569;
     font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .dps-add-extra-btn:hover {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border-color: #10b981;
-    color: #10b981;
-    background: #f0fdf4;
+    color: #059669;
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.15);
+    transform: translateY(-1px);
+}
+
+.dps-add-extra-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Classe base para botão de sucesso (verde) - Padronizado v1.7.0 */
+.dps-btn-success,
+.dps-services-addon #dps-add-extra-service.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    text-shadow: none;
+}
+
+.dps-btn-success:hover,
+.dps-services-addon #dps-add-extra-service.button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.dps-btn-success:active,
+.dps-services-addon #dps-add-extra-service.button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+/* Fallback para quando wrapper não tiver classe específica */
+#dps-add-extra-service {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Input com prefixo (R$) */
@@ -1285,7 +1343,13 @@
         margin-top: 8px;
     }
     
-    .dps-extras-toggle {
+    .dps-extras-toggle,
+    .dps-discount-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-add-extra-btn {
         width: 100%;
         justify-content: center;
     }
@@ -1397,35 +1461,43 @@
     margin-top: 20px;
 }
 
+/* Botão toggle de desconto - Padronizado v1.7.0 */
 .dps-discount-toggle {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border: 2px solid #f59e0b;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: none;
     border-radius: 8px;
-    color: #b45309;
+    color: #ffffff;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .dps-discount-toggle:hover {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-color: #d97706;
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    color: #ffffff;
+}
+
+.dps-discount-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
 }
 
 .dps-discount-toggle[aria-expanded="true"] {
-    background: #f59e0b;
-    color: #fff;
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    color: #ffffff;
 }
 
 .dps-discount-toggle[aria-expanded="true"]:hover {
-    background: #d97706;
+    background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
 }
 
 .dps-discount-toggle-icon {
