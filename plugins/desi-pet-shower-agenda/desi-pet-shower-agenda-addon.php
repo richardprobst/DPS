@@ -1903,10 +1903,64 @@ class DPS_Agenda_Addon {
             $taxidog_price = (float) get_post_meta( $id_param, 'appointment_taxidog_price', true );
         }
 
+        // Busca informações do pet para exibir no modal
+        $pet_id   = get_post_meta( $id_param, 'appointment_pet', true );
+        $pet_info = [];
+        if ( $pet_id ) {
+            $pet_post = get_post( $pet_id );
+            if ( $pet_post ) {
+                $pet_info = [
+                    'name'   => $pet_post->post_title,
+                    'size'   => get_post_meta( $pet_id, 'pet_size', true ),
+                    'breed'  => get_post_meta( $pet_id, 'pet_breed', true ),
+                    'weight' => get_post_meta( $pet_id, 'pet_weight', true ),
+                ];
+            }
+        }
+
         // Delega para Services API se disponível (recomendado)
         if ( class_exists( 'DPS_Services_API' ) ) {
             $details = DPS_Services_API::get_services_details( $id_param );
-            $services = $details['services'];
+            $services_basic = $details['services'];
+            
+            // Enriquece dados dos serviços com informações adicionais úteis para o funcionário
+            $service_ids = get_post_meta( $id_param, 'appointment_services', true );
+            $services = [];
+            $total_duration = 0;
+            
+            if ( is_array( $service_ids ) ) {
+                foreach ( $service_ids as $idx => $sid ) {
+                    $srv_data = DPS_Services_API::get_service( $sid );
+                    if ( $srv_data ) {
+                        // Busca o preço do serviço básico
+                        $basic_price = isset( $services_basic[ $idx ]['price'] ) ? $services_basic[ $idx ]['price'] : $srv_data['price'];
+                        
+                        // Determina duração baseada no porte do pet
+                        $duration = 0;
+                        $pet_size = isset( $pet_info['size'] ) ? strtolower( $pet_info['size'] ) : '';
+                        if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
+                            $duration = (int) get_post_meta( $sid, 'service_duration_small', true );
+                        } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
+                            $duration = (int) get_post_meta( $sid, 'service_duration_medium', true );
+                        } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
+                            $duration = (int) get_post_meta( $sid, 'service_duration_large', true );
+                        }
+                        if ( ! $duration ) {
+                            $duration = (int) get_post_meta( $sid, 'service_duration', true );
+                        }
+                        $total_duration += $duration;
+                        
+                        $services[] = [
+                            'name'        => $srv_data['title'],
+                            'price'       => (float) $basic_price,
+                            'type'        => $srv_data['type'],
+                            'category'    => $srv_data['category'],
+                            'description' => $srv_data['description'],
+                            'duration'    => $duration,
+                        ];
+                    }
+                }
+            }
             
             // Adiciona TaxiDog como serviço se foi solicitado
             if ( $taxidog_requested ) {
@@ -1914,12 +1968,17 @@ class DPS_Agenda_Addon {
                     'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
                     'price'      => $taxidog_price,
                     'is_taxidog' => true,
+                    'type'       => 'extra',
+                    'category'   => 'transporte',
+                    'duration'   => 0,
                 ];
             }
             
             wp_send_json_success( [
-                'services' => $services,
-                'notes'    => $appt_notes,
+                'services'       => $services,
+                'notes'          => $appt_notes,
+                'pet'            => $pet_info,
+                'total_duration' => $total_duration,
             ] );
         }
 
@@ -1930,6 +1989,7 @@ class DPS_Agenda_Addon {
             $service_prices = [];
         }
         $services = [];
+        $total_duration = 0;
         if ( is_array( $service_ids ) ) {
             foreach ( $service_ids as $sid ) {
                 $srv = get_post( $sid );
@@ -1942,7 +2002,34 @@ class DPS_Agenda_Addon {
                     } else {
                         $price = (float) get_post_meta( $sid, 'service_price', true );
                     }
-                    $services[] = [ 'name' => $name, 'price' => $price ];
+                    
+                    // Busca tipo, categoria e duração
+                    $type     = get_post_meta( $sid, 'service_type', true );
+                    $category = get_post_meta( $sid, 'service_category', true );
+                    
+                    // Determina duração baseada no porte do pet
+                    $duration = 0;
+                    $pet_size = isset( $pet_info['size'] ) ? strtolower( $pet_info['size'] ) : '';
+                    if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
+                        $duration = (int) get_post_meta( $sid, 'service_duration_small', true );
+                    } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
+                        $duration = (int) get_post_meta( $sid, 'service_duration_medium', true );
+                    } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
+                        $duration = (int) get_post_meta( $sid, 'service_duration_large', true );
+                    }
+                    if ( ! $duration ) {
+                        $duration = (int) get_post_meta( $sid, 'service_duration', true );
+                    }
+                    $total_duration += $duration;
+                    
+                    $services[] = [
+                        'name'        => $name,
+                        'price'       => $price,
+                        'type'        => $type,
+                        'category'    => $category,
+                        'description' => $srv->post_content,
+                        'duration'    => $duration,
+                    ];
                 }
             }
         }
@@ -1953,10 +2040,18 @@ class DPS_Agenda_Addon {
                 'name'       => __( 'TaxiDog', 'dps-agenda-addon' ),
                 'price'      => $taxidog_price,
                 'is_taxidog' => true,
+                'type'       => 'extra',
+                'category'   => 'transporte',
+                'duration'   => 0,
             ];
         }
         
-        wp_send_json_success( [ 'services' => $services, 'notes' => $appt_notes ] );
+        wp_send_json_success( [
+            'services'       => $services,
+            'notes'          => $appt_notes,
+            'pet'            => $pet_info,
+            'total_duration' => $total_duration,
+        ] );
     }
 
     /**
