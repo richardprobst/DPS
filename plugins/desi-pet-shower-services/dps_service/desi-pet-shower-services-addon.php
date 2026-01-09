@@ -1496,8 +1496,8 @@ class DPS_Services_Addon {
         $has_discount = ( '' !== $discount_val || '' !== $discount_desc );
         
         echo '<div class="dps-discount-section">';
-        echo '<button type="button" class="dps-btn dps-btn--outline dps-discount-toggle" data-target="#dps-discount-container" aria-expanded="' . ( $has_discount ? 'true' : 'false' ) . '">';
-        echo '<span class="dps-discount-toggle-icon">🏷️</span> ';
+        echo '<button type="button" class="dps-btn dps-btn--outline dps-discount-toggle" data-target="#dps-discount-container" aria-expanded="' . ( $has_discount ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'Adicionar desconto ao agendamento', 'dps-services-addon' ) . '">';
+        echo '<span class="dps-discount-toggle-icon" aria-hidden="true">🏷️</span> ';
         echo esc_html__( 'Adicionar desconto', 'dps-services-addon' );
         echo '</button>';
         
@@ -1947,10 +1947,11 @@ class DPS_Services_Addon {
         // === SALVAMENTO DOS VALORES POR PET (ASSINATURA) ===
         if ( isset( $_POST['subscription_pet_values'] ) && is_array( $_POST['subscription_pet_values'] ) ) {
             $pet_values = [];
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitização numérica abaixo
-            foreach ( wp_unslash( $_POST['subscription_pet_values'] ) as $pet_id => $value ) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitização numérica é feita individualmente abaixo
+            $raw_pet_values = $_POST['subscription_pet_values'];
+            foreach ( $raw_pet_values as $pet_id => $raw_value ) {
                 $pet_id = intval( $pet_id );
-                $value  = floatval( str_replace( ',', '.', $value ) );
+                $value  = floatval( str_replace( ',', '.', sanitize_text_field( wp_unslash( $raw_value ) ) ) );
                 if ( $value < 0 ) {
                     $value = 0;
                 }
