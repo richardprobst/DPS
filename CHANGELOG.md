@@ -83,6 +83,25 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Formulário de Agendamento - Melhorias de UX (v1.5.0)**
+
+- **TaxiDog em card próprio**: O campo TaxiDog agora é exibido em um card visual destacado com cores dinâmicas (amarelo quando desativado, verde quando ativado).
+- **Campo de valor TaxiDog simplificado**: Removido o label "Valor TaxiDog" quando o serviço é selecionado, mostrando apenas o campo de valor com prefixo R$.
+- **Botão "Adicionar desconto"**: Novo botão abaixo de "Adicionar Serviço Extra" para aplicar descontos ao agendamento simples, com campo de descrição e valor.
+- **Exibição de preços por porte**: Os serviços agora exibem os preços por porte (P, M, G) de forma identificada sem campo de edição, facilitando a visualização.
+- **Valores por pet em assinaturas**: Para agendamentos de assinatura com múltiplos pets, cada pet é listado com seu porte e campo individual para inserção do valor.
+- **"Valor total da assinatura" reposicionado**: Campo movido para o final da seção, abaixo do botão "Adicionar Serviço Extra".
+- **Desconto refletido no resumo**: O resumo do agendamento agora exibe o desconto aplicado e calcula corretamente o valor total.
+- **Novos estilos visuais**: ~260 linhas de CSS para cards de serviço, seção de desconto, valores por pet em assinatura e preços por porte.
+
+#### Changed (Alterado)
+
+**Formulário de Agendamento - Simplificação da Seção "Cliente e Pet(s)" (v1.5.0)**
+
+- **Textos de orientação removidos**: Removidos os textos "Selecione os pets do cliente escolhido..." e "Escolha um cliente para visualizar os pets disponíveis.".
+- **Área de busca removida**: Removida a barra de busca de pets por nome, tutor ou raça, simplificando a interface.
+- **Nome do proprietário oculto nos cards de pets**: Nos cards de seleção de pets, o nome do proprietário não é mais exibido, já que o cliente já foi selecionado acima.
+
 **Client Portal Add-on - Modernização Completa da Aba Galeria (v3.2.0)**
 
 - **Header moderno padronizado**: Título 📸 com subtítulo descritivo seguindo padrão global DPS (`.dps-section-title`).

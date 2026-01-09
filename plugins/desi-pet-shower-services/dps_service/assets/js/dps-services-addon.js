@@ -370,6 +370,12 @@ jQuery(document).ready(function ($) {
       total += parseCurrency($('#dps-taxidog-price').val());
     }
     
+    // Subtrai o desconto se houver
+    if ($('#dps-discount-container').is(':visible')) {
+      var discount = parseCurrency($('.dps-discount-value-input').val());
+      total = Math.max(0, total - discount);
+    }
+    
     $('#dps-appointment-total').val(total.toFixed(2));
     
     // Dispara evento customizado para outros scripts reagirem
@@ -481,13 +487,111 @@ jQuery(document).ready(function ($) {
     applyPricesByPetSize();
   });
   // Impede valores negativos e formata campos
-  $(document).on('input', '.dps-service-price, #dps-appointment-total, #dps-taxidog-price, #dps-simple-extra-value, #dps-subscription-base, #dps-subscription-total, #dps-subscription-extra-value, #dps-tosa-price', function () {
+  $(document).on('input', '.dps-service-price, #dps-appointment-total, #dps-taxidog-price, #dps-simple-extra-value, #dps-subscription-base, #dps-subscription-total, #dps-subscription-extra-value, #dps-tosa-price, .dps-discount-value-input, .dps-subscription-pet-value', function () {
     var val = parseFloat($(this).val());
     if (isNaN(val) || val < 0) {
       $(this).val('0.00');
     }
   });
+  
+  // === NOVO: Toggle do botão de desconto ===
+  $(document).on('click', '.dps-discount-toggle', function (event) {
+    event.preventDefault();
+    var $button = $(this);
+    var targetSelector = $button.data('target');
+    var $target = $(targetSelector);
+    var isExpanded = $button.attr('aria-expanded') === 'true';
+    
+    if (isExpanded) {
+      $target.slideUp(200);
+      $button.attr('aria-expanded', 'false');
+    } else {
+      $target.slideDown(200);
+      $button.attr('aria-expanded', 'true');
+    }
+  });
+  
+  // === NOVO: Atualizar total quando desconto é alterado ===
+  $(document).on('input', '.dps-discount-value-input', function () {
+    updateTotal();
+  });
+  
+  // === NOVO: Geração de campos de valor por pet para assinaturas ===
+  function updateSubscriptionPetValues() {
+    var $container = $('#dps-subscription-pets-values');
+    if (!$container.length) {
+      return;
+    }
+    
+    var appointmentType = getAppointmentType();
+    if (appointmentType !== 'subscription') {
+      return;
+    }
+    
+    var pets = getSelectedPetsWithSize();
+    
+    if (pets.length === 0) {
+      $container.html('<p class="dps-subscription-pets-hint">Selecione os pets acima para definir os valores individuais da assinatura.</p>');
+      return;
+    }
+    
+    var html = '<h4 class="dps-subscription-pets-title">Valor por Pet</h4>';
+    
+    pets.forEach(function(pet, index) {
+      var sizeText = pet.sizeLabel || 'Porte não definido';
+      var sizeClass = pet.size || 'unknown';
+      
+      html += '<div class="dps-subscription-pet-value-row" data-pet-id="' + pet.id + '">';
+      html += '<div class="dps-subscription-pet-info">';
+      html += '<span class="dps-subscription-pet-name">' + pet.name + '</span>';
+      html += '<span class="dps-subscription-pet-size"><span class="dps-subscription-pet-size-badge dps-size-' + sizeClass + '">' + sizeText + '</span></span>';
+      html += '</div>';
+      html += '<div class="dps-subscription-pet-value-field">';
+      html += '<div class="dps-input-with-prefix">';
+      html += '<span class="dps-input-prefix">R$</span>';
+      html += '<input type="number" step="0.01" min="0" name="subscription_pet_values[' + pet.id + ']" value="" placeholder="0,00" class="dps-subscription-pet-value">';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+    });
+    
+    $container.html(html);
+  }
+  
+  // Atualiza valores por pet quando pets são selecionados
+  $(document).on('change', '.dps-pet-checkbox', function () {
+    if (getAppointmentType() === 'subscription') {
+      updateSubscriptionPetValues();
+    }
+  });
+  
+  $(document).on('change', 'input[name="appointment_type"]', function () {
+    if ($(this).val() === 'subscription') {
+      updateSubscriptionPetValues();
+    }
+  });
+  
+  // Atualiza total quando valores de pets da assinatura mudam
+  $(document).on('input', '.dps-subscription-pet-value', function () {
+    var total = 0;
+    $('.dps-subscription-pet-value').each(function () {
+      total += parseCurrency($(this).val());
+    });
+    
+    // Adiciona extras se houver
+    if ($('#dps-subscription-extras-container').is(':visible')) {
+      total += calculateExtrasTotal('#dps-subscription-extras-list');
+    }
+    
+    $('#dps-subscription-total').val(total.toFixed(2));
+  });
+  
   // Ao carregar a página, aplica preços e atualiza total
   applyPricesByPetSize();
   updateTotal();
+  
+  // Inicializa valores por pet se for assinatura
+  if (getAppointmentType() === 'subscription') {
+    updateSubscriptionPetValues();
+  }
 });

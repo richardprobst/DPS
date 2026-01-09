@@ -1338,18 +1338,23 @@ class DPS_Services_Addon {
                     }
                 }
                 $current_price = isset( $custom_prices[ $srv['id'] ] ) ? (float) $custom_prices[ $srv['id'] ] : (float) $srv['price'];
-                echo '<p><label>';
+                
+                // Formata preços por porte para exibição
+                $price_display = $this->format_service_price_display( $srv );
+                
+                echo '<div class="dps-service-item">';
+                echo '<label class="dps-service-label">';
                 echo '<input type="checkbox" class="dps-service-checkbox" name="appointment_services[]" value="' . esc_attr( $srv['id'] ) . '" '
                     . 'data-price-default="' . esc_attr( $srv['price'] ) . '" '
                     . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
-                echo esc_html( $srv['name'] ) . ' ';
-                echo '<span class="dps-service-price-wrapper">(R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
-                echo ')</span>';
-                echo '</label></p>';
+                echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
+                echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
+                echo '</label>';
+                echo '<span class="dps-service-prices-display">' . $price_display . '</span>';
+                echo '</div>';
             }
         }
         if ( ! empty( $grouped['extra'] ) ) {
@@ -1377,18 +1382,23 @@ class DPS_Services_Addon {
                 foreach ( $items as $srv ) {
                     $checked = in_array( $srv['id'], $selected, false ) ? 'checked' : '';
                     $current_price = isset( $custom_prices[ $srv['id'] ] ) ? (float) $custom_prices[ $srv['id'] ] : (float) $srv['price'];
-                    echo '<p><label>';
+                    
+                    // Formata preços por porte para exibição
+                    $price_display = $this->format_service_price_display( $srv );
+                    
+                    echo '<div class="dps-service-item">';
+                    echo '<label class="dps-service-label">';
                     echo '<input type="checkbox" class="dps-service-checkbox" name="appointment_services[]" value="' . esc_attr( $srv['id'] ) . '" '
                         . 'data-price-default="' . esc_attr( $srv['price'] ) . '" '
                         . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                         . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                         . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                         . $checked . '> ';
-                    echo esc_html( $srv['name'] ) . ' ';
-                    echo '<span class="dps-service-price-wrapper">(R$ ';
-                    echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
-                    echo ')</span>';
-                    echo '</label></p>';
+                    echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
+                    echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
+                    echo '</label>';
+                    echo '<span class="dps-service-prices-display">' . $price_display . '</span>';
+                    echo '</div>';
                 }
             }
         }
@@ -1404,18 +1414,23 @@ class DPS_Services_Addon {
             foreach ( $grouped['package'] as $srv ) {
                 $checked = in_array( $srv['id'], $selected, false ) ? 'checked' : '';
                 $current_price = isset( $custom_prices[ $srv['id'] ] ) ? (float) $custom_prices[ $srv['id'] ] : (float) $srv['price'];
-                echo '<p><label>';
+                
+                // Formata preços por porte para exibição
+                $price_display = $this->format_service_price_display( $srv );
+                
+                echo '<div class="dps-service-item">';
+                echo '<label class="dps-service-label">';
                 echo '<input type="checkbox" class="dps-service-checkbox" name="appointment_services[]" value="' . esc_attr( $srv['id'] ) . '" '
                     . 'data-price-default="' . esc_attr( $srv['price'] ) . '" '
                     . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
                     . $checked . '> ';
-                echo esc_html( $srv['name'] ) . ' ';
-                echo '<span class="dps-service-price-wrapper">(R$ ';
-                echo '<input type="number" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" step="0.01" value="' . esc_attr( $current_price ) . '" min="0">';
-                echo ')</span>';
-                echo '</label></p>';
+                echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
+                echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
+                echo '</label>';
+                echo '<span class="dps-service-prices-display">' . $price_display . '</span>';
+                echo '</div>';
             }
         }
         if ( $edit_id ) {
@@ -1471,6 +1486,40 @@ class DPS_Services_Addon {
         echo '</div>'; // extras-container
         echo '</div>'; // extras-section
         
+        // === SEÇÃO DE DESCONTO ===
+        $discount_val = '';
+        $discount_desc = '';
+        if ( $edit_id ) {
+            $discount_val = get_post_meta( $edit_id, 'appointment_discount_value', true );
+            $discount_desc = get_post_meta( $edit_id, 'appointment_discount_description', true );
+        }
+        $has_discount = ( '' !== $discount_val || '' !== $discount_desc );
+        
+        echo '<div class="dps-discount-section">';
+        echo '<button type="button" class="dps-btn dps-btn--outline dps-discount-toggle" data-target="#dps-discount-container" aria-expanded="' . ( $has_discount ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'Adicionar desconto ao agendamento', 'dps-services-addon' ) . '">';
+        echo '<span class="dps-discount-toggle-icon" aria-hidden="true">🏷️</span> ';
+        echo esc_html__( 'Adicionar desconto', 'dps-services-addon' );
+        echo '</button>';
+        
+        echo '<div id="dps-discount-container" class="dps-discount-container" style="display:' . ( $has_discount ? 'block' : 'none' ) . ';">';
+        echo '<div class="dps-discount-header">';
+        echo '<h4 class="dps-discount-title">' . esc_html__( 'Desconto', 'dps-services-addon' ) . '</h4>';
+        echo '</div>';
+        
+        echo '<div class="dps-discount-row">';
+        echo '<div class="dps-discount-description-field">';
+        echo '<input type="text" name="appointment_discount_description" value="' . esc_attr( $discount_desc ) . '" placeholder="' . esc_attr__( 'Motivo do desconto (opcional)', 'dps-services-addon' ) . '" class="dps-discount-description-input">';
+        echo '</div>';
+        echo '<div class="dps-discount-value-field">';
+        echo '<div class="dps-input-with-prefix dps-input-discount">';
+        echo '<span class="dps-input-prefix">- R$</span>';
+        echo '<input type="number" step="0.01" min="0" name="appointment_discount_value" value="' . esc_attr( $discount_val ) . '" placeholder="0,00" class="dps-discount-value-input">';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>'; // discount-container
+        echo '</div>'; // discount-section
+        
         echo '<p><label>' . esc_html__( 'Valor total do serviço (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" id="dps-appointment-total" name="appointment_total" value="' . esc_attr( $total_val ) . '" min="0"></label></p>';
         echo '</div>'; // simple-fields
         
@@ -1499,8 +1548,11 @@ class DPS_Services_Addon {
         $has_subscription_extras = ! empty( $subscription_extras_list );
         
         echo '<div id="dps-subscription-fields" class="dps-subscription-fields" style="display:' . esc_attr( $subscription_display ) . ';">';
-        echo '<p><label>' . esc_html__( 'Valor da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-base" name="subscription_base_value" value="' . esc_attr( $subscription_base_value ) . '"></label></p>';
-        echo '<p><label>' . esc_html__( 'Valor total da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-total" name="subscription_total_value" value="' . esc_attr( $subscription_total_value ) . '"></label></p>';
+        
+        // Container para valores individuais por pet (preenchido via JS)
+        echo '<div id="dps-subscription-pets-values" class="dps-subscription-pets-values">';
+        echo '<p class="dps-subscription-pets-hint">' . esc_html__( 'Selecione os pets acima para definir os valores individuais da assinatura.', 'dps-services-addon' ) . '</p>';
+        echo '</div>';
         
         // Seção de extras para assinatura
         echo '<div class="dps-extras-section">';
@@ -1529,8 +1581,48 @@ class DPS_Services_Addon {
         echo '</div>'; // extras-container
         echo '</div>'; // extras-section
         
+        // Campo de valor total da assinatura movido para o final
+        echo '<p class="dps-subscription-total-wrapper"><label>' . esc_html__( 'Valor total da assinatura (R$)', 'dps-services-addon' ) . '<br><input type="number" step="0.01" min="0" id="dps-subscription-total" name="subscription_total_value" value="' . esc_attr( $subscription_total_value ) . '"></label></p>';
+        
         echo '</div>'; // subscription-fields
         echo '</fieldset>';
+    }
+    
+    /**
+     * Formata a exibição de preços de um serviço por porte.
+     *
+     * @since 1.5.0
+     *
+     * @param array $srv Dados do serviço contendo preços.
+     * @return string HTML formatado com os preços por porte.
+     */
+    private function format_service_price_display( $srv ) {
+        $prices = [];
+        $default_price = isset( $srv['price'] ) ? (float) $srv['price'] : 0;
+        $price_small   = isset( $srv['price_small'] ) && '' !== $srv['price_small'] ? (float) $srv['price_small'] : null;
+        $price_medium  = isset( $srv['price_medium'] ) && '' !== $srv['price_medium'] ? (float) $srv['price_medium'] : null;
+        $price_large   = isset( $srv['price_large'] ) && '' !== $srv['price_large'] ? (float) $srv['price_large'] : null;
+        
+        // Verifica se existem preços diferenciados por porte
+        $has_size_prices = ( null !== $price_small || null !== $price_medium || null !== $price_large );
+        
+        if ( $has_size_prices ) {
+            // Exibe preços por porte identificados
+            if ( null !== $price_small ) {
+                $prices[] = '<span class="dps-price-size" data-size="small"><span class="dps-price-label">' . esc_html__( 'P', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_small, 2, ',', '.' ) ) . '</span>';
+            }
+            if ( null !== $price_medium ) {
+                $prices[] = '<span class="dps-price-size" data-size="medium"><span class="dps-price-label">' . esc_html__( 'M', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_medium, 2, ',', '.' ) ) . '</span>';
+            }
+            if ( null !== $price_large ) {
+                $prices[] = '<span class="dps-price-size" data-size="large"><span class="dps-price-label">' . esc_html__( 'G', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_large, 2, ',', '.' ) ) . '</span>';
+            }
+            
+            return '<span class="dps-service-prices-multi">' . implode( ' ', $prices ) . '</span>';
+        }
+        
+        // Exibe preço único padrão
+        return '<span class="dps-service-price-single">R$ ' . esc_html( number_format( $default_price, 2, ',', '.' ) ) . '</span>';
     }
     
     /**
@@ -1831,6 +1923,44 @@ class DPS_Services_Addon {
                 delete_post_meta( $post_id, 'subscription_extra_value' );
             }
         }
+        
+        // === SALVAMENTO DO DESCONTO ===
+        $discount_desc = isset( $_POST['appointment_discount_description'] ) 
+            ? sanitize_text_field( wp_unslash( $_POST['appointment_discount_description'] ) ) 
+            : '';
+        $discount_value = 0;
+        if ( isset( $_POST['appointment_discount_value'] ) ) {
+            $discount_value = floatval( str_replace( ',', '.', wp_unslash( $_POST['appointment_discount_value'] ) ) );
+            if ( $discount_value < 0 ) {
+                $discount_value = 0;
+            }
+        }
+        
+        if ( '' !== $discount_desc || $discount_value > 0 ) {
+            update_post_meta( $post_id, 'appointment_discount_description', $discount_desc );
+            update_post_meta( $post_id, 'appointment_discount_value', $discount_value );
+        } else {
+            delete_post_meta( $post_id, 'appointment_discount_description' );
+            delete_post_meta( $post_id, 'appointment_discount_value' );
+        }
+        
+        // === SALVAMENTO DOS VALORES POR PET (ASSINATURA) ===
+        if ( isset( $_POST['subscription_pet_values'] ) && is_array( $_POST['subscription_pet_values'] ) ) {
+            $pet_values = [];
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitização numérica é feita individualmente abaixo
+            $raw_pet_values = $_POST['subscription_pet_values'];
+            foreach ( $raw_pet_values as $pet_id => $raw_value ) {
+                $pet_id = intval( $pet_id );
+                $value  = floatval( str_replace( ',', '.', sanitize_text_field( wp_unslash( $raw_value ) ) ) );
+                if ( $value < 0 ) {
+                    $value = 0;
+                }
+                $pet_values[ $pet_id ] = $value;
+            }
+            update_post_meta( $post_id, 'subscription_pet_values', $pet_values );
+        } else {
+            delete_post_meta( $post_id, 'subscription_pet_values' );
+        }
 
         // Calcula e armazena preço histórico deste agendamento em centavos
         $this->store_booking_totals_snapshot( $post_id );
@@ -1886,6 +2016,10 @@ class DPS_Services_Addon {
         $sub_extra   = $this->parse_to_cents( get_post_meta( $appointment_id, 'subscription_extra_value', true ) );
 
         $total_cents += $extra_cents + $taxi_cents + $sub_extra;
+        
+        // Subtrai desconto se houver
+        $discount_cents = $this->parse_to_cents( get_post_meta( $appointment_id, 'appointment_discount_value', true ) );
+        $total_cents = max( 0, $total_cents - $discount_cents );
 
         // Fallback: se não houver serviços mas existir total calculado anteriormente
         if ( $total_cents <= 0 ) {

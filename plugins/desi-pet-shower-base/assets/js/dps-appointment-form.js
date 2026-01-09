@@ -36,9 +36,6 @@
             $(document).on('change', '#dps-taxidog-toggle', this.toggleTaxiDog.bind(this));
             $(document).on('change', '#dps-tosa-toggle', this.updateTosaFields.bind(this));
             
-            // Evento para atualização do indicador de valor do TaxiDog
-            $(document).on('input', '#dps-taxidog-price', this.updateTaxiDogIndicator.bind(this));
-            
             // Eventos para agendamento passado
             $(document).on('change', '#past_payment_status', this.togglePastPaymentValue.bind(this));
             
@@ -60,7 +57,8 @@
             
             // Eventos para extras (novo formato múltiplos)
             $(document).on('input', '.dps-extra-description-input, .dps-extra-value-input', this.updateAppointmentSummary.bind(this));
-            $(document).on('click', '.dps-extras-toggle, .dps-add-extra-btn, .dps-remove-extra-btn', function() {
+            $(document).on('input', '.dps-discount-description-input, .dps-discount-value-input', this.updateAppointmentSummary.bind(this));
+            $(document).on('click', '.dps-extras-toggle, .dps-add-extra-btn, .dps-remove-extra-btn, .dps-discount-toggle', function() {
                 // Delay para aguardar animação de toggle
                 setTimeout(function() { DPSAppointmentForm.updateAppointmentSummary(); }, 250);
             });
@@ -115,31 +113,14 @@
         toggleTaxiDog: function() {
             const type = $('input[name="appointment_type"]:checked').val();
             const hasTaxi = $('#dps-taxidog-toggle').is(':checked');
+            const $card = $('.dps-taxidog-card');
             
             if (type === 'subscription' || type === 'past') {
                 $('#dps-taxidog-extra').hide();
+                $card.attr('data-taxidog-active', '0');
             } else {
                 $('#dps-taxidog-extra').toggle(hasTaxi);
-            }
-            
-            // Atualiza indicador visual do valor
-            this.updateTaxiDogIndicator();
-        },
-        
-        /**
-         * Atualiza o indicador visual do valor do TaxiDog
-         */
-        updateTaxiDogIndicator: function() {
-            const $indicator = $('#dps-taxidog-value-indicator');
-            const value = parseFloat($('#dps-taxidog-price').val()) || 0;
-            
-            if (value > 0) {
-                const formatted = value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                $indicator.addClass('dps-value-filled').html(
-                    '<span class="dps-value-badge">✓ R$ ' + formatted + '</span>'
-                );
-            } else {
-                $indicator.removeClass('dps-value-filled').html('');
+                $card.attr('data-taxidog-active', hasTaxi ? '1' : '0');
             }
         },
         
@@ -408,6 +389,20 @@
                     totalValue += extraValue;
                 }
             }
+            
+            // Calcula desconto se aplicável
+            let discountValue = 0;
+            if ($('#dps-discount-container').is(':visible')) {
+                discountValue = parseCurrency($('.dps-discount-value-input').val());
+                if (discountValue > 0) {
+                    const discountDesc = $('input[name="appointment_discount_description"]').val();
+                    const discountLabel = discountDesc && discountDesc.trim() !== '' ? discountDesc.trim() : 'Desconto';
+                    services.push(discountLabel + ' (- R$ ' + discountValue.toFixed(2) + ')');
+                }
+            }
+            
+            // Aplica o desconto ao total
+            totalValue = Math.max(0, totalValue - discountValue);
 
             // Verifica se campos mínimos estão preenchidos
             const hasMinimumData = clientId && selectedPetsData.length > 0 && date && time;

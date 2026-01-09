@@ -1771,6 +1771,45 @@
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
 }
 
+/* === CARD TAXIDOG REDESENHADO === */
+.dps-taxidog-card {
+    margin: 16px 0 24px 0;
+    padding: 16px 20px;
+    background: linear-gradient(to right, #fef3c7 0%, #fffbeb 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.dps-taxidog-card[data-taxidog-active="1"] {
+    background: linear-gradient(to right, #d1fae5 0%, #ecfdf5 100%);
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.dps-taxidog-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dps-taxidog-card__header .dps-checkbox-label {
+    margin-bottom: 0;
+}
+
+.dps-taxidog-card__value {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.dps-taxidog-card__value .dps-input-with-prefix {
+    flex-shrink: 0;
+}
+
 /* === SEÇÃO DE ATRIBUIÇÃO === */
 .dps-assignment-fieldset {
     border-left-color: #8b5cf6 !important;
