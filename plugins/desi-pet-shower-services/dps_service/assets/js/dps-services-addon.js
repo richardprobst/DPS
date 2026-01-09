@@ -311,6 +311,11 @@ jQuery(document).ready(function ($) {
       large: 'Grande'
     };
     
+    // Helper para verificar se um preço é válido
+    function hasValidPrice(price) {
+      return price !== undefined && price !== null && price !== '';
+    }
+    
     $('.dps-service-checkbox').each(function() {
       var $checkbox = $(this);
       var $item = $checkbox.closest('.dps-service-item');
@@ -326,9 +331,9 @@ jQuery(document).ready(function ($) {
       var priceLarge = $checkbox.data('price-large');
       
       // Verifica se há preços por porte
-      var hasSmall = priceSmall !== undefined && priceSmall !== null && priceSmall !== '';
-      var hasMedium = priceMedium !== undefined && priceMedium !== null && priceMedium !== '';
-      var hasLarge = priceLarge !== undefined && priceLarge !== null && priceLarge !== '';
+      var hasSmall = hasValidPrice(priceSmall);
+      var hasMedium = hasValidPrice(priceMedium);
+      var hasLarge = hasValidPrice(priceLarge);
       var hasSizePrices = hasSmall || hasMedium || hasLarge;
       
       if (!hasSizePrices) {
@@ -358,7 +363,6 @@ jQuery(document).ready(function ($) {
       sizeInfo.sizes.forEach(function(size) {
         var price = 0;
         var label = '';
-        var sizeLabel = sizeLabelsMap[size] || size;
         
         if (size === 'small' && hasSmall) {
           price = parseCurrency(priceSmall);
@@ -372,7 +376,8 @@ jQuery(document).ready(function ($) {
         } else {
           // Usa o preço padrão se não houver preço específico para o porte
           price = defaultPrice;
-          label = sizeLabelsMap[size] ? sizeLabelsMap[size].charAt(0) : '?';
+          // Usa a primeira letra do nome do porte como fallback
+          label = sizeLabelsMap[size] ? sizeLabelsMap[size].charAt(0) : '-';
         }
         
         filteredPrices.push('<span class="dps-price-size" data-size="' + size + '"><span class="dps-price-label">' + label + '</span> R$ ' + price.toFixed(2).replace('.', ',') + '</span>');
