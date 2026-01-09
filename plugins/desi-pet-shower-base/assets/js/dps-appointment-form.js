@@ -7,6 +7,17 @@
 (function($) {
     'use strict';
     
+    /**
+     * Escapa caracteres HTML para prevenir XSS
+     * @param {string} text - Texto a ser escapado
+     * @returns {string} Texto com caracteres HTML escapados
+     */
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
     const DPSAppointmentForm = {
         eventsBound: false,
         /**
@@ -421,17 +432,21 @@
                 
                 // Formata serviços como lista visual com badges
                 const $servicesEl = $list.find('[data-summary="services"]');
+                const $servicesLi = $servicesEl.closest('li');
                 if (services.length > 0) {
+                    // Adiciona classe para estilização do item pai
+                    $servicesLi.addClass('dps-summary-services-item');
                     let servicesHtml = '<ul class="dps-summary-services-list">';
                     services.forEach(function(service) {
                         // Identifica se é desconto (valor negativo)
                         const isDiscount = service.indexOf('- R$') !== -1;
                         const badgeClass = isDiscount ? 'dps-service-badge--discount' : 'dps-service-badge';
-                        servicesHtml += '<li class="' + badgeClass + '">' + service + '</li>';
+                        servicesHtml += '<li class="' + badgeClass + '">' + escapeHtml(service) + '</li>';
                     });
                     servicesHtml += '</ul>';
                     $servicesEl.html(servicesHtml);
                 } else {
+                    $servicesLi.removeClass('dps-summary-services-item');
                     $servicesEl.text('Nenhum serviço extra');
                 }
                 

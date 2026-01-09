@@ -1987,7 +1987,7 @@
 }
 
 /* Item de serviços ocupa toda a largura para melhor visualização */
-.dps-appointment-summary__list li:has([data-summary="services"]) {
+.dps-appointment-summary__list li.dps-summary-services-item {
     grid-column: 1 / -1;
     flex-direction: column;
     align-items: flex-start;
