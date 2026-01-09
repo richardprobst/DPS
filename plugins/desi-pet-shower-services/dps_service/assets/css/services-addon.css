@@ -1056,35 +1056,45 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Botão adicionar extra na seção de finalização - Padronizado v1.7.0 */
-#dps-add-extra-service {
+/* Classe base para botão de sucesso (verde) - Padronizado v1.7.0 */
+.dps-btn-success,
+.dps-services-addon #dps-add-extra-service.button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border: none !important;
-    border-radius: 8px !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
     transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    text-shadow: none !important;
+    text-shadow: none;
 }
 
-#dps-add-extra-service:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+.dps-btn-success:hover,
+.dps-services-addon #dps-add-extra-service.button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
     transform: translateY(-1px);
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
-#dps-add-extra-service:active {
+.dps-btn-success:active,
+.dps-services-addon #dps-add-extra-service.button:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+/* Fallback para quando wrapper não tiver classe específica */
+#dps-add-extra-service {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Input com prefixo (R$) */

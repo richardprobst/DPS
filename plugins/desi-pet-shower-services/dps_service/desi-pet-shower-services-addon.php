@@ -1707,7 +1707,7 @@ class DPS_Services_Addon {
             $extras = [];
         }
         // Container para campos de extras
-        echo '<div id="dps-extra-services-wrapper">';
+        echo '<div id="dps-extra-services-wrapper" class="dps-services-addon">';
         $index = 0;
         foreach ( $extras as $extra ) {
             $name  = isset( $extra['name'] ) ? $extra['name'] : '';
@@ -1726,9 +1726,9 @@ class DPS_Services_Addon {
         echo '<input type="number" step="0.01" min="0" name="appointment_extra_prices[]" placeholder="' . esc_attr__( 'Valor', 'dps-services-addon' ) . '" style="width:100px; margin-right:10px;">';
         echo '<button type="button" class="button dps-remove-extra" onclick="jQuery(this).parent().remove();">' . esc_html__( 'Remover', 'dps-services-addon' ) . '</button>';
         echo '</div>';
-        echo '</div>'; // wrapper
         // Botão para adicionar nova linha - Padronizado v1.7.0
         echo '<p><button type="button" class="button" id="dps-add-extra-service"><span class="dps-extras-toggle-icon">➕</span> ' . esc_html__( 'Adicionar Serviço Extra', 'dps-services-addon' ) . '</button></p>';
+        echo '</div>'; // wrapper
         // Script JS para adicionar linha
         echo '<script>(function($){$(document).ready(function(){\
             $("#dps-add-extra-service").on("click", function(){\
