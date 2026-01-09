@@ -418,9 +418,22 @@
                 $list.find('[data-summary="date"]').text(dateFormatted);
                 
                 $list.find('[data-summary="time"]').text(time);
-                $list.find('[data-summary="services"]').text(
-                    services.length > 0 ? services.join(', ') : 'Nenhum serviço extra'
-                );
+                
+                // Formata serviços como lista visual com badges
+                const $servicesEl = $list.find('[data-summary="services"]');
+                if (services.length > 0) {
+                    let servicesHtml = '<ul class="dps-summary-services-list">';
+                    services.forEach(function(service) {
+                        // Identifica se é desconto (valor negativo)
+                        const isDiscount = service.indexOf('- R$') !== -1;
+                        const badgeClass = isDiscount ? 'dps-service-badge--discount' : 'dps-service-badge';
+                        servicesHtml += '<li class="' + badgeClass + '">' + service + '</li>';
+                    });
+                    servicesHtml += '</ul>';
+                    $servicesEl.html(servicesHtml);
+                } else {
+                    $servicesEl.text('Nenhum serviço extra');
+                }
                 
                 // Se há múltiplos pets, mostra o detalhamento
                 const $priceEl = $list.find('[data-summary="price"]');

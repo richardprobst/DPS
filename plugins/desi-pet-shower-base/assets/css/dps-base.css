@@ -1986,6 +1986,13 @@
     grid-column: 1 / -1;
 }
 
+/* Item de serviços ocupa toda a largura para melhor visualização */
+.dps-appointment-summary__list li:has([data-summary="services"]) {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .dps-appointment-summary__list strong {
     display: inline-block;
     color: #6b7280;
@@ -2020,6 +2027,35 @@
     font-style: italic;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* Lista de serviços no resumo - formato visual melhorado */
+.dps-summary-services-list {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dps-summary-services-list li {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+    border: 1px solid #7dd3fc;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #0369a1;
+    white-space: nowrap;
+}
+
+.dps-summary-services-list li.dps-service-badge--discount {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #b45309;
 }
 
 /* Mensagens de erro do formulário */
