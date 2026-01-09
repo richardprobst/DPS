@@ -1669,48 +1669,6 @@
     margin-bottom: 12px;
 }
 
-/* === SEÇÃO TAXIDOG MELHORADA === */
-.dps-taxidog-section {
-    margin: 16px 0;
-    padding: 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-}
-
-.dps-taxidog-toggle-label {
-    margin-bottom: 0;
-}
-
-.dps-taxidog-icon {
-    font-size: 18px;
-    margin-right: 4px;
-}
-
-.dps-taxidog-value-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px dashed #e5e7eb;
-}
-
-.dps-taxidog-value-wrapper {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.dps-taxidog-value-wrapper > label {
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0;
-}
-
-.dps-taxidog-price-input {
-    width: 80px !important;
-    text-align: right;
-}
-
 /* Indicador visual de valor */
 .dps-value-indicator {
     display: inline-flex;
@@ -1902,6 +1860,11 @@
     flex-shrink: 0;
 }
 
+.dps-taxidog-price-input {
+    width: 80px !important;
+    text-align: right;
+}
+
 /* === SEÇÃO DE ATRIBUIÇÃO === */
 .dps-assignment-fieldset {
     border-left-color: #8b5cf6 !important;
@@ -2023,6 +1986,13 @@
     grid-column: 1 / -1;
 }
 
+/* Item de serviços ocupa toda a largura para melhor visualização */
+.dps-appointment-summary__list li.dps-summary-services-item {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .dps-appointment-summary__list strong {
     display: inline-block;
     color: #6b7280;
@@ -2057,6 +2027,35 @@
     font-style: italic;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* Lista de serviços no resumo - formato visual melhorado */
+.dps-summary-services-list {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dps-summary-services-list li {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+    border: 1px solid #7dd3fc;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #0369a1;
+    white-space: nowrap;
+}
+
+.dps-summary-services-list li.dps-service-badge--discount {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #f59e0b;
+    color: #b45309;
 }
 
 /* Mensagens de erro do formulário */

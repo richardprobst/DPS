@@ -2088,8 +2088,13 @@ class DPS_Services_Addon {
         if ( ! shortcode_exists( 'dps_base' ) ) {
             return;
         }
-        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], '1.6.0' );
-        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], '1.6.0', true );
+        $css_path = plugin_dir_path( __FILE__ ) . 'assets/css/services-addon.css';
+        $js_path = plugin_dir_path( __FILE__ ) . 'assets/js/dps-services-addon.js';
+        $css_version = file_exists( $css_path ) ? filemtime( $css_path ) : '1.6.1';
+        $js_version = file_exists( $js_path ) ? filemtime( $js_path ) : '1.6.1';
+        
+        wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], $css_version );
+        wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], $js_version, true );
     }
 
     /**

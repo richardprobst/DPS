@@ -7,6 +7,20 @@
 (function($) {
     'use strict';
     
+    /**
+     * Escapa caracteres HTML para prevenir XSS
+     * @param {string} text - Texto a ser escapado
+     * @returns {string} Texto com caracteres HTML escapados
+     */
+    function escapeHtml(text) {
+        if (typeof text !== 'string') {
+            return '';
+        }
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
     const DPSAppointmentForm = {
         eventsBound: false,
         /**
@@ -418,9 +432,26 @@
                 $list.find('[data-summary="date"]').text(dateFormatted);
                 
                 $list.find('[data-summary="time"]').text(time);
-                $list.find('[data-summary="services"]').text(
-                    services.length > 0 ? services.join(', ') : 'Nenhum serviço extra'
-                );
+                
+                // Formata serviços como lista visual com badges
+                const $servicesEl = $list.find('[data-summary="services"]');
+                const $servicesLi = $servicesEl.closest('li');
+                if (services.length > 0) {
+                    // Adiciona classe para estilização do item pai
+                    $servicesLi.addClass('dps-summary-services-item');
+                    let servicesHtml = '<ul class="dps-summary-services-list">';
+                    services.forEach(function(service) {
+                        // Identifica se é desconto (valor negativo) - regex para variações de formato
+                        const isDiscount = /[-−]\s*R\$/.test(service);
+                        const badgeClass = isDiscount ? 'dps-service-badge--discount' : 'dps-service-badge';
+                        servicesHtml += `<li class="${badgeClass}">${escapeHtml(service)}</li>`;
+                    });
+                    servicesHtml += '</ul>';
+                    $servicesEl.html(servicesHtml);
+                } else {
+                    $servicesLi.removeClass('dps-summary-services-item');
+                    $servicesEl.text('Nenhum serviço extra');
+                }
                 
                 // Se há múltiplos pets, mostra o detalhamento
                 const $priceEl = $list.find('[data-summary="price"]');
