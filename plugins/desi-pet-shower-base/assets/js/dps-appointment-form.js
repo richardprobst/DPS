@@ -13,6 +13,9 @@
      * @returns {string} Texto com caracteres HTML escapados
      */
     function escapeHtml(text) {
+        if (typeof text !== 'string') {
+            return '';
+        }
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -438,10 +441,10 @@
                     $servicesLi.addClass('dps-summary-services-item');
                     let servicesHtml = '<ul class="dps-summary-services-list">';
                     services.forEach(function(service) {
-                        // Identifica se é desconto (valor negativo)
-                        const isDiscount = service.indexOf('- R$') !== -1;
+                        // Identifica se é desconto (valor negativo) - regex para variações de formato
+                        const isDiscount = /[-−]\s*R\$/.test(service);
                         const badgeClass = isDiscount ? 'dps-service-badge--discount' : 'dps-service-badge';
-                        servicesHtml += '<li class="' + badgeClass + '">' + escapeHtml(service) + '</li>';
+                        servicesHtml += `<li class="${badgeClass}">${escapeHtml(service)}</li>`;
                     });
                     servicesHtml += '</ul>';
                     $servicesEl.html(servicesHtml);
