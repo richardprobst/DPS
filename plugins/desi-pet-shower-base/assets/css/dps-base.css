@@ -1771,39 +1771,131 @@
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
 }
 
-/* === CARD TAXIDOG REDESENHADO === */
+/* === SEÇÃO TAXIDOG INDEPENDENTE === */
+.dps-taxidog-section {
+    margin: 24px 0;
+}
+
 .dps-taxidog-card {
-    margin: 16px 0 24px 0;
-    padding: 16px 20px;
-    background: linear-gradient(to right, #fef3c7 0%, #fffbeb 100%);
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
     border: 2px solid #f59e0b;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    transition: all 0.3s ease;
 }
 
 .dps-taxidog-card[data-taxidog-active="1"] {
-    background: linear-gradient(to right, #d1fae5 0%, #ecfdf5 100%);
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border-color: #10b981;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
 }
 
 .dps-taxidog-card__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
 }
 
-.dps-taxidog-card__header .dps-checkbox-label {
-    margin-bottom: 0;
+.dps-taxidog-card__icon-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dps-taxidog-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-taxidog-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.dps-taxidog-card[data-taxidog-active="1"] .dps-taxidog-title {
+    color: #047857;
+}
+
+.dps-taxidog-description {
+    margin: 8px 0 0 0;
+    font-size: 14px;
+    color: #b45309;
+    opacity: 0.9;
+}
+
+.dps-taxidog-card[data-taxidog-active="1"] .dps-taxidog-description {
+    color: #059669;
+}
+
+/* Toggle Switch */
+.dps-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.dps-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.dps-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d1d5db;
+    transition: 0.3s;
+    border-radius: 28px;
+}
+
+.dps-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dps-toggle-switch input:checked + .dps-toggle-slider {
+    background-color: #10b981;
+}
+
+.dps-toggle-switch input:checked + .dps-toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.dps-toggle-switch input:focus + .dps-toggle-slider {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
 }
 
 .dps-taxidog-card__value {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.dps-taxidog-value-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
 }
 
 .dps-taxidog-card__value .dps-input-with-prefix {
