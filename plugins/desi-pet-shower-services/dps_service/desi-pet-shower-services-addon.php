@@ -1727,8 +1727,8 @@ class DPS_Services_Addon {
         echo '<button type="button" class="button dps-remove-extra" onclick="jQuery(this).parent().remove();">' . esc_html__( 'Remover', 'dps-services-addon' ) . '</button>';
         echo '</div>';
         echo '</div>'; // wrapper
-        // Botão para adicionar nova linha
-        echo '<p><button type="button" class="button" id="dps-add-extra-service">' . esc_html__( 'Adicionar Serviço Extra', 'dps-services-addon' ) . '</button></p>';
+        // Botão para adicionar nova linha - Padronizado v1.7.0
+        echo '<p><button type="button" class="button" id="dps-add-extra-service"><span class="dps-extras-toggle-icon">➕</span> ' . esc_html__( 'Adicionar Serviço Extra', 'dps-services-addon' ) . '</button></p>';
         // Script JS para adicionar linha
         echo '<script>(function($){$(document).ready(function(){\
             $("#dps-add-extra-service").on("click", function(){\
