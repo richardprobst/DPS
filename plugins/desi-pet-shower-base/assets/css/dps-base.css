@@ -1669,48 +1669,6 @@
     margin-bottom: 12px;
 }
 
-/* === SEÇÃO TAXIDOG MELHORADA === */
-.dps-taxidog-section {
-    margin: 16px 0;
-    padding: 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-}
-
-.dps-taxidog-toggle-label {
-    margin-bottom: 0;
-}
-
-.dps-taxidog-icon {
-    font-size: 18px;
-    margin-right: 4px;
-}
-
-.dps-taxidog-value-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px dashed #e5e7eb;
-}
-
-.dps-taxidog-value-wrapper {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.dps-taxidog-value-wrapper > label {
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0;
-}
-
-.dps-taxidog-price-input {
-    width: 80px !important;
-    text-align: right;
-}
-
 /* Indicador visual de valor */
 .dps-value-indicator {
     display: inline-flex;
@@ -1900,6 +1858,11 @@
 
 .dps-taxidog-card__value .dps-input-with-prefix {
     flex-shrink: 0;
+}
+
+.dps-taxidog-price-input {
+    width: 80px !important;
+    text-align: right;
 }
 
 /* === SEÇÃO DE ATRIBUIÇÃO === */
