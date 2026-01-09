@@ -1936,18 +1936,8 @@ class DPS_Agenda_Addon {
                         $basic_price = isset( $services_basic[ $idx ]['price'] ) ? $services_basic[ $idx ]['price'] : $srv_data['price'];
                         
                         // Determina duração baseada no porte do pet
-                        $duration = 0;
-                        $pet_size = isset( $pet_info['size'] ) ? strtolower( $pet_info['size'] ) : '';
-                        if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
-                            $duration = (int) get_post_meta( $sid, 'service_duration_small', true );
-                        } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
-                            $duration = (int) get_post_meta( $sid, 'service_duration_medium', true );
-                        } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
-                            $duration = (int) get_post_meta( $sid, 'service_duration_large', true );
-                        }
-                        if ( ! $duration ) {
-                            $duration = (int) get_post_meta( $sid, 'service_duration', true );
-                        }
+                        $pet_size = isset( $pet_info['size'] ) ? $pet_info['size'] : '';
+                        $duration = $this->get_service_duration_for_pet_size( $sid, $pet_size );
                         $total_duration += $duration;
                         
                         $services[] = [
@@ -2008,18 +1998,8 @@ class DPS_Agenda_Addon {
                     $category = get_post_meta( $sid, 'service_category', true );
                     
                     // Determina duração baseada no porte do pet
-                    $duration = 0;
-                    $pet_size = isset( $pet_info['size'] ) ? strtolower( $pet_info['size'] ) : '';
-                    if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
-                        $duration = (int) get_post_meta( $sid, 'service_duration_small', true );
-                    } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
-                        $duration = (int) get_post_meta( $sid, 'service_duration_medium', true );
-                    } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
-                        $duration = (int) get_post_meta( $sid, 'service_duration_large', true );
-                    }
-                    if ( ! $duration ) {
-                        $duration = (int) get_post_meta( $sid, 'service_duration', true );
-                    }
+                    $pet_size = isset( $pet_info['size'] ) ? $pet_info['size'] : '';
+                    $duration = $this->get_service_duration_for_pet_size( $sid, $pet_size );
                     $total_duration += $duration;
                     
                     $services[] = [
@@ -2052,6 +2032,33 @@ class DPS_Agenda_Addon {
             'pet'            => $pet_info,
             'total_duration' => $total_duration,
         ] );
+    }
+
+    /**
+     * Obtém a duração de um serviço baseada no porte do pet.
+     *
+     * @param int    $service_id ID do serviço.
+     * @param string $pet_size   Porte do pet (pequeno, medio, grande, small, medium, large).
+     * @return int Duração em minutos.
+     */
+    private function get_service_duration_for_pet_size( $service_id, $pet_size ) {
+        $pet_size = strtolower( $pet_size );
+        $duration = 0;
+
+        if ( 'pequeno' === $pet_size || 'small' === $pet_size ) {
+            $duration = (int) get_post_meta( $service_id, 'service_duration_small', true );
+        } elseif ( 'medio' === $pet_size || 'médio' === $pet_size || 'medium' === $pet_size ) {
+            $duration = (int) get_post_meta( $service_id, 'service_duration_medium', true );
+        } elseif ( 'grande' === $pet_size || 'large' === $pet_size ) {
+            $duration = (int) get_post_meta( $service_id, 'service_duration_large', true );
+        }
+
+        // Fallback para duração base se não houver duração específica por porte
+        if ( ! $duration ) {
+            $duration = (int) get_post_meta( $service_id, 'service_duration', true );
+        }
+
+        return $duration;
     }
 
     /**

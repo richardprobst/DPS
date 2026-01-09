@@ -13,6 +13,96 @@
     return div.innerHTML;
   }
 
+  /**
+   * Obtém o label e ícone do porte do pet.
+   * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
+   * @return {object} Objeto com label e icon.
+   */
+  function getPetSizeInfo(size) {
+    if (!size) return { label: '', icon: '🐕' };
+    
+    var sizeLower = size.toLowerCase();
+    var sizeMap = {
+      'pequeno': { label: 'Pequeno', icon: '🐕' },
+      'small': { label: 'Pequeno', icon: '🐕' },
+      'medio': { label: 'Médio', icon: '🦮' },
+      'médio': { label: 'Médio', icon: '🦮' },
+      'medium': { label: 'Médio', icon: '🦮' },
+      'grande': { label: 'Grande', icon: '🐕‍🦺' },
+      'large': { label: 'Grande', icon: '🐕‍🦺' }
+    };
+    
+    return sizeMap[sizeLower] || { label: '', icon: '🐕' };
+  }
+
+  /**
+   * Obtém informações visuais do serviço (ícone, classe, label).
+   * @param {object} service Objeto do serviço com name, type, category, is_taxidog.
+   * @return {object} Objeto com icon, typeClass, typeLabel.
+   */
+  function getServiceVisualInfo(service) {
+    // Mapas de ícones por tipo e categoria
+    var typeIcons = {
+      'taxidog': { icon: '🚐', typeClass: 'dps-service-type-taxidog', typeLabel: 'Transporte' },
+      'extra': { icon: '✨', typeClass: 'dps-service-type-extra', typeLabel: 'Extra' },
+      'package': { icon: '📦', typeClass: 'dps-service-type-pacote', typeLabel: 'Pacote' }
+    };
+    
+    var categoryIcons = {
+      'banho': '🛁',
+      'tosa': '✂️',
+      'unha': '💅',
+      'ouvido': '👂',
+      'dente': '🦷'
+    };
+    
+    // Verifica TaxiDog primeiro
+    if (service.is_taxidog) {
+      return typeIcons.taxidog;
+    }
+    
+    // Verifica tipo
+    if (service.type && typeIcons[service.type]) {
+      var info = Object.assign({}, typeIcons[service.type]);
+      // Determina ícone pela categoria ou nome
+      info.icon = getCategoryIcon(service, categoryIcons);
+      return info;
+    }
+    
+    // Serviço padrão
+    return {
+      icon: getCategoryIcon(service, categoryIcons),
+      typeClass: 'dps-service-type-padrao',
+      typeLabel: 'Serviço'
+    };
+  }
+
+  /**
+   * Obtém o ícone baseado na categoria ou nome do serviço.
+   * @param {object} service Objeto do serviço.
+   * @param {object} categoryIcons Mapa de ícones por categoria.
+   * @return {string} Ícone emoji.
+   */
+  function getCategoryIcon(service, categoryIcons) {
+    // Verifica categoria diretamente
+    if (service.category && categoryIcons[service.category]) {
+      return categoryIcons[service.category];
+    }
+    
+    // Verifica pelo nome do serviço
+    if (service.name) {
+      var nameLower = service.name.toLowerCase();
+      for (var cat in categoryIcons) {
+        if (nameLower.indexOf(cat) !== -1) {
+          return categoryIcons[cat];
+        }
+      }
+    }
+    
+    // Ícone padrão
+    return '✂️';
+  }
+
   $(document).ready(function(){
     var reloadDelay = parseInt(DPS_AG_Addon.reloadDelay, 10) || 600;
 
@@ -919,29 +1009,15 @@
         
         // Seção do pet (se disponível)
         if (pet && pet.name) {
-          var petSizeLabel = '';
-          var petSizeIcon = '🐕';
-          if (pet.size) {
-            var sizeLower = pet.size.toLowerCase();
-            if (sizeLower === 'pequeno' || sizeLower === 'small') {
-              petSizeLabel = 'Pequeno';
-              petSizeIcon = '🐕';
-            } else if (sizeLower === 'medio' || sizeLower === 'médio' || sizeLower === 'medium') {
-              petSizeLabel = 'Médio';
-              petSizeIcon = '🦮';
-            } else if (sizeLower === 'grande' || sizeLower === 'large') {
-              petSizeLabel = 'Grande';
-              petSizeIcon = '🐕‍🦺';
-            }
-          }
+          var petSizeInfo = getPetSizeInfo(pet.size);
           
           modalHtml += '<div class="dps-services-pet-info">' +
-            '<span class="dps-services-pet-icon">' + petSizeIcon + '</span>' +
+            '<span class="dps-services-pet-icon">' + petSizeInfo.icon + '</span>' +
             '<div class="dps-services-pet-details">' +
               '<span class="dps-services-pet-name">' + escapeHtml(pet.name) + '</span>';
           
           var petMeta = [];
-          if (petSizeLabel) petMeta.push(petSizeLabel);
+          if (petSizeInfo.label) petMeta.push(petSizeInfo.label);
           if (pet.breed) petMeta.push(escapeHtml(pet.breed));
           if (pet.weight) petMeta.push(escapeHtml(pet.weight) + ' kg');
           
@@ -976,44 +1052,18 @@
             var price = parseFloat(srv.price) || 0;
             total += price;
             
-            // Define ícone baseado no tipo
-            var icon = '✂️'; // padrão
-            var typeClass = 'dps-service-type-padrao';
-            var typeLabel = 'Serviço';
+            // Usa função helper para obter informações visuais do serviço
+            var visualInfo = getServiceVisualInfo(srv);
             
-            if (srv.is_taxidog) {
-              icon = '🚐';
-              typeClass = 'dps-service-type-taxidog';
-              typeLabel = 'Transporte';
-            } else if (srv.type === 'extra') {
-              icon = '✨';
-              typeClass = 'dps-service-type-extra';
-              typeLabel = 'Extra';
-            } else if (srv.type === 'package') {
-              icon = '📦';
-              typeClass = 'dps-service-type-pacote';
-              typeLabel = 'Pacote';
-            } else if (srv.category === 'tosa' || (srv.name && srv.name.toLowerCase().indexOf('tosa') !== -1)) {
-              icon = '✂️';
-            } else if (srv.category === 'banho' || (srv.name && srv.name.toLowerCase().indexOf('banho') !== -1)) {
-              icon = '🛁';
-            } else if (srv.category === 'unha' || (srv.name && srv.name.toLowerCase().indexOf('unha') !== -1)) {
-              icon = '💅';
-            } else if (srv.category === 'ouvido' || (srv.name && srv.name.toLowerCase().indexOf('ouvido') !== -1)) {
-              icon = '👂';
-            } else if (srv.category === 'dente' || (srv.name && srv.name.toLowerCase().indexOf('dente') !== -1)) {
-              icon = '🦷';
-            }
-            
-            modalHtml += '<div class="dps-service-card ' + typeClass + '">' +
+            modalHtml += '<div class="dps-service-card ' + visualInfo.typeClass + '">' +
               '<div class="dps-service-card-header">' +
-                '<span class="dps-service-card-icon">' + icon + '</span>' +
+                '<span class="dps-service-card-icon">' + visualInfo.icon + '</span>' +
                 '<div class="dps-service-card-info">' +
                   '<span class="dps-service-card-name">' + escapeHtml(srv.name) + '</span>' +
                   '<span class="dps-service-card-meta">';
             
             var cardMeta = [];
-            if (typeLabel && srv.type !== 'padrao') cardMeta.push(typeLabel);
+            if (visualInfo.typeLabel && srv.type !== 'padrao') cardMeta.push(visualInfo.typeLabel);
             if (srv.duration && srv.duration > 0) cardMeta.push(srv.duration + ' min');
             
             modalHtml += cardMeta.length > 0 ? cardMeta.join(' • ') : '';
