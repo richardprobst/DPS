@@ -83,6 +83,23 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Página de Configurações Frontend - Fase 4: Abas de Automação (v2.0.0)**
+
+- **Aba Notificações (Push Add-on)**: Nova aba de configurações para gerenciamento de relatórios automáticos por email:
+  - Configuração de horário e destinatários para relatório da manhã (agenda do dia)
+  - Configuração de horário e destinatários para relatório financeiro do final do dia
+  - Configuração de dia da semana, horário e período de inatividade para relatório semanal de pets inativos
+  - Campos para integração com Telegram (token do bot e chat ID)
+  - Checkboxes individuais para ativar/desativar cada tipo de relatório
+  - Visualização do próximo envio agendado para cada relatório
+- **Aba Financeiro - Lembretes (Finance Add-on)**: Nova aba de configurações para gerenciamento de lembretes automáticos de pagamento:
+  - Checkbox para habilitar/desabilitar lembretes automáticos
+  - Configuração de dias antes do vencimento para envio de lembrete preventivo
+  - Configuração de dias após vencimento para envio de cobrança
+  - Templates de mensagem personalizáveis com placeholders ({cliente}, {pet}, {data}, {valor}, {link}, {pix}, {loja})
+- **Validação de formulários**: Validação de formato de horário (HH:MM), lista de emails e limites numéricos
+- **Estilos CSS**: Novos estilos para campos de horário, selects, textareas e badges de próximo agendamento
+
 **Formulário de Agendamento - Melhorias de UX (v1.5.0)**
 
 - **TaxiDog em card próprio**: O campo TaxiDog agora é exibido em um card visual destacado com cores dinâmicas (amarelo quando desativado, verde quando ativado).

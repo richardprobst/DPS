@@ -4496,3 +4496,99 @@
     border-color: #0ea5e9;
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
+
+/* ========================================
+ * FASE 4: Estilos para abas de automação
+ * ======================================== */
+
+/* Badge de próximo agendamento */
+.dps-next-schedule {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 4px 10px;
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    border-left: 3px solid #10b981;
+}
+
+/* Campos de horário e número */
+.dps-form-row input[type="time"],
+.dps-form-row input[type="number"] {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-form-row input[type="time"]:focus,
+.dps-form-row input[type="number"]:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Select dropdown melhorado */
+.dps-form-row select {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 8px center;
+    background-size: 16px;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-form-row select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Espaçamento entre surfaces */
+.dps-settings-section .dps-surface + .dps-surface {
+    margin-top: 20px;
+}
+
+/* Textarea melhorado */
+.dps-form-row textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-form-row textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Notice de informação */
+.dps-notice--info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    border-radius: 6px;
+    color: #0369a1;
+    font-size: 13px;
+}
+
+.dps-notice--info .dashicons {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
