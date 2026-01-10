@@ -90,6 +90,40 @@ class DPS_Settings_Frontend {
             [ __CLASS__, 'render_tab_seguranca' ],
             20
         );
+
+        // ========================================
+        // FASE 3: Abas de Add-ons Core
+        // ========================================
+
+        // Aba Portal do Cliente (se add-on ativo)
+        if ( class_exists( 'DPS_Client_Portal' ) ) {
+            self::register_tab(
+                'portal',
+                __( '📱 Portal do Cliente', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_portal' ],
+                30
+            );
+        }
+
+        // Aba Comunicações (se add-on ativo)
+        if ( class_exists( 'DPS_Communications_Addon' ) ) {
+            self::register_tab(
+                'comunicacoes',
+                __( '💬 Comunicações', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_comunicacoes' ],
+                40
+            );
+        }
+
+        // Aba Pagamentos (se add-on ativo)
+        if ( class_exists( 'DPS_Payment_Addon' ) ) {
+            self::register_tab(
+                'pagamentos',
+                __( '💳 Pagamentos', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_pagamentos' ],
+                50
+            );
+        }
     }
 
     /**
@@ -348,6 +382,15 @@ class DPS_Settings_Frontend {
                 break;
             case 'save_seguranca':
                 self::handle_save_seguranca();
+                break;
+            case 'save_portal':
+                self::handle_save_portal();
+                break;
+            case 'save_comunicacoes':
+                self::handle_save_comunicacoes();
+                break;
+            case 'save_pagamentos':
+                self::handle_save_pagamentos();
                 break;
             default:
                 /**
@@ -645,5 +688,414 @@ class DPS_Settings_Frontend {
      */
     private static function is_masked_value( $value ) {
         return strpos( $value, '•' ) !== false;
+    }
+
+    // ========================================
+    // FASE 3: Abas de Add-ons Core
+    // ========================================
+
+    /**
+     * Renderiza a aba Portal do Cliente.
+     *
+     * @return void
+     */
+    public static function render_tab_portal() {
+        if ( ! class_exists( 'DPS_Client_Portal' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Portal do Cliente não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        $portal_page_id       = (int) get_option( 'dps_portal_page_id', 0 );
+        $logo_id              = get_option( 'dps_portal_logo_id', '' );
+        $primary_color        = get_option( 'dps_portal_primary_color', '#0ea5e9' );
+        $hero_id              = get_option( 'dps_portal_hero_id', '' );
+        $review_url           = get_option( 'dps_portal_review_url', '' );
+        $access_notification  = get_option( 'dps_portal_access_notification_enabled', false );
+
+        // Obtém lista de páginas para o selector
+        $pages = get_pages( [ 'post_status' => 'publish' ] );
+        ?>
+        <form method="post" action="" class="dps-settings-form" enctype="multipart/form-data">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_portal">
+
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-smartphone"></span>
+                    <?php esc_html_e( 'Portal do Cliente', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure a página e aparência do portal de autoatendimento dos clientes.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Página do Portal', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_portal_page_id"><?php esc_html_e( 'Página do Portal', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_portal_page_id" name="dps_portal_page_id" class="regular-text">
+                            <option value=""><?php esc_html_e( '— Selecione uma página —', 'desi-pet-shower' ); ?></option>
+                            <?php foreach ( $pages as $page ) : ?>
+                                <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $portal_page_id, $page->ID ); ?>>
+                                    <?php echo esc_html( $page->post_title ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Página onde o shortcode [dps_portal] está inserido.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Personalização Visual', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_portal_primary_color"><?php esc_html_e( 'Cor Primária', 'desi-pet-shower' ); ?></label>
+                        <input type="color" id="dps_portal_primary_color" name="dps_portal_primary_color" value="<?php echo esc_attr( $primary_color ); ?>" style="width: 60px; height: 40px; padding: 2px;" />
+                        <span style="margin-left: 10px; color: #6b7280;"><?php echo esc_html( $primary_color ); ?></span>
+                        <p class="description"><?php esc_html_e( 'Cor principal usada em botões e destaques do portal.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_portal_logo_id"><?php esc_html_e( 'Logo do Portal', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_portal_logo_id" name="dps_portal_logo_id" value="<?php echo esc_attr( $logo_id ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'ID do anexo ou URL', 'desi-pet-shower' ); ?>" />
+                        <?php if ( $logo_id && is_numeric( $logo_id ) ) : ?>
+                            <div style="margin-top: 10px;">
+                                <?php echo wp_get_attachment_image( (int) $logo_id, 'thumbnail', false, [ 'style' => 'max-height: 60px; width: auto;' ] ); ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="description"><?php esc_html_e( 'ID do anexo da logo na biblioteca de mídia.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_portal_hero_id"><?php esc_html_e( 'Imagem Hero', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_portal_hero_id" name="dps_portal_hero_id" value="<?php echo esc_attr( $hero_id ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'ID do anexo ou URL', 'desi-pet-shower' ); ?>" />
+                        <?php if ( $hero_id && is_numeric( $hero_id ) ) : ?>
+                            <div style="margin-top: 10px;">
+                                <?php echo wp_get_attachment_image( (int) $hero_id, 'medium', false, [ 'style' => 'max-height: 100px; width: auto;' ] ); ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="description"><?php esc_html_e( 'Imagem de destaque exibida no topo do portal.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Configurações Adicionais', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_portal_review_url"><?php esc_html_e( 'URL de Avaliação', 'desi-pet-shower' ); ?></label>
+                        <input type="url" id="dps_portal_review_url" name="dps_portal_review_url" value="<?php echo esc_url( $review_url ); ?>" class="regular-text" placeholder="https://g.page/r/..." />
+                        <p class="description"><?php esc_html_e( 'Link para avaliação no Google ou outra plataforma (exibido após atendimento).', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" id="dps_portal_access_notification_enabled" name="dps_portal_access_notification_enabled" value="1" <?php checked( $access_notification ); ?> />
+                            <?php esc_html_e( 'Notificar administradores sobre acessos ao portal', 'desi-pet-shower' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Envia notificação quando um cliente acessa o portal.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Renderiza a aba Comunicações.
+     *
+     * @return void
+     */
+    public static function render_tab_comunicacoes() {
+        if ( ! class_exists( 'DPS_Communications_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Comunicações não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        $whatsapp_number = get_option( 'dps_whatsapp_number', '' );
+        
+        // Carrega configurações do add-on se disponível
+        $comm_settings = get_option( 'dps_comm_settings', [] );
+        $api_url       = $comm_settings['whatsapp_api_url'] ?? '';
+        $api_token     = $comm_settings['whatsapp_api_token'] ?? '';
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_comunicacoes">
+
+            <div class="dps-surface dps-surface--success">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-format-chat"></span>
+                    <?php esc_html_e( 'Comunicações', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure integrações de WhatsApp e canais de comunicação com clientes.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'WhatsApp', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_whatsapp_number"><?php esc_html_e( 'Número WhatsApp', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_whatsapp_number" name="dps_whatsapp_number" value="<?php echo esc_attr( $whatsapp_number ); ?>" class="regular-text" placeholder="+55 11 99999-9999" />
+                        <p class="description"><?php esc_html_e( 'Número principal para comunicação via WhatsApp. Use formato internacional.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'API WhatsApp (Avançado)', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--warning" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-warning"></span>
+                        <?php esc_html_e( 'Configure apenas se você possui uma API de WhatsApp Business. Deixe em branco para usar links padrão.', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_comm_whatsapp_api_url"><?php esc_html_e( 'URL da API', 'desi-pet-shower' ); ?></label>
+                        <input type="url" id="dps_comm_whatsapp_api_url" name="dps_comm_whatsapp_api_url" value="<?php echo esc_url( $api_url ); ?>" class="regular-text" placeholder="https://api.whatsapp.com/..." />
+                        <p class="description"><?php esc_html_e( 'Endpoint da API de envio de mensagens.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_comm_whatsapp_api_token"><?php esc_html_e( 'Token da API', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_comm_whatsapp_api_token" name="dps_comm_whatsapp_api_token" value="<?php echo esc_attr( self::mask_sensitive_value( $api_token ) ); ?>" class="regular-text" autocomplete="new-password" />
+                        <p class="description"><?php esc_html_e( 'Token de autenticação da API.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Renderiza a aba Pagamentos.
+     *
+     * @return void
+     */
+    public static function render_tab_pagamentos() {
+        if ( ! class_exists( 'DPS_Payment_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Pagamentos não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        $access_token    = get_option( 'dps_mercadopago_access_token', '' );
+        $public_key      = get_option( 'dps_mercadopago_public_key', '' );
+        $webhook_secret  = get_option( 'dps_mercadopago_webhook_secret', '' );
+        $pix_key         = get_option( 'dps_pix_key', '' );
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_pagamentos">
+
+            <div class="dps-surface dps-surface--success">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-money-alt"></span>
+                    <?php esc_html_e( 'Pagamentos', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure integração com Mercado Pago e chaves de pagamento.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <div class="dps-notice dps-notice--warning" style="margin-bottom: 20px;">
+                    <span class="dashicons dashicons-shield"></span>
+                    <?php esc_html_e( 'Atenção: Estas são credenciais sensíveis. Mantenha-as em segurança e nunca compartilhe.', 'desi-pet-shower' ); ?>
+                </div>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Mercado Pago', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_mercadopago_access_token"><?php esc_html_e( 'Access Token', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_mercadopago_access_token" name="dps_mercadopago_access_token" value="<?php echo esc_attr( self::mask_sensitive_value( $access_token ) ); ?>" class="regular-text" autocomplete="new-password" />
+                        <p class="description"><?php esc_html_e( 'Token de acesso da sua conta Mercado Pago (começa com APP_USR-).', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_mercadopago_public_key"><?php esc_html_e( 'Chave Pública', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_mercadopago_public_key" name="dps_mercadopago_public_key" value="<?php echo esc_attr( self::mask_sensitive_value( $public_key ) ); ?>" class="regular-text" />
+                        <p class="description"><?php esc_html_e( 'Chave pública para integrações no frontend (começa com APP_USR-).', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_mercadopago_webhook_secret"><?php esc_html_e( 'Webhook Secret', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_mercadopago_webhook_secret" name="dps_mercadopago_webhook_secret" value="<?php echo esc_attr( self::mask_sensitive_value( $webhook_secret ) ); ?>" class="regular-text" autocomplete="new-password" />
+                        <p class="description"><?php esc_html_e( 'Chave secreta para validação de webhooks do Mercado Pago.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'PIX', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_pix_key"><?php esc_html_e( 'Chave PIX', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_pix_key" name="dps_pix_key" value="<?php echo esc_attr( $pix_key ); ?>" class="regular-text" placeholder="email@exemplo.com ou CPF/CNPJ" />
+                        <p class="description"><?php esc_html_e( 'Chave PIX para recebimentos (email, CPF, CNPJ ou chave aleatória).', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Processa salvamento da aba Portal.
+     *
+     * @return void
+     */
+    private static function handle_save_portal() {
+        // Página do portal
+        if ( isset( $_POST['dps_portal_page_id'] ) ) {
+            $page_id = absint( wp_unslash( $_POST['dps_portal_page_id'] ) );
+            update_option( 'dps_portal_page_id', $page_id );
+        }
+
+        // Cor primária
+        if ( isset( $_POST['dps_portal_primary_color'] ) ) {
+            $color = sanitize_hex_color( wp_unslash( $_POST['dps_portal_primary_color'] ) );
+            if ( $color ) {
+                update_option( 'dps_portal_primary_color', $color );
+            }
+        }
+
+        // Logo ID
+        if ( isset( $_POST['dps_portal_logo_id'] ) ) {
+            $logo_id = sanitize_text_field( wp_unslash( $_POST['dps_portal_logo_id'] ) );
+            update_option( 'dps_portal_logo_id', $logo_id );
+        }
+
+        // Hero ID
+        if ( isset( $_POST['dps_portal_hero_id'] ) ) {
+            $hero_id = sanitize_text_field( wp_unslash( $_POST['dps_portal_hero_id'] ) );
+            update_option( 'dps_portal_hero_id', $hero_id );
+        }
+
+        // URL de avaliação
+        if ( isset( $_POST['dps_portal_review_url'] ) ) {
+            $review_url = esc_url_raw( wp_unslash( $_POST['dps_portal_review_url'] ) );
+            update_option( 'dps_portal_review_url', $review_url );
+        }
+
+        // Notificação de acesso
+        $access_notification = ! empty( $_POST['dps_portal_access_notification_enabled'] );
+        update_option( 'dps_portal_access_notification_enabled', $access_notification );
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações do Portal atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'portal_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações do Portal salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Processa salvamento da aba Comunicações.
+     *
+     * @return void
+     */
+    private static function handle_save_comunicacoes() {
+        // Número WhatsApp
+        if ( isset( $_POST['dps_whatsapp_number'] ) ) {
+            $whatsapp = self::sanitize_phone( wp_unslash( $_POST['dps_whatsapp_number'] ) );
+            update_option( 'dps_whatsapp_number', $whatsapp );
+        }
+
+        // Configurações da API (se fornecidas)
+        $comm_settings = get_option( 'dps_comm_settings', [] );
+        
+        if ( isset( $_POST['dps_comm_whatsapp_api_url'] ) ) {
+            $api_url = esc_url_raw( wp_unslash( $_POST['dps_comm_whatsapp_api_url'] ) );
+            $comm_settings['whatsapp_api_url'] = $api_url;
+        }
+
+        if ( isset( $_POST['dps_comm_whatsapp_api_token'] ) ) {
+            $api_token = sanitize_text_field( wp_unslash( $_POST['dps_comm_whatsapp_api_token'] ) );
+            // Só atualiza se não for valor mascarado
+            if ( ! self::is_masked_value( $api_token ) && ! empty( $api_token ) ) {
+                $comm_settings['whatsapp_api_token'] = $api_token;
+            }
+        }
+
+        update_option( 'dps_comm_settings', $comm_settings );
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Comunicações atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'communications_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Comunicações salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Processa salvamento da aba Pagamentos.
+     *
+     * @return void
+     */
+    private static function handle_save_pagamentos() {
+        $sensitive_fields = [
+            'dps_mercadopago_access_token',
+            'dps_mercadopago_public_key',
+            'dps_mercadopago_webhook_secret',
+        ];
+
+        foreach ( $sensitive_fields as $field ) {
+            if ( isset( $_POST[ $field ] ) ) {
+                $value = sanitize_text_field( wp_unslash( $_POST[ $field ] ) );
+                // Só atualiza se não for valor mascarado e não estiver vazio
+                if ( ! self::is_masked_value( $value ) && ! empty( $value ) ) {
+                    update_option( $field, $value );
+                }
+            }
+        }
+
+        // Chave PIX (não é sensível da mesma forma)
+        if ( isset( $_POST['dps_pix_key'] ) ) {
+            $pix_key = sanitize_text_field( wp_unslash( $_POST['dps_pix_key'] ) );
+            update_option( 'dps_pix_key', $pix_key );
+        }
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Pagamentos atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_WARNING,
+            'payment_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Pagamentos salvas com sucesso!', 'desi-pet-shower' ) );
     }
 }

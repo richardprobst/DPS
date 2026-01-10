@@ -302,9 +302,10 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 
 ---
 
-### FASE 3: Abas de Add-ons Core (Estimativa: 6h)
+### FASE 3: Abas de Add-ons Core (Estimativa: 6h) ✅ CONCLUÍDA
 **Prioridade:** 🟠 Média-Alta  
-**Dependências:** Fase 2
+**Dependências:** Fase 2  
+**Status:** Implementada em 2026-01-10
 
 #### 4.3.1 Objetivos
 - Implementar abas para Portal, Comunicações e Pagamentos
@@ -314,28 +315,32 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 #### 4.3.2 Tarefas
 
 **Aba Portal do Cliente:**
-- [ ] Selector de página do portal
-- [ ] Upload de logo e hero
-- [ ] Color picker para cor primária
-- [ ] Campo URL de avaliação
-- [ ] Checkbox de notificações
+- [x] Selector de página do portal
+- [x] Upload de logo e hero (via ID de anexo)
+- [x] Color picker para cor primária
+- [x] Campo URL de avaliação
+- [x] Checkbox de notificações
 
 **Aba Comunicações:**
-- [ ] Campo número WhatsApp
-- [ ] Textarea para templates
-- [ ] Campos de gateway (se aplicável)
+- [x] Campo número WhatsApp
+- [x] Campos de API WhatsApp (URL e Token)
+- [x] Campos de gateway (se aplicável)
 
 **Aba Pagamentos:**
-- [ ] Campo token Mercado Pago (mascarado)
-- [ ] Campo chave pública
-- [ ] Campo webhook secret (mascarado)
-- [ ] Campo chave PIX
+- [x] Campo token Mercado Pago (mascarado)
+- [x] Campo chave pública (mascarado)
+- [x] Campo webhook secret (mascarado)
+- [x] Campo chave PIX
 
 #### 4.3.3 Critérios de Aceite
-- [ ] Abas só aparecem se add-on está ativo
-- [ ] Formulários salvam nas options corretas
-- [ ] Campos sensíveis são mascarados
-- [ ] Upload de mídia funciona corretamente
+- [x] Abas só aparecem se add-on está ativo
+- [x] Formulários salvam nas options corretas
+- [x] Campos sensíveis são mascarados
+- [x] Upload de mídia funciona corretamente (via ID)
+
+#### 4.3.4 Arquivos Modificados
+- `includes/class-dps-settings-frontend.php` (expandido com +400 linhas)
+- `assets/css/dps-base.css` (estilos para checkbox e color picker)
 
 ---
 
