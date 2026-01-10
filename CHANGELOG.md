@@ -83,6 +83,25 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Sistema de Prevenção de Cache de Páginas (v1.1.1)**
+
+- **Nova classe `DPS_Cache_Control`**: Classe helper no plugin base que gerencia a prevenção de cache em todas as páginas do sistema DPS.
+  - Envia headers HTTP de no-cache (`Cache-Control`, `Pragma`, `Expires`) para garantir que navegadores não armazenem páginas em cache.
+  - Define constantes `DONOTCACHEPAGE`, `DONOTCACHEDB`, `DONOTMINIFY`, `DONOTCDN` e `DONOTCACHEOBJECT` para compatibilidade com plugins de cache populares (WP Super Cache, W3 Total Cache, LiteSpeed Cache, etc.).
+  - Detecta automaticamente páginas com shortcodes DPS via hook `template_redirect`.
+  - Desabilita cache em todas as páginas administrativas do DPS via hook `admin_init`.
+- **Método `DPS_Cache_Control::force_no_cache()`**: Método público para forçar desabilitação de cache em qualquer contexto.
+- **Método `DPS_Cache_Control::register_shortcode()`**: Permite que add-ons registrem shortcodes adicionais para prevenção automática de cache.
+- **Integração em todos os shortcodes**: Todos os shortcodes do sistema agora chamam `DPS_Cache_Control::force_no_cache()` para garantir camada extra de proteção:
+  - Base: `dps_base`, `dps_configuracoes`
+  - Client Portal: `dps_client_portal`, `dps_client_login`
+  - Agenda: `dps_agenda_page`, `dps_agenda_dashboard`
+  - Groomers: `dps_groomer_portal`, `dps_groomer_login`, `dps_groomer_dashboard`, `dps_groomer_agenda`, `dps_groomer_review`, `dps_groomer_reviews`
+  - Services: `dps_services_catalog`
+  - Finance: `dps_fin_docs`
+  - Registration: `dps_registration_form`
+  - AI: `dps_ai_chat`
+
 **Formulário de Cadastro - Terceira Etapa com Preferências de Produtos (v2.0.0)**
 
 - **Terceira etapa no Registration Add-on**: O formulário de cadastro agora possui 3 etapas:

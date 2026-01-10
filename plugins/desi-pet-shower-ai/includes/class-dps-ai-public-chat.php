@@ -92,6 +92,11 @@ class DPS_AI_Public_Chat {
      * @return string HTML do chat.
      */
     public function render_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // Verifica se a IA está habilitada
         $settings = get_option( 'dps_ai_settings', [] );
         if ( empty( $settings['enabled'] ) || empty( $settings['api_key'] ) ) {

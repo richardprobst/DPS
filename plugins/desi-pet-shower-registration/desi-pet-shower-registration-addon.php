@@ -2437,6 +2437,11 @@ class DPS_Registration_Addon {
      * @since 1.2.0 Removido session_start (F2.9), melhoradas mensagens de sucesso (F2.3/F2.8).
      */
     public function render_registration_form() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // F2.9: Removido session_start() - não é mais necessário pois usamos transients/cookies
         
         $success = false;

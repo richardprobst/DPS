@@ -2181,6 +2181,11 @@ class DPS_Services_Addon {
      * @since 1.3.0
      */
     public function render_catalog_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $atts = shortcode_atts( [
             'show_prices' => 'yes',
             'type'        => '',

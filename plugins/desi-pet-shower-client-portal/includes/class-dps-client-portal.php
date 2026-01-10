@@ -1153,6 +1153,11 @@ final class DPS_Client_Portal {
      * @return string Conteúdo HTML renderizado.
      */
     public function render_portal_shortcode() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // Hook: Antes de renderizar o portal (Fase 2.3)
         do_action( 'dps_portal_before_render' );
         
@@ -4262,6 +4267,11 @@ final class DPS_Client_Portal {
      * @return string Mensagem de depreciação
      */
     public function render_login_shortcode() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // Log de uso do shortcode depreciado
         $this->log_security_event( 'deprecated_login_shortcode_used', [
             'ip'  => $this->get_client_ip(),

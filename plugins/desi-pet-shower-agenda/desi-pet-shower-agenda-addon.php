@@ -466,6 +466,11 @@ class DPS_Agenda_Addon {
      * @return string HTML do dashboard.
      */
     public function render_dashboard_shortcode() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // Verifica permissão
         if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             return '<p>' . esc_html__( 'Acesso negado.', 'dps-agenda-addon' ) . '</p>';
@@ -1079,6 +1084,11 @@ class DPS_Agenda_Addon {
      * Renderiza o conteúdo do shortcode [dps_agenda_page].
      */
     public function render_agenda_shortcode() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         ob_start();
         /*
          * Verifica permissão: somente administradores (capacidade manage_options).

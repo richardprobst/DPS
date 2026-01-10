@@ -600,6 +600,11 @@ class DPS_Groomers_Addon {
      * @return string HTML do portal.
      */
     public function render_groomer_portal_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $this->register_and_enqueue_assets();
         $this->enqueue_chartjs();
 
@@ -731,6 +736,11 @@ class DPS_Groomers_Addon {
      * @return string HTML do login.
      */
     public function render_groomer_login_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $this->register_and_enqueue_assets();
 
         $session_manager = DPS_Groomer_Session_Manager::get_instance();
@@ -2858,6 +2868,11 @@ class DPS_Groomers_Addon {
      * @return string HTML do dashboard.
      */
     public function render_groomer_dashboard_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $atts = shortcode_atts(
             [
                 'groomer_id' => 0,
@@ -3291,6 +3306,11 @@ class DPS_Groomers_Addon {
      * @return string HTML da agenda.
      */
     public function render_groomer_agenda_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $atts = shortcode_atts(
             [
                 'groomer_id' => 0,
@@ -3514,6 +3534,11 @@ class DPS_Groomers_Addon {
      * @return string HTML do formulário.
      */
     public function render_review_form_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $atts = shortcode_atts(
             [
                 'groomer_id'     => 0,
@@ -3645,6 +3670,11 @@ class DPS_Groomers_Addon {
      * @return string HTML das avaliações.
      */
     public function render_reviews_list_shortcode( $atts ) {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         $atts = shortcode_atts(
             [
                 'groomer_id' => 0,

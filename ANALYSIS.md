@@ -220,6 +220,51 @@ echo '<h2>Cadastro de Clientes</h2>';
 - Mensagens são armazenadas via transients específicos por usuário, garantindo isolamento
 - Mensagens são exibidas apenas uma vez (single-use) e removidas automaticamente após renderização
 
+#### DPS_Cache_Control
+**Propósito**: Gerenciamento de cache de páginas para garantir que todas as páginas do sistema DPS não sejam armazenadas em cache, forçando conteúdo sempre atualizado.
+
+**Entrada/Saída**:
+- `init()`: Registra hooks para detecção e prevenção de cache (chamado automaticamente no boot do plugin)
+- `force_no_cache()`: Força desabilitação de cache na requisição atual
+- `register_shortcode( string $shortcode )`: Registra shortcode adicional para prevenção automática de cache
+- `get_registered_shortcodes()`: Retorna lista de shortcodes registrados
+
+**Constantes definidas quando cache é desabilitado**:
+- `DONOTCACHEPAGE`: Previne cache de página (WP Super Cache, W3 Total Cache, LiteSpeed Cache)
+- `DONOTCACHEDB`: Previne cache de queries
+- `DONOTMINIFY`: Previne minificação de assets
+- `DONOTCDN`: Previne uso de CDN
+- `DONOTCACHEOBJECT`: Previne cache de objetos
+
+**Headers HTTP enviados**:
+- `Cache-Control: no-cache, must-revalidate, max-age=0`
+- `Pragma: no-cache`
+- `Expires: Wed, 11 Jan 1984 05:00:00 GMT`
+
+**Exemplos práticos**:
+```php
+// Em um shortcode personalizado de add-on, forçar no-cache
+public function render_meu_shortcode() {
+    if ( class_exists( 'DPS_Cache_Control' ) ) {
+        DPS_Cache_Control::force_no_cache();
+    }
+    // ... renderização do shortcode
+}
+
+// Registrar um shortcode personalizado para prevenção automática de cache
+add_action( 'init', function() {
+    if ( class_exists( 'DPS_Cache_Control' ) ) {
+        DPS_Cache_Control::register_shortcode( 'meu_addon_shortcode' );
+    }
+} );
+```
+
+**Boas práticas**:
+- Todos os shortcodes do DPS já chamam `force_no_cache()` automaticamente
+- Para add-ons customizados, sempre inclua a chamada no início do método de renderização
+- Use `class_exists( 'DPS_Cache_Control' )` antes de chamar para compatibilidade com versões anteriores
+- A detecção automática via hook `template_redirect` funciona como backup
+
 ### Feedback visual e organização de interface
 - Todos os formulários principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback após salvar ou excluir
 - Formulários são organizados em fieldsets semânticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos
