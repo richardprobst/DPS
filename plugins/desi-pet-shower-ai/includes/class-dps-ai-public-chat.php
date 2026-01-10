@@ -172,6 +172,18 @@ class DPS_AI_Public_Chat {
                     </div>
                 </div>
 
+                <!-- Toolbar do chat -->
+                <div class="dps-ai-public-toolbar">
+                    <div class="dps-ai-public-toolbar-left">
+                        <span class="dps-ai-public-msg-count">1 msg</span>
+                    </div>
+                    <div class="dps-ai-public-toolbar-right">
+                        <button type="button" class="dps-ai-public-clear-btn" title="<?php esc_attr_e( 'Limpar conversa', 'dps-ai' ); ?>">
+                            <span>🗑️</span> <?php esc_html_e( 'Limpar', 'dps-ai' ); ?>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Área de chat -->
                 <div class="dps-ai-public-body">
                     <?php if ( 'true' === $atts['show_faqs'] && ! empty( $faqs ) ) : ?>
@@ -194,7 +206,9 @@ class DPS_AI_Public_Chat {
                         <div class="dps-ai-public-message dps-ai-public-message--assistant">
                             <div class="dps-ai-public-message-avatar">🐾</div>
                             <div class="dps-ai-public-message-content">
-                                <p><?php esc_html_e( 'Olá! 👋 Sou o assistente virtual do pet shop. Posso ajudar com informações sobre nossos serviços de Banho e Tosa, preços, horários e muito mais. Como posso ajudar você hoje?', 'dps-ai' ); ?></p>
+                                <div class="dps-ai-public-message-text">
+                                    <p><?php esc_html_e( 'Olá! 👋 Sou o assistente virtual do pet shop. Posso ajudar com informações sobre nossos serviços de Banho e Tosa, preços, horários e muito mais. Como posso ajudar você hoje?', 'dps-ai' ); ?></p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -800,6 +814,10 @@ class DPS_AI_Public_Chat {
                 'sending'             => __( 'Enviando...', 'dps-ai' ),
                 'feedbackThanks'      => __( 'Obrigado pelo feedback!', 'dps-ai' ),
                 'wasHelpful'          => __( 'Esta resposta foi útil?', 'dps-ai' ),
+                'copied'              => __( 'Copiado!', 'dps-ai' ),
+                'copy'                => __( 'Copiar', 'dps-ai' ),
+                'clearConfirm'        => __( 'Tem certeza que deseja limpar a conversa?', 'dps-ai' ),
+                'messages'            => __( 'mensagens', 'dps-ai' ),
             ],
         ] );
     }

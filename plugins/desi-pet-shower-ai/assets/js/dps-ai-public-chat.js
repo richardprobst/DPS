@@ -2,9 +2,11 @@
  * JavaScript do Chat Público de IA.
  *
  * Gerencia interações do chat público para visitantes do site.
- * Inclui: envio de perguntas, exibição de respostas, FAQs, feedback, modo flutuante.
+ * Inclui: envio de perguntas, exibição de respostas, FAQs, feedback,
+ * modo flutuante, reconhecimento de voz, formatação Markdown, cópia de texto.
  *
  * @since 1.6.0
+ * @updated 1.7.0 - Adicionadas funcionalidades de UX modernas
  */
 
 (function($) {
@@ -12,6 +14,8 @@
 
     // Constantes
     var HISTORY_EXPIRATION_MINUTES = 30;
+    var MAX_CHARS = 500;
+    var WARNING_THRESHOLD = 400;
 
     // Variáveis globais
     var $widget = null;
@@ -20,11 +24,13 @@
     var $submit = null;
     var $voiceBtn = null;
     var $typing = null;
+    var $charCounter = null;
     var nonce = '';
     var isFloating = false;
     var conversationHistory = [];
     var recognition = null;
     var isListening = false;
+    var messageCount = 0;
 
     /**
      * Inicializa o chat público.
@@ -45,6 +51,9 @@
         nonce = $widget.data('nonce');
         isFloating = $widget.hasClass('dps-ai-public-chat--floating');
 
+        // Adiciona contador de caracteres
+        addCharCounter();
+
         // Inicializa reconhecimento de voz
         initVoiceRecognition();
 
@@ -53,6 +62,9 @@
 
         // Event listeners
         bindEvents();
+
+        // Atualiza contador de mensagens
+        updateMessageCount();
     }
 
     /**
@@ -70,9 +82,10 @@
             }
         });
 
-        // Auto-resize do textarea
+        // Auto-resize do textarea e contador de caracteres
         $input.on('input', function() {
             autoResizeTextarea(this);
+            updateCharCounter();
         });
 
         // Botão de voz
@@ -85,6 +98,7 @@
             var question = $(this).data('question');
             if (question) {
                 $input.val(question);
+                updateCharCounter();
                 handleSubmit();
             }
         });
@@ -114,6 +128,12 @@
 
         // Feedback
         $widget.on('click', '.dps-ai-public-feedback-btn', handleFeedback);
+
+        // Copiar mensagem
+        $widget.on('click', '.dps-ai-public-copy-btn', handleCopyMessage);
+
+        // Limpar conversa
+        $widget.on('click', '.dps-ai-public-clear-btn', handleClearConversation);
     }
 
     /**
@@ -202,30 +222,43 @@
             messageClass = 'dps-ai-public-message dps-ai-public-message--error dps-ai-public-message--rate-limit';
         }
 
-        var feedbackHtml = '';
+        // Formata o conteúdo
+        var formattedContent = formatMessage(content);
+
+        // Ações da mensagem (feedback, copiar)
+        var actionsHtml = '';
         if (type === 'assistant' && messageId) {
-            feedbackHtml = '<div class="dps-ai-public-feedback" data-message-id="' + messageId + '" data-question="' + escapeHtml(question) + '">' +
-                '<span class="dps-ai-public-feedback-label">' + dpsAIPublicChat.i18n.wasHelpful + '</span>' +
-                '<button type="button" class="dps-ai-public-feedback-btn" data-feedback="positive" aria-label="Útil">👍</button>' +
-                '<button type="button" class="dps-ai-public-feedback-btn" data-feedback="negative" aria-label="Não útil">👎</button>' +
+            actionsHtml = '<div class="dps-ai-public-message-actions">' +
+                '<button type="button" class="dps-ai-public-copy-btn" data-content="' + escapeHtml(content) + '" title="Copiar resposta">' +
+                    '<span>📋</span> Copiar' +
+                '</button>' +
+                '<div class="dps-ai-public-feedback" data-message-id="' + messageId + '" data-question="' + escapeHtml(question) + '">' +
+                    '<span class="dps-ai-public-feedback-label">' + dpsAIPublicChat.i18n.wasHelpful + '</span>' +
+                    '<button type="button" class="dps-ai-public-feedback-btn" data-feedback="positive" aria-label="Útil">👍</button>' +
+                    '<button type="button" class="dps-ai-public-feedback-btn" data-feedback="negative" aria-label="Não útil">👎</button>' +
+                '</div>' +
             '</div>';
         }
 
         var html = '<div class="' + messageClass + '">' +
             '<div class="dps-ai-public-message-avatar">' + avatar + '</div>' +
             '<div class="dps-ai-public-message-content">' +
-                '<p>' + formatMessage(content) + '</p>' +
-                feedbackHtml +
+                '<div class="dps-ai-public-message-text">' + formattedContent + '</div>' +
+                actionsHtml +
             '</div>' +
         '</div>';
 
         $messages.append(html);
         
+        // Atualiza contador
+        messageCount++;
+        updateMessageCount();
+        
         // Autoscroll inteligente
         smartScrollToBottom();
 
         // Salva no histórico
-        if (type !== 'error') {
+        if (type !== 'error' && type !== 'rate-limit') {
             conversationHistory.push({
                 type: type,
                 content: content,
@@ -389,23 +422,69 @@
     }
 
     /**
-     * Formata mensagem para exibição.
+     * Formata mensagem para exibição com suporte a Markdown básico.
      *
      * @param {string} text Texto da mensagem.
-     * @return {string} Texto formatado.
+     * @return {string} Texto formatado em HTML.
      */
     function formatMessage(text) {
-        // Escapa HTML
+        if (!text) return '';
+        
+        // Escapa HTML primeiro
         text = escapeHtml(text);
         
-        // Converte quebras de linha
-        text = text.replace(/\n/g, '<br>');
+        // Converte Markdown básico
         
-        // Converte URLs em links (básico)
+        // Negrito: **texto** ou __texto__
+        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
+        
+        // Itálico: *texto* ou _texto_ (não dentro de palavras)
+        text = text.replace(/(?<!\w)\*([^*]+)\*(?!\w)/g, '<em>$1</em>');
+        text = text.replace(/(?<!\w)_([^_]+)_(?!\w)/g, '<em>$1</em>');
+        
+        // Código inline: `texto`
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // Listas não ordenadas: linhas começando com - ou *
+        text = text.replace(/^[\-\*]\s+(.+)$/gm, '<li>$1</li>');
+        // Agrupa <li> consecutivos em <ul>
+        text = text.replace(/(<li>.*<\/li>\n?)+/g, function(match) {
+            return '<ul>' + match.replace(/\n/g, '') + '</ul>';
+        });
+        
+        // Listas ordenadas: linhas começando com número.
+        text = text.replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>');
+        // Agrupa <li> de listas ordenadas em <ol>
+        text = text.replace(/(<li>.*<\/li>\n?)+/g, function(match) {
+            // Verifica se já tem <ul>, senão usa <ol>
+            if (match.indexOf('<ul>') === -1 && match.indexOf('</ul>') === -1) {
+                return '<ol>' + match.replace(/\n/g, '') + '</ol>';
+            }
+            return match;
+        });
+        
+        // Converte quebras de linha (exceto dentro de listas)
+        text = text.replace(/\n(?![<])/g, '<br>');
+        
+        // Converte URLs em links clicáveis
         text = text.replace(
             /(https?:\/\/[^\s<]+)/gi,
             '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
         );
+        
+        // Envolve em parágrafos se não tiver tags de bloco
+        if (text.indexOf('<ul>') === -1 && text.indexOf('<ol>') === -1) {
+            // Divide por quebras duplas para criar parágrafos
+            var paragraphs = text.split(/<br><br>/);
+            if (paragraphs.length > 1) {
+                text = paragraphs.map(function(p) {
+                    return '<p>' + p + '</p>';
+                }).join('');
+            } else {
+                text = '<p>' + text + '</p>';
+            }
+        }
         
         return text;
     }
@@ -605,6 +684,120 @@
         // Remove feedback visual
         $voiceBtn.removeClass('dps-ai-public-voice--listening');
         $voiceBtn.attr('title', 'Falar ao invés de digitar');
+    }
+
+    /**
+     * Adiciona contador de caracteres ao input.
+     */
+    function addCharCounter() {
+        var $wrapper = $input.closest('.dps-ai-public-input-wrapper');
+        $charCounter = $('<span class="dps-ai-public-char-counter">0/' + MAX_CHARS + '</span>');
+        $wrapper.append($charCounter);
+    }
+
+    /**
+     * Atualiza o contador de caracteres.
+     */
+    function updateCharCounter() {
+        if (!$charCounter) return;
+        
+        var length = $input.val().length;
+        $charCounter.text(length + '/' + MAX_CHARS);
+        
+        // Remove classes anteriores
+        $charCounter.removeClass('warning limit');
+        
+        if (length >= MAX_CHARS) {
+            $charCounter.addClass('limit');
+        } else if (length >= WARNING_THRESHOLD) {
+            $charCounter.addClass('warning');
+        }
+    }
+
+    /**
+     * Atualiza contador de mensagens na toolbar.
+     */
+    function updateMessageCount() {
+        var $msgCount = $widget.find('.dps-ai-public-msg-count');
+        if ($msgCount.length) {
+            var count = $messages.find('.dps-ai-public-message').length;
+            $msgCount.text(count + ' msg');
+        }
+    }
+
+    /**
+     * Handler para copiar mensagem.
+     */
+    function handleCopyMessage(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var content = $btn.data('content');
+        
+        if (!content) return;
+        
+        // Usa a Clipboard API moderna
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(content).then(function() {
+                showCopyFeedback($btn);
+            }).catch(function() {
+                fallbackCopyText(content, $btn);
+            });
+        } else {
+            fallbackCopyText(content, $btn);
+        }
+    }
+
+    /**
+     * Fallback para copiar texto em navegadores antigos.
+     */
+    function fallbackCopyText(text, $btn) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            showCopyFeedback($btn);
+        } catch (err) {
+            console.error('Erro ao copiar:', err);
+        }
+        
+        document.body.removeChild(textarea);
+    }
+
+    /**
+     * Mostra feedback visual de cópia bem-sucedida.
+     */
+    function showCopyFeedback($btn) {
+        var originalHtml = $btn.html();
+        $btn.addClass('copied').html('<span>✓</span> Copiado!');
+        
+        setTimeout(function() {
+            $btn.removeClass('copied').html(originalHtml);
+        }, 2000);
+    }
+
+    /**
+     * Handler para limpar conversa.
+     */
+    function handleClearConversation(e) {
+        e.preventDefault();
+        
+        // Confirmação antes de limpar
+        var confirmMsg = dpsAIPublicChat.i18n.clearConfirm || 'Tem certeza que deseja limpar a conversa?';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+        
+        // Limpa histórico
+        window.dpsAIPublicClearHistory();
+        
+        // Atualiza contador
+        messageCount = 1; // Mantém mensagem de boas-vindas
+        updateMessageCount();
     }
 
     // Inicializa quando DOM estiver pronto
