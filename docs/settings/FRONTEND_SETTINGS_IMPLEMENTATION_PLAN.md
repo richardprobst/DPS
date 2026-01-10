@@ -381,9 +381,10 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 
 ---
 
-### FASE 5: Abas Avançadas (Estimativa: 5h)
+### FASE 5: Abas Avançadas (Estimativa: 5h) ✅ CONCLUÍDA
 **Prioridade:** 🟡 Média  
 **Dependências:** Fase 4
+**Status:** Implementada em 2026-01-10
 
 #### 4.5.1 Objetivos
 - Implementar abas para Cadastro Público, IA e Fidelidade
@@ -393,30 +394,33 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 #### 4.5.2 Tarefas
 
 **Aba Cadastro Público:**
-- [ ] Selector de página
-- [ ] Configurações reCAPTCHA
-- [ ] Toggle API REST
-- [ ] Campos rate limiting
-- [ ] Templates de email
+- [x] Selector de página
+- [x] Configurações reCAPTCHA
+- [x] Toggle API REST
+- [x] Campos rate limiting
+- [x] Templates de email
 
 **Aba Assistente IA:**
-- [ ] Toggle ativar/desativar
-- [ ] Campo API key OpenAI (mascarado)
-- [ ] Selector de modelo
-- [ ] Slider de temperatura
-- [ ] Campos numéricos (timeout, tokens)
-- [ ] Textarea instruções adicionais
-- [ ] Botão de teste de conexão
+- [x] Toggle ativar/desativar
+- [x] Campo API key OpenAI (mascarado)
+- [x] Selector de modelo
+- [x] Slider de temperatura
+- [x] Campos numéricos (timeout, tokens)
+- [x] Textarea instruções adicionais
+- [ ] Botão de teste de conexão (mantido apenas no admin)
 
 **Aba Fidelidade:**
-- [ ] Configurações de pontos
-- [ ] Recompensas
-- [ ] Elegibilidade
+- [x] Configurações de pontos
+- [x] Recompensas
+- [x] Elegibilidade
 
 #### 4.5.3 Critérios de Aceite
-- [ ] Teste de API OpenAI funciona
-- [ ] reCAPTCHA é validado
-- [ ] Limites são respeitados
+- [ ] Teste de API OpenAI funciona (mantido apenas no admin)
+- [x] reCAPTCHA é validado
+- [x] Limites são respeitados
+
+#### 4.5.4 Arquivos Modificados
+- `includes/class-dps-settings-frontend.php` (expandido com ~700 linhas)
 
 ---
 

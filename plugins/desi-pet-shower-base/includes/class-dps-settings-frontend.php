@@ -148,6 +148,40 @@ class DPS_Settings_Frontend {
                 70
             );
         }
+
+        // ========================================
+        // FASE 5: Abas Avançadas
+        // ========================================
+
+        // Aba Cadastro Público (se Registration Add-on ativo)
+        if ( class_exists( 'DPS_Registration_Addon' ) ) {
+            self::register_tab(
+                'cadastro',
+                __( '📝 Cadastro Público', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_cadastro' ],
+                80
+            );
+        }
+
+        // Aba Assistente IA (se AI Add-on ativo)
+        if ( class_exists( 'DPS_AI_Addon' ) ) {
+            self::register_tab(
+                'ia',
+                __( '🤖 Assistente IA', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_ia' ],
+                90
+            );
+        }
+
+        // Aba Fidelidade (se Loyalty Add-on ativo)
+        if ( class_exists( 'DPS_Loyalty_Addon' ) ) {
+            self::register_tab(
+                'fidelidade',
+                __( '🎁 Fidelidade', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_fidelidade' ],
+                100
+            );
+        }
     }
 
     /**
@@ -424,6 +458,18 @@ class DPS_Settings_Frontend {
                 break;
             case 'save_financeiro_lembretes':
                 self::handle_save_financeiro_lembretes();
+                break;
+            // ========================================
+            // FASE 5: Handlers de Abas Avançadas
+            // ========================================
+            case 'save_cadastro':
+                self::handle_save_cadastro();
+                break;
+            case 'save_ia':
+                self::handle_save_ia();
+                break;
+            case 'save_fidelidade':
+                self::handle_save_fidelidade();
                 break;
             default:
                 /**
@@ -1602,5 +1648,717 @@ class DPS_Settings_Frontend {
             return $time;
         }
         return '08:00';
+    }
+
+    // ========================================
+    // FASE 5: Abas Avançadas
+    // ========================================
+
+    /**
+     * Renderiza a aba Cadastro Público (Registration Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_cadastro() {
+        if ( ! class_exists( 'DPS_Registration_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Cadastro Público não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $registration_page_id    = (int) get_option( 'dps_registration_page_id', 0 );
+        $api_enabled             = get_option( 'dps_registration_api_enabled', false );
+        $api_rate_key            = (int) get_option( 'dps_registration_api_rate_key_per_hour', 60 );
+        $api_rate_ip             = (int) get_option( 'dps_registration_api_rate_ip_per_hour', 30 );
+        $recaptcha_enabled       = get_option( 'dps_registration_recaptcha_enabled', false );
+        $recaptcha_site_key      = get_option( 'dps_registration_recaptcha_site_key', '' );
+        $recaptcha_secret_key    = get_option( 'dps_registration_recaptcha_secret_key', '' );
+        $recaptcha_threshold     = (float) get_option( 'dps_registration_recaptcha_threshold', 0.5 );
+        $confirm_email_subject   = get_option( 'dps_registration_confirm_email_subject', '' );
+        $confirm_email_body      = get_option( 'dps_registration_confirm_email_body', '' );
+
+        // Obtém lista de páginas para o selector
+        $pages = get_pages( [ 'post_status' => 'publish' ] );
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_cadastro">
+
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-admin-users"></span>
+                    <?php esc_html_e( 'Cadastro Público de Clientes', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure o formulário de cadastro público para novos clientes via front-end.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Página de Cadastro', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_registration_page_id"><?php esc_html_e( 'Página do Formulário', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_registration_page_id" name="dps_registration_page_id" class="regular-text">
+                            <option value=""><?php esc_html_e( '— Selecione uma página —', 'desi-pet-shower' ); ?></option>
+                            <?php foreach ( $pages as $page ) : ?>
+                                <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $registration_page_id, $page->ID ); ?>>
+                                    <?php echo esc_html( $page->post_title ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Página onde o shortcode [dps_registro] está inserido.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Proteção reCAPTCHA', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_registration_recaptcha_enabled" value="1" <?php checked( $recaptcha_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Ativar proteção reCAPTCHA v3', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Protege o formulário contra bots usando Google reCAPTCHA v3 (invisível).', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_recaptcha_site_key"><?php esc_html_e( 'Site Key', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_registration_recaptcha_site_key" name="dps_registration_recaptcha_site_key" value="<?php echo esc_attr( self::mask_sensitive_value( $recaptcha_site_key ) ); ?>" class="regular-text" />
+                        <p class="description"><?php esc_html_e( 'Chave do site obtida no console do Google reCAPTCHA.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_recaptcha_secret_key"><?php esc_html_e( 'Secret Key', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_registration_recaptcha_secret_key" name="dps_registration_recaptcha_secret_key" value="<?php echo esc_attr( self::mask_sensitive_value( $recaptcha_secret_key ) ); ?>" class="regular-text" autocomplete="new-password" />
+                        <p class="description"><?php esc_html_e( 'Chave secreta obtida no console do Google reCAPTCHA.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_recaptcha_threshold"><?php esc_html_e( 'Threshold de Confiança', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_registration_recaptcha_threshold" name="dps_registration_recaptcha_threshold" value="<?php echo esc_attr( $recaptcha_threshold ); ?>" min="0" max="1" step="0.1" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Score mínimo para considerar humano (0.0 a 1.0). Padrão: 0.5', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'API REST', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--info" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-info"></span>
+                        <?php esc_html_e( 'A API REST permite cadastros programáticos via integração externa.', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_registration_api_enabled" value="1" <?php checked( $api_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Habilitar API REST de cadastro', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Permite cadastros via endpoint REST autenticado.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_api_rate_key"><?php esc_html_e( 'Rate Limit por API Key', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_registration_api_rate_key" name="dps_registration_api_rate_key_per_hour" value="<?php echo esc_attr( $api_rate_key ); ?>" min="1" max="1000" class="regular-text" style="width: 100px;" />
+                        <span style="margin-left: 8px;"><?php esc_html_e( 'requisições/hora', 'desi-pet-shower' ); ?></span>
+                        <p class="description"><?php esc_html_e( 'Limite de requisições por hora para cada API key.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_api_rate_ip"><?php esc_html_e( 'Rate Limit por IP', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_registration_api_rate_ip" name="dps_registration_api_rate_ip_per_hour" value="<?php echo esc_attr( $api_rate_ip ); ?>" min="1" max="1000" class="regular-text" style="width: 100px;" />
+                        <span style="margin-left: 8px;"><?php esc_html_e( 'requisições/hora', 'desi-pet-shower' ); ?></span>
+                        <p class="description"><?php esc_html_e( 'Limite de requisições por hora para cada endereço IP.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Email de Confirmação', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--info" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-info"></span>
+                        <?php esc_html_e( 'Placeholders disponíveis: {nome}, {email}, {telefone}, {loja}', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_confirm_email_subject"><?php esc_html_e( 'Assunto do Email', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_registration_confirm_email_subject" name="dps_registration_confirm_email_subject" value="<?php echo esc_attr( $confirm_email_subject ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Bem-vindo à {loja}!', 'desi-pet-shower' ); ?>" />
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_registration_confirm_email_body"><?php esc_html_e( 'Corpo do Email', 'desi-pet-shower' ); ?></label>
+                        <textarea id="dps_registration_confirm_email_body" name="dps_registration_confirm_email_body" rows="6" class="large-text"><?php echo esc_textarea( $confirm_email_body ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Mensagem enviada para o cliente após cadastro bem-sucedido.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Renderiza a aba Assistente IA (AI Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_ia() {
+        if ( ! class_exists( 'DPS_AI_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Assistente IA não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $ai_settings = get_option( 'dps_ai_settings', [] );
+        
+        $enabled                  = ! empty( $ai_settings['enabled'] );
+        $api_key                  = $ai_settings['api_key'] ?? '';
+        $model                    = $ai_settings['model'] ?? 'gpt-4o-mini';
+        $temperature              = $ai_settings['temperature'] ?? 0.4;
+        $timeout                  = $ai_settings['timeout'] ?? 10;
+        $max_tokens               = $ai_settings['max_tokens'] ?? 500;
+        $additional_instructions  = $ai_settings['additional_instructions'] ?? '';
+        $widget_mode              = $ai_settings['widget_mode'] ?? 'inline';
+        $scheduling_mode          = $ai_settings['scheduling_mode'] ?? 'disabled';
+        $enable_feedback          = ! empty( $ai_settings['enable_feedback'] );
+        $public_chat_enabled      = ! empty( $ai_settings['public_chat_enabled'] );
+
+        // Modelos disponíveis
+        $models = [
+            'gpt-4o-mini'   => 'GPT-4o Mini (Recomendado - Rápido e econômico)',
+            'gpt-4o'        => 'GPT-4o (Mais preciso, custo médio)',
+            'gpt-4-turbo'   => 'GPT-4 Turbo (Alta precisão)',
+            'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Legado - Mais barato)',
+        ];
+
+        // Modos de widget
+        $widget_modes = [
+            'inline'   => __( 'Integrado (no topo do portal)', 'desi-pet-shower' ),
+            'floating' => __( 'Flutuante (botão no canto)', 'desi-pet-shower' ),
+        ];
+
+        // Modos de agendamento
+        $scheduling_modes = [
+            'disabled' => __( 'Desabilitado', 'desi-pet-shower' ),
+            'request'  => __( 'Solicitar confirmação (equipe confirma)', 'desi-pet-shower' ),
+            'direct'   => __( 'Agendamento direto (confirmação automática)', 'desi-pet-shower' ),
+        ];
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_ia">
+
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-format-status"></span>
+                    <?php esc_html_e( 'Assistente Virtual Inteligente', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure o assistente de IA para atendimento automatizado no Portal do Cliente.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Ativação', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_ai_enabled" value="1" <?php checked( $enabled ); ?> />
+                            <strong><?php esc_html_e( 'Habilitar Assistente de IA', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Quando desativado, o widget de IA não aparece no portal.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_ai_public_chat_enabled" value="1" <?php checked( $public_chat_enabled ); ?> />
+                            <?php esc_html_e( 'Habilitar Chat Público para visitantes', 'desi-pet-shower' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Permite que visitantes não logados usem o assistente via shortcode [dps_ai_public_chat].', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Credenciais OpenAI', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--warning" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-shield"></span>
+                        <?php esc_html_e( 'Sua API key é sensível. Nunca compartilhe ou exponha publicamente.', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_ai_api_key"><?php esc_html_e( 'Chave de API da OpenAI', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_ai_api_key" name="dps_ai_api_key" value="<?php echo esc_attr( self::mask_sensitive_value( $api_key ) ); ?>" class="regular-text" autocomplete="new-password" placeholder="sk-..." />
+                        <p class="description"><?php esc_html_e( 'Token de autenticação da API da OpenAI (sk-...). Mantenha em segredo.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Modelo e Parâmetros', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_ai_model"><?php esc_html_e( 'Modelo GPT', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_ai_model" name="dps_ai_model" class="regular-text">
+                            <?php foreach ( $models as $value => $label ) : ?>
+                                <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $model, $value ); ?>>
+                                    <?php echo esc_html( $label ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Modelo de linguagem a ser utilizado. GPT-4o Mini é recomendado para melhor custo/benefício.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_ai_temperature"><?php esc_html_e( 'Temperatura', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_ai_temperature" name="dps_ai_temperature" value="<?php echo esc_attr( $temperature ); ?>" min="0" max="1" step="0.1" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Controla a criatividade das respostas (0 = mais focado, 1 = mais criativo). Recomendado: 0.4', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_ai_timeout"><?php esc_html_e( 'Timeout (segundos)', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_ai_timeout" name="dps_ai_timeout" value="<?php echo esc_attr( $timeout ); ?>" min="5" max="60" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Tempo máximo de espera pela resposta da API. Recomendado: 10', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_ai_max_tokens"><?php esc_html_e( 'Máximo de Tokens', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_ai_max_tokens" name="dps_ai_max_tokens" value="<?php echo esc_attr( $max_tokens ); ?>" min="100" max="2000" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Limite de tokens na resposta (afeta custo e tamanho). Recomendado: 500', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Comportamento do Widget', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_ai_widget_mode"><?php esc_html_e( 'Modo do Widget', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_ai_widget_mode" name="dps_ai_widget_mode" class="regular-text">
+                            <?php foreach ( $widget_modes as $value => $label ) : ?>
+                                <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $widget_mode, $value ); ?>>
+                                    <?php echo esc_html( $label ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_ai_scheduling_mode"><?php esc_html_e( 'Agendamento via Chat', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_ai_scheduling_mode" name="dps_ai_scheduling_mode" class="regular-text">
+                            <?php foreach ( $scheduling_modes as $value => $label ) : ?>
+                                <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $scheduling_mode, $value ); ?>>
+                                    <?php echo esc_html( $label ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Define como os agendamentos solicitados via chat são processados.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_ai_enable_feedback" value="1" <?php checked( $enable_feedback ); ?> />
+                            <?php esc_html_e( 'Habilitar feedback (👍/👎)', 'desi-pet-shower' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Permite que clientes avaliem as respostas da IA.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Personalização', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_ai_additional_instructions"><?php esc_html_e( 'Instruções Adicionais', 'desi-pet-shower' ); ?></label>
+                        <textarea id="dps_ai_additional_instructions" name="dps_ai_additional_instructions" rows="5" class="large-text" maxlength="2000"><?php echo esc_textarea( $additional_instructions ); ?></textarea>
+                        <p class="description">
+                            <?php esc_html_e( 'Regras complementares sobre tom de voz, estilo de atendimento e orientações da marca. Máximo: 2000 caracteres.', 'desi-pet-shower' ); ?>
+                        </p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Renderiza a aba Fidelidade (Loyalty Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_fidelidade() {
+        if ( ! class_exists( 'DPS_Loyalty_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Fidelidade não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
+        
+        $brl_per_point              = isset( $loyalty_settings['brl_per_point'] ) && $loyalty_settings['brl_per_point'] > 0 ? (float) $loyalty_settings['brl_per_point'] : 10.0;
+        $referrals_enabled          = ! empty( $loyalty_settings['referrals_enabled'] );
+        $referrer_reward_type       = $loyalty_settings['referrer_reward_type'] ?? 'none';
+        $referrer_reward_value      = $loyalty_settings['referrer_reward_value'] ?? 0;
+        $referee_reward_type        = $loyalty_settings['referee_reward_type'] ?? 'none';
+        $referee_reward_value       = $loyalty_settings['referee_reward_value'] ?? 0;
+        $enable_portal_redemption   = ! empty( $loyalty_settings['enable_portal_redemption'] );
+        $portal_min_points          = isset( $loyalty_settings['portal_min_points_to_redeem'] ) ? absint( $loyalty_settings['portal_min_points_to_redeem'] ) : 0;
+        $portal_points_per_real     = isset( $loyalty_settings['portal_points_per_real'] ) ? absint( $loyalty_settings['portal_points_per_real'] ) : 100;
+
+        // Tipos de recompensa
+        $reward_types = [
+            'none'    => __( 'Sem recompensa', 'desi-pet-shower' ),
+            'points'  => __( 'Pontos de fidelidade', 'desi-pet-shower' ),
+            'fixed'   => __( 'Crédito fixo (R$)', 'desi-pet-shower' ),
+            'percent' => __( 'Crédito percentual', 'desi-pet-shower' ),
+        ];
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_fidelidade">
+
+            <div class="dps-surface dps-surface--success">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-star-filled"></span>
+                    <?php esc_html_e( 'Programa de Fidelidade', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure regras de acúmulo de pontos, recompensas e programa de indicações.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Regras de Pontos', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_loyalty_brl_per_point"><?php esc_html_e( 'Conversão BRL → Pontos', 'desi-pet-shower' ); ?></label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span><?php esc_html_e( '1 ponto a cada', 'desi-pet-shower' ); ?></span>
+                            <input type="number" id="dps_loyalty_brl_per_point" name="dps_loyalty_brl_per_point" value="<?php echo esc_attr( $brl_per_point ); ?>" min="0.01" step="0.01" class="regular-text" style="width: 100px;" />
+                            <span><?php esc_html_e( 'reais faturados', 'desi-pet-shower' ); ?></span>
+                        </div>
+                        <p class="description"><?php esc_html_e( 'Exemplo: Se definido como 10, o cliente ganha 1 ponto a cada R$ 10,00 gastos.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Resgate de Pontos no Portal', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_loyalty_enable_portal_redemption" value="1" <?php checked( $enable_portal_redemption ); ?> />
+                            <strong><?php esc_html_e( 'Permitir resgate de pontos pelo Portal do Cliente', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Quando ativado, clientes podem trocar pontos por créditos diretamente no portal.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_loyalty_portal_min_points"><?php esc_html_e( 'Mínimo de pontos para resgate', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_loyalty_portal_min_points" name="dps_loyalty_portal_min_points" value="<?php echo esc_attr( $portal_min_points ); ?>" min="0" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Quantidade mínima de pontos necessária para solicitar resgate.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_loyalty_portal_points_per_real"><?php esc_html_e( 'Pontos por R$ 1,00', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_loyalty_portal_points_per_real" name="dps_loyalty_portal_points_per_real" value="<?php echo esc_attr( $portal_points_per_real ); ?>" min="1" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Quantos pontos equivalem a R$ 1,00 de crédito. Ex: 100 pontos = R$ 1,00.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Programa de Indicações', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_loyalty_referrals_enabled" value="1" <?php checked( $referrals_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Ativar programa "Indique e Ganhe"', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Permite que clientes ganhem recompensas por indicar novos clientes.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_loyalty_referrer_reward_type"><?php esc_html_e( 'Recompensa do Indicador', 'desi-pet-shower' ); ?></label>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <select id="dps_loyalty_referrer_reward_type" name="dps_loyalty_referrer_reward_type" class="regular-text" style="width: auto;">
+                                <?php foreach ( $reward_types as $value => $label ) : ?>
+                                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $referrer_reward_type, $value ); ?>>
+                                        <?php echo esc_html( $label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text" name="dps_loyalty_referrer_reward_value" value="<?php echo esc_attr( $referrer_reward_value ); ?>" class="regular-text" style="width: 100px;" placeholder="<?php esc_attr_e( 'Valor', 'desi-pet-shower' ); ?>" />
+                        </div>
+                        <p class="description"><?php esc_html_e( 'Recompensa que o cliente indicador recebe quando a indicação é confirmada.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_loyalty_referee_reward_type"><?php esc_html_e( 'Recompensa do Indicado', 'desi-pet-shower' ); ?></label>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <select id="dps_loyalty_referee_reward_type" name="dps_loyalty_referee_reward_type" class="regular-text" style="width: auto;">
+                                <?php foreach ( $reward_types as $value => $label ) : ?>
+                                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $referee_reward_type, $value ); ?>>
+                                        <?php echo esc_html( $label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text" name="dps_loyalty_referee_reward_value" value="<?php echo esc_attr( $referee_reward_value ); ?>" class="regular-text" style="width: 100px;" placeholder="<?php esc_attr_e( 'Valor', 'desi-pet-shower' ); ?>" />
+                        </div>
+                        <p class="description"><?php esc_html_e( 'Recompensa que o novo cliente indicado recebe.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Processa salvamento da aba Cadastro Público.
+     *
+     * @return void
+     */
+    private static function handle_save_cadastro() {
+        // Página de cadastro
+        if ( isset( $_POST['dps_registration_page_id'] ) ) {
+            $page_id = absint( wp_unslash( $_POST['dps_registration_page_id'] ) );
+            update_option( 'dps_registration_page_id', $page_id );
+        }
+
+        // reCAPTCHA
+        $recaptcha_enabled = ! empty( $_POST['dps_registration_recaptcha_enabled'] );
+        update_option( 'dps_registration_recaptcha_enabled', $recaptcha_enabled );
+
+        if ( isset( $_POST['dps_registration_recaptcha_site_key'] ) ) {
+            $site_key = sanitize_text_field( wp_unslash( $_POST['dps_registration_recaptcha_site_key'] ) );
+            if ( ! self::is_masked_value( $site_key ) && ! empty( $site_key ) ) {
+                update_option( 'dps_registration_recaptcha_site_key', $site_key );
+            }
+        }
+
+        if ( isset( $_POST['dps_registration_recaptcha_secret_key'] ) ) {
+            $secret_key = sanitize_text_field( wp_unslash( $_POST['dps_registration_recaptcha_secret_key'] ) );
+            if ( ! self::is_masked_value( $secret_key ) && ! empty( $secret_key ) ) {
+                update_option( 'dps_registration_recaptcha_secret_key', $secret_key );
+            }
+        }
+
+        if ( isset( $_POST['dps_registration_recaptcha_threshold'] ) ) {
+            $threshold = floatval( $_POST['dps_registration_recaptcha_threshold'] );
+            $threshold = max( 0, min( 1, $threshold ) );
+            update_option( 'dps_registration_recaptcha_threshold', $threshold );
+        }
+
+        // API REST
+        $api_enabled = ! empty( $_POST['dps_registration_api_enabled'] );
+        update_option( 'dps_registration_api_enabled', $api_enabled );
+
+        if ( isset( $_POST['dps_registration_api_rate_key_per_hour'] ) ) {
+            $rate_key = max( 1, min( 1000, absint( $_POST['dps_registration_api_rate_key_per_hour'] ) ) );
+            update_option( 'dps_registration_api_rate_key_per_hour', $rate_key );
+        }
+
+        if ( isset( $_POST['dps_registration_api_rate_ip_per_hour'] ) ) {
+            $rate_ip = max( 1, min( 1000, absint( $_POST['dps_registration_api_rate_ip_per_hour'] ) ) );
+            update_option( 'dps_registration_api_rate_ip_per_hour', $rate_ip );
+        }
+
+        // Email de confirmação
+        if ( isset( $_POST['dps_registration_confirm_email_subject'] ) ) {
+            $subject = sanitize_text_field( wp_unslash( $_POST['dps_registration_confirm_email_subject'] ) );
+            update_option( 'dps_registration_confirm_email_subject', $subject );
+        }
+
+        if ( isset( $_POST['dps_registration_confirm_email_body'] ) ) {
+            $body = sanitize_textarea_field( wp_unslash( $_POST['dps_registration_confirm_email_body'] ) );
+            update_option( 'dps_registration_confirm_email_body', $body );
+        }
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Cadastro Público atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'registration_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Cadastro Público salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Processa salvamento da aba Assistente IA.
+     *
+     * @return void
+     */
+    private static function handle_save_ia() {
+        // Carrega configurações existentes para preservar campos não modificados
+        $ai_settings = get_option( 'dps_ai_settings', [] );
+
+        // Atualiza campos
+        $ai_settings['enabled'] = ! empty( $_POST['dps_ai_enabled'] );
+        $ai_settings['public_chat_enabled'] = ! empty( $_POST['dps_ai_public_chat_enabled'] );
+        $ai_settings['enable_feedback'] = ! empty( $_POST['dps_ai_enable_feedback'] );
+
+        // API Key - só atualiza se não for mascarado
+        if ( isset( $_POST['dps_ai_api_key'] ) ) {
+            $api_key = sanitize_text_field( wp_unslash( $_POST['dps_ai_api_key'] ) );
+            if ( ! self::is_masked_value( $api_key ) && ! empty( $api_key ) ) {
+                $ai_settings['api_key'] = $api_key;
+            }
+        }
+
+        // Modelo
+        if ( isset( $_POST['dps_ai_model'] ) ) {
+            $allowed_models = [ 'gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo' ];
+            $model = sanitize_text_field( wp_unslash( $_POST['dps_ai_model'] ) );
+            if ( in_array( $model, $allowed_models, true ) ) {
+                $ai_settings['model'] = $model;
+            }
+        }
+
+        // Temperatura
+        if ( isset( $_POST['dps_ai_temperature'] ) ) {
+            $temperature = floatval( $_POST['dps_ai_temperature'] );
+            $ai_settings['temperature'] = max( 0, min( 1, $temperature ) );
+        }
+
+        // Timeout
+        if ( isset( $_POST['dps_ai_timeout'] ) ) {
+            $timeout = absint( $_POST['dps_ai_timeout'] );
+            $ai_settings['timeout'] = max( 5, min( 60, $timeout ) );
+        }
+
+        // Max tokens
+        if ( isset( $_POST['dps_ai_max_tokens'] ) ) {
+            $max_tokens = absint( $_POST['dps_ai_max_tokens'] );
+            $ai_settings['max_tokens'] = max( 100, min( 2000, $max_tokens ) );
+        }
+
+        // Modo do widget
+        if ( isset( $_POST['dps_ai_widget_mode'] ) ) {
+            $allowed_modes = [ 'inline', 'floating' ];
+            $widget_mode = sanitize_text_field( wp_unslash( $_POST['dps_ai_widget_mode'] ) );
+            if ( in_array( $widget_mode, $allowed_modes, true ) ) {
+                $ai_settings['widget_mode'] = $widget_mode;
+            }
+        }
+
+        // Modo de agendamento
+        if ( isset( $_POST['dps_ai_scheduling_mode'] ) ) {
+            $allowed_scheduling = [ 'disabled', 'request', 'direct' ];
+            $scheduling_mode = sanitize_text_field( wp_unslash( $_POST['dps_ai_scheduling_mode'] ) );
+            if ( in_array( $scheduling_mode, $allowed_scheduling, true ) ) {
+                $ai_settings['scheduling_mode'] = $scheduling_mode;
+            }
+        }
+
+        // Instruções adicionais
+        if ( isset( $_POST['dps_ai_additional_instructions'] ) ) {
+            $instructions = sanitize_textarea_field( wp_unslash( $_POST['dps_ai_additional_instructions'] ) );
+            // Limita a 2000 caracteres
+            if ( mb_strlen( $instructions ) > 2000 ) {
+                $instructions = mb_substr( $instructions, 0, 2000 );
+            }
+            $ai_settings['additional_instructions'] = $instructions;
+        }
+
+        update_option( 'dps_ai_settings', $ai_settings );
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações do Assistente IA atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_WARNING,
+            'ai_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações do Assistente IA salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Processa salvamento da aba Fidelidade.
+     *
+     * @return void
+     */
+    private static function handle_save_fidelidade() {
+        // Carrega configurações existentes para preservar campos não modificados
+        $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
+
+        // BRL por ponto
+        if ( isset( $_POST['dps_loyalty_brl_per_point'] ) ) {
+            $brl_per_point = floatval( $_POST['dps_loyalty_brl_per_point'] );
+            $loyalty_settings['brl_per_point'] = max( 0.01, $brl_per_point );
+        }
+
+        // Resgate no portal
+        $loyalty_settings['enable_portal_redemption'] = ! empty( $_POST['dps_loyalty_enable_portal_redemption'] );
+
+        if ( isset( $_POST['dps_loyalty_portal_min_points'] ) ) {
+            $loyalty_settings['portal_min_points_to_redeem'] = absint( $_POST['dps_loyalty_portal_min_points'] );
+        }
+
+        if ( isset( $_POST['dps_loyalty_portal_points_per_real'] ) ) {
+            $loyalty_settings['portal_points_per_real'] = max( 1, absint( $_POST['dps_loyalty_portal_points_per_real'] ) );
+        }
+
+        // Programa de indicações
+        $loyalty_settings['referrals_enabled'] = ! empty( $_POST['dps_loyalty_referrals_enabled'] );
+
+        if ( isset( $_POST['dps_loyalty_referrer_reward_type'] ) ) {
+            $allowed_types = [ 'none', 'points', 'fixed', 'percent' ];
+            $type = sanitize_text_field( wp_unslash( $_POST['dps_loyalty_referrer_reward_type'] ) );
+            if ( in_array( $type, $allowed_types, true ) ) {
+                $loyalty_settings['referrer_reward_type'] = $type;
+            }
+        }
+
+        if ( isset( $_POST['dps_loyalty_referrer_reward_value'] ) ) {
+            $loyalty_settings['referrer_reward_value'] = sanitize_text_field( wp_unslash( $_POST['dps_loyalty_referrer_reward_value'] ) );
+        }
+
+        if ( isset( $_POST['dps_loyalty_referee_reward_type'] ) ) {
+            $allowed_types = [ 'none', 'points', 'fixed', 'percent' ];
+            $type = sanitize_text_field( wp_unslash( $_POST['dps_loyalty_referee_reward_type'] ) );
+            if ( in_array( $type, $allowed_types, true ) ) {
+                $loyalty_settings['referee_reward_type'] = $type;
+            }
+        }
+
+        if ( isset( $_POST['dps_loyalty_referee_reward_value'] ) ) {
+            $loyalty_settings['referee_reward_value'] = sanitize_text_field( wp_unslash( $_POST['dps_loyalty_referee_reward_value'] ) );
+        }
+
+        update_option( 'dps_loyalty_settings', $loyalty_settings );
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Fidelidade atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'loyalty_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Fidelidade salvas com sucesso!', 'desi-pet-shower' ) );
     }
 }
