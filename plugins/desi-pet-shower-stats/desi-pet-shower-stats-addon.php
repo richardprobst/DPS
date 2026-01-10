@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.5.0
+ * Version:           1.5.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.5.0' );
+define( 'DPS_STATS_VERSION', '1.5.1' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -724,6 +724,7 @@ class DPS_Stats_Addon {
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Variação vs. Anterior', 'dps-stats-addon' ); ?></span>
             </div>
         </div>
+        <?php if ( ! empty( $previous['start_date'] ) && ! empty( $previous['end_date'] ) ) : ?>
         <p class="dps-stats-period-note">
             <?php
             printf(
@@ -734,6 +735,7 @@ class DPS_Stats_Addon {
             );
             ?>
         </p>
+        <?php endif; ?>
         <div class="dps-stats-export-bar">
             <a href="<?php echo esc_url( $this->get_export_url( 'metrics' ) ); ?>" class="dps-stats-export-btn">
                 📥 <?php esc_html_e( 'Exportar Métricas CSV', 'dps-stats-addon' ); ?>
