@@ -483,6 +483,8 @@ class DPS_Stats_API {
                 'expenses'     => $current_expenses,
                 'profit'       => $current_revenue - $current_expenses,
                 'ticket_avg'   => $current_appointments > 0 ? $current_revenue / $current_appointments : 0,
+                'start_date'   => $start_date,
+                'end_date'     => $end_date,
             ],
             'previous' => [
                 'appointments' => $prev_appointments,
@@ -504,6 +506,11 @@ class DPS_Stats_API {
                 ),
             ],
         ];
+
+        // Propagar erro de Finance não ativo para o array current
+        if ( isset( $current_financials['error'] ) ) {
+            $result['current']['error'] = $current_financials['error'];
+        }
 
         // Armazena cache apenas se não estiver desabilitado
         if ( ! dps_is_cache_disabled() ) {

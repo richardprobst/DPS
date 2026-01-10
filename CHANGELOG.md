@@ -217,6 +217,12 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Stats Add-on - Correções na Aba Estatísticas (v1.5.1)**
+
+- **Erro de Finance não detectado no comparativo de períodos**: O erro `finance_not_active` retornado por `get_financial_totals()` agora é corretamente propagado para o array `current` em `get_period_comparison()`. Anteriormente, se o Finance Add-on não estivesse ativo, as métricas financeiras exibiam zero sem mostrar a mensagem de aviso adequada.
+- **Datas do período adicionadas ao array current**: O array `current` em `get_period_comparison()` agora inclui `start_date` e `end_date` para consistência com o array `previous` e melhor tratamento de dados no frontend.
+- **Nota do período anterior com validação**: A nota "Comparando com período anterior" agora verifica se as datas estão preenchidas antes de tentar formatá-las, evitando exibição de datas incorretas quando os dados estão incompletos.
+
 **Push Add-on - Correção de Relatórios por Email (v1.3.1)**
 
 - **Relatório da manhã vazio corrigido**: A query de agendamentos do dia usava `post_type => 'dps_appointment'` ao invés de `post_type => 'dps_agendamento'`, fazendo com que nenhum agendamento fosse encontrado. Corrigido para usar o post_type correto `dps_agendamento`.
