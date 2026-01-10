@@ -83,6 +83,25 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Formulário de Cadastro - Terceira Etapa com Preferências de Produtos (v2.0.0)**
+
+- **Terceira etapa no Registration Add-on**: O formulário de cadastro agora possui 3 etapas:
+  1. Dados do Cliente
+  2. Dados dos Pets
+  3. Preferências e Restrições de Produtos
+- **Campos de preferências por pet**: Para cada pet cadastrado, é possível definir:
+  - Preferência de shampoo (hipoalergênico, antisséptico, pelagem branca/escura, antipulgas, hidratante)
+  - Preferência de perfume (suave, intenso, sem perfume/proibido, hipoalergênico)
+  - Preferência de adereços (lacinho, gravata, lenço, bandana, sem adereços)
+  - Outras restrições de produtos (campo livre)
+- **Novos meta fields do pet**: `pet_shampoo_pref`, `pet_perfume_pref`, `pet_accessories_pref`, `pet_product_restrictions`
+- **Badge visual na agenda**: Pets com restrições de produtos exibem badge 🧴 ao lado do nome com tooltip detalhado
+- **Portal do Cliente**: Clientes podem visualizar e editar as preferências de produtos de seus pets
+- **Admin Panel**: Nova seção "Preferências de Produtos" no formulário de edição de pets
+- **Formulário de Agendamento**: Exibe as preferências de produtos na seção de informações do pet
+- **~110 linhas de CSS** para estilização da nova etapa no formulário de cadastro
+- **JavaScript atualizado** para navegação entre 3 etapas com validação e renderização dinâmica
+
 **Página de Configurações Frontend - Fase 6: Aba Agenda (v2.0.0)**
 
 - **Aba Agenda (Agenda Add-on)**: Nova aba de configurações para gerenciamento da agenda de atendimentos:

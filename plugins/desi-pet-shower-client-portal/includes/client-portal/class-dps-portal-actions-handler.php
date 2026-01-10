@@ -123,6 +123,11 @@ class DPS_Portal_Actions_Handler {
         $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
         $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
         $observations = isset( $_POST['pet_observations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_observations'] ) ) : '';
+        // Preferências de produtos
+        $shampoo_pref         = isset( $_POST['pet_shampoo_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_shampoo_pref'] ) ) : '';
+        $perfume_pref         = isset( $_POST['pet_perfume_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_perfume_pref'] ) ) : '';
+        $accessories_pref     = isset( $_POST['pet_accessories_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_accessories_pref'] ) ) : '';
+        $product_restrictions = isset( $_POST['pet_product_restrictions'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_restrictions'] ) ) : '';
 
         if ( $pet_name ) {
             wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
@@ -140,6 +145,11 @@ class DPS_Portal_Actions_Handler {
         update_post_meta( $pet_id, 'pet_allergies', $allergies );
         update_post_meta( $pet_id, 'pet_behavior', $behavior );
         update_post_meta( $pet_id, 'pet_observations', $observations );
+        // Preferências de produtos
+        update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
+        update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
+        update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
+        update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
 
         // Processa upload de foto se fornecido
         $redirect_url = wp_get_referer() ?: home_url();

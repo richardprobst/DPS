@@ -1439,6 +1439,12 @@ class DPS_Services_Addon {
                 $vacc = get_post_meta( $pet_id, 'pet_vaccinations', true );
                 $all  = get_post_meta( $pet_id, 'pet_allergies', true );
                 $beh  = get_post_meta( $pet_id, 'pet_behavior', true );
+                // Preferências de produtos
+                $shampoo_pref     = get_post_meta( $pet_id, 'pet_shampoo_pref', true );
+                $perfume_pref     = get_post_meta( $pet_id, 'pet_perfume_pref', true );
+                $accessories_pref = get_post_meta( $pet_id, 'pet_accessories_pref', true );
+                $product_restrictions = get_post_meta( $pet_id, 'pet_product_restrictions', true );
+                
                 echo '<div class="dps-pet-notes" style="background:#f9f9f9;border:1px solid #ddd;padding:10px;margin-top:10px;">';
                 echo '<p><strong>' . esc_html__( 'Informações do pet', 'dps-services-addon' ) . ':</strong></p>';
                 if ( $vacc ) {
@@ -1449,6 +1455,47 @@ class DPS_Services_Addon {
                 }
                 if ( $beh ) {
                     echo '<p><em>' . esc_html__( 'Notas de Comportamento', 'dps-services-addon' ) . ':</em> ' . esc_html( $beh ) . '</p>';
+                }
+                // Exibe preferências de produtos se houver
+                $has_product_prefs = $shampoo_pref || $perfume_pref || $accessories_pref || $product_restrictions;
+                if ( $has_product_prefs ) {
+                    echo '<hr style="margin:8px 0;border:none;border-top:1px solid #ddd;">';
+                    echo '<p><strong>🧴 ' . esc_html__( 'Preferências de Produtos', 'dps-services-addon' ) . ':</strong></p>';
+                    $shampoo_labels = [
+                        'hipoalergenico' => __( 'Hipoalergênico', 'dps-services-addon' ),
+                        'antisseptico'   => __( 'Antisséptico', 'dps-services-addon' ),
+                        'pelagem_branca' => __( 'Para pelagem branca', 'dps-services-addon' ),
+                        'pelagem_escura' => __( 'Para pelagem escura', 'dps-services-addon' ),
+                        'antipulgas'     => __( 'Antipulgas', 'dps-services-addon' ),
+                        'hidratante'     => __( 'Hidratante', 'dps-services-addon' ),
+                        'outro'          => __( 'Outro', 'dps-services-addon' ),
+                    ];
+                    $perfume_labels = [
+                        'suave'          => __( 'Perfume suave', 'dps-services-addon' ),
+                        'intenso'        => __( 'Perfume intenso', 'dps-services-addon' ),
+                        'sem_perfume'    => __( '❌ SEM PERFUME', 'dps-services-addon' ),
+                        'hipoalergenico' => __( 'Hipoalergênico apenas', 'dps-services-addon' ),
+                    ];
+                    $accessories_labels = [
+                        'lacinho'      => __( 'Lacinho', 'dps-services-addon' ),
+                        'gravata'      => __( 'Gravata', 'dps-services-addon' ),
+                        'lenco'        => __( 'Lenço', 'dps-services-addon' ),
+                        'bandana'      => __( 'Bandana', 'dps-services-addon' ),
+                        'sem_aderecos' => __( 'Não usar adereços', 'dps-services-addon' ),
+                    ];
+                    if ( $shampoo_pref && isset( $shampoo_labels[ $shampoo_pref ] ) ) {
+                        echo '<p><em>' . esc_html__( 'Shampoo', 'dps-services-addon' ) . ':</em> ' . esc_html( $shampoo_labels[ $shampoo_pref ] ) . '</p>';
+                    }
+                    if ( $perfume_pref && isset( $perfume_labels[ $perfume_pref ] ) ) {
+                        $style = 'sem_perfume' === $perfume_pref ? ' style="color:#dc2626;font-weight:bold;"' : '';
+                        echo '<p' . $style . '><em>' . esc_html__( 'Perfume', 'dps-services-addon' ) . ':</em> ' . esc_html( $perfume_labels[ $perfume_pref ] ) . '</p>';
+                    }
+                    if ( $accessories_pref && isset( $accessories_labels[ $accessories_pref ] ) ) {
+                        echo '<p><em>' . esc_html__( 'Adereços', 'dps-services-addon' ) . ':</em> ' . esc_html( $accessories_labels[ $accessories_pref ] ) . '</p>';
+                    }
+                    if ( $product_restrictions ) {
+                        echo '<p><em>' . esc_html__( 'Outras restrições', 'dps-services-addon' ) . ':</em> ' . esc_html( $product_restrictions ) . '</p>';
+                    }
                 }
                 echo '</div>';
             }
