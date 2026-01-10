@@ -1437,6 +1437,11 @@ class DPS_Finance_Addon {
      * @return string HTML renderizado
      */
     public function render_fin_docs_shortcode() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+
         // SEGURANÇA: Verifica permissões antes de listar documentos
         // Permite filtro para habilitar visualização pública se necessário
         $allow_public_view = apply_filters( 'dps_finance_docs_allow_public', false );

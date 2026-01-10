@@ -806,6 +806,9 @@ class DPS_Base_Frontend {
      * Renderiza a aplicação no frontend (abas para clientes, pets e agendamentos)
      */
     public static function render_app() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        DPS_Cache_Control::force_no_cache();
+
         // Garante que o CSS/JS do painel estejam carregados mesmo em contextos
         // onde wp_enqueue_scripts não foi executado (ex.: shortcodes renderizados
         // em builders ou pré-visualizações).
@@ -876,6 +879,9 @@ class DPS_Base_Frontend {
      * @return string HTML da página de configurações.
      */
     public static function render_settings() {
+        // Desabilita cache da página para garantir dados sempre atualizados
+        DPS_Cache_Control::force_no_cache();
+
         // Garante que o CSS/JS estejam carregados
         DPS_Base_Plugin::enqueue_frontend_assets();
 

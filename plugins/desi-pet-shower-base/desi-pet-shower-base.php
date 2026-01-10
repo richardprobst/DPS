@@ -77,6 +77,12 @@ require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 // Carrega classe de configurações frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-settings-frontend.php';
 
+// Controle de cache - previne cache de páginas do DPS
+require_once DPS_BASE_DIR . 'includes/class-dps-cache-control.php';
+
+// Inicializa controle de cache imediatamente
+DPS_Cache_Control::init();
+
 if ( ! function_exists( 'dps_load_textdomain' ) ) {
     /**
      * Carrega o text domain do plugin base.
