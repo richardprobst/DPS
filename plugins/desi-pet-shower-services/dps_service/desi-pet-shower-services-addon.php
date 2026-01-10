@@ -2124,22 +2124,43 @@ class DPS_Services_Addon {
     }
 
     /**
-     * Enfileira scripts para cálculo de valor total
+     * Enfileira scripts e estilos para o frontend.
+     *
+     * Usa a mesma lógica do plugin base para detectar se o shortcode [dps_base]
+     * está presente no conteúdo da página atual, garantindo que os estilos
+     * sejam carregados corretamente em qualquer contexto (páginas, page builders, etc.).
+     *
+     * @since 1.5.0
+     * @since 1.5.1 Alinhada lógica com plugin base usando has_shortcode().
      */
     public function enqueue_scripts() {
-        // Verifica se shortcode base está sendo usado
-        if ( ! is_page() ) {
+        global $post;
+
+        // Não carrega no admin
+        if ( is_admin() ) {
             return;
         }
-        // Carrega somente se o plugin base estiver ativo (verifica função de navegação)
-        if ( ! shortcode_exists( 'dps_base' ) ) {
+
+        // Verifica se o shortcode dps_base ou dps_services_catalog está sendo usado
+        $should_enqueue = false;
+        if ( $post instanceof WP_Post ) {
+            $content = $post->post_content;
+            $should_enqueue = has_shortcode( $content, 'dps_base' ) ||
+                              has_shortcode( $content, 'dps_services_catalog' );
+        }
+
+        // Permite que outros plugins/temas forcem o carregamento dos assets
+        $should_enqueue = apply_filters( 'dps_services_should_enqueue_assets', $should_enqueue, $post );
+
+        if ( ! $should_enqueue ) {
             return;
         }
+
         $css_path = plugin_dir_path( __FILE__ ) . 'assets/css/services-addon.css';
         $js_path = plugin_dir_path( __FILE__ ) . 'assets/js/dps-services-addon.js';
         $css_version = file_exists( $css_path ) ? filemtime( $css_path ) : '1.6.1';
         $js_version = file_exists( $js_path ) ? filemtime( $js_path ) : '1.6.1';
-        
+
         wp_enqueue_style( 'dps-services-addon-css', plugin_dir_url( __FILE__ ) . 'assets/css/services-addon.css', [], $css_version );
         wp_enqueue_script( 'dps-services-addon-js', plugin_dir_url( __FILE__ ) . 'assets/js/dps-services-addon.js', [ 'jquery' ], $js_version, true );
     }
