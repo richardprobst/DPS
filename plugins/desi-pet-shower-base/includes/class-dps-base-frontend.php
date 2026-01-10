@@ -807,7 +807,9 @@ class DPS_Base_Frontend {
      */
     public static function render_app() {
         // Desabilita cache da página para garantir dados sempre atualizados
-        DPS_Cache_Control::force_no_cache();
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
 
         // Garante que o CSS/JS do painel estejam carregados mesmo em contextos
         // onde wp_enqueue_scripts não foi executado (ex.: shortcodes renderizados
@@ -880,7 +882,9 @@ class DPS_Base_Frontend {
      */
     public static function render_settings() {
         // Desabilita cache da página para garantir dados sempre atualizados
-        DPS_Cache_Control::force_no_cache();
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
 
         // Garante que o CSS/JS estejam carregados
         DPS_Base_Plugin::enqueue_frontend_assets();
