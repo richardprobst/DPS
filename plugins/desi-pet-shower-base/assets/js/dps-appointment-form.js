@@ -103,6 +103,7 @@
             const type = $('input[name="appointment_type"]:checked').val();
             const isSubscription = (type === 'subscription');
             const isPast = (type === 'past');
+            const isSimple = (type === 'simple');
             
             // Exibe ou oculta o seletor de frequência
             $('#dps-appointment-frequency-wrapper').toggle(isSubscription);
@@ -114,7 +115,8 @@
             $('#dps-past-payment-wrapper').toggle(isPast);
             
             // Controla campos específicos de cada tipo
-            $('.dps-simple-fields').toggle(!isSubscription && !isPast);
+            // "Past" appointments should have the same fields as "Simple" appointments
+            $('.dps-simple-fields').toggle(isSimple || isPast);
             $('.dps-subscription-fields').toggle(isSubscription);
             
             // Atualiza campos de TaxiDog
@@ -129,7 +131,8 @@
             const hasTaxi = $('#dps-taxidog-toggle').is(':checked');
             const $card = $('.dps-taxidog-card');
             
-            if (type === 'subscription' || type === 'past') {
+            // TaxiDog price field is available for simple and past appointments
+            if (type === 'subscription') {
                 $('#dps-taxidog-extra').hide();
                 $card.attr('data-taxidog-active', '0');
             } else {
@@ -567,6 +570,7 @@
          */
         validateForm: function() {
             const errors = [];
+            const appointmentType = $('input[name="appointment_type"]:checked').val() || 'simple';
             
             // Valida cliente
             const clientId = $('#dps-appointment-cliente').val();
@@ -585,13 +589,20 @@
             if (!date) {
                 errors.push(dpsAppointmentData.l10n.selectDate || 'Selecione uma data');
             } else {
-                // Verifica se não é data passada
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const selectedDate = new Date(date + 'T00:00:00');
                 
-                if (selectedDate < today) {
-                    errors.push(dpsAppointmentData.l10n.pastDate || 'A data não pode ser anterior a hoje');
+                if (appointmentType === 'past') {
+                    // Past appointments require exclusively past dates
+                    if (selectedDate >= today) {
+                        errors.push(dpsAppointmentData.l10n.requirePastDate || 'Para agendamento passado, a data deve ser anterior a hoje');
+                    }
+                } else {
+                    // Simple and subscription appointments cannot use past dates
+                    if (selectedDate < today) {
+                        errors.push(dpsAppointmentData.l10n.pastDate || 'A data não pode ser anterior a hoje');
+                    }
                 }
             }
             
@@ -599,6 +610,14 @@
             const time = $('#appointment_time').val();
             if (!time) {
                 errors.push(dpsAppointmentData.l10n.selectTimeSlot || 'Selecione um horário');
+            }
+            
+            // Valida status de pagamento para agendamentos passados
+            if (appointmentType === 'past') {
+                const paymentStatus = $('#past_payment_status').val();
+                if (!paymentStatus) {
+                    errors.push(dpsAppointmentData.l10n.selectPaymentStatus || 'Selecione o status do pagamento');
+                }
             }
             
             return errors;

@@ -3303,6 +3303,30 @@ class DPS_Base_Frontend {
             $errors[] = __( 'O campo Horário é obrigatório.', 'desi-pet-shower' );
         }
         
+        // Validação de data conforme tipo de agendamento
+        if ( ! empty( $date ) ) {
+            $today       = wp_date( 'Y-m-d' );
+            $date_parsed = gmdate( 'Y-m-d', strtotime( $date ) );
+            
+            if ( 'past' === $appt_type ) {
+                // Agendamentos passados exigem data anterior a hoje
+                if ( $date_parsed >= $today ) {
+                    $errors[] = __( 'Para agendamento passado, a data deve ser anterior a hoje.', 'desi-pet-shower' );
+                }
+                
+                // Status de pagamento é obrigatório para agendamentos passados
+                $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
+                if ( empty( $past_payment_status ) ) {
+                    $errors[] = __( 'Selecione o status do pagamento para agendamentos passados.', 'desi-pet-shower' );
+                }
+            } elseif ( in_array( $appt_type, [ 'simple', 'subscription' ], true ) ) {
+                // Agendamentos simples e de assinatura não aceitam datas passadas
+                if ( $date_parsed < $today ) {
+                    $errors[] = __( 'A data não pode ser anterior a hoje. Use "Agendamento Passado" para registrar atendimentos já realizados.', 'desi-pet-shower' );
+                }
+            }
+        }
+        
         if ( ! empty( $errors ) ) {
             DPS_Logger::warning(
                 __( 'Tentativa de salvar agendamento com dados incompletos', 'desi-pet-shower' ),
@@ -3694,7 +3718,8 @@ class DPS_Base_Frontend {
         update_post_meta( $appt_id, 'appointment_tosa', $tosa );
         update_post_meta( $appt_id, 'appointment_taxidog', $taxidog );
 
-        if ( 'simple' === $appt_type ) {
+        // TaxiDog price is available for simple and past appointments
+        if ( 'simple' === $appt_type || 'past' === $appt_type ) {
             update_post_meta( $appt_id, 'appointment_taxidog_price', $taxi_price );
         } else {
             update_post_meta( $appt_id, 'appointment_taxidog_price', 0 );
@@ -3852,11 +3877,13 @@ class DPS_Base_Frontend {
 
             if ( 'pending' === $past_payment_status ) {
                 update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
+                // Pendente: marca como finalizado (aguardando pagamento)
+                update_post_meta( $appt_id, 'appointment_status', 'finalizado' );
             } else {
                 delete_post_meta( $appt_id, 'past_payment_value' );
+                // Pago: marca como finalizado e pago
+                update_post_meta( $appt_id, 'appointment_status', 'finalizado_pago' );
             }
-
-            update_post_meta( $appt_id, 'appointment_status', 'realizado' );
         }
     }
 
