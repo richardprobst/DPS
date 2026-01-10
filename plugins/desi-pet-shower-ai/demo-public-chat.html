@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Público de IA - Demo do Layout Moderno</title>
+    <link rel="stylesheet" href="assets/css/dps-ai-public-chat.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .demo-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .demo-header p {
+            font-size: 16px;
+            color: #6b7280;
+        }
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .demo-section {
+            margin-bottom: 60px;
+        }
+        .demo-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .demo-row {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .demo-column {
+            flex: 1;
+            min-width: 300px;
+        }
+        .demo-note {
+            background: #eff6ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .demo-note h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0284c7;
+            margin-bottom: 8px;
+        }
+        .demo-note p {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .demo-note code {
+            background: rgba(0,0,0,0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🐾 Chat Público de IA - Layout Moderno v1.7</h1>
+        <p>Demonstração das melhorias visuais e funcionalidades do chat público</p>
+    </div>
+    
+    <div class="demo-container">
+        <!-- Seção 1: Modo Inline Claro -->
+        <div class="demo-section">
+            <h2>📱 Modo Inline (Tema Claro)</h2>
+            
+            <div id="dps-ai-public-chat" class="dps-ai-public-chat dps-ai-public-chat--inline dps-ai-public-chat--light" data-nonce="demo123">
+                <div class="dps-ai-public-panel">
+                    <!-- Cabeçalho -->
+                    <div class="dps-ai-public-header">
+                        <div class="dps-ai-public-header-content">
+                            <h3 class="dps-ai-public-title">Tire suas dúvidas</h3>
+                            <p class="dps-ai-public-subtitle">Nosso assistente virtual pode ajudar com informações sobre serviços de Banho e Tosa.</p>
+                        </div>
+                        <div class="dps-ai-public-status">
+                            <span class="dps-ai-public-status-dot"></span>
+                            <span class="dps-ai-public-status-text">Online</span>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="dps-ai-public-toolbar">
+                        <div class="dps-ai-public-toolbar-left">
+                            <span class="dps-ai-public-msg-count">3 msg</span>
+                        </div>
+                        <div class="dps-ai-public-toolbar-right">
+                            <button type="button" class="dps-ai-public-clear-btn">
+                                <span>🗑️</span> Limpar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área de chat -->
+                    <div class="dps-ai-public-body">
+                        <!-- FAQs sugeridas -->
+                        <div class="dps-ai-public-faqs">
+                            <p class="dps-ai-public-faqs-label">Perguntas frequentes:</p>
+                            <div class="dps-ai-public-faqs-list">
+                                <button type="button" class="dps-ai-public-faq-btn">Quanto custa um banho?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Qual o horário de funcionamento?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Como agendar um serviço?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Vocês fazem tosa para gatos?</button>
+                            </div>
+                        </div>
+
+                        <!-- Container de mensagens -->
+                        <div id="dps-ai-public-messages" class="dps-ai-public-messages">
+                            <!-- Mensagem de boas-vindas -->
+                            <div class="dps-ai-public-message dps-ai-public-message--assistant">
+                                <div class="dps-ai-public-message-avatar">🐾</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Olá! 👋 Sou o assistente virtual do pet shop. Posso ajudar com informações sobre nossos serviços de Banho e Tosa, preços, horários e muito mais. Como posso ajudar você hoje?</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mensagem do usuário -->
+                            <div class="dps-ai-public-message dps-ai-public-message--user">
+                                <div class="dps-ai-public-message-avatar">👤</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Quanto custa um banho para cachorro de porte médio?</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resposta do assistente com Markdown formatado -->
+                            <div class="dps-ai-public-message dps-ai-public-message--assistant">
+                                <div class="dps-ai-public-message-avatar">🐾</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>O valor do banho para cães de porte médio (entre 10 e 25 kg) varia de acordo com algumas características:</p>
+                                        <ul>
+                                            <li><strong>Banho simples:</strong> R$ 50,00 a R$ 70,00</li>
+                                            <li><strong>Banho + Tosa higiênica:</strong> R$ 70,00 a R$ 90,00</li>
+                                            <li><strong>Banho + Tosa completa:</strong> R$ 90,00 a R$ 120,00</li>
+                                        </ul>
+                                        <p>O preço pode variar conforme a pelagem do pet. Quer agendar um horário?</p>
+                                    </div>
+                                    <div class="dps-ai-public-message-actions">
+                                        <button type="button" class="dps-ai-public-copy-btn">
+                                            <span>📋</span> Copiar
+                                        </button>
+                                        <div class="dps-ai-public-feedback">
+                                            <span class="dps-ai-public-feedback-label">Esta resposta foi útil?</span>
+                                            <button type="button" class="dps-ai-public-feedback-btn" aria-label="Útil">👍</button>
+                                            <button type="button" class="dps-ai-public-feedback-btn" aria-label="Não útil">👎</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicador de digitação (visível para demo) -->
+                        <div class="dps-ai-public-typing">
+                            <div class="dps-ai-public-typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span class="dps-ai-public-typing-text">Digitando...</span>
+                        </div>
+                    </div>
+
+                    <!-- Área de input -->
+                    <div class="dps-ai-public-footer">
+                        <div class="dps-ai-public-input-wrapper">
+                            <textarea class="dps-ai-public-input" placeholder="Digite sua pergunta sobre nossos serviços..." rows="1"></textarea>
+                            <button class="dps-ai-public-voice" style="display: flex;">
+                                <span class="dps-ai-public-voice-icon">🎤</span>
+                            </button>
+                            <button class="dps-ai-public-submit">
+                                <span class="dps-ai-public-submit-icon">➤</span>
+                            </button>
+                            <span class="dps-ai-public-char-counter">0/500</span>
+                        </div>
+                        <p class="dps-ai-public-disclaimer">
+                            Este é um assistente virtual. Para informações mais detalhadas, entre em contato conosco.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-note">
+                <h4>✨ Novidades v1.7</h4>
+                <p>
+                    • <strong>Toolbar</strong> com contador de mensagens e botão limpar<br>
+                    • <strong>Contador de caracteres</strong> com indicador de limite<br>
+                    • <strong>Botão Copiar</strong> nas respostas do assistente<br>
+                    • <strong>Formatação Markdown</strong> para listas, negrito e itálico<br>
+                    • <strong>Gradientes modernos</strong> nos botões e avatares<br>
+                    • <strong>Animações suaves</strong> com easing melhorado<br>
+                    • <strong>Acessibilidade</strong> com focus-visible e suporte a alto contraste
+                </p>
+            </div>
+        </div>
+
+        <!-- Seção 2: Estados de Erro -->
+        <div class="demo-section">
+            <h2>⚠️ Estados de Erro e Rate Limit</h2>
+            
+            <div class="dps-ai-public-chat dps-ai-public-chat--inline" style="max-width: 600px;">
+                <div class="dps-ai-public-panel" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;">
+                    <div class="dps-ai-public-messages" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Erro genérico -->
+                        <div class="dps-ai-public-message dps-ai-public-message--error">
+                            <div class="dps-ai-public-message-avatar">⚠️</div>
+                            <div class="dps-ai-public-message-content">
+                                <div class="dps-ai-public-message-text">
+                                    <p>Desculpe, não consegui processar sua pergunta no momento. Por favor, tente novamente.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rate limit -->
+                        <div class="dps-ai-public-message dps-ai-public-message--error dps-ai-public-message--rate-limit">
+                            <div class="dps-ai-public-message-avatar">⏱️</div>
+                            <div class="dps-ai-public-message-content">
+                                <div class="dps-ai-public-message-text">
+                                    <p>Você atingiu o limite de perguntas. Por favor, aguarde alguns minutos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: Tema Escuro -->
+        <div class="demo-section">
+            <h2>🌙 Tema Escuro</h2>
+            
+            <div class="dps-ai-public-chat dps-ai-public-chat--inline dps-ai-public-chat--dark">
+                <div class="dps-ai-public-panel">
+                    <div class="dps-ai-public-header">
+                        <div class="dps-ai-public-header-content">
+                            <h3 class="dps-ai-public-title">Tire suas dúvidas</h3>
+                            <p class="dps-ai-public-subtitle">Assistente virtual disponível 24h.</p>
+                        </div>
+                        <div class="dps-ai-public-status">
+                            <span class="dps-ai-public-status-dot"></span>
+                            <span class="dps-ai-public-status-text">Online</span>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-toolbar">
+                        <div class="dps-ai-public-toolbar-left">
+                            <span class="dps-ai-public-msg-count">2 msg</span>
+                        </div>
+                        <div class="dps-ai-public-toolbar-right">
+                            <button type="button" class="dps-ai-public-clear-btn">
+                                <span>🗑️</span> Limpar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-body">
+                        <div class="dps-ai-public-faqs">
+                            <p class="dps-ai-public-faqs-label">Perguntas frequentes:</p>
+                            <div class="dps-ai-public-faqs-list">
+                                <button type="button" class="dps-ai-public-faq-btn">Quanto custa um banho?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Horário de funcionamento?</button>
+                            </div>
+                        </div>
+                        
+                        <div class="dps-ai-public-messages">
+                            <div class="dps-ai-public-message dps-ai-public-message--assistant">
+                                <div class="dps-ai-public-message-avatar">🐾</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Olá! 👋 Como posso ajudar você hoje?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dps-ai-public-message dps-ai-public-message--user">
+                                <div class="dps-ai-public-message-avatar">👤</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Quais são os horários de funcionamento?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-footer">
+                        <div class="dps-ai-public-input-wrapper">
+                            <textarea class="dps-ai-public-input" placeholder="Digite sua pergunta..." rows="1"></textarea>
+                            <button class="dps-ai-public-submit">
+                                <span class="dps-ai-public-submit-icon">➤</span>
+                            </button>
+                        </div>
+                        <p class="dps-ai-public-disclaimer">
+                            Este é um assistente virtual.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Uso do Shortcode -->
+        <div class="demo-section">
+            <h2>📝 Uso do Shortcode</h2>
+            
+            <div class="demo-note">
+                <h4>Exemplos de uso</h4>
+                <p>
+                    <code>[dps_ai_public_chat]</code> - Chat inline padrão<br><br>
+                    <code>[dps_ai_public_chat mode="floating" position="bottom-right"]</code> - Chat flutuante<br><br>
+                    <code>[dps_ai_public_chat theme="dark" primary_color="#8b5cf6"]</code> - Tema escuro com cor customizada<br><br>
+                    <code>[dps_ai_public_chat title="Fale conosco" show_faqs="false"]</code> - Título customizado sem FAQs
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
