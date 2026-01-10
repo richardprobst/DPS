@@ -217,6 +217,14 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Base Plugin - Correção do Shortcode [dps_configuracoes] (v1.1.1)**
+
+- **Erro "Falha ao publicar. A resposta não é um JSON válido" corrigido**: O shortcode `[dps_configuracoes]` causava um PHP Fatal Error ao ser inserido no editor de blocos (Gutenberg). A classe `DPS_Settings_Frontend` referenciava `DPS_Logger::LEVEL_DEBUG` que não estava definida na classe `DPS_Logger`.
+- **Constante LEVEL_DEBUG adicionada**: Adicionada constante `LEVEL_DEBUG = 'debug'` à classe `DPS_Logger` para suportar nível de log mais detalhado.
+- **Método debug() adicionado**: Novo método `DPS_Logger::debug()` para consistência com os outros níveis de log (info, warning, error).
+- **Ordem de prioridade de logs atualizada**: DEBUG (0) → INFO (1) → WARNING (2) → ERROR (3), permitindo filtrar logs por nível mínimo configurado.
+- **Causa raiz**: A aba "Empresa" do shortcode de configurações usava `DPS_Logger::LEVEL_DEBUG` no dropdown de níveis de log, mas a constante nunca foi definida na classe.
+
 **Stats Add-on - Correções na Aba Estatísticas (v1.5.1)**
 
 - **Erro de Finance não detectado no comparativo de períodos**: O erro `finance_not_active` retornado por `get_financial_totals()` agora é corretamente propagado para o array `current` em `get_period_comparison()`. Anteriormente, se o Finance Add-on não estivesse ativo, as métricas financeiras exibiam zero sem mostrar a mensagem de aviso adequada.
