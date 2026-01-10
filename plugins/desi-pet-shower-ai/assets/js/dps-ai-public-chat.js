@@ -439,9 +439,10 @@
         text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
         
-        // Itálico: *texto* ou _texto_ (não dentro de palavras)
-        text = text.replace(/(?<!\w)\*([^*]+)\*(?!\w)/g, '<em>$1</em>');
-        text = text.replace(/(?<!\w)_([^_]+)_(?!\w)/g, '<em>$1</em>');
+        // Itálico: *texto* ou _texto_ (simplificado para compatibilidade)
+        // Processa apenas quando há espaço ou início de linha antes
+        text = text.replace(/(^|\s)\*([^*]+)\*(\s|$)/g, '$1<em>$2</em>$3');
+        text = text.replace(/(^|\s)_([^_]+)_(\s|$)/g, '$1<em>$2</em>$3');
         
         // Código inline: `texto`
         text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
