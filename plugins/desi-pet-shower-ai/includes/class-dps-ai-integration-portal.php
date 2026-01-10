@@ -229,6 +229,14 @@ class DPS_AI_Integration_Portal {
 
     /**
      * Processa perguntas via AJAX.
+     *
+     * SEGURANÇA (Isolamento de Dados):
+     * - Verifica nonce para proteção CSRF
+     * - Obtém client_id exclusivamente via autenticação do portal (não aceita de POST)
+     * - Busca pet_ids filtrando por pet_client_id = client_id
+     * - Passa dados validados para DPS_AI_Assistant que filtra consultas por client_id
+     *
+     * Isso garante que um cliente não pode acessar dados de outros clientes.
      */
     public function handle_ajax_ask() {
         // Verifica nonce
@@ -504,11 +512,21 @@ class DPS_AI_Integration_Portal {
     /**
      * Busca os IDs dos pets de um cliente.
      *
-     * @param int $client_id ID do cliente.
+     * SEGURANÇA: Filtra pets por pet_client_id no banco de dados para garantir
+     * que apenas pets do cliente autenticado sejam retornados.
+     * Esta validação é crítica para o isolamento de dados no assistente de IA.
      *
-     * @return array IDs dos pets.
+     * @param int $client_id ID do cliente autenticado.
+     *
+     * @return array IDs dos pets que pertencem ao cliente.
      */
     private function get_client_pet_ids( $client_id ) {
+        // Valida entrada para evitar queries sem filtro de cliente
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return [];
+        }
+
         $query = new WP_Query( [
             'post_type'      => 'dps_pet',
             'post_status'    => 'publish',
@@ -519,6 +537,7 @@ class DPS_AI_Integration_Portal {
                     'key'     => 'pet_client_id',
                     'value'   => $client_id,
                     'compare' => '=',
+                    'type'    => 'NUMERIC',
                 ],
             ],
         ] );
