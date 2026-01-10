@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Logger {
 
     const DB_VERSION    = '1.0.0';
+    const LEVEL_DEBUG   = 'debug';
     const LEVEL_INFO    = 'info';
     const LEVEL_WARNING = 'warning';
     const LEVEL_ERROR   = 'error';
@@ -82,7 +83,7 @@ class DPS_Logger {
      * @return array
      */
     public static function get_levels() {
-        return [ self::LEVEL_INFO, self::LEVEL_WARNING, self::LEVEL_ERROR ];
+        return [ self::LEVEL_DEBUG, self::LEVEL_INFO, self::LEVEL_WARNING, self::LEVEL_ERROR ];
     }
 
     /**
@@ -118,6 +119,9 @@ class DPS_Logger {
         }
 
         switch ( $level ) {
+            case self::LEVEL_DEBUG:
+                self::debug( $message, $context, $source );
+                break;
             case self::LEVEL_WARNING:
                 self::warning( $message, $context, $source );
                 break;
@@ -129,6 +133,17 @@ class DPS_Logger {
                 self::info( $message, $context, $source );
                 break;
         }
+    }
+
+    /**
+     * Registra log de debug.
+     *
+     * @param string $message Texto principal.
+     * @param array  $context Dados complementares.
+     * @param string $source  Origem (base, finance, payment, etc.).
+     */
+    public static function debug( $message, $context = array(), $source = 'base' ) {
+        self::write( self::LEVEL_DEBUG, $message, $context, $source );
     }
 
     /**
@@ -173,9 +188,10 @@ class DPS_Logger {
      */
     private static function should_log( $level ) {
         $order = [
-            self::LEVEL_INFO    => 0,
-            self::LEVEL_WARNING => 1,
-            self::LEVEL_ERROR   => 2,
+            self::LEVEL_DEBUG   => 0,
+            self::LEVEL_INFO    => 1,
+            self::LEVEL_WARNING => 2,
+            self::LEVEL_ERROR   => 3,
         ];
 
         $min_level = get_option( 'dps_logger_min_level', self::LEVEL_INFO );
