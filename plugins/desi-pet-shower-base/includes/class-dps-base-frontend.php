@@ -1255,21 +1255,26 @@ class DPS_Base_Frontend {
             if ( $editing ) {
                 // Carrega metadados do pet para edição
                 $meta = [
-                    'owner_id'     => get_post_meta( $edit_id, 'owner_id', true ),
-                    'species'      => get_post_meta( $edit_id, 'pet_species', true ),
-                    'breed'        => get_post_meta( $edit_id, 'pet_breed', true ),
-                    'size'         => get_post_meta( $edit_id, 'pet_size', true ),
-                    'weight'       => get_post_meta( $edit_id, 'pet_weight', true ),
-                    'coat'         => get_post_meta( $edit_id, 'pet_coat', true ),
-                    'color'        => get_post_meta( $edit_id, 'pet_color', true ),
-                    'birth'        => get_post_meta( $edit_id, 'pet_birth', true ),
-                    'sex'          => get_post_meta( $edit_id, 'pet_sex', true ),
-                    'care'         => get_post_meta( $edit_id, 'pet_care', true ),
-                    'aggressive'   => get_post_meta( $edit_id, 'pet_aggressive', true ),
-                    'vaccinations' => get_post_meta( $edit_id, 'pet_vaccinations', true ),
-                    'allergies'    => get_post_meta( $edit_id, 'pet_allergies', true ),
-                    'behavior'     => get_post_meta( $edit_id, 'pet_behavior', true ),
-                    'photo_id'     => get_post_meta( $edit_id, 'pet_photo_id', true ),
+                    'owner_id'             => get_post_meta( $edit_id, 'owner_id', true ),
+                    'species'              => get_post_meta( $edit_id, 'pet_species', true ),
+                    'breed'                => get_post_meta( $edit_id, 'pet_breed', true ),
+                    'size'                 => get_post_meta( $edit_id, 'pet_size', true ),
+                    'weight'               => get_post_meta( $edit_id, 'pet_weight', true ),
+                    'coat'                 => get_post_meta( $edit_id, 'pet_coat', true ),
+                    'color'                => get_post_meta( $edit_id, 'pet_color', true ),
+                    'birth'                => get_post_meta( $edit_id, 'pet_birth', true ),
+                    'sex'                  => get_post_meta( $edit_id, 'pet_sex', true ),
+                    'care'                 => get_post_meta( $edit_id, 'pet_care', true ),
+                    'aggressive'           => get_post_meta( $edit_id, 'pet_aggressive', true ),
+                    'vaccinations'         => get_post_meta( $edit_id, 'pet_vaccinations', true ),
+                    'allergies'            => get_post_meta( $edit_id, 'pet_allergies', true ),
+                    'behavior'             => get_post_meta( $edit_id, 'pet_behavior', true ),
+                    'photo_id'             => get_post_meta( $edit_id, 'pet_photo_id', true ),
+                    // Preferências de produtos
+                    'shampoo_pref'         => get_post_meta( $edit_id, 'pet_shampoo_pref', true ),
+                    'perfume_pref'         => get_post_meta( $edit_id, 'pet_perfume_pref', true ),
+                    'accessories_pref'     => get_post_meta( $edit_id, 'pet_accessories_pref', true ),
+                    'product_restrictions' => get_post_meta( $edit_id, 'pet_product_restrictions', true ),
                 ];
             }
         }
@@ -2900,6 +2905,11 @@ class DPS_Base_Frontend {
         $vaccinations = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
         $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
         $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+        // Preferências de produtos
+        $shampoo_pref         = isset( $_POST['pet_shampoo_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_shampoo_pref'] ) ) : '';
+        $perfume_pref         = isset( $_POST['pet_perfume_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_perfume_pref'] ) ) : '';
+        $accessories_pref     = isset( $_POST['pet_accessories_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_accessories_pref'] ) ) : '';
+        $product_restrictions = isset( $_POST['pet_product_restrictions'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_restrictions'] ) ) : '';
         
         // Validação de campos obrigatórios
         $errors = [];
@@ -2964,6 +2974,11 @@ class DPS_Base_Frontend {
         update_post_meta( $pet_id, 'pet_vaccinations', $vaccinations );
         update_post_meta( $pet_id, 'pet_allergies', $allergies );
         update_post_meta( $pet_id, 'pet_behavior', $behavior );
+        // Preferências de produtos
+        update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
+        update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
+        update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
+        update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
         // Lida com upload da foto do pet, se houver
         if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
             $file = $_FILES['pet_photo'];
@@ -3286,6 +3301,30 @@ class DPS_Base_Frontend {
         }
         if ( empty( $time ) ) {
             $errors[] = __( 'O campo Horário é obrigatório.', 'desi-pet-shower' );
+        }
+        
+        // Validação de data conforme tipo de agendamento
+        if ( ! empty( $date ) ) {
+            $today       = wp_date( 'Y-m-d' );
+            $date_parsed = gmdate( 'Y-m-d', strtotime( $date ) );
+            
+            if ( 'past' === $appt_type ) {
+                // Agendamentos passados exigem data anterior a hoje
+                if ( $date_parsed >= $today ) {
+                    $errors[] = __( 'Para agendamento passado, a data deve ser anterior a hoje.', 'desi-pet-shower' );
+                }
+                
+                // Status de pagamento é obrigatório para agendamentos passados
+                $past_payment_status = isset( $_POST['past_payment_status'] ) ? sanitize_text_field( wp_unslash( $_POST['past_payment_status'] ) ) : '';
+                if ( empty( $past_payment_status ) ) {
+                    $errors[] = __( 'Selecione o status do pagamento para agendamentos passados.', 'desi-pet-shower' );
+                }
+            } elseif ( in_array( $appt_type, [ 'simple', 'subscription' ], true ) ) {
+                // Agendamentos simples e de assinatura não aceitam datas passadas
+                if ( $date_parsed < $today ) {
+                    $errors[] = __( 'A data não pode ser anterior a hoje. Use "Agendamento Passado" para registrar atendimentos já realizados.', 'desi-pet-shower' );
+                }
+            }
         }
         
         if ( ! empty( $errors ) ) {
@@ -3679,7 +3718,8 @@ class DPS_Base_Frontend {
         update_post_meta( $appt_id, 'appointment_tosa', $tosa );
         update_post_meta( $appt_id, 'appointment_taxidog', $taxidog );
 
-        if ( 'simple' === $appt_type ) {
+        // TaxiDog price is available for simple and past appointments
+        if ( 'simple' === $appt_type || 'past' === $appt_type ) {
             update_post_meta( $appt_id, 'appointment_taxidog_price', $taxi_price );
         } else {
             update_post_meta( $appt_id, 'appointment_taxidog_price', 0 );
@@ -3837,11 +3877,13 @@ class DPS_Base_Frontend {
 
             if ( 'pending' === $past_payment_status ) {
                 update_post_meta( $appt_id, 'past_payment_value', $past_payment_value );
+                // Pendente: marca como finalizado (aguardando pagamento)
+                update_post_meta( $appt_id, 'appointment_status', 'finalizado' );
             } else {
                 delete_post_meta( $appt_id, 'past_payment_value' );
+                // Pago: marca como finalizado e pago
+                update_post_meta( $appt_id, 'appointment_status', 'finalizado_pago' );
             }
-
-            update_post_meta( $appt_id, 'appointment_status', 'realizado' );
         }
     }
 

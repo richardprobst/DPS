@@ -505,6 +505,11 @@ final class DPS_Client_Portal {
             $behavior_notes    = isset( $_POST['pet_behavior_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior_notes'] ) ) : '';
             $grooming_pref     = isset( $_POST['pet_grooming_preference'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_grooming_preference'] ) ) : '';
             $product_notes     = isset( $_POST['pet_product_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_notes'] ) ) : '';
+            // Preferências de produtos
+            $shampoo_pref         = isset( $_POST['pet_shampoo_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_shampoo_pref'] ) ) : '';
+            $perfume_pref         = isset( $_POST['pet_perfume_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_perfume_pref'] ) ) : '';
+            $accessories_pref     = isset( $_POST['pet_accessories_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_accessories_pref'] ) ) : '';
+            $product_restrictions = isset( $_POST['pet_product_restrictions'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_restrictions'] ) ) : '';
 
             if ( $pet_name ) {
                 wp_update_post( [ 'ID' => $pet_id, 'post_title' => $pet_name ] );
@@ -526,6 +531,11 @@ final class DPS_Client_Portal {
             update_post_meta( $pet_id, 'pet_behavior_notes', $behavior_notes );
             update_post_meta( $pet_id, 'pet_grooming_preference', $grooming_pref );
             update_post_meta( $pet_id, 'pet_product_notes', $product_notes );
+            // Preferências de produtos
+            update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
+            update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
+            update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
+            update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
 
             if ( ! empty( $_FILES['pet_photo']['name'] ) ) {
                 $file = $_FILES['pet_photo'];

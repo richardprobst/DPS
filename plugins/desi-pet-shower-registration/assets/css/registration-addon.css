@@ -766,3 +766,113 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   17. Product Preferences Step (Step 3)
+   ========================================================================== */
+
+.dps-step-description {
+    margin: 0 0 20px;
+    padding: 16px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    color: #0c4a6e;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#dps-product-prefs-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.dps-product-prefs-pet {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f9fafb;
+}
+
+.dps-product-prefs-pet__title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-product-pref-field {
+    margin-bottom: 12px;
+}
+
+.dps-product-pref-field:last-child {
+    margin-bottom: 0;
+}
+
+.dps-product-pref-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dps-product-pref-field select,
+.dps-product-pref-field textarea {
+    width: 100%;
+    margin-top: 4px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-product-pref-field select:focus,
+.dps-product-pref-field textarea:focus {
+    border-color: #0ea5e9;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-product-pref-field--full {
+    flex: 1 1 100%;
+}
+
+.dps-empty-message {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+}
+
+/* Grid para campos de preferências */
+@media (min-width: 768px) {
+    .dps-product-prefs-pet {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .dps-product-prefs-pet__title {
+        grid-column: 1 / -1;
+    }
+    
+    .dps-product-pref-field--full {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767px) {
+    .dps-product-prefs-pet {
+        display: flex;
+        flex-direction: column;
+    }
+}

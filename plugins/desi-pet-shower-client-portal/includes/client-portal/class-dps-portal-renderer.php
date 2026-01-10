@@ -876,6 +876,85 @@ class DPS_Portal_Renderer {
         
         echo '</fieldset>';
         
+        // Fieldset: Preferências de Produtos
+        $shampoo_pref         = get_post_meta( $pet_id, 'pet_shampoo_pref', true );
+        $perfume_pref         = get_post_meta( $pet_id, 'pet_perfume_pref', true );
+        $accessories_pref     = get_post_meta( $pet_id, 'pet_accessories_pref', true );
+        $product_restrictions = get_post_meta( $pet_id, 'pet_product_restrictions', true );
+        
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( '🧴 Preferências de Produtos', 'dps-client-portal' ) . '</legend>';
+        echo '<p class="dps-fieldset__help">' . esc_html__( 'Informe preferências ou restrições de produtos para garantir um atendimento personalizado.', 'dps-client-portal' ) . '</p>';
+        
+        echo '<div class="dps-form-row dps-form-row--3col">';
+        
+        // Shampoo
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_shampoo_pref_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Shampoo', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_shampoo_pref" id="pet_shampoo_pref_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $shampoo_options = [
+            ''               => __( 'Sem preferência', 'dps-client-portal' ),
+            'hipoalergenico' => __( 'Hipoalergênico', 'dps-client-portal' ),
+            'antisseptico'   => __( 'Antisséptico', 'dps-client-portal' ),
+            'pelagem_branca' => __( 'Para pelagem branca', 'dps-client-portal' ),
+            'pelagem_escura' => __( 'Para pelagem escura', 'dps-client-portal' ),
+            'antipulgas'     => __( 'Antipulgas', 'dps-client-portal' ),
+            'hidratante'     => __( 'Hidratante', 'dps-client-portal' ),
+            'outro'          => __( 'Outro', 'dps-client-portal' ),
+        ];
+        foreach ( $shampoo_options as $value => $label ) {
+            $selected = ( $shampoo_pref === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        // Perfume
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_perfume_pref_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Perfume', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_perfume_pref" id="pet_perfume_pref_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $perfume_options = [
+            ''               => __( 'Sem preferência', 'dps-client-portal' ),
+            'suave'          => __( 'Perfume suave', 'dps-client-portal' ),
+            'intenso'        => __( 'Perfume intenso', 'dps-client-portal' ),
+            'sem_perfume'    => __( 'Sem perfume (proibido)', 'dps-client-portal' ),
+            'hipoalergenico' => __( 'Hipoalergênico apenas', 'dps-client-portal' ),
+        ];
+        foreach ( $perfume_options as $value => $label ) {
+            $selected = ( $perfume_pref === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        // Adereços
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_accessories_pref_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Adereços', 'dps-client-portal' ) . '</label>';
+        echo '<select name="pet_accessories_pref" id="pet_accessories_pref_' . esc_attr( $pet_id ) . '" class="dps-form-control">';
+        $accessories_options = [
+            ''             => __( 'Sem preferência', 'dps-client-portal' ),
+            'lacinho'      => __( 'Lacinho', 'dps-client-portal' ),
+            'gravata'      => __( 'Gravata', 'dps-client-portal' ),
+            'lenco'        => __( 'Lenço', 'dps-client-portal' ),
+            'bandana'      => __( 'Bandana', 'dps-client-portal' ),
+            'sem_aderecos' => __( 'Não usar adereços', 'dps-client-portal' ),
+        ];
+        foreach ( $accessories_options as $value => $label ) {
+            $selected = ( $accessories_pref === $value ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        
+        echo '<div class="dps-form-col">';
+        echo '<label for="pet_product_restrictions_' . esc_attr( $pet_id ) . '" class="dps-form-label">' . esc_html__( 'Outras restrições de produtos', 'dps-client-portal' ) . '</label>';
+        echo '<textarea name="pet_product_restrictions" id="pet_product_restrictions_' . esc_attr( $pet_id ) . '" rows="2" class="dps-form-control" placeholder="' . esc_attr__( 'Ex.: Alérgico a produto X, usar apenas produtos naturais...', 'dps-client-portal' ) . '">' . esc_textarea( $product_restrictions ) . '</textarea>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+        
         // Botão de submit
         echo '<div class="dps-form-actions">';
         echo '<button type="submit" class="button button-primary dps-btn-submit">';

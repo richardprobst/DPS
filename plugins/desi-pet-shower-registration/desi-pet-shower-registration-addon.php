@@ -2085,6 +2085,11 @@ class DPS_Registration_Addon {
         $pet_cares      = isset( $_POST['pet_care'] ) && is_array( $_POST['pet_care'] ) ? array_map( 'wp_unslash', $_POST['pet_care'] ) : [];
         // pet_aggressive é checkbox - valor é só "1", não precisa wp_unslash mas aplicamos por consistência
         $pet_aggs       = isset( $_POST['pet_aggressive'] ) && is_array( $_POST['pet_aggressive'] ) ? array_map( 'wp_unslash', $_POST['pet_aggressive'] ) : [];
+        // Campos de preferências de produtos (Etapa 3)
+        $pet_shampoo_prefs       = isset( $_POST['pet_shampoo_pref'] ) && is_array( $_POST['pet_shampoo_pref'] ) ? array_map( 'wp_unslash', $_POST['pet_shampoo_pref'] ) : [];
+        $pet_perfume_prefs       = isset( $_POST['pet_perfume_pref'] ) && is_array( $_POST['pet_perfume_pref'] ) ? array_map( 'wp_unslash', $_POST['pet_perfume_pref'] ) : [];
+        $pet_accessories_prefs   = isset( $_POST['pet_accessories_pref'] ) && is_array( $_POST['pet_accessories_pref'] ) ? array_map( 'wp_unslash', $_POST['pet_accessories_pref'] ) : [];
+        $pet_product_restrictions = isset( $_POST['pet_product_restrictions'] ) && is_array( $_POST['pet_product_restrictions'] ) ? array_map( 'wp_unslash', $_POST['pet_product_restrictions'] ) : [];
         // phpcs:enable
 
         if ( is_array( $pet_names ) ) {
@@ -2104,6 +2109,11 @@ class DPS_Registration_Addon {
                 $sex      = is_array( $pet_sexes )   && isset( $pet_sexes[ $index ] )   ? sanitize_text_field( $pet_sexes[ $index ] )   : '';
                 $care     = is_array( $pet_cares )   && isset( $pet_cares[ $index ] )   ? sanitize_textarea_field( $pet_cares[ $index ] )   : '';
                 $agg      = is_array( $pet_aggs )    && isset( $pet_aggs[ $index ] )    ? 1 : 0;
+                // Preferências de produtos (Etapa 3)
+                $shampoo_pref       = is_array( $pet_shampoo_prefs ) && isset( $pet_shampoo_prefs[ $index ] ) ? sanitize_text_field( $pet_shampoo_prefs[ $index ] ) : '';
+                $perfume_pref       = is_array( $pet_perfume_prefs ) && isset( $pet_perfume_prefs[ $index ] ) ? sanitize_text_field( $pet_perfume_prefs[ $index ] ) : '';
+                $accessories_pref   = is_array( $pet_accessories_prefs ) && isset( $pet_accessories_prefs[ $index ] ) ? sanitize_text_field( $pet_accessories_prefs[ $index ] ) : '';
+                $product_restrictions = is_array( $pet_product_restrictions ) && isset( $pet_product_restrictions[ $index ] ) ? sanitize_textarea_field( $pet_product_restrictions[ $index ] ) : '';
 
                 // Whitelist validation para campos com valores predefinidos
                 $valid_species = array( 'cao', 'gato', 'outro' );
@@ -2162,6 +2172,11 @@ class DPS_Registration_Addon {
                     update_post_meta( $pet_id, 'pet_sex', $sex );
                     update_post_meta( $pet_id, 'pet_care', $care );
                     update_post_meta( $pet_id, 'pet_aggressive', $agg );
+                    // Preferências de produtos (Etapa 3)
+                    update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
+                    update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
+                    update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
+                    update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
                 }
             }
         }
@@ -2487,10 +2502,10 @@ class DPS_Registration_Addon {
 
         echo '<div class="dps-progress" aria-live="polite">';
         echo '<div class="dps-progress-top">';
-        echo '<span id="dps-step-label">' . esc_html__( 'Passo 1 de 2', 'dps-registration-addon' ) . '</span>';
-        echo '<span id="dps-step-counter">1/2</span>';
+        echo '<span id="dps-step-label">' . esc_html__( 'Passo 1 de 3', 'dps-registration-addon' ) . '</span>';
+        echo '<span id="dps-step-counter">1/3</span>';
         echo '</div>';
-        echo '<div class="dps-progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1">';
+        echo '<div class="dps-progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">';
         echo '<span id="dps-progress-bar-fill"></span>';
         echo '</div>';
         echo '</div>';
@@ -2548,6 +2563,21 @@ class DPS_Registration_Addon {
         echo '</div>';
         // Botão para adicionar outro pet
         echo '<p><button type="button" id="dps-add-pet" class="button">' . esc_html__( 'Adicionar outro pet', 'dps-registration-addon' ) . '</button></p>';
+        echo '<div class="dps-step-actions">';
+        echo '<button type="button" id="dps-back-step" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-next-step-2" class="button button-primary dps-button-next">' . esc_html__( 'Próximo', 'dps-registration-addon' ) . '</button>';
+        echo '</div>';
+        echo '</div>';
+
+        // =====================================================================
+        // STEP 3: Preferências de Produtos e Restrições
+        // =====================================================================
+        echo '<div class="dps-step" data-step="3">';
+        echo '<h4>' . esc_html__( 'Preferências e Restrições de Produtos', 'dps-registration-addon' ) . '</h4>';
+        echo '<p class="dps-step-description">' . esc_html__( 'Informe preferências ou restrições de produtos para cada pet. Essas informações são muito importantes para garantir a segurança e bem-estar do seu pet durante o atendimento.', 'dps-registration-addon' ) . '</p>';
+        echo '<div id="dps-product-prefs-wrapper">';
+        // Container para campos de preferências por pet (renderizado via JS)
+        echo '</div>';
         echo '<div class="dps-summary-box" id="dps-summary-box">';
         echo '<div class="dps-summary-header">';
         echo '<h4>' . esc_html__( 'Resumo antes de enviar', 'dps-registration-addon' ) . '</h4>';
@@ -2561,7 +2591,7 @@ class DPS_Registration_Addon {
         echo '<input type="hidden" name="client_lng" id="dps-client-lng" value="">';
         do_action( 'dps_registration_after_fields' );
         echo '<div class="dps-step-actions">';
-        echo '<button type="button" id="dps-back-step" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
+        echo '<button type="button" id="dps-back-step-2" class="button dps-button-secondary">' . esc_html__( 'Voltar', 'dps-registration-addon' ) . '</button>';
         echo '<button type="submit" class="button button-primary" disabled>' . esc_html__( 'Enviar cadastro', 'dps-registration-addon' ) . '</button>';
         echo '</div>';
         echo '</div>';

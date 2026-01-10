@@ -54,8 +54,18 @@ class DPS_AI_Assistant {
     /**
      * Responde a uma pergunta feita pelo cliente no Portal.
      *
-     * @param int    $client_id     ID do cliente logado.
-     * @param array  $pet_ids       IDs dos pets do cliente.
+     * SEGURANÇA (Isolamento de Dados):
+     * - O $client_id é obtido via autenticação do portal (DPS_Client_Portal::get_current_client_id)
+     * - Os $pet_ids são buscados filtrando por pet_client_id = $client_id
+     * - O contexto é construído usando apenas dados do cliente autenticado
+     * - Agendamentos são filtrados por appointment_client_id no banco de dados
+     * - Transações são filtradas por cliente_id na tabela dps_transacoes
+     * - Pontos de fidelidade são filtrados por loyalty_client_id
+     *
+     * Isso garante que o assistente de IA não tem acesso a dados de outros clientes.
+     *
+     * @param int    $client_id     ID do cliente autenticado no portal.
+     * @param array  $pet_ids       IDs dos pets do cliente (validados como pertencentes ao cliente).
      * @param string $user_question Pergunta do usuário.
      *
      * @return string|null Resposta da IA ou null em caso de erro/indisponibilidade.
@@ -248,10 +258,15 @@ class DPS_AI_Assistant {
     /**
      * Monta o contexto do cliente e pets para incluir na pergunta.
      *
+     * SEGURANÇA: Este método constrói o contexto apenas com dados do cliente autenticado.
+     * Todos os métodos auxiliares (get_client_data, get_pets_data, get_appointments_data,
+     * get_pending_charges, get_loyalty_points) filtram por $client_id ou $pet_ids
+     * para garantir isolamento de dados entre clientes.
+     *
      * Agora refatorado para usar métodos auxiliares especializados.
      *
-     * @param int   $client_id ID do cliente.
-     * @param array $pet_ids   IDs dos pets.
+     * @param int   $client_id ID do cliente autenticado.
+     * @param array $pet_ids   IDs dos pets do cliente (já validados como pertencentes ao cliente).
      *
      * @return string Contexto formatado.
      */
@@ -271,7 +286,8 @@ class DPS_AI_Assistant {
         }
 
         // Últimos agendamentos (limitado a 5 mais recentes)
-        $appointments_data = self::get_appointments_data( $pet_ids, 5 );
+        // SEGURANÇA: Passa $client_id para garantir filtragem no banco de dados
+        $appointments_data = self::get_appointments_data( $client_id, $pet_ids, 5 );
         if ( ! empty( $appointments_data ) ) {
             $context .= "\nÚltimos agendamentos:\n" . $appointments_data;
         }
@@ -374,13 +390,17 @@ class DPS_AI_Assistant {
     /**
      * Obtém dados formatados dos agendamentos recentes.
      *
-     * @param array $pet_ids IDs dos pets.
-     * @param int   $limit   Limite de agendamentos.
+     * SEGURANÇA: Agora recebe $client_id para garantir filtragem no banco de dados,
+     * evitando carregar dados de outros clientes em memória.
+     *
+     * @param int   $client_id ID do cliente autenticado.
+     * @param array $pet_ids   IDs dos pets do cliente.
+     * @param int   $limit     Limite de agendamentos.
      *
      * @return string Dados dos agendamentos formatados ou string vazia.
      */
-    private static function get_appointments_data( array $pet_ids, $limit = 5 ) {
-        $appointments = self::get_recent_appointments( $pet_ids, $limit );
+    private static function get_appointments_data( $client_id, array $pet_ids, $limit = 5 ) {
+        $appointments = self::get_recent_appointments( $client_id, $pet_ids, $limit );
 
         if ( empty( $appointments ) ) {
             return '';
@@ -395,26 +415,46 @@ class DPS_AI_Assistant {
     }
 
     /**
-     * Busca os agendamentos mais recentes dos pets.
+     * Busca os agendamentos mais recentes dos pets do cliente.
      *
-     * @param array $pet_ids IDs dos pets.
-     * @param int   $limit   Limite de agendamentos a retornar.
+     * SEGURANÇA: Filtra por appointment_client_id no banco de dados para garantir
+     * que apenas agendamentos do cliente autenticado sejam retornados.
+     * Isso evita carregar dados de outros clientes em memória.
+     *
+     * @param int   $client_id ID do cliente autenticado.
+     * @param array $pet_ids   IDs dos pets do cliente.
+     * @param int   $limit     Limite de agendamentos a retornar.
      *
      * @return array Array de strings descrevendo cada agendamento.
      */
-    private static function get_recent_appointments( array $pet_ids, $limit = 5 ) {
+    private static function get_recent_appointments( $client_id, array $pet_ids, $limit = 5 ) {
+        // Valida parâmetros de entrada
+        $client_id = absint( $client_id );
+        if ( ! $client_id ) {
+            return [];
+        }
+
         if ( empty( $pet_ids ) ) {
             return [];
         }
 
-        // Busca todos os agendamentos e filtra manualmente para maior compatibilidade
+        // Busca agendamentos filtrando por appointment_client_id no banco de dados
+        // Isso garante que apenas agendamentos do cliente autenticado sejam carregados
         $query = new WP_Query( [
             'post_type'      => 'dps_agendamento',
             'post_status'    => 'publish',
-            'posts_per_page' => 50, // Busca mais para garantir que temos suficientes após filtrar
+            'posts_per_page' => $limit * 2, // Busca um pouco mais para compensar possíveis filtros adicionais
             'orderby'        => 'meta_value',
             'order'          => 'DESC',
             'meta_key'       => 'appointment_date',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_client_id',
+                    'value'   => $client_id,
+                    'compare' => '=',
+                    'type'    => 'NUMERIC',
+                ],
+            ],
         ] );
 
         $appointments = [];
@@ -427,28 +467,25 @@ class DPS_AI_Assistant {
                 $appointment_pets = get_post_meta( $appointment_id, 'appointment_pets', true );
 
                 // Verifica se algum dos pets do cliente está neste agendamento
-                if ( empty( $appointment_pets ) ) {
-                    continue;
+                // Esta verificação adicional garante consistência entre pet_ids e appointment_pets
+                if ( ! empty( $appointment_pets ) ) {
+                    // appointment_pets pode ser array ou string serializada
+                    if ( is_string( $appointment_pets ) ) {
+                        $appointment_pets = maybe_unserialize( $appointment_pets );
+                    }
+
+                    if ( is_array( $appointment_pets ) ) {
+                        // Converte para inteiros e verifica interseção
+                        $appointment_pets = array_map( 'intval', $appointment_pets );
+                        $pet_ids_int      = array_map( 'intval', $pet_ids );
+
+                        if ( empty( array_intersect( $appointment_pets, $pet_ids_int ) ) ) {
+                            continue;
+                        }
+                    }
                 }
 
-                // appointment_pets pode ser array ou string serializada
-                if ( is_string( $appointment_pets ) ) {
-                    $appointment_pets = maybe_unserialize( $appointment_pets );
-                }
-
-                if ( ! is_array( $appointment_pets ) ) {
-                    continue;
-                }
-
-                // Converte para inteiros e verifica interseção
-                $appointment_pets = array_map( 'intval', $appointment_pets );
-                $pet_ids_int      = array_map( 'intval', $pet_ids );
-
-                if ( empty( array_intersect( $appointment_pets, $pet_ids_int ) ) ) {
-                    continue;
-                }
-
-                // Este agendamento pertence a um dos pets do cliente
+                // Este agendamento pertence ao cliente autenticado
                 $appointment_date   = get_post_meta( $appointment_id, 'appointment_date', true );
                 $appointment_status = get_post_meta( $appointment_id, 'appointment_status', true );
                 $services_raw       = get_post_meta( $appointment_id, 'appointment_services', true );
@@ -466,7 +503,7 @@ class DPS_AI_Assistant {
                         $status_label = 'Cancelado';
                         break;
                     default:
-                        $status_label = ucfirst( $appointment_status );
+                        $status_label = ucfirst( (string) $appointment_status );
                 }
 
                 $appointment_desc = "Data: {$appointment_date}, Status: {$status_label}";
