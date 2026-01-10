@@ -2141,12 +2141,13 @@ class DPS_Services_Addon {
             return;
         }
 
-        // Verifica se o shortcode dps_base está sendo usado no conteúdo atual
-        $content = ( $post instanceof WP_Post ) ? (string) $post->post_content : '';
-        $should_enqueue = ( $post instanceof WP_Post ) && (
-            has_shortcode( $content, 'dps_base' ) ||
-            has_shortcode( $content, 'dps_services_catalog' )
-        );
+        // Verifica se o shortcode dps_base ou dps_services_catalog está sendo usado
+        $should_enqueue = false;
+        if ( $post instanceof WP_Post ) {
+            $content = $post->post_content;
+            $should_enqueue = has_shortcode( $content, 'dps_base' ) ||
+                              has_shortcode( $content, 'dps_services_catalog' );
+        }
 
         // Permite que outros plugins/temas forcem o carregamento dos assets
         $should_enqueue = apply_filters( 'dps_services_should_enqueue_assets', $should_enqueue, $post );
