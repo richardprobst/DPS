@@ -53,6 +53,12 @@ if ( $photo_id ) {
 	$photo_url = wp_get_attachment_image_url( $photo_id, 'thumbnail' );
 }
 
+// Preferências de produtos
+$shampoo_pref        = $meta['shampoo_pref'] ?? '';
+$perfume_pref        = $meta['perfume_pref'] ?? '';
+$accessories_pref    = $meta['accessories_pref'] ?? '';
+$product_restrictions = $meta['product_restrictions'] ?? '';
+
 $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_html__( 'Salvar Pet', 'desi-pet-shower' );
 ?>
 
@@ -218,7 +224,63 @@ $btn_text = $edit_id ? esc_html__( 'Atualizar Pet', 'desi-pet-shower' ) : esc_ht
 		</p>
 	</fieldset>
 
-	<!-- Fieldset 4: Foto do Pet -->
+	<!-- Fieldset 4: Preferências de Produtos -->
+	<fieldset class="dps-fieldset">
+		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Preferências de Produtos', 'desi-pet-shower' ); ?></legend>
+		<p class="dps-fieldset__description"><?php echo esc_html__( 'Restrições e preferências de produtos para o atendimento.', 'desi-pet-shower' ); ?></p>
+
+		<div class="dps-form-row dps-form-row--3col">
+			<p class="dps-form-col">
+				<label>
+					<?php echo esc_html__( 'Shampoo', 'desi-pet-shower' ); ?><br>
+					<select name="pet_shampoo_pref">
+						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
+						<option value="hipoalergenico" <?php selected( $shampoo_pref, 'hipoalergenico' ); ?>><?php echo esc_html__( 'Hipoalergênico', 'desi-pet-shower' ); ?></option>
+						<option value="antisseptico" <?php selected( $shampoo_pref, 'antisseptico' ); ?>><?php echo esc_html__( 'Antisséptico', 'desi-pet-shower' ); ?></option>
+						<option value="pelagem_branca" <?php selected( $shampoo_pref, 'pelagem_branca' ); ?>><?php echo esc_html__( 'Para pelagem branca', 'desi-pet-shower' ); ?></option>
+						<option value="pelagem_escura" <?php selected( $shampoo_pref, 'pelagem_escura' ); ?>><?php echo esc_html__( 'Para pelagem escura', 'desi-pet-shower' ); ?></option>
+						<option value="antipulgas" <?php selected( $shampoo_pref, 'antipulgas' ); ?>><?php echo esc_html__( 'Antipulgas', 'desi-pet-shower' ); ?></option>
+						<option value="hidratante" <?php selected( $shampoo_pref, 'hidratante' ); ?>><?php echo esc_html__( 'Hidratante', 'desi-pet-shower' ); ?></option>
+						<option value="outro" <?php selected( $shampoo_pref, 'outro' ); ?>><?php echo esc_html__( 'Outro', 'desi-pet-shower' ); ?></option>
+					</select>
+				</label>
+			</p>
+			<p class="dps-form-col">
+				<label>
+					<?php echo esc_html__( 'Perfume', 'desi-pet-shower' ); ?><br>
+					<select name="pet_perfume_pref">
+						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
+						<option value="suave" <?php selected( $perfume_pref, 'suave' ); ?>><?php echo esc_html__( 'Perfume suave', 'desi-pet-shower' ); ?></option>
+						<option value="intenso" <?php selected( $perfume_pref, 'intenso' ); ?>><?php echo esc_html__( 'Perfume intenso', 'desi-pet-shower' ); ?></option>
+						<option value="sem_perfume" <?php selected( $perfume_pref, 'sem_perfume' ); ?>><?php echo esc_html__( 'Sem perfume (proibido)', 'desi-pet-shower' ); ?></option>
+						<option value="hipoalergenico" <?php selected( $perfume_pref, 'hipoalergenico' ); ?>><?php echo esc_html__( 'Hipoalergênico apenas', 'desi-pet-shower' ); ?></option>
+					</select>
+				</label>
+			</p>
+			<p class="dps-form-col">
+				<label>
+					<?php echo esc_html__( 'Adereços', 'desi-pet-shower' ); ?><br>
+					<select name="pet_accessories_pref">
+						<option value=""><?php echo esc_html__( 'Sem preferência', 'desi-pet-shower' ); ?></option>
+						<option value="lacinho" <?php selected( $accessories_pref, 'lacinho' ); ?>><?php echo esc_html__( 'Lacinho', 'desi-pet-shower' ); ?></option>
+						<option value="gravata" <?php selected( $accessories_pref, 'gravata' ); ?>><?php echo esc_html__( 'Gravata', 'desi-pet-shower' ); ?></option>
+						<option value="lenco" <?php selected( $accessories_pref, 'lenco' ); ?>><?php echo esc_html__( 'Lenço', 'desi-pet-shower' ); ?></option>
+						<option value="bandana" <?php selected( $accessories_pref, 'bandana' ); ?>><?php echo esc_html__( 'Bandana', 'desi-pet-shower' ); ?></option>
+						<option value="sem_aderecos" <?php selected( $accessories_pref, 'sem_aderecos' ); ?>><?php echo esc_html__( 'Não usar adereços', 'desi-pet-shower' ); ?></option>
+					</select>
+				</label>
+			</p>
+		</div>
+
+		<p>
+			<label>
+				<?php echo esc_html__( 'Outras restrições de produtos', 'desi-pet-shower' ); ?><br>
+				<textarea name="pet_product_restrictions" rows="2" placeholder="<?php echo esc_attr__( 'Ex.: Alérgico a produto X, usar apenas produtos naturais...', 'desi-pet-shower' ); ?>"><?php echo esc_textarea( $product_restrictions ); ?></textarea>
+			</label>
+		</p>
+	</fieldset>
+
+	<!-- Fieldset 5: Foto do Pet -->
 	<fieldset class="dps-fieldset">
 		<legend class="dps-fieldset__legend"><?php echo esc_html__( 'Foto do Pet', 'desi-pet-shower' ); ?></legend>
 

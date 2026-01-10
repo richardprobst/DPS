@@ -2803,6 +2803,18 @@ tr.dps-row-updated {
     }
 }
 
+/* === Badge de Restrições de Produtos === */
+.dps-pet-badge--restrictions {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    cursor: help;
+}
+
+.dps-pet-badge--restrictions:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+}
+
 /* === Dropdown Elegante de Confirmação (Tab1) === */
 .dps-confirmation-dropdown-wrapper {
     position: relative;

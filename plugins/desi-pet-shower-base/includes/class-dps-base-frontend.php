@@ -1255,21 +1255,26 @@ class DPS_Base_Frontend {
             if ( $editing ) {
                 // Carrega metadados do pet para edição
                 $meta = [
-                    'owner_id'     => get_post_meta( $edit_id, 'owner_id', true ),
-                    'species'      => get_post_meta( $edit_id, 'pet_species', true ),
-                    'breed'        => get_post_meta( $edit_id, 'pet_breed', true ),
-                    'size'         => get_post_meta( $edit_id, 'pet_size', true ),
-                    'weight'       => get_post_meta( $edit_id, 'pet_weight', true ),
-                    'coat'         => get_post_meta( $edit_id, 'pet_coat', true ),
-                    'color'        => get_post_meta( $edit_id, 'pet_color', true ),
-                    'birth'        => get_post_meta( $edit_id, 'pet_birth', true ),
-                    'sex'          => get_post_meta( $edit_id, 'pet_sex', true ),
-                    'care'         => get_post_meta( $edit_id, 'pet_care', true ),
-                    'aggressive'   => get_post_meta( $edit_id, 'pet_aggressive', true ),
-                    'vaccinations' => get_post_meta( $edit_id, 'pet_vaccinations', true ),
-                    'allergies'    => get_post_meta( $edit_id, 'pet_allergies', true ),
-                    'behavior'     => get_post_meta( $edit_id, 'pet_behavior', true ),
-                    'photo_id'     => get_post_meta( $edit_id, 'pet_photo_id', true ),
+                    'owner_id'             => get_post_meta( $edit_id, 'owner_id', true ),
+                    'species'              => get_post_meta( $edit_id, 'pet_species', true ),
+                    'breed'                => get_post_meta( $edit_id, 'pet_breed', true ),
+                    'size'                 => get_post_meta( $edit_id, 'pet_size', true ),
+                    'weight'               => get_post_meta( $edit_id, 'pet_weight', true ),
+                    'coat'                 => get_post_meta( $edit_id, 'pet_coat', true ),
+                    'color'                => get_post_meta( $edit_id, 'pet_color', true ),
+                    'birth'                => get_post_meta( $edit_id, 'pet_birth', true ),
+                    'sex'                  => get_post_meta( $edit_id, 'pet_sex', true ),
+                    'care'                 => get_post_meta( $edit_id, 'pet_care', true ),
+                    'aggressive'           => get_post_meta( $edit_id, 'pet_aggressive', true ),
+                    'vaccinations'         => get_post_meta( $edit_id, 'pet_vaccinations', true ),
+                    'allergies'            => get_post_meta( $edit_id, 'pet_allergies', true ),
+                    'behavior'             => get_post_meta( $edit_id, 'pet_behavior', true ),
+                    'photo_id'             => get_post_meta( $edit_id, 'pet_photo_id', true ),
+                    // Preferências de produtos
+                    'shampoo_pref'         => get_post_meta( $edit_id, 'pet_shampoo_pref', true ),
+                    'perfume_pref'         => get_post_meta( $edit_id, 'pet_perfume_pref', true ),
+                    'accessories_pref'     => get_post_meta( $edit_id, 'pet_accessories_pref', true ),
+                    'product_restrictions' => get_post_meta( $edit_id, 'pet_product_restrictions', true ),
                 ];
             }
         }
@@ -2900,6 +2905,11 @@ class DPS_Base_Frontend {
         $vaccinations = isset( $_POST['pet_vaccinations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_vaccinations'] ) ) : '';
         $allergies    = isset( $_POST['pet_allergies'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_allergies'] ) ) : '';
         $behavior     = isset( $_POST['pet_behavior'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_behavior'] ) ) : '';
+        // Preferências de produtos
+        $shampoo_pref         = isset( $_POST['pet_shampoo_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_shampoo_pref'] ) ) : '';
+        $perfume_pref         = isset( $_POST['pet_perfume_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_perfume_pref'] ) ) : '';
+        $accessories_pref     = isset( $_POST['pet_accessories_pref'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_accessories_pref'] ) ) : '';
+        $product_restrictions = isset( $_POST['pet_product_restrictions'] ) ? sanitize_textarea_field( wp_unslash( $_POST['pet_product_restrictions'] ) ) : '';
         
         // Validação de campos obrigatórios
         $errors = [];
@@ -2964,6 +2974,11 @@ class DPS_Base_Frontend {
         update_post_meta( $pet_id, 'pet_vaccinations', $vaccinations );
         update_post_meta( $pet_id, 'pet_allergies', $allergies );
         update_post_meta( $pet_id, 'pet_behavior', $behavior );
+        // Preferências de produtos
+        update_post_meta( $pet_id, 'pet_shampoo_pref', $shampoo_pref );
+        update_post_meta( $pet_id, 'pet_perfume_pref', $perfume_pref );
+        update_post_meta( $pet_id, 'pet_accessories_pref', $accessories_pref );
+        update_post_meta( $pet_id, 'pet_product_restrictions', $product_restrictions );
         // Lida com upload da foto do pet, se houver
         if ( isset( $_FILES['pet_photo'] ) && ! empty( $_FILES['pet_photo']['name'] ) ) {
             $file = $_FILES['pet_photo'];

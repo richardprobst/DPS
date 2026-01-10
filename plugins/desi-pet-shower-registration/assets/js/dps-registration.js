@@ -525,6 +525,49 @@
         return true;
     }
 
+    /**
+     * Validate step two (pet data) before proceeding.
+     *
+     * @param {HTMLFormElement} form - The form.
+     * @return {boolean} True if valid.
+     */
+    function validateStepTwo(form) {
+        clearJSErrors(form);
+
+        var errors = [];
+        var errorContainer = getErrorContainer(form);
+
+        // Verifica se há pelo menos um pet com nome
+        var petsWrapper = document.getElementById('dps-pets-wrapper');
+        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
+        
+        if (!petFieldsets || !petFieldsets.length) {
+            errors.push('Adicione pelo menos um pet para continuar.');
+        } else {
+            var hasValidPet = false;
+            for (var i = 0; i < petFieldsets.length; i++) {
+                var petNameInput = petFieldsets[i].querySelector('input[name="pet_name[]"]');
+                if (petNameInput && petNameInput.value.trim().length >= 2) {
+                    hasValidPet = true;
+                    break;
+                }
+            }
+            
+            if (!hasValidPet) {
+                errors.push('Informe o nome do pet para continuar.');
+            }
+        }
+
+        if (errors.length > 0) {
+            for (var i = 0; i < errors.length; i++) {
+                showError(errorContainer, errors[i]);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     // =========================================================================
     // Loading Indicator (F2.4)
     // =========================================================================
@@ -657,6 +700,7 @@
     // =========================================================================
 
     var currentStep = 1;
+    var totalSteps = 3;
 
     function updateProgress(step, progressElements) {
         if (!progressElements) return;
@@ -666,15 +710,15 @@
         var bar = progressElements.bar;
 
         if (label) {
-            label.textContent = 'Passo ' + step + ' de 2';
+            label.textContent = 'Passo ' + step + ' de ' + totalSteps;
         }
 
         if (counter) {
-            counter.textContent = step + '/2';
+            counter.textContent = step + '/' + totalSteps;
         }
 
         if (bar) {
-            var width = step === 1 ? '50%' : '100%';
+            var width = Math.round((step / totalSteps) * 100) + '%';
             bar.style.width = width;
             bar.parentElement.setAttribute('aria-valuenow', step);
         }
@@ -692,16 +736,125 @@
         currentStep = step;
         updateProgress(step, progressElements);
 
+        // Atualiza visibilidade dos botões de navegação
         if (buttons) {
+            // Botão "Próximo" da etapa 1 → etapa 2
             if (buttons.next) {
                 buttons.next.style.display = step === 1 ? 'inline-flex' : 'none';
             }
+            // Botão "Próximo" da etapa 2 → etapa 3
+            if (buttons.next2) {
+                buttons.next2.style.display = step === 2 ? 'inline-flex' : 'none';
+            }
+            // Botão "Voltar" da etapa 2 → etapa 1
             if (buttons.back) {
                 buttons.back.style.display = step === 2 ? 'inline-flex' : 'none';
             }
-            if (buttons.submit) {
-                buttons.submit.style.display = step === 2 ? 'inline-flex' : 'none';
+            // Botão "Voltar" da etapa 3 → etapa 2
+            if (buttons.back2) {
+                buttons.back2.style.display = step === 3 ? 'inline-flex' : 'none';
             }
+            // Botão "Enviar" só aparece na etapa 3
+            if (buttons.submit) {
+                buttons.submit.style.display = step === 3 ? 'inline-flex' : 'none';
+            }
+        }
+        
+        // Na etapa 3, renderiza os campos de preferências para cada pet
+        if (step === 3) {
+            renderProductPrefsStep(form);
+        }
+    }
+
+    /**
+     * Renderiza os campos de preferências de produtos para cada pet na etapa 3.
+     *
+     * @param {HTMLFormElement} form - Formulário de cadastro.
+     */
+    function renderProductPrefsStep(form) {
+        var prefsWrapper = document.getElementById('dps-product-prefs-wrapper');
+        if (!prefsWrapper) return;
+        
+        prefsWrapper.innerHTML = '';
+        
+        var petsWrapper = document.getElementById('dps-pets-wrapper');
+        var petFieldsets = petsWrapper ? petsWrapper.querySelectorAll('.dps-pet-fieldset') : [];
+        
+        if (!petFieldsets || !petFieldsets.length) {
+            prefsWrapper.innerHTML = '<p class="dps-empty-message">Nenhum pet cadastrado. Volte para a etapa anterior para adicionar pets.</p>';
+            return;
+        }
+        
+        for (var i = 0; i < petFieldsets.length; i++) {
+            var fieldset = petFieldsets[i];
+            var petNameInput = fieldset.querySelector('input[name="pet_name[]"]');
+            var petSpeciesSelect = fieldset.querySelector('select[name="pet_species[]"]');
+            
+            var petName = petNameInput ? petNameInput.value.trim() : ('Pet ' + (i + 1));
+            var speciesValue = petSpeciesSelect ? petSpeciesSelect.value : '';
+            var speciesIcon = speciesValue === 'cao' ? '🐶' : (speciesValue === 'gato' ? '🐱' : '🐾');
+            
+            // Cria fieldset para este pet
+            var petPrefsBox = document.createElement('div');
+            petPrefsBox.className = 'dps-product-prefs-pet';
+            
+            var petTitle = document.createElement('h5');
+            petTitle.className = 'dps-product-prefs-pet__title';
+            petTitle.innerHTML = speciesIcon + ' ' + (petName || 'Pet ' + (i + 1));
+            petPrefsBox.appendChild(petTitle);
+            
+            // Campo: Preferência de Shampoo
+            var shampooField = document.createElement('div');
+            shampooField.className = 'dps-product-pref-field';
+            shampooField.innerHTML = '<label>🧴 Preferência de Shampoo<br>' +
+                '<select name="pet_shampoo_pref[]">' +
+                '<option value="">Sem preferência específica</option>' +
+                '<option value="hipoalergenico">Hipoalergênico</option>' +
+                '<option value="antisseptico">Antisséptico</option>' +
+                '<option value="pelagem_branca">Para pelagem branca</option>' +
+                '<option value="pelagem_escura">Para pelagem escura</option>' +
+                '<option value="antipulgas">Antipulgas</option>' +
+                '<option value="hidratante">Hidratante</option>' +
+                '<option value="outro">Outro (especificar abaixo)</option>' +
+                '</select></label>';
+            petPrefsBox.appendChild(shampooField);
+            
+            // Campo: Preferência de Perfume
+            var perfumeField = document.createElement('div');
+            perfumeField.className = 'dps-product-pref-field';
+            perfumeField.innerHTML = '<label>✨ Preferência de Perfume<br>' +
+                '<select name="pet_perfume_pref[]">' +
+                '<option value="">Sem preferência</option>' +
+                '<option value="suave">Perfume suave</option>' +
+                '<option value="intenso">Perfume intenso</option>' +
+                '<option value="sem_perfume">Sem perfume (proibido)</option>' +
+                '<option value="hipoalergenico">Hipoalergênico apenas</option>' +
+                '</select></label>';
+            petPrefsBox.appendChild(perfumeField);
+            
+            // Campo: Preferência de Adereços
+            var accessoriesField = document.createElement('div');
+            accessoriesField.className = 'dps-product-pref-field';
+            accessoriesField.innerHTML = '<label>🎀 Adereços<br>' +
+                '<select name="pet_accessories_pref[]">' +
+                '<option value="">Sem preferência</option>' +
+                '<option value="lacinho">Lacinho</option>' +
+                '<option value="gravata">Gravata</option>' +
+                '<option value="lenco">Lenço</option>' +
+                '<option value="bandana">Bandana</option>' +
+                '<option value="sem_aderecos">Não usar adereços</option>' +
+                '</select></label>';
+            petPrefsBox.appendChild(accessoriesField);
+            
+            // Campo: Outras restrições/observações
+            var restrictionsField = document.createElement('div');
+            restrictionsField.className = 'dps-product-pref-field dps-product-pref-field--full';
+            restrictionsField.innerHTML = '<label>📝 Outras restrições ou observações sobre produtos<br>' +
+                '<textarea name="pet_product_restrictions[]" rows="2" ' +
+                'placeholder="Ex.: Alérgico a produto X, usar apenas produtos naturais, etc."></textarea></label>';
+            petPrefsBox.appendChild(restrictionsField);
+            
+            prefsWrapper.appendChild(petPrefsBox);
         }
     }
 
@@ -861,6 +1014,28 @@
                 
                 if (petAggressive && petAggressive.checked) {
                     addSummaryItem(petList, 'Alerta', '⚠️ Pet agressivo');
+                }
+                
+                // Preferências de produtos (Etapa 3)
+                var prefsWrapper = document.getElementById('dps-product-prefs-wrapper');
+                if (prefsWrapper) {
+                    var allShampooPrefs = prefsWrapper.querySelectorAll('select[name="pet_shampoo_pref[]"]');
+                    var allPerfumePrefs = prefsWrapper.querySelectorAll('select[name="pet_perfume_pref[]"]');
+                    var allAccessoriesPrefs = prefsWrapper.querySelectorAll('select[name="pet_accessories_pref[]"]');
+                    var allRestrictions = prefsWrapper.querySelectorAll('textarea[name="pet_product_restrictions[]"]');
+                    
+                    if (allShampooPrefs[i]) {
+                        addSummaryItem(petList, 'Shampoo', getSelectText(allShampooPrefs[i]));
+                    }
+                    if (allPerfumePrefs[i]) {
+                        addSummaryItem(petList, 'Perfume', getSelectText(allPerfumePrefs[i]));
+                    }
+                    if (allAccessoriesPrefs[i]) {
+                        addSummaryItem(petList, 'Adereços', getSelectText(allAccessoriesPrefs[i]));
+                    }
+                    if (allRestrictions[i] && allRestrictions[i].value.trim()) {
+                        addSummaryItem(petList, 'Restrições', allRestrictions[i].value.trim());
+                    }
                 }
 
                 if (petList.children.length) {
@@ -1267,7 +1442,9 @@
         // Wizard elements
         var steps = form.querySelectorAll('.dps-step');
         var nextButton = document.getElementById('dps-next-step');
+        var nextButton2 = document.getElementById('dps-next-step-2');
         var backButton = document.getElementById('dps-back-step');
+        var backButton2 = document.getElementById('dps-back-step-2');
         var submitButton = form.querySelector('button[type="submit"]');
         var confirmCheckbox = document.getElementById('dps-summary-confirm');
         var progressElements = {
@@ -1275,15 +1452,20 @@
             counter: document.getElementById('dps-step-counter'),
             bar: document.getElementById('dps-progress-bar-fill')
         };
-
-        showStep(1, form, steps, progressElements, {
+        
+        var wizardButtons = {
             next: nextButton,
+            next2: nextButton2,
             back: backButton,
+            back2: backButton2,
             submit: submitButton
-        });
+        };
+
+        showStep(1, form, steps, progressElements, wizardButtons);
 
         initBreedSelectors();
 
+        // Etapa 1 → Etapa 2
         if (nextButton) {
             nextButton.addEventListener('click', function() {
                 if (!validateStepOne(form)) {
@@ -1298,22 +1480,41 @@
                     submitButton.disabled = true;
                 }
 
-                showStep(2, form, steps, progressElements, {
-                    next: nextButton,
-                    back: backButton,
-                    submit: submitButton
-                });
+                showStep(2, form, steps, progressElements, wizardButtons);
+            });
+        }
+        
+        // Etapa 2 → Etapa 3
+        if (nextButton2) {
+            nextButton2.addEventListener('click', function() {
+                if (!validateStepTwo(form)) {
+                    return;
+                }
+
+                if (confirmCheckbox) {
+                    confirmCheckbox.checked = false;
+                }
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+
+                showStep(3, form, steps, progressElements, wizardButtons);
                 buildSummary(form);
             });
         }
 
+        // Etapa 2 → Etapa 1 (voltar)
         if (backButton) {
             backButton.addEventListener('click', function() {
-                showStep(1, form, steps, progressElements, {
-                    next: nextButton,
-                    back: backButton,
-                    submit: submitButton
-                });
+                showStep(1, form, steps, progressElements, wizardButtons);
+            });
+        }
+        
+        // Etapa 3 → Etapa 2 (voltar)
+        if (backButton2) {
+            backButton2.addEventListener('click', function() {
+                showStep(2, form, steps, progressElements, wizardButtons);
             });
         }
 
@@ -1325,7 +1526,7 @@
         }
 
         form.addEventListener('input', function() {
-            if (currentStep === 2) {
+            if (currentStep === 3) {
                 buildSummary(form);
             }
         });

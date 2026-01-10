@@ -32,6 +32,80 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Verifica se o pet possui restrições de produtos e retorna badge HTML.
+     *
+     * @since 1.5.0
+     * @param int|WP_Post $pet Pet ID ou objeto.
+     * @return string HTML do badge de restrição ou string vazia.
+     */
+    private function get_pet_product_restrictions_badge( $pet ) {
+        $pet_id = is_object( $pet ) ? $pet->ID : absint( $pet );
+        if ( ! $pet_id ) {
+            return '';
+        }
+        
+        $has_restrictions = false;
+        $restrictions_items = [];
+        
+        // Verifica preferência de shampoo especial
+        $shampoo = get_post_meta( $pet_id, 'pet_shampoo_pref', true );
+        if ( $shampoo && '' !== $shampoo ) {
+            $has_restrictions = true;
+            $shampoo_labels = [
+                'hipoalergenico' => __( 'Shampoo hipoalergênico', 'dps-agenda-addon' ),
+                'antisseptico'   => __( 'Shampoo antisséptico', 'dps-agenda-addon' ),
+                'pelagem_branca' => __( 'Shampoo p/ pelagem branca', 'dps-agenda-addon' ),
+                'pelagem_escura' => __( 'Shampoo p/ pelagem escura', 'dps-agenda-addon' ),
+                'antipulgas'     => __( 'Shampoo antipulgas', 'dps-agenda-addon' ),
+                'hidratante'     => __( 'Shampoo hidratante', 'dps-agenda-addon' ),
+                'outro'          => __( 'Shampoo especial', 'dps-agenda-addon' ),
+            ];
+            $restrictions_items[] = $shampoo_labels[ $shampoo ] ?? $shampoo;
+        }
+        
+        // Verifica proibição de perfume
+        $perfume = get_post_meta( $pet_id, 'pet_perfume_pref', true );
+        if ( 'sem_perfume' === $perfume ) {
+            $has_restrictions = true;
+            $restrictions_items[] = __( '❌ SEM PERFUME', 'dps-agenda-addon' );
+        } elseif ( 'hipoalergenico' === $perfume ) {
+            $has_restrictions = true;
+            $restrictions_items[] = __( 'Perfume hipoalergênico', 'dps-agenda-addon' );
+        }
+        
+        // Verifica preferência de adereços
+        $accessories = get_post_meta( $pet_id, 'pet_accessories_pref', true );
+        if ( 'sem_aderecos' === $accessories ) {
+            $has_restrictions = true;
+            $restrictions_items[] = __( 'Sem adereços', 'dps-agenda-addon' );
+        } elseif ( $accessories && '' !== $accessories ) {
+            $accessories_labels = [
+                'lacinho' => __( 'Usar lacinho', 'dps-agenda-addon' ),
+                'gravata' => __( 'Usar gravata', 'dps-agenda-addon' ),
+                'lenco'   => __( 'Usar lenço', 'dps-agenda-addon' ),
+                'bandana' => __( 'Usar bandana', 'dps-agenda-addon' ),
+            ];
+            if ( isset( $accessories_labels[ $accessories ] ) ) {
+                $restrictions_items[] = $accessories_labels[ $accessories ];
+            }
+        }
+        
+        // Verifica outras restrições
+        $other = get_post_meta( $pet_id, 'pet_product_restrictions', true );
+        if ( $other && '' !== trim( $other ) ) {
+            $has_restrictions = true;
+            $restrictions_items[] = esc_html( $other );
+        }
+        
+        if ( ! $has_restrictions ) {
+            return '';
+        }
+        
+        $tooltip = implode( ' | ', $restrictions_items );
+        return ' <span class="dps-pet-badge dps-pet-badge--restrictions" title="' . esc_attr( $tooltip ) . '">🧴</span>';
+    }
+
+    /**
      * Processa e sanitiza parâmetros da requisição.
      *
      * @since 1.3.0
@@ -400,14 +474,16 @@ trait DPS_Agenda_Renderer {
         $pet_name    = $pet_post ? $pet_post->post_title : '';
         $client_name = $client_post ? $client_post->post_title : '';
         $aggr_flag   = '';
+        $restrictions_badge = '';
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
                 // Flag melhorada com emoji e tooltip
                 $aggr_flag = ' <span class="dps-aggressive-flag" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️</span>';
             }
+            $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr( $column_labels['pet'] ?? __( 'Pet (Cliente)', 'dps-agenda-addon' ) ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . '</td>';
+        echo '<td data-label="' . esc_attr( $column_labels['pet'] ?? __( 'Pet (Cliente)', 'dps-agenda-addon' ) ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . $restrictions_badge . '</td>';
         
         // Serviços e assinatura
         echo '<td data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviço', 'dps-agenda-addon' ) ) . '">';
@@ -859,13 +935,15 @@ trait DPS_Agenda_Renderer {
         // Pet com flag de agressividade e badge
         $pet_name = $pet_post ? $pet_post->post_title : '';
         $aggr_badge = '';
+        $restrictions_badge = '';
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
                 $aggr_badge = ' <span class="dps-pet-badge dps-pet-badge--aggressive" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️ AGRESSIVO</span>';
             }
+            $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
         
         // Tutor
         $client_name = $client_post ? $client_post->post_title : '';
@@ -964,13 +1042,15 @@ trait DPS_Agenda_Renderer {
         // Pet com flag de agressividade e badge
         $pet_name = $pet_post ? $pet_post->post_title : '';
         $aggr_badge = '';
+        $restrictions_badge = '';
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
                 $aggr_badge = ' <span class="dps-pet-badge dps-pet-badge--aggressive" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️ AGRESSIVO</span>';
             }
+            $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
         
         // Tutor
         $client_name = $client_post ? $client_post->post_title : '';
@@ -1100,13 +1180,15 @@ trait DPS_Agenda_Renderer {
         // Pet com flag de agressividade e badge
         $pet_name = $pet_post ? $pet_post->post_title : '';
         $aggr_badge = '';
+        $restrictions_badge = '';
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
                 $aggr_badge = ' <span class="dps-pet-badge dps-pet-badge--aggressive" title="' . esc_attr__( 'Pet agressivo - cuidado no manejo', 'dps-agenda-addon' ) . '">⚠️ AGRESSIVO</span>';
             }
+            $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . '</td>';
+        echo '<td data-label="' . esc_attr__( 'Pet', 'dps-agenda-addon' ) . '">' . esc_html( $pet_name ) . $aggr_badge . $restrictions_badge . '</td>';
         
         // Tutor
         $client_name = $client_post ? $client_post->post_title : '';
