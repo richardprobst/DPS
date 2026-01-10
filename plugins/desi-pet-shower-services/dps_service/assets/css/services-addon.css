@@ -1458,7 +1458,9 @@
    ============================================ */
 
 .dps-discount-section {
-    margin-top: 20px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px dashed #e5e7eb;
 }
 
 /* Botão toggle de desconto - Padronizado v1.7.0 */
