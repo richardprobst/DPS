@@ -867,62 +867,20 @@ class DPS_Base_Frontend {
     }
 
     /**
-     * Renderiza a página de configurações avançadas (shortcode dps_configuracoes).
-     *
-     * @return string
-     */
-    /**
      * Renderiza o shortcode [dps_configuracoes].
      * 
-     * DEPRECATED: Este shortcode foi movido para o painel administrativo do WordPress.
-     * Mantido apenas para retrocompatibilidade, mas não deve mais ser usado.
+     * Página de configurações do sistema DPS com sistema de abas extensível.
+     * Permite que administradores gerenciem configurações diretamente no front-end.
      * 
-     * @return string Mensagem de depreciação com link para o admin.
+     * @since 2.0.0 Reativado com sistema de abas e segurança aprimorada.
+     * @return string HTML da página de configurações.
      */
     public static function render_settings() {
-        // Log de depreciação para administradores
-        if ( current_user_can( 'manage_options' ) ) {
-            DPS_Logger::log(
-                __( 'O shortcode [dps_configuracoes] está deprecated e será removido em versões futuras. Use o menu admin "desi.pet by PRObst".', 'desi-pet-shower' ),
-                DPS_Logger::LEVEL_WARNING,
-                'shortcode_deprecated'
-            );
-        }
+        // Garante que o CSS/JS estejam carregados
+        DPS_Base_Plugin::enqueue_frontend_assets();
 
-        $admin_url = admin_url( 'admin.php?page=desi-pet-shower' );
-        
-        ob_start();
-        ?>
-        <div class="dps-base-wrapper dps-settings-deprecated" style="max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center;">
-            <div style="font-size: 48px; color: #0ea5e9; margin-bottom: 20px;">
-                <span class="dashicons dashicons-admin-settings" style="font-size: 48px; width: 48px; height: 48px;"></span>
-            </div>
-            <h2 style="color: #374151; margin-bottom: 16px;"><?php esc_html_e( 'Configurações Movidas para o Admin', 'desi-pet-shower' ); ?></h2>
-            <p style="font-size: 16px; color: #6b7280; margin-bottom: 24px; line-height: 1.6;">
-                <?php esc_html_e( 'As configurações do sistema foram movidas para o painel administrativo do WordPress por questões de segurança e organização.', 'desi-pet-shower' ); ?>
-            </p>
-            <p style="font-size: 16px; color: #6b7280; margin-bottom: 32px; line-height: 1.6;">
-                <?php esc_html_e( 'Para acessar Backup, Comunicações, Notificações e outras configurações, utilize o menu "desi.pet by PRObst" no painel admin.', 'desi-pet-shower' ); ?>
-            </p>
-            <?php if ( current_user_can( 'manage_options' ) ) : ?>
-                <a href="<?php echo esc_url( $admin_url ); ?>" class="button button-primary button-hero" style="padding: 12px 32px; height: auto; font-size: 16px;">
-                    <?php esc_html_e( 'Acessar Configurações no Admin', 'desi-pet-shower' ); ?>
-                </a>
-            <?php else : ?>
-                <p style="color: #ef4444; font-weight: 600;">
-                    <?php esc_html_e( 'Você precisa de permissões de administrador para acessar as configurações.', 'desi-pet-shower' ); ?>
-                </p>
-            <?php endif; ?>
-            
-            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-                <p style="font-size: 14px; color: #9ca3af;">
-                    <strong><?php esc_html_e( 'Nota:', 'desi-pet-shower' ); ?></strong>
-                    <?php esc_html_e( 'Este shortcode [dps_configuracoes] está deprecated e será removido em versões futuras.', 'desi-pet-shower' ); ?>
-                </p>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
+        // Delega para a nova classe de configurações
+        return DPS_Settings_Frontend::render();
     }
 
     /**

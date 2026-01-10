@@ -4239,3 +4239,260 @@
     font-size: 13px;
     color: #6b7280;
 }
+
+/* ================================================
+   PÁGINA DE CONFIGURAÇÕES - FRONTEND
+   ================================================ */
+
+/* Container principal da página de configurações */
+.dps-settings-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.dps-settings-wrapper .dps-page-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Navegação de configurações */
+.dps-settings-nav {
+    margin-bottom: 0;
+}
+
+/* Seção de configurações */
+.dps-settings-section {
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 0 0 8px 8px;
+}
+
+.dps-settings-section.active {
+    display: block;
+}
+
+/* Formulário de configurações */
+.dps-settings-form {
+    max-width: 100%;
+}
+
+.dps-settings-form .dps-surface {
+    margin-bottom: 24px;
+}
+
+/* Fieldset dentro de configurações */
+.dps-fieldset {
+    margin: 0 0 24px 0;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.dps-fieldset legend {
+    padding: 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    background: #fafafa;
+}
+
+/* Linhas de formulário */
+.dps-form-row {
+    margin-bottom: 20px;
+}
+
+.dps-form-row:last-child {
+    margin-bottom: 0;
+}
+
+.dps-form-row label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-form-row input[type="text"],
+.dps-form-row input[type="password"],
+.dps-form-row input[type="email"],
+.dps-form-row input[type="url"],
+.dps-form-row input[type="number"],
+.dps-form-row select,
+.dps-form-row textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dps-form-row input:focus,
+.dps-form-row select:focus,
+.dps-form-row textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-form-row textarea {
+    max-width: 100%;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.dps-form-row .description {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* Ações do formulário */
+.dps-form-actions {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-form-actions .button-large {
+    padding: 12px 28px !important;
+    height: auto !important;
+    font-size: 15px !important;
+}
+
+.dps-form-actions .button-large .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+/* Notice dentro de configurações */
+.dps-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dps-notice .dashicons {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.dps-notice--info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+}
+
+.dps-notice--info .dashicons {
+    color: #0ea5e9;
+}
+
+.dps-notice--warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.dps-notice--warning .dashicons {
+    color: #f59e0b;
+}
+
+.dps-notice--success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+.dps-notice--success .dashicons {
+    color: #10b981;
+}
+
+.dps-notice--danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.dps-notice--danger .dashicons {
+    color: #ef4444;
+}
+
+/* Responsividade para configurações */
+@media (max-width: 768px) {
+    .dps-settings-wrapper {
+        padding: 0 16px;
+    }
+    
+    .dps-settings-wrapper .dps-page-title {
+        font-size: 22px;
+    }
+    
+    .dps-settings-section {
+        padding: 16px;
+    }
+    
+    .dps-fieldset {
+        padding: 16px;
+    }
+    
+    .dps-form-row input[type="text"],
+    .dps-form-row input[type="password"],
+    .dps-form-row input[type="email"],
+    .dps-form-row select {
+        max-width: 100%;
+    }
+}
+
+/* Checkbox label para configurações */
+.dps-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+}
+
+.dps-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0ea5e9;
+    cursor: pointer;
+}
+
+/* Color picker melhorado */
+.dps-form-row input[type="color"] {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.dps-form-row input[type="color"]:hover {
+    border-color: #0ea5e9;
+}
+
+.dps-form-row input[type="color"]:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}

@@ -179,6 +179,14 @@ Verificação completa do PR #161 (alinhamento de preços de serviços):
 - `PR_161_VERIFICATION.md` - Verificação detalhada
 - `README_VERIFICATION.md` - README da verificação
 
+### 📁 /docs/settings
+
+Documentação de configurações do sistema.
+
+**Arquivos:**
+- `FRONTEND_SETTINGS_IMPLEMENTATION_PLAN.md` - **🆕** Plano detalhado para implementação da página de configurações front-end (`[dps_configuracoes]`)
+- `GROOMERS_SETTINGS_VERIFICATION.md` - Verificação das configurações do Groomers Add-on
+
 ### 📁 /docs/security
 
 Documentação de segurança e auditoria.
@@ -233,6 +241,7 @@ Os seguintes documentos permanecem na raiz do repositório como **documentos cen
 9. **Para detalhes de UX/UI**: navegue até a subpasta correspondente em `/docs/layout`
 10. **Para planos de refatoração**: consulte `/docs/refactoring`
 11. **Para padrões visuais**: veja `/docs/visual/VISUAL_STYLE_GUIDE.md`
+12. **🆕 Para página de configurações front-end**: veja `docs/settings/FRONTEND_SETTINGS_IMPLEMENTATION_PLAN.md`
 
 ## Navegação Rápida
 

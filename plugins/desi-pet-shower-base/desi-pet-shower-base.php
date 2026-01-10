@@ -74,6 +74,9 @@ require_once DPS_BASE_DIR . 'includes/class-dps-github-updater.php';
 // Carrega classe de frontend
 require_once DPS_BASE_DIR . 'includes/class-dps-base-frontend.php';
 
+// Carrega classe de configurações frontend
+require_once DPS_BASE_DIR . 'includes/class-dps-settings-frontend.php';
+
 if ( ! function_exists( 'dps_load_textdomain' ) ) {
     /**
      * Carrega o text domain do plugin base.
@@ -109,6 +112,9 @@ class DPS_Base_Plugin {
         // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
         add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
+
+        // Inicializa sistema de configurações frontend
+        add_action( 'init', [ 'DPS_Settings_Frontend', 'init' ], 5 );
 
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
         add_action( 'save_post_dps_pet', [ $this, 'clear_pets_cache' ], 10, 2 );
