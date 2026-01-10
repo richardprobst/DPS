@@ -344,9 +344,10 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 
 ---
 
-### FASE 4: Abas de Automação (Estimativa: 4h)
+### FASE 4: Abas de Automação (Estimativa: 4h) ✅ CONCLUÍDA
 **Prioridade:** 🟡 Média  
-**Dependências:** Fase 3
+**Dependências:** Fase 3  
+**Status:** Implementada em 2026-01-10
 
 #### 4.4.1 Objetivos
 - Implementar abas para Notificações e Financeiro
@@ -356,23 +357,27 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 #### 4.4.2 Tarefas
 
 **Aba Notificações:**
-- [ ] Campos de emails (múltiplos)
-- [ ] Seletores de horário
-- [ ] Selector de dia da semana
-- [ ] Campos Telegram (token, chat ID)
-- [ ] Checkboxes de ativação
-- [ ] Botão de teste de envio
+- [x] Campos de emails (múltiplos)
+- [x] Seletores de horário
+- [x] Selector de dia da semana
+- [x] Campos Telegram (token, chat ID)
+- [x] Checkboxes de ativação
+- [ ] Botão de teste de envio (mantido apenas no admin)
 
 **Aba Financeiro:**
-- [ ] Checkbox de lembretes ativados
-- [ ] Campos dias antes/depois
-- [ ] Textareas para templates de mensagem
+- [x] Checkbox de lembretes ativados
+- [x] Campos dias antes/depois
+- [x] Textareas para templates de mensagem
 
 #### 4.4.3 Critérios de Aceite
-- [ ] Horários são validados (HH:MM)
-- [ ] Emails são validados
-- [ ] Cron jobs são reagendados ao salvar
-- [ ] Teste de envio funciona
+- [x] Horários são validados (HH:MM)
+- [x] Emails são validados
+- [x] Cron jobs são reagendados ao salvar
+- [ ] Teste de envio funciona (mantido apenas no admin para segurança)
+
+#### 4.4.4 Arquivos Modificados
+- `includes/class-dps-settings-frontend.php` (expandido com ~450 linhas)
+- `assets/css/dps-base.css` (estilos adicionados para campos de automação)
 
 ---
 

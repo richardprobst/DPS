@@ -124,6 +124,30 @@ class DPS_Settings_Frontend {
                 50
             );
         }
+
+        // ========================================
+        // FASE 4: Abas de Automação
+        // ========================================
+
+        // Aba Notificações (se Push Add-on ativo)
+        if ( class_exists( 'DPS_Push_Addon' ) ) {
+            self::register_tab(
+                'notificacoes',
+                __( '🔔 Notificações', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_notificacoes' ],
+                60
+            );
+        }
+
+        // Aba Financeiro - Lembretes (se Finance Add-on ativo)
+        if ( class_exists( 'DPS_Finance_Addon' ) ) {
+            self::register_tab(
+                'financeiro_lembretes',
+                __( '💰 Financeiro', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_financeiro_lembretes' ],
+                70
+            );
+        }
     }
 
     /**
@@ -391,6 +415,15 @@ class DPS_Settings_Frontend {
                 break;
             case 'save_pagamentos':
                 self::handle_save_pagamentos();
+                break;
+            // ========================================
+            // FASE 4: Handlers de Automação
+            // ========================================
+            case 'save_notificacoes':
+                self::handle_save_notificacoes();
+                break;
+            case 'save_financeiro_lembretes':
+                self::handle_save_financeiro_lembretes();
                 break;
             default:
                 /**
@@ -1097,5 +1130,477 @@ class DPS_Settings_Frontend {
         );
 
         DPS_Message_Helper::add_success( __( 'Configurações de Pagamentos salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    // ========================================
+    // FASE 4: Abas de Automação
+    // ========================================
+
+    /**
+     * Renderiza a aba Notificações (Push Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_notificacoes() {
+        if ( ! class_exists( 'DPS_Push_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Notificações não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $emails_agenda   = get_option( 'dps_push_emails_agenda', get_option( 'admin_email' ) );
+        $emails_report   = get_option( 'dps_push_emails_report', get_option( 'admin_email' ) );
+        $agenda_time     = get_option( 'dps_push_agenda_time', '08:00' );
+        $report_time     = get_option( 'dps_push_report_time', '19:00' );
+        $weekly_day      = get_option( 'dps_push_weekly_day', 'monday' );
+        $weekly_time     = get_option( 'dps_push_weekly_time', '08:00' );
+        $inactive_days   = get_option( 'dps_push_inactive_days', 30 );
+        $telegram_token  = get_option( 'dps_push_telegram_token', '' );
+        $telegram_chat   = get_option( 'dps_push_telegram_chat', '' );
+        $agenda_enabled  = get_option( 'dps_push_agenda_enabled', true );
+        $report_enabled  = get_option( 'dps_push_report_enabled', true );
+        $weekly_enabled  = get_option( 'dps_push_weekly_enabled', true );
+
+        // Formata emails para exibição
+        $emails_agenda_display = is_array( $emails_agenda ) ? implode( ', ', $emails_agenda ) : $emails_agenda;
+        $emails_report_display = is_array( $emails_report ) ? implode( ', ', $emails_report ) : $emails_report;
+
+        // Próximos envios agendados
+        $next_agenda = wp_next_scheduled( 'dps_send_agenda_notification' );
+        $next_report = wp_next_scheduled( 'dps_send_daily_report' );
+        $next_weekly = wp_next_scheduled( 'dps_send_weekly_inactive_report' );
+
+        // Dias da semana para select
+        $weekdays = [
+            'monday'    => __( 'Segunda-feira', 'desi-pet-shower' ),
+            'tuesday'   => __( 'Terça-feira', 'desi-pet-shower' ),
+            'wednesday' => __( 'Quarta-feira', 'desi-pet-shower' ),
+            'thursday'  => __( 'Quinta-feira', 'desi-pet-shower' ),
+            'friday'    => __( 'Sexta-feira', 'desi-pet-shower' ),
+            'saturday'  => __( 'Sábado', 'desi-pet-shower' ),
+            'sunday'    => __( 'Domingo', 'desi-pet-shower' ),
+        ];
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_notificacoes">
+
+            <!-- Relatório da Manhã -->
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-calendar-alt"></span>
+                    <?php esc_html_e( 'Relatório da Manhã – Agenda do Dia', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Receba no início do dia um resumo com todos os agendamentos programados.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Configurações', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_push_agenda_enabled" value="1" <?php checked( $agenda_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Ativar relatório da manhã', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_agenda_time"><?php esc_html_e( 'Horário de envio', 'desi-pet-shower' ); ?></label>
+                        <input type="time" id="dps_push_agenda_time" name="dps_push_agenda_time" value="<?php echo esc_attr( $agenda_time ); ?>" class="regular-text" style="width: 120px;" />
+                        <?php if ( $agenda_enabled && $next_agenda ) : ?>
+                            <span class="dps-next-schedule">
+                                ✓ <?php esc_html_e( 'Próximo:', 'desi-pet-shower' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_agenda ) ); ?>
+                            </span>
+                        <?php endif; ?>
+                        <p class="description"><?php esc_html_e( 'Horário em que o relatório será enviado diariamente.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_emails_agenda"><?php esc_html_e( 'Destinatários', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_push_emails_agenda" name="dps_push_emails_agenda" value="<?php echo esc_attr( $emails_agenda_display ); ?>" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" />
+                        <p class="description"><?php esc_html_e( 'Separe múltiplos emails por vírgula.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Relatório do Final do Dia -->
+            <div class="dps-surface dps-surface--neutral" style="margin-top: 20px;">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-chart-bar"></span>
+                    <?php esc_html_e( 'Relatório do Final do Dia – Resumo Financeiro', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Receba no final do expediente um balanço com receitas, despesas e atendimentos.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Configurações', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_push_report_enabled" value="1" <?php checked( $report_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Ativar relatório do final do dia', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_report_time"><?php esc_html_e( 'Horário de envio', 'desi-pet-shower' ); ?></label>
+                        <input type="time" id="dps_push_report_time" name="dps_push_report_time" value="<?php echo esc_attr( $report_time ); ?>" class="regular-text" style="width: 120px;" />
+                        <?php if ( $report_enabled && $next_report ) : ?>
+                            <span class="dps-next-schedule">
+                                ✓ <?php esc_html_e( 'Próximo:', 'desi-pet-shower' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_report ) ); ?>
+                            </span>
+                        <?php endif; ?>
+                        <p class="description"><?php esc_html_e( 'Horário em que o relatório será enviado diariamente.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_emails_report"><?php esc_html_e( 'Destinatários', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_push_emails_report" name="dps_push_emails_report" value="<?php echo esc_attr( $emails_report_display ); ?>" class="regular-text" placeholder="email1@exemplo.com, email2@exemplo.com" />
+                        <p class="description"><?php esc_html_e( 'Separe múltiplos emails por vírgula.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Relatório Semanal -->
+            <div class="dps-surface dps-surface--neutral" style="margin-top: 20px;">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-groups"></span>
+                    <?php esc_html_e( 'Relatório Semanal – Pets Inativos', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Receba semanalmente uma lista de pets que não foram atendidos há muito tempo.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Configurações', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_push_weekly_enabled" value="1" <?php checked( $weekly_enabled ); ?> />
+                            <strong><?php esc_html_e( 'Ativar relatório semanal', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_weekly_day"><?php esc_html_e( 'Dia da semana', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_push_weekly_day" name="dps_push_weekly_day" class="regular-text" style="width: auto;">
+                            <?php foreach ( $weekdays as $value => $label ) : ?>
+                                <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $weekly_day, $value ); ?>>
+                                    <?php echo esc_html( $label ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_weekly_time"><?php esc_html_e( 'Horário de envio', 'desi-pet-shower' ); ?></label>
+                        <input type="time" id="dps_push_weekly_time" name="dps_push_weekly_time" value="<?php echo esc_attr( $weekly_time ); ?>" class="regular-text" style="width: 120px;" />
+                        <?php if ( $weekly_enabled && $next_weekly ) : ?>
+                            <span class="dps-next-schedule">
+                                ✓ <?php esc_html_e( 'Próximo:', 'desi-pet-shower' ); ?> <?php echo esc_html( date_i18n( 'd/m H:i', $next_weekly ) ); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_inactive_days"><?php esc_html_e( 'Considerar inativo após', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_push_inactive_days" name="dps_push_inactive_days" value="<?php echo esc_attr( $inactive_days ); ?>" min="7" max="365" class="regular-text" style="width: 100px;" />
+                        <span style="margin-left: 8px;"><?php esc_html_e( 'dias sem atendimento', 'desi-pet-shower' ); ?></span>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Integração Telegram -->
+            <div class="dps-surface dps-surface--info" style="margin-top: 20px;">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-format-status"></span>
+                    <?php esc_html_e( 'Integração com Telegram', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Receba os relatórios também via Telegram. Configure um bot e informe o Chat ID.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Credenciais do Bot', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_telegram_token"><?php esc_html_e( 'Token do Bot', 'desi-pet-shower' ); ?></label>
+                        <input type="password" id="dps_push_telegram_token" name="dps_push_telegram_token" value="<?php echo esc_attr( self::mask_sensitive_value( $telegram_token ) ); ?>" class="regular-text" autocomplete="new-password" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" />
+                        <p class="description"><?php esc_html_e( 'Crie um bot via @BotFather no Telegram para obter o token.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_push_telegram_chat"><?php esc_html_e( 'Chat ID', 'desi-pet-shower' ); ?></label>
+                        <input type="text" id="dps_push_telegram_chat" name="dps_push_telegram_chat" value="<?php echo esc_attr( $telegram_chat ); ?>" class="regular-text" placeholder="-1001234567890" />
+                        <p class="description"><?php esc_html_e( 'ID do chat ou grupo. Use @userinfobot para descobrir.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Renderiza a aba Financeiro - Lembretes (Finance Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_financeiro_lembretes() {
+        if ( ! class_exists( 'DPS_Finance_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Financeiro não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $enabled      = get_option( 'dps_finance_reminders_enabled', 'no' );
+        $days_before  = get_option( 'dps_finance_reminder_days_before', 1 );
+        $days_after   = get_option( 'dps_finance_reminder_days_after', 1 );
+        $msg_before   = get_option( 'dps_finance_reminder_message_before', '' );
+        $msg_after    = get_option( 'dps_finance_reminder_message_after', '' );
+
+        // Mensagens padrão se vazias
+        $default_msg_before = __( 'Olá {cliente}, este é um lembrete amigável: o pagamento de R$ {valor} vence amanhã. Para sua comodidade, você pode pagar via PIX ou utilizar o link: {link}. Obrigado!', 'desi-pet-shower' );
+        $default_msg_after  = __( 'Olá {cliente}, o pagamento de R$ {valor} está vencido. Para regularizar, você pode pagar via PIX ou utilizar o link: {link}. Agradecemos a atenção!', 'desi-pet-shower' );
+
+        if ( empty( $msg_before ) ) {
+            $msg_before = $default_msg_before;
+        }
+        if ( empty( $msg_after ) ) {
+            $msg_after = $default_msg_after;
+        }
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_financeiro_lembretes">
+
+            <div class="dps-surface dps-surface--warning">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-bell"></span>
+                    <?php esc_html_e( 'Lembretes Automáticos de Pagamento', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure lembretes automáticos para cobranças pendentes. O sistema enviará mensagens antes e depois do vencimento.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Ativação', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label class="dps-checkbox-label">
+                            <input type="checkbox" name="dps_finance_reminders_enabled" value="yes" <?php checked( $enabled, 'yes' ); ?> />
+                            <strong><?php esc_html_e( 'Habilitar lembretes automáticos de pagamento', 'desi-pet-shower' ); ?></strong>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Quando habilitado, o sistema enviará lembretes automáticos antes e depois do vencimento.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Timing dos Lembretes', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-form-row">
+                        <label for="dps_finance_reminder_days_before"><?php esc_html_e( 'Dias antes do vencimento', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_finance_reminder_days_before" name="dps_finance_reminder_days_before" value="<?php echo esc_attr( $days_before ); ?>" min="0" max="30" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Quantos dias antes do vencimento enviar o primeiro lembrete (ex: 1 = envia 1 dia antes).', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_finance_reminder_days_after"><?php esc_html_e( 'Dias após o vencimento', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_finance_reminder_days_after" name="dps_finance_reminder_days_after" value="<?php echo esc_attr( $days_after ); ?>" min="0" max="30" class="regular-text" style="width: 100px;" />
+                        <p class="description"><?php esc_html_e( 'Quantos dias após o vencimento enviar o lembrete de cobrança.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Templates de Mensagem', 'desi-pet-shower' ); ?></legend>
+
+                    <div class="dps-notice dps-notice--info" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-info"></span>
+                        <?php esc_html_e( 'Placeholders disponíveis: {cliente}, {pet}, {data}, {valor}, {link}, {pix}, {loja}', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_finance_reminder_message_before"><?php esc_html_e( 'Mensagem - Antes do Vencimento', 'desi-pet-shower' ); ?></label>
+                        <textarea id="dps_finance_reminder_message_before" name="dps_finance_reminder_message_before" rows="4" class="large-text"><?php echo esc_textarea( $msg_before ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Mensagem enviada antes do vencimento do pagamento.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_finance_reminder_message_after"><?php esc_html_e( 'Mensagem - Após Vencimento', 'desi-pet-shower' ); ?></label>
+                        <textarea id="dps_finance_reminder_message_after" name="dps_finance_reminder_message_after" rows="4" class="large-text"><?php echo esc_textarea( $msg_after ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Mensagem enviada após o vencimento do pagamento.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Processa salvamento da aba Notificações.
+     *
+     * @return void
+     */
+    private static function handle_save_notificacoes() {
+        // Valida e filtra lista de emails
+        $emails_agenda = '';
+        if ( isset( $_POST['dps_push_emails_agenda'] ) ) {
+            $emails_agenda = self::validate_email_list( sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_agenda'] ) ) );
+        }
+
+        $emails_report = '';
+        if ( isset( $_POST['dps_push_emails_report'] ) ) {
+            $emails_report = self::validate_email_list( sanitize_textarea_field( wp_unslash( $_POST['dps_push_emails_report'] ) ) );
+        }
+
+        // Valida horários
+        $agenda_time = self::validate_time( isset( $_POST['dps_push_agenda_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_agenda_time'] ) ) : '08:00' );
+        $report_time = self::validate_time( isset( $_POST['dps_push_report_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_report_time'] ) ) : '19:00' );
+        $weekly_time = self::validate_time( isset( $_POST['dps_push_weekly_time'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_time'] ) ) : '08:00' );
+
+        // Valida dia da semana
+        $allowed_days   = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
+        $weekly_day_raw = isset( $_POST['dps_push_weekly_day'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_weekly_day'] ) ) : 'monday';
+        $weekly_day     = in_array( $weekly_day_raw, $allowed_days, true ) ? $weekly_day_raw : 'monday';
+
+        // Valida dias de inatividade
+        $inactive_days = isset( $_POST['dps_push_inactive_days'] ) ? absint( $_POST['dps_push_inactive_days'] ) : 30;
+        if ( $inactive_days < 7 ) {
+            $inactive_days = 7;
+        } elseif ( $inactive_days > 365 ) {
+            $inactive_days = 365;
+        }
+
+        // Token e chat Telegram
+        $telegram_token = isset( $_POST['dps_push_telegram_token'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_token'] ) ) : '';
+        $telegram_chat  = isset( $_POST['dps_push_telegram_chat'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_push_telegram_chat'] ) ) : '';
+
+        // Atualiza opções
+        update_option( 'dps_push_emails_agenda', $emails_agenda );
+        update_option( 'dps_push_emails_report', $emails_report );
+        update_option( 'dps_push_agenda_time', $agenda_time );
+        update_option( 'dps_push_report_time', $report_time );
+        update_option( 'dps_push_weekly_day', $weekly_day );
+        update_option( 'dps_push_weekly_time', $weekly_time );
+        update_option( 'dps_push_inactive_days', $inactive_days );
+
+        // Token do Telegram - só atualiza se não for mascarado
+        if ( ! self::is_masked_value( $telegram_token ) && ! empty( $telegram_token ) ) {
+            update_option( 'dps_push_telegram_token', $telegram_token );
+        }
+        update_option( 'dps_push_telegram_chat', $telegram_chat );
+
+        // Checkboxes de ativação
+        update_option( 'dps_push_agenda_enabled', ! empty( $_POST['dps_push_agenda_enabled'] ) );
+        update_option( 'dps_push_report_enabled', ! empty( $_POST['dps_push_report_enabled'] ) );
+        update_option( 'dps_push_weekly_enabled', ! empty( $_POST['dps_push_weekly_enabled'] ) );
+
+        // Reagenda crons se a classe existir
+        if ( class_exists( 'DPS_Email_Reports' ) ) {
+            $email_reports = DPS_Email_Reports::get_instance();
+            if ( method_exists( $email_reports, 'reschedule_all_crons' ) ) {
+                $email_reports->reschedule_all_crons();
+            }
+        }
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Notificações atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'notifications_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Notificações salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Processa salvamento da aba Financeiro - Lembretes.
+     *
+     * @return void
+     */
+    private static function handle_save_financeiro_lembretes() {
+        // Habilitar/desabilitar
+        $enabled = isset( $_POST['dps_finance_reminders_enabled'] ) && $_POST['dps_finance_reminders_enabled'] === 'yes' ? 'yes' : 'no';
+        update_option( 'dps_finance_reminders_enabled', $enabled );
+
+        // Dias antes/depois
+        if ( isset( $_POST['dps_finance_reminder_days_before'] ) ) {
+            $days_before = max( 0, min( 30, intval( $_POST['dps_finance_reminder_days_before'] ) ) );
+            update_option( 'dps_finance_reminder_days_before', $days_before );
+        }
+
+        if ( isset( $_POST['dps_finance_reminder_days_after'] ) ) {
+            $days_after = max( 0, min( 30, intval( $_POST['dps_finance_reminder_days_after'] ) ) );
+            update_option( 'dps_finance_reminder_days_after', $days_after );
+        }
+
+        // Mensagens
+        if ( isset( $_POST['dps_finance_reminder_message_before'] ) ) {
+            update_option( 'dps_finance_reminder_message_before', sanitize_textarea_field( wp_unslash( $_POST['dps_finance_reminder_message_before'] ) ) );
+        }
+
+        if ( isset( $_POST['dps_finance_reminder_message_after'] ) ) {
+            update_option( 'dps_finance_reminder_message_after', sanitize_textarea_field( wp_unslash( $_POST['dps_finance_reminder_message_after'] ) ) );
+        }
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações de Lembretes Financeiros atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'finance_reminders_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações de Lembretes Financeiros salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    /**
+     * Valida e filtra lista de emails separados por vírgula.
+     *
+     * @param string $input Lista de emails.
+     * @return string Lista de emails válidos.
+     */
+    private static function validate_email_list( $input ) {
+        if ( empty( $input ) ) {
+            return '';
+        }
+        $emails       = array_map( 'trim', explode( ',', $input ) );
+        $valid_emails = array_filter( $emails, 'is_email' );
+        return implode( ', ', $valid_emails );
+    }
+
+    /**
+     * Valida horário no formato HH:MM.
+     *
+     * @param string $time Horário.
+     * @return string Horário válido ou padrão.
+     */
+    private static function validate_time( $time ) {
+        if ( preg_match( '/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time ) ) {
+            return $time;
+        }
+        return '08:00';
     }
 }
