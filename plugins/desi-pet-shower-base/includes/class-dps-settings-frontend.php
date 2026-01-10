@@ -182,6 +182,20 @@ class DPS_Settings_Frontend {
                 100
             );
         }
+
+        // ========================================
+        // FASE 6: Aba Agenda
+        // ========================================
+
+        // Aba Agenda (se Agenda Add-on ativo)
+        if ( class_exists( 'DPS_Agenda_Addon' ) ) {
+            self::register_tab(
+                'agenda',
+                __( '⏰ Agenda', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_agenda' ],
+                110
+            );
+        }
     }
 
     /**
@@ -470,6 +484,12 @@ class DPS_Settings_Frontend {
                 break;
             case 'save_fidelidade':
                 self::handle_save_fidelidade();
+                break;
+            // ========================================
+            // FASE 6: Handler da Aba Agenda
+            // ========================================
+            case 'save_agenda':
+                self::handle_save_agenda();
                 break;
             default:
                 /**
@@ -2360,5 +2380,172 @@ class DPS_Settings_Frontend {
         );
 
         DPS_Message_Helper::add_success( __( 'Configurações de Fidelidade salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    // ========================================
+    // FASE 6: Aba Agenda
+    // ========================================
+
+    /**
+     * Renderiza a aba Agenda (Agenda Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_agenda() {
+        if ( ! class_exists( 'DPS_Agenda_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Agenda não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Carrega configurações existentes
+        $agenda_page_id  = (int) get_option( 'dps_agenda_page_id', 0 );
+        $shop_address    = get_option( 'dps_shop_address', '' );
+        
+        // Carrega configuração de capacidade usando o helper se disponível
+        $capacity_config = [
+            'morning'   => 10,
+            'afternoon' => 10,
+        ];
+        if ( class_exists( 'DPS_Agenda_Capacity_Helper' ) ) {
+            $capacity_config = DPS_Agenda_Capacity_Helper::get_capacity_config();
+        }
+
+        // Obtém lista de páginas para o selector (otimizado: apenas campos necessários)
+        $pages = get_pages( [
+            'post_status' => 'publish',
+            'sort_column' => 'post_title',
+            'sort_order'  => 'ASC',
+        ] );
+        ?>
+        <form method="post" action="" class="dps-settings-form">
+            <?php self::nonce_field(); ?>
+            <input type="hidden" name="dps_settings_action" value="save_agenda">
+
+            <div class="dps-surface dps-surface--info">
+                <h3 class="dps-surface__title">
+                    <span class="dashicons dashicons-calendar-alt"></span>
+                    <?php esc_html_e( 'Configurações da Agenda', 'desi-pet-shower' ); ?>
+                </h3>
+                <p class="dps-surface__description">
+                    <?php esc_html_e( 'Configure a página da agenda e os limites de capacidade de atendimento.', 'desi-pet-shower' ); ?>
+                </p>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Página da Agenda', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-form-row">
+                        <label for="dps_agenda_page_id"><?php esc_html_e( 'Página da Agenda', 'desi-pet-shower' ); ?></label>
+                        <select id="dps_agenda_page_id" name="dps_agenda_page_id" class="regular-text">
+                            <option value=""><?php esc_html_e( '— Selecione uma página —', 'desi-pet-shower' ); ?></option>
+                            <?php foreach ( $pages as $page ) : ?>
+                                <option value="<?php echo esc_attr( $page->ID ); ?>" <?php selected( $agenda_page_id, $page->ID ); ?>>
+                                    <?php echo esc_html( $page->post_title ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Página onde o shortcode [dps_agenda_page] está inserido.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Capacidade de Atendimento', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--info" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-info"></span>
+                        <?php esc_html_e( 'Defina a capacidade máxima de atendimentos por período. Isso é utilizado para calcular a lotação no heatmap de capacidade.', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_agenda_capacity_morning"><?php esc_html_e( 'Capacidade da Manhã (08:00 - 11:59)', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_agenda_capacity_morning" name="dps_agenda_capacity_morning" value="<?php echo esc_attr( $capacity_config['morning'] ); ?>" min="1" max="100" class="regular-text" style="width: 100px;" />
+                        <span style="margin-left: 8px;"><?php esc_html_e( 'atendimentos', 'desi-pet-shower' ); ?></span>
+                        <p class="description"><?php esc_html_e( 'Número máximo de atendimentos no período da manhã.', 'desi-pet-shower' ); ?></p>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_agenda_capacity_afternoon"><?php esc_html_e( 'Capacidade da Tarde (12:00 - 17:59)', 'desi-pet-shower' ); ?></label>
+                        <input type="number" id="dps_agenda_capacity_afternoon" name="dps_agenda_capacity_afternoon" value="<?php echo esc_attr( $capacity_config['afternoon'] ); ?>" min="1" max="100" class="regular-text" style="width: 100px;" />
+                        <span style="margin-left: 8px;"><?php esc_html_e( 'atendimentos', 'desi-pet-shower' ); ?></span>
+                        <p class="description"><?php esc_html_e( 'Número máximo de atendimentos no período da tarde.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="dps-fieldset">
+                    <legend><?php esc_html_e( 'Localização do Petshop', 'desi-pet-shower' ); ?></legend>
+                    
+                    <div class="dps-notice dps-notice--info" style="margin-bottom: 16px;">
+                        <span class="dashicons dashicons-location"></span>
+                        <?php esc_html_e( 'O endereço é usado para GPS, navegação e convites de calendário. Este campo também é gerenciado na aba "Empresa".', 'desi-pet-shower' ); ?>
+                    </div>
+
+                    <div class="dps-form-row">
+                        <label for="dps_shop_address"><?php esc_html_e( 'Endereço do Petshop', 'desi-pet-shower' ); ?></label>
+                        <textarea id="dps_shop_address" name="dps_shop_address" rows="2" class="large-text"><?php echo esc_textarea( $shop_address ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Endereço completo utilizado para cálculos de GPS e rotas.', 'desi-pet-shower' ); ?></p>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="dps-form-actions">
+                <button type="submit" class="button button-primary button-large">
+                    <span class="dashicons dashicons-saved" style="margin-top: 3px;"></span>
+                    <?php esc_html_e( 'Salvar Configurações', 'desi-pet-shower' ); ?>
+                </button>
+            </div>
+        </form>
+        <?php
+    }
+
+    /**
+     * Processa salvamento da aba Agenda.
+     *
+     * @return void
+     */
+    private static function handle_save_agenda() {
+        // Página da agenda
+        if ( isset( $_POST['dps_agenda_page_id'] ) ) {
+            $page_id = absint( wp_unslash( $_POST['dps_agenda_page_id'] ) );
+            update_option( 'dps_agenda_page_id', $page_id );
+        }
+
+        // Capacidade por período
+        $capacity_morning   = isset( $_POST['dps_agenda_capacity_morning'] ) ? absint( $_POST['dps_agenda_capacity_morning'] ) : 10;
+        $capacity_afternoon = isset( $_POST['dps_agenda_capacity_afternoon'] ) ? absint( $_POST['dps_agenda_capacity_afternoon'] ) : 10;
+
+        // Valida limites (mínimo 1, máximo 100)
+        $capacity_morning   = max( 1, min( 100, $capacity_morning ) );
+        $capacity_afternoon = max( 1, min( 100, $capacity_afternoon ) );
+
+        // Salva usando o helper se disponível, caso contrário diretamente na option
+        if ( class_exists( 'DPS_Agenda_Capacity_Helper' ) ) {
+            DPS_Agenda_Capacity_Helper::save_capacity_config( [
+                'morning'   => $capacity_morning,
+                'afternoon' => $capacity_afternoon,
+            ] );
+        } else {
+            update_option( 'dps_agenda_capacity_config', [
+                'morning'   => $capacity_morning,
+                'afternoon' => $capacity_afternoon,
+            ] );
+        }
+
+        // Endereço do petshop
+        if ( isset( $_POST['dps_shop_address'] ) ) {
+            $address = sanitize_textarea_field( wp_unslash( $_POST['dps_shop_address'] ) );
+            update_option( 'dps_shop_address', $address );
+        }
+
+        // Log de auditoria
+        DPS_Logger::log(
+            sprintf(
+                /* translators: %d: User ID who modified settings */
+                __( 'Configurações da Agenda atualizadas pelo usuário ID %d', 'desi-pet-shower' ),
+                get_current_user_id()
+            ),
+            DPS_Logger::LEVEL_INFO,
+            'agenda_settings_updated'
+        );
+
+        DPS_Message_Helper::add_success( __( 'Configurações da Agenda salvas com sucesso!', 'desi-pet-shower' ) );
     }
 }
