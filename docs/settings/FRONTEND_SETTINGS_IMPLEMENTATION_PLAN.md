@@ -424,9 +424,10 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 
 ---
 
-### FASE 6: Aba Agenda e Refinamentos (Estimativa: 3h)
+### FASE 6: Aba Agenda e Refinamentos (Estimativa: 3h) ✅ CONCLUÍDA
 **Prioridade:** 🟢 Baixa  
 **Dependências:** Fase 5
+**Status:** Implementada em 2026-01-10
 
 #### 4.6.1 Objetivos
 - Implementar aba Agenda
@@ -434,17 +435,20 @@ Este documento detalha o plano de reimplementação da página de configuraçõe
 - Otimizar performance
 
 #### 4.6.2 Tarefas
-- [ ] Selector de página da agenda
-- [ ] Configuração de capacidade por horário
-- [ ] Campo endereço do petshop
-- [ ] Melhorias de responsividade
-- [ ] Validação final de segurança
-- [ ] Otimização de queries
+- [x] Selector de página da agenda
+- [x] Configuração de capacidade por horário
+- [x] Campo endereço do petshop
+- [x] Melhorias de responsividade
+- [x] Validação final de segurança
+- [x] Otimização de queries
 
 #### 4.6.3 Critérios de Aceite
-- [ ] Todas as abas funcionam em mobile
-- [ ] Performance aceitável (<2s load)
-- [ ] Sem vulnerabilidades de segurança
+- [x] Todas as abas funcionam em mobile
+- [x] Performance aceitável (<2s load)
+- [x] Sem vulnerabilidades de segurança
+
+#### 4.6.4 Arquivos Modificados
+- `includes/class-dps-settings-frontend.php` (expandido com ~180 linhas)
 
 ---
 

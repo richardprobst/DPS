@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Página de Configurações Frontend - Fase 6: Aba Agenda (v2.0.0)**
+
+- **Aba Agenda (Agenda Add-on)**: Nova aba de configurações para gerenciamento da agenda de atendimentos:
+  - Selector de página da agenda (`dps_agenda_page_id`)
+  - Configuração de capacidade por horário (manhã 08:00-11:59 e tarde 12:00-17:59)
+  - Campo de endereço do petshop para GPS e navegação (sincronizado com aba Empresa)
+  - Integração com `DPS_Agenda_Capacity_Helper` para cálculos de heatmap de lotação
+- **Validação e segurança**: Nonce verification, capability check (`manage_options`), sanitização de inputs e log de auditoria
+- **Responsividade**: Estilos herdados do sistema de abas garantem funcionamento em mobile
+
 **Página de Configurações Frontend - Fase 4: Abas de Automação (v2.0.0)**
 
 - **Aba Notificações (Push Add-on)**: Nova aba de configurações para gerenciamento de relatórios automáticos por email:
