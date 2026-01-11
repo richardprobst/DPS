@@ -1559,6 +1559,7 @@ class DPS_Services_Addon {
         echo '<div id="dps-discount-container" class="dps-discount-container" style="display:' . ( $has_discount ? 'block' : 'none' ) . ';">';
         echo '<div class="dps-discount-header">';
         echo '<h4 class="dps-discount-title">' . esc_html__( 'Desconto', 'dps-services-addon' ) . '</h4>';
+        echo '<p class="dps-discount-hint">' . esc_html__( 'Aplique um desconto com descrição e valor.', 'dps-services-addon' ) . '</p>';
         echo '</div>';
         
         echo '<div class="dps-discount-row">';
