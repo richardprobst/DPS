@@ -806,6 +806,12 @@ class DPS_Base_Frontend {
      * Renderiza a aplicação no frontend (abas para clientes, pets e agendamentos)
      */
     public static function render_app() {
+        // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
+        // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
+        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+            return '';
+        }
+
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
@@ -881,6 +887,12 @@ class DPS_Base_Frontend {
      * @return string HTML da página de configurações.
      */
     public static function render_settings() {
+        // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
+        // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
+        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+            return '';
+        }
+
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();

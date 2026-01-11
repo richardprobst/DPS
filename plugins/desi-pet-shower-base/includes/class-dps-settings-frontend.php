@@ -264,6 +264,12 @@ class DPS_Settings_Frontend {
      * @return string HTML da página de configurações.
      */
     public static function render() {
+        // Evita renderizar durante requisições REST API (Block Editor) ou AJAX
+        // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
+        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+            return '';
+        }
+
         // Inicializa abas se ainda não foram registradas
         if ( empty( self::$tabs ) ) {
             self::init();
