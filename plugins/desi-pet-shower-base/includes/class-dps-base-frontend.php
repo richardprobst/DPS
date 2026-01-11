@@ -10,6 +10,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Base_Frontend {
 
     /**
+     * Verifica se a renderização deve ser ignorada (durante requisições REST/AJAX).
+     * 
+     * Previne o erro "Falha ao publicar. A resposta não é um JSON válido" no
+     * Block Editor ao evitar renderização de shortcodes durante requisições REST.
+     *
+     * @since 1.1.1
+     * @return bool True se a renderização deve ser ignorada.
+     */
+    private static function should_skip_rendering() {
+        return ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax();
+    }
+
+    /**
      * Verifica se o usuário atual possui permissão para gerenciar o painel.
      * 
      * Permite acesso a administradores (manage_options) ou usuários com qualquer
@@ -806,6 +819,12 @@ class DPS_Base_Frontend {
      * Renderiza a aplicação no frontend (abas para clientes, pets e agendamentos)
      */
     public static function render_app() {
+        // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
+        // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
+        if ( self::should_skip_rendering() ) {
+            return '';
+        }
+
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
@@ -881,6 +900,12 @@ class DPS_Base_Frontend {
      * @return string HTML da página de configurações.
      */
     public static function render_settings() {
+        // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
+        // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
+        if ( self::should_skip_rendering() ) {
+            return '';
+        }
+
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
