@@ -54,6 +54,19 @@ class DPS_Settings_Frontend {
     private static $callbacks = [];
 
     /**
+     * Verifica se a renderização deve ser ignorada (durante requisições REST/AJAX).
+     * 
+     * Previne o erro "Falha ao publicar. A resposta não é um JSON válido" no
+     * Block Editor ao evitar renderização de shortcodes durante requisições REST.
+     *
+     * @since 2.0.0
+     * @return bool True se a renderização deve ser ignorada.
+     */
+    private static function should_skip_rendering() {
+        return ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax();
+    }
+
+    /**
      * Inicializa o sistema de configurações.
      *
      * @return void
@@ -266,7 +279,7 @@ class DPS_Settings_Frontend {
     public static function render() {
         // Evita renderizar durante requisições REST API (Block Editor) ou AJAX
         // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
-        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+        if ( self::should_skip_rendering() ) {
             return '';
         }
 

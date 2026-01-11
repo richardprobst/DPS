@@ -10,6 +10,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DPS_Base_Frontend {
 
     /**
+     * Verifica se a renderização deve ser ignorada (durante requisições REST/AJAX).
+     * 
+     * Previne o erro "Falha ao publicar. A resposta não é um JSON válido" no
+     * Block Editor ao evitar renderização de shortcodes durante requisições REST.
+     *
+     * @since 1.1.1
+     * @return bool True se a renderização deve ser ignorada.
+     */
+    private static function should_skip_rendering() {
+        return ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax();
+    }
+
+    /**
      * Verifica se o usuário atual possui permissão para gerenciar o painel.
      * 
      * Permite acesso a administradores (manage_options) ou usuários com qualquer
@@ -808,7 +821,7 @@ class DPS_Base_Frontend {
     public static function render_app() {
         // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
         // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
-        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+        if ( self::should_skip_rendering() ) {
             return '';
         }
 
@@ -889,7 +902,7 @@ class DPS_Base_Frontend {
     public static function render_settings() {
         // Evita renderizar o shortcode durante requisições REST API (Block Editor) ou AJAX
         // para prevenir o erro "Falha ao publicar. A resposta não é um JSON válido."
-        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+        if ( self::should_skip_rendering() ) {
             return '';
         }
 
