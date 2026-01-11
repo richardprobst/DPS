@@ -158,79 +158,118 @@ class DPS_Finance_Addon {
     }
 
     /**
-     * Registra e enfileira CSS e JS do add-on financeiro.
+     * Verifica se assets devem ser carregados e os enfileira condicionalmente.
      *
      * @since 1.1.0
+     * @since 1.6.2 Refatorado para carregar apenas quando shortcodes relevantes estão presentes.
      */
     public function enqueue_assets() {
-        // Enfileira apenas no frontend (shortcode [dps_base])
-        if ( ! is_admin() ) {
-            // CSS
-            wp_enqueue_style(
-                'dps-finance-addon',
-                plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/css/finance-addon.css',
-                [],
-                DPS_FINANCE_VERSION
-            );
+        global $post;
 
-            // Chart.js via CDN para gráficos financeiros
-            wp_enqueue_script(
-                'chartjs',
-                'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
-                [],
-                '4.4.1',
-                true
-            );
-
-            // JS
-            wp_enqueue_script(
-                'dps-finance-addon',
-                plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/js/finance-addon.js',
-                [ 'jquery', 'chartjs' ],
-                DPS_FINANCE_VERSION,
-                true
-            );
-
-            // Localização do script
-            wp_localize_script( 'dps-finance-addon', 'dpsFinance', [
-                'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
-                'servicesNonce'      => wp_create_nonce( 'dps_get_services_details' ),
-                'deleteNonce'        => wp_create_nonce( 'dps_finance_delete' ),
-                'partialHistoryNonce'=> wp_create_nonce( 'dps_partial_history' ),
-                'deletePartialNonce' => wp_create_nonce( 'dps_delete_partial' ),
-                'i18n'               => [
-                    'loading'              => __( 'Carregando...', 'dps-finance-addon' ),
-                    'view'                 => __( 'Ver', 'dps-finance-addon' ),
-                    'noServices'           => __( 'Nenhum serviço encontrado.', 'dps-finance-addon' ),
-                    'error'                => __( 'Erro ao buscar serviços.', 'dps-finance-addon' ),
-                    'servicesTitle'        => __( 'Serviços do Atendimento', 'dps-finance-addon' ),
-                    'service'              => __( 'Serviço', 'dps-finance-addon' ),
-                    'price'                => __( 'Valor', 'dps-finance-addon' ),
-                    'total'                => __( 'Total', 'dps-finance-addon' ),
-                    'close'                => __( 'Fechar', 'dps-finance-addon' ),
-                    'confirmDelete'        => __( 'Tem certeza que deseja excluir esta transação?', 'dps-finance-addon' ),
-                    'confirmStatusChange'  => __( 'Tem certeza que deseja alterar o status desta transação já paga?', 'dps-finance-addon' ),
-                    'partialHistoryTitle'  => __( 'Histórico de Pagamentos', 'dps-finance-addon' ),
-                    'date'                 => __( 'Data', 'dps-finance-addon' ),
-                    'value'                => __( 'Valor', 'dps-finance-addon' ),
-                    'method'               => __( 'Método', 'dps-finance-addon' ),
-                    'actions'              => __( 'Ações', 'dps-finance-addon' ),
-                    'delete'               => __( 'Excluir', 'dps-finance-addon' ),
-                    'totalPaid'            => __( 'Total Pago', 'dps-finance-addon' ),
-                    'remaining'            => __( 'Restante', 'dps-finance-addon' ),
-                    'confirmDeletePartial' => __( 'Tem certeza que deseja excluir este pagamento?', 'dps-finance-addon' ),
-                    'noPartials'           => __( 'Nenhum pagamento registrado.', 'dps-finance-addon' ),
-                    'history'              => __( 'Histórico', 'dps-finance-addon' ),
-                    // Validação de formulário
-                    'valueRequired'        => __( 'O valor deve ser maior que zero.', 'dps-finance-addon' ),
-                    'dateRequired'         => __( 'A data é obrigatória.', 'dps-finance-addon' ),
-                    'categoryRequired'     => __( 'A categoria é obrigatória.', 'dps-finance-addon' ),
-                    // Mensagens de erro de rede
-                    'offline'              => __( 'Você está offline. Verifique sua conexão.', 'dps-finance-addon' ),
-                    'timeout'              => __( 'Tempo limite excedido. Tente novamente.', 'dps-finance-addon' ),
-                ],
-            ] );
+        // Não carrega no admin
+        if ( is_admin() ) {
+            return;
         }
+
+        // Verifica se o shortcode dps_base ou dps_fin_docs está sendo usado
+        $is_valid_post = $post instanceof WP_Post;
+        $should_enqueue = false;
+
+        if ( $is_valid_post ) {
+            $content = (string) $post->post_content;
+            $should_enqueue = has_shortcode( $content, 'dps_base' ) || has_shortcode( $content, 'dps_fin_docs' );
+        }
+
+        // Permite que outros plugins/temas forcem o carregamento dos assets
+        $should_enqueue = apply_filters( 'dps_finance_should_enqueue_assets', $should_enqueue, $post );
+
+        if ( ! $should_enqueue ) {
+            return;
+        }
+
+        self::enqueue_frontend_assets();
+    }
+
+    /**
+     * Enfileira os assets de frontend do Finance Add-on.
+     *
+     * Este método é estático para poder ser chamado tanto pelo hook wp_enqueue_scripts
+     * quanto como fallback durante a renderização do shortcode em page builders
+     * (onde wp_enqueue_scripts pode já ter sido executado sem detectar o shortcode).
+     *
+     * @since 1.6.2
+     */
+    public static function enqueue_frontend_assets() {
+        // Evita enfileiramento duplicado usando verificação nativa do WordPress
+        if ( wp_script_is( 'dps-finance-addon', 'enqueued' ) || wp_script_is( 'dps-finance-addon', 'registered' ) ) {
+            return;
+        }
+
+        // CSS
+        wp_enqueue_style(
+            'dps-finance-addon',
+            plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/css/finance-addon.css',
+            [],
+            DPS_FINANCE_VERSION
+        );
+
+        // Chart.js via CDN para gráficos financeiros
+        wp_enqueue_script(
+            'chartjs',
+            'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+            [],
+            '4.4.1',
+            true
+        );
+
+        // JS
+        wp_enqueue_script(
+            'dps-finance-addon',
+            plugin_dir_url( DPS_FINANCE_PLUGIN_FILE ) . 'assets/js/finance-addon.js',
+            [ 'jquery', 'chartjs' ],
+            DPS_FINANCE_VERSION,
+            true
+        );
+
+        // Localização do script
+        wp_localize_script( 'dps-finance-addon', 'dpsFinance', [
+            'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
+            'servicesNonce'      => wp_create_nonce( 'dps_get_services_details' ),
+            'deleteNonce'        => wp_create_nonce( 'dps_finance_delete' ),
+            'partialHistoryNonce'=> wp_create_nonce( 'dps_partial_history' ),
+            'deletePartialNonce' => wp_create_nonce( 'dps_delete_partial' ),
+            'i18n'               => [
+                'loading'              => __( 'Carregando...', 'dps-finance-addon' ),
+                'view'                 => __( 'Ver', 'dps-finance-addon' ),
+                'noServices'           => __( 'Nenhum serviço encontrado.', 'dps-finance-addon' ),
+                'error'                => __( 'Erro ao buscar serviços.', 'dps-finance-addon' ),
+                'servicesTitle'        => __( 'Serviços do Atendimento', 'dps-finance-addon' ),
+                'service'              => __( 'Serviço', 'dps-finance-addon' ),
+                'price'                => __( 'Valor', 'dps-finance-addon' ),
+                'total'                => __( 'Total', 'dps-finance-addon' ),
+                'close'                => __( 'Fechar', 'dps-finance-addon' ),
+                'confirmDelete'        => __( 'Tem certeza que deseja excluir esta transação?', 'dps-finance-addon' ),
+                'confirmStatusChange'  => __( 'Tem certeza que deseja alterar o status desta transação já paga?', 'dps-finance-addon' ),
+                'partialHistoryTitle'  => __( 'Histórico de Pagamentos', 'dps-finance-addon' ),
+                'date'                 => __( 'Data', 'dps-finance-addon' ),
+                'value'                => __( 'Valor', 'dps-finance-addon' ),
+                'method'               => __( 'Método', 'dps-finance-addon' ),
+                'actions'              => __( 'Ações', 'dps-finance-addon' ),
+                'delete'               => __( 'Excluir', 'dps-finance-addon' ),
+                'totalPaid'            => __( 'Total Pago', 'dps-finance-addon' ),
+                'remaining'            => __( 'Restante', 'dps-finance-addon' ),
+                'confirmDeletePartial' => __( 'Tem certeza que deseja excluir este pagamento?', 'dps-finance-addon' ),
+                'noPartials'           => __( 'Nenhum pagamento registrado.', 'dps-finance-addon' ),
+                'history'              => __( 'Histórico', 'dps-finance-addon' ),
+                // Validação de formulário
+                'valueRequired'        => __( 'O valor deve ser maior que zero.', 'dps-finance-addon' ),
+                'dateRequired'         => __( 'A data é obrigatória.', 'dps-finance-addon' ),
+                'categoryRequired'     => __( 'A categoria é obrigatória.', 'dps-finance-addon' ),
+                // Mensagens de erro de rede
+                'offline'              => __( 'Você está offline. Verifique sua conexão.', 'dps-finance-addon' ),
+                'timeout'              => __( 'Tempo limite excedido. Tente novamente.', 'dps-finance-addon' ),
+            ],
+        ] );
     }
 
     /**
@@ -544,6 +583,9 @@ class DPS_Finance_Addon {
         if ( $visitor_only ) {
             return;
         }
+        // Fallback: garante que os assets estejam carregados (para page builders)
+        self::enqueue_frontend_assets();
+
         echo $this->section_financeiro();
     }
 
@@ -1437,6 +1479,9 @@ class DPS_Finance_Addon {
      * @return string HTML renderizado
      */
     public function render_fin_docs_shortcode() {
+        // Fallback: garante que os assets estejam carregados (para page builders)
+        self::enqueue_frontend_assets();
+
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
