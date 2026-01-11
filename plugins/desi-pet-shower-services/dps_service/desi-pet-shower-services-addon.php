@@ -252,6 +252,11 @@ class DPS_Services_Addon {
         if ( $visitor_only ) {
             return;
         }
+        
+        // Fallback: garante que os assets estejam carregados mesmo em page builders
+        // onde wp_enqueue_scripts pode não ter detectado o shortcode no post_content.
+        self::enqueue_frontend_assets();
+        
         echo $this->section_services();
     }
 
@@ -1249,6 +1254,9 @@ class DPS_Services_Addon {
      * @param array $meta    Metadados do agendamento
      */
     public function appointment_service_fields( $edit_id, $meta ) {
+        // Fallback: garante que os assets estejam carregados em page builders
+        self::enqueue_frontend_assets();
+        
         // Recupera lista de serviços
         $services = get_posts( [
             'post_type'      => 'dps_service',
@@ -1714,6 +1722,9 @@ class DPS_Services_Addon {
      * @param array $meta    Metadados atuais do agendamento
      */
     public function appointment_finalization_fields( $edit_id, $meta ) {
+        // Fallback: garante que os assets estejam carregados em page builders
+        self::enqueue_frontend_assets();
+        
         // Só exibe em modo de edição e quando o status for finalizado ou finalizado_pago
         if ( ! $edit_id ) {
             return;
@@ -2132,6 +2143,7 @@ class DPS_Services_Addon {
      *
      * @since 1.5.0
      * @since 1.5.1 Alinhada lógica com plugin base usando has_shortcode().
+     * @since 1.5.2 Adicionado cast para (string) e fallback para page builders.
      */
     public function enqueue_scripts() {
         global $post;
@@ -2142,12 +2154,12 @@ class DPS_Services_Addon {
         }
 
         // Verifica se o shortcode dps_base ou dps_services_catalog está sendo usado
-        $should_enqueue = false;
-        if ( $post instanceof WP_Post ) {
-            $content = $post->post_content;
-            $should_enqueue = has_shortcode( $content, 'dps_base' ) ||
-                              has_shortcode( $content, 'dps_services_catalog' );
-        }
+        // Cast para (string) por segurança de tipo, consistente com o plugin base
+        $content = ( $post instanceof WP_Post ) ? (string) $post->post_content : '';
+        $should_enqueue = ( $post instanceof WP_Post ) && (
+            has_shortcode( $content, 'dps_base' ) ||
+            has_shortcode( $content, 'dps_services_catalog' )
+        );
 
         // Permite que outros plugins/temas forcem o carregamento dos assets
         $should_enqueue = apply_filters( 'dps_services_should_enqueue_assets', $should_enqueue, $post );
@@ -2155,6 +2167,27 @@ class DPS_Services_Addon {
         if ( ! $should_enqueue ) {
             return;
         }
+
+        self::enqueue_frontend_assets();
+    }
+
+    /**
+     * Enfileira os assets de frontend do Services Add-on.
+     *
+     * Este método é estático para poder ser chamado tanto pelo hook wp_enqueue_scripts
+     * quanto como fallback durante a renderização do shortcode em page builders
+     * (onde wp_enqueue_scripts pode já ter sido executado sem detectar o shortcode).
+     *
+     * @since 1.5.2
+     */
+    public static function enqueue_frontend_assets() {
+        static $enqueued = false;
+
+        if ( $enqueued ) {
+            return;
+        }
+
+        $enqueued = true;
 
         $css_path = plugin_dir_path( __FILE__ ) . 'assets/css/services-addon.css';
         $js_path = plugin_dir_path( __FILE__ ) . 'assets/js/dps-services-addon.js';
@@ -2181,6 +2214,9 @@ class DPS_Services_Addon {
      * @since 1.3.0
      */
     public function render_catalog_shortcode( $atts ) {
+        // Fallback: garante que os assets estejam carregados
+        self::enqueue_frontend_assets();
+        
         // Desabilita cache da página para garantir dados sempre atualizados
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
