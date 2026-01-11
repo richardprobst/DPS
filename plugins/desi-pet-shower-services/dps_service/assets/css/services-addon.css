@@ -1509,20 +1509,26 @@
 .dps-discount-container {
     margin-top: 16px;
     padding: 20px;
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
 }
 
 .dps-discount-header {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .dps-discount-title {
-    font-size: 14px;
+    margin: 0 0 4px 0;
+    font-size: 16px;
     font-weight: 600;
-    color: #92400e;
+    color: #374151;
+}
+
+.dps-discount-hint {
     margin: 0;
+    font-size: 13px;
+    color: #6b7280;
 }
 
 .dps-discount-row {
