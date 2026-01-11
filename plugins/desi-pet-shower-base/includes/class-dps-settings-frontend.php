@@ -197,7 +197,7 @@ class DPS_Settings_Frontend {
         }
 
         // ========================================
-        // FASE 6: Aba Agenda (prioridade 35 - logo após Portal)
+        // Aba Agenda (prioridade 35 - logo após Portal)
         // ========================================
 
         // Aba Agenda (se Agenda Add-on ativo)
