@@ -267,14 +267,16 @@ class DPS_Booking_Addon {
 
         // Detecta edição de agendamento
         $edit_id = 0;
-        if ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) {
+        $dps_edit_param = isset( $_GET['dps_edit'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_edit'] ) ) : '';
+        if ( 'appointment' === $dps_edit_param && isset( $_GET['id'] ) ) {
             $edit_id = absint( $_GET['id'] );
         }
 
         // Detecta duplicação de agendamento
         $duplicate_id = 0;
         $is_duplicate = false;
-        if ( isset( $_GET['dps_duplicate'] ) && 'appointment' === $_GET['dps_duplicate'] && isset( $_GET['id'] ) ) {
+        $dps_duplicate_param = isset( $_GET['dps_duplicate'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_duplicate'] ) ) : '';
+        if ( 'appointment' === $dps_duplicate_param && isset( $_GET['id'] ) ) {
             $duplicate_id = absint( $_GET['id'] );
             $is_duplicate = true;
         }
@@ -310,11 +312,27 @@ class DPS_Booking_Addon {
         $pref_client = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
         $pref_pet    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
 
-        // URLs
+        // URLs - use safe URL building instead of raw REQUEST_URI
         $base_url    = $this->get_booking_page_url();
-        $current_url = add_query_arg( [], $base_url );
-        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-            $current_url = home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+        $current_url = $base_url;
+        
+        // Build current URL from known safe components
+        $current_args = [];
+        if ( $edit_id ) {
+            $current_args['dps_edit'] = 'appointment';
+            $current_args['id'] = $edit_id;
+        } elseif ( $duplicate_id ) {
+            $current_args['dps_duplicate'] = 'appointment';
+            $current_args['id'] = $duplicate_id;
+        }
+        if ( $pref_client ) {
+            $current_args['client_id'] = $pref_client;
+        }
+        if ( $pref_pet ) {
+            $current_args['pet_id'] = $pref_pet;
+        }
+        if ( ! empty( $current_args ) ) {
+            $current_url = add_query_arg( $current_args, $base_url );
         }
 
         ob_start();
@@ -647,7 +665,10 @@ class DPS_Booking_Addon {
      * @return WP_Query Objeto de consulta com pets paginados.
      */
     private function get_pets( $page = 1 ) {
-        $per_page = defined( 'DPS_BASE_PETS_PER_PAGE' ) ? DPS_BASE_PETS_PER_PAGE : 50;
+        $per_page = defined( 'DPS_BASE_PETS_PER_PAGE' ) ? absint( DPS_BASE_PETS_PER_PAGE ) : 50;
+        // Validate per_page to prevent excessive memory usage
+        $per_page = min( max( $per_page, 1 ), 200 );
+        
         return new WP_Query( [
             'post_type'      => 'dps_pet',
             'posts_per_page' => $per_page,
