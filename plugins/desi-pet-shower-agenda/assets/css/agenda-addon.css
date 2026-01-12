@@ -4195,7 +4195,7 @@ tr.dps-row-updated {
 
 /* === RESPONSIVIDADE APRIMORADA PARA TABLETS === */
 
-/* Tablets grandes (900px - 1024px) - Otimização principal */
+/* Tablets e desktop pequeno (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
     .dps-agenda-wrapper {
         padding: 0 0.5rem;
@@ -4261,8 +4261,8 @@ tr.dps-row-updated {
     }
 }
 
-/* Tablets menores (768px - 900px) */
-@media (min-width: 641px) and (max-width: 900px) {
+/* Tablets menores e mobile landscape (641px - 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
     .dps-agenda-header {
         flex-wrap: wrap;
         justify-content: center;
@@ -4322,8 +4322,8 @@ tr.dps-row-updated {
     }
 }
 
-/* Mobile landscape e tablets pequenos (640px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
+/* Mobile landscape (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
     .dps-agenda-wrapper table.dps-table {
         min-width: 580px;
     }
