@@ -57,11 +57,11 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
-    padding: 1.25rem 1.5rem;
-    background: var(--dps-surface);
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     border: 1px solid var(--dps-border);
-    border-radius: 0.9rem;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
 }
 
 .dps-agenda-title h3 {
@@ -3832,5 +3832,773 @@ tr.dps-row-updated {
     
     .dps-services-total-row {
         padding: 0.75rem;
+    }
+}
+
+/* ========================================================
+   MELHORIAS DE LAYOUT E USABILIDADE v2.0
+   Foco: Visual moderno, elegante, discreto
+   Prioridade: Tablets (768px-1024px)
+   ======================================================== */
+
+/* === Refinamentos do Header === */
+.dps-agenda-title h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.dps-agenda-header .dps-current-date {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--dps-accent-soft);
+    border-radius: 8px;
+    border: 1px solid rgba(37, 99, 235, 0.15);
+}
+
+.dps-agenda-header .dps-current-date strong {
+    color: var(--dps-accent);
+}
+
+/* Botões de navegação de data mais elegantes */
+.dps-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--dps-border);
+    border-radius: 8px;
+    background: var(--dps-surface);
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dps-nav-btn:hover {
+    background: var(--dps-accent-soft);
+    border-color: var(--dps-accent);
+    color: var(--dps-accent);
+}
+
+.dps-nav-btn--prev,
+.dps-nav-btn--next {
+    font-size: 1rem;
+    padding: 0.5rem 0.65rem;
+}
+
+.dps-nav-btn--today {
+    background: var(--dps-accent);
+    border-color: var(--dps-accent);
+    color: white;
+}
+
+.dps-nav-btn--today:hover {
+    background: var(--dps-accent-strong);
+    border-color: var(--dps-accent-strong);
+    color: white;
+}
+
+/* === Controles de Visualização Refinados === */
+.dps-agenda-controls-wrapper {
+    margin-bottom: 1.25rem;
+}
+
+.dps-agenda-nav--primary {
+    padding: 0.75rem 1rem;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    border-radius: 10px;
+}
+
+.dps-agenda-nav-group--views {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dps-nav-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--dps-muted);
+    margin-right: 0.25rem;
+}
+
+.dps-view-buttons {
+    display: flex;
+    gap: 0.375rem;
+    background: var(--dps-background);
+    padding: 0.25rem;
+    border-radius: 8px;
+}
+
+.dps-view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.dps-view-btn:hover {
+    background: var(--dps-surface);
+    color: var(--dps-accent);
+}
+
+.dps-view-btn--active {
+    background: var(--dps-accent);
+    color: white;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.dps-view-btn--active:hover {
+    background: var(--dps-accent-strong);
+    color: white;
+}
+
+/* === Abas Aprimoradas === */
+.dps-agenda-tabs-wrapper {
+    margin-top: 1.25rem;
+}
+
+.dps-agenda-tabs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--dps-border);
+}
+
+.dps-agenda-tabs-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+/* Cards de abas com visual mais elegante */
+.dps-agenda-tabs-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.25rem;
+}
+
+.dps-agenda-tab-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.125rem 1rem;
+    background: var(--dps-surface);
+    border: 2px solid var(--dps-border);
+    border-radius: 12px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.dps-agenda-tab-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    transition: background 0.2s ease;
+}
+
+.dps-agenda-tab-button:hover {
+    border-color: rgba(37, 99, 235, 0.4);
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    color: var(--dps-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.dps-agenda-tab-button--active {
+    border-color: var(--dps-accent);
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    color: var(--dps-accent);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
+}
+
+.dps-agenda-tab-button--active::before {
+    background: linear-gradient(90deg, var(--dps-accent) 0%, #60a5fa 100%);
+}
+
+.dps-tab-icon {
+    font-size: 1.625rem;
+    line-height: 1;
+    filter: grayscale(0.3);
+    transition: filter 0.2s ease;
+}
+
+.dps-agenda-tab-button:hover .dps-tab-icon,
+.dps-agenda-tab-button--active .dps-tab-icon {
+    filter: grayscale(0);
+}
+
+.dps-tab-label {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: inherit;
+    letter-spacing: -0.01em;
+}
+
+.dps-tab-desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94a3b8;
+    line-height: 1.3;
+}
+
+.dps-agenda-tab-button--active .dps-tab-desc {
+    color: #60a5fa;
+}
+
+/* === Tabelas Aprimoradas === */
+.dps-agenda-table-container {
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+    border-radius: 10px;
+    background: var(--dps-surface);
+    border: 1px solid var(--dps-border);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.dps-agenda-wrapper table.dps-table thead th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid var(--dps-border);
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr {
+    transition: background 0.15s ease, border-left-color 0.15s ease;
+    border-left: 4px solid transparent;
+}
+
+.dps-agenda-wrapper table.dps-table tbody tr:hover {
+    background: linear-gradient(90deg, #f8fafc 0%, transparent 100%);
+}
+
+.dps-agenda-wrapper table.dps-table tbody td {
+    padding: 0.9rem 1rem;
+    border-top: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #1e293b;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+}
+
+/* Estilos de status com melhor contraste */
+.dps-agenda-wrapper table.dps-table tr.status-pendente {
+    border-left-color: #f59e0b;
+    background: linear-gradient(90deg, #fffbeb 0%, transparent 30%);
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-finalizado {
+    border-left-color: #0ea5e9;
+    background: linear-gradient(90deg, #f0f9ff 0%, transparent 30%);
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-finalizado_pago {
+    border-left-color: #22c55e;
+    background: linear-gradient(90deg, #f0fdf4 0%, transparent 30%);
+}
+
+.dps-agenda-wrapper table.dps-table tr.status-cancelado {
+    border-left-color: #ef4444;
+    background: linear-gradient(90deg, #fef2f2 0%, transparent 30%);
+    opacity: 0.8;
+}
+
+/* Subtítulos de seções mais elegantes */
+.dps-tab-content h5 {
+    margin: 1.75rem 0 0.875rem;
+    padding: 0.625rem 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 2px solid var(--dps-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+.dps-tab-content h5:first-child {
+    margin-top: 0;
+}
+
+.dps-tab-content h5::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.1em;
+    background: var(--dps-accent);
+    border-radius: 2px;
+    margin-right: 0.25rem;
+}
+
+/* === Estado Vazio Aprimorado === */
+.dps-agenda-empty {
+    margin: 2rem auto 0;
+    padding: 2rem 1.5rem;
+    max-width: min(100%, 28rem);
+    text-align: center;
+    line-height: 1.6;
+    color: #64748b;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+}
+
+.dps-agenda-empty::before {
+    content: '📋';
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.6;
+}
+
+/* === RESPONSIVIDADE APRIMORADA PARA TABLETS === */
+
+/* Tablets grandes (900px - 1024px) - Otimização principal */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dps-agenda-wrapper {
+        padding: 0 0.5rem;
+    }
+    
+    .dps-agenda-header {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .dps-agenda-title h3 {
+        font-size: 1.2rem;
+    }
+    
+    .dps-agenda-header .dps-current-date {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.75rem;
+    }
+    
+    .dps-nav-btn {
+        min-width: 2rem;
+        min-height: 2rem;
+        padding: 0.4rem 0.65rem;
+        font-size: 0.8125rem;
+    }
+    
+    /* Abas em grid de 3 colunas mais compactas */
+    .dps-agenda-tabs-nav {
+        gap: 0.625rem;
+    }
+    
+    .dps-agenda-tab-button {
+        padding: 0.875rem 0.75rem;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.375rem;
+    }
+    
+    .dps-tab-label {
+        font-size: 0.875rem;
+    }
+    
+    .dps-tab-desc {
+        font-size: 0.6875rem;
+    }
+    
+    /* Tabela mais compacta */
+    .dps-agenda-wrapper table.dps-table thead th {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.6875rem;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody td {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Controles de visualização */
+    .dps-view-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Tablets menores (768px - 900px) */
+@media (min-width: 641px) and (max-width: 900px) {
+    .dps-agenda-header {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .dps-agenda-title {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .dps-agenda-header-nav {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-header .dps-current-date {
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Abas ocupam toda largura mas em linha */
+    .dps-agenda-tabs-nav {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-tab-button {
+        padding: 0.75rem 0.5rem;
+        gap: 0.375rem;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.25rem;
+    }
+    
+    .dps-tab-label {
+        font-size: 0.8125rem;
+    }
+    
+    .dps-tab-desc {
+        display: none;
+    }
+    
+    /* Controles de visualização empilhados */
+    .dps-agenda-nav--primary {
+        padding: 0.625rem 0.75rem;
+    }
+    
+    .dps-view-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .dps-view-btn {
+        padding: 0.4rem 0.625rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Mobile landscape e tablets pequenos (640px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .dps-agenda-wrapper table.dps-table {
+        min-width: 580px;
+    }
+    
+    /* Abas em layout horizontal compacto */
+    .dps-agenda-tabs-nav {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.375rem;
+    }
+    
+    .dps-agenda-tab-button {
+        flex-direction: row;
+        justify-content: center;
+        padding: 0.625rem 0.5rem;
+        gap: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .dps-agenda-tab-button::before {
+        display: none;
+    }
+    
+    .dps-agenda-tab-button--active {
+        border-width: 2px;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.125rem;
+    }
+    
+    .dps-tab-label {
+        font-size: 0.75rem;
+    }
+    
+    .dps-tab-desc {
+        display: none;
+    }
+}
+
+/* Mobile (até 640px) - Melhorias adicionais */
+@media (max-width: 640px) {
+    .dps-agenda-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 1rem;
+    }
+    
+    .dps-agenda-title h3 {
+        font-size: 1.125rem;
+        text-align: center;
+    }
+    
+    .dps-agenda-header-nav {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-header .dps-current-date {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.25rem;
+    }
+    
+    .dps-agenda-header .dps-date-nav {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Abas em coluna única com layout horizontal */
+    .dps-agenda-tabs-nav {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .dps-agenda-tab-button {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.875rem 1rem;
+        gap: 0.75rem;
+        border-radius: 10px;
+    }
+    
+    .dps-agenda-tab-button::before {
+        display: none;
+    }
+    
+    .dps-agenda-tab-button--active {
+        border-left-width: 4px;
+        padding-left: calc(1rem - 2px);
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.375rem;
+    }
+    
+    .dps-tab-label {
+        font-size: 0.9375rem;
+        flex: 1;
+    }
+    
+    .dps-tab-desc {
+        display: none;
+    }
+    
+    /* Cards de tabela aprimorados */
+    .dps-agenda-wrapper table.dps-table tr {
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+    
+    .dps-agenda-wrapper table.dps-table tr.status-pendente,
+    .dps-agenda-wrapper table.dps-table tr.status-finalizado,
+    .dps-agenda-wrapper table.dps-table tr.status-finalizado_pago,
+    .dps-agenda-wrapper table.dps-table tr.status-cancelado {
+        background: var(--dps-surface);
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody td::before {
+        font-size: 0.6875rem;
+        letter-spacing: 0.03em;
+    }
+    
+    /* Controles de visualização em mobile */
+    .dps-agenda-nav--primary {
+        padding: 0.75rem;
+    }
+    
+    .dps-view-buttons {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .dps-view-btn {
+        flex: 1 1 auto;
+        padding: 0.5rem 0.625rem;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+    
+    /* Estado vazio mais compacto */
+    .dps-agenda-empty {
+        padding: 1.5rem 1rem;
+        margin-top: 1.25rem;
+    }
+    
+    .dps-agenda-empty::before {
+        font-size: 2rem;
+    }
+}
+
+/* Mobile pequeno (até 420px) */
+@media (max-width: 420px) {
+    .dps-agenda-header {
+        padding: 0.875rem;
+    }
+    
+    .dps-agenda-title h3 {
+        font-size: 1rem;
+    }
+    
+    .dps-nav-btn {
+        min-width: 2rem;
+        min-height: 2rem;
+        font-size: 0.75rem;
+    }
+    
+    .dps-agenda-tabs-title {
+        font-size: 0.9375rem;
+    }
+    
+    .dps-agenda-tab-button {
+        padding: 0.75rem 0.875rem;
+    }
+    
+    .dps-tab-icon {
+        font-size: 1.25rem;
+    }
+    
+    .dps-tab-label {
+        font-size: 0.875rem;
+    }
+    
+    /* Dropdowns mais compactos */
+    .dps-confirmation-dropdown,
+    .dps-status-dropdown {
+        min-width: 100%;
+        font-size: 0.8125rem;
+    }
+    
+    .dps-services-popup-btn,
+    .dps-payment-popup-btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.8125rem;
+    }
+}
+
+/* === Animações Sutis e Feedback Visual === */
+.dps-row-updated {
+    animation: rowUpdatePulse 1.5s ease-out;
+}
+
+@keyframes rowUpdatePulse {
+    0% {
+        background: #d1fae5;
+        transform: scale(1.002);
+    }
+    50% {
+        background: #ecfdf5;
+    }
+    100% {
+        background: transparent;
+        transform: scale(1);
+    }
+}
+
+/* Loading state para elementos interativos */
+.dps-agenda-tab-button.is-loading,
+.dps-view-btn.is-loading,
+.dps-nav-btn.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.dps-agenda-tab-button.is-loading::after,
+.dps-view-btn.is-loading::after,
+.dps-nav-btn.is-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* === Print Styles === */
+@media print {
+    .dps-agenda-header-nav,
+    .dps-agenda-nav,
+    .dps-agenda-controls-wrapper,
+    .dps-agenda-tabs-nav,
+    .dps-quick-actions,
+    .dps-confirmation-btn,
+    .dps-quick-action-btn {
+        display: none !important;
+    }
+    
+    .dps-agenda-wrapper {
+        max-width: 100%;
+    }
+    
+    .dps-agenda-table-container {
+        border: none;
+        box-shadow: none;
+    }
+    
+    .dps-agenda-wrapper table.dps-table {
+        min-width: 0;
+        font-size: 11px;
+    }
+    
+    .dps-agenda-wrapper table.dps-table tbody tr {
+        page-break-inside: avoid;
     }
 }
