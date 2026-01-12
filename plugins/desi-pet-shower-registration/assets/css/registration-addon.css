@@ -139,7 +139,7 @@
 .dps-progress-bar span {
     display: block;
     height: 100%;
-    width: 33%;
+    width: calc(100% / 3); /* Initial width for step 1 of 3 - updated via JS */
     background: linear-gradient(90deg, var(--dps-accent) 0%, var(--dps-accent-strong) 100%);
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 999px;
@@ -684,7 +684,6 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     border: 1px solid var(--dps-border);
     margin-top: 4px;
-    font-family: inherit;
 }
 
 .pac-item {
@@ -1151,13 +1150,7 @@
 }
 
 /* ==========================================================================
-   19. Summary Box Enhancements (deprecated - keeping for backwards compat)
-   ========================================================================== */
-
-/* Moved to section 10 - Summary Box */
-
-/* ==========================================================================
-   20. Step Transitions - Smooth Animation
+   19. Step Transitions - Smooth Animation
    ========================================================================== */
 
 .dps-step {
@@ -1324,7 +1317,7 @@
 /* Feedback visual ao interagir com campos */
 .dps-registration-form input:valid:not(:placeholder-shown),
 .dps-registration-form select:valid:not(:placeholder-shown) {
-    border-color: #d1d5db;
+    border-color: var(--dps-border);
 }
 
 /* Transição suave ao focar */
