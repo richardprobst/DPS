@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       desi.pet by PRObst – Booking Add-on
  * Plugin URI:        https://www.probst.pro
- * Description:       Página pública de agendamentos de serviços para clientes. Formulário moderno e responsivo.
- * Version:           1.0.0
+ * Description:       Página dedicada de agendamentos para administradores. Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS.
+ * Version:           1.1.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -52,9 +52,11 @@ add_action( 'init', 'dps_booking_load_textdomain', 1 );
 /**
  * Classe principal do Booking Add-on.
  *
- * Fornece um formulário público de agendamento de serviços para clientes.
+ * Fornece uma página dedicada de agendamentos para administradores,
+ * com a mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS.
  *
  * @since 1.0.0
+ * @since 1.1.0 Refatorado para usar a funcionalidade do Painel de Gestão DPS.
  */
 class DPS_Booking_Addon {
 
@@ -91,9 +93,6 @@ class DPS_Booking_Addon {
         // Enfileira assets
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 
-        // Processa formulário de agendamento
-        add_action( 'init', [ $this, 'maybe_handle_booking' ] );
-
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
     }
@@ -104,7 +103,7 @@ class DPS_Booking_Addon {
      * @since 1.0.0
      */
     public function activate() {
-        $title = __( 'Agendar Serviços', 'dps-booking-addon' );
+        $title = __( 'Agendamento de Serviços', 'dps-booking-addon' );
         $slug  = sanitize_title( $title );
         $page  = get_page_by_path( $slug );
         if ( ! $page ) {
@@ -138,427 +137,34 @@ class DPS_Booking_Addon {
             return;
         }
 
-        $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.0.0';
+        // Carrega assets do plugin base (necessários para o formulário de agendamento)
+        if ( class_exists( 'DPS_Base_Plugin' ) && method_exists( 'DPS_Base_Plugin', 'enqueue_frontend_assets' ) ) {
+            DPS_Base_Plugin::enqueue_frontend_assets();
+        }
 
-        // CSS responsivo
+        // CSS adicional do add-on para ajustes de layout na página dedicada
+        $addon_url = plugin_dir_url( __FILE__ );
+        $version   = '1.1.0';
+
         wp_enqueue_style(
             'dps-booking-addon',
             $addon_url . 'assets/css/booking-addon.css',
-            [],
+            [ 'dps-base' ],
             $version
         );
-
-        // JS de interações
-        wp_enqueue_script(
-            'dps-booking-addon',
-            $addon_url . 'assets/js/booking-addon.js',
-            [],
-            $version,
-            true
-        );
-
-        // Localiza dados para JavaScript
-        wp_localize_script(
-            'dps-booking-addon',
-            'dpsBookingData',
-            [
-                'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-                'nonce'       => wp_create_nonce( 'dps_booking_nonce' ),
-                'i18n'        => [
-                    'selectService'   => __( 'Selecione um serviço', 'dps-booking-addon' ),
-                    'selectDate'      => __( 'Selecione uma data', 'dps-booking-addon' ),
-                    'selectTime'      => __( 'Selecione um horário', 'dps-booking-addon' ),
-                    'confirmBooking'  => __( 'Confirmar agendamento', 'dps-booking-addon' ),
-                    'loading'         => __( 'Carregando...', 'dps-booking-addon' ),
-                    'success'         => __( 'Agendamento realizado com sucesso!', 'dps-booking-addon' ),
-                    'error'           => __( 'Erro ao processar agendamento. Tente novamente.', 'dps-booking-addon' ),
-                    'required'        => __( 'Este campo é obrigatório', 'dps-booking-addon' ),
-                    'invalidPhone'    => __( 'Telefone inválido', 'dps-booking-addon' ),
-                    'invalidEmail'    => __( 'Email inválido', 'dps-booking-addon' ),
-                ],
-            ]
-        );
     }
 
     /**
-     * Processa o formulário de agendamento se enviado.
+     * Verifica se o usuário atual possui permissão para acessar a página de agendamentos.
      *
-     * @since 1.0.0
-     */
-    public function maybe_handle_booking() {
-        if ( ! isset( $_POST['dps_booking_action'] ) || 'save_booking' !== $_POST['dps_booking_action'] ) {
-            return;
-        }
-
-        // Verifica nonce
-        if ( ! isset( $_POST['dps_booking_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_booking_nonce'] ) ), 'dps_booking_nonce' ) ) {
-            $this->add_error( __( 'Sessão expirada. Por favor, recarregue a página e tente novamente.', 'dps-booking-addon' ) );
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Honeypot check
-        if ( ! empty( $_POST['dps_hp_field'] ) ) {
-            $this->add_error( __( 'Ocorreu um erro no envio. Tente novamente.', 'dps-booking-addon' ) );
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Sanitiza dados do formulário
-        $client_name  = isset( $_POST['client_name'] ) ? sanitize_text_field( wp_unslash( $_POST['client_name'] ) ) : '';
-        $client_phone = isset( $_POST['client_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['client_phone'] ) ) : '';
-        $client_email = isset( $_POST['client_email'] ) ? sanitize_email( wp_unslash( $_POST['client_email'] ) ) : '';
-        $pet_name     = isset( $_POST['pet_name'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_name'] ) ) : '';
-        $pet_breed    = isset( $_POST['pet_breed'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_breed'] ) ) : '';
-        $pet_size     = isset( $_POST['pet_size'] ) ? sanitize_text_field( wp_unslash( $_POST['pet_size'] ) ) : '';
-        $service_id   = isset( $_POST['service_id'] ) ? absint( $_POST['service_id'] ) : 0;
-        $extras       = isset( $_POST['extras'] ) && is_array( $_POST['extras'] ) ? array_map( 'absint', $_POST['extras'] ) : [];
-        $appt_date    = isset( $_POST['appointment_date'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_date'] ) ) : '';
-        $appt_time    = isset( $_POST['appointment_time'] ) ? sanitize_text_field( wp_unslash( $_POST['appointment_time'] ) ) : '';
-        $observations = isset( $_POST['observations'] ) ? sanitize_textarea_field( wp_unslash( $_POST['observations'] ) ) : '';
-
-        // Validações
-        $errors = [];
-
-        if ( empty( $client_name ) ) {
-            $errors[] = __( 'O nome é obrigatório.', 'dps-booking-addon' );
-        }
-
-        if ( empty( $client_phone ) ) {
-            $errors[] = __( 'O telefone é obrigatório.', 'dps-booking-addon' );
-        } elseif ( ! $this->validate_phone( $client_phone ) ) {
-            $errors[] = __( 'Telefone inválido.', 'dps-booking-addon' );
-        }
-
-        if ( ! empty( $client_email ) && ! is_email( $client_email ) ) {
-            $errors[] = __( 'Email inválido.', 'dps-booking-addon' );
-        }
-
-        if ( empty( $pet_name ) ) {
-            $errors[] = __( 'O nome do pet é obrigatório.', 'dps-booking-addon' );
-        }
-
-        if ( empty( $service_id ) ) {
-            $errors[] = __( 'Selecione um serviço.', 'dps-booking-addon' );
-        }
-
-        if ( empty( $appt_date ) ) {
-            $errors[] = __( 'Selecione uma data para o agendamento.', 'dps-booking-addon' );
-        }
-
-        if ( empty( $appt_time ) ) {
-            $errors[] = __( 'Selecione um horário para o agendamento.', 'dps-booking-addon' );
-        }
-
-        // Valida data (não pode ser no passado)
-        if ( ! empty( $appt_date ) ) {
-            $today = current_time( 'Y-m-d' );
-            if ( $appt_date < $today ) {
-                $errors[] = __( 'A data do agendamento não pode ser no passado.', 'dps-booking-addon' );
-            }
-        }
-
-        if ( ! empty( $errors ) ) {
-            foreach ( $errors as $error ) {
-                $this->add_error( $error );
-            }
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Normaliza telefone
-        $client_phone = $this->normalize_phone( $client_phone );
-
-        // Busca ou cria cliente
-        $client_id = $this->find_or_create_client( $client_name, $client_phone, $client_email );
-        if ( ! $client_id ) {
-            $this->add_error( __( 'Erro ao criar cliente. Tente novamente.', 'dps-booking-addon' ) );
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Busca ou cria pet
-        $pet_id = $this->find_or_create_pet( $client_id, $pet_name, $pet_breed, $pet_size );
-        if ( ! $pet_id ) {
-            $this->add_error( __( 'Erro ao criar pet. Tente novamente.', 'dps-booking-addon' ) );
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Cria agendamento
-        $appointment_id = $this->create_appointment( $client_id, $pet_id, $service_id, $extras, $appt_date, $appt_time, $observations );
-        if ( ! $appointment_id ) {
-            $this->add_error( __( 'Erro ao criar agendamento. Tente novamente.', 'dps-booking-addon' ) );
-            $this->redirect_with_error();
-            return;
-        }
-
-        // Sucesso - redireciona com mensagem de sucesso
-        $redirect_url = add_query_arg( 'booking_success', '1', $this->get_booking_page_url() );
-        wp_safe_redirect( $redirect_url );
-        exit;
-    }
-
-    /**
-     * Valida telefone brasileiro.
-     *
-     * @since 1.0.0
-     * @param string $phone Telefone a validar.
+     * @since 1.1.0
      * @return bool
      */
-    private function validate_phone( $phone ) {
-        if ( class_exists( 'DPS_Phone_Helper' ) && method_exists( 'DPS_Phone_Helper', 'is_valid_brazilian_phone' ) ) {
-            return DPS_Phone_Helper::is_valid_brazilian_phone( $phone );
-        }
-
-        $digits = preg_replace( '/\D/', '', (string) $phone );
-        $length = strlen( $digits );
-
-        return ( $length === 10 || $length === 11 );
-    }
-
-    /**
-     * Normaliza telefone para apenas dígitos.
-     *
-     * @since 1.0.0
-     * @param string $phone Telefone bruto.
-     * @return string Apenas dígitos.
-     */
-    private function normalize_phone( $phone ) {
-        $digits = preg_replace( '/\D/', '', (string) $phone );
-
-        // Remove código do país se presente
-        $length = strlen( $digits );
-        if ( ( $length === 12 || $length === 13 ) && substr( $digits, 0, 2 ) === '55' ) {
-            $digits = substr( $digits, 2 );
-        }
-
-        return $digits;
-    }
-
-    /**
-     * Busca cliente existente por telefone ou cria novo.
-     *
-     * @since 1.0.0
-     * @param string $name  Nome do cliente.
-     * @param string $phone Telefone normalizado.
-     * @param string $email Email do cliente.
-     * @return int|false ID do cliente ou false.
-     */
-    private function find_or_create_client( $name, $phone, $email ) {
-        // Busca cliente existente por telefone
-        $existing = get_posts( [
-            'post_type'      => 'dps_cliente',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'   => 'client_phone',
-                    'value' => $phone,
-                ],
-            ],
-        ] );
-
-        if ( ! empty( $existing ) ) {
-            return (int) $existing[0];
-        }
-
-        // Cria novo cliente
-        $client_id = wp_insert_post( [
-            'post_type'   => 'dps_cliente',
-            'post_title'  => $name,
-            'post_status' => 'publish',
-        ] );
-
-        if ( $client_id && ! is_wp_error( $client_id ) ) {
-            update_post_meta( $client_id, 'client_phone', $phone );
-            if ( ! empty( $email ) ) {
-                update_post_meta( $client_id, 'client_email', $email );
-            }
-            return $client_id;
-        }
-
-        return false;
-    }
-
-    /**
-     * Busca pet existente ou cria novo.
-     *
-     * @since 1.0.0
-     * @param int    $client_id ID do cliente.
-     * @param string $name      Nome do pet.
-     * @param string $breed     Raça do pet.
-     * @param string $size      Porte do pet.
-     * @return int|false ID do pet ou false.
-     */
-    private function find_or_create_pet( $client_id, $name, $breed, $size ) {
-        // Busca pet existente do mesmo cliente com mesmo nome
-        $existing = get_posts( [
-            'post_type'      => 'dps_pet',
-            'posts_per_page' => 50,
-            'fields'         => 'ids',
-            'post_status'    => 'publish',
-            'no_found_rows'  => true,
-            'meta_query'     => [
-                [
-                    'key'   => 'owner_id',
-                    'value' => $client_id,
-                ],
-            ],
-        ] );
-
-        // Filter by title manually (WP deprecated 'title' parameter in get_posts)
-        if ( ! empty( $existing ) ) {
-            foreach ( $existing as $pet_id ) {
-                $pet_post = get_post( $pet_id );
-                if ( $pet_post && strtolower( $pet_post->post_title ) === strtolower( $name ) ) {
-                    return (int) $pet_id;
-                }
-            }
-        }
-
-        // Cria novo pet
-        $pet_id = wp_insert_post( [
-            'post_type'   => 'dps_pet',
-            'post_title'  => $name,
-            'post_status' => 'publish',
-        ] );
-
-        if ( $pet_id && ! is_wp_error( $pet_id ) ) {
-            update_post_meta( $pet_id, 'owner_id', $client_id );
-            if ( ! empty( $breed ) ) {
-                update_post_meta( $pet_id, 'pet_breed', $breed );
-            }
-            if ( ! empty( $size ) ) {
-                update_post_meta( $pet_id, 'pet_size', $size );
-            }
-            return $pet_id;
-        }
-
-        return false;
-    }
-
-    /**
-     * Cria um novo agendamento.
-     *
-     * @since 1.0.0
-     * @param int    $client_id    ID do cliente.
-     * @param int    $pet_id       ID do pet.
-     * @param int    $service_id   ID do serviço principal.
-     * @param array  $extras       IDs dos extras selecionados.
-     * @param string $date         Data do agendamento (Y-m-d).
-     * @param string $time         Hora do agendamento (H:i).
-     * @param string $observations Observações.
-     * @return int|false ID do agendamento ou false.
-     */
-    private function create_appointment( $client_id, $pet_id, $service_id, $extras, $date, $time, $observations ) {
-        $pet = get_post( $pet_id );
-        $pet_name = $pet ? $pet->post_title : __( 'Pet', 'dps-booking-addon' );
-
-        $title = sprintf(
-            __( 'Agendamento - %s - %s às %s', 'dps-booking-addon' ),
-            $pet_name,
-            date_i18n( 'd/m/Y', strtotime( $date ) ),
-            $time
-        );
-
-        $appointment_id = wp_insert_post( [
-            'post_type'   => 'dps_agendamento',
-            'post_title'  => $title,
-            'post_status' => 'publish',
-        ] );
-
-        if ( ! $appointment_id || is_wp_error( $appointment_id ) ) {
-            return false;
-        }
-
-        // Salva metadados
-        update_post_meta( $appointment_id, 'appointment_client', $client_id );
-        update_post_meta( $appointment_id, 'appointment_pet', $pet_id );
-        update_post_meta( $appointment_id, 'appointment_date', $date );
-        update_post_meta( $appointment_id, 'appointment_time', $time );
-        update_post_meta( $appointment_id, 'appointment_status', 'pendente' );
-        update_post_meta( $appointment_id, 'appointment_type', 'simple' );
-
-        // Serviços
-        $all_services = [ $service_id ];
-        if ( ! empty( $extras ) ) {
-            $all_services = array_merge( $all_services, $extras );
-        }
-        update_post_meta( $appointment_id, 'appointment_services', $all_services );
-
-        // Observações
-        if ( ! empty( $observations ) ) {
-            update_post_meta( $appointment_id, 'appointment_observations', $observations );
-        }
-
-        // Marca como agendamento online
-        update_post_meta( $appointment_id, 'booking_source', 'online' );
-
-        // Dispara hook para integrações (notificações, etc.)
-        do_action( 'dps_booking_after_appointment_created', $appointment_id, $client_id, $pet_id );
-
-        return $appointment_id;
-    }
-
-    /**
-     * Adiciona mensagem de erro.
-     *
-     * @since 1.0.0
-     * @param string $message Mensagem de erro.
-     */
-    private function add_error( $message ) {
-        if ( class_exists( 'DPS_Message_Helper' ) ) {
-            DPS_Message_Helper::add_error( $message );
-            return;
-        }
-
-        // Fallback: usa transient
-        $transient_key = 'dps_booking_errors_' . $this->get_session_id();
-        $errors = get_transient( $transient_key );
-        if ( ! is_array( $errors ) ) {
-            $errors = [];
-        }
-        $errors[] = $message;
-        set_transient( $transient_key, $errors, 60 );
-    }
-
-    /**
-     * Obtém mensagens de erro.
-     *
-     * @since 1.0.0
-     * @return array
-     */
-    private function get_errors() {
-        $transient_key = 'dps_booking_errors_' . $this->get_session_id();
-        $errors = get_transient( $transient_key );
-        delete_transient( $transient_key );
-        return is_array( $errors ) ? $errors : [];
-    }
-
-    /**
-     * Obtém um identificador de sessão baseado no IP.
-     *
-     * @since 1.0.0
-     * @return string
-     */
-    private function get_session_id() {
-        $ip = '';
-        if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-            $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-        }
-        return substr( hash( 'sha256', 'dps_booking_' . $ip ), 0, 16 );
-    }
-
-    /**
-     * Redireciona com flag de erro.
-     *
-     * @since 1.0.0
-     */
-    private function redirect_with_error() {
-        wp_safe_redirect( add_query_arg( 'booking_error', '1', $this->get_booking_page_url() ) );
-        exit;
+    private function can_access() {
+        return current_user_can( 'manage_options' ) 
+            || current_user_can( 'dps_manage_clients' )
+            || current_user_can( 'dps_manage_pets' )
+            || current_user_can( 'dps_manage_appointments' );
     }
 
     /**
@@ -579,425 +185,477 @@ class DPS_Booking_Addon {
     }
 
     /**
-     * Obtém serviços disponíveis.
+     * Renderiza a página de agendamentos.
+     *
+     * Reutiliza a funcionalidade do Painel de Gestão DPS (aba Agendamentos).
      *
      * @since 1.0.0
-     * @return array
-     */
-    private function get_available_services() {
-        $services = get_posts( [
-            'post_type'      => 'dps_service',
-            'posts_per_page' => 100,
-            'post_status'    => 'publish',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ] );
-
-        $result = [];
-        foreach ( $services as $service ) {
-            $price = get_post_meta( $service->ID, 'service_price', true );
-            $is_extra = get_post_meta( $service->ID, 'service_is_extra', true );
-
-            $result[] = [
-                'id'       => $service->ID,
-                'name'     => $service->post_title,
-                'price'    => $price ? (float) $price : 0,
-                'is_extra' => ! empty( $is_extra ),
-            ];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Obtém horários disponíveis para uma data.
-     *
-     * @since 1.0.0
-     * @param string $date Data no formato Y-m-d.
-     * @return array
-     */
-    private function get_available_times( $date = '' ) {
-        // Horários padrão de funcionamento
-        $default_times = [
-            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-            '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
-            '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-        ];
-
-        // Permite filtrar horários
-        $times = apply_filters( 'dps_booking_available_times', $default_times, $date );
-
-        return $times;
-    }
-
-    /**
-     * Renderiza o formulário de agendamento.
-     *
-     * @since 1.0.0
+     * @since 1.1.0 Refatorado para usar a funcionalidade do Painel de Gestão DPS.
      * @return string HTML do formulário.
      */
     public function render_booking_form() {
+        // Evita renderizar durante requisições REST API ou AJAX
+        if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
+            return '';
+        }
+
         // Desabilita cache da página
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
         }
 
-        $success = isset( $_GET['booking_success'] ) && '1' === $_GET['booking_success'];
-        $services = $this->get_available_services();
-        $main_services = array_filter( $services, function( $s ) {
-            return ! $s['is_extra'];
-        } );
-        $extra_services = array_filter( $services, function( $s ) {
-            return $s['is_extra'];
-        } );
-        $available_times = $this->get_available_times();
+        // Verifica permissões
+        if ( ! is_user_logged_in() ) {
+            $login_url = wp_login_url( $this->get_booking_page_url() );
+            return '<div class="dps-booking-access-denied">' .
+                   '<p>' . esc_html__( 'Você precisa estar logado para acessar esta página.', 'dps-booking-addon' ) . '</p>' .
+                   '<p><a href="' . esc_url( $login_url ) . '" class="button">' . esc_html__( 'Fazer login', 'dps-booking-addon' ) . '</a></p>' .
+                   '</div>';
+        }
+
+        if ( ! $this->can_access() ) {
+            return '<div class="dps-booking-access-denied">' .
+                   '<p>' . esc_html__( 'Você não tem permissão para acessar esta página.', 'dps-booking-addon' ) . '</p>' .
+                   '<p>' . esc_html__( 'Esta funcionalidade é restrita a administradores e usuários autorizados.', 'dps-booking-addon' ) . '</p>' .
+                   '</div>';
+        }
 
         ob_start();
-        ?>
-        <div class="dps-booking-form">
-            <?php
-            // Display messages (DPS_Message_Helper returns pre-escaped HTML)
-            if ( class_exists( 'DPS_Message_Helper' ) ) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- DPS_Message_Helper::display_messages() returns pre-escaped safe HTML
-                echo DPS_Message_Helper::display_messages();
-            } else {
-                $errors = $this->get_errors();
-                foreach ( $errors as $error ) {
-                    echo '<div class="dps-booking-message dps-booking-message--error" role="alert">';
-                    echo '<span class="dps-booking-message__icon">⚠️</span>';
-                    echo '<span>' . esc_html( $error ) . '</span>';
-                    echo '</div>';
-                }
-            }
 
-            // Mensagem de sucesso
-            if ( $success ) {
-                ?>
-                <div class="dps-booking-success" role="status">
-                    <div class="dps-booking-success__icon">✓</div>
-                    <h4 class="dps-booking-success__title"><?php esc_html_e( 'Agendamento confirmado!', 'dps-booking-addon' ); ?></h4>
-                    <p class="dps-booking-success__text"><?php esc_html_e( 'Seu agendamento foi realizado com sucesso. Em breve você receberá uma confirmação por WhatsApp.', 'dps-booking-addon' ); ?></p>
-                    <div class="dps-booking-success__actions">
-                        <a href="<?php echo esc_url( $this->get_booking_page_url() ); ?>" class="dps-booking-btn dps-booking-btn--primary">
-                            <?php esc_html_e( 'Agendar outro serviço', 'dps-booking-addon' ); ?>
-                        </a>
-                    </div>
-                </div>
-                <?php
-                echo '</div>';
-                return ob_get_clean();
-            }
-            ?>
+        echo '<div class="dps-booking-wrapper dps-panel">';
 
-            <!-- Header do formulário -->
-            <header class="dps-booking-header">
-                <h2 class="dps-booking-header__title">
-                    <span class="dps-booking-header__icon">📅</span>
-                    <?php esc_html_e( 'Agendar Serviço', 'dps-booking-addon' ); ?>
-                </h2>
-                <p class="dps-booking-header__subtitle">
-                    <?php esc_html_e( 'Preencha os dados abaixo para agendar banho, tosa ou outros serviços para seu pet.', 'dps-booking-addon' ); ?>
-                </p>
-            </header>
+        // Header da página
+        echo '<header class="dps-booking-page-header">';
+        echo '<h1 class="dps-page-title">' . esc_html__( 'Agendamento de Serviços', 'dps-booking-addon' ) . '</h1>';
+        echo '<p class="dps-page-subtitle">' . esc_html__( 'Gerencie os agendamentos de banho, tosa e outros serviços para pets.', 'dps-booking-addon' ) . '</p>';
+        echo '</header>';
 
-            <!-- Progress indicator -->
-            <div class="dps-booking-progress" aria-live="polite">
-                <div class="dps-booking-progress__steps">
-                    <div class="dps-booking-progress__step dps-booking-progress__step--active" data-step="1">
-                        <span class="dps-booking-progress__number">1</span>
-                        <span class="dps-booking-progress__label"><?php esc_html_e( 'Seus Dados', 'dps-booking-addon' ); ?></span>
-                    </div>
-                    <div class="dps-booking-progress__connector"></div>
-                    <div class="dps-booking-progress__step" data-step="2">
-                        <span class="dps-booking-progress__number">2</span>
-                        <span class="dps-booking-progress__label"><?php esc_html_e( 'Pet', 'dps-booking-addon' ); ?></span>
-                    </div>
-                    <div class="dps-booking-progress__connector"></div>
-                    <div class="dps-booking-progress__step" data-step="3">
-                        <span class="dps-booking-progress__number">3</span>
-                        <span class="dps-booking-progress__label"><?php esc_html_e( 'Serviço', 'dps-booking-addon' ); ?></span>
-                    </div>
-                    <div class="dps-booking-progress__connector"></div>
-                    <div class="dps-booking-progress__step" data-step="4">
-                        <span class="dps-booking-progress__number">4</span>
-                        <span class="dps-booking-progress__label"><?php esc_html_e( 'Data e Hora', 'dps-booking-addon' ); ?></span>
-                    </div>
-                </div>
-            </div>
+        // Exibe mensagens de feedback
+        if ( class_exists( 'DPS_Message_Helper' ) ) {
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- DPS_Message_Helper::display_messages() returns pre-escaped safe HTML
+            echo DPS_Message_Helper::display_messages();
+        }
 
-            <form method="post" id="dps-booking-form-element" class="dps-booking-form__form">
-                <input type="hidden" name="dps_booking_action" value="save_booking">
-                <?php wp_nonce_field( 'dps_booking_nonce', 'dps_booking_nonce' ); ?>
+        // Renderiza a seção de agendamentos usando o método do plugin base
+        if ( class_exists( 'DPS_Base_Frontend' ) ) {
+            // Usa reflection para acessar o método privado section_agendas
+            // Alternativa: invocar os métodos públicos necessários
+            echo $this->render_appointments_section();
+        } else {
+            echo '<div class="dps-notice dps-notice--error">';
+            echo '<p>' . esc_html__( 'Erro: O plugin base não está carregado corretamente.', 'dps-booking-addon' ) . '</p>';
+            echo '</div>';
+        }
 
-                <!-- Honeypot -->
-                <div class="dps-booking-hp" aria-hidden="true">
-                    <label for="dps_hp_field"><?php esc_html_e( 'Deixe este campo vazio', 'dps-booking-addon' ); ?></label>
-                    <input type="text" name="dps_hp_field" id="dps_hp_field" tabindex="-1" autocomplete="off">
-                </div>
+        echo '</div>';
 
-                <!-- Step 1: Dados do Cliente -->
-                <div class="dps-booking-step dps-booking-step--active" data-step="1">
-                    <h3 class="dps-booking-step__title">
-                        <span class="dps-booking-step__icon">👤</span>
-                        <?php esc_html_e( 'Seus Dados', 'dps-booking-addon' ); ?>
-                    </h3>
-
-                    <div class="dps-booking-fields">
-                        <div class="dps-booking-field">
-                            <label for="client_name" class="dps-booking-label">
-                                <?php esc_html_e( 'Nome completo', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-required">*</span>
-                            </label>
-                            <input type="text" id="client_name" name="client_name" class="dps-booking-input" required 
-                                   placeholder="<?php esc_attr_e( 'Digite seu nome', 'dps-booking-addon' ); ?>">
-                        </div>
-
-                        <div class="dps-booking-field">
-                            <label for="client_phone" class="dps-booking-label">
-                                <?php esc_html_e( 'WhatsApp', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-required">*</span>
-                            </label>
-                            <input type="tel" id="client_phone" name="client_phone" class="dps-booking-input" required
-                                   placeholder="<?php esc_attr_e( '(00) 00000-0000', 'dps-booking-addon' ); ?>">
-                            <span class="dps-booking-help"><?php esc_html_e( 'Usaremos para confirmar o agendamento', 'dps-booking-addon' ); ?></span>
-                        </div>
-
-                        <div class="dps-booking-field dps-booking-field--full">
-                            <label for="client_email" class="dps-booking-label">
-                                <?php esc_html_e( 'Email', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-optional"><?php esc_html_e( '(opcional)', 'dps-booking-addon' ); ?></span>
-                            </label>
-                            <input type="email" id="client_email" name="client_email" class="dps-booking-input"
-                                   placeholder="<?php esc_attr_e( 'seu@email.com', 'dps-booking-addon' ); ?>">
-                        </div>
-                    </div>
-
-                    <div class="dps-booking-actions">
-                        <button type="button" class="dps-booking-btn dps-booking-btn--primary dps-booking-btn--next" data-next="2">
-                            <?php esc_html_e( 'Continuar', 'dps-booking-addon' ); ?>
-                            <span class="dps-booking-btn__icon">→</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 2: Dados do Pet -->
-                <div class="dps-booking-step" data-step="2">
-                    <h3 class="dps-booking-step__title">
-                        <span class="dps-booking-step__icon">🐾</span>
-                        <?php esc_html_e( 'Dados do Pet', 'dps-booking-addon' ); ?>
-                    </h3>
-
-                    <div class="dps-booking-fields">
-                        <div class="dps-booking-field">
-                            <label for="pet_name" class="dps-booking-label">
-                                <?php esc_html_e( 'Nome do pet', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-required">*</span>
-                            </label>
-                            <input type="text" id="pet_name" name="pet_name" class="dps-booking-input" required
-                                   placeholder="<?php esc_attr_e( 'Nome do seu pet', 'dps-booking-addon' ); ?>">
-                        </div>
-
-                        <div class="dps-booking-field">
-                            <label for="pet_breed" class="dps-booking-label">
-                                <?php esc_html_e( 'Raça', 'dps-booking-addon' ); ?>
-                            </label>
-                            <input type="text" id="pet_breed" name="pet_breed" class="dps-booking-input"
-                                   placeholder="<?php esc_attr_e( 'Ex: Golden Retriever', 'dps-booking-addon' ); ?>">
-                        </div>
-
-                        <div class="dps-booking-field dps-booking-field--full">
-                            <label class="dps-booking-label">
-                                <?php esc_html_e( 'Porte', 'dps-booking-addon' ); ?>
-                            </label>
-                            <div class="dps-booking-options">
-                                <label class="dps-booking-option">
-                                    <input type="radio" name="pet_size" value="pequeno">
-                                    <span class="dps-booking-option__card">
-                                        <span class="dps-booking-option__icon">🐕</span>
-                                        <span class="dps-booking-option__label"><?php esc_html_e( 'Pequeno', 'dps-booking-addon' ); ?></span>
-                                        <span class="dps-booking-option__desc"><?php esc_html_e( 'Até 10kg', 'dps-booking-addon' ); ?></span>
-                                    </span>
-                                </label>
-                                <label class="dps-booking-option">
-                                    <input type="radio" name="pet_size" value="medio" checked>
-                                    <span class="dps-booking-option__card">
-                                        <span class="dps-booking-option__icon">🐕‍🦺</span>
-                                        <span class="dps-booking-option__label"><?php esc_html_e( 'Médio', 'dps-booking-addon' ); ?></span>
-                                        <span class="dps-booking-option__desc"><?php esc_html_e( '10 a 25kg', 'dps-booking-addon' ); ?></span>
-                                    </span>
-                                </label>
-                                <label class="dps-booking-option">
-                                    <input type="radio" name="pet_size" value="grande">
-                                    <span class="dps-booking-option__card">
-                                        <span class="dps-booking-option__icon">🦮</span>
-                                        <span class="dps-booking-option__label"><?php esc_html_e( 'Grande', 'dps-booking-addon' ); ?></span>
-                                        <span class="dps-booking-option__desc"><?php esc_html_e( 'Acima de 25kg', 'dps-booking-addon' ); ?></span>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dps-booking-actions">
-                        <button type="button" class="dps-booking-btn dps-booking-btn--secondary dps-booking-btn--prev" data-prev="1">
-                            <span class="dps-booking-btn__icon">←</span>
-                            <?php esc_html_e( 'Voltar', 'dps-booking-addon' ); ?>
-                        </button>
-                        <button type="button" class="dps-booking-btn dps-booking-btn--primary dps-booking-btn--next" data-next="3">
-                            <?php esc_html_e( 'Continuar', 'dps-booking-addon' ); ?>
-                            <span class="dps-booking-btn__icon">→</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Serviço -->
-                <div class="dps-booking-step" data-step="3">
-                    <h3 class="dps-booking-step__title">
-                        <span class="dps-booking-step__icon">✨</span>
-                        <?php esc_html_e( 'Escolha o Serviço', 'dps-booking-addon' ); ?>
-                    </h3>
-
-                    <?php if ( ! empty( $main_services ) ) : ?>
-                    <div class="dps-booking-services">
-                        <h4 class="dps-booking-services__title"><?php esc_html_e( 'Serviços Principais', 'dps-booking-addon' ); ?></h4>
-                        <div class="dps-booking-services__list">
-                            <?php foreach ( $main_services as $service ) : ?>
-                            <label class="dps-booking-service">
-                                <input type="radio" name="service_id" value="<?php echo esc_attr( $service['id'] ); ?>" required>
-                                <span class="dps-booking-service__card">
-                                    <span class="dps-booking-service__name"><?php echo esc_html( $service['name'] ); ?></span>
-                                    <?php if ( $service['price'] > 0 ) : ?>
-                                    <span class="dps-booking-service__price">
-                                        <?php 
-                                        if ( class_exists( 'DPS_Money_Helper' ) ) {
-                                            echo 'R$ ' . esc_html( DPS_Money_Helper::format_to_brazilian( (int) ( $service['price'] * 100 ) ) );
-                                        } else {
-                                            echo 'R$ ' . esc_html( number_format( $service['price'], 2, ',', '.' ) );
-                                        }
-                                        ?>
-                                    </span>
-                                    <?php endif; ?>
-                                    <span class="dps-booking-service__check">✓</span>
-                                </span>
-                            </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php else : ?>
-                    <div class="dps-booking-empty">
-                        <p><?php esc_html_e( 'Nenhum serviço disponível no momento.', 'dps-booking-addon' ); ?></p>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if ( ! empty( $extra_services ) ) : ?>
-                    <div class="dps-booking-extras">
-                        <h4 class="dps-booking-extras__title"><?php esc_html_e( 'Adicionar Extras', 'dps-booking-addon' ); ?></h4>
-                        <p class="dps-booking-extras__subtitle"><?php esc_html_e( 'Selecione serviços adicionais se desejar', 'dps-booking-addon' ); ?></p>
-                        <div class="dps-booking-extras__list">
-                            <?php foreach ( $extra_services as $extra ) : ?>
-                            <label class="dps-booking-extra">
-                                <input type="checkbox" name="extras[]" value="<?php echo esc_attr( $extra['id'] ); ?>">
-                                <span class="dps-booking-extra__card">
-                                    <span class="dps-booking-extra__check"></span>
-                                    <span class="dps-booking-extra__info">
-                                        <span class="dps-booking-extra__name"><?php echo esc_html( $extra['name'] ); ?></span>
-                                        <?php if ( $extra['price'] > 0 ) : ?>
-                                        <span class="dps-booking-extra__price">
-                                            + R$ <?php 
-                                            if ( class_exists( 'DPS_Money_Helper' ) ) {
-                                                echo esc_html( DPS_Money_Helper::format_to_brazilian( (int) ( $extra['price'] * 100 ) ) );
-                                            } else {
-                                                echo esc_html( number_format( $extra['price'], 2, ',', '.' ) );
-                                            }
-                                            ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </span>
-                                </span>
-                            </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <div class="dps-booking-actions">
-                        <button type="button" class="dps-booking-btn dps-booking-btn--secondary dps-booking-btn--prev" data-prev="2">
-                            <span class="dps-booking-btn__icon">←</span>
-                            <?php esc_html_e( 'Voltar', 'dps-booking-addon' ); ?>
-                        </button>
-                        <button type="button" class="dps-booking-btn dps-booking-btn--primary dps-booking-btn--next" data-next="4">
-                            <?php esc_html_e( 'Continuar', 'dps-booking-addon' ); ?>
-                            <span class="dps-booking-btn__icon">→</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 4: Data e Hora -->
-                <div class="dps-booking-step" data-step="4">
-                    <h3 class="dps-booking-step__title">
-                        <span class="dps-booking-step__icon">📅</span>
-                        <?php esc_html_e( 'Escolha Data e Horário', 'dps-booking-addon' ); ?>
-                    </h3>
-
-                    <div class="dps-booking-fields">
-                        <div class="dps-booking-field">
-                            <label for="appointment_date" class="dps-booking-label">
-                                <?php esc_html_e( 'Data', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-required">*</span>
-                            </label>
-                            <input type="date" id="appointment_date" name="appointment_date" class="dps-booking-input" required
-                                   min="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>">
-                        </div>
-
-                        <div class="dps-booking-field">
-                            <label for="appointment_time" class="dps-booking-label">
-                                <?php esc_html_e( 'Horário', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-required">*</span>
-                            </label>
-                            <select id="appointment_time" name="appointment_time" class="dps-booking-input dps-booking-select" required>
-                                <option value=""><?php esc_html_e( 'Selecione um horário', 'dps-booking-addon' ); ?></option>
-                                <?php foreach ( $available_times as $time ) : ?>
-                                <option value="<?php echo esc_attr( $time ); ?>"><?php echo esc_html( $time ); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="dps-booking-field dps-booking-field--full">
-                            <label for="observations" class="dps-booking-label">
-                                <?php esc_html_e( 'Observações', 'dps-booking-addon' ); ?>
-                                <span class="dps-booking-optional"><?php esc_html_e( '(opcional)', 'dps-booking-addon' ); ?></span>
-                            </label>
-                            <textarea id="observations" name="observations" class="dps-booking-input dps-booking-textarea" rows="3"
-                                      placeholder="<?php esc_attr_e( 'Alguma informação importante sobre seu pet? Cuidados especiais, preferências, etc.', 'dps-booking-addon' ); ?>"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Resumo do agendamento -->
-                    <div class="dps-booking-summary" id="booking-summary">
-                        <h4 class="dps-booking-summary__title">
-                            <span>📋</span>
-                            <?php esc_html_e( 'Resumo do Agendamento', 'dps-booking-addon' ); ?>
-                        </h4>
-                        <div class="dps-booking-summary__content" id="summary-content">
-                            <!-- Preenchido via JavaScript -->
-                        </div>
-                    </div>
-
-                    <div class="dps-booking-actions">
-                        <button type="button" class="dps-booking-btn dps-booking-btn--secondary dps-booking-btn--prev" data-prev="3">
-                            <span class="dps-booking-btn__icon">←</span>
-                            <?php esc_html_e( 'Voltar', 'dps-booking-addon' ); ?>
-                        </button>
-                        <button type="submit" class="dps-booking-btn dps-booking-btn--success dps-booking-btn--submit">
-                            <span class="dps-booking-btn__icon">✓</span>
-                            <?php esc_html_e( 'Confirmar Agendamento', 'dps-booking-addon' ); ?>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Renderiza a seção de agendamentos replicando a funcionalidade do Painel de Gestão DPS.
+     *
+     * @since 1.1.0
+     * @return string HTML da seção de agendamentos.
+     */
+    private function render_appointments_section() {
+        // Prepara dados necessários para o formulário
+        $clients    = $this->get_clients();
+        $pets_query = $this->get_pets();
+        $pets       = $pets_query->posts;
+        $pet_pages  = (int) max( 1, $pets_query->max_num_pages );
+
+        // Detecta edição de agendamento
+        $edit_id = 0;
+        if ( isset( $_GET['dps_edit'] ) && 'appointment' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) {
+            $edit_id = absint( $_GET['id'] );
+        }
+
+        // Detecta duplicação de agendamento
+        $duplicate_id = 0;
+        $is_duplicate = false;
+        if ( isset( $_GET['dps_duplicate'] ) && 'appointment' === $_GET['dps_duplicate'] && isset( $_GET['id'] ) ) {
+            $duplicate_id = absint( $_GET['id'] );
+            $is_duplicate = true;
+        }
+
+        // Carrega dados do agendamento em edição ou duplicação
+        $editing = null;
+        $meta    = [];
+        $source_id = $edit_id ? $edit_id : $duplicate_id;
+
+        if ( $source_id ) {
+            $editing = get_post( $source_id );
+            if ( $editing && 'dps_agendamento' === $editing->post_type ) {
+                $meta = [
+                    'client_id'          => get_post_meta( $source_id, 'appointment_client_id', true ),
+                    'pet_id'             => get_post_meta( $source_id, 'appointment_pet', true ),
+                    'date'               => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_date', true ),
+                    'time'               => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_time', true ),
+                    'notes'              => get_post_meta( $source_id, 'appointment_notes', true ),
+                    'taxidog'            => get_post_meta( $source_id, 'appointment_taxidog', true ),
+                    'taxidog_price'      => get_post_meta( $source_id, 'appointment_taxidog_price', true ),
+                    'tosa'               => get_post_meta( $source_id, 'appointment_tosa', true ),
+                    'tosa_price'         => get_post_meta( $source_id, 'appointment_tosa_price', true ),
+                    'tosa_occurrence'    => get_post_meta( $source_id, 'appointment_tosa_occurrence', true ),
+                    'past_payment_status'=> get_post_meta( $source_id, 'past_payment_status', true ),
+                    'past_payment_value' => get_post_meta( $source_id, 'past_payment_value', true ),
+                ];
+                $appt_type = get_post_meta( $source_id, 'appointment_type', true );
+                $meta['appointment_type'] = $appt_type ?: 'simple';
+            }
+        }
+
+        // Cliente e pet pré-selecionados via URL
+        $pref_client = isset( $_GET['client_id'] ) ? absint( $_GET['client_id'] ) : 0;
+        $pref_pet    = isset( $_GET['pet_id'] ) ? absint( $_GET['pet_id'] ) : 0;
+
+        // URLs
+        $base_url    = $this->get_booking_page_url();
+        $current_url = add_query_arg( [], $base_url );
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+            $current_url = home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+        }
+
+        ob_start();
+
+        // Início da seção
+        echo '<div class="dps-section active" id="dps-section-agendas">';
+        
+        // Título da seção
+        echo '<h2 class="dps-section-title">';
+        echo '<span class="dps-section-title__icon">📅</span>';
+        echo esc_html__( 'Agendamento de Serviços', 'dps-booking-addon' );
+        echo '</h2>';
+
+        // Formulário
+        echo '<div class="dps-surface dps-surface--info">';
+        echo '<div class="dps-surface__title">';
+        echo '<span>📝</span>';
+        echo $edit_id ? esc_html__( 'Editar Agendamento', 'dps-booking-addon' ) : esc_html__( 'Novo Agendamento', 'dps-booking-addon' );
+        echo '</div>';
+
+        // Mensagem de duplicação
+        if ( $is_duplicate ) {
+            echo '<div class="dps-alert dps-alert--info" role="status" aria-live="polite">';
+            echo '<strong>' . esc_html__( 'Duplicando agendamento', 'dps-booking-addon' ) . '</strong><br>';
+            echo esc_html__( 'Os dados do agendamento anterior foram copiados. Selecione uma nova data e horário, então salve para criar o novo agendamento.', 'dps-booking-addon' );
+            echo '</div>';
+        }
+
+        echo '<form method="post" class="dps-form">';
+        echo '<input type="hidden" name="dps_action" value="save_appointment">';
+        wp_nonce_field( 'dps_action', 'dps_nonce_agendamentos' );
+        echo '<input type="hidden" name="dps_redirect_url" value="' . esc_attr( $current_url ) . '">';
+        if ( $edit_id ) {
+            echo '<input type="hidden" name="appointment_id" value="' . esc_attr( $edit_id ) . '">';
+        }
+
+        // FIELDSET 1: Tipo de Agendamento
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Tipo de Agendamento', 'dps-booking-addon' ) . '</legend>';
+        
+        $appt_type = isset( $meta['appointment_type'] ) ? $meta['appointment_type'] : 'simple';
+        echo '<div class="dps-radio-group">';
+        
+        echo '<label class="dps-radio-option">';
+        echo '<input type="radio" name="appointment_type" value="simple" ' . checked( $appt_type, 'simple', false ) . '>';
+        echo '<div class="dps-radio-label">';
+        echo '<strong>' . esc_html__( 'Agendamento Simples', 'dps-booking-addon' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Atendimento único, sem recorrência', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        echo '</label>';
+        
+        echo '<label class="dps-radio-option">';
+        echo '<input type="radio" name="appointment_type" value="subscription" ' . checked( $appt_type, 'subscription', false ) . '>';
+        echo '<div class="dps-radio-label">';
+        echo '<strong>' . esc_html__( 'Agendamento de Assinatura', 'dps-booking-addon' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Atendimentos recorrentes (semanal ou quinzenal)', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        echo '</label>';
+        
+        echo '<label class="dps-radio-option">';
+        echo '<input type="radio" name="appointment_type" value="past" ' . checked( $appt_type, 'past', false ) . '>';
+        echo '<div class="dps-radio-label">';
+        echo '<strong>' . esc_html__( 'Agendamento Passado', 'dps-booking-addon' ) . '</strong>';
+        echo '<p>' . esc_html__( 'Registrar atendimento já realizado anteriormente', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        echo '</label>';
+        
+        echo '</div>';
+        
+        // Campo: frequência para assinaturas
+        $freq_display = ( $appt_type === 'subscription' ) ? 'block' : 'none';
+        echo '<div id="dps-appointment-frequency-wrapper" class="dps-conditional-field" style="display:' . esc_attr( $freq_display ) . ';">';
+        echo '<label for="dps-appointment-frequency">' . esc_html__( 'Frequência', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="appointment_frequency" id="dps-appointment-frequency">';
+        echo '<option value="semanal">' . esc_html__( 'Semanal', 'dps-booking-addon' ) . '</option>';
+        echo '<option value="quinzenal">' . esc_html__( 'Quinzenal', 'dps-booking-addon' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+
+        // FIELDSET 2: Cliente e Pet(s)
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Cliente e Pet(s)', 'dps-booking-addon' ) . '</legend>';
+        
+        // Cliente
+        if ( ! $edit_id && $pref_client ) {
+            $meta['client_id'] = $pref_client;
+        }
+        $sel_client = isset( $meta['client_id'] ) ? $meta['client_id'] : '';
+        
+        echo '<div class="dps-form-field">';
+        echo '<label for="dps-appointment-cliente">' . esc_html__( 'Cliente', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="appointment_client_id" id="dps-appointment-cliente" class="dps-client-select" required>';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-booking-addon' ) . '</option>';
+        foreach ( $clients as $client ) {
+            $selected = ( (string) $client->ID === (string) $sel_client ) ? ' selected' : '';
+            echo '<option value="' . esc_attr( $client->ID ) . '"' . $selected . '>' . esc_html( $client->post_title ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        // Pets
+        if ( ! $edit_id && $pref_pet ) {
+            $meta['pet_id'] = $pref_pet;
+        }
+        $sel_pets = [];
+        if ( isset( $meta['pet_id'] ) && $meta['pet_id'] ) {
+            $sel_pets[] = (string) $meta['pet_id'];
+        }
+        if ( $edit_id ) {
+            $multi_meta = get_post_meta( $edit_id, 'appointment_pet_ids', true );
+            if ( $multi_meta && is_array( $multi_meta ) ) {
+                $sel_pets = array_map( 'strval', $multi_meta );
+            }
+        }
+        
+        echo '<div id="dps-appointment-pet-wrapper" class="dps-pet-picker" data-current-page="1" data-total-pages="' . esc_attr( $pet_pages ) . '">';
+        echo '<p id="dps-pet-selector-label"><strong>' . esc_html__( 'Pet(s)', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></strong>';
+        echo '<span id="dps-pet-counter" class="dps-selection-counter" style="display:none;">0 ' . esc_html__( 'selecionados', 'dps-booking-addon' ) . '</span></p>';
+        
+        echo '<div class="dps-pet-picker-actions">';
+        echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="select">' . esc_html__( 'Selecionar todos', 'dps-booking-addon' ) . '</button> ';
+        echo '<button type="button" class="button button-secondary dps-pet-toggle" data-action="clear">' . esc_html__( 'Limpar seleção', 'dps-booking-addon' ) . '</button>';
+        echo '</div>';
+        
+        echo '<div id="dps-appointment-pet-list" class="dps-pet-list" role="group" aria-labelledby="dps-pet-selector-label">';
+        foreach ( $pets as $pet ) {
+            $owner_id   = get_post_meta( $pet->ID, 'owner_id', true );
+            $owner_post = $owner_id ? get_post( $owner_id ) : null;
+            $owner_name = $owner_post ? $owner_post->post_title : '';
+            $size       = get_post_meta( $pet->ID, 'pet_size', true );
+            $breed      = get_post_meta( $pet->ID, 'pet_breed', true );
+            $sel        = in_array( (string) $pet->ID, $sel_pets, true ) ? 'checked' : '';
+            $size_attr  = $size ? ' data-size="' . esc_attr( strtolower( $size ) ) . '"' : '';
+            $owner_attr = $owner_id ? ' data-owner="' . esc_attr( $owner_id ) . '"' : '';
+            $search_blob = strtolower( $pet->post_title . ' ' . $breed . ' ' . $owner_name );
+            
+            echo '<label class="dps-pet-option"' . $owner_attr . $size_attr . ' data-search="' . esc_attr( $search_blob ) . '">';
+            echo '<input type="checkbox" class="dps-pet-checkbox" name="appointment_pet_ids[]" value="' . esc_attr( $pet->ID ) . '" ' . $sel . '>';
+            echo '<span class="dps-pet-name">' . esc_html( $pet->post_title ) . '</span>';
+            if ( $breed ) {
+                echo '<span class="dps-pet-breed"> – ' . esc_html( $breed ) . '</span>';
+            }
+            if ( $size ) {
+                echo '<span class="dps-pet-size"> · ' . esc_html( ucfirst( $size ) ) . '</span>';
+            }
+            echo '</label>';
+        }
+        echo '</div>';
+        
+        if ( $pet_pages > 1 ) {
+            echo '<p><button type="button" class="button dps-pet-load-more" data-next-page="2" data-loading="false">' . esc_html__( 'Carregar mais pets', 'dps-booking-addon' ) . '</button></p>';
+        }
+        
+        echo '<p id="dps-pet-summary" class="dps-field-hint" style="display:none;"></p>';
+        echo '<p id="dps-no-pets-message" class="dps-field-hint" style="display:none;">' . esc_html__( 'Nenhum pet disponível para o cliente selecionado.', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+
+        // FIELDSET 3: Data e Horário
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Data e Horário', 'dps-booking-addon' ) . '</legend>';
+        
+        $date_val = isset( $meta['date'] ) ? $meta['date'] : '';
+        $time_val = isset( $meta['time'] ) ? $meta['time'] : '';
+        
+        echo '<div class="dps-form-row dps-form-row--2col">';
+        echo '<div class="dps-form-field">';
+        echo '<label for="appointment_date">' . esc_html__( 'Data', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<input type="date" id="appointment_date" name="appointment_date" value="' . esc_attr( $date_val ) . '" required>';
+        echo '<p class="dps-field-hint">' . esc_html__( 'Horários disponíveis serão carregados após escolher a data', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        
+        echo '<div class="dps-form-field">';
+        echo '<label for="appointment_time">' . esc_html__( 'Horário', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select id="appointment_time" name="appointment_time" required>';
+        if ( $time_val ) {
+            echo '<option value="' . esc_attr( $time_val ) . '" selected>' . esc_html( $time_val ) . '</option>';
+        } else {
+            echo '<option value="">' . esc_html__( 'Escolha uma data primeiro', 'dps-booking-addon' ) . '</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</fieldset>';
+
+        // SEÇÃO: TaxiDog
+        $taxidog = isset( $meta['taxidog'] ) ? $meta['taxidog'] : '';
+        $taxidog_price_val = isset( $meta['taxidog_price'] ) ? $meta['taxidog_price'] : '';
+        
+        echo '<div class="dps-taxidog-section">';
+        echo '<div class="dps-taxidog-card" data-taxidog-active="' . ( $taxidog ? '1' : '0' ) . '">';
+        echo '<div class="dps-taxidog-card__header">';
+        echo '<div class="dps-taxidog-card__icon-title">';
+        echo '<span class="dps-taxidog-icon" aria-hidden="true">🚗</span>';
+        echo '<span class="dps-taxidog-title">' . esc_html__( 'Solicitar TaxiDog?', 'dps-booking-addon' ) . '</span>';
+        echo '</div>';
+        echo '<label class="dps-toggle-switch">';
+        echo '<input type="checkbox" id="dps-taxidog-toggle" name="appointment_taxidog" value="1" ' . checked( $taxidog, '1', false ) . '>';
+        echo '<span class="dps-toggle-slider"></span>';
+        echo '</label>';
+        echo '</div>';
+        echo '<p class="dps-taxidog-description">' . esc_html__( 'Serviço de transporte para buscar e/ou levar o pet', 'dps-booking-addon' ) . '</p>';
+        
+        echo '<div id="dps-taxidog-extra" class="dps-taxidog-card__value" style="display:' . ( $taxidog ? 'flex' : 'none' ) . ';">';
+        echo '<label for="dps-taxidog-price" class="dps-taxidog-value-label">' . esc_html__( 'Valor do serviço:', 'dps-booking-addon' ) . '</label>';
+        echo '<div class="dps-input-with-prefix">';
+        echo '<span class="dps-input-prefix">R$</span>';
+        echo '<input type="number" id="dps-taxidog-price" name="appointment_taxidog_price" step="0.01" min="0" value="' . esc_attr( $taxidog_price_val ) . '" class="dps-input-money dps-taxidog-price-input" placeholder="0,00">';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+
+        // FIELDSET 4: Serviços e Extras
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Serviços e Extras', 'dps-booking-addon' ) . '</legend>';
+        
+        // Hook para add-ons injetarem campos extras (ex.: serviços)
+        do_action( 'dps_base_appointment_fields', $edit_id, $meta );
+        
+        echo '</fieldset>';
+
+        // FIELDSET 5: Atribuição (se houver hook)
+        $has_assignment = has_action( 'dps_base_appointment_assignment_fields' );
+        if ( $has_assignment ) {
+            echo '<fieldset class="dps-fieldset dps-assignment-fieldset">';
+            echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Atribuição', 'dps-booking-addon' ) . '</legend>';
+            do_action( 'dps_base_appointment_assignment_fields', $edit_id, $meta );
+            echo '</fieldset>';
+        }
+
+        // FIELDSET 6: Informações de Pagamento (apenas para agendamentos passados)
+        $past_payment_status = isset( $meta['past_payment_status'] ) ? $meta['past_payment_status'] : '';
+        $past_payment_value  = isset( $meta['past_payment_value'] ) ? $meta['past_payment_value'] : '';
+        $past_display = ( $appt_type === 'past' ) ? 'block' : 'none';
+        
+        echo '<fieldset id="dps-past-payment-wrapper" class="dps-fieldset dps-conditional-field" style="display:' . esc_attr( $past_display ) . ';">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Informações de Pagamento', 'dps-booking-addon' ) . '</legend>';
+        
+        echo '<div class="dps-form-field">';
+        echo '<label for="past_payment_status">' . esc_html__( 'Status do Pagamento', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<select name="past_payment_status" id="past_payment_status">';
+        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-booking-addon' ) . '</option>';
+        echo '<option value="paid" ' . selected( $past_payment_status, 'paid', false ) . '>' . esc_html__( 'Pago', 'dps-booking-addon' ) . '</option>';
+        echo '<option value="pending" ' . selected( $past_payment_status, 'pending', false ) . '>' . esc_html__( 'Pendente', 'dps-booking-addon' ) . '</option>';
+        echo '</select>';
+        echo '</div>';
+        
+        $payment_value_display = ( $past_payment_status === 'pending' ) ? 'block' : 'none';
+        echo '<div id="dps-past-payment-value-wrapper" class="dps-form-field dps-conditional-field" style="display:' . esc_attr( $payment_value_display ) . ';">';
+        echo '<label for="past_payment_value">' . esc_html__( 'Valor Pendente (R$)', 'dps-booking-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<input type="number" step="0.01" min="0" id="past_payment_value" name="past_payment_value" value="' . esc_attr( $past_payment_value ) . '" class="dps-input-money" placeholder="0,00">';
+        echo '</div>';
+        
+        echo '</fieldset>';
+
+        // FIELDSET 7: Observações
+        echo '<fieldset class="dps-fieldset">';
+        echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Observações e Notas', 'dps-booking-addon' ) . '</legend>';
+        
+        $notes_val = isset( $meta['notes'] ) ? $meta['notes'] : '';
+        echo '<label for="appointment_notes">' . esc_html__( 'Observações', 'dps-booking-addon' ) . '</label>';
+        echo '<textarea id="appointment_notes" name="appointment_notes" rows="3" placeholder="' . esc_attr__( 'Instruções especiais, preferências do cliente, etc.', 'dps-booking-addon' ) . '">' . esc_textarea( $notes_val ) . '</textarea>';
+        echo '<p class="dps-field-hint">' . esc_html__( 'Opcional - use este campo para anotações internas', 'dps-booking-addon' ) . '</p>';
+        
+        echo '</fieldset>';
+
+        // Resumo do agendamento
+        echo '<div class="dps-appointment-summary" aria-live="polite">';
+        echo '<h3><span class="dps-appointment-summary__icon" aria-hidden="true">📋</span>' . esc_html__( 'Resumo do agendamento', 'dps-booking-addon' ) . '</h3>';
+        echo '<p class="dps-appointment-summary__empty">' . esc_html__( 'Preencha cliente, pet, data e horário para ver o resumo aqui.', 'dps-booking-addon' ) . '</p>';
+        echo '<ul class="dps-appointment-summary__list" hidden>';
+        echo '<li><strong>' . esc_html__( 'Cliente:', 'dps-booking-addon' ) . '</strong> <span data-summary="client">-</span></li>';
+        echo '<li><strong>' . esc_html__( 'Pets:', 'dps-booking-addon' ) . '</strong> <span data-summary="pets">-</span></li>';
+        echo '<li><strong>' . esc_html__( 'Data:', 'dps-booking-addon' ) . '</strong> <span data-summary="date">-</span></li>';
+        echo '<li><strong>' . esc_html__( 'Horário:', 'dps-booking-addon' ) . '</strong> <span data-summary="time">-</span></li>';
+        echo '<li><strong>' . esc_html__( 'Serviços:', 'dps-booking-addon' ) . '</strong> <span data-summary="services">-</span></li>';
+        echo '<li class="dps-appointment-summary__extras" style="display:none;"><strong>' . esc_html__( 'Extras:', 'dps-booking-addon' ) . '</strong> <span data-summary="extras">-</span></li>';
+        echo '<li><strong>' . esc_html__( 'Valor estimado:', 'dps-booking-addon' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
+        echo '<li class="dps-appointment-summary__notes"><strong>' . esc_html__( 'Observações:', 'dps-booking-addon' ) . '</strong> <span data-summary="notes">-</span></li>';
+        echo '</ul>';
+        echo '</div>';
+
+        // Botões de ação
+        $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'dps-booking-addon' ) : esc_html__( 'Salvar Agendamento', 'dps-booking-addon' );
+        echo '<div class="dps-form-actions">';
+        echo '<button type="submit" class="dps-btn dps-btn--primary dps-submit-btn dps-appointment-submit">✓ ' . $btn_text . '</button>';
+        if ( $edit_id ) {
+            $cancel_url = remove_query_arg( [ 'dps_edit', 'id' ], $current_url );
+            echo '<a href="' . esc_url( $cancel_url ) . '" class="dps-btn dps-btn--secondary">' . esc_html__( 'Cancelar', 'dps-booking-addon' ) . '</a>';
+        }
+        echo '</div>';
+
+        // Bloco de erros de validação
+        echo '<div class="dps-form-error" role="alert" aria-live="assertive" hidden></div>';
+
+        echo '</form>';
+        echo '</div>'; // .dps-surface
+
+        echo '</div>'; // .dps-section
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Obtém lista completa de clientes cadastrados.
+     *
+     * @since 1.1.0
+     * @return array Lista de posts do tipo dps_cliente.
+     */
+    private function get_clients() {
+        return get_posts( [
+            'post_type'      => 'dps_cliente',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+    }
+
+    /**
+     * Obtém lista paginada de pets.
+     *
+     * @since 1.1.0
+     * @param int $page Número da página.
+     * @return WP_Query Objeto de consulta com pets paginados.
+     */
+    private function get_pets( $page = 1 ) {
+        $per_page = defined( 'DPS_BASE_PETS_PER_PAGE' ) ? DPS_BASE_PETS_PER_PAGE : 50;
+        return new WP_Query( [
+            'post_type'      => 'dps_pet',
+            'posts_per_page' => $per_page,
+            'paged'          => $page,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
     }
 }
 
