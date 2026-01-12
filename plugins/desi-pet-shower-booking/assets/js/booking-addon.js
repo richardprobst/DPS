@@ -185,13 +185,14 @@
                 error.remove();
             });
 
-            // Valida campos obrigatórios
+            // Validate required fields
+            const self = this;
             requiredFields.forEach(function(field) {
                 if (!field.value.trim()) {
                     isValid = false;
-                    this.showFieldError(field, this.getI18n('required'));
+                    self.showFieldError(field, self.getI18n('required'));
                 }
-            }.bind(this));
+            });
 
             // Validações específicas por step
             if (this.currentStep === 1) {

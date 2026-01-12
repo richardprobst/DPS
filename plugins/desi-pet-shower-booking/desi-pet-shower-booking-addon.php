@@ -396,23 +396,25 @@ class DPS_Booking_Addon {
         // Busca pet existente do mesmo cliente com mesmo nome
         $existing = get_posts( [
             'post_type'      => 'dps_pet',
-            'posts_per_page' => 1,
+            'posts_per_page' => 50,
             'fields'         => 'ids',
             'post_status'    => 'publish',
+            'no_found_rows'  => true,
             'meta_query'     => [
                 [
                     'key'   => 'owner_id',
                     'value' => $client_id,
                 ],
             ],
-            'title'          => $name,
         ] );
 
-        // Verifica por título
+        // Filter by title manually (WP deprecated 'title' parameter in get_posts)
         if ( ! empty( $existing ) ) {
-            $pet_post = get_post( $existing[0] );
-            if ( $pet_post && strtolower( $pet_post->post_title ) === strtolower( $name ) ) {
-                return (int) $existing[0];
+            foreach ( $existing as $pet_id ) {
+                $pet_post = get_post( $pet_id );
+                if ( $pet_post && strtolower( $pet_post->post_title ) === strtolower( $name ) ) {
+                    return (int) $pet_id;
+                }
             }
         }
 
@@ -642,17 +644,21 @@ class DPS_Booking_Addon {
 
         $success = isset( $_GET['booking_success'] ) && '1' === $_GET['booking_success'];
         $services = $this->get_available_services();
-        $main_services = array_filter( $services, fn( $s ) => ! $s['is_extra'] );
-        $extra_services = array_filter( $services, fn( $s ) => $s['is_extra'] );
+        $main_services = array_filter( $services, function( $s ) {
+            return ! $s['is_extra'];
+        } );
+        $extra_services = array_filter( $services, function( $s ) {
+            return $s['is_extra'];
+        } );
         $available_times = $this->get_available_times();
 
         ob_start();
         ?>
         <div class="dps-booking-form">
             <?php
-            // Exibe mensagens
+            // Display messages (DPS_Message_Helper returns pre-escaped HTML)
             if ( class_exists( 'DPS_Message_Helper' ) ) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- DPS_Message_Helper::display_messages() returns pre-escaped safe HTML
                 echo DPS_Message_Helper::display_messages();
             } else {
                 $errors = $this->get_errors();
