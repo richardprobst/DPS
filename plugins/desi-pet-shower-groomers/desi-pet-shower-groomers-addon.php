@@ -59,6 +59,13 @@ add_action( 'init', 'dps_groomers_load_textdomain', 1 );
 class DPS_Groomers_Addon {
 
     /**
+     * Instância única da classe (singleton).
+     *
+     * @var DPS_Groomers_Addon|null
+     */
+    private static $instance = null;
+
+    /**
      * Versão do add-on para cache busting de assets.
      *
      * @var string
@@ -77,6 +84,19 @@ class DPS_Groomers_Addon {
         'auxiliar'  => 'Auxiliar',
         'recepcao'  => 'Recepção',
     ];
+
+    /**
+     * Recupera a instância única (singleton).
+     *
+     * @since 1.8.7
+     * @return DPS_Groomers_Addon
+     */
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 
     /**
      * Inicializa hooks do add-on.
@@ -3872,9 +3892,9 @@ register_activation_hook( __FILE__, [ 'DPS_Groomers_Addon', 'activate' ] );
  * de outros registros (prioridade 10).
  */
 function dps_groomers_init_addon() {
-    global $dps_groomers_addon_instance;
     if ( class_exists( 'DPS_Groomers_Addon' ) ) {
-        $dps_groomers_addon_instance = new DPS_Groomers_Addon();
+        // Usa o padrão singleton para garantir única instância
+        DPS_Groomers_Addon::get_instance();
     }
 }
 add_action( 'init', 'dps_groomers_init_addon', 5 );
@@ -3886,6 +3906,8 @@ add_action( 'init', 'dps_groomers_init_addon', 5 );
  * @return DPS_Groomers_Addon|null Instância do add-on ou null se não inicializado.
  */
 function dps_groomers_get_instance() {
-    global $dps_groomers_addon_instance;
-    return $dps_groomers_addon_instance;
+    if ( class_exists( 'DPS_Groomers_Addon' ) ) {
+        return DPS_Groomers_Addon::get_instance();
+    }
+    return null;
 }
