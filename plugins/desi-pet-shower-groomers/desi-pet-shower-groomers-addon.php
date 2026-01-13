@@ -126,9 +126,11 @@ class DPS_Groomers_Addon {
         // Shortcode de login do groomer
         add_shortcode( 'dps_groomer_login', [ $this, 'render_groomer_login_shortcode' ] );
         
-        // Adiciona seção de gerenciamento de tokens no admin
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_groomer_tokens_tab' ], 25, 1 );
-        add_action( 'dps_settings_sections', [ $this, 'render_groomer_tokens_section' ], 25, 1 );
+        // REMOVIDO: Hooks legados para aba de tokens no shortcode [dps_configuracoes]
+        // A aba "Logins de Groomers" agora é registrada via sistema moderno em DPS_Settings_Frontend::register_core_tabs()
+        // Manter esses hooks causava abas duplicadas e HTML inconsistente na interface.
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_groomer_tokens_tab' ], 25, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_groomer_tokens_section' ], 25, 1 );
         
         // Handler para ações de tokens no admin
         add_action( 'init', [ $this, 'handle_token_admin_actions' ] );
@@ -434,6 +436,31 @@ class DPS_Groomers_Addon {
             
             <?php $this->render_groomer_tokens_list(); ?>
         </section>
+        <?php
+    }
+
+    /**
+     * Renderiza o conteúdo da aba de tokens para o sistema moderno de configurações.
+     *
+     * Este método é chamado pelo DPS_Settings_Frontend::render_tab_groomers()
+     * para integrar com o sistema moderno de abas via register_tab().
+     *
+     * @since 1.8.7
+     * @return void
+     */
+    public function render_groomer_tokens_content() {
+        ?>
+        <div class="dps-surface dps-surface--info">
+            <h3 class="dps-surface__title">
+                <span class="dashicons dashicons-admin-users"></span>
+                <?php esc_html_e( 'Gerenciamento de Logins de Groomers', 'dps-groomers-addon' ); ?>
+            </h3>
+            <p class="dps-surface__description">
+                <?php esc_html_e( 'Gere links de acesso (magic links) para que os groomers acessem seu portal sem precisar de senha.', 'dps-groomers-addon' ); ?>
+            </p>
+            
+            <?php $this->render_groomer_tokens_list(); ?>
+        </div>
         <?php
     }
 

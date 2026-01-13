@@ -108,11 +108,13 @@ final class DPS_Client_Portal {
         // Registra menu administrativo delegado para DPS_Portal_Admin (evita duplicação)
         // add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 ); // REMOVIDO - já está em class-dps-portal-admin.php
         
-        // Adiciona abas no front-end via shortcode [dps_configuracoes]
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
-        add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
-        add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+        // REMOVIDO: Hooks legados para abas no shortcode [dps_configuracoes]
+        // As abas Portal e Logins agora são registradas via sistema moderno em DPS_Settings_Frontend::register_core_tabs()
+        // Manter esses hooks causava abas duplicadas na interface.
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
         
         // AJAX handlers para o chat do portal
         add_action( 'wp_ajax_dps_chat_get_messages', [ $this, 'ajax_get_chat_messages' ] );
