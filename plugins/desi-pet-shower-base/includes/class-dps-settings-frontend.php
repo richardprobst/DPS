@@ -116,6 +116,14 @@ class DPS_Settings_Frontend {
                 [ __CLASS__, 'render_tab_portal' ],
                 30
             );
+
+            // Aba Logins de Clientes (sempre disponível se Portal ativo)
+            self::register_tab(
+                'logins_clientes',
+                __( '🔑 Logins de Clientes', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_logins_clientes' ],
+                31
+            );
         }
 
         // Aba Comunicações (se add-on ativo)
@@ -209,18 +217,41 @@ class DPS_Settings_Frontend {
                 35
             );
         }
+
+        // ========================================
+        // Aba Groomers (prioridade 105 - após Fidelidade)
+        // ========================================
+
+        // Aba Logins de Groomers (se Groomers Add-on ativo)
+        if ( class_exists( 'DPS_Groomers_Addon' ) ) {
+            self::register_tab(
+                'groomers',
+                __( '👤 Logins de Groomers', 'desi-pet-shower' ),
+                [ __CLASS__, 'render_tab_groomers' ],
+                105
+            );
+        }
     }
 
     /**
      * Registra abas de add-ons via hook.
      *
+     * NOTA: O hook dps_settings_nav_tabs foi depreciado para renderização de HTML.
+     * Add-ons agora devem registrar abas usando DPS_Settings_Frontend::register_tab()
+     * ou o hook dps_settings_register_tabs para chamar register_tab() durante a inicialização.
+     *
+     * @deprecated 2.5.0 Use register_tab() em vez de hooks legados.
      * @return void
      */
     public static function register_addon_tabs() {
         /**
-         * Hook para add-ons registrarem suas abas de configuração.
+         * Hook depreciado - mantido para compatibilidade retroativa.
+         *
+         * Add-ons devem migrar para DPS_Settings_Frontend::register_tab()
+         * que oferece melhor consistência visual e integração com o sistema moderno.
          *
          * @since 2.0.0
+         * @deprecated 2.5.0
          * @param DPS_Settings_Frontend $instance Instância da classe.
          */
         do_action( 'dps_settings_nav_tabs' );
@@ -353,8 +384,10 @@ class DPS_Settings_Frontend {
             );
         }
 
-        // Hook para add-ons adicionarem abas via método legado
-        do_action( 'dps_settings_nav_tabs' );
+        // REMOVIDO: Hook legado dps_settings_nav_tabs
+        // Os add-ons agora devem usar o sistema moderno de registro via register_tab()
+        // ou via hook dps_settings_register_tabs para chamar register_tab().
+        // O hook legado causava abas duplicadas e HTML inconsistente na interface.
     }
 
     /**
@@ -378,8 +411,10 @@ class DPS_Settings_Frontend {
             echo '</div>';
         }
 
-        // Hook para add-ons renderizarem suas seções (método legado)
-        do_action( 'dps_settings_sections' );
+        // REMOVIDO: Hook legado dps_settings_sections
+        // Os add-ons agora devem usar o sistema moderno de registro via register_tab()
+        // que renderiza o conteúdo automaticamente via callbacks.
+        // O hook legado causava seções duplicadas e conflitos com o sistema moderno.
     }
 
     /**
@@ -2558,5 +2593,201 @@ class DPS_Settings_Frontend {
         );
 
         DPS_Message_Helper::add_success( __( 'Configurações da Agenda salvas com sucesso!', 'desi-pet-shower' ) );
+    }
+
+    // ========================================
+    // FASE 6.5: Aba Logins de Clientes
+    // ========================================
+
+    /**
+     * Renderiza a aba Logins de Clientes (Client Portal Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_logins_clientes() {
+        if ( ! class_exists( 'DPS_Client_Portal' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Portal do Cliente não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Delega para o DPS_Portal_Admin que tem os métodos de gerenciamento de logins
+        if ( class_exists( 'DPS_Portal_Admin' ) ) {
+            $portal_admin = DPS_Portal_Admin::get_instance();
+            if ( method_exists( $portal_admin, 'render_client_logins_page' ) ) {
+                echo '<div class="dps-surface dps-surface--info">';
+                echo '<h3 class="dps-surface__title">';
+                echo '<span class="dashicons dashicons-admin-network"></span> ';
+                esc_html_e( 'Gerenciamento de Logins de Clientes', 'desi-pet-shower' );
+                echo '</h3>';
+                echo '<p class="dps-surface__description">';
+                esc_html_e( 'Gerencie os links de acesso (magic links) para que os clientes acessem o portal sem precisar de senha.', 'desi-pet-shower' );
+                echo '</p>';
+                $portal_admin->render_client_logins_page( 'frontend', '' );
+                echo '</div>';
+                return;
+            }
+        }
+
+        // Fallback se DPS_Portal_Admin não estiver disponível
+        echo '<div class="dps-notice dps-notice--warning">';
+        echo '<span class="dashicons dashicons-info"></span> ';
+        esc_html_e( 'Gerenciador de logins de clientes não disponível. Verifique se o add-on Portal do Cliente está instalado corretamente.', 'desi-pet-shower' );
+        echo '</div>';
+    }
+
+    // ========================================
+    // FASE 7: Aba Logins de Groomers
+    // ========================================
+
+    /**
+     * Renderiza a aba Logins de Groomers (Groomers Add-on).
+     *
+     * @return void
+     */
+    public static function render_tab_groomers() {
+        if ( ! class_exists( 'DPS_Groomers_Addon' ) ) {
+            echo '<p>' . esc_html__( 'O add-on Groomers não está ativo.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        // Usa o padrão singleton para obter a instância única do add-on
+        $groomers_addon = DPS_Groomers_Addon::get_instance();
+        
+        if ( method_exists( $groomers_addon, 'render_groomer_tokens_content' ) ) {
+            $groomers_addon->render_groomer_tokens_content();
+        } else {
+            // Fallback: renderiza versão simplificada se o método não existir
+            self::render_groomers_fallback();
+        }
+    }
+
+    /**
+     * Renderiza conteúdo de fallback para aba Groomers.
+     *
+     * @return void
+     */
+    private static function render_groomers_fallback() {
+        if ( ! class_exists( 'DPS_Groomer_Token_Manager' ) ) {
+            echo '<p>' . esc_html__( 'Gerenciador de tokens não disponível.', 'desi-pet-shower' ) . '</p>';
+            return;
+        }
+
+        $groomers = get_users( [ 'role' => 'dps_groomer' ] );
+        $token_manager = DPS_Groomer_Token_Manager::get_instance();
+        ?>
+        <div class="dps-surface dps-surface--info">
+            <h3 class="dps-surface__title">
+                <span class="dashicons dashicons-admin-users"></span>
+                <?php esc_html_e( 'Gerenciamento de Logins de Groomers', 'desi-pet-shower' ); ?>
+            </h3>
+            <p class="dps-surface__description">
+                <?php esc_html_e( 'Gere links de acesso (magic links) para que os groomers acessem seu portal sem precisar de senha.', 'desi-pet-shower' ); ?>
+            </p>
+
+            <?php if ( empty( $groomers ) ) : ?>
+                <div class="dps-notice dps-notice--warning">
+                    <span class="dashicons dashicons-info"></span>
+                    <?php esc_html_e( 'Nenhum groomer cadastrado. Cadastre groomers através do painel administrativo.', 'desi-pet-shower' ); ?>
+                </div>
+            <?php else : ?>
+                <table class="dps-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 10px; border-bottom: 2px solid #e5e7eb;"><?php esc_html_e( 'Groomer', 'desi-pet-shower' ); ?></th>
+                            <th style="text-align: left; padding: 10px; border-bottom: 2px solid #e5e7eb;"><?php esc_html_e( 'Email', 'desi-pet-shower' ); ?></th>
+                            <th style="text-align: center; padding: 10px; border-bottom: 2px solid #e5e7eb;"><?php esc_html_e( 'Tokens Ativos', 'desi-pet-shower' ); ?></th>
+                            <th style="text-align: left; padding: 10px; border-bottom: 2px solid #e5e7eb;"><?php esc_html_e( 'Último Acesso', 'desi-pet-shower' ); ?></th>
+                            <th style="text-align: right; padding: 10px; border-bottom: 2px solid #e5e7eb;"><?php esc_html_e( 'Ações', 'desi-pet-shower' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $groomers as $groomer ) : 
+                            $stats = $token_manager->get_groomer_stats( $groomer->ID );
+                            $token_url = get_transient( 'dps_groomer_token_url_' . $groomer->ID );
+                            
+                            if ( $token_url ) {
+                                delete_transient( 'dps_groomer_token_url_' . $groomer->ID );
+                            }
+                        ?>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 12px 10px;">
+                                    <strong><?php echo esc_html( $groomer->display_name ); ?></strong>
+                                </td>
+                                <td style="padding: 12px 10px; color: #6b7280;"><?php echo esc_html( $groomer->user_email ); ?></td>
+                                <td style="padding: 12px 10px; text-align: center;">
+                                    <span style="display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; background: <?php echo $stats['active_tokens'] > 0 ? '#d1fae5' : '#f3f4f6'; ?>; color: <?php echo $stats['active_tokens'] > 0 ? '#065f46' : '#6b7280'; ?>;">
+                                        <?php echo esc_html( $stats['active_tokens'] ); ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 10px;">
+                                    <?php 
+                                    if ( $stats['last_used_at'] ) {
+                                        echo esc_html( date_i18n( 'd/m/Y H:i', strtotime( $stats['last_used_at'] ) ) );
+                                    } else {
+                                        echo '<span style="color: #9ca3af;">' . esc_html__( 'Nunca', 'desi-pet-shower' ) . '</span>';
+                                    }
+                                    ?>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: right;">
+                                    <form method="post" style="display: inline-block;">
+                                        <?php wp_nonce_field( 'dps_generate_groomer_token_' . $groomer->ID ); ?>
+                                        <input type="hidden" name="dps_groomer_token_action" value="generate" />
+                                        <input type="hidden" name="groomer_id" value="<?php echo esc_attr( $groomer->ID ); ?>" />
+                                        <select name="token_type" style="padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                                            <option value="login"><?php esc_html_e( 'Temporário (30min)', 'desi-pet-shower' ); ?></option>
+                                            <option value="permanent"><?php esc_html_e( 'Permanente', 'desi-pet-shower' ); ?></option>
+                                        </select>
+                                        <button type="submit" class="button button-primary" style="padding: 4px 12px; font-size: 13px;">
+                                            <?php esc_html_e( 'Gerar Link', 'desi-pet-shower' ); ?>
+                                        </button>
+                                    </form>
+                                    
+                                    <?php if ( $stats['active_tokens'] > 0 ) : ?>
+                                        <a href="<?php echo esc_url( wp_nonce_url( 
+                                            add_query_arg( [
+                                                'dps_groomer_token_action' => 'revoke_all',
+                                                'groomer_id'               => $groomer->ID,
+                                            ] ),
+                                            'dps_revoke_all_groomer_tokens_' . $groomer->ID
+                                        ) ); ?>" 
+                                           class="button" 
+                                           style="padding: 4px 12px; font-size: 13px; color: #dc2626; border-color: #dc2626;"
+                                           onclick="return confirm('<?php echo esc_js( __( 'Revogar todos os tokens deste groomer?', 'desi-pet-shower' ) ); ?>');">
+                                            <?php esc_html_e( 'Revogar Todos', 'desi-pet-shower' ); ?>
+                                        </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            
+                            <?php if ( $token_url ) : ?>
+                            <tr style="background: #f0f9ff;">
+                                <td colspan="5" style="padding: 12px 10px;">
+                                    <div style="background: #fff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px;">
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #0c4a6e;">
+                                            <?php esc_html_e( 'Link de acesso gerado (copie agora, não será exibido novamente):', 'desi-pet-shower' ); ?>
+                                        </label>
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="text" 
+                                                   value="<?php echo esc_url( $token_url ); ?>" 
+                                                   readonly 
+                                                   onclick="this.select();" 
+                                                   style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;" />
+                                            <button type="button" 
+                                                    class="button" 
+                                                    onclick="navigator.clipboard.writeText('<?php echo esc_js( $token_url ); ?>'); this.textContent='✓ Copiado!';"
+                                                    style="padding: 8px 16px;">
+                                                📋 <?php esc_html_e( 'Copiar', 'desi-pet-shower' ); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
+        <?php
     }
 }

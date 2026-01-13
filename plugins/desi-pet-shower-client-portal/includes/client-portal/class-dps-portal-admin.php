@@ -65,13 +65,16 @@ class DPS_Portal_Admin {
         add_action( 'manage_dps_portal_message_posts_custom_column', [ $this, 'render_message_column' ], 10, 2 );
         add_filter( 'manage_edit-dps_portal_message_sortable_columns', [ $this, 'make_message_columns_sortable' ] );
         
-        // Abas no front-end via shortcode [dps_configuracoes]
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
-        add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
-        add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
-        add_action( 'dps_settings_nav_tabs', [ $this, 'render_branding_tab' ], 25, 1 ); // Fase 4 - branding
-        add_action( 'dps_settings_sections', [ $this, 'render_branding_section' ], 25, 1 ); // Fase 4 - branding
+        // REMOVIDO: Hooks legados para abas no shortcode [dps_configuracoes]
+        // As abas Portal, Logins e Branding agora são registradas via sistema moderno em DPS_Settings_Frontend::register_core_tabs()
+        // A aba "Branding" foi consolidada nos campos da aba "Portal do Cliente" (cor, logo, hero)
+        // Manter esses hooks causava abas duplicadas e conflitos com a interface moderna.
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_portal_settings_tab' ], 15, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_portal_settings_section' ], 15, 1 );
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_logins_tab' ], 20, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_logins_section' ], 20, 1 );
+        // add_action( 'dps_settings_nav_tabs', [ $this, 'render_branding_tab' ], 25, 1 );
+        // add_action( 'dps_settings_sections', [ $this, 'render_branding_section' ], 25, 1 );
     }
 
     /**

@@ -4,7 +4,8 @@
 - O arquivo principal declara constantes globais, registra os *custom post types* de clientes, pets e agendamentos, carrega os ativos do frontend e expõe os *shortcodes* `[dps_base]` e `[dps_configuracoes]`, que servem como ponto de entrada para o painel e para a tela de configurações consumida pelos add-ons.
 - `includes/class-dps-cpt-helper.php` centraliza o registro de CPTs com rótulos e argumentos padrão; novos tipos devem instanciar `DPS_CPT_Helper` para herdar as opções comuns e apenas sobrescrever particularidades (ex.: capabilities customizadas ou suporte a editor).
 - **NOTA**: Os CPTs principais (`dps_cliente`, `dps_pet`, `dps_agendamento`) estão registrados com `show_ui => true` e `show_in_menu => false`, sendo exibidos pelo painel central e reutilizáveis pelos add-ons via abas. Para análise completa sobre a interface nativa do WordPress para estes CPTs, consulte `docs/admin/ADMIN_CPT_INTERFACE_ANALYSIS.md` e `docs/admin/ADMIN_CPT_INTERFACE_SUMMARY.md`.
-- A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, `dps_settings_nav_tabs`, etc.).
+- A classe `DPS_Base_Frontend` concentra a lógica de interface: normaliza telefones para WhatsApp, agrega dados de agendamentos multi-pet para cobranças conjuntas, monta botões de cobrança, controla salvamento/exclusão de clientes, pets e atendimentos e renderiza as abas consumidas pelos add-ons via *hooks* (`dps_base_nav_tabs_after_pets`, `dps_base_nav_tabs_after_history`, etc.).
+- A classe `DPS_Settings_Frontend` gerencia a página de configurações (`[dps_configuracoes]`) com sistema moderno de registro de abas via `register_tab()`. Os hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` foram depreciados em favor do sistema moderno que oferece melhor consistência visual.
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis. A classe principal é inicializada no hook `init` com prioridade 5, após o carregamento do text domain em prioridade 1.
 - A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
 - A criação de tabelas do núcleo (ex.: `dps_logs`) é registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versão não exista ou esteja desatualizada, `dbDelta` é chamado uma única vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificação em todos os ciclos de `init`.
@@ -589,9 +590,10 @@ Todos os add-ons do DPS devem registrar seus menus e submenus sob o menu princip
       // ...
   ] );
   ```
-- Prefira integração via hooks do shortcode base (`dps_settings_nav_tabs`, `dps_settings_sections`) quando apropriado
+- Prefira integração via `DPS_Settings_Frontend::register_tab()` para adicionar abas na página de configurações. Os hooks legados (`dps_settings_nav_tabs`, `dps_settings_sections`) estão depreciados.
 
 **Histórico de correções**:
+- **2025-01-13**: Hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` depreciados em favor do sistema moderno de abas
 - **2025-12-01**: Mensagens do Portal migrado de menu próprio para submenu do desi.pet by PRObst (CPT com show_in_menu)
 - **2025-12-01**: Cadastro Público renomeado para "Formulário de Cadastro" (mais intuitivo)
 - **2025-12-01**: Logs do Sistema migrado de menu próprio para submenu do desi.pet by PRObst
@@ -782,8 +784,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 
 **Hooks consumidos**:
 - `dps_base_after_save_appointment`: dispara confirmação após salvar agendamento
-- `dps_settings_nav_tabs`: adiciona aba "Comunicações"
-- `dps_settings_sections`: renderiza configurações de canais e templates
+- ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) aba "Comunicações" registrada em `DPS_Settings_Frontend`
+- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderização via callback em `register_tab()`
 
 **Hooks disparados (Actions)**:
 - `dps_after_whatsapp_sent( $to, $message, $context, $result )`: após envio de WhatsApp
@@ -896,10 +898,8 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
   - Histórico de acessos por cliente
 
 **Hooks consumidos**:
-- `dps_settings_nav_tabs`: adiciona aba "Portal" nas configurações (prioridade 15)
-- `dps_settings_sections`: renderiza seção de configurações do portal (prioridade 15)
-- `dps_settings_nav_tabs`: adiciona aba "Logins de Clientes" (prioridade 20)
-- `dps_settings_sections`: renderiza seção de gerenciamento de logins (prioridade 20)
+- ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) abas "Portal do Cliente" e "Logins de Clientes" registradas em `DPS_Settings_Frontend`
+- ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderização via callbacks em `register_tab()`
 - Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
 
 **Hooks disparados**:
@@ -1515,15 +1515,17 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
   - **Propósito**: renderizar conteúdo de seções customizadas após a seção "Histórico"
   - **Consumido por**: Groomers, Estatísticas, Estoque, Campanhas & Fidelidade
 
-- **`dps_settings_nav_tabs`** (action)
+- **`dps_settings_nav_tabs`** (action) **DEPRECIADO desde v2.5.0**
   - **Parâmetros**: nenhum
-  - **Propósito**: adicionar abas de navegação na página de configurações
-  - **Consumido por**: Backup, Comunicações, Push Notifications
+  - **Propósito**: (depreciado) adicionar abas de navegação na página de configurações
+  - **Migração**: usar `DPS_Settings_Frontend::register_tab()` em vez deste hook
+  - **Nota**: As abas de configuração agora são registradas no sistema moderno via `register_tab()` em `DPS_Settings_Frontend::register_core_tabs()`. Add-ons devem migrar para o novo sistema.
 
-- **`dps_settings_sections`** (action)
+- **`dps_settings_sections`** (action) **DEPRECIADO desde v2.5.0**
   - **Parâmetros**: nenhum
-  - **Propósito**: renderizar conteúdo de seções na página de configurações
-  - **Consumido por**: add-ons que adicionaram abas via `dps_settings_nav_tabs`
+  - **Propósito**: (depreciado) renderizar conteúdo de seções na página de configurações
+  - **Migração**: usar `DPS_Settings_Frontend::register_tab()` com callback que renderiza o conteúdo
+  - **Nota**: O sistema moderno de abas já renderiza automaticamente o conteúdo via callbacks registrados.
 
 #### Fluxo de agendamentos
 

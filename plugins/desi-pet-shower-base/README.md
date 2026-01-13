@@ -167,7 +167,7 @@ Renderiza a tela de configurações do sistema.
 [dps_configuracoes]
 ```
 
-**Descrição**: Exibe navegação de configurações onde add-ons injetam suas próprias seções via hooks `dps_settings_nav_tabs` e `dps_settings_sections`.
+**Descrição**: Exibe navegação de configurações com sistema moderno de registro de abas via `DPS_Settings_Frontend::register_tab()`. Abas de todos os add-ons ativos são exibidas automaticamente quando estes estão presentes.
 
 **Permissões**: Usuário deve ter capability `manage_options`.
 
@@ -207,15 +207,17 @@ Este plugin não consome hooks externos; ele é a base do sistema.
 
 #### Configurações
 
-- **`dps_settings_nav_tabs`** (action)
+- **`dps_settings_nav_tabs`** (action) **DEPRECIADO desde v2.5.0**
   - **Momento**: Durante renderização das abas de configurações
   - **Parâmetros**: nenhum
-  - **Uso**: Add-ons adicionam abas na tela de configurações
+  - **Uso**: (depreciado) Add-ons adicionavam abas na tela de configurações
+  - **Migração**: Usar `DPS_Settings_Frontend::register_tab()` em `register_core_tabs()` ou via hook `dps_settings_register_tabs`
 
-- **`dps_settings_sections`** (action)
+- **`dps_settings_sections`** (action) **DEPRECIADO desde v2.5.0**
   - **Momento**: Durante renderização do conteúdo de configurações
   - **Parâmetros**: nenhum
-  - **Uso**: Add-ons renderizam suas configurações
+  - **Uso**: (depreciado) Add-ons renderizavam suas configurações
+  - **Migração**: Usar callback no método `register_tab()` que renderiza o conteúdo automaticamente
 
 #### Formulários e dados
 
