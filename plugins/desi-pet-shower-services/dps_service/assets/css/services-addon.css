@@ -863,8 +863,10 @@
 /* === Seção de Extras Redesenhada === */
 .dps-extras-section {
     margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px dashed #e5e7eb;
+    padding: 16px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
 }
 
 /* Botão toggle de extras - Padronizado v1.7.0 */
@@ -1459,8 +1461,10 @@
 
 .dps-discount-section {
     margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px dashed #e5e7eb;
+    padding: 16px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
 }
 
 /* Botão toggle de desconto - Padronizado v1.7.0 */

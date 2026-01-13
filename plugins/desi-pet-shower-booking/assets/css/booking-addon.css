@@ -1,0 +1,223 @@
+/**
+ * Estilos do Booking Add-on - DPS
+ *
+ * CSS complementar para a página dedicada de agendamentos.
+ * Herda estilos do plugin base e adiciona ajustes específicos para a página.
+ *
+ * @package Desi_Pet_Shower_Booking
+ * @since 1.0.0
+ * @since 1.1.0 Simplificado para herdar estilos do plugin base.
+ */
+
+/* ==========================================================================
+   1. Container Principal
+   ========================================================================== */
+
+.dps-booking-wrapper {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* ==========================================================================
+   2. Header da Página
+   ========================================================================== */
+
+.dps-booking-page-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dps-booking-page-header .dps-page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px;
+}
+
+.dps-booking-page-header .dps-page-subtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ==========================================================================
+   3. Access Denied
+   ========================================================================== */
+
+.dps-booking-access-denied {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 40px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.dps-booking-access-denied p {
+    margin: 0 0 20px;
+    font-size: 16px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.dps-booking-access-denied .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-booking-access-denied .button:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   4. Seção de Agendamentos
+   ========================================================================== */
+
+.dps-booking-wrapper .dps-section {
+    display: block;
+}
+
+.dps-booking-wrapper .dps-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 24px;
+}
+
+.dps-booking-wrapper .dps-section-title__icon {
+    font-size: 28px;
+}
+
+/* ==========================================================================
+   5. Ajustes de Formulário para Página Dedicada
+   ========================================================================== */
+
+.dps-booking-wrapper .dps-surface {
+    margin-bottom: 24px;
+}
+
+.dps-booking-wrapper .dps-form-actions {
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 24px;
+}
+
+/* ==========================================================================
+   6. Responsividade
+   ========================================================================== */
+
+/* Tablet grande (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dps-booking-wrapper {
+        max-width: 720px;
+        margin: 32px auto;
+    }
+}
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+    .dps-booking-wrapper {
+        margin: 24px auto;
+        padding: 0 16px;
+    }
+
+    .dps-booking-page-header {
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+    }
+
+    .dps-booking-page-header .dps-page-title {
+        font-size: 24px;
+    }
+
+    .dps-booking-page-header .dps-page-subtitle {
+        font-size: 15px;
+    }
+
+    .dps-booking-wrapper .dps-section-title {
+        font-size: 20px;
+    }
+}
+
+/* Mobile (640px) */
+@media (max-width: 640px) {
+    .dps-booking-wrapper {
+        margin: 16px auto;
+        padding: 0 12px;
+    }
+
+    .dps-booking-page-header .dps-page-title {
+        font-size: 22px;
+    }
+
+    .dps-booking-access-denied {
+        margin: 40px auto;
+        padding: 30px 20px;
+    }
+}
+
+/* Mobile pequeno (480px) */
+@media (max-width: 480px) {
+    .dps-booking-wrapper {
+        padding: 0 8px;
+    }
+
+    .dps-booking-page-header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+
+    .dps-booking-page-header .dps-page-title {
+        font-size: 20px;
+    }
+
+    .dps-booking-page-header .dps-page-subtitle {
+        font-size: 14px;
+    }
+
+    .dps-booking-wrapper .dps-section-title {
+        font-size: 18px;
+    }
+
+    .dps-booking-access-denied {
+        margin: 24px auto;
+        padding: 24px 16px;
+    }
+}
+
+/* ==========================================================================
+   7. Print Styles
+   ========================================================================== */
+
+@media print {
+    .dps-booking-wrapper {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .dps-booking-page-header {
+        border: none;
+    }
+}
