@@ -142,21 +142,21 @@ class DPS_Settings_Frontend {
         // FASE 4: Abas de Automação
         // ========================================
 
-        // Aba Notificações (se Push Add-on ativo)
+        // Aba Relatórios Automáticos (se Push Add-on ativo)
         if ( class_exists( 'DPS_Push_Addon' ) ) {
             self::register_tab(
                 'notificacoes',
-                __( '🔔 Notificações', 'desi-pet-shower' ),
+                __( '📧 Relatórios Automáticos', 'desi-pet-shower' ),
                 [ __CLASS__, 'render_tab_notificacoes' ],
                 60
             );
         }
 
-        // Aba Financeiro - Lembretes (se Finance Add-on ativo)
+        // Aba Lembretes de Cobrança (se Finance Add-on ativo)
         if ( class_exists( 'DPS_Finance_Addon' ) ) {
             self::register_tab(
                 'financeiro_lembretes',
-                __( '💰 Financeiro', 'desi-pet-shower' ),
+                __( '💰 Lembretes de Cobrança', 'desi-pet-shower' ),
                 [ __CLASS__, 'render_tab_financeiro_lembretes' ],
                 70
             );
@@ -197,7 +197,7 @@ class DPS_Settings_Frontend {
         }
 
         // ========================================
-        // FASE 6: Aba Agenda
+        // Aba Agenda (prioridade 35 - logo após Portal)
         // ========================================
 
         // Aba Agenda (se Agenda Add-on ativo)
@@ -206,7 +206,7 @@ class DPS_Settings_Frontend {
                 'agenda',
                 __( '⏰ Agenda', 'desi-pet-shower' ),
                 [ __CLASS__, 'render_tab_agenda' ],
-                110
+                35
             );
         }
     }
@@ -536,7 +536,6 @@ class DPS_Settings_Frontend {
         $shop_name        = get_option( 'dps_shop_name', get_bloginfo( 'name' ) );
         $shop_address     = get_option( 'dps_shop_address', '' );
         $business_address = get_option( 'dps_business_address', '' );
-        $whatsapp_number  = get_option( 'dps_whatsapp_number', '' );
         $google_api_key   = get_option( 'dps_google_api_key', '' );
         $logger_min_level = get_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
 
@@ -567,12 +566,6 @@ class DPS_Settings_Frontend {
                         <label for="dps_shop_name"><?php esc_html_e( 'Nome do Petshop', 'desi-pet-shower' ); ?></label>
                         <input type="text" id="dps_shop_name" name="dps_shop_name" value="<?php echo esc_attr( $shop_name ); ?>" class="regular-text" />
                         <p class="description"><?php esc_html_e( 'Nome exibido em mensagens e documentos.', 'desi-pet-shower' ); ?></p>
-                    </div>
-
-                    <div class="dps-form-row">
-                        <label for="dps_whatsapp_number"><?php esc_html_e( 'WhatsApp da Equipe', 'desi-pet-shower' ); ?></label>
-                        <input type="text" id="dps_whatsapp_number" name="dps_whatsapp_number" value="<?php echo esc_attr( $whatsapp_number ); ?>" class="regular-text" placeholder="+55 11 99999-9999" />
-                        <p class="description"><?php esc_html_e( 'Número para contato via WhatsApp. Use formato internacional.', 'desi-pet-shower' ); ?></p>
                     </div>
                 </fieldset>
 
@@ -693,7 +686,6 @@ class DPS_Settings_Frontend {
             'dps_shop_name'        => 'sanitize_text_field',
             'dps_shop_address'     => 'sanitize_textarea_field',
             'dps_business_address' => 'sanitize_textarea_field',
-            'dps_whatsapp_number'  => [ __CLASS__, 'sanitize_phone' ],
             'dps_google_api_key'   => 'sanitize_text_field',
             'dps_logger_min_level' => 'sanitize_key',
         ];
