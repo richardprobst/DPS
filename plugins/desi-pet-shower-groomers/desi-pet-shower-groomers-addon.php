@@ -3872,8 +3872,20 @@ register_activation_hook( __FILE__, [ 'DPS_Groomers_Addon', 'activate' ] );
  * de outros registros (prioridade 10).
  */
 function dps_groomers_init_addon() {
+    global $dps_groomers_addon_instance;
     if ( class_exists( 'DPS_Groomers_Addon' ) ) {
-        new DPS_Groomers_Addon();
+        $dps_groomers_addon_instance = new DPS_Groomers_Addon();
     }
 }
 add_action( 'init', 'dps_groomers_init_addon', 5 );
+
+/**
+ * Retorna a instância do Groomers Add-on.
+ *
+ * @since 1.8.7
+ * @return DPS_Groomers_Addon|null Instância do add-on ou null se não inicializado.
+ */
+function dps_groomers_get_instance() {
+    global $dps_groomers_addon_instance;
+    return $dps_groomers_addon_instance;
+}

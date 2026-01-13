@@ -2650,8 +2650,14 @@ class DPS_Settings_Frontend {
             return;
         }
 
-        // Delega para o add-on que tem os métodos de gerenciamento de tokens
-        $groomers_addon = new DPS_Groomers_Addon();
+        // Usa a instância global do add-on se disponível
+        $groomers_addon = function_exists( 'dps_groomers_get_instance' ) ? dps_groomers_get_instance() : null;
+        
+        // Fallback: cria nova instância se a global não estiver disponível
+        if ( ! $groomers_addon ) {
+            $groomers_addon = new DPS_Groomers_Addon();
+        }
+        
         if ( method_exists( $groomers_addon, 'render_groomer_tokens_content' ) ) {
             $groomers_addon->render_groomer_tokens_content();
         } else {
