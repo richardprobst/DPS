@@ -94,21 +94,21 @@ Plugins complementares que estendem o sistema com funcionalidades específicas:
   - Breaking changes
   - Migrações necessárias
 
-- **[BACKEND_FRONTEND_MAPPING.md](BACKEND_FRONTEND_MAPPING.md)** - 🆕 Mapeamento BACK-END vs FRONT-END
+- **[BACKEND_FRONTEND_MAPPING.md](docs/analysis/BACKEND_FRONTEND_MAPPING.md)** - Mapeamento BACK-END vs FRONT-END
   - Classificação completa: CONFIG vs OPERAÇÃO
   - Identificação de violações críticas (configurações expostas no front)
   - 10 ações priorizadas para segregação adequada
   - Análise de segurança e estimativas de esforço
   - **Baseado no código real** (fonte da verdade)
 
-- **[SYSTEM_ANALYSIS_COMPLETE.md](SYSTEM_ANALYSIS_COMPLETE.md)** - Análise profunda do sistema
+- **[SYSTEM_ANALYSIS_COMPLETE.md](docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md)** - Análise profunda do sistema
   - Mapeamento completo de back-end (admin) e front-end
   - Identificação de duplicações de arquivos, funções e classes
   - Lógica espalhada entre core e add-ons
   - Sugestões detalhadas de reorganização
   - Baseado no código real (não em documentação)
 
-- **[SYSTEM_ANALYSIS_SUMMARY.md](SYSTEM_ANALYSIS_SUMMARY.md)** - Resumo executivo da análise
+- **[SYSTEM_ANALYSIS_SUMMARY.md](docs/analysis/SYSTEM_ANALYSIS_SUMMARY.md)** - Resumo executivo da análise
   - Quick reference com principais descobertas
   - Ações priorizadas (Alta/Média/Baixa prioridade)
   - Problemas críticos identificados
@@ -206,10 +206,10 @@ Software proprietário - todos os direitos reservados.
 - [Arquitetura do Sistema](ANALYSIS.md)
 - [Histórico de Versões](CHANGELOG.md)
 
-### Análise do Sistema 🆕
-- [**Mapeamento BACK-END vs FRONT-END**](BACKEND_FRONTEND_MAPPING.md) - ⚠️ Classificação CONFIG vs OPERAÇÃO
-- [**Análise Completa**](SYSTEM_ANALYSIS_COMPLETE.md) - Mapeamento detalhado back + front
-- [**Resumo Executivo**](SYSTEM_ANALYSIS_SUMMARY.md) - Quick reference e ações priorizadas
+### Análise do Sistema
+- [**Mapeamento BACK-END vs FRONT-END**](docs/analysis/BACKEND_FRONTEND_MAPPING.md) - Classificação CONFIG vs OPERAÇÃO
+- [**Análise Completa**](docs/analysis/SYSTEM_ANALYSIS_COMPLETE.md) - Mapeamento detalhado back + front
+- [**Resumo Executivo**](docs/analysis/SYSTEM_ANALYSIS_SUMMARY.md) - Quick reference e ações priorizadas
 
 ### UX e Refatoração
 - [Guia de Estilo Visual](docs/visual/VISUAL_STYLE_GUIDE.md)

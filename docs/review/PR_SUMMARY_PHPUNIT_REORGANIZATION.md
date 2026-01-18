@@ -271,9 +271,9 @@ $this->markTestIncomplete('Waiting for method extraction');
 
 ## 📖 Referências
 
-- [Documento de Análise](../docs/review/ai-addon-deep-analysis-2025-12-07.md)
-- [Resumo Completo](../docs/implementation/PHPUNIT_REORGANIZATION_SUMMARY.md)
-- [Guia de Testes](../plugins/desi-pet-shower-ai/tests/README.md)
+- [Documento de Análise](./ai-addon-deep-analysis-2025-12-07.md)
+- [Resumo Completo](../implementation/PHPUNIT_REORGANIZATION_SUMMARY.md)
+- [Guia de Testes](../../plugins/desi-pet-shower-ai/tests/README.md)
 
 ---
 
