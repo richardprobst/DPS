@@ -122,6 +122,14 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         private static $instance = null;
 
         /**
+         * Arquivos restaurados durante a execução.
+         *
+         * @since 1.1.0
+         * @var array
+         */
+        private $restored_files = [];
+
+        /**
          * Recupera a instância única.
          *
          * @since 1.1.0
@@ -537,9 +545,14 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             }
 
             // Obter componentes selecionados
-            $components = isset( $_POST['components'] ) && is_array( $_POST['components'] ) 
-                ? array_map( 'sanitize_key', wp_unslash( $_POST['components'] ) ) 
-                : array_keys( DPS_Backup_Settings::get_available_components() );
+            $available_components = array_keys( DPS_Backup_Settings::get_available_components() );
+            $components = isset( $_POST['components'] ) && is_array( $_POST['components'] )
+                ? array_map( 'sanitize_key', wp_unslash( $_POST['components'] ) )
+                : $available_components;
+            $components = array_values( array_intersect( $components, $available_components ) );
+            if ( empty( $components ) ) {
+                $components = $available_components;
+            }
 
             // Gerar backup seletivo
             $exporter = new DPS_Backup_Exporter();
@@ -755,6 +768,17 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Tipo de arquivo inválido. Apenas arquivos JSON são permitidos.', 'dps-backup-addon' ) );
             }
 
+            $filetype = wp_check_filetype_and_ext(
+                $_FILES['dps_backup_file']['tmp_name'],
+                $uploaded_file,
+                [
+                    'json' => 'application/json',
+                ]
+            );
+            if ( empty( $filetype['ext'] ) ) {
+                $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Arquivo enviado não é um JSON válido.', 'dps-backup-addon' ) );
+            }
+
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Leitura de arquivo temporário de upload
             $file_contents = file_get_contents( $_FILES['dps_backup_file']['tmp_name'] );
             if ( false === $file_contents ) {
@@ -866,11 +890,17 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             }
 
             $schema_version = isset( $data['schema_version'] ) ? absint( $data['schema_version'] ) : 0;
-            if ( 1 !== $schema_version ) {
+            if ( ! in_array( $schema_version, [ 1, 2 ], true ) ) {
                 return new WP_Error( 'dps_backup_schema', __( 'Versão de esquema do backup ausente ou não suportada.', 'dps-backup-addon' ) );
             }
 
-            $required_blocks = [ 'clients', 'pets', 'appointments', 'transactions' ];
+            $backup_type = isset( $data['backup_type'] ) ? sanitize_key( $data['backup_type'] ) : 'complete';
+            if ( 'differential' === $backup_type ) {
+                return new WP_Error( 'dps_backup_differential', __( 'Backups diferenciais não podem ser restaurados automaticamente. Gere um backup completo antes de restaurar.', 'dps-backup-addon' ) );
+            }
+
+            $components = $this->normalize_components_from_payload( $data );
+            $required_blocks = $schema_version >= 2 ? $components : [ 'clients', 'pets', 'appointments', 'transactions' ];
             foreach ( $required_blocks as $block ) {
                 if ( ! isset( $data[ $block ] ) || ! is_array( $data[ $block ] ) ) {
                     return new WP_Error( 'dps_backup_block', sprintf( __( 'O backup está incompleto: bloco %s ausente ou inválido.', 'dps-backup-addon' ), $block ) );
@@ -880,6 +910,9 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             // Validação da estrutura interna das entidades
             $entity_blocks = [ 'clients', 'pets', 'appointments' ];
             foreach ( $entity_blocks as $block ) {
+                if ( ! isset( $data[ $block ] ) || ! is_array( $data[ $block ] ) ) {
+                    continue;
+                }
                 foreach ( $data[ $block ] as $idx => $entity ) {
                     if ( ! isset( $entity['post'] ) || ! is_array( $entity['post'] ) ) {
                         return new WP_Error(
@@ -1000,13 +1033,14 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * Restaura entidades estruturadas e constrói mapas de IDs antigos x novos.
          *
          * @param array $payload Dados validados do backup.
+         * @param array $components Componentes selecionados.
          */
-        private function restore_structured_entities( $payload ) {
+        private function restore_structured_entities( $payload, $components ) {
             $client_map      = [];
             $pet_map         = [];
             $appointment_map = [];
 
-            if ( ! empty( $payload['clients'] ) ) {
+            if ( in_array( 'clients', $components, true ) && ! empty( $payload['clients'] ) ) {
                 foreach ( $payload['clients'] as $client ) {
                     $old_id = isset( $client['id'] ) ? (int) $client['id'] : 0;
                     $new_id = $this->create_entity_post( $client, 'dps_cliente' );
@@ -1014,7 +1048,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
             }
 
-            if ( ! empty( $payload['pets'] ) ) {
+            if ( in_array( 'pets', $components, true ) && ! empty( $payload['pets'] ) ) {
                 foreach ( $payload['pets'] as $pet ) {
                     $old_id = isset( $pet['id'] ) ? (int) $pet['id'] : 0;
                     $meta   = $pet['meta'] ?? [];
@@ -1027,7 +1061,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
             }
 
-            if ( ! empty( $payload['appointments'] ) ) {
+            if ( in_array( 'appointments', $components, true ) && ! empty( $payload['appointments'] ) ) {
                 foreach ( $payload['appointments'] as $appointment ) {
                     $old_id = isset( $appointment['id'] ) ? (int) $appointment['id'] : 0;
                     $meta   = $appointment['meta'] ?? [];
@@ -1059,7 +1093,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
             }
 
-            if ( ! empty( $payload['transactions'] ) ) {
+            if ( in_array( 'transactions', $components, true ) && ! empty( $payload['transactions'] ) ) {
                 $this->restore_transactions_with_mapping( $payload['transactions'], $client_map, $appointment_map );
             }
         }
@@ -1181,24 +1215,37 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
         private function restore_backup_payload( $payload ) {
             global $wpdb;
 
+            $components = $this->normalize_components_from_payload( $payload );
+            $this->restored_files = [];
+
             $wpdb->query( 'SET autocommit = 0' );
             $wpdb->query( 'START TRANSACTION' );
 
             try {
-                $this->wipe_existing_data();
+                $this->wipe_existing_data( $components );
 
-                $this->restore_structured_entities( $payload );
+                $this->restore_structured_entities( $payload, $components );
 
-                $this->restore_options( $payload['options'] ?? [] );
-                $this->restore_tables( $payload['tables'] ?? [] );
-                $this->restore_attachments( $payload['attachments'] ?? [] );
-                $this->restore_additional_files( $payload['files'] ?? [] );
+                if ( in_array( 'options', $components, true ) ) {
+                    $this->restore_options( $payload['options'] ?? [] );
+                }
+
+                if ( in_array( 'tables', $components, true ) ) {
+                    $skip_tables = in_array( 'transactions', $components, true ) ? [ 'dps_transacoes' ] : [];
+                    $this->restore_tables( $payload['tables'] ?? [], $skip_tables );
+                }
+
+                if ( in_array( 'files', $components, true ) ) {
+                    $this->restore_attachments( $payload['attachments'] ?? [] );
+                    $this->restore_additional_files( $payload['files'] ?? [] );
+                }
 
                 $wpdb->query( 'COMMIT' );
                 $wpdb->query( 'SET autocommit = 1' );
             } catch ( Exception $e ) {
                 $wpdb->query( 'ROLLBACK' );
                 $wpdb->query( 'SET autocommit = 1' );
+                $this->cleanup_restored_files();
                 return new WP_Error( 'dps_backup_restore', $e->getMessage() );
             }
 
@@ -1211,21 +1258,30 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.0.0
          * @throws Exception Se a limpeza de dados falhar.
          */
-        private function wipe_existing_data() {
+        private function wipe_existing_data( $components ) {
             global $wpdb;
 
             $posts_table    = $wpdb->posts;
             $postmeta_table = $wpdb->postmeta;
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->postmeta é seguro
-            $attachment_meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT meta_value FROM {$postmeta_table} WHERE meta_key = %s", 'pet_photo_id' ) );
-            $attachment_meta_ids = array_map( 'intval', $attachment_meta_ids );
-            $attachment_meta_ids = array_filter( $attachment_meta_ids );
+            $post_types = $this->get_post_types_from_components( $components );
+            $existing_posts = [];
+            if ( $post_types ) {
+                $post_types_sql = implode( "','", array_map( 'esc_sql', $post_types ) );
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Escapado com esc_sql()
+                $existing_posts = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type IN ('{$post_types_sql}')" );
+            }
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->posts é seguro
-            $existing_posts = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type LIKE 'dps\\_%' ESCAPE '\\'" );
+            $attachment_meta_ids = [];
+            if ( in_array( 'files', $components, true ) ) {
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->postmeta é seguro
+                $attachment_meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT meta_value FROM {$postmeta_table} WHERE meta_key = %s", 'pet_photo_id' ) );
+                $attachment_meta_ids = array_map( 'intval', $attachment_meta_ids );
+                $attachment_meta_ids = array_filter( $attachment_meta_ids );
+            }
+
             $attachment_by_parent = [];
-            if ( $existing_posts ) {
+            if ( $existing_posts && in_array( 'files', $components, true ) ) {
                 $ids_in              = implode( ',', array_map( 'intval', $existing_posts ) );
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IDs sanitizados com intval()
                 $attachment_by_parent = $wpdb->get_col( "SELECT ID FROM {$posts_table} WHERE post_type = 'attachment' AND post_parent IN ( {$ids_in} )" );
@@ -1261,17 +1317,33 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
             }
 
-            // Limpa tabelas personalizadas do plugin
-            $tables = $this->gather_custom_tables_names();
-            foreach ( $tables as $table ) {
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada via gather_custom_tables_names()
-                $result = $wpdb->query( "TRUNCATE TABLE `{$table}`" );
-                if ( false === $result ) {
-                    throw new Exception( sprintf( __( 'Não foi possível limpar a tabela personalizada %s.', 'dps-backup-addon' ), esc_html( $table ) ) );
+            if ( in_array( 'transactions', $components, true ) ) {
+                $table = $wpdb->prefix . 'dps_transacoes';
+                $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+                if ( $exists === $table ) {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Nome com prefixo validado
+                    $truncate = $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+                    if ( false === $truncate ) {
+                        throw new Exception( __( 'Não foi possível limpar a tabela de transações.', 'dps-backup-addon' ) );
+                    }
                 }
             }
 
-            $this->clear_finance_documents();
+            if ( in_array( 'tables', $components, true ) ) {
+                $skip_tables = in_array( 'transactions', $components, true ) ? [ $wpdb->prefix . 'dps_transacoes' ] : [];
+                $tables = $this->gather_custom_tables_names( $skip_tables );
+                foreach ( $tables as $table ) {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada via gather_custom_tables_names()
+                    $result = $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+                    if ( false === $result ) {
+                        throw new Exception( sprintf( __( 'Não foi possível limpar a tabela personalizada %s.', 'dps-backup-addon' ), esc_html( $table ) ) );
+                    }
+                }
+            }
+
+            if ( in_array( 'files', $components, true ) ) {
+                $this->clear_finance_documents();
+            }
         }
 
         /**
@@ -1386,7 +1458,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @param array $tables Lista de tabelas exportadas.
          * @throws Exception Se a restauração de alguma tabela falhar.
          */
-        private function restore_tables( $tables ) {
+        private function restore_tables( $tables, $skip_tables = [] ) {
             global $wpdb;
 
             if ( empty( $tables ) ) {
@@ -1407,6 +1479,10 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     continue;
                 }
                 
+                if ( in_array( $table_name, $skip_tables, true ) ) {
+                    continue;
+                }
+
                 $full_name = $wpdb->prefix . $table_name;
 
                 $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $full_name ) );
@@ -1520,9 +1596,19 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function write_upload_file( $relative_path, $content_base64 ) {
             $uploads = wp_upload_dir();
-            $path    = ltrim( str_replace( '\\', '/', $relative_path ), '/' );
-            $target  = trailingslashit( $uploads['basedir'] ) . $path;
-            $dir     = dirname( $target );
+            $path    = wp_normalize_path( ltrim( str_replace( '\\', '/', (string) $relative_path ), '/' ) );
+
+            if ( '' === $path || preg_match( '#(^|/)\.\.(?:/|$)#', $path ) || preg_match( '#^[A-Za-z]:#', $path ) ) {
+                throw new Exception( __( 'Caminho de arquivo inválido no backup.', 'dps-backup-addon' ) );
+            }
+
+            $base_dir = wp_normalize_path( $uploads['basedir'] );
+            $target   = $base_dir . '/' . $path;
+            if ( 0 !== strpos( $target, $base_dir ) ) {
+                throw new Exception( __( 'Caminho de arquivo fora do diretório de uploads.', 'dps-backup-addon' ) );
+            }
+
+            $dir = dirname( $target );
 
             if ( ! wp_mkdir_p( $dir ) ) {
                 throw new Exception( sprintf( __( 'Não foi possível criar o diretório %s para armazenar arquivos do backup.', 'dps-backup-addon' ), $dir ) );
@@ -1536,6 +1622,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             if ( false === file_put_contents( $target, $data ) ) {
                 throw new Exception( sprintf( __( 'Não foi possível gravar o arquivo %s durante a restauração.', 'dps-backup-addon' ), $target ) );
             }
+
+            $this->restored_files[] = $target;
         }
 
         /**
@@ -1576,14 +1664,20 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          *
          * @return array
          */
-        private function gather_custom_tables_names() {
+        private function gather_custom_tables_names( $skip_tables = [] ) {
             global $wpdb;
 
             $prefix = $wpdb->prefix . 'dps_';
             $like   = $wpdb->esc_like( $prefix ) . '%';
 
             $tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
-            return is_array( $tables ) ? $tables : [];
+            $tables = is_array( $tables ) ? $tables : [];
+
+            if ( $skip_tables ) {
+                $tables = array_values( array_diff( $tables, $skip_tables ) );
+            }
+
+            return $tables;
         }
 
         /**
@@ -1781,6 +1875,66 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function can_manage() {
             return current_user_can( 'manage_options' );
+        }
+
+        /**
+         * Normaliza componentes do payload.
+         *
+         * @param array $payload Payload do backup.
+         * @return array
+         */
+        private function normalize_components_from_payload( $payload ) {
+            $available = array_keys( DPS_Backup_Settings::get_available_components() );
+
+            if ( isset( $payload['components'] ) && is_array( $payload['components'] ) ) {
+                $components = array_map( 'sanitize_key', $payload['components'] );
+                $components = array_values( array_intersect( $components, $available ) );
+                if ( $components ) {
+                    return $components;
+                }
+            }
+
+            return $available;
+        }
+
+        /**
+         * Retorna post types relacionados aos componentes.
+         *
+         * @param array $components Lista de componentes.
+         * @return array
+         */
+        private function get_post_types_from_components( $components ) {
+            $mapping = [
+                'clients'       => 'dps_cliente',
+                'pets'          => 'dps_pet',
+                'appointments'  => 'dps_agendamento',
+                'services'      => 'dps_service',
+                'subscriptions' => 'dps_subscription',
+                'campaigns'     => 'dps_campaign',
+            ];
+
+            $post_types = [];
+            foreach ( $components as $component ) {
+                if ( isset( $mapping[ $component ] ) ) {
+                    $post_types[] = $mapping[ $component ];
+                }
+            }
+
+            return array_values( array_unique( $post_types ) );
+        }
+
+        /**
+         * Remove arquivos restaurados em caso de falha.
+         *
+         * @return void
+         */
+        private function cleanup_restored_files() {
+            foreach ( $this->restored_files as $file ) {
+                if ( is_string( $file ) && file_exists( $file ) && is_file( $file ) ) {
+                    @unlink( $file );
+                }
+            }
+            $this->restored_files = [];
         }
 
         /**
