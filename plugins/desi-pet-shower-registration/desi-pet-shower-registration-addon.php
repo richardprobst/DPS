@@ -580,7 +580,7 @@ class DPS_Registration_Addon {
             return new WP_Error( $code, __( 'Não foi possível validar os dados enviados.', 'dps-registration-addon' ), array( 'status' => 400 ) );
         }
 
-        $duplicate_id = $this->find_duplicate_client( $email_clean, $normalized_phone, $normalized_cpf );
+        $duplicate_id = $this->find_duplicate_client( '', $normalized_phone, '' );
         if ( $duplicate_id > 0 ) {
             $this->log_event( 'warning', 'Cadastro bloqueado por duplicata de telefone (API)', array(
                 'duplicate_id' => $duplicate_id,
@@ -1947,7 +1947,7 @@ class DPS_Registration_Addon {
         // - Para não-admins: bloqueia duplicatas de telefone
         // - Para admins: permite continuar se confirmou via modal (dps_confirm_duplicate=1)
         // =====================================================================
-        $duplicate_id = $this->find_duplicate_client( $client_email, $client_phone, $client_cpf );
+        $duplicate_id = $this->find_duplicate_client( '', $client_phone, '' );
         $admin_confirmed_duplicate = isset( $_POST['dps_confirm_duplicate'] ) && '1' === $_POST['dps_confirm_duplicate'];
         
         if ( $duplicate_id > 0 ) {
