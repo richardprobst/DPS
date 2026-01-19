@@ -1581,6 +1581,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab1( $appt, $column_labels );
@@ -1639,6 +1640,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab2( $appt, $column_labels );
@@ -1696,6 +1698,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab3( $appt, $column_labels );

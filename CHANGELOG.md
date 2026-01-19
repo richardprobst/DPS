@@ -83,6 +83,17 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Botão de Reagendamento nas Abas Simplificadas da Agenda (v1.1.0)**
+
+- **Coluna "Ações" nas abas da agenda**: Adicionada nova coluna "Ações" nas três abas simplificadas da agenda (Visão Rápida, Operação, Detalhes).
+  - Botão "📅 Reagendar" disponível em cada linha de atendimento
+  - Permite alterar a data e/ou horário de um agendamento diretamente pela interface
+  - Modal de reagendamento com seletor de data e hora
+  - Registro automático no histórico do agendamento
+  - Dispara hook `dps_appointment_rescheduled` para integrações
+- **Funcionalidade já existente agora acessível**: O backend de reagendamento já existia (`quick_reschedule_ajax`), mas o botão não estava visível nas abas mais utilizadas do dia-a-dia.
+- **Método helper `render_reschedule_button()`**: Criado método privado para renderizar o botão de reagendamento, evitando duplicação de código em 4 locais diferentes.
+
 **Modo Administrador no Chat Público de IA (v1.8.0)**
 
 - **Modo Administrador com acesso expandido**: O shortcode `[dps_ai_public_chat]` agora detecta automaticamente quando um administrador (capability `manage_options`) está logado e ativa o modo sistema:
