@@ -30,7 +30,19 @@ jQuery(document).ready(function ($) {
   }
 
   function updateSubscriptionTotal() {
-    var total = parseCurrency($('#dps-subscription-base').val());
+    var total = 0;
+    
+    // Prioriza valores por pet se existirem
+    var $petValues = $('.dps-subscription-pet-value');
+    if ($petValues.length > 0) {
+      $petValues.each(function () {
+        total += parseCurrency($(this).val());
+      });
+    } else {
+      // Fallback para campo base único
+      total = parseCurrency($('#dps-subscription-base').val());
+    }
+    
     if ($('#dps-tosa-toggle').is(':checked')) {
       total += parseCurrency($('#dps-tosa-price').val());
     }
@@ -674,17 +686,7 @@ jQuery(document).ready(function ($) {
   
   // Atualiza total quando valores de pets da assinatura mudam
   $(document).on('input', '.dps-subscription-pet-value', function () {
-    var total = 0;
-    $('.dps-subscription-pet-value').each(function () {
-      total += parseCurrency($(this).val());
-    });
-    
-    // Adiciona extras se houver
-    if ($('#dps-subscription-extras-container').is(':visible')) {
-      total += calculateExtrasTotal('#dps-subscription-extras-list');
-    }
-    
-    $('#dps-subscription-total').val(total.toFixed(2));
+    updateSubscriptionTotal();
   });
   
   // Ao carregar a página, aplica preços e atualiza total
