@@ -1789,8 +1789,16 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             
             $sanitized = [];
             foreach ( $array as $key => $value ) {
-                // Sanitizar chave do array sem alterar maiúsculas/minúsculas
+                // Sanitizar chave do array preservando underscore e hífen (para case-sensitivity)
+                // O padrão remove apenas caracteres especiais, preservando a-z, A-Z, 0-9, _ e -
                 $sanitized_key = preg_replace( '/[^\w\-]/', '', (string) $key );
+                
+                // Se a chave sanitizada já existe (colisão rara), pular para evitar sobrescrever
+                if ( isset( $sanitized[ $sanitized_key ] ) ) {
+                    error_log( sprintf( 'DPS Backup: Colisão de chave detectada após sanitização: %s → %s (ignorada).', $key, $sanitized_key ) );
+                    continue;
+                }
+                
                 if ( is_array( $value ) ) {
                     $sanitized[ $sanitized_key ] = $this->sanitize_array_recursive( $value );
                 } elseif ( is_string( $value ) ) {
