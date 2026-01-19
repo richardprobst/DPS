@@ -1,29 +1,65 @@
-# Análise de Integração com Google Tarefas (Google Tasks API)
+# Análise de Integração com Google Workspace (Tasks + Calendar)
 
 **Autor:** PRObst  
 **Data:** 2026-01-19  
-**Versão:** 1.0.0  
-**Status:** Proposta de análise  
+**Versão:** 2.0.0  
+**Status:** Proposta de análise expandida  
+**Atualização:** 2026-01-19 - Adicionada integração com Google Calendar  
 
 ## Sumário Executivo
 
-Este documento analisa a viabilidade e benefícios de integrar o sistema DPS (desi.pet by PRObst) com a **Google Tasks API**. A integração permitiria sincronizar atividades do sistema de gestão de pet shop com listas de tarefas do Google, melhorando a organização e follow-up de atividades administrativas.
+Este documento analisa a viabilidade e benefícios de integrar o sistema DPS (desi.pet by PRObst) com **Google Tasks API** e **Google Calendar API**. A integração permitiria sincronizar atividades do sistema de gestão de pet shop com:
+- **Google Tasks**: Tarefas administrativas (follow-ups, cobranças, lembretes)
+- **Google Calendar**: Agendamentos de atendimentos (banho, tosa, etc.)
+
+Esta combinação oferece visibilidade completa da operação do pet shop no ecossistema Google.
 
 ### Conclusão Rápida
 
-✅ **VIÁVEL e INTERESSANTE** - A integração com Google Tasks é tecnicamente viável e oferece benefícios práticos para o fluxo de trabalho da equipe administrativa, especialmente para:
+✅ **VIÁVEL e ALTAMENTE RECOMENDADO** - A integração dupla (Tasks + Calendar) é tecnicamente viável e oferece benefícios complementares:
+
+**Google Tasks** (Tarefas Administrativas):
 - Lembretes e follow-ups de agendamentos
 - Tarefas de gestão financeira (cobranças pendentes)
 - Atividades de comunicação com clientes
 - Gestão de estoque e tarefas operacionais
 
+**Google Calendar** (Agendamentos Operacionais):
+- Visualização visual de horários de atendimento
+- Sincronização com calendário pessoal da equipe
+- Notificações de compromissos iminentes
+- Gestão de capacidade e disponibilidade
+
 ### Benefícios Principais
 
-1. **Centralização de Tarefas**: Equipe pode gerenciar tarefas do pet shop no mesmo local onde já gerenciam outras atividades pessoais/profissionais
-2. **Notificações Nativas**: Aproveita sistema de notificações do Google (mobile, desktop, email)
-3. **Integração com Ecossistema Google**: Sincroniza automaticamente com Google Calendar, Gmail, Android, iOS
-4. **Acessibilidade**: Tarefas acessíveis de qualquer dispositivo com conta Google
-5. **Sem Custo Adicional**: Google Tasks API é gratuita (dentro de cotas generosas)
+1. **Visibilidade Completa**: Calendário mostra QUANDO atender, Tasks mostra O QUE fazer
+2. **Notificações Nativas**: Sistema de notificações do Google (mobile, desktop, email) para ambos
+3. **Integração Total**: Calendar e Tasks já se comunicam nativamente no ecossistema Google
+4. **Acessibilidade**: Ambos acessíveis de qualquer dispositivo com conta Google
+5. **Sem Custo Adicional**: Ambas APIs são gratuitas (dentro de cotas generosas)
+6. **Sincronização Bidirecional** (Calendar): Alterações no Google Calendar podem refletir no DPS
+
+### Decisão Arquitetural: Onde Implementar?
+
+**RECOMENDAÇÃO: Integrar no add-on Agenda existente (`desi-pet-shower-agenda`)**
+
+**Justificativa:**
+- ✅ **Coesão funcional**: Agenda já gerencia agendamentos, faz sentido ela sincronizar com Calendar
+- ✅ **Menor complexidade**: Evita dependências circulares entre add-ons
+- ✅ **Reutilização de código**: Agenda já formata dados de agendamentos
+- ✅ **Experiência do usuário**: Configuração única em um só lugar (Agenda → Integrações Google)
+- ✅ **Manutenção simplificada**: Um único add-on para manter e testar
+
+**Estrutura proposta:**
+```
+desi-pet-shower-agenda/
+├── includes/
+│   ├── integrations/
+│   │   ├── class-dps-google-auth.php          # OAuth compartilhado
+│   │   ├── class-dps-google-calendar-sync.php # Sincronização Calendar
+│   │   └── class-dps-google-tasks-sync.php    # Sincronização Tasks
+│   └── ... (arquivos existentes)
+```
 
 ---
 
@@ -59,33 +95,147 @@ Google Tasks é um gerenciador de tarefas integrado ao ecossistema Google, dispo
 
 ---
 
-## 2. Funcionalidades do DPS Compatíveis com Google Tasks
+## 1B. Visão Geral da Google Calendar API
 
-### 2.1. Agendamentos (Alta Prioridade)
+### 1B.1. O que é Google Calendar?
+
+Google Calendar é o calendário online do Google, disponível em:
+- Web (calendar.google.com)
+- Android (app Google Calendar)
+- iOS (app Google Calendar)
+- Integrado nativamente em Gmail, Google Workspace
+- APIs REST v3 para integração programática
+
+### 1B.2. Recursos Principais da API
+
+| Recurso | Descrição | Relevância para DPS |
+|---------|-----------|---------------------|
+| **Events** | Eventos de calendário com data/hora início e fim | ✅ Agendamentos de atendimento (banho, tosa) |
+| **Attendees** | Participantes do evento (com email) | ✅ Adicionar groomer responsável |
+| **Reminders** | Lembretes automáticos (popup, email) | ✅ Notificações antes do atendimento |
+| **Color Coding** | Cor do evento (11 cores padrão) | ✅ Diferenciar tipos de serviço visualmente |
+| **Recurrence** | Eventos recorrentes (RRULE) | ✅ Assinaturas com frequência semanal/quinzenal |
+| **Extended Properties** | Metadados customizados | ✅ Armazenar ID do agendamento DPS |
+| **Free/Busy** | Consultar disponibilidade | ✅ Verificar capacidade de horários |
+| **Watch/Webhook** | Notificações push de mudanças | ✅ Sincronização bidirecional (Calendar → DPS) |
+
+### 1B.3. Vantagens sobre Google Tasks para Agendamentos
+
+| Aspecto | Google Tasks | Google Calendar | Vencedor |
+|---------|--------------|-----------------|----------|
+| **Visualização temporal** | Lista simples | Grid visual por dia/semana/mês | ✅ Calendar |
+| **Horário início/fim** | Apenas data de vencimento | Horário exato de início e fim | ✅ Calendar |
+| **Lembretes** | Limitados | Múltiplos lembretes (popup, email, SMS) | ✅ Calendar |
+| **Participantes** | Não suporta | Email de participantes (groomer) | ✅ Calendar |
+| **Sincronização bidirecional** | Não (sem webhook) | Sim (webhook push) | ✅ Calendar |
+| **Capacidade/Lotação** | Não | Free/Busy API | ✅ Calendar |
+| **Cores visuais** | Não | 11 cores padrão | ✅ Calendar |
+| **Eventos recorrentes** | Subtarefas manuais | RRULE nativo | ✅ Calendar |
+
+**Conclusão:** Google Calendar é SUPERIOR para agendamentos operacionais (quando atender), enquanto Google Tasks é melhor para tarefas administrativas (o que fazer).
+
+### 1B.4. Limitações Conhecidas
+
+| Limitação | Impacto | Mitigação |
+|-----------|---------|-----------|
+| Quota: 1,000,000 requisições/dia (gratuito) | Muito generosa | Improvável atingir |
+| Requer email para participantes | Groomer sem email não pode ser adicionado | Adicionar apenas na descrição |
+| Webhook expira após 1 semana | Precisa renovar | Cron job semanal para renovar |
+| Sincronização bidirecional complexa | Risco de loops infinitos | Usar flags de controle (`_synced_from_google`) |
+
+---
+
+## 2. Funcionalidades do DPS Compatíveis com Google Calendar + Tasks
+
+### 🔵 Divisão Estratégica: Calendar vs Tasks
+
+**Google Calendar** → Agendamentos operacionais (QUANDO atender)
+- Atendimentos de banho e tosa
+- Compromissos com hora de início e fim
+- Visualização temporal da equipe
+
+**Google Tasks** → Tarefas administrativas (O QUE fazer)
+- Follow-ups pós-atendimento
+- Cobranças pendentes
+- Lembretes e ações internas
+
+---
+
+### 2.1. Agendamentos Operacionais → **GOOGLE CALENDAR** (Alta Prioridade)
 
 **Add-on:** `desi-pet-shower-agenda`
 
-**Casos de Uso:**
+#### 2.1.1. Evento de Atendimento no Calendário
 
-#### 2.1.1. Lembrete de Agendamento Confirmado
+**Exemplo de evento:**
 ```
-Título: 🐾 Agendamento: Rex (João Silva) - 15/12/2024 14:00
+📅 GOOGLE CALENDAR EVENT
+
+Título: 🐾 Banho e Tosa - Rex (João Silva)
+
+Início: 15/12/2024 14:00
+Fim:    15/12/2024 15:30
+
 Descrição:
-  Cliente: João Silva (11) 98765-4321
+  Cliente: João Silva
+  Telefone: (11) 98765-4321
   Pet: Rex (Labrador, Grande)
   Serviços: Banho, Tosa
-  Groomer: Maria Santos
+  Valor: R$ 150,00
   
-  Link: https://petshop.com.br/admin/agendamento/123
-Data de Vencimento: 15/12/2024
+  🔗 Ver no DPS: https://petshop.com.br/admin/agendamento/123
+
+Participantes:
+  - maria@petshop.com.br (Groomer Maria Santos)
+
+Cor: Azul (serviço Tosa)
+Lembrete: 1 hora antes (popup), 15 minutos antes (email)
+
+Extended Properties:
+  dps_appointment_id: 123
+  dps_client_id: 456
+  dps_pet_id: 789
 ```
 
 **Trigger:** Ao salvar novo agendamento com status "pendente"  
-**Ação no Google Tasks:** Criar tarefa 1 dia antes da data do agendamento  
-**Marcação como concluída:** Quando agendamento muda para status "realizado"  
+**Ação no Google Calendar:** Criar evento no horário exato do atendimento  
+**Sincronização bidirecional:**
+- DPS → Calendar: Criar/atualizar/deletar evento
+- Calendar → DPS: Reagendar no DPS se admin alterar horário no Calendar (webhook)
+**Marcação como concluída:** Quando agendamento muda para status "realizado", cor do evento muda para verde
 
-#### 2.1.2. Follow-up Pós-Atendimento
+#### 2.1.2. Códigos de Cores por Tipo de Serviço
+
+| Serviço | Cor Google Calendar | Código |
+|---------|---------------------|--------|
+| Banho | Azul claro (#a4bdfc) | 1 |
+| Tosa | Azul (#5484ed) | 9 |
+| Banho + Tosa | Roxo (#b99aff) | 3 |
+| Consulta Veterinária | Verde (#51b749) | 10 |
+| TaxiDog | Amarelo (#fbd75b) | 5 |
+| Emergência | Vermelho (#dc2127) | 11 |
+
+#### 2.1.3. Assinaturas Recorrentes
+
+**Para assinaturas semanais/quinzenais:**
 ```
+Recorrência (RRULE):
+  FREQ=WEEKLY;INTERVAL=1;BYDAY=MO;COUNT=4
+  (Toda segunda-feira, 4 ocorrências)
+```
+
+**Vantagem:** Google Calendar exibe série inteira visualmente, facilitando visualização de capacidade futura.
+
+---
+
+### 2.2. Tarefas Administrativas → **GOOGLE TASKS** (Alta Prioridade)
+
+**Add-on:** `desi-pet-shower-agenda` (tarefas relacionadas a agendamentos)
+
+#### 2.2.1. Follow-up Pós-Atendimento
+```
+✅ GOOGLE TASKS
+
 Título: 📞 Follow-up: Rex (João Silva) - Pós-Atendimento
 Descrição:
   Agendamento realizado em: 15/12/2024
@@ -100,13 +250,13 @@ Data de Vencimento: 17/12/2024 (2 dias após)
 
 ---
 
-### 2.2. Financeiro (Alta Prioridade)
+### 2.3. Financeiro → **GOOGLE TASKS** (Alta Prioridade)
 
 **Add-on:** `desi-pet-shower-finance`
 
 **Casos de Uso:**
 
-#### 2.2.1. Cobrança Pendente
+#### 2.3.1. Cobrança Pendente
 ```
 Título: 💰 Cobrança: João Silva - R$ 150,00 (Venc. 20/12/2024)
 Descrição:
@@ -127,7 +277,7 @@ Data de Vencimento: 20/12/2024
 **Ação no Google Tasks:** Criar tarefa 1 dia antes do vencimento  
 **Marcação como concluída:** Quando transação muda para status "pago"  
 
-#### 2.2.2. Renovação de Assinatura
+#### 2.3.2. Renovação de Assinatura
 ```
 Título: 🔄 Renovação Assinatura: Maria Santos - Pacote Mensal
 Descrição:
@@ -224,45 +374,110 @@ Data de Vencimento: 20/12/2024
 
 ## 3. Arquitetura Proposta
 
-### 3.1. Novo Add-on: `desi-pet-shower-google-tasks`
+### 3.1. Decisão: Integrar no Add-on Agenda Existente
 
-**Estrutura de Diretório:**
+**RECOMENDAÇÃO FINAL: Expandir `desi-pet-shower-agenda` com módulo de integrações Google**
+
+**Justificativa detalhada:**
+
+| Critério | Add-on Novo | Integrar na Agenda | Vencedor |
+|----------|-------------|-------------------|----------|
+| **Coesão funcional** | Baixa (lógica de agendamentos espalhada) | Alta (tudo relacionado a agenda em um lugar) | ✅ Agenda |
+| **Reutilização de código** | Precisa duplicar formatação de agendamentos | Reutiliza lógica existente | ✅ Agenda |
+| **Complexidade de manutenção** | 2 add-ons para manter | 1 add-on com módulos | ✅ Agenda |
+| **Dependências** | Agenda depende do novo add-on | Sem dependências circulares | ✅ Agenda |
+| **Experiência do usuário** | 2 páginas de configuração | 1 página com abas | ✅ Agenda |
+| **Testabilidade** | Precisa testar integração entre add-ons | Testa módulos isolados | ✅ Agenda |
+| **Evolução futura** | Difícil adicionar Google Drive, Sheets, etc. | Fácil: adiciona novo módulo de integração | ✅ Agenda |
+
+**Estrutura Proposta:**
 ```
-plugins/desi-pet-shower-google-tasks/
-├── desi-pet-shower-google-tasks-addon.php
+plugins/desi-pet-shower-agenda/
+├── desi-pet-shower-agenda-addon.php
 ├── includes/
-│   ├── class-dps-google-tasks-client.php       # Cliente HTTP para Google Tasks API
-│   ├── class-dps-google-tasks-auth.php         # Autenticação OAuth 2.0
-│   ├── class-dps-google-tasks-sync.php         # Sincronização de tarefas
-│   ├── class-dps-google-tasks-settings.php     # Interface administrativa
-│   └── class-dps-google-tasks-formatter.php    # Formatação de tarefas
+│   ├── integrations/                                # NOVO: Módulo de integrações
+│   │   ├── class-dps-google-auth.php               # OAuth 2.0 compartilhado
+│   │   ├── class-dps-google-calendar-client.php    # Cliente HTTP Calendar API
+│   │   ├── class-dps-google-calendar-sync.php      # Sincronização Calendar
+│   │   ├── class-dps-google-tasks-client.php       # Cliente HTTP Tasks API
+│   │   ├── class-dps-google-tasks-sync.php         # Sincronização Tasks
+│   │   └── class-dps-google-integrations-settings.php # UI configuração
+│   ├── class-dps-agenda-hub.php                     # EXISTENTE
+│   ├── class-dps-agenda-payment-helper.php          # EXISTENTE
+│   └── ... (demais arquivos existentes)
 ├── assets/
 │   ├── css/
-│   │   └── google-tasks-admin.css
+│   │   └── google-integrations.css                  # NOVO
 │   └── js/
-│       └── google-tasks-admin.js
-├── languages/
-│   └── dps-google-tasks-addon-pt_BR.po
+│       └── google-integrations.js                   # NOVO
 └── README.md
 ```
 
-### 3.2. Fluxo de Autenticação
+### 3.2. Fluxo de Autenticação OAuth 2.0 Compartilhado
 
 ```
-1. Admin acessa: desi.pet by PRObst → Google Tasks
+1. Admin acessa: Agenda → Integrações Google
 2. Clica em "Conectar com Google"
 3. Redirecionado para tela de consentimento Google OAuth
-4. Autoriza acesso às listas de tarefas
+4. Autoriza acesso a Calendar + Tasks
 5. Google redireciona de volta com authorization code
 6. Plugin troca code por access_token + refresh_token
 7. Tokens armazenados em wp_options (criptografados)
-8. Sincronização ativada
+8. Sincronização ativada para ambos (Calendar + Tasks)
 ```
 
 **Permissões OAuth necessárias:**
+- `https://www.googleapis.com/auth/calendar` (leitura e escrita de eventos)
 - `https://www.googleapis.com/auth/tasks` (leitura e escrita de tarefas)
 
-### 3.3. Fluxo de Sincronização
+**Classe `DPS_Google_Auth` (compartilhada):**
+```php
+class DPS_Google_Auth {
+    const SCOPES = [
+        'https://www.googleapis.com/auth/calendar',
+        'https://www.googleapis.com/auth/tasks',
+    ];
+    
+    public function get_auth_url() { /* ... */ }
+    public function exchange_code_for_tokens( $code ) { /* ... */ }
+    public function refresh_access_token() { /* ... */ }
+    public function is_connected() { /* ... */ }
+    public function disconnect() { /* ... */ }
+}
+```
+
+### 3.3. Fluxo de Sincronização - Google Calendar
+
+```mermaid
+sequenceDiagram
+    participant DPS as DPS Sistema
+    participant Hook as WordPress Hooks
+    participant Sync as DPS_Google_Calendar_Sync
+    participant API as Google Calendar API
+    
+    DPS->>Hook: dps_base_after_save_appointment
+    Hook->>Sync: handle_appointment_saved($appointment_id)
+    Sync->>Sync: format_appointment_as_event($appointment_id)
+    Sync->>API: POST /calendar/v3/calendars/{calendarId}/events
+    API-->>Sync: event_id
+    Sync->>DPS: update_post_meta($appointment_id, '_google_calendar_event_id', $event_id)
+```
+
+**Sincronização bidirecional (Calendar → DPS):**
+```mermaid
+sequenceDiagram
+    participant Calendar as Google Calendar
+    participant Webhook as DPS Webhook Endpoint
+    participant DPS as DPS Sistema
+    
+    Calendar->>Webhook: POST /wp-json/dps/v1/google-calendar-webhook
+    Webhook->>Webhook: Verificar assinatura + sync token
+    Webhook->>DPS: get_post_by_meta('_google_calendar_event_id', $event_id)
+    Webhook->>DPS: update_post_meta($appointment_id, 'appointment_date', $new_date)
+    Webhook->>DPS: update_post_meta($appointment_id, '_synced_from_google', true)
+```
+
+### 3.4. Fluxo de Sincronização - Google Tasks
 
 ```mermaid
 sequenceDiagram
@@ -271,23 +486,25 @@ sequenceDiagram
     participant Sync as DPS_Google_Tasks_Sync
     participant API as Google Tasks API
     
-    DPS->>Hook: dps_base_after_save_appointment
-    Hook->>Sync: handle_new_appointment($appointment_id)
-    Sync->>Sync: format_appointment_as_task($appointment_id)
-    Sync->>API: POST /tasks (criar tarefa)
+    DPS->>Hook: dps_finance_transaction_created
+    Hook->>Sync: handle_transaction_created($transaction_id)
+    Sync->>Sync: format_transaction_as_task($transaction_id)
+    Sync->>API: POST /tasks/v1/lists/{listId}/tasks
     API-->>Sync: task_id
-    Sync->>DPS: update_post_meta($appointment_id, 'google_task_id', $task_id)
+    Sync->>DPS: update_post_meta($transaction_id, 'google_task_id', $task_id)
 ```
 
-### 3.4. Mapeamento de Entidades
+### 3.5. Mapeamento de Entidades
 
-| Entidade DPS | Google Tasks | Sincronização |
-|--------------|--------------|---------------|
-| Agendamento (pendente) | Task (lista "Agendamentos") | Unidirecional (DPS → Google) |
-| Agendamento (realizado) | Task (marcada como concluída) | Status sincronizado |
-| Transação (pendente) | Task (lista "Financeiro") | Unidirecional (DPS → Google) |
-| Transação (paga) | Task (marcada como concluída) | Status sincronizado |
-| Mensagem do Portal | Task (lista "Comunicações") | Unidirecional (DPS → Google) |
+| Entidade DPS | Google Calendar | Google Tasks | Prioridade |
+|--------------|-----------------|--------------|------------|
+| Agendamento (pendente) | ✅ Event com horário | ❌ (apenas evento) | Alta |
+| Agendamento (realizado) | ✅ Event (cor verde) | ❌ | Alta |
+| Follow-up pós-atendimento | ❌ | ✅ Task | Alta |
+| Transação (pendente) | ❌ | ✅ Task | Alta |
+| Transação (paga) | ❌ | ✅ Task (concluída) | Alta |
+| Mensagem do Portal | ❌ | ✅ Task | Média |
+| Alerta de Estoque | ❌ | ✅ Task | Baixa |
 | Alerta de Estoque | Task (lista "Estoque") | Unidirecional (DPS → Google) |
 
 **Decisão de Design:** Sincronização **unidirecional** (DPS → Google Tasks)
@@ -580,74 +797,106 @@ DELETE /lists/{listId}/tasks/{taskId} # Deletar tarefa
 
 ---
 
-## 9. Estimativa de Esforço
+## 9. Estimativa de Esforço (Revisada com Google Calendar)
 
 ### 9.1. Breakdown de Tarefas
 
 | Tarefa | Esforço | Prioridade |
 |--------|---------|------------|
-| **Fase 1: Infraestrutura** | | |
-| 1.1. Criar estrutura do add-on | 2h | Alta |
-| 1.2. Implementar cliente HTTP para Google Tasks API | 6h | Alta |
-| 1.3. Implementar OAuth 2.0 (autenticação e refresh) | 8h | Alta |
-| 1.4. Implementar criptografia de tokens | 3h | Alta |
-| 1.5. Criar interface administrativa (configurações) | 6h | Alta |
-| **Subtotal Fase 1** | **25h** | |
+| **Fase 1: Infraestrutura Compartilhada** | | |
+| 1.1. Criar estrutura de integração em Agenda add-on | 3h | Alta |
+| 1.2. Implementar cliente HTTP para Google Calendar API | 8h | Alta |
+| 1.3. Implementar cliente HTTP para Google Tasks API | 6h | Alta |
+| 1.4. Implementar OAuth 2.0 compartilhado (Calendar + Tasks) | 10h | Alta |
+| 1.5. Implementar criptografia de tokens | 3h | Alta |
+| 1.6. Criar interface administrativa (aba "Integrações Google") | 8h | Alta |
+| **Subtotal Fase 1** | **38h** | |
 | | | |
-| **Fase 2: Sincronização de Agendamentos** | | |
-| 2.1. Classe de formatação de tarefas | 4h | Alta |
-| 2.2. Sincronização de novos agendamentos | 5h | Alta |
-| 2.3. Atualização de status (realizado → concluído) | 3h | Alta |
-| 2.4. Criar hook `dps_base_appointment_status_changed` no Base | 2h | Alta |
-| 2.5. Indicadores visuais na lista de agendamentos | 3h | Média |
-| **Subtotal Fase 2** | **17h** | |
+| **Fase 2: Sincronização Google Calendar** | | |
+| 2.1. Classe de formatação de eventos (agendamentos → eventos) | 5h | Alta |
+| 2.2. Sincronização DPS → Calendar (criar/atualizar/deletar) | 8h | Alta |
+| 2.3. Webhook handler Calendar → DPS (reagendamento) | 6h | Alta |
+| 2.4. Sistema de cores por tipo de serviço | 2h | Média |
+| 2.5. Suporte a eventos recorrentes (assinaturas) | 4h | Média |
+| 2.6. Criar hook `dps_base_appointment_status_changed` no Base | 2h | Alta |
+| 2.7. Indicadores visuais na lista de agendamentos | 3h | Média |
+| **Subtotal Fase 2** | **30h** | |
 | | | |
-| **Fase 3: Sincronização Financeira** | | |
-| 3.1. Sincronização de transações pendentes | 4h | Alta |
-| 3.2. Atualização de status (pago → concluído) | 2h | Alta |
-| 3.3. Criar hook `dps_finance_transaction_created` no Finance | 2h | Média |
-| 3.4. Indicadores visuais na lista de transações | 2h | Baixa |
-| **Subtotal Fase 3** | **10h** | |
+| **Fase 3: Sincronização Google Tasks** | | |
+| 3.1. Classe de formatação de tarefas (follow-ups, cobranças) | 4h | Alta |
+| 3.2. Sincronização de follow-ups pós-atendimento | 4h | Alta |
+| 3.3. Sincronização de transações financeiras pendentes | 5h | Alta |
+| 3.4. Atualização de status (pago → task concluída) | 2h | Alta |
+| 3.5. Criar hook `dps_finance_transaction_created` no Finance | 2h | Média |
+| 3.6. Indicadores visuais na lista de transações | 2h | Baixa |
+| **Subtotal Fase 3** | **19h** | |
 | | | |
 | **Fase 4: Funcionalidades Extras** | | |
-| 4.1. Sincronização de mensagens do Portal | 4h | Média |
-| 4.2. Sincronização de alertas de estoque | 3h | Baixa |
-| 4.3. Sincronização manual (botão "Sincronizar Agora") | 3h | Média |
-| 4.4. Logs de sincronização | 4h | Média |
-| **Subtotal Fase 4** | **14h** | |
+| 4.1. Sincronização de mensagens do Portal (Tasks) | 4h | Média |
+| 4.2. Sincronização de alertas de estoque (Tasks) | 3h | Baixa |
+| 4.3. Sincronização manual (botão "Sincronizar Agora") | 4h | Média |
+| 4.4. Logs de sincronização (Calendar + Tasks) | 5h | Média |
+| 4.5. Resolver conflitos de sincronização bidirecional | 6h | Alta |
+| **Subtotal Fase 4** | **22h** | |
 | | | |
 | **Fase 5: Testes e Documentação** | | |
-| 5.1. Testes unitários (PHPUnit) | 8h | Média |
-| 5.2. Testes de integração com API real | 6h | Alta |
-| 5.3. Documentação (README, ANALYSIS.md) | 4h | Alta |
-| 5.4. Guia de configuração para usuários | 3h | Alta |
-| **Subtotal Fase 5** | **21h** | |
+| 5.1. Testes unitários (PHPUnit) | 10h | Média |
+| 5.2. Testes de integração com APIs reais (Calendar + Tasks) | 8h | Alta |
+| 5.3. Testes de sincronização bidirecional (webhooks) | 6h | Alta |
+| 5.4. Documentação técnica (README, ANALYSIS.md) | 5h | Alta |
+| 5.5. Guia de configuração para usuários finais | 4h | Alta |
+| **Subtotal Fase 5** | **33h** | |
 | | | |
-| **TOTAL GERAL** | **87h** | |
-| **(~11 dias úteis)** | | |
+| **TOTAL GERAL** | **142h** | |
+| **(~18 dias úteis)** | | |
 
-### 9.2. Roadmap Sugerido
+### 9.2. Roadmap Sugerido (Revisado)
 
-**v1.0.0 - MVP (Fase 1 + 2)** - 42h (~5.5 dias)
-- Autenticação OAuth funcionando
-- Sincronização básica de agendamentos
-- Interface administrativa mínima
+**v1.0.0 - MVP Calendar** - 68h (~8.5 dias)
+- OAuth 2.0 compartilhado funcionando
+- Sincronização DPS → Google Calendar (criar/atualizar/deletar eventos)
+- Webhook Calendar → DPS (reagendamento)
+- Interface administrativa básica
 - Documentação de instalação
 
-**v1.1.0 - Financeiro (Fase 3)** - +10h (~1.5 dias)
-- Sincronização de transações financeiras
-- Atualização de status de pagamento
+**v1.1.0 - Tasks Administrativas** - +19h (~2.5 dias)
+- Sincronização de follow-ups pós-atendimento
+- Sincronização de transações financeiras pendentes
+- Integração Tasks com Finance add-on
 
-**v1.2.0 - Features Completas (Fase 4)** - +14h (~2 dias)
-- Mensagens do Portal
-- Alertas de Estoque
-- Sincronização manual
-- Logs detalhados
+**v1.2.0 - Features Completas** - +22h (~3 dias)
+- Mensagens do Portal sincronizadas com Tasks
+- Alertas de Estoque sincronizados com Tasks
+- Sincronização manual (botão admin)
+- Logs detalhados de todas as operações
+- Resolução de conflitos bidirecional
 
-**v1.3.0 - Estabilização (Fase 5)** - +21h (~2.5 dias)
-- Cobertura de testes
-- Documentação completa
+**v1.3.0 - Estabilização** - +33h (~4 dias)
+- Cobertura completa de testes unitários
+- Testes de integração com APIs reais
+- Testes de sincronização bidirecional
+- Documentação completa (técnica + usuário final)
 - Otimizações de performance
+
+### 9.3. Comparação: Esforço Original vs Revisado
+
+| Aspecto | Original (só Tasks) | Revisado (Calendar + Tasks) | Diferença |
+|---------|---------------------|----------------------------|-----------|
+| **Infraestrutura** | 25h | 38h | +13h |
+| **Sincronização principal** | 17h | 30h (Calendar) + 19h (Tasks) | +32h |
+| **Features extras** | 14h | 22h | +8h |
+| **Testes e docs** | 21h | 33h | +12h |
+| **TOTAL** | **87h (~11 dias)** | **142h (~18 dias)** | **+55h (+7 dias)** |
+
+**Justificativa do aumento:**
+- ✅ Sincronização bidirecional (Calendar → DPS) adiciona complexidade (webhooks, conflitos)
+- ✅ Dois clientes HTTP (Calendar + Tasks) em vez de um
+- ✅ Eventos recorrentes (assinaturas) requerem lógica RRULE
+- ✅ Sistema de cores por tipo de serviço
+- ✅ Testes de integração mais complexos (2 APIs)
+- ✅ **PORÉM**: Benefício é MUITO maior - visualização completa da operação
+
+**ROI ainda é POSITIVO**: Mesmo com +7 dias, a integração dupla oferece muito mais valor (Calendar visual + Tasks administrativas)
 
 ---
 
