@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Assinaturas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Pacotes mensais de banho com frequência semanal ou quinzenal. Agendamentos automáticos e controle de renovação.
- * Version:           1.2.1
+ * Version:           1.3.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-subscription-addon

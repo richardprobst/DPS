@@ -3,8 +3,7 @@
  *
  * @package Desi_Pet_Shower_Subscription
  * @since 1.1.0
- * @updated 1.3.0 - Prevenção de duplo clique, feedback visual, validação client-side
- * @updated 1.4.0 - Suporte a múltiplos pets via checkboxes
+ * @updated 1.3.0 - Suporte a múltiplos pets via checkboxes, prevenção de duplo clique, feedback visual
  */
 
 (function($) {

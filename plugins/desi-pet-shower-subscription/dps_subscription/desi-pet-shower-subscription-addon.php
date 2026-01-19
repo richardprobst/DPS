@@ -230,6 +230,7 @@ class DPS_Subscription_Addon {
 
     /**
      * Cria a mensagem de cobrança para a renovação da assinatura.
+     * Suporta múltiplos pets na mensagem.
      *
      * @param WP_Post $sub Objeto da assinatura
      * @param string $payment_link Link de pagamento a ser usado
@@ -237,13 +238,41 @@ class DPS_Subscription_Addon {
      */
     private function build_subscription_whatsapp_message( $sub, $payment_link ) {
         $cid   = get_post_meta( $sub->ID, 'subscription_client_id', true );
-        $pid   = get_post_meta( $sub->ID, 'subscription_pet_id', true );
         $price = get_post_meta( $sub->ID, 'subscription_price', true );
         $client_post = $cid ? get_post( absint( $cid ) ) : null;
-        $pet_post    = $pid ? get_post( absint( $pid ) ) : null;
         $client_name = $client_post ? sanitize_text_field( $client_post->post_title ) : '';
-        $pet_name    = $pet_post ? sanitize_text_field( $pet_post->post_title ) : '';
         $valor_fmt   = $price ? number_format( floatval( $price ), 2, ',', '.' ) : '0,00';
+        
+        // Suporta múltiplos pets
+        $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
+        $pet_id_single = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+        
+        if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+            $pet_ids = array_map( 'absint', $pet_ids_raw );
+        } elseif ( $pet_id_single ) {
+            $pet_ids = [ absint( $pet_id_single ) ];
+        } else {
+            $pet_ids = [];
+        }
+        
+        // Coleta nomes de todos os pets
+        $pet_names = [];
+        foreach ( $pet_ids as $pid ) {
+            $pet_post = get_post( $pid );
+            if ( $pet_post ) {
+                $pet_names[] = sanitize_text_field( $pet_post->post_title );
+            }
+        }
+        
+        // Formata lista de pets
+        if ( count( $pet_names ) > 1 ) {
+            $last_pet = array_pop( $pet_names );
+            $pets_display = implode( ', ', $pet_names ) . ' e ' . $last_pet;
+        } elseif ( count( $pet_names ) === 1 ) {
+            $pets_display = $pet_names[0];
+        } else {
+            $pets_display = '';
+        }
         
         // Obtém a chave PIX configurada ou utiliza padrão
         // Reaproveita a opção do módulo de pagamentos
@@ -253,16 +282,28 @@ class DPS_Subscription_Addon {
         // O $payment_link já vem escapado de get_subscription_payment_link()
         // Não fazer escape adicional para evitar duplo escape
         
-        // Mensagem padrão para renovação da assinatura
-        $msg = sprintf(
-            /* translators: %1$s: client name, %2$s: pet name, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
-            __( 'Olá %1$s! A assinatura do pet %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
-            $client_name,
-            $pet_name,
-            $valor_fmt,
-            $pix_display,
-            $payment_link
-        );
+        // Mensagem padrão para renovação da assinatura (ajusta singular/plural)
+        if ( count( $pet_ids ) > 1 ) {
+            $msg = sprintf(
+                /* translators: %1$s: client name, %2$s: pet names, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
+                __( 'Olá %1$s! A assinatura dos pets %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
+                $client_name,
+                $pets_display,
+                $valor_fmt,
+                $pix_display,
+                $payment_link
+            );
+        } else {
+            $msg = sprintf(
+                /* translators: %1$s: client name, %2$s: pet name, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
+                __( 'Olá %1$s! A assinatura do pet %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
+                $client_name,
+                $pets_display,
+                $valor_fmt,
+                $pix_display,
+                $payment_link
+            );
+        }
         
         // Permite customização via filtro
         return apply_filters( 'dps_subscription_whatsapp_message', $msg, $sub, $payment_link );
@@ -656,7 +697,11 @@ class DPS_Subscription_Addon {
         
         // Salva metadados da assinatura
         update_post_meta( $sub_id, 'subscription_client_id', $client_id );
-        update_post_meta( $sub_id, 'subscription_pet_id', $pet_ids[0] );       // Legado: primeiro pet
+        // Legado: primeiro pet (protegido contra array vazio, já validado acima mas reforçado)
+        $first_pet_id = reset( $pet_ids );
+        if ( $first_pet_id ) {
+            update_post_meta( $sub_id, 'subscription_pet_id', $first_pet_id );
+        }
         update_post_meta( $sub_id, 'subscription_pet_ids', $pet_ids );          // Novo: todos os pets
         update_post_meta( $sub_id, 'subscription_service', $service );
         update_post_meta( $sub_id, 'subscription_frequency', $frequency );
@@ -810,6 +855,12 @@ class DPS_Subscription_Addon {
             wp_delete_post( $appt->ID, true );
         }
         
+        // Valida tosa_occurrence dentro do range esperado
+        $max_occurrence = ( $frequency === 'quinzenal' ) ? 2 : 4;
+        if ( $tosa_occurrence < 1 || $tosa_occurrence > $max_occurrence ) {
+            $tosa_occurrence = 1; // Default para primeiro atendimento se inválido
+        }
+        
         // Cria agendamentos para CADA PET em CADA DATA do ciclo
         foreach ( $pet_ids as $pet_id ) {
             $event_index = 0;
@@ -823,7 +874,6 @@ class DPS_Subscription_Addon {
                 if ( $appt_id ) {
                     update_post_meta( $appt_id, 'appointment_client_id', $client_id );
                     update_post_meta( $appt_id, 'appointment_pet_id', $pet_id );
-                    update_post_meta( $appt_id, 'appointment_pet_ids', [ $pet_id ] );
                     update_post_meta( $appt_id, 'appointment_date', $date );
                     update_post_meta( $appt_id, 'appointment_time', $start_time );
                     update_post_meta( $appt_id, 'appointment_services', [] );
@@ -834,7 +884,7 @@ class DPS_Subscription_Addon {
                     update_post_meta( $appt_id, 'subscription_id', $sub_id );
                     update_post_meta( $appt_id, 'subscription_cycle', $cycle_key );
                     
-                    // Tosa: verifica se este evento é o de tosa
+                    // Tosa: verifica se este evento é o de tosa (dentro do range validado)
                     $is_tosa_event = ( '1' === $tosa && $event_index === $tosa_occurrence );
                     update_post_meta( $appt_id, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
                     update_post_meta( $appt_id, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
