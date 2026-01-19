@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Backup & Restauração Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Gere backups completos dos dados do sistema e restaure em outro ambiente. Exportação e importação simplificadas.
- * Version:           1.3.0
+ * Version:           1.3.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-backup-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Definir constante de versão
 if ( ! defined( 'DPS_BACKUP_VERSION' ) ) {
-    define( 'DPS_BACKUP_VERSION', '1.3.0' );
+    define( 'DPS_BACKUP_VERSION', '1.3.1' );
 }
 
 // Carregar classes auxiliares
@@ -79,7 +79,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.0.0
          * @var string
          */
-        const VERSION = '1.3.0';
+        const VERSION = '1.3.1';
 
         /**
          * Action name para exportação.
@@ -523,8 +523,9 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 if ( ! empty( $email ) && is_email( $email ) ) {
                     $settings['notification_email'] = $email;
                 } else {
-                    // Se email inválido, usar o email do admin
-                    $settings['notification_email'] = get_option( 'admin_email' );
+                    // Se email inválido, usar o email do admin (se válido)
+                    $admin_email = get_option( 'admin_email' );
+                    $settings['notification_email'] = ( ! empty( $admin_email ) && is_email( $admin_email ) ) ? $admin_email : '';
                 }
             }
 
@@ -1127,22 +1128,24 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     $old_id = isset( $pet['id'] ) ? (int) $pet['id'] : 0;
                     $meta   = $pet['meta'] ?? [];
                     
-                    // Validar e mapear owner_id
-                    if ( isset( $meta['owner_id'] ) ) {
+                    // Validar e mapear owner_id (somente se não for vazio/zero)
+                    if ( isset( $meta['owner_id'] ) && ! empty( $meta['owner_id'] ) ) {
                         $old_owner_id = (int) $meta['owner_id'];
-                        if ( isset( $client_map[ $old_owner_id ] ) ) {
-                            $meta['owner_id'] = $client_map[ $old_owner_id ];
-                            $pet['meta']      = $meta;
-                        } else {
-                            // Pet tem proprietário que não foi restaurado
-                            throw new Exception(
-                                sprintf(
-                                    /* translators: 1: ID do pet, 2: ID do proprietário */
-                                    __( 'Pet %1$d tem proprietário (ID %2$d) que não foi restaurado. Inclua os clientes no backup.', 'dps-backup-addon' ),
-                                    $old_id,
-                                    $old_owner_id
-                                )
-                            );
+                        if ( $old_owner_id > 0 ) {
+                            if ( isset( $client_map[ $old_owner_id ] ) ) {
+                                $meta['owner_id'] = $client_map[ $old_owner_id ];
+                                $pet['meta']      = $meta;
+                            } else {
+                                // Pet tem proprietário que não foi restaurado
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do pet, 2: ID do proprietário */
+                                        __( 'Pet %1$d tem proprietário (ID %2$d) que não foi restaurado. Inclua os clientes no backup.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_owner_id
+                                    )
+                                );
+                            }
                         }
                     }
                     
@@ -1170,37 +1173,41 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     $old_id = isset( $appointment['id'] ) ? (int) $appointment['id'] : 0;
                     $meta   = $appointment['meta'] ?? [];
 
-                    // Validar e mapear appointment_client_id
-                    if ( isset( $meta['appointment_client_id'] ) ) {
+                    // Validar e mapear appointment_client_id (somente se não for vazio/zero)
+                    if ( isset( $meta['appointment_client_id'] ) && ! empty( $meta['appointment_client_id'] ) ) {
                         $old_client_id = (int) $meta['appointment_client_id'];
-                        if ( isset( $client_map[ $old_client_id ] ) ) {
-                            $meta['appointment_client_id'] = $client_map[ $old_client_id ];
-                        } else {
-                            throw new Exception(
-                                sprintf(
-                                    /* translators: 1: ID do agendamento, 2: ID do cliente */
-                                    __( 'Agendamento %1$d referencia cliente (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
-                                    $old_id,
-                                    $old_client_id
-                                )
-                            );
+                        if ( $old_client_id > 0 ) {
+                            if ( isset( $client_map[ $old_client_id ] ) ) {
+                                $meta['appointment_client_id'] = $client_map[ $old_client_id ];
+                            } else {
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do agendamento, 2: ID do cliente */
+                                        __( 'Agendamento %1$d referencia cliente (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_client_id
+                                    )
+                                );
+                            }
                         }
                     }
 
-                    // Validar e mapear appointment_pet_id (singular)
-                    if ( isset( $meta['appointment_pet_id'] ) ) {
+                    // Validar e mapear appointment_pet_id (singular, somente se não for vazio/zero)
+                    if ( isset( $meta['appointment_pet_id'] ) && ! empty( $meta['appointment_pet_id'] ) ) {
                         $old_pet_id = (int) $meta['appointment_pet_id'];
-                        if ( isset( $pet_map[ $old_pet_id ] ) ) {
-                            $meta['appointment_pet_id'] = $pet_map[ $old_pet_id ];
-                        } else {
-                            throw new Exception(
-                                sprintf(
-                                    /* translators: 1: ID do agendamento, 2: ID do pet */
-                                    __( 'Agendamento %1$d referencia pet (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
-                                    $old_id,
-                                    $old_pet_id
-                                )
-                            );
+                        if ( $old_pet_id > 0 ) {
+                            if ( isset( $pet_map[ $old_pet_id ] ) ) {
+                                $meta['appointment_pet_id'] = $pet_map[ $old_pet_id ];
+                            } else {
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do agendamento, 2: ID do pet */
+                                        __( 'Agendamento %1$d referencia pet (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_pet_id
+                                    )
+                                );
+                            }
                         }
                     }
 
@@ -1489,10 +1496,11 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $orphan_pets = $wpdb->get_var(
                     "SELECT COUNT(*)
                      FROM {$wpdb->postmeta} pm
-                     LEFT JOIN {$wpdb->posts} c ON pm.meta_value = c.ID AND c.post_type = 'dps_cliente'
+                     LEFT JOIN {$wpdb->posts} c ON CAST(pm.meta_value AS UNSIGNED) = c.ID AND c.post_type = 'dps_cliente'
                      WHERE pm.meta_key = 'owner_id' 
                        AND pm.meta_value != '' 
                        AND pm.meta_value IS NOT NULL
+                       AND CAST(pm.meta_value AS UNSIGNED) > 0
                        AND c.ID IS NULL"
                 );
                 
@@ -1513,10 +1521,11 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $orphan_appointments = $wpdb->get_var(
                     "SELECT COUNT(*)
                      FROM {$wpdb->postmeta} pm
-                     LEFT JOIN {$wpdb->posts} c ON pm.meta_value = c.ID AND c.post_type = 'dps_cliente'
+                     LEFT JOIN {$wpdb->posts} c ON CAST(pm.meta_value AS UNSIGNED) = c.ID AND c.post_type = 'dps_cliente'
                      WHERE pm.meta_key = 'appointment_client_id'
                        AND pm.meta_value != ''
                        AND pm.meta_value IS NOT NULL
+                       AND CAST(pm.meta_value AS UNSIGNED) > 0
                        AND c.ID IS NULL"
                 );
                 
@@ -1780,20 +1789,29 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             
             $sanitized = [];
             foreach ( $array as $key => $value ) {
-                $key = sanitize_key( $key );
+                // Sanitizar chave do array preservando underscore e hífen (para case-sensitivity)
+                // O padrão remove apenas caracteres especiais, preservando a-z, A-Z, 0-9, _ e -
+                $sanitized_key = preg_replace( '/[^\w\-]/', '', (string) $key );
+                
+                // Se a chave sanitizada já existe (colisão rara), pular para evitar sobrescrever
+                if ( isset( $sanitized[ $sanitized_key ] ) ) {
+                    error_log( sprintf( 'DPS Backup: Colisão de chave detectada após sanitização: %s → %s (ignorada).', $key, $sanitized_key ) );
+                    continue;
+                }
+                
                 if ( is_array( $value ) ) {
-                    $sanitized[ $key ] = $this->sanitize_array_recursive( $value );
+                    $sanitized[ $sanitized_key ] = $this->sanitize_array_recursive( $value );
                 } elseif ( is_string( $value ) ) {
-                    $sanitized[ $key ] = sanitize_text_field( $value );
+                    $sanitized[ $sanitized_key ] = sanitize_text_field( $value );
                 } elseif ( is_numeric( $value ) ) {
-                    $sanitized[ $key ] = $value;
+                    $sanitized[ $sanitized_key ] = $value;
                 } elseif ( is_bool( $value ) ) {
-                    $sanitized[ $key ] = $value;
+                    $sanitized[ $sanitized_key ] = $value;
                 } elseif ( is_null( $value ) ) {
-                    $sanitized[ $key ] = null;
+                    $sanitized[ $sanitized_key ] = null;
                 } else {
                     // Rejeitar outros tipos (objects, resources)
-                    error_log( sprintf( 'DPS Backup: Tipo não suportado em array, chave %s ignorada.', $key ) );
+                    error_log( sprintf( 'DPS Backup: Tipo não suportado em array, chave %s ignorada.', $sanitized_key ) );
                 }
             }
             return $sanitized;
@@ -2066,9 +2084,9 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 
                 $name = substr( $table, strlen( $wpdb->prefix ) );
                 
-                // Usar $wpdb->prepare com identificador para prevenir SQL injection
+                // Usar interpolação direta pois a tabela já foi validada com regex
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada com regex acima
-                $create = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE `%1s`', $table ), ARRAY_A );
+                $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_A );
                 
                 if ( empty( $create['Create Table'] ) ) {
                     return new WP_Error(
@@ -2082,7 +2100,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 }
                 
                 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada com regex acima
-                $rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM `%1s`', $table ), ARRAY_A );
+                $rows = $wpdb->get_results( "SELECT * FROM `{$table}`", ARRAY_A );
                 
                 $result[] = [
                     'name'   => $name,
