@@ -124,8 +124,11 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            // O wp_kses_post é usado aqui para permitir HTML seguro (formulários, inputs, etc.)
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() aqui porque essa função
+            // remove elementos de formulário (<input>, <select>, <textarea>, <form>, <button>)
+            // que são essenciais para a página de configurações funcionar.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -144,7 +147,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_analytics_page() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<input>, <select>, <form>, <button>) necessários para filtros e exportação.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -163,7 +169,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_conversations_list_page() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<input>, <select>, <form>, <button>) necessários para filtros.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -182,7 +191,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<input>, <textarea>, <form>, <button>) necessários para gerenciar entradas.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -201,7 +213,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<input>, <textarea>, <form>, <button>) necessários para testar perguntas.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -220,7 +235,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_interface() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<input>, <textarea>, <form>, <button>) necessários para a interface.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 
@@ -239,7 +257,10 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
             // SEGURANÇA: O conteúdo vem de render_dashboard() que já aplica escape adequado
-            echo wp_kses_post( $content );
+            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
+            // de formulário (<select>, <form>, <button>) que podem ser necessários.
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
+            echo $content;
         }
     }
 }
