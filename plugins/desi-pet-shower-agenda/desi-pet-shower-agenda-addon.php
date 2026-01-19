@@ -101,7 +101,7 @@ if ( extension_loaded( 'openssl' ) ) {
             add_action( 'dps_google_calendar_process_changes', [ $webhook, 'process_calendar_changes' ] );
             
             // FASE 4: Inicializa sincronização Google Tasks
-            new DPS_Google_Tasks_Sync( new DPS_Google_Auth() );
+            new DPS_Google_Tasks_Sync();
         }
     }, 20 );
 }
