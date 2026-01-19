@@ -9,7 +9,7 @@
 
 ## Sumário Executivo
 
-Esta auditoria identific ou **16 vulnerabilidades críticas e bugs** no add-on Backup & Restauração que podem resultar em:
+Esta auditoria identificou **16 vulnerabilidades críticas e bugs** no add-on Backup & Restauração que podem resultar em:
 
 - ✅ **Perda total de dados** durante restauração
 - ✅ **Corrupção de relacionamentos** entre entidades

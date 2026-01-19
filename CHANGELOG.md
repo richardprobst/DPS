@@ -236,6 +236,10 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Backup Add-on - Correções de Documentação (v1.3.1)**
+
+- **Erro de digitação corrigido**: Corrigido "identific ou" → "identificou" na documentação de auditoria de segurança (`docs/security/BACKUP_SECURITY_AUDIT.md`).
+
 **Stats Add-on - Correção de PHP Warning no Cache Invalidator (v1.2.1)**
 
 - **PHP Warning corrigido**: O método `invalidate_on_post_delete()` assumia que o segundo parâmetro era sempre um objeto WP_Post, mas o hook `trashed_post` passa `$post_id` (int) e `$previous_status` (string), causando warnings "Attempt to read property 'post_type' on string" ao mover posts para lixeira.
@@ -421,6 +425,14 @@ Antes de criar uma nova versão oficial:
 - **Secret mascarado no REST**: Endpoint `/webhook-url` agora retorna apenas preview mascarado do secret (`abc***xyz`) em vez do valor completo.
 
 #### Security (Segurança)
+
+**Backup Add-on - Correções de Revisão de Código (v1.3.1)**
+
+- **Placeholder SQL inválido corrigido**: Removido uso de `%1s` (placeholder não suportado) em `$wpdb->prepare()` para queries de tabelas. Como as tabelas já são validadas com regex `^[a-zA-Z0-9_]+$`, a interpolação direta é segura e não causa erros.
+- **Cast explícito para INTEGER em queries**: Adicionado `CAST(pm.meta_value AS UNSIGNED)` nas queries de validação de integridade referencial para garantir comparação correta entre meta_value (string) e post ID (integer), melhorando performance e confiabilidade.
+- **Validação de admin_email fallback**: O fallback para email do administrador agora valida que o email é válido antes de usar, evitando configurações com emails inválidos.
+- **Sanitização de array keys preserva maiúsculas**: Substituído `sanitize_key()` por `preg_replace('/[^\w\-]/', '')` para preservar case-sensitivity em chaves de array, evitando quebrar configurações que dependem de maiúsculas.
+- **Validação de valores falsy em mapeamento de IDs**: Adicionada verificação `! empty()` e `> 0` para owner_id, appointment_client_id e appointment_pet_id antes de tentar mapear, evitando processamento incorreto de valores zerados ou vazios.
 
 **Communications Add-on - Auditoria de Segurança Completa (v0.2.1)**
 
