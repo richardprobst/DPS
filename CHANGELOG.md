@@ -83,6 +83,42 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Modo Administrador no Chat Público de IA (v1.8.0)**
+
+- **Modo Administrador com acesso expandido**: O shortcode `[dps_ai_public_chat]` agora detecta automaticamente quando um administrador (capability `manage_options`) está logado e ativa o modo sistema:
+  - Acesso a dados de clientes cadastrados (total, ativos nos últimos 90 dias)
+  - Acesso a estatísticas de pets registrados
+  - Acesso a informações de agendamentos (hoje, semana, mês)
+  - Acesso a dados financeiros (faturamento do mês, valores pendentes)
+  - Informações de versão e status do sistema
+- **UI/UX diferenciada para administradores**:
+  - Badge visual "🔐 Admin" no cabeçalho do chat
+  - Indicador "Modo Sistema" na toolbar
+  - Cor temática roxa (#7c3aed) para distinguir do modo visitante
+  - FAQs específicas para gestão (clientes, agendamentos, faturamento)
+  - Mensagem de boas-vindas com lista de capacidades disponíveis
+  - Disclaimer informando sobre acesso a dados sensíveis
+- **Segurança reforçada**:
+  - Validação de capability no backend (não pode ser burlada via frontend)
+  - Rate limiting diferenciado: 30/min e 200/hora para admins (vs 10/min e 60/hora para visitantes)
+  - Logs de auditoria para todas as consultas em modo admin
+  - Visitantes NUNCA recebem dados de clientes, financeiros ou sensíveis
+- **Prompt de sistema específico**: Administradores recebem prompt expandido com instruções para fornecer dados do sistema
+- **Limite de caracteres expandido**: 1000 caracteres para admins (vs 500 para visitantes)
+- **Atributo `data-admin-mode`**: Indicador no HTML para debugging e extensibilidade
+
+#### Changed (Alterado)
+
+- **Estrutura do header do chat público**: Reorganizada para acomodar badge de admin e status lado a lado
+- **Método `check_rate_limit()`**: Agora aceita parâmetro `$is_admin_mode` para aplicar limites diferenciados
+- **Método `get_ai_response()`**: Agora aceita parâmetro `$is_admin_mode` para usar contexto e prompt apropriados
+- **Demo HTML atualizado**: Nova seção demonstrando o Modo Administrador com todas as características visuais
+
+#### Security (Segurança)
+
+- **Isolamento de dados por role**: Implementada separação completa de contexto entre visitantes e administradores
+- **Auditoria de requisições admin**: Todas as perguntas feitas por administradores são registradas com user_login e user_id
+
 **Sistema de Prevenção de Cache de Páginas (v1.1.1)**
 
 - **Nova classe `DPS_Cache_Control`**: Classe helper no plugin base que gerencia a prevenção de cache em todas as páginas do sistema DPS.

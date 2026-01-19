@@ -329,7 +329,108 @@
             </div>
         </div>
 
-        <!-- Seção 4: Uso do Shortcode -->
+        <!-- Seção 4: Modo Administrador (v1.8.0) -->
+        <div class="demo-section">
+            <h2>🔐 Modo Administrador (v1.8.0)</h2>
+            <p style="color: #6b7280; margin-bottom: 20px;">Quando um administrador está logado, o chat entra automaticamente no modo sistema com acesso expandido.</p>
+            
+            <div class="dps-ai-public-chat dps-ai-public-chat--inline dps-ai-public-chat--admin-mode" data-admin-mode="true">
+                <div class="dps-ai-public-panel">
+                    <div class="dps-ai-public-header">
+                        <div class="dps-ai-public-header-content">
+                            <h3 class="dps-ai-public-title">Tire suas dúvidas</h3>
+                            <p class="dps-ai-public-subtitle">Assistente com acesso ao sistema.</p>
+                        </div>
+                        <div class="dps-ai-public-header-right">
+                            <div class="dps-ai-public-admin-badge" title="Modo administrador com acesso expandido">
+                                <span class="dps-ai-public-admin-icon">🔐</span>
+                                <span class="dps-ai-public-admin-text">Admin</span>
+                            </div>
+                            <div class="dps-ai-public-status">
+                                <span class="dps-ai-public-status-dot"></span>
+                                <span class="dps-ai-public-status-text">Online</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-toolbar">
+                        <div class="dps-ai-public-toolbar-left">
+                            <span class="dps-ai-public-msg-count">2 msg</span>
+                            <span class="dps-ai-public-mode-indicator">• Modo Sistema</span>
+                        </div>
+                        <div class="dps-ai-public-toolbar-right">
+                            <button type="button" class="dps-ai-public-clear-btn">
+                                <span>🗑️</span> Limpar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-body">
+                        <div class="dps-ai-public-faqs">
+                            <p class="dps-ai-public-faqs-label">Consultas do sistema:</p>
+                            <div class="dps-ai-public-faqs-list">
+                                <button type="button" class="dps-ai-public-faq-btn">Quantos clientes temos?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Agendamentos de hoje?</button>
+                                <button type="button" class="dps-ai-public-faq-btn">Faturamento do mês?</button>
+                            </div>
+                        </div>
+                        
+                        <div class="dps-ai-public-messages">
+                            <div class="dps-ai-public-message dps-ai-public-message--assistant">
+                                <div class="dps-ai-public-message-avatar">🔐</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Olá, Administrador! 👋 Você está no Modo Sistema com acesso expandido. Posso ajudar com:</p>
+                                        <ul>
+                                            <li>📊 Estatísticas e métricas do sistema</li>
+                                            <li>👥 Consultas sobre clientes e pets</li>
+                                            <li>📅 Agendamentos e histórico</li>
+                                            <li>💰 Informações financeiras</li>
+                                        </ul>
+                                        <p>Como posso ajudar?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dps-ai-public-message dps-ai-public-message--user">
+                                <div class="dps-ai-public-message-avatar">👤</div>
+                                <div class="dps-ai-public-message-content">
+                                    <div class="dps-ai-public-message-text">
+                                        <p>Quantos clientes temos cadastrados?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dps-ai-public-footer">
+                        <div class="dps-ai-public-input-wrapper">
+                            <textarea class="dps-ai-public-input" placeholder="Pergunte sobre clientes, agendamentos, finanças..." rows="1"></textarea>
+                            <button class="dps-ai-public-submit">
+                                <span class="dps-ai-public-submit-icon">➤</span>
+                            </button>
+                        </div>
+                        <p class="dps-ai-public-disclaimer">
+                            🔐 Modo Administrador: dados sensíveis do sistema estão disponíveis nesta sessão.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-note">
+                <h4>⚡ Características do Modo Admin</h4>
+                <p>
+                    • <strong>Acesso automático</strong>: detecta administradores logados automaticamente<br>
+                    • <strong>Contexto expandido</strong>: acesso a dados de clientes, pets, agendamentos e financeiro<br>
+                    • <strong>FAQs específicas</strong>: perguntas sugeridas focadas em gestão do sistema<br>
+                    • <strong>Rate limit relaxado</strong>: 30/min e 200/hora (vs 10/min e 60/hora para visitantes)<br>
+                    • <strong>Logs de auditoria</strong>: todas as consultas admin são registradas<br>
+                    • <strong>Segurança</strong>: validação de capability no backend (não pode ser burlada)
+                </p>
+            </div>
+        </div>
+
+        <!-- Seção 5: Uso do Shortcode -->
         <div class="demo-section">
             <h2>📝 Uso do Shortcode</h2>
             
@@ -340,6 +441,15 @@
                     <code>[dps_ai_public_chat mode="floating" position="bottom-right"]</code> - Chat flutuante<br><br>
                     <code>[dps_ai_public_chat theme="dark" primary_color="#8b5cf6"]</code> - Tema escuro com cor customizada<br><br>
                     <code>[dps_ai_public_chat title="Fale conosco" show_faqs="false"]</code> - Título customizado sem FAQs
+                </p>
+            </div>
+
+            <div class="demo-note" style="margin-top: 20px; border-left-color: #7c3aed;">
+                <h4>🔐 Modo Administrador</h4>
+                <p>
+                    O modo administrador é <strong>ativado automaticamente</strong> quando um usuário com capability <code>manage_options</code> está logado.<br><br>
+                    <strong>Visitantes e usuários comuns:</strong> Veem apenas informações públicas sobre serviços e preços.<br>
+                    <strong>Administradores:</strong> Acesso completo a dados do sistema, clientes, agendamentos e financeiro.
                 </p>
             </div>
         </div>
