@@ -67,6 +67,20 @@ require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
 // Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
 require_once __DIR__ . '/includes/class-dps-agenda-hub.php';
 
+// FASE 1 - Integrações Google (Calendar + Tasks): Infraestrutura
+// Carrega apenas se extensões OpenSSL estão disponíveis (necessário para criptografia)
+if ( extension_loaded( 'openssl' ) ) {
+    require_once __DIR__ . '/includes/integrations/class-dps-google-auth.php';
+    require_once __DIR__ . '/includes/integrations/class-dps-google-integrations-settings.php';
+    
+    // Inicializa interface de configurações
+    add_action( 'plugins_loaded', function() {
+        if ( is_admin() ) {
+            new DPS_Google_Integrations_Settings();
+        }
+    }, 20 );
+}
+
 class DPS_Agenda_Addon {
     
     // FASE 3: Usa traits para métodos auxiliares
