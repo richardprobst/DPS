@@ -244,6 +244,11 @@ Antes de criar uma nova versão oficial:
   - `invalidate_on_trash()`: Lida com o hook `trashed_post` que recebe apenas post_id e busca o objeto internamente
 - **Validação de tipo robusta**: Adicionada verificação `instanceof WP_Post` no método `invalidate_on_before_delete()` para garantir que o parâmetro é um objeto válido antes de acessar propriedades.
 
+**Agenda Add-on - Validação Defensiva no Google Calendar Sync (v2.0.1)**
+
+- **Validação preventiva adicionada**: Método `handle_delete_appointment()` agora valida que o segundo parâmetro é `instanceof WP_Post` antes de acessar propriedades, prevenindo potenciais warnings caso o hook seja usado incorretamente no futuro.
+- **Consistência com correção do Stats Add-on**: Aplica o mesmo padrão de validação defensiva implementado no cache invalidator.
+
 **AI Add-on - Correção das Configurações do Assistente de IA (v1.6.2)**
 
 - **Configurações não editáveis corrigidas**: O uso de `wp_kses_post()` no Hub de IA (`class-dps-ai-hub.php`) removia elementos de formulário (`<input>`, `<select>`, `<textarea>`, `<form>`, `<button>`), tornando todas as configurações apenas texto sem possibilidade de edição.
