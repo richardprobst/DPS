@@ -990,6 +990,11 @@ trait DPS_Agenda_Renderer {
         echo '</div>';
         echo '</td>';
         
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
+        echo '</td>';
+        
         echo '</tr>';
         
         return ob_get_clean();
@@ -1134,6 +1139,11 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
+        echo '</td>';
+        
         echo '</tr>';
         
         return ob_get_clean();
@@ -1224,6 +1234,11 @@ trait DPS_Agenda_Renderer {
             echo '<span class="dps-taxidog-label dps-taxidog-label--not-requested">⚪ ' . esc_html__( 'NÃO SOLICITADO', 'dps-agenda-addon' ) . '</span>';
             echo '</div>';
         }
+        echo '</td>';
+        
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
         echo '</td>';
         
         echo '</tr>';
