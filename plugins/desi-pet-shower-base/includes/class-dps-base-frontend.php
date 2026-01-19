@@ -2037,27 +2037,46 @@ class DPS_Base_Frontend {
             echo '<legend class="dps-fieldset__legend">' . esc_html__( 'Serviços e Extras', 'desi-pet-shower' ) . '</legend>';
             
             // Campo: indicativo de necessidade de tosa (apenas para assinaturas)
+            // Card de tosa com design similar ao TaxiDog para melhor UX
             $tosa       = $meta['tosa'] ?? '';
             $tosa_price = $meta['tosa_price'] ?? '';
             $tosa_occ   = $meta['tosa_occurrence'] ?? '1';
-            $tosa_display = ( '1' === $tosa ) ? 'block' : 'none';
-            echo '<div id="dps-tosa-wrapper" class="dps-conditional-field" style="display:none;">';
-            echo '<label class="dps-checkbox-label">';
-            echo '<input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '>';
-            echo '<span class="dps-checkbox-text">';
-            echo esc_html__( 'Precisa de tosa?', 'desi-pet-shower' );
-            echo ' <span class="dps-tooltip" data-tooltip="' . esc_attr__( 'Adicione um serviço de tosa à assinatura', 'desi-pet-shower' ) . '">ℹ️</span>';
-            echo '</span>';
-            echo '</label>';
-            
-            echo '<div id="dps-tosa-fields" class="dps-conditional-field" style="display:' . esc_attr( $tosa_display ) . ';">';
-            // Preço da tosa com valor padrão 30 se não definido
             $tosa_price_val = $tosa_price !== '' ? $tosa_price : '30';
-            echo '<label for="dps-tosa-price">' . esc_html__( 'Preço da tosa (R$)', 'desi-pet-shower' ) . '</label>';
-            echo '<input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" class="dps-input-money">';
+            
+            echo '<div id="dps-tosa-wrapper" class="dps-tosa-section" style="display:none;">';
+            echo '<div class="dps-tosa-card" data-tosa-active="' . ( '1' === $tosa ? '1' : '0' ) . '">';
+            echo '<div class="dps-tosa-card__header">';
+            echo '<div class="dps-tosa-card__icon-title">';
+            echo '<span class="dps-tosa-icon" aria-hidden="true">✂️</span>';
+            echo '<span class="dps-tosa-title">' . esc_html__( 'Adicionar tosa?', 'desi-pet-shower' ) . '</span>';
+            echo '</div>';
+            echo '<label class="dps-toggle-switch">';
+            echo '<input type="checkbox" id="dps-tosa-toggle" name="appointment_tosa" value="1" ' . checked( $tosa, '1', false ) . '>';
+            echo '<span class="dps-toggle-slider"></span>';
+            echo '</label>';
+            echo '</div>';
+            echo '<p class="dps-tosa-description">' . esc_html__( 'Serviço de tosa adicional em um dos atendimentos da assinatura', 'desi-pet-shower' ) . '</p>';
+            
+            // Campos de configuração da tosa (visíveis quando ativo)
+            echo '<div id="dps-tosa-fields" class="dps-tosa-card__fields" style="display:' . ( '1' === $tosa ? 'grid' : 'none' ) . ';">';
+            
+            // Preço da tosa
+            echo '<div class="dps-tosa-field">';
+            echo '<label for="dps-tosa-price" class="dps-tosa-field-label">' . esc_html__( 'Valor da tosa:', 'desi-pet-shower' ) . '</label>';
+            echo '<div class="dps-input-with-prefix">';
+            echo '<span class="dps-input-prefix">R$</span>';
+            echo '<input type="number" step="0.01" min="0" id="dps-tosa-price" name="appointment_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" class="dps-input-money dps-tosa-price-input" placeholder="30,00">';
+            echo '</div>';
+            echo '</div>';
+            
             // Ocorrência da tosa (selecionada via JS conforme frequência)
-            echo '<label for="appointment_tosa_occurrence" style="margin-left:20px;">' . esc_html__( 'Ocorrência da tosa', 'desi-pet-shower' ) . '</label>';
-            echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" data-current="' . esc_attr( $tosa_occ ) . '"></select>';
+            echo '<div class="dps-tosa-field">';
+            echo '<label for="appointment_tosa_occurrence" class="dps-tosa-field-label">' . esc_html__( 'Em qual atendimento:', 'desi-pet-shower' ) . '</label>';
+            echo '<select name="appointment_tosa_occurrence" id="appointment_tosa_occurrence" class="dps-tosa-occurrence-select" data-current="' . esc_attr( $tosa_occ ) . '"></select>';
+            echo '<p class="dps-tosa-field-hint">' . esc_html__( 'Escolha o atendimento em que a tosa será realizada', 'desi-pet-shower' ) . '</p>';
+            echo '</div>';
+            
+            echo '</div>';
             echo '</div>';
             echo '</div>';
             
