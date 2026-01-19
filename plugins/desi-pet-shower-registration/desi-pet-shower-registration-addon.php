@@ -205,34 +205,23 @@ class DPS_Registration_Addon {
             wp_send_json_error( [ 'message' => __( 'Acesso negado.', 'dps-registration-addon' ) ], 403 );
         }
 
-        // Obtém e sanitiza dados
-        $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        // Obtém e sanitiza dados - verificação de duplicata é feita apenas pelo telefone
         $phone = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
-        $cpf   = isset( $_POST['cpf'] ) ? sanitize_text_field( wp_unslash( $_POST['cpf'] ) ) : '';
 
-        // Normaliza telefone e CPF
+        // Normaliza telefone
         $phone = $this->normalize_phone( $phone );
-        $cpf   = $this->normalize_cpf( $cpf );
 
-        // Busca duplicata
-        $duplicate_id = $this->find_duplicate_client( $email, $phone, $cpf );
+        // Busca duplicata apenas por telefone
+        $duplicate_id = $this->find_duplicate_client( '', $phone, '' );
 
         if ( $duplicate_id > 0 ) {
             $client = get_post( $duplicate_id );
-            $client_email = get_post_meta( $duplicate_id, 'client_email', true );
             $client_phone = get_post_meta( $duplicate_id, 'client_phone', true );
-            $client_cpf   = get_post_meta( $duplicate_id, 'client_cpf', true );
 
-            // Identifica quais campos são duplicados
+            // Indica que o campo duplicado é o telefone
             $duplicated_fields = [];
-            if ( ! empty( $email ) && $client_email === $email ) {
-                $duplicated_fields[] = __( 'Email', 'dps-registration-addon' );
-            }
             if ( ! empty( $phone ) && $client_phone === $phone ) {
                 $duplicated_fields[] = __( 'Telefone', 'dps-registration-addon' );
-            }
-            if ( ! empty( $cpf ) && $client_cpf === $cpf ) {
-                $duplicated_fields[] = __( 'CPF', 'dps-registration-addon' );
             }
 
             // URL para visualizar o cliente existente
@@ -508,43 +497,22 @@ class DPS_Registration_Addon {
     // =========================================================================
 
     /**
-     * Busca cliente existente por email, telefone ou CPF.
+     * Busca cliente existente por telefone.
+     * 
+     * NOTA: A verificação de duplicatas é feita APENAS pelo telefone para evitar
+     * bloqueios indevidos quando o mesmo email ou CPF é compartilhado em famílias.
      *
      * @since 1.1.0
-     * @param string $email Email normalizado
-     * @param string $phone Telefone normalizado (apenas dígitos)
-     * @param string $cpf CPF normalizado (apenas dígitos)
+     * @since 1.3.2 Modificado para verificar apenas telefone (não mais email/CPF).
+     * 
+     * @param string $email Email normalizado (mantido por compatibilidade, não usado).
+     * @param string $phone Telefone normalizado (apenas dígitos).
+     * @param string $cpf CPF normalizado (mantido por compatibilidade, não usado).
      * @return int ID do cliente encontrado ou 0
      */
     private function find_duplicate_client( $email, $phone, $cpf ) {
-        $meta_query = [
-            'relation' => 'OR',
-        ];
-        
-        // Adiciona critérios apenas se preenchidos
-        if ( ! empty( $email ) ) {
-            $meta_query[] = [
-                'key'   => 'client_email',
-                'value' => $email,
-            ];
-        }
-        
-        if ( ! empty( $phone ) ) {
-            $meta_query[] = [
-                'key'   => 'client_phone',
-                'value' => $phone,
-            ];
-        }
-        
-        if ( ! empty( $cpf ) ) {
-            $meta_query[] = [
-                'key'   => 'client_cpf',
-                'value' => $cpf,
-            ];
-        }
-        
-        // Se nenhum critério, não há duplicata
-        if ( count( $meta_query ) <= 1 ) {
+        // Verifica duplicata APENAS por telefone
+        if ( empty( $phone ) ) {
             return 0;
         }
         
@@ -552,7 +520,12 @@ class DPS_Registration_Addon {
             'post_type'      => 'dps_cliente',
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'meta_query'     => $meta_query,
+            'meta_query'     => [
+                [
+                    'key'   => 'client_phone',
+                    'value' => $phone,
+                ],
+            ],
         ] );
 
         return ! empty( $clients ) ? (int) $clients[0] : 0;
@@ -609,11 +582,9 @@ class DPS_Registration_Addon {
 
         $duplicate_id = $this->find_duplicate_client( $email_clean, $normalized_phone, $normalized_cpf );
         if ( $duplicate_id > 0 ) {
-            $this->log_event( 'warning', 'Cadastro bloqueado por duplicata (API)', array(
+            $this->log_event( 'warning', 'Cadastro bloqueado por duplicata de telefone (API)', array(
                 'duplicate_id' => $duplicate_id,
-                'email_hash'   => $this->get_safe_hash( $email_clean ),
                 'phone_hash'   => $this->get_safe_hash( $normalized_phone ),
-                'cpf_hash'     => $this->get_safe_hash( $normalized_cpf ),
                 'ip_hash'      => $this->get_client_ip_hash(),
             ) );
 
@@ -1972,7 +1943,8 @@ class DPS_Registration_Addon {
 
         // =====================================================================
         // F1.5: Detecção de duplicatas
-        // - Para não-admins: bloqueia duplicatas
+        // - Verificação é feita APENAS pelo telefone para evitar bloqueios indevidos
+        // - Para não-admins: bloqueia duplicatas de telefone
         // - Para admins: permite continuar se confirmou via modal (dps_confirm_duplicate=1)
         // =====================================================================
         $duplicate_id = $this->find_duplicate_client( $client_email, $client_phone, $client_cpf );
@@ -1981,25 +1953,23 @@ class DPS_Registration_Addon {
         if ( $duplicate_id > 0 ) {
             if ( ! $is_admin ) {
                 // Não-admin: sempre bloqueia
-                $this->log_event( 'warning', 'Cadastro bloqueado por duplicata', array(
+                $this->log_event( 'warning', 'Cadastro bloqueado por duplicata de telefone', array(
                     'duplicate_id' => $duplicate_id,
-                    'email_hash'   => $this->get_safe_hash( $client_email ),
                     'phone_hash'   => $this->get_safe_hash( $client_phone ),
-                    'cpf_hash'     => $this->get_safe_hash( $client_cpf ),
                     'ip_hash'      => $this->get_client_ip_hash(),
                 ) );
-                $this->add_error( __( 'Já encontramos um cadastro com esses dados. Se você já se cadastrou, verifique seu e-mail (se informado) ou fale com a equipe do pet shop.', 'dps-registration-addon' ) );
+                $this->add_error( __( 'Já encontramos um cadastro com esse telefone. Se você já se cadastrou, verifique seu e-mail (se informado) ou fale com a equipe do pet shop.', 'dps-registration-addon' ) );
                 $this->redirect_with_error();
             } elseif ( ! $admin_confirmed_duplicate ) {
                 // Admin não confirmou: a verificação AJAX deve ter sido pulada (JS desabilitado)
                 // Fallback: permitir continuar mas logar o evento
-                $this->log_event( 'info', 'Admin criando cliente com dados duplicados (sem confirmação JS)', array(
+                $this->log_event( 'info', 'Admin criando cliente com telefone duplicado (sem confirmação JS)', array(
                     'duplicate_id' => $duplicate_id,
                     'admin_user'   => get_current_user_id(),
                 ) );
             } else {
                 // Admin confirmou via modal: logar e permitir
-                $this->log_event( 'info', 'Admin confirmou criação de cliente com dados duplicados', array(
+                $this->log_event( 'info', 'Admin confirmou criação de cliente com telefone duplicado', array(
                     'duplicate_id' => $duplicate_id,
                     'admin_user'   => get_current_user_id(),
                 ) );
@@ -2517,14 +2487,6 @@ class DPS_Registration_Addon {
 
         // F3: Funcionalidades para Administradores Logados
         $is_admin = current_user_can( 'manage_options' );
-        if ( $is_admin ) {
-            echo '<div class="dps-admin-preview-banner">';
-            echo '<span class="dashicons dashicons-visibility" style="margin-right: 8px;"></span>';
-            echo esc_html__( 'Você está visualizando o formulário como administrador.', 'dps-registration-addon' ) . ' ';
-            echo '<a href="' . esc_url( admin_url( 'admin.php?page=dps-registration-settings' ) ) . '">' . esc_html__( 'Configurar formulário', 'dps-registration-addon' ) . '</a>';
-            echo ' | <a href="' . esc_url( admin_url( 'admin.php?page=dps-registration-pending' ) ) . '">' . esc_html__( 'Ver cadastros pendentes', 'dps-registration-addon' ) . '</a>';
-            echo '</div>';
-        }
 
         // Legenda de campos obrigatórios
         echo '<p class="dps-required-legend"><span class="dps-required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-registration-addon' ) . '</p>';
@@ -2541,7 +2503,7 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth"></label></p>';
         echo '<p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>';
         echo '<p><label>Facebook<br><input type="text" name="client_facebook"></label></p>';
-        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do desi.pet by PRObst', 'dps-registration-addon' ) . '</label></p>';
+        echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';

@@ -719,6 +719,142 @@
     }
 }
 
+/* Desktop muito grande (1200px+) */
+@media (min-width: 1200px) {
+    .dps-registration-form {
+        max-width: 840px;
+        padding: 48px 56px;
+    }
+    
+    .dps-registration-form h4 {
+        font-size: 22px;
+        margin-bottom: 28px;
+    }
+    
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        gap: 24px;
+    }
+    
+    .dps-registration-form input[type="text"],
+    .dps-registration-form input[type="email"],
+    .dps-registration-form input[type="tel"],
+    .dps-registration-form input[type="date"],
+    .dps-registration-form input[type="number"],
+    .dps-registration-form select,
+    .dps-registration-form textarea {
+        padding: 14px 16px;
+    }
+    
+    .dps-progress {
+        padding: 24px 28px;
+    }
+    
+    .dps-pet-fieldset {
+        padding: 28px;
+    }
+    
+    .dps-summary-content {
+        padding: 24px 28px;
+    }
+}
+
+/* Desktop extra grande (1440px+) */
+@media (min-width: 1440px) {
+    .dps-registration-form {
+        max-width: 920px;
+        padding: 56px 64px;
+        border-radius: 20px;
+    }
+    
+    .dps-registration-form h4 {
+        font-size: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .dps-registration-form h4::before {
+        width: 5px;
+        height: 28px;
+    }
+    
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        gap: 28px;
+    }
+    
+    .dps-registration-form label {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .dps-registration-form input[type="text"],
+    .dps-registration-form input[type="email"],
+    .dps-registration-form input[type="tel"],
+    .dps-registration-form input[type="date"],
+    .dps-registration-form input[type="number"],
+    .dps-registration-form select,
+    .dps-registration-form textarea {
+        padding: 16px 18px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    
+    .dps-progress {
+        padding: 28px 32px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .dps-progress-bar {
+        height: 12px;
+    }
+    
+    #dps-step-counter {
+        padding: 6px 14px;
+        font-size: 14px;
+    }
+    
+    .dps-pet-fieldset {
+        padding: 32px;
+        border-radius: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .dps-pet-fieldset legend {
+        font-size: 17px;
+        padding: 10px 18px;
+    }
+    
+    .dps-button-next,
+    .dps-button-secondary,
+    .dps-registration-form .button {
+        padding: 16px 32px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    
+    .dps-step-actions {
+        margin-top: 36px;
+        padding-top: 28px;
+    }
+    
+    .dps-summary-box {
+        border-radius: 20px;
+    }
+    
+    .dps-summary-header {
+        padding: 24px 28px;
+    }
+    
+    .dps-summary-content {
+        padding: 28px 32px;
+    }
+    
+    .dps-summary-confirm {
+        padding: 24px 28px;
+    }
+}
+
 /* Tablet grande (769px - 1024px) - PRIORIDADE */
 @media (min-width: 769px) and (max-width: 1024px) {
     .dps-registration-form {
