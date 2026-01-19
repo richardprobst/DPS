@@ -77,6 +77,9 @@ if ( extension_loaded( 'openssl' ) ) {
     require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-client.php';
     require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-sync.php';
     
+    // FASE 3 - Google Calendar: Sincronização Bidirecional (Calendar ⇄ DPS)
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-webhook.php';
+    
     // Inicializa interface de configurações
     add_action( 'plugins_loaded', function() {
         if ( is_admin() ) {
@@ -86,6 +89,12 @@ if ( extension_loaded( 'openssl' ) ) {
         // Inicializa sincronização Calendar (se conectado)
         if ( DPS_Google_Auth::is_connected() ) {
             new DPS_Google_Calendar_Sync();
+            
+            // Inicializa webhook para sincronização bidirecional
+            $webhook = new DPS_Google_Calendar_Webhook();
+            
+            // Registra ação para processar mudanças
+            add_action( 'dps_google_calendar_process_changes', [ $webhook, 'process_calendar_changes' ] );
         }
     }, 20 );
 }

@@ -1,9 +1,10 @@
-# Integrações Google - Fases 1 e 2
+# Integrações Google - Fases 1, 2 e 3
 
 **Status Fase 1:** ✅ Concluída  
 **Status Fase 2:** ✅ Concluída  
+**Status Fase 3:** ✅ Concluída  
 **Data:** 2026-01-19  
-**Versão:** 2.0.0-fase2  
+**Versão:** 2.0.0-fase3  
 
 ## O que foi implementado
 
@@ -12,9 +13,10 @@
 ```
 desi-pet-shower-agenda/includes/integrations/
 ├── class-dps-google-auth.php                    ✅ OAuth 2.0 Handler (Fase 1)
-├── class-dps-google-integrations-settings.php   ✅ Interface Administrativa (Fase 1+2)
+├── class-dps-google-integrations-settings.php   ✅ Interface Administrativa (Fase 1+2+3)
 ├── class-dps-google-calendar-client.php         ✅ Cliente Calendar API (Fase 2)
 ├── class-dps-google-calendar-sync.php           ✅ Sincronização Calendar (Fase 2)
+├── class-dps-google-calendar-webhook.php        ✅ Webhook Handler (Fase 3)
 └── README.md                                    ✅ Esta documentação
 ```
 
@@ -190,9 +192,90 @@ Lembretes: 1h antes + 15min antes
 - Botão "Salvar Configurações"
 - Mensagem de status: "Fase 2 concluída"
 
+## Fase 3: Sincronização Bidirecional (Concluída)
+
+### Funcionalidades Implementadas
+
+#### 1. Webhook Handler (`class-dps-google-calendar-webhook.php`)
+
+**Responsabilidades:**
+- Registrar webhook no Google Calendar (watch channel)
+- Receber notificações push quando eventos mudam
+- Processar mudanças e atualizar agendamentos no DPS
+- Renovar webhook automaticamente (7 dias)
+- Parar webhook ao desconectar
+
+**Fluxo do Webhook:**
+```
+1. Conectar ao Google → Registra webhook
+   ↓
+2. Google Calendar: Admin reagenda evento
+   ↓
+3. Google envia notificação push
+   ↓
+4. Endpoint REST: /wp-json/dps/v1/google-calendar-webhook
+   ↓
+5. Valida token secreto
+   ↓
+6. Agenda processamento em background
+   ↓
+7. Busca eventos atualizados (updatedMin)
+   ↓
+8. Identifica evento via extendedProperties.dps_appointment_id
+   ↓
+9. Atualiza appointment_date e appointment_time no DPS
+   ↓
+10. Marca _dps_syncing_from_google (previne loop)
+```
+
+**Métodos Principais:**
+- `register_webhook()` - Registra webhook no Google
+- `stop_webhook()` - Para webhook
+- `renew_webhook()` - Renova webhook (cron 5 dias antes)
+- `handle_webhook_notification()` - Endpoint REST
+- `process_calendar_changes()` - Processa mudanças
+- `fetch_updated_events()` - Busca eventos atualizados
+- `sync_event_to_dps()` - Atualiza agendamento
+
+**Segurança:**
+- Token secreto único por webhook
+- Validação via header `x-goog-channel-token`
+- Ignora notificações de sincronização (apenas mudanças reais)
+- Previne loops infinitos (_dps_syncing_from_google)
+
+**Metadados Adicionados:**
+- `_google_calendar_synced_from_calendar_at` - Timestamp da sincronização do Calendar
+- `_google_calendar_deleted` - Flag se evento foi deletado no Calendar
+
+**Options WordPress:**
+- `dps_google_calendar_webhook` - Dados do webhook (id, resource_id, token, expiration)
+- `dps_google_calendar_last_sync` - Timestamp da última sincronização
+
+**Cron Jobs:**
+- `dps_google_webhook_renew` - Renovação automática (5 dias antes de expirar)
+- `dps_google_calendar_process_changes` - Processamento de mudanças
+
+#### 2. Hooks e Actions Adicionados
+
+**Actions Disparadas:**
+- `dps_google_auth_connected` - Após conectar (registra webhook)
+- `dps_google_auth_disconnected` - Antes de desconectar (para webhook)
+- `dps_google_calendar_synced_from_calendar` - Após sincronizar do Calendar para DPS
+- `dps_google_calendar_webhook_error` - Após erro no webhook
+
+**Actions Consumidas:**
+- `dps_google_webhook_renew` - Cron para renovar webhook
+- `dps_google_calendar_process_changes` - Processar mudanças em background
+
+#### 3. Interface Atualizada
+
+**Status do Webhook:**
+- Exibe "✅ Sincronização bidirecional ativa (Calendar ⇄ DPS)"
+- Mostra data de renovação automática
+- Mensagem: "Fase 3 concluída"
+
 ## O que NÃO foi implementado (Próximas Fases)
 
-❌ Webhook Calendar → DPS (sincronização bidirecional) - Fase 3  
 ❌ Sincronização com Google Tasks - Fase 4  
 ❌ Interface de logs de sincronização - Fase 5  
 
@@ -275,11 +358,76 @@ Lembretes: 1h antes + 15min antes
    _google_calendar_synced_at: 1234567890
    ```
 
-### Fase 1+2: Testar Desconexão
+### Fase 3: Sincronização Bidirecional (Calendar → DPS)
+
+#### 1. Verificar Status do Webhook
+
+1. Após conectar, verifique interface
+2. Deve exibir:
+   - "✅ Sincronização bidirecional ativa (Calendar ⇄ DPS)"
+   - Data de renovação automática
+
+#### 2. Testar Reagendamento no Calendar
+
+1. Crie agendamento no DPS:
+   - Cliente: João Silva
+   - Pet: Rex
+   - Data: Amanhã às 14:00
+2. Aguarde evento aparecer no Google Calendar
+3. No Google Calendar, **arraste o evento** para outro dia/horário
+   - Ex: Mude de 14:00 para 16:00
+4. Aguarde ~30 segundos
+5. Recarregue página do DPS
+6. ✅ Agendamento deve estar atualizado com novo horário!
+
+#### 3. Testar Deleção no Calendar
+
+1. Crie agendamento no DPS
+2. Aguarde evento aparecer no Calendar
+3. Delete o evento no Google Calendar
+4. Aguarde ~30 segundos
+5. Verifique agendamento no DPS
+6. Deve ter metadado `_google_calendar_deleted = true`
+7. (Evento não é deletado do DPS, apenas marcado)
+
+#### 4. Verificar Webhook Registrado
+
+1. Verifique option no banco:
+   ```sql
+   SELECT * FROM wp_options WHERE option_name = 'dps_google_calendar_webhook';
+   ```
+2. Deve ter:
+   - `id`: dps-calendar-{uuid}
+   - `resource_id`: ID do Google
+   - `token`: Token secreto
+   - `expiration`: Timestamp em milissegundos
+
+#### 5. Testar Renovação Automática
+
+1. Webhook renova automaticamente 5 dias antes de expirar
+2. Verifique cron agendado:
+   ```php
+   wp_next_scheduled('dps_google_webhook_renew');
+   ```
+3. Deve retornar timestamp futuro
+
+#### 6. Verificar Previne Loop Infinito
+
+1. Reagende no Calendar
+2. DPS recebe notificação
+3. DPS atualiza agendamento
+4. Marca `_dps_syncing_from_google = true`
+5. Hook `dps_base_after_save_appointment` dispara
+6. Sync verifica flag e ignora (previne enviar de volta para Calendar)
+7. Flag é removida após sync
+
+### Fase 1+2+3: Testar Desconexão
 
 1. Clique em "Desconectar"
 2. Confirme no alerta
-3. Status deve voltar para "Não Conectado"
+3. Webhook é parado no Google
+4. Cron de renovação é limpo
+5. Status volta para "Não Conectado"
 4. Criar novo agendamento NÃO deve sincronizar
 
 ### 4. Testar Desconexão

@@ -194,6 +194,25 @@ class DPS_Google_Integrations_Settings {
                         esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $settings['connected_at'] ) )
                     );
                     echo '</p>';
+                    
+                    // Status do webhook
+                    $webhook_data = get_option( 'dps_google_calendar_webhook' );
+                    if ( ! empty( $webhook_data['id'] ) ) {
+                        echo '<p class="description" style="color: #10b981;">';
+                        echo '✅ ' . esc_html__( 'Sincronização bidirecional ativa (Calendar ⇄ DPS)', 'dps-agenda-addon' );
+                        echo '</p>';
+                        
+                        if ( ! empty( $webhook_data['expiration'] ) ) {
+                            $expires_at = intval( $webhook_data['expiration'] / 1000 );
+                            echo '<p class="description" style="font-size: 0.9em;">';
+                            printf(
+                                /* translators: %s: Data de expiração */
+                                esc_html__( 'Renovação automática em: %s', 'dps-agenda-addon' ),
+                                esc_html( date_i18n( get_option( 'date_format' ), $expires_at ) )
+                            );
+                            echo '</p>';
+                        }
+                    }
                 }
                 ?>
                 
@@ -353,7 +372,9 @@ class DPS_Google_Integrations_Settings {
                 <?php submit_button( __( 'Salvar Configurações', 'dps-agenda-addon' ) ); ?>
                 
                 <p class="description" style="margin-top: 20px; padding: 15px; background: #d1fae5; border-left: 4px solid #10b981;">
-                    ✅ <?php esc_html_e( 'Fase 2 concluída: Sincronização Google Calendar implementada (DPS → Calendar).', 'dps-agenda-addon' ); ?>
+                    ✅ <?php esc_html_e( 'Fase 3 concluída: Sincronização bidirecional Google Calendar implementada (Calendar ⇄ DPS).', 'dps-agenda-addon' ); ?>
+                    <br>
+                    <small><?php esc_html_e( 'Webhook automático registrado. Reagendamentos no Google Calendar sincronizam automaticamente para o DPS.', 'dps-agenda-addon' ); ?></small>
                 </p>
             </form>
         </div>

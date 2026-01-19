@@ -153,6 +153,13 @@ class DPS_Google_Auth {
         
         update_option( self::OPTION_NAME, $settings );
         
+        /**
+         * Disparado após conectar com sucesso ao Google.
+         *
+         * @since 2.0.0
+         */
+        do_action( 'dps_google_auth_connected' );
+        
         return $data;
     }
     
@@ -264,6 +271,14 @@ class DPS_Google_Auth {
      * @return bool True em caso de sucesso.
      */
     public static function disconnect() {
+        /**
+         * Disparado antes de desconectar do Google.
+         * Permite que outros componentes limpem seus dados.
+         *
+         * @since 2.0.0
+         */
+        do_action( 'dps_google_auth_disconnected' );
+        
         delete_option( self::OPTION_NAME );
         
         /**
