@@ -172,6 +172,9 @@ class DPS_Google_Tasks_Client {
     /**
      * Formata data para formato RFC 3339 (Google Tasks)
      *
+     * Nota: Google Tasks aceita RFC 3339 completo para 'due', mas ignora o componente de tempo,
+     * usando apenas a data. O formato completo é mantido para compatibilidade com a API.
+     *
      * @param string $date Data no formato Y-m-d ou timestamp.
      * @return string Data formatada.
      */
@@ -182,7 +185,7 @@ class DPS_Google_Tasks_Client {
             $timestamp = strtotime( $date );
         }
 
-        // Google Tasks usa apenas data (sem horário) para 'due'
+        // Google Tasks aceita RFC 3339, mas só considera a data (ignora horário)
         return gmdate( 'Y-m-d\TH:i:s\Z', $timestamp );
     }
 
