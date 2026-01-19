@@ -83,7 +83,7 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
-**Botão de Reagendamento nas Abas Simplificadas da Agenda (v1.1.1)**
+**Botão de Reagendamento nas Abas Simplificadas da Agenda (v1.1.0)**
 
 - **Coluna "Ações" nas abas da agenda**: Adicionada nova coluna "Ações" nas três abas simplificadas da agenda (Visão Rápida, Operação, Detalhes).
   - Botão "📅 Reagendar" disponível em cada linha de atendimento

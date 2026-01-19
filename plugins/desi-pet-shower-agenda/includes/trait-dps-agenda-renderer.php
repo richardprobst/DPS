@@ -36,7 +36,7 @@ trait DPS_Agenda_Renderer {
      *
      * Método helper para evitar duplicação de código nas diferentes abas.
      *
-     * @since 1.1.1
+     * @since 1.1.0
      * @param int    $appt_id ID do agendamento.
      * @param string $date    Data do agendamento (Y-m-d).
      * @param string $time    Hora do agendamento (H:i).
