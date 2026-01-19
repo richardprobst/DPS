@@ -230,6 +230,7 @@ class DPS_Subscription_Addon {
 
     /**
      * Cria a mensagem de cobrança para a renovação da assinatura.
+     * Suporta múltiplos pets na mensagem.
      *
      * @param WP_Post $sub Objeto da assinatura
      * @param string $payment_link Link de pagamento a ser usado
@@ -237,13 +238,41 @@ class DPS_Subscription_Addon {
      */
     private function build_subscription_whatsapp_message( $sub, $payment_link ) {
         $cid   = get_post_meta( $sub->ID, 'subscription_client_id', true );
-        $pid   = get_post_meta( $sub->ID, 'subscription_pet_id', true );
         $price = get_post_meta( $sub->ID, 'subscription_price', true );
         $client_post = $cid ? get_post( absint( $cid ) ) : null;
-        $pet_post    = $pid ? get_post( absint( $pid ) ) : null;
         $client_name = $client_post ? sanitize_text_field( $client_post->post_title ) : '';
-        $pet_name    = $pet_post ? sanitize_text_field( $pet_post->post_title ) : '';
         $valor_fmt   = $price ? number_format( floatval( $price ), 2, ',', '.' ) : '0,00';
+        
+        // Suporta múltiplos pets
+        $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
+        $pet_id_single = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+        
+        if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+            $pet_ids = array_map( 'absint', $pet_ids_raw );
+        } elseif ( $pet_id_single ) {
+            $pet_ids = [ absint( $pet_id_single ) ];
+        } else {
+            $pet_ids = [];
+        }
+        
+        // Coleta nomes de todos os pets
+        $pet_names = [];
+        foreach ( $pet_ids as $pid ) {
+            $pet_post = get_post( $pid );
+            if ( $pet_post ) {
+                $pet_names[] = sanitize_text_field( $pet_post->post_title );
+            }
+        }
+        
+        // Formata lista de pets
+        if ( count( $pet_names ) > 1 ) {
+            $last_pet = array_pop( $pet_names );
+            $pets_display = implode( ', ', $pet_names ) . ' e ' . $last_pet;
+        } elseif ( count( $pet_names ) === 1 ) {
+            $pets_display = $pet_names[0];
+        } else {
+            $pets_display = '';
+        }
         
         // Obtém a chave PIX configurada ou utiliza padrão
         // Reaproveita a opção do módulo de pagamentos
@@ -253,16 +282,28 @@ class DPS_Subscription_Addon {
         // O $payment_link já vem escapado de get_subscription_payment_link()
         // Não fazer escape adicional para evitar duplo escape
         
-        // Mensagem padrão para renovação da assinatura
-        $msg = sprintf(
-            /* translators: %1$s: client name, %2$s: pet name, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
-            __( 'Olá %1$s! A assinatura do pet %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
-            $client_name,
-            $pet_name,
-            $valor_fmt,
-            $pix_display,
-            $payment_link
-        );
+        // Mensagem padrão para renovação da assinatura (ajusta singular/plural)
+        if ( count( $pet_ids ) > 1 ) {
+            $msg = sprintf(
+                /* translators: %1$s: client name, %2$s: pet names, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
+                __( 'Olá %1$s! A assinatura dos pets %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
+                $client_name,
+                $pets_display,
+                $valor_fmt,
+                $pix_display,
+                $payment_link
+            );
+        } else {
+            $msg = sprintf(
+                /* translators: %1$s: client name, %2$s: pet name, %3$s: formatted value, %4$s: PIX key, %5$s: payment link */
+                __( 'Olá %1$s! A assinatura do pet %2$s foi concluída. O valor da renovação de R$ %3$s está pendente. Você pode pagar via PIX (%4$s) ou pelo link: %5$s. Obrigado!', 'dps-subscription-addon' ),
+                $client_name,
+                $pets_display,
+                $valor_fmt,
+                $pix_display,
+                $payment_link
+            );
+        }
         
         // Permite customização via filtro
         return apply_filters( 'dps_subscription_whatsapp_message', $msg, $sub, $payment_link );
@@ -542,7 +583,19 @@ class DPS_Subscription_Addon {
     private function save_subscription() {
         // Sanitiza e valida todos os campos de entrada
         $client_id    = isset( $_POST['subscription_client_id'] ) ? absint( $_POST['subscription_client_id'] ) : 0;
-        $pet_id       = isset( $_POST['subscription_pet_id'] ) ? absint( $_POST['subscription_pet_id'] ) : 0;
+        
+        // Suporta múltiplos pets (novo) ou pet único (legado)
+        $pet_ids_raw  = isset( $_POST['subscription_pet_ids'] ) ? (array) wp_unslash( $_POST['subscription_pet_ids'] ) : [];
+        $pet_ids      = array_filter( array_map( 'absint', $pet_ids_raw ) );
+        
+        // Fallback para campo de pet único (compatibilidade com formulário legado)
+        if ( empty( $pet_ids ) && isset( $_POST['subscription_pet_id'] ) ) {
+            $pet_id_single = absint( $_POST['subscription_pet_id'] );
+            if ( $pet_id_single ) {
+                $pet_ids = [ $pet_id_single ];
+            }
+        }
+        
         $service      = isset( $_POST['subscription_service'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_service'] ) ) : '';
         $frequency    = isset( $_POST['subscription_frequency'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_frequency'] ) ) : '';
         $price_raw    = isset( $_POST['subscription_price'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_price'] ) ) : '0';
@@ -555,8 +608,14 @@ class DPS_Subscription_Addon {
         $extras_val   = isset( $_POST['subscription_extras_values'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['subscription_extras_values'] ) ) : [];
         $extras_list  = $this->parse_extras_from_request( $extras_desc, $extras_val );
         
+        // Campos adicionais de tosa (compatibilidade com criação via plugin base)
+        $tosa            = isset( $_POST['subscription_tosa'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_tosa'] ) ) : '';
+        $tosa_price_raw  = isset( $_POST['subscription_tosa_price'] ) ? sanitize_text_field( wp_unslash( $_POST['subscription_tosa_price'] ) ) : '0';
+        $tosa_price      = floatval( str_replace( ',', '.', $tosa_price_raw ) );
+        $tosa_occurrence = isset( $_POST['subscription_tosa_occurrence'] ) ? absint( $_POST['subscription_tosa_occurrence'] ) : 0;
+        
         // Valida campos obrigatórios com feedback ao usuário
-        if ( ! $client_id || ! $pet_id || ! $service || ! $frequency || ! $start_date || ! $start_time ) {
+        if ( ! $client_id || empty( $pet_ids ) || ! $service || ! $frequency || ! $start_date || ! $start_time ) {
             $this->add_user_message( __( 'Por favor, preencha todos os campos obrigatórios.', 'dps-subscription-addon' ), 'error' );
             return;
         }
@@ -594,11 +653,13 @@ class DPS_Subscription_Addon {
             return;
         }
         
-        // Valida que pet existe e é do tipo correto
-        $pet_post = get_post( $pet_id );
-        if ( ! $pet_post || 'dps_pet' !== $pet_post->post_type ) {
-            $this->add_user_message( __( 'Pet selecionado não existe ou é inválido.', 'dps-subscription-addon' ), 'error' );
-            return;
+        // Valida que todos os pets existem e são do tipo correto
+        foreach ( $pet_ids as $pet_id ) {
+            $pet_post = get_post( $pet_id );
+            if ( ! $pet_post || 'dps_pet' !== $pet_post->post_type ) {
+                $this->add_user_message( __( 'Um ou mais pets selecionados não existem ou são inválidos.', 'dps-subscription-addon' ), 'error' );
+                return;
+            }
         }
         
         // Valida preço positivo
@@ -633,13 +694,32 @@ class DPS_Subscription_Addon {
         if ( ! $sub_id || is_wp_error( $sub_id ) ) {
             return;
         }
+        
+        // Salva metadados da assinatura
         update_post_meta( $sub_id, 'subscription_client_id', $client_id );
-        update_post_meta( $sub_id, 'subscription_pet_id', $pet_id );
+        // Legado: primeiro pet (protegido contra array vazio, já validado acima mas reforçado)
+        $first_pet_id = reset( $pet_ids );
+        if ( $first_pet_id ) {
+            update_post_meta( $sub_id, 'subscription_pet_id', $first_pet_id );
+        }
+        update_post_meta( $sub_id, 'subscription_pet_ids', $pet_ids );          // Novo: todos os pets
         update_post_meta( $sub_id, 'subscription_service', $service );
         update_post_meta( $sub_id, 'subscription_frequency', $frequency );
         update_post_meta( $sub_id, 'subscription_price', $price );
         update_post_meta( $sub_id, 'subscription_start_date', $start_date );
         update_post_meta( $sub_id, 'subscription_start_time', $start_time );
+        
+        // Salva campos de tosa (compatibilidade com plugin base)
+        if ( $tosa ) {
+            update_post_meta( $sub_id, 'subscription_tosa', $tosa );
+            update_post_meta( $sub_id, 'subscription_tosa_price', $tosa_price );
+            update_post_meta( $sub_id, 'subscription_tosa_occurrence', $tosa_occurrence );
+        } else {
+            delete_post_meta( $sub_id, 'subscription_tosa' );
+            delete_post_meta( $sub_id, 'subscription_tosa_price' );
+            delete_post_meta( $sub_id, 'subscription_tosa_occurrence' );
+        }
+        
         if ( $notes ) {
             update_post_meta( $sub_id, 'subscription_notes', $notes );
         } else {
@@ -676,10 +756,16 @@ class DPS_Subscription_Addon {
         // vigente (data de início) e ao valor do pacote. O status da transação
         // refletirá o campo subscription_payment_status.
         $this->create_or_update_finance_record( $sub_id, $cycle_key );
+        
+        // Mensagem de sucesso
+        $this->add_user_message( __( 'Assinatura salva com sucesso!', 'dps-subscription-addon' ), 'success' );
     }
 
     /**
-     * Gera os agendamentos para uma assinatura para o mês da data inicial
+     * Gera os agendamentos para uma assinatura para o mês da data inicial.
+     * Suporta múltiplos pets (subscription_pet_ids) criando agendamentos
+     * para cada pet em cada data do ciclo.
+     *
      * @param int    $sub_id     ID da assinatura
      * @param string $date_start Data inicial (Y-m-d)
      * @param string $cycle_key  Ciclo (Y-m) calculado previamente
@@ -689,13 +775,31 @@ class DPS_Subscription_Addon {
         if ( ! $cycle_key || $this->has_generated_cycle( $sub_id, $cycle_key ) ) {
             return;
         }
-        $pet_id    = get_post_meta( $sub_id, 'subscription_pet_id', true );
-        $client_id = get_post_meta( $sub_id, 'subscription_client_id', true );
-        $frequency = get_post_meta( $sub_id, 'subscription_frequency', true );
-        $service   = get_post_meta( $sub_id, 'subscription_service', true );
-        $start_time= get_post_meta( $sub_id, 'subscription_start_time', true );
-        $notes     = get_post_meta( $sub_id, 'subscription_notes', true );
-        $extras    = get_post_meta( $sub_id, 'subscription_extras_list', true );
+        
+        // Suporta múltiplos pets (novo) ou pet único (legado)
+        $pet_ids_raw = get_post_meta( $sub_id, 'subscription_pet_ids', true );
+        $pet_id_single = get_post_meta( $sub_id, 'subscription_pet_id', true );
+        
+        if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+            $pet_ids = array_map( 'absint', $pet_ids_raw );
+        } elseif ( $pet_id_single ) {
+            $pet_ids = [ absint( $pet_id_single ) ];
+        } else {
+            $pet_ids = [];
+        }
+        
+        $client_id     = get_post_meta( $sub_id, 'subscription_client_id', true );
+        $frequency     = get_post_meta( $sub_id, 'subscription_frequency', true );
+        $service       = get_post_meta( $sub_id, 'subscription_service', true );
+        $start_time    = get_post_meta( $sub_id, 'subscription_start_time', true );
+        $notes         = get_post_meta( $sub_id, 'subscription_notes', true );
+        $extras        = get_post_meta( $sub_id, 'subscription_extras_list', true );
+        
+        // Campos de tosa (compatibilidade com plugin base)
+        $tosa            = get_post_meta( $sub_id, 'subscription_tosa', true );
+        $tosa_price      = (float) get_post_meta( $sub_id, 'subscription_tosa_price', true );
+        $tosa_occurrence = absint( get_post_meta( $sub_id, 'subscription_tosa_occurrence', true ) );
+        
         if ( ! is_array( $extras ) || empty( $extras ) ) {
             $legacy_desc = get_post_meta( $sub_id, 'subscription_extra_description', true );
             $legacy_val  = get_post_meta( $sub_id, 'subscription_extra_value', true );
@@ -710,32 +814,33 @@ class DPS_Subscription_Addon {
                 $extras = [];
             }
         }
-        if ( ! $pet_id || ! $client_id || ! $frequency || ! $date_start ) {
+        
+        if ( empty( $pet_ids ) || ! $client_id || ! $frequency || ! $date_start ) {
             return;
         }
+        
         // Parse date
         try {
             $start_dt = new DateTime( $date_start );
         } catch ( Exception $e ) {
             return;
         }
-        $year  = intval( $start_dt->format( 'Y' ) );
-        $month = intval( $start_dt->format( 'm' ) );
+        
         // Determine increment in days
         $interval_days = ( $frequency === 'quinzenal' ) ? 14 : 7;
+        
         /*
          * A assinatura gera um número fixo de atendimentos por ciclo: 4 para semanal e 2 para quinzenal.
-         * Em vez de limitar os agendamentos ao mês de início, geramos a quantidade necessária de datas
-         * a partir da data inicial, mesmo que atravesse meses. Isso atende ao requisito de sempre ter
-         * quatro ou duas consultas conforme a frequência escolhida.
+         * Para cada pet, geramos a quantidade necessária de datas a partir da data inicial.
          */
-        $dates   = [];
-        $count   = ( $frequency === 'quinzenal' ) ? 2 : 4;
+        $dates = [];
+        $count = ( $frequency === 'quinzenal' ) ? 2 : 4;
         $current_dt = clone $start_dt;
         for ( $i = 0; $i < $count; $i++ ) {
-            $dates[]   = $current_dt->format( 'Y-m-d' );
+            $dates[] = $current_dt->format( 'Y-m-d' );
             $current_dt->modify( '+' . $interval_days . ' days' );
         }
+        
         // Remove agendamentos já criados para o mesmo ciclo para evitar duplicidade
         $existing = get_posts( [
             'post_type'      => 'dps_agendamento',
@@ -749,37 +854,58 @@ class DPS_Subscription_Addon {
         foreach ( $existing as $appt ) {
             wp_delete_post( $appt->ID, true );
         }
-        // Cria novos agendamentos com as datas calculadas
-        foreach ( $dates as $date ) {
-            $appt_id = wp_insert_post( [
-                'post_type'   => 'dps_agendamento',
-                'post_title'  => $date . ' ' . $start_time,
-                'post_status' => 'publish',
-            ] );
-            if ( $appt_id ) {
-                update_post_meta( $appt_id, 'appointment_client_id', $client_id );
-                update_post_meta( $appt_id, 'appointment_pet_id', $pet_id );
-                update_post_meta( $appt_id, 'appointment_date', $date );
-                update_post_meta( $appt_id, 'appointment_time', $start_time );
-                update_post_meta( $appt_id, 'appointment_services', [] );
-                update_post_meta( $appt_id, 'appointment_service_prices', [] );
-                update_post_meta( $appt_id, 'appointment_total_value', 0 );
-                update_post_meta( $appt_id, 'appointment_status', 'pendente' );
-                update_post_meta( $appt_id, 'subscription_id', $sub_id );
-                update_post_meta( $appt_id, 'subscription_cycle', $cycle_key );
-                // Indica que o agendamento pertence a um pacote de assinatura
-                $appt_note = __( 'Serviço de assinatura', 'dps-subscription-addon' );
-                if ( $notes ) {
-                    $appt_note .= ' — ' . $notes;
-                }
-                update_post_meta( $appt_id, 'appointment_notes', $appt_note );
-                if ( ! empty( $extras ) ) {
-                    update_post_meta( $appt_id, 'subscription_extras_list', $extras );
-                    update_post_meta( $appt_id, 'subscription_extra_description', $extras[0]['description'] );
-                    update_post_meta( $appt_id, 'subscription_extra_value', $extras[0]['value'] );
+        
+        // Valida tosa_occurrence dentro do range esperado
+        $max_occurrence = ( $frequency === 'quinzenal' ) ? 2 : 4;
+        if ( $tosa_occurrence < 1 || $tosa_occurrence > $max_occurrence ) {
+            $tosa_occurrence = 1; // Default para primeiro atendimento se inválido
+        }
+        
+        // Cria agendamentos para CADA PET em CADA DATA do ciclo
+        foreach ( $pet_ids as $pet_id ) {
+            $event_index = 0;
+            foreach ( $dates as $date ) {
+                $event_index++;
+                $appt_id = wp_insert_post( [
+                    'post_type'   => 'dps_agendamento',
+                    'post_title'  => $date . ' ' . $start_time,
+                    'post_status' => 'publish',
+                ] );
+                if ( $appt_id ) {
+                    update_post_meta( $appt_id, 'appointment_client_id', $client_id );
+                    update_post_meta( $appt_id, 'appointment_pet_id', $pet_id );
+                    update_post_meta( $appt_id, 'appointment_date', $date );
+                    update_post_meta( $appt_id, 'appointment_time', $start_time );
+                    update_post_meta( $appt_id, 'appointment_services', [] );
+                    update_post_meta( $appt_id, 'appointment_service_prices', [] );
+                    update_post_meta( $appt_id, 'appointment_total_value', 0 );
+                    update_post_meta( $appt_id, 'appointment_status', 'pendente' );
+                    update_post_meta( $appt_id, 'appointment_type', 'subscription' );
+                    update_post_meta( $appt_id, 'subscription_id', $sub_id );
+                    update_post_meta( $appt_id, 'subscription_cycle', $cycle_key );
+                    
+                    // Tosa: verifica se este evento é o de tosa (dentro do range validado)
+                    $is_tosa_event = ( '1' === $tosa && $event_index === $tosa_occurrence );
+                    update_post_meta( $appt_id, 'appointment_tosa', $is_tosa_event ? '1' : '0' );
+                    update_post_meta( $appt_id, 'appointment_tosa_price', $is_tosa_event ? $tosa_price : 0 );
+                    update_post_meta( $appt_id, 'appointment_tosa_occurrence', $tosa_occurrence );
+                    
+                    // Nota do agendamento
+                    $appt_note = __( 'Serviço de assinatura', 'dps-subscription-addon' );
+                    if ( $notes ) {
+                        $appt_note .= ' — ' . $notes;
+                    }
+                    update_post_meta( $appt_id, 'appointment_notes', $appt_note );
+                    
+                    if ( ! empty( $extras ) ) {
+                        update_post_meta( $appt_id, 'subscription_extras_list', $extras );
+                        update_post_meta( $appt_id, 'subscription_extra_description', $extras[0]['description'] );
+                        update_post_meta( $appt_id, 'subscription_extra_value', $extras[0]['value'] );
+                    }
                 }
             }
         }
+        
         $this->mark_cycle_generated( $sub_id, $cycle_key );
         $this->mark_cycle_status( $sub_id, $cycle_key, 'pendente' );
     }
@@ -1125,17 +1251,38 @@ class DPS_Subscription_Addon {
         $edit_id = ( isset( $_GET['dps_edit'] ) && 'subscription' === $_GET['dps_edit'] && isset( $_GET['id'] ) ) ? intval( $_GET['id'] ) : 0;
         $meta    = [];
         if ( $edit_id ) {
+            // Carrega todos os metadados da assinatura, incluindo campos de múltiplos pets
+            $pet_ids_raw = get_post_meta( $edit_id, 'subscription_pet_ids', true );
+            $pet_id_single = get_post_meta( $edit_id, 'subscription_pet_id', true );
+            
+            // Suporta ambos os formatos: array de IDs (novo) e ID único (legado)
+            if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+                $pet_ids = array_map( 'absint', $pet_ids_raw );
+            } elseif ( $pet_id_single ) {
+                $pet_ids = [ absint( $pet_id_single ) ];
+            } else {
+                $pet_ids = [];
+            }
+            
             $meta = [
-                'client_id'  => get_post_meta( $edit_id, 'subscription_client_id', true ),
-                'pet_id'     => get_post_meta( $edit_id, 'subscription_pet_id', true ),
-                'service'    => get_post_meta( $edit_id, 'subscription_service', true ),
-                'frequency'  => get_post_meta( $edit_id, 'subscription_frequency', true ),
-                'price'      => get_post_meta( $edit_id, 'subscription_price', true ),
-                'start_date' => get_post_meta( $edit_id, 'subscription_start_date', true ),
-                'start_time' => get_post_meta( $edit_id, 'subscription_start_time', true ),
-                'notes'      => get_post_meta( $edit_id, 'subscription_notes', true ),
-                'assignee'   => get_post_meta( $edit_id, 'subscription_assignee', true ),
-                'extras'     => get_post_meta( $edit_id, 'subscription_extras_list', true ),
+                'client_id'       => get_post_meta( $edit_id, 'subscription_client_id', true ),
+                'pet_id'          => $pet_id_single, // Legado para compatibilidade
+                'pet_ids'         => $pet_ids,       // Novo: array de pet IDs
+                'service'         => get_post_meta( $edit_id, 'subscription_service', true ),
+                'frequency'       => get_post_meta( $edit_id, 'subscription_frequency', true ),
+                'price'           => get_post_meta( $edit_id, 'subscription_price', true ),
+                'start_date'      => get_post_meta( $edit_id, 'subscription_start_date', true ),
+                'start_time'      => get_post_meta( $edit_id, 'subscription_start_time', true ),
+                'notes'           => get_post_meta( $edit_id, 'subscription_notes', true ),
+                'assignee'        => get_post_meta( $edit_id, 'subscription_assignee', true ),
+                'extras'          => get_post_meta( $edit_id, 'subscription_extras_list', true ),
+                // Campos adicionais de tosa (compatibilidade com criação via plugin base)
+                'tosa'            => get_post_meta( $edit_id, 'subscription_tosa', true ),
+                'tosa_price'      => get_post_meta( $edit_id, 'subscription_tosa_price', true ),
+                'tosa_occurrence' => get_post_meta( $edit_id, 'subscription_tosa_occurrence', true ),
+                // Campos de valores (compatibilidade com criação via plugin base)
+                'base_value'      => get_post_meta( $edit_id, 'subscription_base_value', true ),
+                'total_value'     => get_post_meta( $edit_id, 'subscription_total_value', true ),
             ];
         }
         // Opções de frequência
@@ -1272,7 +1419,19 @@ class DPS_Subscription_Addon {
             
             foreach ( $active_subs as $sub ) {
                 $cid   = get_post_meta( $sub->ID, 'subscription_client_id', true );
-                $pid   = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+                
+                // Suporta múltiplos pets (subscription_pet_ids) ou único (subscription_pet_id)
+                $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
+                $pet_id_single = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+                
+                if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+                    $pet_ids = array_map( 'absint', $pet_ids_raw );
+                } elseif ( $pet_id_single ) {
+                    $pet_ids = [ absint( $pet_id_single ) ];
+                } else {
+                    $pet_ids = [];
+                }
+                
                 $srv   = get_post_meta( $sub->ID, 'subscription_service', true );
                 $freq  = get_post_meta( $sub->ID, 'subscription_frequency', true );
                 $price = get_post_meta( $sub->ID, 'subscription_price', true );
@@ -1280,7 +1439,15 @@ class DPS_Subscription_Addon {
                 $stime = get_post_meta( $sub->ID, 'subscription_start_time', true );
                 $pay   = get_post_meta( $sub->ID, 'subscription_payment_status', true );
                 $client_post = $cid ? get_post( $cid ) : null;
-                $pet_post    = $pid ? get_post( $pid ) : null;
+                
+                // Coleta nomes de todos os pets
+                $pet_names = [];
+                foreach ( $pet_ids as $pid ) {
+                    $pet_post = get_post( $pid );
+                    if ( $pet_post ) {
+                        $pet_names[] = $pet_post->post_title;
+                    }
+                }
                 
                 // Próximo agendamento
                 $next_appt = '';
@@ -1327,10 +1494,12 @@ class DPS_Subscription_Addon {
                 // Adiciona classe de pagamento para colorir a linha
                 echo '<tr class="pay-status-' . esc_attr( $pay ) . '">';
                 
-                // Cliente / Pet (combinados para reduzir colunas)
+                // Cliente / Pets (combinados para reduzir colunas)
                 $client_name = $client_post ? $client_post->post_title : '—';
-                $pet_name    = $pet_post ? $pet_post->post_title : '—';
-                echo '<td data-label="' . $lbl_cliente . '"><strong>' . esc_html( $client_name ) . '</strong><br><span class="dps-text-secondary">🐾 ' . esc_html( $pet_name ) . '</span></td>';
+                $pets_display = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : '—';
+                $pet_count = count( $pet_names );
+                $pet_icon = $pet_count > 1 ? '🐾🐾' : '🐾';
+                echo '<td data-label="' . $lbl_cliente . '"><strong>' . esc_html( $client_name ) . '</strong><br><span class="dps-text-secondary">' . $pet_icon . ' ' . esc_html( $pets_display ) . '</span></td>';
                 
                 // Serviço
                 echo '<td data-label="' . $lbl_servico . '">' . esc_html( $srv ) . '</td>';
@@ -1386,13 +1555,15 @@ class DPS_Subscription_Addon {
                 );
                 echo '<a href="' . esc_url( $cancel_url ) . '" class="dps-action-btn" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja cancelar esta assinatura?', 'dps-subscription-addon' ) ) . '\');" title="' . esc_attr__( 'Cancelar assinatura', 'dps-subscription-addon' ) . '">❌</a>';
                 
-                // O botão Renovar só aparece quando todos os atendimentos do ciclo foram realizados
-                if ( $completed_count >= $total_appts && $total_appts > 0 ) {
-                    // Link para renovar com nonce
-                    $renew_url = wp_nonce_url(
-                        add_query_arg( [ 'tab' => 'assinaturas', 'dps_renew' => '1', 'id' => $sub->ID ], $base_url ),
-                        'dps_renew_subscription_' . $sub->ID
-                    );
+                // O botão Renovar fica sempre visível, mas só habilitado quando todos os atendimentos foram concluídos
+                $all_completed = ( $completed_count >= $total_appts && $total_appts > 0 );
+                $renew_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'assinaturas', 'dps_renew' => '1', 'id' => $sub->ID ], $base_url ),
+                    'dps_renew_subscription_' . $sub->ID
+                );
+                
+                if ( $all_completed ) {
+                    // Botão habilitado - todos os atendimentos concluídos
                     echo '<a href="' . esc_url( $renew_url ) . '" class="dps-action-btn dps-action-renew" title="' . esc_attr__( 'Renovar assinatura para próximo ciclo', 'dps-subscription-addon' ) . '">🔄</a>';
                     
                     // Link de cobrança via WhatsApp usando helper centralizado
@@ -1412,6 +1583,15 @@ class DPS_Subscription_Addon {
                         }
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" class="dps-action-btn dps-action-charge" title="' . esc_attr__( 'Cobrar via WhatsApp', 'dps-subscription-addon' ) . '">💰</a>';
                     }
+                } else {
+                    // Botão desabilitado - aguardando conclusão de todos os atendimentos
+                    $remaining = $total_appts - $completed_count;
+                    $tooltip = sprintf(
+                        /* translators: %d: number of remaining appointments */
+                        _n( 'Aguarde a conclusão de %d atendimento restante para renovar', 'Aguarde a conclusão de %d atendimentos restantes para renovar', $remaining, 'dps-subscription-addon' ),
+                        $remaining
+                    );
+                    echo '<span class="dps-action-btn dps-action-renew dps-action-disabled" title="' . esc_attr( $tooltip ) . '">🔄</span>';
                 }
                 echo '</div>';
                 echo '</td>';
@@ -1458,20 +1638,42 @@ class DPS_Subscription_Addon {
             
             foreach ( $canceled_subs as $sub ) {
                 $cid   = get_post_meta( $sub->ID, 'subscription_client_id', true );
-                $pid   = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+                
+                // Suporta múltiplos pets (subscription_pet_ids) ou único (subscription_pet_id)
+                $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
+                $pet_id_single = get_post_meta( $sub->ID, 'subscription_pet_id', true );
+                
+                if ( ! empty( $pet_ids_raw ) && is_array( $pet_ids_raw ) ) {
+                    $pet_ids = array_map( 'absint', $pet_ids_raw );
+                } elseif ( $pet_id_single ) {
+                    $pet_ids = [ absint( $pet_id_single ) ];
+                } else {
+                    $pet_ids = [];
+                }
+                
                 $srv   = get_post_meta( $sub->ID, 'subscription_service', true );
                 $freq  = get_post_meta( $sub->ID, 'subscription_frequency', true );
                 $price = get_post_meta( $sub->ID, 'subscription_price', true );
                 $pay   = get_post_meta( $sub->ID, 'subscription_payment_status', true );
                 $client_post = $cid ? get_post( $cid ) : null;
-                $pet_post    = $pid ? get_post( $pid ) : null;
+                
+                // Coleta nomes de todos os pets
+                $pet_names = [];
+                foreach ( $pet_ids as $pid ) {
+                    $pet_post = get_post( $pid );
+                    if ( $pet_post ) {
+                        $pet_names[] = $pet_post->post_title;
+                    }
+                }
                 
                 echo '<tr class="dps-canceled-row">';
                 
-                // Cliente / Pet
+                // Cliente / Pets
                 $client_name = $client_post ? $client_post->post_title : '—';
-                $pet_name    = $pet_post ? $pet_post->post_title : '—';
-                echo '<td data-label="' . $lbl_cliente_pet . '"><strong>' . esc_html( $client_name ) . '</strong><br><span class="dps-text-secondary">🐾 ' . esc_html( $pet_name ) . '</span></td>';
+                $pets_display = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : '—';
+                $pet_count = count( $pet_names );
+                $pet_icon = $pet_count > 1 ? '🐾🐾' : '🐾';
+                echo '<td data-label="' . $lbl_cliente_pet . '"><strong>' . esc_html( $client_name ) . '</strong><br><span class="dps-text-secondary">' . $pet_icon . ' ' . esc_html( $pets_display ) . '</span></td>';
                 
                 // Serviço + Frequência
                 echo '<td data-label="' . $lbl_servico . '">' . esc_html( $srv ) . ' <span class="dps-text-muted">(' . esc_html( $freq_options[ $freq ] ?? $freq ) . ')</span></td>';
@@ -1622,10 +1824,17 @@ class DPS_Subscription_Addon {
         echo '</div>';
         echo '</fieldset>';
 
-        // Fieldset: Cliente e Pet
+        // Fieldset: Cliente e Pets
+        // Obtém IDs de pets selecionados (suporta múltiplos)
+        $selected_pet_ids = $meta['pet_ids'] ?? [];
+        if ( empty( $selected_pet_ids ) && ! empty( $meta['pet_id'] ) ) {
+            $selected_pet_ids = [ absint( $meta['pet_id'] ) ];
+        }
+        
         echo '<fieldset class="dps-fieldset">';
-        echo '<legend>' . esc_html__( 'Cliente e Pet', 'dps-subscription-addon' ) . '</legend>';
-        echo '<div class="dps-form-row dps-form-row--2col">';
+        echo '<legend>' . esc_html__( 'Cliente e Pets', 'dps-subscription-addon' ) . '</legend>';
+        
+        // Cliente
         echo '<div class="dps-form-field">';
         echo '<label for="subscription_client_id">' . esc_html__( 'Cliente', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
         echo '<select name="subscription_client_id" id="subscription_client_id" required onchange="DPSSubscription.filterPetsByClient(this.value)">';
@@ -1636,18 +1845,25 @@ class DPS_Subscription_Addon {
         }
         echo '</select>';
         echo '</div>';
+        
+        // Pets (checkboxes para seleção múltipla)
         echo '<div class="dps-form-field">';
-        echo '<label for="dps-subscription-pet-select">' . esc_html__( 'Pet', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
-        echo '<select name="subscription_pet_id" id="dps-subscription-pet-select" required>';
-        echo '<option value="">' . esc_html__( 'Selecione...', 'dps-subscription-addon' ) . '</option>';
+        echo '<label>' . esc_html__( 'Pets', 'dps-subscription-addon' ) . ' <span class="dps-required">*</span></label>';
+        echo '<p class="dps-field-hint">' . esc_html__( 'Selecione um ou mais pets para esta assinatura.', 'dps-subscription-addon' ) . '</p>';
+        echo '<div id="dps-subscription-pets-list" class="dps-checkbox-grid">';
         foreach ( $pets as $pet ) {
             $owner_id = get_post_meta( $pet->ID, 'owner_id', true );
-            $sel = ( $meta['pet_id'] ?? '' ) == $pet->ID ? 'selected' : '';
-            echo '<option value="' . esc_attr( $pet->ID ) . '" data-owner="' . esc_attr( $owner_id ) . '" ' . $sel . '>' . esc_html( $pet->post_title ) . '</option>';
+            $is_checked = in_array( (int) $pet->ID, array_map( 'intval', $selected_pet_ids ), true ) ? 'checked' : '';
+            // Oculta pets de outros clientes via data-owner
+            echo '<label class="dps-checkbox-item" data-owner="' . esc_attr( $owner_id ) . '">';
+            echo '<input type="checkbox" name="subscription_pet_ids[]" value="' . esc_attr( $pet->ID ) . '" ' . $is_checked . '>';
+            echo '<span class="dps-checkbox-label">🐾 ' . esc_html( $pet->post_title ) . '</span>';
+            echo '</label>';
         }
-        echo '</select>';
         echo '</div>';
+        echo '<p class="dps-pets-count"><span id="dps-selected-pets-count">' . count( $selected_pet_ids ) . '</span> ' . esc_html__( 'pet(s) selecionado(s)', 'dps-subscription-addon' ) . '</p>';
         echo '</div>';
+        
         echo '</fieldset>';
 
         // Fieldset: Data e Horário
@@ -1688,6 +1904,48 @@ class DPS_Subscription_Addon {
         echo '<input type="number" step="0.01" min="0" name="subscription_price" id="subscription_price" value="' . esc_attr( $price_val ) . '" required placeholder="0,00">';
         echo '</div>';
         echo '</div>';
+
+        // Seção de Tosa (compatibilidade com criação via plugin base)
+        $tosa_val = $meta['tosa'] ?? '';
+        $tosa_price_val = $meta['tosa_price'] ?? '';
+        $tosa_occurrence_val = $meta['tosa_occurrence'] ?? '';
+        $freq_val = $meta['frequency'] ?? 'semanal';
+        $max_occurrence = ( 'quinzenal' === $freq_val ) ? 2 : 4;
+        
+        echo '<div class="dps-tosa-section">';
+        echo '<h5 class="dps-extras-title">' . esc_html__( 'Tosa opcional', 'dps-subscription-addon' ) . '</h5>';
+        echo '<div class="dps-form-row dps-form-row--3col">';
+        
+        // Checkbox de tosa
+        echo '<div class="dps-form-field">';
+        echo '<label class="dps-checkbox-inline">';
+        echo '<input type="checkbox" name="subscription_tosa" value="1" ' . checked( '1', $tosa_val, false ) . ' id="subscription_tosa" onchange="DPSSubscription.toggleTosaFields()">';
+        echo '<span>' . esc_html__( 'Incluir tosa', 'dps-subscription-addon' ) . '</span>';
+        echo '</label>';
+        echo '</div>';
+        
+        // Valor da tosa
+        echo '<div class="dps-form-field dps-tosa-conditional" ' . ( '1' !== $tosa_val ? 'style="display:none;"' : '' ) . '>';
+        echo '<label for="subscription_tosa_price">' . esc_html__( 'Valor da tosa', 'dps-subscription-addon' ) . '</label>';
+        echo '<div class="dps-input-with-prefix">';
+        echo '<span class="dps-input-prefix">R$</span>';
+        echo '<input type="number" step="0.01" min="0" name="subscription_tosa_price" id="subscription_tosa_price" value="' . esc_attr( $tosa_price_val ) . '" placeholder="0,00">';
+        echo '</div>';
+        echo '</div>';
+        
+        // Ocorrência da tosa
+        echo '<div class="dps-form-field dps-tosa-conditional" ' . ( '1' !== $tosa_val ? 'style="display:none;"' : '' ) . '>';
+        echo '<label for="subscription_tosa_occurrence">' . esc_html__( 'Em qual atendimento?', 'dps-subscription-addon' ) . '</label>';
+        echo '<select name="subscription_tosa_occurrence" id="subscription_tosa_occurrence">';
+        for ( $i = 1; $i <= $max_occurrence; $i++ ) {
+            $sel = ( (int) $tosa_occurrence_val === $i ) ? 'selected' : '';
+            echo '<option value="' . esc_attr( $i ) . '" ' . $sel . '>' . esc_html( $i ) . 'º</option>';
+        }
+        echo '</select>';
+        echo '</div>';
+        
+        echo '</div>'; // .dps-form-row
+        echo '</div>'; // .dps-tosa-section
 
         // Extras
         echo '<div class="dps-extras-section">';
