@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Backup & Restauração Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Gere backups completos dos dados do sistema e restaure em outro ambiente. Exportação e importação simplificadas.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-backup-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Definir constante de versão
 if ( ! defined( 'DPS_BACKUP_VERSION' ) ) {
-    define( 'DPS_BACKUP_VERSION', '1.1.0' );
+    define( 'DPS_BACKUP_VERSION', '1.2.0' );
 }
 
 // Carregar classes auxiliares
@@ -79,7 +79,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.0.0
          * @var string
          */
-        const VERSION = '1.1.0';
+        const VERSION = '1.2.0';
 
         /**
          * Action name para exportação.
@@ -564,6 +564,32 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             $filename = 'dps-backup-' . gmdate( 'Ymd-His' ) . '.json';
             $content = wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+            
+            // Validar se a codificação JSON foi bem-sucedida
+            if ( false === $content || null === $content ) {
+                $json_error = json_last_error_msg();
+                error_log( 'DPS Backup: Falha ao codificar JSON: ' . $json_error );
+                
+                $this->redirect_with_message(
+                    $this->get_post_redirect(),
+                    'error',
+                    sprintf(
+                        /* translators: %s: mensagem de erro JSON */
+                        __( 'Falha ao codificar dados do backup em JSON. Erro: %s. Verifique se há caracteres inválidos nos metadados.', 'dps-backup-addon' ),
+                        $json_error
+                    )
+                );
+            }
+            
+            // Validar que o conteúdo não está vazio
+            if ( empty( $content ) || strlen( $content ) < 50 ) {
+                error_log( 'DPS Backup: Conteúdo do backup está vazio ou corrompido.' );
+                $this->redirect_with_message(
+                    $this->get_post_redirect(),
+                    'error',
+                    __( 'Conteúdo do backup está vazio ou corrompido. Operação cancelada.', 'dps-backup-addon' )
+                );
+            }
 
             // Salvar no histórico
             $stats = $exporter->get_backup_stats( $payload );
@@ -938,6 +964,21 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     }
                 }
             }
+            
+            // Validar que o backup não está completamente vazio
+            $total_records = 0;
+            foreach ( [ 'clients', 'pets', 'appointments', 'transactions', 'services', 'subscriptions' ] as $component ) {
+                if ( isset( $data[ $component ] ) && is_array( $data[ $component ] ) ) {
+                    $total_records += count( $data[ $component ] );
+                }
+            }
+            
+            if ( $total_records === 0 ) {
+                return new WP_Error(
+                    'dps_backup_empty',
+                    __( 'O backup está vazio. Nenhum dado será restaurado. Esta ação foi cancelada como medida de segurança. Verifique se o backup foi gerado corretamente.', 'dps-backup-addon' )
+                );
+            }
 
             return $data;
         }
@@ -1043,8 +1084,23 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             if ( in_array( 'clients', $components, true ) && ! empty( $payload['clients'] ) ) {
                 foreach ( $payload['clients'] as $client ) {
                     $old_id = isset( $client['id'] ) ? (int) $client['id'] : 0;
-                    $new_id = $this->create_entity_post( $client, 'dps_cliente' );
-                    $client_map[ $old_id ] = $new_id;
+                    try {
+                        $new_id = $this->create_entity_post( $client, 'dps_cliente' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do cliente antigo */
+                                    __( 'Falha ao criar cliente com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $client_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        // Log do erro e re-lança para ser capturado pela transação
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar cliente %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1052,12 +1108,42 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 foreach ( $payload['pets'] as $pet ) {
                     $old_id = isset( $pet['id'] ) ? (int) $pet['id'] : 0;
                     $meta   = $pet['meta'] ?? [];
-                    if ( isset( $meta['owner_id'] ) && isset( $client_map[ (int) $meta['owner_id'] ] ) ) {
-                        $meta['owner_id'] = $client_map[ (int) $meta['owner_id'] ];
-                        $pet['meta']      = $meta;
+                    
+                    // Validar e mapear owner_id
+                    if ( isset( $meta['owner_id'] ) ) {
+                        $old_owner_id = (int) $meta['owner_id'];
+                        if ( isset( $client_map[ $old_owner_id ] ) ) {
+                            $meta['owner_id'] = $client_map[ $old_owner_id ];
+                            $pet['meta']      = $meta;
+                        } else {
+                            // Pet tem proprietário que não foi restaurado
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: 1: ID do pet, 2: ID do proprietário */
+                                    __( 'Pet %1$d tem proprietário (ID %2$d) que não foi restaurado. Inclua os clientes no backup.', 'dps-backup-addon' ),
+                                    $old_id,
+                                    $old_owner_id
+                                )
+                            );
+                        }
                     }
-                    $new_id = $this->create_entity_post( $pet, 'dps_pet' );
-                    $pet_map[ $old_id ] = $new_id;
+                    
+                    try {
+                        $new_id = $this->create_entity_post( $pet, 'dps_pet' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do pet antigo */
+                                    __( 'Falha ao criar pet com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $pet_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar pet %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1066,30 +1152,87 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     $old_id = isset( $appointment['id'] ) ? (int) $appointment['id'] : 0;
                     $meta   = $appointment['meta'] ?? [];
 
-                    if ( isset( $meta['appointment_client_id'] ) && isset( $client_map[ (int) $meta['appointment_client_id'] ] ) ) {
-                        $meta['appointment_client_id'] = $client_map[ (int) $meta['appointment_client_id'] ];
+                    // Validar e mapear appointment_client_id
+                    if ( isset( $meta['appointment_client_id'] ) ) {
+                        $old_client_id = (int) $meta['appointment_client_id'];
+                        if ( isset( $client_map[ $old_client_id ] ) ) {
+                            $meta['appointment_client_id'] = $client_map[ $old_client_id ];
+                        } else {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: 1: ID do agendamento, 2: ID do cliente */
+                                    __( 'Agendamento %1$d referencia cliente (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                    $old_id,
+                                    $old_client_id
+                                )
+                            );
+                        }
                     }
 
-                    if ( isset( $meta['appointment_pet_id'] ) && isset( $pet_map[ (int) $meta['appointment_pet_id'] ] ) ) {
-                        $meta['appointment_pet_id'] = $pet_map[ (int) $meta['appointment_pet_id'] ];
+                    // Validar e mapear appointment_pet_id (singular)
+                    if ( isset( $meta['appointment_pet_id'] ) ) {
+                        $old_pet_id = (int) $meta['appointment_pet_id'];
+                        if ( isset( $pet_map[ $old_pet_id ] ) ) {
+                            $meta['appointment_pet_id'] = $pet_map[ $old_pet_id ];
+                        } else {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: 1: ID do agendamento, 2: ID do pet */
+                                    __( 'Agendamento %1$d referencia pet (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                    $old_id,
+                                    $old_pet_id
+                                )
+                            );
+                        }
                     }
 
+                    // Validar e mapear appointment_pet_ids (plural - múltiplos pets)
                     if ( isset( $meta['appointment_pet_ids'] ) && is_array( $meta['appointment_pet_ids'] ) ) {
                         $mapped_pets = [];
+                        $missing_pets = [];
+                        
                         foreach ( $meta['appointment_pet_ids'] as $pet_id ) {
                             $pet_id = (int) $pet_id;
                             if ( isset( $pet_map[ $pet_id ] ) ) {
                                 $mapped_pets[] = $pet_map[ $pet_id ];
+                            } else {
+                                $missing_pets[] = $pet_id;
                             }
                         }
-                        if ( $mapped_pets ) {
-                            $meta['appointment_pet_ids'] = $mapped_pets;
+                        
+                        // Se há pets faltando, lançar erro
+                        if ( ! empty( $missing_pets ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: 1: ID do agendamento, 2: Lista de IDs de pets */
+                                    __( 'Agendamento %1$d referencia pets que não foram restaurados: %2$s', 'dps-backup-addon' ),
+                                    $old_id,
+                                    implode( ', ', $missing_pets )
+                                )
+                            );
                         }
+                        
+                        $meta['appointment_pet_ids'] = $mapped_pets;
                     }
 
                     $appointment['meta'] = $meta;
-                    $new_id               = $this->create_entity_post( $appointment, 'dps_agendamento' );
-                    $appointment_map[ $old_id ] = $new_id;
+                    
+                    try {
+                        $new_id = $this->create_entity_post( $appointment, 'dps_agendamento' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do agendamento antigo */
+                                    __( 'Falha ao criar agendamento com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $appointment_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar agendamento %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1180,14 +1323,41 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $wpdb->query( "TRUNCATE TABLE `{$table}`" );
 
             foreach ( $transactions as $row ) {
+                $original_cliente_id = isset( $row['cliente_id'] ) ? (int) $row['cliente_id'] : 0;
+                $original_agendamento_id = isset( $row['agendamento_id'] ) ? (int) $row['agendamento_id'] : 0;
+                
                 unset( $row['id'] );
 
-                if ( isset( $row['cliente_id'] ) && isset( $client_map[ (int) $row['cliente_id'] ] ) ) {
-                    $row['cliente_id'] = $client_map[ (int) $row['cliente_id'] ];
+                // Mapear cliente_id com validação de órfãos
+                if ( isset( $row['cliente_id'] ) && $row['cliente_id'] ) {
+                    if ( isset( $client_map[ $original_cliente_id ] ) ) {
+                        $row['cliente_id'] = $client_map[ $original_cliente_id ];
+                    } else {
+                        // Cliente órfão detectado - lançar exceção
+                        throw new Exception(
+                            sprintf(
+                                /* translators: %d: ID do cliente */
+                                __( 'Transação com cliente_id %d não pode ser restaurada (cliente não encontrado no backup).', 'dps-backup-addon' ),
+                                $original_cliente_id
+                            )
+                        );
+                    }
                 }
 
-                if ( isset( $row['agendamento_id'] ) && isset( $appointment_map[ (int) $row['agendamento_id'] ] ) ) {
-                    $row['agendamento_id'] = $appointment_map[ (int) $row['agendamento_id'] ];
+                // Mapear agendamento_id com validação de órfãos
+                if ( isset( $row['agendamento_id'] ) && $row['agendamento_id'] ) {
+                    if ( isset( $appointment_map[ $original_agendamento_id ] ) ) {
+                        $row['agendamento_id'] = $appointment_map[ $original_agendamento_id ];
+                    } else {
+                        // Agendamento órfão detectado - lançar exceção
+                        throw new Exception(
+                            sprintf(
+                                /* translators: %d: ID do agendamento */
+                                __( 'Transação com agendamento_id %d não pode ser restaurada (agendamento não encontrado no backup).', 'dps-backup-addon' ),
+                                $original_agendamento_id
+                            )
+                        );
+                    }
                 }
 
                 // Sanitizar campos de texto conhecidos
@@ -1200,9 +1370,17 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
                 $result = $wpdb->insert( $table, $row );
                 if ( false === $result ) {
-                    throw new Exception( __( 'Falha ao restaurar transações financeiras.', 'dps-backup-addon' ) );
+                    throw new Exception(
+                        sprintf(
+                            /* translators: %s: mensagem de erro do banco */
+                            __( 'Falha ao restaurar transações financeiras: %s', 'dps-backup-addon' ),
+                            $wpdb->last_error
+                        )
+                    );
                 }
             }
+            
+            error_log( sprintf( 'DPS Backup: %d transações restauradas com sucesso.', count( $transactions ) ) );
         }
 
         /**
