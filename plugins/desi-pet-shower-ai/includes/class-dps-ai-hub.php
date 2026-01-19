@@ -58,6 +58,143 @@ class DPS_AI_Hub {
     }
 
     /**
+     * Retorna lista de tags HTML permitidas para o conteúdo do hub.
+     * 
+     * Extende wp_kses_post_tags para incluir elementos de formulário que são
+     * necessários para as páginas de configuração funcionarem corretamente.
+     *
+     * @return array Lista de tags HTML permitidas com seus atributos.
+     */
+    private function get_allowed_form_tags() {
+        // Começa com as tags permitidas pelo wp_kses_post
+        $allowed_tags = wp_kses_allowed_html( 'post' );
+
+        // Atributos comuns para elementos de formulário
+        // Nota: wp_kses não suporta wildcards, então listamos atributos específicos
+        $common_attrs = [
+            'id'              => true,
+            'class'           => true,
+            'style'           => true,
+            'title'           => true,
+            'data-context'    => true,
+            'data-default-color' => true,
+            'data-nonce'      => true,
+            'aria-label'      => true,
+            'aria-describedby' => true,
+            'aria-hidden'     => true,
+        ];
+
+        // Adiciona form
+        $allowed_tags['form'] = array_merge( $common_attrs, [
+            'action'      => true,
+            'method'      => true,
+            'enctype'     => true,
+            'name'        => true,
+            'target'      => true,
+            'novalidate'  => true,
+            'autocomplete' => true,
+        ] );
+
+        // Adiciona input
+        $allowed_tags['input'] = array_merge( $common_attrs, [
+            'type'        => true,
+            'name'        => true,
+            'value'       => true,
+            'placeholder' => true,
+            'checked'     => true,
+            'disabled'    => true,
+            'readonly'    => true,
+            'required'    => true,
+            'min'         => true,
+            'max'         => true,
+            'step'        => true,
+            'size'        => true,
+            'maxlength'   => true,
+            'pattern'     => true,
+            'autocomplete' => true,
+            'autofocus'   => true,
+        ] );
+
+        // Adiciona select
+        $allowed_tags['select'] = array_merge( $common_attrs, [
+            'name'        => true,
+            'disabled'    => true,
+            'required'    => true,
+            'multiple'    => true,
+            'size'        => true,
+            'autocomplete' => true,
+        ] );
+
+        // Adiciona option
+        $allowed_tags['option'] = [
+            'value'       => true,
+            'selected'    => true,
+            'disabled'    => true,
+            'label'       => true,
+        ];
+
+        // Adiciona optgroup
+        $allowed_tags['optgroup'] = [
+            'label'       => true,
+            'disabled'    => true,
+        ];
+
+        // Adiciona textarea
+        $allowed_tags['textarea'] = array_merge( $common_attrs, [
+            'name'        => true,
+            'rows'        => true,
+            'cols'        => true,
+            'placeholder' => true,
+            'disabled'    => true,
+            'readonly'    => true,
+            'required'    => true,
+            'maxlength'   => true,
+            'wrap'        => true,
+            'autocomplete' => true,
+        ] );
+
+        // Adiciona button
+        $allowed_tags['button'] = array_merge( $common_attrs, [
+            'type'        => true,
+            'name'        => true,
+            'value'       => true,
+            'disabled'    => true,
+            'formaction'  => true,
+            'formmethod'  => true,
+        ] );
+
+        // Adiciona label
+        $allowed_tags['label'] = array_merge( $common_attrs, [
+            'for'         => true,
+        ] );
+
+        // Adiciona fieldset e legend
+        $allowed_tags['fieldset'] = array_merge( $common_attrs, [
+            'disabled'    => true,
+            'name'        => true,
+        ] );
+        $allowed_tags['legend'] = $common_attrs;
+
+        // Adiciona canvas para gráficos (Chart.js)
+        $allowed_tags['canvas'] = $common_attrs;
+
+        // Adiciona script (necessário para inicialização inline)
+        $allowed_tags['script'] = [
+            'type'        => true,
+            'src'         => true,
+            'async'       => true,
+            'defer'       => true,
+        ];
+
+        // Garante que links podem ter onclick (para JavaScript inline)
+        if ( isset( $allowed_tags['a'] ) ) {
+            $allowed_tags['a']['onclick'] = true;
+        }
+
+        return $allowed_tags;
+    }
+
+    /**
      * Registra o menu hub centralizado.
      */
     public function register_hub_menu() {
@@ -123,12 +260,10 @@ class DPS_AI_Hub {
             // Remove o H1 duplicado
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() aqui porque essa função
-            // remove elementos de formulário (<input>, <select>, <textarea>, <form>, <button>)
-            // que são essenciais para a página de configurações funcionar.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário essenciais para as configurações.
+            // O conteúdo original em render_admin_page() já aplica escape em valores de usuário.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -146,11 +281,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_analytics_page() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<input>, <select>, <form>, <button>) necessários para filtros e exportação.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário para filtros e exportação.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -168,11 +301,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_conversations_list_page() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<input>, <select>, <form>, <button>) necessários para filtros.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário para filtros.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -190,11 +321,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<input>, <textarea>, <form>, <button>) necessários para gerenciar entradas.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário para gerenciar entradas.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -212,11 +341,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_admin_page() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<input>, <textarea>, <form>, <button>) necessários para testar perguntas.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário para testar perguntas.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -234,11 +361,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_interface() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<input>, <textarea>, <form>, <button>) necessários para a interface.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário para a interface.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 
@@ -256,11 +381,9 @@ class DPS_AI_Hub {
             $content = preg_replace( '/<\/div>\s*$/i', '', $content );
             $content = preg_replace( '/<h1>.*?<\/h1>/i', '', $content, 1 );
             
-            // SEGURANÇA: O conteúdo vem de render_dashboard() que já aplica escape adequado
-            // em todos os valores de usuário. Não usamos wp_kses_post() porque remove elementos
-            // de formulário (<select>, <form>, <button>) que podem ser necessários.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Conteúdo gerado internamente com escape adequado
-            echo $content;
+            // SEGURANÇA: Usa wp_kses com lista personalizada de tags permitidas
+            // que inclui elementos de formulário.
+            echo wp_kses( $content, $this->get_allowed_form_tags() );
         }
     }
 }
