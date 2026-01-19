@@ -504,6 +504,14 @@
 
 /* === Modal de Serviços === */
 .dps-modal-overlay {
+    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    --dps-accent: #2563eb;
+    --dps-accent-strong: #1d4ed8;
+    --dps-surface: #ffffff;
+    --dps-background: #f8fafc;
+    --dps-border: #e2e8f0;
+    --dps-muted: #64748b;
+    
     position: fixed;
     top: 0;
     right: 0;
@@ -1635,6 +1643,13 @@
 
 /* === FASE 5: Modal de Reagendamento Rápido === */
 .dps-reschedule-modal {
+    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    --dps-accent: #2563eb;
+    --dps-accent-strong: #1d4ed8;
+    --dps-background: #f8fafc;
+    --dps-border: #e2e8f0;
+    --dps-muted: #64748b;
+    
     position: fixed;
     top: 0;
     right: 0;
@@ -3163,6 +3178,14 @@ tr.dps-row-updated {
 
 /* === Modal de Popup de Pagamento === */
 .dps-payment-modal {
+    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    --dps-accent: #2563eb;
+    --dps-accent-strong: #1d4ed8;
+    --dps-surface: #ffffff;
+    --dps-background: #f8fafc;
+    --dps-border: #e2e8f0;
+    --dps-muted: #64748b;
+    
     position: fixed;
     top: 0;
     right: 0;
@@ -3316,6 +3339,14 @@ tr.dps-row-updated {
 
 /* === Modal de Popup de Serviços === */
 .dps-services-modal {
+    /* CSS Variables para o modal (necessárias pois o modal é anexado ao body e não herda de .dps-agenda-wrapper) */
+    --dps-accent: #2563eb;
+    --dps-accent-strong: #1d4ed8;
+    --dps-surface: #ffffff;
+    --dps-background: #f8fafc;
+    --dps-border: #e2e8f0;
+    --dps-muted: #64748b;
+    
     position: fixed;
     top: 0;
     right: 0;
