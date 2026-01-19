@@ -92,6 +92,7 @@ Antes de criar uma nova versão oficial:
   - Registro automático no histórico do agendamento
   - Dispara hook `dps_appointment_rescheduled` para integrações
 - **Funcionalidade já existente agora acessível**: O backend de reagendamento já existia (`quick_reschedule_ajax`), mas o botão não estava visível nas abas mais utilizadas do dia-a-dia.
+- **Método helper `render_reschedule_button()`**: Criado método privado para renderizar o botão de reagendamento, evitando duplicação de código em 4 locais diferentes.
 
 **Modo Administrador no Chat Público de IA (v1.8.0)**
 
