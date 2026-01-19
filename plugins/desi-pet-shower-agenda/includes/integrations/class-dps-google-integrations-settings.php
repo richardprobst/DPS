@@ -452,13 +452,13 @@ class DPS_Google_Integrations_Settings {
      * @since 2.0.0
      */
     public function handle_actions() {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        // Callback OAuth
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Verifica parâmetros GET para roteamento
         $page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
         $tab    = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
         $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
         // phpcs:enable
         
+        // Callback OAuth
         if ( 'dps-agenda-hub' === $page && 'google-integrations' === $tab && 'oauth_callback' === $action ) {
             $this->handle_oauth_callback();
         }

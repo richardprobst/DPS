@@ -181,8 +181,8 @@ class DPS_Google_Tasks_Client {
      *
      * @since 2.0.0
      *
-     * @param string|int $date Data no formato Y-m-d ou timestamp.
-     * @return string Data formatada.
+     * @param string|int $date Data no formato Y-m-d (string) ou Unix timestamp (int).
+     * @return string Data formatada em RFC 3339.
      */
     public static function format_due_date( $date ) {
         if ( is_numeric( $date ) ) {
