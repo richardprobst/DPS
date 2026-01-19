@@ -44,6 +44,112 @@
 }
 
 /* =====================================================
+   Modo Administrador
+   ===================================================== */
+.dps-ai-public-chat--admin-mode {
+    --dps-ai-primary: #7c3aed;
+    --dps-ai-primary-dark: #6d28d9;
+    --dps-ai-primary-darker: #5b21b6;
+    --dps-ai-primary-light: rgba(124, 58, 237, 0.1);
+    --dps-ai-shadow-primary: rgba(124, 58, 237, 0.25);
+    --dps-ai-shadow-primary-hover: rgba(124, 58, 237, 0.35);
+}
+
+/* Header adaptado para admin */
+.dps-ai-public-chat--admin-mode .dps-ai-public-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+}
+
+/* Badge de Administrador */
+.dps-ai-public-admin-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    border-radius: 20px;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: admin-pulse 3s ease-in-out infinite;
+}
+
+@keyframes admin-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0);
+    }
+}
+
+.dps-ai-public-admin-icon {
+    font-size: 14px;
+}
+
+.dps-ai-public-admin-text {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Container header-right para agrupar badge e status */
+.dps-ai-public-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Indicador de modo na toolbar */
+.dps-ai-public-mode-indicator {
+    font-size: 11px;
+    color: var(--dps-ai-primary);
+    font-weight: 600;
+    padding: 2px 8px;
+    background: var(--dps-ai-primary-light);
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* FAQs no modo admin com estilo diferenciado */
+.dps-ai-public-chat--admin-mode .dps-ai-public-faq-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-color: #7c3aed;
+}
+
+/* Botão de envio no modo admin */
+.dps-ai-public-chat--admin-mode .dps-ai-public-submit {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* FAB no modo admin */
+.dps-ai-public-chat--admin-mode .dps-ai-public-fab {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* Avatar diferente para mensagem do assistente no modo admin */
+.dps-ai-public-chat--admin-mode .dps-ai-public-message--assistant .dps-ai-public-message-avatar {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* Disclaimer estilizado para admin */
+.dps-ai-public-chat--admin-mode .dps-ai-public-disclaimer {
+    color: var(--dps-ai-primary);
+    font-weight: 500;
+    background: var(--dps-ai-primary-light);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--dps-ai-primary);
+}
+
+/* =====================================================
    Container Principal - Modo Inline
    ===================================================== */
 .dps-ai-public-chat--inline {
