@@ -4,6 +4,7 @@
  * @package Desi_Pet_Shower_Subscription
  * @since 1.1.0
  * @updated 1.3.0 - Prevenção de duplo clique, feedback visual, validação client-side
+ * @updated 1.4.0 - Suporte a múltiplos pets via checkboxes
  */
 
 (function($) {
@@ -20,16 +21,42 @@
         required_fields: 'Por favor, preencha todos os campos obrigatórios.',
         invalid_date: 'Por favor, insira uma data válida.',
         invalid_time: 'Por favor, insira um horário válido.',
-        updating_status: 'Atualizando...'
+        updating_status: 'Atualizando...',
+        select_pet: 'Selecione pelo menos um pet.'
     };
 
     /**
      * Filtra pets pelo cliente selecionado no formulário de assinatura.
-     * Oculta pets que não pertencem ao cliente e limpa seleção se necessário.
+     * Oculta pets que não pertencem ao cliente.
+     * Suporta tanto select único (legado) quanto checkboxes (novo).
      *
      * @param {string} ownerId ID do cliente proprietário
      */
     DPSSubscription.filterPetsByClient = function(ownerId) {
+        // Filtra checkboxes de pets
+        var $checkboxList = $('#dps-subscription-pets-list');
+        if ($checkboxList.length > 0) {
+            if (!ownerId) {
+                $checkboxList.find('.dps-checkbox-item').hide();
+                $checkboxList.find('input[type="checkbox"]').prop('checked', false);
+            } else {
+                $checkboxList.find('.dps-checkbox-item').each(function() {
+                    var $item = $(this);
+                    var itemOwner = $item.attr('data-owner');
+                    
+                    if (String(itemOwner) === String(ownerId)) {
+                        $item.show();
+                    } else {
+                        $item.hide();
+                        $item.find('input[type="checkbox"]').prop('checked', false);
+                    }
+                });
+            }
+            DPSSubscription.updatePetsCount();
+            return;
+        }
+        
+        // Fallback: Filtra select de pets (legado)
         var $select = $('#dps-subscription-pet-select');
         var $container = $select.closest('.dps-form-field');
         
@@ -60,6 +87,26 @@
     };
 
     /**
+     * Atualiza o contador de pets selecionados
+     */
+    DPSSubscription.updatePetsCount = function() {
+        var count = $('#dps-subscription-pets-list input[type="checkbox"]:checked:visible').length;
+        $('#dps-selected-pets-count').text(count);
+    };
+
+    /**
+     * Toggle campos de tosa baseado no checkbox
+     */
+    DPSSubscription.toggleTosaFields = function() {
+        var isChecked = $('#subscription_tosa').is(':checked');
+        if (isChecked) {
+            $('.dps-tosa-conditional').slideDown(200);
+        } else {
+            $('.dps-tosa-conditional').slideUp(200);
+        }
+    };
+
+    /**
      * Valida o formulário de assinatura antes do envio
      * 
      * @param {jQuery} $form Formulário a validar
@@ -82,6 +129,21 @@
                 isValid = false;
             }
         });
+        
+        // Valida que pelo menos um pet foi selecionado (checkboxes)
+        var $petCheckboxes = $form.find('input[name="subscription_pet_ids[]"]:checked:visible');
+        if ($petCheckboxes.length === 0) {
+            // Verifica se temos o select de pet único (legado)
+            var $petSelect = $form.find('select[name="subscription_pet_id"]');
+            if ($petSelect.length > 0 && !$petSelect.val()) {
+                $petSelect.addClass('dps-field-error');
+                isValid = false;
+            } else if ($petCheckboxes.closest('#dps-subscription-pets-list').length > 0) {
+                // Temos checkboxes mas nenhum selecionado
+                $('#dps-subscription-pets-list').addClass('dps-field-error');
+                isValid = false;
+            }
+        }
         
         // Valida formato de data (Y-m-d)
         var $dateField = $form.find('input[name="subscription_start_date"]');
@@ -151,6 +213,7 @@
         DPSSubscription.bindFormSubmit();
         DPSSubscription.bindPaymentStatusChange();
         DPSSubscription.bindConfirmActions();
+        DPSSubscription.bindPetCheckboxes();
 
         var $clientSelect = $('select[name="subscription_client_id"]');
         
@@ -160,16 +223,34 @@
         
         var initialClient = $clientSelect.val();
         
-        // Aplica filtro inicial
+        // Aplica filtro inicial para checkboxes de pets
         if (initialClient) {
             DPSSubscription.filterPetsByClient(initialClient);
         } else {
+            // Oculta todos os pets se nenhum cliente selecionado
+            $('#dps-subscription-pets-list .dps-checkbox-item').hide();
             $('#dps-subscription-pet-select').closest('.dps-form-field').hide();
         }
         
         // Evento de mudança de cliente
         $clientSelect.on('change', function() {
             DPSSubscription.filterPetsByClient($(this).val());
+        });
+        
+        // Inicializa contagem de pets
+        DPSSubscription.updatePetsCount();
+    };
+
+    /**
+     * Vincula eventos para checkboxes de pets
+     */
+    DPSSubscription.bindPetCheckboxes = function() {
+        $(document).on('change', '#dps-subscription-pets-list input[type="checkbox"]', function() {
+            DPSSubscription.updatePetsCount();
+            // Remove classe de erro quando pelo menos um pet é selecionado
+            if ($('#dps-subscription-pets-list input[type="checkbox"]:checked:visible').length > 0) {
+                $('#dps-subscription-pets-list').removeClass('dps-field-error');
+            }
         });
     };
 

@@ -412,6 +412,123 @@ table.dps-table tr.dps-canceled-row {
     margin-bottom: 32px;
 }
 
+/* Hint de campo */
+.dps-subscription-form .dps-field-hint {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Grid de checkboxes para seleção de pets */
+.dps-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dps-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dps-checkbox-item:hover {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.dps-checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #0ea5e9;
+}
+
+.dps-checkbox-item input[type="checkbox"]:checked + .dps-checkbox-label {
+    font-weight: 500;
+    color: #0284c7;
+}
+
+.dps-checkbox-label {
+    font-size: 14px;
+    color: #374151;
+}
+
+.dps-pets-count {
+    margin: 8px 0 0 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dps-pets-count span {
+    font-weight: 600;
+    color: #0ea5e9;
+}
+
+/* Grid de 3 colunas para seção de tosa */
+.dps-form-row--3col {
+    grid-template-columns: auto 1fr 1fr;
+    align-items: end;
+}
+
+/* Seção de Tosa */
+.dps-tosa-section {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fefce8;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+}
+
+.dps-tosa-section .dps-extras-title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #854d0e;
+}
+
+/* Checkbox inline */
+.dps-checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.dps-checkbox-inline input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0ea5e9;
+}
+
+.dps-checkbox-inline span {
+    font-size: 14px;
+    color: #374151;
+}
+
+/* Campos condicionais de tosa */
+.dps-tosa-conditional {
+    transition: opacity 0.2s ease;
+}
+
+.dps-tosa-conditional .dps-input-with-prefix {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .dps-subscription-form .dps-fieldset,
 .dps-subscription-form fieldset {
     border: 1px solid #e5e7eb;
