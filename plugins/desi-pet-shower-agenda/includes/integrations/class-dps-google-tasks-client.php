@@ -4,8 +4,9 @@
  *
  * Implementa operações CRUD de tarefas no Google Tasks.
  *
- * @package DPS_Google_Integrations
- * @since 1.0.0
+ * @package    DPS_Agenda_Addon
+ * @subpackage Integrations
+ * @since      2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,40 +14,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Classe cliente para Google Tasks API
+ * Classe cliente para Google Tasks API.
+ *
+ * Gerencia comunicação HTTP com Google Tasks API v1:
+ * - Criar tarefas
+ * - Atualizar tarefas existentes
+ * - Deletar tarefas
+ * - Obter tarefas
+ *
+ * @since 2.0.0
  */
 class DPS_Google_Tasks_Client {
 
     /**
-     * Base URL da API Google Tasks
+     * Base URL da API Google Tasks.
+     *
+     * @since 2.0.0
+     * @var string
      */
     const API_BASE_URL = 'https://www.googleapis.com/tasks/v1';
 
     /**
-     * Instância da classe de autenticação
+     * Cria uma nova tarefa.
      *
-     * @var DPS_Google_Auth
-     */
-    private $auth;
-
-    /**
-     * Construtor
-     *
-     * @param DPS_Google_Auth $auth Instância de autenticação.
-     */
-    public function __construct( $auth ) {
-        $this->auth = $auth;
-    }
-
-    /**
-     * Cria uma nova tarefa
+     * @since 2.0.0
      *
      * @param string $task_list_id ID da lista de tarefas (default: '@default').
-     * @param array  $task_data Dados da tarefa.
+     * @param array  $task_data    Dados da tarefa.
      * @return array|WP_Error Resposta da API ou erro.
      */
-    public function create_task( $task_list_id = '@default', $task_data = [] ) {
-        $access_token = $this->auth->get_access_token();
+    public static function create_task( $task_list_id = '@default', $task_data = [] ) {
+        $access_token = DPS_Google_Auth::get_access_token();
         if ( is_wp_error( $access_token ) ) {
             return $access_token;
         }
@@ -65,19 +63,21 @@ class DPS_Google_Tasks_Client {
             ]
         );
 
-        return $this->handle_response( $response );
+        return self::handle_response( $response );
     }
 
     /**
-     * Atualiza uma tarefa existente
+     * Atualiza uma tarefa existente.
+     *
+     * @since 2.0.0
      *
      * @param string $task_list_id ID da lista de tarefas.
-     * @param string $task_id ID da tarefa.
-     * @param array  $task_data Dados atualizados.
+     * @param string $task_id      ID da tarefa.
+     * @param array  $task_data    Dados atualizados.
      * @return array|WP_Error Resposta da API ou erro.
      */
-    public function update_task( $task_list_id, $task_id, $task_data ) {
-        $access_token = $this->auth->get_access_token();
+    public static function update_task( $task_list_id, $task_id, $task_data ) {
+        $access_token = DPS_Google_Auth::get_access_token();
         if ( is_wp_error( $access_token ) ) {
             return $access_token;
         }
@@ -97,18 +97,20 @@ class DPS_Google_Tasks_Client {
             ]
         );
 
-        return $this->handle_response( $response );
+        return self::handle_response( $response );
     }
 
     /**
-     * Deleta uma tarefa
+     * Deleta uma tarefa.
+     *
+     * @since 2.0.0
      *
      * @param string $task_list_id ID da lista de tarefas.
-     * @param string $task_id ID da tarefa.
+     * @param string $task_id      ID da tarefa.
      * @return true|WP_Error True se sucesso ou erro.
      */
-    public function delete_task( $task_list_id, $task_id ) {
-        $access_token = $this->auth->get_access_token();
+    public static function delete_task( $task_list_id, $task_id ) {
+        $access_token = DPS_Google_Auth::get_access_token();
         if ( is_wp_error( $access_token ) ) {
             return $access_token;
         }
@@ -142,14 +144,16 @@ class DPS_Google_Tasks_Client {
     }
 
     /**
-     * Obtém detalhes de uma tarefa
+     * Obtém detalhes de uma tarefa.
+     *
+     * @since 2.0.0
      *
      * @param string $task_list_id ID da lista de tarefas.
-     * @param string $task_id ID da tarefa.
+     * @param string $task_id      ID da tarefa.
      * @return array|WP_Error Dados da tarefa ou erro.
      */
-    public function get_task( $task_list_id, $task_id ) {
-        $access_token = $this->auth->get_access_token();
+    public static function get_task( $task_list_id, $task_id ) {
+        $access_token = DPS_Google_Auth::get_access_token();
         if ( is_wp_error( $access_token ) ) {
             return $access_token;
         }
@@ -166,19 +170,21 @@ class DPS_Google_Tasks_Client {
             ]
         );
 
-        return $this->handle_response( $response );
+        return self::handle_response( $response );
     }
 
     /**
-     * Formata data para formato RFC 3339 (Google Tasks)
+     * Formata data para formato RFC 3339 (Google Tasks).
      *
      * Nota: Google Tasks aceita RFC 3339 completo para 'due', mas ignora o componente de tempo,
      * usando apenas a data. O formato completo é mantido para compatibilidade com a API.
      *
-     * @param string $date Data no formato Y-m-d ou timestamp.
+     * @since 2.0.0
+     *
+     * @param string|int $date Data no formato Y-m-d ou timestamp.
      * @return string Data formatada.
      */
-    public function format_due_date( $date ) {
+    public static function format_due_date( $date ) {
         if ( is_numeric( $date ) ) {
             $timestamp = (int) $date;
         } else {
@@ -190,12 +196,14 @@ class DPS_Google_Tasks_Client {
     }
 
     /**
-     * Processa resposta HTTP da API
+     * Processa resposta HTTP da API.
+     *
+     * @since 2.0.0
      *
      * @param array|WP_Error $response Resposta do wp_remote_*.
      * @return array|WP_Error Dados decodificados ou erro.
      */
-    private function handle_response( $response ) {
+    private static function handle_response( $response ) {
         if ( is_wp_error( $response ) ) {
             return $response;
         }
