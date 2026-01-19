@@ -148,11 +148,19 @@
         },
         
         /**
-         * Alterna exibição dos campos de tosa
+         * Alterna exibição dos campos de tosa e atualiza o estado visual do card
          */
         updateTosaFields: function() {
             const show = $('#dps-tosa-toggle').is(':checked');
-            $('#dps-tosa-fields').toggle(show);
+            const $card = $('.dps-tosa-card');
+            
+            if (show) {
+                $('#dps-tosa-fields').slideDown(200);
+                $card.attr('data-tosa-active', '1');
+            } else {
+                $('#dps-tosa-fields').slideUp(200);
+                $card.attr('data-tosa-active', '0');
+            }
         },
         
         /**
