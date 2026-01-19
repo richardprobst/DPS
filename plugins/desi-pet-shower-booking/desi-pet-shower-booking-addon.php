@@ -699,6 +699,10 @@ class DPS_Booking_Addon {
     /**
      * Captura dados do agendamento salvo para exibição na página de confirmação.
      *
+     * Note: This hook is called after nonce verification in save_appointment(),
+     * so we don't need to verify nonce again here. The $_POST access is only
+     * to check the redirect URL destination.
+     *
      * @since 1.2.0
      * @param int    $appointment_id ID do agendamento salvo.
      * @param string $appointment_type Tipo do agendamento.
@@ -706,10 +710,12 @@ class DPS_Booking_Addon {
     public function capture_saved_appointment( $appointment_id, $appointment_type ) {
         // Verifica se estamos na página de agendamento
         $booking_page_id = (int) get_option( 'dps_booking_page_id' );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce already verified in save_appointment()
         $redirect_url = isset( $_POST['dps_redirect_url'] ) ? esc_url_raw( wp_unslash( $_POST['dps_redirect_url'] ) ) : '';
         
         // Se o redirect contém a página de booking, armazena para confirmação
-        if ( $booking_page_id && ( strpos( $redirect_url, get_permalink( $booking_page_id ) ) !== false || is_page( $booking_page_id ) ) ) {
+        $booking_permalink = $booking_page_id ? get_permalink( $booking_page_id ) : '';
+        if ( $booking_page_id && $booking_permalink && strpos( $redirect_url, $booking_permalink ) !== false ) {
             $transient_key = 'dps_booking_confirmation_' . get_current_user_id();
             $data = [
                 'appointment_id'   => $appointment_id,
@@ -725,14 +731,17 @@ class DPS_Booking_Addon {
      *
      * @since 1.2.0
      * @param array $confirmation_data Dados da confirmação.
-     * @return string HTML da página de confirmação.
+     * @return string HTML da página de confirmação, ou mensagem de erro se inválido.
      */
     private function render_confirmation_page( $confirmation_data ) {
         $appointment_id = (int) $confirmation_data['appointment_id'];
         $appointment = get_post( $appointment_id );
         
         if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
-            return '';
+            return '<div class="dps-notice dps-notice--warning"><p>' . 
+                   esc_html__( 'Não foi possível carregar os detalhes do agendamento.', 'dps-booking-addon' ) . 
+                   ' <a href="' . esc_url( $this->get_booking_page_url() ) . '">' . 
+                   esc_html__( 'Criar novo agendamento', 'dps-booking-addon' ) . '</a></p></div>';
         }
         
         // Coleta dados do agendamento
@@ -766,7 +775,7 @@ class DPS_Booking_Addon {
         
         // Formata data
         $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
-        $date_formatted = $date_obj ? $date_obj->format( 'd/m/Y' ) : $date;
+        $date_formatted = ( $date_obj !== false ) ? $date_obj->format( 'd/m/Y' ) : $date;
         
         // Tipo de agendamento em texto
         $type_labels = [

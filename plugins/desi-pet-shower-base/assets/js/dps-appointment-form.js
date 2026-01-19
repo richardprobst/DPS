@@ -469,14 +469,15 @@
                     const frequencyLabel = frequency === 'quinzenal' ? 'Quinzenal' : 'Semanal';
                     $list.find('[data-summary="frequency"]').text(frequencyLabel);
                     
-                    // Calculate future appointment dates
+                    // Calculate future appointment dates using a base timestamp for consistency
                     const futureDates = [];
                     const daysInterval = frequency === 'quinzenal' ? 14 : 7;
                     const numberOfFutureDates = 4; // Show next 4 appointments
+                    const baseTimestamp = new Date(date + 'T12:00:00').getTime(); // Use noon to avoid DST issues
+                    const msPerDay = 24 * 60 * 60 * 1000;
                     
                     for (let i = 1; i <= numberOfFutureDates; i++) {
-                        const futureDate = new Date(date + 'T00:00:00');
-                        futureDate.setDate(futureDate.getDate() + (daysInterval * i));
+                        const futureDate = new Date(baseTimestamp + (daysInterval * i * msPerDay));
                         futureDates.push(futureDate.toLocaleDateString('pt-BR'));
                     }
                     
