@@ -7,8 +7,9 @@
  * - Cobranças pendentes (transações vencendo)
  * - Mensagens do portal do cliente (resposta necessária)
  *
- * @package DPS_Google_Integrations
- * @since 1.0.0
+ * @package    DPS_Agenda_Addon
+ * @subpackage Integrations
+ * @since      2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,38 +17,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Classe de sincronização de tarefas administrativas
+ * Classe de sincronização de tarefas administrativas.
+ *
+ * Sincronização unidirecional: DPS → Google Tasks
+ * - Cria tarefas quando agendamentos são finalizados (follow-ups)
+ * - Cria tarefas para cobranças pendentes
+ * - Cria tarefas para mensagens do portal
+ *
+ * @since 2.0.0
  */
 class DPS_Google_Tasks_Sync {
 
     /**
-     * Instância do cliente Google Tasks
+     * Construtor.
      *
-     * @var DPS_Google_Tasks_Client
+     * @since 2.0.0
      */
-    private $client;
-
-    /**
-     * Instância de autenticação
-     *
-     * @var DPS_Google_Auth
-     */
-    private $auth;
-
-    /**
-     * Construtor
-     *
-     * @param DPS_Google_Auth $auth Instância de autenticação.
-     */
-    public function __construct( $auth ) {
-        $this->auth   = $auth;
-        $this->client = new DPS_Google_Tasks_Client( $auth );
-
+    public function __construct() {
         $this->init_hooks();
     }
 
     /**
-     * Inicializa hooks do WordPress
+     * Inicializa hooks do WordPress.
+     *
+     * @since 2.0.0
      */
     private function init_hooks() {
         // Follow-up após agendamento finalizado
@@ -62,12 +55,14 @@ class DPS_Google_Tasks_Sync {
     }
 
     /**
-     * Cria tarefa de follow-up após agendamento finalizado
+     * Cria tarefa de follow-up após agendamento finalizado.
      *
-     * @param int    $appt_id ID do agendamento.
+     * @since 2.0.0
+     *
+     * @param int    $appt_id    ID do agendamento.
      * @param string $old_status Status anterior.
      * @param string $new_status Novo status.
-     * @param array  $appt_data Dados do agendamento.
+     * @param array  $appt_data  Dados do agendamento.
      */
     public function maybe_create_followup_task( $appt_id, $old_status, $new_status, $appt_data ) {
         // Só cria follow-up se mudou para 'finalizado' e sync tasks está habilitado
@@ -76,7 +71,7 @@ class DPS_Google_Tasks_Sync {
         }
 
         $settings = get_option( 'dps_google_integrations_settings', [] );
-        if ( empty( $settings['sync_tasks'] ) || ! $this->auth->is_connected() ) {
+        if ( empty( $settings['sync_tasks'] ) || ! DPS_Google_Auth::is_connected() ) {
             return;
         }
 
@@ -112,7 +107,7 @@ class DPS_Google_Tasks_Sync {
                 esc_html( $services_text ),
                 esc_url( $admin_url )
             ),
-            'due'    => $this->client->format_due_date( strtotime( '+2 days' ) ), // Follow-up 2 dias depois
+            'due'    => DPS_Google_Tasks_Client::format_due_date( strtotime( '+2 days' ) ), // Follow-up 2 dias depois
             'status' => 'needsAction',
         ];
 
@@ -125,7 +120,7 @@ class DPS_Google_Tasks_Sync {
         $task_data = apply_filters( 'dps_google_tasks_followup_data', $task_data, $appt_id );
 
         // Cria tarefa no Google Tasks
-        $result = $this->client->create_task( '@default', $task_data );
+        $result = DPS_Google_Tasks_Client::create_task( '@default', $task_data );
 
         if ( is_wp_error( $result ) ) {
             update_post_meta( $appt_id, '_google_task_followup_error', $result->get_error_message() );
@@ -141,14 +136,16 @@ class DPS_Google_Tasks_Sync {
     }
 
     /**
-     * Cria tarefa de cobrança pendente
+     * Cria tarefa de cobrança pendente.
+     *
+     * @since 2.0.0
      *
      * @param int $charge_id ID da cobrança (row ID na tabela dps_transacoes).
-     * @param int $appt_id ID do agendamento relacionado.
+     * @param int $appt_id   ID do agendamento relacionado.
      */
     public function maybe_create_payment_task( $charge_id, $appt_id ) {
         $settings = get_option( 'dps_google_integrations_settings', [] );
-        if ( empty( $settings['sync_tasks'] ) || ! $this->auth->is_connected() ) {
+        if ( empty( $settings['sync_tasks'] ) || ! DPS_Google_Auth::is_connected() ) {
             return;
         }
 
@@ -203,7 +200,7 @@ class DPS_Google_Tasks_Sync {
                 esc_html( $transaction['descricao'] ?: __( 'Pagamento de serviços', 'desi-pet-shower' ) ),
                 esc_url( $admin_url )
             ),
-            'due'    => $this->client->format_due_date( strtotime( $due_date . ' -1 day' ) ), // 1 dia antes do vencimento
+            'due'    => DPS_Google_Tasks_Client::format_due_date( strtotime( $due_date . ' -1 day' ) ), // 1 dia antes do vencimento
             'status' => 'needsAction',
         ];
 
@@ -217,7 +214,7 @@ class DPS_Google_Tasks_Sync {
         $task_data = apply_filters( 'dps_google_tasks_payment_data', $task_data, $charge_id, $appt_id );
 
         // Cria tarefa no Google Tasks
-        $result = $this->client->create_task( '@default', $task_data );
+        $result = DPS_Google_Tasks_Client::create_task( '@default', $task_data );
 
         if ( is_wp_error( $result ) ) {
             update_post_meta( $appt_id, '_google_task_payment_error_' . $charge_id, $result->get_error_message() );
@@ -233,14 +230,16 @@ class DPS_Google_Tasks_Sync {
     }
 
     /**
-     * Atualiza tarefa de cobrança quando status mudar
+     * Atualiza tarefa de cobrança quando status mudar.
+     *
+     * @since 2.0.0
      *
      * @param int $charge_id ID da cobrança.
-     * @param int $appt_id ID do agendamento.
+     * @param int $appt_id   ID do agendamento.
      */
     public function maybe_update_payment_task( $charge_id, $appt_id ) {
         $settings = get_option( 'dps_google_integrations_settings', [] );
-        if ( empty( $settings['sync_tasks'] ) || ! $this->auth->is_connected() ) {
+        if ( empty( $settings['sync_tasks'] ) || ! DPS_Google_Auth::is_connected() ) {
             return;
         }
 
@@ -264,10 +263,10 @@ class DPS_Google_Tasks_Sync {
         if ( $transaction && $transaction['status'] === 'pago' ) {
             $update_data = [
                 'status'    => 'completed',
-                'completed' => $this->client->format_due_date( time() ),
+                'completed' => DPS_Google_Tasks_Client::format_due_date( time() ),
             ];
 
-            $result = $this->client->update_task( '@default', $task_id, $update_data );
+            $result = DPS_Google_Tasks_Client::update_task( '@default', $task_id, $update_data );
 
             if ( ! is_wp_error( $result ) ) {
                 update_post_meta( $appt_id, '_google_task_payment_completed_at_' . $charge_id, current_time( 'mysql' ) );
@@ -277,13 +276,15 @@ class DPS_Google_Tasks_Sync {
     }
 
     /**
-     * Cria tarefa quando mensagem do cliente é recebida
+     * Cria tarefa quando mensagem do cliente é recebida.
+     *
+     * @since 2.0.0
      *
      * @param array $message_data Dados da mensagem.
      */
     public function maybe_create_message_task( $message_data ) {
         $settings = get_option( 'dps_google_integrations_settings', [] );
-        if ( empty( $settings['sync_tasks'] ) || ! $this->auth->is_connected() ) {
+        if ( empty( $settings['sync_tasks'] ) || ! DPS_Google_Auth::is_connected() ) {
             return;
         }
 
@@ -309,7 +310,7 @@ class DPS_Google_Tasks_Sync {
                 esc_html( wp_trim_words( $message, 50 ) ),
                 esc_url( $portal_url )
             ),
-            'due'    => $this->client->format_due_date( strtotime( '+1 day' ) ), // Responder em 1 dia
+            'due'    => DPS_Google_Tasks_Client::format_due_date( strtotime( '+1 day' ) ), // Responder em 1 dia
             'status' => 'needsAction',
         ];
 
@@ -322,7 +323,7 @@ class DPS_Google_Tasks_Sync {
         $task_data = apply_filters( 'dps_google_tasks_message_data', $task_data, $message_data );
 
         // Cria tarefa no Google Tasks
-        $result = $this->client->create_task( '@default', $task_data );
+        $result = DPS_Google_Tasks_Client::create_task( '@default', $task_data );
 
         if ( ! is_wp_error( $result ) ) {
             do_action( 'dps_google_task_message_created', $message_id, $result['id'] );

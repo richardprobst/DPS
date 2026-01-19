@@ -70,6 +70,13 @@ class DPS_Google_Integrations_Settings {
         
         $is_connected = DPS_Google_Auth::is_connected();
         
+        // Exibe mensagens de feedback
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura de parâmetro
+        $message = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
+        if ( $message ) {
+            $this->render_feedback_message( $message );
+        }
+        
         ?>
         <div class="dps-google-integrations-settings">
             <h2><?php esc_html_e( 'Integrações com Google Workspace', 'dps-agenda-addon' ); ?></h2>
@@ -154,6 +161,61 @@ class DPS_Google_Integrations_Settings {
             padding: 2px 6px;
             border-radius: 3px;
             font-size: 13px;
+        }
+        </style>
+        <?php
+    }
+    
+    /**
+     * Renderiza mensagem de feedback após operações.
+     *
+     * @since 2.0.0
+     *
+     * @param string $message Tipo da mensagem.
+     */
+    private function render_feedback_message( $message ) {
+        $messages = [
+            'connected' => [
+                'type'    => 'success',
+                'message' => __( 'Conectado ao Google com sucesso! Agora configure as sincronizações desejadas.', 'dps-agenda-addon' ),
+            ],
+            'disconnected' => [
+                'type'    => 'info',
+                'message' => __( 'Desconectado do Google. As sincronizações foram interrompidas.', 'dps-agenda-addon' ),
+            ],
+            'settings_saved' => [
+                'type'    => 'success',
+                'message' => __( 'Configurações salvas com sucesso!', 'dps-agenda-addon' ),
+            ],
+        ];
+        
+        if ( ! isset( $messages[ $message ] ) ) {
+            return;
+        }
+        
+        $msg_data = $messages[ $message ];
+        $class    = 'dps-feedback-message dps-feedback-' . esc_attr( $msg_data['type'] );
+        
+        ?>
+        <div class="<?php echo esc_attr( $class ); ?>">
+            <?php echo esc_html( $msg_data['message'] ); ?>
+        </div>
+        <style>
+        .dps-feedback-message {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .dps-feedback-success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #047857;
+        }
+        .dps-feedback-info {
+            background: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            color: #0369a1;
         }
         </style>
         <?php
@@ -390,21 +452,26 @@ class DPS_Google_Integrations_Settings {
      * @since 2.0.0
      */
     public function handle_actions() {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Verifica parâmetros GET para roteamento
+        $page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+        $tab    = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
+        $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+        // phpcs:enable
+        
         // Callback OAuth
-        if ( isset( $_GET['page'] ) && $_GET['page'] === 'dps-agenda-hub' &&
-             isset( $_GET['tab'] ) && $_GET['tab'] === 'google-integrations' &&
-             isset( $_GET['action'] ) && $_GET['action'] === 'oauth_callback' ) {
-            
+        if ( 'dps-agenda-hub' === $page && 'google-integrations' === $tab && 'oauth_callback' === $action ) {
             $this->handle_oauth_callback();
         }
         
         // Desconectar
-        if ( isset( $_GET['action'] ) && $_GET['action'] === 'dps_google_disconnect' ) {
+        if ( 'dps_google_disconnect' === $action ) {
             $this->handle_disconnect();
         }
         
         // Salvar configurações
-        if ( isset( $_POST['dps_action'] ) && $_POST['dps_action'] === 'save_google_settings' ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verificado em handle_save_settings
+        $post_action = isset( $_POST['dps_action'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_action'] ) ) : '';
+        if ( 'save_google_settings' === $post_action ) {
             $this->handle_save_settings();
         }
     }
@@ -420,7 +487,8 @@ class DPS_Google_Integrations_Settings {
         }
         
         // Verifica nonce
-        if ( empty( $_POST['dps_google_nonce'] ) || ! wp_verify_nonce( $_POST['dps_google_nonce'], 'dps_google_save_settings' ) ) {
+        $nonce = isset( $_POST['dps_google_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_google_nonce'] ) ) : '';
+        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_save_settings' ) ) {
             wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
         }
         
@@ -458,26 +526,31 @@ class DPS_Google_Integrations_Settings {
         }
         
         // Verifica state (nonce)
-        if ( empty( $_GET['state'] ) || ! wp_verify_nonce( $_GET['state'], 'dps_google_oauth' ) ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- State é o nonce que será verificado
+        $state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+        if ( empty( $state ) || ! wp_verify_nonce( $state, 'dps_google_oauth' ) ) {
             wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
         }
         
         // Verifica erro
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
         if ( ! empty( $_GET['error'] ) ) {
             $error_msg = sprintf(
                 /* translators: %s: Mensagem de erro */
                 __( 'Erro ao autorizar: %s', 'dps-agenda-addon' ),
-                sanitize_text_field( $_GET['error'] )
+                sanitize_text_field( wp_unslash( $_GET['error'] ) )
             );
             wp_die( esc_html( $error_msg ) );
         }
         
         // Troca code por tokens
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
         if ( empty( $_GET['code'] ) ) {
             wp_die( esc_html__( 'Authorization code não recebido.', 'dps-agenda-addon' ) );
         }
         
-        $code   = sanitize_text_field( $_GET['code'] );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Já verificamos o nonce acima
+        $code   = sanitize_text_field( wp_unslash( $_GET['code'] ) );
         $result = DPS_Google_Auth::exchange_code_for_tokens( $code );
         
         if ( is_wp_error( $result ) ) {
@@ -509,7 +582,9 @@ class DPS_Google_Integrations_Settings {
         }
         
         // Verifica nonce
-        if ( empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'dps_google_disconnect' ) ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce passado via URL
+        $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_disconnect' ) ) {
             wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
         }
         
