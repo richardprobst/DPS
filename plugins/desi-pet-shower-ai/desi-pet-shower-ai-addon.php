@@ -2366,7 +2366,13 @@ class DPS_AI_Addon {
             'usd_to_brl_rate'            => isset( $raw_settings['usd_to_brl_rate'] ) && ! empty( $raw_settings['usd_to_brl_rate'] ) ? max( 0.01, min( 100, floatval( $raw_settings['usd_to_brl_rate'] ) ) ) : '',
             // WhatsApp Business Integration settings
             'whatsapp_enabled'                      => ! empty( $raw_settings['whatsapp_enabled'] ),
-            'whatsapp_provider'                     => isset( $raw_settings['whatsapp_provider'] ) ? sanitize_text_field( $raw_settings['whatsapp_provider'] ) : 'meta',
+            'whatsapp_provider'                     => ( function( $provider ) {
+                $allowed_providers = array( 'meta', 'twilio', 'custom' );
+                if ( ! in_array( $provider, $allowed_providers, true ) ) {
+                    return 'meta';
+                }
+                return $provider;
+            } )( isset( $raw_settings['whatsapp_provider'] ) ? sanitize_text_field( $raw_settings['whatsapp_provider'] ) : 'meta' ),
             'whatsapp_verify_token'                 => isset( $raw_settings['whatsapp_verify_token'] ) ? sanitize_text_field( $raw_settings['whatsapp_verify_token'] ) : '',
             'whatsapp_meta_phone_id'                => isset( $raw_settings['whatsapp_meta_phone_id'] ) ? sanitize_text_field( $raw_settings['whatsapp_meta_phone_id'] ) : '',
             'whatsapp_meta_token'                   => isset( $raw_settings['whatsapp_meta_token'] ) ? sanitize_text_field( $raw_settings['whatsapp_meta_token'] ) : '',
@@ -2376,13 +2382,13 @@ class DPS_AI_Addon {
             'whatsapp_twilio_from'                  => isset( $raw_settings['whatsapp_twilio_from'] ) ? sanitize_text_field( $raw_settings['whatsapp_twilio_from'] ) : '',
             'whatsapp_custom_webhook_url'           => isset( $raw_settings['whatsapp_custom_webhook_url'] ) ? esc_url_raw( $raw_settings['whatsapp_custom_webhook_url'] ) : '',
             'whatsapp_custom_api_key'               => isset( $raw_settings['whatsapp_custom_api_key'] ) ? sanitize_text_field( $raw_settings['whatsapp_custom_api_key'] ) : '',
-            'whatsapp_instructions'                 => isset( $raw_settings['whatsapp_instructions'] ) ? sanitize_textarea_field( $raw_settings['whatsapp_instructions'] ) : '',
+            'whatsapp_instructions'                 => isset( $raw_settings['whatsapp_instructions'] ) ? mb_substr( sanitize_textarea_field( $raw_settings['whatsapp_instructions'] ), 0, 2000 ) : '',
             // Proactive Scheduling settings
             'proactive_scheduling_enabled'          => ! empty( $raw_settings['proactive_scheduling_enabled'] ),
             'proactive_scheduling_interval'         => isset( $raw_settings['proactive_scheduling_interval'] ) ? max( 7, min( 90, absint( $raw_settings['proactive_scheduling_interval'] ) ) ) : 28,
             'proactive_scheduling_cooldown'         => isset( $raw_settings['proactive_scheduling_cooldown'] ) ? max( 1, min( 30, absint( $raw_settings['proactive_scheduling_cooldown'] ) ) ) : 7,
-            'proactive_scheduling_first_time_message'   => isset( $raw_settings['proactive_scheduling_first_time_message'] ) ? sanitize_textarea_field( $raw_settings['proactive_scheduling_first_time_message'] ) : '',
-            'proactive_scheduling_recurring_message'    => isset( $raw_settings['proactive_scheduling_recurring_message'] ) ? sanitize_textarea_field( $raw_settings['proactive_scheduling_recurring_message'] ) : '',
+            'proactive_scheduling_first_time_message'   => isset( $raw_settings['proactive_scheduling_first_time_message'] ) ? mb_substr( sanitize_textarea_field( $raw_settings['proactive_scheduling_first_time_message'] ), 0, 2000 ) : '',
+            'proactive_scheduling_recurring_message'    => isset( $raw_settings['proactive_scheduling_recurring_message'] ) ? mb_substr( sanitize_textarea_field( $raw_settings['proactive_scheduling_recurring_message'] ), 0, 2000 ) : '',
         ];
 
         update_option( self::OPTION_KEY, $settings );

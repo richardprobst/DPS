@@ -69,19 +69,26 @@ class DPS_AI_Hub {
         // Começa com as tags permitidas pelo wp_kses_post
         $allowed_tags = wp_kses_allowed_html( 'post' );
 
-        // Atributos comuns para elementos de formulário
-        // Nota: wp_kses não suporta wildcards, então listamos atributos específicos
+        // Atributos comuns para elementos de formulário.
+        // Nota: wp_kses não suporta wildcards, então cada atributo data-* precisa ser listado explicitamente.
+        // Os atributos abaixo cobrem:
+        // - os data-* atualmente usados por este plugin (data-context, data-default-color, data-nonce);
+        // - alguns atributos data-* genéricos comuns em UIs de admin (data-id, data-value, data-type).
+        // Se novos atributos data-* forem necessários no futuro, adicione-os aqui de forma explícita.
         $common_attrs = [
-            'id'              => true,
-            'class'           => true,
-            'style'           => true,
-            'title'           => true,
-            'data-context'    => true,
+            'id'                 => true,
+            'class'              => true,
+            'style'              => true,
+            'title'              => true,
+            'data-context'       => true,
             'data-default-color' => true,
-            'data-nonce'      => true,
-            'aria-label'      => true,
-            'aria-describedby' => true,
-            'aria-hidden'     => true,
+            'data-nonce'         => true,
+            'data-id'            => true,
+            'data-value'         => true,
+            'data-type'          => true,
+            'aria-label'         => true,
+            'aria-describedby'   => true,
+            'aria-hidden'        => true,
         ];
 
         // Adiciona form
@@ -178,18 +185,15 @@ class DPS_AI_Hub {
         // Adiciona canvas para gráficos (Chart.js)
         $allowed_tags['canvas'] = $common_attrs;
 
-        // Adiciona script (necessário para inicialização inline)
+        // Adiciona script apenas para inicialização inline (sem atributo src para prevenir XSS)
+        // Scripts externos devem ser carregados via wp_enqueue_script() para segurança adequada.
         $allowed_tags['script'] = [
             'type'        => true,
-            'src'         => true,
-            'async'       => true,
-            'defer'       => true,
         ];
 
-        // Garante que links podem ter onclick (para JavaScript inline)
-        if ( isset( $allowed_tags['a'] ) ) {
-            $allowed_tags['a']['onclick'] = true;
-        }
+        // NOTA: onclick e outros handlers de evento inline (onclick, onmouseover, etc.)
+        // NÃO são permitidos por razões de segurança. Use event listeners via JavaScript
+        // enfileirado com wp_enqueue_script() para interatividade em links.
 
         return $allowed_tags;
     }

@@ -261,6 +261,15 @@ Antes de criar uma nova versão oficial:
 - **Campos de WhatsApp não salvavam**: Os campos de integração WhatsApp Business (enabled, provider, tokens, etc.) estavam presentes no formulário mas não eram processados no salvamento. Adicionados 11 campos ao método `maybe_handle_save()`.
 - **Campos de Sugestões Proativas não salvavam**: Os campos de sugestões proativas de agendamento (enabled, interval, cooldown, mensagens) não eram salvos. Adicionados 5 campos ao método `maybe_handle_save()`.
 
+#### Security (Segurança)
+
+**AI Add-on - Melhorias de Segurança no Hub de IA (v1.6.3)**
+
+- **Validação de whatsapp_provider**: Adicionada validação explícita para restringir o campo `whatsapp_provider` a valores permitidos ('meta', 'twilio', 'custom'). Valores inválidos agora retornam o padrão 'meta', evitando erros de configuração.
+- **Limite de caracteres em campos textarea**: Campos `whatsapp_instructions`, `proactive_scheduling_first_time_message` e `proactive_scheduling_recurring_message` agora têm limite de 2000 caracteres (consistente com outros campos similares como `additional_instructions`).
+- **Remoção de atributos perigosos em wp_kses**: Removido atributo `onclick` de links e `src` de scripts no método `get_allowed_form_tags()` para prevenir potenciais vulnerabilidades XSS. Scripts externos devem ser carregados via `wp_enqueue_script()`.
+- **Documentação de data-* attributes**: Adicionados comentários explicativos sobre os atributos `data-*` permitidos e incluídos atributos genéricos adicionais (`data-id`, `data-value`, `data-type`) para compatibilidade com UIs de admin.
+
 **Base Plugin - Correção do Shortcode [dps_configuracoes] (v1.1.1)**
 
 - **Erro "Falha ao publicar. A resposta não é um JSON válido" corrigido**: O shortcode `[dps_configuracoes]` causava um PHP Fatal Error ao ser inserido no editor de blocos (Gutenberg). A classe `DPS_Settings_Frontend` referenciava `DPS_Logger::LEVEL_DEBUG` que não estava definida na classe `DPS_Logger`.
