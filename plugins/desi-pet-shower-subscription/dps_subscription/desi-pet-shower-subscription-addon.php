@@ -1555,13 +1555,15 @@ class DPS_Subscription_Addon {
                 );
                 echo '<a href="' . esc_url( $cancel_url ) . '" class="dps-action-btn" onclick="return confirm(\'' . esc_js( __( 'Tem certeza que deseja cancelar esta assinatura?', 'dps-subscription-addon' ) ) . '\');" title="' . esc_attr__( 'Cancelar assinatura', 'dps-subscription-addon' ) . '">❌</a>';
                 
-                // O botão Renovar só aparece quando todos os atendimentos do ciclo foram realizados
-                if ( $completed_count >= $total_appts && $total_appts > 0 ) {
-                    // Link para renovar com nonce
-                    $renew_url = wp_nonce_url(
-                        add_query_arg( [ 'tab' => 'assinaturas', 'dps_renew' => '1', 'id' => $sub->ID ], $base_url ),
-                        'dps_renew_subscription_' . $sub->ID
-                    );
+                // O botão Renovar fica sempre visível, mas só habilitado quando todos os atendimentos foram concluídos
+                $all_completed = ( $completed_count >= $total_appts && $total_appts > 0 );
+                $renew_url = wp_nonce_url(
+                    add_query_arg( [ 'tab' => 'assinaturas', 'dps_renew' => '1', 'id' => $sub->ID ], $base_url ),
+                    'dps_renew_subscription_' . $sub->ID
+                );
+                
+                if ( $all_completed ) {
+                    // Botão habilitado - todos os atendimentos concluídos
                     echo '<a href="' . esc_url( $renew_url ) . '" class="dps-action-btn dps-action-renew" title="' . esc_attr__( 'Renovar assinatura para próximo ciclo', 'dps-subscription-addon' ) . '">🔄</a>';
                     
                     // Link de cobrança via WhatsApp usando helper centralizado
@@ -1581,6 +1583,15 @@ class DPS_Subscription_Addon {
                         }
                         echo '<a href="' . esc_url( $wa_link ) . '" target="_blank" class="dps-action-btn dps-action-charge" title="' . esc_attr__( 'Cobrar via WhatsApp', 'dps-subscription-addon' ) . '">💰</a>';
                     }
+                } else {
+                    // Botão desabilitado - aguardando conclusão de todos os atendimentos
+                    $remaining = $total_appts - $completed_count;
+                    $tooltip = sprintf(
+                        /* translators: %d: number of remaining appointments */
+                        _n( 'Aguarde a conclusão de %d atendimento restante para renovar', 'Aguarde a conclusão de %d atendimentos restantes para renovar', $remaining, 'dps-subscription-addon' ),
+                        $remaining
+                    );
+                    echo '<span class="dps-action-btn dps-action-renew dps-action-disabled" title="' . esc_attr( $tooltip ) . '">🔄</span>';
                 }
                 echo '</div>';
                 echo '</td>';

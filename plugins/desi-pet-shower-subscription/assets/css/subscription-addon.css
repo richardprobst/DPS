@@ -935,6 +935,17 @@ table.dps-table tr.dps-canceled-row {
     background-color: #dbeafe;
 }
 
+/* Botão de ação desabilitado */
+.dps-action-btn.dps-action-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dps-action-btn.dps-action-disabled:hover {
+    background-color: transparent;
+}
+
 .dps-action-btn.dps-action-charge:hover {
     background-color: #d1fae5;
 }
