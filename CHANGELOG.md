@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Seção de Tosa no Formulário de Agendamento via Shortcode (v1.2.1)**
+
+- **Card de tosa no shortcode `[dps_booking_form]`**: Adicionada a mesma seção de tosa com design card-based que foi implementada no formulário de agendamento do Painel de Gestão DPS pela PR #498.
+  - Card com toggle switch para ativar/desativar tosa
+  - Campo de valor da tosa com prefixo R$
+  - Seletor de ocorrência (em qual atendimento a tosa será realizada)
+  - Design consistente com o card de TaxiDog já existente no formulário
+  - Estilos reutilizam classes CSS do plugin base (`dps-tosa-section`, `dps-tosa-card`, etc.)
+  - Visibilidade condicional via JavaScript (aparece apenas para agendamentos de assinatura)
+
 **Botão de Reagendamento nas Abas Simplificadas da Agenda (v1.1.0)**
 
 - **Coluna "Ações" nas abas da agenda**: Adicionada nova coluna "Ações" nas três abas simplificadas da agenda (Visão Rápida, Operação, Detalhes).
