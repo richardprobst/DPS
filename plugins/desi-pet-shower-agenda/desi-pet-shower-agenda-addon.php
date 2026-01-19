@@ -73,10 +73,19 @@ if ( extension_loaded( 'openssl' ) ) {
     require_once __DIR__ . '/includes/integrations/class-dps-google-auth.php';
     require_once __DIR__ . '/includes/integrations/class-dps-google-integrations-settings.php';
     
+    // FASE 2 - Google Calendar: Sincronização (DPS → Calendar)
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-client.php';
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-sync.php';
+    
     // Inicializa interface de configurações
     add_action( 'plugins_loaded', function() {
         if ( is_admin() ) {
             new DPS_Google_Integrations_Settings();
+        }
+        
+        // Inicializa sincronização Calendar (se conectado)
+        if ( DPS_Google_Auth::is_connected() ) {
+            new DPS_Google_Calendar_Sync();
         }
     }, 20 );
 }

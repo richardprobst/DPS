@@ -296,6 +296,10 @@ class DPS_Google_Integrations_Settings {
      * @since 2.0.0
      */
     private function render_sync_settings_section() {
+        $settings = get_option( DPS_Google_Auth::OPTION_NAME, [] );
+        $sync_calendar = ! empty( $settings['sync_calendar'] );
+        $sync_tasks = ! empty( $settings['sync_tasks'] );
+        
         ?>
         <div class="dps-setup-instructions">
             <h3><?php esc_html_e( 'Configurações de Sincronização', 'dps-agenda-addon' ); ?></h3>
@@ -305,6 +309,7 @@ class DPS_Google_Integrations_Settings {
             
             <form method="post" action="">
                 <?php wp_nonce_field( 'dps_google_save_settings', 'dps_google_nonce' ); ?>
+                <input type="hidden" name="dps_action" value="save_google_settings">
                 
                 <table class="form-table">
                     <tr>
@@ -316,12 +321,12 @@ class DPS_Google_Integrations_Settings {
                         <td>
                             <fieldset>
                                 <label>
-                                    <input type="checkbox" name="sync_calendar" value="1" disabled>
+                                    <input type="checkbox" name="sync_calendar" value="1" <?php checked( $sync_calendar ); ?>>
                                     <?php esc_html_e( 'Sincronizar agendamentos com Google Calendar', 'dps-agenda-addon' ); ?>
-                                    <span class="description" style="color: #f59e0b;">
-                                        <?php esc_html_e( '(Disponível na próxima fase)', 'dps-agenda-addon' ); ?>
-                                    </span>
                                 </label>
+                                <p class="description">
+                                    <?php esc_html_e( 'Cria eventos no Google Calendar quando agendamentos são salvos no DPS.', 'dps-agenda-addon' ); ?>
+                                </p>
                             </fieldset>
                         </td>
                     </tr>
@@ -337,7 +342,7 @@ class DPS_Google_Integrations_Settings {
                                     <input type="checkbox" name="sync_tasks" value="1" disabled>
                                     <?php esc_html_e( 'Sincronizar follow-ups e cobranças com Google Tasks', 'dps-agenda-addon' ); ?>
                                     <span class="description" style="color: #f59e0b;">
-                                        <?php esc_html_e( '(Disponível na próxima fase)', 'dps-agenda-addon' ); ?>
+                                        <?php esc_html_e( '(Disponível na Fase 4)', 'dps-agenda-addon' ); ?>
                                     </span>
                                 </label>
                             </fieldset>
@@ -345,8 +350,10 @@ class DPS_Google_Integrations_Settings {
                     </tr>
                 </table>
                 
-                <p class="description" style="margin-top: 20px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b;">
-                    <?php esc_html_e( 'Fase 1 concluída: Infraestrutura de autenticação OAuth 2.0 implementada. As funcionalidades de sincronização serão habilitadas nas próximas fases.', 'dps-agenda-addon' ); ?>
+                <?php submit_button( __( 'Salvar Configurações', 'dps-agenda-addon' ) ); ?>
+                
+                <p class="description" style="margin-top: 20px; padding: 15px; background: #d1fae5; border-left: 4px solid #10b981;">
+                    ✅ <?php esc_html_e( 'Fase 2 concluída: Sincronização Google Calendar implementada (DPS → Calendar).', 'dps-agenda-addon' ); ?>
                 </p>
             </form>
         </div>
@@ -354,7 +361,7 @@ class DPS_Google_Integrations_Settings {
     }
     
     /**
-     * Processa ações (conectar, desconectar).
+     * Processa ações (conectar, desconectar, salvar configurações).
      *
      * @since 2.0.0
      */
@@ -371,6 +378,49 @@ class DPS_Google_Integrations_Settings {
         if ( isset( $_GET['action'] ) && $_GET['action'] === 'dps_google_disconnect' ) {
             $this->handle_disconnect();
         }
+        
+        // Salvar configurações
+        if ( isset( $_POST['dps_action'] ) && $_POST['dps_action'] === 'save_google_settings' ) {
+            $this->handle_save_settings();
+        }
+    }
+    
+    /**
+     * Processa salvamento de configurações.
+     *
+     * @since 2.0.0
+     */
+    private function handle_save_settings() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+        }
+        
+        // Verifica nonce
+        if ( empty( $_POST['dps_google_nonce'] ) || ! wp_verify_nonce( $_POST['dps_google_nonce'], 'dps_google_save_settings' ) ) {
+            wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+        }
+        
+        // Obtém settings atuais
+        $settings = get_option( DPS_Google_Auth::OPTION_NAME, [] );
+        
+        // Atualiza configurações
+        $settings['sync_calendar'] = ! empty( $_POST['sync_calendar'] ) ? 1 : 0;
+        $settings['sync_tasks'] = ! empty( $_POST['sync_tasks'] ) ? 1 : 0;
+        
+        update_option( DPS_Google_Auth::OPTION_NAME, $settings );
+        
+        // Redireciona com mensagem de sucesso
+        $redirect_url = add_query_arg(
+            [
+                'page'    => 'dps-agenda-hub',
+                'tab'     => 'google-integrations',
+                'message' => 'settings_saved',
+            ],
+            admin_url( 'admin.php' )
+        );
+        
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
     
     /**
