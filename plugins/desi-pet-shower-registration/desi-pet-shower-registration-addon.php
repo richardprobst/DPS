@@ -216,13 +216,9 @@ class DPS_Registration_Addon {
 
         if ( $duplicate_id > 0 ) {
             $client = get_post( $duplicate_id );
-            $client_phone = get_post_meta( $duplicate_id, 'client_phone', true );
 
-            // Indica que o campo duplicado é o telefone
-            $duplicated_fields = [];
-            if ( ! empty( $phone ) && $client_phone === $phone ) {
-                $duplicated_fields[] = __( 'Telefone', 'dps-registration-addon' );
-            }
+            // Como a duplicata é encontrada apenas por telefone, sempre indicamos o telefone como campo duplicado
+            $duplicated_fields = [ __( 'Telefone', 'dps-registration-addon' ) ];
 
             // URL para visualizar o cliente existente
             $painel_page_id = get_option( 'dps_painel_page_id', 0 );
@@ -503,14 +499,18 @@ class DPS_Registration_Addon {
      * bloqueios indevidos quando o mesmo email ou CPF é compartilhado em famílias.
      *
      * @since 1.1.0
-     * @since 1.3.2 Modificado para verificar apenas telefone (não mais email/CPF).
+     * @since 1.3.0 Modificado para verificar apenas telefone (não mais email/CPF).
      * 
-     * @param string $email Email normalizado (mantido por compatibilidade, não usado).
+     * @param string $email Email normalizado. Mantido apenas por compatibilidade e ignorado desde 1.3.0.
      * @param string $phone Telefone normalizado (apenas dígitos).
-     * @param string $cpf CPF normalizado (mantido por compatibilidade, não usado).
+     * @param string $cpf   CPF normalizado. Mantido apenas por compatibilidade e ignorado desde 1.3.0.
      * @return int ID do cliente encontrado ou 0
      */
     private function find_duplicate_client( $email, $phone, $cpf ) {
+        // Parâmetros $email e $cpf são mantidos apenas por compatibilidade e não são usados.
+        // Qualquer valor passado para eles será ignorado.
+        unset( $email, $cpf );
+
         // Verifica duplicata APENAS por telefone
         if ( empty( $phone ) ) {
             return 0;
@@ -2497,16 +2497,16 @@ class DPS_Registration_Addon {
         // Campos do cliente agrupados para melhor distribuição
         echo '<div class="dps-client-fields">';
         echo '<p><label>' . esc_html__( 'Nome', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_name" id="dps-client-name" required></label></p>';
-        echo '<p><label>CPF<br><input type="text" name="client_cpf"></label></p>';
-        echo '<p><label>' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="text" name="client_phone" required></label></p>';
-        echo '<p><label>Email<br><input type="email" name="client_email"></label></p>';
-        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth"></label></p>';
-        echo '<p><label>Instagram<br><input type="text" name="client_instagram" placeholder="@usuario"></label></p>';
-        echo '<p><label>Facebook<br><input type="text" name="client_facebook"></label></p>';
+        echo '<p><label>CPF<br><input type="text" name="client_cpf" id="dps-client-cpf" placeholder="000.000.000-00"></label></p>';
+        echo '<p><label for="dps-client-phone">' . esc_html__( 'Telefone / WhatsApp', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><input type="tel" name="client_phone" id="dps-client-phone" placeholder="(11) 98765-4321" autocomplete="tel" required aria-describedby="dps-phone-hint"></label><span id="dps-phone-hint" class="dps-field-hint">' . esc_html__( 'Formato: (DDD) número com 8 ou 9 dígitos', 'dps-registration-addon' ) . '</span></p>';
+        echo '<p><label>Email<br><input type="email" name="client_email" id="dps-client-email" autocomplete="email"></label></p>';
+        echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="client_birth" id="dps-client-birth"></label></p>';
+        echo '<p><label>Instagram<br><input type="text" name="client_instagram" id="dps-client-instagram" placeholder="@usuario"></label></p>';
+        echo '<p><label>Facebook<br><input type="text" name="client_facebook" id="dps-client-facebook"></label></p>';
         echo '<p><label><input type="checkbox" name="client_photo_auth" value="1"> ' . esc_html__( 'Autorizo publicação da foto do pet nas redes sociais do DESI PET SHOWER', 'dps-registration-addon' ) . '</label></p>';
         // Endereço completo com id específico para ativar autocomplete do Google
         echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Endereço completo', 'dps-registration-addon' ) . '<br><textarea name="client_address" id="dps-client-address" rows="2"></textarea></label></p>';
-        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral"></label></p>';
+        echo '<p style="flex:1 1 100%;"><label>' . esc_html__( 'Como nos conheceu?', 'dps-registration-addon' ) . '<br><input type="text" name="client_referral" id="dps-client-referral"></label></p>';
         echo '</div>';
 
         // F3.2: Opções administrativas para cadastro rápido
