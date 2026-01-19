@@ -1030,52 +1030,67 @@ CONTEXTO DO SISTEMA:
         
         $context = "DADOS DO SISTEMA (atualizados em " . current_time( 'd/m/Y H:i' ) . "):\n\n";
 
+        // Define nomes das tabelas
+        $clients_table    = $wpdb->prefix . 'dps_clientes';
+        $pets_table       = $wpdb->prefix . 'dps_pets';
+        $agenda_table     = $wpdb->prefix . 'dps_agendamentos';
+        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
+
+        // Cache de verificação de existência de tabelas
+        $tables_exist = [
+            'clients'    => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $clients_table ) ) === $clients_table,
+            'pets'       => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pets_table ) ) === $pets_table,
+            'agenda'     => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $agenda_table ) ) === $agenda_table,
+            'transacoes' => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table,
+        ];
+
         // 1. Estatísticas de clientes
-        $clients_table = $wpdb->prefix . 'dps_clientes';
-        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $clients_table ) ) === $clients_table ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $total_clients = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$clients_table}" );
+        if ( $tables_exist['clients'] ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $total_clients = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `{$clients_table}` WHERE 1 = %d", 1 ) );
             $context .= "📊 CLIENTES:\n";
             $context .= "- Total de clientes cadastrados: {$total_clients}\n";
             
             // Clientes ativos (com agendamento nos últimos 90 dias)
-            $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $active_clients = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(DISTINCT c.id) FROM {$clients_table} c 
-                INNER JOIN {$wpdb->prefix}dps_agendamentos a ON c.id = a.cliente_id 
-                WHERE a.data >= %s",
-                $active_date
-            ) );
-            $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
+            if ( $tables_exist['agenda'] ) {
+                $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $active_clients = (int) $wpdb->get_var( $wpdb->prepare(
+                    "SELECT COUNT(DISTINCT c.id) FROM `{$clients_table}` c 
+                    INNER JOIN `{$agenda_table}` a ON c.id = a.cliente_id 
+                    WHERE a.data >= %s",
+                    $active_date
+                ) );
+                $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
+            } else {
+                $context .= "\n";
+            }
         }
 
         // 2. Estatísticas de pets
-        $pets_table = $wpdb->prefix . 'dps_pets';
-        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pets_table ) ) === $pets_table ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $total_pets = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$pets_table}" );
+        if ( $tables_exist['pets'] ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $total_pets = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `{$pets_table}` WHERE 1 = %d", 1 ) );
             $context .= "🐾 PETS:\n";
             $context .= "- Total de pets cadastrados: {$total_pets}\n\n";
         }
 
         // 3. Agendamentos
-        $agenda_table = $wpdb->prefix . 'dps_agendamentos';
-        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $agenda_table ) ) === $agenda_table ) {
+        if ( $tables_exist['agenda'] ) {
             $today = current_time( 'Y-m-d' );
             
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $today_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$agenda_table} WHERE data = %s",
+                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data = %s",
                 $today
             ) );
             
             // Esta semana
             $week_start = gmdate( 'Y-m-d', strtotime( 'monday this week' ) );
             $week_end = gmdate( 'Y-m-d', strtotime( 'sunday this week' ) );
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $week_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$agenda_table} WHERE data BETWEEN %s AND %s",
+                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data BETWEEN %s AND %s",
                 $week_start,
                 $week_end
             ) );
@@ -1083,9 +1098,9 @@ CONTEXTO DO SISTEMA:
             // Este mês
             $month_start = gmdate( 'Y-m-01' );
             $month_end = gmdate( 'Y-m-t' );
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $month_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$agenda_table} WHERE data BETWEEN %s AND %s",
+                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data BETWEEN %s AND %s",
                 $month_start,
                 $month_end
             ) );
@@ -1097,24 +1112,27 @@ CONTEXTO DO SISTEMA:
         }
 
         // 4. Dados financeiros (se tabela existir)
-        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
-        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table ) {
+        if ( $tables_exist['transacoes'] ) {
             $month_start = gmdate( 'Y-m-01' );
+            $status_pago = 'pago';
+            $status_pendente = 'pendente';
             
             // Faturamento do mês (transações pagas)
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $month_revenue = $wpdb->get_var( $wpdb->prepare(
-                "SELECT COALESCE(SUM(valor), 0) FROM {$transacoes_table} 
-                WHERE status = 'pago' AND created_at >= %s",
+                "SELECT COALESCE(SUM(valor), 0) FROM `{$transacoes_table}` 
+                WHERE status = %s AND created_at >= %s",
+                $status_pago,
                 $month_start
             ) );
             $month_revenue = (float) $month_revenue;
             
             // Pendentes
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $pending_amount = $wpdb->get_var(
-                "SELECT COALESCE(SUM(valor), 0) FROM {$transacoes_table} WHERE status = 'pendente'"
-            );
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $pending_amount = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COALESCE(SUM(valor), 0) FROM `{$transacoes_table}` WHERE status = %s",
+                $status_pendente
+            ) );
             $pending_amount = (float) $pending_amount;
             
             $context .= "💰 FINANCEIRO:\n";
