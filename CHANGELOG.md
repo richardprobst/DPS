@@ -236,6 +236,14 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**AI Add-on - Correção das Configurações do Assistente de IA (v1.6.2)**
+
+- **Configurações não editáveis corrigidas**: O uso de `wp_kses_post()` no Hub de IA (`class-dps-ai-hub.php`) removia elementos de formulário (`<input>`, `<select>`, `<textarea>`, `<form>`, `<button>`), tornando todas as configurações apenas texto sem possibilidade de edição.
+- **Novo método `get_allowed_form_tags()`**: Criada lista personalizada de tags HTML permitidas que extende `wp_kses_post` com elementos de formulário essenciais para as configurações funcionarem.
+- **Correção em todas as 7 abas do Hub**: Configurações, Analytics, Conversas, Base de Conhecimento, Testar Base, Modo Especialista e Insights agora usam `wp_kses()` com lista segura em vez de bypass total ou `wp_kses_post()`.
+- **Campos de WhatsApp não salvavam**: Os campos de integração WhatsApp Business (enabled, provider, tokens, etc.) estavam presentes no formulário mas não eram processados no salvamento. Adicionados 11 campos ao método `maybe_handle_save()`.
+- **Campos de Sugestões Proativas não salvavam**: Os campos de sugestões proativas de agendamento (enabled, interval, cooldown, mensagens) não eram salvos. Adicionados 5 campos ao método `maybe_handle_save()`.
+
 **Base Plugin - Correção do Shortcode [dps_configuracoes] (v1.1.1)**
 
 - **Erro "Falha ao publicar. A resposta não é um JSON válido" corrigido**: O shortcode `[dps_configuracoes]` causava um PHP Fatal Error ao ser inserido no editor de blocos (Gutenberg). A classe `DPS_Settings_Frontend` referenciava `DPS_Logger::LEVEL_DEBUG` que não estava definida na classe `DPS_Logger`.
