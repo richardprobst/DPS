@@ -1,10 +1,11 @@
-# Integrações Google - Fases 1, 2 e 3
+# Integrações Google - Fases 1, 2, 3 e 4 (COMPLETO)
 
 **Status Fase 1:** ✅ Concluída  
 **Status Fase 2:** ✅ Concluída  
 **Status Fase 3:** ✅ Concluída  
+**Status Fase 4:** ✅ Concluída  
 **Data:** 2026-01-19  
-**Versão:** 2.0.0-fase3  
+**Versão:** 2.0.0-completo  
 
 ## O que foi implementado
 
@@ -13,10 +14,12 @@
 ```
 desi-pet-shower-agenda/includes/integrations/
 ├── class-dps-google-auth.php                    ✅ OAuth 2.0 Handler (Fase 1)
-├── class-dps-google-integrations-settings.php   ✅ Interface Administrativa (Fase 1+2+3)
+├── class-dps-google-integrations-settings.php   ✅ Interface Administrativa (Fase 1+2+3+4)
 ├── class-dps-google-calendar-client.php         ✅ Cliente Calendar API (Fase 2)
 ├── class-dps-google-calendar-sync.php           ✅ Sincronização Calendar (Fase 2)
 ├── class-dps-google-calendar-webhook.php        ✅ Webhook Handler (Fase 3)
+├── class-dps-google-tasks-client.php            ✅ Cliente Tasks API (Fase 4)
+├── class-dps-google-tasks-sync.php              ✅ Sincronização Tasks (Fase 4)
 └── README.md                                    ✅ Esta documentação
 ```
 
@@ -469,23 +472,194 @@ Opção: `dps_google_integrations_settings`
 - Não modifica nenhuma funcionalidade existente
 - Não adiciona queries em páginas existentes
 
-## Próximos Passos (Fase 2)
+## Próximos Passos
 
-1. Criar `class-dps-google-calendar-client.php`
-   - Cliente HTTP para Calendar API v3
-   - Métodos: `create_event()`, `update_event()`, `delete_event()`
+✅ **Todas as 4 fases foram implementadas!**
 
-2. Criar `class-dps-google-calendar-sync.php`
-   - Sincronização unidirecional (DPS → Calendar)
-   - Hook em `save_post_dps_agendamento`
-   - Formatação de agendamentos como eventos
+Integração completa com Google Workspace (Calendar + Tasks):
+- ✅ Fase 1: Infraestrutura OAuth 2.0
+- ✅ Fase 2: Sincronização Google Calendar (DPS → Calendar)
+- ✅ Fase 3: Sincronização bidirecional (Calendar ⇄ DPS)
+- ✅ Fase 4: Google Tasks (tarefas administrativas)
 
-3. Adicionar metadados:
-   - `_google_calendar_event_id`
-   - `_google_calendar_synced_at`
+**Documentação para usuários finais:**
+- Guia completo passo a passo: `docs/implementation/GOOGLE_WORKSPACE_USER_GUIDE.md`
+- Análise técnica: `docs/analysis/GOOGLE_TASKS_INTEGRATION_ANALYSIS.md`
+- Resumo executivo: `docs/analysis/GOOGLE_TASKS_INTEGRATION_SUMMARY.md`
 
-4. Habilitar checkbox na UI:
-   - "Sincronizar agendamentos com Google Calendar"
+## Fase 4: Google Tasks (Concluída)
+
+### Funcionalidades Implementadas
+
+#### 1. Cliente Google Tasks API (`class-dps-google-tasks-client.php`)
+
+**Responsabilidades:**
+- Criar tarefas no Google Tasks
+- Atualizar tarefas existentes
+- Deletar tarefas
+- Obter detalhes de tarefa
+- Formatar datas (RFC 3339)
+
+**Métodos Públicos:**
+- `create_task($task_list_id, $task_data)` - Cria tarefa
+- `update_task($task_list_id, $task_id, $task_data)` - Atualiza tarefa
+- `delete_task($task_list_id, $task_id)` - Deleta tarefa
+- `get_task($task_list_id, $task_id)` - Obtém tarefa
+- `format_due_date($date)` - Formata data para Google
+
+**Endpoint API:**
+- Base URL: `https://www.googleapis.com/tasks/v1`
+
+#### 2. Sincronização Automática (`class-dps-google-tasks-sync.php`)
+
+**Responsabilidades:**
+- Criar tarefas de follow-up após agendamento finalizado
+- Criar tarefas de cobrança para pagamentos pendentes
+- Criar tarefas para mensagens do portal do cliente
+- Atualizar tarefas quando status mudar
+
+**Hooks Consumidos:**
+- `dps_appointment_status_changed` - Follow-ups pós-atendimento
+- `dps_finance_charge_created` - Cobranças pendentes
+- `dps_finance_charge_updated` - Atualiza status da tarefa
+- `dps_client_message_received` - Mensagens do portal
+
+**Tipos de Tarefas Criadas:**
+
+##### a) Follow-up pós-atendimento
+**Quando:** Agendamento mudou para status "finalizado"
+**Título:** `📞 Follow-up: Rex - Banho, Tosa`
+**Vencimento:** 2 dias após atendimento
+**Descrição:**
+```
+Cliente: João Silva
+Pet: Rex
+Serviços: Banho, Tosa
+
+✅ Atendimento finalizado - fazer contato para avaliar satisfação e agendar retorno.
+
+🔗 Ver agendamento no DPS: [link]
+```
+
+##### b) Cobrança pendente
+**Quando:** Nova transação pendente criada
+**Título:** `💰 Cobrança: João Silva - R$ 150,00`
+**Vencimento:** 1 dia antes da data de vencimento
+**Descrição:**
+```
+Cliente: João Silva
+Valor: R$ 150,00
+Vencimento: 25/01/2026
+Descrição: Pagamento de serviços
+
+⚠️ Cobrança pendente - entrar em contato para solicitar pagamento.
+
+🔗 Ver agendamento no DPS: [link]
+```
+**Atualização automática:** Quando transação é paga, a tarefa é marcada como "completed"
+
+##### c) Mensagem do portal
+**Quando:** Cliente envia mensagem pelo portal
+**Título:** `💬 Responder: João Silva - Solicitação`
+**Vencimento:** 1 dia após recebimento
+**Descrição:**
+```
+Cliente: João Silva
+Assunto: Dúvida sobre horários
+
+Mensagem:
+Olá, gostaria de saber se vocês atendem aos sábados...
+
+📱 Responder no Portal: [link]
+```
+
+**Actions Disparadas:**
+- `dps_google_task_followup_created` - Após criar follow-up
+- `dps_google_task_payment_created` - Após criar tarefa de cobrança
+- `dps_google_task_payment_completed` - Quando pagamento é feito
+- `dps_google_task_message_created` - Após criar tarefa de mensagem
+- `dps_google_tasks_sync_error` - Após erro de sincronização
+
+**Filters Disponíveis:**
+- `dps_google_tasks_followup_data` - Modificar dados da tarefa de follow-up
+- `dps_google_tasks_payment_data` - Modificar dados da tarefa de cobrança
+- `dps_google_tasks_message_data` - Modificar dados da tarefa de mensagem
+
+**Metadados Armazenados:**
+- `_google_task_followup_id` - ID da tarefa de follow-up no Google
+- `_google_task_followup_created_at` - Data/hora de criação
+- `_google_task_followup_error` - Log de erro (se houver)
+- `_google_task_payment_id_{charge_id}` - ID da tarefa de cobrança
+- `_google_task_payment_created_at_{charge_id}` - Data/hora de criação
+- `_google_task_payment_completed_at_{charge_id}` - Data/hora de conclusão
+- `_google_task_payment_error_{charge_id}` - Log de erro (se houver)
+
+#### 3. Interface Administrativa Atualizada
+
+**Checkbox habilitado:**
+- ✅ "Sincronizar tarefas administrativas com Google Tasks"
+- Descrição: "Cria tarefas no Google Tasks para follow-ups pós-atendimento, cobranças pendentes e mensagens do portal."
+
+**Mensagem de Status:**
+```
+✅ Fase 4 concluída: Integração completa com Google Calendar + Google Tasks implementada!
+• Sincronização bidirecional de agendamentos (Calendar ⇄ DPS)
+• Tarefas administrativas automáticas (follow-ups, cobranças, mensagens)
+```
+
+### Fluxo Completo de Sincronização (Fase 4)
+
+```
+DPS: Agendamento finalizado
+  ↓
+Hook: dps_appointment_status_changed($appt_id, $old, 'finalizado', $data)
+  ↓
+DPS_Google_Tasks_Sync::maybe_create_followup_task()
+  ├─ Verifica se sync_tasks habilitado
+  ├─ Verifica se já tem task criada (evita duplicação)
+  ├─ Formata dados da tarefa
+  └─ Chama DPS_Google_Tasks_Client::create_task()
+  ↓
+API: POST https://www.googleapis.com/tasks/v1/lists/@default/tasks
+  ↓
+Response: { "id": "abc123", "title": "...", ... }
+  ↓
+Meta: update_post_meta($appt_id, '_google_task_followup_id', 'abc123')
+  ↓
+✅ Tarefa criada no Google Tasks!
+  ↓
+Usuário recebe notificação no Google Tasks (mobile/desktop/email)
+```
+
+### Como Testar Fase 4
+
+#### Teste 1: Follow-up pós-atendimento
+
+1. Crie agendamento no DPS
+2. Marque status como "Finalizado"
+3. Aguarde ~2 segundos
+4. Abra Google Tasks (tasks.google.com ou app)
+5. ✅ Deve aparecer tarefa "📞 Follow-up: [Pet] - [Serviços]"
+6. Vencimento deve ser daqui a 2 dias
+
+#### Teste 2: Cobrança pendente
+
+1. Crie transação pendente no Finance addon
+2. Aguarde ~2 segundos
+3. Abra Google Tasks
+4. ✅ Deve aparecer tarefa "💰 Cobrança: [Cliente] - [Valor]"
+5. Vencimento deve ser 1 dia antes da data de vencimento
+6. Marque transação como "paga" no DPS
+7. Aguarde ~2 segundos
+8. ✅ Tarefa deve ser marcada como "concluída" automaticamente
+
+#### Teste 3: Mensagem do portal
+
+1. Simule mensagem do cliente (se addon Communications ativo)
+2. Aguarde ~2 segundos
+3. Abra Google Tasks
+4. ✅ Deve aparecer tarefa "💬 Responder: [Cliente] - [Assunto]"
+5. Vencimento deve ser daqui a 1 dia
 
 ## Troubleshooting
 

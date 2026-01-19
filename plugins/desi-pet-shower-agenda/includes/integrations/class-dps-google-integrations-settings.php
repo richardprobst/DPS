@@ -358,12 +358,12 @@ class DPS_Google_Integrations_Settings {
                         <td>
                             <fieldset>
                                 <label>
-                                    <input type="checkbox" name="sync_tasks" value="1" disabled>
-                                    <?php esc_html_e( 'Sincronizar follow-ups e cobranças com Google Tasks', 'dps-agenda-addon' ); ?>
-                                    <span class="description" style="color: #f59e0b;">
-                                        <?php esc_html_e( '(Disponível na Fase 4)', 'dps-agenda-addon' ); ?>
-                                    </span>
+                                    <input type="checkbox" name="sync_tasks" value="1" <?php checked( $sync_tasks ); ?>>
+                                    <?php esc_html_e( 'Sincronizar tarefas administrativas com Google Tasks', 'dps-agenda-addon' ); ?>
                                 </label>
+                                <p class="description">
+                                    <?php esc_html_e( 'Cria tarefas no Google Tasks para follow-ups pós-atendimento, cobranças pendentes e mensagens do portal.', 'dps-agenda-addon' ); ?>
+                                </p>
                             </fieldset>
                         </td>
                     </tr>
@@ -372,9 +372,12 @@ class DPS_Google_Integrations_Settings {
                 <?php submit_button( __( 'Salvar Configurações', 'dps-agenda-addon' ) ); ?>
                 
                 <p class="description" style="margin-top: 20px; padding: 15px; background: #d1fae5; border-left: 4px solid #10b981;">
-                    ✅ <?php esc_html_e( 'Fase 3 concluída: Sincronização bidirecional Google Calendar implementada (Calendar ⇄ DPS).', 'dps-agenda-addon' ); ?>
+                    ✅ <?php esc_html_e( 'Fase 4 concluída: Integração completa com Google Calendar + Google Tasks implementada!', 'dps-agenda-addon' ); ?>
                     <br>
-                    <small><?php esc_html_e( 'Webhook automático registrado. Reagendamentos no Google Calendar sincronizam automaticamente para o DPS.', 'dps-agenda-addon' ); ?></small>
+                    <small>
+                        <?php esc_html_e( '• Sincronização bidirecional de agendamentos (Calendar ⇄ DPS)', 'dps-agenda-addon' ); ?><br>
+                        <?php esc_html_e( '• Tarefas administrativas automáticas (follow-ups, cobranças, mensagens)', 'dps-agenda-addon' ); ?>
+                    </small>
                 </p>
             </form>
         </div>
