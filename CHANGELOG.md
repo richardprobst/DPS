@@ -236,6 +236,19 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Stats Add-on - Correção de PHP Warning no Cache Invalidator (v1.2.1)**
+
+- **PHP Warning corrigido**: O método `invalidate_on_post_delete()` assumia que o segundo parâmetro era sempre um objeto WP_Post, mas o hook `trashed_post` passa `$post_id` (int) e `$previous_status` (string), causando warnings "Attempt to read property 'post_type' on string" ao mover posts para lixeira.
+- **Separação de métodos**: Criados métodos separados para cada hook:
+  - `invalidate_on_before_delete()`: Lida com o hook `before_delete_post` que recebe objeto WP_Post
+  - `invalidate_on_trash()`: Lida com o hook `trashed_post` que recebe apenas post_id e busca o objeto internamente
+- **Validação de tipo robusta**: Adicionada verificação `instanceof WP_Post` no método `invalidate_on_before_delete()` para garantir que o parâmetro é um objeto válido antes de acessar propriedades.
+
+**Agenda Add-on - Validação Defensiva no Google Calendar Sync (v2.0.1)**
+
+- **Validação preventiva adicionada**: Método `handle_delete_appointment()` agora valida que o segundo parâmetro é `instanceof WP_Post` antes de acessar propriedades, prevenindo potenciais warnings caso o hook seja usado incorretamente no futuro.
+- **Consistência com correção do Stats Add-on**: Aplica o mesmo padrão de validação defensiva implementado no cache invalidator.
+
 **AI Add-on - Correção das Configurações do Assistente de IA (v1.6.2)**
 
 - **Configurações não editáveis corrigidas**: O uso de `wp_kses_post()` no Hub de IA (`class-dps-ai-hub.php`) removia elementos de formulário (`<input>`, `<select>`, `<textarea>`, `<form>`, `<button>`), tornando todas as configurações apenas texto sem possibilidade de edição.

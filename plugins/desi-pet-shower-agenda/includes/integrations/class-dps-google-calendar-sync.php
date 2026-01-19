@@ -336,6 +336,11 @@ class DPS_Google_Calendar_Sync {
      * @param WP_Post $post    Objeto do post.
      */
     public function handle_delete_appointment( $post_id, $post ) {
+        // Verificar se é um objeto WP_Post válido
+        if ( ! $post instanceof WP_Post ) {
+            return;
+        }
+        
         if ( 'dps_agendamento' !== $post->post_type ) {
             return;
         }
