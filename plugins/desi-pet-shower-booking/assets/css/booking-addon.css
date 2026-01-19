@@ -159,6 +159,15 @@
     .dps-booking-wrapper .dps-section-title {
         font-size: 20px;
     }
+
+    .dps-confirmation-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .dps-confirmation-list dt {
+        margin-bottom: -4px;
+    }
 }
 
 /* Mobile (640px) */
@@ -175,6 +184,27 @@
     .dps-booking-access-denied {
         margin: 40px auto;
         padding: 30px 20px;
+    }
+
+    .dps-confirmation-header {
+        padding: 30px 16px 24px;
+    }
+
+    .dps-confirmation-icon {
+        font-size: 48px;
+    }
+
+    .dps-confirmation-title {
+        font-size: 24px;
+    }
+
+    .dps-confirmation-actions {
+        flex-direction: column;
+    }
+
+    .dps-confirmation-actions .dps-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -208,7 +238,174 @@
 }
 
 /* ==========================================================================
-   7. Print Styles
+   7. Confirmation Page
+   ========================================================================== */
+
+.dps-booking-confirmation {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dps-confirmation-header {
+    padding: 40px 20px 30px;
+}
+
+.dps-confirmation-icon {
+    display: inline-block;
+    font-size: 64px;
+    margin-bottom: 16px;
+    animation: dps-bounce 0.5s ease-out;
+}
+
+@keyframes dps-bounce {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.dps-confirmation-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.dps-confirmation-subtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+.dps-confirmation-details {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 0 0 24px;
+    text-align: left;
+}
+
+.dps-confirmation-details h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dps-confirmation-list {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px 16px;
+    margin: 0;
+}
+
+.dps-confirmation-list dt {
+    font-weight: 500;
+    color: #64748b;
+    margin: 0;
+}
+
+.dps-confirmation-list dd {
+    font-weight: 500;
+    color: #0f172a;
+    margin: 0;
+}
+
+.dps-confirmation-list dd strong {
+    font-size: 18px;
+    color: #059669;
+}
+
+.dps-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dps-status--pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-status--finalizado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-status--finalizado_pago {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-status--cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dps-confirmation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.dps-confirmation-actions .dps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dps-confirmation-actions .dps-btn--primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    border: none;
+}
+
+.dps-confirmation-actions .dps-btn--primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+    color: #ffffff;
+}
+
+.dps-confirmation-actions .dps-btn--secondary {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+.dps-confirmation-actions .dps-btn--secondary:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.dps-confirmation-actions .dps-btn--outline {
+    background: transparent;
+    color: #0ea5e9;
+    border: 2px solid #0ea5e9;
+}
+
+.dps-confirmation-actions .dps-btn--outline:hover {
+    background: #0ea5e9;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   8. Print Styles
    ========================================================================== */
 
 @media print {
@@ -219,5 +416,9 @@
 
     .dps-booking-page-header {
         border: none;
+    }
+
+    .dps-confirmation-actions {
+        display: none;
     }
 }

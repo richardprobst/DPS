@@ -46,7 +46,10 @@
             
             // Eventos de mudança de tipo de agendamento
             $(document).on('change', 'input[name="appointment_type"]', this.handleTypeChange.bind(this));
-            $(document).on('change', '#appointment_frequency, select[name="appointment_frequency"]', this.updateTosaOptions.bind(this));
+            $(document).on('change', '#appointment_frequency, select[name="appointment_frequency"]', function() {
+                self.updateTosaOptions();
+                self.updateAppointmentSummary();
+            });
             $(document).on('change', '#dps-taxidog-toggle', this.toggleTaxiDog.bind(this));
             $(document).on('change', '#dps-tosa-toggle', this.updateTosaFields.bind(this));
             
@@ -68,6 +71,9 @@
             // Eventos para serviços do Services Add-on
             $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
             $(document).on('input', '.dps-service-price', this.updateAppointmentSummary.bind(this));
+            
+            // Eventos para valores de assinatura por pet
+            $(document).on('input', '.dps-subscription-pet-value', this.updateAppointmentSummary.bind(this));
             
             // Eventos para extras (novo formato múltiplos)
             $(document).on('input', '.dps-extra-description-input, .dps-extra-value-input', this.updateAppointmentSummary.bind(this));
@@ -356,10 +362,31 @@
             }
 
             if (appointmentType === 'subscription') {
-                const baseValue = parseCurrency($('#dps-subscription-base').val());
-                if (baseValue > 0) {
-                    services.push('Assinatura base (R$ ' + baseValue.toFixed(2) + ')');
-                    totalValue += baseValue;
+                // Prioriza valores por pet se existirem
+                const $petValues = $('.dps-subscription-pet-value');
+                if ($petValues.length > 0) {
+                    let petTotalValue = 0;
+                    const petValuesBreakdown = [];
+                    $petValues.each(function() {
+                        const $row = $(this).closest('.dps-subscription-pet-value-row');
+                        const petName = $row.find('.dps-subscription-pet-name').text().trim();
+                        const val = parseCurrency($(this).val());
+                        if (val > 0) {
+                            petTotalValue += val;
+                            petValuesBreakdown.push(petName + ': R$ ' + val.toFixed(2));
+                        }
+                    });
+                    if (petTotalValue > 0) {
+                        services.push('Assinatura por pet (' + petValuesBreakdown.join(', ') + ')');
+                        totalValue += petTotalValue;
+                    }
+                } else {
+                    // Fallback para campo base único
+                    const baseValue = parseCurrency($('#dps-subscription-base').val());
+                    if (baseValue > 0) {
+                        services.push('Assinatura base (R$ ' + baseValue.toFixed(2) + ')');
+                        totalValue += baseValue;
+                    }
                 }
 
                 // Novo formato: múltiplos extras
@@ -435,6 +462,30 @@
                 $list.find('[data-summary="date"]').text(dateFormatted);
                 
                 $list.find('[data-summary="time"]').text(time);
+                
+                // Subscription-specific: show frequency and future dates
+                if (appointmentType === 'subscription') {
+                    const frequency = $('select[name="appointment_frequency"]').val() || 'semanal';
+                    const frequencyLabel = frequency === 'quinzenal' ? 'Quinzenal' : 'Semanal';
+                    $list.find('[data-summary="frequency"]').text(frequencyLabel);
+                    
+                    // Calculate future appointment dates using a base timestamp for consistency
+                    const futureDates = [];
+                    const daysInterval = frequency === 'quinzenal' ? 14 : 7;
+                    const numberOfFutureDates = 4; // Show next 4 appointments
+                    const baseTimestamp = new Date(date + 'T12:00:00').getTime(); // Use noon to avoid DST issues
+                    const msPerDay = 24 * 60 * 60 * 1000;
+                    
+                    for (let i = 1; i <= numberOfFutureDates; i++) {
+                        const futureDate = new Date(baseTimestamp + (daysInterval * i * msPerDay));
+                        futureDates.push(futureDate.toLocaleDateString('pt-BR'));
+                    }
+                    
+                    $list.find('[data-summary="future-dates"]').text(futureDates.join(', '));
+                    $('.dps-appointment-summary__subscription-info').show();
+                } else {
+                    $('.dps-appointment-summary__subscription-info').hide();
+                }
                 
                 // Formata serviços como lista visual com badges
                 const $servicesEl = $list.find('[data-summary="services"]');

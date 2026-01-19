@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Booking Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Página dedicada de agendamentos para administradores. Mesma funcionalidade da aba Agendamentos do Painel de Gestão DPS.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-booking-addon
@@ -95,6 +95,9 @@ class DPS_Booking_Addon {
 
         // Cria a página automaticamente ao ativar
         register_activation_hook( __FILE__, [ $this, 'activate' ] );
+        
+        // Hook para capturar agendamento salvo e armazenar para confirmação
+        add_action( 'dps_base_after_save_appointment', [ $this, 'capture_saved_appointment' ], 5, 2 );
     }
 
     /**
@@ -144,7 +147,7 @@ class DPS_Booking_Addon {
 
         // CSS adicional do add-on para ajustes de layout na página dedicada
         $addon_url = plugin_dir_url( __FILE__ );
-        $version   = '1.1.0';
+        $version   = '1.2.0';
 
         wp_enqueue_style(
             'dps-booking-addon',
@@ -191,6 +194,7 @@ class DPS_Booking_Addon {
      *
      * @since 1.0.0
      * @since 1.1.0 Refatorado para usar a funcionalidade do Painel de Gestão DPS.
+     * @since 1.2.0 Adicionado suporte para página de confirmação.
      * @return string HTML do formulário.
      */
     public function render_booking_form() {
@@ -220,15 +224,32 @@ class DPS_Booking_Addon {
                    '</div>';
         }
 
+        // Verifica se há confirmação de agendamento a exibir
+        $transient_key = 'dps_booking_confirmation_' . get_current_user_id();
+        $confirmation_data = get_transient( $transient_key );
+        
+        if ( $confirmation_data && ! empty( $confirmation_data['appointment_id'] ) ) {
+            // Remove o transient para não exibir novamente em refresh
+            delete_transient( $transient_key );
+            
+            ob_start();
+            echo '<div class="dps-booking-wrapper dps-panel">';
+            
+            // Exibe mensagens de feedback
+            if ( class_exists( 'DPS_Message_Helper' ) ) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- DPS_Message_Helper::display_messages() returns pre-escaped safe HTML
+                echo DPS_Message_Helper::display_messages();
+            }
+            
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_confirmation_page() returns pre-escaped safe HTML
+            echo $this->render_confirmation_page( $confirmation_data );
+            echo '</div>';
+            return ob_get_clean();
+        }
+
         ob_start();
 
         echo '<div class="dps-booking-wrapper dps-panel">';
-
-        // Header da página
-        echo '<header class="dps-booking-page-header">';
-        echo '<h1 class="dps-page-title">' . esc_html__( 'Agendamento de Serviços', 'dps-booking-addon' ) . '</h1>';
-        echo '<p class="dps-page-subtitle">' . esc_html__( 'Gerencie os agendamentos de banho, tosa e outros serviços para pets.', 'dps-booking-addon' ) . '</p>';
-        echo '</header>';
 
         // Exibe mensagens de feedback
         if ( class_exists( 'DPS_Message_Helper' ) ) {
@@ -339,12 +360,6 @@ class DPS_Booking_Addon {
 
         // Início da seção
         echo '<div class="dps-section active" id="dps-section-agendas">';
-        
-        // Título da seção
-        echo '<h2 class="dps-section-title">';
-        echo '<span class="dps-section-title__icon">📅</span>';
-        echo esc_html__( 'Agendamento de Serviços', 'dps-booking-addon' );
-        echo '</h2>';
 
         // Formulário
         echo '<div class="dps-surface dps-surface--info">';
@@ -613,6 +628,8 @@ class DPS_Booking_Addon {
         echo '<li><strong>' . esc_html__( 'Pets:', 'dps-booking-addon' ) . '</strong> <span data-summary="pets">-</span></li>';
         echo '<li><strong>' . esc_html__( 'Data:', 'dps-booking-addon' ) . '</strong> <span data-summary="date">-</span></li>';
         echo '<li><strong>' . esc_html__( 'Horário:', 'dps-booking-addon' ) . '</strong> <span data-summary="time">-</span></li>';
+        echo '<li class="dps-appointment-summary__subscription-info" style="display:none;"><strong>' . esc_html__( 'Frequência:', 'dps-booking-addon' ) . '</strong> <span data-summary="frequency">-</span></li>';
+        echo '<li class="dps-appointment-summary__subscription-info" style="display:none;"><strong>' . esc_html__( 'Próximas datas:', 'dps-booking-addon' ) . '</strong> <span data-summary="future-dates">-</span></li>';
         echo '<li><strong>' . esc_html__( 'Serviços:', 'dps-booking-addon' ) . '</strong> <span data-summary="services">-</span></li>';
         echo '<li class="dps-appointment-summary__extras" style="display:none;"><strong>' . esc_html__( 'Extras:', 'dps-booking-addon' ) . '</strong> <span data-summary="extras">-</span></li>';
         echo '<li><strong>' . esc_html__( 'Valor estimado:', 'dps-booking-addon' ) . '</strong> <span data-summary="price">R$ 0,00</span></li>';
@@ -677,6 +694,199 @@ class DPS_Booking_Addon {
             'orderby'        => 'title',
             'order'          => 'ASC',
         ] );
+    }
+
+    /**
+     * Captura dados do agendamento salvo para exibição na página de confirmação.
+     *
+     * Note: This hook is called after nonce verification in save_appointment(),
+     * so we don't need to verify nonce again here. The $_POST access is only
+     * to check the redirect URL destination.
+     *
+     * @since 1.2.0
+     * @param int    $appointment_id ID do agendamento salvo.
+     * @param string $appointment_type Tipo do agendamento.
+     */
+    public function capture_saved_appointment( $appointment_id, $appointment_type ) {
+        // Verifica se estamos na página de agendamento
+        $booking_page_id = (int) get_option( 'dps_booking_page_id' );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce already verified in save_appointment()
+        $redirect_url = isset( $_POST['dps_redirect_url'] ) ? esc_url_raw( wp_unslash( $_POST['dps_redirect_url'] ) ) : '';
+        
+        // Se o redirect contém a página de booking, armazena para confirmação
+        $booking_permalink = $booking_page_id ? get_permalink( $booking_page_id ) : '';
+        if ( $booking_page_id && $booking_permalink && strpos( $redirect_url, $booking_permalink ) !== false ) {
+            $transient_key = 'dps_booking_confirmation_' . get_current_user_id();
+            $data = [
+                'appointment_id'   => $appointment_id,
+                'appointment_type' => $appointment_type,
+                'timestamp'        => time(),
+            ];
+            set_transient( $transient_key, $data, 5 * MINUTE_IN_SECONDS );
+        }
+    }
+
+    /**
+     * Renderiza a página de confirmação de agendamento.
+     *
+     * @since 1.2.0
+     * @param array $confirmation_data Dados da confirmação.
+     * @return string HTML da página de confirmação, ou mensagem de erro se inválido.
+     */
+    private function render_confirmation_page( $confirmation_data ) {
+        $appointment_id = (int) $confirmation_data['appointment_id'];
+        $appointment = get_post( $appointment_id );
+        
+        if ( ! $appointment || 'dps_agendamento' !== $appointment->post_type ) {
+            return '<div class="dps-notice dps-notice--warning"><p>' . 
+                   esc_html__( 'Não foi possível carregar os detalhes do agendamento.', 'dps-booking-addon' ) . 
+                   ' <a href="' . esc_url( $this->get_booking_page_url() ) . '">' . 
+                   esc_html__( 'Criar novo agendamento', 'dps-booking-addon' ) . '</a></p></div>';
+        }
+        
+        // Coleta dados do agendamento
+        $client_id = (int) get_post_meta( $appointment_id, 'appointment_client_id', true );
+        $pet_id    = (int) get_post_meta( $appointment_id, 'appointment_pet_id', true );
+        $date      = get_post_meta( $appointment_id, 'appointment_date', true );
+        $time      = get_post_meta( $appointment_id, 'appointment_time', true );
+        $type      = get_post_meta( $appointment_id, 'appointment_type', true ) ?: 'simple';
+        $notes     = get_post_meta( $appointment_id, 'appointment_notes', true );
+        $status    = get_post_meta( $appointment_id, 'appointment_status', true ) ?: 'pendente';
+        
+        // Dados do cliente
+        $client = get_post( $client_id );
+        $client_name = $client ? $client->post_title : __( 'Cliente não encontrado', 'dps-booking-addon' );
+        
+        // Dados do pet (pode ser múltiplos)
+        $pet_ids = get_post_meta( $appointment_id, 'appointment_pet_ids', true );
+        if ( empty( $pet_ids ) && $pet_id ) {
+            $pet_ids = [ $pet_id ];
+        }
+        $pet_names = [];
+        if ( is_array( $pet_ids ) ) {
+            foreach ( $pet_ids as $pid ) {
+                $pet = get_post( $pid );
+                if ( $pet ) {
+                    $pet_names[] = $pet->post_title;
+                }
+            }
+        }
+        $pets_display = ! empty( $pet_names ) ? implode( ', ', $pet_names ) : __( 'Pet não encontrado', 'dps-booking-addon' );
+        
+        // Formata data
+        $date_obj = DateTime::createFromFormat( 'Y-m-d', $date );
+        $date_formatted = ( $date_obj !== false ) ? $date_obj->format( 'd/m/Y' ) : $date;
+        
+        // Tipo de agendamento em texto
+        $type_labels = [
+            'simple'       => __( 'Agendamento Simples', 'dps-booking-addon' ),
+            'subscription' => __( 'Agendamento de Assinatura', 'dps-booking-addon' ),
+            'past'         => __( 'Agendamento Passado', 'dps-booking-addon' ),
+        ];
+        $type_label = isset( $type_labels[ $type ] ) ? $type_labels[ $type ] : $type;
+        
+        // Status em texto
+        $status_labels = [
+            'pendente'        => __( 'Pendente', 'dps-booking-addon' ),
+            'finalizado'      => __( 'Finalizado', 'dps-booking-addon' ),
+            'finalizado_pago' => __( 'Finalizado e Pago', 'dps-booking-addon' ),
+            'cancelado'       => __( 'Cancelado', 'dps-booking-addon' ),
+        ];
+        $status_label = isset( $status_labels[ $status ] ) ? $status_labels[ $status ] : $status;
+        
+        // Valor total (se disponível)
+        $total_value = 0;
+        if ( 'subscription' === $type ) {
+            $total_value = (float) get_post_meta( $appointment_id, 'subscription_total_value', true );
+        } else {
+            $total_value = (float) get_post_meta( $appointment_id, 'appointment_total_value', true );
+        }
+        
+        ob_start();
+        
+        echo '<div class="dps-booking-confirmation">';
+        
+        // Ícone de sucesso
+        echo '<div class="dps-confirmation-header">';
+        echo '<span class="dps-confirmation-icon" aria-hidden="true">✅</span>';
+        echo '<h2 class="dps-confirmation-title">' . esc_html__( 'Agendamento Confirmado!', 'dps-booking-addon' ) . '</h2>';
+        echo '<p class="dps-confirmation-subtitle">' . esc_html__( 'Seu agendamento foi salvo com sucesso.', 'dps-booking-addon' ) . '</p>';
+        echo '</div>';
+        
+        // Dados do agendamento
+        echo '<div class="dps-confirmation-details">';
+        echo '<h3>' . esc_html__( 'Detalhes do Agendamento', 'dps-booking-addon' ) . '</h3>';
+        echo '<dl class="dps-confirmation-list">';
+        
+        echo '<dt>' . esc_html__( 'Tipo:', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd>' . esc_html( $type_label ) . '</dd>';
+        
+        echo '<dt>' . esc_html__( 'Cliente:', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd>' . esc_html( $client_name ) . '</dd>';
+        
+        echo '<dt>' . esc_html__( 'Pet(s):', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd>' . esc_html( $pets_display ) . '</dd>';
+        
+        echo '<dt>' . esc_html__( 'Data:', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd>' . esc_html( $date_formatted ) . '</dd>';
+        
+        echo '<dt>' . esc_html__( 'Horário:', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd>' . esc_html( $time ) . '</dd>';
+        
+        echo '<dt>' . esc_html__( 'Status:', 'dps-booking-addon' ) . '</dt>';
+        echo '<dd><span class="dps-status dps-status--' . esc_attr( $status ) . '">' . esc_html( $status_label ) . '</span></dd>';
+        
+        if ( $total_value > 0 ) {
+            echo '<dt>' . esc_html__( 'Valor:', 'dps-booking-addon' ) . '</dt>';
+            echo '<dd><strong>R$ ' . esc_html( number_format( $total_value, 2, ',', '.' ) ) . '</strong></dd>';
+        }
+        
+        if ( $notes ) {
+            echo '<dt>' . esc_html__( 'Observações:', 'dps-booking-addon' ) . '</dt>';
+            echo '<dd>' . esc_html( $notes ) . '</dd>';
+        }
+        
+        echo '</dl>';
+        echo '</div>';
+        
+        // Botões de ação
+        echo '<div class="dps-confirmation-actions">';
+        
+        // Novo agendamento
+        echo '<a href="' . esc_url( $this->get_booking_page_url() ) . '" class="dps-btn dps-btn--primary">';
+        echo '<span>➕</span> ' . esc_html__( 'Novo Agendamento', 'dps-booking-addon' );
+        echo '</a>';
+        
+        // Ver cliente (se disponível painel de gestão)
+        if ( $client_id && class_exists( 'DPS_Base_Frontend' ) ) {
+            $panel_url = get_option( 'dps_panel_page_id' ) ? get_permalink( get_option( 'dps_panel_page_id' ) ) : '';
+            if ( $panel_url ) {
+                $client_url = add_query_arg( [
+                    'dps_tab' => 'clientes',
+                    'cliente' => $client_id,
+                ], $panel_url );
+                echo '<a href="' . esc_url( $client_url ) . '" class="dps-btn dps-btn--secondary">';
+                echo '<span>👤</span> ' . esc_html__( 'Ver Cliente', 'dps-booking-addon' );
+                echo '</a>';
+            }
+        }
+        
+        // Ver agendamentos
+        if ( class_exists( 'DPS_Base_Frontend' ) ) {
+            $panel_url = get_option( 'dps_panel_page_id' ) ? get_permalink( get_option( 'dps_panel_page_id' ) ) : '';
+            if ( $panel_url ) {
+                $agenda_url = add_query_arg( 'dps_tab', 'agendas', $panel_url );
+                echo '<a href="' . esc_url( $agenda_url ) . '" class="dps-btn dps-btn--outline">';
+                echo '<span>📅</span> ' . esc_html__( 'Ver Agenda', 'dps-booking-addon' );
+                echo '</a>';
+            }
+        }
+        
+        echo '</div>';
+        
+        echo '</div>';
+        
+        return ob_get_clean();
     }
 }
 
