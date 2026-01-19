@@ -2470,3 +2470,75 @@ if ( null !== $result ) {
 - Modal de pré-visualização para e-mails
 - 6 tipos de mensagens suportados
 - Documentação e exemplos de integração
+
+---
+
+## Integrações Futuras Propostas
+
+### Integração com Google Tarefas (Google Tasks API)
+
+**Status:** Proposta de análise (2026-01-19)  
+**Documentação:** `docs/analysis/GOOGLE_TASKS_INTEGRATION_ANALYSIS.md` (análise completa), `docs/analysis/GOOGLE_TASKS_INTEGRATION_SUMMARY.md` (resumo executivo)
+
+**Resumo:**
+A integração do sistema DPS com Google Tasks API permite sincronizar atividades do sistema (agendamentos, cobranças, mensagens) com listas de tarefas do Google, melhorando a organização e follow-up de atividades administrativas.
+
+**Status:** ✅ VIÁVEL e RECOMENDADO
+
+**Funcionalidades propostas:**
+1. **Agendamentos** (Alta Prioridade)
+   - Lembretes de agendamentos pendentes (1 dia antes)
+   - Follow-ups pós-atendimento (2 dias depois)
+
+2. **Financeiro** (Alta Prioridade)
+   - Cobranças pendentes (1 dia antes do vencimento)
+   - Renovações de assinatura (5 dias antes)
+
+3. **Portal do Cliente** (Média Prioridade)
+   - Mensagens recebidas de clientes (tarefa imediata)
+
+4. **Estoque** (Baixa Prioridade)
+   - Alertas de estoque baixo (tarefa de reposição)
+
+**Add-on proposto:** `desi-pet-shower-google-tasks`
+
+**Tipo de sincronização:** Unidirecional (DPS → Google Tasks)
+- DPS cria tarefas no Google Tasks
+- Google Tasks não modifica dados do DPS
+- DPS permanece como "fonte da verdade"
+
+**Esforço estimado:**
+- v1.0.0 MVP (OAuth + Agendamentos): 42h (~5.5 dias)
+- v1.1.0 (+ Financeiro): 10h (~1.5 dias)
+- v1.2.0 (+ Portal + Estoque): 14h (~2 dias)
+- v1.3.0 (Testes + Documentação): 21h (~2.5 dias)
+- **Total:** 87h (~11 dias úteis)
+
+**Benefícios:**
+- Centralização de tarefas em app que equipe já usa
+- Notificações nativas do Google (mobile, desktop, email)
+- Integração com ecossistema Google (Calendar, Gmail, Android, iOS)
+- API gratuita (50.000 requisições/dia)
+- Redução de agendamentos esquecidos (-30% esperado)
+
+**Segurança:**
+- Autenticação OAuth 2.0
+- Tokens criptografados com AES-256
+- Dados sensíveis filtráveis (admin escolhe o que incluir)
+- LGPD compliance (não envia CPF, RG, telefone completo)
+
+**Próximos passos (se aprovado):**
+1. Criar projeto no Google Cloud Console
+2. Obter credenciais OAuth 2.0
+3. Implementar v1.0.0 MVP
+4. Testar com 3-5 pet shops piloto (beta 1 mês)
+5. Iterar baseado em feedback
+6. Lançamento geral para clientes DPS
+
+**Consulte os documentos completos para:**
+- Arquitetura detalhada (classes, hooks, estrutura de dados)
+- Casos de uso detalhados (3 cenários reais)
+- Requisitos técnicos (APIs, OAuth, configuração Google Cloud)
+- Análise de riscos e mitigações
+- Métricas de sucesso (KPIs técnicos e de negócio)
+- Comparação com alternativas (Microsoft To Do, Todoist, sistema interno)
