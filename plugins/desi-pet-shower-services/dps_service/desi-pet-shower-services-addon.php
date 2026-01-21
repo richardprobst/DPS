@@ -956,23 +956,23 @@ class DPS_Services_Addon {
             $category = isset( $_POST['service_category'] ) ? sanitize_text_field( wp_unslash( $_POST['service_category'] ) ) : '';
             // Sanitiza e valida preços - garante que valores negativos sejam convertidos para 0
             $price_small  = isset( $_POST['service_price_small'] ) && $_POST['service_price_small'] !== '' 
-                ? max( 0, floatval( wp_unslash( $_POST['service_price_small'] ) ) ) 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_small'] ) ) ) ) 
                 : null;
             $price_medium = isset( $_POST['service_price_medium'] ) && $_POST['service_price_medium'] !== '' 
-                ? max( 0, floatval( wp_unslash( $_POST['service_price_medium'] ) ) ) 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_medium'] ) ) ) ) 
                 : null;
             $price_large  = isset( $_POST['service_price_large'] ) && $_POST['service_price_large'] !== '' 
-                ? max( 0, floatval( wp_unslash( $_POST['service_price_large'] ) ) ) 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_large'] ) ) ) ) 
                 : null;
             // Sanitiza e valida durações - garante que valores negativos sejam convertidos para 0
             $dur_small  = isset( $_POST['service_duration_small'] ) && $_POST['service_duration_small'] !== '' 
-                ? max( 0, intval( wp_unslash( $_POST['service_duration_small'] ) ) ) 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_small'] ) ) ) ) 
                 : null;
             $dur_medium = isset( $_POST['service_duration_medium'] ) && $_POST['service_duration_medium'] !== '' 
-                ? max( 0, intval( wp_unslash( $_POST['service_duration_medium'] ) ) ) 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_medium'] ) ) ) ) 
                 : null;
             $dur_large  = isset( $_POST['service_duration_large'] ) && $_POST['service_duration_large'] !== '' 
-                ? max( 0, intval( wp_unslash( $_POST['service_duration_large'] ) ) ) 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_large'] ) ) ) ) 
                 : null;
             $price_candidates = [];
             foreach ( [ $price_small, $price_medium, $price_large ] as $candidate ) {
