@@ -1698,6 +1698,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
+            echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {

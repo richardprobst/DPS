@@ -14,6 +14,60 @@
   }
 
   /**
+   * Exibe notificação toast estilizada para feedback do usuário.
+   * Substitui alert() nativo por uma notificação moderna.
+   * @param {string} message Mensagem a ser exibida.
+   * @param {string} type Tipo da notificação: 'error', 'success', 'warning', 'info'.
+   * @param {number} duration Duração em ms (padrão: 4000).
+   */
+  function showToast(message, type, duration) {
+    type = type || 'error';
+    duration = duration || 4000;
+    
+    // Remove toast existente
+    $('.dps-toast').remove();
+    
+    var icons = {
+      error: '❌',
+      success: '✅',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+    
+    var icon = icons[type] || icons.info;
+    
+    var toast = $('<div class="dps-toast dps-toast--' + type + '">' +
+      '<span class="dps-toast-icon">' + icon + '</span>' +
+      '<span class="dps-toast-message">' + escapeHtml(message) + '</span>' +
+      '<button type="button" class="dps-toast-close" aria-label="Fechar">&times;</button>' +
+    '</div>');
+    
+    $('body').append(toast);
+    
+    // Anima entrada
+    setTimeout(function() {
+      toast.addClass('dps-toast--visible');
+    }, 10);
+    
+    // Fechar ao clicar
+    toast.find('.dps-toast-close').on('click', function() {
+      toast.removeClass('dps-toast--visible');
+      setTimeout(function() { toast.remove(); }, 300);
+    });
+    
+    // Auto-remove após duração
+    if (duration > 0) {
+      setTimeout(function() {
+        toast.removeClass('dps-toast--visible');
+        setTimeout(function() { toast.remove(); }, 300);
+      }, duration);
+    }
+  }
+
+  // Expõe globalmente para uso em outros módulos
+  window.DPSToast = { show: showToast };
+
+  /**
    * Obtém o label e ícone do porte do pet.
    * @param {string} size Porte do pet (pequeno, medio, grande, small, medium, large).
    * @return {object} Objeto com label e icon.
@@ -226,11 +280,11 @@
             if ( typeof window.DPSServicesModal !== 'undefined' ) {
               window.DPSServicesModal.show([]);
             } else {
-              alert('Nenhum serviço encontrado para este agendamento.');
+              showToast('Nenhum serviço encontrado para este agendamento.', 'info');
             }
           }
         } else {
-          alert(resp.data ? resp.data.message : 'Erro ao buscar serviços.');
+          showToast(resp.data ? resp.data.message : 'Erro ao buscar serviços.', 'error');
         }
       });
     });
@@ -289,7 +343,7 @@
           ? response.data.message 
           : 'Erro ao executar ação. Tente novamente.';
         
-        alert(message);
+        showToast(message, 'error');
         
         // Remove estado de loading
         row.find('.dps-quick-action-btn').prop('disabled', false).removeClass('is-loading');
@@ -351,7 +405,7 @@
           ? response.data.message 
           : 'Erro ao atualizar confirmação. Tente novamente.';
         
-        alert(message);
+        showToast(message, 'error');
         
         // Remove estado de loading
         row.find('.dps-confirmation-btn').prop('disabled', false).removeClass('is-loading');
@@ -558,11 +612,11 @@
           btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
         }, 2000);
       } else {
-        alert(resp.data ? resp.data.message : 'Erro ao exportar.');
+        showToast(resp.data ? resp.data.message : 'Erro ao exportar.', 'error');
         btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
       }
     }).fail(function(){
-      alert('Erro ao exportar agenda.');
+      showToast('Erro ao exportar agenda.', 'error');
       btn.prop('disabled', false).html('📥 ' + getMessage('export', 'Exportar'));
     });
   });
@@ -649,7 +703,7 @@
     var newTime = $('#dps-reschedule-time').val();
     
     if ( ! newDate || ! newTime ) {
-      alert(getMessage('fill_all_fields', 'Preencha todos os campos.'));
+      showToast(getMessage('fill_all_fields', 'Preencha todos os campos.'), 'warning');
       return;
     }
     
@@ -663,14 +717,14 @@
       time: newTime
     }, function(resp){
       if ( resp && resp.success ) {
-        alert(resp.data.message);
-        location.reload();
+        showToast(resp.data.message, 'success');
+        setTimeout(function(){ location.reload(); }, 1000);
       } else {
-        alert(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'));
+        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
         btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
       }
     }).fail(function(){
-      alert(getMessage('error', 'Erro ao reagendar.'));
+      showToast(getMessage('error', 'Erro ao reagendar.'), 'error');
       btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
     });
   });
@@ -699,7 +753,7 @@
       if ( resp && resp.success ) {
         var history = resp.data.history || [];
         if ( history.length === 0 ) {
-          alert(getMessage('no_history', 'Sem histórico de alterações.'));
+          showToast(getMessage('no_history', 'Sem histórico de alterações.'), 'info');
           return;
         }
         
@@ -718,9 +772,15 @@
           }
         });
         
-        alert(content);
+        // Exibe histórico em modal ou alert como fallback para conteúdo formatado
+        if ( typeof window.DPSServicesModal !== 'undefined' ) {
+          // Usa o modal de serviços adaptado para histórico
+          window.DPSServicesModal.show([{ name: content.replace(/\n/g, '<br>'), price: '0' }]);
+        } else {
+          alert(content);
+        }
       } else {
-        alert(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'));
+        showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'), 'error');
       }
     });
   });
@@ -767,12 +827,12 @@
         }
       } else {
         var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao atualizar TaxiDog.';
-        alert(message);
+        showToast(message, 'error');
         // Reabilita botões em caso de erro
         row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
       }
     }).fail(function(){
-      alert('Erro de comunicação ao atualizar TaxiDog.');
+      showToast('Erro de comunicação ao atualizar TaxiDog.', 'error');
       // Reabilita botões em caso de erro
       row.find('.dps-taxidog-action-btn').prop('disabled', false).css('opacity', 1);
     });
@@ -838,11 +898,11 @@
         }
       } else {
         var message = (resp && resp.data && resp.data.message) ? resp.data.message : 'Erro ao reenviar link.';
-        alert(message);
+        showToast(message, 'error');
         btn.prop('disabled', false).text('🔄 Reenviar');
       }
     }).fail(function(){
-      alert('Erro de comunicação ao reenviar link.');
+      showToast('Erro de comunicação ao reenviar link.', 'error');
       btn.prop('disabled', false).text('🔄 Reenviar');
     });
   });
@@ -908,10 +968,10 @@
           row.css('background-color', '');
         }, 1000);
       } else {
-        alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar confirmação.', 'error');
       }
     }).fail(function(){
-      alert('Erro de comunicação.');
+      showToast('Erro de comunicação.', 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -965,14 +1025,14 @@
         }, 800);
       } else {
         if (resp && resp.data && resp.data.error_code === 'version_conflict') {
-          alert(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'));
+          showToast(getMessage('versionConflict', 'Esse agendamento foi atualizado por outro usuário. Atualize a página para ver as alterações.'), 'warning');
         } else {
-          alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.');
+          showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar status.', 'error');
         }
         select.val(previous);
       }
     }).fail(function(){
-      alert('Erro de comunicação.');
+      showToast('Erro de comunicação.', 'error');
       select.val(previous);
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
@@ -1113,10 +1173,10 @@
         
         $('body').append(modalHtml);
       } else {
-        alert(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao carregar serviços.', 'error');
       }
     }).fail(function(){
-      alert('Erro de comunicação.');
+      showToast('Erro de comunicação.', 'error');
     }).always(function(){
       btn.prop('disabled', false);
     });
@@ -1254,10 +1314,10 @@
           row.css('background-color', '');
         }, 1000);
       } else {
-        alert(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao atualizar TaxiDog.', 'error');
       }
     }).fail(function(){
-      alert('Erro de comunicação.');
+      showToast('Erro de comunicação.', 'error');
     }).always(function(){
       select.prop('disabled', false).removeClass('is-loading');
     });
@@ -1285,11 +1345,11 @@
         // Recarrega a página para atualizar a UI
         location.reload();
       } else {
-        alert(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.');
+        showToast(resp && resp.data ? resp.data.message : 'Erro ao solicitar TaxiDog.', 'error');
         btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
       }
     }).fail(function(){
-      alert('Erro de comunicação.');
+      showToast('Erro de comunicação.', 'error');
       btn.prop('disabled', false).text('🚐 SOLICITAR TAXIDOG');
     });
   });
