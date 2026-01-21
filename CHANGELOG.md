@@ -83,6 +83,21 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Catálogo Completo de Serviços de Banho e Tosa - Região SP (v1.6.1)**
+
+- **30+ serviços pré-configurados com valores de mercado SP 2024**: Lista completa de serviços típicos de pet shop com preços diferenciados por porte (pequeno/médio/grande):
+  - **Serviços Padrão**: Banho (R$ 50-120), Banho e Tosa (R$ 100-230), Tosa Higiênica (R$ 40-80)
+  - **Opções de Tosa**: Tosa Máquina (R$ 65-140), Tosa Tesoura (R$ 85-180), Tosa da Raça (R$ 120-280), Corte Estilizado (R$ 135-300)
+  - **Preparação da Pelagem**: Remoção de Nós (leve/moderado/severo), Desembaraço Total
+  - **Tratamentos**: Banho Terapêutico/Ozônio, Banho Medicamentoso, Banho Antipulgas, Tratamento Dermatológico
+  - **Pelagem e Pele**: Hidratação, Hidratação Profunda, Restauração Capilar, Cauterização
+  - **Cuidados Adicionais**: Corte de Unhas (R$ 18-35), Limpeza de Ouvido, Escovação Dental, Limpeza de Glândulas Anais, Tosa de Patas
+  - **Extras/Mimos**: Perfume Premium, Laço/Gravatinha, Bandana, Tintura/Coloração
+  - **Transporte**: TaxiDog (Leva e Traz) R$ 30-45
+  - **Pacotes**: Pacote Completo, Pacote Spa
+- **Durações por porte**: Cada serviço inclui tempo estimado de execução para cada porte de pet
+- **Ativo por padrão**: Todos os serviços são criados como ativos para edição imediata pelo administrador
+
 **Seção de Tosa no Formulário de Agendamento via Shortcode (v1.2.1)**
 
 - **Card de tosa no shortcode `[dps_booking_form]`**: Adicionada a mesma seção de tosa com design card-based que foi implementada no formulário de agendamento do Painel de Gestão DPS pela PR #498.
