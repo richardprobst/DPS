@@ -245,5 +245,5 @@ class DPS_Stats_Cache_Invalidator {
     }
 }
 
-// Inicializar invalidador
-DPS_Stats_Cache_Invalidator::init();
+// Inicializar invalidador via hook apropriado
+add_action( 'plugins_loaded', [ 'DPS_Stats_Cache_Invalidator', 'init' ], 10 );
