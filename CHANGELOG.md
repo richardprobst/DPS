@@ -130,6 +130,25 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**Services Add-on - Melhorias de UI/UX e Validações (v1.6.0)**
+
+- **Empty state com CTA**: A aba Serviços agora exibe botão "Cadastrar primeiro serviço" quando não há serviços cadastrados, melhorando o fluxo de onboarding.
+- **Indicador de campos obrigatórios**: Adicionada mensagem explicativa "* Campos obrigatórios" no formulário de cadastro/edição de serviços.
+- **Espaçamento padronizado**: Valores por pet (assinatura) agora usam 16px de padding, alinhado com padrão visual global.
+- **Link de cancelar edição melhorado**: Estilizado como botão secundário vermelho para melhor feedback visual.
+- **Acessibilidade em ícones**: Adicionados atributos `aria-label` e `role="img"` nos ícones de informação.
+- **Focus visible melhorado**: Estilos de foco visíveis consistentes para acessibilidade de navegação por teclado.
+
+#### Security (Segurança)
+
+**Services Add-on - Validações reforçadas (v1.6.0)**
+
+- **Validação de preços não-negativos**: Todos os preços de serviços (pequeno/médio/grande) agora são validados para impedir valores negativos via `max(0, floatval(...))`.
+- **Validação de durações não-negativas**: Durações por porte agora impedem valores negativos.
+- **Sanitização de insumos**: Quantidade de insumos vinculados a serviços agora é sanitizada com `sanitize_text_field()` antes da conversão numérica.
+- **Total de agendamento não-negativo**: Valor total do agendamento validado para impedir negativos.
+- **Desconto de pacotes normalizado**: Desconto percentual na API de cálculo de pacotes agora é normalizado para intervalo 0-100 com `min(100, max(0, $discount))`.
+
 - **Estrutura do header do chat público**: Reorganizada para acomodar badge de admin e status lado a lado
 - **Método `check_rate_limit()`**: Agora aceita parâmetro `$is_admin_mode` para aplicar limites diferenciados
 - **Método `get_ai_response()`**: Agora aceita parâmetro `$is_admin_mode` para usar contexto e prompt apropriados

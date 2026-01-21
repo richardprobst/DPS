@@ -270,7 +270,7 @@ jQuery(document).ready(function ($) {
     });
     
     var message = '<div class="dps-multi-pet-message">' +
-      '<span class="dps-info-icon">ℹ️</span>' +
+      '<span class="dps-info-icon" aria-label="Informação" role="img">ℹ️</span>' +
       '<div class="dps-info-content">' +
       '<strong>Múltiplos pets com portes diferentes</strong>' +
       '<p>Os preços dos serviços variam por porte. O valor total será calculado individualmente para cada pet:</p>' +

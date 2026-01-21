@@ -469,6 +469,9 @@ class DPS_Services_Addon {
         if ( $edit_id ) {
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $edit_id ) . '">';
         }
+        
+        // Indicador de campos obrigatórios
+        echo '<p class="dps-required-fields-hint"><span class="required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-services-addon' ) . '</p>';
 
         // === FIELDSET: Informações Básicas ===
         echo '<fieldset class="dps-fieldset dps-fieldset-basic">';
@@ -914,10 +917,12 @@ class DPS_Services_Addon {
             echo '</tbody></table>';
             echo '</div>'; // .dps-table-wrapper
         } else {
-            // Empty state moderno
+            // Empty state moderno com CTA para primeiro serviço
             echo '<div class="dps-empty-state">';
-            echo '<span class="dps-empty-state__icon">🧼</span>';
+            echo '<span class="dps-empty-state__icon" aria-hidden="true">🧼</span>';
             echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum serviço cadastrado', 'dps-services-addon' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Cadastre seu primeiro serviço para começar a usar o sistema de agendamentos.', 'dps-services-addon' ) . '</p>';
+            echo '<a href="#dps-services-form-section" class="button button-primary dps-empty-state__action">' . esc_html__( 'Cadastrar primeiro serviço', 'dps-services-addon' ) . '</a>';
             echo '</div>';
         }
     }
@@ -949,12 +954,26 @@ class DPS_Services_Addon {
             $name     = isset( $_POST['service_name'] ) ? sanitize_text_field( wp_unslash( $_POST['service_name'] ) ) : '';
             $type     = isset( $_POST['service_type'] ) ? sanitize_text_field( wp_unslash( $_POST['service_type'] ) ) : '';
             $category = isset( $_POST['service_category'] ) ? sanitize_text_field( wp_unslash( $_POST['service_category'] ) ) : '';
-            $price_small  = isset( $_POST['service_price_small'] ) && $_POST['service_price_small'] !== '' ? floatval( wp_unslash( $_POST['service_price_small'] ) ) : null;
-            $price_medium = isset( $_POST['service_price_medium'] ) && $_POST['service_price_medium'] !== '' ? floatval( wp_unslash( $_POST['service_price_medium'] ) ) : null;
-            $price_large  = isset( $_POST['service_price_large'] ) && $_POST['service_price_large'] !== '' ? floatval( wp_unslash( $_POST['service_price_large'] ) ) : null;
-            $dur_small  = isset( $_POST['service_duration_small'] ) && $_POST['service_duration_small'] !== '' ? intval( wp_unslash( $_POST['service_duration_small'] ) ) : null;
-            $dur_medium = isset( $_POST['service_duration_medium'] ) && $_POST['service_duration_medium'] !== '' ? intval( wp_unslash( $_POST['service_duration_medium'] ) ) : null;
-            $dur_large  = isset( $_POST['service_duration_large'] ) && $_POST['service_duration_large'] !== '' ? intval( wp_unslash( $_POST['service_duration_large'] ) ) : null;
+            // Sanitiza e valida preços - garante que valores negativos sejam convertidos para 0
+            $price_small  = isset( $_POST['service_price_small'] ) && $_POST['service_price_small'] !== '' 
+                ? max( 0, floatval( wp_unslash( $_POST['service_price_small'] ) ) ) 
+                : null;
+            $price_medium = isset( $_POST['service_price_medium'] ) && $_POST['service_price_medium'] !== '' 
+                ? max( 0, floatval( wp_unslash( $_POST['service_price_medium'] ) ) ) 
+                : null;
+            $price_large  = isset( $_POST['service_price_large'] ) && $_POST['service_price_large'] !== '' 
+                ? max( 0, floatval( wp_unslash( $_POST['service_price_large'] ) ) ) 
+                : null;
+            // Sanitiza e valida durações - garante que valores negativos sejam convertidos para 0
+            $dur_small  = isset( $_POST['service_duration_small'] ) && $_POST['service_duration_small'] !== '' 
+                ? max( 0, intval( wp_unslash( $_POST['service_duration_small'] ) ) ) 
+                : null;
+            $dur_medium = isset( $_POST['service_duration_medium'] ) && $_POST['service_duration_medium'] !== '' 
+                ? max( 0, intval( wp_unslash( $_POST['service_duration_medium'] ) ) ) 
+                : null;
+            $dur_large  = isset( $_POST['service_duration_large'] ) && $_POST['service_duration_large'] !== '' 
+                ? max( 0, intval( wp_unslash( $_POST['service_duration_large'] ) ) ) 
+                : null;
             $price_candidates = [];
             foreach ( [ $price_small, $price_medium, $price_large ] as $candidate ) {
                 if ( null !== $candidate ) {
@@ -1076,8 +1095,9 @@ class DPS_Services_Addon {
 
                 foreach ( $posted_items as $idx => $item_raw ) {
                     $item_id = intval( $item_raw );
-                    $qty_raw = isset( $posted_qty[ $idx ] ) ? $posted_qty[ $idx ] : '';
-                    $qty     = '' === $qty_raw ? 0 : floatval( str_replace( ',', '.', $qty_raw ) );
+                    // Sanitiza e valida quantidade de insumos
+                    $qty_raw = isset( $posted_qty[ $idx ] ) ? sanitize_text_field( $posted_qty[ $idx ] ) : '';
+                    $qty     = '' === $qty_raw ? 0 : max( 0, floatval( str_replace( ',', '.', $qty_raw ) ) );
 
                     if ( $item_id && $qty > 0 ) {
                         $consumption[] = [
@@ -1899,7 +1919,8 @@ class DPS_Services_Addon {
             delete_post_meta( $post_id, 'appointment_service_prices' );
         }
         if ( isset( $_POST['appointment_total'] ) ) {
-            $total = floatval( $_POST['appointment_total'] );
+            // Valida que o total não seja negativo
+            $total = max( 0, floatval( $_POST['appointment_total'] ) );
             update_post_meta( $post_id, 'appointment_total_value', $total );
         }
         
