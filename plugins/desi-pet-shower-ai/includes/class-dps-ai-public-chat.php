@@ -1110,23 +1110,23 @@ CONTEXTO DO SISTEMA:
             $status_pago = 'pago';
             $status_pendente = 'pendente';
             
-            // Faturamento do mês (transações pagas)
+            // Faturamento do mês (transações pagas) - usa valor_cents que armazena centavos
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $month_revenue = $wpdb->get_var( $wpdb->prepare(
-                "SELECT COALESCE(SUM(valor), 0) FROM `{$transacoes_table}` 
+            $month_revenue_cents = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COALESCE(SUM(valor_cents), 0) FROM `{$transacoes_table}` 
                 WHERE status = %s AND created_at >= %s",
                 $status_pago,
                 $month_start_dt
             ) );
-            $month_revenue = (float) $month_revenue;
+            $month_revenue = (float) $month_revenue_cents / 100;
             
-            // Pendentes
+            // Pendentes - usa valor_cents que armazena centavos
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $pending_amount = $wpdb->get_var( $wpdb->prepare(
-                "SELECT COALESCE(SUM(valor), 0) FROM `{$transacoes_table}` WHERE status = %s",
+            $pending_amount_cents = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COALESCE(SUM(valor_cents), 0) FROM `{$transacoes_table}` WHERE status = %s",
                 $status_pendente
             ) );
-            $pending_amount = (float) $pending_amount;
+            $pending_amount = (float) $pending_amount_cents / 100;
             
             $context .= "💰 FINANCEIRO:\n";
             $context .= "- Faturamento deste mês: R$ " . number_format( $month_revenue, 2, ',', '.' ) . "\n";
