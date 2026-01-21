@@ -230,18 +230,39 @@
     }
 
     /**
-     * Exporta dados em CSV
+     * Mostra estado de carregamento em um canvas
      *
-     * @param {string} url - URL de exportação
-     * @param {string} filename - Nome do arquivo
+     * @param {string} canvasId - ID do canvas
      */
-    function exportCSV(url, filename) {
-        var link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    function showLoading(canvasId) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        var parent = canvas.parentElement;
+        if (parent) {
+            var loading = document.createElement('div');
+            loading.className = 'dps-stats-loading';
+            loading.id = canvasId + '-loading';
+            loading.textContent = 'Carregando gráfico...';
+            parent.insertBefore(loading, canvas);
+            canvas.style.display = 'none';
+        }
+    }
+
+    /**
+     * Remove estado de carregamento
+     *
+     * @param {string} canvasId - ID do canvas
+     */
+    function hideLoading(canvasId) {
+        var loading = document.getElementById(canvasId + '-loading');
+        if (loading) {
+            loading.remove();
+        }
+        var canvas = document.getElementById(canvasId);
+        if (canvas) {
+            canvas.style.display = 'block';
+        }
     }
 
     /**
@@ -265,14 +286,25 @@
         return sign + value.toFixed(1) + '%';
     }
 
+    /**
+     * Verifica se Chart.js está disponível
+     *
+     * @returns {boolean} - True se Chart.js está carregado
+     */
+    function isChartAvailable() {
+        return typeof Chart !== 'undefined' && window.Chart;
+    }
+
     // Expor funções globalmente
     window.DPSStats = {
         initServicesChart: initServicesChart,
         initPieChart: initPieChart,
         initTrendChart: initTrendChart,
-        exportCSV: exportCSV,
+        showLoading: showLoading,
+        hideLoading: hideLoading,
         formatCurrency: formatCurrency,
         formatVariation: formatVariation,
+        isChartAvailable: isChartAvailable,
         colors: chartColors
     };
 

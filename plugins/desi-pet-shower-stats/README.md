@@ -6,7 +6,7 @@ Dashboard visual de métricas operacionais e financeiras do sistema.
 
 O **Estatísticas Add-on** fornece um dashboard completo e visual com métricas de uso do sistema, incluindo atendimentos realizados, receita gerada, clientes inativos, serviços mais recorrentes e análise de distribuição de espécies/raças. Ideal para acompanhamento gerencial e tomada de decisões.
 
-### Funcionalidades principais (v1.1.0):
+### Funcionalidades principais (v1.5.2):
 - ✅ **Dashboard visual** com cards de métricas coloridos
 - ✅ **Comparativo de períodos** (variação % vs período anterior)
 - ✅ **Ticket médio** calculado automaticamente
@@ -16,9 +16,12 @@ O **Estatísticas Add-on** fornece um dashboard completo e visual com métricas 
 - ✅ **Exportação CSV** de métricas e pets inativos
 - ✅ **Distribuição de espécies** com gráfico de pizza
 - ✅ **Top 5 raças** com barras horizontais
-- ✅ **Seções colapsáveis** para melhor organização
 - ✅ **API pública** (`DPS_Stats_API`) para integração com outros add-ons
-- ✅ **Cache otimizado** via transients
+- ✅ **Cache otimizado** via transients e object cache
+- ✅ **KPIs Avançados**: Taxa de retorno, No-show, Inadimplência, Conversão, Clientes recorrentes
+- ✅ **Atalhos de período**: Últimos 7/30 dias, Este mês, Mês anterior, Este ano
+- ✅ **Tabela de inativos melhorada**: Busca, ordenação, coluna de dias parado
+- ✅ **Tooltips visuais** nos cards de KPIs
 
 **Tipo**: Add-on (extensão do plugin base DPS)
 
@@ -29,6 +32,7 @@ O **Estatísticas Add-on** fornece um dashboard completo e visual com métricas 
 - **Classe principal**: `DPS_Stats_Addon`
 - **Arquivo principal**: `desi-pet-shower-stats-addon.php`
 - **API pública**: `includes/class-dps-stats-api.php`
+- **Cache Invalidator**: `includes/class-dps-stats-cache-invalidator.php`
 - **Tipo**: Add-on (depende do plugin base)
 
 ## Estrutura de arquivos
@@ -37,12 +41,14 @@ O **Estatísticas Add-on** fornece um dashboard completo e visual com métricas 
 plugins/desi-pet-shower-stats/
 ├── desi-pet-shower-stats-addon.php    # Plugin principal
 ├── includes/
-│   └── class-dps-stats-api.php        # API pública para métricas
+│   ├── class-dps-stats-api.php        # API pública para métricas
+│   └── class-dps-stats-cache-invalidator.php  # Invalidação automática de cache
 ├── assets/
 │   ├── css/
 │   │   └── stats-addon.css            # Estilos do dashboard
 │   └── js/
-│       └── stats-addon.js             # Gráficos Chart.js
+│       ├── stats-addon.js             # Gráficos Chart.js
+│       └── chart.min.js               # Fallback local do Chart.js
 ├── README.md
 └── uninstall.php
 ```
@@ -51,15 +57,15 @@ plugins/desi-pet-shower-stats/
 
 ### Dependências obrigatórias
 - **desi.pet by PRObst Base**: v1.0.0 ou superior (obrigatório)
-- **WordPress**: 6.0 ou superior
-- **PHP**: 7.4 ou superior
+- **WordPress**: 6.9 ou superior
+- **PHP**: 8.4 ou superior
 
 ### Dependências opcionais
 - **Finance Add-on**: para métricas financeiras completas (receita, ticket médio, inadimplência)
 - **Services Add-on**: para ranking de serviços mais realizados
 
 ### Versão
-- **Versão atual**: v1.1.0
+- **Versão atual**: v1.5.2
 - **Introduzido em**: v0.1.0 (estimado)
 - **Compatível com plugin base**: v1.0.0+
 

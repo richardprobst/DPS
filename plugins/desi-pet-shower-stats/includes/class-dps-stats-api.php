@@ -529,7 +529,7 @@ class DPS_Stats_API {
      * @return float Variação percentual.
      */
     private static function calculate_variation( $old_value, $new_value ) {
-        if ( $old_value == 0 ) {
+        if ( (float) $old_value === 0.0 ) {
             return $new_value > 0 ? 100 : 0;
         }
         return round( ( ( $new_value - $old_value ) / abs( $old_value ) ) * 100, 1 );
@@ -566,7 +566,7 @@ class DPS_Stats_API {
         $total     = self::get_appointments_count( $start_date, $end_date );
         $cancelled = self::get_appointments_count( $start_date, $end_date, 'cancelado' );
 
-        if ( $total == 0 ) {
+        if ( $total === 0 ) {
             return 0;
         }
 
