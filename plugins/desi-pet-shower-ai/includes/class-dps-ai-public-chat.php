@@ -1030,90 +1030,116 @@ CONTEXTO DO SISTEMA:
         
         $context = "DADOS DO SISTEMA (atualizados em " . current_time( 'd/m/Y H:i' ) . "):\n\n";
 
-        // Define nomes das tabelas
-        $clients_table    = $wpdb->prefix . 'dps_clientes';
-        $pets_table       = $wpdb->prefix . 'dps_pets';
-        $agenda_table     = $wpdb->prefix . 'dps_agendamentos';
-        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
-
-        // Cache de verificação de existência de tabelas
-        $tables_exist = [
-            'clients'    => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $clients_table ) ) === $clients_table,
-            'pets'       => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pets_table ) ) === $pets_table,
-            'agenda'     => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $agenda_table ) ) === $agenda_table,
-            'transacoes' => $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table,
-        ];
-
-        // 1. Estatísticas de clientes
-        if ( $tables_exist['clients'] ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $total_clients = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `{$clients_table}` WHERE 1 = %d", 1 ) );
-            $context .= "📊 CLIENTES:\n";
-            $context .= "- Total de clientes cadastrados: {$total_clients}\n";
-            
-            // Clientes ativos (com agendamento nos últimos 90 dias)
-            if ( $tables_exist['agenda'] ) {
-                $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                $active_clients = (int) $wpdb->get_var( $wpdb->prepare(
-                    "SELECT COUNT(DISTINCT c.id) FROM `{$clients_table}` c 
-                    INNER JOIN `{$agenda_table}` a ON c.id = a.cliente_id 
-                    WHERE a.data >= %s",
-                    $active_date
-                ) );
-                $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
-            } else {
-                $context .= "\n";
+        // 1. Estatísticas de clientes (CPT dps_cliente)
+        $client_counts = wp_count_posts( 'dps_cliente' );
+        $total_clients = isset( $client_counts->publish ) ? (int) $client_counts->publish : 0;
+        
+        $context .= "📊 CLIENTES:\n";
+        $context .= "- Total de clientes cadastrados: {$total_clients}\n";
+        
+        // Clientes ativos (com agendamento nos últimos 90 dias)
+        $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
+        $active_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $active_date,
+                    'compare' => '>=',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ] );
+        
+        // Conta clientes únicos com agendamentos recentes
+        $active_client_ids = [];
+        foreach ( $active_appointments as $appt_id ) {
+            $client_id = get_post_meta( $appt_id, 'appointment_client_id', true );
+            if ( $client_id ) {
+                $active_client_ids[ $client_id ] = true;
             }
         }
+        $active_clients = count( $active_client_ids );
+        $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
 
-        // 2. Estatísticas de pets
-        if ( $tables_exist['pets'] ) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $total_pets = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `{$pets_table}` WHERE 1 = %d", 1 ) );
-            $context .= "🐾 PETS:\n";
-            $context .= "- Total de pets cadastrados: {$total_pets}\n\n";
-        }
+        // 2. Estatísticas de pets (CPT dps_pet)
+        $pet_counts = wp_count_posts( 'dps_pet' );
+        $total_pets = isset( $pet_counts->publish ) ? (int) $pet_counts->publish : 0;
+        $context .= "🐾 PETS:\n";
+        $context .= "- Total de pets cadastrados: {$total_pets}\n\n";
 
-        // 3. Agendamentos
-        if ( $tables_exist['agenda'] ) {
-            $today = current_time( 'Y-m-d' );
-            
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $today_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data = %s",
-                $today
-            ) );
-            
-            // Esta semana
-            $week_start = gmdate( 'Y-m-d', strtotime( 'monday this week' ) );
-            $week_end = gmdate( 'Y-m-d', strtotime( 'sunday this week' ) );
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $week_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data BETWEEN %s AND %s",
-                $week_start,
-                $week_end
-            ) );
-            
-            // Este mês
-            $month_start = gmdate( 'Y-m-01' );
-            $month_end = gmdate( 'Y-m-t' );
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $month_appointments = (int) $wpdb->get_var( $wpdb->prepare(
-                "SELECT COUNT(*) FROM `{$agenda_table}` WHERE data BETWEEN %s AND %s",
-                $month_start,
-                $month_end
-            ) );
-            
-            $context .= "📅 AGENDAMENTOS:\n";
-            $context .= "- Agendamentos hoje ({$today}): {$today_appointments}\n";
-            $context .= "- Agendamentos esta semana: {$week_appointments}\n";
-            $context .= "- Agendamentos este mês: {$month_appointments}\n\n";
-        }
+        // 3. Agendamentos (CPT dps_agendamento com meta appointment_date)
+        $today = current_time( 'Y-m-d' );
+        
+        // Agendamentos de hoje
+        $today_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => $today,
+                    'compare' => '=',
+                ],
+            ],
+        ] );
+        $today_count = count( $today_appointments );
+        
+        // Esta semana
+        $week_start = gmdate( 'Y-m-d', strtotime( 'monday this week' ) );
+        $week_end = gmdate( 'Y-m-d', strtotime( 'sunday this week' ) );
+        $week_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => [ $week_start, $week_end ],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ] );
+        $week_count = count( $week_appointments );
+        
+        // Este mês
+        $month_start = gmdate( 'Y-m-01' );
+        $month_end = gmdate( 'Y-m-t' );
+        $month_appointments = get_posts( [
+            'post_type'      => 'dps_agendamento',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'appointment_date',
+                    'value'   => [ $month_start, $month_end ],
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE',
+                ],
+            ],
+        ] );
+        $month_count = count( $month_appointments );
+        
+        $context .= "📅 AGENDAMENTOS:\n";
+        $context .= "- Agendamentos hoje ({$today}): {$today_count}\n";
+        $context .= "- Agendamentos esta semana: {$week_count}\n";
+        $context .= "- Agendamentos este mês: {$month_count}\n\n";
 
-        // 4. Dados financeiros (se tabela existir)
-        if ( $tables_exist['transacoes'] ) {
-            $month_start = gmdate( 'Y-m-01' );
+        // 4. Dados financeiros (tabela dps_transacoes - esta é uma tabela real)
+        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table;
+        
+        if ( $table_exists ) {
+            $month_start_dt = gmdate( 'Y-m-01' );
             $status_pago = 'pago';
             $status_pendente = 'pendente';
             
@@ -1123,7 +1149,7 @@ CONTEXTO DO SISTEMA:
                 "SELECT COALESCE(SUM(valor), 0) FROM `{$transacoes_table}` 
                 WHERE status = %s AND created_at >= %s",
                 $status_pago,
-                $month_start
+                $month_start_dt
             ) );
             $month_revenue = (float) $month_revenue;
             
