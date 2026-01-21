@@ -1627,6 +1627,9 @@ class DPS_Base_Frontend {
                     'subscription_total_value'       => get_post_meta( $source_id, 'subscription_total_value', true ),
                     'subscription_extra_description' => get_post_meta( $source_id, 'subscription_extra_description', true ),
                     'subscription_extra_value'       => get_post_meta( $source_id, 'subscription_extra_value', true ),
+                    'past_payment_status'            => get_post_meta( $source_id, 'past_payment_status', true ),
+                    'past_payment_value'             => get_post_meta( $source_id, 'past_payment_value', true ),
+                    'appointment_total_value'        => get_post_meta( $source_id, 'appointment_total_value', true ),
                 ];
 
                 // Se está duplicando, limpa a data para forçar nova seleção.
@@ -2168,6 +2171,18 @@ class DPS_Base_Frontend {
             echo '<li class="dps-appointment-summary__notes"><strong>' . esc_html__( 'Observações:', 'desi-pet-shower' ) . '</strong> <span data-summary="notes">-</span></li>';
             echo '</ul>';
             echo '</div>';
+            
+            // Campos hidden para valores calculados pelo JavaScript
+            // Estes campos serão populados automaticamente pelo JS ao atualizar o resumo
+            $total_value_current = isset( $meta['appointment_total_value'] ) ? floatval( $meta['appointment_total_value'] ) : 0;
+            $sub_base_current    = isset( $meta['subscription_base_value'] ) ? floatval( $meta['subscription_base_value'] ) : 0;
+            $sub_total_current   = isset( $meta['subscription_total_value'] ) ? floatval( $meta['subscription_total_value'] ) : 0;
+            $sub_extra_current   = isset( $meta['subscription_extra_value'] ) ? floatval( $meta['subscription_extra_value'] ) : 0;
+            
+            echo '<input type="hidden" id="appointment_total" name="appointment_total" value="' . esc_attr( $total_value_current ) . '">';
+            echo '<input type="hidden" id="subscription_base_value" name="subscription_base_value" value="' . esc_attr( $sub_base_current ) . '">';
+            echo '<input type="hidden" id="subscription_total_value" name="subscription_total_value" value="' . esc_attr( $sub_total_current ) . '">';
+            echo '<input type="hidden" id="subscription_extra_value" name="subscription_extra_value" value="' . esc_attr( $sub_extra_current ) . '">';
             
             // Botões de ação
             $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'desi-pet-shower' ) : esc_html__( 'Salvar Agendamento', 'desi-pet-shower' );
