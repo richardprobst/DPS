@@ -287,6 +287,23 @@
     }
 
     /**
+     * Exporta dados via download (retrocompatibilidade)
+     *
+     * @deprecated Usar links diretos de download
+     * @param {string} url - URL de exportação
+     * @param {string} filename - Nome do arquivo
+     */
+    function exportCSV(url, filename) {
+        console.warn('DPSStats.exportCSV está deprecado. Use links diretos de download.');
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'export.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    /**
      * Verifica se Chart.js está disponível
      *
      * @returns {boolean} - True se Chart.js está carregado
@@ -302,6 +319,7 @@
         initTrendChart: initTrendChart,
         showLoading: showLoading,
         hideLoading: hideLoading,
+        exportCSV: exportCSV, // Mantido para retrocompatibilidade
         formatCurrency: formatCurrency,
         formatVariation: formatVariation,
         isChartAvailable: isChartAvailable,

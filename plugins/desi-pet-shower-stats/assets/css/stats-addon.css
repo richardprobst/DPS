@@ -709,9 +709,9 @@
     opacity: 1;
 }
 
-/* Tooltip visual customizado (melhor que title nativo em mobile) */
+/* Tooltip visual customizado usando data-tooltip (melhor acessibilidade) */
 .dps-stats-card--with-tooltip::after {
-    content: attr(title);
+    content: attr(data-tooltip);
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;

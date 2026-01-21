@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'DPS_STATS_VERSION', '1.5.2' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'DPS_STATS_NEVER_ATTENDED_DAYS', 999 ); // Valor para pets nunca atendidos
 
 /**
  * Verifica se o plugin base desi.pet by PRObst está ativo.
@@ -717,12 +718,15 @@ class DPS_Stats_Addon {
             $trend_class = $variation > 0 ? 'dps-stats-card__trend--up' : ( $variation < 0 ? 'dps-stats-card__trend--down' : 'dps-stats-card__trend--neutral' );
         }
         ?>
-        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" title="<?php echo esc_attr( $tooltip ); ?>">
-            <span class="dps-stats-card__icon"><?php echo esc_html( $icon ); ?></span>
+        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" 
+             data-tooltip="<?php echo esc_attr( $tooltip ); ?>"
+             role="group"
+             aria-label="<?php echo esc_attr( $label . ': ' . $value ); ?>">
+            <span class="dps-stats-card__icon" aria-hidden="true"><?php echo esc_html( $icon ); ?></span>
             <span class="dps-stats-card__value"><?php echo esc_html( $value ); ?></span>
             <span class="dps-stats-card__label">
                 <?php echo esc_html( $label ); ?>
-                <span class="dps-stats-card__info" title="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
+                <span class="dps-stats-card__info" aria-label="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
             </span>
             <?php if ( $variation !== null ) : ?>
                 <span class="dps-stats-card__trend <?php echo esc_attr( $trend_class ); ?>"><?php echo $variation >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation, 1 ) ); ?>%</span>
@@ -1035,7 +1039,7 @@ class DPS_Stats_Addon {
                         $pet = $item['pet'];
                         $client = $item['client'];
                         $last_date = $item['last_date'];
-                        $days_inactive = $last_date ? (int) floor( ( $today - strtotime( $last_date ) ) / DAY_IN_SECONDS ) : 999;
+                        $days_inactive = $last_date ? (int) floor( ( $today - strtotime( $last_date ) ) / DAY_IN_SECONDS ) : DPS_STATS_NEVER_ATTENDED_DAYS;
                         $last_fmt = $last_date ? date_i18n( 'd/m/Y', strtotime( $last_date ) ) : __( 'Nunca', 'dps-stats-addon' );
                         $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
                         $whats_url = '';
