@@ -1545,3 +1545,725 @@
         font-size: 36px;
     }
 }
+
+/* ========================================
+   26. MELHORIAS DE ACESSIBILIDADE
+   ======================================== */
+
+/* Focus visible para todos os elementos interativos */
+#dps-section-financeiro input:focus-visible,
+#dps-section-financeiro select:focus-visible,
+#dps-section-financeiro button:focus-visible,
+#dps-section-financeiro a:focus-visible,
+#dps-section-financeiro .dps-tab-link:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+/* Esconder elementos visualmente mas manter para screen readers */
+.dps-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Skip link para navegação por teclado */
+.dps-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #0ea5e9;
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 100001;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 4px 0;
+}
+
+.dps-skip-link:focus {
+    top: 0;
+}
+
+/* Mensagens de erro/sucesso com ícones */
+.dps-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.dps-alert::before {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.dps-alert--success {
+    background-color: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+}
+
+.dps-alert--success::before {
+    content: "✓";
+    color: #10b981;
+}
+
+.dps-alert--danger {
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+}
+
+.dps-alert--danger::before {
+    content: "✕";
+    color: #ef4444;
+}
+
+.dps-alert--pending,
+.dps-alert--warning {
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+}
+
+.dps-alert--pending::before,
+.dps-alert--warning::before {
+    content: "⚠";
+    color: #f59e0b;
+}
+
+/* ========================================
+   27. MODAL MELHORADO COM BACKDROP
+   ======================================== */
+
+.dps-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.dps-modal-overlay.show,
+.dps-modal-overlay[style*="display: block"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dps-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: dps-modal-slide-in 0.3s ease;
+}
+
+@keyframes dps-modal-slide-in {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.dps-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.dps-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.dps-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6b7280;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.dps-modal-close:hover {
+    color: #111827;
+    background: #e5e7eb;
+}
+
+.dps-modal-close:focus {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+.dps-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 50vh;
+}
+
+.dps-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    text-align: right;
+    background: #f9fafb;
+}
+
+/* ========================================
+   28. GRÁFICO RESPONSIVO
+   ======================================== */
+
+.dps-finance-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 250px;
+}
+
+.dps-finance-chart-wrapper canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+@media (max-width: 768px) {
+    .dps-finance-chart-wrapper {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-finance-chart-wrapper {
+        height: 180px;
+    }
+}
+
+/* ========================================
+   29. CORES DE TEXTO PARA STATUS
+   ======================================== */
+
+/* Classes de cor de texto para substituir estilos inline */
+.dps-text-danger {
+    color: #ef4444 !important;
+}
+
+.dps-text-warning {
+    color: #f59e0b !important;
+}
+
+.dps-text-success {
+    color: #10b981 !important;
+}
+
+.dps-text-muted {
+    color: #6b7280 !important;
+}
+
+/* Peso de texto */
+.dps-font-semibold {
+    font-weight: 600 !important;
+}
+
+.dps-font-bold {
+    font-weight: 700 !important;
+}
+
+/* ========================================
+   30. INDICADORES DE TENDÊNCIA
+   ======================================== */
+
+.dps-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dps-trend-up {
+    color: #10b981;
+}
+
+.dps-trend-up::before {
+    content: "↑";
+}
+
+.dps-trend-down {
+    color: #ef4444;
+}
+
+.dps-trend-down::before {
+    content: "↓";
+}
+
+.dps-trend-neutral {
+    color: #6b7280;
+}
+
+/* ========================================
+   31. LOADING/SPINNER
+   ======================================== */
+
+.dps-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+}
+
+.dps-loading::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #0ea5e9;
+    border-radius: 50%;
+    animation: dps-spin 0.8s linear infinite;
+}
+
+@keyframes dps-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Botão em estado de loading */
+.button.loading,
+.dps-finance-btn-primary.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.button.loading::after,
+.dps-finance-btn-primary.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: dps-spin 0.8s linear infinite;
+}
+
+/* ========================================
+   32. RESUMO DE PAGAMENTO PARCIAL
+   ======================================== */
+
+.dps-partial-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.dps-partial-summary__item {
+    text-align: center;
+    padding: 12px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-partial-summary__item--highlight {
+    border-color: #0ea5e9;
+    background: #eff6ff;
+}
+
+.dps-partial-summary__label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dps-partial-summary__value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dps-partial-summary__item--highlight .dps-partial-summary__value {
+    color: #0ea5e9;
+}
+
+@media (max-width: 768px) {
+    .dps-partial-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-partial-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .dps-partial-summary__item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+    
+    .dps-partial-summary__label {
+        margin-bottom: 0;
+    }
+}
+
+/* ========================================
+   33. AÇÕES DE PAGAMENTO PARCIAL
+   ======================================== */
+
+.dps-partial-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 480px) {
+    .dps-partial-actions {
+        flex-direction: column;
+    }
+    
+    .dps-partial-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   34. TOOLBAR FINANCEIRO
+   ======================================== */
+
+.dps-finance-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.dps-finance-toolbar__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dps-finance-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ========================================
+   35. GRID FINANCEIRO
+   ======================================== */
+
+.dps-finance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .dps-finance-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   36. AUDITORIA LINK
+   ======================================== */
+
+.dps-finance-audit-link {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-finance-audit-link h5 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-finance-audit-link p {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* ========================================
+   37. ESTRUTURAS DE DESCRIÇÃO E PAGAMENTOS
+   ======================================== */
+
+/* Container de descrição da transação */
+.dps-trans-desc {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-trans-desc__header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dps-trans-desc__meta {
+    font-size: 12px;
+}
+
+/* Badge pequeno para tipo (receita/despesa) */
+.dps-badge--small {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+}
+
+/* Container de pagamentos */
+.dps-pagamentos-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dps-pagamentos-values {
+    white-space: nowrap;
+}
+
+.dps-pagamentos-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   38. MELHORIAS DE USABILIDADE
+   ======================================== */
+
+/* Indicador de campo obrigatório */
+.dps-field label .dps-required {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+/* Tooltip simples */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 1000;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Animação para mensagens de alerta */
+.dps-alert {
+    animation: dps-alert-slide-in 0.3s ease;
+}
+
+@keyframes dps-alert-slide-in {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   39. MELHORIAS PARA TABELAS EM MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Melhorar cards de transação em mobile */
+    #dps-section-financeiro table.dps-table tbody tr {
+        position: relative;
+        padding-right: 12px;
+    }
+    
+    /* Coluna de descrição em mobile */
+    .dps-trans-desc__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Ações em mobile - posicionar melhor */
+    .dps-actions-group {
+        justify-content: flex-start;
+    }
+    
+    /* Pagamentos em mobile */
+    .dps-pagamentos-info {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Cards mais compactos */
+    #dps-section-financeiro table.dps-table tbody tr {
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+    
+    /* Fontes ligeiramente menores */
+    .dps-pagamentos-values {
+        font-size: 13px;
+    }
+    
+    /* Ações empilhadas */
+    .dps-pagamentos-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+/* ========================================
+   40. PRINT STYLES
+   ======================================== */
+
+@media print {
+    /* Esconder elementos não essenciais */
+    .dps-finance-toolbar,
+    .dps-finance-filters,
+    .dps-finance-new-trans-surface,
+    .dps-finance-cobrancas-surface,
+    .button,
+    .dps-actions-group,
+    .dps-pagamentos-actions {
+        display: none !important;
+    }
+    
+    /* Expandir tabela */
+    .dps-finance-table-wrapper {
+        overflow: visible;
+        border: none;
+    }
+    
+    /* Remover cores de fundo */
+    #dps-section-financeiro table.dps-table tr {
+        background: none !important;
+    }
+    
+    /* Bordas visíveis */
+    #dps-section-financeiro table.dps-table th,
+    #dps-section-financeiro table.dps-table td {
+        border: 1px solid #000;
+    }
+}
+
+/* ========================================
+   41. CAMPO OBRIGATÓRIO
+   ======================================== */
+
+.dps-required {
+    color: #ef4444;
+    font-weight: 600;
+    margin-left: 2px;
+}
+
+/* Campo com erro */
+.dps-field.has-error input,
+.dps-field.has-error select {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.dps-field.has-error label {
+    color: #991b1b;
+}
+
+/* Mensagem de erro do campo */
+.dps-field-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #ef4444;
+}
+
+/* Transição suave para estados de input */
+#dps-section-financeiro input,
+#dps-section-financeiro select,
+#dps-section-financeiro textarea {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* ========================================
+   42. FORMULÁRIO DE STATUS INLINE
+   ======================================== */
+
+.dps-status-form {
+    display: inline-block;
+}
