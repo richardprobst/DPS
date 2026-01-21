@@ -2364,12 +2364,12 @@ class DPS_Finance_Addon {
                     $trans_date = $tr->data;
                     
                     if ( $trans_date < $today ) {
-                        echo '<span class="dps-text-danger dps-font-semibold" title="' . esc_attr__( 'Vencida', 'dps-finance-addon' ) . '" role="status">';
+                        echo '<span class="dps-text-danger dps-font-semibold" title="' . esc_attr__( 'Vencida', 'dps-finance-addon' ) . '">';
                         echo '<span aria-hidden="true">⚠</span> ' . esc_html( $date_display );
                         echo '<span class="dps-sr-only">' . esc_html__( ' - Transação vencida', 'dps-finance-addon' ) . '</span>';
                         echo '</span>';
                     } elseif ( $trans_date === $today ) {
-                        echo '<span class="dps-text-warning dps-font-semibold" title="' . esc_attr__( 'Vence hoje', 'dps-finance-addon' ) . '" role="status">';
+                        echo '<span class="dps-text-warning dps-font-semibold" title="' . esc_attr__( 'Vence hoje', 'dps-finance-addon' ) . '">';
                         echo '<span aria-hidden="true">⚠</span> ' . esc_html( $date_display );
                         echo '<span class="dps-sr-only">' . esc_html__( ' - Vence hoje', 'dps-finance-addon' ) . '</span>';
                         echo '</span>';

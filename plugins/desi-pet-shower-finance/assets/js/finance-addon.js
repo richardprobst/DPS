@@ -549,28 +549,34 @@
         // Remove existing messages
         $('.dps-temp-message').remove();
 
-        // Map type to alert class
+        // Map type to alert class and ARIA attribute
         var alertClass = 'dps-alert';
         var icon = '';
+        var ariaAttr = '';
+        
         switch (type) {
             case 'success':
                 alertClass += ' dps-alert--success';
                 icon = '✓';
+                ariaAttr = 'aria-live="polite"';
                 break;
             case 'error':
                 alertClass += ' dps-alert--danger';
                 icon = '✕';
+                ariaAttr = 'role="alert"'; // role="alert" implicitly has aria-live="assertive"
                 break;
             case 'warning':
                 alertClass += ' dps-alert--warning';
                 icon = '⚠';
+                ariaAttr = 'role="alert"';
                 break;
             default:
                 alertClass += ' dps-alert--info';
                 icon = 'ℹ';
+                ariaAttr = 'aria-live="polite"';
         }
         
-        var html = '<div class="dps-temp-message ' + alertClass + '" role="alert" aria-live="polite">';
+        var html = '<div class="dps-temp-message ' + alertClass + '" ' + ariaAttr + '>';
         html += '<span class="dps-alert-icon" aria-hidden="true">' + icon + '</span>';
         html += '<span>' + escapeHtml(text) + '</span>';
         html += '</div>';
