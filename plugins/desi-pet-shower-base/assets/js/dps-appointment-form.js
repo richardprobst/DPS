@@ -530,7 +530,13 @@
                 }
                 
                 // Atualiza campos hidden com os valores calculados para submissão
-                $('#appointment_total').val(totalValue.toFixed(2));
+                // Cache dos seletores para melhor performance
+                var $appointmentTotal = $('#appointment_total');
+                var $subscriptionBaseValue = $('#subscription_base_value');
+                var $subscriptionTotalValue = $('#subscription_total_value');
+                var $subscriptionExtraValue = $('#subscription_extra_value');
+                
+                $appointmentTotal.val(totalValue.toFixed(2));
                 
                 // Para assinaturas, calcula e popula os valores específicos
                 if (appointmentType === 'subscription') {
@@ -547,14 +553,14 @@
                         }
                     });
                     
-                    $('#subscription_base_value').val(Math.max(0, baseValue).toFixed(2));
-                    $('#subscription_total_value').val(totalValue.toFixed(2));
-                    $('#subscription_extra_value').val(extraValue.toFixed(2));
+                    $subscriptionBaseValue.val(Math.max(0, baseValue).toFixed(2));
+                    $subscriptionTotalValue.val(totalValue.toFixed(2));
+                    $subscriptionExtraValue.val(extraValue.toFixed(2));
                 } else {
                     // Para agendamentos simples e passados, zera os valores de assinatura
-                    $('#subscription_base_value').val('0');
-                    $('#subscription_total_value').val('0');
-                    $('#subscription_extra_value').val('0');
+                    $subscriptionBaseValue.val('0');
+                    $subscriptionTotalValue.val('0');
+                    $subscriptionExtraValue.val('0');
                 }
                 
                 // Atualiza observações (exibe somente se tiver conteúdo)
