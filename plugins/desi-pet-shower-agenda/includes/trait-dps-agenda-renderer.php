@@ -1254,6 +1254,28 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
+        // Coluna de Observações (notas do agendamento)
+        echo '<td data-label="' . esc_attr__( 'Observações', 'dps-agenda-addon' ) . '">';
+        $appointment_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
+        if ( ! empty( $appointment_notes ) ) {
+            // Trunca observações longas com tooltip para o texto completo
+            $word_count = str_word_count( $appointment_notes );
+            $max_words = 8;
+            $has_more = $word_count > $max_words;
+            
+            if ( $has_more ) {
+                $notes_preview = wp_trim_words( $appointment_notes, $max_words, '...' );
+                echo '<span class="dps-notes-preview" title="' . esc_attr( $appointment_notes ) . '">';
+                echo '📝 ' . esc_html( $notes_preview );
+                echo '</span>';
+            } else {
+                echo '<span class="dps-notes-text">📝 ' . esc_html( $appointment_notes ) . '</span>';
+            }
+        } else {
+            echo '<span class="dps-notes-empty">—</span>';
+        }
+        echo '</td>';
+        
         // Coluna de Ações (reagendar)
         echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
