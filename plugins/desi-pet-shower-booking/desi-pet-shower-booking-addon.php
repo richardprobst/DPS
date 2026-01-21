@@ -311,18 +311,22 @@ class DPS_Booking_Addon {
             $editing = get_post( $source_id );
             if ( $editing && 'dps_agendamento' === $editing->post_type ) {
                 $meta = [
-                    'client_id'          => get_post_meta( $source_id, 'appointment_client_id', true ),
-                    'pet_id'             => get_post_meta( $source_id, 'appointment_pet', true ),
-                    'date'               => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_date', true ),
-                    'time'               => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_time', true ),
-                    'notes'              => get_post_meta( $source_id, 'appointment_notes', true ),
-                    'taxidog'            => get_post_meta( $source_id, 'appointment_taxidog', true ),
-                    'taxidog_price'      => get_post_meta( $source_id, 'appointment_taxidog_price', true ),
-                    'tosa'               => get_post_meta( $source_id, 'appointment_tosa', true ),
-                    'tosa_price'         => get_post_meta( $source_id, 'appointment_tosa_price', true ),
-                    'tosa_occurrence'    => get_post_meta( $source_id, 'appointment_tosa_occurrence', true ),
-                    'past_payment_status'=> get_post_meta( $source_id, 'past_payment_status', true ),
-                    'past_payment_value' => get_post_meta( $source_id, 'past_payment_value', true ),
+                    'client_id'                      => get_post_meta( $source_id, 'appointment_client_id', true ),
+                    'pet_id'                         => get_post_meta( $source_id, 'appointment_pet', true ),
+                    'date'                           => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_date', true ),
+                    'time'                           => $is_duplicate ? '' : get_post_meta( $source_id, 'appointment_time', true ),
+                    'notes'                          => get_post_meta( $source_id, 'appointment_notes', true ),
+                    'taxidog'                        => get_post_meta( $source_id, 'appointment_taxidog', true ),
+                    'taxidog_price'                  => get_post_meta( $source_id, 'appointment_taxidog_price', true ),
+                    'tosa'                           => get_post_meta( $source_id, 'appointment_tosa', true ),
+                    'tosa_price'                     => get_post_meta( $source_id, 'appointment_tosa_price', true ),
+                    'tosa_occurrence'                => get_post_meta( $source_id, 'appointment_tosa_occurrence', true ),
+                    'past_payment_status'            => get_post_meta( $source_id, 'past_payment_status', true ),
+                    'past_payment_value'             => get_post_meta( $source_id, 'past_payment_value', true ),
+                    'subscription_base_value'        => get_post_meta( $source_id, 'subscription_base_value', true ),
+                    'subscription_total_value'       => get_post_meta( $source_id, 'subscription_total_value', true ),
+                    'subscription_extra_value'       => get_post_meta( $source_id, 'subscription_extra_value', true ),
+                    'appointment_total_value'        => get_post_meta( $source_id, 'appointment_total_value', true ),
                 ];
                 $appt_type = get_post_meta( $source_id, 'appointment_type', true );
                 $meta['appointment_type'] = $appt_type ?: 'simple';
@@ -680,6 +684,18 @@ class DPS_Booking_Addon {
         echo '<li class="dps-appointment-summary__notes"><strong>' . esc_html__( 'Observações:', 'dps-booking-addon' ) . '</strong> <span data-summary="notes">-</span></li>';
         echo '</ul>';
         echo '</div>';
+
+        // Campos hidden para valores calculados pelo JavaScript
+        // Estes campos serão populados automaticamente pelo JS ao atualizar o resumo
+        $total_value_current = isset( $meta['appointment_total_value'] ) ? floatval( $meta['appointment_total_value'] ) : 0;
+        $sub_base_current    = isset( $meta['subscription_base_value'] ) ? floatval( $meta['subscription_base_value'] ) : 0;
+        $sub_total_current   = isset( $meta['subscription_total_value'] ) ? floatval( $meta['subscription_total_value'] ) : 0;
+        $sub_extra_current   = isset( $meta['subscription_extra_value'] ) ? floatval( $meta['subscription_extra_value'] ) : 0;
+        
+        echo '<input type="hidden" id="appointment_total" name="appointment_total" value="' . esc_attr( $total_value_current ) . '">';
+        echo '<input type="hidden" id="subscription_base_value" name="subscription_base_value" value="' . esc_attr( $sub_base_current ) . '">';
+        echo '<input type="hidden" id="subscription_total_value" name="subscription_total_value" value="' . esc_attr( $sub_total_current ) . '">';
+        echo '<input type="hidden" id="subscription_extra_value" name="subscription_extra_value" value="' . esc_attr( $sub_extra_current ) . '">';
 
         // Botões de ação
         $btn_text = $edit_id ? esc_html__( 'Atualizar Agendamento', 'dps-booking-addon' ) : esc_html__( 'Salvar Agendamento', 'dps-booking-addon' );

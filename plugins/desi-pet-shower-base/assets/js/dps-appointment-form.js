@@ -529,6 +529,34 @@
                     $priceEl.text('R$ ' + totalValue.toFixed(2));
                 }
                 
+                // Atualiza campos hidden com os valores calculados para submissão
+                $('#appointment_total').val(totalValue.toFixed(2));
+                
+                // Para assinaturas, calcula e popula os valores específicos
+                if (appointmentType === 'subscription') {
+                    // subscription_base_value = valor total dos serviços (sem extras de assinatura)
+                    var baseValue = totalValue;
+                    var extraValue = 0;
+                    
+                    // Subtrai extras de assinatura do total para obter o base
+                    $('.dps-subscription-extra-value').each(function() {
+                        var val = parseCurrency($(this).val());
+                        if (val > 0) {
+                            extraValue += val;
+                            baseValue -= val;
+                        }
+                    });
+                    
+                    $('#subscription_base_value').val(Math.max(0, baseValue).toFixed(2));
+                    $('#subscription_total_value').val(totalValue.toFixed(2));
+                    $('#subscription_extra_value').val(extraValue.toFixed(2));
+                } else {
+                    // Para agendamentos simples e passados, zera os valores de assinatura
+                    $('#subscription_base_value').val('0');
+                    $('#subscription_total_value').val('0');
+                    $('#subscription_extra_value').val('0');
+                }
+                
                 // Atualiza observações (exibe somente se tiver conteúdo)
                 if (notes && notes.trim() !== '') {
                     $list.find('[data-summary="notes"]').text(notes.trim());
