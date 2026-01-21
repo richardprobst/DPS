@@ -774,7 +774,20 @@ class DPS_Finance_Addon {
                 $paid_sum = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM {$parc_table} WHERE trans_id = %d", $trans_id ) );
                 $paid_sum_cents = $paid_sum ? (int) round( (float) $paid_sum * 100 ) : 0;
 
-                $available_credit   = ( $credit_enabled && $trans && $trans->cliente_id ) ? DPS_Loyalty_API::get_credit( (int) $trans->cliente_id ) : 0;
+                // FASE 1 - F1.2: Validação segura de créditos de fidelidade com proteção
+                $available_credit = 0;
+                if ( $credit_enabled && $trans && $trans->cliente_id ) {
+                    if ( class_exists( 'DPS_Loyalty_API' ) && method_exists( 'DPS_Loyalty_API', 'get_credit' ) ) {
+                        try {
+                            $credit_result = DPS_Loyalty_API::get_credit( (int) $trans->cliente_id );
+                            $available_credit = is_numeric( $credit_result ) ? (int) $credit_result : 0;
+                        } catch ( \Exception $e ) {
+                            // Log error silently - não quebra fluxo de pagamento
+                            error_log( 'DPS Finance: Erro ao obter créditos de fidelidade - ' . $e->getMessage() );
+                            $available_credit = 0;
+                        }
+                    }
+                }
                 $credit_cap_allowed = $credit_cap > 0 ? min( $credit_cap, $available_credit ) : $available_credit;
                 $outstanding_cents  = max( 0, $total_val_cents - $paid_sum_cents );
                 $credit_allowed     = min( $credit_cap_allowed, $outstanding_cents, $value_cents );
@@ -1960,7 +1973,20 @@ class DPS_Finance_Addon {
                 $loyalty_settings = get_option( 'dps_loyalty_settings', [] );
                 $credit_enabled   = ! empty( $loyalty_settings['enable_finance_credit_usage'] );
                 $credit_cap       = isset( $loyalty_settings['finance_max_credit_per_appointment'] ) ? (int) $loyalty_settings['finance_max_credit_per_appointment'] : 0;
-                $client_credit    = ( $credit_enabled && $trans_pp->cliente_id ) ? DPS_Loyalty_API::get_credit( (int) $trans_pp->cliente_id ) : 0;
+                
+                // FASE 1 - F1.2: Validação segura de créditos de fidelidade
+                $client_credit = 0;
+                if ( $credit_enabled && $trans_pp->cliente_id ) {
+                    if ( class_exists( 'DPS_Loyalty_API' ) && method_exists( 'DPS_Loyalty_API', 'get_credit' ) ) {
+                        try {
+                            $credit_result = DPS_Loyalty_API::get_credit( (int) $trans_pp->cliente_id );
+                            $client_credit = is_numeric( $credit_result ) ? (int) $credit_result : 0;
+                        } catch ( \Exception $e ) {
+                            error_log( 'DPS Finance: Erro ao obter créditos - ' . $e->getMessage() );
+                            $client_credit = 0;
+                        }
+                    }
+                }
                 $credit_limit      = $credit_cap > 0 ? min( $credit_cap, $client_credit ) : $client_credit;
                 $credit_limit      = min( $credit_limit, $outstanding_cents );
                 $credit_limit_display = DPS_Money_Helper::format_to_brazilian( $credit_limit );
@@ -3088,10 +3114,11 @@ class DPS_Finance_Addon {
         
         $chart_id = 'dps-finance-chart-' . wp_rand( 1000, 9999 );
         
+        // FASE 2 - F2.4: Gráfico responsivo sem width/height hardcoded
         echo '<div class="dps-finance-chart-container">';
         echo '<h4>' . esc_html__( 'Receitas x Despesas Mensais', 'dps-finance-addon' ) . '</h4>';
         echo '<div class="dps-finance-chart-wrapper">';
-        echo '<canvas id="' . esc_attr( $chart_id ) . '" width="400" height="200"></canvas>';
+        echo '<canvas id="' . esc_attr( $chart_id ) . '" role="img" aria-label="' . esc_attr__( 'Gráfico de receitas e despesas mensais', 'dps-finance-addon' ) . '"></canvas>';
         echo '</div>';
         echo '</div>';
         
@@ -4057,14 +4084,44 @@ class DPS_Finance_Addon {
     /**
      * Calcula a soma de todos os pagamentos parciais registrados para uma transação.
      *
+     * FASE 1 - F1.1: Corrigido para retornar centavos (int) para evitar imprecisão de ponto flutuante.
+     * 
+     * NOTA: Para manter compatibilidade com código existente que espera float,
+     * este método ainda retorna float. Use get_partial_sum_cents() para operações
+     * que requerem precisão.
+     *
      * @param int $trans_id ID da transação
-     * @return float Valor total pago até o momento
+     * @return float Valor total pago até o momento (em reais, com decimais)
      */
     public function get_partial_sum( $trans_id ) {
+        // Usa versão em centavos e converte para compatibilidade
+        return $this->get_partial_sum_cents( $trans_id ) / 100.0;
+    }
+    
+    /**
+     * Calcula a soma de todos os pagamentos parciais em centavos.
+     *
+     * FASE 1 - F1.1: Novo método que usa operações em centavos (inteiros)
+     * para evitar imprecisão de ponto flutuante.
+     *
+     * @since 1.6.1
+     * @param int $trans_id ID da transação
+     * @return int Valor total pago em centavos
+     */
+    public function get_partial_sum_cents( $trans_id ) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'dps_parcelas';
-        $sum        = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(valor) FROM $table_name WHERE trans_id = %d", $trans_id ) );
-        return $sum ? (float) $sum : 0.0;
+        
+        // SEGURANÇA: Valida e escapa nome da tabela
+        $safe_table = esc_sql( $table_name );
+        
+        // Usa ROUND() no SQL para garantir precisão na conversão para centavos
+        $sum_cents = $wpdb->get_var( $wpdb->prepare( 
+            "SELECT COALESCE(SUM(ROUND(valor * 100)), 0) FROM `{$safe_table}` WHERE trans_id = %d", 
+            $trans_id 
+        ) );
+        
+        return (int) $sum_cents;
     }
 
     /**
