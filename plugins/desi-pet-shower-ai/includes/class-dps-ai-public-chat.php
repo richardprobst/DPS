@@ -1039,30 +1039,17 @@ CONTEXTO DO SISTEMA:
         
         // Clientes ativos (com agendamento nos últimos 90 dias)
         $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
-        $active_appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_date',
-                    'value'   => $active_date,
-                    'compare' => '>=',
-                    'type'    => 'DATE',
-                ],
-            ],
-        ] );
-        
-        // Conta clientes únicos com agendamentos recentes
-        $active_client_ids = [];
-        foreach ( $active_appointments as $appt_id ) {
-            $client_id = get_post_meta( $appt_id, 'appointment_client_id', true );
-            if ( $client_id ) {
-                $active_client_ids[ $client_id ] = true;
-            }
-        }
-        $active_clients = count( $active_client_ids );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $active_clients = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(DISTINCT meta_client.meta_value) 
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} meta_date ON p.ID = meta_date.post_id AND meta_date.meta_key = 'appointment_date'
+            INNER JOIN {$wpdb->postmeta} meta_client ON p.ID = meta_client.post_id AND meta_client.meta_key = 'appointment_client_id'
+            WHERE p.post_type = 'dps_agendamento'
+            AND p.post_status = 'publish'
+            AND meta_date.meta_value >= %s",
+            $active_date
+        ) );
         $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
 
         // 2. Estatísticas de pets (CPT dps_pet)
@@ -1073,60 +1060,40 @@ CONTEXTO DO SISTEMA:
 
         // 3. Agendamentos (CPT dps_agendamento com meta appointment_date)
         $today = current_time( 'Y-m-d' );
-        
-        // Agendamentos de hoje
-        $today_appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_date',
-                    'value'   => $today,
-                    'compare' => '=',
-                ],
-            ],
-        ] );
-        $today_count = count( $today_appointments );
-        
-        // Esta semana
         $week_start = gmdate( 'Y-m-d', strtotime( 'monday this week' ) );
         $week_end = gmdate( 'Y-m-d', strtotime( 'sunday this week' ) );
-        $week_appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_date',
-                    'value'   => [ $week_start, $week_end ],
-                    'compare' => 'BETWEEN',
-                    'type'    => 'DATE',
-                ],
-            ],
-        ] );
-        $week_count = count( $week_appointments );
-        
-        // Este mês
         $month_start = gmdate( 'Y-m-01' );
         $month_end = gmdate( 'Y-m-t' );
-        $month_appointments = get_posts( [
-            'post_type'      => 'dps_agendamento',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'fields'         => 'ids',
-            'meta_query'     => [
-                [
-                    'key'     => 'appointment_date',
-                    'value'   => [ $month_start, $month_end ],
-                    'compare' => 'BETWEEN',
-                    'type'    => 'DATE',
-                ],
-            ],
-        ] );
-        $month_count = count( $month_appointments );
+        
+        // Contagem eficiente usando SQL direto com prepared statements
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $today_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value = %s",
+            $today
+        ) );
+        
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $week_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value BETWEEN %s AND %s",
+            $week_start,
+            $week_end
+        ) );
+        
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $month_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value BETWEEN %s AND %s",
+            $month_start,
+            $month_end
+        ) );
         
         $context .= "📅 AGENDAMENTOS:\n";
         $context .= "- Agendamentos hoje ({$today}): {$today_count}\n";
