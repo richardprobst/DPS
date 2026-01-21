@@ -1259,10 +1259,12 @@ trait DPS_Agenda_Renderer {
         $appointment_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
         if ( ! empty( $appointment_notes ) ) {
             // Trunca observações longas com tooltip para o texto completo
-            $notes_preview = wp_trim_words( $appointment_notes, 8, '...' );
-            $has_more = strlen( $appointment_notes ) > strlen( $notes_preview );
+            $word_count = str_word_count( $appointment_notes );
+            $max_words = 8;
+            $has_more = $word_count > $max_words;
             
             if ( $has_more ) {
+                $notes_preview = wp_trim_words( $appointment_notes, $max_words, '...' );
                 echo '<span class="dps-notes-preview" title="' . esc_attr( $appointment_notes ) . '">';
                 echo '📝 ' . esc_html( $notes_preview );
                 echo '</span>';

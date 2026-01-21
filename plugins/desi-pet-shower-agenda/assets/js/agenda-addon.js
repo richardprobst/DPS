@@ -718,7 +718,8 @@
     }, function(resp){
       if ( resp && resp.success ) {
         showToast(resp.data.message, 'success');
-        setTimeout(function(){ location.reload(); }, 1000);
+        // Aguarda 2 segundos para o usuário ver a mensagem de sucesso antes de recarregar
+        setTimeout(function(){ location.reload(); }, 2000);
       } else {
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao reagendar.'), 'error');
         btn.prop('disabled', false).text(getMessage('save', 'Salvar'));
@@ -772,13 +773,9 @@
           }
         });
         
-        // Exibe histórico em modal ou alert como fallback para conteúdo formatado
-        if ( typeof window.DPSServicesModal !== 'undefined' ) {
-          // Usa o modal de serviços adaptado para histórico
-          window.DPSServicesModal.show([{ name: content.replace(/\n/g, '<br>'), price: '0' }]);
-        } else {
-          alert(content);
-        }
+        // Exibe histórico em alert - formato de texto longo requer modal dedicado
+        // TODO: Criar modal genérico de conteúdo para substituir alert em histórico
+        alert(content);
       } else {
         showToast(resp.data ? resp.data.message : getMessage('error', 'Erro ao buscar histórico.'), 'error');
       }
