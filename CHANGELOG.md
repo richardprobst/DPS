@@ -83,6 +83,21 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Catálogo Completo de Serviços de Banho e Tosa - Região SP (v1.6.1)**
+
+- **30+ serviços pré-configurados com valores de mercado SP 2024**: Lista completa de serviços típicos de pet shop com preços diferenciados por porte (pequeno/médio/grande):
+  - **Serviços Padrão**: Banho (R$ 50-120), Banho e Tosa (R$ 100-230), Tosa Higiênica (R$ 40-80)
+  - **Opções de Tosa**: Tosa Máquina (R$ 65-140), Tosa Tesoura (R$ 85-180), Tosa da Raça (R$ 120-280), Corte Estilizado (R$ 135-300)
+  - **Preparação da Pelagem**: Remoção de Nós (leve/moderado/severo), Desembaraço Total
+  - **Tratamentos**: Banho Terapêutico/Ozônio, Banho Medicamentoso, Banho Antipulgas, Tratamento Dermatológico
+  - **Pelagem e Pele**: Hidratação, Hidratação Profunda, Restauração Capilar, Cauterização
+  - **Cuidados Adicionais**: Corte de Unhas (R$ 18-35), Limpeza de Ouvido, Escovação Dental, Limpeza de Glândulas Anais, Tosa de Patas
+  - **Extras/Mimos**: Perfume Premium, Laço/Gravatinha, Bandana, Tintura/Coloração
+  - **Transporte**: TaxiDog (Leva e Traz) R$ 30-45
+  - **Pacotes**: Pacote Completo, Pacote Spa
+- **Durações por porte**: Cada serviço inclui tempo estimado de execução para cada porte de pet
+- **Ativo por padrão**: Todos os serviços são criados como ativos para edição imediata pelo administrador
+
 **Seção de Tosa no Formulário de Agendamento via Shortcode (v1.2.1)**
 
 - **Card de tosa no shortcode `[dps_booking_form]`**: Adicionada a mesma seção de tosa com design card-based que foi implementada no formulário de agendamento do Painel de Gestão DPS pela PR #498.
@@ -129,6 +144,25 @@ Antes de criar uma nova versão oficial:
 - **Atributo `data-admin-mode`**: Indicador no HTML para debugging e extensibilidade
 
 #### Changed (Alterado)
+
+**Services Add-on - Melhorias de UI/UX e Validações (v1.6.0)**
+
+- **Empty state com CTA**: A aba Serviços agora exibe botão "Cadastrar primeiro serviço" quando não há serviços cadastrados, melhorando o fluxo de onboarding.
+- **Indicador de campos obrigatórios**: Adicionada mensagem explicativa "* Campos obrigatórios" no formulário de cadastro/edição de serviços.
+- **Espaçamento padronizado**: Valores por pet (assinatura) agora usam 16px de padding, alinhado com padrão visual global.
+- **Link de cancelar edição melhorado**: Estilizado como botão secundário vermelho para melhor feedback visual.
+- **Acessibilidade em ícones**: Adicionados atributos `aria-label` e `role="img"` nos ícones de informação.
+- **Focus visible melhorado**: Estilos de foco visíveis consistentes para acessibilidade de navegação por teclado.
+
+#### Security (Segurança)
+
+**Services Add-on - Validações reforçadas (v1.6.0)**
+
+- **Validação de preços não-negativos**: Todos os preços de serviços (pequeno/médio/grande) agora são validados para impedir valores negativos via `max(0, floatval(...))`.
+- **Validação de durações não-negativas**: Durações por porte agora impedem valores negativos.
+- **Sanitização de insumos**: Quantidade de insumos vinculados a serviços agora é sanitizada com `sanitize_text_field()` antes da conversão numérica.
+- **Total de agendamento não-negativo**: Valor total do agendamento validado para impedir negativos.
+- **Desconto de pacotes normalizado**: Desconto percentual na API de cálculo de pacotes agora é normalizado para intervalo 0-100 com `min(100, max(0, $discount))`.
 
 - **Estrutura do header do chat público**: Reorganizada para acomodar badge de admin e status lado a lado
 - **Método `check_rate_limit()`**: Agora aceita parâmetro `$is_admin_mode` para aplicar limites diferenciados
