@@ -315,9 +315,15 @@ final class DPS_Portal_Session_Manager implements DPS_Portal_Session_Manager_Int
     /**
      * Obtém o IP do cliente de forma segura
      *
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
+     *
      * @return string IP do cliente
      */
     private function get_client_ip() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip();
+        }
+        // Fallback para retrocompatibilidade
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
         }

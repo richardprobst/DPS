@@ -255,9 +255,16 @@ class DPS_Registration_Addon {
      * Obtém o IP do cliente de forma segura.
      *
      * @since 1.1.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_hash( 'dps_reg_' ) diretamente.
+     *
      * @return string IP do cliente (hash para privacidade)
      */
     private function get_client_ip_hash() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip_hash( 'dps_reg_' );
+        }
+        
+        // Fallback para retrocompatibilidade
         $ip = '';
         
         // Prioriza REMOTE_ADDR por segurança

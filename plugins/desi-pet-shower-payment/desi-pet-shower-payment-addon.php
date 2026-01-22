@@ -1178,9 +1178,17 @@ class DPS_Payment_Addon {
      * Considera headers de proxy reverso como Cloudflare, mas valida formato.
      *
      * @since 1.2.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_with_proxy_support() diretamente.
+     *
      * @return string IP do cliente.
      */
     private function get_client_ip() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            $ip = DPS_IP_Helper::get_ip_with_proxy_support();
+            return ! empty( $ip ) ? $ip : 'unknown';
+        }
+        
+        // Fallback para retrocompatibilidade
         $ip = '';
         
         // Cloudflare

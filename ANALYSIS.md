@@ -193,6 +193,55 @@ echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
 - Add-on de Stats (reengajamento de clientes inativos)
 - Portal do Cliente (solicitação de acesso, envio de link, agendamento, compartilhamento)
 
+#### DPS_IP_Helper
+**Propósito**: Obtenção e validação centralizada de endereços IP do cliente, com suporte a proxies, CDNs (Cloudflare) e ambientes de desenvolvimento.
+
+**Entrada/Saída**:
+- `get_ip()`: Obtém IP simples via REMOTE_ADDR → string (IP ou 'unknown')
+- `get_ip_with_proxy_support()`: Obtém IP real através de proxies/CDNs → string (IP ou vazio)
+- `get_ip_hash( string $salt )`: Obtém hash SHA-256 do IP para rate limiting → string (64 caracteres)
+- `is_valid_ip( string $ip )`: Valida IPv4 ou IPv6 → bool
+- `is_valid_ipv4( string $ip )`: Valida apenas IPv4 → bool
+- `is_valid_ipv6( string $ip )`: Valida apenas IPv6 → bool
+- `is_localhost( string $ip = null )`: Verifica se é localhost → bool
+- `anonymize( string $ip )`: Anonimiza IP para LGPD/GDPR → string
+
+**Exemplos práticos**:
+```php
+// Obter IP simples para logging
+$ip = DPS_IP_Helper::get_ip();
+
+// Obter IP real através de CDN (Cloudflare)
+$ip = DPS_IP_Helper::get_ip_with_proxy_support();
+
+// Gerar hash para rate limiting
+$hash = DPS_IP_Helper::get_ip_hash( 'dps_login_' );
+set_transient( 'rate_limit_' . $hash, $count, HOUR_IN_SECONDS );
+
+// Anonimizar IP para logs de longa duração (LGPD)
+$anon_ip = DPS_IP_Helper::anonymize( $ip );
+// '192.168.1.100' → '192.168.1.0'
+```
+
+**Headers verificados** (em ordem de prioridade):
+1. `HTTP_CF_CONNECTING_IP` - Cloudflare
+2. `HTTP_X_REAL_IP` - Nginx proxy
+3. `HTTP_X_FORWARDED_FOR` - Proxy padrão (usa primeiro IP da lista)
+4. `REMOTE_ADDR` - Conexão direta
+
+**Boas práticas**:
+- Use `get_ip()` para casos simples (logging, auditoria)
+- Use `get_ip_with_proxy_support()` quando há CDN/proxy (rate limiting, segurança)
+- Use `get_ip_hash()` para armazenar referências de IP sem expor o endereço real
+- Use `anonymize()` para logs de longa duração em compliance com LGPD/GDPR
+
+**Add-ons que usam este helper**:
+- Portal do Cliente (autenticação, rate limiting, logs de acesso)
+- Add-on de Pagamentos (webhooks, auditoria)
+- Add-on de IA (rate limiting do chat público)
+- Add-on de Finance (auditoria de operações)
+- Add-on de Registration (rate limiting de cadastros)
+
 #### DPS_Message_Helper
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 

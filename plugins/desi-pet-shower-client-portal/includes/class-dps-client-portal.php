@@ -4476,10 +4476,15 @@ final class DPS_Client_Portal {
      * Obtém o endereço IP do cliente de forma segura.
      *
      * @since 2.2.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
      *
      * @return string Endereço IP sanitizado ou 'unknown' se não disponível.
      */
     private function get_client_ip() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip();
+        }
+        // Fallback para retrocompatibilidade
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
         }
@@ -5210,9 +5215,17 @@ HTML;
      * Verifica headers de proxy (Cloudflare, AWS, Nginx) e valida IPv4/IPv6
      *
      * @since 2.4.3
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_with_proxy_support() diretamente.
+     *
      * @return string IP do cliente ou 'unknown'
      */
     private function get_client_ip_with_proxy_support() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            $ip = DPS_IP_Helper::get_ip_with_proxy_support();
+            return ! empty( $ip ) ? $ip : 'unknown';
+        }
+        
+        // Fallback para retrocompatibilidade
         // Headers a verificar, em ordem de prioridade
         $headers = [
             'HTTP_CF_CONNECTING_IP', // Cloudflare
