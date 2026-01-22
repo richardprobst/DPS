@@ -241,7 +241,7 @@ class DPS_Subscription_Addon {
         $price = get_post_meta( $sub->ID, 'subscription_price', true );
         $client_post = $cid ? get_post( absint( $cid ) ) : null;
         $client_name = $client_post ? sanitize_text_field( $client_post->post_title ) : '';
-        $valor_fmt   = $price ? number_format( floatval( $price ), 2, ',', '.' ) : '0,00';
+        $valor_fmt   = $price ? DPS_Money_Helper::format_decimal_to_brazilian( floatval( $price ) ) : '0,00';
         
         // Suporta múltiplos pets
         $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
@@ -1361,7 +1361,7 @@ class DPS_Subscription_Addon {
             echo '<span class="dps-status-badge dps-status-badge--paid">' . esc_html__( 'Valor dos Pacotes', 'dps-subscription-addon' ) . '</span>';
             echo '<small>' . esc_html__( 'Receita mensal estimada', 'dps-subscription-addon' ) . '</small>';
             echo '</div>';
-            echo '<strong class="dps-inline-stats__value">R$ ' . esc_html( number_format( $monthly_revenue, 2, ',', '.' ) ) . '</strong>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $monthly_revenue ) ) . '</strong>';
             echo '</li>';
             echo '<li>';
             echo '<div class="dps-inline-stats__label">';
@@ -1508,7 +1508,7 @@ class DPS_Subscription_Addon {
                 echo '<td data-label="' . $lbl_frequencia . '">' . esc_html( $freq_options[ $freq ] ?? $freq ) . '</td>';
                 
                 // Valor
-                echo '<td data-label="' . $lbl_valor . '"><strong>R$ ' . esc_html( number_format( (float) $price, 2, ',', '.' ) ) . '</strong></td>';
+                echo '<td data-label="' . $lbl_valor . '"><strong>' . esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $price ) ) . '</strong></td>';
                 
                 // Próximo agendamento
                 echo '<td data-label="' . $lbl_proximo . '">' . ( $next_appt ? esc_html( $next_appt ) : '<span class="dps-text-muted">—</span>' ) . '</td>';
@@ -1679,7 +1679,7 @@ class DPS_Subscription_Addon {
                 echo '<td data-label="' . $lbl_servico . '">' . esc_html( $srv ) . ' <span class="dps-text-muted">(' . esc_html( $freq_options[ $freq ] ?? $freq ) . ')</span></td>';
                 
                 // Valor
-                echo '<td data-label="' . $lbl_valor . '">R$ ' . esc_html( number_format( (float) $price, 2, ',', '.' ) ) . '</td>';
+                echo '<td data-label="' . $lbl_valor . '">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $price ) ) . '</td>';
                 
                 // Status de pagamento
                 $pay_label = $pay === 'pago' ? __( 'Pago', 'dps-subscription-addon' ) : __( 'Pendente', 'dps-subscription-addon' );

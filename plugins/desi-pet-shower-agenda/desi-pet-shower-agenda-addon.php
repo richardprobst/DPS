@@ -4163,7 +4163,7 @@ class DPS_Agenda_Addon {
             'canceled'        => $canceled,
             'total'           => count( $day_appointments ),
             'revenue_estimate' => $revenue_estimate,
-            'revenue_formatted' => 'R$ ' . number_format( $revenue_estimate / 100, 2, ',', '.' ),
+            'revenue_formatted' => DPS_Money_Helper::format_currency( $revenue_estimate ),
             'cancel_rate'     => $cancel_rate,
             'avg_daily'       => $avg_daily,
         ];

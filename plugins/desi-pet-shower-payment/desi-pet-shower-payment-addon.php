@@ -525,7 +525,7 @@ class DPS_Payment_Addon {
         $pet_id       = get_post_meta( $appt->ID, 'appointment_pet_id', true );
         $pet_post     = $pet_id ? get_post( $pet_id ) : null;
         $pet_name     = $pet_post ? $pet_post->post_title : '';
-        $valor_fmt    = number_format( (float) $total, 2, ',', '.' );
+        $valor_fmt    = DPS_Money_Helper::format_decimal_to_brazilian( (float) $total );
         // Define link de fallback
         $fallback     = 'https://link.mercadopago.com.br/desipetshower';
         $link_to_use  = $payment_link ? $payment_link : $fallback;
@@ -1050,7 +1050,7 @@ class DPS_Payment_Addon {
         $pet_post    = $pet_id ? get_post( $pet_id ) : null;
         $pet_name    = $pet_post ? $pet_post->post_title : '';
         $amount      = get_post_meta( $appt_id, 'appointment_total_value', true );
-        $amount_fmt  = $amount ? number_format( (float) $amount, 2, ',', '.' ) : '';
+        $amount_fmt  = $amount ? DPS_Money_Helper::format_decimal_to_brazilian( (float) $amount ) : '';
         $subject     = sprintf( 'Pagamento confirmado: Agendamento #%d', $appt_id );
         $message     = sprintf( "O pagamento do agendamento #%d foi confirmado.\n", $appt_id );
         $message    .= $client_name ? sprintf( "Cliente: %s\n", $client_name ) : '';
@@ -1083,7 +1083,7 @@ class DPS_Payment_Addon {
         $pet_post    = $pet_id ? get_post( $pet_id ) : null;
         $pet_name    = $pet_post ? $pet_post->post_title : '';
         $price       = get_post_meta( $sub_id, 'subscription_price', true );
-        $price_fmt   = $price ? number_format( (float) $price, 2, ',', '.' ) : '';
+        $price_fmt   = $price ? DPS_Money_Helper::format_decimal_to_brazilian( (float) $price ) : '';
         $subject     = sprintf( 'Pagamento confirmado: Assinatura #%d', $sub_id );
         $message     = sprintf( "O pagamento da assinatura #%d foi confirmado.\n", $sub_id );
         $message    .= $client_name ? sprintf( "Cliente: %s\n", $client_name ) : '';

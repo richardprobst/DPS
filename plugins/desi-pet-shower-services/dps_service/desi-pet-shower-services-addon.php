@@ -2054,20 +2054,20 @@ class DPS_Services_Addon {
         if ( $has_size_prices ) {
             // Exibe preços por porte identificados
             if ( null !== $price_small ) {
-                $prices[] = '<span class="dps-price-size" data-size="small"><span class="dps-price-label">' . esc_html__( 'P', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_small, 2, ',', '.' ) ) . '</span>';
+                $prices[] = '<span class="dps-price-size" data-size="small"><span class="dps-price-label">' . esc_html__( 'P', 'dps-services-addon' ) . '</span> ' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $price_small ) ) . '</span>';
             }
             if ( null !== $price_medium ) {
-                $prices[] = '<span class="dps-price-size" data-size="medium"><span class="dps-price-label">' . esc_html__( 'M', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_medium, 2, ',', '.' ) ) . '</span>';
+                $prices[] = '<span class="dps-price-size" data-size="medium"><span class="dps-price-label">' . esc_html__( 'M', 'dps-services-addon' ) . '</span> ' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $price_medium ) ) . '</span>';
             }
             if ( null !== $price_large ) {
-                $prices[] = '<span class="dps-price-size" data-size="large"><span class="dps-price-label">' . esc_html__( 'G', 'dps-services-addon' ) . '</span> R$ ' . esc_html( number_format( $price_large, 2, ',', '.' ) ) . '</span>';
+                $prices[] = '<span class="dps-price-size" data-size="large"><span class="dps-price-label">' . esc_html__( 'G', 'dps-services-addon' ) . '</span> ' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $price_large ) ) . '</span>';
             }
             
             return '<span class="dps-service-prices-multi">' . implode( ' ', $prices ) . '</span>';
         }
         
         // Exibe preço único padrão
-        return '<span class="dps-service-price-single">R$ ' . esc_html( number_format( $default_price, 2, ',', '.' ) ) . '</span>';
+        return '<span class="dps-service-price-single">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $default_price ) ) . '</span>';
     }
     
     /**

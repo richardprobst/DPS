@@ -5253,12 +5253,12 @@ class DPS_Base_Frontend {
                         $srv_name  = $srv ? $srv->post_title : '';
                         $price_val = isset( $prices[ $idx ] ) ? floatval( $prices[ $idx ] ) : 0.0;
                         $total    += $price_val;
-                        $price_fmt = number_format( $price_val, 2, ',', '.' );
+                        $price_fmt = DPS_Money_Helper::format_decimal_to_brazilian( $price_val );
                         $service_lines[] = $srv_name . ' (R$ ' . $price_fmt . ')';
                     }
                 }
                 $services_str = $service_lines ? implode( ', ', $service_lines ) : '-';
-                $total_fmt    = number_format( $total, 2, ',', '.' );
+                $total_fmt    = DPS_Money_Helper::format_decimal_to_brazilian( $total );
                 // Status
                 $status_meta = get_post_meta( $appt->ID, 'appointment_status', true );
                 $status_label = '';

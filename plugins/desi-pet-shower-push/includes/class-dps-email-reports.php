@@ -514,11 +514,11 @@ class DPS_Email_Reports {
         // Cards de resumo
         $html .= '<div style="display: flex; gap: 15px; margin: 20px 0;">';
         $html .= '<div style="flex: 1; padding: 15px; background: #d1fae5; border-radius: 8px; text-align: center;">';
-        $html .= '<div style="font-size: 24px; color: #10b981; font-weight: bold;">R$ ' . number_format( $total_receitas, 2, ',', '.' ) . '</div>';
+        $html .= '<div style="font-size: 24px; color: #10b981; font-weight: bold;">' . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . '</div>';
         $html .= '<div style="color: #6b7280; font-size: 12px;">Receitas</div>';
         $html .= '</div>';
         $html .= '<div style="flex: 1; padding: 15px; background: #fee2e2; border-radius: 8px; text-align: center;">';
-        $html .= '<div style="font-size: 24px; color: #ef4444; font-weight: bold;">R$ ' . number_format( $total_despesas, 2, ',', '.' ) . '</div>';
+        $html .= '<div style="font-size: 24px; color: #ef4444; font-weight: bold;">' . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . '</div>';
         $html .= '<div style="color: #6b7280; font-size: 12px;">Despesas</div>';
         $html .= '</div>';
         $html .= '</div>';
@@ -540,7 +540,7 @@ class DPS_Email_Reports {
                 $color = $trans->tipo === 'receita' ? '#10b981' : '#ef4444';
                 $html .= '<tr style="border-bottom: 1px solid #e5e7eb;">';
                 $html .= '<td style="padding: 8px;">' . esc_html( $trans->descricao ) . '</td>';
-                $html .= '<td style="padding: 8px; text-align: right; color: ' . $color . ';">R$ ' . number_format( (float) $trans->valor, 2, ',', '.' ) . '</td>';
+                $html .= '<td style="padding: 8px; text-align: right; color: ' . $color . ';">' . DPS_Money_Helper::format_currency_from_decimal( (float) $trans->valor ) . '</td>';
                 $html .= '</tr>';
             }
 
@@ -576,9 +576,9 @@ class DPS_Email_Reports {
         $text = "💰 *Relatório Financeiro*\n";
         $text .= date_i18n( 'd/m/Y', strtotime( $date ) ) . "\n\n";
         $text .= "📋 " . count( $appointments ) . " atendimento(s)\n";
-        $text .= "💵 Receitas: R$ " . number_format( $total_receitas, 2, ',', '.' ) . "\n";
-        $text .= "�� Despesas: R$ " . number_format( $total_despesas, 2, ',', '.' ) . "\n";
-        $text .= "📊 Saldo: R$ " . number_format( $total_receitas - $total_despesas, 2, ',', '.' );
+        $text .= "💵 Receitas: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas ) . "\n";
+        $text .= "💸 Despesas: " . DPS_Money_Helper::format_currency_from_decimal( $total_despesas ) . "\n";
+        $text .= "📊 Saldo: " . DPS_Money_Helper::format_currency_from_decimal( $total_receitas - $total_despesas );
 
         return $text;
     }

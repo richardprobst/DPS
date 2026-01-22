@@ -1911,7 +1911,7 @@ final class DPS_Client_Portal {
                 _n( '%d Pendência', '%d Pendências', count( $pendings ), 'dps-client-portal' ),
                 count( $pendings )
             ) ) . '</div>';
-            echo '<div class="dps-financial-summary__amount">R$ ' . esc_html( number_format( $total, 2, ',', '.' ) ) . '</div>';
+            echo '<div class="dps-financial-summary__amount">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total ) ) . '</div>';
             echo '</div>';
             echo '<div class="dps-financial-summary__action">';
             echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
@@ -1931,7 +1931,7 @@ final class DPS_Client_Portal {
             foreach ( $pendings as $trans ) {
                 $date = $trans->data;
                 $desc = $trans->descricao ? $trans->descricao : __( 'Serviço', 'dps-client-portal' );
-                $valor = number_format( (float) $trans->valor, 2, ',', '.' );
+                $valor = DPS_Money_Helper::format_decimal_to_brazilian( (float) $trans->valor );
                 echo '<tr>';
                 echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Descrição', 'dps-client-portal' ) . '">' . esc_html( $desc ) . '</td>';

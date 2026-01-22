@@ -255,7 +255,7 @@ class DPS_Portal_Renderer {
             _n( '%d Pendência', '%d Pendências', count( $pendings ), 'dps-client-portal' ),
             count( $pendings )
         ) ) . '</div>';
-        echo '<div class="dps-financial-summary__amount">R$ ' . esc_html( number_format( $total, 2, ',', '.' ) ) . '</div>';
+        echo '<div class="dps-financial-summary__amount">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total ) ) . '</div>';
         echo '</div>';
         echo '<div class="dps-financial-summary__action">';
         echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
@@ -287,7 +287,7 @@ class DPS_Portal_Renderer {
     private function render_financial_pending_row( $transaction ) {
         $date = $transaction->data;
         $desc = $transaction->descricao ? $transaction->descricao : __( 'Serviço', 'dps-client-portal' );
-        $valor = number_format( (float) $transaction->valor, 2, ',', '.' );
+        $valor = DPS_Money_Helper::format_decimal_to_brazilian( (float) $transaction->valor );
         echo '<tr>';
         echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
         echo '<td data-label="' . esc_attr__( 'Descrição', 'dps-client-portal' ) . '">' . esc_html( $desc ) . '</td>';
@@ -1597,7 +1597,7 @@ class DPS_Portal_Renderer {
                                 </td>
                                 <td><?php echo esc_html( $service['services'] ); ?></td>
                                 <td><?php echo esc_html( ! empty( $service['professional'] ) ? $service['professional'] : '-' ); ?></td>
-                                <td><?php echo $appointment_value && is_numeric( $appointment_value ) ? 'R$ ' . esc_html( number_format( (float) $appointment_value, 2, ',', '.' ) ) : '-'; ?></td>
+                                <td><?php echo $appointment_value && is_numeric( $appointment_value ) ? esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $appointment_value ) ) : '-'; ?></td>
                                 <td><span class="status-badge <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status ); ?></span></td>
                             </tr>
                         <?php endforeach; ?>
@@ -1733,7 +1733,7 @@ class DPS_Portal_Renderer {
             if ( ! empty( $appointment_value ) && is_numeric( $appointment_value ) && (float) $appointment_value > 0 ) {
                 echo '<span class="dps-timeline-meta__item dps-timeline-meta__item--value">';
                 echo '<span class="dps-timeline-meta__icon">💰</span>';
-                echo 'R$ ' . esc_html( number_format( (float) $appointment_value, 2, ',', '.' ) );
+                echo esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $appointment_value ) );
                 echo '</span>';
             }
             

@@ -699,7 +699,7 @@ class DPS_AI_Public_Chat {
                 $context .= "\nSERVIÇOS DISPONÍVEIS:\n";
                 foreach ( $services as $service ) {
                     $name  = $service['title'] ?? '';
-                    $price = isset( $service['price'] ) ? 'R$ ' . number_format( $service['price'], 2, ',', '.' ) : '';
+                    $price = isset( $service['price'] ) ? DPS_Money_Helper::format_currency_from_decimal( $service['price'] ) : '';
                     if ( $name ) {
                         $context .= "- {$name}" . ( $price ? " (a partir de {$price})" : '' ) . "\n";
                     }
@@ -1139,8 +1139,8 @@ CONTEXTO DO SISTEMA:
             $pending_amount = (float) $pending_amount_cents / 100;
             
             $context .= "💰 FINANCEIRO:\n";
-            $context .= "- Faturamento deste mês: R$ " . number_format( $month_revenue, 2, ',', '.' ) . "\n";
-            $context .= "- Valor pendente total: R$ " . number_format( $pending_amount, 2, ',', '.' ) . "\n\n";
+            $context .= "- Faturamento deste mês: " . DPS_Money_Helper::format_currency_from_decimal( $month_revenue ) . "\n";
+            $context .= "- Valor pendente total: " . DPS_Money_Helper::format_currency_from_decimal( $pending_amount ) . "\n\n";
         }
 
         // 5. Informações do sistema

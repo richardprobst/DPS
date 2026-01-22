@@ -1636,7 +1636,7 @@ class DPS_AI_Addon {
                         $cost_brl = $cost * floatval( $settings['usd_to_brl_rate'] );
                         ?>
                         <p style="margin: 5px 0 0 0; font-size: 16px; color: #6b7280;">
-                            (~R$ <?php echo esc_html( number_format( $cost_brl, 2, ',', '.' ) ); ?>)
+                            (~<?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $cost_brl ) ); ?>)
                         </p>
                     <?php } ?>
                 </div>
@@ -2167,7 +2167,7 @@ class DPS_AI_Addon {
 
             if ( $exchange_rate > 0 ) {
                 $cost_brl = $cost_usd * $exchange_rate;
-                $row[]    = 'R$ ' . number_format( $cost_brl, 2, ',', '.' );
+                $row[]    = DPS_Money_Helper::format_currency_from_decimal( $cost_brl );
             }
 
             $row[] = number_format( floatval( $day->avg_response_time ), 2 );
