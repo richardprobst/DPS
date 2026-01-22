@@ -54,3 +54,13 @@ add_action( 'init', 'dps_services_load_textdomain', 1 );
 
 // Inclui o arquivo principal do add-on localizado na subpasta
 require_once plugin_dir_path( __FILE__ ) . 'dps_service/desi-pet-shower-services-addon.php';
+
+/**
+ * Registra o hook de ativação para popular os serviços padrão.
+ * 
+ * IMPORTANTE: Este hook DEVE ser registrado no arquivo principal do plugin
+ * (este arquivo) e não dentro do construtor da classe, pois o WordPress
+ * processa hooks de ativação ANTES do hook 'init' rodar, e a classe
+ * DPS_Services_Addon só é instanciada no hook 'init'.
+ */
+register_activation_hook( __FILE__, [ 'DPS_Services_Addon', 'activate' ] );

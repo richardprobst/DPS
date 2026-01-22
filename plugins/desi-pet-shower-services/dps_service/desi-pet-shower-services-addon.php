@@ -56,10 +56,9 @@ class DPS_Services_Addon {
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
         // Registra shortcodes
         add_shortcode( 'dps_services_catalog', [ $this, 'render_catalog_shortcode' ] );
-        // Popula serviços padrões na ativação
-        if ( defined( 'DPS_SERVICES_PLUGIN_FILE' ) ) {
-            register_activation_hook( DPS_SERVICES_PLUGIN_FILE, [ $this, 'activate' ] );
-        }
+        // Nota: O register_activation_hook foi movido para o arquivo wrapper
+        // (desi-pet-shower-services.php) para garantir que seja registrado
+        // antes da ativação do plugin, não durante o hook init.
     }
 
     /**
@@ -171,8 +170,11 @@ class DPS_Services_Addon {
      * - price_large: porte grande (acima de 25kg)
      * - duration: duração base em minutos
      * - duration_small/medium/large: duração por porte
+     * 
+     * NOTA: Este método é estático para poder ser chamado pelo register_activation_hook
+     * que é registrado no arquivo wrapper antes da instanciação da classe.
      */
-    public function activate() {
+    public static function activate() {
         // Cria serviços padrão com valores de mercado SP 2024
         $default_services = [
             // === SERVIÇOS PADRÃO (principais) ===
