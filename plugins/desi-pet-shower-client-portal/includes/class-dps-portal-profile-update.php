@@ -476,7 +476,8 @@ final class DPS_Portal_Profile_Update {
     public function render_profile_update_shortcode( $atts ) {
         // Este shortcode é usado internamente pelo portal
         // Verifica se há token válido na URL
-        if ( ! isset( $_GET['dps_action'] ) || 'profile_update' !== $_GET['dps_action'] || ! isset( $_GET['token'] ) ) {
+        $action = isset( $_GET['dps_action'] ) ? sanitize_text_field( wp_unslash( $_GET['dps_action'] ) ) : '';
+        if ( 'profile_update' !== $action || ! isset( $_GET['token'] ) ) {
             return '';
         }
         
