@@ -83,6 +83,23 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Link de Atualização de Perfil para Clientes (Client Portal v2.5.0)**
+
+- **Botão "Link de Atualização" na página do cliente**: Administradores agora podem gerar um link exclusivo para que o cliente atualize seus próprios dados e de seus pets.
+  - Botão disponível no header da página de detalhes do cliente
+  - Link válido por 7 dias (token type: `profile_update`)
+  - Copia automaticamente para a área de transferência
+  - Pode ser enviado via WhatsApp ou Email pelo administrador
+- **Formulário público de atualização de perfil**: Clientes podem atualizar:
+  - Dados pessoais (nome, CPF, data de nascimento)
+  - Contato (telefone, email, Instagram, Facebook)
+  - Endereço e preferências
+  - Dados de pets existentes (espécie, raça, porte, peso, cuidados especiais)
+  - Cadastrar novos pets
+- **Design responsivo e intuitivo**: Formulário com interface limpa, cards colapsáveis para pets, validação de campos obrigatórios
+- **Hook `dps_client_page_header_actions`**: Novo hook no header da página do cliente para extensões adicionarem ações personalizadas
+- **Novo token type `profile_update`**: Suporte no Token Manager para tokens de atualização de perfil com expiração de 7 dias
+
 **Catálogo Completo de Serviços de Banho e Tosa - Região SP (v1.6.1)**
 
 - **30+ serviços pré-configurados com valores de mercado SP 2024**: Lista completa de serviços típicos de pet shop com preços diferenciados por porte (pequeno/médio/grande):

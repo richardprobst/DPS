@@ -1036,15 +1036,17 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Exibir histórico de atendimentos e pendências financeiras
 - Integrar com módulo "Indique e Ganhe" quando ativo
 - Sistema de autenticação via tokens (magic links) sem necessidade de senhas
+- Link de atualização de perfil para clientes atualizarem seus dados sem login
 
 **Shortcodes expostos**:
 - `[dps_client_portal]`: renderiza portal completo do cliente
 - `[dps_client_login]`: exibe formulário de login
+- `[dps_profile_update]`: formulário público de atualização de perfil (usado internamente via token)
 
 **CPTs, tabelas e opções**:
 - Não cria CPTs próprios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
-  - Suporta 3 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação)
+  - Suporta 4 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias)
 - Sessões PHP próprias para autenticação independente do WordPress
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Tipos de mensagem customizados para notificações
@@ -1061,10 +1063,14 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - ~~`dps_settings_nav_tabs`~~: (migrado para sistema moderno) abas "Portal do Cliente" e "Logins de Clientes" registradas em `DPS_Settings_Frontend`
 - ~~`dps_settings_sections`~~: (migrado para sistema moderno) renderização via callbacks em `register_tab()`
 - Hooks do add-on de Pagamentos para links de quitação via Mercado Pago
+- `dps_client_page_header_actions`: adiciona botão "Link de Atualização" no header da página de detalhes do cliente
 
 **Hooks disparados**:
 - `dps_client_portal_before_content`: disparado após o menu de navegação e antes das seções de conteúdo; passa $client_id como parâmetro; útil para adicionar conteúdo no topo do portal (ex: widgets, assistentes)
 - `dps_client_portal_after_content`: disparado ao final do portal, antes do fechamento do container principal; passa $client_id como parâmetro
+- `dps_portal_profile_update_link_generated`: disparado quando um link de atualização de perfil é gerado; passa $client_id e $update_url como parâmetros
+- `dps_portal_profile_updated`: disparado quando o cliente atualiza seu perfil; passa $client_id como parâmetro
+- `dps_portal_new_pet_created`: disparado quando um novo pet é cadastrado via formulário de atualização; passa $pet_id e $client_id como parâmetros
 
 **Métodos públicos da classe `DPS_Client_Portal`**:
 - `get_current_client_id()`: retorna o ID do cliente autenticado via sessão ou usuário WordPress (0 se não autenticado); permite que add-ons obtenham o cliente logado no portal
@@ -1686,6 +1692,19 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
   - **Propósito**: (depreciado) renderizar conteúdo de seções na página de configurações
   - **Migração**: usar `DPS_Settings_Frontend::register_tab()` com callback que renderiza o conteúdo
   - **Nota**: O sistema moderno de abas já renderiza automaticamente o conteúdo via callbacks registrados.
+
+#### Página de detalhes do cliente
+
+- **`dps_client_page_header_actions`** (action) (desde v1.1.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$base_url` (string)
+  - **Propósito**: adicionar botões de ação ao header da página de detalhes do cliente
+  - **Consumido por**: Client Portal (botão de gerar link de atualização de perfil)
+  - **Exemplo**:
+    ```php
+    add_action( 'dps_client_page_header_actions', function( $client_id, $client, $base_url ) {
+        echo '<button class="dps-btn-action">Minha Ação</button>';
+    }, 10, 3 );
+    ```
 
 #### Fluxo de agendamentos
 

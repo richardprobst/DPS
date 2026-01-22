@@ -84,6 +84,7 @@ require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-session-ma
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-admin-actions.php';
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-cache-helper.php'; // Fase 2.2
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-calendar-helper.php'; // Fase 2.8
+require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/class-dps-portal-profile-update.php'; // Fase 5 - Atualização de perfil via link
 
 // Inclui repositórios (Fase 3.1 - Repository Pattern)
 require_once DPS_CLIENT_PORTAL_ADDON_DIR . 'includes/client-portal/repositories/class-dps-client-repository.php';
@@ -144,6 +145,11 @@ function dps_client_portal_init_addon() {
     // Inicializa o Hub centralizado do Portal (Fase 2 - Reorganização de Menus)
     if ( class_exists( 'DPS_Portal_Hub' ) ) {
         DPS_Portal_Hub::get_instance();
+    }
+    
+    // Inicializa gerenciador de atualização de perfil via link (Fase 5)
+    if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
+        DPS_Portal_Profile_Update::get_instance();
     }
 }
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
