@@ -34,8 +34,8 @@ class DPS_Stats_Cache_Invalidator {
     public static function init() {
         // Invalidar quando agendamentos mudarem
         add_action( 'save_post_dps_agendamento', [ __CLASS__, 'invalidate_on_appointment_change' ], 10, 3 );
-        add_action( 'before_delete_post', [ __CLASS__, 'invalidate_on_post_delete' ], 10, 2 );
-        add_action( 'trashed_post', [ __CLASS__, 'invalidate_on_post_delete' ], 10, 2 );
+        add_action( 'before_delete_post', [ __CLASS__, 'invalidate_on_before_delete' ], 10, 2 );
+        add_action( 'trashed_post', [ __CLASS__, 'invalidate_on_trash' ], 10, 2 );
         
         // Invalidar quando clientes mudarem
         add_action( 'save_post_dps_cliente', [ __CLASS__, 'invalidate_on_client_change' ], 10, 3 );
@@ -140,17 +140,35 @@ class DPS_Stats_Cache_Invalidator {
     }
 
     /**
-     * Invalidar cache quando post é deletado.
+     * Invalidar cache quando post é deletado (hook before_delete_post).
      *
-     * @param int    $post_id ID do post.
-     * @param object $post    Objeto do post (pode ser null em alguns contextos).
+     * @param int     $post_id ID do post.
+     * @param WP_Post $post    Objeto do post.
      *
      * @since 1.2.0
      */
-    public static function invalidate_on_post_delete( $post_id, $post = null ) {
-        if ( ! $post ) {
-            $post = get_post( $post_id );
+    public static function invalidate_on_before_delete( $post_id, $post ) {
+        // Verificar se é um objeto válido
+        if ( ! $post instanceof WP_Post ) {
+            return;
         }
+        
+        // Verificar tipo de post
+        if ( in_array( $post->post_type, [ 'dps_agendamento', 'dps_cliente', 'dps_pet', 'dps_subscription' ], true ) ) {
+            self::invalidate_all_with_throttle();
+        }
+    }
+
+    /**
+     * Invalidar cache quando post é movido para lixeira (hook trashed_post).
+     *
+     * @param int    $post_id         ID do post.
+     * @param string $previous_status Status anterior do post (WordPress 6.3+).
+     *
+     * @since 1.2.0
+     */
+    public static function invalidate_on_trash( $post_id, $previous_status = '' ) {
+        $post = get_post( $post_id );
         
         if ( ! $post ) {
             return;
@@ -227,5 +245,5 @@ class DPS_Stats_Cache_Invalidator {
     }
 }
 
-// Inicializar invalidador
-DPS_Stats_Cache_Invalidator::init();
+// Inicializar invalidador via hook apropriado
+add_action( 'plugins_loaded', [ 'DPS_Stats_Cache_Invalidator', 'init' ], 10 );

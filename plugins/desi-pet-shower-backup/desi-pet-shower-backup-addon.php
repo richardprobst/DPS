@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Backup & Restauração Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Gere backups completos dos dados do sistema e restaure em outro ambiente. Exportação e importação simplificadas.
- * Version:           1.1.0
+ * Version:           1.3.1
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-backup-addon
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Definir constante de versão
 if ( ! defined( 'DPS_BACKUP_VERSION' ) ) {
-    define( 'DPS_BACKUP_VERSION', '1.1.0' );
+    define( 'DPS_BACKUP_VERSION', '1.3.1' );
 }
 
 // Carregar classes auxiliares
@@ -79,7 +79,7 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.0.0
          * @var string
          */
-        const VERSION = '1.1.0';
+        const VERSION = '1.3.1';
 
         /**
          * Action name para exportação.
@@ -514,8 +514,20 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 'scheduled_time'      => isset( $_POST['scheduled_time'] ) ? sanitize_text_field( wp_unslash( $_POST['scheduled_time'] ) ) : '02:00',
                 'retention_count'     => isset( $_POST['retention_count'] ) ? absint( $_POST['retention_count'] ) : 5,
                 'email_notification'  => ! empty( $_POST['email_notification'] ),
-                'notification_email'  => isset( $_POST['notification_email'] ) ? sanitize_email( wp_unslash( $_POST['notification_email'] ) ) : '',
+                'notification_email'  => '',
             ];
+            
+            // Validar email com is_email()
+            if ( isset( $_POST['notification_email'] ) ) {
+                $email = sanitize_email( wp_unslash( $_POST['notification_email'] ) );
+                if ( ! empty( $email ) && is_email( $email ) ) {
+                    $settings['notification_email'] = $email;
+                } else {
+                    // Se email inválido, usar o email do admin (se válido)
+                    $admin_email = get_option( 'admin_email' );
+                    $settings['notification_email'] = ( ! empty( $admin_email ) && is_email( $admin_email ) ) ? $admin_email : '';
+                }
+            }
 
             DPS_Backup_Settings::save( $settings );
 
@@ -564,6 +576,32 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             $filename = 'dps-backup-' . gmdate( 'Ymd-His' ) . '.json';
             $content = wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+            
+            // Validar se a codificação JSON foi bem-sucedida
+            if ( false === $content || null === $content ) {
+                $json_error = json_last_error_msg();
+                error_log( 'DPS Backup: Falha ao codificar JSON: ' . $json_error );
+                
+                $this->redirect_with_message(
+                    $this->get_post_redirect(),
+                    'error',
+                    sprintf(
+                        /* translators: %s: mensagem de erro JSON */
+                        __( 'Falha ao codificar dados do backup em JSON. Erro: %s. Verifique se há caracteres inválidos nos metadados.', 'dps-backup-addon' ),
+                        $json_error
+                    )
+                );
+            }
+            
+            // Validar que o conteúdo não está vazio
+            if ( empty( $content ) || strlen( $content ) < 50 ) {
+                error_log( 'DPS Backup: Conteúdo do backup está vazio ou corrompido.' );
+                $this->redirect_with_message(
+                    $this->get_post_redirect(),
+                    'error',
+                    __( 'Conteúdo do backup está vazio ou corrompido. Operação cancelada.', 'dps-backup-addon' )
+                );
+            }
 
             // Salvar no histórico
             $stats = $exporter->get_backup_stats( $payload );
@@ -677,10 +715,17 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             if ( ! $entry || empty( $entry['file_path'] ) || ! file_exists( $entry['file_path'] ) ) {
                 wp_die( esc_html__( 'Backup não encontrado.', 'dps-backup-addon' ) );
             }
+            
+            // Sanitizar filename contra header injection
+            $filename = isset( $entry['filename'] ) ? sanitize_file_name( $entry['filename'] ) : 'backup.json';
+            // Remover qualquer quebra de linha ou caractere de controle
+            $filename = preg_replace( '/[\r\n\x00-\x1F\x7F]/', '', $filename );
+            // Escapar aspas duplas
+            $filename = str_replace( '"', '\"', $filename );
 
             nocache_headers();
             header( 'Content-Type: application/json; charset=utf-8' );
-            header( 'Content-Disposition: attachment; filename="' . $entry['filename'] . '"' );
+            header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
             header( 'Content-Length: ' . filesize( $entry['file_path'] ) );
             readfile( $entry['file_path'] );
             exit;
@@ -938,6 +983,21 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     }
                 }
             }
+            
+            // Validar que o backup não está completamente vazio
+            $total_records = 0;
+            foreach ( [ 'clients', 'pets', 'appointments', 'transactions', 'services', 'subscriptions' ] as $component ) {
+                if ( isset( $data[ $component ] ) && is_array( $data[ $component ] ) ) {
+                    $total_records += count( $data[ $component ] );
+                }
+            }
+            
+            if ( $total_records === 0 ) {
+                return new WP_Error(
+                    'dps_backup_empty',
+                    __( 'O backup está vazio. Nenhum dado será restaurado. Esta ação foi cancelada como medida de segurança. Verifique se o backup foi gerado corretamente.', 'dps-backup-addon' )
+                );
+            }
 
             return $data;
         }
@@ -1043,8 +1103,23 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             if ( in_array( 'clients', $components, true ) && ! empty( $payload['clients'] ) ) {
                 foreach ( $payload['clients'] as $client ) {
                     $old_id = isset( $client['id'] ) ? (int) $client['id'] : 0;
-                    $new_id = $this->create_entity_post( $client, 'dps_cliente' );
-                    $client_map[ $old_id ] = $new_id;
+                    try {
+                        $new_id = $this->create_entity_post( $client, 'dps_cliente' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do cliente antigo */
+                                    __( 'Falha ao criar cliente com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $client_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        // Log do erro e re-lança para ser capturado pela transação
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar cliente %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1052,12 +1127,44 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 foreach ( $payload['pets'] as $pet ) {
                     $old_id = isset( $pet['id'] ) ? (int) $pet['id'] : 0;
                     $meta   = $pet['meta'] ?? [];
-                    if ( isset( $meta['owner_id'] ) && isset( $client_map[ (int) $meta['owner_id'] ] ) ) {
-                        $meta['owner_id'] = $client_map[ (int) $meta['owner_id'] ];
-                        $pet['meta']      = $meta;
+                    
+                    // Validar e mapear owner_id (somente se não for vazio/zero)
+                    if ( isset( $meta['owner_id'] ) && ! empty( $meta['owner_id'] ) ) {
+                        $old_owner_id = (int) $meta['owner_id'];
+                        if ( $old_owner_id > 0 ) {
+                            if ( isset( $client_map[ $old_owner_id ] ) ) {
+                                $meta['owner_id'] = $client_map[ $old_owner_id ];
+                                $pet['meta']      = $meta;
+                            } else {
+                                // Pet tem proprietário que não foi restaurado
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do pet, 2: ID do proprietário */
+                                        __( 'Pet %1$d tem proprietário (ID %2$d) que não foi restaurado. Inclua os clientes no backup.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_owner_id
+                                    )
+                                );
+                            }
+                        }
                     }
-                    $new_id = $this->create_entity_post( $pet, 'dps_pet' );
-                    $pet_map[ $old_id ] = $new_id;
+                    
+                    try {
+                        $new_id = $this->create_entity_post( $pet, 'dps_pet' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do pet antigo */
+                                    __( 'Falha ao criar pet com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $pet_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar pet %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1066,30 +1173,91 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                     $old_id = isset( $appointment['id'] ) ? (int) $appointment['id'] : 0;
                     $meta   = $appointment['meta'] ?? [];
 
-                    if ( isset( $meta['appointment_client_id'] ) && isset( $client_map[ (int) $meta['appointment_client_id'] ] ) ) {
-                        $meta['appointment_client_id'] = $client_map[ (int) $meta['appointment_client_id'] ];
+                    // Validar e mapear appointment_client_id (somente se não for vazio/zero)
+                    if ( isset( $meta['appointment_client_id'] ) && ! empty( $meta['appointment_client_id'] ) ) {
+                        $old_client_id = (int) $meta['appointment_client_id'];
+                        if ( $old_client_id > 0 ) {
+                            if ( isset( $client_map[ $old_client_id ] ) ) {
+                                $meta['appointment_client_id'] = $client_map[ $old_client_id ];
+                            } else {
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do agendamento, 2: ID do cliente */
+                                        __( 'Agendamento %1$d referencia cliente (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_client_id
+                                    )
+                                );
+                            }
+                        }
                     }
 
-                    if ( isset( $meta['appointment_pet_id'] ) && isset( $pet_map[ (int) $meta['appointment_pet_id'] ] ) ) {
-                        $meta['appointment_pet_id'] = $pet_map[ (int) $meta['appointment_pet_id'] ];
+                    // Validar e mapear appointment_pet_id (singular, somente se não for vazio/zero)
+                    if ( isset( $meta['appointment_pet_id'] ) && ! empty( $meta['appointment_pet_id'] ) ) {
+                        $old_pet_id = (int) $meta['appointment_pet_id'];
+                        if ( $old_pet_id > 0 ) {
+                            if ( isset( $pet_map[ $old_pet_id ] ) ) {
+                                $meta['appointment_pet_id'] = $pet_map[ $old_pet_id ];
+                            } else {
+                                throw new Exception(
+                                    sprintf(
+                                        /* translators: 1: ID do agendamento, 2: ID do pet */
+                                        __( 'Agendamento %1$d referencia pet (ID %2$d) que não foi restaurado.', 'dps-backup-addon' ),
+                                        $old_id,
+                                        $old_pet_id
+                                    )
+                                );
+                            }
+                        }
                     }
 
+                    // Validar e mapear appointment_pet_ids (plural - múltiplos pets)
                     if ( isset( $meta['appointment_pet_ids'] ) && is_array( $meta['appointment_pet_ids'] ) ) {
                         $mapped_pets = [];
+                        $missing_pets = [];
+                        
                         foreach ( $meta['appointment_pet_ids'] as $pet_id ) {
                             $pet_id = (int) $pet_id;
                             if ( isset( $pet_map[ $pet_id ] ) ) {
                                 $mapped_pets[] = $pet_map[ $pet_id ];
+                            } else {
+                                $missing_pets[] = $pet_id;
                             }
                         }
-                        if ( $mapped_pets ) {
-                            $meta['appointment_pet_ids'] = $mapped_pets;
+                        
+                        // Se há pets faltando, lançar erro
+                        if ( ! empty( $missing_pets ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: 1: ID do agendamento, 2: Lista de IDs de pets */
+                                    __( 'Agendamento %1$d referencia pets que não foram restaurados: %2$s', 'dps-backup-addon' ),
+                                    $old_id,
+                                    implode( ', ', $missing_pets )
+                                )
+                            );
                         }
+                        
+                        $meta['appointment_pet_ids'] = $mapped_pets;
                     }
 
                     $appointment['meta'] = $meta;
-                    $new_id               = $this->create_entity_post( $appointment, 'dps_agendamento' );
-                    $appointment_map[ $old_id ] = $new_id;
+                    
+                    try {
+                        $new_id = $this->create_entity_post( $appointment, 'dps_agendamento' );
+                        if ( ! $new_id || is_wp_error( $new_id ) ) {
+                            throw new Exception(
+                                sprintf(
+                                    /* translators: %d: ID do agendamento antigo */
+                                    __( 'Falha ao criar agendamento com ID %d. Operação cancelada.', 'dps-backup-addon' ),
+                                    $old_id
+                                )
+                            );
+                        }
+                        $appointment_map[ $old_id ] = $new_id;
+                    } catch ( Exception $e ) {
+                        error_log( sprintf( 'DPS Backup: Erro ao restaurar agendamento %d: %s', $old_id, $e->getMessage() ) );
+                        throw $e;
+                    }
                 }
             }
 
@@ -1180,14 +1348,41 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $wpdb->query( "TRUNCATE TABLE `{$table}`" );
 
             foreach ( $transactions as $row ) {
+                $original_cliente_id = isset( $row['cliente_id'] ) ? (int) $row['cliente_id'] : 0;
+                $original_agendamento_id = isset( $row['agendamento_id'] ) ? (int) $row['agendamento_id'] : 0;
+                
                 unset( $row['id'] );
 
-                if ( isset( $row['cliente_id'] ) && isset( $client_map[ (int) $row['cliente_id'] ] ) ) {
-                    $row['cliente_id'] = $client_map[ (int) $row['cliente_id'] ];
+                // Mapear cliente_id com validação de órfãos
+                if ( isset( $row['cliente_id'] ) && $row['cliente_id'] ) {
+                    if ( isset( $client_map[ $original_cliente_id ] ) ) {
+                        $row['cliente_id'] = $client_map[ $original_cliente_id ];
+                    } else {
+                        // Cliente órfão detectado - lançar exceção
+                        throw new Exception(
+                            sprintf(
+                                /* translators: %d: ID do cliente */
+                                __( 'Transação com cliente_id %d não pode ser restaurada (cliente não encontrado no backup).', 'dps-backup-addon' ),
+                                $original_cliente_id
+                            )
+                        );
+                    }
                 }
 
-                if ( isset( $row['agendamento_id'] ) && isset( $appointment_map[ (int) $row['agendamento_id'] ] ) ) {
-                    $row['agendamento_id'] = $appointment_map[ (int) $row['agendamento_id'] ];
+                // Mapear agendamento_id com validação de órfãos
+                if ( isset( $row['agendamento_id'] ) && $row['agendamento_id'] ) {
+                    if ( isset( $appointment_map[ $original_agendamento_id ] ) ) {
+                        $row['agendamento_id'] = $appointment_map[ $original_agendamento_id ];
+                    } else {
+                        // Agendamento órfão detectado - lançar exceção
+                        throw new Exception(
+                            sprintf(
+                                /* translators: %d: ID do agendamento */
+                                __( 'Transação com agendamento_id %d não pode ser restaurada (agendamento não encontrado no backup).', 'dps-backup-addon' ),
+                                $original_agendamento_id
+                            )
+                        );
+                    }
                 }
 
                 // Sanitizar campos de texto conhecidos
@@ -1200,9 +1395,17 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
                 $result = $wpdb->insert( $table, $row );
                 if ( false === $result ) {
-                    throw new Exception( __( 'Falha ao restaurar transações financeiras.', 'dps-backup-addon' ) );
+                    throw new Exception(
+                        sprintf(
+                            /* translators: %s: mensagem de erro do banco */
+                            __( 'Falha ao restaurar transações financeiras: %s', 'dps-backup-addon' ),
+                            $wpdb->last_error
+                        )
+                    );
                 }
             }
+            
+            error_log( sprintf( 'DPS Backup: %d transações restauradas com sucesso.', count( $transactions ) ) );
         }
 
         /**
@@ -1218,37 +1421,156 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             $components = $this->normalize_components_from_payload( $payload );
             $this->restored_files = [];
 
+            // Desabilitar autocommit e iniciar transação
             $wpdb->query( 'SET autocommit = 0' );
             $wpdb->query( 'START TRANSACTION' );
 
             try {
+                // SAVEPOINT após limpeza para permitir rollback parcial
                 $this->wipe_existing_data( $components );
-
+                $wpdb->query( 'SAVEPOINT after_wipe' );
+                
+                // Restaurar entidades estruturadas
                 $this->restore_structured_entities( $payload, $components );
+                $wpdb->query( 'SAVEPOINT after_entities' );
 
+                // Restaurar options
                 if ( in_array( 'options', $components, true ) ) {
                     $this->restore_options( $payload['options'] ?? [] );
                 }
 
+                // Restaurar tabelas customizadas
                 if ( in_array( 'tables', $components, true ) ) {
                     $skip_tables = in_array( 'transactions', $components, true ) ? [ 'dps_transacoes' ] : [];
                     $this->restore_tables( $payload['tables'] ?? [], $skip_tables );
                 }
 
+                // Restaurar arquivos
                 if ( in_array( 'files', $components, true ) ) {
                     $this->restore_attachments( $payload['attachments'] ?? [] );
                     $this->restore_additional_files( $payload['files'] ?? [] );
                 }
+                
+                $wpdb->query( 'SAVEPOINT before_validation' );
+                
+                // VALIDAÇÃO CRÍTICA: Verificar integridade referencial
+                $integrity_check = $this->validate_referential_integrity( $components );
+                if ( is_wp_error( $integrity_check ) ) {
+                    throw new Exception( $integrity_check->get_error_message() );
+                }
 
+                // Se tudo passou, COMMIT
                 $wpdb->query( 'COMMIT' );
                 $wpdb->query( 'SET autocommit = 1' );
+                
+                error_log( 'DPS Backup: Restauração concluída com sucesso.' );
+
             } catch ( Exception $e ) {
+                error_log( 'DPS Backup: Erro na restauração - ' . $e->getMessage() );
+                
+                // ROLLBACK completo
                 $wpdb->query( 'ROLLBACK' );
                 $wpdb->query( 'SET autocommit = 1' );
+                
+                // Limpar arquivos restaurados
                 $this->cleanup_restored_files();
+                
                 return new WP_Error( 'dps_backup_restore', $e->getMessage() );
             }
 
+            return true;
+        }
+        
+        /**
+         * Valida integridade referencial após restauração.
+         *
+         * @since 1.2.0
+         * @param array $components Componentes restaurados.
+         * @return true|WP_Error
+         */
+        private function validate_referential_integrity( $components ) {
+            global $wpdb;
+            
+            // Validar que pets têm owners válidos
+            if ( in_array( 'pets', $components, true ) ) {
+                $orphan_pets = $wpdb->get_var(
+                    "SELECT COUNT(*)
+                     FROM {$wpdb->postmeta} pm
+                     LEFT JOIN {$wpdb->posts} c ON CAST(pm.meta_value AS UNSIGNED) = c.ID AND c.post_type = 'dps_cliente'
+                     WHERE pm.meta_key = 'owner_id' 
+                       AND pm.meta_value != '' 
+                       AND pm.meta_value IS NOT NULL
+                       AND CAST(pm.meta_value AS UNSIGNED) > 0
+                       AND c.ID IS NULL"
+                );
+                
+                if ( $orphan_pets > 0 ) {
+                    return new WP_Error(
+                        'dps_backup_orphan_pets',
+                        sprintf(
+                            /* translators: %d: número de pets órfãos */
+                            __( 'Restauração cancelada: %d pets sem proprietário válido detectados.', 'dps-backup-addon' ),
+                            $orphan_pets
+                        )
+                    );
+                }
+            }
+            
+            // Validar que agendamentos têm clientes válidos
+            if ( in_array( 'appointments', $components, true ) ) {
+                $orphan_appointments = $wpdb->get_var(
+                    "SELECT COUNT(*)
+                     FROM {$wpdb->postmeta} pm
+                     LEFT JOIN {$wpdb->posts} c ON CAST(pm.meta_value AS UNSIGNED) = c.ID AND c.post_type = 'dps_cliente'
+                     WHERE pm.meta_key = 'appointment_client_id'
+                       AND pm.meta_value != ''
+                       AND pm.meta_value IS NOT NULL
+                       AND CAST(pm.meta_value AS UNSIGNED) > 0
+                       AND c.ID IS NULL"
+                );
+                
+                if ( $orphan_appointments > 0 ) {
+                    return new WP_Error(
+                        'dps_backup_orphan_appointments',
+                        sprintf(
+                            /* translators: %d: número de agendamentos órfãos */
+                            __( 'Restauração cancelada: %d agendamentos sem cliente válido detectados.', 'dps-backup-addon' ),
+                            $orphan_appointments
+                        )
+                    );
+                }
+            }
+            
+            // Validar que transações têm clientes válidos
+            if ( in_array( 'transactions', $components, true ) ) {
+                $table = $wpdb->prefix . 'dps_transacoes';
+                $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+                
+                if ( $exists === $table ) {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela com prefixo validado
+                    $orphan_transactions = $wpdb->get_var(
+                        "SELECT COUNT(*)
+                         FROM {$table} t
+                         LEFT JOIN {$wpdb->posts} c ON t.cliente_id = c.ID AND c.post_type = 'dps_cliente'
+                         WHERE t.cliente_id IS NOT NULL
+                           AND t.cliente_id != 0
+                           AND c.ID IS NULL"
+                    );
+                    
+                    if ( $orphan_transactions > 0 ) {
+                        return new WP_Error(
+                            'dps_backup_orphan_transactions',
+                            sprintf(
+                                /* translators: %d: número de transações órfãs */
+                                __( 'Restauração cancelada: %d transações sem cliente válido detectadas.', 'dps-backup-addon' ),
+                                $orphan_transactions
+                            )
+                        );
+                    }
+                }
+            }
+            
+            error_log( 'DPS Backup: Validação de integridade referencial passou.' );
             return true;
         }
 
@@ -1431,24 +1753,68 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 
                 $autoload = isset( $option['autoload'] ) && 'no' === $option['autoload'] ? 'no' : 'yes';
                 
-                // Evitar maybe_unserialize em dados de fonte externa
-                // Os valores JSON já foram decodificados; preservar o tipo original
+                // IMPORTANTE: Dados do JSON já foram decodificados.
+                // NÃO usar unserialize() em dados de backup externo.
+                // WordPress armazenará corretamente usando maybe_serialize() internamente.
                 $value = $option['option_value'] ?? '';
                 
-                // Se o valor parece ser serializado, validar antes de usar
-                // Detecta todos os tipos serializados: a (array), O (object), s (string), i (int), d (double), b (bool), N (null)
-                if ( is_string( $value ) && preg_match( '/^[aOsidNb]:/', $value ) ) {
-                    // Tentar deserializar de forma segura, rejeitando objetos
-                    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- allowed_classes=false impede instanciação de objetos
-                    $unserialized = @unserialize( $value, [ 'allowed_classes' => false ] );
-                    if ( false !== $unserialized || 'b:0;' === $value ) {
-                        $value = $unserialized;
-                    }
-                    // Se falhar, manter como string
+                // Sanitizar valores escalares
+                if ( is_string( $value ) ) {
+                    // Manter strings como estão, WordPress serializa automaticamente se necessário
+                    $value = $value;
+                } elseif ( is_array( $value ) ) {
+                    // Arrays são sanitizados recursivamente
+                    $value = $this->sanitize_array_recursive( $value );
+                } elseif ( is_object( $value ) ) {
+                    // Rejeitar objetos para prevenir instanciação não segura
+                    error_log( sprintf( 'DPS Backup: Opção %s contém objeto, será ignorada por segurança.', $option_name ) );
+                    continue;
                 }
                 
                 update_option( $option_name, $value, 'yes' === $autoload );
             }
+        }
+        
+        /**
+         * Sanitiza array recursivamente.
+         *
+         * @since 1.2.0
+         * @param array $array Array a ser sanitizado.
+         * @return array
+         */
+        private function sanitize_array_recursive( $array ) {
+            if ( ! is_array( $array ) ) {
+                return $array;
+            }
+            
+            $sanitized = [];
+            foreach ( $array as $key => $value ) {
+                // Sanitizar chave do array preservando underscore e hífen (para case-sensitivity)
+                // O padrão remove apenas caracteres especiais, preservando a-z, A-Z, 0-9, _ e -
+                $sanitized_key = preg_replace( '/[^\w\-]/', '', (string) $key );
+                
+                // Se a chave sanitizada já existe (colisão rara), pular para evitar sobrescrever
+                if ( isset( $sanitized[ $sanitized_key ] ) ) {
+                    error_log( sprintf( 'DPS Backup: Colisão de chave detectada após sanitização: %s → %s (ignorada).', $key, $sanitized_key ) );
+                    continue;
+                }
+                
+                if ( is_array( $value ) ) {
+                    $sanitized[ $sanitized_key ] = $this->sanitize_array_recursive( $value );
+                } elseif ( is_string( $value ) ) {
+                    $sanitized[ $sanitized_key ] = sanitize_text_field( $value );
+                } elseif ( is_numeric( $value ) ) {
+                    $sanitized[ $sanitized_key ] = $value;
+                } elseif ( is_bool( $value ) ) {
+                    $sanitized[ $sanitized_key ] = $value;
+                } elseif ( is_null( $value ) ) {
+                    $sanitized[ $sanitized_key ] = null;
+                } else {
+                    // Rejeitar outros tipos (objects, resources)
+                    error_log( sprintf( 'DPS Backup: Tipo não suportado em array, chave %s ignorada.', $sanitized_key ) );
+                }
+            }
+            return $sanitized;
         }
 
         /**
@@ -1596,22 +1962,78 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          */
         private function write_upload_file( $relative_path, $content_base64 ) {
             $uploads = wp_upload_dir();
-            $path    = wp_normalize_path( ltrim( str_replace( '\\', '/', (string) $relative_path ), '/' ) );
-
-            if ( '' === $path || preg_match( '#(^|/)\.\.(?:/|$)#', $path ) || preg_match( '#^[A-Za-z]:#', $path ) ) {
-                throw new Exception( __( 'Caminho de arquivo inválido no backup.', 'dps-backup-addon' ) );
+            
+            // Validação rigorosa contra path traversal
+            // Extrair apenas o nome do arquivo (sem diretórios)
+            $filename = basename( (string) $relative_path );
+            if ( empty( $filename ) || '.' === $filename || '..' === $filename ) {
+                throw new Exception( __( 'Nome de arquivo inválido no backup.', 'dps-backup-addon' ) );
             }
-
+            
+            // Validar diretório específico permitido
+            $dirname = dirname( (string) $relative_path );
+            $allowed_dirs = [ 'dps_docs', '.' ];
+            
+            // Normalizar dirname
+            $dirname = wp_normalize_path( $dirname );
+            $dirname = ltrim( $dirname, '/' );
+            
+            // Verificar se está dentro de diretórios permitidos
+            $is_allowed = false;
+            foreach ( $allowed_dirs as $allowed ) {
+                if ( '.' === $allowed && ( '.' === $dirname || '' === $dirname ) ) {
+                    $is_allowed = true;
+                    break;
+                }
+                if ( $dirname === $allowed || 0 === strpos( $dirname, $allowed . '/' ) ) {
+                    $is_allowed = true;
+                    break;
+                }
+            }
+            
+            if ( ! $is_allowed ) {
+                throw new Exception(
+                    sprintf(
+                        /* translators: %s: diretório tentado */
+                        __( 'Arquivo fora dos diretórios permitidos: %s', 'dps-backup-addon' ),
+                        esc_html( $dirname )
+                    )
+                );
+            }
+            
+            // Construir caminho seguro
             $base_dir = wp_normalize_path( $uploads['basedir'] );
-            $target   = $base_dir . '/' . $path;
-            if ( 0 !== strpos( $target, $base_dir ) ) {
-                throw new Exception( __( 'Caminho de arquivo fora do diretório de uploads.', 'dps-backup-addon' ) );
+            if ( '.' === $dirname || '' === $dirname ) {
+                $target = $base_dir . '/' . $filename;
+            } else {
+                $target = $base_dir . '/' . $dirname . '/' . $filename;
             }
-
-            $dir = dirname( $target );
-
-            if ( ! wp_mkdir_p( $dir ) ) {
-                throw new Exception( sprintf( __( 'Não foi possível criar o diretório %s para armazenar arquivos do backup.', 'dps-backup-addon' ), $dir ) );
+            $target = wp_normalize_path( $target );
+            
+            // Validar com realpath para detectar symlinks
+            $target_dir = dirname( $target );
+            
+            // Criar diretório se necessário
+            if ( ! wp_mkdir_p( $target_dir ) ) {
+                throw new Exception(
+                    sprintf(
+                        /* translators: %s: caminho do diretório */
+                        __( 'Não foi possível criar o diretório %s para armazenar arquivos do backup.', 'dps-backup-addon' ),
+                        esc_html( $target_dir )
+                    )
+                );
+            }
+            
+            // Validar que o diretório criado está dentro de uploads
+            $real_target_dir = realpath( $target_dir );
+            $real_base_dir = realpath( $uploads['basedir'] );
+            
+            if ( false === $real_target_dir || false === $real_base_dir ) {
+                throw new Exception( __( 'Não foi possível validar o caminho do arquivo.', 'dps-backup-addon' ) );
+            }
+            
+            if ( 0 !== strpos( $real_target_dir, $real_base_dir ) ) {
+                throw new Exception( __( 'Caminho de arquivo fora do diretório de uploads.', 'dps-backup-addon' ) );
             }
 
             $data = base64_decode( $content_base64, true );
@@ -1620,7 +2042,13 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             }
 
             if ( false === file_put_contents( $target, $data ) ) {
-                throw new Exception( sprintf( __( 'Não foi possível gravar o arquivo %s durante a restauração.', 'dps-backup-addon' ), $target ) );
+                throw new Exception(
+                    sprintf(
+                        /* translators: %s: caminho do arquivo */
+                        __( 'Não foi possível gravar o arquivo %s durante a restauração.', 'dps-backup-addon' ),
+                        esc_html( basename( $target ) )
+                    )
+                );
             }
 
             $this->restored_files[] = $target;
@@ -1643,12 +2071,37 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
 
             $result = [];
             foreach ( $tables as $table ) {
-                $name = substr( $table, strlen( $wpdb->prefix ) );
-                $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_A );
-                if ( empty( $create['Create Table'] ) ) {
-                    return new WP_Error( 'dps_backup_table', sprintf( __( 'Não foi possível ler a estrutura da tabela %s.', 'dps-backup-addon' ), $table ) );
+                // Validar que a tabela começa com o prefixo esperado
+                if ( 0 !== strpos( $table, $wpdb->prefix ) ) {
+                    continue;
                 }
+                
+                // Validar que o nome da tabela contém apenas caracteres válidos (alfanuméricos e underscore)
+                if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $table ) ) {
+                    error_log( sprintf( 'DPS Backup: Tabela com nome inválido ignorada: %s', esc_html( $table ) ) );
+                    continue;
+                }
+                
+                $name = substr( $table, strlen( $wpdb->prefix ) );
+                
+                // Usar interpolação direta pois a tabela já foi validada com regex
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada com regex acima
+                $create = $wpdb->get_row( "SHOW CREATE TABLE `{$table}`", ARRAY_A );
+                
+                if ( empty( $create['Create Table'] ) ) {
+                    return new WP_Error(
+                        'dps_backup_table',
+                        sprintf(
+                            /* translators: %s: nome da tabela */
+                            __( 'Não foi possível ler a estrutura da tabela %s.', 'dps-backup-addon' ),
+                            esc_html( $table )
+                        )
+                    );
+                }
+                
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela validada com regex acima
                 $rows = $wpdb->get_results( "SELECT * FROM `{$table}`", ARRAY_A );
+                
                 $result[] = [
                     'name'   => $name,
                     'schema' => str_replace( $wpdb->prefix, '{prefix}', $create['Create Table'] ),
@@ -1788,24 +2241,55 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
             }
 
             if ( ! class_exists( 'DirectoryIterator' ) ) {
-                return [];
+                return new WP_Error(
+                    'dps_backup_no_iterator',
+                    __( 'DirectoryIterator não está disponível. Documentos não podem ser incluídos no backup.', 'dps-backup-addon' )
+                );
             }
 
             $files = [];
-            $iterator = new DirectoryIterator( $dir );
-            foreach ( $iterator as $fileinfo ) {
-                if ( $fileinfo->isDot() || ! $fileinfo->isFile() ) {
-                    continue;
+            $file_count = 0;
+            
+            try {
+                $iterator = new DirectoryIterator( $dir );
+                
+                foreach ( $iterator as $fileinfo ) {
+                    if ( $fileinfo->isDot() || ! $fileinfo->isFile() ) {
+                        continue;
+                    }
+                    $path     = 'dps_docs/' . $fileinfo->getFilename();
+                    $contents = file_get_contents( $fileinfo->getPathname() );
+                    if ( false === $contents ) {
+                        return new WP_Error( 'dps_backup_file', sprintf( __( 'Não foi possível ler o arquivo %s para o backup.', 'dps-backup-addon' ), $fileinfo->getFilename() ) );
+                    }
+                    $files[] = [
+                        'path'    => $path,
+                        'content' => base64_encode( $contents ),
+                    ];
+                    $file_count++;
                 }
-                $path     = 'dps_docs/' . $fileinfo->getFilename();
-                $contents = file_get_contents( $fileinfo->getPathname() );
-                if ( false === $contents ) {
-                    return new WP_Error( 'dps_backup_file', sprintf( __( 'Não foi possível ler o arquivo %s para o backup.', 'dps-backup-addon' ), $fileinfo->getFilename() ) );
-                }
-                $files[] = [
-                    'path'    => $path,
-                    'content' => base64_encode( $contents ),
-                ];
+                
+                // Log de sucesso
+                error_log( sprintf( 'DPS Backup: %d arquivos adicionais incluídos no backup.', $file_count ) );
+                
+            } catch ( UnexpectedValueException $e ) {
+                return new WP_Error(
+                    'dps_backup_file_read',
+                    sprintf(
+                        /* translators: %s: mensagem de erro */
+                        __( 'Não foi possível ler o diretório de documentos: %s. Verifique as permissões.', 'dps-backup-addon' ),
+                        $e->getMessage()
+                    )
+                );
+            } catch ( Exception $e ) {
+                return new WP_Error(
+                    'dps_backup_file_error',
+                    sprintf(
+                        /* translators: %s: mensagem de erro */
+                        __( 'Erro ao processar documentos: %s', 'dps-backup-addon' ),
+                        $e->getMessage()
+                    )
+                );
             }
 
             return $files;

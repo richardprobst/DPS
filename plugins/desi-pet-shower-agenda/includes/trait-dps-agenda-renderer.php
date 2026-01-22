@@ -32,6 +32,21 @@ trait DPS_Agenda_Renderer {
     }
 
     /**
+     * Renderiza o botão de reagendamento.
+     *
+     * Método helper para evitar duplicação de código nas diferentes abas.
+     *
+     * @since 1.1.0
+     * @param int    $appt_id ID do agendamento.
+     * @param string $date    Data do agendamento (Y-m-d).
+     * @param string $time    Hora do agendamento (H:i).
+     * @return string HTML do botão de reagendamento.
+     */
+    private function render_reschedule_button( $appt_id, $date, $time ) {
+        return '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt_id ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
+    }
+
+    /**
      * Verifica se o pet possui restrições de produtos e retorna badge HTML.
      *
      * @since 1.5.0
@@ -767,7 +782,8 @@ trait DPS_Agenda_Renderer {
         }
         
         // Botão de reagendamento rápido
-        echo '<a href="#" class="dps-quick-action dps-quick-reschedule" data-appt-id="' . esc_attr( $appt->ID ) . '" data-date="' . esc_attr( $date ) . '" data-time="' . esc_attr( $time ) . '" title="' . esc_attr__( 'Reagendar', 'dps-agenda-addon' ) . '">📅 ' . esc_html__( 'Reagendar', 'dps-agenda-addon' ) . '</a>';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
+        echo $this->render_reschedule_button( $appt->ID, $date, $time );
         
         // Indicador de histórico
         $history = get_post_meta( $appt->ID, '_dps_appointment_history', true );
@@ -990,6 +1006,12 @@ trait DPS_Agenda_Renderer {
         echo '</div>';
         echo '</td>';
         
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
+        echo $this->render_reschedule_button( $appt->ID, $date, $time );
+        echo '</td>';
+        
         echo '</tr>';
         
         return ob_get_clean();
@@ -1134,6 +1156,12 @@ trait DPS_Agenda_Renderer {
         }
         echo '</td>';
         
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
+        echo $this->render_reschedule_button( $appt->ID, $date, $time );
+        echo '</td>';
+        
         echo '</tr>';
         
         return ob_get_clean();
@@ -1224,6 +1252,34 @@ trait DPS_Agenda_Renderer {
             echo '<span class="dps-taxidog-label dps-taxidog-label--not-requested">⚪ ' . esc_html__( 'NÃO SOLICITADO', 'dps-agenda-addon' ) . '</span>';
             echo '</div>';
         }
+        echo '</td>';
+        
+        // Coluna de Observações (notas do agendamento)
+        echo '<td data-label="' . esc_attr__( 'Observações', 'dps-agenda-addon' ) . '">';
+        $appointment_notes = get_post_meta( $appt->ID, 'appointment_notes', true );
+        if ( ! empty( $appointment_notes ) ) {
+            // Trunca observações longas com tooltip para o texto completo
+            $word_count = str_word_count( $appointment_notes );
+            $max_words = 8;
+            $has_more = $word_count > $max_words;
+            
+            if ( $has_more ) {
+                $notes_preview = wp_trim_words( $appointment_notes, $max_words, '...' );
+                echo '<span class="dps-notes-preview" title="' . esc_attr( $appointment_notes ) . '">';
+                echo '📝 ' . esc_html( $notes_preview );
+                echo '</span>';
+            } else {
+                echo '<span class="dps-notes-text">📝 ' . esc_html( $appointment_notes ) . '</span>';
+            }
+        } else {
+            echo '<span class="dps-notes-empty">—</span>';
+        }
+        echo '</td>';
+        
+        // Coluna de Ações (reagendar)
+        echo '<td data-label="' . esc_attr__( 'Ações', 'dps-agenda-addon' ) . '">';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML seguro retornado pelo helper
+        echo $this->render_reschedule_button( $appt->ID, $date, $time );
         echo '</td>';
         
         echo '</tr>';

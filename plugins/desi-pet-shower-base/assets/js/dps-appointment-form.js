@@ -148,11 +148,19 @@
         },
         
         /**
-         * Alterna exibição dos campos de tosa
+         * Alterna exibição dos campos de tosa e atualiza o estado visual do card
          */
         updateTosaFields: function() {
             const show = $('#dps-tosa-toggle').is(':checked');
-            $('#dps-tosa-fields').toggle(show);
+            const $card = $('.dps-tosa-card');
+            
+            if (show) {
+                $('#dps-tosa-fields').slideDown(200);
+                $card.attr('data-tosa-active', '1');
+            } else {
+                $('#dps-tosa-fields').slideUp(200);
+                $card.attr('data-tosa-active', '0');
+            }
         },
         
         /**
@@ -519,6 +527,40 @@
                     $priceEl.html(priceHtml);
                 } else {
                     $priceEl.text('R$ ' + totalValue.toFixed(2));
+                }
+                
+                // Atualiza campos hidden com os valores calculados para submissão
+                // Cache dos seletores para melhor performance
+                var $appointmentTotal = $('#appointment_total');
+                var $subscriptionBaseValue = $('#subscription_base_value');
+                var $subscriptionTotalValue = $('#subscription_total_value');
+                var $subscriptionExtraValue = $('#subscription_extra_value');
+                
+                $appointmentTotal.val(totalValue.toFixed(2));
+                
+                // Para assinaturas, calcula e popula os valores específicos
+                if (appointmentType === 'subscription') {
+                    // subscription_base_value = valor total dos serviços (sem extras de assinatura)
+                    var baseValue = totalValue;
+                    var extraValue = 0;
+                    
+                    // Subtrai extras de assinatura do total para obter o base
+                    $('.dps-subscription-extra-value').each(function() {
+                        var val = parseCurrency($(this).val());
+                        if (val > 0) {
+                            extraValue += val;
+                            baseValue -= val;
+                        }
+                    });
+                    
+                    $subscriptionBaseValue.val(Math.max(0, baseValue).toFixed(2));
+                    $subscriptionTotalValue.val(totalValue.toFixed(2));
+                    $subscriptionExtraValue.val(extraValue.toFixed(2));
+                } else {
+                    // Para agendamentos simples e passados, zera os valores de assinatura
+                    $subscriptionBaseValue.val('0');
+                    $subscriptionTotalValue.val('0');
+                    $subscriptionExtraValue.val('0');
                 }
                 
                 // Atualiza observações (exibe somente se tiver conteúdo)

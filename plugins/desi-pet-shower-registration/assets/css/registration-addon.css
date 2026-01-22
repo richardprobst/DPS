@@ -317,6 +317,29 @@
 }
 
 /* ==========================================================================
+   6.1. Field Hints - Accessibility
+   ========================================================================== */
+
+.dps-field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--dps-muted);
+    letter-spacing: 0;
+}
+
+/* Focus visible para melhor acessibilidade com teclado */
+.dps-registration-form input:focus-visible,
+.dps-registration-form select:focus-visible,
+.dps-registration-form textarea:focus-visible {
+    outline: 2px solid var(--dps-accent);
+    outline-offset: 2px;
+    border-color: var(--dps-accent);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+/* ==========================================================================
    7. Checkboxes - Modern Style
    ========================================================================== */
 

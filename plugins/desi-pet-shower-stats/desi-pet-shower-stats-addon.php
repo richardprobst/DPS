@@ -3,7 +3,7 @@
  * Plugin Name:       desi.pet by PRObst – Estatísticas Add-on
  * Plugin URI:        https://www.probst.pro
  * Description:       Dashboard visual com métricas e relatórios. Acompanhe desempenho, compare períodos e exporte dados.
- * Version:           1.5.1
+ * Version:           1.5.2
  * Author:            PRObst
  * Author URI:        https://www.probst.pro
  * Text Domain:       dps-stats-addon
@@ -20,9 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constantes
-define( 'DPS_STATS_VERSION', '1.5.1' );
+define( 'DPS_STATS_VERSION', '1.5.2' );
 define( 'DPS_STATS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DPS_STATS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'DPS_STATS_NEVER_ATTENDED_DAYS', 999 ); // Valor para pets nunca atendidos
 
 /**
  * Verifica se o plugin base desi.pet by PRObst está ativo.
@@ -99,9 +100,6 @@ if ( ! function_exists( 'dps_get_total_revenue' ) ) {
     function dps_get_total_revenue( $start_date, $end_date ) {
         _deprecated_function( __FUNCTION__, '1.1.0', 'DPS_Stats_API::get_revenue_total()' );
         
-        if ( class_exists( 'DPS_Stats_API' ) ) {
-            return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
-        }
         // Delega para API que tem validação de tabela
         return DPS_Stats_API::get_revenue_total( $start_date, $end_date );
     }
@@ -486,12 +484,76 @@ class DPS_Stats_Addon {
     }
 
     private function render_date_filter( $start_date, $end_date ) {
+        $today = current_time( 'timestamp' );
+        
+        // Atalhos de período pré-definidos
+        $presets = [
+            '7_days' => [
+                'label' => __( 'Últimos 7 dias', 'dps-stats-addon' ),
+                'start' => date( 'Y-m-d', $today - 7 * DAY_IN_SECONDS ),
+                'end'   => date( 'Y-m-d', $today ),
+            ],
+            '30_days' => [
+                'label' => __( 'Últimos 30 dias', 'dps-stats-addon' ),
+                'start' => date( 'Y-m-d', $today - 30 * DAY_IN_SECONDS ),
+                'end'   => date( 'Y-m-d', $today ),
+            ],
+            'this_month' => [
+                'label' => __( 'Este mês', 'dps-stats-addon' ),
+                'start' => date( 'Y-m-01' ),
+                'end'   => date( 'Y-m-d', $today ),
+            ],
+            'last_month' => [
+                'label' => __( 'Mês anterior', 'dps-stats-addon' ),
+                'start' => date( 'Y-m-01', strtotime( 'first day of last month' ) ),
+                'end'   => date( 'Y-m-t', strtotime( 'last day of last month' ) ),
+            ],
+            'this_year' => [
+                'label' => __( 'Este ano', 'dps-stats-addon' ),
+                'start' => date( 'Y-01-01' ),
+                'end'   => date( 'Y-m-d', $today ),
+            ],
+        ];
+        
+        // Determinar qual preset está ativo (se algum)
+        $active_preset = '';
+        foreach ( $presets as $key => $preset ) {
+            if ( $start_date === $preset['start'] && $end_date === $preset['end'] ) {
+                $active_preset = $key;
+                break;
+            }
+        }
+        
+        // Construir URL base preservando outros parâmetros GET
+        $base_url_params = [];
+        foreach ( $_GET as $k => $v ) {
+            if ( ! in_array( $k, [ 'stats_start', 'stats_end' ], true ) ) {
+                $base_url_params[ $k ] = $v;
+            }
+        }
         ?>
         <div class="dps-surface dps-surface--neutral dps-stats-filter-card">
             <div class="dps-surface__title">
                 <span>📅</span>
                 <?php esc_html_e( 'Período de Análise', 'dps-stats-addon' ); ?>
             </div>
+            
+            <!-- Atalhos rápidos de período -->
+            <div class="dps-stats-preset-buttons">
+                <?php foreach ( $presets as $key => $preset ) : 
+                    $preset_url = add_query_arg( array_merge( $base_url_params, [
+                        'stats_start' => $preset['start'],
+                        'stats_end'   => $preset['end'],
+                    ] ) );
+                ?>
+                    <a href="<?php echo esc_url( $preset_url ); ?>" 
+                       class="dps-stats-preset-btn <?php echo $active_preset === $key ? 'active' : ''; ?>">
+                        <?php echo esc_html( $preset['label'] ); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            
+            <!-- Filtro customizado -->
             <div class="dps-stats-filter">
                 <form method="get" class="dps-stats-filter-form">
                     <?php foreach ( $_GET as $k => $v ) : if ( in_array( $k, [ 'stats_start', 'stats_end' ], true ) ) continue; ?>
@@ -656,12 +718,15 @@ class DPS_Stats_Addon {
             $trend_class = $variation > 0 ? 'dps-stats-card__trend--up' : ( $variation < 0 ? 'dps-stats-card__trend--down' : 'dps-stats-card__trend--neutral' );
         }
         ?>
-        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" title="<?php echo esc_attr( $tooltip ); ?>">
-            <span class="dps-stats-card__icon"><?php echo esc_html( $icon ); ?></span>
+        <div class="dps-stats-card dps-stats-card--<?php echo esc_attr( $type ); ?> dps-stats-card--with-tooltip" 
+             data-tooltip="<?php echo esc_attr( $tooltip ); ?>"
+             role="group"
+             aria-label="<?php echo esc_attr( $label . ': ' . $value ); ?>">
+            <span class="dps-stats-card__icon" aria-hidden="true"><?php echo esc_html( $icon ); ?></span>
             <span class="dps-stats-card__value"><?php echo esc_html( $value ); ?></span>
             <span class="dps-stats-card__label">
                 <?php echo esc_html( $label ); ?>
-                <span class="dps-stats-card__info" title="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
+                <span class="dps-stats-card__info" aria-label="<?php echo esc_attr( $tooltip ); ?>">ℹ️</span>
             </span>
             <?php if ( $variation !== null ) : ?>
                 <span class="dps-stats-card__trend <?php echo esc_attr( $trend_class ); ?>"><?php echo $variation >= 0 ? '+' : ''; ?><?php echo esc_html( number_format( $variation, 1 ) ); ?>%</span>
@@ -938,32 +1003,62 @@ class DPS_Stats_Addon {
             <?php
             return;
         }
+        
+        $today = current_time( 'timestamp' );
+        $max_display = 50;
         ?>
+        
+        <!-- Controles de busca e ordenação -->
+        <div class="dps-stats-table-controls">
+            <input type="text" 
+                   class="dps-stats-table-search" 
+                   id="inactive-search" 
+                   placeholder="🔍 <?php esc_attr_e( 'Buscar por pet ou cliente...', 'dps-stats-addon' ); ?>">
+            <select class="dps-stats-table-sort" id="inactive-sort">
+                <option value=""><?php esc_html_e( 'Ordenar por...', 'dps-stats-addon' ); ?></option>
+                <option value="name-asc"><?php esc_html_e( 'Pet (A-Z)', 'dps-stats-addon' ); ?></option>
+                <option value="name-desc"><?php esc_html_e( 'Pet (Z-A)', 'dps-stats-addon' ); ?></option>
+                <option value="days-desc"><?php esc_html_e( 'Mais tempo parado', 'dps-stats-addon' ); ?></option>
+                <option value="days-asc"><?php esc_html_e( 'Menos tempo parado', 'dps-stats-addon' ); ?></option>
+            </select>
+        </div>
+        
         <div class="dps-stats-table-wrapper">
-            <table class="dps-stats-table">
+            <table class="dps-stats-table" id="inactive-pets-table">
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'Pet', 'dps-stats-addon' ); ?></th>
                         <th><?php esc_html_e( 'Cliente', 'dps-stats-addon' ); ?></th>
                         <th><?php esc_html_e( 'Último Atendimento', 'dps-stats-addon' ); ?></th>
+                        <th><?php esc_html_e( 'Dias Parado', 'dps-stats-addon' ); ?></th>
                         <th><?php esc_html_e( 'Ação', 'dps-stats-addon' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ( array_slice( $inactive_pets, 0, 20 ) as $item ) :
+                    <?php foreach ( array_slice( $inactive_pets, 0, $max_display ) as $item ) :
                         $pet = $item['pet'];
                         $client = $item['client'];
                         $last_date = $item['last_date'];
+                        $days_inactive = $last_date ? (int) floor( ( $today - strtotime( $last_date ) ) / DAY_IN_SECONDS ) : DPS_STATS_NEVER_ATTENDED_DAYS;
                         $last_fmt = $last_date ? date_i18n( 'd/m/Y', strtotime( $last_date ) ) : __( 'Nunca', 'dps-stats-addon' );
                         $phone_raw = get_post_meta( $client->ID, 'client_phone', true );
                         $whats_url = '';
                         
+                        // Determinar urgência baseada nos dias parados
+                        $urgency_class = 'info';
+                        if ( $days_inactive >= 90 || ! $last_date ) {
+                            $urgency_class = 'critical';
+                        } elseif ( $days_inactive >= 60 ) {
+                            $urgency_class = 'warning';
+                        }
+                        
                         if ( $phone_raw ) {
                             $message = sprintf(
-                                /* translators: %1$s: nome do cliente, %2$s: nome do pet */
-                                __( 'Olá %1$s! Notamos que %2$s está há mais de 30 dias sem um banho/tosa. Que tal agendar um horário conosco? 😊', 'dps-stats-addon' ),
+                                /* translators: %1$s: nome do cliente, %2$s: nome do pet, %3$d: dias parado */
+                                __( 'Olá %1$s! Notamos que %2$s está há %3$d dias sem um atendimento. Que tal agendar um horário conosco? 😊', 'dps-stats-addon' ),
                                 $client->post_title,
-                                $pet->post_title
+                                $pet->post_title,
+                                $days_inactive
                             );
                             if ( class_exists( 'DPS_WhatsApp_Helper' ) ) {
                                 $whats_url = DPS_WhatsApp_Helper::get_link_to_client( $phone_raw, $message );
@@ -976,7 +1071,9 @@ class DPS_Stats_Addon {
                             }
                         }
                         ?>
-                        <tr>
+                        <tr data-pet-name="<?php echo esc_attr( strtolower( $pet->post_title ) ); ?>" 
+                            data-client-name="<?php echo esc_attr( strtolower( $client->post_title ) ); ?>"
+                            data-days="<?php echo esc_attr( $days_inactive ); ?>">
                             <td>
                                 <span class="dps-stats-pet-name">🐾 <?php echo esc_html( $pet->post_title ); ?></span>
                             </td>
@@ -987,8 +1084,19 @@ class DPS_Stats_Addon {
                                 </span>
                             </td>
                             <td>
+                                <span class="dps-stats-days-badge dps-stats-days-badge--<?php echo esc_attr( $urgency_class ); ?>">
+                                    <?php 
+                                    if ( $last_date ) {
+                                        echo esc_html( $days_inactive );
+                                    } else {
+                                        echo '∞';
+                                    }
+                                    ?>
+                                </span>
+                            </td>
+                            <td>
                                 <?php if ( $whats_url ) : ?>
-                                    <a href="<?php echo esc_url( $whats_url ); ?>" target="_blank" class="dps-whatsapp-link">
+                                    <a href="<?php echo esc_url( $whats_url ); ?>" target="_blank" class="dps-whatsapp-link" title="<?php esc_attr_e( 'Enviar mensagem via WhatsApp', 'dps-stats-addon' ); ?>">
                                         💬 WhatsApp
                                     </a>
                                 <?php else : ?>
@@ -1001,12 +1109,13 @@ class DPS_Stats_Addon {
             </table>
         </div>
         
-        <?php if ( count( $inactive_pets ) > 20 ) : ?>
+        <?php if ( count( $inactive_pets ) > $max_display ) : ?>
             <p class="dps-stats-table-note">
                 <?php
                 printf(
-                    /* translators: %d: número total de pets inativos */
-                    esc_html__( 'Exibindo 20 de %d pets. Exporte o CSV para ver todos.', 'dps-stats-addon' ),
+                    /* translators: %1$d: número exibido, %2$d: número total de pets inativos */
+                    esc_html__( 'Exibindo %1$d de %2$d pets. Exporte o CSV para ver todos.', 'dps-stats-addon' ),
+                    $max_display,
                     count( $inactive_pets )
                 );
                 ?>
@@ -1018,6 +1127,59 @@ class DPS_Stats_Addon {
                 📥 <?php esc_html_e( 'Exportar Inativos CSV', 'dps-stats-addon' ); ?>
             </a>
         </div>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('inactive-search');
+            var sortSelect = document.getElementById('inactive-sort');
+            var table = document.getElementById('inactive-pets-table');
+            
+            if (!table) return;
+            
+            var tbody = table.querySelector('tbody');
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Busca
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    var query = this.value.toLowerCase().trim();
+                    rows.forEach(function(row) {
+                        var petName = row.dataset.petName || '';
+                        var clientName = row.dataset.clientName || '';
+                        var matches = petName.indexOf(query) !== -1 || clientName.indexOf(query) !== -1;
+                        row.style.display = matches ? '' : 'none';
+                    });
+                });
+            }
+            
+            // Ordenação
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    var sortType = this.value;
+                    if (!sortType) return;
+                    
+                    var sortedRows = rows.slice().sort(function(a, b) {
+                        switch(sortType) {
+                            case 'name-asc':
+                                return (a.dataset.petName || '').localeCompare(b.dataset.petName || '');
+                            case 'name-desc':
+                                return (b.dataset.petName || '').localeCompare(a.dataset.petName || '');
+                            case 'days-desc':
+                                return parseInt(b.dataset.days || 0) - parseInt(a.dataset.days || 0);
+                            case 'days-asc':
+                                return parseInt(a.dataset.days || 0) - parseInt(b.dataset.days || 0);
+                            default:
+                                return 0;
+                        }
+                    });
+                    
+                    sortedRows.forEach(function(row) {
+                        tbody.appendChild(row);
+                    });
+                });
+            }
+        });
+        </script>
         <?php
     }
 

@@ -83,6 +83,97 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Catálogo Completo de Serviços de Banho e Tosa - Região SP (v1.6.1)**
+
+- **30+ serviços pré-configurados com valores de mercado SP 2024**: Lista completa de serviços típicos de pet shop com preços diferenciados por porte (pequeno/médio/grande):
+  - **Serviços Padrão**: Banho (R$ 50-120), Banho e Tosa (R$ 100-230), Tosa Higiênica (R$ 40-80)
+  - **Opções de Tosa**: Tosa Máquina (R$ 65-140), Tosa Tesoura (R$ 85-180), Tosa da Raça (R$ 120-280), Corte Estilizado (R$ 135-300)
+  - **Preparação da Pelagem**: Remoção de Nós (leve/moderado/severo), Desembaraço Total
+  - **Tratamentos**: Banho Terapêutico/Ozônio, Banho Medicamentoso, Banho Antipulgas, Tratamento Dermatológico
+  - **Pelagem e Pele**: Hidratação, Hidratação Profunda, Restauração Capilar, Cauterização
+  - **Cuidados Adicionais**: Corte de Unhas (R$ 18-35), Limpeza de Ouvido, Escovação Dental, Limpeza de Glândulas Anais, Tosa de Patas
+  - **Extras/Mimos**: Perfume Premium, Laço/Gravatinha, Bandana, Tintura/Coloração
+  - **Transporte**: TaxiDog (Leva e Traz) R$ 30-45
+  - **Pacotes**: Pacote Completo, Pacote Spa
+- **Durações por porte**: Cada serviço inclui tempo estimado de execução para cada porte de pet
+- **Ativo por padrão**: Todos os serviços são criados como ativos para edição imediata pelo administrador
+
+**Seção de Tosa no Formulário de Agendamento via Shortcode (v1.2.1)**
+
+- **Card de tosa no shortcode `[dps_booking_form]`**: Adicionada a mesma seção de tosa com design card-based que foi implementada no formulário de agendamento do Painel de Gestão DPS pela PR #498.
+  - Card com toggle switch para ativar/desativar tosa
+  - Campo de valor da tosa com prefixo R$
+  - Seletor de ocorrência (em qual atendimento a tosa será realizada)
+  - Design consistente com o card de TaxiDog já existente no formulário
+  - Estilos reutilizam classes CSS do plugin base (`dps-tosa-section`, `dps-tosa-card`, etc.)
+  - Visibilidade condicional via JavaScript (aparece apenas para agendamentos de assinatura)
+
+**Botão de Reagendamento nas Abas Simplificadas da Agenda (v1.1.0)**
+
+- **Coluna "Ações" nas abas da agenda**: Adicionada nova coluna "Ações" nas três abas simplificadas da agenda (Visão Rápida, Operação, Detalhes).
+  - Botão "📅 Reagendar" disponível em cada linha de atendimento
+  - Permite alterar a data e/ou horário de um agendamento diretamente pela interface
+  - Modal de reagendamento com seletor de data e hora
+  - Registro automático no histórico do agendamento
+  - Dispara hook `dps_appointment_rescheduled` para integrações
+- **Funcionalidade já existente agora acessível**: O backend de reagendamento já existia (`quick_reschedule_ajax`), mas o botão não estava visível nas abas mais utilizadas do dia-a-dia.
+- **Método helper `render_reschedule_button()`**: Criado método privado para renderizar o botão de reagendamento, evitando duplicação de código em 4 locais diferentes.
+
+**Modo Administrador no Chat Público de IA (v1.8.0)**
+
+- **Modo Administrador com acesso expandido**: O shortcode `[dps_ai_public_chat]` agora detecta automaticamente quando um administrador (capability `manage_options`) está logado e ativa o modo sistema:
+  - Acesso a dados de clientes cadastrados (total, ativos nos últimos 90 dias)
+  - Acesso a estatísticas de pets registrados
+  - Acesso a informações de agendamentos (hoje, semana, mês)
+  - Acesso a dados financeiros (faturamento do mês, valores pendentes)
+  - Informações de versão e status do sistema
+- **UI/UX diferenciada para administradores**:
+  - Badge visual "🔐 Admin" no cabeçalho do chat
+  - Indicador "Modo Sistema" na toolbar
+  - Cor temática roxa (#7c3aed) para distinguir do modo visitante
+  - FAQs específicas para gestão (clientes, agendamentos, faturamento)
+  - Mensagem de boas-vindas com lista de capacidades disponíveis
+  - Disclaimer informando sobre acesso a dados sensíveis
+- **Segurança reforçada**:
+  - Validação de capability no backend (não pode ser burlada via frontend)
+  - Rate limiting diferenciado: 30/min e 200/hora para admins (vs 10/min e 60/hora para visitantes)
+  - Logs de auditoria para todas as consultas em modo admin
+  - Visitantes NUNCA recebem dados de clientes, financeiros ou sensíveis
+- **Prompt de sistema específico**: Administradores recebem prompt expandido com instruções para fornecer dados do sistema
+- **Limite de caracteres expandido**: 1000 caracteres para admins (vs 500 para visitantes)
+- **Atributo `data-admin-mode`**: Indicador no HTML para debugging e extensibilidade
+
+#### Changed (Alterado)
+
+**Services Add-on - Melhorias de UI/UX e Validações (v1.6.0)**
+
+- **Empty state com CTA**: A aba Serviços agora exibe botão "Cadastrar primeiro serviço" quando não há serviços cadastrados, melhorando o fluxo de onboarding.
+- **Indicador de campos obrigatórios**: Adicionada mensagem explicativa "* Campos obrigatórios" no formulário de cadastro/edição de serviços.
+- **Espaçamento padronizado**: Valores por pet (assinatura) agora usam 16px de padding, alinhado com padrão visual global.
+- **Link de cancelar edição melhorado**: Estilizado como botão secundário vermelho para melhor feedback visual.
+- **Acessibilidade em ícones**: Adicionados atributos `aria-label` e `role="img"` nos ícones de informação.
+- **Focus visible melhorado**: Estilos de foco visíveis consistentes para acessibilidade de navegação por teclado.
+
+#### Security (Segurança)
+
+**Services Add-on - Validações reforçadas (v1.6.0)**
+
+- **Validação de preços não-negativos**: Todos os preços de serviços (pequeno/médio/grande) agora são validados para impedir valores negativos via `max(0, floatval(...))`.
+- **Validação de durações não-negativas**: Durações por porte agora impedem valores negativos.
+- **Sanitização de insumos**: Quantidade de insumos vinculados a serviços agora é sanitizada com `sanitize_text_field()` antes da conversão numérica.
+- **Total de agendamento não-negativo**: Valor total do agendamento validado para impedir negativos.
+- **Desconto de pacotes normalizado**: Desconto percentual na API de cálculo de pacotes agora é normalizado para intervalo 0-100 com `min(100, max(0, $discount))`.
+
+- **Estrutura do header do chat público**: Reorganizada para acomodar badge de admin e status lado a lado
+- **Método `check_rate_limit()`**: Agora aceita parâmetro `$is_admin_mode` para aplicar limites diferenciados
+- **Método `get_ai_response()`**: Agora aceita parâmetro `$is_admin_mode` para usar contexto e prompt apropriados
+- **Demo HTML atualizado**: Nova seção demonstrando o Modo Administrador com todas as características visuais
+
+#### Security (Segurança)
+
+- **Isolamento de dados por role**: Implementada separação completa de contexto entre visitantes e administradores
+- **Auditoria de requisições admin**: Todas as perguntas feitas por administradores são registradas com user_login e user_id
+
 **Sistema de Prevenção de Cache de Páginas (v1.1.1)**
 
 - **Nova classe `DPS_Cache_Control`**: Classe helper no plugin base que gerencia a prevenção de cache em todas as páginas do sistema DPS.
@@ -236,6 +327,23 @@ Antes de criar uma nova versão oficial:
 
 #### Fixed (Corrigido)
 
+**Backup Add-on - Correções de Documentação (v1.3.1)**
+
+- **Erro de digitação corrigido**: Corrigido "identific ou" → "identificou" na documentação de auditoria de segurança (`docs/security/BACKUP_SECURITY_AUDIT.md`).
+
+**Stats Add-on - Correção de PHP Warning no Cache Invalidator (v1.2.1)**
+
+- **PHP Warning corrigido**: O método `invalidate_on_post_delete()` assumia que o segundo parâmetro era sempre um objeto WP_Post, mas o hook `trashed_post` passa `$post_id` (int) e `$previous_status` (string), causando warnings "Attempt to read property 'post_type' on string" ao mover posts para lixeira.
+- **Separação de métodos**: Criados métodos separados para cada hook:
+  - `invalidate_on_before_delete()`: Lida com o hook `before_delete_post` que recebe objeto WP_Post
+  - `invalidate_on_trash()`: Lida com o hook `trashed_post` que recebe apenas post_id e busca o objeto internamente
+- **Validação de tipo robusta**: Adicionada verificação `instanceof WP_Post` no método `invalidate_on_before_delete()` para garantir que o parâmetro é um objeto válido antes de acessar propriedades.
+
+**Agenda Add-on - Validação Defensiva no Google Calendar Sync (v2.0.1)**
+
+- **Validação preventiva adicionada**: Método `handle_delete_appointment()` agora valida que o segundo parâmetro é `instanceof WP_Post` antes de acessar propriedades, prevenindo potenciais warnings caso o hook seja usado incorretamente no futuro.
+- **Consistência com correção do Stats Add-on**: Aplica o mesmo padrão de validação defensiva implementado no cache invalidator.
+
 **AI Add-on - Correção das Configurações do Assistente de IA (v1.6.2)**
 
 - **Configurações não editáveis corrigidas**: O uso de `wp_kses_post()` no Hub de IA (`class-dps-ai-hub.php`) removia elementos de formulário (`<input>`, `<select>`, `<textarea>`, `<form>`, `<button>`), tornando todas as configurações apenas texto sem possibilidade de edição.
@@ -243,6 +351,15 @@ Antes de criar uma nova versão oficial:
 - **Correção em todas as 7 abas do Hub**: Configurações, Analytics, Conversas, Base de Conhecimento, Testar Base, Modo Especialista e Insights agora usam `wp_kses()` com lista segura em vez de bypass total ou `wp_kses_post()`.
 - **Campos de WhatsApp não salvavam**: Os campos de integração WhatsApp Business (enabled, provider, tokens, etc.) estavam presentes no formulário mas não eram processados no salvamento. Adicionados 11 campos ao método `maybe_handle_save()`.
 - **Campos de Sugestões Proativas não salvavam**: Os campos de sugestões proativas de agendamento (enabled, interval, cooldown, mensagens) não eram salvos. Adicionados 5 campos ao método `maybe_handle_save()`.
+
+#### Security (Segurança)
+
+**AI Add-on - Melhorias de Segurança no Hub de IA (v1.6.3)**
+
+- **Validação de whatsapp_provider**: Adicionado novo método `sanitize_whatsapp_provider()` para validação explícita do campo `whatsapp_provider`, restringindo a valores permitidos ('meta', 'twilio', 'custom'). Valores inválidos agora retornam o padrão 'meta', evitando erros de configuração.
+- **Limite de caracteres em campos textarea**: Campos `whatsapp_instructions`, `proactive_scheduling_first_time_message` e `proactive_scheduling_recurring_message` agora têm limite de 2000 caracteres (consistente com outros campos similares como `additional_instructions`).
+- **Remoção de atributos perigosos em wp_kses**: Removido atributo `onclick` de links e `src` de scripts no método `get_allowed_form_tags()` para prevenir potenciais vulnerabilidades XSS. Scripts externos devem ser carregados via `wp_enqueue_script()`.
+- **Documentação de data-* attributes**: Adicionados comentários explicativos sobre os atributos `data-*` permitidos e incluídos atributos genéricos adicionais (`data-id`, `data-value`, `data-type`) para compatibilidade com UIs de admin.
 
 **Base Plugin - Correção do Shortcode [dps_configuracoes] (v1.1.1)**
 
@@ -408,6 +525,14 @@ Antes de criar uma nova versão oficial:
 - **Secret mascarado no REST**: Endpoint `/webhook-url` agora retorna apenas preview mascarado do secret (`abc***xyz`) em vez do valor completo.
 
 #### Security (Segurança)
+
+**Backup Add-on - Correções de Revisão de Código (v1.3.1)**
+
+- **Placeholder SQL inválido corrigido**: Removido uso de `%1s` (placeholder não suportado) em `$wpdb->prepare()` para queries de tabelas. Como as tabelas já são validadas com regex `^[a-zA-Z0-9_]+$`, a interpolação direta é segura e não causa erros.
+- **Cast explícito para INTEGER em queries**: Adicionado `CAST(pm.meta_value AS UNSIGNED)` nas queries de validação de integridade referencial para garantir comparação correta entre meta_value (string) e post ID (integer), melhorando performance e confiabilidade.
+- **Validação de admin_email fallback**: O fallback para email do administrador agora valida que o email é válido antes de usar, evitando configurações com emails inválidos.
+- **Sanitização de array keys preserva maiúsculas**: Substituído `sanitize_key()` por `preg_replace('/[^\w\-]/', '')` para preservar case-sensitivity em chaves de array, evitando quebrar configurações que dependem de maiúsculas.
+- **Validação de valores falsy em mapeamento de IDs**: Adicionada verificação `! empty()` e `> 0` para owner_id, appointment_client_id e appointment_pet_id antes de tentar mapear, evitando processamento incorreto de valores zerados ou vazios.
 
 **Communications Add-on - Auditoria de Segurança Completa (v0.2.1)**
 

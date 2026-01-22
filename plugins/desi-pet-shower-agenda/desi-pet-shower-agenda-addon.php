@@ -67,6 +67,45 @@ require_once __DIR__ . '/includes/class-dps-agenda-capacity-helper.php';
 // Hub centralizado de Agenda (Fase 2 - Reorganização de Menus)
 require_once __DIR__ . '/includes/class-dps-agenda-hub.php';
 
+// FASE 1 - Integrações Google (Calendar + Tasks): Infraestrutura
+// Carrega apenas se extensões OpenSSL estão disponíveis (necessário para criptografia)
+if ( extension_loaded( 'openssl' ) ) {
+    require_once __DIR__ . '/includes/integrations/class-dps-google-auth.php';
+    require_once __DIR__ . '/includes/integrations/class-dps-google-integrations-settings.php';
+    
+    // FASE 2 - Google Calendar: Sincronização (DPS → Calendar)
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-client.php';
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-sync.php';
+    
+    // FASE 3 - Google Calendar: Sincronização Bidirecional (Calendar ⇄ DPS)
+    require_once __DIR__ . '/includes/integrations/class-dps-google-calendar-webhook.php';
+    
+    // FASE 4 - Google Tasks: Sincronização (DPS → Tasks)
+    require_once __DIR__ . '/includes/integrations/class-dps-google-tasks-client.php';
+    require_once __DIR__ . '/includes/integrations/class-dps-google-tasks-sync.php';
+    
+    // Inicializa interface de configurações
+    add_action( 'plugins_loaded', function() {
+        if ( is_admin() ) {
+            new DPS_Google_Integrations_Settings();
+        }
+        
+        // Inicializa sincronização Calendar e Tasks (se conectado)
+        if ( DPS_Google_Auth::is_connected() ) {
+            new DPS_Google_Calendar_Sync();
+            
+            // Inicializa webhook para sincronização bidirecional
+            $webhook = new DPS_Google_Calendar_Webhook();
+            
+            // Registra ação para processar mudanças
+            add_action( 'dps_google_calendar_process_changes', [ $webhook, 'process_calendar_changes' ] );
+            
+            // FASE 4: Inicializa sincronização Google Tasks
+            new DPS_Google_Tasks_Sync();
+        }
+    }, 20 );
+}
+
 class DPS_Agenda_Addon {
     
     // FASE 3: Usa traits para métodos auxiliares
@@ -1542,6 +1581,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['service'] ?? __( 'Serviços', 'dps-agenda-addon' ) ) . '</th>';
             echo '<th>' . esc_html( $column_labels['confirmation'] ?? __( 'Confirmação', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab1( $appt, $column_labels );
@@ -1600,6 +1640,7 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Status do Serviço', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html( $column_labels['payment'] ?? __( 'Pagamento', 'dps-agenda-addon' ) ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab2( $appt, $column_labels );
@@ -1657,6 +1698,8 @@ class DPS_Agenda_Addon {
             echo '<th>' . esc_html__( 'Pet', 'dps-agenda-addon' ) . '</th>';
             echo '<th>' . esc_html__( 'Tutor', 'dps-agenda-addon' ) . '</th>';
             echo '<th>TaxiDog</th>';
+            echo '<th>' . esc_html__( 'Observações', 'dps-agenda-addon' ) . '</th>';
+            echo '<th>' . esc_html__( 'Ações', 'dps-agenda-addon' ) . '</th>';
             echo '</tr></thead><tbody>';
             foreach ( $apts as $appt ) {
                 echo $this->render_appointment_row_tab3( $appt, $column_labels );

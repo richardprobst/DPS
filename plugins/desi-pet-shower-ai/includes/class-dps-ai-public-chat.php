@@ -8,8 +8,20 @@
  * - Não acessa dados pessoais de clientes
  * - Inclui rate limiting para proteção contra abuso
  *
+ * MODO ADMINISTRADOR (v1.8.0):
+ * - Administradores logados recebem acesso expandido a informações do sistema
+ * - Contexto inclui estatísticas, dados de clientes e informações sensíveis
+ * - Indicador visual de "Modo Administrador" no chat
+ * - Rate limiting relaxado para administradores
+ *
+ * SEGURANÇA:
+ * - Visitantes NUNCA recebem dados de clientes, financeiros ou sensíveis
+ * - Validação de capability no backend para determinar modo
+ * - Logs de auditoria para requisições administrativas
+ *
  * @package DPS_AI_Addon
  * @since 1.6.0
+ * @updated 1.8.0 - Adicionado modo administrador com acesso expandido
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,6 +56,20 @@ class DPS_AI_Public_Chat {
      * @var int
      */
     const RATE_LIMIT_PER_HOUR = 60;
+
+    /**
+     * Limite de requisições por minuto para administradores (mais alto).
+     *
+     * @var int
+     */
+    const ADMIN_RATE_LIMIT_PER_MINUTE = 30;
+
+    /**
+     * Limite de requisições por hora para administradores (mais alto).
+     *
+     * @var int
+     */
+    const ADMIN_RATE_LIMIT_PER_HOUR = 200;
 
     /**
      * Instância única (singleton).
@@ -129,8 +155,11 @@ class DPS_AI_Public_Chat {
         $position    = sanitize_text_field( $atts['position'] );
         $theme       = sanitize_text_field( $atts['theme'] );
 
-        // Obtém FAQs para o chat público
-        $faqs = $this->get_public_faqs();
+        // Verifica se o usuário atual é administrador (modo expandido)
+        $is_admin_mode = $this->is_admin_user();
+
+        // Obtém FAQs para o chat público (ou FAQs admin)
+        $faqs = $is_admin_mode ? $this->get_admin_faqs() : $this->get_public_faqs();
 
         // Gera nonce para AJAX
         $nonce = wp_create_nonce( 'dps_ai_public_ask' );
@@ -150,8 +179,9 @@ class DPS_AI_Public_Chat {
         ?>
         <div 
             id="dps-ai-public-chat" 
-            class="dps-ai-public-chat dps-ai-public-chat--<?php echo esc_attr( $widget_mode ); ?> dps-ai-public-chat--<?php echo esc_attr( $theme ); ?> <?php echo 'floating' === $widget_mode ? 'dps-ai-public-chat--' . esc_attr( $position ) : ''; ?>"
+            class="dps-ai-public-chat dps-ai-public-chat--<?php echo esc_attr( $widget_mode ); ?> dps-ai-public-chat--<?php echo esc_attr( $theme ); ?> <?php echo 'floating' === $widget_mode ? 'dps-ai-public-chat--' . esc_attr( $position ) : ''; ?><?php echo $is_admin_mode ? ' dps-ai-public-chat--admin-mode' : ''; ?>"
             data-nonce="<?php echo esc_attr( $nonce ); ?>"
+            data-admin-mode="<?php echo esc_attr( $is_admin_mode ? 'true' : 'false' ); ?>"
             <?php if ( $primary_color ) : ?>
                 style="--dps-ai-primary: <?php echo esc_attr( $primary_color ); ?>;"
             <?php endif; ?>
@@ -171,9 +201,17 @@ class DPS_AI_Public_Chat {
                         <h3 class="dps-ai-public-title"><?php echo esc_html( $atts['title'] ); ?></h3>
                         <p class="dps-ai-public-subtitle"><?php echo esc_html( $atts['subtitle'] ); ?></p>
                     </div>
-                    <div class="dps-ai-public-status">
-                        <span class="dps-ai-public-status-dot"></span>
-                        <span class="dps-ai-public-status-text"><?php esc_html_e( 'Online', 'dps-ai' ); ?></span>
+                    <div class="dps-ai-public-header-right">
+                        <?php if ( $is_admin_mode ) : ?>
+                            <div class="dps-ai-public-admin-badge" title="<?php esc_attr_e( 'Você está no modo administrador com acesso expandido ao sistema', 'dps-ai' ); ?>">
+                                <span class="dps-ai-public-admin-icon">🔐</span>
+                                <span class="dps-ai-public-admin-text"><?php esc_html_e( 'Admin', 'dps-ai' ); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="dps-ai-public-status">
+                            <span class="dps-ai-public-status-dot"></span>
+                            <span class="dps-ai-public-status-text"><?php esc_html_e( 'Online', 'dps-ai' ); ?></span>
+                        </div>
                     </div>
                 </div>
 
@@ -181,6 +219,11 @@ class DPS_AI_Public_Chat {
                 <div class="dps-ai-public-toolbar">
                     <div class="dps-ai-public-toolbar-left">
                         <span class="dps-ai-public-msg-count">1 msg</span>
+                        <?php if ( $is_admin_mode ) : ?>
+                            <span class="dps-ai-public-mode-indicator" title="<?php esc_attr_e( 'Acesso a dados do sistema', 'dps-ai' ); ?>">
+                                <?php esc_html_e( '• Modo Sistema', 'dps-ai' ); ?>
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <div class="dps-ai-public-toolbar-right">
                         <button type="button" class="dps-ai-public-clear-btn" title="<?php esc_attr_e( 'Limpar conversa', 'dps-ai' ); ?>">
@@ -194,7 +237,7 @@ class DPS_AI_Public_Chat {
                     <?php if ( 'true' === $atts['show_faqs'] && ! empty( $faqs ) ) : ?>
                         <!-- FAQs sugeridas -->
                         <div class="dps-ai-public-faqs">
-                            <p class="dps-ai-public-faqs-label"><?php esc_html_e( 'Perguntas frequentes:', 'dps-ai' ); ?></p>
+                            <p class="dps-ai-public-faqs-label"><?php echo $is_admin_mode ? esc_html__( 'Consultas do sistema:', 'dps-ai' ) : esc_html__( 'Perguntas frequentes:', 'dps-ai' ); ?></p>
                             <div class="dps-ai-public-faqs-list">
                                 <?php foreach ( $faqs as $faq ) : ?>
                                     <button type="button" class="dps-ai-public-faq-btn" data-question="<?php echo esc_attr( $faq ); ?>">
@@ -209,10 +252,22 @@ class DPS_AI_Public_Chat {
                     <div id="dps-ai-public-messages" class="dps-ai-public-messages">
                         <!-- Mensagem de boas-vindas -->
                         <div class="dps-ai-public-message dps-ai-public-message--assistant">
-                            <div class="dps-ai-public-message-avatar">🐾</div>
+                            <div class="dps-ai-public-message-avatar"><?php echo $is_admin_mode ? '🔐' : '🐾'; ?></div>
                             <div class="dps-ai-public-message-content">
                                 <div class="dps-ai-public-message-text">
-                                    <p><?php esc_html_e( 'Olá! 👋 Sou o assistente virtual do pet shop. Posso ajudar com informações sobre nossos serviços de Banho e Tosa, preços, horários e muito mais. Como posso ajudar você hoje?', 'dps-ai' ); ?></p>
+                                    <?php if ( $is_admin_mode ) : ?>
+                                        <p><?php esc_html_e( 'Olá, Administrador! 👋 Você está no Modo Sistema com acesso expandido. Posso ajudar com:', 'dps-ai' ); ?></p>
+                                        <ul>
+                                            <li><?php esc_html_e( '📊 Estatísticas e métricas do sistema', 'dps-ai' ); ?></li>
+                                            <li><?php esc_html_e( '👥 Consultas sobre clientes e pets', 'dps-ai' ); ?></li>
+                                            <li><?php esc_html_e( '📅 Agendamentos e histórico', 'dps-ai' ); ?></li>
+                                            <li><?php esc_html_e( '💰 Informações financeiras e faturamento', 'dps-ai' ); ?></li>
+                                            <li><?php esc_html_e( '⚙️ Configurações e status do sistema', 'dps-ai' ); ?></li>
+                                        </ul>
+                                        <p><?php esc_html_e( 'Como posso ajudar você hoje?', 'dps-ai' ); ?></p>
+                                    <?php else : ?>
+                                        <p><?php esc_html_e( 'Olá! 👋 Sou o assistente virtual do pet shop. Posso ajudar com informações sobre nossos serviços de Banho e Tosa, preços, horários e muito mais. Como posso ajudar você hoje?', 'dps-ai' ); ?></p>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -235,9 +290,9 @@ class DPS_AI_Public_Chat {
                         <textarea
                             id="dps-ai-public-input"
                             class="dps-ai-public-input"
-                            placeholder="<?php echo esc_attr( $atts['placeholder'] ); ?>"
+                            placeholder="<?php echo $is_admin_mode ? esc_attr__( 'Pergunte sobre clientes, agendamentos, finanças...', 'dps-ai' ) : esc_attr( $atts['placeholder'] ); ?>"
                             rows="1"
-                            maxlength="500"
+                            maxlength="<?php echo $is_admin_mode ? '1000' : '500'; ?>"
                         ></textarea>
                         <button id="dps-ai-public-voice" class="dps-ai-public-voice" aria-label="<?php esc_attr_e( 'Usar entrada por voz', 'dps-ai' ); ?>" title="<?php esc_attr_e( 'Falar ao invés de digitar', 'dps-ai' ); ?>" style="display: none;">
                             <span class="dps-ai-public-voice-icon">🎤</span>
@@ -247,7 +302,11 @@ class DPS_AI_Public_Chat {
                         </button>
                     </div>
                     <p class="dps-ai-public-disclaimer">
-                        <?php esc_html_e( 'Este é um assistente virtual. Para informações mais detalhadas, entre em contato conosco.', 'dps-ai' ); ?>
+                        <?php if ( $is_admin_mode ) : ?>
+                            <?php esc_html_e( '🔐 Modo Administrador: dados sensíveis do sistema estão disponíveis nesta sessão.', 'dps-ai' ); ?>
+                        <?php else : ?>
+                            <?php esc_html_e( 'Este é um assistente virtual. Para informações mais detalhadas, entre em contato conosco.', 'dps-ai' ); ?>
+                        <?php endif; ?>
                     </p>
                 </div>
             </div>
@@ -275,9 +334,12 @@ class DPS_AI_Public_Chat {
             ] );
         }
 
-        // Rate limiting por IP
+        // Verifica se é modo administrador (validação no backend - CRÍTICO para segurança)
+        $is_admin_mode = $this->is_admin_user();
+
+        // Rate limiting por IP (limites mais altos para admins)
         $ip_address = $this->get_client_ip();
-        if ( ! $this->check_rate_limit( $ip_address ) ) {
+        if ( ! $this->check_rate_limit( $ip_address, $is_admin_mode ) ) {
             wp_send_json_error( [
                 'message'    => __( 'Você atingiu o limite de perguntas. Por favor, aguarde alguns minutos antes de tentar novamente.', 'dps-ai' ),
                 'error_type' => 'rate_limit', // Permite ao frontend diferenciar tipo de erro
@@ -292,15 +354,31 @@ class DPS_AI_Public_Chat {
             ] );
         }
 
-        // Limita tamanho da pergunta
-        if ( mb_strlen( $question ) > 500 ) {
+        // Limita tamanho da pergunta (maior para admins)
+        $max_length = $is_admin_mode ? 1000 : 500;
+        if ( mb_strlen( $question ) > $max_length ) {
             wp_send_json_error( [
-                'message' => __( 'Pergunta muito longa. Por favor, resuma em até 500 caracteres.', 'dps-ai' ),
+                'message' => sprintf(
+                    /* translators: %d: número máximo de caracteres */
+                    __( 'Pergunta muito longa. Por favor, resuma em até %d caracteres.', 'dps-ai' ),
+                    $max_length
+                ),
             ] );
         }
 
         // Registra a requisição no rate limiting
         $this->record_request( $ip_address );
+
+        // Log de auditoria para requisições admin
+        if ( $is_admin_mode ) {
+            $current_user = wp_get_current_user();
+            dps_ai_log( sprintf(
+                'Admin mode request from user %s (ID: %d): %s',
+                $current_user->user_login,
+                $current_user->ID,
+                mb_substr( $question, 0, 100 )
+            ), 'info' );
+        }
 
         // Obtém ou cria conversa para este visitante
         $conversation_id = $this->get_or_create_public_conversation( $ip_address );
@@ -310,14 +388,15 @@ class DPS_AI_Public_Chat {
             $repo = DPS_AI_Conversations_Repository::get_instance();
             $repo->add_message( $conversation_id, [
                 'sender_type'       => 'user',
-                'sender_identifier' => $ip_address,
+                'sender_identifier' => $is_admin_mode ? 'admin_' . get_current_user_id() : $ip_address,
                 'message_text'      => $question,
+                'metadata'          => $is_admin_mode ? [ 'admin_mode' => true ] : [],
             ] );
         }
 
-        // Obtém resposta da IA
+        // Obtém resposta da IA (passa flag de admin mode)
         $start_time = microtime( true );
-        $answer     = $this->get_ai_response( $question );
+        $answer     = $this->get_ai_response( $question, $is_admin_mode );
         $end_time   = microtime( true );
 
         // Se falhou, verifica o tipo de erro
@@ -449,18 +528,24 @@ class DPS_AI_Public_Chat {
     /**
      * Obtém resposta da IA para o chat público.
      *
-     * @param string $question Pergunta do visitante.
+     * @param string $question      Pergunta do visitante.
+     * @param bool   $is_admin_mode Se está no modo administrador (acesso expandido).
      *
      * @return string|null Resposta da IA ou null em caso de erro.
      */
-    private function get_ai_response( $question ) {
-        // Verifica se a pergunta está no contexto permitido
-        if ( ! $this->is_question_in_context( $question ) ) {
+    private function get_ai_response( $question, $is_admin_mode = false ) {
+        // SEGURANÇA: Para visitantes, verifica se a pergunta está no contexto permitido
+        // Administradores podem perguntar qualquer coisa sobre o sistema
+        if ( ! $is_admin_mode && ! $this->is_question_in_context( $question ) ) {
             return __( 'Sou um assistente focado em ajudar com informações sobre serviços de Banho e Tosa para pets. Posso ajudar com dúvidas sobre preços, horários, serviços oferecidos, cuidados com seu pet e muito mais. Como posso ajudar você?', 'dps-ai' );
         }
 
-        // Monta o contexto do negócio
-        $business_context = $this->get_business_context();
+        // Monta o contexto do negócio (para visitantes) ou contexto do sistema (para admins)
+        if ( $is_admin_mode ) {
+            $business_context = $this->get_admin_system_context();
+        } else {
+            $business_context = $this->get_business_context();
+        }
 
         // Busca artigos relevantes da base de conhecimento
         $kb_context = '';
@@ -476,13 +561,20 @@ class DPS_AI_Public_Chat {
         $settings = get_option( 'dps_ai_settings', [] );
         $language = ! empty( $settings['language'] ) ? $settings['language'] : 'pt_BR';
 
-        // 1. System prompt específico para chat público com instrução de idioma
-        $messages[] = [
-            'role'    => 'system',
-            'content' => $this->get_public_system_prompt_with_language( $language ),
-        ];
+        // 1. System prompt específico (diferente para admin e visitante)
+        if ( $is_admin_mode ) {
+            $messages[] = [
+                'role'    => 'system',
+                'content' => $this->get_admin_system_prompt_with_language( $language ),
+            ];
+        } else {
+            $messages[] = [
+                'role'    => 'system',
+                'content' => $this->get_public_system_prompt_with_language( $language ),
+            ];
+        }
 
-        // 2. Contexto do negócio (se disponível)
+        // 2. Contexto do negócio/sistema (se disponível)
         if ( ! empty( $business_context ) ) {
             $messages[] = [
                 'role'    => 'system',
@@ -490,19 +582,22 @@ class DPS_AI_Public_Chat {
             ];
         }
 
-        // 3. Instruções adicionais do administrador
-        $extra_instructions = ! empty( $settings['public_chat_instructions'] ) ? trim( $settings['public_chat_instructions'] ) : '';
-        if ( ! empty( $extra_instructions ) ) {
-            $messages[] = [
-                'role'    => 'system',
-                'content' => 'Instruções adicionais do administrador: ' . $extra_instructions,
-            ];
+        // 3. Instruções adicionais do administrador (apenas para visitantes)
+        if ( ! $is_admin_mode ) {
+            $extra_instructions = ! empty( $settings['public_chat_instructions'] ) ? trim( $settings['public_chat_instructions'] ) : '';
+            if ( ! empty( $extra_instructions ) ) {
+                $messages[] = [
+                    'role'    => 'system',
+                    'content' => 'Instruções adicionais do administrador: ' . $extra_instructions,
+                ];
+            }
         }
 
-        // 4. Pergunta do visitante com contexto da base de conhecimento
+        // 4. Pergunta do visitante/admin com contexto da base de conhecimento
         $user_content = $question;
         if ( ! empty( $kb_context ) ) {
-            $user_content = $kb_context . "\n\nPergunta do visitante: " . $question;
+            $label = $is_admin_mode ? 'Pergunta do administrador: ' : 'Pergunta do visitante: ';
+            $user_content = $kb_context . "\n\n" . $label . $question;
         }
         
         $messages[] = [
@@ -728,24 +823,29 @@ class DPS_AI_Public_Chat {
     /**
      * Verifica rate limiting para um IP.
      *
-     * @param string $ip_address Endereço IP.
+     * @param string $ip_address    Endereço IP.
+     * @param bool   $is_admin_mode Se está no modo administrador (limites mais altos).
      *
      * @return bool True se dentro do limite, false se excedido.
      */
-    private function check_rate_limit( $ip_address ) {
+    private function check_rate_limit( $ip_address, $is_admin_mode = false ) {
         $ip_hash = md5( $ip_address );
+
+        // Define limites baseado no modo
+        $limit_per_minute = $is_admin_mode ? self::ADMIN_RATE_LIMIT_PER_MINUTE : self::RATE_LIMIT_PER_MINUTE;
+        $limit_per_hour   = $is_admin_mode ? self::ADMIN_RATE_LIMIT_PER_HOUR : self::RATE_LIMIT_PER_HOUR;
 
         // Verifica limite por minuto
         $minute_key   = 'dps_ai_rl_m_' . $ip_hash;
         $minute_count = (int) get_transient( $minute_key );
-        if ( $minute_count >= self::RATE_LIMIT_PER_MINUTE ) {
+        if ( $minute_count >= $limit_per_minute ) {
             return false;
         }
 
         // Verifica limite por hora
         $hour_key   = 'dps_ai_rl_h_' . $ip_hash;
         $hour_count = (int) get_transient( $hour_key );
-        if ( $hour_count >= self::RATE_LIMIT_PER_HOUR ) {
+        if ( $hour_count >= $limit_per_hour ) {
             return false;
         }
 
@@ -825,5 +925,221 @@ class DPS_AI_Public_Chat {
                 'messages'            => __( 'mensagens', 'dps-ai' ),
             ],
         ] );
+    }
+
+    /**
+     * Verifica se o usuário atual é administrador (pode acessar modo expandido).
+     *
+     * SEGURANÇA: Esta verificação é feita no backend para garantir que não pode
+     * ser burlada manipulando o frontend. Apenas usuários com capability
+     * 'manage_options' são considerados administradores.
+     *
+     * @return bool True se o usuário é admin, false caso contrário.
+     */
+    private function is_admin_user() {
+        // Apenas usuários logados com manage_options podem acessar modo admin
+        return is_user_logged_in() && current_user_can( 'manage_options' );
+    }
+
+    /**
+     * Obtém FAQs específicas para administradores.
+     *
+     * @return array Lista de perguntas sugeridas para admins.
+     */
+    private function get_admin_faqs() {
+        return [
+            __( 'Quantos clientes temos cadastrados?', 'dps-ai' ),
+            __( 'Quais foram os agendamentos de hoje?', 'dps-ai' ),
+            __( 'Qual é o faturamento deste mês?', 'dps-ai' ),
+            __( 'Quais clientes estão com pagamentos pendentes?', 'dps-ai' ),
+            __( 'Mostre as estatísticas do sistema', 'dps-ai' ),
+        ];
+    }
+
+    /**
+     * Retorna o system prompt específico para modo administrador.
+     *
+     * Este prompt dá acesso expandido a informações do sistema,
+     * incluindo dados de clientes, financeiros e operacionais.
+     *
+     * SEGURANÇA: Este prompt é usado APENAS quando is_admin_user() retorna true.
+     *
+     * @return string Conteúdo do prompt para modo admin.
+     */
+    private function get_admin_system_prompt() {
+        return "Você é um assistente administrativo do sistema desi.pet by PRObst, um software de gestão para pet shops especializado em serviços de Banho e Tosa.
+
+Você está em MODO ADMINISTRADOR com acesso expandido ao sistema. O usuário que está falando com você é um administrador verificado do sistema.
+
+CAPACIDADES NO MODO ADMIN:
+- Você pode acessar e fornecer informações sobre clientes cadastrados
+- Você pode informar dados de agendamentos (passados, presentes e futuros)
+- Você pode fornecer informações financeiras (faturamento, pagamentos pendentes, etc.)
+- Você pode mostrar estatísticas e métricas do sistema
+- Você pode detalhar configurações e status do sistema
+- Você pode listar pets cadastrados e seus históricos
+
+REGRAS DE COMPORTAMENTO:
+- Seja objetivo e forneça dados concretos quando disponíveis
+- Use formatação com listas e tabelas para organizar informações
+- Se não tiver dados específicos no contexto, informe claramente
+- Sempre identifique-se como assistente do sistema DPS
+- Para ações que modifiquem dados, oriente o admin a usar o painel administrativo
+
+CONTEXTO DO SISTEMA:
+- Sistema: desi.pet by PRObst (DPS)
+- Especialização: Gestão de Pet Shops com foco em Banho e Tosa
+- Módulos: Agenda, Clientes, Pets, Financeiro, Assinaturas, Fidelidade, Comunicações";
+    }
+
+    /**
+     * Retorna o system prompt de admin com instrução de idioma.
+     *
+     * @param string $language Código do idioma.
+     * @return string Prompt com instrução de idioma.
+     */
+    private function get_admin_system_prompt_with_language( $language = 'pt_BR' ) {
+        $base_prompt = $this->get_admin_system_prompt();
+        
+        $language_instructions = [
+            'pt_BR' => 'IMPORTANTE: Responda SEMPRE em Português do Brasil.',
+            'en_US' => 'IMPORTANT: ALWAYS respond in English (US).',
+            'es_ES' => 'IMPORTANTE: Responda SIEMPRE en Español.',
+            'auto'  => 'Responda no mesmo idioma da pergunta.',
+        ];
+        
+        $instruction = isset( $language_instructions[ $language ] ) 
+            ? $language_instructions[ $language ] 
+            : $language_instructions['pt_BR'];
+        
+        return $base_prompt . "\n\n" . $instruction;
+    }
+
+    /**
+     * Obtém contexto do sistema para administradores.
+     *
+     * Esta função coleta dados reais do sistema para fornecer ao assistente,
+     * permitindo respostas precisas sobre o estado atual do negócio.
+     *
+     * SEGURANÇA: Só é chamada quando is_admin_user() retorna true.
+     *
+     * @return string Contexto do sistema formatado.
+     */
+    private function get_admin_system_context() {
+        global $wpdb;
+        
+        $context = "DADOS DO SISTEMA (atualizados em " . current_time( 'd/m/Y H:i' ) . "):\n\n";
+
+        // 1. Estatísticas de clientes (CPT dps_cliente)
+        $client_counts = wp_count_posts( 'dps_cliente' );
+        $total_clients = isset( $client_counts->publish ) ? (int) $client_counts->publish : 0;
+        
+        $context .= "📊 CLIENTES:\n";
+        $context .= "- Total de clientes cadastrados: {$total_clients}\n";
+        
+        // Clientes ativos (com agendamento nos últimos 90 dias)
+        $active_date = gmdate( 'Y-m-d', strtotime( '-90 days' ) );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $active_clients = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(DISTINCT meta_client.meta_value) 
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} meta_date ON p.ID = meta_date.post_id AND meta_date.meta_key = 'appointment_date'
+            INNER JOIN {$wpdb->postmeta} meta_client ON p.ID = meta_client.post_id AND meta_client.meta_key = 'appointment_client_id'
+            WHERE p.post_type = 'dps_agendamento'
+            AND p.post_status = 'publish'
+            AND meta_date.meta_value >= %s",
+            $active_date
+        ) );
+        $context .= "- Clientes ativos (últimos 90 dias): {$active_clients}\n\n";
+
+        // 2. Estatísticas de pets (CPT dps_pet)
+        $pet_counts = wp_count_posts( 'dps_pet' );
+        $total_pets = isset( $pet_counts->publish ) ? (int) $pet_counts->publish : 0;
+        $context .= "🐾 PETS:\n";
+        $context .= "- Total de pets cadastrados: {$total_pets}\n\n";
+
+        // 3. Agendamentos (CPT dps_agendamento com meta appointment_date)
+        $today = current_time( 'Y-m-d' );
+        $week_start = gmdate( 'Y-m-d', strtotime( 'monday this week' ) );
+        $week_end = gmdate( 'Y-m-d', strtotime( 'sunday this week' ) );
+        $month_start = gmdate( 'Y-m-01' );
+        $month_end = gmdate( 'Y-m-t' );
+        
+        // Contagem eficiente usando SQL direto com prepared statements
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $today_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value = %s",
+            $today
+        ) );
+        
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $week_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value BETWEEN %s AND %s",
+            $week_start,
+            $week_end
+        ) );
+        
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $month_count = (int) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'appointment_date'
+            WHERE p.post_type = 'dps_agendamento' AND p.post_status = 'publish'
+            AND pm.meta_value BETWEEN %s AND %s",
+            $month_start,
+            $month_end
+        ) );
+        
+        $context .= "📅 AGENDAMENTOS:\n";
+        $context .= "- Agendamentos hoje ({$today}): {$today_count}\n";
+        $context .= "- Agendamentos esta semana: {$week_count}\n";
+        $context .= "- Agendamentos este mês: {$month_count}\n\n";
+
+        // 4. Dados financeiros (tabela dps_transacoes - esta é uma tabela real)
+        $transacoes_table = $wpdb->prefix . 'dps_transacoes';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $transacoes_table ) ) === $transacoes_table;
+        
+        if ( $table_exists ) {
+            $month_start_dt = gmdate( 'Y-m-01' );
+            $status_pago = 'pago';
+            $status_pendente = 'pendente';
+            
+            // Faturamento do mês (transações pagas) - usa valor_cents que armazena centavos
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $month_revenue_cents = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COALESCE(SUM(valor_cents), 0) FROM `{$transacoes_table}` 
+                WHERE status = %s AND created_at >= %s",
+                $status_pago,
+                $month_start_dt
+            ) );
+            $month_revenue = (float) $month_revenue_cents / 100;
+            
+            // Pendentes - usa valor_cents que armazena centavos
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $pending_amount_cents = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COALESCE(SUM(valor_cents), 0) FROM `{$transacoes_table}` WHERE status = %s",
+                $status_pendente
+            ) );
+            $pending_amount = (float) $pending_amount_cents / 100;
+            
+            $context .= "💰 FINANCEIRO:\n";
+            $context .= "- Faturamento deste mês: R$ " . number_format( $month_revenue, 2, ',', '.' ) . "\n";
+            $context .= "- Valor pendente total: R$ " . number_format( $pending_amount, 2, ',', '.' ) . "\n\n";
+        }
+
+        // 5. Informações do sistema
+        $context .= "⚙️ SISTEMA:\n";
+        $context .= "- Versão do Plugin Base: " . ( defined( 'DPS_VERSION' ) ? DPS_VERSION : 'N/A' ) . "\n";
+        $context .= "- Versão do AI Add-on: " . DPS_AI_VERSION . "\n";
+        $context .= "- WordPress: " . get_bloginfo( 'version' ) . "\n";
+        $context .= "- PHP: " . PHP_VERSION . "\n";
+
+        return $context;
     }
 }

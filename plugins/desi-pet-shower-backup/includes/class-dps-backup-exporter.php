@@ -270,7 +270,7 @@ class DPS_Backup_Exporter {
     }
 
     /**
-     * Exporta transações financeiras.
+     * Exporta transações financeiras com validação de relacionamentos.
      *
      * @since 1.1.0
      * @return array
@@ -284,8 +284,41 @@ class DPS_Backup_Exporter {
             return [];
         }
 
-        $rows = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC", ARRAY_A );
-        return is_array( $rows ) ? $rows : [];
+        // Exportar apenas transações com relacionamentos válidos
+        // Validar que cliente_id e agendamento_id referenciam posts existentes
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela com prefixo do WordPress
+        $rows = $wpdb->get_results(
+            "SELECT t.*
+             FROM {$table} t
+             LEFT JOIN {$wpdb->posts} c ON t.cliente_id = c.ID AND c.post_type = 'dps_cliente'
+             LEFT JOIN {$wpdb->posts} a ON t.agendamento_id = a.ID AND a.post_type = 'dps_agendamento'
+             WHERE (t.cliente_id IS NULL OR c.ID IS NOT NULL)
+               AND (t.agendamento_id IS NULL OR a.ID IS NOT NULL)",
+            ARRAY_A
+        );
+
+        if ( ! is_array( $rows ) ) {
+            error_log( 'DPS Backup: Falha ao exportar transações: ' . $wpdb->last_error );
+            return [];
+        }
+
+        // Contar transações órfãs que foram excluídas
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Tabela com prefixo do WordPress
+        $orphan_count = $wpdb->get_var(
+            "SELECT COUNT(*)
+             FROM {$table} t
+             LEFT JOIN {$wpdb->posts} c ON t.cliente_id = c.ID AND c.post_type = 'dps_cliente'
+             LEFT JOIN {$wpdb->posts} a ON t.agendamento_id = a.ID AND a.post_type = 'dps_agendamento'
+             WHERE (t.cliente_id IS NOT NULL AND c.ID IS NULL)
+                OR (t.agendamento_id IS NOT NULL AND a.ID IS NULL)"
+        );
+
+        if ( $orphan_count > 0 ) {
+            error_log( sprintf( 'DPS Backup: %d transações órfãs excluídas do backup.', $orphan_count ) );
+        }
+
+        error_log( sprintf( 'DPS Backup: %d transações válidas exportadas.', count( $rows ) ) );
+        return $rows;
     }
 
     /**

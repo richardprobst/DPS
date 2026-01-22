@@ -543,16 +543,52 @@
     }
 
     /**
-     * Show a temporary message
+     * Show a temporary message with improved styling
      */
     function showMessage(text, type) {
         // Remove existing messages
         $('.dps-temp-message').remove();
 
-        var className = 'dps-temp-message notice notice-' + (type || 'info');
-        var html = '<div class="' + className + '" style="padding: 10px; margin: 10px 0;"><p>' + escapeHtml(text) + '</p></div>';
+        // Map type to alert class and ARIA attribute
+        var alertClass = 'dps-alert';
+        var icon = '';
+        var ariaAttr = '';
         
-        $('#dps-section-financeiro h3').first().after(html);
+        switch (type) {
+            case 'success':
+                alertClass += ' dps-alert--success';
+                icon = '✓';
+                ariaAttr = 'aria-live="polite"';
+                break;
+            case 'error':
+                alertClass += ' dps-alert--danger';
+                icon = '✕';
+                ariaAttr = 'role="alert"'; // role="alert" implicitly has aria-live="assertive"
+                break;
+            case 'warning':
+                alertClass += ' dps-alert--warning';
+                icon = '⚠';
+                ariaAttr = 'role="alert"';
+                break;
+            default:
+                alertClass += ' dps-alert--info';
+                icon = 'ℹ';
+                ariaAttr = 'aria-live="polite"';
+        }
+        
+        var html = '<div class="dps-temp-message ' + alertClass + '" ' + ariaAttr + '>';
+        html += '<span class="dps-alert-icon" aria-hidden="true">' + icon + '</span>';
+        html += '<span>' + escapeHtml(text) + '</span>';
+        html += '</div>';
+        
+        // Insert after section title or at top of section
+        var $section = $('#dps-section-financeiro');
+        var $header = $section.find('.dps-section-header').first();
+        if ($header.length) {
+            $header.after(html);
+        } else {
+            $section.prepend(html);
+        }
 
         // Auto-remove after 5 seconds
         setTimeout(function() {

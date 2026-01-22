@@ -1665,3 +1665,105 @@
         align-items: stretch;
     }
 }
+
+/* ============================================
+   MELHORIAS DE ACESSIBILIDADE E UX v1.6.0
+   ============================================ */
+
+/* Indicador de campo obrigatório */
+.dps-required-fields-hint {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 16px;
+    font-style: italic;
+}
+
+.dps-required-fields-hint .required {
+    color: #ef4444;
+}
+
+/* Estilos para ícones de informação */
+.dps-info-icon[aria-label] {
+    cursor: help;
+}
+
+/* Empty state com CTA melhorado */
+.dps-empty-state__description {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.dps-empty-state__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 200px;
+}
+
+/* Padronização altura de inputs com prefixo/sufixo */
+.dps-porte-item .dps-input-prefix,
+.dps-porte-item .dps-input-suffix {
+    min-height: 44px;
+}
+
+/* Melhoria visual do link cancelar edição */
+.dps-cancel-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #dc2626;
+    font-weight: 500;
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+.dps-cancel-edit:hover {
+    background: #fecaca;
+    border-color: #f87171;
+    color: #b91c1c;
+    text-decoration: none;
+}
+
+/* Badges de porte com cores mais claras para acessibilidade */
+.dps-subscription-pet-size-badge.dps-size-small {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.dps-subscription-pet-size-badge.dps-size-medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.dps-subscription-pet-size-badge.dps-size-large {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Melhoria de espaçamento em valores por pet */
+.dps-subscription-pet-value-row {
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+/* Focus visible melhorado para acessibilidade */
+.dps-services-section :focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}
+
+.dps-services-section button:focus-visible,
+.dps-services-section a:focus-visible,
+.dps-services-section input:focus-visible,
+.dps-services-section select:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+}

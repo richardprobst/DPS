@@ -39,6 +39,8 @@ Análises arquiteturais e de sistema.
 **Arquivos:**
 - `ADDONS_DETAILED_ANALYSIS.md` - Análise detalhada de todos os 15 add-ons
 - `BACKEND_FRONTEND_MAPPING.md` - Mapeamento completo BACK-END vs FRONT-END
+- `GOOGLE_TASKS_INTEGRATION_ANALYSIS.md` - **🆕** Análise completa de integração com Google Tarefas (31KB, arquitetura, casos de uso, segurança, estimativas)
+- `GOOGLE_TASKS_INTEGRATION_SUMMARY.md` - **🆕** Resumo executivo da integração Google Tarefas (recomendação: viável e interessante)
 - `STOCK_ADDON_ANALYSIS.md` - Análise profunda do Add-on Estoque (funcionalidade, integração com Serviços, fluxo de uso)
 - `SUBSCRIPTION_ADDON_ANALYSIS.md` - Análise profunda do Add-on Assinaturas (código, funcionalidades, layout, melhorias propostas)
 - `SYSTEM_ANALYSIS_COMPLETE.md` - Análise profunda do sistema

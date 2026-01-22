@@ -161,30 +161,400 @@ class DPS_Services_Addon {
     }
 
     /**
-     * Popula serviços padrão e extras quando o plugin é ativado
+     * Popula serviços padrão e extras quando o plugin é ativado.
+     * Valores baseados no mercado de pet shops da região de São Paulo (2024).
+     * 
+     * Estrutura de preços:
+     * - price: valor base/referência (menor preço)
+     * - price_small: porte pequeno (até 10kg)
+     * - price_medium: porte médio (10-25kg)
+     * - price_large: porte grande (acima de 25kg)
+     * - duration: duração base em minutos
+     * - duration_small/medium/large: duração por porte
      */
     public function activate() {
-        // Cria serviços padrão se não existirem
+        // Cria serviços padrão com valores de mercado SP 2024
         $default_services = [
-            [ 'name' => 'Banho', 'price' => 0, 'type' => 'padrao', 'category' => '' ],
-            [ 'name' => 'Banho e Tosa', 'price' => 0, 'type' => 'padrao', 'category' => '' ],
-            // Preparação da pelagem
-            [ 'name' => 'Remoção de nós | nível leve', 'price' => 0, 'type' => 'extra', 'category' => 'preparacao_pelagem' ],
-            [ 'name' => 'Remoção de nós | nível moderado', 'price' => 0, 'type' => 'extra', 'category' => 'preparacao_pelagem' ],
-            [ 'name' => 'Remoção de nós | nível severo', 'price' => 0, 'type' => 'extra', 'category' => 'preparacao_pelagem' ],
-            // Opções de tosa
-            [ 'name' => 'Tosa feita com máquina', 'price' => 0, 'type' => 'extra', 'category' => 'opcoes_tosa' ],
-            [ 'name' => 'Tosa feita na tesoura', 'price' => 0, 'type' => 'extra', 'category' => 'opcoes_tosa' ],
-            [ 'name' => 'Tosa da Raça', 'price' => 0, 'type' => 'extra', 'category' => 'opcoes_tosa' ],
-            [ 'name' => 'Tosa Bebê', 'price' => 0, 'type' => 'extra', 'category' => 'opcoes_tosa' ],
-            [ 'name' => 'Tosa higienica', 'price' => 0, 'type' => 'extra', 'category' => 'opcoes_tosa' ],
-            // Tratamento
-            [ 'name' => 'Banho terapêutico (Ozônio)', 'price' => 0, 'type' => 'extra', 'category' => 'tratamento' ],
-            // Cuidados adicionais
-            [ 'name' => 'Escovação dental', 'price' => 0, 'type' => 'extra', 'category' => 'cuidados' ],
-            // Tratamento da pelagem e pele
-            [ 'name' => 'Hidratação', 'price' => 0, 'type' => 'extra', 'category' => 'pelagem' ],
-            [ 'name' => 'Restauração', 'price' => 0, 'type' => 'extra', 'category' => 'pelagem' ],
+            // === SERVIÇOS PADRÃO (principais) ===
+            [ 
+                'name' => 'Banho', 
+                'type' => 'padrao', 
+                'category' => 'banho',
+                'price_small' => 50, 
+                'price_medium' => 70, 
+                'price_large' => 120,
+                'duration_small' => 45,
+                'duration_medium' => 60,
+                'duration_large' => 90,
+            ],
+            [ 
+                'name' => 'Banho e Tosa', 
+                'type' => 'padrao', 
+                'category' => 'banho',
+                'price_small' => 100, 
+                'price_medium' => 145, 
+                'price_large' => 230,
+                'duration_small' => 90,
+                'duration_medium' => 120,
+                'duration_large' => 150,
+            ],
+            [ 
+                'name' => 'Tosa Higiênica', 
+                'type' => 'padrao', 
+                'category' => 'tosa',
+                'price_small' => 40, 
+                'price_medium' => 55, 
+                'price_large' => 80,
+                'duration_small' => 20,
+                'duration_medium' => 30,
+                'duration_large' => 45,
+            ],
+            
+            // === OPÇÕES DE TOSA (extras) ===
+            [ 
+                'name' => 'Tosa Máquina (Completa)', 
+                'type' => 'extra', 
+                'category' => 'opcoes_tosa',
+                'price_small' => 65, 
+                'price_medium' => 90, 
+                'price_large' => 140,
+                'duration_small' => 40,
+                'duration_medium' => 60,
+                'duration_large' => 80,
+            ],
+            [ 
+                'name' => 'Tosa Tesoura', 
+                'type' => 'extra', 
+                'category' => 'opcoes_tosa',
+                'price_small' => 85, 
+                'price_medium' => 120, 
+                'price_large' => 180,
+                'duration_small' => 60,
+                'duration_medium' => 90,
+                'duration_large' => 120,
+            ],
+            [ 
+                'name' => 'Tosa da Raça (Padrão)', 
+                'type' => 'extra', 
+                'category' => 'opcoes_tosa',
+                'price_small' => 120, 
+                'price_medium' => 180, 
+                'price_large' => 280,
+                'duration_small' => 90,
+                'duration_medium' => 120,
+                'duration_large' => 180,
+            ],
+            [ 
+                'name' => 'Tosa Bebê/Filhote', 
+                'type' => 'extra', 
+                'category' => 'opcoes_tosa',
+                'price_small' => 60, 
+                'price_medium' => 80, 
+                'price_large' => 120,
+                'duration_small' => 45,
+                'duration_medium' => 60,
+                'duration_large' => 80,
+            ],
+            [ 
+                'name' => 'Corte Estilizado', 
+                'type' => 'extra', 
+                'category' => 'opcoes_tosa',
+                'price_small' => 135, 
+                'price_medium' => 200, 
+                'price_large' => 300,
+                'duration_small' => 90,
+                'duration_medium' => 120,
+                'duration_large' => 180,
+            ],
+            
+            // === PREPARAÇÃO DA PELAGEM ===
+            [ 
+                'name' => 'Remoção de Nós (Leve)', 
+                'type' => 'extra', 
+                'category' => 'preparacao_pelagem',
+                'price_small' => 15, 
+                'price_medium' => 25, 
+                'price_large' => 40,
+                'duration_small' => 15,
+                'duration_medium' => 20,
+                'duration_large' => 30,
+            ],
+            [ 
+                'name' => 'Remoção de Nós (Moderado)', 
+                'type' => 'extra', 
+                'category' => 'preparacao_pelagem',
+                'price_small' => 30, 
+                'price_medium' => 45, 
+                'price_large' => 70,
+                'duration_small' => 25,
+                'duration_medium' => 40,
+                'duration_large' => 60,
+            ],
+            [ 
+                'name' => 'Remoção de Nós (Severo)', 
+                'type' => 'extra', 
+                'category' => 'preparacao_pelagem',
+                'price_small' => 50, 
+                'price_medium' => 75, 
+                'price_large' => 120,
+                'duration_small' => 45,
+                'duration_medium' => 60,
+                'duration_large' => 90,
+            ],
+            [ 
+                'name' => 'Desembaraço Total', 
+                'type' => 'extra', 
+                'category' => 'preparacao_pelagem',
+                'price_small' => 60, 
+                'price_medium' => 90, 
+                'price_large' => 140,
+                'duration_small' => 60,
+                'duration_medium' => 90,
+                'duration_large' => 120,
+            ],
+            
+            // === TRATAMENTOS ===
+            [ 
+                'name' => 'Banho Terapêutico (Ozônio)', 
+                'type' => 'extra', 
+                'category' => 'tratamento',
+                'price_small' => 70, 
+                'price_medium' => 95, 
+                'price_large' => 150,
+                'duration_small' => 60,
+                'duration_medium' => 75,
+                'duration_large' => 100,
+            ],
+            [ 
+                'name' => 'Banho Medicamentoso', 
+                'type' => 'extra', 
+                'category' => 'tratamento',
+                'price_small' => 65, 
+                'price_medium' => 85, 
+                'price_large' => 130,
+                'duration_small' => 60,
+                'duration_medium' => 75,
+                'duration_large' => 90,
+            ],
+            [ 
+                'name' => 'Banho Antipulgas', 
+                'type' => 'extra', 
+                'category' => 'tratamento',
+                'price_small' => 55, 
+                'price_medium' => 75, 
+                'price_large' => 110,
+                'duration_small' => 50,
+                'duration_medium' => 65,
+                'duration_large' => 85,
+            ],
+            [ 
+                'name' => 'Tratamento Dermatológico', 
+                'type' => 'extra', 
+                'category' => 'tratamento',
+                'price_small' => 80, 
+                'price_medium' => 110, 
+                'price_large' => 160,
+                'duration_small' => 60,
+                'duration_medium' => 80,
+                'duration_large' => 100,
+            ],
+            
+            // === TRATAMENTO DA PELAGEM E PELE ===
+            [ 
+                'name' => 'Hidratação', 
+                'type' => 'extra', 
+                'category' => 'pelagem',
+                'price_small' => 35, 
+                'price_medium' => 50, 
+                'price_large' => 80,
+                'duration_small' => 15,
+                'duration_medium' => 20,
+                'duration_large' => 30,
+            ],
+            [ 
+                'name' => 'Hidratação Profunda', 
+                'type' => 'extra', 
+                'category' => 'pelagem',
+                'price_small' => 55, 
+                'price_medium' => 75, 
+                'price_large' => 110,
+                'duration_small' => 25,
+                'duration_medium' => 35,
+                'duration_large' => 45,
+            ],
+            [ 
+                'name' => 'Restauração Capilar', 
+                'type' => 'extra', 
+                'category' => 'pelagem',
+                'price_small' => 60, 
+                'price_medium' => 85, 
+                'price_large' => 130,
+                'duration_small' => 30,
+                'duration_medium' => 40,
+                'duration_large' => 50,
+            ],
+            [ 
+                'name' => 'Cauterização', 
+                'type' => 'extra', 
+                'category' => 'pelagem',
+                'price_small' => 50, 
+                'price_medium' => 70, 
+                'price_large' => 100,
+                'duration_small' => 20,
+                'duration_medium' => 30,
+                'duration_large' => 40,
+            ],
+            
+            // === CUIDADOS ADICIONAIS ===
+            [ 
+                'name' => 'Corte de Unhas', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 18, 
+                'price_medium' => 25, 
+                'price_large' => 35,
+                'duration_small' => 10,
+                'duration_medium' => 15,
+                'duration_large' => 20,
+            ],
+            [ 
+                'name' => 'Limpeza de Ouvido', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 15, 
+                'price_medium' => 20, 
+                'price_large' => 30,
+                'duration_small' => 10,
+                'duration_medium' => 15,
+                'duration_large' => 20,
+            ],
+            [ 
+                'name' => 'Escovação Dental', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 45, 
+                'price_medium' => 55, 
+                'price_large' => 70,
+                'duration_small' => 15,
+                'duration_medium' => 20,
+                'duration_large' => 25,
+            ],
+            [ 
+                'name' => 'Limpeza de Glândulas Anais', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 25, 
+                'price_medium' => 35, 
+                'price_large' => 50,
+                'duration_small' => 10,
+                'duration_medium' => 15,
+                'duration_large' => 20,
+            ],
+            [ 
+                'name' => 'Tosa de Patas (Arredondamento)', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 20, 
+                'price_medium' => 30, 
+                'price_large' => 45,
+                'duration_small' => 15,
+                'duration_medium' => 20,
+                'duration_large' => 30,
+            ],
+            [ 
+                'name' => 'Limpeza de Olhos/Lágrimas', 
+                'type' => 'extra', 
+                'category' => 'cuidados',
+                'price_small' => 15, 
+                'price_medium' => 20, 
+                'price_large' => 25,
+                'duration_small' => 10,
+                'duration_medium' => 10,
+                'duration_large' => 15,
+            ],
+            
+            // === EXTRAS/MIMOS ===
+            [ 
+                'name' => 'Perfume Premium', 
+                'type' => 'extra', 
+                'category' => 'extras',
+                'price_small' => 15, 
+                'price_medium' => 20, 
+                'price_large' => 30,
+                'duration_small' => 5,
+                'duration_medium' => 5,
+                'duration_large' => 5,
+            ],
+            [ 
+                'name' => 'Laço/Gravatinha', 
+                'type' => 'extra', 
+                'category' => 'extras',
+                'price_small' => 10, 
+                'price_medium' => 12, 
+                'price_large' => 15,
+                'duration_small' => 5,
+                'duration_medium' => 5,
+                'duration_large' => 5,
+            ],
+            [ 
+                'name' => 'Bandana/Lenço', 
+                'type' => 'extra', 
+                'category' => 'extras',
+                'price_small' => 12, 
+                'price_medium' => 15, 
+                'price_large' => 18,
+                'duration_small' => 5,
+                'duration_medium' => 5,
+                'duration_large' => 5,
+            ],
+            [ 
+                'name' => 'Tintura/Coloração (por região)', 
+                'type' => 'extra', 
+                'category' => 'extras',
+                'price_small' => 40, 
+                'price_medium' => 55, 
+                'price_large' => 80,
+                'duration_small' => 30,
+                'duration_medium' => 40,
+                'duration_large' => 50,
+            ],
+            
+            // === SERVIÇOS DE TRANSPORTE ===
+            [ 
+                'name' => 'TaxiDog (Leva e Traz)', 
+                'type' => 'extra', 
+                'category' => 'extras',
+                'price_small' => 30, 
+                'price_medium' => 35, 
+                'price_large' => 45,
+                'duration_small' => 30,
+                'duration_medium' => 30,
+                'duration_large' => 30,
+            ],
+            
+            // === PACOTES (serão montados com desconto) ===
+            [ 
+                'name' => 'Pacote Completo (Banho + Tosa + Hidratação)', 
+                'type' => 'package', 
+                'category' => '',
+                'price_small' => 130, 
+                'price_medium' => 185, 
+                'price_large' => 290,
+                'duration_small' => 105,
+                'duration_medium' => 140,
+                'duration_large' => 180,
+            ],
+            [ 
+                'name' => 'Pacote Spa (Banho Ozônio + Hidratação Profunda + Limpeza)', 
+                'type' => 'package', 
+                'category' => '',
+                'price_small' => 115, 
+                'price_medium' => 160, 
+                'price_large' => 240,
+                'duration_small' => 90,
+                'duration_medium' => 115,
+                'duration_large' => 150,
+            ],
         ];
         foreach ( $default_services as $srv ) {
             // Verifica se já existe
@@ -204,28 +574,25 @@ class DPS_Services_Addon {
                     'post_status' => 'publish',
                 ] );
                 if ( $post_id ) {
-                    update_post_meta( $post_id, 'service_price', $srv['price'] );
+                    // Preço base (menor entre os portes)
+                    $base_price = min( $srv['price_small'], $srv['price_medium'], $srv['price_large'] );
+                    update_post_meta( $post_id, 'service_price', $base_price );
                     update_post_meta( $post_id, 'service_type', $srv['type'] );
                     update_post_meta( $post_id, 'service_category', $srv['category'] );
                     // Define serviço como ativo por padrão
                     update_post_meta( $post_id, 'service_active', '1' );
-                    // Define duração padrão em minutos (pode ser ajustado manualmente depois)
-                    $default_duration = 0;
-                    if ( 'Banho' === $srv['name'] ) {
-                        $default_duration = 60;
-                    } elseif ( 'Banho e Tosa' === $srv['name'] ) {
-                        $default_duration = 90;
-                    } else {
-                        $default_duration = 15;
-                    }
-                    update_post_meta( $post_id, 'service_duration', $default_duration );
-                    // Copia preço e duração padrão para variações por porte
-                    update_post_meta( $post_id, 'service_price_small', $srv['price'] );
-                    update_post_meta( $post_id, 'service_price_medium', $srv['price'] );
-                    update_post_meta( $post_id, 'service_price_large', $srv['price'] );
-                    update_post_meta( $post_id, 'service_duration_small', $default_duration );
-                    update_post_meta( $post_id, 'service_duration_medium', $default_duration );
-                    update_post_meta( $post_id, 'service_duration_large', $default_duration );
+                    
+                    // Salva preços por porte
+                    update_post_meta( $post_id, 'service_price_small', $srv['price_small'] );
+                    update_post_meta( $post_id, 'service_price_medium', $srv['price_medium'] );
+                    update_post_meta( $post_id, 'service_price_large', $srv['price_large'] );
+                    
+                    // Salva durações por porte
+                    $base_duration = min( $srv['duration_small'], $srv['duration_medium'], $srv['duration_large'] );
+                    update_post_meta( $post_id, 'service_duration', $base_duration );
+                    update_post_meta( $post_id, 'service_duration_small', $srv['duration_small'] );
+                    update_post_meta( $post_id, 'service_duration_medium', $srv['duration_medium'] );
+                    update_post_meta( $post_id, 'service_duration_large', $srv['duration_large'] );
                 }
             }
         }
@@ -469,6 +836,9 @@ class DPS_Services_Addon {
         if ( $edit_id ) {
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $edit_id ) . '">';
         }
+        
+        // Indicador de campos obrigatórios
+        echo '<p class="dps-required-fields-hint"><span class="required">*</span> ' . esc_html__( 'Campos obrigatórios', 'dps-services-addon' ) . '</p>';
 
         // === FIELDSET: Informações Básicas ===
         echo '<fieldset class="dps-fieldset dps-fieldset-basic">';
@@ -914,10 +1284,12 @@ class DPS_Services_Addon {
             echo '</tbody></table>';
             echo '</div>'; // .dps-table-wrapper
         } else {
-            // Empty state moderno
+            // Empty state moderno com CTA para primeiro serviço
             echo '<div class="dps-empty-state">';
-            echo '<span class="dps-empty-state__icon">🧼</span>';
+            echo '<span class="dps-empty-state__icon" aria-hidden="true">🧼</span>';
             echo '<h4 class="dps-empty-state__title">' . esc_html__( 'Nenhum serviço cadastrado', 'dps-services-addon' ) . '</h4>';
+            echo '<p class="dps-empty-state__description">' . esc_html__( 'Cadastre seu primeiro serviço para começar a usar o sistema de agendamentos.', 'dps-services-addon' ) . '</p>';
+            echo '<a href="#dps-services-form-section" class="button button-primary dps-empty-state__action">' . esc_html__( 'Cadastrar primeiro serviço', 'dps-services-addon' ) . '</a>';
             echo '</div>';
         }
     }
@@ -949,12 +1321,26 @@ class DPS_Services_Addon {
             $name     = isset( $_POST['service_name'] ) ? sanitize_text_field( wp_unslash( $_POST['service_name'] ) ) : '';
             $type     = isset( $_POST['service_type'] ) ? sanitize_text_field( wp_unslash( $_POST['service_type'] ) ) : '';
             $category = isset( $_POST['service_category'] ) ? sanitize_text_field( wp_unslash( $_POST['service_category'] ) ) : '';
-            $price_small  = isset( $_POST['service_price_small'] ) && $_POST['service_price_small'] !== '' ? floatval( wp_unslash( $_POST['service_price_small'] ) ) : null;
-            $price_medium = isset( $_POST['service_price_medium'] ) && $_POST['service_price_medium'] !== '' ? floatval( wp_unslash( $_POST['service_price_medium'] ) ) : null;
-            $price_large  = isset( $_POST['service_price_large'] ) && $_POST['service_price_large'] !== '' ? floatval( wp_unslash( $_POST['service_price_large'] ) ) : null;
-            $dur_small  = isset( $_POST['service_duration_small'] ) && $_POST['service_duration_small'] !== '' ? intval( wp_unslash( $_POST['service_duration_small'] ) ) : null;
-            $dur_medium = isset( $_POST['service_duration_medium'] ) && $_POST['service_duration_medium'] !== '' ? intval( wp_unslash( $_POST['service_duration_medium'] ) ) : null;
-            $dur_large  = isset( $_POST['service_duration_large'] ) && $_POST['service_duration_large'] !== '' ? intval( wp_unslash( $_POST['service_duration_large'] ) ) : null;
+            // Sanitiza e valida preços - garante que valores negativos sejam convertidos para 0
+            $price_small  = isset( $_POST['service_price_small'] ) && $_POST['service_price_small'] !== '' 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_small'] ) ) ) ) 
+                : null;
+            $price_medium = isset( $_POST['service_price_medium'] ) && $_POST['service_price_medium'] !== '' 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_medium'] ) ) ) ) 
+                : null;
+            $price_large  = isset( $_POST['service_price_large'] ) && $_POST['service_price_large'] !== '' 
+                ? max( 0, floatval( sanitize_text_field( wp_unslash( $_POST['service_price_large'] ) ) ) ) 
+                : null;
+            // Sanitiza e valida durações - garante que valores negativos sejam convertidos para 0
+            $dur_small  = isset( $_POST['service_duration_small'] ) && $_POST['service_duration_small'] !== '' 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_small'] ) ) ) ) 
+                : null;
+            $dur_medium = isset( $_POST['service_duration_medium'] ) && $_POST['service_duration_medium'] !== '' 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_medium'] ) ) ) ) 
+                : null;
+            $dur_large  = isset( $_POST['service_duration_large'] ) && $_POST['service_duration_large'] !== '' 
+                ? max( 0, intval( sanitize_text_field( wp_unslash( $_POST['service_duration_large'] ) ) ) ) 
+                : null;
             $price_candidates = [];
             foreach ( [ $price_small, $price_medium, $price_large ] as $candidate ) {
                 if ( null !== $candidate ) {
@@ -1076,8 +1462,9 @@ class DPS_Services_Addon {
 
                 foreach ( $posted_items as $idx => $item_raw ) {
                     $item_id = intval( $item_raw );
-                    $qty_raw = isset( $posted_qty[ $idx ] ) ? $posted_qty[ $idx ] : '';
-                    $qty     = '' === $qty_raw ? 0 : floatval( str_replace( ',', '.', $qty_raw ) );
+                    // Sanitiza e valida quantidade de insumos
+                    $qty_raw = isset( $posted_qty[ $idx ] ) ? sanitize_text_field( $posted_qty[ $idx ] ) : '';
+                    $qty     = '' === $qty_raw ? 0 : max( 0, floatval( str_replace( ',', '.', $qty_raw ) ) );
 
                     if ( $item_id && $qty > 0 ) {
                         $consumption[] = [
@@ -1899,7 +2286,8 @@ class DPS_Services_Addon {
             delete_post_meta( $post_id, 'appointment_service_prices' );
         }
         if ( isset( $_POST['appointment_total'] ) ) {
-            $total = floatval( $_POST['appointment_total'] );
+            // Valida que o total não seja negativo
+            $total = max( 0, floatval( $_POST['appointment_total'] ) );
             update_post_meta( $post_id, 'appointment_total_value', $total );
         }
         

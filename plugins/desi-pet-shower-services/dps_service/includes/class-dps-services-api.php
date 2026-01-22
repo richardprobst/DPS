@@ -345,8 +345,11 @@ class DPS_Services_API {
             }
         }
 
+        // Normaliza desconto para garantir que esteja no intervalo 0-100
+        $discount = min( 100, max( 0, $discount ) );
+
         // Aplica desconto percentual se houver
-        if ( $discount > 0 && $discount <= 100 ) {
+        if ( $discount > 0 ) {
             $sum = $sum * ( 1 - ( $discount / 100 ) );
         }
 

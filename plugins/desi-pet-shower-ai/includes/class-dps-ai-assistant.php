@@ -585,7 +585,7 @@ class DPS_AI_Assistant {
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed with wpdb prefix
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT valor_centavos, descricao FROM {$table_name} WHERE cliente_id = %d AND status = %s ORDER BY data ASC",
+                "SELECT valor_cents, descricao FROM {$table_name} WHERE cliente_id = %d AND status = %s ORDER BY data ASC",
                 $client_id,
                 'pendente'
             )
@@ -599,7 +599,7 @@ class DPS_AI_Assistant {
         $count         = count( $results );
 
         foreach ( $results as $charge ) {
-            $total_pending += intval( $charge->valor_centavos );
+            $total_pending += intval( $charge->valor_cents );
         }
 
         // Formata valor total usando helper se disponível
