@@ -898,7 +898,7 @@ class DPS_Booking_Addon {
         
         if ( $total_value > 0 ) {
             echo '<dt>' . esc_html__( 'Valor:', 'dps-booking-addon' ) . '</dt>';
-            echo '<dd><strong>R$ ' . esc_html( number_format( $total_value, 2, ',', '.' ) ) . '</strong></dd>';
+            echo '<dd><strong>' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total_value ) ) . '</strong></dd>';
         }
         
         if ( $notes ) {

@@ -84,9 +84,16 @@ class DPS_Finance_Audit {
      * Obtém IP do cliente de forma segura.
      *
      * @since 1.6.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
+     *
      * @return string IP address ou 'unknown'.
      */
     private static function get_client_ip() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip();
+        }
+        
+        // Fallback para retrocompatibilidade
         $ip = '';
 
         // REMOTE_ADDR é a fonte mais confiável (não pode ser falsificado pelo cliente)

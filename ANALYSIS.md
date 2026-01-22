@@ -21,8 +21,11 @@ O plugin base oferece classes utilitárias para padronizar operações comuns e 
 **Entrada/Saída**:
 - `parse_brazilian_format( string )`: Converte string BR (ex.: "1.234,56") → int centavos (123456)
 - `format_to_brazilian( int )`: Converte centavos (123456) → string BR ("1.234,56")
+- `format_currency( int, string $symbol = 'R$ ' )`: Converte centavos → string com símbolo ("R$ 1.234,56")
+- `format_currency_from_decimal( float, string $symbol = 'R$ ' )`: Converte decimal → string com símbolo ("R$ 1.234,56")
 - `decimal_to_cents( float )`: Converte decimal (12.34) → int centavos (1234)
 - `cents_to_decimal( int )`: Converte centavos (1234) → float decimal (12.34)
+- `is_valid_money_string( string )`: Valida se string representa valor monetário → bool
 
 **Exemplos práticos**:
 ```php
@@ -30,11 +33,19 @@ O plugin base oferece classes utilitárias para padronizar operações comuns e 
 $preco_raw = isset( $_POST['preco'] ) ? sanitize_text_field( $_POST['preco'] ) : '';
 $valor_centavos = DPS_Money_Helper::parse_brazilian_format( $preco_raw );
 
-// Exibir valor formatado na tela
-echo 'R$ ' . DPS_Money_Helper::format_to_brazilian( $valor_centavos );
+// Exibir valor formatado na tela (com símbolo de moeda)
+echo DPS_Money_Helper::format_currency( $valor_centavos );
+// Resultado: "R$ 1.234,56"
+
+// Para valores decimais (em reais, não centavos)
+echo DPS_Money_Helper::format_currency_from_decimal( 1234.56 );
+// Resultado: "R$ 1.234,56"
 ```
 
-**Boas práticas**: Use sempre este helper para conversões monetárias. Evite lógica duplicada de `str_replace` e `number_format` espalhada pelo código.
+**Boas práticas**: 
+- Use `format_currency()` para exibição em interfaces (já inclui "R$ ")
+- Use `format_to_brazilian()` quando precisar apenas do valor sem símbolo
+- Evite lógica duplicada de `number_format` espalhada pelo código
 
 #### DPS_URL_Builder
 **Propósito**: Construção padronizada de URLs de ação (edição, exclusão, visualização, navegação entre abas).
@@ -80,27 +91,53 @@ $agendamentos = DPS_Query_Helper::get_paginated_posts( 'dps_appointment', 20, $p
 **Boas práticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e pré-carregue metadados com `update_meta_cache()` quando precisar de metas.
 
 #### DPS_Request_Validator
-**Propósito**: Validação centralizada de nonces, capabilities e sanitização de campos de formulário.
+**Propósito**: Validação centralizada de nonces, capabilities, requisições AJAX e sanitização de campos de formulário.
 
-**Entrada/Saída**:
-- `verify_nonce_and_capability( string $nonce_field, string $capability )`: Valida nonce e permissão
-- `sanitize_text_field_from_post( string $field_name, string $default )`: Sanitiza campo de texto
-- `sanitize_email_from_post( string $field_name )`: Sanitiza e valida email
-- `sanitize_int_from_post( string $field_name, int $default )`: Sanitiza inteiro
+**Métodos principais:**
+- `verify_request_nonce( $nonce_field, $nonce_action, $method, $die_on_failure )`: Verifica nonce POST/GET
+- `verify_nonce_and_capability( $nonce_field, $nonce_action, $capability )`: Valida nonce e permissão
+- `verify_capability( $capability, $die_on_failure )`: Verifica apenas capability
 
-**Exemplos práticos**:
+**Métodos AJAX (Fase 3):**
+- `verify_ajax_nonce( $nonce_action, $nonce_field = 'nonce' )`: Verifica nonce AJAX com resposta JSON automática
+- `verify_ajax_admin( $nonce_action, $capability = 'manage_options' )`: Verifica nonce + capability para AJAX admin
+- `verify_admin_action( $nonce_action, $capability, $nonce_field = '_wpnonce' )`: Verifica nonce de ação GET
+- `verify_admin_form( $nonce_action, $nonce_field, $capability )`: Verifica nonce de formulário POST
+- `verify_dynamic_nonce( $nonce_prefix, $item_id )`: Verifica nonce com ID dinâmico
+
+**Métodos de resposta:**
+- `send_json_error( $message, $code, $status )`: Resposta JSON de erro padronizada
+- `send_json_success( $message, $data )`: Resposta JSON de sucesso padronizada
+
+**Métodos auxiliares:**
+- `get_post_int( $field_name, $default )`: Obtém inteiro do POST sanitizado
+- `get_post_string( $field_name, $default )`: Obtém string do POST sanitizada
+- `get_get_int( $field_name, $default )`: Obtém inteiro do GET sanitizado
+- `get_get_string( $field_name, $default )`: Obtém string do GET sanitizada
+
+**Exemplos práticos:**
 ```php
-// Validar requisição antes de processar formulário
-if ( ! DPS_Request_Validator::verify_nonce_and_capability( 'dps_nonce', 'edit_posts' ) ) {
-    wp_die( 'Acesso negado.' );
+// Handler AJAX admin simples
+public function ajax_delete_item() {
+    if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_delete_item' ) ) {
+        return; // Resposta JSON de erro já enviada
+    }
+    // ... processar ação
 }
 
-// Sanitizar campos do formulário
-$nome = DPS_Request_Validator::sanitize_text_field_from_post( 'client_name', '' );
-$email = DPS_Request_Validator::sanitize_email_from_post( 'client_email' );
+// Verificar nonce com ID dinâmico
+$client_id = absint( $_GET['client_id'] );
+if ( ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_client_', $client_id, 'nonce', 'GET' ) ) {
+    return;
+}
+
+// Validar formulário admin
+if ( ! DPS_Request_Validator::verify_admin_form( 'dps_save_settings', 'dps_settings_nonce' ) ) {
+    return;
+}
 ```
 
-**Boas práticas**: NUNCA implemente validação de nonce ou sanitização manual fora deste helper. Evite duplicar lógica de segurança.
+**Boas práticas**: Use `verify_ajax_admin()` para handlers AJAX admin e `verify_ajax_nonce()` para AJAX público. Evite duplicar lógica de segurança.
 
 #### DPS_Phone_Helper
 **Propósito**: Formatação e validação padronizada de números de telefone para comunicações (WhatsApp, exibição).
@@ -193,7 +230,130 @@ echo '<a href="' . esc_url( $url ) . '" target="_blank">Compartilhar</a>';
 - Add-on de Stats (reengajamento de clientes inativos)
 - Portal do Cliente (solicitação de acesso, envio de link, agendamento, compartilhamento)
 
-#### DPS_Message_Helper
+#### DPS_IP_Helper
+**Propósito**: Obtenção e validação centralizada de endereços IP do cliente, com suporte a proxies, CDNs (Cloudflare) e ambientes de desenvolvimento.
+
+**Entrada/Saída**:
+- `get_ip()`: Obtém IP simples via REMOTE_ADDR → string (IP ou 'unknown')
+- `get_ip_with_proxy_support()`: Obtém IP real através de proxies/CDNs → string (IP ou vazio)
+- `get_ip_hash( string $salt )`: Obtém hash SHA-256 do IP para rate limiting → string (64 caracteres)
+- `is_valid_ip( string $ip )`: Valida IPv4 ou IPv6 → bool
+- `is_valid_ipv4( string $ip )`: Valida apenas IPv4 → bool
+- `is_valid_ipv6( string $ip )`: Valida apenas IPv6 → bool
+- `is_localhost( string $ip = null )`: Verifica se é localhost → bool
+- `anonymize( string $ip )`: Anonimiza IP para LGPD/GDPR → string
+
+**Exemplos práticos**:
+```php
+// Obter IP simples para logging
+$ip = DPS_IP_Helper::get_ip();
+
+// Obter IP real através de CDN (Cloudflare)
+$ip = DPS_IP_Helper::get_ip_with_proxy_support();
+
+// Gerar hash para rate limiting
+$hash = DPS_IP_Helper::get_ip_hash( 'dps_login_' );
+set_transient( 'rate_limit_' . $hash, $count, HOUR_IN_SECONDS );
+
+// Anonimizar IP para logs de longa duração (LGPD)
+$anon_ip = DPS_IP_Helper::anonymize( $ip );
+// '192.168.1.100' → '192.168.1.0'
+```
+
+**Headers verificados** (em ordem de prioridade):
+1. `HTTP_CF_CONNECTING_IP` - Cloudflare
+2. `HTTP_X_REAL_IP` - Nginx proxy
+3. `HTTP_X_FORWARDED_FOR` - Proxy padrão (usa primeiro IP da lista)
+4. `REMOTE_ADDR` - Conexão direta
+
+**Boas práticas**:
+- Use `get_ip()` para casos simples (logging, auditoria)
+- Use `get_ip_with_proxy_support()` quando há CDN/proxy (rate limiting, segurança)
+- Use `get_ip_hash()` para armazenar referências de IP sem expor o endereço real
+- Use `anonymize()` para logs de longa duração em compliance com LGPD/GDPR
+
+**Add-ons que usam este helper**:
+- Portal do Cliente (autenticação, rate limiting, logs de acesso)
+- Add-on de Pagamentos (webhooks, auditoria)
+- Add-on de IA (rate limiting do chat público)
+- Add-on de Finance (auditoria de operações)
+- Add-on de Registration (rate limiting de cadastros)
+
+#### DPS_Client_Helper
+**Propósito**: Acesso centralizado a dados de clientes, com suporte a CPT `dps_client` e usermeta do WordPress, eliminando duplicação de código para obtenção de telefone, email, endereço e outros metadados.
+
+**Entrada/Saída**:
+- `get_phone( int $client_id, ?string $source = null )`: Obtém telefone do cliente → string
+- `get_email( int $client_id, ?string $source = null )`: Obtém email do cliente → string
+- `get_whatsapp( int $client_id, ?string $source = null )`: Obtém WhatsApp (fallback para phone) → string
+- `get_name( int $client_id, ?string $source = null )`: Obtém nome do cliente → string
+- `get_display_name( int $client_id, ?string $source = null )`: Obtém nome para exibição → string
+- `get_address( int $client_id, ?string $source = null, string $sep = ', ' )`: Obtém endereço formatado → string
+- `get_all_data( int $client_id, ?string $source = null )`: Obtém todos os metadados de uma vez → array
+- `has_valid_phone( int $client_id, ?string $source = null )`: Verifica se tem telefone válido → bool
+- `has_valid_email( int $client_id, ?string $source = null )`: Verifica se tem email válido → bool
+- `get_pets( int $client_id, array $args = [] )`: Obtém lista de pets do cliente → array
+- `get_pets_count( int $client_id )`: Conta pets do cliente → int
+- `get_primary_pet( int $client_id )`: Obtém pet principal → WP_Post|null
+- `format_contact_info( int $client_id, ?string $source = null )`: Formata informações de contato → string (HTML)
+- `get_for_display( int $client_id, ?string $source = null )`: Obtém dados formatados para exibição → array
+- `search_by_phone( string $phone, bool $exact = false )`: Busca cliente por telefone → int|null
+- `search_by_email( string $email )`: Busca cliente por email → int|null
+
+**Parâmetro `$source`**:
+- `null` (padrão): Auto-detecta se é post (`dps_client`) ou user (WordPress user)
+- `'post'`: Força busca em post_meta
+- `'user'`: Força busca em usermeta
+
+**Constantes de meta keys**:
+- `META_PHONE` = 'client_phone'
+- `META_EMAIL` = 'client_email'
+- `META_WHATSAPP` = 'client_whatsapp'
+- `META_ADDRESS` = 'client_address'
+- `META_CITY` = 'client_city'
+- `META_STATE` = 'client_state'
+- `META_ZIP` = 'client_zip'
+
+**Exemplos práticos**:
+```php
+// Obter telefone de um cliente (auto-detecta source)
+$phone = DPS_Client_Helper::get_phone( $client_id );
+
+// Obter todos os dados de uma vez (mais eficiente)
+$data = DPS_Client_Helper::get_all_data( $client_id );
+echo $data['name'] . ' - ' . $data['phone'];
+
+// Verificar se tem telefone válido antes de enviar WhatsApp
+if ( DPS_Client_Helper::has_valid_phone( $client_id ) ) {
+    $whatsapp = DPS_Client_Helper::get_whatsapp( $client_id );
+    // ...enviar mensagem
+}
+
+// Buscar cliente por telefone
+$existing = DPS_Client_Helper::search_by_phone( '11999887766' );
+if ( $existing ) {
+    // Cliente já existe
+}
+
+// Para exibição na UI (já formatado)
+$display = DPS_Client_Helper::get_for_display( $client_id );
+echo $display['display_name']; // "João Silva" ou "Cliente sem nome"
+echo $display['phone_formatted']; // "(11) 99988-7766"
+```
+
+**Boas práticas**:
+- Use `get_all_data()` quando precisar de múltiplos campos (evita queries repetidas)
+- Use `get_for_display()` para dados já formatados para UI
+- O helper integra com `DPS_Phone_Helper` automaticamente quando disponível
+- Não acesse diretamente `get_post_meta( $id, 'client_phone' )` — use o helper para consistência
+
+**Add-ons que usam este helper**:
+- Plugin Base (formulários de cliente, frontend)
+- Portal do Cliente (exibição de dados, mensagens)
+- Add-on de IA (chat público, agendador)
+- Add-on de Push (notificações por email/WhatsApp)
+- Add-on de Communications (envio de comunicados)
+- Add-on de Finance (relatórios, cobranças)
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 
 **Entrada/Saída**:

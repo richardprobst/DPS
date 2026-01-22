@@ -239,11 +239,9 @@ class DPS_AI_Integration_Portal {
      * Isso garante que um cliente não pode acessar dados de outros clientes.
      */
     public function handle_ajax_ask() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_ask' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
+        // Verifica nonce (não requer capability - portal público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_ask' ) ) {
+            return;
         }
 
         // Obtém ID do cliente

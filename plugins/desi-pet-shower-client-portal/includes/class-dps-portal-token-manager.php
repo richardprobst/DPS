@@ -355,9 +355,16 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
      *
      * Verifica headers de proxy (Cloudflare, AWS, Nginx) e valida IPv4/IPv6
      *
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_with_proxy_support() diretamente.
+     *
      * @return string IP do cliente ou string vazia
      */
     private function get_client_ip_with_proxy_support() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip_with_proxy_support();
+        }
+        
+        // Fallback para retrocompatibilidade
         // Headers a verificar, em ordem de prioridade
         $headers = [
             'HTTP_CF_CONNECTING_IP', // Cloudflare

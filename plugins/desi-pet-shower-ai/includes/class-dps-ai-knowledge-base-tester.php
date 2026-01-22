@@ -167,18 +167,9 @@ class DPS_AI_Knowledge_Base_Tester {
 	 * Handler AJAX para teste de matching.
 	 */
 	public function ajax_test_matching() {
-		// Verifica nonce
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_kb_test_matching' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-			] );
-		}
-
-		// Verifica permissão
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error( [
-				'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-			] );
+		// Verifica nonce e permissão
+		if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_kb_test_matching', 'edit_posts' ) ) {
+			return;
 		}
 
 		// Obtém dados

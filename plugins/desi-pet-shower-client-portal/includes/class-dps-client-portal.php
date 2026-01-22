@@ -1911,7 +1911,7 @@ final class DPS_Client_Portal {
                 _n( '%d Pendência', '%d Pendências', count( $pendings ), 'dps-client-portal' ),
                 count( $pendings )
             ) ) . '</div>';
-            echo '<div class="dps-financial-summary__amount">R$ ' . esc_html( number_format( $total, 2, ',', '.' ) ) . '</div>';
+            echo '<div class="dps-financial-summary__amount">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $total ) ) . '</div>';
             echo '</div>';
             echo '<div class="dps-financial-summary__action">';
             echo '<button class="button button-primary dps-btn-toggle-details" data-target="financial-details">';
@@ -1931,7 +1931,7 @@ final class DPS_Client_Portal {
             foreach ( $pendings as $trans ) {
                 $date = $trans->data;
                 $desc = $trans->descricao ? $trans->descricao : __( 'Serviço', 'dps-client-portal' );
-                $valor = number_format( (float) $trans->valor, 2, ',', '.' );
+                $valor = DPS_Money_Helper::format_decimal_to_brazilian( (float) $trans->valor );
                 echo '<tr>';
                 echo '<td data-label="' . esc_attr__( 'Data', 'dps-client-portal' ) . '">' . esc_html( date_i18n( 'd-m-Y', strtotime( $date ) ) ) . '</td>';
                 echo '<td data-label="' . esc_attr__( 'Descrição', 'dps-client-portal' ) . '">' . esc_html( $desc ) . '</td>';
@@ -4476,10 +4476,15 @@ final class DPS_Client_Portal {
      * Obtém o endereço IP do cliente de forma segura.
      *
      * @since 2.2.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip() diretamente.
      *
      * @return string Endereço IP sanitizado ou 'unknown' se não disponível.
      */
     private function get_client_ip() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip();
+        }
+        // Fallback para retrocompatibilidade
         if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
             return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
         }
@@ -4644,9 +4649,9 @@ Equipe %4$s', 'dps-client-portal' ),
      * @return int Client ID validado e autenticado.
      */
     private function validate_chat_request() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_chat' ) ) {
+            return 0;
         }
 
         $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
@@ -5179,8 +5184,8 @@ HTML;
      * @since 2.5.0
      */
     public function ajax_export_pet_history_pdf() {
-        // Verifica nonce
-        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_portal_export_pdf' ) ) {
+        // Verifica nonce usando helper (GET)
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_portal_export_pdf', null, 'nonce', false ) ) {
             wp_die( esc_html__( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ), 403 );
         }
 
@@ -5210,9 +5215,17 @@ HTML;
      * Verifica headers de proxy (Cloudflare, AWS, Nginx) e valida IPv4/IPv6
      *
      * @since 2.4.3
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_with_proxy_support() diretamente.
+     *
      * @return string IP do cliente ou 'unknown'
      */
     private function get_client_ip_with_proxy_support() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            $ip = DPS_IP_Helper::get_ip_with_proxy_support();
+            return ! empty( $ip ) ? $ip : 'unknown';
+        }
+        
+        // Fallback para retrocompatibilidade
         // Headers a verificar, em ordem de prioridade
         $headers = [
             'HTTP_CF_CONNECTING_IP', // Cloudflare

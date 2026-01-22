@@ -1636,7 +1636,7 @@ class DPS_AI_Addon {
                         $cost_brl = $cost * floatval( $settings['usd_to_brl_rate'] );
                         ?>
                         <p style="margin: 5px 0 0 0; font-size: 16px; color: #6b7280;">
-                            (~R$ <?php echo esc_html( number_format( $cost_brl, 2, ',', '.' ) ); ?>)
+                            (~<?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $cost_brl ) ); ?>)
                         </p>
                     <?php } ?>
                 </div>
@@ -2107,14 +2107,9 @@ class DPS_AI_Addon {
      * Segurança: Requer capability manage_options + nonce
      */
     public function handle_export_metrics() {
-        // Verifica permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
-        }
-
-        // Verifica nonce
-        if ( ! isset( $_POST['dps_ai_export_metrics_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_metrics_nonce'] ) ), 'dps_ai_export_metrics' ) ) {
-            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_export_metrics', 'dps_ai_export_metrics_nonce' ) ) {
+            return;
         }
 
         // Obtém período
@@ -2167,7 +2162,7 @@ class DPS_AI_Addon {
 
             if ( $exchange_rate > 0 ) {
                 $cost_brl = $cost_usd * $exchange_rate;
-                $row[]    = 'R$ ' . number_format( $cost_brl, 2, ',', '.' );
+                $row[]    = DPS_Money_Helper::format_currency_from_decimal( $cost_brl );
             }
 
             $row[] = number_format( floatval( $day->avg_response_time ), 2 );
@@ -2189,14 +2184,9 @@ class DPS_AI_Addon {
      * Segurança: Requer capability manage_options + nonce
      */
     public function handle_export_feedback() {
-        // Verifica permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
-        }
-
-        // Verifica nonce
-        if ( ! isset( $_POST['dps_ai_export_feedback_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_feedback_nonce'] ) ), 'dps_ai_export_feedback' ) ) {
-            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_export_feedback', 'dps_ai_export_feedback_nonce' ) ) {
+            return;
         }
 
         // Obtém feedbacks (últimos 1000)
@@ -2293,12 +2283,9 @@ class DPS_AI_Addon {
             return;
         }
 
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ) );
-        }
-
-        if ( ! isset( $_POST['dps_ai_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_nonce'] ) ), 'dps_ai_save' ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_save', 'dps_ai_nonce' ) ) {
+            return;
         }
 
         // Sanitiza todo o array POST antes de processar
@@ -2582,18 +2569,9 @@ class DPS_AI_Addon {
      * Verifica se a API key está configurada e testa a conexão.
      */
     public function ajax_test_connection() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_test_nonce' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_test_nonce', 'manage_options' ) ) {
+            return;
         }
 
         // Testa conexão
@@ -2614,18 +2592,9 @@ class DPS_AI_Addon {
      * Handler AJAX para validação de contraste de cores.
      */
     public function ajax_validate_contrast() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_validate_contrast' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_validate_contrast', 'manage_options' ) ) {
+            return;
         }
 
         // Obtém cores
@@ -2656,18 +2625,9 @@ class DPS_AI_Addon {
      * Retorna o prompt padrão do arquivo para substituir no textarea.
      */
     public function ajax_reset_system_prompt() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_reset_prompt' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_reset_prompt', 'manage_options' ) ) {
+            return;
         }
 
         // Obtém contexto

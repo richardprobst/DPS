@@ -495,8 +495,8 @@ class DPS_GitHub_Updater {
             return;
         }
 
-        // Verifica nonce para proteção CSRF
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_force_update_check' ) ) {
+        // Verifica nonce para proteção CSRF usando helper
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_force_update_check', null, '_wpnonce', false ) ) {
             wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ), 403 );
         }
 

@@ -503,7 +503,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->deny_anonymous();
             }
 
-            if ( ! isset( $_POST['dps_backup_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_backup_settings_nonce'] ) ), self::ACTION_SAVE_SETTINGS ) ) {
+            // Verifica nonce usando helper
+            if ( ! DPS_Request_Validator::verify_admin_form( self::ACTION_SAVE_SETTINGS, 'dps_backup_settings_nonce', null, false ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Nonce inválido.', 'dps-backup-addon' ) );
             }
 
@@ -552,7 +553,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->deny_anonymous();
             }
 
-            if ( ! isset( $_POST['dps_backup_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_backup_nonce'] ) ), self::ACTION_EXPORT ) ) {
+            // Verifica nonce usando helper
+            if ( ! DPS_Request_Validator::verify_admin_form( self::ACTION_EXPORT, 'dps_backup_nonce', null, false ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Nonce inválido para exportação.', 'dps-backup-addon' ) );
             }
 
@@ -701,7 +703,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
          * @since 1.1.0
          */
         public function ajax_download_backup() {
-            if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_backup_ajax' ) ) {
+            // Verifica nonce usando helper (GET)
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_backup_ajax', null, 'nonce', false ) ) {
                 wp_die( esc_html__( 'Nonce inválido.', 'dps-backup-addon' ) );
             }
 
@@ -793,7 +796,8 @@ if ( ! class_exists( 'DPS_Backup_Addon' ) ) {
                 $this->deny_anonymous();
             }
 
-            if ( ! isset( $_POST['dps_backup_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_backup_nonce'] ) ), self::ACTION_IMPORT ) ) {
+            // Verifica nonce usando helper
+            if ( ! DPS_Request_Validator::verify_admin_form( self::ACTION_IMPORT, 'dps_backup_nonce', null, false ) ) {
                 $this->redirect_with_message( $this->get_post_redirect(), 'error', __( 'Nonce inválido para importação.', 'dps-backup-addon' ) );
             }
 

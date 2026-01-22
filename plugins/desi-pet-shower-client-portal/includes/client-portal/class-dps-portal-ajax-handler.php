@@ -84,10 +84,9 @@ class DPS_Portal_AJAX_Handler {
      * @return int Client ID ou encerra com erro.
      */
     private function validate_chat_request() {
-        // Verifica nonce
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_chat' ) ) {
+            return 0;
         }
 
         // Obtém client_id da sessão
@@ -107,9 +106,9 @@ class DPS_Portal_AJAX_Handler {
      * @return int Client ID ou encerra com erro.
      */
     private function validate_loyalty_request() {
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_portal_loyalty' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Sessão inválida. Recarregue a página.', 'dps-client-portal' ) ], 403 );
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_loyalty' ) ) {
+            return 0;
         }
 
         $session_manager = DPS_Portal_Session_Manager::get_instance();
@@ -498,10 +497,9 @@ class DPS_Portal_AJAX_Handler {
      * @since 2.4.0
      */
     public function ajax_create_appointment_request() {
-        // Verifica nonce
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_portal_appointment_request' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_appointment_request' ) ) {
+            return;
         }
 
         // Obtém client_id da sessão

@@ -54,6 +54,8 @@ require_once DPS_BASE_DIR . 'includes/class-dps-request-validator.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-message-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-phone-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-whatsapp-helper.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-ip-helper.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-client-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-tabs-helper.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-clients-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
@@ -840,12 +842,12 @@ class DPS_Base_Plugin {
      */
     public function export_clients_csv() {
         // Verifica permissões.
+        // Verifica permissão e nonce usando helper
         if ( ! current_user_can( 'dps_manage_clients' ) && ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Você não tem permissão para exportar clientes.', 'desi-pet-shower' ) );
         }
 
-        // Verifica nonce.
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_clients' ) ) {
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_clients', null, '_wpnonce', false ) ) {
             wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
 
@@ -913,12 +915,12 @@ class DPS_Base_Plugin {
      */
     public function export_pets_csv() {
         // Verifica permissões.
+        // Verifica permissão e nonce usando helper
         if ( ! current_user_can( 'dps_manage_pets' ) && ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'Você não tem permissão para exportar pets.', 'desi-pet-shower' ) );
         }
 
-        // Verifica nonce.
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_pets' ) ) {
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_pets', null, '_wpnonce', false ) ) {
             wp_die( esc_html__( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
 

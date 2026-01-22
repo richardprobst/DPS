@@ -236,7 +236,8 @@ class DPS_AI_Knowledge_Base {
      * @param int $post_id ID do post.
      */
     public function save_meta_boxes( $post_id ) {
-        if ( ! isset( $_POST['dps_ai_knowledge_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_knowledge_nonce'] ) ), 'dps_ai_knowledge_save' ) ) {
+        // Verifica nonce usando helper (não morre em caso de falha para permitir fluxo de save_post)
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_ai_knowledge_nonce', 'dps_ai_knowledge_save', 'POST', false ) ) {
             return;
         }
 

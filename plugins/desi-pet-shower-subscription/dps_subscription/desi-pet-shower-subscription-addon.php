@@ -241,7 +241,7 @@ class DPS_Subscription_Addon {
         $price = get_post_meta( $sub->ID, 'subscription_price', true );
         $client_post = $cid ? get_post( absint( $cid ) ) : null;
         $client_name = $client_post ? sanitize_text_field( $client_post->post_title ) : '';
-        $valor_fmt   = $price ? number_format( floatval( $price ), 2, ',', '.' ) : '0,00';
+        $valor_fmt   = $price ? DPS_Money_Helper::format_decimal_to_brazilian( floatval( $price ) ) : '0,00';
         
         // Suporta múltiplos pets
         $pet_ids_raw = get_post_meta( $sub->ID, 'subscription_pet_ids', true );
@@ -436,16 +436,22 @@ class DPS_Subscription_Addon {
         }
 
         // Salvar ou editar assinatura
-        if ( isset( $_POST['dps_subscription_action'] ) && check_admin_referer( 'dps_subscription_action', 'dps_subscription_nonce' ) ) {
-            $this->save_subscription();
+        if ( isset( $_POST['dps_subscription_action'] ) ) {
+            // Usa helper se disponível, senão fallback
+            if ( class_exists( 'DPS_Request_Validator' ) ) {
+                if ( DPS_Request_Validator::verify_request_nonce( 'dps_subscription_action', 'dps_subscription_nonce' ) ) {
+                    $this->save_subscription();
+                }
+            } elseif ( check_admin_referer( 'dps_subscription_action', 'dps_subscription_nonce' ) ) {
+                $this->save_subscription();
+            }
         }
 
         // Cancelar assinatura: move para lixeira sem excluir transações
         if ( isset( $_GET['dps_cancel'] ) && 'subscription' === $_GET['dps_cancel'] && isset( $_GET['id'] ) ) {
             $sub_id = absint( $_GET['id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_cancel_subscription_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_cancel_subscription_', $sub_id, 'GET' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida
@@ -463,9 +469,8 @@ class DPS_Subscription_Addon {
         // Restaurar assinatura cancelada
         if ( isset( $_GET['dps_restore'] ) && 'subscription' === $_GET['dps_restore'] && isset( $_GET['id'] ) ) {
             $sub_id = absint( $_GET['id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_restore_subscription_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_restore_subscription_', $sub_id, 'GET' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida
@@ -483,9 +488,8 @@ class DPS_Subscription_Addon {
         // Excluir assinatura via GET (permanente)
         if ( isset( $_GET['dps_delete'] ) && 'subscription' === $_GET['dps_delete'] && isset( $_GET['id'] ) ) {
             $sub_id = absint( $_GET['id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_delete_subscription_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_subscription_', $sub_id, 'GET' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida antes de excluir
@@ -506,9 +510,8 @@ class DPS_Subscription_Addon {
         // Renovar assinatura
         if ( isset( $_GET['dps_renew'] ) && isset( $_GET['id'] ) ) {
             $sub_id = absint( $_GET['id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_renew_subscription_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_renew_subscription_', $sub_id, 'GET' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida
@@ -527,9 +530,8 @@ class DPS_Subscription_Addon {
         // Excluir todos os agendamentos vinculados a uma assinatura
         if ( isset( $_GET['dps_delete_appts'] ) && isset( $_GET['id'] ) ) {
             $sub_id = absint( $_GET['id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_delete_appts_subscription_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_appts_subscription_', $sub_id, 'GET' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada. Link expirado ou inválido.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida
@@ -547,9 +549,8 @@ class DPS_Subscription_Addon {
         // Atualizar status de pagamento
         if ( isset( $_POST['dps_update_payment'] ) && isset( $_POST['subscription_id'] ) ) {
             $sub_id = absint( $_POST['subscription_id'] );
-            // Verificar nonce para proteção CSRF
-            $nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-            if ( ! wp_verify_nonce( $nonce, 'dps_update_payment_' . $sub_id ) ) {
+            // Usa helper para verificar nonce dinâmico via POST
+            if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_update_payment_', $sub_id, 'POST' ) ) {
                 wp_die( esc_html__( 'Ação não autorizada.', 'dps-subscription-addon' ) );
             }
             // Valida que é uma assinatura válida
@@ -1169,12 +1170,21 @@ class DPS_Subscription_Addon {
      */
     public function maybe_sync_finance_on_save() {
         // Se estivermos salvando ou atualizando uma assinatura
-        if ( isset( $_POST['dps_subscription_action'] ) && check_admin_referer( 'dps_subscription_action', 'dps_subscription_nonce' ) ) {
-            $sub_id = isset( $_POST['subscription_id'] ) ? intval( $_POST['subscription_id'] ) : 0;
-            // Durante a inserção $sub_id ainda não existirá. Como o save_subscription
-            // chama create_or_update_finance_record ao final, não precisamos
-            // duplicar a chamada aqui. Esta função permanece para compatibilidade.
-            return;
+        if ( isset( $_POST['dps_subscription_action'] ) ) {
+            // Usa helper se disponível, senão fallback
+            $nonce_valid = false;
+            if ( class_exists( 'DPS_Request_Validator' ) ) {
+                $nonce_valid = DPS_Request_Validator::verify_request_nonce( 'dps_subscription_action', 'dps_subscription_nonce' );
+            } else {
+                $nonce_valid = check_admin_referer( 'dps_subscription_action', 'dps_subscription_nonce' );
+            }
+            if ( $nonce_valid ) {
+                $sub_id = isset( $_POST['subscription_id'] ) ? intval( $_POST['subscription_id'] ) : 0;
+                // Durante a inserção $sub_id ainda não existirá. Como o save_subscription
+                // chama create_or_update_finance_record ao final, não precisamos
+                // duplicar a chamada aqui. Esta função permanece para compatibilidade.
+                return;
+            }
         }
     }
 
@@ -1361,7 +1371,7 @@ class DPS_Subscription_Addon {
             echo '<span class="dps-status-badge dps-status-badge--paid">' . esc_html__( 'Valor dos Pacotes', 'dps-subscription-addon' ) . '</span>';
             echo '<small>' . esc_html__( 'Receita mensal estimada', 'dps-subscription-addon' ) . '</small>';
             echo '</div>';
-            echo '<strong class="dps-inline-stats__value">R$ ' . esc_html( number_format( $monthly_revenue, 2, ',', '.' ) ) . '</strong>';
+            echo '<strong class="dps-inline-stats__value">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( $monthly_revenue ) ) . '</strong>';
             echo '</li>';
             echo '<li>';
             echo '<div class="dps-inline-stats__label">';
@@ -1508,7 +1518,7 @@ class DPS_Subscription_Addon {
                 echo '<td data-label="' . $lbl_frequencia . '">' . esc_html( $freq_options[ $freq ] ?? $freq ) . '</td>';
                 
                 // Valor
-                echo '<td data-label="' . $lbl_valor . '"><strong>R$ ' . esc_html( number_format( (float) $price, 2, ',', '.' ) ) . '</strong></td>';
+                echo '<td data-label="' . $lbl_valor . '"><strong>' . esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $price ) ) . '</strong></td>';
                 
                 // Próximo agendamento
                 echo '<td data-label="' . $lbl_proximo . '">' . ( $next_appt ? esc_html( $next_appt ) : '<span class="dps-text-muted">—</span>' ) . '</td>';
@@ -1679,7 +1689,7 @@ class DPS_Subscription_Addon {
                 echo '<td data-label="' . $lbl_servico . '">' . esc_html( $srv ) . ' <span class="dps-text-muted">(' . esc_html( $freq_options[ $freq ] ?? $freq ) . ')</span></td>';
                 
                 // Valor
-                echo '<td data-label="' . $lbl_valor . '">R$ ' . esc_html( number_format( (float) $price, 2, ',', '.' ) ) . '</td>';
+                echo '<td data-label="' . $lbl_valor . '">' . esc_html( DPS_Money_Helper::format_currency_from_decimal( (float) $price ) ) . '</td>';
                 
                 // Status de pagamento
                 $pay_label = $pay === 'pago' ? __( 'Pago', 'dps-subscription-addon' ) : __( 'Pendente', 'dps-subscription-addon' );

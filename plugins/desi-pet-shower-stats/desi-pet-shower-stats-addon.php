@@ -597,8 +597,8 @@ class DPS_Stats_Addon {
         ?>
         <div class="dps-stats-cards">
             <?php $this->render_card( '📋', $current['appointments'], __( 'Atendimentos', 'dps-stats-addon' ), $variation['appointments'], 'primary' ); ?>
-            <?php $this->render_card( '💰', 'R$ ' . number_format( $current['revenue'], 2, ',', '.' ), __( 'Receita', 'dps-stats-addon' ), $variation['revenue'], 'success' ); ?>
-            <?php $this->render_card( '📈', 'R$ ' . number_format( $current['ticket_avg'], 2, ',', '.' ), __( 'Ticket Médio', 'dps-stats-addon' ), $variation['ticket_avg'], 'primary' ); ?>
+            <?php $this->render_card( '💰', DPS_Money_Helper::format_currency_from_decimal( $current['revenue'] ), __( 'Receita', 'dps-stats-addon' ), $variation['revenue'], 'success' ); ?>
+            <?php $this->render_card( '📈', DPS_Money_Helper::format_currency_from_decimal( $current['ticket_avg'] ), __( 'Ticket Médio', 'dps-stats-addon' ), $variation['ticket_avg'], 'primary' ); ?>
             <?php $this->render_card( '👥', $new_clients, __( 'Novos Clientes', 'dps-stats-addon' ), null, 'primary' ); ?>
             <?php $this->render_card( '❌', $cancel_rate . '%', __( 'Cancelamentos', 'dps-stats-addon' ), null, $cancel_rate > 10 ? 'danger' : 'warning' ); ?>
         </div>
@@ -668,7 +668,7 @@ class DPS_Stats_Addon {
             
             // Inadimplência
             $overdue_display = $overdue_revenue['value'] > 0
-                ? 'R$ ' . number_format( $overdue_revenue['value'], 2, ',', '.' )
+                ? DPS_Money_Helper::format_currency_from_decimal( $overdue_revenue['value'] )
                 : 'R$ 0,00';
             $this->render_card_with_tooltip(
                 '⚠️',
@@ -770,17 +770,17 @@ class DPS_Stats_Addon {
         <div class="dps-stats-metrics-list">
             <div class="dps-stats-metric dps-stats-metric--success">
                 <span class="dps-stats-metric__icon">💵</span>
-                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['revenue'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $current['revenue'] ) ); ?></span>
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Receita Total', 'dps-stats-addon' ); ?></span>
             </div>
             <div class="dps-stats-metric dps-stats-metric--danger">
                 <span class="dps-stats-metric__icon">💸</span>
-                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['expenses'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $current['expenses'] ) ); ?></span>
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Despesas', 'dps-stats-addon' ); ?></span>
             </div>
             <div class="dps-stats-metric dps-stats-metric--primary">
                 <span class="dps-stats-metric__icon">📊</span>
-                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $current['profit'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $current['profit'] ) ); ?></span>
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Lucro Líquido', 'dps-stats-addon' ); ?></span>
             </div>
             <div class="dps-stats-metric dps-stats-metric--<?php echo $variation['profit'] >= 0 ? 'success' : 'danger'; ?>">
@@ -886,12 +886,12 @@ class DPS_Stats_Addon {
             </div>
             <div class="dps-stats-metric dps-stats-metric--primary">
                 <span class="dps-stats-metric__icon">💰</span>
-                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $data['revenue'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $data['revenue'] ) ); ?></span>
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Receita no Período', 'dps-stats-addon' ); ?></span>
             </div>
             <div class="dps-stats-metric dps-stats-metric--danger">
                 <span class="dps-stats-metric__icon">⚠️</span>
-                <span class="dps-stats-metric__value">R$ <?php echo esc_html( number_format( $data['open_value'], 2, ',', '.' ) ); ?></span>
+                <span class="dps-stats-metric__value"><?php echo esc_html( DPS_Money_Helper::format_currency_from_decimal( $data['open_value'] ) ); ?></span>
                 <span class="dps-stats-metric__label"><?php esc_html_e( 'Valor em Aberto', 'dps-stats-addon' ); ?></span>
             </div>
         </div>

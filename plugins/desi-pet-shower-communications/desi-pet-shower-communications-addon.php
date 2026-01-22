@@ -514,8 +514,8 @@ class DPS_Communications_Addon {
             return;
         }
 
-        // Verifica nonce e dá feedback adequado
-        if ( ! isset( $_POST['dps_comm_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_comm_nonce'] ) ), 'dps_comm_save' ) ) {
+        // Verifica nonce e dá feedback adequado usando helper
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_comm_nonce', 'dps_comm_save', 'POST', false ) ) {
             // Usa transient para persistir mensagem de erro entre redirects
             set_transient( 'dps_comm_settings_error', __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-communications-addon' ), 30 );
             wp_safe_redirect( add_query_arg( [ 'page' => 'dps-communications' ], admin_url( 'admin.php' ) ) );

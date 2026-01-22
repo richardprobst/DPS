@@ -833,13 +833,13 @@ class DPS_Stats_API {
         $csv .= __( 'MÉTRICAS PRINCIPAIS', 'dps-stats-addon' ) . "\n";
         $csv .= __( 'Atendimentos', 'dps-stats-addon' ) . ';' . $comparison['current']['appointments'] . ';' . 
                 sprintf( '%+.1f%%', $comparison['variation']['appointments'] ) . "\n";
-        $csv .= __( 'Receita', 'dps-stats-addon' ) . ';R$ ' . number_format( $comparison['current']['revenue'], 2, ',', '.' ) . ';' .
+        $csv .= __( 'Receita', 'dps-stats-addon' ) . ';' . DPS_Money_Helper::format_currency_from_decimal( $comparison['current']['revenue'] ) . ';' .
                 sprintf( '%+.1f%%', $comparison['variation']['revenue'] ) . "\n";
-        $csv .= __( 'Despesas', 'dps-stats-addon' ) . ';R$ ' . number_format( $comparison['current']['expenses'], 2, ',', '.' ) . ';' .
+        $csv .= __( 'Despesas', 'dps-stats-addon' ) . ';' . DPS_Money_Helper::format_currency_from_decimal( $comparison['current']['expenses'] ) . ';' .
                 sprintf( '%+.1f%%', $comparison['variation']['expenses'] ) . "\n";
-        $csv .= __( 'Lucro', 'dps-stats-addon' ) . ';R$ ' . number_format( $comparison['current']['profit'], 2, ',', '.' ) . ';' .
+        $csv .= __( 'Lucro', 'dps-stats-addon' ) . ';' . DPS_Money_Helper::format_currency_from_decimal( $comparison['current']['profit'] ) . ';' .
                 sprintf( '%+.1f%%', $comparison['variation']['profit'] ) . "\n";
-        $csv .= __( 'Ticket Médio', 'dps-stats-addon' ) . ';R$ ' . number_format( $comparison['current']['ticket_avg'], 2, ',', '.' ) . ';' .
+        $csv .= __( 'Ticket Médio', 'dps-stats-addon' ) . ';' . DPS_Money_Helper::format_currency_from_decimal( $comparison['current']['ticket_avg'] ) . ';' .
                 sprintf( '%+.1f%%', $comparison['variation']['ticket_avg'] ) . "\n\n";
 
         // Distribuição de espécies

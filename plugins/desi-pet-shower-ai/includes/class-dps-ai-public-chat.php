@@ -319,11 +319,9 @@ class DPS_AI_Public_Chat {
      * Handler AJAX para perguntas do chat público.
      */
     public function handle_ajax_ask() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_public_ask' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança. Recarregue a página e tente novamente.', 'dps-ai' ),
-            ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_public_ask' ) ) {
+            return;
         }
 
         // Verifica se o chat público está habilitado
@@ -494,11 +492,9 @@ class DPS_AI_Public_Chat {
      * Handler AJAX para feedback.
      */
     public function handle_ajax_feedback() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_public_ask' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_public_ask' ) ) {
+            return;
         }
 
         $message_id = isset( $_POST['message_id'] ) ? sanitize_text_field( wp_unslash( $_POST['message_id'] ) ) : '';
@@ -699,7 +695,7 @@ class DPS_AI_Public_Chat {
                 $context .= "\nSERVIÇOS DISPONÍVEIS:\n";
                 foreach ( $services as $service ) {
                     $name  = $service['title'] ?? '';
-                    $price = isset( $service['price'] ) ? 'R$ ' . number_format( $service['price'], 2, ',', '.' ) : '';
+                    $price = isset( $service['price'] ) ? DPS_Money_Helper::format_currency_from_decimal( $service['price'] ) : '';
                     if ( $name ) {
                         $context .= "- {$name}" . ( $price ? " (a partir de {$price})" : '' ) . "\n";
                     }
@@ -784,40 +780,50 @@ class DPS_AI_Public_Chat {
     /**
      * Obtém o IP do cliente de forma segura.
      *
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_with_proxy_support() diretamente.
+     *
      * @return string
      */
     private function get_client_ip() {
-        $ip = '';
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            $ip = DPS_IP_Helper::get_ip_with_proxy_support();
+            if ( ! empty( $ip ) ) {
+                return $ip;
+            }
+        } else {
+            // Fallback para retrocompatibilidade
+            $ip = '';
 
-        // Ordem de prioridade para obter IP
-        $headers = [
-            'HTTP_CF_CONNECTING_IP', // Cloudflare
-            'HTTP_X_FORWARDED_FOR',  // Proxy/Load balancer
-            'HTTP_X_REAL_IP',        // Nginx
-            'REMOTE_ADDR',           // Conexão direta
-        ];
+            // Ordem de prioridade para obter IP
+            $headers = [
+                'HTTP_CF_CONNECTING_IP', // Cloudflare
+                'HTTP_X_FORWARDED_FOR',  // Proxy/Load balancer
+                'HTTP_X_REAL_IP',        // Nginx
+                'REMOTE_ADDR',           // Conexão direta
+            ];
 
-        foreach ( $headers as $header ) {
-            if ( ! empty( $_SERVER[ $header ] ) ) {
-                $ip = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
-                // Se houver múltiplos IPs (X-Forwarded-For), pega o primeiro
-                if ( strpos( $ip, ',' ) !== false ) {
-                    $ips = explode( ',', $ip );
-                    $ip  = trim( $ips[0] );
+            foreach ( $headers as $header ) {
+                if ( ! empty( $_SERVER[ $header ] ) ) {
+                    $ip = sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) );
+                    // Se houver múltiplos IPs (X-Forwarded-For), pega o primeiro
+                    if ( strpos( $ip, ',' ) !== false ) {
+                        $ips = explode( ',', $ip );
+                        $ip  = trim( $ips[0] );
+                    }
+                    break;
                 }
-                break;
+            }
+
+            // Valida IP
+            if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+                return $ip;
             }
         }
 
-        // Valida IP - usa hash único baseado na sessão se IP inválido
-        if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-            // Gera um identificador único baseado em características do navegador
-            $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
-            $accept_lang = isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) : '';
-            $ip = 'unknown_' . substr( md5( $user_agent . $accept_lang . gmdate( 'Y-m-d' ) ), 0, 16 );
-        }
-
-        return $ip;
+        // IP inválido - gera identificador único baseado em características do navegador
+        $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+        $accept_lang = isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) : '';
+        return 'unknown_' . substr( md5( $user_agent . $accept_lang . gmdate( 'Y-m-d' ) ), 0, 16 );
     }
 
     /**
@@ -1129,8 +1135,8 @@ CONTEXTO DO SISTEMA:
             $pending_amount = (float) $pending_amount_cents / 100;
             
             $context .= "💰 FINANCEIRO:\n";
-            $context .= "- Faturamento deste mês: R$ " . number_format( $month_revenue, 2, ',', '.' ) . "\n";
-            $context .= "- Valor pendente total: R$ " . number_format( $pending_amount, 2, ',', '.' ) . "\n\n";
+            $context .= "- Faturamento deste mês: " . DPS_Money_Helper::format_currency_from_decimal( $month_revenue ) . "\n";
+            $context .= "- Valor pendente total: " . DPS_Money_Helper::format_currency_from_decimal( $pending_amount ) . "\n\n";
         }
 
         // 5. Informações do sistema

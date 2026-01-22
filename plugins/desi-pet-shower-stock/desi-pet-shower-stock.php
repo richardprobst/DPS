@@ -222,7 +222,8 @@ class DPS_Stock_Addon {
             return;
         }
 
-        if ( ! isset( $_POST['dps_stock_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_stock_meta_nonce'] ) ), 'dps_stock_meta' ) ) {
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_stock_meta_nonce', 'dps_stock_meta', 'POST', false ) ) {
             return;
         }
 

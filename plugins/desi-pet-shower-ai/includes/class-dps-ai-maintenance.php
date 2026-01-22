@@ -271,14 +271,9 @@ class DPS_AI_Maintenance {
      * @return void
      */
     public function ajax_manual_cleanup() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_manual_cleanup' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ) ] );
-        }
-        
-        // Verifica permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Você não tem permissão para executar esta ação.', 'dps-ai' ) ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_manual_cleanup' ) ) {
+            return;
         }
         
         // Executa limpeza

@@ -255,9 +255,16 @@ class DPS_Registration_Addon {
      * Obtém o IP do cliente de forma segura.
      *
      * @since 1.1.0
+     * @deprecated 2.5.0 Use DPS_IP_Helper::get_ip_hash( 'dps_reg_' ) diretamente.
+     *
      * @return string IP do cliente (hash para privacidade)
      */
     private function get_client_ip_hash() {
+        if ( class_exists( 'DPS_IP_Helper' ) ) {
+            return DPS_IP_Helper::get_ip_hash( 'dps_reg_' );
+        }
+        
+        // Fallback para retrocompatibilidade
         $ip = '';
         
         // Prioriza REMOTE_ADDR por segurança
@@ -1798,8 +1805,8 @@ class DPS_Registration_Addon {
             return;
         }
 
-        // F1.8: Verifica nonce com feedback de erro
-        if ( ! isset( $_POST['dps_reg_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_reg_nonce'] ) ), 'dps_reg_action' ) ) {
+        // F1.8: Verifica nonce com feedback de erro usando helper
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_reg_nonce', 'dps_reg_action', 'POST', false ) ) {
             $this->add_error( __( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }
