@@ -23,7 +23,7 @@ Este documento apresenta uma análise completa de redundâncias e duplicidade de
 |-----------|--------|------------|
 | Obtenção de IP do cliente | ✅ **CORRIGIDO** - DPS_IP_Helper criado | 🔴 Alta |
 | Formatação monetária manual | ✅ **CORRIGIDO** - 44 locais migrados | 🔴 Alta |
-| Verificação de nonce inline | ⏳ Pendente | 🟡 Média |
+| Verificação de nonce inline | ⏳ **EM ANDAMENTO** - Helper expandido, 7 migrados | 🟡 Média |
 | Acesso a metadados de cliente | ⏳ Pendente | 🟡 Média |
 | Carregamento de text domain | ⚪ Mantido (necessário) | 🟢 Baixa |
 | Registro de menu admin | ⚪ Mantido (necessário) | 🟢 Baixa |
@@ -96,41 +96,45 @@ Adicionados novos métodos ao `DPS_Money_Helper`:
 
 ## 🟡 Duplicações de Média Prioridade
 
-### 3. Verificação de Nonce Inline
+### 3. Verificação de Nonce Inline - **EM ANDAMENTO**
+
+**Status:** ⏳ Helper expandido, migração inicial de 7 locais concluída
 
 **Problema:** 161 ocorrências de verificação de nonce com padrões similares, quando poderia usar `DPS_Request_Validator`.
 
-**Padrões repetidos:**
+**Solução Implementada:**
+Expandido `DPS_Request_Validator` com novos métodos:
+- `verify_ajax_nonce( $action, $nonce_field = 'nonce' )` - AJAX público/portal
+- `verify_ajax_admin( $action, $capability = 'manage_options' )` - AJAX admin
+- `verify_admin_action( $action, $capability, $nonce_field = '_wpnonce' )` - GET actions
+- `verify_admin_form( $action, $nonce_field, $capability )` - POST forms
+- `verify_dynamic_nonce( $prefix, $id )` - Nonces com ID dinâmico
+
+**Exemplo de migração:**
 ```php
-// ❌ Padrão 1 (mais comum):
+// ❌ Código antigo (repetido ~50 vezes):
 if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_action' ) ) {
-    wp_die( 'Acesso negado.' );
+    wp_send_json_error( [ 'message' => 'Acesso negado.' ] );
+}
+if ( ! current_user_can( 'manage_options' ) ) {
+    wp_send_json_error( [ 'message' => 'Sem permissão.' ] );
 }
 
-// ❌ Padrão 2:
-if ( ! wp_verify_nonce( $nonce, 'dps_some_action_' . $id ) ) {
-    return false;
-}
-
-// ✅ Deveria usar:
-if ( ! DPS_Request_Validator::verify_nonce_and_capability( 'dps_nonce', 'manage_options' ) ) {
-    wp_die( __( 'Acesso negado.', 'desi-pet-shower' ) );
+// ✅ Novo padrão (1 linha):
+if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_action' ) ) {
+    return;
 }
 ```
 
-**Localizações principais:**
-- `class-dps-base-frontend.php` (12 ocorrências)
-- `class-dps-client-portal.php` (15 ocorrências)
-- `class-dps-portal-admin-actions.php` (8 ocorrências)
-- `desi-pet-shower-subscription-addon.php` (6 ocorrências)
-- Outros add-ons (~120 ocorrências totais)
+**Arquivos migrados (inicial):**
+- [x] `desi-pet-shower-ai-addon.php` (3 handlers AJAX)
+- [x] `class-dps-ai-analytics.php` (1 handler)
+- [x] `class-dps-portal-ajax-handler.php` (3 handlers)
 
-**Solução Proposta:**
-1. Expandir `DPS_Request_Validator` com métodos especializados:
-   - `verify_ajax_nonce( $action )`
-   - `verify_admin_action( $action, $capability )`
-   - `verify_frontend_action( $action )`
-2. Criar wrapper que retorna resposta JSON padronizada para AJAX
+**Próximos passos:**
+- [ ] Migrar handlers em `class-dps-client-portal.php` (~15 ocorrências)
+- [ ] Migrar handlers em `desi-pet-shower-subscription-addon.php` (~6 ocorrências)
+- [ ] Migrar handlers no plugin base (~12 ocorrências)
 
 ---
 
@@ -240,7 +244,7 @@ DPS_Admin_Menu_Helper::register_submenu( [
 | DPS_Phone_Helper | 24 | ~30 | ✅ Bom uso |
 | DPS_WhatsApp_Helper | 26 | ~30 | ✅ Bom uso |
 | DPS_URL_Builder | 30 | ~50 | ⏳ 20 locais não usando |
-| DPS_Request_Validator | 11 | ~161 | ⏳ 150 locais não usando |
+| DPS_Request_Validator | 18 | ~161 | ⏳ **EXPANDIDO** - 7 locais migrados |
 | DPS_Query_Helper | 7 | ~50 | ⏳ 43 locais não usando |
 | DPS_Message_Helper | 252 | ~260 | ✅ Excelente uso |
 
@@ -283,19 +287,25 @@ DPS_Admin_Menu_Helper::register_submenu( [
 
 ---
 
-### Fase 3: Expandir DPS_Request_Validator (Prioridade Média)
+### Fase 3: Expandir DPS_Request_Validator (Prioridade Média) - ⏳ EM ANDAMENTO
 **Esforço:** 4-5 horas | **Risco:** Médio | **Impacto:** Alto
 
-**Tarefas:**
-1. Adicionar métodos especializados ao `DPS_Request_Validator`:
-   - `verify_ajax_request( $action, $capability = null )`
-   - `verify_admin_page_access( $capability )`
-   - `wp_die_unauthorized()`
-2. Criar wrappers para respostas AJAX padronizadas
-3. Migrar progressivamente as 150+ ocorrências
-4. Documentar padrão no AGENTS.md
+**Progresso:**
+- ✅ Adicionados 5 métodos novos ao `DPS_Request_Validator`:
+  - `verify_ajax_nonce()` - AJAX público
+  - `verify_ajax_admin()` - AJAX admin
+  - `verify_admin_action()` - GET actions
+  - `verify_admin_form()` - POST forms
+  - `verify_dynamic_nonce()` - Nonces com ID
+- ✅ Adicionados métodos auxiliares `send_json_error()`, `send_json_success()`
+- ✅ Adicionados getters `get_get_int()`, `get_get_string()`
+- ✅ Migrados 7 handlers AJAX iniciais
+- [ ] Migrar restante das ~150 ocorrências (próximas iterações)
 
-**Abordagem recomendada:** Migrar por add-on, começando pelos mais usados.
+**Arquivos migrados:**
+- `desi-pet-shower-ai-addon.php` (3 handlers)
+- `class-dps-ai-analytics.php` (1 handler)
+- `class-dps-portal-ajax-handler.php` (3 handlers)
 
 ---
 
@@ -360,11 +370,21 @@ DPS_Admin_Menu_Helper::register_submenu( [
 - [x] Migrar desi-pet-shower-services (4 locais)
 - [x] Atualizar relatório de análise
 
-### Fase 3 - Request Validator (Próxima Fase)
-- [ ] Adicionar métodos especializados
-- [ ] Criar helper de resposta AJAX
-- [ ] Migrar plugin base
-- [ ] Migrar add-ons gradualmente
+### Fase 3 - Request Validator ⏳ EM ANDAMENTO
+- [x] Adicionar método `verify_ajax_nonce()`
+- [x] Adicionar método `verify_ajax_admin()`
+- [x] Adicionar método `verify_admin_action()`
+- [x] Adicionar método `verify_admin_form()`
+- [x] Adicionar método `verify_dynamic_nonce()`
+- [x] Adicionar métodos auxiliares `send_json_error()`, `send_json_success()`
+- [x] Adicionar getters `get_get_int()`, `get_get_string()`
+- [x] Migrar desi-pet-shower-ai (3 handlers AJAX)
+- [x] Migrar class-dps-ai-analytics (1 handler)
+- [x] Migrar class-dps-portal-ajax-handler (3 handlers)
+- [ ] Migrar class-dps-client-portal (~15 ocorrências)
+- [ ] Migrar plugin base (~12 ocorrências)
+- [ ] Migrar outros add-ons (~100+ ocorrências)
+- [x] Atualizar documentação ANALYSIS.md
 
 ### Fase 4 - Client Helper
 - [ ] Criar/expandir helper

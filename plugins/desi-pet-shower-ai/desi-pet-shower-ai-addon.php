@@ -2582,18 +2582,9 @@ class DPS_AI_Addon {
      * Verifica se a API key está configurada e testa a conexão.
      */
     public function ajax_test_connection() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_test_nonce' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_test_nonce', 'manage_options' ) ) {
+            return;
         }
 
         // Testa conexão
@@ -2614,18 +2605,9 @@ class DPS_AI_Addon {
      * Handler AJAX para validação de contraste de cores.
      */
     public function ajax_validate_contrast() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_validate_contrast' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_validate_contrast', 'manage_options' ) ) {
+            return;
         }
 
         // Obtém cores
@@ -2656,18 +2638,9 @@ class DPS_AI_Addon {
      * Retorna o prompt padrão do arquivo para substituir no textarea.
      */
     public function ajax_reset_system_prompt() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_reset_prompt' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
-        }
-
-        // Verifica permissão
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ),
-            ] );
+        // Verifica nonce e permissão admin
+        if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_ai_reset_prompt', 'manage_options' ) ) {
+            return;
         }
 
         // Obtém contexto

@@ -91,27 +91,53 @@ $agendamentos = DPS_Query_Helper::get_paginated_posts( 'dps_appointment', 20, $p
 **Boas práticas**: Use `fields => 'ids'` quando precisar apenas de IDs, e pré-carregue metadados com `update_meta_cache()` quando precisar de metas.
 
 #### DPS_Request_Validator
-**Propósito**: Validação centralizada de nonces, capabilities e sanitização de campos de formulário.
+**Propósito**: Validação centralizada de nonces, capabilities, requisições AJAX e sanitização de campos de formulário.
 
-**Entrada/Saída**:
-- `verify_nonce_and_capability( string $nonce_field, string $capability )`: Valida nonce e permissão
-- `sanitize_text_field_from_post( string $field_name, string $default )`: Sanitiza campo de texto
-- `sanitize_email_from_post( string $field_name )`: Sanitiza e valida email
-- `sanitize_int_from_post( string $field_name, int $default )`: Sanitiza inteiro
+**Métodos principais:**
+- `verify_request_nonce( $nonce_field, $nonce_action, $method, $die_on_failure )`: Verifica nonce POST/GET
+- `verify_nonce_and_capability( $nonce_field, $nonce_action, $capability )`: Valida nonce e permissão
+- `verify_capability( $capability, $die_on_failure )`: Verifica apenas capability
 
-**Exemplos práticos**:
+**Métodos AJAX (Fase 3):**
+- `verify_ajax_nonce( $nonce_action, $nonce_field = 'nonce' )`: Verifica nonce AJAX com resposta JSON automática
+- `verify_ajax_admin( $nonce_action, $capability = 'manage_options' )`: Verifica nonce + capability para AJAX admin
+- `verify_admin_action( $nonce_action, $capability, $nonce_field = '_wpnonce' )`: Verifica nonce de ação GET
+- `verify_admin_form( $nonce_action, $nonce_field, $capability )`: Verifica nonce de formulário POST
+- `verify_dynamic_nonce( $nonce_prefix, $item_id )`: Verifica nonce com ID dinâmico
+
+**Métodos de resposta:**
+- `send_json_error( $message, $code, $status )`: Resposta JSON de erro padronizada
+- `send_json_success( $message, $data )`: Resposta JSON de sucesso padronizada
+
+**Métodos auxiliares:**
+- `get_post_int( $field_name, $default )`: Obtém inteiro do POST sanitizado
+- `get_post_string( $field_name, $default )`: Obtém string do POST sanitizada
+- `get_get_int( $field_name, $default )`: Obtém inteiro do GET sanitizado
+- `get_get_string( $field_name, $default )`: Obtém string do GET sanitizada
+
+**Exemplos práticos:**
 ```php
-// Validar requisição antes de processar formulário
-if ( ! DPS_Request_Validator::verify_nonce_and_capability( 'dps_nonce', 'edit_posts' ) ) {
-    wp_die( 'Acesso negado.' );
+// Handler AJAX admin simples
+public function ajax_delete_item() {
+    if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_delete_item' ) ) {
+        return; // Resposta JSON de erro já enviada
+    }
+    // ... processar ação
 }
 
-// Sanitizar campos do formulário
-$nome = DPS_Request_Validator::sanitize_text_field_from_post( 'client_name', '' );
-$email = DPS_Request_Validator::sanitize_email_from_post( 'client_email' );
+// Verificar nonce com ID dinâmico
+$client_id = absint( $_GET['client_id'] );
+if ( ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_client_', $client_id, 'nonce', 'GET' ) ) {
+    return;
+}
+
+// Validar formulário admin
+if ( ! DPS_Request_Validator::verify_admin_form( 'dps_save_settings', 'dps_settings_nonce' ) ) {
+    return;
+}
 ```
 
-**Boas práticas**: NUNCA implemente validação de nonce ou sanitização manual fora deste helper. Evite duplicar lógica de segurança.
+**Boas práticas**: Use `verify_ajax_admin()` para handlers AJAX admin e `verify_ajax_nonce()` para AJAX público. Evite duplicar lógica de segurança.
 
 #### DPS_Phone_Helper
 **Propósito**: Formatação e validação padronizada de números de telefone para comunicações (WhatsApp, exibição).
