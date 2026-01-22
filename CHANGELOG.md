@@ -154,6 +154,14 @@ Antes de criar uma nova versão oficial:
 - **Acessibilidade em ícones**: Adicionados atributos `aria-label` e `role="img"` nos ícones de informação.
 - **Focus visible melhorado**: Estilos de foco visíveis consistentes para acessibilidade de navegação por teclado.
 
+#### Fixed (Corrigido)
+
+**Services Add-on - Correção de ativação do catálogo de serviços (v1.6.2)**
+
+- **Hook de ativação movido para arquivo wrapper**: O `register_activation_hook` que popula os 30+ serviços padrão estava incorretamente registrado dentro do construtor da classe `DPS_Services_Addon`, que só era instanciada no hook `init`. Como o WordPress processa hooks de ativação ANTES do hook `init` rodar, o callback nunca era executado, resultando em catálogo vazio mesmo após desativar/reativar o plugin.
+- **Método `activate()` tornado estático**: O método agora pode ser chamado diretamente pelo hook de ativação sem necessitar de uma instância da classe.
+- **Impacto**: Corrige o problema onde o catálogo de 30+ serviços implementado na PR #508 não era refletido no site mesmo após desativar/reativar o add-on.
+
 #### Security (Segurança)
 
 **Services Add-on - Validações reforçadas (v1.6.0)**
