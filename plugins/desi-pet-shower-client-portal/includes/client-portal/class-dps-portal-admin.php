@@ -366,8 +366,8 @@ class DPS_Portal_Admin {
      * @param bool    $update  Indica se é atualização.
      */
     public function save_message_meta( $post_id, $post, $update ) {
-        $nonce = isset( $_POST['dps_portal_message_meta_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_portal_message_meta_nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'dps_portal_message_meta' ) ) {
+        // Usa helper para verificar nonce de meta box
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_request_nonce( 'dps_portal_message_meta', 'dps_portal_message_meta_nonce' ) ) {
             return;
         }
 
@@ -696,8 +696,17 @@ class DPS_Portal_Admin {
         }
         
         // Processa salvamento se houver POST
-        if ( isset( $_POST['dps_branding_save'] ) && check_admin_referer( 'dps_branding_settings', 'dps_branding_nonce' ) ) {
-            $this->save_branding_settings();
+        if ( isset( $_POST['dps_branding_save'] ) ) {
+            // Usa helper se disponível, senão fallback
+            $nonce_valid = false;
+            if ( class_exists( 'DPS_Request_Validator' ) ) {
+                $nonce_valid = DPS_Request_Validator::verify_admin_form( 'dps_branding_settings', 'dps_branding_nonce' );
+            } elseif ( check_admin_referer( 'dps_branding_settings', 'dps_branding_nonce' ) ) {
+                $nonce_valid = true;
+            }
+            if ( $nonce_valid ) {
+                $this->save_branding_settings();
+            }
         }
         
         // Busca configurações atuais

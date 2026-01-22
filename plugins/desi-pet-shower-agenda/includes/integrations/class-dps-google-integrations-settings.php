@@ -482,14 +482,19 @@ class DPS_Google_Integrations_Settings {
      * @since 2.0.0
      */
     private function handle_save_settings() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
-        }
-        
-        // Verifica nonce
-        $nonce = isset( $_POST['dps_google_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_google_nonce'] ) ) : '';
-        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_save_settings' ) ) {
-            wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+        // Usa helper para verificar nonce com capability
+        if ( class_exists( 'DPS_Request_Validator' ) ) {
+            if ( ! DPS_Request_Validator::verify_admin_form( 'dps_google_save_settings', 'dps_google_nonce' ) ) {
+                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+            }
+        } else {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+            }
+            $nonce = isset( $_POST['dps_google_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['dps_google_nonce'] ) ) : '';
+            if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_save_settings' ) ) {
+                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+            }
         }
         
         // Obtém settings atuais
@@ -577,15 +582,20 @@ class DPS_Google_Integrations_Settings {
      * @since 2.0.0
      */
     private function handle_disconnect() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
-        }
-        
-        // Verifica nonce
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce passado via URL
-        $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_disconnect' ) ) {
-            wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+        // Usa helper para verificar nonce com capability
+        if ( class_exists( 'DPS_Request_Validator' ) ) {
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_google_disconnect' ) ) {
+                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+            }
+        } else {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ) );
+            }
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce passado via URL
+            $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+            if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'dps_google_disconnect' ) ) {
+                wp_die( esc_html__( 'Token de segurança inválido.', 'dps-agenda-addon' ) );
+            }
         }
         
         DPS_Google_Auth::disconnect();

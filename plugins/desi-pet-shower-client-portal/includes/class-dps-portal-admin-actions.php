@@ -94,11 +94,10 @@ final class DPS_Portal_Admin_Actions {
      */
     private function handle_generate_token() {
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
         $type      = isset( $_GET['token_type'] ) ? sanitize_text_field( wp_unslash( $_GET['token_type'] ) ) : 'login';
 
-        // Valida nonce
-        if ( ! wp_verify_nonce( $nonce, 'dps_generate_token_' . $client_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_generate_token_', $client_id, 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 
@@ -152,10 +151,9 @@ final class DPS_Portal_Admin_Actions {
      */
     private function handle_revoke_tokens() {
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-        // Valida nonce
-        if ( ! wp_verify_nonce( $nonce, 'dps_revoke_tokens_' . $client_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_tokens_', $client_id, 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 
@@ -180,10 +178,9 @@ final class DPS_Portal_Admin_Actions {
      */
     private function handle_whatsapp_link() {
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
-        $nonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-        // Valida nonce
-        if ( ! wp_verify_nonce( $nonce, 'dps_whatsapp_link_' . $client_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_whatsapp_link_', $client_id, 'GET' ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-client-portal' ) );
         }
 

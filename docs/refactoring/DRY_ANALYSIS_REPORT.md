@@ -23,7 +23,7 @@ Este documento apresenta uma análise completa de redundâncias e duplicidade de
 |-----------|--------|------------|
 | Obtenção de IP do cliente | ✅ **CORRIGIDO** - DPS_IP_Helper criado | 🔴 Alta |
 | Formatação monetária manual | ✅ **CORRIGIDO** - 44 locais migrados | 🔴 Alta |
-| Verificação de nonce inline | ⏳ **EM ANDAMENTO** - Helper expandido, 7 migrados | 🟡 Média |
+| Verificação de nonce inline | ⏳ **EM ANDAMENTO** - 88 handlers migrados em 35 arquivos | 🟡 Média |
 | Acesso a metadados de cliente | ⏳ Pendente | 🟡 Média |
 | Carregamento de text domain | ⚪ Mantido (necessário) | 🟢 Baixa |
 | Registro de menu admin | ⚪ Mantido (necessário) | 🟢 Baixa |
@@ -98,7 +98,7 @@ Adicionados novos métodos ao `DPS_Money_Helper`:
 
 ### 3. Verificação de Nonce Inline - **EM ANDAMENTO**
 
-**Status:** ⏳ Helper expandido, migração inicial de 7 locais concluída
+**Status:** ⏳ 88 handlers migrados em 35 arquivos
 
 **Problema:** 161 ocorrências de verificação de nonce com padrões similares, quando poderia usar `DPS_Request_Validator`.
 
@@ -108,7 +108,11 @@ Expandido `DPS_Request_Validator` com novos métodos:
 - `verify_ajax_admin( $action, $capability = 'manage_options' )` - AJAX admin
 - `verify_admin_action( $action, $capability, $nonce_field = '_wpnonce' )` - GET actions
 - `verify_admin_form( $action, $nonce_field, $capability )` - POST forms
-- `verify_dynamic_nonce( $prefix, $id )` - Nonces com ID dinâmico
+- `verify_dynamic_nonce( $prefix, $id, $method = 'GET' )` - Nonces com ID dinâmico
+
+**Métodos auxiliares:**
+- `send_json_error()`, `send_json_success()` - Respostas JSON padronizadas
+- `get_get_int()`, `get_get_string()` - Getters GET sanitizados
 
 **Exemplo de migração:**
 ```php
@@ -126,15 +130,27 @@ if ( ! DPS_Request_Validator::verify_ajax_admin( 'dps_action' ) ) {
 }
 ```
 
-**Arquivos migrados (inicial):**
-- [x] `desi-pet-shower-ai-addon.php` (3 handlers AJAX)
-- [x] `class-dps-ai-analytics.php` (1 handler)
-- [x] `class-dps-portal-ajax-handler.php` (3 handlers)
-
-**Próximos passos:**
-- [ ] Migrar handlers em `class-dps-client-portal.php` (~15 ocorrências)
-- [ ] Migrar handlers em `desi-pet-shower-subscription-addon.php` (~6 ocorrências)
-- [ ] Migrar handlers no plugin base (~12 ocorrências)
+**Add-ons migrados:**
+| Add-on | Handlers |
+|--------|----------|
+| desi-pet-shower-ai | 18 |
+| desi-pet-shower-client-portal | 12 |
+| desi-pet-shower-groomers | 7 |
+| desi-pet-shower-subscription | 8 |
+| desi-pet-shower-loyalty | 4 |
+| desi-pet-shower-finance | 10 |
+| desi-pet-shower-base | 7 |
+| desi-pet-shower-stats | 6 |
+| desi-pet-shower-agenda | 3 |
+| desi-pet-shower-backup | 4 |
+| desi-pet-shower-payment | 3 |
+| desi-pet-shower-push | 3 |
+| desi-pet-shower-booking | 3 |
+| desi-pet-shower-stock | 1 |
+| desi-pet-shower-registration | 1 |
+| desi-pet-shower-services | 1 |
+| desi-pet-shower-communications | 1 |
+| **Total** | **88** |
 
 ---
 

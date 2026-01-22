@@ -410,7 +410,8 @@ class DPS_Loyalty_Addon {
     }
 
     public function save_campaign_meta( $post_id ) {
-        if ( ! isset( $_POST['dps_campaign_details_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dps_campaign_details_nonce'] ), 'dps_campaign_details' ) ) {
+        // Usa helper para verificar nonce de formulário POST
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_request_nonce( 'dps_campaign_details', 'dps_campaign_details_nonce' ) ) {
             return;
         }
 
@@ -1509,12 +1510,18 @@ class DPS_Loyalty_Addon {
     }
 
     public function handle_campaign_audit() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
-        }
-
-        if ( ! isset( $_POST['dps_loyalty_run_audit_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dps_loyalty_run_audit_nonce'] ), 'dps_loyalty_run_audit' ) ) {
-            wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+        // Usa helper para verificar nonce de formulário POST com capability
+        if ( class_exists( 'DPS_Request_Validator' ) ) {
+            if ( ! DPS_Request_Validator::verify_admin_form( 'dps_loyalty_run_audit', 'dps_loyalty_run_audit_nonce' ) ) {
+                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+            }
+        } else {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
+            }
+            if ( ! isset( $_POST['dps_loyalty_run_audit_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dps_loyalty_run_audit_nonce'] ), 'dps_loyalty_run_audit' ) ) {
+                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+            }
         }
 
         // Limite de campanhas processadas em uma única execução.
@@ -1540,12 +1547,18 @@ class DPS_Loyalty_Addon {
      * @since 1.2.0
      */
     public function handle_export_referrals() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
-        }
-
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_referrals' ) ) {
-            wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+        // Usa helper para verificar nonce de ação GET com capability
+        if ( class_exists( 'DPS_Request_Validator' ) ) {
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_referrals' ) ) {
+                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+            }
+        } else {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( __( 'Acesso negado.', 'dps-loyalty-addon' ) );
+            }
+            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'dps_export_referrals' ) ) {
+                wp_die( __( 'Nonce inválido.', 'dps-loyalty-addon' ) );
+            }
         }
 
         $status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';

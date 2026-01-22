@@ -305,23 +305,23 @@ class DPS_Groomers_Addon {
      */
     private function handle_generate_token() {
         // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
-        if ( ! isset( $_POST['groomer_id'] ) || ! isset( $_POST['_wpnonce'] ) ) {
+        if ( ! isset( $_POST['groomer_id'] ) ) {
             DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_POST['groomer_id'] );
-        $nonce      = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
         $type       = isset( $_POST['token_type'] ) ? sanitize_text_field( wp_unslash( $_POST['token_type'] ) ) : 'login';
-
-        if ( ! wp_verify_nonce( $nonce, 'dps_generate_groomer_token_' . $groomer_id ) ) {
-            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
-            return;
-        }
 
         // SECURITY: Validar que o groomer_id é válido
         if ( ! $groomer_id ) {
             DPS_Message_Helper::add_error( __( 'ID do groomer inválido.', 'dps-groomers-addon' ) );
+            return;
+        }
+
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_generate_groomer_token_', $groomer_id, 'POST' ) ) {
+            DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
 
@@ -350,14 +350,13 @@ class DPS_Groomers_Addon {
      */
     private function handle_revoke_token() {
         // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
-        if ( ! isset( $_GET['token_id'] ) || ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+        if ( ! isset( $_GET['token_id'] ) || ! isset( $_GET['groomer_id'] ) ) {
             DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $token_id   = absint( $_GET['token_id'] );
         $groomer_id = absint( $_GET['groomer_id'] );
-        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 
         // SECURITY: Validar que os IDs são válidos
         if ( ! $token_id || ! $groomer_id ) {
@@ -365,7 +364,8 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        if ( ! wp_verify_nonce( $nonce, 'dps_revoke_groomer_token_' . $token_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_groomer_token_', $token_id, 'GET' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
@@ -387,13 +387,12 @@ class DPS_Groomers_Addon {
      */
     private function handle_revoke_all_tokens() {
         // SECURITY FIX: Validação de parâmetros obrigatórios com feedback
-        if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+        if ( ! isset( $_GET['groomer_id'] ) ) {
             DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
-        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 
         // SECURITY: Validar que o groomer_id é válido
         if ( ! $groomer_id ) {
@@ -401,7 +400,8 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        if ( ! wp_verify_nonce( $nonce, 'dps_revoke_all_groomer_tokens_' . $groomer_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_revoke_all_groomer_tokens_', $groomer_id, 'GET' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
@@ -1160,13 +1160,12 @@ class DPS_Groomers_Addon {
      */
     private function handle_toggle_status() {
         // FUNCTIONAL FIX: Fornecer feedback quando parâmetros estão ausentes
-        if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+        if ( ! isset( $_GET['groomer_id'] ) ) {
             DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
-        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 
         // FUNCTIONAL FIX: Validar que groomer_id é válido
         if ( ! $groomer_id ) {
@@ -1174,7 +1173,8 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        if ( ! wp_verify_nonce( $nonce, 'dps_toggle_status_' . $groomer_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_toggle_status_', $groomer_id, 'GET' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
@@ -1217,13 +1217,12 @@ class DPS_Groomers_Addon {
      */
     private function handle_delete_groomer() {
         // FUNCTIONAL FIX: Fornecer feedback quando parâmetros estão ausentes
-        if ( ! isset( $_GET['groomer_id'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+        if ( ! isset( $_GET['groomer_id'] ) ) {
             DPS_Message_Helper::add_error( __( 'Parâmetros obrigatórios ausentes.', 'dps-groomers-addon' ) );
             return;
         }
 
         $groomer_id = absint( $_GET['groomer_id'] );
-        $nonce      = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 
         // FUNCTIONAL FIX: Validar que groomer_id é válido
         if ( ! $groomer_id ) {
@@ -1231,7 +1230,8 @@ class DPS_Groomers_Addon {
             return;
         }
 
-        if ( ! wp_verify_nonce( $nonce, 'dps_delete_groomer_' . $groomer_id ) ) {
+        // Usa helper para verificar nonce dinâmico
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_delete_groomer_', $groomer_id, 'GET' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
@@ -1310,13 +1310,8 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_update_groomer() {
-        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
-        if ( ! isset( $_POST['dps_edit_groomer_nonce'] ) ) {
-            DPS_Message_Helper::add_error( __( 'Dados do formulário inválidos.', 'dps-groomers-addon' ) );
-            return;
-        }
-
-        if ( ! wp_verify_nonce( wp_unslash( $_POST['dps_edit_groomer_nonce'] ), 'dps_edit_groomer' ) ) {
+        // Usa helper para verificar nonce de formulário POST
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_admin_form( 'dps_edit_groomer', 'dps_edit_groomer_nonce' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
@@ -1385,13 +1380,8 @@ class DPS_Groomers_Addon {
      * @since 1.2.0
      */
     private function handle_export_csv() {
-        // FUNCTIONAL FIX: Fornecer feedback quando nonce não está presente
-        if ( ! isset( $_GET['_wpnonce'] ) ) {
-            DPS_Message_Helper::add_error( __( 'Parâmetros de segurança ausentes.', 'dps-groomers-addon' ) );
-            return;
-        }
-
-        if ( ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'dps_export_csv' ) ) {
+        // Usa helper para verificar nonce de ação GET
+        if ( class_exists( 'DPS_Request_Validator' ) && ! DPS_Request_Validator::verify_admin_action( 'dps_export_csv' ) ) {
             DPS_Message_Helper::add_error( __( 'Erro de segurança. Tente novamente.', 'dps-groomers-addon' ) );
             return;
         }
