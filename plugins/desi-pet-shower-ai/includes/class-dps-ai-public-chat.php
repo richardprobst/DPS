@@ -319,11 +319,9 @@ class DPS_AI_Public_Chat {
      * Handler AJAX para perguntas do chat público.
      */
     public function handle_ajax_ask() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_public_ask' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança. Recarregue a página e tente novamente.', 'dps-ai' ),
-            ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_public_ask' ) ) {
+            return;
         }
 
         // Verifica se o chat público está habilitado
@@ -494,11 +492,9 @@ class DPS_AI_Public_Chat {
      * Handler AJAX para feedback.
      */
     public function handle_ajax_feedback() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_public_ask' ) ) {
-            wp_send_json_error( [
-                'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ),
-            ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_public_ask' ) ) {
+            return;
         }
 
         $message_id = isset( $_POST['message_id'] ) ? sanitize_text_field( wp_unslash( $_POST['message_id'] ) ) : '';

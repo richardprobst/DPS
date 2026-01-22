@@ -244,7 +244,7 @@ DPS_Admin_Menu_Helper::register_submenu( [
 | DPS_Phone_Helper | 24 | ~30 | ✅ Bom uso |
 | DPS_WhatsApp_Helper | 26 | ~30 | ✅ Bom uso |
 | DPS_URL_Builder | 30 | ~50 | ⏳ 20 locais não usando |
-| DPS_Request_Validator | 18 | ~161 | ⏳ **EXPANDIDO** - 7 locais migrados |
+| DPS_Request_Validator | 29 | ~161 | ⏳ **EXPANDIDO** - 22 handlers migrados |
 | DPS_Query_Helper | 7 | ~50 | ⏳ 43 locais não usando |
 | DPS_Message_Helper | 252 | ~260 | ✅ Excelente uso |
 
@@ -299,13 +299,21 @@ DPS_Admin_Menu_Helper::register_submenu( [
   - `verify_dynamic_nonce()` - Nonces com ID
 - ✅ Adicionados métodos auxiliares `send_json_error()`, `send_json_success()`
 - ✅ Adicionados getters `get_get_int()`, `get_get_string()`
-- ✅ Migrados 7 handlers AJAX iniciais
-- [ ] Migrar restante das ~150 ocorrências (próximas iterações)
+- ✅ Migrados **22 handlers** em 11 arquivos
+- [ ] Migrar restante das ~130 ocorrências (próximas iterações)
 
 **Arquivos migrados:**
-- `desi-pet-shower-ai-addon.php` (3 handlers)
+- `desi-pet-shower-ai-addon.php` (6 handlers)
 - `class-dps-ai-analytics.php` (1 handler)
+- `class-dps-ai-scheduler.php` (2 handlers)
+- `class-dps-ai-maintenance.php` (1 handler)
+- `class-dps-ai-integration-portal.php` (1 handler)
+- `class-dps-ai-knowledge-base.php` (1 handler)
+- `class-dps-ai-public-chat.php` (2 handlers)
+- `class-dps-ai-knowledge-base-admin.php` (1 handler)
+- `class-dps-ai-knowledge-base-tester.php` (1 handler)
 - `class-dps-portal-ajax-handler.php` (3 handlers)
+- `desi-pet-shower-finance-addon.php` (3 handlers)
 
 ---
 
@@ -378,12 +386,20 @@ DPS_Admin_Menu_Helper::register_submenu( [
 - [x] Adicionar método `verify_dynamic_nonce()`
 - [x] Adicionar métodos auxiliares `send_json_error()`, `send_json_success()`
 - [x] Adicionar getters `get_get_int()`, `get_get_string()`
-- [x] Migrar desi-pet-shower-ai (3 handlers AJAX)
-- [x] Migrar class-dps-ai-analytics (1 handler)
-- [x] Migrar class-dps-portal-ajax-handler (3 handlers)
+- [x] Migrar desi-pet-shower-ai-addon.php (6 handlers)
+- [x] Migrar class-dps-ai-analytics.php (1 handler)
+- [x] Migrar class-dps-ai-scheduler.php (2 handlers)
+- [x] Migrar class-dps-ai-maintenance.php (1 handler)
+- [x] Migrar class-dps-ai-integration-portal.php (1 handler)
+- [x] Migrar class-dps-ai-knowledge-base.php (1 handler)
+- [x] Migrar class-dps-ai-public-chat.php (2 handlers)
+- [x] Migrar class-dps-ai-knowledge-base-admin.php (1 handler)
+- [x] Migrar class-dps-ai-knowledge-base-tester.php (1 handler)
+- [x] Migrar class-dps-portal-ajax-handler.php (3 handlers)
+- [x] Migrar desi-pet-shower-finance-addon.php (3 handlers)
 - [ ] Migrar class-dps-client-portal (~15 ocorrências)
 - [ ] Migrar plugin base (~12 ocorrências)
-- [ ] Migrar outros add-ons (~100+ ocorrências)
+- [ ] Migrar outros add-ons (~80+ ocorrências)
 - [x] Atualizar documentação ANALYSIS.md
 
 ### Fase 4 - Client Helper

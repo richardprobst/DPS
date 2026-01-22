@@ -608,14 +608,9 @@ class DPS_Finance_Addon {
         if ( isset( $_GET['dps_finance_export_pdf'] ) ) {
             $report_type = sanitize_text_field( wp_unslash( $_GET['dps_finance_export_pdf'] ) );
             
-            // Valida nonce
-            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_pdf' ) ) {
-                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
-            }
-            
-            // Verifica permissão
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'Você não tem permissão para exportar relatórios.', 'dps-finance-addon' ) );
+            // Valida nonce e permissão usando helper
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_pdf' ) ) {
+                return;
             }
             
             if ( $report_type === 'dre' ) {
@@ -630,13 +625,9 @@ class DPS_Finance_Addon {
         // Exportação CSV - processa antes das outras ações
         // SEGURANÇA: Adicionada verificação de nonce e permissão
         if ( isset( $_GET['dps_fin_export'] ) && '1' === $_GET['dps_fin_export'] ) {
-            // Verifica nonce
-            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_export_csv' ) ) {
-                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
-            }
-            // Verifica permissão
-            if ( ! current_user_can( 'manage_options' ) ) {
-                wp_die( esc_html__( 'Você não tem permissão para exportar.', 'dps-finance-addon' ) );
+            // Verifica nonce e permissão usando helper
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_export_csv' ) ) {
+                return;
             }
             $this->export_transactions_csv();
             exit;
@@ -646,12 +637,10 @@ class DPS_Finance_Addon {
         if ( isset( $_GET['dps_resend_payment_link'] ) && isset( $_GET['trans_id'] ) ) {
             $trans_id = intval( $_GET['trans_id'] );
             
-            // Valida nonce
-            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_resend_link_' . $trans_id ) ) {
-                wp_die( esc_html__( 'Link de segurança inválido.', 'dps-finance-addon' ) );
+            // Valida nonce dinâmico e permissão usando helper
+            if ( ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_resend_link_', $trans_id, '_wpnonce', 'GET' ) ) {
+                return;
             }
-            
-            // Verifica permissão
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_die( esc_html__( 'Você não tem permissão para esta ação.', 'dps-finance-addon' ) );
             }

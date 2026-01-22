@@ -52,9 +52,9 @@ class DPS_AI_Scheduler {
      * Handler AJAX para verificar disponibilidade.
      */
     public function ajax_check_availability() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_scheduler' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ) ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_scheduler' ) ) {
+            return;
         }
 
         $date = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
@@ -96,9 +96,9 @@ class DPS_AI_Scheduler {
      * Handler AJAX para solicitar agendamento.
      */
     public function ajax_request_appointment() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_ai_scheduler' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'dps-ai' ) ] );
+        // Verifica nonce (não requer capability - chat público)
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_ai_scheduler' ) ) {
+            return;
         }
 
         $settings        = get_option( 'dps_ai_settings', [] );

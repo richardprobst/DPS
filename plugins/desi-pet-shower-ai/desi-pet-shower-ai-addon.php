@@ -2107,14 +2107,9 @@ class DPS_AI_Addon {
      * Segurança: Requer capability manage_options + nonce
      */
     public function handle_export_metrics() {
-        // Verifica permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
-        }
-
-        // Verifica nonce
-        if ( ! isset( $_POST['dps_ai_export_metrics_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_metrics_nonce'] ) ), 'dps_ai_export_metrics' ) ) {
-            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_export_metrics', 'dps_ai_export_metrics_nonce' ) ) {
+            return;
         }
 
         // Obtém período
@@ -2189,14 +2184,9 @@ class DPS_AI_Addon {
      * Segurança: Requer capability manage_options + nonce
      */
     public function handle_export_feedback() {
-        // Verifica permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para exportar dados.', 'dps-ai' ) );
-        }
-
-        // Verifica nonce
-        if ( ! isset( $_POST['dps_ai_export_feedback_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_export_feedback_nonce'] ) ), 'dps_ai_export_feedback' ) ) {
-            wp_die( esc_html__( 'Requisição inválida (nonce).', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_export_feedback', 'dps_ai_export_feedback_nonce' ) ) {
+            return;
         }
 
         // Obtém feedbacks (últimos 1000)
@@ -2293,12 +2283,9 @@ class DPS_AI_Addon {
             return;
         }
 
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Você não tem permissão para realizar esta ação.', 'dps-ai' ) );
-        }
-
-        if ( ! isset( $_POST['dps_ai_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_ai_nonce'] ) ), 'dps_ai_save' ) ) {
-            wp_die( esc_html__( 'Falha na verificação de segurança.', 'dps-ai' ) );
+        // Verifica permissões e nonce
+        if ( ! DPS_Request_Validator::verify_admin_form( 'dps_ai_save', 'dps_ai_nonce' ) ) {
+            return;
         }
 
         // Sanitiza todo o array POST antes de processar
