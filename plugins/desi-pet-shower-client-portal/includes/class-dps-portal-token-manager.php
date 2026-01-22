@@ -52,6 +52,13 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
     const PERMANENT_EXPIRATION_MINUTES = 60 * 24 * 365 * 10;
     
     /**
+     * Tempo de expiração para tokens de atualização de perfil em minutos (7 dias)
+     *
+     * @var int
+     */
+    const PROFILE_UPDATE_EXPIRATION_MINUTES = 60 * 24 * 7;
+    
+    /**
      * Tamanho máximo do user agent armazenado no log de acesso
      *
      * @var int
@@ -166,16 +173,19 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
         }
 
         // Valida o tipo
-        $allowed_types = [ 'login', 'first_access', 'permanent' ];
+        $allowed_types = [ 'login', 'first_access', 'permanent', 'profile_update' ];
         if ( ! in_array( $type, $allowed_types, true ) ) {
             $type = 'login';
         }
 
         // Define expiração
         // Tokens permanentes recebem data de expiração muito distante (10 anos)
+        // Tokens de atualização de perfil recebem 7 dias de validade
         // Para revogá-los, usa-se a coluna revoked_at
         if ( 'permanent' === $type ) {
             $expiration_minutes = self::PERMANENT_EXPIRATION_MINUTES;
+        } elseif ( 'profile_update' === $type ) {
+            $expiration_minutes = self::PROFILE_UPDATE_EXPIRATION_MINUTES;
         } elseif ( null === $expiration_minutes ) {
             $expiration_minutes = self::DEFAULT_EXPIRATION_MINUTES;
         } else {

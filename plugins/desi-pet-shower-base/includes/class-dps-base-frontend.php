@@ -4296,6 +4296,18 @@ class DPS_Base_Frontend {
         echo '<a href="' . esc_url( $back_url ) . '" class="dps-client-header__back">← ' . esc_html__( 'Voltar', 'desi-pet-shower' ) . '</a>';
         echo '<h2 class="dps-client-header__title">' . esc_html( $client->post_title ) . '</h2>';
         echo '<div class="dps-client-header__actions">';
+        
+        /**
+         * Hook para adicionar ações extras ao cabeçalho da página do cliente.
+         * Usado pelo client-portal add-on para adicionar botão de gerar link de atualização.
+         *
+         * @since 1.1.0
+         * @param int     $client_id ID do cliente.
+         * @param WP_Post $client    Objeto do post do cliente.
+         * @param string  $base_url  URL base da página.
+         */
+        do_action( 'dps_client_page_header_actions', $client_id, $client, $base_url );
+        
         echo '<a href="' . esc_url( $edit_url ) . '" class="dps-btn-action">';
         echo '✏️ ' . esc_html__( 'Editar', 'desi-pet-shower' );
         echo '</a>';

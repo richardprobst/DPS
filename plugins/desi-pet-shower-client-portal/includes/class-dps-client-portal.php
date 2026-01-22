@@ -1166,6 +1166,13 @@ final class DPS_Client_Portal {
         wp_enqueue_style( 'dps-client-portal' );
         wp_enqueue_script( 'dps-client-portal' );
         
+        // Verifica se é uma ação de atualização de perfil via token (Fase 5)
+        if ( isset( $_GET['dps_action'] ) && 'profile_update' === $_GET['dps_action'] && isset( $_GET['token'] ) ) {
+            if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
+                return DPS_Portal_Profile_Update::get_instance()->render_profile_update_shortcode( [] );
+            }
+        }
+        
         // Verifica autenticação pelo novo sistema
         $client_id = $this->get_authenticated_client_id();
         
