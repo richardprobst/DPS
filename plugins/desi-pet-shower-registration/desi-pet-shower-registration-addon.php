@@ -1805,8 +1805,8 @@ class DPS_Registration_Addon {
             return;
         }
 
-        // F1.8: Verifica nonce com feedback de erro
-        if ( ! isset( $_POST['dps_reg_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_reg_nonce'] ) ), 'dps_reg_action' ) ) {
+        // F1.8: Verifica nonce com feedback de erro usando helper
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_reg_nonce', 'dps_reg_action', 'POST', false ) ) {
             $this->add_error( __( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-registration-addon' ) );
             $this->redirect_with_error();
         }

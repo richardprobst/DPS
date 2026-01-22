@@ -244,7 +244,7 @@ DPS_Admin_Menu_Helper::register_submenu( [
 | DPS_Phone_Helper | 24 | ~30 | ✅ Bom uso |
 | DPS_WhatsApp_Helper | 26 | ~30 | ✅ Bom uso |
 | DPS_URL_Builder | 30 | ~50 | ⏳ 20 locais não usando |
-| DPS_Request_Validator | 29 | ~161 | ⏳ **EXPANDIDO** - 22 handlers migrados |
+| DPS_Request_Validator | 47 | ~161 | ⏳ **EXPANDIDO** - 40 handlers migrados |
 | DPS_Query_Helper | 7 | ~50 | ⏳ 43 locais não usando |
 | DPS_Message_Helper | 252 | ~260 | ✅ Excelente uso |
 
@@ -299,8 +299,8 @@ DPS_Admin_Menu_Helper::register_submenu( [
   - `verify_dynamic_nonce()` - Nonces com ID
 - ✅ Adicionados métodos auxiliares `send_json_error()`, `send_json_success()`
 - ✅ Adicionados getters `get_get_int()`, `get_get_string()`
-- ✅ Migrados **22 handlers** em 11 arquivos
-- [ ] Migrar restante das ~130 ocorrências (próximas iterações)
+- ✅ Migrados **40 handlers** em 22 arquivos
+- [ ] Migrar restante das ~50 ocorrências (próximas iterações)
 
 **Arquivos migrados:**
 - `desi-pet-shower-ai-addon.php` (6 handlers)
@@ -314,6 +314,17 @@ DPS_Admin_Menu_Helper::register_submenu( [
 - `class-dps-ai-knowledge-base-tester.php` (1 handler)
 - `class-dps-portal-ajax-handler.php` (3 handlers)
 - `desi-pet-shower-finance-addon.php` (3 handlers)
+- `desi-pet-shower-base.php` (2 handlers)
+- `class-dps-base-frontend.php` (4 handlers)
+- `class-dps-github-updater.php` (1 handler)
+- `class-dps-client-portal.php` (2 handlers)
+- `desi-pet-shower-backup-addon.php` (4 handlers)
+- `class-dps-groomer-session-manager.php` (1 handler)
+- `desi-pet-shower-stock.php` (1 handler)
+- `desi-pet-shower-agenda-addon.php` (1 handler)
+- `desi-pet-shower-registration-addon.php` (1 handler)
+- `desi-pet-shower-services-addon.php` (1 handler)
+- `desi-pet-shower-communications-addon.php` (1 handler)
 
 ---
 
@@ -397,9 +408,18 @@ DPS_Admin_Menu_Helper::register_submenu( [
 - [x] Migrar class-dps-ai-knowledge-base-tester.php (1 handler)
 - [x] Migrar class-dps-portal-ajax-handler.php (3 handlers)
 - [x] Migrar desi-pet-shower-finance-addon.php (3 handlers)
-- [ ] Migrar class-dps-client-portal (~15 ocorrências)
-- [ ] Migrar plugin base (~12 ocorrências)
-- [ ] Migrar outros add-ons (~80+ ocorrências)
+- [x] Migrar desi-pet-shower-base.php (2 handlers: export_clients, export_pets)
+- [x] Migrar class-dps-base-frontend.php (4 handlers: handle_form, logout, history, delete_doc)
+- [x] Migrar class-dps-github-updater.php (1 handler: force_update_check)
+- [x] Migrar class-dps-client-portal.php (2 handlers: chat, export_pdf)
+- [x] Migrar desi-pet-shower-backup-addon.php (4 handlers: settings, export, download, import)
+- [x] Migrar class-dps-groomer-session-manager.php (1 handler: logout)
+- [x] Migrar desi-pet-shower-stock.php (1 handler: save_meta)
+- [x] Migrar desi-pet-shower-agenda-addon.php (1 handler: export_pdf)
+- [x] Migrar desi-pet-shower-registration-addon.php (1 handler: save_registration)
+- [x] Migrar desi-pet-shower-services-addon.php (1 handler: save_service)
+- [x] Migrar desi-pet-shower-communications-addon.php (1 handler: save_settings)
+- [ ] Migrar restante (~50+ ocorrências)
 - [x] Atualizar documentação ANALYSIS.md
 
 ### Fase 4 - Client Helper

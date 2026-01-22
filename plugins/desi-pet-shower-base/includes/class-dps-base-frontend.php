@@ -649,8 +649,8 @@ class DPS_Base_Frontend {
         
         $nonce_field = isset( $nonce_map[ $action ] ) ? $nonce_map[ $action ] : 'dps_nonce';
         
-        // Verifica nonce
-        if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ), 'dps_action' ) ) {
+        // Verifica nonce usando helper (não morre em falha para manter compatibilidade)
+        if ( ! DPS_Request_Validator::verify_request_nonce( $nonce_field, 'dps_action', 'POST', false ) ) {
             self::handle_invalid_nonce( $action );
             return;
         }
@@ -747,8 +747,8 @@ class DPS_Base_Frontend {
             return;
         }
         
-        // Verifica nonce para proteção CSRF
-        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_logout' ) ) {
+        // Verifica nonce para proteção CSRF usando helper
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_logout', null, '_wpnonce', false ) ) {
             wp_die( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
         }
         
@@ -4109,8 +4109,8 @@ class DPS_Base_Frontend {
     private static function handle_client_page_actions( $client_id ) {
         // 1. Gerar histórico HTML (requer nonce para proteção CSRF)
         if ( isset( $_GET['dps_client_history'] ) && '1' === $_GET['dps_client_history'] ) {
-            // Verifica nonce para proteção CSRF
-            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_client_history' ) ) {
+            // Verifica nonce para proteção CSRF usando helper
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_client_history', null, '_wpnonce', false ) ) {
                 DPS_Message_Helper::add_error( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
                 $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_client_history', 'send_email', 'to_email', '_wpnonce' ] ) );
                 wp_safe_redirect( $redirect );
@@ -4137,8 +4137,8 @@ class DPS_Base_Frontend {
 
         // 2. Exclusão de documentos (requer nonce para proteção CSRF)
         if ( isset( $_GET['dps_delete_doc'] ) && '1' === $_GET['dps_delete_doc'] && isset( $_GET['file'] ) ) {
-            // Verifica nonce para proteção CSRF
-            if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'dps_delete_doc' ) ) {
+            // Verifica nonce para proteção CSRF usando helper
+            if ( ! DPS_Request_Validator::verify_admin_action( 'dps_delete_doc', null, '_wpnonce', false ) ) {
                 DPS_Message_Helper::add_error( __( 'Ação não autorizada.', 'desi-pet-shower' ) );
                 $redirect = add_query_arg( [ 'dps_view' => 'client', 'id' => $client_id ], remove_query_arg( [ 'dps_delete_doc', 'file', '_wpnonce' ] ) );
                 wp_safe_redirect( $redirect );
@@ -5517,7 +5517,8 @@ class DPS_Base_Frontend {
     public static function ajax_save_appointment_modal() {
         check_ajax_referer( 'dps_modal_appointment', 'nonce' );
 
-        if ( ! isset( $_POST['dps_nonce_agendamentos'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_nonce_agendamentos'] ) ), 'dps_action' ) ) {
+        // Verifica nonce secundário usando helper
+        if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_nonce_agendamentos', 'dps_action', 'POST', false ) ) {
             DPS_Message_Helper::add_error( __( 'Não foi possível validar sua sessão. Atualize a página e tente novamente.', 'desi-pet-shower' ) );
             self::send_ajax_response(
                 false,

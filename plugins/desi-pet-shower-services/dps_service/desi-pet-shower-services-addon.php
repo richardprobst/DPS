@@ -1311,8 +1311,8 @@ class DPS_Services_Addon {
                 wp_safe_redirect( $redirect );
                 exit;
             }
-            // Verifica nonce
-            if ( ! isset( $_POST['dps_service_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dps_service_nonce'] ) ), 'dps_service_action' ) ) {
+            // Verifica nonce usando helper
+            if ( ! DPS_Request_Validator::verify_request_nonce( 'dps_service_nonce', 'dps_service_action', 'POST', false ) ) {
                 if ( class_exists( 'DPS_Message_Helper' ) ) {
                     DPS_Message_Helper::add_error( __( 'Sessão expirada. Atualize a página e tente novamente.', 'dps-services-addon' ) );
                 }

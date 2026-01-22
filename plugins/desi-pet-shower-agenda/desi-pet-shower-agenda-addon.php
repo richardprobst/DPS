@@ -3096,14 +3096,9 @@ class DPS_Agenda_Addon {
      * @since 1.4.0
      */
     public function export_pdf_ajax() {
-        // Verificar nonce (deve corresponder ao nonce_export_pdf gerado em enqueue_assets)
-        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_agenda_export_pdf' ) ) {
+        // Verificar nonce e permissão usando helper
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_agenda_export_pdf', 'manage_options', 'nonce', false ) ) {
             wp_die( esc_html__( 'Falha na verificação de segurança. Por favor, recarregue a página e tente novamente.', 'dps-agenda-addon' ), 403 );
-        }
-        
-        // Verificar permissões
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permissão negada.', 'dps-agenda-addon' ), 403 );
         }
         
         $date = isset( $_GET['date'] ) ? sanitize_text_field( $_GET['date'] ) : '';

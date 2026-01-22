@@ -4649,9 +4649,9 @@ Equipe %4$s', 'dps-client-portal' ),
      * @return int Client ID validado e autenticado.
      */
     private function validate_chat_request() {
-        // Verifica nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'dps_portal_chat' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Nonce inválido', 'dps-client-portal' ) ] );
+        // Verifica nonce usando helper
+        if ( ! DPS_Request_Validator::verify_ajax_nonce( 'dps_portal_chat' ) ) {
+            return 0;
         }
 
         $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
@@ -5184,8 +5184,8 @@ HTML;
      * @since 2.5.0
      */
     public function ajax_export_pet_history_pdf() {
-        // Verifica nonce
-        if ( ! isset( $_GET['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'dps_portal_export_pdf' ) ) {
+        // Verifica nonce usando helper (GET)
+        if ( ! DPS_Request_Validator::verify_admin_action( 'dps_portal_export_pdf', null, 'nonce', false ) ) {
             wp_die( esc_html__( 'Erro de segurança. Por favor, recarregue a página e tente novamente.', 'dps-client-portal' ), 403 );
         }
 
