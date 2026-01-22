@@ -6,7 +6,7 @@
  * CDNs (Cloudflare) e ambientes de desenvolvimento.
  *
  * @package DesiPetShower
- * @since 2.3.0
+ * @since 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,7 +24,7 @@ class DPS_IP_Helper {
      * Usa apenas REMOTE_ADDR, que é a fonte mais confiável e não pode ser
      * falsificada pelo cliente. Recomendado para a maioria dos casos.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @return string Endereço IP sanitizado ou 'unknown' se não disponível.
      *
@@ -54,7 +54,7 @@ class DPS_IP_Helper {
      * 3. HTTP_X_FORWARDED_FOR - Proxy padrão (primeiro IP da lista)
      * 4. REMOTE_ADDR - Conexão direta
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @return string Endereço IP validado ou string vazia se não encontrado.
      *
@@ -103,7 +103,7 @@ class DPS_IP_Helper {
      * armazenar referências de IP sem expor o endereço real.
      * Inclui fallback para X-Forwarded-For quando REMOTE_ADDR é localhost.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string $salt Prefixo opcional para o hash (padrão: 'dps_ip_').
      * @return string Hash SHA-256 do IP.
@@ -139,7 +139,7 @@ class DPS_IP_Helper {
      *
      * Suporta IPv4 e IPv6.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string $ip Endereço IP a validar.
      * @return bool True se válido, false caso contrário.
@@ -156,7 +156,7 @@ class DPS_IP_Helper {
     /**
      * Valida se uma string é um endereço IPv4 válido.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string $ip Endereço IP a validar.
      * @return bool True se IPv4 válido, false caso contrário.
@@ -168,7 +168,7 @@ class DPS_IP_Helper {
     /**
      * Valida se uma string é um endereço IPv6 válido.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string $ip Endereço IP a validar.
      * @return bool True se IPv6 válido, false caso contrário.
@@ -182,7 +182,7 @@ class DPS_IP_Helper {
      *
      * Útil para detectar ambiente de desenvolvimento.
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string|null $ip Endereço IP a verificar. Se null, usa IP atual.
      * @return bool True se localhost, false caso contrário.
@@ -207,7 +207,7 @@ class DPS_IP_Helper {
      * Para IPv4: zera o último octeto (192.168.1.100 → 192.168.1.0)
      * Para IPv6: zera os últimos 80 bits
      *
-     * @since 2.3.0
+     * @since 2.5.0
      *
      * @param string $ip Endereço IP a anonimizar.
      * @return string IP anonimizado ou string vazia se inválido.

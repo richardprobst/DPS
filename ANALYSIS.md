@@ -21,8 +21,11 @@ O plugin base oferece classes utilitárias para padronizar operações comuns e 
 **Entrada/Saída**:
 - `parse_brazilian_format( string )`: Converte string BR (ex.: "1.234,56") → int centavos (123456)
 - `format_to_brazilian( int )`: Converte centavos (123456) → string BR ("1.234,56")
+- `format_currency( int, string $symbol = 'R$ ' )`: Converte centavos → string com símbolo ("R$ 1.234,56")
+- `format_currency_from_decimal( float, string $symbol = 'R$ ' )`: Converte decimal → string com símbolo ("R$ 1.234,56")
 - `decimal_to_cents( float )`: Converte decimal (12.34) → int centavos (1234)
 - `cents_to_decimal( int )`: Converte centavos (1234) → float decimal (12.34)
+- `is_valid_money_string( string )`: Valida se string representa valor monetário → bool
 
 **Exemplos práticos**:
 ```php
@@ -30,11 +33,19 @@ O plugin base oferece classes utilitárias para padronizar operações comuns e 
 $preco_raw = isset( $_POST['preco'] ) ? sanitize_text_field( $_POST['preco'] ) : '';
 $valor_centavos = DPS_Money_Helper::parse_brazilian_format( $preco_raw );
 
-// Exibir valor formatado na tela
-echo 'R$ ' . DPS_Money_Helper::format_to_brazilian( $valor_centavos );
+// Exibir valor formatado na tela (com símbolo de moeda)
+echo DPS_Money_Helper::format_currency( $valor_centavos );
+// Resultado: "R$ 1.234,56"
+
+// Para valores decimais (em reais, não centavos)
+echo DPS_Money_Helper::format_currency_from_decimal( 1234.56 );
+// Resultado: "R$ 1.234,56"
 ```
 
-**Boas práticas**: Use sempre este helper para conversões monetárias. Evite lógica duplicada de `str_replace` e `number_format` espalhada pelo código.
+**Boas práticas**: 
+- Use `format_currency()` para exibição em interfaces (já inclui "R$ ")
+- Use `format_to_brazilian()` quando precisar apenas do valor sem símbolo
+- Evite lógica duplicada de `number_format` espalhada pelo código
 
 #### DPS_URL_Builder
 **Propósito**: Construção padronizada de URLs de ação (edição, exclusão, visualização, navegação entre abas).
