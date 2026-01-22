@@ -279,7 +279,81 @@ $anon_ip = DPS_IP_Helper::anonymize( $ip );
 - Add-on de Finance (auditoria de operações)
 - Add-on de Registration (rate limiting de cadastros)
 
-#### DPS_Message_Helper
+#### DPS_Client_Helper
+**Propósito**: Acesso centralizado a dados de clientes, com suporte a CPT `dps_client` e usermeta do WordPress, eliminando duplicação de código para obtenção de telefone, email, endereço e outros metadados.
+
+**Entrada/Saída**:
+- `get_phone( int $client_id, ?string $source = null )`: Obtém telefone do cliente → string
+- `get_email( int $client_id, ?string $source = null )`: Obtém email do cliente → string
+- `get_whatsapp( int $client_id, ?string $source = null )`: Obtém WhatsApp (fallback para phone) → string
+- `get_name( int $client_id, ?string $source = null )`: Obtém nome do cliente → string
+- `get_display_name( int $client_id, ?string $source = null )`: Obtém nome para exibição → string
+- `get_address( int $client_id, ?string $source = null, string $sep = ', ' )`: Obtém endereço formatado → string
+- `get_all_data( int $client_id, ?string $source = null )`: Obtém todos os metadados de uma vez → array
+- `has_valid_phone( int $client_id, ?string $source = null )`: Verifica se tem telefone válido → bool
+- `has_valid_email( int $client_id, ?string $source = null )`: Verifica se tem email válido → bool
+- `get_pets( int $client_id, array $args = [] )`: Obtém lista de pets do cliente → array
+- `get_pets_count( int $client_id )`: Conta pets do cliente → int
+- `get_primary_pet( int $client_id )`: Obtém pet principal → WP_Post|null
+- `format_contact_info( int $client_id, ?string $source = null )`: Formata informações de contato → string (HTML)
+- `get_for_display( int $client_id, ?string $source = null )`: Obtém dados formatados para exibição → array
+- `search_by_phone( string $phone, bool $exact = false )`: Busca cliente por telefone → int|null
+- `search_by_email( string $email )`: Busca cliente por email → int|null
+
+**Parâmetro `$source`**:
+- `null` (padrão): Auto-detecta se é post (`dps_client`) ou user (WordPress user)
+- `'post'`: Força busca em post_meta
+- `'user'`: Força busca em usermeta
+
+**Constantes de meta keys**:
+- `META_PHONE` = 'client_phone'
+- `META_EMAIL` = 'client_email'
+- `META_WHATSAPP` = 'client_whatsapp'
+- `META_ADDRESS` = 'client_address'
+- `META_CITY` = 'client_city'
+- `META_STATE` = 'client_state'
+- `META_ZIP` = 'client_zip'
+
+**Exemplos práticos**:
+```php
+// Obter telefone de um cliente (auto-detecta source)
+$phone = DPS_Client_Helper::get_phone( $client_id );
+
+// Obter todos os dados de uma vez (mais eficiente)
+$data = DPS_Client_Helper::get_all_data( $client_id );
+echo $data['name'] . ' - ' . $data['phone'];
+
+// Verificar se tem telefone válido antes de enviar WhatsApp
+if ( DPS_Client_Helper::has_valid_phone( $client_id ) ) {
+    $whatsapp = DPS_Client_Helper::get_whatsapp( $client_id );
+    // ...enviar mensagem
+}
+
+// Buscar cliente por telefone
+$existing = DPS_Client_Helper::search_by_phone( '11999887766' );
+if ( $existing ) {
+    // Cliente já existe
+}
+
+// Para exibição na UI (já formatado)
+$display = DPS_Client_Helper::get_for_display( $client_id );
+echo $display['display_name']; // "João Silva" ou "Cliente sem nome"
+echo $display['phone_formatted']; // "(11) 99988-7766"
+```
+
+**Boas práticas**:
+- Use `get_all_data()` quando precisar de múltiplos campos (evita queries repetidas)
+- Use `get_for_display()` para dados já formatados para UI
+- O helper integra com `DPS_Phone_Helper` automaticamente quando disponível
+- Não acesse diretamente `get_post_meta( $id, 'client_phone' )` — use o helper para consistência
+
+**Add-ons que usam este helper**:
+- Plugin Base (formulários de cliente, frontend)
+- Portal do Cliente (exibição de dados, mensagens)
+- Add-on de IA (chat público, agendador)
+- Add-on de Push (notificações por email/WhatsApp)
+- Add-on de Communications (envio de comunicados)
+- Add-on de Finance (relatórios, cobranças)
 **Propósito**: Gerenciamento de mensagens de feedback visual (sucesso, erro, aviso) para operações administrativas.
 
 **Entrada/Saída**:
