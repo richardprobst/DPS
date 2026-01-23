@@ -3250,7 +3250,7 @@ class DPS_Registration_Addon {
         // Nome do cliente (readonly)
         echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
         // Espécie
-        echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . '<br><select name="pet_species[]" required>';
+        echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_species[]" required>';
         $species_opts = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'cao' => __( 'Cachorro', 'dps-registration-addon' ), 'gato' => __( 'Gato', 'dps-registration-addon' ), 'outro' => __( 'Outro', 'dps-registration-addon' ) ];
         foreach ( $species_opts as $val => $label ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $label ) . '</option>';
@@ -3264,7 +3264,7 @@ class DPS_Registration_Addon {
         }
         echo '</datalist>';
         // Porte
-        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . '<br><select name="pet_size[]" required>';
+        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_size[]" required>';
         $sizes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'pequeno' => __( 'Pequeno', 'dps-registration-addon' ), 'medio' => __( 'Médio', 'dps-registration-addon' ), 'grande' => __( 'Grande', 'dps-registration-addon' ) ];
         foreach ( $sizes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
@@ -3279,7 +3279,7 @@ class DPS_Registration_Addon {
         // Data de nascimento
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
         // Sexo
-        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . '<br><select name="pet_sex[]" required>';
+        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_sex[]" required>';
         $sexes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'macho' => __( 'Macho', 'dps-registration-addon' ), 'femea' => __( 'Fêmea', 'dps-registration-addon' ) ];
         foreach ( $sexes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
@@ -3306,7 +3306,7 @@ class DPS_Registration_Addon {
         echo '<p><label>' . esc_html__( 'Nome do Pet', 'dps-registration-addon' ) . '<br><input type="text" name="pet_name[]" class="dps-pet-name"></label></p>';
         echo '<p><label>' . esc_html__( 'Cliente', 'dps-registration-addon' ) . '<br><input type="text" class="dps-owner-name" readonly></label></p>';
         // Espécie
-        echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . '<br><select name="pet_species[]" required>';
+        echo '<p><label>' . esc_html__( 'Espécie', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_species[]" required>';
         $species_opts = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'cao' => __( 'Cachorro', 'dps-registration-addon' ), 'gato' => __( 'Gato', 'dps-registration-addon' ), 'outro' => __( 'Outro', 'dps-registration-addon' ) ];
         foreach ( $species_opts as $val => $label ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $label ) . '</option>';
@@ -3321,7 +3321,7 @@ class DPS_Registration_Addon {
         }
         echo '</datalist>';
         // Porte
-        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . '<br><select name="pet_size[]" required>';
+        echo '<p><label>' . esc_html__( 'Porte', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_size[]" required>';
         $sizes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'pequeno' => __( 'Pequeno', 'dps-registration-addon' ), 'medio' => __( 'Médio', 'dps-registration-addon' ), 'grande' => __( 'Grande', 'dps-registration-addon' ) ];
         foreach ( $sizes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';
@@ -3336,7 +3336,7 @@ class DPS_Registration_Addon {
         // Data de nascimento
         echo '<p><label>' . esc_html__( 'Data de nascimento', 'dps-registration-addon' ) . '<br><input type="date" name="pet_birth[]"></label></p>';
         // Sexo
-        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . '<br><select name="pet_sex[]" required>';
+        echo '<p><label>' . esc_html__( 'Sexo', 'dps-registration-addon' ) . ' <span class="dps-required">*</span><br><select name="pet_sex[]" required>';
         $sexes = [ '' => __( 'Selecione...', 'dps-registration-addon' ), 'macho' => __( 'Macho', 'dps-registration-addon' ), 'femea' => __( 'Fêmea', 'dps-registration-addon' ) ];
         foreach ( $sexes as $val => $lab ) {
             echo '<option value="' . esc_attr( $val ) . '">' . esc_html( $lab ) . '</option>';

@@ -83,6 +83,24 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Melhorias de UI/UX e Responsividade no Formulário de Cadastro Público (Registration Add-on v1.3.1)**
+
+- **Novo breakpoint para telas muito pequenas (< 375px)**: Adicionado suporte para dispositivos móveis com telas extra pequenas (ex: iPhone SE, dispositivos antigos).
+  - Padding e espaçamento reduzidos para melhor aproveitamento do espaço
+  - Tamanhos de fonte ajustados mantendo legibilidade
+  - Border-radius menores para visual mais compacto
+- **Indicadores de campos obrigatórios nos pets**: Campos de Espécie, Porte e Sexo agora exibem asterisco vermelho (*) indicando obrigatoriedade.
+  - Aplicado tanto no fieldset inicial quanto nos pets adicionados dinamicamente via JavaScript
+- **Altura mínima de inputs para melhor usabilidade móvel**: Inputs agora têm altura mínima de 48px, melhorando a área de toque para dispositivos touch.
+
+#### Changed (Alterado)
+
+**Refinamentos visuais conforme Guia de Estilo (Registration Add-on v1.3.1)**
+
+- **Bordas padronizadas para 1px**: Alteradas bordas de 2px para 1px em inputs, pet fieldsets, summary box, botão secundário e botão "Adicionar pet", seguindo o guia de estilo visual do DPS.
+- **Botão "Adicionar pet" com borda consistente**: Alterado de `border: 2px dashed` para `border: 1px dashed` para maior consistência visual.
+- **Padding de inputs aumentado**: Alterado de 12px para 14px vertical, resultando em área de toque mais confortável (48px total).
+
 **Link de Atualização de Perfil para Clientes (Client Portal v2.5.0)**
 
 - **Botão "Link de Atualização" na página do cliente**: Administradores agora podem gerar um link exclusivo para que o cliente atualize seus próprios dados e de seus pets.
