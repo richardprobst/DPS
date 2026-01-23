@@ -197,7 +197,7 @@
 
 .dps-button-secondary {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border: 2px solid var(--dps-border);
+    border: 1px solid var(--dps-border);
     color: var(--dps-text-secondary);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
@@ -280,8 +280,9 @@
 .dps-registration-form select,
 .dps-registration-form textarea {
     width: 100%;
-    padding: 12px 14px;
-    border: 2px solid var(--dps-border);
+    padding: 14px 14px;
+    min-height: 48px;
+    border: 1px solid var(--dps-border);
     border-radius: 10px;
     font-size: 15px;
     color: var(--dps-text-primary);
@@ -387,7 +388,7 @@
    ========================================================================== */
 
 .dps-pet-fieldset {
-    border: 2px solid var(--dps-border);
+    border: 1px solid var(--dps-border);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
@@ -466,7 +467,7 @@
     gap: 10px;
     padding: 14px 24px;
     background: var(--dps-surface);
-    border: 2px dashed #cbd5e1;
+    border: 1px dashed var(--dps-border);
     border-radius: 12px;
     color: var(--dps-muted);
     font-weight: 600;
@@ -494,7 +495,7 @@
 .dps-summary-box {
     margin-top: 24px;
     padding: 0;
-    border: 2px solid var(--dps-border);
+    border: 1px solid var(--dps-border);
     border-radius: 16px;
     background: var(--dps-surface);
     overflow: hidden;
@@ -1115,6 +1116,143 @@
     
     .dps-summary-section li {
         font-size: 13px;
+    }
+}
+
+/* Mobile muito pequeno (375px e menor) */
+@media (max-width: 374px) {
+    .dps-registration-form {
+        padding: 12px;
+        margin: 0 4px;
+        border-radius: 8px;
+    }
+    
+    .dps-registration-form h4 {
+        font-size: 15px;
+        margin: 0 0 16px;
+        gap: 8px;
+    }
+    
+    .dps-registration-form h4::before {
+        width: 3px;
+        height: 18px;
+    }
+    
+    .dps-progress {
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+    
+    .dps-progress-top {
+        font-size: 13px;
+        gap: 8px;
+    }
+    
+    #dps-step-counter {
+        font-size: 11px;
+        padding: 3px 8px;
+        min-width: 36px;
+    }
+    
+    .dps-progress-bar {
+        height: 6px;
+    }
+    
+    .dps-client-fields,
+    .dps-pet-fieldset {
+        gap: 12px;
+    }
+    
+    .dps-registration-form label {
+        font-size: 12px;
+    }
+    
+    .dps-registration-form input[type="text"],
+    .dps-registration-form input[type="email"],
+    .dps-registration-form input[type="tel"],
+    .dps-registration-form input[type="date"],
+    .dps-registration-form input[type="number"],
+    .dps-registration-form select,
+    .dps-registration-form textarea {
+        font-size: 16px;
+        padding: 12px 10px;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+    
+    .dps-pet-fieldset {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .dps-pet-fieldset legend {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    
+    .dps-registration-form .button,
+    .dps-button-next,
+    .dps-button-secondary {
+        padding: 12px 16px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+    
+    #dps-add-pet {
+        padding: 12px 16px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+    
+    .dps-step-actions {
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 16px;
+    }
+    
+    .dps-summary-box {
+        border-radius: 10px;
+    }
+    
+    .dps-summary-header {
+        padding: 14px;
+    }
+    
+    .dps-summary-header h4 {
+        font-size: 15px;
+    }
+    
+    .dps-summary-content {
+        padding: 14px;
+    }
+    
+    .dps-summary-confirm {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+    
+    .dps-summary-section h5 {
+        font-size: 14px;
+    }
+    
+    .dps-summary-pet h6 {
+        font-size: 13px;
+    }
+    
+    .dps-summary-section li {
+        font-size: 12px;
+    }
+    
+    .dps-required-legend {
+        font-size: 12px;
+    }
+    
+    .dps-step-description {
+        font-size: 13px;
+    }
+    
+    .dps-field-hint {
+        font-size: 11px;
     }
 }
 
