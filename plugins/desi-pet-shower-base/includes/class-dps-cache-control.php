@@ -54,6 +54,8 @@ class DPS_Cache_Control {
         'dps_registration_form',
         // AI
         'dps_ai_chat',
+        // Consentimentos
+        'dps_consent_tosa_maquina',
     ];
 
     /**

@@ -227,6 +227,27 @@ class DPS_Shortcodes_Admin_Page {
         ];
 
         $catalog[] = [
+            'tag'             => 'dps_consent_tosa_maquina',
+            'title'           => __( 'Consentimento para tosa na máquina', 'desi-pet-shower' ),
+            'group'           => __( 'Consentimentos', 'desi-pet-shower' ),
+            'summary'         => __( 'Exibe o formulário público de consentimento para serviços de tosa na máquina.', 'desi-pet-shower' ),
+            'details'         => __( 'Use em página pública para coleta de assinatura ou impressão. Campos são preenchidos manualmente e não são salvos automaticamente.', 'desi-pet-shower' ),
+            'attributes'      => [
+                [
+                    'label'       => __( 'support_email', 'desi-pet-shower' ),
+                    'description' => __( 'Define o e-mail de contato exibido no cabeçalho do consentimento.', 'desi-pet-shower' ),
+                ],
+                [
+                    'label'       => __( 'support_phone', 'desi-pet-shower' ),
+                    'description' => __( 'Define o telefone de contato exibido no cabeçalho do consentimento.', 'desi-pet-shower' ),
+                ],
+            ],
+            'recommendations' => __( 'Combine com página limpa e opção de impressão para uso interno.', 'desi-pet-shower' ),
+            'deprecated'      => false,
+            'is_active'       => true,
+        ];
+
+        $catalog[] = [
             'tag'             => 'dps_agenda_page',
             'title'           => __( 'Agenda completa', 'desi-pet-shower' ),
             'group'           => __( 'Agenda', 'desi-pet-shower' ),

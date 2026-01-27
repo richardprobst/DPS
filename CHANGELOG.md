@@ -83,6 +83,8 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+- **Página de consentimento para tosa na máquina**: Novo shortcode `[dps_consent_tosa_maquina]` com layout pronto para impressão, campos de identificação e termos de autorização para uso em páginas públicas. (DPS-Consent)
+
 **Melhorias de UI/UX e Responsividade no Formulário de Cadastro Público (Registration Add-on v1.3.1)**
 
 - **Novo breakpoint para telas muito pequenas (< 375px)**: Adicionado suporte para dispositivos móveis com telas extra pequenas (ex: iPhone SE, dispositivos antigos).

@@ -61,6 +61,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-clients-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-menu-cleaner.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-consent-pages.php';
 
 // Hubs centralizados (Fase 2 - Reorganização de Menus)
 require_once DPS_BASE_DIR . 'includes/class-dps-integrations-hub.php';
@@ -120,6 +121,7 @@ class DPS_Base_Plugin {
         // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
         add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
+        add_shortcode( 'dps_consent_tosa_maquina', [ 'DPS_Consent_Pages', 'render_machine_consent' ] );
 
         // Inicializa sistema de configurações frontend
         add_action( 'init', [ 'DPS_Settings_Frontend', 'init' ], 5 );
