@@ -1515,6 +1515,43 @@ class DPS_Base_Frontend {
         
         return $stats;
     }
+
+    /**
+     * Obtém dados do consentimento de tosa com máquina do cliente.
+     *
+     * @param int $client_id ID do cliente.
+     * @return array{status:string,has_consent:bool,granted_at:string,revoked_at:string}
+     */
+    public static function get_client_tosa_consent_data( $client_id ) {
+        $client_id = absint( $client_id );
+
+        if ( ! $client_id ) {
+            return [
+                'status'      => 'missing',
+                'has_consent' => false,
+                'granted_at'  => '',
+                'revoked_at'  => '',
+            ];
+        }
+
+        $status     = get_post_meta( $client_id, 'dps_consent_tosa_maquina_status', true );
+        $granted_at = get_post_meta( $client_id, 'dps_consent_tosa_maquina_granted_at', true );
+        $revoked_at = get_post_meta( $client_id, 'dps_consent_tosa_maquina_revoked_at', true );
+
+        $state = 'missing';
+        if ( 'granted' === $status && empty( $revoked_at ) ) {
+            $state = 'granted';
+        } elseif ( ! empty( $revoked_at ) || 'revoked' === $status ) {
+            $state = 'revoked';
+        }
+
+        return [
+            'status'      => $state,
+            'has_consent' => ( 'granted' === $state ),
+            'granted_at'  => $granted_at ? date_i18n( 'd/m/Y', strtotime( $granted_at ) ) : '',
+            'revoked_at'  => $revoked_at ? date_i18n( 'd/m/Y', strtotime( $revoked_at ) ) : '',
+        ];
+    }
     
     /**
      * Renderiza a seção de pets usando template.
@@ -1866,6 +1903,9 @@ class DPS_Base_Frontend {
                 }
                 $pending_rows = $pending_cache[ $client->ID ];
                 $pending_attr = ' data-has-pending="' . ( $pending_rows ? '1' : '0' ) . '"';
+                $consent_data = self::get_client_tosa_consent_data( $client->ID );
+                $consent_attr = ' data-consent-status="' . esc_attr( $consent_data['status'] ) . '"';
+                $consent_attr .= ' data-consent-date="' . esc_attr( $consent_data['granted_at'] ?: $consent_data['revoked_at'] ) . '"';
                 if ( $pending_rows ) {
                     $payload = [];
                     foreach ( $pending_rows as $row ) {
@@ -1881,7 +1921,7 @@ class DPS_Base_Frontend {
                 if ( (string) $client->ID === (string) $sel_client ) {
                     $option_attrs .= ' selected';
                 }
-                $option_attrs .= $pending_attr;
+                $option_attrs .= $pending_attr . $consent_attr;
                 echo '<option' . $option_attrs . '>' . esc_html( $client->post_title ) . '</option>';
             }
             echo '</select>';
@@ -1922,6 +1962,52 @@ class DPS_Base_Frontend {
                 $alert_attrs .= ' aria-hidden="true" style="display:none;"';
             }
             echo '<div' . $alert_attrs . '>' . $initial_alert_html . '</div>';
+
+            $initial_consent_data = $sel_client ? self::get_client_tosa_consent_data( $sel_client ) : [ 'status' => 'missing', 'has_consent' => false, 'granted_at' => '', 'revoked_at' => '' ];
+            $consent_status = $initial_consent_data['status'];
+            $consent_label  = __( 'Consentimento tosa máquina pendente', 'desi-pet-shower' );
+            $consent_note   = '';
+            $consent_class  = 'dps-consent-badge--missing';
+            if ( 'granted' === $consent_status ) {
+                $consent_label = __( 'Consentimento tosa máquina ativo', 'desi-pet-shower' );
+                $consent_class = 'dps-consent-badge--ok';
+                if ( $initial_consent_data['granted_at'] ) {
+                    $consent_note = sprintf(
+                        /* translators: %s: data */
+                        __( 'Assinado em %s', 'desi-pet-shower' ),
+                        esc_html( $initial_consent_data['granted_at'] )
+                    );
+                }
+            } elseif ( 'revoked' === $consent_status ) {
+                $consent_label = __( 'Consentimento tosa máquina revogado', 'desi-pet-shower' );
+                $consent_class = 'dps-consent-badge--danger';
+                if ( $initial_consent_data['revoked_at'] ) {
+                    $consent_note = sprintf(
+                        /* translators: %s: data */
+                        __( 'Revogado em %s', 'desi-pet-shower' ),
+                        esc_html( $initial_consent_data['revoked_at'] )
+                    );
+                }
+            }
+            $consent_attrs = ' id="dps-client-consent-status" class="dps-consent-status" data-consent-status="' . esc_attr( $consent_status ) . '"';
+            $consent_attrs .= ' data-consent-date="' . esc_attr( $initial_consent_data['granted_at'] ?: $initial_consent_data['revoked_at'] ) . '"';
+            if ( $sel_client ) {
+                $consent_attrs .= ' aria-hidden="false"';
+            } else {
+                $consent_attrs .= ' aria-hidden="true" style="display:none;"';
+            }
+            echo '<div' . $consent_attrs . '>';
+            echo '<span class="dps-consent-badge ' . esc_attr( $consent_class ) . '">' . esc_html( $consent_label ) . '</span>';
+            if ( $consent_note ) {
+                echo '<span class="dps-consent-status__note">' . esc_html( $consent_note ) . '</span>';
+            }
+            echo '</div>';
+
+            $warning_attrs = ' id="dps-consent-warning" class="dps-alert dps-alert--warning dps-consent-warning" role="status" aria-live="polite"';
+            $warning_attrs .= ' aria-hidden="true" style="display:none;"';
+            echo '<div' . $warning_attrs . '>';
+            echo esc_html__( 'Este cliente ainda não possui consentimento de tosa com máquina. Gere o link antes de confirmar o atendimento.', 'desi-pet-shower' );
+            echo '</div>';
             // Pets (permite múltiplos)
             // Se não editando, utiliza pref_pet como pré‑seleção única
             if ( ! $edit_id && $pref_pet ) {
@@ -3214,6 +3300,15 @@ class DPS_Base_Frontend {
             exit;
         }
 
+        if ( self::appointment_requires_tosa_consent( $data ) ) {
+            $consent_data = self::get_client_tosa_consent_data( $data['client_id'] );
+            if ( empty( $consent_data['has_consent'] ) ) {
+                DPS_Message_Helper::add_warning(
+                    __( 'Consentimento de tosa com máquina pendente para este cliente. Gere o link antes de confirmar o atendimento.', 'desi-pet-shower' )
+                );
+            }
+        }
+
         $appt_type = $data['appt_type'];
         $edit_id   = $data['edit_id'];
         $pet_ids   = $data['pet_ids'];
@@ -3438,6 +3533,64 @@ class DPS_Base_Frontend {
             'subscription_extra_value'       => $subscription_extra_value,
             'edit_id'                        => $edit_id,
         ];
+    }
+
+    /**
+     * Verifica se o agendamento exige consentimento de tosa com máquina.
+     *
+     * @param array $data Dados sanitizados do agendamento.
+     * @return bool
+     */
+    private static function appointment_requires_tosa_consent( array $data ) {
+        $requires = ( '1' === $data['tosa'] );
+
+        $service_ids = [];
+        if ( isset( $_POST['appointment_services'] ) ) {
+            $service_ids = array_map( 'absint', (array) wp_unslash( $_POST['appointment_services'] ) );
+            $service_ids = array_filter( $service_ids );
+        }
+
+        if ( ! empty( $service_ids ) && self::services_require_tosa_consent( $service_ids ) ) {
+            $requires = true;
+        }
+
+        /**
+         * Permite sobrescrever a exigência de consentimento de tosa.
+         *
+         * @param bool  $requires    Se o consentimento é exigido.
+         * @param array $data        Dados do agendamento.
+         * @param array $service_ids IDs de serviços selecionados.
+         */
+        return (bool) apply_filters( 'dps_tosa_consent_required', $requires, $data, $service_ids );
+    }
+
+    /**
+     * Detecta serviços que exigem consentimento de tosa com máquina.
+     *
+     * @param array $service_ids IDs de serviços selecionados.
+     * @return bool
+     */
+    private static function services_require_tosa_consent( array $service_ids ) {
+        foreach ( $service_ids as $service_id ) {
+            $category = get_post_meta( $service_id, 'service_category', true );
+            if ( ! $category ) {
+                continue;
+            }
+
+            $name = get_the_title( $service_id );
+            if ( ! $name ) {
+                continue;
+            }
+
+            $is_tosa_category = in_array( $category, [ 'tosa', 'opcoes_tosa' ], true );
+            $has_machine = ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) );
+
+            if ( $is_tosa_category && $has_machine ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

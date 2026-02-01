@@ -339,6 +339,18 @@ class DPS_Shortcodes_Admin_Page {
         ];
 
         $catalog[] = [
+            'tag'             => 'dps_tosa_consent',
+            'title'           => __( 'Consentimento de tosa com máquina', 'desi-pet-shower' ),
+            'group'           => __( 'Portal do Cliente', 'desi-pet-shower' ),
+            'summary'         => __( 'Formulário público para clientes assinarem o consentimento de tosa com máquina via link tokenizado.', 'desi-pet-shower' ),
+            'details'         => __( 'Requer add-on Portal do Cliente ativo. Deve ser usado em página pública dedicada, acessada via token gerado pelo administrador.', 'desi-pet-shower' ),
+            'attributes'      => [],
+            'recommendations' => __( 'Crie uma página pública simples (ex: /consentimento-tosa-maquina/) e envie o link com token.', 'desi-pet-shower' ),
+            'deprecated'      => false,
+            'is_active'       => class_exists( 'DPS_Client_Portal' ),
+        ];
+
+        $catalog[] = [
             'tag'             => 'dps_registration_form',
             'title'           => __( 'Formulário de cadastro', 'desi-pet-shower' ),
             'group'           => __( 'Onboarding', 'desi-pet-shower' ),

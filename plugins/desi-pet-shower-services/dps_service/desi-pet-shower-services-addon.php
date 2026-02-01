@@ -1738,6 +1738,14 @@ class DPS_Services_Addon {
                 
                 // Formata preços por porte para exibição
                 $price_display = $this->format_service_price_display( $srv );
+                $consent_attr = '';
+                $category = $srv['category'] ?? '';
+                if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
+                    $name = $srv['name'] ?? '';
+                    if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
+                        $consent_attr = ' data-consent="tosa_maquina"';
+                    }
+                }
                 
                 echo '<div class="dps-service-item">';
                 echo '<label class="dps-service-label">';
@@ -1746,7 +1754,7 @@ class DPS_Services_Addon {
                     . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
-                    . $checked . '> ';
+                    . $consent_attr . ' ' . $checked . '> ';
                 echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
                 echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
                 echo '</label>';
@@ -1782,6 +1790,14 @@ class DPS_Services_Addon {
                     
                     // Formata preços por porte para exibição
                     $price_display = $this->format_service_price_display( $srv );
+                    $consent_attr = '';
+                    $category = $srv['category'] ?? '';
+                    if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
+                        $name = $srv['name'] ?? '';
+                        if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
+                            $consent_attr = ' data-consent="tosa_maquina"';
+                        }
+                    }
                     
                     echo '<div class="dps-service-item">';
                     echo '<label class="dps-service-label">';
@@ -1790,7 +1806,7 @@ class DPS_Services_Addon {
                         . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                         . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                         . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
-                        . $checked . '> ';
+                        . $consent_attr . ' ' . $checked . '> ';
                     echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
                     echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
                     echo '</label>';
@@ -1814,6 +1830,14 @@ class DPS_Services_Addon {
                 
                 // Formata preços por porte para exibição
                 $price_display = $this->format_service_price_display( $srv );
+                $consent_attr = '';
+                $category = $srv['category'] ?? '';
+                if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
+                    $name = $srv['name'] ?? '';
+                    if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
+                        $consent_attr = ' data-consent="tosa_maquina"';
+                    }
+                }
                 
                 echo '<div class="dps-service-item">';
                 echo '<label class="dps-service-label">';
@@ -1822,7 +1846,7 @@ class DPS_Services_Addon {
                     . 'data-price-small="' . esc_attr( $srv['price_small'] ?? '' ) . '" '
                     . 'data-price-medium="' . esc_attr( $srv['price_medium'] ?? '' ) . '" '
                     . 'data-price-large="' . esc_attr( $srv['price_large'] ?? '' ) . '" '
-                    . $checked . '> ';
+                    . $consent_attr . ' ' . $checked . '> ';
                 echo '<span class="dps-service-name">' . esc_html( $srv['name'] ) . '</span>';
                 echo '<input type="hidden" class="dps-service-price" name="service_price[' . esc_attr( $srv['id'] ) . ']" value="' . esc_attr( $current_price ) . '">';
                 echo '</label>';

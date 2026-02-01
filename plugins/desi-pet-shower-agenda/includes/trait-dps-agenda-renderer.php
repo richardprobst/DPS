@@ -490,6 +490,7 @@ trait DPS_Agenda_Renderer {
         $client_name = $client_post ? $client_post->post_title : '';
         $aggr_flag   = '';
         $restrictions_badge = '';
+        $consent_badge = '';
         if ( $pet_post ) {
             $aggr = get_post_meta( $pet_post->ID, 'pet_aggressive', true );
             if ( $aggr ) {
@@ -498,7 +499,20 @@ trait DPS_Agenda_Renderer {
             }
             $restrictions_badge = $this->get_pet_product_restrictions_badge( $pet_post );
         }
-        echo '<td data-label="' . esc_attr( $column_labels['pet'] ?? __( 'Pet (Cliente)', 'dps-agenda-addon' ) ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . $restrictions_badge . '</td>';
+        if ( $client_id && class_exists( 'DPS_Base_Frontend' ) ) {
+            $consent_data = DPS_Base_Frontend::get_client_tosa_consent_data( $client_id );
+            $badge_class  = 'dps-consent-badge--missing';
+            $badge_text   = __( 'Consentimento pendente', 'dps-agenda-addon' );
+            if ( 'granted' === $consent_data['status'] ) {
+                $badge_class = 'dps-consent-badge--ok';
+                $badge_text  = __( 'Consentimento OK', 'dps-agenda-addon' );
+            } elseif ( 'revoked' === $consent_data['status'] ) {
+                $badge_class = 'dps-consent-badge--danger';
+                $badge_text  = __( 'Consentimento revogado', 'dps-agenda-addon' );
+            }
+            $consent_badge = '<div class="dps-consent-status"><span class="dps-consent-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $badge_text ) . '</span></div>';
+        }
+        echo '<td data-label="' . esc_attr( $column_labels['pet'] ?? __( 'Pet (Cliente)', 'dps-agenda-addon' ) ) . '">' . esc_html( $pet_name . ( $client_name ? ' (' . $client_name . ')' : '' ) ) . $aggr_flag . $restrictions_badge . $consent_badge . '</td>';
         
         // Serviços e assinatura
         echo '<td data-label="' . esc_attr( $column_labels['service'] ?? __( 'Serviço', 'dps-agenda-addon' ) ) . '">';

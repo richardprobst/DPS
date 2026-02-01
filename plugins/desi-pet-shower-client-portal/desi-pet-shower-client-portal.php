@@ -151,6 +151,7 @@ function dps_client_portal_init_addon() {
     if ( class_exists( 'DPS_Portal_Profile_Update' ) ) {
         DPS_Portal_Profile_Update::get_instance();
     }
+
 }
 add_action( 'init', 'dps_client_portal_init_addon', 5 );
 

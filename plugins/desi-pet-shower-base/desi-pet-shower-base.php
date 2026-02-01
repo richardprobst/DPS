@@ -61,6 +61,7 @@ require_once DPS_BASE_DIR . 'includes/class-dps-clients-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-shortcodes-admin-page.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-admin-menu-cleaner.php';
 require_once DPS_BASE_DIR . 'includes/class-dps-dashboard.php';
+require_once DPS_BASE_DIR . 'includes/class-dps-tosa-consent.php';
 
 // Hubs centralizados (Fase 2 - Reorganização de Menus)
 require_once DPS_BASE_DIR . 'includes/class-dps-integrations-hub.php';
@@ -120,6 +121,10 @@ class DPS_Base_Plugin {
         // Shortcodes para exibir a aplicação no frontend
         add_shortcode( 'dps_base', [ 'DPS_Base_Frontend', 'render_app' ] );
         add_shortcode( 'dps_configuracoes', [ 'DPS_Base_Frontend', 'render_settings' ] );
+        if ( class_exists( 'DPS_Tosa_Consent' ) ) {
+            $tosa_consent = DPS_Tosa_Consent::get_instance();
+            add_shortcode( 'dps_tosa_consent', [ $tosa_consent, 'render_consent_shortcode' ] );
+        }
 
         // Inicializa sistema de configurações frontend
         add_action( 'init', [ 'DPS_Settings_Frontend', 'init' ], 5 );
@@ -428,6 +433,12 @@ class DPS_Base_Plugin {
                 'saving'          => __( 'Salvando...', 'desi-pet-shower' ),
                 'loadError'       => __( 'Erro ao carregar horários', 'desi-pet-shower' ),
                 'formErrorsTitle' => __( 'Por favor, corrija os seguintes erros:', 'desi-pet-shower' ),
+                'tosaConsentOk'       => __( 'Consentimento tosa máquina ativo', 'desi-pet-shower' ),
+                'tosaConsentMissing'  => __( 'Consentimento tosa máquina pendente', 'desi-pet-shower' ),
+                'tosaConsentRevoked'  => __( 'Consentimento tosa máquina revogado', 'desi-pet-shower' ),
+                'tosaConsentSignedAt' => __( 'Assinado em %s', 'desi-pet-shower' ),
+                'tosaConsentRevokedAt'=> __( 'Revogado em %s', 'desi-pet-shower' ),
+                'tosaConsentConfirm'  => __( 'Este cliente não possui consentimento de tosa com máquina. Deseja continuar mesmo assim?', 'desi-pet-shower' ),
             ],
         ] );
         
