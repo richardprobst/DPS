@@ -139,6 +139,9 @@ class DPS_Base_Plugin {
         add_action( 'wp_ajax_dps_get_available_times', [ 'DPS_Base_Frontend', 'ajax_get_available_times' ] );
         // Nota: Endpoint nopriv removido - busca de horários requer autenticação para prevenir enumeração de dados
         
+        // AJAX handler para salvar notas internas do cliente
+        add_action( 'wp_ajax_dps_save_client_notes', [ 'DPS_Base_Frontend', 'ajax_save_client_notes' ] );
+        
         // Handler para exportação de clientes
         add_action( 'admin_post_dps_export_clients', [ $this, 'export_clients_csv' ] );
         // Handler para exportação de pets
