@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo: Consentimento Permanente • Tosa na Máquina</title>
+    <style>
+/**
+ * Estilos do formulário de Consentimento Permanente de Tosa com Máquina
+ * Demo version - includes all styles inline
+ */
+
+/* Reset básico */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: #374151;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Container principal */
+.dps-consent-page {
+    background: linear-gradient(180deg, #f0f4f8 0%, #f9fafb 100%);
+    padding: 32px 16px;
+    min-height: 100vh;
+}
+
+.dps-consent-container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.3s ease;
+}
+
+/* Header */
+.dps-consent-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-consent-header__icon {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.dps-consent-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 12px 0;
+    color: #1f2937;
+    letter-spacing: -0.02em;
+}
+
+.dps-consent-subtitle {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0 0 16px;
+}
+
+/* Aviso de permanência */
+.dps-consent-permanent-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    border: 1px solid #93c5fd;
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e40af;
+}
+
+.dps-consent-permanent-icon {
+    font-size: 16px;
+}
+
+/* Cards de seção */
+.dps-consent-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+}
+
+.dps-consent-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dps-consent-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #1f2937;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dps-section-icon {
+    font-size: 20px;
+}
+
+.dps-consent-section-desc {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0 0 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* Card de termos - destaque especial */
+.dps-consent-card--important {
+    border-color: #fbbf24;
+    border-width: 2px;
+    background: linear-gradient(180deg, #fffbeb 0%, #fff 50px);
+}
+
+/* Card de assinatura */
+.dps-consent-card--signature {
+    border-color: #0ea5e9;
+    border-width: 2px;
+    background: linear-gradient(180deg, #f0f9ff 0%, #fff 50px);
+}
+
+/* Grid de campos */
+.dps-consent-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* Campos de formulário */
+.dps-consent-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-consent-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.dps-consent-field input,
+.dps-consent-field select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #374151;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.dps-consent-field input:hover,
+.dps-consent-field select:hover {
+    border-color: #d1d5db;
+}
+
+.dps-consent-field input:focus,
+.dps-consent-field select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+}
+
+.dps-consent-field input::placeholder {
+    color: #9ca3af;
+}
+
+.dps-consent-field--full {
+    grid-column: 1 / -1;
+}
+
+/* Indicadores de campo */
+.dps-required {
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.dps-optional {
+    color: #9ca3af;
+    font-weight: 400;
+    font-size: 12px;
+}
+
+/* Lista de pets melhorada */
+.dps-consent-pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dps-consent-pet-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dps-consent-pet-card:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.dps-consent-pet-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dps-consent-pet-emoji {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.dps-consent-pet-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dps-consent-pet-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dps-consent-pet-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e5e7eb;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 16px;
+}
+
+.dps-consent-pet-tag--warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.dps-consent-pets-count {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* Termos e condições */
+.dps-consent-terms-intro {
+    margin-bottom: 20px;
+}
+
+.dps-consent-terms-intro p {
+    font-size: 15px;
+    color: #374151;
+    margin: 0;
+    font-weight: 500;
+}
+
+.dps-consent-terms-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dps-consent-terms-section:last-of-type {
+    margin-bottom: 20px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dps-consent-terms-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-consent-list {
+    margin: 0;
+    padding-left: 20px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.dps-consent-list li {
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+.dps-consent-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Caixa de aceite destacada */
+.dps-consent-accept-box {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+}
+
+.dps-consent-check {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    transition: none;
+}
+
+.dps-consent-accept-box .dps-consent-check:hover {
+    background: transparent;
+}
+
+.dps-consent-check input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    margin: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #0ea5e9;
+}
+
+.dps-consent-check span {
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+/* Área de assinatura */
+.dps-consent-signature-content {
+    /* Container */
+}
+
+.dps-consent-signature-text {
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.dps-consent-signature-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.dps-consent-signature-info {
+    margin-bottom: 20px;
+}
+
+.dps-consent-signature-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e5e7eb;
+}
+
+.dps-consent-signature-row:last-child {
+    border-bottom: none;
+}
+
+.dps-consent-signature-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.dps-consent-signature-value {
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.dps-consent-signature-line {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 2px solid #1f2937;
+}
+
+.dps-consent-signature-name {
+    display: block;
+    font-size: 18px;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.dps-consent-signature-caption {
+    font-size: 11px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.dps-consent-legal-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Botão de submissão */
+.dps-consent-submit-wrapper {
+    text-align: center;
+    margin-top: 32px;
+}
+
+.dps-consent-submit {
+    width: 100%;
+    max-width: 420px;
+    padding: 18px 32px;
+    font-size: 17px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.dps-consent-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+}
+
+.dps-consent-submit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.dps-consent-submit-note {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 12px 0 0;
+}
+
+/* Alertas */
+.dps-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dps-alert--success {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+}
+
+.dps-alert--warning {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    color: #92400e;
+}
+
+/* Footer */
+.dps-consent-footer {
+    text-align: center;
+    padding-top: 24px;
+    margin-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.dps-consent-footer p {
+    font-size: 12px;
+    color: #9ca3af;
+    margin: 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-consent-page {
+        padding: 16px 12px;
+    }
+
+    .dps-consent-container {
+        padding: 24px 20px;
+        border-radius: 12px;
+    }
+
+    .dps-consent-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .dps-consent-header__icon {
+        font-size: 44px;
+    }
+
+    .dps-consent-title {
+        font-size: 22px;
+    }
+
+    .dps-consent-card {
+        padding: 20px 16px;
+    }
+
+    .dps-consent-card h2 {
+        font-size: 16px;
+    }
+
+    .dps-consent-pets-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-consent-pet-card {
+        padding: 14px;
+    }
+
+    .dps-consent-check span {
+        font-size: 14px;
+    }
+
+    .dps-consent-submit {
+        padding: 16px 24px;
+        font-size: 16px;
+    }
+
+    .dps-consent-permanent-notice {
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-consent-container {
+        padding: 20px 16px;
+        border-radius: 10px;
+    }
+
+    .dps-consent-header {
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+    }
+
+    .dps-consent-title {
+        font-size: 20px;
+    }
+
+    .dps-consent-pets-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-consent-pet-details {
+        gap: 6px;
+    }
+
+    .dps-consent-pet-tag {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .dps-consent-terms-section {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+
+    .dps-consent-signature-box {
+        padding: 16px;
+    }
+
+    .dps-consent-signature-name {
+        font-size: 16px;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="dps-consent-page" role="main">
+        <div class="dps-consent-container">
+            <header class="dps-consent-header">
+                <div class="dps-consent-header__icon" aria-hidden="true">✂️</div>
+                <h1 class="dps-consent-title">Consentimento Permanente • Tosa na Máquina</h1>
+                <p class="dps-consent-subtitle">
+                    Olá, <strong>Maria Silva Santos</strong>! Precisamos do seu aceite para continuar.
+                </p>
+                <div class="dps-consent-permanent-notice">
+                    <span class="dps-consent-permanent-icon" aria-hidden="true">🔒</span>
+                    <span>Este é um consentimento permanente válido para todos os atendimentos futuros.</span>
+                </div>
+            </header>
+
+            <form method="post" class="dps-consent-form" aria-label="Formulário de consentimento">
+                
+                <section class="dps-consent-card" aria-labelledby="section-responsavel">
+                    <h2 id="section-responsavel">
+                        <span class="dps-section-icon" aria-hidden="true">👤</span>
+                        Dados do Responsável
+                    </h2>
+                    <p class="dps-consent-section-desc">Confirme ou atualize seus dados de contato.</p>
+                    <div class="dps-consent-grid">
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_signature_name">Nome completo <span class="dps-required" aria-hidden="true">*</span></label>
+                            <input type="text" id="dps_consent_signature_name" name="dps_consent_signature_name" value="Maria Silva Santos" required aria-required="true" autocomplete="name">
+                        </div>
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_signature_document">CPF <span class="dps-optional">(opcional)</span></label>
+                            <input type="text" id="dps_consent_signature_document" name="dps_consent_signature_document" value="123.456.789-00" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off">
+                        </div>
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_signature_phone">Telefone/WhatsApp <span class="dps-required" aria-hidden="true">*</span></label>
+                            <input type="tel" id="dps_consent_signature_phone" name="dps_consent_signature_phone" value="(15) 99876-5432" placeholder="(00) 00000-0000" autocomplete="tel" required aria-required="true">
+                        </div>
+                        <div class="dps-consent-field">
+                            <label for="dps_consent_signature_email">E-mail <span class="dps-optional">(opcional)</span></label>
+                            <input type="email" id="dps_consent_signature_email" name="dps_consent_signature_email" value="maria.silva@email.com" placeholder="seu@email.com" autocomplete="email">
+                        </div>
+                        <div class="dps-consent-field dps-consent-field--full">
+                            <label for="dps_consent_relationship">Relação com o(s) pet(s)</label>
+                            <select id="dps_consent_relationship" name="dps_consent_relationship">
+                                <option value="tutor" selected>Tutor(a) / Proprietário(a)</option>
+                                <option value="responsavel">Responsável autorizado</option>
+                                <option value="familiar">Familiar</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dps-consent-card" aria-labelledby="section-pets">
+                    <h2 id="section-pets">
+                        <span class="dps-section-icon" aria-hidden="true">🐾</span>
+                        Pets vinculados ao consentimento
+                    </h2>
+                    <p class="dps-consent-section-desc">Este consentimento será válido para todos os pets listados abaixo.</p>
+                    
+                    <div class="dps-consent-pets-grid" role="list">
+                        <!-- Pet 1 - Cachorro com pelagem dupla -->
+                        <div class="dps-consent-pet-card" role="listitem">
+                            <div class="dps-consent-pet-header">
+                                <span class="dps-consent-pet-emoji" aria-hidden="true">🐕</span>
+                                <strong class="dps-consent-pet-name">Thor</strong>
+                            </div>
+                            <div class="dps-consent-pet-details">
+                                <span class="dps-consent-pet-tag">Cachorro</span>
+                                <span class="dps-consent-pet-tag">Golden Retriever</span>
+                                <span class="dps-consent-pet-tag">Porte: Grande</span>
+                                <span class="dps-consent-pet-tag dps-consent-pet-tag--warning">
+                                    Pelagem: Dupla
+                                    <span class="dps-tooltip" title="Pelagem dupla requer cuidados especiais na tosa">⚠️</span>
+                                </span>
+                                <span class="dps-consent-pet-tag">32 kg</span>
+                            </div>
+                        </div>
+
+                        <!-- Pet 2 - Cachorro pequeno -->
+                        <div class="dps-consent-pet-card" role="listitem">
+                            <div class="dps-consent-pet-header">
+                                <span class="dps-consent-pet-emoji" aria-hidden="true">🐕</span>
+                                <strong class="dps-consent-pet-name">Luna</strong>
+                            </div>
+                            <div class="dps-consent-pet-details">
+                                <span class="dps-consent-pet-tag">Cachorro</span>
+                                <span class="dps-consent-pet-tag">Shih Tzu</span>
+                                <span class="dps-consent-pet-tag">Porte: Pequeno</span>
+                                <span class="dps-consent-pet-tag">Pelagem: Longa</span>
+                                <span class="dps-consent-pet-tag">5.5 kg</span>
+                            </div>
+                        </div>
+
+                        <!-- Pet 3 - Gato -->
+                        <div class="dps-consent-pet-card" role="listitem">
+                            <div class="dps-consent-pet-header">
+                                <span class="dps-consent-pet-emoji" aria-hidden="true">🐱</span>
+                                <strong class="dps-consent-pet-name">Mia</strong>
+                            </div>
+                            <div class="dps-consent-pet-details">
+                                <span class="dps-consent-pet-tag">Gato</span>
+                                <span class="dps-consent-pet-tag">Persa</span>
+                                <span class="dps-consent-pet-tag">Porte: Médio</span>
+                                <span class="dps-consent-pet-tag">Pelagem: Longa</span>
+                                <span class="dps-consent-pet-tag">4.2 kg</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="dps-consent-pets-count">
+                        Total: 3 pets cadastrados
+                    </p>
+                </section>
+
+                <section class="dps-consent-card dps-consent-card--important" aria-labelledby="section-termos">
+                    <h2 id="section-termos">
+                        <span class="dps-section-icon" aria-hidden="true">📋</span>
+                        Termos e Condições do Consentimento
+                    </h2>
+                    
+                    <div class="dps-consent-terms-intro">
+                        <p>Ao autorizar a tosa com máquina, você declara estar ciente e de acordo com os seguintes termos:</p>
+                    </div>
+                    
+                    <div class="dps-consent-terms-section">
+                        <h3 class="dps-consent-terms-title">Sobre o Procedimento</h3>
+                        <ul class="dps-consent-list">
+                            <li>A tosa com máquina pode expor pequenas imperfeições, nódulos, irritações ou sensibilidades já existentes na pele do pet que estavam ocultas pela pelagem.</li>
+                            <li>Pelagens muito embaraçadas, com nós ou feltradas podem exigir o uso de máquina para preservar o bem-estar e evitar dor ao pet.</li>
+                            <li>Em casos de pelagem dupla (subpelo denso), a tosa pode afetar a textura e o padrão de crescimento do pelo.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dps-consent-terms-section">
+                        <h3 class="dps-consent-terms-title">Cuidados e Segurança</h3>
+                        <ul class="dps-consent-list">
+                            <li>Nossa equipe é treinada e prioriza a segurança, o conforto e pausas quando necessário para o bem-estar do pet.</li>
+                            <li>Apesar de todos os cuidados, pequenos arranhões, irritações ou cortes superficiais podem ocorrer, especialmente em pets agitados ou com pele sensível.</li>
+                            <li>Caso o pet apresente comportamento agressivo ou excessivamente estressado, o procedimento poderá ser interrompido por segurança.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dps-consent-terms-section">
+                        <h3 class="dps-consent-terms-title">Pós-Tosa</h3>
+                        <ul class="dps-consent-list">
+                            <li>É normal o pet coçar-se mais nas primeiras horas após a tosa. Se a coceira persistir por mais de 24 horas, entre em contato conosco.</li>
+                            <li>Evite exposição prolongada ao sol nos primeiros dias após uma tosa curta.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dps-consent-terms-section">
+                        <h3 class="dps-consent-terms-title">Emergências</h3>
+                        <ul class="dps-consent-list">
+                            <li>Em caso de emergência médica durante o atendimento, autorizo a equipe do <strong>Desi Pet Shower</strong> a buscar atendimento veterinário de urgência, ficando os custos sob minha responsabilidade.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dps-consent-terms-section">
+                        <h3 class="dps-consent-terms-title">Validade e Revogação</h3>
+                        <ul class="dps-consent-list">
+                            <li>Este consentimento é permanente e válido para todos os atendimentos futuros até que seja revogado.</li>
+                            <li>Você pode revogar este consentimento a qualquer momento, solicitando ao estabelecimento por telefone, e-mail ou presencialmente.</li>
+                            <li>A revogação não afeta a validade do consentimento para procedimentos já realizados.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dps-consent-accept-box">
+                        <label class="dps-consent-check">
+                            <input type="checkbox" name="dps_tosa_consent_accept" value="1" required aria-required="true">
+                            <span>Li, compreendi e aceito todos os termos e condições acima descritos.</span>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="dps-consent-card dps-consent-card--signature" aria-labelledby="section-assinatura">
+                    <h2 id="section-assinatura">
+                        <span class="dps-section-icon" aria-hidden="true">✍️</span>
+                        Confirmação e Assinatura Digital
+                    </h2>
+                    <div class="dps-consent-signature-content">
+                        <p class="dps-consent-signature-text">
+                            Eu, abaixo identificado(a), confirmo que autorizo a equipe do <strong>Desi Pet Shower</strong> a realizar a tosa com máquina quando necessário para o bem-estar dos meus pets.
+                        </p>
+                        <div class="dps-consent-signature-box">
+                            <div class="dps-consent-signature-info">
+                                <div class="dps-consent-signature-row">
+                                    <span class="dps-consent-signature-label">Assinante:</span>
+                                    <span class="dps-consent-signature-value">Maria Silva Santos</span>
+                                </div>
+                                <div class="dps-consent-signature-row">
+                                    <span class="dps-consent-signature-label">Data:</span>
+                                    <span class="dps-consent-signature-value">01/02/2026</span>
+                                </div>
+                                <div class="dps-consent-signature-row">
+                                    <span class="dps-consent-signature-label">Estabelecimento:</span>
+                                    <span class="dps-consent-signature-value">Desi Pet Shower</span>
+                                </div>
+                            </div>
+                            <div class="dps-consent-signature-line">
+                                <span class="dps-consent-signature-name">Maria Silva Santos</span>
+                                <span class="dps-consent-signature-caption">Assinatura eletrônica</span>
+                            </div>
+                        </div>
+                        <p class="dps-consent-legal-note">
+                            <span aria-hidden="true">ℹ️</span>
+                            Ao clicar em "Registrar consentimento", você confirma que leu e concorda com todos os termos acima. Esta assinatura digital tem validade legal conforme Lei nº 14.063/2020.
+                        </p>
+                    </div>
+                </section>
+
+                <div class="dps-consent-submit-wrapper">
+                    <button type="submit" class="dps-btn dps-btn--primary dps-consent-submit">
+                        <span aria-hidden="true">✅</span> Registrar Consentimento Permanente
+                    </button>
+                    <p class="dps-consent-submit-note">
+                        Você receberá uma confirmação por e-mail após o registro.
+                    </p>
+                </div>
+            </form>
+            
+            <footer class="dps-consent-footer">
+                <p>
+                    © Desi Pet Shower — Documento gerado eletronicamente. Em caso de dúvidas, entre em contato conosco.
+                </p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
