@@ -2590,7 +2590,7 @@
 }
 
 .dps-quick-actions-panel__header {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .dps-quick-actions-panel__title {
@@ -2611,25 +2611,85 @@
 
 .dps-quick-actions-panel__content {
     display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Grupo de ações dentro do painel */
+.dps-quick-action-group {
+    background: #ffffff;
+    border: 1px solid #e0f2fe;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.dps-quick-action-group__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dps-quick-action-group__icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.dps-quick-action-group__title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.dps-quick-action-group__content {
+    display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Ajustes para elementos dentro do painel de ações rápidas */
 .dps-quick-actions-panel .dps-consent-status {
-    background: #ffffff;
-    border-radius: 6px;
-    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     margin: 0;
     flex-shrink: 0;
 }
 
 .dps-quick-actions-panel .dps-consent-link-container,
 .dps-quick-actions-panel .dps-profile-update-link-container {
-    background: #ffffff;
-    border-radius: 6px;
-    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-quick-actions-panel .dps-link-expires {
+    font-size: 11px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+/* Responsividade do painel de ações rápidas */
+@media (max-width: 600px) {
+    .dps-quick-action-group__content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dps-quick-action-group__content .dps-btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dps-quick-action-group__content .dps-consent-link-container,
+    .dps-quick-action-group__content .dps-profile-update-link-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 /* Legacy: manter compatibilidade com header antigo */
@@ -3137,6 +3197,18 @@
     background: #e0f2fe;
     border-color: #0284c7;
     color: #0c4a6e;
+}
+
+.dps-btn-action--danger {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
+.dps-btn-action--danger:hover {
+    background: #fee2e2;
+    border-color: #dc2626;
+    color: #991b1b;
 }
 
 /* Container para link de atualização de perfil */
