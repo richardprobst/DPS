@@ -4552,9 +4552,13 @@ class DPS_Base_Frontend {
         }
 
         // Calcula tempo de cadastro (cliente desde)
+        // Usa formato explícito 'm/Y' para consistência entre locales
         $client_since = '';
         if ( $client && isset( $client->post_date ) ) {
-            $client_since = date_i18n( 'M/Y', strtotime( $client->post_date ) );
+            $post_datetime = get_post_datetime( $client, 'date', 'gmt' );
+            if ( $post_datetime ) {
+                $client_since = $post_datetime->format( 'm/Y' );
+            }
         }
 
         echo '<div class="dps-client-summary">';
@@ -4562,7 +4566,7 @@ class DPS_Base_Frontend {
         // Cliente desde (data de cadastro)
         if ( $client_since ) {
             echo '<div class="dps-summary-card">';
-            echo '<span class="dps-summary-card__icon">🗓️</span>';
+            echo '<span class="dps-summary-card__icon" aria-hidden="true">🗓️</span>';
             echo '<span class="dps-summary-card__value">' . esc_html( $client_since ) . '</span>';
             echo '<span class="dps-summary-card__label">' . esc_html__( 'Cliente Desde', 'desi-pet-shower' ) . '</span>';
             echo '</div>';
@@ -4570,21 +4574,21 @@ class DPS_Base_Frontend {
 
         // Total de atendimentos
         echo '<div class="dps-summary-card dps-summary-card--highlight">';
-        echo '<span class="dps-summary-card__icon">📋</span>';
+        echo '<span class="dps-summary-card__icon" aria-hidden="true">📋</span>';
         echo '<span class="dps-summary-card__value">' . esc_html( $total_appointments ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Total de Atendimentos', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
 
         // Total gasto
         echo '<div class="dps-summary-card dps-summary-card--success">';
-        echo '<span class="dps-summary-card__icon">💰</span>';
+        echo '<span class="dps-summary-card__icon" aria-hidden="true">💰</span>';
         echo '<span class="dps-summary-card__value">R$ ' . esc_html( number_format_i18n( $total_spent, 2 ) ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Total Gasto', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
 
         // Último atendimento
         echo '<div class="dps-summary-card">';
-        echo '<span class="dps-summary-card__icon">📅</span>';
+        echo '<span class="dps-summary-card__icon" aria-hidden="true">📅</span>';
         echo '<span class="dps-summary-card__value">' . esc_html( $last_appointment ?: '-' ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Último Atendimento', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
@@ -4592,7 +4596,7 @@ class DPS_Base_Frontend {
         // Pendências
         $pending_class = $pending_amount > 0 ? 'dps-summary-card--warning' : '';
         echo '<div class="dps-summary-card ' . esc_attr( $pending_class ) . '">';
-        echo '<span class="dps-summary-card__icon">' . ( $pending_amount > 0 ? '⚠️' : '✅' ) . '</span>';
+        echo '<span class="dps-summary-card__icon" aria-hidden="true">' . ( $pending_amount > 0 ? '⚠️' : '✅' ) . '</span>';
         echo '<span class="dps-summary-card__value">R$ ' . esc_html( number_format_i18n( $pending_amount, 2 ) ) . '</span>';
         echo '<span class="dps-summary-card__label">' . esc_html__( 'Pendências', 'desi-pet-shower' ) . '</span>';
         echo '</div>';
@@ -4631,13 +4635,16 @@ class DPS_Base_Frontend {
         echo '<span class="dps-info-item__value">' . esc_html( $has_birth ? $birth_fmt : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
         echo '</div>';
 
-        // Data de cadastro
-        if ( $client && isset( $client->post_date ) ) {
-            $register_date = date_i18n( 'd/m/Y', strtotime( $client->post_date ) );
-            echo '<div class="dps-info-item">';
-            echo '<span class="dps-info-item__label">' . esc_html__( 'Data de Cadastro', 'desi-pet-shower' ) . '</span>';
-            echo '<span class="dps-info-item__value">' . esc_html( $register_date ) . '</span>';
-            echo '</div>';
+        // Data de cadastro - usa get_post_datetime para manipulação de data mais confiável
+        if ( $client ) {
+            $post_datetime = get_post_datetime( $client, 'date', 'gmt' );
+            if ( $post_datetime ) {
+                $register_date = $post_datetime->format( 'd/m/Y' );
+                echo '<div class="dps-info-item">';
+                echo '<span class="dps-info-item__label">' . esc_html__( 'Data de Cadastro', 'desi-pet-shower' ) . '</span>';
+                echo '<span class="dps-info-item__value">' . esc_html( $register_date ) . '</span>';
+                echo '</div>';
+            }
         }
 
         echo '</div>';
