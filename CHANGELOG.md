@@ -99,6 +99,9 @@ Antes de criar uma nova versão oficial:
 - **Geração de link pelo administrador**: Botão no header do cliente para gerar link, copiar e enviar ao tutor.
 - **Revogação registrada**: Consentimento válido até revogação manual pelo administrador.
 - **Indicadores operacionais**: Badge no formulário e na lista de agendamentos, com alerta de ausência ao salvar.
+- **Logging de auditoria**: Eventos de geração de link, revogação e registro de consentimento agora são registrados no DPS_Logger para rastreabilidade.
+- **Códigos de erro estruturados**: Respostas AJAX agora incluem códigos de erro padronizados (NONCE_INVALIDO, SEM_PERMISSAO, CLIENTE_NAO_ENCONTRADO) para melhor integração.
+- **Função helper global**: `dps_get_tosa_consent_page_url()` para obter URL da página de consentimento.
 
 #### Changed (Alterado)
 

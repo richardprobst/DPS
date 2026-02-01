@@ -1548,8 +1548,8 @@ class DPS_Base_Frontend {
         return [
             'status'      => $state,
             'has_consent' => ( 'granted' === $state ),
-            'granted_at'  => $granted_at ? date_i18n( 'd/m/Y', strtotime( $granted_at ) ) : '',
-            'revoked_at'  => $revoked_at ? date_i18n( 'd/m/Y', strtotime( $revoked_at ) ) : '',
+            'granted_at'  => ( $granted_at && false !== strtotime( $granted_at ) ) ? date_i18n( 'd/m/Y', strtotime( $granted_at ) ) : '',
+            'revoked_at'  => ( $revoked_at && false !== strtotime( $revoked_at ) ) ? date_i18n( 'd/m/Y', strtotime( $revoked_at ) ) : '',
         ];
     }
     
@@ -3537,6 +3537,10 @@ class DPS_Base_Frontend {
 
     /**
      * Verifica se o agendamento exige consentimento de tosa com máquina.
+     *
+     * NOTA: Este método assume que a verificação de nonce já foi realizada
+     * pelo método save_appointment() antes de ser chamado. Não deve ser
+     * chamado diretamente sem validação prévia de nonce.
      *
      * @param array $data Dados sanitizados do agendamento.
      * @return bool
