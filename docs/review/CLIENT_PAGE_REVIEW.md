@@ -1,33 +1,44 @@
 # Revisão da Página de Detalhes do Cliente
 
 **Data:** 01/02/2026  
+**Atualização:** 01/02/2026 - Implementação das recomendações futuras  
 **Escopo:** Página de detalhes do cliente (acessível ao clicar no nome do cliente na aba CLIENTES do Painel de Gestão DPS)
 
 ## Análise Realizada
 
-### Estrutura Atual da Página
+### Estrutura Atual da Página (v1.3.0)
 
-A página de detalhes do cliente é composta por:
+A página de detalhes do cliente foi completamente reorganizada:
 
-#### Header
-- ✅ Link "Voltar" para retornar à lista de clientes
+#### Navegação Superior (Nova)
+- Link "Voltar" em posição de destaque no topo
+
+#### Header Principal (Redesenhado)
 - ✅ Nome do cliente (título principal)
-- ✅ Botões de ação (Editar, Novo Agendamento)
-- ✅ Hook `dps_client_page_header_actions` para extensão por add-ons
+- ✅ **NOVO:** Área para badges (fidelidade, status) via hook `dps_client_page_header_badges`
+- ✅ Botões de ação primários (Editar, Novo Agendamento)
+
+#### Painel de Ações Rápidas (Novo)
+- ✅ Seção dedicada com visual moderno (gradiente azul claro)
+- ✅ Título e descrição explicativos
+- ✅ Links de consentimento de tosa organizados
+- ✅ Links de atualização de perfil organizados
+- ✅ Status/badges de consentimento visíveis
 
 #### Cards de Resumo
+- ✅ Cliente Desde (mês/ano de cadastro)
 - ✅ Total de atendimentos
 - ✅ Total gasto (soma de atendimentos finalizados e pagos)
 - ✅ Último atendimento
 - ✅ Pendências financeiras (com destaque visual quando > 0)
-- ✅ **NOVO:** Cliente Desde (mês/ano de cadastro)
 
 #### Seções de Informações
-1. **Dados Pessoais**: CPF, Data de nascimento, **Data de cadastro**
-2. **Contato e Redes Sociais**: Telefone/WhatsApp, Email, Instagram, Facebook, Autorização para fotos
+1. **Dados Pessoais**: CPF, Data de nascimento, Data de cadastro
+2. **Contato e Redes Sociais**: Telefone/WhatsApp, Email, Instagram, Facebook, Autorização para fotos (com badge)
 3. **Endereço e Indicação**: Endereço completo, Como nos conheceu
-4. **Pets**: Cards individuais com foto, informações e ações
-5. **Histórico de Atendimentos**: Tabela com data, horário, pet, serviços, valor, status, observações e ações
+4. **Notas Internas** (NOVO): Anotações administrativas editáveis
+5. **Pets**: Cards individuais com foto, informações e ações
+6. **Histórico de Atendimentos**: Tabela com data, horário, pet, serviços, valor, status, observações e ações
 
 ## Melhorias Implementadas
 
@@ -80,15 +91,37 @@ do_action( 'dps_client_page_after_appointments_section', $client_id, $client, $a
 - Todos os ícones emoji nos cards de resumo marcados com `aria-hidden="true"`
 - Os labels textuais já fornecem contexto semântico para leitores de tela
 
+### 5. Redesign do Header e Painel de Ações Rápidas (v1.3.0)
+
+**Problema identificado:** Os links de consentimento e atualização estavam misturados com os botões de ação primários, causando confusão visual.
+
+**Solução implementada:**
+- Navegação separada no topo (link "Voltar")
+- Header limpo com título, badges e ações primárias
+- Novo "Painel de Ações Rápidas" com visual destacado (gradiente azul)
+- Organização clara dos links externos (consentimento, atualização de perfil)
+- Novo hook `dps_client_page_header_badges` para add-ons adicionarem indicadores
+
+### 6. Notas Internas (v1.3.0)
+
+**Problema identificado:** Não havia local para a equipe registrar observações sobre o cliente.
+
+**Solução implementada:**
+- Nova seção "Notas Internas" após Endereço
+- Campo de texto editável com salvamento via AJAX
+- Visual diferenciado (amarelo) para destacar que são notas internas
+- Armazenamento em meta `client_internal_notes`
+- Feedback visual ao salvar (✓ Salvo / Erro)
+
 ## Recomendações Futuras
 
 ### Prioridade Alta
-1. **Histórico de comunicações**: Exibir últimas mensagens enviadas/recebidas (WhatsApp, Email)
-2. **Indicadores de fidelidade**: Quando add-on de fidelidade ativo, mostrar pontos/nível
+1. ~~**Indicadores de fidelidade**: Quando add-on de fidelidade ativo, mostrar pontos/nível~~ ✅ Hook implementado (`dps_client_page_header_badges`)
+2. **Histórico de comunicações**: Exibir últimas mensagens enviadas/recebidas (WhatsApp, Email) - pode usar hooks existentes
 
 ### Prioridade Média
-1. **Anexos e documentos**: Seção para visualizar documentos do cliente
-2. **Notas internas**: Campo para anotações administrativas sobre o cliente
+1. ~~**Notas internas**: Campo para anotações administrativas sobre o cliente~~ ✅ Implementado
+2. **Anexos e documentos**: Seção para visualizar documentos do cliente
 3. **Timeline de interações**: Visualização cronológica de todos os contatos
 
 ### Prioridade Baixa
@@ -101,6 +134,8 @@ do_action( 'dps_client_page_after_appointments_section', $client_id, $client, $a
 | Arquivo | Alteração |
 |---------|-----------|
 | `plugins/desi-pet-shower-base/includes/class-dps-base-frontend.php` | Implementação das melhorias |
+| `plugins/desi-pet-shower-base/desi-pet-shower-base.php` | AJAX handler para notas |
+| `plugins/desi-pet-shower-base/assets/css/dps-base.css` | Novos estilos |
 | `ANALYSIS.md` | Documentação dos novos hooks |
 | `CHANGELOG.md` | Registro das melhorias |
 

@@ -4265,6 +4265,9 @@ class DPS_Base_Frontend {
         // Seção: Endereço
         self::render_client_address_section( $data['meta'] );
 
+        // Seção: Notas Internas (apenas para administradores)
+        self::render_client_notes_section( $data['meta'], $client_id );
+
         // Seção: Pets
         self::render_client_pets_section( $data['pets'], $data['base_url'], $client_id );
 
@@ -4365,15 +4368,16 @@ class DPS_Base_Frontend {
     private static function prepare_client_page_data( $client_id, $client ) {
         // Metadados do cliente
         $meta = [
-            'cpf'        => get_post_meta( $client_id, 'client_cpf', true ),
-            'phone'      => get_post_meta( $client_id, 'client_phone', true ),
-            'email'      => get_post_meta( $client_id, 'client_email', true ),
-            'birth'      => get_post_meta( $client_id, 'client_birth', true ),
-            'instagram'  => get_post_meta( $client_id, 'client_instagram', true ),
-            'facebook'   => get_post_meta( $client_id, 'client_facebook', true ),
-            'photo_auth' => get_post_meta( $client_id, 'client_photo_auth', true ),
-            'address'    => get_post_meta( $client_id, 'client_address', true ),
-            'referral'   => get_post_meta( $client_id, 'client_referral', true ),
+            'cpf'            => get_post_meta( $client_id, 'client_cpf', true ),
+            'phone'          => get_post_meta( $client_id, 'client_phone', true ),
+            'email'          => get_post_meta( $client_id, 'client_email', true ),
+            'birth'          => get_post_meta( $client_id, 'client_birth', true ),
+            'instagram'      => get_post_meta( $client_id, 'client_instagram', true ),
+            'facebook'       => get_post_meta( $client_id, 'client_facebook', true ),
+            'photo_auth'     => get_post_meta( $client_id, 'client_photo_auth', true ),
+            'address'        => get_post_meta( $client_id, 'client_address', true ),
+            'referral'       => get_post_meta( $client_id, 'client_referral', true ),
+            'internal_notes' => get_post_meta( $client_id, 'client_internal_notes', true ),
         ];
 
         // Lista de pets
@@ -4493,28 +4497,86 @@ class DPS_Base_Frontend {
         $edit_url     = add_query_arg( [ 'tab' => 'clientes', 'dps_edit' => 'client', 'id' => $client_id ], $base_url );
         $schedule_url = add_query_arg( [ 'tab' => 'agendas', 'pref_client' => $client_id ], $base_url );
 
+        // Barra de navegação superior
+        echo '<div class="dps-client-nav">';
+        echo '<a href="' . esc_url( $back_url ) . '" class="dps-client-nav__back" aria-label="' . esc_attr__( 'Voltar para lista de clientes', 'desi-pet-shower' ) . '">← ' . esc_html__( 'Voltar', 'desi-pet-shower' ) . '</a>';
+        echo '</div>';
+
+        // Header principal com título e ações primárias
         echo '<div class="dps-client-header">';
-        echo '<a href="' . esc_url( $back_url ) . '" class="dps-client-header__back">← ' . esc_html__( 'Voltar', 'desi-pet-shower' ) . '</a>';
+        echo '<div class="dps-client-header__info">';
         echo '<h2 class="dps-client-header__title">' . esc_html( $client->post_title ) . '</h2>';
-        echo '<div class="dps-client-header__actions">';
+        
+        // Sub-info com hook para add-ons adicionarem badges (fidelidade, etc.)
+        echo '<div class="dps-client-header__badges">';
+        /**
+         * Hook para adicionar badges ao lado do nome do cliente.
+         * Útil para add-ons de fidelidade mostrarem nível/status.
+         *
+         * @since 1.3.0
+         * @param int     $client_id ID do cliente.
+         * @param WP_Post $client    Objeto do post do cliente.
+         */
+        do_action( 'dps_client_page_header_badges', $client_id, $client );
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="dps-client-header__primary-actions">';
+        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-btn-action" aria-label="' . esc_attr__( 'Editar dados do cliente', 'desi-pet-shower' ) . '">';
+        echo '<span aria-hidden="true">✏️</span> ' . esc_html__( 'Editar', 'desi-pet-shower' );
+        echo '</a>';
+        echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-btn-action dps-btn-action--primary" aria-label="' . esc_attr__( 'Agendar novo atendimento', 'desi-pet-shower' ) . '">';
+        echo '<span aria-hidden="true">📅</span> ' . esc_html__( 'Novo Agendamento', 'desi-pet-shower' );
+        echo '</a>';
+        echo '</div>';
+        echo '</div>';
+
+        // Painel de Ações Rápidas (Links de Consentimento, Atualização, etc.)
+        self::render_client_quick_actions_panel( $client_id, $client, $base_url );
+    }
+
+    /**
+     * Renderiza o painel de ações rápidas do cliente.
+     * 
+     * Agrupa links de consentimento, atualização de perfil e outras ações
+     * externas em um painel organizado visualmente.
+     *
+     * @since 1.3.0
+     * @param int     $client_id ID do cliente.
+     * @param WP_Post $client    Objeto do post do cliente.
+     * @param string  $base_url  URL base da página.
+     */
+    private static function render_client_quick_actions_panel( $client_id, $client, $base_url ) {
+        // Verifica se há ações a serem renderizadas
+        $has_actions = has_action( 'dps_client_page_header_actions' );
+        
+        // Só renderiza o painel se houver ações registradas
+        if ( ! $has_actions ) {
+            return;
+        }
+
+        echo '<div class="dps-quick-actions-panel">';
+        echo '<div class="dps-quick-actions-panel__header">';
+        echo '<h4 class="dps-quick-actions-panel__title">';
+        echo '<span aria-hidden="true">⚡</span> ' . esc_html__( 'Ações Rápidas', 'desi-pet-shower' );
+        echo '</h4>';
+        echo '<p class="dps-quick-actions-panel__description">' . esc_html__( 'Envie links para o cliente atualizar dados ou assinar documentos.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        echo '<div class="dps-quick-actions-panel__content">';
         
         /**
-         * Hook para adicionar ações extras ao cabeçalho da página do cliente.
+         * Hook para adicionar ações extras ao painel de ações rápidas.
          * Usado pelo client-portal add-on para adicionar botão de gerar link de atualização.
+         * Usado pelo base para adicionar botão de consentimento de tosa.
          *
          * @since 1.1.0
+         * @since 1.3.0 Movido para painel dedicado com melhor organização visual.
          * @param int     $client_id ID do cliente.
          * @param WP_Post $client    Objeto do post do cliente.
          * @param string  $base_url  URL base da página.
          */
         do_action( 'dps_client_page_header_actions', $client_id, $client, $base_url );
         
-        echo '<a href="' . esc_url( $edit_url ) . '" class="dps-btn-action">';
-        echo '✏️ ' . esc_html__( 'Editar', 'desi-pet-shower' );
-        echo '</a>';
-        echo '<a href="' . esc_url( $schedule_url ) . '" class="dps-btn-action dps-btn-action--primary">';
-        echo '📅 ' . esc_html__( 'Novo Agendamento', 'desi-pet-shower' );
-        echo '</a>';
         echo '</div>';
         echo '</div>';
     }
@@ -4768,6 +4830,55 @@ class DPS_Base_Frontend {
         echo '</div>';
 
         echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    /**
+     * Renderiza a seção de notas internas do cliente.
+     * 
+     * Campo de texto editável para anotações administrativas sobre o cliente.
+     * Visível apenas para administradores.
+     *
+     * @since 1.3.0
+     * @param array $meta      Metadados do cliente.
+     * @param int   $client_id ID do cliente.
+     */
+    private static function render_client_notes_section( $meta, $client_id ) {
+        // Verifica se o usuário pode gerenciar clientes
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_clients' ) ) {
+            return;
+        }
+
+        $notes       = isset( $meta['internal_notes'] ) ? $meta['internal_notes'] : '';
+        $save_nonce  = wp_create_nonce( 'dps_save_client_notes_' . $client_id );
+
+        echo '<div class="dps-client-section dps-client-section--notes">';
+        echo '<div class="dps-client-section__header">';
+        echo '<h3 class="dps-client-section__title">';
+        echo '<span aria-hidden="true">📝</span> ' . esc_html__( 'Notas Internas', 'desi-pet-shower' );
+        echo '</h3>';
+        echo '<p class="dps-client-section__subtitle">' . esc_html__( 'Anotações visíveis apenas para a equipe.', 'desi-pet-shower' ) . '</p>';
+        echo '</div>';
+        echo '<div class="dps-client-section__content">';
+        
+        echo '<form class="dps-notes-form" id="dps-notes-form-' . esc_attr( $client_id ) . '">';
+        echo '<input type="hidden" name="client_id" value="' . esc_attr( $client_id ) . '">';
+        echo '<input type="hidden" name="nonce" value="' . esc_attr( $save_nonce ) . '">';
+        
+        echo '<div class="dps-notes-editor">';
+        echo '<textarea name="internal_notes" class="dps-notes-textarea" rows="4" placeholder="' . esc_attr__( 'Adicione anotações sobre este cliente: preferências, observações importantes, lembretes...', 'desi-pet-shower' ) . '">' . esc_textarea( $notes ) . '</textarea>';
+        echo '</div>';
+        
+        echo '<div class="dps-notes-actions">';
+        echo '<button type="submit" class="button button-primary dps-save-notes-btn" data-client-id="' . esc_attr( $client_id ) . '">';
+        echo esc_html__( 'Salvar Notas', 'desi-pet-shower' );
+        echo '</button>';
+        echo '<span class="dps-notes-status"></span>';
+        echo '</div>';
+        
+        echo '</form>';
+        
         echo '</div>';
         echo '</div>';
     }
@@ -5128,6 +5239,41 @@ class DPS_Base_Frontend {
                 anchor.click();
                 document.body.removeChild(anchor);
                 URL.revokeObjectURL(url);
+            });
+
+            // Salvar notas internas do cliente
+            $(document).on('submit', '.dps-notes-form', function(e){
+                e.preventDefault();
+                var $form = $(this);
+                var $btn = $form.find('.dps-save-notes-btn');
+                var $status = $form.find('.dps-notes-status');
+                
+                $btn.prop('disabled', true).text('<?php echo esc_js( __( 'Salvando...', 'desi-pet-shower' ) ); ?>');
+                $status.removeClass('dps-notes-status--success dps-notes-status--error').text('');
+                
+                $.ajax({
+                    url: '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
+                    method: 'POST',
+                    data: {
+                        action: 'dps_save_client_notes',
+                        client_id: $form.find('input[name="client_id"]').val(),
+                        nonce: $form.find('input[name="nonce"]').val(),
+                        internal_notes: $form.find('textarea[name="internal_notes"]').val()
+                    },
+                    success: function(response) {
+                        $btn.prop('disabled', false).text('<?php echo esc_js( __( 'Salvar Notas', 'desi-pet-shower' ) ); ?>');
+                        if (response.success) {
+                            $status.addClass('dps-notes-status--success').text('<?php echo esc_js( __( '✓ Salvo', 'desi-pet-shower' ) ); ?>');
+                            setTimeout(function() { $status.fadeOut(300, function() { $(this).text('').show(); }); }, 3000);
+                        } else {
+                            $status.addClass('dps-notes-status--error').text(response.data && response.data.message ? response.data.message : '<?php echo esc_js( __( 'Erro ao salvar', 'desi-pet-shower' ) ); ?>');
+                        }
+                    },
+                    error: function() {
+                        $btn.prop('disabled', false).text('<?php echo esc_js( __( 'Salvar Notas', 'desi-pet-shower' ) ); ?>');
+                        $status.addClass('dps-notes-status--error').text('<?php echo esc_js( __( 'Erro de conexão', 'desi-pet-shower' ) ); ?>');
+                    }
+                });
             });
         })(jQuery);
         </script>
@@ -5879,5 +6025,54 @@ class DPS_Base_Frontend {
             'times' => $all_times,
             'date'  => $date,
         ] );
+    }
+
+    /**
+     * AJAX: Salva notas internas do cliente.
+     *
+     * @since 1.3.0
+     */
+    public static function ajax_save_client_notes() {
+        // Verifica nonce e capacidade usando helper
+        $client_id = isset( $_POST['client_id'] ) ? absint( $_POST['client_id'] ) : 0;
+        
+        if ( ! $client_id ) {
+            DPS_Request_Validator::send_json_error( __( 'Cliente não especificado.', 'desi-pet-shower' ), 'CLIENTE_NAO_ENCONTRADO', 400 );
+        }
+
+        // Verifica nonce dinâmico
+        if ( ! DPS_Request_Validator::verify_dynamic_nonce( 'dps_save_client_notes_', $client_id, 'nonce', 'POST' ) ) {
+            DPS_Request_Validator::send_json_error( __( 'Sessão expirada. Recarregue a página.', 'desi-pet-shower' ), 'NONCE_INVALIDO', 403 );
+        }
+
+        // Verifica permissão
+        if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_clients' ) ) {
+            DPS_Request_Validator::send_json_error( __( 'Você não tem permissão para realizar esta ação.', 'desi-pet-shower' ), 'SEM_PERMISSAO', 403 );
+        }
+
+        // Verifica se o cliente existe
+        $client = get_post( $client_id );
+        if ( ! $client || 'dps_cliente' !== $client->post_type ) {
+            DPS_Request_Validator::send_json_error( __( 'Cliente não encontrado.', 'desi-pet-shower' ), 'CLIENTE_NAO_ENCONTRADO', 404 );
+        }
+
+        // Sanitiza e salva as notas
+        $notes = isset( $_POST['internal_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['internal_notes'] ) ) : '';
+        
+        update_post_meta( $client_id, 'client_internal_notes', $notes );
+
+        // Log da ação
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::log( 'client_notes_updated', sprintf(
+                'Notas internas do cliente #%d atualizadas pelo usuário #%d',
+                $client_id,
+                get_current_user_id()
+            ) );
+        }
+
+        DPS_Request_Validator::send_json_success(
+            __( 'Notas salvas com sucesso.', 'desi-pet-shower' ),
+            [ 'client_id' => $client_id ]
+        );
     }
 }

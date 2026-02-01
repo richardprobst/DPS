@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Redesign da Página de Detalhes do Cliente (Base v1.3.0)**
+
+- **Novo layout de cabeçalho**: Reorganização visual com navegação separada, título com badges e ações primárias destacadas.
+- **Painel de Ações Rápidas**: Nova seção dedicada para links de consentimento, atualização de perfil e outras ações externas, com visual moderno e organizado.
+- **Hook para badges no título**: `dps_client_page_header_badges` permite que add-ons de fidelidade adicionem indicadores de nível/status ao lado do nome do cliente.
+- **Seção de Notas Internas**: Campo de texto editável para anotações administrativas sobre o cliente (visível apenas para a equipe).
+  - Salvamento via AJAX com feedback visual
+  - Armazenado em `client_internal_notes` meta
+  - Estilo diferenciado (amarelo) para destacar que são notas internas
+
 **Melhorias na Página de Detalhes do Cliente (Base v1.2.0)**
 
 - **Data de cadastro do cliente**: Agora exibida nos cards de resumo ("Cliente Desde") e na seção de Dados Pessoais para visualização do tempo de relacionamento.

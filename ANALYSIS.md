@@ -1702,10 +1702,22 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
 
 #### Página de detalhes do cliente
 
+- **`dps_client_page_header_badges`** (action) (desde v1.3.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post)
+  - **Propósito**: adicionar badges ao lado do nome do cliente (ex: nível de fidelidade, tags)
+  - **Consumido por**: Add-ons de fidelidade para mostrar nível/status
+  - **Exemplo**:
+    ```php
+    add_action( 'dps_client_page_header_badges', function( $client_id, $client ) {
+        echo '<span class="dps-badge dps-badge--gold">⭐ VIP</span>';
+    }, 10, 2 );
+    ```
+
 - **`dps_client_page_header_actions`** (action) (desde v1.1.0)
   - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$base_url` (string)
-  - **Propósito**: adicionar botões de ação ao header da página de detalhes do cliente
-  - **Consumido por**: Client Portal (botão de gerar link de atualização de perfil)
+  - **Propósito**: adicionar botões de ação ao painel de ações rápidas da página de detalhes do cliente
+  - **Atualização v1.3.0**: movido para painel dedicado "Ações Rápidas" com melhor organização visual
+  - **Consumido por**: Client Portal (link de atualização de perfil), Tosa Consent (link de consentimento)
   - **Exemplo**:
     ```php
     add_action( 'dps_client_page_header_actions', function( $client_id, $client, $base_url ) {
