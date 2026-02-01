@@ -406,6 +406,11 @@ final class DPS_Tosa_Consent {
             return;
         }
 
+        if ( empty( $signature_phone ) ) {
+            DPS_Message_Helper::add_error( __( 'Informe o telefone/WhatsApp para contato.', 'desi-pet-shower' ) );
+            return;
+        }
+
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_status', 'granted' );
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_granted_at', current_time( 'mysql' ) );
         delete_post_meta( $client_id, 'dps_consent_tosa_maquina_revoked_at' );
