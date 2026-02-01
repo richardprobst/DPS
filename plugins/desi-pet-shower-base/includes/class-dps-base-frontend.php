@@ -4232,13 +4232,35 @@ class DPS_Base_Frontend {
         self::render_client_page_header( $client, $data['base_url'], $client_id );
 
         // Cards de resumo/métricas
-        self::render_client_summary_cards( $data['appointments'], $data['pending_amount'] );
+        self::render_client_summary_cards( $data['appointments'], $data['pending_amount'], $client );
 
         // Seção: Dados Pessoais
-        self::render_client_personal_section( $data['meta'] );
+        self::render_client_personal_section( $data['meta'], $client );
+
+        /**
+         * Hook para adicionar seções personalizadas após os dados pessoais.
+         * Útil para add-ons que precisam exibir informações complementares.
+         *
+         * @since 1.2.0
+         * @param int     $client_id ID do cliente.
+         * @param WP_Post $client    Objeto do post do cliente.
+         * @param array   $meta      Metadados do cliente.
+         */
+        do_action( 'dps_client_page_after_personal_section', $client_id, $client, $data['meta'] );
 
         // Seção: Contato e Redes
         self::render_client_contact_section( $data['meta'] );
+
+        /**
+         * Hook para adicionar seções personalizadas após contato.
+         * Útil para add-ons de fidelidade, comunicações, etc.
+         *
+         * @since 1.2.0
+         * @param int     $client_id ID do cliente.
+         * @param WP_Post $client    Objeto do post do cliente.
+         * @param array   $meta      Metadados do cliente.
+         */
+        do_action( 'dps_client_page_after_contact_section', $client_id, $client, $data['meta'] );
 
         // Seção: Endereço
         self::render_client_address_section( $data['meta'] );
@@ -4246,8 +4268,30 @@ class DPS_Base_Frontend {
         // Seção: Pets
         self::render_client_pets_section( $data['pets'], $data['base_url'], $client_id );
 
+        /**
+         * Hook para adicionar seções personalizadas após pets.
+         * Útil para add-ons que precisam exibir informações de assinaturas ou pacotes.
+         *
+         * @since 1.2.0
+         * @param int     $client_id ID do cliente.
+         * @param WP_Post $client    Objeto do post do cliente.
+         * @param array   $pets      Lista de pets do cliente.
+         */
+        do_action( 'dps_client_page_after_pets_section', $client_id, $client, $data['pets'] );
+
         // Seção: Histórico de Atendimentos
         self::render_client_appointments_section( $data['appointments'], $data['base_url'], $client_id );
+
+        /**
+         * Hook para adicionar seções personalizadas após histórico.
+         * Útil para add-ons financeiros, estatísticas avançadas, etc.
+         *
+         * @since 1.2.0
+         * @param int     $client_id    ID do cliente.
+         * @param WP_Post $client       Objeto do post do cliente.
+         * @param array   $appointments Lista de agendamentos do cliente.
+         */
+        do_action( 'dps_client_page_after_appointments_section', $client_id, $client, $data['appointments'] );
 
         echo '</div>';
 
@@ -4479,10 +4523,12 @@ class DPS_Base_Frontend {
      * Renderiza os cards de resumo/métricas do cliente.
      *
      * @since 1.0.0
-     * @param array $appointments    Lista de agendamentos.
-     * @param float $pending_amount  Valor pendente.
+     * @since 1.2.0 Adicionado parâmetro $client para exibir data de cadastro.
+     * @param array        $appointments   Lista de agendamentos.
+     * @param float        $pending_amount Valor pendente.
+     * @param WP_Post|null $client         Objeto do post do cliente (opcional, para exibir data de cadastro).
      */
-    private static function render_client_summary_cards( $appointments, $pending_amount ) {
+    private static function render_client_summary_cards( $appointments, $pending_amount, $client = null ) {
         $total_appointments = count( $appointments );
         $last_appointment   = '';
         $total_spent        = 0.0;
@@ -4505,7 +4551,22 @@ class DPS_Base_Frontend {
             }
         }
 
+        // Calcula tempo de cadastro (cliente desde)
+        $client_since = '';
+        if ( $client && isset( $client->post_date ) ) {
+            $client_since = date_i18n( 'M/Y', strtotime( $client->post_date ) );
+        }
+
         echo '<div class="dps-client-summary">';
+
+        // Cliente desde (data de cadastro)
+        if ( $client_since ) {
+            echo '<div class="dps-summary-card">';
+            echo '<span class="dps-summary-card__icon">🗓️</span>';
+            echo '<span class="dps-summary-card__value">' . esc_html( $client_since ) . '</span>';
+            echo '<span class="dps-summary-card__label">' . esc_html__( 'Cliente Desde', 'desi-pet-shower' ) . '</span>';
+            echo '</div>';
+        }
 
         // Total de atendimentos
         echo '<div class="dps-summary-card dps-summary-card--highlight">';
@@ -4543,9 +4604,11 @@ class DPS_Base_Frontend {
      * Renderiza a seção de dados pessoais do cliente.
      *
      * @since 1.0.0
-     * @param array $meta Metadados do cliente.
+     * @since 1.2.0 Adicionado parâmetro $client para exibir data de cadastro.
+     * @param array        $meta   Metadados do cliente.
+     * @param WP_Post|null $client Objeto do post do cliente (opcional, para exibir data de cadastro).
      */
-    private static function render_client_personal_section( $meta ) {
+    private static function render_client_personal_section( $meta, $client = null ) {
         echo '<div class="dps-client-section">';
         echo '<div class="dps-client-section__header">';
         echo '<h3 class="dps-client-section__title">👤 ' . esc_html__( 'Dados Pessoais', 'desi-pet-shower' ) . '</h3>';
@@ -4567,6 +4630,15 @@ class DPS_Base_Frontend {
         echo '<span class="dps-info-item__label">' . esc_html__( 'Data de Nascimento', 'desi-pet-shower' ) . '</span>';
         echo '<span class="dps-info-item__value">' . esc_html( $has_birth ? $birth_fmt : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
         echo '</div>';
+
+        // Data de cadastro
+        if ( $client && isset( $client->post_date ) ) {
+            $register_date = date_i18n( 'd/m/Y', strtotime( $client->post_date ) );
+            echo '<div class="dps-info-item">';
+            echo '<span class="dps-info-item__label">' . esc_html__( 'Data de Cadastro', 'desi-pet-shower' ) . '</span>';
+            echo '<span class="dps-info-item__value">' . esc_html( $register_date ) . '</span>';
+            echo '</div>';
+        }
 
         echo '</div>';
         echo '</div>';
@@ -4640,15 +4712,19 @@ class DPS_Base_Frontend {
         echo '<span class="dps-info-item__value">' . esc_html( $has_facebook ? $meta['facebook'] : __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
         echo '</div>';
 
-        // Autorização de fotos
+        // Autorização de fotos - agora com badge visual
         $photo_auth_val = $meta['photo_auth'];
-        $photo_label    = '';
-        if ( '' !== $photo_auth_val && null !== $photo_auth_val ) {
-            $photo_label = $photo_auth_val ? __( 'Sim', 'desi-pet-shower' ) : __( 'Não', 'desi-pet-shower' );
-        }
-        echo '<div class="dps-info-item' . ( $photo_label ? '' : ' dps-info-item--empty' ) . '">';
+        echo '<div class="dps-info-item">';
         echo '<span class="dps-info-item__label">' . esc_html__( 'Autorização para Fotos', 'desi-pet-shower' ) . '</span>';
-        echo '<span class="dps-info-item__value">' . esc_html( $photo_label ?: __( 'Não informado', 'desi-pet-shower' ) ) . '</span>';
+        if ( '' !== $photo_auth_val && null !== $photo_auth_val ) {
+            if ( $photo_auth_val ) {
+                echo '<span class="dps-info-item__value"><span class="dps-status-badge dps-status-badge--completed">✓ ' . esc_html__( 'Autorizado', 'desi-pet-shower' ) . '</span></span>';
+            } else {
+                echo '<span class="dps-info-item__value"><span class="dps-status-badge dps-status-badge--cancelled">✕ ' . esc_html__( 'Não Autorizado', 'desi-pet-shower' ) . '</span></span>';
+            }
+        } else {
+            echo '<span class="dps-info-item__value dps-info-item--empty">' . esc_html__( 'Não informado', 'desi-pet-shower' ) . '</span>';
+        }
         echo '</div>';
 
         echo '</div>';

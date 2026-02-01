@@ -1713,6 +1713,32 @@ Esta seção consolida os principais hooks expostos pelo núcleo e pelos add-ons
     }, 10, 3 );
     ```
 
+- **`dps_client_page_after_personal_section`** (action) (desde v1.2.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
+  - **Propósito**: adicionar seções personalizadas após os dados pessoais do cliente
+  - **Consumido por**: Add-ons que precisam exibir informações complementares
+  - **Exemplo**:
+    ```php
+    add_action( 'dps_client_page_after_personal_section', function( $client_id, $client, $meta ) {
+        echo '<div class="dps-client-section"><!-- Conteúdo personalizado --></div>';
+    }, 10, 3 );
+    ```
+
+- **`dps_client_page_after_contact_section`** (action) (desde v1.2.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$meta` (array)
+  - **Propósito**: adicionar seções após contato e redes sociais
+  - **Consumido por**: Add-ons de fidelidade, comunicações avançadas
+
+- **`dps_client_page_after_pets_section`** (action) (desde v1.2.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$pets` (array)
+  - **Propósito**: adicionar seções após a lista de pets do cliente
+  - **Consumido por**: Add-ons de assinaturas, pacotes de serviços
+
+- **`dps_client_page_after_appointments_section`** (action) (desde v1.2.0)
+  - **Parâmetros**: `$client_id` (int), `$client` (WP_Post), `$appointments` (array)
+  - **Propósito**: adicionar seções após o histórico de atendimentos
+  - **Consumido por**: Add-ons financeiros, estatísticas avançadas
+
 #### Fluxo de agendamentos
 
 - **`dps_base_appointment_fields`** (action)

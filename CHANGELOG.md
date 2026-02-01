@@ -83,6 +83,16 @@ Antes de criar uma nova versão oficial:
 
 #### Added (Adicionado)
 
+**Melhorias na Página de Detalhes do Cliente (Base v1.2.0)**
+
+- **Data de cadastro do cliente**: Agora exibida nos cards de resumo ("Cliente Desde") e na seção de Dados Pessoais para visualização do tempo de relacionamento.
+- **Hooks de extensão para add-ons na página do cliente**: Novos hooks permitem que add-ons injetem seções personalizadas:
+  - `dps_client_page_after_personal_section`: após dados pessoais
+  - `dps_client_page_after_contact_section`: após contato e redes sociais
+  - `dps_client_page_after_pets_section`: após lista de pets
+  - `dps_client_page_after_appointments_section`: após histórico de atendimentos
+- **Autorização de fotos com badge visual**: Campo de autorização para fotos agora exibe badges coloridos (✓ Autorizado em verde, ✕ Não Autorizado em vermelho) para melhor visibilidade.
+
 **Melhorias de UI/UX e Responsividade no Formulário de Cadastro Público (Registration Add-on v1.3.1)**
 
 - **Novo breakpoint para telas muito pequenas (< 375px)**: Adicionado suporte para dispositivos móveis com telas extra pequenas (ex: iPhone SE, dispositivos antigos).
