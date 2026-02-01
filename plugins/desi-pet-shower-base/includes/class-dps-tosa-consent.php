@@ -75,7 +75,7 @@ final class DPS_Tosa_Consent {
                 'dps-tosa-consent-form',
                 DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
                 [],
-                defined( 'DPS_VERSION' ) ? DPS_VERSION : '1.1.1'
+                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '1.1.0'
             );
         }
     }

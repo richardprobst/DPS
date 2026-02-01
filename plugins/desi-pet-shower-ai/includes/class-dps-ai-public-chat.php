@@ -1141,7 +1141,7 @@ CONTEXTO DO SISTEMA:
 
         // 5. Informações do sistema
         $context .= "⚙️ SISTEMA:\n";
-        $context .= "- Versão do Plugin Base: " . ( defined( 'DPS_VERSION' ) ? DPS_VERSION : 'N/A' ) . "\n";
+        $context .= "- Versão do Plugin Base: " . ( defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : 'N/A' ) . "\n";
         $context .= "- Versão do AI Add-on: " . DPS_AI_VERSION . "\n";
         $context .= "- WordPress: " . get_bloginfo( 'version' ) . "\n";
         $context .= "- PHP: " . PHP_VERSION . "\n";
