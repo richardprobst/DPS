@@ -36,6 +36,8 @@
             this.updateTosaFields();
             this.togglePastPaymentValue();
             this.updateAppointmentSummary();
+            this.updateConsentStatus();
+            this.updateConsentWarning();
         },
         
         /**
@@ -58,6 +60,8 @@
             
             // FASE 2: Eventos para atualização de resumo
             $(document).on('change', '#dps-appointment-cliente', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '#dps-appointment-cliente', this.updateConsentStatus.bind(this));
+            $(document).on('change', '#dps-appointment-cliente', this.updateConsentWarning.bind(this));
             $(document).on('change', '.dps-pet-checkbox', this.updateAppointmentSummary.bind(this));
             $(document).on('change', '#appointment_date', function() {
                 self.loadAvailableTimes();
@@ -65,11 +69,13 @@
             });
             $(document).on('change', '#appointment_time', this.updateAppointmentSummary.bind(this));
             $(document).on('change', '#dps-taxidog-toggle, #dps-tosa-toggle', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '#dps-tosa-toggle', this.updateConsentWarning.bind(this));
             $(document).on('input', '#dps-taxidog-price, #dps-tosa-price', this.updateAppointmentSummary.bind(this));
             $(document).on('input', '#appointment_notes', this.updateAppointmentSummary.bind(this));
             
             // Eventos para serviços do Services Add-on
             $(document).on('change', '.dps-service-checkbox', this.updateAppointmentSummary.bind(this));
+            $(document).on('change', '.dps-service-checkbox', this.updateConsentWarning.bind(this));
             $(document).on('input', '.dps-service-price', this.updateAppointmentSummary.bind(this));
             
             // Eventos para valores de assinatura por pet
@@ -100,6 +106,7 @@
             this.updateTosaOptions();
             this.updateTosaFields();
             this.updateAppointmentSummary();
+            this.updateConsentWarning();
         },
         
         /**
@@ -160,6 +167,106 @@
             } else {
                 $('#dps-tosa-fields').slideUp(200);
                 $card.attr('data-tosa-active', '0');
+            }
+        },
+
+        /**
+         * Obtém status de consentimento do cliente selecionado
+         */
+        getSelectedConsentStatus: function() {
+            const $select = $('#dps-appointment-cliente');
+            const $option = $select.find('option:selected');
+            return {
+                status: $option.data('consent-status') || 'missing',
+                date: $option.data('consent-date') || ''
+            };
+        },
+
+        /**
+         * Atualiza badge de consentimento no formulário
+         */
+        updateConsentStatus: function() {
+            const $status = $('#dps-client-consent-status');
+            if (!$status.length) {
+                return;
+            }
+
+            const clientSelected = $('#dps-appointment-cliente').val();
+            if (!clientSelected) {
+                $status.hide().attr('aria-hidden', 'true');
+                return;
+            }
+
+            const consent = this.getSelectedConsentStatus();
+            const badge = $status.find('.dps-consent-badge');
+            let note = $status.find('.dps-consent-status__note');
+            if (!note.length) {
+                note = $('<span class="dps-consent-status__note"></span>');
+                $status.append(note);
+            }
+
+            let label = dpsAppointmentData.l10n.tosaConsentMissing || 'Consentimento tosa máquina pendente';
+            let badgeClass = 'dps-consent-badge--missing';
+
+            if (consent.status === 'granted') {
+                label = dpsAppointmentData.l10n.tosaConsentOk || 'Consentimento tosa máquina ativo';
+                badgeClass = 'dps-consent-badge--ok';
+            } else if (consent.status === 'revoked') {
+                label = dpsAppointmentData.l10n.tosaConsentRevoked || 'Consentimento tosa máquina revogado';
+                badgeClass = 'dps-consent-badge--danger';
+            }
+
+            badge.text(label)
+                .removeClass('dps-consent-badge--ok dps-consent-badge--missing dps-consent-badge--danger')
+                .addClass(badgeClass);
+
+            if (consent.date) {
+                const noteLabel = (consent.status === 'granted')
+                    ? (dpsAppointmentData.l10n.tosaConsentSignedAt || 'Assinado em %s')
+                    : (dpsAppointmentData.l10n.tosaConsentRevokedAt || 'Revogado em %s');
+                note.text(noteLabel.replace('%s', consent.date)).show();
+            } else {
+                note.hide();
+            }
+
+            $status.show().attr('aria-hidden', 'false');
+        },
+
+        /**
+         * Verifica se o agendamento requer consentimento de tosa máquina
+         */
+        appointmentRequiresConsent: function() {
+            if ($('#dps-tosa-toggle').length && $('#dps-tosa-toggle').is(':checked')) {
+                return true;
+            }
+
+            let requires = false;
+            $('.dps-service-checkbox:checked').each(function() {
+                if ($(this).data('consent') === 'tosa_maquina') {
+                    requires = true;
+                }
+            });
+
+            return requires;
+        },
+
+        /**
+         * Atualiza alerta de consentimento quando necessário
+         */
+        updateConsentWarning: function() {
+            const $warning = $('#dps-consent-warning');
+            if (!$warning.length) {
+                return;
+            }
+
+            const consent = this.getSelectedConsentStatus();
+            const requires = this.appointmentRequiresConsent();
+            const shouldShow = requires && consent.status !== 'granted';
+
+            if (shouldShow) {
+                $warning.show().attr('aria-hidden', 'false');
+            } else {
+                $warning.hide().attr('aria-hidden', 'true');
             }
         },
         
@@ -745,6 +852,16 @@
                 }, 300);
                 
                 return false;
+            }
+
+            const consent = this.getSelectedConsentStatus();
+            if (this.appointmentRequiresConsent() && consent.status !== 'granted') {
+                const confirmMessage = dpsAppointmentData.l10n.tosaConsentConfirm
+                    || 'Este cliente não possui consentimento de tosa com máquina. Deseja continuar mesmo assim?';
+                if (!window.confirm(confirmMessage)) {
+                    event.preventDefault();
+                    return false;
+                }
             }
             
             // Se validação passou, desabilita botão e mostra estado "Salvando..."
