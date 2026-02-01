@@ -1,0 +1,309 @@
+/**
+ * Estilos do formulário de Consentimento de Tosa com Máquina
+ *
+ * @package DesiPetShower
+ * @since 1.1.1
+ */
+
+/* Container principal */
+.dps-consent-page {
+    background: #f9fafb;
+    padding: 32px 16px;
+    min-height: 100vh;
+}
+
+.dps-consent-container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.3s ease;
+}
+
+/* Header */
+.dps-consent-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.dps-consent-header__icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.dps-consent-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 8px 0;
+    color: #374151;
+}
+
+.dps-consent-subtitle {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Cards de seção */
+.dps-consent-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    background: #fff;
+}
+
+.dps-consent-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 12px;
+}
+
+/* Grid de campos */
+.dps-consent-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* Campos de formulário */
+.dps-consent-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.dps-consent-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.dps-consent-field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.dps-consent-field input:hover {
+    border-color: #d1d5db;
+}
+
+.dps-consent-field input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.dps-consent-field input::placeholder {
+    color: #9ca3af;
+}
+
+.dps-consent-field--full {
+    grid-column: 1 / -1;
+}
+
+/* Indicador de campo obrigatório */
+.dps-required {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Lista de pets */
+.dps-consent-pets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dps-consent-pets li {
+    background: #f3f4f6;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dps-consent-pets li::before {
+    content: '🐾';
+    font-size: 14px;
+}
+
+/* Lista de termos */
+.dps-consent-list {
+    margin: 12px 0 16px;
+    padding-left: 24px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.dps-consent-list li {
+    margin-bottom: 8px;
+}
+
+.dps-consent-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Checkbox de aceite */
+.dps-consent-check {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dps-consent-check:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.dps-consent-check input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #0ea5e9;
+}
+
+.dps-consent-check span {
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+/* Área de assinatura */
+.dps-consent-signature {
+    font-size: 16px;
+    color: #374151;
+    margin-top: 12px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 4px solid #0ea5e9;
+}
+
+.dps-consent-signature strong {
+    color: #6b7280;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+/* Botão de submissão */
+.dps-consent-submit {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.dps-consent-submit:hover {
+    transform: translateY(-1px);
+}
+
+.dps-consent-submit:active {
+    transform: translateY(0);
+}
+
+/* Mensagem de erro */
+.dps-consent-error {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 0 16px;
+}
+
+/* Texto auxiliar */
+.dps-text-muted {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dps-consent-page {
+        padding: 16px;
+    }
+
+    .dps-consent-container {
+        padding: 24px;
+        border-radius: 12px;
+    }
+
+    .dps-consent-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dps-consent-header__icon {
+        font-size: 40px;
+    }
+
+    .dps-consent-title {
+        font-size: 20px;
+    }
+
+    .dps-consent-card {
+        padding: 16px;
+    }
+
+    .dps-consent-card h2 {
+        font-size: 16px;
+    }
+
+    .dps-consent-check {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dps-consent-container {
+        padding: 16px;
+    }
+
+    .dps-consent-pets {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

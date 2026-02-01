@@ -58,6 +58,26 @@ final class DPS_Tosa_Consent {
         add_action( 'wp_ajax_dps_generate_tosa_consent_link', [ $this, 'ajax_generate_link' ] );
         add_action( 'wp_ajax_dps_revoke_tosa_consent', [ $this, 'ajax_revoke_consent' ] );
         add_action( 'init', [ $this, 'handle_consent_form' ], 10 );
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_consent_assets' ] );
+    }
+
+    /**
+     * Enfileira assets do formulário de consentimento quando necessário.
+     */
+    public function enqueue_consent_assets() {
+        if ( ! is_singular() ) {
+            return;
+        }
+
+        global $post;
+        if ( $post && has_shortcode( $post->post_content, 'dps_tosa_consent' ) ) {
+            wp_enqueue_style(
+                'dps-tosa-consent-form',
+                DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
+                [],
+                defined( 'DPS_VERSION' ) ? DPS_VERSION : '1.1.1'
+            );
+        }
     }
 
     /**
@@ -240,15 +260,30 @@ final class DPS_Tosa_Consent {
         $nonce     = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 
         if ( ! wp_verify_nonce( $nonce, 'dps_generate_tosa_consent_' . $client_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Falha de nonce ao gerar link de consentimento', [ 'client_id' => $client_id ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'NONCE_INVALIDO',
+                'message'  => __( 'Falha na verificação de segurança.', 'desi-pet-shower' ),
+            ] );
         }
 
         if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_clients' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Você não tem permissão para executar esta ação.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Tentativa de gerar link sem permissão', [ 'client_id' => $client_id, 'user_id' => get_current_user_id() ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'SEM_PERMISSAO',
+                'message'  => __( 'Você não tem permissão para executar esta ação.', 'desi-pet-shower' ),
+            ] );
         }
 
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Cliente inválido.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Cliente inválido ao gerar link', [ 'client_id' => $client_id ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'CLIENTE_NAO_ENCONTRADO',
+                'message'  => __( 'Cliente inválido.', 'desi-pet-shower' ),
+            ] );
         }
 
         $token_plain = bin2hex( random_bytes( 32 ) );
@@ -271,6 +306,8 @@ final class DPS_Tosa_Consent {
             'url'   => $consent_url,
         ], self::TOKEN_TTL_SECONDS );
 
+        $this->log_event( 'info', 'Link de consentimento gerado', [ 'client_id' => $client_id, 'expires_at' => gmdate( 'Y-m-d H:i:s', $expires_at ) ] );
+
         do_action( 'dps_tosa_consent_link_generated', $client_id, $consent_url );
 
         wp_send_json_success( [
@@ -287,19 +324,36 @@ final class DPS_Tosa_Consent {
         $nonce     = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 
         if ( ! wp_verify_nonce( $nonce, 'dps_revoke_tosa_consent_' . $client_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Falha na verificação de segurança.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Falha de nonce ao revogar consentimento', [ 'client_id' => $client_id ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'NONCE_INVALIDO',
+                'message'  => __( 'Falha na verificação de segurança.', 'desi-pet-shower' ),
+            ] );
         }
 
         if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'dps_manage_clients' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Você não tem permissão para executar esta ação.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Tentativa de revogar consentimento sem permissão', [ 'client_id' => $client_id, 'user_id' => get_current_user_id() ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'SEM_PERMISSAO',
+                'message'  => __( 'Você não tem permissão para executar esta ação.', 'desi-pet-shower' ),
+            ] );
         }
 
         if ( ! $client_id || 'dps_cliente' !== get_post_type( $client_id ) ) {
-            wp_send_json_error( [ 'message' => __( 'Cliente inválido.', 'desi-pet-shower' ) ] );
+            $this->log_event( 'warning', 'Cliente inválido ao revogar consentimento', [ 'client_id' => $client_id ] );
+            wp_send_json_error( [
+                'erro'     => true,
+                'codigo'   => 'CLIENTE_NAO_ENCONTRADO',
+                'message'  => __( 'Cliente inválido.', 'desi-pet-shower' ),
+            ] );
         }
 
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_status', 'revoked' );
         update_post_meta( $client_id, 'dps_consent_tosa_maquina_revoked_at', current_time( 'mysql' ) );
+
+        $this->log_event( 'info', 'Consentimento revogado', [ 'client_id' => $client_id, 'revoked_by' => get_current_user_id() ] );
 
         do_action( 'dps_tosa_consent_revoked', $client_id );
 
@@ -318,17 +372,20 @@ final class DPS_Tosa_Consent {
         $token     = sanitize_text_field( wp_unslash( $_POST['dps_tosa_consent_token'] ) );
 
         if ( ! $client_id || empty( $token ) ) {
+            $this->log_event( 'warning', 'Formulário de consentimento com dados inválidos', [ 'client_id' => $client_id ] );
             DPS_Message_Helper::add_error( __( 'Link inválido. Solicite um novo link ao administrador.', 'desi-pet-shower' ) );
             return;
         }
 
         $nonce = sanitize_text_field( wp_unslash( $_POST['dps_tosa_consent_nonce'] ) );
         if ( ! wp_verify_nonce( $nonce, 'dps_tosa_consent_' . $client_id ) ) {
+            $this->log_event( 'warning', 'Falha de nonce no formulário de consentimento', [ 'client_id' => $client_id ] );
             DPS_Message_Helper::add_error( __( 'Falha na verificação de segurança. Tente novamente.', 'desi-pet-shower' ) );
             return;
         }
 
         if ( ! $this->validate_token( $client_id, $token ) ) {
+            $this->log_event( 'warning', 'Token inválido ou expirado no formulário de consentimento', [ 'client_id' => $client_id ] );
             DPS_Message_Helper::add_error( __( 'Link inválido ou expirado. Solicite um novo link ao administrador.', 'desi-pet-shower' ) );
             return;
         }
@@ -374,6 +431,12 @@ final class DPS_Tosa_Consent {
 
         delete_post_meta( $client_id, 'dps_consent_tosa_maquina_token_hash' );
         delete_post_meta( $client_id, 'dps_consent_tosa_maquina_token_expires' );
+
+        $this->log_event( 'info', 'Consentimento registrado com sucesso', [
+            'client_id'      => $client_id,
+            'signature_name' => $signature_name,
+            'ip'             => $ip_address,
+        ] );
 
         do_action( 'dps_tosa_consent_saved', $client_id );
 
@@ -486,6 +549,19 @@ final class DPS_Tosa_Consent {
         $fallback = home_url( '/consentimento-tosa-maquina/' );
 
         return (string) apply_filters( 'dps_tosa_consent_page_url', $fallback, $page_id );
+    }
+
+    /**
+     * Registra evento de log para auditoria.
+     *
+     * @param string $level   Nível do log (info, warning, error).
+     * @param string $message Mensagem descritiva.
+     * @param array  $context Dados adicionais.
+     */
+    private function log_event( $level, $message, $context = [] ) {
+        if ( class_exists( 'DPS_Logger' ) ) {
+            DPS_Logger::log( $level, $message, $context, 'tosa_consent' );
+        }
     }
 }
 

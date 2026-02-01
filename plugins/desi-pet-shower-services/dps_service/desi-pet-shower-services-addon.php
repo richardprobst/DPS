@@ -71,6 +71,30 @@ class DPS_Services_Addon {
     }
 
     /**
+     * Verifica se um serviço requer consentimento de tosa com máquina.
+     *
+     * Extrai a lógica de verificação para evitar duplicação de código.
+     * Serviços das categorias 'tosa' ou 'opcoes_tosa' que contenham
+     * 'máquina' ou 'maquina' no nome requerem consentimento.
+     *
+     * @param array $service Dados do serviço (deve conter 'category' e 'name').
+     * @return bool True se o serviço requer consentimento.
+     */
+    private function service_requires_tosa_consent( $service ) {
+        $category = $service['category'] ?? '';
+        $name     = $service['name'] ?? '';
+
+        if ( ! $category || ! $name ) {
+            return false;
+        }
+
+        $is_tosa_category = in_array( $category, [ 'tosa', 'opcoes_tosa' ], true );
+        $has_machine      = ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) );
+
+        return $is_tosa_category && $has_machine;
+    }
+
+    /**
      * Calcula a URL de redirecionamento após uma ação de serviço.
      *
      * @param string $tab Aba que deve permanecer ativa.
@@ -1738,14 +1762,7 @@ class DPS_Services_Addon {
                 
                 // Formata preços por porte para exibição
                 $price_display = $this->format_service_price_display( $srv );
-                $consent_attr = '';
-                $category = $srv['category'] ?? '';
-                if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
-                    $name = $srv['name'] ?? '';
-                    if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
-                        $consent_attr = ' data-consent="tosa_maquina"';
-                    }
-                }
+                $consent_attr  = $this->service_requires_tosa_consent( $srv ) ? ' data-consent="tosa_maquina"' : '';
                 
                 echo '<div class="dps-service-item">';
                 echo '<label class="dps-service-label">';
@@ -1790,14 +1807,7 @@ class DPS_Services_Addon {
                     
                     // Formata preços por porte para exibição
                     $price_display = $this->format_service_price_display( $srv );
-                    $consent_attr = '';
-                    $category = $srv['category'] ?? '';
-                    if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
-                        $name = $srv['name'] ?? '';
-                        if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
-                            $consent_attr = ' data-consent="tosa_maquina"';
-                        }
-                    }
+                    $consent_attr  = $this->service_requires_tosa_consent( $srv ) ? ' data-consent="tosa_maquina"' : '';
                     
                     echo '<div class="dps-service-item">';
                     echo '<label class="dps-service-label">';
@@ -1830,14 +1840,7 @@ class DPS_Services_Addon {
                 
                 // Formata preços por porte para exibição
                 $price_display = $this->format_service_price_display( $srv );
-                $consent_attr = '';
-                $category = $srv['category'] ?? '';
-                if ( $category && in_array( $category, [ 'tosa', 'opcoes_tosa' ], true ) ) {
-                    $name = $srv['name'] ?? '';
-                    if ( $name && ( false !== stripos( $name, 'máquina' ) || false !== stripos( $name, 'maquina' ) ) ) {
-                        $consent_attr = ' data-consent="tosa_maquina"';
-                    }
-                }
+                $consent_attr  = $this->service_requires_tosa_consent( $srv ) ? ' data-consent="tosa_maquina"' : '';
                 
                 echo '<div class="dps-service-item">';
                 echo '<label class="dps-service-label">';
