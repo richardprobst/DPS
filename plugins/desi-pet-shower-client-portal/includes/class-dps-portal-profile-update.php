@@ -75,13 +75,21 @@ final class DPS_Portal_Profile_Update {
         // Verifica se já existe um token gerado recentemente
         $existing_token = get_transient( 'dps_profile_update_token_' . $client_id );
         
+        // Grupo de ações de atualização de perfil
+        echo '<div class="dps-quick-action-group">';
+        echo '<div class="dps-quick-action-group__header">';
+        echo '<span class="dps-quick-action-group__icon" aria-hidden="true">📝</span>';
+        echo '<h5 class="dps-quick-action-group__title">' . esc_html__( 'Atualização de Perfil', 'dps-client-portal' ) . '</h5>';
+        echo '</div>';
+        echo '<div class="dps-quick-action-group__content">';
+
+        // Link copiável existente
         if ( $existing_token ) {
-            // Mostra o link copiável
             echo '<div class="dps-profile-update-link-container">';
             echo '<button type="button" class="dps-btn-action dps-btn-action--secondary dps-copy-link" data-link="' . esc_attr( $existing_token['url'] ) . '" title="' . esc_attr__( 'Clique para copiar', 'dps-client-portal' ) . '">';
-            echo '📋 ' . esc_html__( 'Copiar Link', 'dps-client-portal' );
+            echo '📋 ' . esc_html__( 'Copiar', 'dps-client-portal' );
             echo '</button>';
-            echo '<span class="dps-link-expires">' . esc_html__( 'Válido por 7 dias', 'dps-client-portal' ) . '</span>';
+            echo '<span class="dps-link-expires">' . esc_html__( '7 dias', 'dps-client-portal' ) . '</span>';
             echo '</div>';
         }
         
@@ -90,8 +98,11 @@ final class DPS_Portal_Profile_Update {
         echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
         echo 'data-nonce="' . esc_attr( $nonce ) . '" ';
         echo 'title="' . esc_attr__( 'Gerar link para o cliente atualizar seus dados', 'dps-client-portal' ) . '">';
-        echo '🔗 ' . esc_html__( 'Link de Atualização', 'dps-client-portal' );
+        echo '🔗 ' . esc_html__( 'Gerar Link', 'dps-client-portal' );
         echo '</button>';
+
+        echo '</div>'; // .dps-quick-action-group__content
+        echo '</div>'; // .dps-quick-action-group
         
         // Adiciona JavaScript inline para o botão
         $this->render_button_script();

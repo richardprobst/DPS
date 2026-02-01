@@ -94,12 +94,12 @@ final class DPS_Tosa_Consent {
         $existing_link = get_transient( 'dps_tosa_consent_token_' . $client_id );
 
         $badge_class = 'dps-consent-badge--missing';
-        $badge_text  = __( 'Consentimento pendente', 'desi-pet-shower' );
+        $badge_text  = __( 'Pendente', 'desi-pet-shower' );
         $badge_note  = '';
 
         if ( 'granted' === $status_data['status'] ) {
             $badge_class = 'dps-consent-badge--ok';
-            $badge_text  = __( 'Consentimento ativo', 'desi-pet-shower' );
+            $badge_text  = __( 'Ativo', 'desi-pet-shower' );
             if ( $status_data['granted_at'] ) {
                 $badge_note = sprintf(
                     /* translators: %s: data */
@@ -109,7 +109,7 @@ final class DPS_Tosa_Consent {
             }
         } elseif ( 'revoked' === $status_data['status'] ) {
             $badge_class = 'dps-consent-badge--danger';
-            $badge_text  = __( 'Consentimento revogado', 'desi-pet-shower' );
+            $badge_text  = __( 'Revogado', 'desi-pet-shower' );
             if ( $status_data['revoked_at'] ) {
                 $badge_note = sprintf(
                     /* translators: %s: data */
@@ -119,6 +119,15 @@ final class DPS_Tosa_Consent {
             }
         }
 
+        // Grupo de ações de consentimento de tosa
+        echo '<div class="dps-quick-action-group">';
+        echo '<div class="dps-quick-action-group__header">';
+        echo '<span class="dps-quick-action-group__icon" aria-hidden="true">✍️</span>';
+        echo '<h5 class="dps-quick-action-group__title">' . esc_html__( 'Consentimento de Tosa', 'desi-pet-shower' ) . '</h5>';
+        echo '</div>';
+        echo '<div class="dps-quick-action-group__content">';
+
+        // Status badge
         echo '<div class="dps-consent-status">';
         echo '<span class="dps-consent-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $badge_text ) . '</span>';
         if ( $badge_note ) {
@@ -126,30 +135,36 @@ final class DPS_Tosa_Consent {
         }
         echo '</div>';
 
+        // Link copiável existente
         if ( $existing_link && ! empty( $existing_link['url'] ) ) {
             echo '<div class="dps-consent-link-container">';
             echo '<button type="button" class="dps-btn-action dps-btn-action--secondary dps-copy-link" data-link="' . esc_attr( $existing_link['url'] ) . '" title="' . esc_attr__( 'Clique para copiar', 'desi-pet-shower' ) . '">';
-            echo '📋 ' . esc_html__( 'Copiar Link', 'desi-pet-shower' );
+            echo '📋 ' . esc_html__( 'Copiar', 'desi-pet-shower' );
             echo '</button>';
-            echo '<span class="dps-link-expires">' . esc_html__( 'Válido por 7 dias', 'desi-pet-shower' ) . '</span>';
+            echo '<span class="dps-link-expires">' . esc_html__( '7 dias', 'desi-pet-shower' ) . '</span>';
             echo '</div>';
         }
 
+        // Botão gerar link
         echo '<button type="button" class="dps-btn-action dps-btn-action--secondary dps-generate-consent-link" ';
         echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
         echo 'data-nonce="' . esc_attr( $nonce ) . '" ';
         echo 'title="' . esc_attr__( 'Gerar link para o cliente assinar o consentimento', 'desi-pet-shower' ) . '">';
-        echo '✍️ ' . esc_html__( 'Link de Consentimento', 'desi-pet-shower' );
+        echo '🔗 ' . esc_html__( 'Gerar Link', 'desi-pet-shower' );
         echo '</button>';
 
+        // Botão revogar (se consentimento ativo)
         if ( 'granted' === $status_data['status'] ) {
             echo '<button type="button" class="dps-btn-action dps-btn-action--danger dps-revoke-consent" ';
             echo 'data-client-id="' . esc_attr( $client_id ) . '" ';
             echo 'data-nonce="' . esc_attr( $revoke_nonce ) . '" ';
             echo 'title="' . esc_attr__( 'Revogar consentimento de tosa com máquina', 'desi-pet-shower' ) . '">';
-            echo '⛔ ' . esc_html__( 'Revogar consentimento', 'desi-pet-shower' );
+            echo '⛔ ' . esc_html__( 'Revogar', 'desi-pet-shower' );
             echo '</button>';
         }
+
+        echo '</div>'; // .dps-quick-action-group__content
+        echo '</div>'; // .dps-quick-action-group
 
         $this->render_button_script();
     }

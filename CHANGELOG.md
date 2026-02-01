@@ -128,6 +128,16 @@ Antes de criar uma nova versão oficial:
 
 #### Changed (Alterado)
 
+**Melhoria de UI no Painel de Ações Rápidas (Base v1.3.1)**
+
+- **Reorganização do painel de Ações Rápidas**: Elementos que antes estavam misturados agora são agrupados por funcionalidade em cards separados:
+  - **Grupo "Consentimento de Tosa"**: Status badge, botões de copiar/gerar link e revogar organizados em um card dedicado
+  - **Grupo "Atualização de Perfil"**: Botões de copiar/gerar link organizados em um card dedicado
+- **Textos mais concisos**: Botões com textos reduzidos ("Copiar" em vez de "Copiar Link", "Gerar Link" em vez de "Link de Consentimento")
+- **Badges de status mais compactos**: "Ativo", "Pendente", "Revogado" em vez de "Consentimento ativo", etc.
+- **Layout responsivo melhorado**: Estilos específicos para mobile (< 600px) com botões em coluna e largura total
+- **Novo estilo `.dps-btn-action--danger`**: Botão vermelho para ações destrutivas como "Revogar"
+
 **Refinamentos visuais conforme Guia de Estilo (Registration Add-on v1.3.1)**
 
 - **Bordas padronizadas para 1px**: Alteradas bordas de 2px para 1px em inputs, pet fieldsets, summary box, botão secundário e botão "Adicionar pet", seguindo o guia de estilo visual do DPS.
