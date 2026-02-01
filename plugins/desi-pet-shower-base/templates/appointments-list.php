@@ -94,11 +94,31 @@ $list_title      = isset( $list_title ) ? $list_title : __( 'Próximos Agendamen
                         if ( get_post_meta( $appt->ID, 'subscription_id', true ) ) {
                             $pet_name .= ' ' . esc_html__( '(Assinatura)', 'desi-pet-shower' );
                         }
+
+                        $consent_badge = '';
+                        if ( $client_id && class_exists( 'DPS_Base_Frontend' ) ) {
+                            $consent_data = DPS_Base_Frontend::get_client_tosa_consent_data( $client_id );
+                            $badge_class  = 'dps-consent-badge--missing';
+                            $badge_text   = __( 'Consentimento pendente', 'desi-pet-shower' );
+                            if ( 'granted' === $consent_data['status'] ) {
+                                $badge_class = 'dps-consent-badge--ok';
+                                $badge_text  = __( 'Consentimento OK', 'desi-pet-shower' );
+                            } elseif ( 'revoked' === $consent_data['status'] ) {
+                                $badge_class = 'dps-consent-badge--danger';
+                                $badge_text  = __( 'Consentimento revogado', 'desi-pet-shower' );
+                            }
+                            $consent_badge = '<span class="dps-consent-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $badge_text ) . '</span>';
+                        }
                         ?>
                         <tr class="<?php echo esc_attr( $row_class ); ?>">
                             <td><?php echo esc_html( $date_fmt ); ?></td>
                             <td><?php echo esc_html( $time ); ?></td>
-                            <td><?php echo esc_html( $client ? $client->post_title : '-' ); ?></td>
+                            <td>
+                                <?php echo esc_html( $client ? $client->post_title : '-' ); ?>
+                                <?php if ( $consent_badge ) : ?>
+                                    <div class="dps-consent-status"><?php echo $consent_badge; ?></div>
+                                <?php endif; ?>
+                            </td>
                             <td><?php echo esc_html( $pet_name ); ?></td>
                             <td>
                                 <?php

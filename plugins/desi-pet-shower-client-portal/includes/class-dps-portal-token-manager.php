@@ -57,6 +57,7 @@ final class DPS_Portal_Token_Manager implements DPS_Portal_Token_Manager_Interfa
      * @var int
      */
     const PROFILE_UPDATE_EXPIRATION_MINUTES = 60 * 24 * 7;
+
     
     /**
      * Tamanho máximo do user agent armazenado no log de acesso

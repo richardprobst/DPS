@@ -93,6 +93,13 @@ Antes de criar uma nova versão oficial:
   - Aplicado tanto no fieldset inicial quanto nos pets adicionados dinamicamente via JavaScript
 - **Altura mínima de inputs para melhor usabilidade móvel**: Inputs agora têm altura mínima de 48px, melhorando a área de toque para dispositivos touch.
 
+**Consentimento de Tosa com Máquina (Client Portal + Base)**
+
+- **Página pública de consentimento via token**: Novo shortcode `[dps_tosa_consent]` para coletar consentimento com preenchimento automático e registro por cliente.
+- **Geração de link pelo administrador**: Botão no header do cliente para gerar link, copiar e enviar ao tutor.
+- **Revogação registrada**: Consentimento válido até revogação manual pelo administrador.
+- **Indicadores operacionais**: Badge no formulário e na lista de agendamentos, com alerta de ausência ao salvar.
+
 #### Changed (Alterado)
 
 **Refinamentos visuais conforme Guia de Estilo (Registration Add-on v1.3.1)**

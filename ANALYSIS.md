@@ -8,6 +8,7 @@
 - A classe `DPS_Settings_Frontend` gerencia a página de configurações (`[dps_configuracoes]`) com sistema moderno de registro de abas via `register_tab()`. Os hooks legados `dps_settings_nav_tabs` e `dps_settings_sections` foram depreciados em favor do sistema moderno que oferece melhor consistência visual.
 - O fluxo de formulários usa `dps_nonce` para CSRF e delega ações específicas (`save_client`, `save_pet`, `save_appointment`, `update_appointment_status`) para métodos especializados, enquanto exclusões limpam também dados financeiros relacionados quando disponíveis. A classe principal é inicializada no hook `init` com prioridade 5, após o carregamento do text domain em prioridade 1.
 - A exclusão de agendamentos dispara o hook `dps_finance_cleanup_for_appointment`, permitindo que add-ons financeiros tratem a remoção de lançamentos vinculados sem depender de SQL no núcleo.
+- O filtro `dps_tosa_consent_required` permite ajustar quando o consentimento de tosa com máquina é exigido ao salvar agendamentos (parâmetros: `$requires`, `$data`, `$service_ids`).
 - A criação de tabelas do núcleo (ex.: `dps_logs`) é registrada no `register_activation_hook` e versionada via option `dps_logger_db_version`. Caso a flag de versão não exista ou esteja desatualizada, `dbDelta` é chamado uma única vez em `plugins_loaded` para alinhar o esquema, evitando consultas de verificação em todos os ciclos de `init`.
 - **Organização do menu admin**: o menu pai `desi-pet-shower` apresenta apenas hubs e itens principais. Um limpador dedicado (`DPS_Admin_Menu_Cleaner`) remove submenus duplicados que já estão cobertos por hubs (Integrações, Sistema, Ferramentas, Agenda, IA, Portal). As páginas continuam acessíveis via URL direta e pelas abas dos hubs, evitando poluição visual na navegação.
 
@@ -1037,16 +1038,18 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - Integrar com módulo "Indique e Ganhe" quando ativo
 - Sistema de autenticação via tokens (magic links) sem necessidade de senhas
 - Link de atualização de perfil para clientes atualizarem seus dados sem login
+- Coleta de consentimento de tosa com máquina via link tokenizado
 
 **Shortcodes expostos**:
 - `[dps_client_portal]`: renderiza portal completo do cliente
 - `[dps_client_login]`: exibe formulário de login
 - `[dps_profile_update]`: formulário público de atualização de perfil (usado internamente via token)
+- `[dps_tosa_consent]`: formulário público de consentimento de tosa com máquina (via token)
 
 **CPTs, tabelas e opções**:
 - Não cria CPTs próprios
 - Tabela customizada `wp_dps_portal_tokens` para gerenciar tokens de acesso
-  - Suporta 4 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias)
+  - Suporta 5 tipos de token: `login` (temporário 30min), `first_access` (temporário 30min), `permanent` (válido até revogação), `profile_update` (7 dias), `tosa_consent` (7 dias)
 - Sessões PHP próprias para autenticação independente do WordPress
 - Option `dps_portal_page_id`: armazena ID da página configurada do portal
 - Tipos de mensagem customizados para notificações
@@ -1071,6 +1074,9 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 - `dps_portal_profile_update_link_generated`: disparado quando um link de atualização de perfil é gerado; passa $client_id e $update_url como parâmetros
 - `dps_portal_profile_updated`: disparado quando o cliente atualiza seu perfil; passa $client_id como parâmetro
 - `dps_portal_new_pet_created`: disparado quando um novo pet é cadastrado via formulário de atualização; passa $pet_id e $client_id como parâmetros
+- `dps_portal_tosa_consent_link_generated`: disparado ao gerar link de consentimento; passa $client_id e $consent_url
+- `dps_portal_tosa_consent_saved`: disparado ao salvar consentimento; passa $client_id
+- `dps_portal_tosa_consent_revoked`: disparado ao revogar consentimento; passa $client_id
 
 **Métodos públicos da classe `DPS_Client_Portal`**:
 - `get_current_client_id()`: retorna o ID do cliente autenticado via sessão ou usuário WordPress (0 se não autenticado); permite que add-ons obtenham o cliente logado no portal
@@ -1078,6 +1084,7 @@ $api->send_message_from_client( $client_id, $message, $context = [] );
 **Funções helper globais**:
 - `dps_get_portal_page_url()`: retorna URL da página do portal (configurada ou fallback)
 - `dps_get_portal_page_id()`: retorna ID da página do portal (configurada ou fallback)
+- `dps_get_tosa_consent_page_url()`: retorna URL da página de consentimento (configurada ou fallback)
 
 **Dependências**:
 - Depende do plugin base para CPTs de clientes e pets

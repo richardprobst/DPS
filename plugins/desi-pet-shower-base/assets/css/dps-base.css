@@ -2880,6 +2880,49 @@
     color: #1e40af;
 }
 
+/* Badge de consentimento de tosa */
+.dps-consent-status {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.dps-consent-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dps-consent-badge--ok {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.dps-consent-badge--missing {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dps-consent-badge--danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dps-consent-status__note {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dps-consent-warning {
+    margin-top: 12px;
+}
+
 /* Ações na tabela de atendimentos */
 .dps-table .dps-actions-cell {
     white-space: nowrap;
