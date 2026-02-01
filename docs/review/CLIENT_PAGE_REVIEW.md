@@ -102,6 +102,20 @@ do_action( 'dps_client_page_after_appointments_section', $client_id, $client, $a
 - Organização clara dos links externos (consentimento, atualização de perfil)
 - Novo hook `dps_client_page_header_badges` para add-ons adicionarem indicadores
 
+### 5.1 Melhoria do Painel de Ações Rápidas (v1.3.1)
+
+**Problema identificado:** Dentro do painel de Ações Rápidas, os elementos (status, botões de copiar, gerar link, revogar) estavam organizados de forma ruim, quase se sobrepondo e difíceis de entender visualmente.
+
+**Solução implementada:**
+- **Agrupamento por funcionalidade**: Ações agora são organizadas em cards separados:
+  - "Consentimento de Tosa" - status badge, copiar, gerar link, revogar
+  - "Atualização de Perfil" - copiar, gerar link
+- **Títulos claros**: Cada grupo tem header com ícone e título descritivo
+- **Textos concisos**: Botões com textos reduzidos ("Copiar" em vez de "Copiar Link")
+- **Badges compactos**: "Ativo", "Pendente", "Revogado" em vez de textos longos
+- **Responsividade**: Layout de coluna em mobile (< 600px)
+- **Novo estilo de botão**: `.dps-btn-action--danger` para ação "Revogar"
+
 ### 6. Notas Internas (v1.3.0)
 
 **Problema identificado:** Não havia local para a equipe registrar observações sobre o cliente.
