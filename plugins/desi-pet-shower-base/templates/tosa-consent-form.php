@@ -26,10 +26,10 @@ $site_name    = get_bloginfo( 'name' );
 $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_status['status'];
 ?>
 
-<div class="dps-consent-page">
+<div class="dps-consent-page" role="main">
     <div class="dps-consent-container">
         <header class="dps-consent-header">
-            <div class="dps-consent-header__icon">✂️</div>
+            <div class="dps-consent-header__icon" aria-hidden="true">✂️</div>
             <h1 class="dps-consent-title"><?php echo esc_html__( 'Consentimento de Tosa com Máquina', 'desi-pet-shower' ); ?></h1>
             <p class="dps-consent-subtitle">
                 <?php
@@ -50,7 +50,7 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
         ?>
 
         <?php if ( $is_granted ) : ?>
-            <div class="dps-alert dps-alert--success">
+            <div class="dps-alert dps-alert--success" role="status">
                 <?php
                 printf(
                     /* translators: %s: data */
@@ -61,29 +61,29 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
             </div>
         <?php endif; ?>
 
-        <form method="post" class="dps-consent-form">
+        <form method="post" class="dps-consent-form" aria-label="<?php echo esc_attr__( 'Formulário de consentimento', 'desi-pet-shower' ); ?>">
             <input type="hidden" name="dps_tosa_consent_token" value="<?php echo esc_attr( $token ); ?>">
             <input type="hidden" name="dps_tosa_consent_client_id" value="<?php echo esc_attr( $client_id ); ?>">
             <?php wp_nonce_field( 'dps_tosa_consent_' . $client_id, 'dps_tosa_consent_nonce' ); ?>
 
-            <section class="dps-consent-card">
-                <h2><?php echo esc_html__( 'Dados do Responsável', 'desi-pet-shower' ); ?></h2>
+            <section class="dps-consent-card" aria-labelledby="section-responsavel">
+                <h2 id="section-responsavel"><?php echo esc_html__( 'Dados do Responsável', 'desi-pet-shower' ); ?></h2>
                 <div class="dps-consent-grid">
                     <div class="dps-consent-field">
-                        <label for="dps_consent_signature_name"><?php echo esc_html__( 'Nome completo', 'desi-pet-shower' ); ?> <span class="dps-required">*</span></label>
-                        <input type="text" id="dps_consent_signature_name" name="dps_consent_signature_name" value="<?php echo esc_attr( $client_name ); ?>" required>
+                        <label for="dps_consent_signature_name"><?php echo esc_html__( 'Nome completo', 'desi-pet-shower' ); ?> <span class="dps-required" aria-hidden="true">*</span></label>
+                        <input type="text" id="dps_consent_signature_name" name="dps_consent_signature_name" value="<?php echo esc_attr( $client_name ); ?>" required aria-required="true" autocomplete="name">
                     </div>
                     <div class="dps-consent-field">
                         <label for="dps_consent_signature_document"><?php echo esc_html__( 'CPF', 'desi-pet-shower' ); ?></label>
-                        <input type="text" id="dps_consent_signature_document" name="dps_consent_signature_document" value="<?php echo esc_attr( $client_cpf ); ?>" placeholder="000.000.000-00">
+                        <input type="text" id="dps_consent_signature_document" name="dps_consent_signature_document" value="<?php echo esc_attr( $client_cpf ); ?>" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off">
                     </div>
                     <div class="dps-consent-field">
                         <label for="dps_consent_signature_phone"><?php echo esc_html__( 'Telefone/WhatsApp', 'desi-pet-shower' ); ?></label>
-                        <input type="tel" id="dps_consent_signature_phone" name="dps_consent_signature_phone" value="<?php echo esc_attr( $client_phone ); ?>" placeholder="(00) 00000-0000">
+                        <input type="tel" id="dps_consent_signature_phone" name="dps_consent_signature_phone" value="<?php echo esc_attr( $client_phone ); ?>" placeholder="(00) 00000-0000" autocomplete="tel">
                     </div>
                     <div class="dps-consent-field">
                         <label for="dps_consent_signature_email"><?php echo esc_html__( 'E-mail', 'desi-pet-shower' ); ?></label>
-                        <input type="email" id="dps_consent_signature_email" name="dps_consent_signature_email" value="<?php echo esc_attr( $client_email ); ?>" placeholder="seu@email.com">
+                        <input type="email" id="dps_consent_signature_email" name="dps_consent_signature_email" value="<?php echo esc_attr( $client_email ); ?>" placeholder="seu@email.com" autocomplete="email">
                     </div>
                     <div class="dps-consent-field dps-consent-field--full">
                         <label for="dps_consent_relationship"><?php echo esc_html__( 'Relação com o pet', 'desi-pet-shower' ); ?></label>
@@ -92,10 +92,10 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
                 </div>
             </section>
 
-            <section class="dps-consent-card">
-                <h2><?php echo esc_html__( 'Pets vinculados', 'desi-pet-shower' ); ?></h2>
+            <section class="dps-consent-card" aria-labelledby="section-pets">
+                <h2 id="section-pets"><?php echo esc_html__( 'Pets vinculados', 'desi-pet-shower' ); ?></h2>
                 <?php if ( ! empty( $pets ) ) : ?>
-                    <ul class="dps-consent-pets">
+                    <ul class="dps-consent-pets" role="list">
                         <?php foreach ( $pets as $pet ) : ?>
                             <li><?php echo esc_html( $pet->post_title ); ?></li>
                         <?php endforeach; ?>
@@ -105,8 +105,8 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
                 <?php endif; ?>
             </section>
 
-            <section class="dps-consent-card">
-                <h2><?php echo esc_html__( 'Termos do consentimento', 'desi-pet-shower' ); ?></h2>
+            <section class="dps-consent-card" aria-labelledby="section-termos">
+                <h2 id="section-termos"><?php echo esc_html__( 'Termos do consentimento', 'desi-pet-shower' ); ?></h2>
                 <p><?php echo esc_html__( 'Ao autorizar a tosa com máquina, você declara estar ciente de que:', 'desi-pet-shower' ); ?></p>
                 <ul class="dps-consent-list">
                     <li><?php echo esc_html__( 'A tosa com máquina pode expor pequenas imperfeições, nódulos ou sensibilidades já existentes.', 'desi-pet-shower' ); ?></li>
@@ -115,13 +115,13 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
                     <li><?php echo esc_html__( 'Você pode revogar este consentimento a qualquer momento, solicitando ao administrador.', 'desi-pet-shower' ); ?></li>
                 </ul>
                 <label class="dps-consent-check">
-                    <input type="checkbox" name="dps_tosa_consent_accept" value="1" required>
+                    <input type="checkbox" name="dps_tosa_consent_accept" value="1" required aria-required="true">
                     <span><?php echo esc_html__( 'Li e aceito os termos acima.', 'desi-pet-shower' ); ?></span>
                 </label>
             </section>
 
-            <section class="dps-consent-card">
-                <h2><?php echo esc_html__( 'Assinatura', 'desi-pet-shower' ); ?></h2>
+            <section class="dps-consent-card" aria-labelledby="section-assinatura">
+                <h2 id="section-assinatura"><?php echo esc_html__( 'Assinatura', 'desi-pet-shower' ); ?></h2>
                 <p class="dps-text-muted">
                     <?php
                     printf(
@@ -138,109 +138,8 @@ $is_granted   = isset( $consent_status['status'] ) && 'granted' === $consent_sta
             </section>
 
             <button type="submit" class="dps-btn dps-btn--primary dps-consent-submit">
-                ✅ <?php echo esc_html__( 'Registrar consentimento', 'desi-pet-shower' ); ?>
+                <span aria-hidden="true">✅</span> <?php echo esc_html__( 'Registrar consentimento', 'desi-pet-shower' ); ?>
             </button>
         </form>
     </div>
 </div>
-
-<style>
-.dps-consent-page {
-    background: #f9fafb;
-    padding: 32px 16px;
-}
-.dps-consent-container {
-    max-width: 860px;
-    margin: 0 auto;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 32px;
-}
-.dps-consent-header {
-    text-align: center;
-    margin-bottom: 24px;
-}
-.dps-consent-header__icon {
-    font-size: 32px;
-}
-.dps-consent-title {
-    font-size: 24px;
-    margin: 8px 0;
-    color: #374151;
-}
-.dps-consent-subtitle {
-    color: #6b7280;
-}
-.dps-consent-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-}
-.dps-consent-card h2 {
-    font-size: 18px;
-    margin: 0 0 16px;
-    color: #374151;
-}
-.dps-consent-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-.dps-consent-field label {
-    display: block;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
-}
-.dps-consent-field input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-}
-.dps-consent-field--full {
-    grid-column: 1 / -1;
-}
-.dps-consent-pets {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 8px;
-    margin: 0;
-    padding-left: 20px;
-}
-.dps-consent-list {
-    margin: 12px 0 16px;
-    padding-left: 20px;
-    color: #4b5563;
-}
-.dps-consent-check {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    font-weight: 600;
-    color: #374151;
-}
-.dps-consent-submit {
-    width: 100%;
-    padding: 14px 20px;
-}
-.dps-consent-signature {
-    font-size: 16px;
-    color: #374151;
-    margin-top: 12px;
-}
-.dps-text-muted {
-    color: #6b7280;
-}
-@media (max-width: 768px) {
-    .dps-consent-container {
-        padding: 24px;
-    }
-    .dps-consent-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>

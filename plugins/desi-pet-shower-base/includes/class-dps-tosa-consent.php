@@ -58,6 +58,26 @@ final class DPS_Tosa_Consent {
         add_action( 'wp_ajax_dps_generate_tosa_consent_link', [ $this, 'ajax_generate_link' ] );
         add_action( 'wp_ajax_dps_revoke_tosa_consent', [ $this, 'ajax_revoke_consent' ] );
         add_action( 'init', [ $this, 'handle_consent_form' ], 10 );
+        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_consent_assets' ] );
+    }
+
+    /**
+     * Enfileira assets do formulário de consentimento quando necessário.
+     */
+    public function enqueue_consent_assets() {
+        if ( ! is_singular() ) {
+            return;
+        }
+
+        global $post;
+        if ( $post && has_shortcode( $post->post_content, 'dps_tosa_consent' ) ) {
+            wp_enqueue_style(
+                'dps-tosa-consent-form',
+                DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
+                [],
+                defined( 'DPS_VERSION' ) ? DPS_VERSION : '1.1.1'
+            );
+        }
     }
 
     /**
