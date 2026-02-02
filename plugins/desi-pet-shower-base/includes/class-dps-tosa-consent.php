@@ -520,6 +520,13 @@ final class DPS_Tosa_Consent {
         do_action( 'dps_tosa_consent_saved', $client_id );
 
         DPS_Message_Helper::add_success( __( 'Consentimento registrado com sucesso! Obrigado.', 'desi-pet-shower' ) );
+
+        // Redirect to clean URL (without token parameters) to prevent validation error on reload
+        // Uses PRG (Post-Redirect-Get) pattern to avoid re-submission and token validation issues
+        $redirect_url = $this->get_consent_page_url();
+        $redirect_url = add_query_arg( 'consent_saved', '1', $redirect_url );
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
 
     /**
@@ -535,6 +542,12 @@ final class DPS_Tosa_Consent {
         // Força desabilitação de cache para esta página
         if ( class_exists( 'DPS_Cache_Control' ) ) {
             DPS_Cache_Control::force_no_cache();
+        }
+
+        // Check if this is a redirect after successful consent submission
+        $consent_saved = isset( $_GET['consent_saved'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['consent_saved'] ) );
+        if ( $consent_saved ) {
+            return $this->render_success_page();
         }
 
         $token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
@@ -596,6 +609,37 @@ final class DPS_Tosa_Consent {
      */
     private function render_error_message( $message ) {
         return '<div class="dps-consent-error"><div class="dps-alert dps-alert--error"><p>' . esc_html( $message ) . '</p></div></div>';
+    }
+
+    /**
+     * Renderiza página de sucesso após consentimento.
+     *
+     * @return string HTML da página de sucesso.
+     */
+    private function render_success_page() {
+        $messages_html = '';
+        if ( class_exists( 'DPS_Message_Helper' ) ) {
+            $messages_html = DPS_Message_Helper::display_messages();
+        }
+
+        $html  = '<div class="dps-consent-success-page">';
+        $html .= '<div class="dps-consent-container">';
+        $html .= '<div class="dps-consent-success-icon" role="img" aria-label="' . esc_attr__( 'Sucesso', 'desi-pet-shower' ) . '">✅</div>';
+        $html .= '<h1 class="dps-consent-title">' . esc_html__( 'Consentimento Registrado', 'desi-pet-shower' ) . '</h1>';
+
+        if ( $messages_html ) {
+            $html .= $messages_html;
+        } else {
+            $html .= '<div class="dps-alert dps-alert--success" role="status">';
+            $html .= '<p>' . esc_html__( 'Consentimento registrado com sucesso! Obrigado.', 'desi-pet-shower' ) . '</p>';
+            $html .= '</div>';
+        }
+
+        $html .= '<p class="dps-consent-success-info">' . esc_html__( 'Você pode fechar esta página. O estabelecimento já recebeu sua autorização.', 'desi-pet-shower' ) . '</p>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
     }
 
     /**
