@@ -427,6 +427,68 @@ add_action( 'init', function() {
 - Use `class_exists( 'DPS_Cache_Control' )` antes de chamar para compatibilidade com versões anteriores
 - A detecção automática via hook `template_redirect` funciona como backup
 
+#### Sistema de Templates Sobrescrevíveis
+
+**Propósito**: Permitir que temas customizem a aparência de templates do DPS mantendo a lógica de negócio no plugin. O sistema também oferece controle sobre quando forçar o uso do template do plugin.
+
+**Funções disponíveis** (definidas em `includes/template-functions.php`):
+
+| Função | Propósito |
+|--------|-----------|
+| `dps_get_template( $template_name, $args )` | Localiza e inclui um template, permitindo override pelo tema |
+| `dps_get_template_path( $template_name )` | Retorna o caminho do template que seria carregado (sem incluí-lo) |
+| `dps_is_template_overridden( $template_name )` | Verifica se um template está sendo sobrescrito pelo tema |
+
+**Ordem de busca de templates**:
+1. Tema filho: `wp-content/themes/CHILD_THEME/dps-templates/{template_name}`
+2. Tema pai: `wp-content/themes/PARENT_THEME/dps-templates/{template_name}`
+3. Plugin base: `wp-content/plugins/desi-pet-shower-base/templates/{template_name}`
+
+**Filtros disponíveis**:
+
+| Filtro | Propósito | Parâmetros |
+|--------|-----------|------------|
+| `dps_use_plugin_template` | Força uso do template do plugin, ignorando override do tema | `$use_plugin (bool)`, `$template_name (string)` |
+| `dps_allow_consent_template_override` | Permite que tema sobrescreva o template de consentimento de tosa | `$allow_override (bool)` |
+
+**Actions disponíveis**:
+
+| Action | Propósito | Parâmetros |
+|--------|-----------|------------|
+| `dps_template_loaded` | Disparada quando um template é carregado | `$path_to_load (string)`, `$template_name (string)`, `$is_theme_override (bool)` |
+
+**Exemplos práticos**:
+```php
+// Forçar uso do template do plugin para um template específico
+add_filter( 'dps_use_plugin_template', function( $use_plugin, $template_name ) {
+    if ( $template_name === 'meu-template.php' ) {
+        return true; // Sempre usa versão do plugin
+    }
+    return $use_plugin;
+}, 10, 2 );
+
+// Permitir override do tema no template de consentimento de tosa
+add_filter( 'dps_allow_consent_template_override', '__return_true' );
+
+// Debug: logar qual template está sendo carregado
+add_action( 'dps_template_loaded', function( $path, $name, $is_override ) {
+    if ( $is_override ) {
+        error_log( "DPS: Template '$name' sendo carregado do tema: $path" );
+    }
+}, 10, 3 );
+
+// Verificar se um template está sendo sobrescrito
+if ( dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
+    // Template do tema está sendo usado
+}
+```
+
+**Boas práticas**:
+- O template de consentimento de tosa (`tosa-consent-form.php`) força uso do plugin por padrão para garantir que melhorias sejam visíveis
+- Use `dps_get_template_path()` para debug quando templates não aparecem como esperado
+- A action `dps_template_loaded` é útil para logging e diagnóstico de problemas
+- Quando sobrescrever templates no tema, mantenha as variáveis esperadas pelo sistema
+
 ### Feedback visual e organização de interface
 - Todos os formulários principais (clientes, pets, agendamentos) utilizam `DPS_Message_Helper` para feedback após salvar ou excluir
 - Formulários são organizados em fieldsets semânticos com bordas sutis (`1px solid #e5e7eb`) e legends descritivos

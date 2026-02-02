@@ -59,6 +59,65 @@ final class DPS_Tosa_Consent {
         add_action( 'wp_ajax_dps_revoke_tosa_consent', [ $this, 'ajax_revoke_consent' ] );
         add_action( 'init', [ $this, 'handle_consent_form' ], 10 );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_consent_assets' ] );
+        
+        // Força uso do template do plugin para garantir versão mais recente
+        // Isso evita problemas com templates desatualizados no tema
+        add_filter( 'dps_use_plugin_template', [ $this, 'force_consent_template' ], 10, 2 );
+    }
+
+    /**
+     * Força uso do template de consentimento do plugin.
+     *
+     * Isso garante que a versão mais recente do template seja usada,
+     * evitando problemas com templates customizados desatualizados no tema.
+     *
+     * Para permitir override do tema, use o filtro 'dps_allow_consent_template_override':
+     * add_filter( 'dps_allow_consent_template_override', '__return_true' );
+     *
+     * @param bool   $use_plugin    Se deve usar o template do plugin.
+     * @param string $template_name Nome do arquivo de template.
+     * @return bool
+     */
+    public function force_consent_template( $use_plugin, $template_name ) {
+        // Apenas força para o template de consentimento de tosa
+        if ( 'tosa-consent-form.php' !== $template_name ) {
+            return $use_plugin;
+        }
+        
+        /**
+         * Permite que temas sobrescrevam o template de consentimento.
+         *
+         * Por padrão, o template do plugin é forçado para garantir que
+         * a versão mais recente seja usada. Use este filtro para permitir
+         * override do tema quando necessário.
+         *
+         * @param bool $allow_override Se deve permitir override do tema. Default false.
+         */
+        $allow_theme_override = apply_filters( 'dps_allow_consent_template_override', false );
+        
+        // Se override do tema for permitido, não força o template do plugin
+        if ( $allow_theme_override ) {
+            // Loga quando override do tema é detectado para diagnóstico
+            if ( function_exists( 'dps_is_template_overridden' ) && dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
+                $this->log_event( 'info', 'Usando template de consentimento do tema (override permitido)', [
+                    'template' => 'tosa-consent-form.php',
+                    'theme'    => get_template(),
+                ] );
+            }
+            return false;
+        }
+        
+        // Loga quando override do tema é ignorado
+        if ( function_exists( 'dps_is_template_overridden' ) && dps_is_template_overridden( 'tosa-consent-form.php' ) ) {
+            $this->log_event( 'warning', 'Template de consentimento do tema ignorado - usando versão do plugin', [
+                'template' => 'tosa-consent-form.php',
+                'theme'    => get_template(),
+                'reason'   => 'Forçado para garantir versão mais recente do formulário',
+            ] );
+        }
+        
+        // Força uso do template do plugin
+        return true;
     }
 
     /**
