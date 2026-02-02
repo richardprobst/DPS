@@ -5635,3 +5635,24 @@ Para reportar bugs ou sugerir melhorias nesta documentação:
 
 **© 2024 PRObst - desi.pet by PRObst**  
 **Versão do Documento:** 1.0.0
+
+---
+
+## 📝 Documentation Notes
+
+### Coverage
+This reference documents all major public APIs across the DPS ecosystem, including:
+- ✅ All 16 add-ons (Communications, Finance, Client Portal, Push, AI, Agenda, Stats, Services, Backup, Booking, Groomers, Payment, Registration, Stock, Subscription)
+- ✅ Base plugin helper classes (32+ classes, 148+ methods)
+- ✅ Template functions, portal functions, and core utilities
+
+### Quality Levels
+- **Primary APIs**: Fully documented with complete parameter tables, return values, and examples (Communications, Finance, Portal, Push, AI, Agenda, Stats, Services)
+- **Utility Methods**: Some base helper methods have abbreviated documentation; consult source files for complete details when needed
+
+### Continuous Improvement
+This is a living document. If you find missing or incomplete documentation for a specific method you need, please:
+1. Check the source file indicated in the comment
+2. Submit an issue or PR to improve the documentation
+3. Contact: contato@probst.pro
+
