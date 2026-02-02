@@ -201,6 +201,11 @@ class DPS_Base_Plugin {
 
         add_option( 'dps_logger_min_level', DPS_Logger::LEVEL_INFO );
         DPS_Logger::maybe_install();
+
+        // Cria página de consentimento de tosa se não existir
+        if ( class_exists( 'DPS_Tosa_Consent' ) ) {
+            DPS_Tosa_Consent::create_consent_page();
+        }
     }
 
     /**
