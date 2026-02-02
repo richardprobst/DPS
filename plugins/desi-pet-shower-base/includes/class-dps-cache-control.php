@@ -106,6 +106,8 @@ class DPS_Cache_Control {
 
         // Detecta URLs de consentimento de tosa (parâmetros client_id + token)
         // Sanitização e validação básica para prevenir abuso de cache bypass
+        // Nota: Validação completa do token ocorre no shortcode handler; aqui apenas
+        // verificamos formato para evitar cache bypass com valores obviamente inválidos
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
         $raw_client_id = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
