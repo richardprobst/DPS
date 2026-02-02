@@ -23,7 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Verifica se funções DPS existem
 if ( ! function_exists( 'dps_is_template_overridden' ) ) {
-    require_once WP_CONTENT_DIR . '/plugins/desi-pet-shower-base/includes/template-functions.php';
+    $template_functions_path = WP_CONTENT_DIR . '/plugins/desi-pet-shower-base/includes/template-functions.php';
+    if ( ! file_exists( $template_functions_path ) ) {
+        die( 'Plugin DPS Base não encontrado. Certifique-se de que o plugin está instalado e ativado.' );
+    }
+    require_once $template_functions_path;
 }
 
 ?>
@@ -81,6 +85,7 @@ if ( ! function_exists( 'dps_is_template_overridden' ) ) {
     $theme_path = get_template_directory() . '/dps-templates/' . $template_name;
     $child_theme_path = get_stylesheet_directory() . '/dps-templates/' . $template_name;
     $plugin_path = WP_CONTENT_DIR . '/plugins/desi-pet-shower-base/templates/' . $template_name;
+    $css_file_path = WP_CONTENT_DIR . '/plugins/desi-pet-shower-base/assets/css/tosa-consent-form.css';
     
     // Verifica qual arquivo está sendo usado
     ?>
@@ -139,7 +144,7 @@ if ( ! function_exists( 'dps_is_template_overridden' ) ) {
                 <li><strong>Cache do WordPress:</strong> Limpe o cache de plugins como WP Super Cache, W3 Total Cache, etc.</li>
                 <li><strong>Cache de CDN:</strong> Se usar Cloudflare ou similar, limpe o cache no painel de controle</li>
                 <li><strong>Verifique o CSS:</strong> Inspecione a página e confirme se o arquivo CSS está sendo carregado:<br>
-                    <code>...assets/css/tosa-consent-form.css?ver=<?php echo filemtime( $plugin_path ); ?></code>
+                    <code>...assets/css/tosa-consent-form.css?ver=<?php echo file_exists( $css_file_path ) ? filemtime( $css_file_path ) : 'N/A'; ?></code>
                 </li>
             </ul>
         <?php endif; ?>
