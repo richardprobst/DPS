@@ -32,6 +32,7 @@ class DPS_Cache_Control {
         // Base
         'dps_base',
         'dps_configuracoes',
+        'dps_tosa_consent',
         // Client Portal
         'dps_client_portal',
         'dps_client_login',

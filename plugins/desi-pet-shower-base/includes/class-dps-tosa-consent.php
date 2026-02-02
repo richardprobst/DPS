@@ -75,7 +75,7 @@ final class DPS_Tosa_Consent {
                 'dps-tosa-consent-form',
                 DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
                 [],
-                defined( 'DPS_BASE_VERSION' ) ? DPS_BASE_VERSION : '1.1.0'
+                $this->get_css_version()
             );
         }
     }
@@ -470,6 +470,14 @@ final class DPS_Tosa_Consent {
      * @return string HTML do formulário.
      */
     public function render_consent_shortcode( $atts ) {
+        // Garante que CSS seja carregado mesmo se wp_enqueue_scripts já passou
+        $this->maybe_enqueue_assets_inline();
+        
+        // Força desabilitação de cache para esta página
+        if ( class_exists( 'DPS_Cache_Control' ) ) {
+            DPS_Cache_Control::force_no_cache();
+        }
+        
         $token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
         $client_id = isset( $_GET['client_id'] ) ? absint( wp_unslash( $_GET['client_id'] ) ) : 0;
 
@@ -569,6 +577,43 @@ final class DPS_Tosa_Consent {
         $fallback = home_url( '/consentimento-tosa-maquina/' );
 
         return (string) apply_filters( 'dps_tosa_consent_page_url', $fallback, $page_id );
+    }
+
+    /**
+     * Garante que os assets sejam enfileirados mesmo após wp_enqueue_scripts.
+     *
+     * Esta função é chamada diretamente do shortcode para garantir que o CSS
+     * seja carregado em todos os cenários, incluindo page builders e temas
+     * que podem modificar o fluxo normal de carregamento de assets.
+     */
+    private function maybe_enqueue_assets_inline() {
+        static $enqueued = false;
+        
+        if ( $enqueued ) {
+            return;
+        }
+        
+        $enqueued = true;
+        
+        // Enfileira se ainda não foi registrado
+        if ( ! wp_style_is( 'dps-tosa-consent-form', 'enqueued' ) ) {
+            wp_enqueue_style(
+                'dps-tosa-consent-form',
+                DPS_BASE_URL . 'assets/css/tosa-consent-form.css',
+                [],
+                $this->get_css_version()
+            );
+        }
+    }
+
+    /**
+     * Obtém versão do arquivo CSS baseada no timestamp de modificação.
+     *
+     * @return string|int Versão do arquivo ou versão base do plugin.
+     */
+    private function get_css_version() {
+        $css_file = DPS_BASE_DIR . 'assets/css/tosa-consent-form.css';
+        return file_exists( $css_file ) ? filemtime( $css_file ) : DPS_BASE_VERSION;
     }
 
     /**
