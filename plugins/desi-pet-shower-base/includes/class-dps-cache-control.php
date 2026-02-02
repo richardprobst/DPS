@@ -92,6 +92,7 @@ class DPS_Cache_Control {
      * (ex.: page builders, LiteSpeed Cache, WP Rocket) sirvam conteúdo cacheado.
      *
      * @since 1.2.1
+     * @return void
      */
     public static function maybe_disable_cache_by_url_params() {
         // Ignora requisições de admin, AJAX, REST e cron
@@ -104,10 +105,16 @@ class DPS_Cache_Control {
         }
 
         // Detecta URLs de consentimento de tosa (parâmetros client_id + token)
+        // Validação básica: client_id deve ser numérico e token deve ter formato alfanumérico
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Apenas leitura para detecção de página
-        $has_consent_params = isset( $_GET['client_id'] ) && isset( $_GET['token'] );
+        $client_id = isset( $_GET['client_id'] ) ? $_GET['client_id'] : '';
+        $token     = isset( $_GET['token'] ) ? $_GET['token'] : '';
+        
+        // client_id deve ser numérico e token deve ter formato hexadecimal (64 caracteres)
+        $is_valid_client_id = ctype_digit( (string) $client_id ) && (int) $client_id > 0;
+        $is_valid_token     = ! empty( $token ) && preg_match( '/^[a-f0-9]{64}$/i', $token );
 
-        if ( $has_consent_params ) {
+        if ( $is_valid_client_id && $is_valid_token ) {
             self::disable_cache();
             
             // Envia headers imediatamente se possível
@@ -166,7 +173,7 @@ class DPS_Cache_Control {
         }
 
         // Verifica em metadados de page builders populares
-        // Elementor armazena dados em _elementor_data
+        // Elementor armazena dados em _elementor_data (formato JSON)
         $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
         if ( $elementor_data && is_string( $elementor_data ) ) {
             foreach ( self::$dps_shortcodes as $shortcode ) {
@@ -176,7 +183,7 @@ class DPS_Cache_Control {
             }
         }
 
-        // YooTheme armazena dados em _yootheme_source ou builder JSON
+        // YooTheme armazena dados em _yootheme_source (formato JSON)
         $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
         if ( $yootheme_source && is_string( $yootheme_source ) ) {
             foreach ( self::$dps_shortcodes as $shortcode ) {
