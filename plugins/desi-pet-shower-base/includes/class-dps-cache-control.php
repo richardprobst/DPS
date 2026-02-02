@@ -112,7 +112,8 @@ class DPS_Cache_Control {
         $raw_token     = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
         
         // client_id deve ser numérico positivo e token deve ter formato hexadecimal (64 caracteres)
-        $is_valid_client_id = ctype_digit( $raw_client_id ) && absint( $raw_client_id ) > 0;
+        // ctype_digit garante que é apenas dígitos; (int) > 0 garante valor positivo
+        $is_valid_client_id = ! empty( $raw_client_id ) && ctype_digit( $raw_client_id ) && (int) $raw_client_id > 0;
         $is_valid_token     = ! empty( $raw_token ) && preg_match( '/^[a-f0-9]{64}$/i', $raw_token );
 
         if ( $is_valid_client_id && $is_valid_token ) {
@@ -174,16 +175,24 @@ class DPS_Cache_Control {
         }
 
         // Pré-constrói padrões de busca para shortcodes (otimização para loops)
-        $shortcode_patterns = [];
+        // Inclui espaço ou ] após o nome para evitar falsos positivos (ex: [dps_tosa vs [dps_tosa_extra])
+        $shortcode_patterns_space = [];
+        $shortcode_patterns_close = [];
         foreach ( self::$dps_shortcodes as $shortcode ) {
-            $shortcode_patterns[] = '[' . $shortcode;
+            $shortcode_patterns_space[] = '[' . $shortcode . ' ';
+            $shortcode_patterns_close[] = '[' . $shortcode . ']';
         }
 
         // Verifica em metadados de page builders populares
         // Elementor armazena dados em _elementor_data (formato JSON)
         $elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
         if ( $elementor_data && is_string( $elementor_data ) ) {
-            foreach ( $shortcode_patterns as $pattern ) {
+            foreach ( $shortcode_patterns_space as $pattern ) {
+                if ( strpos( $elementor_data, $pattern ) !== false ) {
+                    return true;
+                }
+            }
+            foreach ( $shortcode_patterns_close as $pattern ) {
                 if ( strpos( $elementor_data, $pattern ) !== false ) {
                     return true;
                 }
@@ -193,7 +202,12 @@ class DPS_Cache_Control {
         // YooTheme armazena dados em _yootheme_source (formato JSON)
         $yootheme_source = get_post_meta( $post->ID, '_yootheme_source', true );
         if ( $yootheme_source && is_string( $yootheme_source ) ) {
-            foreach ( $shortcode_patterns as $pattern ) {
+            foreach ( $shortcode_patterns_space as $pattern ) {
+                if ( strpos( $yootheme_source, $pattern ) !== false ) {
+                    return true;
+                }
+            }
+            foreach ( $shortcode_patterns_close as $pattern ) {
                 if ( strpos( $yootheme_source, $pattern ) !== false ) {
                     return true;
                 }
